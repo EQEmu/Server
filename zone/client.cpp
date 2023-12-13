@@ -7427,7 +7427,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 		merchant->SayString(zone->random.Int(WONT_SELL_DEEDS1, WONT_SELL_DEEDS6));
 	} else if (lowestvalue == fmod.race_mod) { // race biggest
 		// Non-standard race (ex. illusioned to wolf)
-		if (GetRace() > PLAYER_RACE_COUNT) {
+		if (!IsPlayerRace(GetRace())) {
 			messageid = zone->random.Int(1, 3); // these aren't sequential StringIDs :(
 			switch (messageid) {
 			case 1:
@@ -8518,8 +8518,8 @@ void Client::InitInnates()
 	m_pp.InnateSkills[InnateInspect] = InnateEnabled;
 	m_pp.InnateSkills[InnateOpen] = InnateEnabled;
 
-	if (race >= RT_FROGLOK_3) {
-		if (race == RT_SKELETON_2 || race == RT_FROGLOK_3) {
+	if (race >= Races::Froglok) {
+		if (race == Races::Skeleton2 || race == Races::Froglok) {
 			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
 		} else {
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
@@ -8527,75 +8527,75 @@ void Client::InitInnates()
 	}
 
 	switch (race) {
-		case RT_BARBARIAN:
-		case RT_BARBARIAN_2:
+		case Races::Human:
+		case Races::FreeportGuard:
+		case Races::HumanBeggar:
+		case Races::HighpassCitizen:
+		case Races::QeynosCitizen:
+		case Races::Froglok: // client does froglok weird, but this should work out fine
+			break;
+		case Races::Barbarian:
+		case Races::HalasCitizen:
 			m_pp.InnateSkills[InnateSlam] = InnateEnabled;
 			break;
-		case RT_ERUDITE:
-		case RT_ERUDITE_2:
+		case Races::Erudite:
+		case Races::EruditeCitizen:
 			m_pp.InnateSkills[InnateLore] = InnateEnabled;
 			break;
-		case RT_WOOD_ELF:
-		case RT_GUARD_3:
+		case Races::WoodElf:
+		case Races::Fayguard:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case RT_GNOME:
-		case RT_HIGH_ELF:
-		case RT_GUARD_2:
+		case Races::HighElf:
+		case Races::Gnome:
+		case Races::Felguard:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			m_pp.InnateSkills[InnateLore]        = InnateEnabled;
 			break;
-		case RT_TROLL:
-		case RT_TROLL_2:
+		case Races::DarkElf:
+		case Races::NeriakCitizen:
+		case Races::ElfVampire:
+		case Races::FroglokGhoul:
+		case Races::Ghost:
+		case Races::Ghoul:
+		case Races::Skeleton:
+		case Races::Vampire:
+		case Races::Wisp:
+		case Races::Zombie:
+		case Races::Spectre:
+		case Races::DwarfGhost:
+		case Races::EruditeGhost:
+		case Races::DragonSkeleton:
+		case Races::Innoruuk:
+			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
+			break;
+		case Races::Dwarf:
+		case Races::KaladimCitizen:
+			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
+			break;
+		case Races::Troll:
+		case Races::GrobbCitizen:
 			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
 			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case RT_DWARF:
-		case RT_DWARF_2:
-			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-			break;
-		case RT_OGRE:
-		case RT_OGRE_2:
+		case Races::Ogre:
+		case Races::OggokCitizen:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			m_pp.InnateSkills[InnateSlam]        = InnateEnabled;
 			m_pp.InnateSkills[InnateNoBash]      = InnateEnabled;
 			m_pp.InnateSkills[InnateBashDoor]    = InnateEnabled;
 			break;
-		case RT_HALFLING:
-		case RT_HALFLING_2:
+		case Races::Halfling:
+		case Races::RivervaleCitizen:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case RT_IKSAR:
+		case Races::Iksar:
 			m_pp.InnateSkills[InnateRegen]       = InnateEnabled;
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
 			break;
-		case RT_VAH_SHIR:
+		case Races::VahShir:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;
-			break;
-		case RT_DARK_ELF:
-		case RT_DARK_ELF_2:
-		case RT_VAMPIRE_2:
-		case RT_FROGLOK_2:
-		case RT_GHOST:
-		case RT_GHOUL:
-		case RT_SKELETON:
-		case RT_VAMPIRE:
-		case RT_WILL_O_WISP:
-		case RT_ZOMBIE:
-		case RT_SPECTRE:
-		case RT_GHOST_2:
-		case RT_GHOST_3:
-		case RT_DRAGON_2:
-		case RT_INNORUUK:
-			m_pp.InnateSkills[InnateUltraVision] = InnateEnabled;
-			break;
-		case RT_HUMAN:
-		case RT_GUARD:
-		case RT_BEGGAR:
-		case RT_HUMAN_2:
-		case RT_HUMAN_3:
-		case RT_FROGLOK_3: // client does froglok weird, but this should work out fine
 			break;
 		default:
 			m_pp.InnateSkills[InnateInfravision] = InnateEnabled;

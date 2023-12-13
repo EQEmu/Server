@@ -71,7 +71,7 @@ Petition::Petition(uint32 id)
 {
 	petid = id;
 	charclass = Class::None;
-	charrace = RACE_DOUG_0;
+	charrace = Races::Doug;
 	charlevel = 0;
 	checkouts = 0;
 	unavailables = 0;

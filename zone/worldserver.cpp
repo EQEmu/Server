@@ -3515,7 +3515,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 	uint16 player_race = GetPlayerRaceValue(From->GetRace());
 
-	if (player_race == PLAYER_RACE_UNKNOWN) {
+	if (!player_race) {
 		player_race = From->GetBaseRace();
 	}
 

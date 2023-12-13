@@ -95,13 +95,13 @@ bool IsOfEqualRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case DARK_ELF:
-			if (r2 == RACE_NERIAK_CITIZEN_77) {
+		case Races::DarkElf:
+			if (r2 == Races::NeriakCitizen) {
 				return true;
 			}
 			break;
-		case BARBARIAN:
-			if (r2 == RACE_HALAS_CITIZEN_90) {
+		case Races::Barbarian:
+			if (r2 == Races::HalasCitizen) {
 				return true;
 			}
 	}
@@ -116,49 +116,49 @@ bool IsOfIndiffRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case DARK_ELF:
-		case OGRE:
-		case TROLL:
-			if (r2 == OGRE || r2 == TROLL || r2 == DARK_ELF) {
+		case Races::DarkElf:
+		case Races::Ogre:
+		case Races::Troll:
+			if (r2 == Races::Ogre || r2 == Races::Troll || r2 == Races::DarkElf) {
 				return true;
 			}
 			break;
-		case HUMAN:
-		case BARBARIAN:
-		case HALF_ELF:
-		case GNOME:
-		case HALFLING:
-		case WOOD_ELF:
-			if (r2 == HUMAN ||
-			    r2 == BARBARIAN ||
-			    r2 == ERUDITE ||
-			    r2 == HALF_ELF ||
-			    r2 == GNOME ||
-			    r2 == HALFLING ||
-			    r2 == DWARF ||
-			    r2 == HIGH_ELF ||
-			    r2 == WOOD_ELF) {
+		case Races::Human:
+		case Races::Barbarian:
+		case Races::HalfElf:
+		case Races::Gnome:
+		case Races::Halfling:
+		case Races::WoodElf:
+			if (r2 == Races::Human ||
+			    r2 == Races::Barbarian ||
+			    r2 == Races::Erudite ||
+			    r2 == Races::HalfElf ||
+			    r2 == Races::Gnome ||
+			    r2 == Races::Halfling ||
+			    r2 == Races::Dwarf ||
+			    r2 == Races::HighElf ||
+			    r2 == Races::WoodElf) {
 				return true;
 			}
 			break;
-		case ERUDITE:
-			if (r2 == HUMAN || r2 == HALF_ELF) {
+		case Races::Erudite:
+			if (r2 == Races::Human || r2 == Races::HalfElf) {
 				return true;
 			}
 			break;
-		case DWARF:
-			if (r2 == HALFLING || r2 == GNOME) {
+		case Races::Dwarf:
+			if (r2 == Races::Halfling || r2 == Races::Gnome) {
 				return true;
 			}
 			break;
-		case HIGH_ELF:
-			if (r2 == WOOD_ELF) {
+		case Races::HighElf:
+			if (r2 == Races::WoodElf) {
 				return true;
 			}
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			return true;
-		case IKSAR:
+		case Races::Iksar:
 			return false;
 	}
 	return false;

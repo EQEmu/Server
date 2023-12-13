@@ -1219,7 +1219,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQ::lightsource::LightActive];
 
-	if (IsNPC() && race == ERUDITE)
+	if (IsNPC() && race == Races::Erudite)
 		ns->spawn.showhelm = 1;
 	else
 		ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
@@ -2867,7 +2867,7 @@ void Mob::ShowStats(Client* c)
 		);
 
 		// Drakkin Features
-		if (t->GetRace() == RACE_DRAKKIN_522) {
+		if (t->GetRace() == Races::Drakkin) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -3526,7 +3526,7 @@ void Mob::GMMove(const glm::vec4 &position) {
 void Mob::SendIllusionPacket(const AppearanceStruct& a)
 {
 	uint16 new_race = (
-		a.race_id != RACE_DOUG_0 ?
+		a.race_id != Races::Doug ?
 		a.race_id :
 		(use_model ? use_model : GetBaseRace())
 	);
@@ -3558,7 +3558,7 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	uint32 new_drakkin_tattoo   = a.drakkin_tattoo == UINT32_MAX ? GetDrakkinTattoo() : a.drakkin_tattoo;
 
 	// Reset features to Base from the Player Profile
-	if (IsClient() && a.race_id == RACE_DOUG_0) {
+	if (IsClient() && a.race_id == Races::Doug) {
 		new_beard            = CastToClient()->GetBaseBeard();
 		new_beard_color      = CastToClient()->GetBaseBeardColor();
 		new_drakkin_details  = CastToClient()->GetBaseDetails();
@@ -3700,149 +3700,149 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 		// Adjust all settings based on the min and max for each feature of each race and gender
 		switch (GetRace()) {
-			case HUMAN:
+			case Races::Human:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case BARBARIAN:
+			case Races::Barbarian:
 				new_hair_color = zone->random.Int(0, 19);
 				new_luclin_face = zone->random.Int(0, 87);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case ERUDITE:
-				if (current_gender == MALE) {
+			case Races::Erudite:
+				if (current_gender == Genders::Male) {
 					new_beard_color = zone->random.Int(0, 19);
 					new_beard = zone->random.Int(0, 5);
 					new_luclin_face = zone->random.Int(0, 57);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_luclin_face = zone->random.Int(0, 87);
 				}
 
 				break;
-			case WOOD_ELF:
+			case Races::WoodElf:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_hair_style = zone->random.Int(0, 3);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case HIGH_ELF:
+			case Races::HighElf:
 				new_hair_color = zone->random.Int(0, 14);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case DARK_ELF:
+			case Races::DarkElf:
 				new_hair_color = zone->random.Int(13, 18);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case HALF_ELF:
+			case Races::HalfElf:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case DWARF:
+			case Races::Dwarf:
 				new_hair_color = zone->random.Int(0, 19);
 				new_beard_color = new_hair_color;
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 					new_luclin_face = zone->random.Int(0, 17);
 				}
 
 				break;
-			case TROLL:
+			case Races::Troll:
 				new_eye_color_one = zone->random.Int(0, 10);
 				new_eye_color_two = zone->random.Int(0, 10);
 
-				if (current_gender == FEMALE) {
+				if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_hair_color = zone->random.Int(0, 23);
 				}
 
 				break;
-			case OGRE:
-				if (current_gender == FEMALE) {
+			case Races::Ogre:
+				if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_hair_color = zone->random.Int(0, 23);
 				}
 
 				break;
-			case HALFLING:
+			case Races::Halfling:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case GNOME:
+			case Races::Gnome:
 				new_hair_color = zone->random.Int(0, 24);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
-			case IKSAR:
-			case VAHSHIR:
+			case Races::Iksar:
+			case Races::VahShir:
 				new_luclin_face = zone->random.Int(0, 7);
 				break;
-			case FROGLOK:
+			case Races::Froglok:
 				new_luclin_face = zone->random.Int(0, 9);
 				break;
-			case DRAKKIN:
+			case Races::Drakkin:
 				new_hair_color = zone->random.Int(0, 3);
 				new_beard_color = new_hair_color;
 				new_eye_color_one = zone->random.Int(0, 11);
@@ -3852,10 +3852,10 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 				new_drakkin_tattoo = zone->random.Int(0, 7);
 				new_drakkin_details = zone->random.Int(0, 7);
 
-				if (current_gender == MALE) {
+				if (current_gender == Genders::Male) {
 					new_beard = zone->random.Int(0, 12);
 					new_hair_style = zone->random.Int(0, 8);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Genders::Female) {
 					new_beard = zone->random.Int(0, 3);
 					new_hair_style = zone->random.Int(0, 7);
 				}
@@ -3906,8 +3906,8 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 uint16 Mob::GetFactionRace() {
 	uint16 current_race = GetRace();
-	if (IsPlayerRace(current_race) || current_race == TREE ||
-		current_race == MINOR_ILL_OBJ) {
+	if (IsPlayerRace(current_race) || current_race == Races::Tree ||
+		current_race == Races::MinorIllusion) {
 		return current_race;
 	}
 	else {
@@ -3918,86 +3918,86 @@ uint16 Mob::GetFactionRace() {
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (
 		IsPlayerRace(in_race) ||
-		in_race == RACE_BROWNIE_15 ||
-		in_race == RACE_KERRAN_23 ||
-		in_race == RACE_LION_50 ||
-		in_race == RACE_DRACHNID_57 ||
-		in_race == RACE_ZOMBIE_70 ||
-		in_race == RACE_QEYNOS_CITIZEN_71 ||
-		in_race == RACE_RIVERVALE_CITIZEN_81 ||
-		in_race == RACE_HALAS_CITIZEN_90 ||
-		in_race == RACE_GROBB_CITIZEN_92 ||
-		in_race == RACE_OGGOK_CITIZEN_93 ||
-		in_race == RACE_KALADIM_CITIZEN_94 ||
-		in_race == RACE_ELF_VAMPIRE_98 ||
-		in_race == RACE_FELGUARD_106 ||
-		in_race == RACE_FAYGUARD_112 ||
-		in_race == RACE_ERUDITE_GHOST_118 ||
-		in_race == RACE_IKSAR_CITIZEN_139 ||
-		in_race == RACE_SHADE_224 ||
-		in_race == RACE_TROLL_CREW_MEMBER_331 ||
-		in_race == RACE_PIRATE_DECKHAND_332 ||
-		in_race == RACE_GNOME_PIRATE_338 ||
-		in_race == RACE_DARK_ELF_PIRATE_339 ||
-		in_race == RACE_OGRE_PIRATE_340 ||
-		in_race == RACE_HUMAN_PIRATE_341 ||
-		in_race == RACE_ERUDITE_PIRATE_342 ||
-		in_race == RACE_UNDEAD_PIRATE_344 ||
-		in_race == RACE_KNIGHT_OF_HATE_351 ||
-		in_race == RACE_WARLOCK_OF_HATE_352 ||
-		in_race == RACE_UNDEAD_VAMPIRE_359 ||
-		in_race == RACE_VAMPIRE_360 ||
-		in_race == RACE_SAND_ELF_364 ||
-		in_race == RACE_TAELOSIAN_NATIVE_385 ||
-		in_race == RACE_TAELOSIAN_EVOKER_386 ||
-		in_race == RACE_DRACHNID_461 ||
-		in_race == RACE_ZOMBIE_471 ||
-		in_race == RACE_ELDDAR_489 ||
-		in_race == RACE_VAMPIRE_497 ||
-		in_race == RACE_KERRAN_562 ||
-		in_race == RACE_BROWNIE_568 ||
-		in_race == RACE_HUMAN_566 ||
-		in_race == RACE_ELVEN_GHOST_587 ||
-		in_race == RACE_HUMAN_GHOST_588 ||
-		in_race == RACE_COLDAIN_645
+		in_race == Races::Brownie ||
+		in_race == Races::Kerran ||
+		in_race == Races::Lion ||
+		in_race == Races::Drachnid ||
+		in_race == Races::Zombie ||
+		in_race == Races::QeynosCitizen ||
+		in_race == Races::RivervaleCitizen ||
+		in_race == Races::HalasCitizen ||
+		in_race == Races::GrobbCitizen ||
+		in_race == Races::OggokCitizen ||
+		in_race == Races::KaladimCitizen ||
+		in_race == Races::ElfVampire ||
+		in_race == Races::Felguard ||
+		in_race == Races::Fayguard ||
+		in_race == Races::EruditeGhost ||
+		in_race == Races::IksarCitizen ||
+		in_race == Races::Shade ||
+		in_race == Races::TrollCrewMember ||
+		in_race == Races::PirateDeckhand ||
+		in_race == Races::GnomePirate ||
+		in_race == Races::DarkElfPirate ||
+		in_race == Races::OgrePirate ||
+		in_race == Races::HumanPirate ||
+		in_race == Races::EruditePirate ||
+		in_race == Races::TrollZombie ||
+		in_race == Races::KnightOfHate ||
+		in_race == Races::ArcanistOfHate ||
+		in_race == Races::UndeadVampire ||
+		in_race == Races::Vampire3 ||
+		in_race == Races::SandElf ||
+		in_race == Races::Nihil ||
+		in_race == Races::Trusik ||
+		in_race == Races::Drachnid2 ||
+		in_race == Races::Zombie2 ||
+		in_race == Races::Elddar ||
+		in_race == Races::Vampire4 ||
+		in_race == Races::Kerran2 ||
+		in_race == Races::Human2 ||
+		in_race == Races::Brownie2 ||
+		in_race == Races::ElvenGhost ||
+		in_race == Races::HumanGhost ||
+		in_race == Races::Coldain2
 	) {
-		if (in_gender >= 2) { // Male default for PC Races
-			return 0;
+		if (in_gender >= Genders::Neuter) { // Male default for PC Races
+			return Genders::Male;
 		} else {
 			return in_gender;
 		}
 	} else if (
-		in_race == RACE_FREEPORT_GUARD_44 ||
-		in_race == RACE_MIMIC_52 ||
-		in_race == RACE_HUMAN_BEGGAR_55 ||
-		in_race == RACE_VAMPIRE_65 ||
-		in_race == RACE_HIGHPASS_CITIZEN_67 ||
-		in_race == RACE_NERIAK_CITIZEN_77 ||
-		in_race == RACE_ERUDITE_CITIZEN_78 ||
-		in_race == RACE_CLOCKWORK_GNOME_88 ||
-		in_race == RACE_DWARF_GHOST_117 ||
-		in_race == RACE_SPECTRAL_IKSAR_147 ||
-		in_race == RACE_INVISIBLE_MAN_127 ||
-		in_race == RACE_VAMPYRE_208 ||
-		in_race == RACE_RECUSO_237 ||
-		in_race == RACE_BROKEN_SKULL_PIRATE_333 ||
-		in_race == RACE_INVISIBLE_MAN_OF_ZOMM_600 ||
-		in_race == RACE_OGRE_NPC_MALE_624 ||
-		in_race == RACE_BEEFEATER_667 ||
-		in_race == RACE_ERUDITE_678
+		in_race == Races::FreeportGuard ||
+		in_race == Races::Mimic ||
+		in_race == Races::HumanBeggar ||
+		in_race == Races::Vampire ||
+		in_race == Races::HighpassCitizen ||
+		in_race == Races::NeriakCitizen ||
+		in_race == Races::EruditeCitizen ||
+		in_race == Races::ClockworkGnome ||
+		in_race == Races::DwarfGhost ||
+		in_race == Races::InvisibleMan ||
+		in_race == Races::IksarSpirit ||
+		in_race == Races::Vampire2 ||
+		in_race == Races::Recuso ||
+		in_race == Races::BrokenSkullPirate ||
+		in_race == Races::InvisibleManOfZomm ||
+		in_race == Races::Ogre2 ||
+		in_race == Races::RoyalGuard ||
+		in_race == Races::Erudite2
 	) { // Male only races
-		return 0;
+		return Genders::Male;
 	} else if (
-		in_race == RACE_FAIRY_25 ||
-		in_race == RACE_PIXIE_56 ||
-		in_race == RACE_BANSHEE_487 ||
-		in_race == RACE_BANSHEE_488 ||
-		in_race == RACE_AYONAE_RO_498 ||
-		in_race == RACE_SULLON_ZEK_499
+		in_race == Races::Fairy ||
+		in_race == Races::Pixie ||
+		in_race == Races::Banshee2 ||
+		in_race == Races::Banshee3 ||
+		in_race == Races::AyonaeRo ||
+		in_race == Races::SullonZek
 	) { // Female only races
-		return 1;
-	} else { // Neutral default for NPC Races
-		return 2;
+		return Genders::Female;
+	} else { // Neuter default for NPC Races
+		return Genders::Neuter;
 	}
 }
 
@@ -6864,25 +6864,25 @@ void Mob::RemoveAllNimbusEffects()
 	nimbus_effect3 = 0;
 }
 
-bool Mob::IsBoat() const {
-
+bool Mob::IsBoat() const
+{
 	return (
-		race == RACE_SHIP_72 ||
-		race == RACE_LAUNCH_73 ||
-		race == RACE_GHOST_SHIP_114 ||
-		race == RACE_SHIP_404 ||
-		race == RACE_MERCHANT_SHIP_550 ||
-		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552 ||
-		race == RACE_BOAT_533
+		race == Races::Ship ||
+		race == Races::Launch ||
+		race == Races::GhostShip ||
+		race == Races::DiscordShip ||
+		race == Races::MerchantShip ||
+		race == Races::PirateShip ||
+		race == Races::GhostShip2 ||
+		race == Races::Boat2
 	);
 }
 
-bool Mob::IsControllableBoat() const {
-
+bool Mob::IsControllableBoat() const
+{
 	return (
-		race == RACE_BOAT_141 ||
-		race == RACE_ROWBOAT_502
+		race == Races::Boat ||
+		race == Races::Rowboat
 	);
 }
 
@@ -7541,29 +7541,24 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 
 bool Mob::CanRaceEquipItem(uint32 item_id)
 {
-	const EQ::ItemData* itm = nullptr;
-	itm = database.GetItem(item_id);
+	const auto *item = database.GetItem(item_id);
 
-	if (!itm) {
+	if (!item) {
 		return false;
 	}
 
-	auto item_races = itm->Races;
-	if(item_races == PLAYER_RACE_ALL_MASK) {
+	const uint16 item_races = item->Races;
+	if (item_races == ALL_RACES_BITMASK) {
 		return true;
 	}
 
-	auto race_id = GetBaseRace();
+	const uint16 race_id = GetBaseRace();
 	if (!IsPlayerRace(race_id)) {
 		return false;
 	}
 
-	int race_bitmask = GetPlayerRaceBit(race_id);
-	if(!(item_races & race_bitmask)) {
-		return false;
-	} else {
-		return true;
-	}
+	const uint32 race_bitmask = GetPlayerRaceBit(race_id);
+	return (item_races & race_bitmask);
 }
 
 void Mob::SendAddPlayerState(PlayerState new_state)
@@ -8218,37 +8213,37 @@ int Mob::DispatchZoneControllerEvent(
 std::string Mob::GetRacePlural()
 {
 	switch (GetBaseRace()) {
-		case RACE_HUMAN_1:
+		case Races::Human:
 			return "Humans";
-		case RACE_BARBARIAN_2:
+		case Races::Barbarian:
 			return "Barbarians";
-		case RACE_ERUDITE_3:
+		case Races::Erudite:
 			return "Erudites";
-		case RACE_WOOD_ELF_4:
+		case Races::WoodElf:
 			return "Wood Elves";
-		case RACE_HIGH_ELF_5:
+		case Races::HighElf:
 			return "High Elves";
-		case RACE_DARK_ELF_6:
+		case Races::DarkElf:
 			return "Dark Elves";
-		case RACE_HALF_ELF_7:
+		case Races::HalfElf:
 			return "Half Elves";
-		case RACE_DWARF_8:
+		case Races::Dwarf:
 			return "Dwarves";
-		case RACE_TROLL_9:
+		case Races::Troll:
 			return "Trolls";
-		case RACE_OGRE_10:
+		case Races::Ogre:
 			return "Ogres";
-		case RACE_HALFLING_11:
+		case Races::Halfling:
 			return "Halflings";
-		case RACE_GNOME_12:
+		case Races::Gnome:
 			return "Gnomes";
-		case RACE_IKSAR_128:
+		case Races::Iksar:
 			return "Iksar";
-		case RACE_VAH_SHIR_130:
+		case Races::VahShir:
 			return "Vah Shir";
-		case RACE_FROGLOK_330:
+		case Races::Froglok:
 			return "Frogloks";
-		case RACE_DRAKKIN_522:
+		case Races::Drakkin:
 			return "Drakkin";
 		default:
 			return "Races";

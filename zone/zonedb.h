@@ -15,8 +15,6 @@
 
 #include "bot_database.h"
 
-#define WOLF 42
-
 class Client;
 class Corpse;
 class Merc;
@@ -337,12 +335,12 @@ struct CharacterCorpseEntry
 
 namespace BeastlordPetData {
 	struct PetStruct {
-		uint16 race_id = WOLF;
-		uint8 texture = 0;
-		uint8 helm_texture = 0;
-		uint8 gender = NEUTER;
-		float size_modifier = 1.0f;
-		uint8 face = 0;
+		uint16 race_id       = Races::Wolf;
+		uint8  texture       = 0;
+		uint8  helm_texture  = 0;
+		uint8  gender        = Genders::Neuter;
+		float  size_modifier = 1.0f;
+		uint8  face          = 0;
 	};
 }
 

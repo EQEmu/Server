@@ -1019,52 +1019,52 @@ int32	Client::CalcMR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Races::Human:
 			MR = 25;
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			MR = 25;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			MR = 30;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			MR = 25;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			MR = 25;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			MR = 25;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			MR = 25;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			MR = 30;
 			break;
-		case TROLL:
+		case Races::Troll:
 			MR = 25;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			MR = 25;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			MR = 25;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			MR = 25;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			MR = 25;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			MR = 25;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			MR = 30;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 		{
 			MR = 25;
 			if (GetDrakkinHeritage() == 2)
@@ -1093,52 +1093,52 @@ int32	Client::CalcFR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Races::Human:
 			FR = 25;
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			FR = 25;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			FR = 25;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			FR = 25;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			FR = 25;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			FR = 25;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			FR = 25;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			FR = 25;
 			break;
-		case TROLL:
+		case Races::Troll:
 			FR = 5;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			FR = 25;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			FR = 25;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			FR = 25;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			FR = 30;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			FR = 25;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			FR = 25;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 		{
 			FR = 25;
 			if (GetDrakkinHeritage() == 0)
@@ -1179,52 +1179,52 @@ int32	Client::CalcDR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Races::Human:
 			DR = 15;
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			DR = 15;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			DR = 10;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			DR = 15;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			DR = 15;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			DR = 15;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			DR = 15;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			DR = 15;
 			break;
-		case TROLL:
+		case Races::Troll:
 			DR = 15;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			DR = 15;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			DR = 20;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			DR = 15;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			DR = 15;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			DR = 15;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			DR = 15;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 		{
 			DR = 15;
 			if (GetDrakkinHeritage() == 1)
@@ -1271,52 +1271,52 @@ int32	Client::CalcPR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Races::Human:
 			PR = 15;
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			PR = 15;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			PR = 15;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			PR = 15;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			PR = 15;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			PR = 15;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			PR = 15;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			PR = 20;
 			break;
-		case TROLL:
+		case Races::Troll:
 			PR = 15;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			PR = 15;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			PR = 20;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			PR = 15;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			PR = 15;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			PR = 15;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			PR = 30;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 		{
 			PR = 15;
 			if (GetDrakkinHeritage() == 3)
@@ -1363,52 +1363,52 @@ int32	Client::CalcCR()
 {
 	//racial bases
 	switch (GetBaseRace()) {
-		case HUMAN:
+		case Races::Human:
 			CR = 25;
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			CR = 35;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			CR = 25;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			CR = 25;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			CR = 25;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			CR = 25;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			CR = 25;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			CR = 25;
 			break;
-		case TROLL:
+		case Races::Troll:
 			CR = 25;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			CR = 25;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			CR = 25;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			CR = 25;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			CR = 15;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			CR = 25;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			CR = 25;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 		{
 			CR = 25;
 			if (GetDrakkinHeritage() == 4)

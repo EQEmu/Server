@@ -880,118 +880,108 @@ float Mob::GetZOffset() const {
 	float offset = 3.125f;
 
 	switch (GetModel()) {
-		case RACE_BASILISK_436:
+		case Races::Basilisk:
 			offset = 0.577f;
 			break;
-		case RACE_DRAKE_430:
-			offset = 0.5f;
-			break;
-		case RACE_DRAKE_432:
+		case Races::Drake3:
 			offset = 1.9f;
 			break;
-		case RACE_DRAGON_435:
+		case Races::Dragon:
 			offset = 0.93f;
 			break;
-		case RACE_LAVA_SPIDER_450:
+		case Races::LavaSpider:
 			offset = 0.938f;
 			break;
-		case RACE_ALLIGATOR_479:
+		case Races::Alligator2:
 			offset = 0.8f;
 			break;
-		case RACE_LAVA_SPIDER_QUEEN_451:
+		case Races::LavaSpiderQueen:
 			offset = 0.816f;
 			break;
-		case RACE_DRAGON_437:
+		case Races::Dragon2:
 			offset = 0.527f;
 			break;
-		case RACE_PUMA_439:
+		case Races::Puma2:
 			offset = 1.536f;
 			break;
-		case RACE_RAT_415:
+		case Races::Rat:
 			offset = 1.0f;
 			break;
-		case RACE_DRAGON_438:
-		case RACE_DRAGON_452:
+		case Races::Dragon3:
+		case Races::Dragon4:
 			offset = 0.776f;
 			break;
-		case RACE_SPIDER_QUEEN_441:
+		case Races::SpiderQueen:
 			offset = 0.816f;
 			break;
-		case RACE_SPIDER_440:
+		case Races::Spider:
 			offset = 0.938f;
 			break;
-		case RACE_IMP_46:
-		case RACE_SNAKE_468:
-		case RACE_CORATHUS_459:
+		case Races::Imp:
+		case Races::Snake:
+		case Races::Corathus:
 			offset = 1.0f;
 			break;
-		case RACE_DRACHNID_COCOON_462:
+		case Races::DrachnidCocoon:
 			offset = 1.5f;
 			break;
-		case RACE_DRAGON_530:
+		case Races::Dracolich:
+		case Races::Dragon5:
 			offset = 1.2f;
 			break;
-		case RACE_GOO_549:
-		case RACE_GOO_548:
+		case Races::Siren:
+		case Races::HalasCitizen:
+		case Races::Othmir:
+		case Races::Drake2:
+		case Races::Goo2:
+		case Races::Goo3:
+		case Races::Goo4:
 			offset = 0.5f;
 			break;
-		case RACE_GOO_547:
-			offset = 0.5f;
-			break;
-		case RACE_DRACOLICH_604:
-			offset = 1.2f;
-			break;
-		case RACE_TELMIRA_653:
+		case Races::Telmira:
 			offset = 5.9f;
 			break;
-		case RACE_MORELL_THULE_658:
+		case Races::IksarSpirit:
+		case Races::Sandman:
+		case Races::MorellThule:
 			offset = 4.0f;
 			break;
-		case RACE_ARMOR_OF_MARR_323:
-		case RACE_AMYGDALAN_663:
+		case Races::AnimatedArmor:
+		case Races::Amygdalan:
 			offset = 5.0f;
 			break;
-		case RACE_SPECTRAL_IKSAR_147:
-		case RACE_SANDMAN_664:
-			offset = 4.0f;
-			break;
-		case RACE_LAVA_DRAGON_49:
-		case RACE_ALARAN_SENTRY_STONE_703:
+		case Races::LavaDragon:
+		case Races::AlaranSentryStone:
 			offset = 9.0f;
 			break;
-		case RACE_RABBIT_668:
+		case Races::Rabbit:
 			offset = 5.0f;
 			break;
-		case RACE_WURM_158:
-		case RACE_BLIND_DREAMER_669:
+		case Races::Wurm:
+		case Races::BlindDreamer:
 			offset = 7.0f;
 			break;
-		case RACE_SIREN_187:
-		case RACE_HALAS_CITIZEN_90:
-		case RACE_OTTERMAN_190:
-			offset = .5f;
+		case Races::Coldain:
+			offset = 0.6f;
 			break;
-		case RACE_COLDAIN_183:
-			offset = .6f;
-			break;
-		case RACE_WEREWOLF_14:
+		case Races::Werewolf:
 			offset = 1.2f;
 			break;
-		case RACE_DWARF_8:
-			offset = .7f;
+		case Races::Dwarf:
+			offset = 0.7f;
 			break;
-		case RACE_HORSE_216:
+		case Races::HorseMount:
 			offset = 1.4f;
 			break;
-		case RACE_ENCHANTED_ARMOR_175:
-		case RACE_TIGER_63:
+		case Races::EnchantedArmor:
+		case Races::Tiger:
 			offset = 1.75f;
 			break;
-		case RACE_STATUE_OF_RALLOS_ZEK_66:
+		case Races::StatueOfRallosZek:
 			offset = 1.0f;
 			break;
-		case RACE_GORAL_687:
-		case RACE_SELYRAH_686:
+		case Races::Selyrah:
+		case Races::Goral:
 			offset = 2.0f;
 			break;
 		default:

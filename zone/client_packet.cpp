@@ -1417,23 +1417,23 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	switch (race)
 	{
-	case OGRE:
+	case Races::Ogre:
 		size = 9; break;
-	case TROLL:
+	case Races::Troll:
 		size = 8; break;
-	case VAHSHIR: case BARBARIAN:
+	case Races::VahShir: case Races::Barbarian:
 		size = 7; break;
-	case HUMAN: case HIGH_ELF: case ERUDITE: case IKSAR: case DRAKKIN:
+	case Races::Human: case Races::HighElf: case Races::Erudite: case Races::Iksar: case Races::Drakkin:
 		size = 6; break;
-	case HALF_ELF:
+	case Races::HalfElf:
 		size = 5.5; break;
-	case WOOD_ELF: case DARK_ELF: case FROGLOK:
+	case Races::WoodElf: case Races::DarkElf: case Races::Froglok:
 		size = 5; break;
-	case DWARF:
+	case Races::Dwarf:
 		size = 4; break;
-	case HALFLING:
+	case Races::Halfling:
 		size = 3.5; break;
-	case GNOME:
+	case Races::Gnome:
 		size = 3; break;
 	default:
 		size = 0;

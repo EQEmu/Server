@@ -83,7 +83,7 @@ struct AppearanceStruct {
 	uint8  hair             = UINT8_MAX;
 	uint8  hair_color       = UINT8_MAX;
 	uint8  helmet_texture   = UINT8_MAX;
-	uint16 race_id          = RACE_DOUG_0;
+	uint16 race_id          = Races::Doug;
 	bool   send_effects     = true;
 	float  size             = -1.0f;
 	Client *target          = nullptr;

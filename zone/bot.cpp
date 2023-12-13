@@ -280,10 +280,10 @@ Bot::Bot(
 				case SE_IllusionCopy:
 				case SE_Illusion: {
 					if (spell.base_value[x1] == -1) {
-						if (gender == FEMALE) {
-							gender = MALE;
-						} else if (gender == MALE) {
-							gender = FEMALE;
+						if (gender == Genders::Female) {
+							gender = Genders::Male;
+						} else if (gender == Genders::Male) {
+							gender = Genders::Female;
 						}
 
 						SendIllusionPacket(
@@ -294,7 +294,7 @@ Bot::Bot(
 						);
 					} else if (spell.base_value[x1] == -2) // WTF IS THIS
 					{
-						if (GetRace() == IKSAR || GetRace() == VAHSHIR || GetRace() <= GNOME) {
+						if (GetRace() == Races::Iksar || GetRace() == Races::VahShir || GetRace() <= Races::Gnome) {
 							SendIllusionPacket(
 								AppearanceStruct{
 									.gender_id = GetGender(),
@@ -323,27 +323,27 @@ Bot::Bot(
 					}
 
 					switch (spell.base_value[x1]) {
-					case OGRE:
+					case Races::Ogre:
 						SendAppearancePacket(AT_Size, 9);
 						break;
-					case TROLL:
+					case Races::Troll:
 						SendAppearancePacket(AT_Size, 8);
 						break;
-					case VAHSHIR:
-					case BARBARIAN:
+					case Races::VahShir:
+					case Races::Barbarian:
 						SendAppearancePacket(AT_Size, 7);
 						break;
-					case HALF_ELF:
-					case WOOD_ELF:
-					case DARK_ELF:
-					case FROGLOK:
+					case Races::HalfElf:
+					case Races::WoodElf:
+					case Races::DarkElf:
+					case Races::Froglok:
 						SendAppearancePacket(AT_Size, 5);
 						break;
-					case DWARF:
+					case Races::Dwarf:
 						SendAppearancePacket(AT_Size, 4);
 						break;
-					case HALFLING:
-					case GNOME:
+					case Races::Halfling:
+					case Races::Gnome:
 						SendAppearancePacket(AT_Size, 3);
 						break;
 					default:
@@ -434,10 +434,10 @@ Bot::Bot(
 			int resurrection_sickness_spell_id = (
 				RuleB(Bots, OldRaceRezEffects) &&
 				(
-					GetRace() == BARBARIAN ||
-					GetRace() == DWARF ||
-					GetRace() == TROLL ||
-					GetRace() == OGRE
+					GetRace() == Races::Barbarian ||
+					GetRace() == Races::Dwarf ||
+					GetRace() == Races::Troll ||
+					GetRace() == Races::Ogre
 				) ?
 				RuleI(Bots, OldResurrectionSicknessSpell) :
 				RuleI(Bots, ResurrectionSicknessSpell)
@@ -896,9 +896,9 @@ void Bot::GenerateBaseStats()
 	float BotSize = GetSize();
 
 	switch(GetRace()) {
-		case HUMAN: // Humans have no race bonus
+		case Races::Human: // Humans have no race bonus
 			break;
-		case BARBARIAN:
+		case Races::Barbarian:
 			Strength += 28;
 			Stamina += 20;
 			Agility += 7;
@@ -909,7 +909,7 @@ void Bot::GenerateBaseStats()
 			BotSize = 7.0;
 			ColdResist += 10;
 			break;
-		case ERUDITE:
+		case Races::Erudite:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility -= 5;
@@ -920,7 +920,7 @@ void Bot::GenerateBaseStats()
 			MagicResist += 5;
 			DiseaseResist -= 5;
 			break;
-		case WOOD_ELF:
+		case Races::WoodElf:
 			Strength -= 10;
 			Stamina -= 10;
 			Agility += 20;
@@ -928,7 +928,7 @@ void Bot::GenerateBaseStats()
 			Wisdom += 5;
 			BotSize = 5.0;
 			break;
-		case HIGH_ELF:
+		case Races::HighElf:
 			Strength -= 20;
 			Stamina -= 10;
 			Agility += 10;
@@ -937,7 +937,7 @@ void Bot::GenerateBaseStats()
 			Intelligence += 12;
 			Charisma += 5;
 			break;
-		case DARK_ELF:
+		case Races::DarkElf:
 			Strength -= 15;
 			Stamina -= 10;
 			Agility += 15;
@@ -946,7 +946,7 @@ void Bot::GenerateBaseStats()
 			Charisma -= 15;
 			BotSize = 5.0;
 			break;
-		case HALF_ELF:
+		case Races::HalfElf:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -954,7 +954,7 @@ void Bot::GenerateBaseStats()
 			Wisdom -= 15;
 			BotSize = 5.5;
 			break;
-		case DWARF:
+		case Races::Dwarf:
 			Strength += 15;
 			Stamina += 15;
 			Agility -= 5;
@@ -966,7 +966,7 @@ void Bot::GenerateBaseStats()
 			MagicResist -= 5;
 			PoisonResist += 5;
 			break;
-		case TROLL:
+		case Races::Troll:
 			Strength += 33;
 			Stamina += 34;
 			Agility += 8;
@@ -976,7 +976,7 @@ void Bot::GenerateBaseStats()
 			BotSize = 8.0;
 			FireResist -= 20;
 			break;
-		case OGRE:
+		case Races::Ogre:
 			Strength += 55;
 			Stamina += 77;
 			Agility -= 5;
@@ -986,7 +986,7 @@ void Bot::GenerateBaseStats()
 			Charisma -= 38;
 			BotSize = 9.0;
 			break;
-		case HALFLING:
+		case Races::Halfling:
 			Strength -= 5;
 			Agility += 20;
 			Dexterity += 15;
@@ -997,7 +997,7 @@ void Bot::GenerateBaseStats()
 			PoisonResist += 5;
 			DiseaseResist += 5;
 			break;
-		case GNOME:
+		case Races::Gnome:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility += 10;
@@ -1007,7 +1007,7 @@ void Bot::GenerateBaseStats()
 			Charisma -= 15;
 			BotSize = 3.0;
 			break;
-		case IKSAR:
+		case Races::Iksar:
 			Strength -= 5;
 			Stamina -= 5;
 			Agility += 15;
@@ -1017,7 +1017,7 @@ void Bot::GenerateBaseStats()
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case VAHSHIR:
+		case Races::VahShir:
 			Strength += 15;
 			Agility += 15;
 			Dexterity -= 5;
@@ -1028,7 +1028,7 @@ void Bot::GenerateBaseStats()
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case FROGLOK:
+		case Races::Froglok:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 25;
@@ -1038,7 +1038,7 @@ void Bot::GenerateBaseStats()
 			MagicResist -= 5;
 			FireResist -= 5;
 			break;
-		case DRAKKIN:
+		case Races::Drakkin:
 			Strength -= 5;
 			Stamina += 5;
 			Agility += 10;
@@ -1081,7 +1081,7 @@ void Bot::GenerateBaseStats()
 void Bot::GenerateAppearance() {
 	// Randomize facial appearance
 	int iFace = 0;
-	if (GetRace() == BARBARIAN) // Barbarian w/Tatoo
+	if (GetRace() == Races::Barbarian) // Barbarian w/Tatoo
 	{
 		iFace = zone->random.Int(0, 79);
 	}
@@ -1093,13 +1093,13 @@ void Bot::GenerateAppearance() {
 	int iHair = 0;
 	int iBeard = 0;
 	int iBeardColor = 1;
-	if (GetRace() == DRAKKIN) {
+	if (GetRace() == Races::Drakkin) {
 		iHair = zone->random.Int(0, 8);
 		iBeard = zone->random.Int(0, 11);
 		iBeardColor = zone->random.Int(0, 3);
 	} else if (GetGender()) {
 		iHair = zone->random.Int(0, 2);
-		if (GetRace() == DWARF && zone->random.Int(1, 100) < 50) {
+		if (GetRace() == Races::Dwarf && zone->random.Int(1, 100) < 50) {
 			iFace += 10;
 		}
 	} else {
@@ -1109,7 +1109,7 @@ void Bot::GenerateAppearance() {
 	}
 
 	int iHairColor = 0;
-	if (GetRace() == DRAKKIN) {
+	if (GetRace() == Races::Drakkin) {
 		iHairColor = zone->random.Int(0, 3);
 	} else {
 		iHairColor = zone->random.Int(0, 19);
@@ -1117,7 +1117,7 @@ void Bot::GenerateAppearance() {
 
 	auto iEyeColor1 = (uint8)zone->random.Int(0, 9);
 	uint8 iEyeColor2 = 0;
-	if (GetRace() == DRAKKIN) {
+	if (GetRace() == Races::Drakkin) {
 		iEyeColor1 = iEyeColor2 = (uint8)zone->random.Int(0, 11);
 	} else if (zone->random.Int(1, 100) > 96) {
 		iEyeColor2 = zone->random.Int(0, 9);
@@ -1128,7 +1128,7 @@ void Bot::GenerateAppearance() {
 	int iHeritage = 0;
 	int iTattoo = 0;
 	int iDetails = 0;
-	if (GetRace() == DRAKKIN) {
+	if (GetRace() == Races::Drakkin) {
 		iHeritage = zone->random.Int(0, 6);
 		iTattoo = zone->random.Int(0, 7);
 		iDetails = zone->random.Int(0, 7);
@@ -2680,7 +2680,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 	float other_size_mod = tar->GetSize();
 
 	// For races with a fixed size
-	if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) {
+	if (GetRace() == Races::LavaDragon || GetRace() == Races::Wurm || GetRace() == Races::GhostDragon) {
 		// size_mod = 60.0f;
 	}
 
@@ -2689,7 +2689,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 	}
 
 	// For races with a fixed size
-	if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) {
+	if (tar->GetRace() == Races::LavaDragon || tar->GetRace() == Races::Wurm || tar->GetRace() == Races::GhostDragon) {
 		other_size_mod = 60.0f;
 	}
 
@@ -5151,7 +5151,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case Class::Warrior:
 			if (bot_level >= RuleI(Combat, NPCBashKickLevel)) {
 				bool canBash = false;
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
+				if ((GetRace() == Races::Ogre || GetRace() == Races::Troll || GetRace() == Races::Barbarian) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					canBash = true;
 
 				if (!canBash || zone->random.Int(0, 100) > 25)
@@ -5170,7 +5170,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case Class::ShadowKnight:
 		case Class::Paladin:
 			if (bot_level >= RuleI(Combat, NPCBashKickLevel)) {
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
+				if ((GetRace() == Races::Ogre || GetRace() == Races::Troll || GetRace() == Races::Barbarian) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					skill_to_use = EQ::skills::SkillBash;
 			}
 			break;

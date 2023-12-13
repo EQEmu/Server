@@ -3933,14 +3933,14 @@ float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 		float size_mod = GetSize();
 		float other_size_mod = target->GetSize();
 
-		if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (GetRace() == Races::LavaDragon || GetRace() == Races::Wurm || GetRace() == Races::GhostDragon) //For races with a fixed size
 		{
 			size_mod = 60.0f;
 		} else if (size_mod < 6.0) {
 			size_mod = 8.0f;
 		}
 
-		if (target->GetRace() == RACE_LAVA_DRAGON_49 || target->GetRace() == RACE_WURM_158 || target->GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (target->GetRace() == Races::LavaDragon || target->GetRace() == Races::Wurm || target->GetRace() == Races::GhostDragon) //For races with a fixed size
 		{
 			other_size_mod = 60.0f;
 		} else if (other_size_mod < 6.0) {
@@ -4323,7 +4323,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->race = merc_template->RaceID;
 
 			// Use the Gender and Size of the Merchant if possible
-			uint8 tmpgender = MALE;
+			uint8 tmpgender = Genders::Male;
 			float tmpsize = 6.0f;
 			if(merchant_id > 0)
 			{
@@ -5624,7 +5624,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().myTemplate = nullptr;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
-		GetMercInfo().Gender = MALE;
+		GetMercInfo().Gender = Genders::Male;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
 		Log(Logs::General, Logs::Mercenaries, "SetMerc No Merc for %s.", GetName());

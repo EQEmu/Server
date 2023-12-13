@@ -155,10 +155,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
-	if (race == RACE_LAVA_DRAGON_49) {
+	if (race == Races::LavaDragon) {
 		size = 5;
 	}
-	if (race == RACE_WURM_158) {
+	if (race == Races::Wurm) {
 		size = 15;
 	}
 
@@ -1220,7 +1220,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = NEUTER;
+	npc_type->gender = Genders::Neuter;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 200;
@@ -3691,32 +3691,42 @@ void NPC::ScaleNPC(uint8 npc_level, bool always_scale, bool override_special_abi
 bool NPC::IsGuard()
 {
 	switch (GetRace()) {
-	case RT_GUARD:
-		if (GetTexture() == 1 || GetTexture() == 2)
+		case Races::FreeportGuard:
+			if (GetTexture() == 1 || GetTexture() == 2) {
+				return true;
+			}
+
+			break;
+		case Races::IksarCitizen:
+			if (GetTexture() == 1) {
+				return true;
+			}
+
+			break;
+		case Races::Felguard:
+		case Races::Fayguard:
+		case Races::VahShirGuard:
+		case Races::QeynosCitizen:
+		case Races::RivervaleCitizen:
+		case Races::EruditeCitizen:
+		case Races::HalasCitizen:
+		case Races::NeriakCitizen:
+		case Races::GrobbCitizen:
+		case Races::OggokCitizen:
+		case Races::KaladimCitizen:
 			return true;
-		break;
-	case RT_IKSAR_2:
-		if (GetTexture() == 1)
-			return true;
-		break;
-	case RT_GUARD_2:
-	case RT_GUARD_3:
-	case RT_GUARD_4:
-	case RT_HUMAN_3:
-	case RT_HALFLING_2:
-	case RT_ERUDITE_2:
-	case RT_BARBARIAN_2:
-	case RT_DARK_ELF_2:
-	case RT_TROLL_2:
-	case OGGOK_CITIZEN:
-	case RT_DWARF_2:
-		return true;
-	default:
-		break;
+		default:
+			break;
 	}
-	if (GetPrimaryFaction() == DB_FACTION_GEM_CHOPPERS || GetPrimaryFaction() == DB_FACTION_HERETICS || GetPrimaryFaction() == DB_FACTION_KING_AKANON) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
+
+	if (
+		GetPrimaryFaction() == DB_FACTION_GEM_CHOPPERS ||
+		GetPrimaryFaction() == DB_FACTION_HERETICS ||
+		GetPrimaryFaction() == DB_FACTION_KING_AKANON
+	) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
 		return true;
 	}
+
 	return false;
 }
 
