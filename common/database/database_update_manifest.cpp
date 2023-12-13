@@ -5062,8 +5062,8 @@ INSERT INTO
 (
 	SELECT
 		0 AS `id`,
-		GROUP_CONCAT(DISTINCT `class` ORDER BY class ASC SEPARATOR '|') AS `class_list`,
 		GROUP_CONCAT(DISTINCT `race` ORDER BY race ASC SEPARATOR '|') AS `race_list`,
+		GROUP_CONCAT(DISTINCT `class` ORDER BY class ASC SEPARATOR '|') AS `class_list`,
 		GROUP_CONCAT(DISTINCT `deityid` ORDER BY deityid ASC SEPARATOR '|') AS `deity_list`,
 		GROUP_CONCAT(DISTINCT `zoneid` ORDER BY zoneid ASC SEPARATOR '|') AS `zone_list`,
 		`itemid`,
