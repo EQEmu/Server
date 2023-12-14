@@ -9,17 +9,18 @@ void SetTime(Client *c, const Seperator *sep)
 		TimeOfDay_Struct world_time{};
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &world_time);
 
-		auto time_string = fmt::format(
+		/**commenting out timezone info(it's always 12 am regardless) since it's not useful **/
+		/*auto time_string = fmt::format( 
 			"{} (Timezone: {})",
-			Strings::ZoneTime(world_time.hour, world_time.minute),
+			Strings::ZoneTime(world_time.hour - 1, world_time.minute),
 			Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneHr())
-		);
+		);*/
 
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"It is currently {}.",
-				time_string
+				Strings::ZoneTime(world_time.hour - 1, world_time.minute)
 			).c_str()
 		);
 
@@ -27,15 +28,15 @@ void SetTime(Client *c, const Seperator *sep)
 	}
 
 	uint8 minutes = 0;
-	uint8 hours = Strings::ToUnsignedInt(sep->arg[2]) + 1;
+	uint8 hours = Strings::ToUnsignedInt(sep->arg[2]);
 
 	if (hours > 24) {
 		hours = 24;
 	}
 
 	uint8 real_hours = (
-		(hours - 1) > 0 ?
-		(hours - 1) :
+		(hours) > 0 ?
+		(hours) :
 		0
 	);
 
@@ -47,21 +48,24 @@ void SetTime(Client *c, const Seperator *sep)
 		}
 	}
 
+
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Setting world time to {} (Timezone: {}).",
-			Strings::ZoneTime(hours, minutes),
-			Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneHr())
+			"Setting world time to {}).",
+			//"Setting world time to {} (Timezone: {}).",
+			Strings::ZoneTime(hours, minutes)
+			//Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneMin())
 		).c_str()
 	);
 
-	zone->SetTime(real_hours, minutes);
+	zone->SetTime(real_hours + 1, minutes);
 
 	LogInfo(
-		"{} :: Setting world time to {} (Timezone: {})",
+		"{} :: Setting world time to {})",
+		//"{} :: Setting world time to {} (Timezone: {})",
 		c->GetCleanName(),
-		Strings::ZoneTime(hours, minutes),
-		Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneHr())
+		Strings::ZoneTime(hours, minutes)
+		//Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneMin())
 	);
 }
