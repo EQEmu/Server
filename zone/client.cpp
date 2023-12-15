@@ -10769,8 +10769,8 @@ void Client::ReconnectUCS()
 
 	buffer = StringFormat(
 		"%s,%i,%s.%s,%c%s",
-		Config->ChatHost.c_str(),
-		Config->ChatPort,
+		Config->GetUCSHost().c_str(),
+		Config->GetUCSPort(),
 		Config->ShortName.c_str(),
 		GetName(),
 		connection_type,
@@ -10796,8 +10796,8 @@ void Client::ReconnectUCS()
 
 	buffer = StringFormat(
 		"%s,%i,%s.%s,%c%s",
-		Config->MailHost.c_str(),
-		Config->MailPort,
+		Config->GetUCSHost().c_str(),
+		Config->GetUCSPort(),
 		Config->ShortName.c_str(),
 		GetName(),
 		connection_type,

@@ -945,8 +945,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->ChatHost,
-			config->ChatPort,
+			config->GetUCSHost(),
+			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
 			static_cast<char>(connection_type),
@@ -971,8 +971,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->MailHost,
-			config->MailPort,
+			config->GetUCSHost(),
+			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
 			static_cast<char>(connection_type),
