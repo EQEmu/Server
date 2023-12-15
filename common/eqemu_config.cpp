@@ -178,7 +178,7 @@ void EQEmuConfig::parse_config()
 
 		// write to file
 		std::ofstream o(config_file_path);
-		o << std::setw(2) << data << std::endl;
+		o << std::setw(1) << data << std::endl;
 		o.close();
 
 		// write new config
