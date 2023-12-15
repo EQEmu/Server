@@ -45,7 +45,7 @@ void SetTime(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Setting world time to {}).",
+			"Setting world time to {}.",
 			Strings::ZoneTime(hours, minutes)
 		).c_str()
 	);
@@ -53,7 +53,7 @@ void SetTime(Client *c, const Seperator *sep)
 	zone->SetTime(real_hours + 1, minutes);
 
 	LogInfo(
-		"{} :: Setting world time to {})",
+		"{} :: Setting world time to {}.",
 		c->GetCleanName(),
 		Strings::ZoneTime(hours, minutes)
 	);
