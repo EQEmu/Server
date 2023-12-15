@@ -184,6 +184,16 @@ void EQEmuConfig::parse_config()
 		// write new config
 		LogInfo("New configuration written to [{}]", config_file_path);
 		LogInfo("Migration complete, please review the new configuration file");
+
+		// reload config internally
+		try {
+			std::ifstream fconfig(config_file_path, std::ifstream::binary);
+			fconfig >> _config->_root;
+			_config->parse_config();
+		}
+		catch (std::exception &) {
+			return;
+		}
 	}
 
 	m_ucs_host = _root["server"]["ucs"].get("host", "eqchat.eqemulator.net").asString();
