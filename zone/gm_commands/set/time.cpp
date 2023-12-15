@@ -9,13 +9,6 @@ void SetTime(Client *c, const Seperator *sep)
 		TimeOfDay_Struct world_time{};
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &world_time);
 
-		/**commenting out timezone info(it's always 12 am regardless) since it's not useful **/
-		/*auto time_string = fmt::format( 
-			"{} (Timezone: {})",
-			Strings::ZoneTime(world_time.hour - 1, world_time.minute),
-			Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneHr())
-		);*/
-
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -35,8 +28,8 @@ void SetTime(Client *c, const Seperator *sep)
 	}
 
 	uint8 real_hours = (
-		(hours) > 0 ?
-		(hours) :
+		hours > 0 ?
+		hours :
 		0
 	);
 
@@ -53,9 +46,7 @@ void SetTime(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Setting world time to {}).",
-			//"Setting world time to {} (Timezone: {}).",
 			Strings::ZoneTime(hours, minutes)
-			//Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneMin())
 		).c_str()
 	);
 
@@ -63,9 +54,7 @@ void SetTime(Client *c, const Seperator *sep)
 
 	LogInfo(
 		"{} :: Setting world time to {})",
-		//"{} :: Setting world time to {} (Timezone: {})",
 		c->GetCleanName(),
 		Strings::ZoneTime(hours, minutes)
-		//Strings::ZoneTime(zone->zone_time.getEQTimeZoneHr(), zone->zone_time.getEQTimeZoneMin())
 	);
 }
