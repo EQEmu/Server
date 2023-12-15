@@ -5122,7 +5122,7 @@ ADD PRIMARY KEY (`id`);
 		.version = 9247,
 		.description = "2023_12_14_starting_items_fix.sql",
 		.check = "SHOW COLUMNS FROM `starting_items` LIKE 'inventory_slot'",
-		.condition = "not_empty",
+		.condition = "empty",
 		.match = "",
 		.sql = R"(
 ALTER TABLE `starting_items`
