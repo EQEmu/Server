@@ -140,12 +140,12 @@ void EQEmuConfig::parse_config()
 		dst << src.rdbuf();
 		src.close();
 
-		LogInfo("Old configuration backed up to [{}]", ConfigFile + ".ucs-migrate.bak");
+		LogInfo("Old configuration backed up to [{}]", config_file_bak_path);
 
 		// read eqemu_config.json, transplant new fields and write to eqemu_config.json
 		Json::Value   root;
 		Json::Reader  reader;
-		std::ifstream file(ConfigFile);
+		std::ifstream file(config_file_path);
 		if (!reader.parse(file, root)) {
 			LogError("Failed to parse configuration file");
 			return;
@@ -182,7 +182,7 @@ void EQEmuConfig::parse_config()
 		o.close();
 
 		// write new config
-		LogInfo("New configuration written to [{}]", ConfigFile);
+		LogInfo("New configuration written to [{}]", config_file_path);
 		LogInfo("Migration complete, please review the new configuration file");
 	}
 
