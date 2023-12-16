@@ -22,9 +22,14 @@
 #include <algorithm>
 #include <utility>
 #include <tuple>
+#include <fstream>
+#include <cstdio>
+
 
 // fmt
-#include <fmt/format.h>
+//#include <fmt/format.h>
+# include <fmt/core.h>
+# define FMT_STRING(s) s
 
 // lua
 #include "lua.hpp"
