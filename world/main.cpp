@@ -434,7 +434,7 @@ int main(int argc, char **argv)
 					tod.year,
 					tod.month,
 					tod.day,
-					tod.hour,
+					tod.hour - 1,
 					tod.minute
 				);
 			}

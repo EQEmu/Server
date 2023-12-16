@@ -1526,7 +1526,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= true*/)
 {
 	if (zone)
-		zone->SetTime(new_hour - 1, new_min, update_world);
+		zone->SetTime(new_hour, new_min, update_world);
 }
 
 void QuestManager::itemlink(int item_id) {

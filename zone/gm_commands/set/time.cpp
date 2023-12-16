@@ -50,7 +50,7 @@ void SetTime(Client *c, const Seperator *sep)
 		).c_str()
 	);
 
-	zone->SetTime(real_hours + 1, minutes);
+	zone->SetTime(real_hours, minutes);
 
 	LogInfo(
 		"{} :: Setting world time to {}.",
