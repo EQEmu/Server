@@ -1,3 +1,35 @@
+## [22.36.0] - 12/16/2023
+
+### Bots
+
+* Add rule to toggle DT hitting owner ([#3757](https://github.com/EQEmu/Server/pull/3757)) @nytmyr 2023-12-11
+* Enable auto-saving of bots. ([#3758](https://github.com/EQEmu/Server/pull/3758)) @nytmyr 2023-12-13
+
+### Code
+
+* Cleanup classes.cpp/classes.h ([#3752](https://github.com/EQEmu/Server/pull/3752)) @Kinglykrab 2023-12-13
+
+### Corpse
+
+* Fix /corpse command regression from #3727 ([#3770](https://github.com/EQEmu/Server/pull/3770)) @Akkadius 2023-12-16
+
+### Database
+
+* Make it clearer to users that a database backup is occurring ([#3769](https://github.com/EQEmu/Server/pull/3769)) @Akkadius 2023-12-16
+* When database version is greater than binary, we are up to date ([#3771](https://github.com/EQEmu/Server/pull/3771)) @Akkadius 2023-12-16
+
+### Fixes
+
+* Fix Starting Items SQL ([#3766](https://github.com/EQEmu/Server/pull/3766)) @Kinglykrab 2023-12-16
+
+### Logging
+
+* Change empty object loading to warning ([#3759](https://github.com/EQEmu/Server/pull/3759)) @nytmyr 2023-12-11
+
+### Rules
+
+* Add DOT and HOT Rules ([#3760](https://github.com/EQEmu/Server/pull/3760)) @Kinglykrab 2023-12-16
+
 ## [22.35.0] - 12/10/2023
 
 ### Bots
