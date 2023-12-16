@@ -274,9 +274,9 @@ bool DatabaseUpdate::CheckVersionsUpToDate(DatabaseVersion v, DatabaseVersion b)
 	LogInfo("{}", Strings::Repeat("-", BREAK_LENGTH));
 
 	// server database version is required
-	bool server_up_to_date = v.server_database_version == b.server_database_version;
+	bool server_up_to_date = v.server_database_version >= b.server_database_version;
 	// bots database version is optional, if not enabled then it is always up-to-date
-	bool bots_up_to_date   = RuleB(Bots, Enabled) ? v.bots_database_version == b.bots_database_version : true;
+	bool bots_up_to_date   = RuleB(Bots, Enabled) ? v.bots_database_version >= b.bots_database_version : true;
 
 	return server_up_to_date && bots_up_to_date;
 }
