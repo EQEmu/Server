@@ -130,7 +130,7 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 			if (
 				GetClass() == Class::Warrior ||
 				GetClass() == Class::Rogue ||
-				GetBaseRace() == HALFLING
+				GetBaseRace() == Race::Halfling
 			) {
 				total_modifier *= 1.05;
 			}
@@ -291,7 +291,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 	// Shouldn't race not affect AA XP?
 	if (RuleB(Character, UseRaceClassExpBonuses))
 	{
-		if (GetBaseRace() == HALFLING) {
+		if (GetBaseRace() == Race::Halfling) {
 			aatotalmod *= 1.05;
 		}
 
@@ -439,7 +439,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 
 		if (RuleB(Character, UseRaceClassExpBonuses))
 		{
-			if (GetBaseRace() == HALFLING) {
+			if (GetBaseRace() == Race::Halfling) {
 				totalmod *= 1.05;
 			}
 
@@ -1035,13 +1035,13 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	if(RuleB(Character,UseOldRaceExpPenalties))
 	{
 		float racemod = 1.0;
-		if(GetBaseRace() == TROLL || GetBaseRace() == IKSAR) {
+		if(GetBaseRace() == Race::Troll || GetBaseRace() == Race::Iksar) {
 			racemod = 1.2;
-		} else if(GetBaseRace() == OGRE) {
+		} else if(GetBaseRace() == Race::Ogre) {
 			racemod = 1.15;
-		} else if(GetBaseRace() == BARBARIAN) {
+		} else if(GetBaseRace() == Race::Barbarian) {
 			racemod = 1.05;
-		} else if(GetBaseRace() == HALFLING) {
+		} else if(GetBaseRace() == Race::Halfling) {
 			racemod = 0.95;
 		}
 

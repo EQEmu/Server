@@ -50,7 +50,7 @@ Beacon::Beacon(const glm::vec4 &in_pos, int lifetime) : Mob(
 	0, // in_cur_hp
 	0, // in_max_hp
 	MALE, // in_gender
-	INVISIBLE_MAN, // in_race
+	Race::InvisibleMan, // in_race
 	0, // in_class
 	BT_NoTarget, // in_bodytype
 	0, // in_deity

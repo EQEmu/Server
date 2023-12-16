@@ -1358,7 +1358,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 
 			bool is_delayed_packet = (
 				DistanceSquared(client_position, spawn_position) > distance_max ||
-				(spawn->IsClient() && (spawn->GetRace() == MINOR_ILL_OBJ || spawn->GetRace() == TREE))
+				(spawn->IsClient() && (spawn->GetRace() == Race::MinorIllusion || spawn->GetRace() == Race::Tree))
 			);
 
 			if (is_delayed_packet) {
@@ -1382,7 +1382,7 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 			 *
 			 * Illusion races on PCs don't work as a mass spawn
 			 * But they will work as an add_spawn AFTER CLIENT_CONNECTED.
-			 * if (spawn->IsClient() && (race == MINOR_ILL_OBJ || race == TREE)) {
+			 * if (spawn->IsClient() && (race == Race::MinorIllusion || race == Race::Tree)) {
 			 * 	app = new EQApplicationPacket;
 			 * 	spawn->CreateSpawnPacket(app);
 			 * 	client->QueuePacket(app, true, Client::CLIENT_CONNECTED);
@@ -4920,7 +4920,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				FormatMSGID = 5023; // 5023 %T1[ANONYMOUS] %2 %3 %4
 			uint32 PlayerClass = Class::None;
 			uint32 PlayerLevel = 0;
-			uint32 PlayerRace = RACE_DOUG_0;
+			uint32 PlayerRace = Race::Doug;
 			uint32 ZoneMSGID = 0xFFFFFFFF;
 
 			if (ClientEntry->GetAnon()==0) {
@@ -5750,7 +5750,7 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 		Mob *mob = m.second;
 		if (
 			mob->IsNPC() &&
-			mob->GetRace() == RACE_NODE_2254 &&
+			mob->GetRace() == Race::Node &&
 			mob->EntityVariableExists("grid_id") &&
 			Strings::ToInt(mob->GetEntityVariable("grid_id")) == grid_id)
 		{
