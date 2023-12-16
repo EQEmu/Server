@@ -506,7 +506,7 @@ bool SharedDatabase::SetStartingItems(
 	for (const auto &e : v) {
 		const uint32 item_id      = e.item_id;
 		const uint8  item_charges = e.item_charges;
-		int32        slot         = e.slot;
+		int32        slot         = e.inventory_slot;
 
 		item_data = GetItem(item_id);
 
