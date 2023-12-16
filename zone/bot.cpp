@@ -240,7 +240,7 @@ Bot::Bot(
 		error_message.clear();
 	}
 
-	if (GetClass() == ROGUE) {
+	if (GetClass() == Class::Rogue) {
 		m_evade_timer.Start();
 	}
 
@@ -9246,11 +9246,11 @@ void Bot::DoItemClick(const EQ::ItemData* item, uint16 slot_id) {
 		CommonBreakInvisible();
 	}
 
-	if (GetClass() == BARD && IsCasting() && casting_spell_slot < EQ::spells::CastingSlot::MaxGems) {
+	if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < EQ::spells::CastingSlot::MaxGems) {
 		is_casting_bard_song = true;
 	}
 
-	if (GetClass() == BARD) {
+	if (GetClass() == Class::Bard) {
 		DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, tar->GetID(), EQ::spells::CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 	}
 	else {
