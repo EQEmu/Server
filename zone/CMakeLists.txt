@@ -285,8 +285,8 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch.h)
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h client.h zone.h)
+#TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
+#TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h client.h zone.h)
 
 ADD_DEFINITIONS(-DZONE)
 
