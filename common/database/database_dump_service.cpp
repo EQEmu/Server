@@ -322,6 +322,10 @@ void DatabaseDumpService::DatabaseDump()
 			pipe_file
 		);
 
+		LogInfo("Backing up database [{}]", execute_command);
+		LogInfo("This can take a few minutes depending on the size of your database");
+		LogInfo("LOADING... PLEASE WAIT...");
+
 		BuildCredentialsFile();
 		std::string execution_result = Process::execute(execute_command);
 		if (!execution_result.empty() && IsDumpOutputToConsole()) {
