@@ -6879,12 +6879,6 @@ void Client::Handle_OP_GMSummon(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (!GetGM()) {
-		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /summon"});
-		return;
-	}
-
 	OPGMSummon(app);
 	return;
 }
