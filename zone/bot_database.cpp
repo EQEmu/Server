@@ -1022,9 +1022,8 @@ bool BotDatabase::DeleteTimers(const uint32 bot_id)
 		return false;
 	}
 
-	query = StringFormat("DELETE FROM `bot_timers` WHERE `bot_id` = '%u'", bot_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	auto success = BotTimersRepository::DeleteWhere(database, fmt::format("bot_id = {}", bot_id));
+	if (!success) {
 		return false;
 	}
 
