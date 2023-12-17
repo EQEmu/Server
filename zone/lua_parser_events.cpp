@@ -2300,4 +2300,30 @@ void handle_bot_damage(
 	lua_setfield(L, -2, "other");
 }
 
+void handle_bot_level_up(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushinteger(L, Strings::ToInt(data));
+	lua_setfield(L, -2, "levels_gained");
+}
+
+void handle_bot_level_down(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushinteger(L, Strings::ToInt(data));
+	lua_setfield(L, -2, "levels_lost");
+}
+
 #endif

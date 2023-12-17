@@ -341,6 +341,8 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
 	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]     = handle_bot_damage;
 	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]     = handle_bot_damage;
+	BotArgumentDispatch[EVENT_LEVEL_UP]         = handle_bot_level_up;
+	BotArgumentDispatch[EVENT_LEVEL_DOWN]       = handle_bot_level_down;
 #endif
 
 	L = nullptr;
