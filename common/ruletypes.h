@@ -305,6 +305,7 @@ RULE_BOOL(World, EnableChecksumVerification, false, "Enable or Disable the Check
 RULE_INT(World, MaximumQuestErrors, 30, "Changes the maximum number of quest errors that can be displayed in #questerrors, default is 30")
 RULE_INT(World, BootHour, 0, "Sets the in-game hour world will set when it first boots. 0-24 are valid options, where 0 disables this rule")
 RULE_BOOL(World, UseItemLinksForKeyRing, false, "Uses item links for Key Ring Listing instead of item name")
+RULE_BOOL(World, UseOldShadowKnightClassExport, true, "Disable to have Shadowknight show as Shadow Knight (live-like)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -458,6 +459,8 @@ RULE_INT(Spells, WizardCritMinimumRandomRatio, 20, "The minimum value for the ra
 RULE_INT(Spells, WizardCritMaximumRandomRatio, 70, "The maximum value for the random range which Wizards and Caster DPS Mercs innately have for spell crit ratio. Set to 70 for vanilla values.")
 RULE_INT(Spells, DefensiveProcPenaltyLevelGap, 6, "Defensive Proc Penalty Level Gap where procs start losing their proc rate at RuleR(Spells, DefensiveProcPenaltyModifier)% per level difference")
 RULE_REAL(Spells, DefensiveProcPenaltyLevelGapModifier, 10.0f, "Defensive Proc Penalty Level Gap Modifier where procs start losing their proc rate at defined % after RuleI(Spells, DefensiveProcLevelGap) level difference")
+RULE_BOOL(Spells, DOTBonusDamageSplitOverDuration, true, "Disable to have Damage Over Time total bonus damage added to each tick instead of divided across duration")
+RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal Over Time total bonus healing added to each tick instead of divided across duration")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -651,6 +654,8 @@ RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrecti
 RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sickness Spell")
 RULE_BOOL(Bots, AllowPickpocketCommand, true, "Allows the use of the bot command 'pickpocket'")
 RULE_BOOL(Bots, BotHealOnLevel, false, "Setting whether a bot should heal completely when leveling. Default FALSE.")
+RULE_INT(Bots, AutosaveIntervalSeconds, 300, "Number of seconds after which a timer is triggered which stores the bot data. The value 0 means no periodic automatic saving.")
+RULE_BOOL(Bots, CazicTouchBotsOwner, true, "Default True. Cazic Touch/DT will hit bot owner rather than bot.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

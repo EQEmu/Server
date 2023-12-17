@@ -4,7 +4,7 @@ void FindClass(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const auto class_id = Strings::ToInt(sep->arg[2]);
-		if (EQ::ValueWithin(class_id, WARRIOR, BERSERKER)) {
+		if (EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker)) {
 			const std::string& class_name = GetClassIDName(class_id);
 			c->Message(
 				Chat::White,
@@ -41,7 +41,7 @@ void FindClass(Client *c, const Seperator *sep)
 
 	auto found_count = 0;
 
-	for (uint16 class_id = WARRIOR; class_id <= MERCENARY_MASTER; class_id++) {
+	for (uint16 class_id = Class::Warrior; class_id <= Class::MercenaryLiaison; class_id++) {
 		const std::string& class_name       = GetClassIDName(class_id);
 		const auto&        class_name_lower = Strings::ToLower(class_name);
 		if (!Strings::Contains(class_name_lower, search_criteria)) {

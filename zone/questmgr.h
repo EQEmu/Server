@@ -365,8 +365,8 @@ public:
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 
-	int createbotcount(uint8 class_id = NO_CLASS);
-	int spawnbotcount(uint8 class_id = NO_CLASS);
+	int createbotcount(uint8 class_id = Class::None);
+	int spawnbotcount(uint8 class_id = Class::None);
 	bool botquest();
 	bool createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender);
 

@@ -1094,7 +1094,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 	float diff = par_skill + static_cast<float>(spells[spell_id].base_difficulty) - act_skill;
 
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
-	if(GetClass() == BARD)
+	if(GetClass() == Class::Bard)
 	{
 		diff -= (GetCHA() - 110) / 20.0;
 	}
@@ -1381,7 +1381,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	Mob *spell_target = entity_list.GetMob(target_id);
 	// here we do different things if this is a bard casting a bard song from
 	// a spell bar slot
-	if(GetClass() == BARD) // bard's can move when casting any spell...
+	if(GetClass() == Class::Bard) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id) && slot < CastingSlot::MaxGems) {
 			if (spells[spell_id].buff_duration == 0xFFFF) {
@@ -1938,7 +1938,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 						return false;
 					}
 
-					if(spell_target->GetClass() != LDON_TREASURE)
+					if(spell_target->GetClass() != Class::LDoNTreasure)
 					{
 						LogSpells("Spell [{}] canceled: invalid target (normal)", spell_id);
 						MessageString(Chat::Red,SPELL_NEED_TAR);
@@ -2301,11 +2301,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		return false;
 
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
-	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
-		Mob* owner =  spell_target->GetOwner();
+	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && !spell_target->IsBot() && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
+		Mob* owner = spell_target->GetOwner();
 
 		if (owner) {
 			spell_target = owner;
+		}
+	}
+
+	if ((RuleB(Bots, CazicTouchBotsOwner) && spell_target && spell_target->IsBot()) && spell_id == (SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
+		auto bot_owner = spell_target->GetOwner();
+		if (bot_owner) {
+			spell_target = bot_owner;
 		}
 	}
 
@@ -2687,7 +2694,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			}
 		}
 		//handle bard AA and Discipline recast timers when singing
-		if (GetClass() == BARD && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+		if (GetClass() == Class::Bard && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
 			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
@@ -3143,8 +3150,8 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		if(effect1 != effect2)
 			continue;
 
-		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, BARD) != 255 &&
-			GetSpellLevel(spellid2, BARD) != 255)
+		if (IsBardOnlyStackEffect(effect1) && GetSpellLevel(spellid1, Class::Bard) != 255 &&
+			GetSpellLevel(spellid2, Class::Bard) != 255)
 			continue;
 
 		// big ol' list according to the client, wasn't that nice!
@@ -6199,7 +6206,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 	(
 		IsValidSpell(spell_id) &&
 		slot != -1 &&
-		GetClass() == BARD &&
+		GetClass() == Class::Bard &&
 		slot <= EQ::spells::SPELL_GEM_COUNT &&
 		IsBardSong(spell_id)
 	);

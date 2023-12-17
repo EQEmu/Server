@@ -245,12 +245,12 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	MerchantType          = npc_type_data->merchanttype;
 	merchant_open         = (
-		GetClass() == MERCHANT ||
-		GetClass() == DISCORD_MERCHANT ||
-		GetClass() == ADVENTURE_MERCHANT ||
-		GetClass() == NORRATHS_KEEPERS_MERCHANT ||
-		GetClass() == DARK_REIGN_MERCHANT ||
-		GetClass() == ALT_CURRENCY_MERCHANT
+		GetClass() == Class::Merchant ||
+		GetClass() == Class::DiscordMerchant ||
+		GetClass() == Class::AdventureMerchant ||
+		GetClass() == Class::NorrathsKeepersMerchant ||
+		GetClass() == Class::DarkReignMerchant ||
+		GetClass() == Class::AlternateCurrencyMerchant
 	);
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
@@ -294,7 +294,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	innate_proc_spell_id = 0;
 	m_record_loot_stats  = false;
 
-	if (GetClass() == MERCENARY_MASTER && RuleB(Mercs, AllowMercs)) {
+	if (GetClass() == Class::MercenaryLiaison && RuleB(Mercs, AllowMercs)) {
 		LoadMercTypes();
 		LoadMercs();
 	}
@@ -364,10 +364,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	// There are some known low level SHM/BST pets that do not follow this, which supports
 	// the theory of needing to be able to set skills for each mob separately
 	if (IsBot()) {
-		if (GetClass() != PALADIN && GetClass() != SHADOWKNIGHT) {
+		if (GetClass() != Class::Paladin && GetClass() != Class::ShadowKnight) {
 			knightattack_timer.Disable();
 		}
-		else if (GetClass() != MONK || GetLevel() < 10) {
+		else if (GetClass() != Class::Monk || GetLevel() < 10) {
 			monkattack_timer.Disable();
 		}
 	}

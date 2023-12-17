@@ -183,7 +183,7 @@ bool Zone::LoadZoneObjects()
 		)
 	);
 	if (l.empty()) {
-		LogError("Error Loading Objects for Zone [{}] Version [{}]", zoneid, instanceversion);
+		LogWarning("No Objects to load for Zone [{}] Version [{}]", zoneid, instanceversion);
 		return false;
 	}
 

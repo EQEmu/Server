@@ -2706,7 +2706,7 @@ namespace RoF2
 
 		switch (raid_gen->action)
 		{
-		case raidAdd: 
+		case raidAdd:
 		{
 			RaidAddMember_Struct* emu = (RaidAddMember_Struct*)__emu_buffer;
 
@@ -3986,7 +3986,7 @@ namespace RoF2
 			if (strlen(emu->suffix))
 				PacketSize += strlen(emu->suffix) + 1;
 
-			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
 			{
 				if (emu->DestructibleObject)
 					PacketSize = PacketSize - 4;	// No bodytype
@@ -4076,7 +4076,7 @@ namespace RoF2
 			// actually part of bitfields
 			uint8 OtherData = 0;
 
-			if (emu->class_ == LDON_TREASURE) //LDoN Chest
+			if (emu->class_ == Class::LDoNTreasure) //LDoN Chest
 			{
 				OtherData = OtherData | 0x04;
 			}
@@ -4104,7 +4104,7 @@ namespace RoF2
 			// int DefaultEmitterID
 			VARSTRUCT_ENCODE_TYPE(float, Buffer, 0);	// unknown4
 
-			if (emu->DestructibleObject || emu->class_ == LDON_TREASURE)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
 			{
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleModel);
 				VARSTRUCT_ENCODE_STRING(Buffer, emu->DestructibleName2);

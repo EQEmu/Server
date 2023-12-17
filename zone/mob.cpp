@@ -983,33 +983,33 @@ int64 Mob::GetSpellHPBonuses() {
 char Mob::GetCasterClass() const {
 	switch(class_)
 	{
-	case CLERIC:
-	case PALADIN:
-	case RANGER:
-	case DRUID:
-	case SHAMAN:
-	case BEASTLORD:
-	case CLERICGM:
-	case PALADINGM:
-	case RANGERGM:
-	case DRUIDGM:
-	case SHAMANGM:
-	case BEASTLORDGM:
+	case Class::Cleric:
+	case Class::Paladin:
+	case Class::Ranger:
+	case Class::Druid:
+	case Class::Shaman:
+	case Class::Beastlord:
+	case Class::ClericGM:
+	case Class::PaladinGM:
+	case Class::RangerGM:
+	case Class::DruidGM:
+	case Class::ShamanGM:
+	case Class::BeastlordGM:
 		return 'W';
 		break;
 
-	case SHADOWKNIGHT:
-	case BARD:
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
-	case SHADOWKNIGHTGM:
-	case BARDGM:
-	case NECROMANCERGM:
-	case WIZARDGM:
-	case MAGICIANGM:
-	case ENCHANTERGM:
+	case Class::ShadowKnight:
+	case Class::Bard:
+	case Class::Necromancer:
+	case Class::Wizard:
+	case Class::Magician:
+	case Class::Enchanter:
+	case Class::ShadowKnightGM:
+	case Class::BardGM:
+	case Class::NecromancerGM:
+	case Class::WizardGM:
+	case Class::MagicianGM:
+	case Class::EnchanterGM:
 		return 'I';
 		break;
 
@@ -1022,42 +1022,42 @@ char Mob::GetCasterClass() const {
 uint8 Mob::GetArchetype() const {
 	switch(class_)
 	{
-	case PALADIN:
-	case RANGER:
-	case SHADOWKNIGHT:
-	case BARD:
-	case BEASTLORD:
-	case PALADINGM:
-	case RANGERGM:
-	case SHADOWKNIGHTGM:
-	case BARDGM:
-	case BEASTLORDGM:
+	case Class::Paladin:
+	case Class::Ranger:
+	case Class::ShadowKnight:
+	case Class::Bard:
+	case Class::Beastlord:
+	case Class::PaladinGM:
+	case Class::RangerGM:
+	case Class::ShadowKnightGM:
+	case Class::BardGM:
+	case Class::BeastlordGM:
 		return ARCHETYPE_HYBRID;
 		break;
-	case CLERIC:
-	case DRUID:
-	case SHAMAN:
-	case NECROMANCER:
-	case WIZARD:
-	case MAGICIAN:
-	case ENCHANTER:
-	case CLERICGM:
-	case DRUIDGM:
-	case SHAMANGM:
-	case NECROMANCERGM:
-	case WIZARDGM:
-	case MAGICIANGM:
-	case ENCHANTERGM:
+	case Class::Cleric:
+	case Class::Druid:
+	case Class::Shaman:
+	case Class::Necromancer:
+	case Class::Wizard:
+	case Class::Magician:
+	case Class::Enchanter:
+	case Class::ClericGM:
+	case Class::DruidGM:
+	case Class::ShamanGM:
+	case Class::NecromancerGM:
+	case Class::WizardGM:
+	case Class::MagicianGM:
+	case Class::EnchanterGM:
 		return ARCHETYPE_CASTER;
 		break;
-	case WARRIOR:
-	case MONK:
-	case ROGUE:
-	case BERSERKER:
-	case WARRIORGM:
-	case MONKGM:
-	case ROGUEGM:
-	case BERSERKERGM:
+	case Class::Warrior:
+	case Class::Monk:
+	case Class::Rogue:
+	case Class::Berserker:
+	case Class::WarriorGM:
+	case Class::MonkGM:
+	case Class::RogueGM:
+	case Class::BerserkerGM:
 		return ARCHETYPE_MELEE;
 		break;
 	default:
@@ -1069,73 +1069,73 @@ uint8 Mob::GetArchetype() const {
 void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
 {
 	switch (ns->spawn.class_) {
-		case TRIBUTE_MASTER:
+		case Class::TributeMaster:
 			strcpy(ns->spawn.lastName, "Tribute Master");
 			break;
-		case GUILD_TRIBUTE_MASTER:
+		case Class::GuildTributeMaster:
 			strcpy(ns->spawn.lastName, "Guild Tribute Master");
 			break;
-		case GUILD_BANKER:
+		case Class::GuildBanker:
 			strcpy(ns->spawn.lastName, "Guild Banker");
 			break;
-		case ADVENTURE_RECRUITER:
+		case Class::AdventureRecruiter:
 			strcpy(ns->spawn.lastName, "Adventure Recruiter");
 			break;
-		case ADVENTURE_MERCHANT:
+		case Class::AdventureMerchant:
 			strcpy(ns->spawn.lastName, "Adventure Merchant");
 			break;
-		case BANKER:
+		case Class::Banker:
 			strcpy(ns->spawn.lastName, "Banker");
 			break;
-		case WARRIORGM:
+		case Class::WarriorGM:
 			strcpy(ns->spawn.lastName, "Warrior Guildmaster");
 			break;
-		case CLERICGM:
+		case Class::ClericGM:
 			strcpy(ns->spawn.lastName, "Cleric Guildmaster");
 			break;
-		case PALADINGM:
+		case Class::PaladinGM:
 			strcpy(ns->spawn.lastName, "Paladin Guildmaster");
 			break;
-		case RANGERGM:
+		case Class::RangerGM:
 			strcpy(ns->spawn.lastName, "Ranger Guildmaster");
 			break;
-		case SHADOWKNIGHTGM:
+		case Class::ShadowKnightGM:
 			strcpy(ns->spawn.lastName, "Shadow Knight Guildmaster");
 			break;
-		case DRUIDGM:
+		case Class::DruidGM:
 			strcpy(ns->spawn.lastName, "Druid Guildmaster");
 			break;
-		case MONKGM:
+		case Class::MonkGM:
 			strcpy(ns->spawn.lastName, "Monk Guildmaster");
 			break;
-		case BARDGM:
+		case Class::BardGM:
 			strcpy(ns->spawn.lastName, "Bard Guildmaster");
 			break;
-		case ROGUEGM:
+		case Class::RogueGM:
 			strcpy(ns->spawn.lastName, "Rogue Guildmaster");
 			break;
-		case SHAMANGM:
+		case Class::ShamanGM:
 			strcpy(ns->spawn.lastName, "Shaman Guildmaster");
 			break;
-		case NECROMANCERGM:
+		case Class::NecromancerGM:
 			strcpy(ns->spawn.lastName, "Necromancer Guildmaster");
 			break;
-		case WIZARDGM:
+		case Class::WizardGM:
 			strcpy(ns->spawn.lastName, "Wizard Guildmaster");
 			break;
-		case MAGICIANGM:
+		case Class::MagicianGM:
 			strcpy(ns->spawn.lastName, "Magician Guildmaster");
 			break;
-		case ENCHANTERGM:
+		case Class::EnchanterGM:
 			strcpy(ns->spawn.lastName, "Enchanter Guildmaster");
 			break;
-		case BEASTLORDGM:
+		case Class::BeastlordGM:
 			strcpy(ns->spawn.lastName, "Beastlord Guildmaster");
 			break;
-		case BERSERKERGM:
+		case Class::BerserkerGM:
 			strcpy(ns->spawn.lastName, "Berserker Guildmaster");
 			break;
-		case MERCENARY_MASTER:
+		case Class::MercenaryLiaison:
 			strcpy(ns->spawn.lastName, "Mercenary Liaison");
 			break;
 		default:
@@ -1346,8 +1346,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	}
 
 	if (RuleB(Character, AllowCrossClassTrainers) && ForWho) {
-		if (ns->spawn.class_ >= WARRIORGM && ns->spawn.class_ <= BERSERKERGM) {
-			int trainer_class = WARRIORGM + (ForWho->GetClass() - 1);
+		if (ns->spawn.class_ >= Class::WarriorGM && ns->spawn.class_ <= Class::BerserkerGM) {
+			int trainer_class = Class::WarriorGM + (ForWho->GetClass() - 1);
 			ns->spawn.class_ = trainer_class;
 		}
 	}
@@ -2118,7 +2118,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	std::string bard_info;
 
-	if (GetClass() == BARD) {
+	if (GetClass() == Class::Bard) {
 		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
 		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
 		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
@@ -2419,7 +2419,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	}
 
 	// Bard Modifiers
-	if (GetClass() == BARD) {
+	if (GetClass() == Class::Bard) {
 		final_string += bard_info + DialogueWindow::Break(1);
 	}
 
@@ -2688,7 +2688,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		);
 	}
 
-	if (GetClass() == BARD) {
+	if (GetClass() == Class::Bard) {
 		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
 		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
 		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
@@ -4531,7 +4531,7 @@ bool Mob::CanThisClassDualWield(void) const {
 
 		// Dual-Wielding Empty Fists
 		if(!pinst && !sinst)
-			if(class_ != MONK && class_ != MONKGM && class_ != BEASTLORD && class_ != BEASTLORDGM)
+			if(class_ != Class::Monk && class_ != Class::MonkGM && class_ != Class::Beastlord && class_ != Class::BeastlordGM)
 				return false;
 
 		return true;
@@ -4564,24 +4564,24 @@ bool Mob::IsWarriorClass(void) const
 {
 	switch(GetClass())
 	{
-	case WARRIOR:
-	case WARRIORGM:
-	case ROGUE:
-	case ROGUEGM:
-	case MONK:
-	case MONKGM:
-	case PALADIN:
-	case PALADINGM:
-	case SHADOWKNIGHT:
-	case SHADOWKNIGHTGM:
-	case RANGER:
-	case RANGERGM:
-	case BEASTLORD:
-	case BEASTLORDGM:
-	case BERSERKER:
-	case BERSERKERGM:
-	case BARD:
-	case BARDGM:
+	case Class::Warrior:
+	case Class::WarriorGM:
+	case Class::Rogue:
+	case Class::RogueGM:
+	case Class::Monk:
+	case Class::MonkGM:
+	case Class::Paladin:
+	case Class::PaladinGM:
+	case Class::ShadowKnight:
+	case Class::ShadowKnightGM:
+	case Class::Ranger:
+	case Class::RangerGM:
+	case Class::Beastlord:
+	case Class::BeastlordGM:
+	case Class::Berserker:
+	case Class::BerserkerGM:
+	case Class::Bard:
+	case Class::BardGM:
 		{
 			return true;
 		}
@@ -5185,7 +5185,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
 
 	if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
-	    (GetClass() == RANGER || GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == BEASTLORD)) {
+	    (GetClass() == Class::Ranger || GetClass() == Class::ShadowKnight || GetClass() == Class::Paladin || GetClass() == Class::Beastlord)) {
 		int level_mod = std::min(15, GetLevel() - 50);
 		cast_reducer += level_mod * 3;
 	}
@@ -7520,29 +7520,23 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 bool Mob::CanClassEquipItem(uint32 item_id)
 {
-	const EQ::ItemData* itm = nullptr;
-	itm = database.GetItem(item_id);
-
-	if (!itm) {
+	const auto *item = database.GetItem(item_id);
+	if (!item) {
 		return false;
 	}
 
-	auto item_classes = itm->Classes;
-	if(item_classes == PLAYER_CLASS_ALL_MASK) {
+	const uint16 item_classes = item->Classes;
+	if (item_classes == Class::ALL_CLASSES_BITMASK) {
 		return true;
 	}
 
-	auto class_id = GetClass();
-	if (class_id > BERSERKER) {
+	const uint8 class_id = GetClass();
+	if (!IsPlayerClass(class_id)) {
 		return false;
 	}
 
-	int class_bitmask = GetPlayerClassBit(class_id);
-	if(!(item_classes & class_bitmask)) {
-		return false;
-	} else {
-		return true;
-	}
+	const uint16 class_bitmask = GetPlayerClassBit(class_id);
+	return (item_classes & class_bitmask);
 }
 
 bool Mob::CanRaceEquipItem(uint32 item_id)
@@ -8264,37 +8258,37 @@ std::string Mob::GetRacePlural()
 std::string Mob::GetClassPlural()
 {
 	switch (GetClass()) {
-		case WARRIOR:
+		case Class::Warrior:
 			return "Warriors";
-		case CLERIC:
+		case Class::Cleric:
 			return "Clerics";
-		case PALADIN:
+		case Class::Paladin:
 			return "Paladins";
-		case RANGER:
+		case Class::Ranger:
 			return "Rangers";
-		case SHADOWKNIGHT:
-			return "Shadowknights";
-		case DRUID:
+		case Class::ShadowKnight:
+			return fmt::format("{}s", shadow_knight_class_name);
+		case Class::Druid:
 			return "Druids";
-		case MONK:
+		case Class::Monk:
 			return "Monks";
-		case BARD:
+		case Class::Bard:
 			return "Bards";
-		case ROGUE:
+		case Class::Rogue:
 			return "Rogues";
-		case SHAMAN:
+		case Class::Shaman:
 			return "Shamans";
-		case NECROMANCER:
+		case Class::Necromancer:
 			return "Necromancers";
-		case WIZARD:
+		case Class::Wizard:
 			return "Wizards";
-		case MAGICIAN:
+		case Class::Magician:
 			return "Magicians";
-		case ENCHANTER:
+		case Class::Enchanter:
 			return "Enchanters";
-		case BEASTLORD:
+		case Class::Beastlord:
 			return "Beastlords";
-		case BERSERKER:
+		case Class::Berserker:
 			return "Berserkers";
 		default:
 			return "Classes";

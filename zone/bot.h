@@ -394,14 +394,14 @@ public:
 
 	// Static Class Methods
 	static Bot* LoadBot(uint32 botID);
-	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = NO_CLASS);
-	static void LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance);
+	static uint32 SpawnedBotCount(const uint32 owner_id, uint8 class_id = Class::None);
+	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, const std::string& botName);
 	static void ProcessBotGroupInvite(Client* c, std::string const& botName);
 	static void ProcessBotGroupDisband(Client* c, const std::string& botName);
-	static void BotOrderCampAll(Client* c, uint8 class_id = NO_CLASS);
+	static void BotOrderCampAll(Client* c, uint8 class_id = Class::None);
 	static void ProcessBotInspectionRequest(Bot* inspectedBot, Client* client);
 	static void LoadAndSpawnAllZonedBots(Client* bot_owner);
 	static bool GroupHasBot(Group* group);
@@ -604,7 +604,7 @@ public:
 	void SetBotCharmer(bool c) { _botCharmer = c; }
 	void SetPetChooser(bool p) { _petChooser = p; }
 	void SetBotOwner(Mob* botOwner) { this->_botOwner = botOwner; }
-	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == RANGER ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
+	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == Class::Ranger ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
 	void SetBotStance(EQ::constants::StanceType botStance) {
 		if (botStance >= EQ::constants::stancePassive && botStance <= EQ::constants::stanceBurnAE)
 			_botStance = botStance;
@@ -738,7 +738,7 @@ public:
 	//Raid additions
 	Raid* p_raid_instance;
 
-	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
+	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND];
 
 	bool BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSpell, Raid* raid);
 	bool BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, Raid* raid);
@@ -866,6 +866,7 @@ private:
 	Timer m_evade_timer; // can be moved to pTimers at some point
 	Timer m_alt_combat_hate_timer;
 	Timer m_auto_defend_timer;
+	Timer auto_save_timer;
 	bool m_dirtyautohaters;
 	bool m_guard_flag;
 	bool m_hold_flag;

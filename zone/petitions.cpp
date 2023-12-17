@@ -70,7 +70,7 @@ void Petition::SendPetitionToPlayer(Client* clientto) {
 Petition::Petition(uint32 id)
 {
 	petid = id;
-	charclass = NO_CLASS;
+	charclass = Class::None;
 	charrace = RACE_DOUG_0;
 	charlevel = 0;
 	checkouts = 0;
