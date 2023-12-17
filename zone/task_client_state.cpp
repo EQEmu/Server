@@ -15,6 +15,7 @@
 #include "dynamic_zone.h"
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
+#include <fmt/format.h>
 
 #define EBON_CRYSTAL 40902
 #define RADIANT_CRYSTAL 40903

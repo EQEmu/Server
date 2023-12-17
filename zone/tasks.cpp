@@ -9,6 +9,7 @@
 #include "tasks.h"
 #include "zonedb.h"
 #include "../common/repositories/character_task_timers_repository.h"
+#include <fmt/format.h>
 
 extern QueryServ *QServ;
 
