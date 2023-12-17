@@ -103,7 +103,7 @@ ALTER TABLE `bot_timers`
 ALTER TABLE `bot_timers`
 	DROP PRIMARY KEY;
 ALTER TABLE `bot_timers`
-	ADD PRIMARY KEY (`bot_id`, `timer_id`);
+	ADD PRIMARY KEY (`bot_id`, `timer_id`, `spell_id`, `item_id`);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
