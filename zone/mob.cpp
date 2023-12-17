@@ -3511,14 +3511,14 @@ void Mob::GMMove(float x, float y, float z, float heading, bool save_guard_spot)
 	}
 }
 
-void Mob::GMMove(const glm::vec4 &position) {
+void Mob::GMMove(const glm::vec4 &position, bool save_guard_spot) {
 	m_Position.x = position.x;
 	m_Position.y = position.y;
 	m_Position.z = position.z;
 	SetHeading(position.w);
 	mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 
-	if (IsNPC()) {
+	if (IsNPC() && save_guard_spot) {
 		CastToNPC()->SaveGuardSpot(position);
 	}
 }
