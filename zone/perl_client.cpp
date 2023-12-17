@@ -1159,7 +1159,23 @@ void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Curren
 
 void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_count) // @categories Currency and Points
 {
-	self->AddCrystals(radiant_count, ebon_count);
+	if (ebon_count != 0) {
+		if (ebon_count > 0) {
+			self->AddEbonCrystals(ebon_count);
+			return;
+		}
+
+		self->RemoveEbonCrystals(ebon_count);
+	}
+
+	if (radiant_count != 0) {
+		if (radiant_count > 0) {
+			self->AddRadiantCrystals(radiant_count);
+			return;
+		}
+
+		self->RemoveRadiantCrystals(radiant_count);
+	}
 }
 
 void Perl_Client_SetEbonCrystals(Client* self, uint32 value)
@@ -2992,6 +3008,26 @@ void Perl_Client_GrantAllAAPoints(Client* self, uint8 unlock_level)
 	self->GrantAllAAPoints(unlock_level);
 }
 
+void Perl_Client_AddEbonCrystals(Client* self, uint32 amount)
+{
+	self->AddEbonCrystals(amount);
+}
+
+void Perl_Client_AddRadiantCrystals(Client* self, uint32 amount)
+{
+	self->AddRadiantCrystals(amount);
+}
+
+void Perl_Client_RemoveEbonCrystals(Client* self, uint32 amount)
+{
+	self->RemoveEbonCrystals(amount);
+}
+
+void Perl_Client_RemoveRadiantCrystals(Client* self, uint32 amount)
+{
+	self->RemoveRadiantCrystals(amount);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3006,6 +3042,7 @@ void perl_register_client()
 	package.add("AddEXP", (void(*)(Client*, uint32))&Perl_Client_AddEXP);
 	package.add("AddEXP", (void(*)(Client*, uint32, uint8))&Perl_Client_AddEXP);
 	package.add("AddEXP", (void(*)(Client*, uint32, uint8, bool))&Perl_Client_AddEXP);
+	package.add("AddEbonCrystals", &Perl_Client_AddEbonCrystals);
 	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32))&Perl_Client_AddExpeditionLockout);
 	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32, std::string))&Perl_Client_AddExpeditionLockout);
 	package.add("AddExpeditionLockoutDuration", (void(*)(Client*, std::string, std::string, int))&Perl_Client_AddExpeditionLockoutDuration);
@@ -3021,6 +3058,7 @@ void perl_register_client()
 	package.add("AddPlatinum", (void(*)(Client*, uint32))&Perl_Client_AddPlatinum);
 	package.add("AddPlatinum", (void(*)(Client*, uint32, bool))&Perl_Client_AddPlatinum);
 	package.add("AddPVPPoints", &Perl_Client_AddPVPPoints);
+	package.add("AddRadiantCrystals", &Perl_Client_AddRadiantCrystals);
 	package.add("AddSkill", &Perl_Client_AddSkill);
 	package.add("Admin", &Perl_Client_Admin);
 	package.add("ApplySpell", (void(*)(Client*, int))&Perl_Client_ApplySpell);
@@ -3352,6 +3390,7 @@ void perl_register_client()
 	package.add("ReloadDataBuckets", &Perl_Client_ReloadDataBuckets);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
+	package.add("RemoveEbonCrystals", &Perl_Client_RemoveEbonCrystals);
 	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);
 	package.add("RemoveFromInstance", &Perl_Client_RemoveFromInstance);
 	package.add("RemoveItem", (void(*)(Client*, uint32))&Perl_Client_RemoveItem);
@@ -3359,6 +3398,7 @@ void perl_register_client()
 	package.add("RemoveLDoNLoss", &Perl_Client_RemoveLDoNLoss);
 	package.add("RemoveLDoNWin", &Perl_Client_RemoveLDoNWin);
 	package.add("RemoveNoRent", &Perl_Client_RemoveNoRent);
+	package.add("RemoveRadiantCrystals", &Perl_Client_RemoveRadiantCrystals);
 	package.add("ResetAA", &Perl_Client_ResetAA);
 	package.add("ResetAllDisciplineTimers", &Perl_Client_ResetAllDisciplineTimers);
 	package.add("ResetAllCastbarCooldowns", &Perl_Client_ResetAllCastbarCooldowns);
