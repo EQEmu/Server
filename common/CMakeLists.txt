@@ -787,8 +787,9 @@ INCLUDE_DIRECTORIES(Patches SocketLib StackWalker)
 
 ADD_LIBRARY(common ${common_sources} ${common_headers} ${repositories})
 
-TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch.h)
-
+IF(WIN32)
+    TARGET_PRECOMPILE_HEADERS(common PRIVATE pch/pch.h)
+ENDIF(WIN32)
 
 IF (UNIX)
     SET_SOURCE_FILES_PROPERTIES("SocketLib/Mime.cpp" PROPERTY COMPILE_FLAGS -Wno-unused-result)
