@@ -656,6 +656,9 @@ RULE_BOOL(Bots, AllowPickpocketCommand, true, "Allows the use of the bot command
 RULE_BOOL(Bots, BotHealOnLevel, false, "Setting whether a bot should heal completely when leveling. Default FALSE.")
 RULE_INT(Bots, AutosaveIntervalSeconds, 300, "Number of seconds after which a timer is triggered which stores the bot data. The value 0 means no periodic automatic saving.")
 RULE_BOOL(Bots, CazicTouchBotsOwner, true, "Default True. Cazic Touch/DT will hit bot owner rather than bot.")
+RULE_INT(Bots, BotsClickItemsMinLvl, 1, "Minimum level for bots to be able to use ^clickitem. Default 1.")
+RULE_BOOL(Bots, BotsCanClickItems, true, "Enabled the ability for bots to click items they have equipped. Default TRUE")
+RULE_BOOL(Bots, CanClickMageEpicV1, true, "Whether or not bots are allowed to click Mage Epic 1.0. Default TRUE")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)

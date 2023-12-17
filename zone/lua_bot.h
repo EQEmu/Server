@@ -107,6 +107,25 @@ public:
 	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets);
 	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
 
+	void ClearDisciplineReuseTimer();
+	void ClearDisciplineReuseTimer(uint16 spell_id);
+	void ClearItemReuseTimer();
+	void ClearItemReuseTimer(uint32 item_id);
+	void ClearSpellRecastTimer();
+	void ClearSpellRecastTimer(uint16 spell_id);
+	uint32 GetDisciplineReuseTimer();
+	uint32 GetDisciplineReuseTimer(uint16 spell_id);
+	uint32 GetItemReuseTimer();
+	uint32 GetItemReuseTimer(uint32 item_id);
+	uint32 GetSpellRecastTimer();
+	uint32 GetSpellRecastTimer(uint16 spell_id);
+	void SetDisciplineReuseTimer(uint16 spell_id);
+	void SetDisciplineReuseTimer(uint16 spell_id, uint32 reuse_timer);
+	void SetItemReuseTimer(uint32 item_id);
+	void SetItemReuseTimer(uint32 item_id, uint32 reuse_timer);
+	void SetSpellRecastTimer(uint16 spell_id);
+	void SetSpellRecastTimer(uint16 spell_id, uint32 reuse_timer);
+
 	int CountAugmentEquippedByID(uint32 item_id);
 	int CountItemEquippedByID(uint32 item_id);
 	bool HasAugmentEquippedByID(uint32 item_id);

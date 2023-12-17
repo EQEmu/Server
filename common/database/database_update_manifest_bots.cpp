@@ -82,6 +82,28 @@ CREATE TABLE `bot_starting_items`  (
 `content_flags_disabled` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
 PRIMARY KEY (`id`)
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci;
+)",
+	},
+	ManifestEntry{
+		.version = 9041,
+		.description = "2023_12_04_bot_timers.sql",
+		.check = "SHOW COLUMNS FROM `bot_timers` LIKE 'recast_time'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `bot_timers`
+	ADD COLUMN `recast_time` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `timer_value`,
+	ADD COLUMN `is_spell` TINYINT(2) UNSIGNED NOT NULL DEFAULT 0 AFTER `recast_time`,
+	ADD COLUMN `is_disc` TINYINT(2) UNSIGNED NOT NULL DEFAULT 0 AFTER `is_spell`,
+	ADD COLUMN `spell_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `is_disc`,
+	ADD COLUMN `is_item` TINYINT(2) UNSIGNED NOT NULL DEFAULT 0 AFTER `spell_id`,
+	ADD COLUMN `item_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `is_item`;
+ALTER TABLE `bot_timers`
+	DROP FOREIGN KEY `FK_bot_timers_1`;
+ALTER TABLE `bot_timers`
+	DROP PRIMARY KEY;
+ALTER TABLE `bot_timers`
+	ADD PRIMARY KEY (`bot_id`, `timer_id`, `spell_id`, `item_id`);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
