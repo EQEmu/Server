@@ -7919,13 +7919,11 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 			}
 		} else {
 			uint32 remaining_time = (GetDisciplineReuseRemainingTime(spell_id) / 1000);
-			GetOwner()->Message(
-				Chat::White,
+			OwnerMessage(
 				fmt::format(
-					"{} can use this discipline in {}.",
-					GetCleanName(),
+					"I can use this discipline in {}.",
 					Strings::SecondsToTime(remaining_time)
-				).c_str()
+				)
 			);
 			return false;
 		}
@@ -8810,7 +8808,7 @@ void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 
 void Bot::SetSpellRecastTimer(uint16 spell_id, int32 recast_delay) {
 	if (!IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, 'Failed to set spell recast timer.'", GetCleanName());
+		OwnerMessage("Failed to set spell recast timer.");
 		return;
 	}
 
@@ -8821,21 +8819,29 @@ void Bot::SetSpellRecastTimer(uint16 spell_id, int32 recast_delay) {
 	if (CheckSpellRecastTimer(spell_id)) {
 		BotTimer_Struct t;
 
-		t.timer_id = spells[spell_id].timer_id;
+		t.timer_id    = spells[ spell_id ].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + recast_delay);
 		t.recast_time = recast_delay;
-		t.is_spell = true;
-		t.is_disc = false;
-		t.spell_id = spells[spell_id].id;
-		t.is_item = false;
-		t.item_id = 0;
+		t.is_spell    = true;
+		t.is_disc     = false;
+		t.spell_id    = spells[ spell_id ].id;
+		t.is_item     = false;
+		t.item_id     = 0;
 
 		bot_timers.push_back(t);
-	}
-	else {
+	} else {
 		if (!bot_timers.empty()) {
 			for (int i = 0; i < bot_timers.size(); i++) {
-				if (bot_timers[i].is_spell && ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id)) {
+				if (
+					bot_timers[i].is_spell &&
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[ i ].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				) {
 					bot_timers[i].timer_value = (Timer::GetCurrentTime() + recast_delay);
 					bot_timers[i].recast_time = recast_delay;
 					break;
@@ -8845,17 +8851,30 @@ void Bot::SetSpellRecastTimer(uint16 spell_id, int32 recast_delay) {
 	}
 }
 
-int32 Bot::GetSpellRecastTimer(uint16 spell_id) {
-	int32 result = 0;
+uint32 Bot::GetSpellRecastTimer(uint16 spell_id)
+{
+	uint32 result = 0;
 
 	if (spell_id && !IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, 'Failed to get spell recast timer.'", GetCleanName());
+		OwnerMessage("Failed to get spell recast timer.");
 		return result;
 	}
 
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
-			if (bot_timers[i].is_spell && (!spell_id || ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id))) {
+			if (
+				bot_timers[i].is_spell &&
+				(
+					!spell_id ||
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				)
+			) {
 				result = bot_timers[i].timer_value;
 				break;
 			}
@@ -8865,8 +8884,9 @@ int32 Bot::GetSpellRecastTimer(uint16 spell_id) {
 	return result;
 }
 
-uint32 Bot::GetSpellRecastRemainingTime(uint16 spell_id) {
-	int32 result = 0;
+uint32 Bot::GetSpellRecastRemainingTime(uint16 spell_id)
+{
+	uint32 result = 0;
 
 	if (GetSpellRecastTimer(spell_id) > Timer::GetCurrentTime()) {
 		result = (GetSpellRecastTimer(spell_id) - Timer::GetCurrentTime());
@@ -8875,11 +8895,12 @@ uint32 Bot::GetSpellRecastRemainingTime(uint16 spell_id) {
 	return result;
 }
 
-bool Bot::CheckSpellRecastTimer(uint16 spell_id) {
+bool Bot::CheckSpellRecastTimer(uint16 spell_id)
+{
 	ClearExpiredTimers();
 
 	if (spell_id && !IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, 'Failed to check spell recast timer.'", GetCleanName());
+		OwnerMessage("Failed to check spell recast timer.");
 		return false;
 	}
 
@@ -8890,9 +8911,10 @@ bool Bot::CheckSpellRecastTimer(uint16 spell_id) {
 	return false;
 }
 
-void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer) {
+void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer)
+{
 	if (!IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, 'Failed to set discipline reuse timer.'", GetCleanName());
+		OwnerMessage("Failed to set discipline reuse timer.");
 		return;
 	}
 
@@ -8903,21 +8925,29 @@ void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer) {
 	if (CheckDisciplineReuseTimer(spell_id)) {
 		BotTimer_Struct t;
 
-		t.timer_id = spells[spell_id].timer_id;
+		t.timer_id    = spells[ spell_id ].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + reuse_timer);
 		t.recast_time = reuse_timer;
-		t.is_spell = false;
-		t.is_disc = true;
-		t.spell_id = spells[spell_id].id;
-		t.is_item = false;
-		t.item_id = 0;
+		t.is_spell    = false;
+		t.is_disc     = true;
+		t.spell_id    = spells[ spell_id ].id;
+		t.is_item     = false;
+		t.item_id     = 0;
 
 		bot_timers.push_back(t);
-	}
-	else {
+	} else {
 		if (!bot_timers.empty()) {
 			for (int i = 0; i < bot_timers.size(); i++) {
-				if (bot_timers[i].is_disc && ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id)) {
+				if (
+					bot_timers[i].is_disc &&
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				) {
 					bot_timers[i].timer_value = (Timer::GetCurrentTime() + reuse_timer);
 					bot_timers[i].recast_time = reuse_timer;
 					break;
@@ -8927,12 +8957,25 @@ void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer) {
 	}
 }
 
-int32 Bot::GetDisciplineReuseTimer(uint16 spell_id) {
-	int32 result = 0;
+uint32 Bot::GetDisciplineReuseTimer(uint16 spell_id)
+{
+	uint32 result = 0;
 
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
-			if (bot_timers[i].is_disc && (!spell_id || ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id))) {
+			if (
+				bot_timers[i].is_disc &&
+				(
+					!spell_id ||
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				)
+			) {
 				result = bot_timers[i].timer_value;
 				break;
 			}
@@ -8943,7 +8986,7 @@ int32 Bot::GetDisciplineReuseTimer(uint16 spell_id) {
 }
 
 uint32 Bot::GetDisciplineReuseRemainingTime(uint16 spell_id) {
-	int32 result = 0;
+	uint32 result = 0;
 
 	if (GetDisciplineReuseTimer(spell_id) > Timer::GetCurrentTime()) {
 		result = (GetDisciplineReuseTimer(spell_id) - Timer::GetCurrentTime());
@@ -8952,7 +8995,8 @@ uint32 Bot::GetDisciplineReuseRemainingTime(uint16 spell_id) {
 	return result;
 }
 
-bool Bot::CheckDisciplineReuseTimer(uint16 spell_id) {
+bool Bot::CheckDisciplineReuseTimer(uint16 spell_id)
+{
 	ClearExpiredTimers();
 
 	if (GetDisciplineReuseTimer(spell_id) < Timer::GetCurrentTime()) { //checks for spells on the same timer
@@ -8962,11 +9006,12 @@ bool Bot::CheckDisciplineReuseTimer(uint16 spell_id) {
 	return false;
 }
 
-void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer) {
-	const EQ::ItemData* item = database.GetItem(item_id);
+void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer)
+{
+	const auto *item = database.GetItem(item_id);
 
 	if (!item) {
-		GetOwner()->Message(Chat::Red, "%s says, 'Failed to set item reuse timer.'", GetCleanName());
+		OwnerMessage("Failed to set item reuse timer.");
 		return;
 	}
 
@@ -8977,23 +9022,44 @@ void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer) {
 	if (CheckItemReuseTimer(item_id)) {
 		BotTimer_Struct t;
 
-		t.timer_id = (item->RecastType == NegativeItemReuse ? item->ID : item->RecastType);
-		t.timer_value = (reuse_timer != 0 ? (Timer::GetCurrentTime() + reuse_timer) : (Timer::GetCurrentTime() + (item->RecastDelay * 1000)));
+		t.timer_id    = (item->RecastType == NegativeItemReuse ? item->ID : item->RecastType);
+		t.timer_value = (
+			reuse_timer != 0 ?
+			(Timer::GetCurrentTime() + reuse_timer) :
+			(Timer::GetCurrentTime() + (item->RecastDelay * 1000))
+		);
 		t.recast_time = (reuse_timer != 0 ? reuse_timer : (item->RecastDelay * 1000));
-		t.is_spell = false;
-		t.is_disc = false;
-		t.spell_id = 0;
-		t.is_item = true;
-		t.item_id = item->ID;
+		t.is_spell    = false;
+		t.is_disc     = false;
+		t.spell_id    = 0;
+		t.is_item     = true;
+		t.item_id     = item->ID;
 
 		bot_timers.push_back(t);
 	}
 	else {
 		if (!bot_timers.empty()) {
 			for (int i = 0; i < bot_timers.size(); i++) {
-				if (bot_timers[i].is_item && ((item->RecastType != 0 && item->RecastType == bot_timers[i].timer_id) || bot_timers[i].item_id == item_id)) {
-					bot_timers[i].timer_value = (reuse_timer != 0 ? (Timer::GetCurrentTime() + reuse_timer) : (Timer::GetCurrentTime() + (item->RecastDelay * 1000)));
-					bot_timers[i].recast_time = (reuse_timer != 0 ? reuse_timer : (item->RecastDelay * 1000));
+				if (
+					bot_timers[i].is_item &&
+					(
+						(
+							item->RecastType != 0 &&
+							item->RecastType == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].item_id == item_id
+					)
+				) {
+					bot_timers[i].timer_value = (
+						reuse_timer != 0 ?
+						(Timer::GetCurrentTime() + reuse_timer) :
+						(Timer::GetCurrentTime() + (item->RecastDelay * 1000))
+					);
+					bot_timers[i].recast_time = (
+						reuse_timer != 0 ?
+						reuse_timer :
+						(item->RecastDelay * 1000)
+					);
 					break;
 				}
 			}
@@ -9001,22 +9067,35 @@ void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer) {
 	}
 }
 
-int32 Bot::GetItemReuseTimer(uint32 item_id) {
-	int32 result = 0;
+uint32 Bot::GetItemReuseTimer(uint32 item_id)
+{
+	uint32 result = 0;
 	const EQ::ItemData* item;
 
 	if (item_id) {
 		item = database.GetItem(item_id);
 
 		if (!item) {
-			GetOwner()->Message(Chat::Red, "%s says, 'Failed to get item reuse timer.'", GetCleanName());
+			OwnerMessage("Failed to get item reuse timer.");
 			return result;
 		}
 	}
 
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
-			if (bot_timers[i].is_item && (!item_id || ((item->RecastType != 0 && item->RecastType == bot_timers[i].timer_id) || bot_timers[i].item_id == item_id))) {
+			if (
+				bot_timers[i].is_item &&
+				(
+					!item_id ||
+					(
+						(
+							item->RecastType != 0 &&
+							item->RecastType == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].item_id == item_id
+					)
+				)
+			) {
 				result = bot_timers[i].timer_value;
 				break;
 			}
@@ -9028,7 +9107,8 @@ int32 Bot::GetItemReuseTimer(uint32 item_id) {
 	return result;
 }
 
-bool Bot::CheckItemReuseTimer(uint32 item_id) {
+bool Bot::CheckItemReuseTimer(uint32 item_id)
+{
 	ClearExpiredTimers();
 
 	if (GetItemReuseTimer(item_id) < Timer::GetCurrentTime()) {
@@ -9038,8 +9118,9 @@ bool Bot::CheckItemReuseTimer(uint32 item_id) {
 	return false;
 }
 
-uint32 Bot::GetItemReuseRemainingTime(uint32 item_id) {
-	int32 result = 0;
+uint32 Bot::GetItemReuseRemainingTime(uint32 item_id)
+{
+	uint32 result = 0;
 
 	if (GetItemReuseTimer(item_id) > Timer::GetCurrentTime()) {
 		result = (GetItemReuseTimer(item_id) - Timer::GetCurrentTime());
@@ -9048,16 +9129,16 @@ uint32 Bot::GetItemReuseRemainingTime(uint32 item_id) {
 	return result;
 }
 
-uint32 Bot::CalcSpellRecastTimer(uint16 spell_id) {
-	int32 result = 0;
+uint32 Bot::CalcSpellRecastTimer(uint16 spell_id)
+{
+	uint32 result = 0;
+
 	if (spells[spell_id].recast_time == 0 && spells[spell_id].recovery_time == 0) {
 		return result;
-	}
-	else {
+	} else {
 		if (spells[spell_id].recovery_time > spells[spell_id].recast_time) {
 			result = spells[spell_id].recovery_time;
-		}
-		else {
+		} else {
 			result = spells[spell_id].recast_time;
 		}
 	}
@@ -9065,16 +9146,34 @@ uint32 Bot::CalcSpellRecastTimer(uint16 spell_id) {
 	return result;
 }
 
-void Bot::ClearDisciplineReuseTimer(uint16 spell_id) {
+void Bot::ClearDisciplineReuseTimer(uint16 spell_id)
+{
 	if (spell_id && !IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, '%i is not a valid spell ID.'", spell_id, GetCleanName());
+		OwnerMessage(
+			fmt::format(
+				"{} is not a valid spell ID.'",
+				spell_id
+			)
+		);
 		return;
 	}
 
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
-			if (bot_timers[i].is_disc && bot_timers[i].timer_value >= Timer::GetCurrentTime()) {
-				if (!spell_id || ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id)) {
+			if (
+				bot_timers[i].is_disc &&
+				bot_timers[i].timer_value >= Timer::GetCurrentTime()
+			) {
+				if (
+					!spell_id ||
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				) {
 					bot_timers[i].timer_value = 0;
 				}
 			}
@@ -9084,14 +9183,20 @@ void Bot::ClearDisciplineReuseTimer(uint16 spell_id) {
 	ClearExpiredTimers();
 }
 
-void Bot::ClearItemReuseTimer(uint32 item_id) {
+void Bot::ClearItemReuseTimer(uint32 item_id)
+{
 	const EQ::ItemData* item;
 
 	if (item_id) {
 		item = database.GetItem(item_id);
 
 		if (!item) {
-			GetOwner()->Message(Chat::Red, "%s says, '%i is not a valid spell ID.'", item_id, GetCleanName());
+			OwnerMessage(
+				fmt::format(
+					"{} is not a valid item ID.",
+					item_id
+				)
+			);
 			return;
 		}
 	}
@@ -9099,7 +9204,16 @@ void Bot::ClearItemReuseTimer(uint32 item_id) {
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
 			if (bot_timers[i].is_item && bot_timers[i].timer_value >= Timer::GetCurrentTime()) {
-				if (!item_id || ((item->RecastType != 0 && item->RecastType == bot_timers[i].timer_id) || bot_timers[i].item_id == item_id)) {
+				if (
+					!item_id ||
+					(
+						(
+							item->RecastType != 0 &&
+							item->RecastType == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].item_id == item_id
+					)
+				) {
 					bot_timers[i].timer_value = 0;
 				}
 			}
@@ -9109,17 +9223,31 @@ void Bot::ClearItemReuseTimer(uint32 item_id) {
 	ClearExpiredTimers();
 }
 
-void Bot::ClearSpellRecastTimer(uint16 spell_id) {
-
+void Bot::ClearSpellRecastTimer(uint16 spell_id)
+{
 	if (spell_id && !IsValidSpell(spell_id)) {
-		GetOwner()->Message(Chat::Red, "%s says, '%i is not a valid spell ID.'", spell_id, GetCleanName());
+		OwnerMessage(
+			fmt::format(
+				"{} is not a valid spell ID.",
+				spell_id
+			)
+		);
 		return;
 	}
 
 	if (!bot_timers.empty()) {
 		for (int i = 0; i < bot_timers.size(); i++) {
 			if (bot_timers[i].is_spell && bot_timers[i].timer_value >= Timer::GetCurrentTime()) {
-				if (!spell_id || ((spells[spell_id].timer_id != 0 && spells[spell_id].timer_id == bot_timers[i].timer_id) || bot_timers[i].spell_id == spell_id)) {
+				if (
+					!spell_id ||
+					(
+						(
+							spells[spell_id].timer_id != 0 &&
+							spells[spell_id].timer_id == bot_timers[i].timer_id
+						) ||
+						bot_timers[i].spell_id == spell_id
+					)
+				) {
 					bot_timers[i].timer_value = 0;
 				}
 			}
@@ -9130,34 +9258,37 @@ void Bot::ClearSpellRecastTimer(uint16 spell_id) {
 }
 
 
-void Bot::ClearExpiredTimers() {
+void Bot::ClearExpiredTimers()
+{
 	if (!bot_timers.empty()) {
 		int current = 0;
 		int end = bot_timers.size();
+
 		while (current < end) {
 			if (bot_timers[current].timer_value < Timer::GetCurrentTime()) {
 				bot_timers.erase(bot_timers.begin() + current);
-			}
-			else {
+			} else {
 				current++;
 			}
+
 			end = bot_timers.size();
 		}
 	}
 }
 
-void Bot::TryItemClick(uint16 slot_id) {
+void Bot::TryItemClick(uint16 slot_id)
+{
 	if (!GetOwner()) {
 		return;
 	}
 
-	const EQ::ItemInstance* inst = GetClickItem(slot_id);
+	const auto *inst = GetClickItem(slot_id);
 
 	if (!inst) {
 		return;
 	}
 
-	const EQ::ItemData* item = inst->GetItem();
+	const auto *item = inst->GetItem();
 
 	if (!item) {
 		return;
@@ -9165,12 +9296,11 @@ void Bot::TryItemClick(uint16 slot_id) {
 
 	if (!CheckItemReuseTimer(item->ID)) {
 		uint32 remaining_time = (GetItemReuseRemainingTime(item->ID) / 1000);
-		GetOwner()->Message(Chat::Yellow,
+		OwnerMessage(
 			fmt::format(
-				"{} says, 'I can use this item in {}'.",
-				GetCleanName(),
+				"I can use this item in {}.",
 				Strings::SecondsToTime(remaining_time)
-			).c_str()
+			)
 		);
 		return;
 	}
@@ -9178,7 +9308,8 @@ void Bot::TryItemClick(uint16 slot_id) {
 	DoItemClick(item, slot_id);
 }
 
-EQ::ItemInstance* Bot::GetClickItem(uint16 slot_id) {
+EQ::ItemInstance *Bot::GetClickItem(uint16 slot_id)
+{
 	EQ::ItemInstance* inst = nullptr;
 	const EQ::ItemData* item = nullptr;
 
@@ -9191,39 +9322,72 @@ EQ::ItemInstance* Bot::GetClickItem(uint16 slot_id) {
 	item = inst->GetItem();
 
 	if (item->ID == MAG_EPIC_1_0 && !RuleB(Bots, CanClickMageEpicV1)) {
-		GetOwner()->Message(Chat::Red, "%s says, '%s is currently disabled for bots to click.'", GetCleanName(), item->Name);
+		OwnerMessage(
+			fmt::format(
+				"{} is currently disabled for bots to click.",
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	if (item->Click.Effect <= 0) {
-		GetOwner()->Message(Chat::Red, "%s says, '%s does not have a clickable effect.'", GetCleanName(), item->Name);
+		OwnerMessage(
+			fmt::format(
+				"{} does not have a clickable effect.",
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	if (!IsValidSpell(item->Click.Effect)) {
-		GetOwner()->Message(Chat::Red, "%s says, '%s does not have a valid clickable effect.'", GetCleanName(), item->Name);
+		OwnerMessage(
+			fmt::format(
+				"{} does not have a valid clickable effect.",
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	if (item->ReqLevel > GetLevel()) {
-		GetOwner()->Message(Chat::Red, "%s says, 'I am below the level requirement of %i for %s.'", GetCleanName(), item->ReqLevel, item->Name);
+		OwnerMessage(
+			fmt::format(
+				"I am below the level requirement of {} for {}.",
+				item->ReqLevel,
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	if (item->Click.Level2 > GetLevel()) {
-		GetOwner()->Message(Chat::Red, "%s says, 'I must be level %i to use %s.'", GetCleanName(), item->Click.Level2, item->Name);
+		OwnerMessage(
+			fmt::format(
+				"I must be level {} to use {}.",
+				item->Click.Level2,
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	if (inst->GetCharges() == 0) {
-		GetOwner()->Message(Chat::Red, "%s says, '%s is out of charges.'", GetCleanName(), item->Name);
+		OwnerMessage(
+			fmt::format(
+				"{} is out of charges.",
+				item->Name
+			)
+		);
 		return nullptr;
 	}
 
 	return inst;
 }
 
-void Bot::DoItemClick(const EQ::ItemData* item, uint16 slot_id) {
+void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
+{
 	bool is_casting_bard_song = false;
 	Mob* tar = (GetOwner()->GetTarget() ? GetOwner()->GetTarget() : this);
 
@@ -9252,10 +9416,14 @@ void Bot::DoItemClick(const EQ::ItemData* item, uint16 slot_id) {
 
 	if (GetClass() == Class::Bard) {
 		DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, tar->GetID(), EQ::spells::CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
-	}
-	else {
+	} else {
 		if (!CastSpell(item->Click.Effect, tar->GetID(), EQ::spells::CastingSlot::Item, item->CastTime, 0, 0, slot_id)) {
-			GetOwner()->Message(Chat::Red, "%s says, 'Casting failed for %s. This could be due to zone restrictions, target restrictions or other limiting factors.", GetCleanName(), item->Name);
+			OwnerMessage(
+				fmt::format(
+					"Casting failed for {}. This could be due to zone restrictions, target restrictions or other limiting factors.",
+					item->Name
+				)
+			);
 		}
 	}
 

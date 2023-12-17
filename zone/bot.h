@@ -612,16 +612,16 @@ public:
 			_botStance = EQ::constants::stancePassive;
 	}
 	void SetBotCasterRange(uint32 bot_caster_range) { m_bot_caster_range = bot_caster_range; }
-	int32 GetSpellRecastTimer(uint16 spell_id = 0);
+	uint32 GetSpellRecastTimer(uint16 spell_id = 0);
 	bool CheckSpellRecastTimer(uint16 spell_id = 0);
 	uint32 GetSpellRecastRemainingTime(uint16 spell_id = 0);
 	void SetSpellRecastTimer(uint16 spell_id, int32 recast_delay = 0);
 	uint32 CalcSpellRecastTimer(uint16 spell_id);
-	int32 GetDisciplineReuseTimer(uint16 spell_id = 0);
+	uint32 GetDisciplineReuseTimer(uint16 spell_id = 0);
 	bool CheckDisciplineReuseTimer(uint16 spell_id = 0);
 	uint32 GetDisciplineReuseRemainingTime(uint16 spell_id = 0);
 	void SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer = 0);
-	int32 GetItemReuseTimer(uint32 item_id = 0);
+	uint32 GetItemReuseTimer(uint32 item_id = 0);
 	bool CheckItemReuseTimer(uint32 item_id = 0);
 	void SetItemReuseTimer(uint32 item_id, uint32 reuse_timer = 0);
 	void ClearDisciplineReuseTimer(uint16 spell_id = 0);
