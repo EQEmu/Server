@@ -44,7 +44,7 @@
 #include <tuple>
 #include <type_traits>
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #ifndef _WIN32
 // this doesn't appear to affect linux-based systems..need feedback for _WIN64
@@ -206,7 +206,7 @@ const std::string NUM_TO_ENGLISH_Y[] = {
 	"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety "
 };
 
-// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
+// _WIN32 builds require that #include<fmt/core.h> be included in whatever code file the invocation is made from (no header files)
 template<typename T1, typename T2>
 std::vector<std::string> join_pair(
 	const std::string &glue,
@@ -239,7 +239,7 @@ std::vector<std::string> join_pair(
 	return output;
 }
 
-// _WIN32 builds require that #include<fmt/format.h> be included in whatever code file the invocation is made from (no header files)
+// _WIN32 builds require that #include<fmt/core.h> be included in whatever code file the invocation is made from (no header files)
 template<typename T1, typename T2, typename T3, typename T4>
 std::vector<std::string> join_tuple(
 	const std::string &glue,

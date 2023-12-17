@@ -31,7 +31,7 @@
 #include "../common/md5.h"
 #include "eqemu_api_world_data_service.h"
 #include "../common/zone_store.h"
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 extern ClientList      client_list;
 extern ZSList          zoneserver_list;

@@ -33,7 +33,8 @@
 #endif
 #endif
 
-#include <fmt/format.h>
+//#define FMT_HEADER_ONLY
+#include <fmt/core.h>
 #include "types.h"
 
 namespace Logs {

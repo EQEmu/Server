@@ -34,7 +34,7 @@
 */
 
 #include "strings.h"
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <algorithm>
 #include <cctype>
 

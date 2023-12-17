@@ -18,7 +18,7 @@
  *
  */
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include "clientlist.h"
 #include "cliententry.h"
 #include "eqemu_api_world_data_service.h"

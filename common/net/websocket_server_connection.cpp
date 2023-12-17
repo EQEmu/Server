@@ -3,7 +3,7 @@
 #include "../timer.h"
 #include "../util/uuid.h"
 #include <sstream>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 struct EQ::Net::WebsocketServerConnection::Impl {
 	WebsocketServer *parent;
@@ -16,7 +16,7 @@ struct EQ::Net::WebsocketServerConnection::Impl {
 	int status;
 };
 
-EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *parent, 
+EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *parent,
 	std::shared_ptr<TCPConnection> connection,
 	std::shared_ptr<websocket_connection> ws_connection)
 {
@@ -34,7 +34,7 @@ EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *p
 	connection->OnDisconnect([this](EQ::Net::TCPConnection *connection) {
 		_impl->parent->ReleaseConnection(this);
 	});
-	
+
 	connection->OnRead([this](EQ::Net::TCPConnection *c, const unsigned char *buffer, size_t buffer_size) {
 		_impl->ws_connection->read_all((const char*)buffer, buffer_size);
 	});

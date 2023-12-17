@@ -2,7 +2,7 @@
 #include "../repositories/character_data_repository.h"
 #include "../json/json_archive_single_line.h"
 #include <vector>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <cereal/archives/json.hpp>
 #include <cereal/types/vector.hpp>
 

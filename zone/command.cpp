@@ -1,7 +1,7 @@
 #include <string.h>
 #include <algorithm>
 #include <thread>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include "../common/repositories/command_subsettings_repository.h"
 
 #ifdef _WINDOWS

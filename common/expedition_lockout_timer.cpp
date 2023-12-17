@@ -22,6 +22,7 @@
 #include "../common/strings.h"
 #include "../common/rulesys.h"
 #include "../common/util/uuid.h"
+#include <fmt/core.h>
 #include <fmt/format.h>
 
 const char* const DZ_REPLAY_TIMER_NAME = "Replay Timer"; // see December 14, 2016 patch notes

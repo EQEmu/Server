@@ -22,7 +22,7 @@
 #include "strings.h"
 #include <cstdlib>
 #include <cstring>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include "../common/repositories/rule_sets_repository.h"
 #include "../common/repositories/rule_values_repository.h"

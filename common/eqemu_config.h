@@ -22,7 +22,7 @@
 #include "linked_list.h"
 #include "path_manager.h"
 #include <fstream>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 struct LoginConfig {
 	std::string LoginHost;

@@ -25,7 +25,7 @@
 
 #include <ctime>
 #include <iostream>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 extern Zone* zone;
 

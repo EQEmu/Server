@@ -16,6 +16,7 @@
 #include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
 #include <ctime>
+#include <fmt/format.h>
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;

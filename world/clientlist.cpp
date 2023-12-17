@@ -35,6 +35,7 @@
 #include "wguild_mgr.h"
 #include "../common/zone_store.h"
 #include <set>
+#include <fmt/format.h>
 
 extern WebInterfaceList web_interface;
 

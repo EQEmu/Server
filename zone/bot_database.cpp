@@ -29,7 +29,7 @@
 #include "bot.h"
 #include "client.h"
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 
 bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &bot_command_settings)

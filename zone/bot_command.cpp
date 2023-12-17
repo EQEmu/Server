@@ -65,7 +65,7 @@
 #include "dialogue_window.h"
 #include "mob.h"
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;

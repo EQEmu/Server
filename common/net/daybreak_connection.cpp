@@ -5,7 +5,7 @@
 #include "crc32.h"
 #include "../eqemu_logsys.h"
 #include <zlib.h>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <sstream>
 
 EQ::Net::DaybreakConnectionManager::DaybreakConnectionManager()

@@ -2,7 +2,7 @@
 #include "client.h"
 #include "pathfinder_null.h"
 #include "pathfinder_nav_mesh.h"
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <sys/stat.h>
 
 IPathfinder *IPathfinder::Load(const std::string &zone) {

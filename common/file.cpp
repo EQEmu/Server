@@ -35,7 +35,7 @@
 
 #endif
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <filesystem>
 #include <iostream>
 

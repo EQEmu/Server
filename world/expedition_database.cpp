@@ -23,6 +23,7 @@
 #include "../common/repositories/expeditions_repository.h"
 #include "../common/repositories/expedition_lockouts_repository.h"
 #include "../common/repositories/dynamic_zone_members_repository.h"
+#include <fmt/format.h>
 
 void ExpeditionDatabase::PurgeExpiredExpeditions()
 {

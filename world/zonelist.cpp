@@ -28,6 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/event_sub.h"
 #include "web_interface.h"
 #include "../common/zone_store.h"
+#include <fmt/format.h>
 
 extern uint32 numzones;
 extern EQ::Random emu_random;
