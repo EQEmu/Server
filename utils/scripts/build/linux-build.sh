@@ -15,8 +15,8 @@ mkdir -p build && cd build && \
       -DEQEMU_BUILD_LOGIN=ON \
       -DEQEMU_BUILD_LUA=ON \
       -DEQEMU_BUILD_PERL=ON \
-      -DCMAKE_CXX_FLAGS:STRING="-O1 -g" \
-      -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O1 -g" \
+      -DCMAKE_CXX_FLAGS:STRING="-O1 -g -Wno-everything" \
+      -DCMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING="-O1 -g -Wno-everything" \
       -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
       -G 'Unix Makefiles' \
       .. && make -j$((`nproc`-4))

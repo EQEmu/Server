@@ -15,7 +15,7 @@ volumes:
 
 steps:
   - name: Build Linux X64
-    image: akkadius/eqemu-server:v13
+    image: akkadius/eqemu-server:v14
     environment:
       GITHUB_TOKEN:
         from_secret: GH_RELEASE_GITHUB_API_TOKEN
