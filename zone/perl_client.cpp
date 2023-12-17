@@ -1472,12 +1472,12 @@ void Perl_Client_NotifyNewTitlesAvailable(Client* self) // @categories Account a
 	self->NotifyNewTitlesAvailable();
 }
 
-void Perl_Client_AddAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
+void Perl_Client_AddAlternateCurrencyValue(Client* self, uint32 currency_id, int amount) // @categories Currency and Points
 {
 	self->AddAlternateCurrencyValue(currency_id, amount, true);
 }
 
-void Perl_Client_SetAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
+void Perl_Client_SetAlternateCurrencyValue(Client* self, uint32 currency_id, uint32 amount) // @categories Currency and Points
 {
 	self->SetAlternateCurrencyValue(currency_id, amount);
 }

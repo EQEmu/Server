@@ -6491,7 +6491,7 @@ void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 	SendAlternateCurrencyValue(currency_id);
 }
 
-int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, bool is_scripted)
+int Client::AddAlternateCurrencyValue(uint32 currency_id, int amount, bool is_scripted)
 {
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
 	if (is_scripted) {
@@ -6530,7 +6530,9 @@ int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, bool is_
 
 	SendAlternateCurrencyValue(currency_id);
 
-	if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_GAIN) || parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_LOSS)) {
+	QuestEventID event_id = amount > 0 ? EVENT_ALT_CURRENCY_GAIN : EVENT_ALT_CURRENCY_LOSS;
+
+	if (parse->PlayerHasQuestSub(event_id)) {
 		const std::string &export_string = fmt::format(
 			"{} {} {}",
 			currency_id,
@@ -6538,11 +6540,7 @@ int Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, bool is_
 			new_value
 		);
 
-		if (amount > 0) {
-			parse->EventPlayer(EVENT_ALT_CURRENCY_GAIN, this, export_string, 0);
-		} else {
-			parse->EventPlayer(EVENT_ALT_CURRENCY_LOSS, this, export_string, 0);
-		}
+		parse->EventPlayer(event_id, this, export_string, 0);
 	}
 
 	return new_value;
