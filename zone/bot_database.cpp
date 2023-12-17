@@ -926,14 +926,14 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	std::vector<BotTimer_Struct> bot_timers;
 
 	BotTimer_Struct t{};
-	t.timer_id		= 0;
-	t.timer_value	= 0;
-	t.recast_time	= 0;
-	t.is_spell		= false;
-	t.is_disc		= false;
-	t.spell_id		= 0;
-	t.is_item		= false;
-	t.item_id		= 0;
+	t.timer_id    = 0;
+	t.timer_value = 0;
+	t.recast_time = 0;
+	t.is_spell    = false;
+	t.is_disc     = false;
+	t.spell_id    = 0;
+	t.is_item     = false;
+	t.item_id     = 0;
 
 	for (auto& timer : timers) {
 		if (t.timer_value < (Timer::GetCurrentTime() + t.recast_time)) {
