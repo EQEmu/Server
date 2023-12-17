@@ -1544,26 +1544,16 @@ bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
 
 	m_pp.ldon_points_available += points;
 
-	if (!is_loss) {
-		if (parse->PlayerHasQuestSub(EVENT_LDON_POINTS_GAIN)) {
-			const std::string &export_string = fmt::format(
-				"{} {}",
-				theme_id,
-				std::abs(points)
-			);
+	QuestEventID event_id = is_loss ? EVENT_LDON_POINTS_LOSS : EVENT_LDON_POINTS_GAIN;
 
-			parse->EventPlayer(EVENT_LDON_POINTS_GAIN, this, export_string, 0);
-		}
-	} else {
-		if (parse->PlayerHasQuestSub(EVENT_LDON_POINTS_LOSS)) {
-			const std::string &export_string = fmt::format(
-				"{} {}",
-				theme_id,
-				std::abs(points)
-			);
+	if (parse->PlayerHasQuestSub(event_id)) {
+		const std::string &export_string = fmt::format(
+			"{} {}",
+			theme_id,
+			std::abs(points)
+		);
 
-			parse->EventPlayer(EVENT_LDON_POINTS_LOSS, this, export_string, 0);
-		}
+		parse->EventPlayer(event_id, this, export_string, 0);
 	}
 
 	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
