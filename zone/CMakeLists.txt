@@ -280,7 +280,7 @@ SET(zone_headers
     zone_reload.h
     zone_cli.cpp)
 
-ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${lua_headers})
+ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 

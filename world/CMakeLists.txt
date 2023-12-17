@@ -78,7 +78,9 @@ ADD_EXECUTABLE(world ${world_sources} ${world_headers})
 
 INSTALL(TARGETS world RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch.h)
+IF (WIN32)
+    TARGET_PRECOMPILE_HEADERS(world PRIVATE ../common/pch/pch.h)
+ENDIF (WIN32)
 
 ADD_DEFINITIONS(-DWORLD)
 
