@@ -204,6 +204,33 @@ SET(zone_headers
     hate_list.h
     heal_rotation.h
     horse.h
+    lua_bot.h
+    lua_bit.h
+    lua_client.h
+    lua_corpse.h
+    lua_door.h
+    lua_encounter.h
+    lua_entity.h
+    lua_entity_list.h
+    lua_expedition.h
+    lua_general.h
+    lua_group.h
+    lua_hate_list.h
+    lua_inventory.h
+    lua_item.h
+    lua_iteminst.h
+    lua_mob.h
+    lua_mod.h
+    lua_npc.h
+    lua_object.h
+    lua_packet.h
+    lua_parser.h
+    lua_parser_events.h
+    lua_ptr.h
+    lua_raid.h
+    lua_spawn.h
+    lua_spell.h
+    lua_stat_bonuses.h
     map.h
     masterentity.h
     merc.h
@@ -253,36 +280,6 @@ SET(zone_headers
     zone_reload.h
     zone_cli.cpp)
 
-SET (lua_headers
-    lua_bot.h
-    lua_bit.h
-    lua_client.h
-    lua_corpse.h
-    lua_door.h
-    lua_encounter.h
-    lua_entity.h
-    lua_entity_list.h
-    lua_expedition.h
-    lua_general.h
-    lua_group.h
-    lua_hate_list.h
-    lua_inventory.h
-    lua_item.h
-    lua_iteminst.h
-    lua_mob.h
-    lua_mod.h
-    lua_npc.h
-    lua_object.h
-    lua_packet.h
-    lua_parser.h
-    lua_parser_events.h
-    lua_ptr.h
-    lua_raid.h
-    lua_spawn.h
-    lua_spell.h
-    lua_stat_bonuses.h
-)
-
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${lua_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -291,7 +288,6 @@ IF (WIN32)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
     TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
-    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ${lua_headers})
 ENDIF(WIN32)
 
 ADD_DEFINITIONS(-DZONE)
