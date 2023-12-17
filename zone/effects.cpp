@@ -523,14 +523,15 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			}
 		}
 
-		if (RuleB(Spells, HOTBonusHealingSplitOverDuration)) {
-			if (extra_heal) {
+		if (extra_heal) {
+			if (RuleB(Spells, HOTBonusHealingSplitOverDuration)) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
 					extra_heal /= duration;
-					value += extra_heal;
 				}
 			}
+
+			value += extra_heal;
 		}
 
 		value *= critical_modifier;
