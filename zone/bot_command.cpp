@@ -3940,7 +3940,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	else if (arg1.compare("byclass") == 0) {
 		if (Strings::IsNumber(sep->arg[2])) {
 			class_mask = Strings::ToUnsignedInt(sep->arg[2]);
-			if (!(class_mask >= WARRIOR && class_mask <= BERSERKER)) {
+			if (!(class_mask >= Class::Warrior && class_mask <= Class::Berserker)) {
 				c->Message(Chat::White, "Invalid class range, you must choose between 1 (Warrior) and 15 (Beastlord)");
 				return;
 			}
