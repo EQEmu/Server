@@ -287,10 +287,10 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${lua_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch.h)
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
-TARGET_PRECOMPILE_HEADERS(zone PRIVATE ${lua_headers})
+TARGET_PRECOMPILE_HEADERS(zone PRIVATE pch.h)
+#TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
+#TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
+#TARGET_PRECOMPILE_HEADERS(zone PRIVATE ${lua_headers})
 
 ADD_DEFINITIONS(-DZONE)
 
