@@ -1941,7 +1941,7 @@ void Zone::SetTime(uint8 hour, uint8 minute, bool update_world /*= true*/)
 		zone_time.GetCurrentEQTimeOfDay(time(0), &eq_time_of_day->start_eqtime);
 
 		eq_time_of_day->start_eqtime.minute = minute;
-		eq_time_of_day->start_eqtime.hour = hour;
+		eq_time_of_day->start_eqtime.hour = hour + 1;
 		eq_time_of_day->start_realtime = time(0);
 
 		/* By Default we update worlds time, but we can optionally no update world which updates the rest of the zone servers */
