@@ -36,7 +36,7 @@
 #undef FMT_HEADER_ONLY
 #include <fmt/core.h>
 #include "types.h"
-
+ 
 namespace Logs {
 	enum DebugLevel {
 		General = 1,    // 1 - Low-Level general debugging, useful info on single line
