@@ -15,6 +15,7 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
+#include <fmt/format.h>
 
 class BaseCharacterExpeditionLockoutsRepository {
 public:

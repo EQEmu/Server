@@ -36,6 +36,7 @@
 #include "bot.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
+#include <fmt/format.h>
 
 extern WorldServer worldserver;
 

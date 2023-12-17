@@ -25,6 +25,7 @@
 #include "raids.h"
 #include "string_ids.h"
 #include "../common/repositories/character_expedition_lockouts_repository.h"
+#include <fmt/format.h>
 
 constexpr char SystemName[] = "expedition";
 

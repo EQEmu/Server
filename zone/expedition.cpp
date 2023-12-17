@@ -26,6 +26,7 @@
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/repositories/expedition_lockouts_repository.h"
+#include <fmt/format.h>
 
 extern WorldServer worldserver;
 extern Zone* zone;

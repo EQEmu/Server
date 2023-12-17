@@ -7,6 +7,7 @@
 #include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/repositories/instance_list_repository.h"
+#include <fmt/format.h>
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;

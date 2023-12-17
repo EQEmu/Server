@@ -69,6 +69,7 @@ extern volatile bool RunLoops;
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
+#include <fmt/format.h>
 
 
 extern QueryServ* QServ;
