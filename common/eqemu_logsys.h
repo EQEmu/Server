@@ -28,7 +28,7 @@
 #include <algorithm>
 
 #ifdef _WIN32
-#ifdef utf16_to_utf8  
+#ifdef utf16_to_utf8
 #undef utf16_to_utf8
 #endif
 #endif
