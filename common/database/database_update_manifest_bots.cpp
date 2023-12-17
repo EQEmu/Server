@@ -102,6 +102,8 @@ ALTER TABLE `bot_timers`
 	DROP FOREIGN KEY `FK_bot_timers_1`;
 ALTER TABLE `bot_timers`
 	DROP PRIMARY KEY;
+ALTER TABLE `bot_timers`
+	ADD PRIMARY KEY (`bot_id`, `timer_id`);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry

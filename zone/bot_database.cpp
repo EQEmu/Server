@@ -24,6 +24,7 @@
 
 #include "../common/repositories/bot_data_repository.h"
 #include "../common/repositories/bot_inventories_repository.h"
+#include "../common/repositories/bot_timers_repository.h"
 
 #include "zonedb.h"
 #include "bot.h"
@@ -917,18 +918,10 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	if (!bot_inst)
 		return false;
 
-	query = StringFormat(
-		"SELECT *"
-		" FROM `bot_timers` bt"
-		" WHERE bt.`bot_id` = '%u'",
-		bot_inst->GetBotID()
+	auto timers = BotTimersRepository::GetWhere(
+		database,
+		fmt::format("bot_id = {}", bot_inst->GetBotID())
 	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return false;
-	if (!results.RowCount())
-		return true;
 
 	std::vector<BotTimer_Struct> bot_timers;
 
@@ -941,7 +934,7 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	bool is_item		= false;
 	uint32 item_id		= 0;
 
-	BotTimer_Struct t;
+	BotTimer_Struct t{};
 	t.timer_id		= 0;
 	t.timer_value	= 0;
 	t.recast_time	= 0;
@@ -951,27 +944,16 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	t.is_item		= false;
 	t.item_id		= 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		//bot_id		= Strings::ToInt(row[0]); //unused
-		timer_id		= Strings::ToInt(row[1]);
-		timer_value		= Strings::ToInt(row[2]);
-		recast_time		= Strings::ToInt(row[3]);
-		is_spell		= Strings::ToInt(row[4]);
-		is_disc			= Strings::ToInt(row[5]);
-		spell_id		= Strings::ToInt(row[6]);
-		is_item			= Strings::ToInt(row[7]);
-		item_id			= Strings::ToInt(row[8]);
-
+	for (auto& timer : timers) {
 		if (timer_value < (Timer::GetCurrentTime() + recast_time)) {
-			t.timer_id		= timer_id;
-			t.timer_value	= timer_value;
-			t.recast_time	= recast_time;
-			t.is_spell		= is_spell ? true : false;
-			t.is_disc		= is_disc ? true : false;
-			t.spell_id		= spell_id;
-			t.is_item		= is_item ? true : false;
-			t.item_id		= item_id;
-
+			t.timer_id    = timer.timer_id;
+			t.timer_value = timer.timer_value;
+			t.recast_time = timer.recast_time;
+			t.is_spell    = timer.is_spell ? true : false;
+			t.is_disc     = timer.is_disc ? true : false;
+			t.spell_id    = timer.spell_id;
+			t.is_item     = timer.is_item ? true : false;
+			t.item_id     = timer.item_id;
 			bot_timers.push_back(t);
 		}
 	}
@@ -999,32 +981,44 @@ bool BotDatabase::SaveTimers(Bot* bot_inst)
 		return true;
 	}
 
+	std::vector<BotTimersRepository::BotTimers> timers;
+
 	if (!bot_timers.empty()) {
-		for (int i = 0; i < bot_timers.size(); i++) {
-			if (bot_timers[i].timer_value <= Timer::GetCurrentTime()) {
+		for (auto & bot_timer : bot_timers) {
+			if (bot_timer.timer_value <= Timer::GetCurrentTime()) {
 				continue;
 			}
 
-			query = fmt::format(
-				"REPLACE INTO `bot_timers` "
-				" (`bot_id`, `timer_id`, `timer_value`, `recast_time`, `is_spell`, `is_disc`, `spell_id`, `is_item`, `item_id`)"
-				" VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')",
-				bot_inst->GetBotID(),
-				bot_timers[i].timer_id,
-				bot_timers[i].timer_value,
-				bot_timers[i].recast_time,
-				bot_timers[i].is_spell ? 1 : 0,
-				bot_timers[i].is_disc ? 1 : 0,
-				bot_timers[i].spell_id,
-				bot_timers[i].is_item ? 1 : 0,
-				bot_timers[i].item_id
-			);
+			auto t = BotTimersRepository::BotTimers{
+				.bot_id = bot_inst->GetBotID(),
+				.timer_id = bot_timer.timer_id,
+				.timer_value = bot_timer.timer_value,
+				.recast_time = bot_timer.recast_time,
+				.is_spell = bot_timer.is_spell ? true : false,
+				.is_disc = bot_timer.is_disc ? true : false,
+				.spell_id = bot_timer.spell_id,
+				.is_item = bot_timer.is_item ? true : false,
+				.item_id = bot_timer.item_id
+			};
 
-			auto results = database.QueryDatabase(query);
-			if (!results.Success()) {
-				DeleteTimers(bot_inst->GetBotID());
-				return false;
-			}
+			timers.push_back(t);
+		}
+
+		if (timers.empty()) {
+			return true;
+		}
+
+		// delete existing
+		BotTimersRepository::DeleteWhere(
+			database,
+			fmt::format("bot_id = {}", bot_inst->GetBotID())
+		);
+
+		// bulk insert current
+		auto success = BotTimersRepository::InsertMany(database, timers);
+		if (!success) {
+			DeleteTimers(bot_inst->GetBotID());
+			return false;
 		}
 	}
 
