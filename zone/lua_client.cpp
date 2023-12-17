@@ -1215,17 +1215,19 @@ void Lua_Client::AddCrystals(uint32 radiant, uint32 ebon) {
 	if (ebon != 0) {
 		if (ebon > 0) {
 			self->AddEbonCrystals(ebon);
-		} else {
-			self->RemoveEbonCrystals(ebon);
+			return;
 		}
+
+		self->RemoveEbonCrystals(ebon);
 	}
 
 	if (radiant != 0) {
 		if (radiant > 0) {
 			self->AddRadiantCrystals(radiant);
-		} else {
-			self->RemoveRadiantCrystals(radiant);
+			return;
 		}
+
+		self->RemoveRadiantCrystals(radiant);
 	}
 }
 
