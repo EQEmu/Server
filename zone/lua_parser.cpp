@@ -168,7 +168,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_memorize_spell",
 	"event_unmemorize_spell",
 	"event_scribe_spell",
-	"event_unscribe_spell"
+	"event_unscribe_spell",
+	"event_loot_added"
 };
 
 extern Zone *zone;
@@ -226,6 +227,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]    = handle_npc_despawn_zone;
 	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]    = handle_npc_damage;
 	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]    = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_LOOT_ADDED]      = handle_npc_loot_added;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;

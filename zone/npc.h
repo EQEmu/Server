@@ -192,10 +192,20 @@ public:
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
-	void	AddItem(const EQ::ItemData* item, uint16 charges, bool equipitem = true);
-	void	AddItem(uint32 itemid, uint16 charges, bool equipitem = true, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
+	void AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item = true);
+	void AddItem(
+		uint32 item_id,
+		uint16 charges,
+		bool equip_item = true,
+		uint32 augment_one = 0,
+		uint32 augment_two = 0,
+		uint32 augment_three = 0,
+		uint32 augment_four = 0,
+		uint32 augment_five = 0,
+		uint32 augment_six = 0
+	);
 	void	AddLootTable();
-	void	AddLootTable(uint32 ldid);
+	void	AddLootTable(uint32 loottable_id);
 	void	CheckGlobalLootTables();
 	void	DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
@@ -314,12 +324,12 @@ public:
 		ItemList *itemlist,
 		LootDropEntries_Struct loot_drop,
 		bool wear_change = false,
-		uint32 aug1 = 0,
-		uint32 aug2 = 0,
-		uint32 aug3 = 0,
-		uint32 aug4 = 0,
-		uint32 aug5 = 0,
-		uint32 aug6 = 0
+		uint32 augment_one = 0,
+		uint32 augment_two = 0,
+		uint32 augment_three = 0,
+		uint32 augment_four = 0,
+		uint32 augment_five = 0,
+		uint32 augment_six = 0
 	);
 
 	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose=false);
