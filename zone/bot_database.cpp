@@ -925,15 +925,6 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 
 	std::vector<BotTimer_Struct> bot_timers;
 
-	uint32 timer_id		= 0;
-	uint32 timer_value	= 0;
-	uint32 recast_time	= 0;
-	bool is_spell		= false;
-	bool is_disc		= false;
-	uint16 spell_id		= 0;
-	bool is_item		= false;
-	uint32 item_id		= 0;
-
 	BotTimer_Struct t{};
 	t.timer_id		= 0;
 	t.timer_value	= 0;
@@ -945,7 +936,7 @@ bool BotDatabase::LoadTimers(Bot* bot_inst)
 	t.item_id		= 0;
 
 	for (auto& timer : timers) {
-		if (timer_value < (Timer::GetCurrentTime() + recast_time)) {
+		if (t.timer_value < (Timer::GetCurrentTime() + t.recast_time)) {
 			t.timer_id    = timer.timer_id;
 			t.timer_value = timer.timer_value;
 			t.recast_time = timer.recast_time;
