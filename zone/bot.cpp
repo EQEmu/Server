@@ -4609,11 +4609,12 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 
 	if (parse->BotHasQuestSub(EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {}",
+			"{} {} {} {} {}",
 			killerMob ? killerMob->GetID() : 0,
 			damage,
 			spell_id,
-			static_cast<int>(attack_skill)
+			static_cast<int>(attack_skill),
+			GetID()
 		);
 
 		parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
