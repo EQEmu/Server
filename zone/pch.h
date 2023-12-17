@@ -32,9 +32,9 @@
 //# define FMT_STRING(s) s
 
 // lua
-#include "lua.hpp"
-#include <luabind/luabind.hpp>
-#include <luabind/object.hpp>
+//#include "lua.hpp"
+//#include <luabind/luabind.hpp>
+//#include <luabind/object.hpp>
 
 // perl
 //#include <perlbind/perlbind.h>
