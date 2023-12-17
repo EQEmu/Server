@@ -1411,126 +1411,163 @@ void Client::SetMaxHP() {
 	Save();
 }
 
-bool Client::UpdateLDoNPoints(uint32 theme_id, int points) {
-
-/* make sure total stays in sync with individual buckets
-	m_pp.ldon_points_available = m_pp.ldon_points_guk
-		+m_pp.ldon_points_mir
-		+m_pp.ldon_points_mmc
-		+m_pp.ldon_points_ruj
-		+m_pp.ldon_points_tak; */
-
-	if(points < 0) {
-		if(m_pp.ldon_points_available < (0 - points))
+bool Client::UpdateLDoNPoints(uint32 theme_id, int points)
+{
+	if (points < 0) {
+		if (m_pp.ldon_points_available < (0 - points)) {
 			return false;
+		}
 	}
+
+	bool is_loss = false;
 
 	switch (theme_id) {
 		case LDoNThemes::Unused: { // No theme, so distribute evenly across all
 			int split_points = (points / 5);
+
 			int guk_points = (split_points + (points % 5));
 			int mir_points = split_points;
 			int mmc_points = split_points;
 			int ruj_points = split_points;
 			int tak_points = split_points;
+
 			split_points = 0;
-			if(points < 0) {
-				if(m_pp.ldon_points_available < (0 - points)) {
+
+			if (points < 0) {
+				if (m_pp.ldon_points_available < (0 - points)) {
 					return false;
 				}
 
-				if(m_pp.ldon_points_guk < (0 - guk_points)) {
+				is_loss = true;
+
+				if (m_pp.ldon_points_guk < (0 - guk_points)) {
 					mir_points += (guk_points + m_pp.ldon_points_guk);
 					guk_points = (0 - m_pp.ldon_points_guk);
 				}
 
-				if(m_pp.ldon_points_mir < (0 - mir_points)) {
+				if (m_pp.ldon_points_mir < (0 - mir_points)) {
 					mmc_points += (mir_points + m_pp.ldon_points_mir);
 					mir_points = (0 - m_pp.ldon_points_mir);
 				}
 
-				if(m_pp.ldon_points_mmc < (0 - mmc_points)) {
+				if (m_pp.ldon_points_mmc < (0 - mmc_points)) {
 					ruj_points += (mmc_points + m_pp.ldon_points_mmc);
 					mmc_points = (0 - m_pp.ldon_points_mmc);
 				}
 
-				if(m_pp.ldon_points_ruj < (0 - ruj_points)) {
+				if (m_pp.ldon_points_ruj < (0 - ruj_points)) {
 					tak_points += (ruj_points + m_pp.ldon_points_ruj);
 					ruj_points = (0 - m_pp.ldon_points_ruj);
 				}
 
-				if(m_pp.ldon_points_tak < (0 - tak_points)) {
+				if (m_pp.ldon_points_tak < (0 - tak_points)) {
 					split_points = (tak_points + m_pp.ldon_points_tak);
-					tak_points = (0 - m_pp.ldon_points_tak);
+					tak_points   = (0 - m_pp.ldon_points_tak);
 				}
 			}
+
 			m_pp.ldon_points_guk += guk_points;
 			m_pp.ldon_points_mir += mir_points;
 			m_pp.ldon_points_mmc += mmc_points;
 			m_pp.ldon_points_ruj += ruj_points;
 			m_pp.ldon_points_tak += tak_points;
+
 			points -= split_points;
+
 			if (split_points != 0) { // if anything left, recursively loop thru again
-				UpdateLDoNPoints(0, split_points);
+				UpdateLDoNPoints(LDoNThemes::Unused, split_points);
 			}
+
 			break;
 		}
-		case LDoNThemes::GUK:	{
-			if(points < 0) {
-				if(m_pp.ldon_points_guk < (0 - points)) {
+		case LDoNThemes::GUK: {
+			if (points < 0) {
+				if (m_pp.ldon_points_guk < (0 - points)) {
 					return false;
 				}
+
+				is_loss = true;
 			}
+
 			m_pp.ldon_points_guk += points;
 			break;
 		}
 		case LDoNThemes::MIR: {
-			if(points < 0) {
-				if(m_pp.ldon_points_mir < (0 - points)) {
+			if (points < 0) {
+				if (m_pp.ldon_points_mir < (0 - points)) {
 					return false;
 				}
+
+				is_loss = true;
 			}
+
 			m_pp.ldon_points_mir += points;
 			break;
 		}
 		case LDoNThemes::MMC: {
-			if(points < 0) {
-				if(m_pp.ldon_points_mmc < (0 - points)) {
+			if (points < 0) {
+				if (m_pp.ldon_points_mmc < (0 - points)) {
 					return false;
 				}
+
+				is_loss = true;
 			}
+
 			m_pp.ldon_points_mmc += points;
 			break;
 		}
 		case LDoNThemes::RUJ: {
-			if(points < 0) {
-				if(m_pp.ldon_points_ruj < (0 - points)) {
+			if (points < 0) {
+				if (m_pp.ldon_points_ruj < (0 - points)) {
 					return false;
 				}
+
+				is_loss = true;
 			}
+
 			m_pp.ldon_points_ruj += points;
 			break;
 		}
 		case LDoNThemes::TAK: {
-			if(points < 0) {
-				if(m_pp.ldon_points_tak < (0 - points)) {
+			if (points < 0) {
+				if (m_pp.ldon_points_tak < (0 - points)) {
 					return false;
 				}
+
+				is_loss = true;
 			}
+
 			m_pp.ldon_points_tak += points;
 			break;
 		}
 	}
+
 	m_pp.ldon_points_available += points;
+
+	QuestEventID event_id = is_loss ? EVENT_LDON_POINTS_LOSS : EVENT_LDON_POINTS_GAIN;
+
+	if (parse->PlayerHasQuestSub(event_id)) {
+		const std::string &export_string = fmt::format(
+			"{} {}",
+			theme_id,
+			std::abs(points)
+		);
+
+		parse->EventPlayer(event_id, this, export_string, 0);
+	}
+
 	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
-	AdventurePoints_Update_Struct* apus = (AdventurePoints_Update_Struct*)outapp->pBuffer;
+	auto *apus = (AdventurePoints_Update_Struct *) outapp->pBuffer;
+
 	apus->ldon_available_points = m_pp.ldon_points_available;
-	apus->ldon_guk_points = m_pp.ldon_points_guk;
-	apus->ldon_mirugal_points = m_pp.ldon_points_mir;
+	apus->ldon_guk_points       = m_pp.ldon_points_guk;
+	apus->ldon_mirugal_points   = m_pp.ldon_points_mir;
 	apus->ldon_mistmoore_points = m_pp.ldon_points_mmc;
 	apus->ldon_rujarkian_points = m_pp.ldon_points_ruj;
-	apus->ldon_takish_points = m_pp.ldon_points_tak;
+	apus->ldon_takish_points    = m_pp.ldon_points_tak;
+
 	outapp->priority = 6;
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	return true;
