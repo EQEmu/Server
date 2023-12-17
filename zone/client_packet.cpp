@@ -2626,7 +2626,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			parse->EventPlayer(EVENT_ALT_CURRENCY_MERCHANT_BUY, this, export_string, 0);
 		}
 
-		uint64 current_balance = AddAlternateCurrencyValue(alt_cur_id, -((int32) cost));
+		uint64 current_balance = AddAlternateCurrencyValue(alt_cur_id, -((int) cost));
 		int16  charges         = 1;
 		if (item->MaxCharges != 0) {
 			charges = item->MaxCharges;
@@ -2701,7 +2701,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 		}
 		else {
 			SummonItem(item_id, reclaim->count, 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
-			AddAlternateCurrencyValue(reclaim->currency_id, -((int32)reclaim->count));
+			AddAlternateCurrencyValue(reclaim->currency_id, -((int)reclaim->count));
 		}
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
 		if (RuleB(QueryServ, PlayerLogAlternateCurrencyTransactions)) {

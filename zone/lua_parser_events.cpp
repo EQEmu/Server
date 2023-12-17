@@ -1518,6 +1518,26 @@ void handle_player_ldon_points_gain_loss(
 	lua_setfield(L, -2, "points");
 }
 
+void handle_player_alt_currency_gain_loss(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "currency_id");
+
+	lua_pushnumber(L, Strings::ToInt(sep.arg[1]));
+	lua_setfield(L, -2, "amount");
+
+	lua_pushnumber(L, Strings::ToUnsignedInt(sep.arg[2]));
+	lua_setfield(L, -2, "total");
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
