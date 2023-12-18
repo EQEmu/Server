@@ -1022,10 +1022,7 @@ bool BotDatabase::DeleteTimers(const uint32 bot_id)
 		return false;
 	}
 
-	auto success = BotTimersRepository::DeleteWhere(database, fmt::format("bot_id = {}", bot_id));
-	if (!success) {
-		return false;
-	}
+	BotTimersRepository::DeleteWhere(database, fmt::format("bot_id = {}", bot_id));
 
 	return true;
 }
