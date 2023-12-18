@@ -2705,6 +2705,69 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	Corpse* corpse = nullptr;
 
+	// Parse quests even if we're killed by an NPC
+	if (oos) {
+		if (IsNPC()) {
+			auto emote_id = GetEmoteID();
+			if (emote_id) {
+				DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid);
+			}
+		}
+
+		if (oos->IsNPC()) {
+			if (parse->HasQuestSub(oos->GetNPCTypeID(), EVENT_NPC_SLAY)) {
+				parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
+			}
+
+			auto emote_id = oos->GetEmoteID();
+			if (emote_id) {
+				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emote_id);
+			}
+			if (killer_mob) {
+				killer_mob->TrySpellOnKill(killed_level, spell);
+			}
+		}
+	}
+
+	if (killer_mob && killer_mob->IsBot()) {
+		if (parse->BotHasQuestSub(EVENT_NPC_SLAY)) {
+			parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
+		}
+
+		killer_mob->TrySpellOnKill(killed_level, spell);
+	}
+
+	m_combat_record.Stop();
+	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH_COMPLETE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+
+		std::vector<std::any> args = { corpse };
+
+		parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0, &args);
+	}
+
+	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
+
+	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
+		const auto& export_string = fmt::format(
+			"{} {} {} {}",
+			killer_mob ? killer_mob->GetID() : 0,
+			damage,
+			spell,
+			static_cast<int>(attack_skill)
+		);
+
+		std::vector<std::any> args = { corpse, this };
+
+		DispatchZoneControllerEvent(EVENT_DEATH_ZONE, oos, export_string, 0, &args);
+	}
+
 	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
 		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
@@ -2814,38 +2877,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		entity_list.RemoveFromXTargets(this);
 	}
 
-	// Parse quests even if we're killed by an NPC
-	if (oos) {
-		if (IsNPC()) {
-			auto emote_id = GetEmoteID();
-			if (emote_id) {
-				DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid);
-			}
-		}
-
-		if (oos->IsNPC()) {
-			if (parse->HasQuestSub(oos->GetNPCTypeID(), EVENT_NPC_SLAY)) {
-				parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
-			}
-
-			auto emote_id = oos->GetEmoteID();
-			if (emote_id) {
-				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emote_id);
-			}
-			if (killer_mob) {
-				killer_mob->TrySpellOnKill(killed_level, spell);
-			}
-		}
-	}
-
-	if (killer_mob && killer_mob->IsBot()) {
-		if (parse->BotHasQuestSub(EVENT_NPC_SLAY)) {
-			parse->EventBot(EVENT_NPC_SLAY, killer_mob->CastToBot(), this, "", 0);
-		}
-
-		killer_mob->TrySpellOnKill(killed_level, spell);
-	}
-
 	WipeHateList();
 	p_depop = true;
 
@@ -2853,37 +2884,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		killer_mob->SetTarget(nullptr); //via AE effects and such..
 
 	entity_list.UpdateFindableNPCState(this, true);
-
-	m_combat_record.Stop();
-	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH_COMPLETE)) {
-		const auto& export_string = fmt::format(
-			"{} {} {} {}",
-			killer_mob ? killer_mob->GetID() : 0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill)
-		);
-
-		std::vector<std::any> args = { corpse };
-
-		parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, export_string, 0, &args);
-	}
-
-	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
-
-	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
-		const auto& export_string = fmt::format(
-			"{} {} {} {}",
-			killer_mob ? killer_mob->GetID() : 0,
-			damage,
-			spell,
-			static_cast<int>(attack_skill)
-		);
-
-		std::vector<std::any> args = { corpse, this };
-
-		DispatchZoneControllerEvent(EVENT_DEATH_ZONE, oos, export_string, 0, &args);
-	}
 
 	return true;
 }
