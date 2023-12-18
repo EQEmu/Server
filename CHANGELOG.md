@@ -1,3 +1,40 @@
+## [22.37.0] - 12/18/2023
+
+### Bots
+
+* Add ScanCloseMobs support to fix AEs ([#3786](https://github.com/EQEmu/Server/pull/3786)) @nytmyr 2023-12-18
+* Expand ^itemuse options ([#3756](https://github.com/EQEmu/Server/pull/3756)) @nytmyr 2023-12-17
+* Fix ^defensive from checking aggressive disciplines. ([#3787](https://github.com/EQEmu/Server/pull/3787)) @nytmyr 2023-12-18
+* Fix ^oo autodefend from sending bots/pets to invalid haters ([#3772](https://github.com/EQEmu/Server/pull/3772)) @nytmyr 2023-12-16
+* Fix unnecessary failed to save timer error ([#3788](https://github.com/EQEmu/Server/pull/3788)) @nytmyr 2023-12-18
+* [Quest API] Add ^clickitem, ^timer, fix GetBestBotSpellForCure ([#3755](https://github.com/EQEmu/Server/pull/3755)) @nytmyr 2023-12-17
+
+### CI
+
+* Switch to use clang for Linux builds (speed) ([#3777](https://github.com/EQEmu/Server/pull/3777)) @Akkadius 2023-12-17
+
+### Compilation
+
+* Use pre-compiled headers for Windows (speed) ([#3778](https://github.com/EQEmu/Server/pull/3778)) @Akkadius 2023-12-18
+
+### Fixes
+
+* Drop Invisibility when hit by traps ([#3785](https://github.com/EQEmu/Server/pull/3785)) @Kinglykrab 2023-12-18
+* Fix NPCs routing to 0.0, 0.0 on #summon ([#3780](https://github.com/EQEmu/Server/pull/3780)) @Kinglykrab 2023-12-18
+* Fix bad merge  @Akkadius 2023-12-17
+* Fix issue with HOTBonusHealingSplitOverDuration Rule ([#3776](https://github.com/EQEmu/Server/pull/3776)) @Kinglykrab 2023-12-17
+* Fixed the discrepacy with time using command #time and in quests. ([#3767](https://github.com/EQEmu/Server/pull/3767)) @regneq 2023-12-17
+* Send Entity ID in Death Events to resolve #3721 ([#3779](https://github.com/EQEmu/Server/pull/3779)) @Kinglykrab 2023-12-18
+
+### Quest API
+
+* Add EVENT_ALT_CURRENCY_GAIN and EVENT_ALT_CURRENCY_LOSS to Perl/Lua ([#3734](https://github.com/EQEmu/Server/pull/3734)) @Kinglykrab 2023-12-17
+* Add EVENT_CRYSTAL_GAIN and EVENT_CRYSTAL_LOSS to Perl/Lua ([#3735](https://github.com/EQEmu/Server/pull/3735)) @Kinglykrab 2023-12-17
+* Add EVENT_LDON_POINTS_GAIN and EVENT_LDON_POINTS_LOSS to Perl/Lua ([#3742](https://github.com/EQEmu/Server/pull/3742)) @Kinglykrab 2023-12-17
+* Add EVENT_LEVEL_UP and EVENT_LEVEL_DOWN to Bots ([#3750](https://github.com/EQEmu/Server/pull/3750)) @Kinglykrab 2023-12-17
+* Add EVENT_LOOT_ADDED to Perl/Lua ([#3739](https://github.com/EQEmu/Server/pull/3739)) @Kinglykrab 2023-12-17
+* Add GetNPCAggro() and SetNPCAggro() to Perl/Lua ([#3781](https://github.com/EQEmu/Server/pull/3781)) @Kinglykrab 2023-12-18
+
 ## [22.36.0] - 12/16/2023
 
 ### Bots
