@@ -6284,6 +6284,10 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 			);
 			parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, export_string, 0);
 		}
+
+		if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Trap) {
+			BreakInvisibleSpells();
+		}
 	}
 
 	if (GetHP() <= 0) {
