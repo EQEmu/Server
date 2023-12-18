@@ -1669,7 +1669,7 @@ bool Bot::Process()
 			mob_close_scan_timer.GetDuration()
 		);
 
-		entity_list.ScanCloseClientMobs(close_mobs, this);
+		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}
 
 	SpellProcess();
