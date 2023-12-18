@@ -330,9 +330,6 @@ void handle_npc_death(
 		l_npc_o.push(L);
 		lua_setfield(L, -2, "killed");
 	}
-
-	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
-	lua_setfield(L, -2, "killed_entity_id");
 }
 
 void handle_npc_cast(

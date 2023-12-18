@@ -1734,12 +1734,11 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	if (parse->PlayerHasQuestSub(EVENT_DEATH)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {}",
 			killerMob ? killerMob->GetID() : 0,
 			damage,
 			spell,
-			static_cast<int>(attack_skill),
-			GetID()
+			static_cast<int>(attack_skill)
 		);
 
 		if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0) != 0) {
@@ -2081,12 +2080,11 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	if (parse->PlayerHasQuestSub(EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {}",
 			killerMob ? killerMob->GetID() : 0,
 			damage,
 			spell,
-			static_cast<int>(attack_skill),
-			GetID()
+			static_cast<int>(attack_skill)
 		);
 
 		std::vector<std::any> args = { new_corpse };
@@ -2383,12 +2381,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (IsNPC()) {
 		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH)) {
 			const auto& export_string = fmt::format(
-				"{} {} {} {} {}",
+				"{} {} {} {}",
 				killer_mob ? killer_mob->GetID() : 0,
 				damage,
 				spell,
-				static_cast<int>(attack_skill),
-				GetID()
+				static_cast<int>(attack_skill)
 			);
 
 			if (parse->EventNPC(EVENT_DEATH, this, oos, export_string, 0) != 0) {
@@ -2402,12 +2399,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	} else if (IsBot()) {
 		if (parse->BotHasQuestSub(EVENT_DEATH)) {
 			const auto& export_string = fmt::format(
-				"{} {} {} {} {}",
+				"{} {} {} {}",
 				killer_mob ? killer_mob->GetID() : 0,
 				damage,
 				spell,
-				static_cast<int>(attack_skill),
-				GetID()
+				static_cast<int>(attack_skill)
 			);
 			if (parse->EventBot(EVENT_DEATH, CastToBot(), oos, export_string, 0) != 0) {
 				if (GetHP() < 0) {
@@ -2744,12 +2740,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	m_combat_record.Stop();
 	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {}",
 			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
-			static_cast<int>(attack_skill),
-			GetID()
+			static_cast<int>(attack_skill)
 		);
 
 		std::vector<std::any> args = { corpse };
@@ -2761,12 +2756,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {}",
 			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
-			static_cast<int>(attack_skill),
-			GetID()
+			static_cast<int>(attack_skill)
 		);
 
 		std::vector<std::any> args = { corpse, this };
