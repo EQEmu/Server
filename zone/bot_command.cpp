@@ -3302,7 +3302,7 @@ void bot_command_defensive(Client *c, const Seperator *sep)
 		auto local_entry = list_iter->SafeCastToStance();
 		if (helper_spell_check_fail(local_entry))
 			continue;
-		if (local_entry->stance_type != BCEnum::StT_Aggressive)
+		if (local_entry->stance_type != BCEnum::StT_Defensive)
 			continue;
 
 		for (auto bot_iter = sbl.begin(); bot_iter != sbl.end(); ) {
