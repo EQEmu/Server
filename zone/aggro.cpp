@@ -46,7 +46,7 @@ void EntityList::DescribeAggro(Client *to_who, NPC *from_who, float d, bool verb
 	);
 
 	bool is_engaged = from_who->IsEngaged();
-	bool will_aggro_npcs = from_who->WillAggroNPCs();
+	bool will_aggro_npcs = from_who->GetNPCAggro();
 	if (is_engaged) {
 		Mob *top = from_who->GetHateTop();
 		to_who->Message(
