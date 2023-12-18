@@ -293,7 +293,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			target_y = m_pp.binds[0].y;
 			target_z = m_pp.binds[0].z;
 			target_heading = m_pp.binds[0].heading;
-			ignore_restrictions = 1;	//can always get to our bind point? seems exploitable
 			break;
 		case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 			//recycle zonesummon variables
@@ -832,11 +831,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 		zone_mode = zm;
 		if (zm == ZoneToBindPoint) {
-			if (!CanEnterZone(pZoneName)) {
-				LogInfo("Zone [{}] Cannot be entered by [{}]", pZoneName, GetCleanName());
-				return;
-			}
-
 			auto outapp = new EQApplicationPacket(OP_ZonePlayerToBind,
 							      sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
