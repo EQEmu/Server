@@ -394,7 +394,8 @@ public:
 	int		GetNumMercs() { return static_cast<int>(mercDataList.size()); };
 	int		GetNumMercs( uint32 expansion );
 
-	inline bool WillAggroNPCs() const { return(npc_aggro); }
+	inline bool GetNPCAggro() const { return npc_aggro; }
+	inline void SetNPCAggro(bool in_npc_aggro) { npc_aggro = in_npc_aggro; }
 
 	inline void GiveNPCTypeData(NPCType *ours) { NPCTypedata_ours = ours; }
 	inline const uint32 GetNPCSpellsID()	const { return npc_spells_id; }

@@ -245,7 +245,7 @@ Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["swarm_owner"]     = npc->GetSwarmOwner();
 		row["swarm_target"]    = npc->GetSwarmTarget();
 		row["waypoint_max"]    = npc->GetWaypointMax();
-		row["will_aggro_npcs"] = npc->WillAggroNPCs();
+		row["npc_aggro"]       = npc->GetNPCAggro();
 
 		response.append(row);
 	}
