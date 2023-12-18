@@ -832,6 +832,11 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 		zone_mode = zm;
 		if (zm == ZoneToBindPoint) {
+			if (!CanEnterZone(pZoneName)) {
+				LogInfo("Zone [{}] Cannot be entered by [{}]", pZoneName, GetCleanName());
+				return;
+			}
+
 			auto outapp = new EQApplicationPacket(OP_ZonePlayerToBind,
 							      sizeof(ZonePlayerToBind_Struct) + iZoneNameLength);
 			ZonePlayerToBind_Struct* gmg = (ZonePlayerToBind_Struct*) outapp->pBuffer;
