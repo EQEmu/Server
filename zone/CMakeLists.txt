@@ -284,6 +284,12 @@ ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 
 INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
+IF (WIN32 AND EQEMU_BUILD_PCH)
+    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/pch/pch.h)
+    TARGET_PRECOMPILE_HEADERS(zone PRIVATE ../common/types.h ../common/eqemu_logsys.h ../common/eqemu_logsys_log_aliases.h ../common/features.h ../common/global_define.h)
+    TARGET_PRECOMPILE_HEADERS(zone PRIVATE mob.h npc.h corpse.h doors.h bot.h entity.h client.h zone.h)
+ENDIF()
+
 ADD_DEFINITIONS(-DZONE)
 
 TARGET_LINK_LIBRARIES(zone ${ZONE_LIBS})
