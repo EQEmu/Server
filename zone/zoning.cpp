@@ -781,7 +781,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			y = m_Position.y = m_pp.binds[0].y;
 			z = m_Position.z = m_pp.binds[0].z;
 			heading = m_pp.binds[0].heading;
-			zonesummon_ignorerestrictions = 1;
 			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]",
 					GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
