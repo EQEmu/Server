@@ -70,1275 +70,1275 @@ const char* GetRaceIDName(uint16 race_id)
 	//	return "Drakkin";
 
 	// RoF2 Race Labels
-	case RT_ABHORRENT:
+	case Race::Abhorrent:
 		return "Abhorrent";
-	case RT_AIR_ELEMENTAL:
-	case RT_AIR_ELEMENTAL_2:
+	case Race::AirElemental:
+	case Race::AirElemental2:
 		return "Air Elemental";
-	case RT_AIR_MEPHIT:
+	case Race::AirMephit:
 		return "Air Mephit";
-	case RT_AKHEVA:
-	case RT_AKHEVA_2:
+	case Race::Akhevan:
+	case Race::Akheva:
 		return "Akheva";
-	case RT_ALARAN:
+	case Race::Alaran:
 		return "Alaran";
-	case RT_ALARAN_GHOST:
+	case Race::AlaranGhost:
 		return "Alaran Ghost";
-	case RT_ALARAN_SENTRY_STONE:
+	case Race::AlaranSentryStone:
 		return "Alaran Sentry Stone";
-	case RT_ALLIGATOR:
-	case RT_ALLIGATOR_2:
+	case Race::Alligator:
+	case Race::Alligator2:
 		return "Alligator";
-	case RT_AMYGDALAN:
-	case RT_AMYGDALAN_2:
+	case Race::Denizen:
+	case Race::Amygdalan:
 		return "Amygdalan";
-	case RT_ANEUK:
+	case Race::Aneuk:
 		return "Aneuk";
-	case RT_ANIMATED_ARMOR:
+	case Race::AnimatedArmor:
 		return "Animated Armor";
-	case RT_ANIMATED_HAND:
+	case Race::AnimatedHand:
 		return "Animated Hand";
-	case RT_ANIMATED_STATUE:
-	case RT_ANIMATED_STATUE_2:
+	case Race::AnimatedStatue:
+	case Race::AnimatedStatue2:
 		return "Animated Statue";
-	case RT_APEXUS:
+	case Race::Apexus:
 		return "Apexus";
-	case RT_ARACHNID:
+	case Race::Arachnid:
 		return "Arachnid";
-	case RT_ARCANIST_OF_HATE:
+	case Race::ArcanistOfHate:
 		return "Arcanist of Hate";
-	case RT_ARMADILLO:
+	case Race::Armadillo:
 		return "Armadillo";
-	case RT_ARMOR_RACK:
+	case Race::ArmorRack:
 		return "Armor Rack";
-	case RT_AVIAK:
-	case RT_AVIAK_2:
+	case Race::Aviak:
+	case Race::Aviak2:
 		return "Aviak";
-	case RT_AVIAK_PULL_ALONG:
+	case Race::AviakPullAlong:
 		return "Aviak Pull Along";
-	case RT_AYONAE_RO:
+	case Race::AyonaeRo:
 		return "Ayonae Ro";
-	case RT_BANNER:
-	case RT_BANNER_2:
-	case RT_BANNER_3:
-	case RT_BANNER_4:
-	case RT_BANNER_5:
-	case RT_BANNER_6:
-	case RT_BANNER_7:
+	case Race::Banner:
+	case Race::Banner2:
+	case Race::Banner3:
+	case Race::Banner4:
+	case Race::Banner5:
+	case Race::Banner6:
+	case Race::Banner7:
 		return "Banner";
-	case RT_BANNER_10TH_ANNIVERSARY:
+	case Race::TenthAnniversaryBanner:
 		return "10th Anniversary Banner";
-	case RT_BANSHEE:
-	case RT_BANSHEE_2:
-	case RT_BANSHEE_3:
+	case Race::Banshee:
+	case Race::Banshee2:
+	case Race::Banshee3:
 		return "Banshee";
-	case RT_BARBARIAN:
-	case RT_BARBARIAN_2:
+	case Race::Barbarian:
+	case Race::HalasCitizen:
 		return "Barbarian";
-	case RT_BARREL:
+	case Race::Barrel:
 		return "Barrel";
-	case RT_BARREL_BARGE_SHIP:
+	case Race::UndeadBoat:
 		return "Barrel Barge Ship";
-	case RT_BASILISK:
+	case Race::Basilisk:
 		return "Basilisk";
-	case RT_BAT:
-	case RT_BAT_2:
-	case RT_BAT_3:
+	case Race::GiantBat:
+	case Race::Bat:
+	case Race::Bat2:
 		return "Bat";
-	case RT_BAZU:
+	case Race::Bazu:
 		return "Bazu";
-	case RT_BEAR:
-	case RT_BEAR_2:
-	case RT_BEAR_3:
+	case Race::Bear:
+	case Race::Bear2:
+	case Race::Bear3:
 		return "Bear";
-	case RT_BEAR_MOUNT:
+	case Race::BearMount:
 		return "Bear Mount";
-	case RT_BEAR_TRAP:
+	case Race::BearTrap:
 		return "Bear Trap";
-	case RT_BEETLE:
-	case RT_BEETLE_2:
-	case RT_BEETLE_3:
+	case Race::Beetle:
+	case Race::Beetle2:
+	case Race::Beetle3:
 		return "Beetle";
-	case RT_BEGGAR:
+	case Race::HumanBeggar:
 		return "Beggar";
-	case RT_BELLIKOS:
+	case Race::Bellikos:
 		return "Bellikos";
-	case RT_BERTOXXULOUS:
-	case RT_BERTOXXULOUS_2:
+	case Race::Bertoxxulous:
+	case Race::BertoxxulousNew:
 		return "Bertoxxulous";
-	case RT_BIXIE:
-	case RT_BIXIE_2:
+	case Race::Bixie:
+	case Race::Bixie2:
 		return "Bixie";
-	case RT_BLIMP_SHIP:
+	case Race::BlimpShip:
 		return "Blimp Ship";
-	case RT_BLIND_DREAMER:
+	case Race::BlindDreamer:
 		return "Blind Dreamer";
-	case RT_BLOOD_RAVEN:
+	case Race::BloodRaven:
 		return "Blood Raven";
-	case RT_BOAT:
-	case RT_BOAT_2:
+	case Race::Boat:
+	case Race::Boat2:
 		return "Boat";
-	case RT_BOLVIRK:
+	case Race::Bolvirk:
 		return "Bolvirk";
-	case RT_BONE_GOLEM:
-	case RT_BONE_GOLEM_2:
+	case Race::BoneGolem:
+	case Race::BoneGolem2:
 		return "Bone Golem";
-	case RT_BONES:
+	case Race::Bones:
 		return "Bones";
-	case RT_BOOK_DERVISH:
+	case Race::BookDervish:
 		return "Book Dervish";
-	case RT_BOT_PORTAL:
+	case Race::Portal:
 		return "BoT Portal";
-	case RT_BOULDER:
+	case Race::Boulder:
 		return "Boulder";
-	case RT_BOX:
+	case Race::Box:
 		return "Box";
-	case RT_BRAXI:
+	case Race::Braxi:
 		return "Braxi";
-	case RT_BRAXI_MOUNT:
+	case Race::BraxiMount:
 		return "Braxi Mount";
-	case RT_BRELL:
+	case Race::Brell:
 		return "Brell";
-	case RT_BRELLS_FIRST_CREATION:
+	case Race::BrellsFirstCreation:
 		return "Brell's First Creation";
-	case RT_BRISTLEBANE:
+	case Race::Bristlebane:
 		return "Bristlebane";
-	case RT_BROKEN_CLOCKWORK:
+	case Race::BrokenClockwork:
 		return "Broken Clockwork";
-	case RT_BRONTOTHERIUM:
+	case Race::Brontotherium:
 		return "Brontotherium";
-	case RT_BROWNIE:
-	case RT_BROWNIE_2:
+	case Race::Brownie:
+	case Race::Brownie2:
 		return "Brownie";
-	case RT_BUBONIAN:
+	case Race::Bubonian:
 		return "Bubonian";
-	case RT_BUBONIAN_UNDERLING:
+	case Race::BubonianUnderling:
 		return "Bubonian Underling";
-	case RT_BURYNAI:
-	case RT_BURYNAI_2:
+	case Race::Burynai:
+	case Race::Burynai2:
 		return "Burynai";
-	case RT_CAKE_10TH_ANNIVERSARY:
+	case Race::TenthAnniversaryCake:
 		return "10th Anniversary Cake";
-	case RT_CAMPFIRE:
+	case Race::Campfire:
 		return "Campfire";
-	case RT_CARRIER_HAND:
+	case Race::CarrierHand:
 		return "Carrier Hand";
-	case RT_CAT:
+	case Race::Cat:
 		return "Cat";
-	case RT_CAZIC_THULE:
-	case RT_CAZIC_THULE_2:
+	case Race::CazicThule:
+	case Race::CazicThule2:
 		return "Cazic Thule";
-	case RT_CENTAUR:
-	case RT_CENTAUR_2:
+	case Race::Centaur:
+	case Race::Centaur2:
 		return "Centaur";
-	case RT_CHEST:
-	case RT_CHEST_2:
-	case RT_CHEST_3:
+	case Race::Chest:
+	case Race::Chest2:
+	case Race::Chest3:
 		return "Chest";
-	case RT_CHIMERA:
-	case RT_CHIMERA_2:
+	case Race::Chimera:
+	case Race::Chimera2:
 		return "Chimera";
-	case RT_CHOKIDAI:
+	case Race::Chokidai:
 		return "Chokidai";
-	case RT_CLAM:
+	case Race::Clam:
 		return "Clam";
-	case RT_CLIKNAR_MOUNT:
+	case Race::CliknarMount:
 		return "Cliknar Mount";
-	case RT_CLIKNAR_QUEEN:
+	case Race::CliknarQueen:
 		return "Cliknar Queen";
-	case RT_CLIKNAR_SOLDIER:
+	case Race::CliknarSoldier:
 		return "Cliknar Soldier";
-	case RT_CLIKNAR_WORKER:
+	case Race::CliknarWorker:
 		return "Cliknar Worker";
-	case RT_CLOCKWORK_BEETLE:
+	case Race::ClockworkBeetle:
 		return "Clockwork Beetle";
-	case RT_CLOCKWORK_BOAR:
+	case Race::ClockworkBoar:
 		return "Clockwork Boar";
-	case RT_CLOCKWORK_BOMB:
+	case Race::ClockworkBomb:
 		return "Clockwork Bomb";
-	case RT_CLOCKWORK_BRAIN:
+	case Race::ClockworkBrain:
 		return "Clockwork Brain";
-	case RT_CLOCKWORK_GNOME:
+	case Race::ClockworkGnome:
 		return "Clockwork Gnome";
-	case RT_CLOCKWORK_GOLEM:
+	case Race::ClockworkGolem:
 		return "Clockwork Golem";
-	case RT_CLOCKWORK_GUARDIAN:
+	case Race::ClockworkGuardian:
 		return "Clockwork Guardian";
-	case RT_COCKATRICE:
+	case Race::Cockatrice:
 		return "Cockatrice";
-	case RT_COFFIN:
-	case RT_COFFIN_2:
+	case Race::Coffin:
+	case Race::Coffin2:
 		return "Coffin";
-	case RT_COIN_PURSE:
+	case Race::CoinPurse:
 		return "Coin Purse";
-	case RT_COLDAIN:
-	case RT_COLDAIN_2:
-	case RT_COLDAIN_3:
+	case Race::Coldain:
+	case Race::Coldain2:
+	case Race::Coldain3:
 		return "Coldain";
-	case RT_CORAL:
+	case Race::Coral:
 		return "Coral";
-	case RT_CORATHUS:
+	case Race::Corathus:
 		return "Corathus";
-	case RT_CRAB:
+	case Race::Crab:
 		return "Crab";
-	case RT_CRAGBEAST:
+	case Race::Cragbeast:
 		return "Cragbeast";
-	case RT_CRAGSLITHER:
+	case Race::Cragslither:
 		return "Cragslither";
-	case RT_CROCODILE:
+	case Race::Crocodile:
 		return "Crocodile";
-	case RT_CRYSTAL:
+	case Race::Crystal:
 		return "Crystal";
-	case RT_CRYSTAL_SHARD:
+	case Race::CrystalShard:
 		return "Crystal Shard";
-	case RT_CRYSTAL_SPHERE:
+	case Race::CrystalSphere:
 		return "Crystal Sphere";
-	case RT_CRYSTAL_SPIDER:
+	case Race::CrystalSpider:
 		return "Crystal Spider";
-	case RT_CRYSTALSKIN_AMBULOID:
+	case Race::CrystalskinAmbuloid:
 		return "Crystalskin Ambuloid";
-	case RT_CRYSTALSKIN_SESSILOID:
+	case Race::CrystalskinSessiloid:
 		return "Crystalskin Sessiloid";
-	case RT_DAISY_MAN:
+	case Race::DaisyMan:
 		return "Daisy Man";
-	case RT_DARK_ELF:
-	case RT_DARK_ELF_2:
+	case Race::DarkElf:
+	case Race::NeriakCitizen:
 		return "Dark Elf";
-	case RT_DARK_LORD:
+	case Race::DarkLord:
 		return "Dark Lord";
-	case RT_DEMI_LICH:
+	case Race::DemiLich:
 		return "Demi Lich";
-	case RT_DEMON_VULTURE:
+	case Race::DemonVulture:
 		return "Demon Vulture";
-	case RT_DERVISH:
-	case RT_DERVISH_2:
-	case RT_DERVISH_3:
-	case RT_DERVISH_4:
+	case Race::Dervish:
+	case Race::Dervish2:
+	case Race::Dervish3:
+	case Race::Dervish4:
 		return "Dervish";
-	case RT_DERVISH_VER_5:
+	case Race::Dervish5:
 		return "Dervish(Ver. 5)";
-	case RT_DERVISH_VER_6:
+	case Race::Dervish6:
 		return "Dervish(Ver. 6)";
-	case RT_DEVOURER:
+	case Race::Devourer:
 		return "Devourer";
-	case RT_DIRE_WOLF:
+	case Race::DireWolf:
 		return "Dire Wolf";
-	case RT_DISCORD_SHIP:
+	case Race::DiscordShip:
 		return "Discord Ship";
-	case RT_DISCORDLING:
+	case Race::Discordling:
 		return "Discordling";
-	case RT_DISEASED_FIEND:
+	case Race::DiseasedFiend:
 		return "Diseased Fiend";
-	case RT_DJINN:
+	case Race::Djinn:
 		return "Djinn";
-	case RT_DRACHNID:
-	case RT_DRACHNID_2:
+	case Race::Drachnid:
+	case Race::Drachnid2:
 		return "Drachnid";
-	case RT_DRACHNID_COCOON:
+	case Race::DrachnidCocoon:
 		return "Drachnid Cocoon";
-	case RT_DRACOLICH:
+	case Race::Dracolich:
 		return "Dracolich";
-	case RT_DRAGLOCK:
+	case Race::Draglock:
 		return "Draglock";
-	case RT_DRAGON:
-	case RT_DRAGON_2:
-	case RT_DRAGON_3:
-	case RT_DRAGON_4:
-	case RT_DRAGON_5:
-	case RT_DRAGON_6:
-	case RT_DRAGON_7:
-	case RT_DRAGON_8:
-	case RT_DRAGON_9:
-	case RT_DRAGON_10:
-	case RT_DRAGON_11:
-	case RT_DRAGON_12:
-	case RT_DRAGON_13:
-	case RT_DRAGON_14:
-	case RT_DRAGON_15:
-	case RT_DRAGON_16:
+	case Race::LavaDragon:
+	case Race::DragonSkeleton:
+	case Race::WaterDragon:
+	case Race::VeliousDragon:
+	case Race::ClockworkDragon:
+	case Race::BlackAndWhiteDragon:
+	case Race::GhostDragon:
+	case Race::PrismaticDragon:
+	case Race::Quarm:
+	case Race::Dragon:
+	case Race::Dragon2:
+	case Race::Dragon3:
+	case Race::Dragon4:
+	case Race::Dragon5:
+	case Race::Dragon6:
+	case Race::Dragon7:
 		return "Dragon";
-	case RT_DRAGON_BONES:
+	case Race::DragonBones:
 		return "Dragon Bones";
-	case RT_DRAGON_EGG:
+	case Race::DragonEgg:
 		return "Dragon Egg";
-	case RT_DRAGON_STATUE:
+	case Race::DragonStatue:
 		return "Dragon Statue";
-	case RT_DRAGORN:
+	case Race::Dragorn:
 		return "Dragorn";
-	case RT_DRAGORN_BOX:
+	case Race::DragornBox:
 		return "Dragorn Box";
-	case RT_DRAKE:
-	case RT_DRAKE_2:
-	case RT_DRAKE_3:
+	case Race::Drake:
+	case Race::Drake2:
+	case Race::Drake3:
 		return "Drake";
-	case RT_DRAKKIN:
+	case Race::Drakkin:
 		return "Drakkin";
-	case RT_DRIXIE:
+	case Race::Drixie:
 		return "Drixie";
-	case RT_DROGMORE:
+	case Race::Drogmor:
 		return "Drogmore";
-	case RT_DROLVARG:
+	case Race::Drolvarg:
 		return "Drolvarg";
-	case RT_DRYAD:
+	case Race::Dryad:
 		return "Dryad";
-	case RT_DWARF:
-	case RT_DWARF_2:
+	case Race::Dwarf:
+	case Race::KaladimCitizen:
 		return "Dwarf";
-	case RT_DYNAMITE_KEG:
+	case Race::DynamiteKeg:
 		return "Dynamite Keg";
-	case RT_DYNLETH:
+	case Race::Dynleth:
 		return "Dyn'Leth";
-	case RT_EARTH_ELEMENTAL:
-	case RT_EARTH_ELEMENTAL_2:
+	case Race::EarthElemental:
+	case Race::EarthElemental2:
 		return "Earth Elemental";
-	case RT_EARTH_MEPHIT:
+	case Race::EarthMephit:
 		return "Earth Mephit";
-	case RT_EEL:
+	case Race::GiantEel:
 		return "Eel";
-	case RT_EFREETI:
-	case RT_EFREETI_2:
+	case Race::Efreeti:
+	case Race::Efreeti2:
 		return "Efreeti";
-	case RT_ELDDAR:
+	case Race::Elddar:
 		return "Elddar";
-	case RT_ELEMENTAL:
+	case Race::Elemental:
 		return "Elemental";
-	case RT_ELK_HEAD:
+	case Race::ElkHead:
 		return "Elk Head";
-	case RT_ELVEN_BOAT:
+	case Race::ElvenBoat:
 		return "Elven Boat";
-	case RT_ELVEN_GHOST:
+	case Race::ElvenGhost:
 		return "Elven Ghost";
-	case RT_ENCHANTED_ARMOR:
+	case Race::EnchantedArmor:
 		return "Enchanted Armor";
-	case RT_EROLLISI:
+	case Race::Erollisi:
 		return "Erollisi";
-	case RT_ERUDITE:
-	case RT_ERUDITE_2:
-	case RT_ERUDITE_3:
+	case Race::Erudite:
+	case Race::EruditeCitizen:
+	case Race::Erudite2:
 		return "Erudite";
-	case RT_EVAN_TEST:
+	case Race::EvanTest:
 		return "Evan Test";
-	case RT_EVIL_EYE:
-	case RT_EVIL_EYE_2:
-	case RT_EVIL_EYE_3:
+	case Race::EvilEye:
+	case Race::EvilEye2:
+	case Race::EvilEye3:
 		return "Evil Eye";
-	case RT_EXOSKELETON:
+	case Race::Exoskeleton:
 		return "Exoskeleton";
-	case RT_EXPLOSIVE_CART:
+	case Race::ExplosiveCart:
 		return "Explosive Cart";
-	case RT_EYE:
+	case Race::EyeOfZomm:
 		return "Eye";
-	case RT_FAIRY:
-	case RT_FAIRY_2:
+	case Race::Fairy:
+	case Race::Fairy2:
 		return "Fairy";
-	case RT_FALLEN_KNIGHT:
+	case Race::FallenKnight:
 		return "Fallen Knight";
-	case RT_FAUN:
+	case Race::Faun:
 		return "Faun";
-	case RT_FAY_DRAKE:
+	case Race::FayDrake:
 		return "Fay Drake";
-	case RT_FENNIN_RO:
+	case Race::FenninRo:
 		return "Fennin Ro";
-	case RT_FERAN:
+	case Race::Feran:
 		return "Feran";
-	case RT_FERAN_MOUNT:
+	case Race::FeranMount:
 		return "Feran Mount";
-	case RT_FIEND:
+	case Race::Fiend:
 		return "Fiend";
-	case RT_FIRE_ELEMENTAL:
-	case RT_FIRE_ELEMENTAL_2:
+	case Race::FireElemental:
+	case Race::FireElemental2:
 		return "Fire Elemental";
-	case RT_FIRE_MEPHIT:
+	case Race::FireMephit:
 		return "Fire Mephit";
-	case RT_FISH:
-	case RT_FISH_2:
+	case Race::Fish:
+	case Race::KunarkFish:
 		return "Fish";
-	case RT_FLAG:
+	case Race::Flag:
 		return "Flag";
-	case RT_FLOATING_ISLAND:
+	case Race::FloatingIsland:
 		return "Floating Island";
-	case RT_FLOATING_SKULL:
+	case Race::FloatingSkull:
 		return "Floating Skull";
-	case RT_FLOATING_TOWER:
+	case Race::FloatingTower:
 		return "Floating Tower";
-	case RT_FLY:
+	case Race::Fly:
 		return "Fly";
-	case RT_FLYING_CARPET:
+	case Race::FlyingCarpet:
 		return "Flying Carpet";
-	case RT_FOREST_GIANT:
+	case Race::ForestGiant2:
 		return "Forest Giant";
-	case RT_FROG:
-	case RT_FROG_2:
+	case Race::Frog:
+	case Race::Frog2:
 		return "Frog";
-	case RT_FROGLOK:
-	case RT_FROGLOK_2:
-	case RT_FROGLOK_3:
+	case Race::Froglok:
+	case Race::FroglokGhoul:
+	case Race::Froglok2:
 		return "Froglok";
-	case RT_FROGLOK_GHOST:
+	case Race::FroglokGhost:
 		return "Froglok Ghost";
-	case RT_FROGLOK_SKELETON:
+	case Race::FroglokSkeleton:
 		return "Froglok Skeleton";
-	case RT_FUNGAL_FIEND:
+	case Race::FungalFiend:
 		return "Fungal Fiend";
-	case RT_FUNGUS_PATCH:
+	case Race::FungusPatch:
 		return "Fungus Patch";
-	case RT_FUNGUSMAN:
+	case Race::Fungusman:
 		return "Fungusman";
-	case RT_GALORIAN:
+	case Race::Galorian:
 		return "Galorian";
-	case RT_GARGOYLE:
-	case RT_GARGOYLE_2:
+	case Race::Gargoyle:
+	case Race::Gargoyle2:
 		return "Gargoyle";
-	case RT_GASBAG:
+	case Race::Gasbag:
 		return "Gasbag";
-	case RT_GELATINOUS_CUBE:
-	case RT_GELATINOUS_CUBE_2:
+	case Race::GelatinousCube:
+	case Race::GelatinousCube2:
 		return "Gelatinous Cube";
-	case RT_GELIDRAN:
+	case Race::Gelidran:
 		return "Gelidran";
-	case RT_GENARI:
+	case Race::Genari:
 		return "Genari";
-	case RT_GEONID:
+	case Race::Geonid:
 		return "Geonid";
-	case RT_GHOST:
-	case RT_GHOST_2:
-	case RT_GHOST_3:
-	case RT_GHOST_4:
+	case Race::Ghost:
+	case Race::DwarfGhost:
+	case Race::EruditeGhost:
+	case Race::PirateGhost:
 		return "Ghost";
-	case RT_GHOST_SHIP:
-	case RT_GHOST_SHIP_2:
+	case Race::GhostShip:
+	case Race::GhostShip2:
 		return "Ghost Ship";
-	case RT_GHOUL:
-	case RT_GHOUL_2:
+	case Race::Ghoul:
+	case Race::Ghoul2:
 		return "Ghoul";
-	case RT_GIANT:
-	case RT_GIANT_2:
-	case RT_GIANT_3:
-	case RT_GIANT_4:
-	case RT_GIANT_5:
-	case RT_GIANT_6:
-	case RT_GIANT_7:
-	case RT_GIANT_8:
-	case RT_GIANT_9:
-	case RT_GIANT_10:
-	case RT_GIANT_11:
-	case RT_GIANT_12:
-	case RT_GIANT_13:
+	case Race::Giant:
+	case Race::ForestGiant:
+	case Race::FrostGiant:
+	case Race::StormGiant:
+	case Race::EarthGolem:
+	case Race::IronGolem:
+	case Race::StormGolem:
+	case Race::AirGolem:
+	case Race::WoodGolem:
+	case Race::FireGolem:
+	case Race::WaterGolem:
+	case Race::Giant2:
+	case Race::Giant3:
 		return "Giant";
-	case RT_GIANT_CLOCKWORK:
+	case Race::GiantClockwork:
 		return "Giant Clockwork";
-	case RT_GIANT_RALLOSIAN_MATS:
+	case Race::Giant4:
 		return "Giant(Rallosian mats)";
-	case RT_GIANT_SHADE:
+	case Race::GiantShade:
 		return "Giant Shade";
-	case RT_GIGYN:
+	case Race::Gigyn:
 		return "Gigyn";
-	case RT_GINGERBREAD_MAN:
+	case Race::GingerbreadMan:
 		return "Gingerbread Man";
-	case RT_GIRPLAN:
+	case Race::Girplan:
 		return "Girplan";
-	case RT_GNOLL:
-	case RT_GNOLL_2:
-	case RT_GNOLL_3:
+	case Race::Gnoll:
+	case Race::Gnoll2:
+	case Race::Gnoll3:
 		return "Gnoll";
-	case RT_GNOME:
+	case Race::Gnome:
 		return "Gnome";
-	case RT_GNOMEWORK:
+	case Race::Gnomework:
 		return "Gnomework";
-	case RT_GNOMISH_BALLOON:
+	case Race::GnomishBalloon:
 		return "Gnomish Balloon";
-	case RT_GNOMISH_BOAT:
+	case Race::GnomishBoat:
 		return "Gnomish Boat";
-	case RT_GNOMISH_HOVERING_TRANSPORT:
+	case Race::GnomishHoveringTransport:
 		return "Gnomish Hovering Transport";
-	case RT_GNOMISH_ROCKET_PACK:
+	case Race::GnomishRocketPack:
 		return "Gnomish Rocket Pack";
-	case RT_GOBLIN:
-	case RT_GOBLIN_2:
-	case RT_GOBLIN_3:
-	case RT_GOBLIN_4:
-	case RT_GOBLIN_5:
+	case Race::Goblin:
+	case Race::Bloodgill:
+	case Race::KunarkGoblin:
+	case Race::NewGoblin:
+	case Race::Goblin2:
 		return "Goblin";
-	case RT_GOD_LUCLIN_VER_2:
+	case Race::Luclin2:
 		return "God - Luclin(Ver. 2)";
-	case RT_GOD_LUCLIN_VER_3:
+	case Race::Luclin3:
 		return "God - Luclin(Ver. 3)";
-	case RT_GOD_LUCLIN_VER_4:
+	case Race::Luclin4:
 		return "God - Luclin(Ver. 4)";
-	case RT_GOD_OF_DISCORD:
+	case Race::GodOfDiscord:
 		return "God of Discord";
-	case RT_GOLEM:
-	case RT_GOLEM_2:
+	case Race::Golem:
+	case Race::Golem2:
 		return "Golem";
-	case RT_GOO:
-	case RT_GOO_2:
-	case RT_GOO_3:
-	case RT_GOO_4:
+	case Race::Goo:
+	case Race::Goo2:
+	case Race::Goo3:
+	case Race::Goo4:
 		return "Goo";
-	case RT_GORAL:
+	case Race::Goral:
 		return "Goral";
-	case RT_GORAL_MOUNT:
+	case Race::GoralMount:
 		return "Goral Mount";
-	case RT_GORGON:
+	case Race::Gorgon:
 		return "Gorgon";
-	case RT_GORILLA:
-	case RT_GORILLA_2:
+	case Race::Gorilla:
+	case Race::Gorilla2:
 		return "Gorilla";
-	case RT_GRANDFATHER_CLOCK:
+	case Race::GrandfatherClock:
 		return "Grandfather Clock";
-	case RT_GREKEN_YOUNG:
+	case Race::GrekenYoung:
 		return "Greken - Young";
-	case RT_GREKEN_YOUNG_ADULT:
+	case Race::GrekenYoungAdult:
 		return "Greken - Young Adult";
-	case RT_GRENDLAEN:
+	case Race::Grendlaen:
 		return "Grendlaen";
-	case RT_GRIEG_VENEFICUS:
+	case Race::GriegVeneficus:
 		return "Grieg Veneficus";
-	case RT_GRIFFIN:
-	case RT_GRIFFIN_2:
+	case Race::Griffin:
+	case Race::Griffin2:
 		return "Griffin";
-	case RT_GRIMLING:
+	case Race::Grimling:
 		return "Grimling";
-	case RT_GROUND_SHAKER:
+	case Race::GroundShaker:
 		return "Ground Shaker";
-	case RT_GUARD:
-	case RT_GUARD_2:
-	case RT_GUARD_3:
-	case RT_GUARD_4:
+	case Race::FreeportGuard:
+	case Race::Felguard:
+	case Race::Fayguard:
+	case Race::VahShirGuard:
 		return "Guard";
-	case RT_GUARD_OF_JUSTICE:
+	case Race::GuardOfJustice:
 		return "Guard of Justice";
-	case RT_GUARDIAN_CPU:
+	case Race::GuardianCpu:
 		return "Guardian CPU";
-	case RT_HADAL:
+	case Race::Hadal:
 		return "Hadal";
-	case RT_HAG:
+	case Race::Hag:
 		return "Hag";
-	case RT_HALF_ELF:
+	case Race::HalfElf:
 		return "Half Elf";
-	case RT_HALFLING:
-	case RT_HALFLING_2:
+	case Race::Halfling:
+	case Race::RivervaleCitizen:
 		return "Halfling";
-	case RT_HARPY:
-	case RT_HARPY_2:
+	case Race::Harpy:
+	case Race::Harpy2:
 		return "Harpy";
-	case RT_HIGH_ELF:
+	case Race::HighElf:
 		return "High Elf";
-	case RT_HIPPOGRIFF:
+	case Race::Hippogriff:
 		return "Hippogriff";
-	case RT_HOLGRESH:
-	case RT_HOLGRESH_2:
+	case Race::Holgresh:
+	case Race::Holgresh2:
 		return "Holgresh";
-	case RT_HONEY_POT:
+	case Race::HoneyPot:
 		return "Honey Pot";
-	case RT_HORSE:
-	case RT_HORSE_2:
-	case RT_HORSE_3:
+	case Race::Horse:
+	case Race::Horse2:
+	case Race::Horse3:
 		return "Horse";
-	case RT_HOVERING_PLATFORM:
+	case Race::HoveringPlatform:
 		return "Hovering Platform";
-	case RT_HRAQUIS:
+	case Race::Hraquis:
 		return "Hraquis";
-	case RT_HUMAN:
-	case RT_HUMAN_2:
-	case RT_HUMAN_3:
-	case RT_HUMAN_4:
+	case Race::Human:
+	case Race::HighpassCitizen:
+	case Race::QeynosCitizen:
+	case Race::Human2:
 		return "Human";
-	case RT_HUMAN_GHOST:
+	case Race::HumanGhost:
 		return "Human Ghost";
-	case RT_HUVUL:
+	case Race::Huvul:
 		return "Huvul";
-	case RT_HYDRA_CRYSTAL:
+	case Race::HydraCrystal:
 		return "Hydra Crystal";
-	case RT_HYDRA_MOUNT:
+	case Race::HydraMount:
 		return "Hydra Mount";
-	case RT_HYDRA_NPC:
+	case Race::Hydra:
 		return "Hydra NPC";
-	case RT_HYNID:
+	case Race::Hynid:
 		return "Hynid";
-	case RT_ICE_SPECTRE:
+	case Race::IceSpectre:
 		return "Ice Spectre";
-	case RT_IKAAV:
+	case Race::Ikaav:
 		return "Ikaav";
-	case RT_IKSAR:
-	case RT_IKSAR_2:
+	case Race::Iksar:
+	case Race::IksarCitizen:
 		return "Iksar";
-	case RT_IKSAR_GHOST:
+	case Race::IksarGhost:
 		return "Iksar Ghost";
-	case RT_IKSAR_GOLEM:
+	case Race::IksarGolem:
 		return "Iksar Golem";
-	case RT_IKSAR_SKELETON:
+	case Race::IksarSkeleton:
 		return "Iksar Skeleton";
-	case RT_IKSAR_SPIRIT:
+	case Race::IksarSpirit:
 		return "Iksar Spirit";
-	case RT_IMP:
+	case Race::Imp:
 		return "Imp";
-	case RT_INNORUUK:
+	case Race::Innoruuk:
 		return "Innoruuk";
-	case RT_INSECT:
+	case Race::Insect:
 		return "Insect";
-	case RT_INTERACTIVE_OBJECT:
+	case Race::InteractiveObject:
 		return "Interactive Object";
-	case RT_INVISIBLE_MAN:
-	case RT_INVISIBLE_MAN_2:
-	case RT_INVISIBLE_MAN_3:
+	case Race::InvisibleMan:
+	case Race::InvisibleMan2:
+	case Race::InvisibleMan3:
 		return "Invisible Man";
-	case RT_INVISIBLE_MAN_OF_ZOMM:
+	case Race::InvisibleManOfZomm:
 		return "Invisible Man of Zomm";
-	case RT_IXT:
+	case Race::Ixt:
 		return "Ixt";
-	case RT_JOKESTER:
+	case Race::Jokester:
 		return "Jokester";
-	case RT_JUM_JUM_BUCKET:
+	case Race::JumJumBucket:
 		return "Jum Jum Bucket";
-	case RT_JUNK_BEAST:
+	case Race::JunkBeast:
 		return "Junk Beast";
-	case RT_KANGON:
+	case Race::Kangon:
 		return "Kangon";
-	case RT_KANGON_MOUNT:
+	case Race::KangonMount:
 		return "Kangon Mount";
-	case RT_KARANA:
+	case Race::Karana:
 		return "Karana";
-	case RT_KEDGE:
-	case RT_KEDGE_2:
+	case Race::PhinigelAutropos:
+	case Race::Kedge:
 		return "Kedge";
-	case RT_KERRAN:
-	case RT_KERRAN_2:
+	case Race::Kerran:
+	case Race::Kerran2:
 		return "Kerran";
-	case RT_KIRIN:
-	case RT_KIRIN_2:
+	case Race::Kirin:
+	case Race::Kirin2:
 		return "Kirin";
-	case RT_KNIGHT_OF_HATE:
+	case Race::KnightOfHate:
 		return "Knight of Hate";
-	case RT_KNIGHT_OF_PESTILENCE:
+	case Race::KnightOfPestilence:
 		return "Knight of Pestilence";
-	case RT_KOBOLD:
-	case RT_KOBOLD_2:
+	case Race::Kobold:
+	case Race::Kobold2:
 		return "Kobold";
-	case RT_KRAKEN:
+	case Race::Kraken:
 		return "Kraken";
-	case RT_KYV:
+	case Race::Kyv:
 		return "Kyv";
-	case RT_LAUNCH:
+	case Race::Launch:
 		return "Launch";
-	case RT_LAVA_ROCK:
+	case Race::LavaRock:
 		return "Lava Rock";
-	case RT_LAVA_SPIDER:
+	case Race::LavaSpider:
 		return "Lava Spider";
-	case RT_LAVA_SPIDER_QUEEN:
+	case Race::LavaSpiderQueen:
 		return "Lava Spider Queen";
-	case RT_LEECH:
+	case Race::Leech:
 		return "Leech";
-	case RT_LEPERTOLOTH:
+	case Race::Lepertoloth:
 		return "Lepertoloth";
-	case RT_LIGHTCRAWLER:
+	case Race::Lightcrawler:
 		return "Lightcrawler";
-	case RT_LIGHTNING_WARRIOR:
+	case Race::LightingWarrior:
 		return "Lightning Warrior";
-	case RT_LION:
+	case Race::Lion:
 		return "Lion";
-	case RT_LIZARD_MAN:
+	case Race::LizardMan:
 		return "Lizard Man";
-	case RT_LUCLIN:
+	case Race::Luclin:
 		return "Luclin";
-	case RT_LUGGALD:
-	case RT_LUGGALD_2:
+	case Race::Luggald:
+	case Race::Luggald2:
 		return "Luggald";
-	case RT_LUGGALDS:
+	case Race::Luggald3:
 		return "Luggalds";
-	case RT_MALARIAN:
+	case Race::Malarian:
 		return "Malarian";
-	case RT_MAMMOTH:
-	case RT_MAMMOTH_2:
+	case Race::Mammoth:
+	case Race::Mammoth2:
 		return "Mammoth";
-	case RT_MAN_EATING_PLANT:
+	case Race::ManEatingPlant:
 		return "Man - Eating Plant";
-	case RT_MANSION:
+	case Race::Mansion:
 		return "Mansion";
-	case RT_MANTICORE:
+	case Race::Manticore:
 		return "Manticore";
-	case RT_MANTRAP:
+	case Race::Unknown5:
 		return "Mantrap";
-	case RT_MARIONETTE:
+	case Race::Marionette:
 		return "Marionette";
-	case RT_MASTRUQ:
+	case Race::Mastruq:
 		return "Mastruq";
-	case RT_MATA_MURAM:
+	case Race::MataMuram:
 		return "Mata Muram";
-	case RT_MEDIUM_PLANT:
+	case Race::Toolbox:
 		return "Medium Plant";
-	case RT_MEPHIT:
+	case Race::Mephit:
 		return "Mephit";
-	case RT_MERCHANT_SHIP:
+	case Race::MerchantShip:
 		return "Merchant Ship";
-	case RT_MERMAID:
+	case Race::Mermaid:
 		return "Mermaid";
-	case RT_MIMIC:
+	case Race::Mimic:
 		return "Mimic";
-	case RT_MINI_POM:
+	case Race::MiniPom:
 		return "Mini POM";
-	case RT_MINOTAUR:
-	case RT_MINOTAUR_2:
-	case RT_MINOTAUR_3:
-	case RT_MINOTAUR_4:
+	case Race::Minotaur:
+	case Race::Minotaur2:
+	case Race::Minotaur3:
+	case Race::Minotaur4:
 		return "Minotaur";
-	case RT_MITHANIEL_MARR:
+	case Race::MithanielMarr:
 		return "Mithaniel Marr";
-	case RT_MORELL_THULE:
+	case Race::MorellThule:
 		return "Morell Thule";
-	case RT_MOSQUITO:
+	case Race::Mosquito:
 		return "Mosquito";
-	case RT_MOUTH_OF_INSANITY:
+	case Race::MouthOfInsanity:
 		return "Mouth of Insanity";
-	case RT_MUDDITE:
+	case Race::Muddite:
 		return "Muddite";
-	case RT_MUMMY:
+	case Race::Mummy:
 		return "Mummy";
-	case RT_MURAMITE_ARMOR_PILE:
+	case Race::MuramiteArmorPile:
 		return "Muramite Armor Pile";
-	case RT_MURKGLIDER:
+	case Race::Murkglider:
 		return "Murkglider";
-	case RT_MURKGLIDER_EGG_SAC:
+	case Race::MurkgliderEggSack:
 		return "Murkglider Egg Sac";
-	case RT_MUTNA:
+	case Race::Mutna:
 		return "Mutna";
-	case RT_NEKHON:
+	case Race::Nekhon:
 		return "Nekhon";
-	case RT_NETHERBIAN:
+	case Race::Netherbian:
 		return "Netherbian";
-	case RT_NIGHTMARE:
+	case Race::Nightmare:
 		return "Nightmare";
-	case RT_NIGHTMARE_GARGOYLE:
+	case Race::NightmareGargoyle:
 		return "Nightmare Gargoyle";
-	case RT_NIGHTMARE_GOBLIN:
+	case Race::NightmareGoblin:
 		return "Nightmare Goblin";
-	case RT_NIGHTMARE_MEPHIT:
+	case Race::NightmareMephit:
 		return "Nightmare Mephit";
-	case RT_NIGHTMARE_UNICORN:
-	case RT_NIGHTMARE_UNICORN_2:
+	case Race::Unicorn2:
+	case Race::Unicorn3:
 		return "Nightmare / Unicorn";
-	case RT_NIGHTMARE_WRAITH:
+	case Race::NightmareWraith:
 		return "Nightmare Wraith";
-	case RT_NIHIL:
+	case Race::Nihil:
 		return "Nihil";
-	case RT_NILBORIEN:
+	case Race::Nilborien:
 		return "Nilborien";
-	case RT_NOC:
+	case Race::Noc:
 		return "Noc";
-	case RT_NYMPH:
+	case Race::Nymph:
 		return "Nymph";
-	case RT_OGRE:
-	case RT_OGRE_2:
+	case Race::Ogre:
+	case Race::OggokCitizen:
 		return "Ogre";
-	case RT_OGRE_NPC_MALE:
+	case Race::Ogre2:
 		return "Ogre NPC - Male";
-	case RT_ORB:
+	case Race::Orb:
 		return "Orb";
-	case RT_ORC:
-	case RT_ORC_2:
+	case Race::Orc:
+	case Race::Orc2:
 		return "Orc";
-	case RT_OTHMIR:
+	case Race::Othmir:
 		return "Othmir";
-	case RT_OWLBEAR:
+	case Race::Owlbear:
 		return "Owlbear";
-	case RT_PARASITIC_SCAVENGER:
+	case Race::ParasiticScavenger:
 		return "Parasitic Scavenger";
-	case RT_PEGASUS:
-	case RT_PEGASUS_2:
-	case RT_PEGASUS_3:
+	case Race::Pegasus:
+	case Race::Pegasus2:
+	case Race::Pegasus3:
 		return "Pegasus";
-	case RT_PHOENIX:
+	case Race::Phoenix:
 		return "Phoenix";
-	case RT_PIRANHA:
+	case Race::Piranha:
 		return "Piranha";
-	case RT_PIRATE:
-	case RT_PIRATE_2:
-	case RT_PIRATE_3:
-	case RT_PIRATE_4:
-	case RT_PIRATE_5:
-	case RT_PIRATE_6:
-	case RT_PIRATE_7:
-	case RT_PIRATE_8:
+	case Race::OneArmedPirate:
+	case Race::SpiritmasterNadox:
+	case Race::BrokenSkullTaskmaster:
+	case Race::GnomePirate:
+	case Race::DarkElfPirate:
+	case Race::OgrePirate:
+	case Race::HumanPirate:
+	case Race::EruditePirate:
 		return "Pirate";
-	case RT_PIRATE_SHIP:
+	case Race::PirateShip:
 		return "Pirate Ship";
-	case RT_PIXIE:
+	case Race::Pixie:
 		return "Pixie";
-	case RT_POISON_FROG:
+	case Race::PoisonFrog:
 		return "Poison Frog";
-	case RT_PORTAL:
+	case Race::Portal2:
 		return "Portal";
-	case RT_POWDER_KEG:
+	case Race::PowderKeg:
 		return "Powder Keg";
-	case RT_PRESSURE_PLATE:
+	case Race::PressurePlate:
 		return "Pressure Plate";
-	case RT_PUFFER_SPORE:
+	case Race::PufferSpore:
 		return "Puffer Spore";
-	case RT_PUMA:
-	case RT_PUMA_2:
-	case RT_PUMA_3:
+	case Race::Puma:
+	case Race::Puma2:
+	case Race::Puma3:
 		return "Puma";
-	case RT_PUSLING:
+	case Race::Pusling:
 		return "Pusling";
-	case RT_PYRILEN:
+	case Race::Pyrilen:
 		return "Pyrilen";
-	case RT_RA_TUK:
+	case Race::Ratuk:
 		return "Ra`tuk";
-	case RT_RABBIT:
+	case Race::Rabbit:
 		return "Rabbit";
-	case RT_RALLOS_ZEK:
-	case RT_RALLOS_ZEK_2:
+	case Race::StatueOfRallosZek:
+	case Race::NewRallosZek:
 		return "Rallos Zek";
-	case RT_RALLOS_ZEK_MINION:
+	case Race::RallosOgre:
 		return "Rallos Zek Minion";
-	case RT_RAPTOR:
-	case RT_RAPTOR_2:
+	case Race::Raptor:
+	case Race::Raptor2:
 		return "Raptor";
-	case RT_RAPTOR_MOUNT:
+	case Race::RaptorMount:
 		return "Raptor Mount";
-	case RT_RAT:
-	case RT_RAT_2:
+	case Race::GiantRat:
+	case Race::Rat:
 		return "Rat";
-	case RT_RAT_MOUNT:
+	case Race::RatMount:
 		return "Rat Mount";
-	case RT_RATMAN:
-	case RT_RATMAN_2:
+	case Race::Ratman:
+	case Race::Ratman2:
 		return "Ratman";
-	case RT_REANIMATED_HAND:
+	case Race::ReanimatedHand:
 		return "Reanimated Hand";
-	case RT_RECUSO:
+	case Race::Recuso:
 		return "Recuso";
-	case RT_REGENERATION_POOL:
+	case Race::RegenerationPool:
 		return "Regeneration Pool";
-	case RT_RELIC_CASE:
+	case Race::RelicCase:
 		return "Relic case ";
-	case RT_RHINO_BEETLE:
+	case Race::RhinoBeetle:
 		return "Rhino Beetle";
-	case RT_RHINOCEROS:
+	case Race::Rhinoceros:
 		return "Rhinoceros";
-	case RT_ROBOCOPTER_OF_ZOMM:
+	case Race::RobocopterOfZomm:
 		return "Robocopter of Zomm";
-	case RT_ROCK_PILE:
+	case Race::RockPile:
 		return "Rock Pile";
-	case RT_ROCKHOPPER:
+	case Race::Rockhopper:
 		return "Rockhopper";
-	case RT_RONNIE_TEST:
+	case Race::RonnieTest:
 		return "Ronnie Test";
-	case RT_ROOT_TENTACLE:
+	case Race::RootTentacle:
 		return "Root Tentacle";
-	case RT_ROT_DOG_MOUNT:
+	case Race::RotDogMount:
 		return "Rot Dog Mount";
-	case RT_ROTDOG:
+	case Race::RotDog:
 		return "Rotdog";
-	case RT_ROTOCOPTER:
+	case Race::Rotocopter:
 		return "Rotocopter";
-	case RT_ROWBOAT:
+	case Race::Rowboat:
 		return "Rowboat";
-	case RT_ROYAL_GUARD:
+	case Race::RoyalGuard:
 		return "Royal Guard";
-	case RT_RUJARKIAN_ORC:
-	case RT_RUJARKIAN_ORC_2:
+	case Race::RujarkianOrc:
+	case Race::MasterOrc:
 		return "Rujarkian Orc";
-	case RT_RUNED_ORB:
+	case Race::RunedOrb:
 		return "Runed Orb";
-	case RT_RUNIC_SYMBOL:
+	case Race::RunicSymbol:
 		return "Runic Symbol";
-	case RT_SABER_TOOTHED_CAT:
+	case Race::Sabertooth:
 		return "Saber - toothed Cat";
-	case RT_SALTPETTER_BOMB:
+	case Race::SaltpetterBomb:
 		return "Saltpetter Bomb";
-	case RT_SAND_ELF:
+	case Race::SandElf:
 		return "Sand Elf";
-	case RT_SANDMAN:
+	case Race::Sandman:
 		return "Sandman";
-	case RT_SARNAK:
-	case RT_SARNAK_2:
+	case Race::Sarnak:
+	case Race::Sarnak2:
 		return "Sarnak";
-	case RT_SARNAK_GOLEM:
+	case Race::SarnakGolem:
 		return "Sarnak Golem";
-	case RT_SARNAK_SPIRIT:
+	case Race::SarnakSpirit:
 		return "Sarnak Spirit";
-	case RT_SARYRN:
+	case Race::Saryrn:
 		return "Saryrn";
-	case RT_SATYR:
+	case Race::Satyr:
 		return "Satyr";
-	case RT_SCALED_WOLF:
+	case Race::ScaledWolf:
 		return "Scaled Wolf";
-	case RT_SCARECROW:
-	case RT_SCARECROW_2:
+	case Race::Scarecrow:
+	case Race::Scarecrow2:
 		return "Scarecrow";
-	case RT_SCARLET_CHEETAH:
+	case Race::ScarletCheetah:
 		return "Scarlet Cheetah";
-	case RT_SCLERA_MOUNT:
+	case Race::ScleraMount:
 		return "Sclera Mount";
-	case RT_SCORPION:
-	case RT_SCORPION_2:
-	case RT_SCORPION_3:
+	case Race::Scorpion:
+	case Race::IksarScorpion:
+	case Race::Scorpion2:
 		return "Scorpion";
-	case RT_SCRYKIN:
+	case Race::Scrykin:
 		return "Scrykin";
-	case RT_SEA_TURTLE:
+	case Race::SeaTurtle:
 		return "Sea Turtle";
-	case RT_SEAHORSE:
+	case Race::SeaHorse:
 		return "Seahorse";
-	case RT_SELYRAH:
+	case Race::Selyrah:
 		return "Selyrah";
-	case RT_SELYRAH_MOUNT:
+	case Race::SelyrahMount:
 		return "Selyrah Mount";
-	case RT_SERU:
+	case Race::LordInquisitorSeru:
 		return "Seru";
-	case RT_SERVANT_OF_SHADOW:
+	case Race::ServantOfShadow:
 		return "Servant of Shadow";
-	case RT_SESSILOID_MOUNT:
+	case Race::SessiloidMount:
 		return "Sessiloid Mount";
-	case RT_SHADE:
-	case RT_SHADE_2:
-	case RT_SHADE_3:
+	case Race::Shade:
+	case Race::Shade2:
+	case Race::Shade3:
 		return "Shade";
-	case RT_SHADEL:
+	case Race::KhatiSha:
 		return "Shadel";
-	case RT_SHAMBLING_MOUND:
+	case Race::ShamblingMound:
 		return "Shambling Mound";
-	case RT_SHARK:
+	case Race::Shark:
 		return "Shark";
-	case RT_SHIKNAR:
+	case Race::Shiknar:
 		return "Shik'Nar";
-	case RT_SHILISKIN:
+	case Race::Shiliskin:
 		return "Shiliskin";
-	case RT_SHIP:
+	case Race::Ship:
 		return "Ship";
-	case RT_SHIP_IN_A_BOTTLE:
+	case Race::ShipInABottle:
 		return "Ship in a Bottle";
-	case RT_SHISSAR:
-	case RT_SHISSAR_2:
+	case Race::Shissar:
+	case Race::Shissar2:
 		return "Shissar";
-	case RT_SHRIEKER:
+	case Race::Shrieker:
 		return "Shrieker";
-	case RT_SIREN:
-	case RT_SIREN_2:
+	case Race::Siren:
+	case Race::Siren2:
 		return "Siren";
-	case RT_SKELETAL_HORSE:
+	case Race::SkeletalHorse:
 		return "Skeletal Horse";
-	case RT_SKELETON:
-	case RT_SKELETON_2:
-	case RT_SKELETON_3:
+	case Race::Skeleton:
+	case Race::Skeleton2:
+	case Race::Skeleton3:
 		return "Skeleton";
-	case RT_SKUNK:
+	case Race::Skunk:
 		return "Skunk";
-	case RT_SKYSTRIDER:
+	case Race::Skystrider:
 		return "Skystrider";
-	case RT_SMALL_PLANT:
+	case Race::Plant2:
 		return "Small Plant";
-	case RT_SNAKE:
-	case RT_SNAKE_2:
+	case Race::GiantSnake:
+	case Race::Snake:
 		return "Snake";
-	case RT_SNAKE_ELEMENTAL:
+	case Race::SnakeElemental:
 		return "Snake Elemental";
-	case RT_SNOW_DERVISH:
+	case Race::SnowDervish:
 		return "Snow Dervish";
-	case RT_SNOW_RABBIT:
+	case Race::SnowRabbit:
 		return "Snow Rabbit";
-	case RT_SOKOKAR:
+	case Race::Sokokar:
 		return "Sokokar";
-	case RT_SOKOKAR_MOUNT:
+	case Race::SokokarMount:
 		return "Sokokar Mount";
-	case RT_SOKOKAR_W_SADDLE:
+	case Race::SokokarMount2:
 		return "Sokokar(w saddle)";
-	case RT_SOLUSEK_RO:
-	case RT_SOLUSEK_RO_2:
+	case Race::SolusekRo:
+	case Race::SolusekRo2:
 		return "Solusek Ro";
-	case RT_SOLUSEK_RO_GUARD:
+	case Race::SolusekRoGuard:
 		return "Solusek Ro Guard";
-	case RT_SONIC_WOLF:
+	case Race::SonicWolf:
 		return "Sonic Wolf";
-	case RT_SOUL_DEVOURER:
+	case Race::SoulDevourer:
 		return "Soul Devourer";
-	case RT_SPECTRE:
-	case RT_SPECTRE_2:
+	case Race::Spectre:
+	case Race::Spectre2:
 		return "Spectre";
-	case RT_SPELL_PARTICLE_1:
+	case Race::SpellParticle:
 		return "Spell Particle 1";
-	case RT_SPHINX:
-	case RT_SPHINX_2:
+	case Race::Sphinx:
+	case Race::Sphinx2:
 		return "Sphinx";
-	case RT_SPIDER:
-	case RT_SPIDER_2:
+	case Race::GiantSpider:
+	case Race::Spider:
 		return "Spider";
-	case RT_SPIDER_EGG_SACK:
+	case Race::SpiderEggSack:
 		return "Spider Egg Sack";
-	case RT_SPIDER_MOUNT:
+	case Race::SpiderMount:
 		return "Spider Mount";
-	case RT_SPIDER_QUEEN:
+	case Race::SpiderQueen:
 		return "Spider Queen";
-	case RT_SPIKE_TRAP:
+	case Race::SpikeTrap:
 		return "Spike Trap";
-	case RT_SPIRIT_WOLF:
+	case Race::SpiritWolf:
 		return "Spirit Wolf";
-	case RT_SPORALI:
+	case Race::Sporali:
 		return "Sporali";
-	case RT_STONE_JUG:
+	case Race::StoneJug:
 		return "Stone Jug";
-	case RT_STONE_PYLON:
+	case Race::StonePylon:
 		return "Stone Pylon";
-	case RT_STONE_RING:
+	case Race::StoneRing:
 		return "Stone Ring";
-	case RT_STONE_WORKER:
-	case RT_STONE_WORKER_2:
+	case Race::StoneWorker:
+	case Race::StoneWorker2:
 		return "Stone Worker";
-	case RT_STONEGRABBER:
+	case Race::Stonegrabber:
 		return "Stonegrabber";
-	case RT_STONEMITE:
+	case Race::Stonemite:
 		return "Stonemite";
-	case RT_STORMRIDER:
+	case Race::Stormrider:
 		return "Stormrider";
-	case RT_SUCCUBUS:
+	case Race::Succubus:
 		return "Succubus";
-	case RT_SUCCULENT:
+	case Race::Succulent:
 		return "Succulent";
-	case RT_SULLON_ZEK:
+	case Race::SullonZek:
 		return "Sullon Zek";
-	case RT_SUN_REVENANT:
+	case Race::Shadel:
 		return "Sun Revenant";
-	case RT_SUNFLOWER:
+	case Race::Sunflower:
 		return "Sunflower";
-	case RT_SWINETOR:
+	case Race::Swinetor:
 		return "Swinetor";
-	case RT_SWORDFISH:
+	case Race::Swordfish:
 		return "Swordfish";
-	case RT_SYNARCANA:
+	case Race::Synarcana:
 		return "Synarcana";
-	case RT_TABLE:
+	case Race::Table:
 		return "Table";
-	case RT_TADPOLE:
+	case Race::FroglokTadpole:
 		return "Tadpole";
-	case RT_TAELOSIAN:
+	case Race::Taelosian:
 		return "Taelosian";
-	case RT_TALL_PLANT:
+	case Race::WineCask:
 		return "Tall Plant";
-	case RT_TALLON_ZEK:
+	case Race::TallonZek:
 		return "Tallon Zek";
-	case RT_TANETH:
+	case Race::Taneth:
 		return "Taneth";
-	case RT_TAREW_MARR:
+	case Race::TarewMarr:
 		return "Tarew Marr";
-	case RT_TEGI:
+	case Race::Tegi:
 		return "Tegi";
-	case RT_TELEPORT_MAN:
+	case Race::TeleportMan:
 		return "Teleport Man";
-	case RT_TELEPORTATION_STAND:
+	case Race::TeleportationStand:
 		return "Teleportation Stand";
-	case RT_TELMIRA:
+	case Race::Telmira:
 		return "Telmira";
-	case RT_TENTACLE_TERROR:
-	case RT_TENTACLE_TERROR_2:
+	case Race::TentacleTerror:
+	case Race::TentacleTerror2:
 		return "Tentacle Terror";
-	case RT_TERRIS_THULE:
+	case Race::TerrisThule:
 		return "Terris Thule";
-	case RT_TEST_OBJECT:
+	case Race::TestObject:
 		return "Test Object";
-	case RT_THE_RATHE:
+	case Race::Rathe:
 		return "The Rathe";
-	case RT_THE_TRIBUNAL:
+	case Race::TribunalNew:
 		return "The Tribunal";
-	case RT_THOUGHT_HORROR:
+	case Race::ThoughtHorror:
 		return "Thought Horror";
-	case RT_TIGER:
+	case Race::Tiger:
 		return "Tiger";
-	case RT_TIN_SOLDIER:
+	case Race::TinSoldier:
 		return "Tin Soldier";
-	case RT_TOOLBOX:
+	case Race::Plant:
 		return "Toolbox";
-	case RT_TOPIARY_LION:
+	case Race::TopiaryLion:
 		return "Topiary Lion";
-	case RT_TOPIARY_LION_MOUNT:
+	case Race::TopiaryLionMount:
 		return "Topiary Lion Mount";
-	case RT_TORMENTOR:
+	case Race::Tormentor:
 		return "Tormentor";
-	case RT_TOTEM:
-	case RT_TOTEM_2:
+	case Race::Totem:
+	case Race::Totem2:
 		return "Totem";
-	case RT_TRAKANON:
+	case Race::Trakanon:
 		return "Trakanon";
-	case RT_TRANQUILION:
+	case Race::Tranquilion:
 		return "Tranquilion";
-	case RT_TREANT:
-	case RT_TREANT_2:
-	case RT_TREANT_3:
+	case Race::Treant:
+	case Race::Treant2:
+	case Race::Treant3:
 		return "Treant";
-	case RT_TRIBUNAL:
+	case Race::Tribunal:
 		return "Tribunal";
-	case RT_TRIUMVIRATE:
+	case Race::Triumvirate:
 		return "Triumvirate";
-	case RT_TROLL:
-	case RT_TROLL_2:
-	case RT_TROLL_3:
-	case RT_TROLL_4:
-	case RT_TROLL_5:
+	case Race::Troll:
+	case Race::GrobbCitizen:
+	case Race::TrollCrewMember:
+	case Race::PirateDeckhand:
+	case Race::BrokenSkullPirate:
 		return "Troll";
-	case RT_TROLL_ZOMBIE:
+	case Race::TrollZombie:
 		return "Troll Zombie";
-	case RT_TRUSIK:
+	case Race::Trusik:
 		return "Trusik";
-	case RT_TSETSIAN:
+	case Race::Tsetsian:
 		return "Tsetsian";
-	case RT_TUMBLEWEED:
+	case Race::Tumbleweed:
 		return "Tumbleweed";
-	case RT_TUNARE:
+	case Race::Tunare:
 		return "Tunare";
-	case RT_TUREPTA:
+	case Race::Turepta:
 		return "Turepta";
-	case RT_UKUN:
+	case Race::Ukun:
 		return "Ukun";
-	case RT_ULTHORK:
+	case Race::Ulthork:
 		return "Ulthork";
-	case RT_UNDEAD_CHOKIDAI:
+	case Race::UndeadChokidai:
 		return "Undead Chokidai";
-	case RT_UNDEAD_FOOTMAN:
+	case Race::UndeadFootman:
 		return "Undead Footman";
-	case RT_UNDEAD_FROGLOK:
+	case Race::UndeadFroglok:
 		return "Undead Froglok";
-	case RT_UNDEAD_IKSAR:
+	case Race::UndeadIksar:
 		return "Undead Iksar";
-	case RT_UNDEAD_KNIGHT:
+	case Race::UndeadKnight:
 		return "Undead Knight";
-	case RT_UNDEAD_SARNAK:
+	case Race::UndeadSarnak:
 		return "Undead Sarnak";
-	case RT_UNDEAD_VEKSAR:
+	case Race::UndeadVeksar:
 		return "Undead Veksar";
-	case RT_UNDERBULK:
+	case Race::Underbulk:
 		return "Underbulk";
-	case RT_UNICORN:
+	case Race::Unicorn:
 		return "Unicorn";
-	case RT_UNKNOWN_RACE:
-	case RT_UNKNOWN_RACE_2:
-	case RT_UNKNOWN_RACE_3:
-	case RT_UNKNOWN_RACE_4:
-	case RT_UNKNOWN_RACE_5:
-	case RT_UNKNOWN_RACE_6:
-	case RT_UNKNOWN_RACE_7:
+	case Race::Doug:
+	case Race::MinorIllusion:
+	case Race::Tree:
+	case Race::Unknown:
+	case Race::Unknown2:
+	case Race::Unknown3:
+	case Race::Unknown4:
 		return "UNKNOWN RACE";
-	case RT_VAH_SHIR:
-	case RT_VAH_SHIR_2:
+	case Race::VahShir:
+	case Race::VahShirKing:
 		return "Vah Shir";
-	case RT_VAH_SHIR_SKELETON:
+	case Race::VahShirSkeleton:
 		return "Vah Shir Skeleton";
-	case RT_VALLON_ZEK:
+	case Race::VallonZek:
 		return "Vallon Zek";
-	case RT_VALORIAN:
-	case RT_VALORIAN_2:
+	case Race::Valorian:
+	case Race::Valorian2:
 		return "Valorian";
-	case RT_VAMPIRE:
-	case RT_VAMPIRE_2:
-	case RT_VAMPIRE_3:
-	case RT_VAMPIRE_4:
-	case RT_VAMPIRE_5:
-	case RT_VAMPIRE_6:
-	case RT_VAMPIRE_7:
-	case RT_VAMPIRE_8:
+	case Race::Vampire:
+	case Race::ElfVampire:
+	case Race::Vampire2:
+	case Race::VampireVolatalis:
+	case Race::UndeadVampire:
+	case Race::Vampire3:
+	case Race::MasterVampire:
+	case Race::Vampire4:
 		return "Vampire";
-	case RT_VASE:
+	case Race::Vase:
 		return "Vase";
-	case RT_VEGEROG:
+	case Race::Vegerog:
 		return "Vegerog";
-	case RT_VEKSAR:
-	case RT_VEKSAR_2:
-	case RT_VEKSAR_3:
+	case Race::Veksar:
+	case Race::Veksar2:
+	case Race::Veksar3:
 		return "Veksar";
-	case RT_VENRIL_SATHIR:
+	case Race::VenrilSathir:
 		return "Venril Sathir";
-	case RT_VINE_MAW:
+	case Race::VineMaw:
 		return "Vine Maw";
-	case RT_WAGON:
+	case Race::Wagon:
 		return "Wagon";
-	case RT_WALRUS:
+	case Race::Walrus:
 		return "Walrus";
-	case RT_WAR_BOAR:
-	case RT_WAR_BOAR_2:
+	case Race::WarBoar:
+	case Race::WarBoar2:
 		return "War Boar";
-	case RT_WAR_WRAITH:
+	case Race::WarWraith:
 		return "War Wraith";
-	case RT_WASP:
+	case Race::Wasp:
 		return "Wasp";
-	case RT_WATER_ELEMENTAL:
-	case RT_WATER_ELEMENTAL_2:
+	case Race::WaterElemental:
+	case Race::WaterElemental2:
 		return "Water Elemental";
-	case RT_WATER_MEPHIT:
+	case Race::WaterMephit:
 		return "Water Mephit";
-	case RT_WATER_SPOUT:
+	case Race::WaterSpout:
 		return "Water Spout";
-	case RT_WEAPON_RACK:
-	case RT_WEAPON_RACK_2:
+	case Race::WeaponRack:
+	case Race::WeaponRack2:
 		return "Weapon Rack";
-	case RT_WEB:
+	case Race::Web:
 		return "Web";
-	case RT_WEDDING_ALTAR:
+	case Race::WeddingAltar:
 		return "Wedding Altar";
-	case RT_WEDDING_ARBOR:
+	case Race::WeddingArbor:
 		return "Wedding Arbor";
-	case RT_WEDDING_FLOWERS:
+	case Race::WeddingFlowers:
 		return "Wedding Flowers";
-	case RT_WEREORC:
+	case Race::Wereorc:
 		return "Wereorc";
-	case RT_WEREWOLF:
-	case RT_WEREWOLF_2:
-	case RT_WEREWOLF_3:
+	case Race::Werewolf:
+	case Race::Werewolf2:
+	case Race::Werewolf3:
 		return "Werewolf";
-	case RT_WETFANG_MINNOW:
+	case Race::WetfangMinnow:
 		return "Wetfang Minnow";
-	case RT_WHIRLIGIG:
+	case Race::Whirligig:
 		return "Whirligig";
-	case RT_WICKER_BASKET:
+	case Race::WickerBasket:
 		return "Wicker Basket";
-	case RT_WILL_O_WISP:
+	case Race::Wisp:
 		return "Will - O - Wisp";
-	case RT_WINE_CASK:
-	case RT_WINE_CASK_2:
+	case Race::StoneJug2:
+	case Race::WineCask2:
 		return "Wine Cask";
-	case RT_WITHERAN:
-	case RT_WITHERAN_2:
+	case Race::Witheran:
+	case Race::Witheran2:
 		return "Witheran";
-	case RT_WOLF:
-	case RT_WOLF_2:
-	case RT_WOLF_3:
+	case Race::Wolf:
+	case Race::WolfElemental:
+	case Race::Wolf2:
 		return "Wolf";
-	case RT_WOOD_ELF:
+	case Race::WoodElf:
 		return "Wood Elf";
-	case RT_WORG:
-	case RT_WORG_2:
+	case Race::Worg:
+	case Race::Worg2:
 		return "Worg";
-	case RT_WORM:
+	case Race::Worm:
 		return "Worm";
-	case RT_WRETCH:
+	case Race::Wretch:
 		return "Wretch";
-	case RT_WRULON:
-	case RT_WRULON_2:
+	case Race::Wrulon:
+	case Race::Wrulon2:
 		return "Wrulon";
-	case RT_WURM:
-	case RT_WURM_2:
+	case Race::Wurm:
+	case Race::Wurm2:
 		return "Wurm";
-	case RT_WURM_MOUNT:
+	case Race::WurmMount:
 		return "Wurm Mount";
-	case RT_WYVERN:
-	case RT_WYVERN_2:
+	case Race::Wyvern:
+	case Race::Wyvern2:
 		return "Wyvern";
-	case RT_XALGOZ:
+	case Race::Xalgoz:
 		return "Xalgoz";
-	case RT_XARIC_THE_UNSPOKEN:
+	case Race::Xaric:
 		return "Xaric the Unspoken";
-	case RT_XEGONY:
+	case Race::Xegony:
 		return "Xegony";
-	case RT_YAKKAR:
+	case Race::Yakkar:
 		return "Yakkar";
-	case RT_YETI:
+	case Race::Yeti:
 		return "Yeti";
-	case RT_ZEBUXORUK:
+	case Race::Zebuxoruk:
 		return "Zebuxoruk";
-	case RT_ZEBUXORUKS_CAGE:
+	case Race::ZebuxoruksCage:
 		return "Zebuxoruk's Cage";
-	case RT_ZELNIAK:
+	case Race::Zelniak:
 		return "Zelniak";
-	case RT_ZOMBIE:
-	case RT_ZOMBIE_2:
+	case Race::Zombie:
+	case Race::Zombie2:
 		return "Zombie";
 	default:
 		return "UNKNOWN RACE";
@@ -2255,37 +2255,37 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 	}
 
 	switch (race_id) {
-		case RACE_HUMAN_1:
+		case Race::Human:
 			return "HUM";
-		case RACE_BARBARIAN_2:
+		case Race::Barbarian:
 			return "BAR";
-		case RACE_ERUDITE_3:
+		case Race::Erudite:
 			return "ERU";
-		case RACE_WOOD_ELF_4:
+		case Race::WoodElf:
 			return "ELF";
-		case RACE_HIGH_ELF_5:
+		case Race::HighElf:
 			return "HIE";
-		case RACE_DARK_ELF_6:
+		case Race::DarkElf:
 			return "DEF";
-		case RACE_HALF_ELF_7:
+		case Race::HalfElf:
 			return "HEF";
-		case RACE_DWARF_8:
+		case Race::Dwarf:
 			return "DWF";
-		case RACE_TROLL_9:
+		case Race::Troll:
 			return "TRL";
-		case RACE_OGRE_10:
+		case Race::Ogre:
 			return "OGR";
-		case RACE_HALFLING_11:
+		case Race::Halfling:
 			return "HFL";
-		case RACE_GNOME_12:
+		case Race::Gnome:
 			return "GNM";
-		case RACE_IKSAR_128:
+		case Race::Iksar:
 			return "IKS";
-		case RACE_VAH_SHIR_130:
+		case Race::VahShir:
 			return "VAH";
-		case RACE_FROGLOK_330:
+		case Race::Froglok2:
 			return "FRG";
-		case RACE_DRAKKIN_522:
+		case Race::Drakkin:
 			return "DRK";
 	}
 
@@ -2294,10 +2294,10 @@ const std::string GetPlayerRaceAbbreviation(uint16 race_id)
 
 bool IsPlayerRace(uint16 race_id) {
 	return (
-		EQ::ValueWithin(race_id, RACE_HUMAN_1, RACE_GNOME_12) ||
-		race_id == RACE_IKSAR_128 ||
-		race_id == RACE_VAH_SHIR_130 ||
-		race_id == RACE_FROGLOK_330 ||
-		race_id == RACE_DRAKKIN_522
+		EQ::ValueWithin(race_id, Race::Human, Race::Gnome) ||
+		race_id == Race::Iksar ||
+		race_id == Race::VahShir ||
+		race_id == Race::Froglok2 ||
+		race_id == Race::Drakkin
 	);
 }

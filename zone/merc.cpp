@@ -3933,14 +3933,14 @@ float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 		float size_mod = GetSize();
 		float other_size_mod = target->GetSize();
 
-		if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) //For races with a fixed size
 		{
 			size_mod = 60.0f;
 		} else if (size_mod < 6.0) {
 			size_mod = 8.0f;
 		}
 
-		if (target->GetRace() == RACE_LAVA_DRAGON_49 || target->GetRace() == RACE_WURM_158 || target->GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (target->GetRace() == Race::LavaDragon || target->GetRace() == Race::Wurm || target->GetRace() == Race::GhostDragon) //For races with a fixed size
 		{
 			other_size_mod = 60.0f;
 		} else if (other_size_mod < 6.0) {
