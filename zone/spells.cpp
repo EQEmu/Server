@@ -3885,7 +3885,7 @@ bool Mob::SpellOnTarget(
 	// Prevent double invising, which made you uninvised
 	// Not sure if all 3 should be stacking
 	//This is not live like behavior (~Kayen confirmed 2/2/22)
-	if (!RuleB(Spells, AllowDoubleInvis)) {
+	if (!RuleB(Spells, AllowDoubleInvis) && !IsActiveBardSong(spell_id)) {
 		if (IsEffectInSpell(spell_id, SE_Invisibility)) {
 			if (spelltar->invisible) {
 				spelltar->MessageString(Chat::SpellFailure, ALREADY_INVIS, GetCleanName());
