@@ -6287,6 +6287,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 		if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Trap) {
 			BreakInvisibleSpells();
+			CancelSneakHide();
 		}
 	}
 
