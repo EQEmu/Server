@@ -456,7 +456,7 @@ void Client::ForageItem(bool guarantee) {
 		}
 
 		//not an else in case theres no DB food
-		if (foragedfood == 0) {
+		if (foragedfood == 0 && RuleB(Character, UseForageCommonFood)) {
 			uint8 index = 0;
 			index = zone->random.Int(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
