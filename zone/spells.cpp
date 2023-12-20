@@ -2765,9 +2765,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			CastToBot()->SetItemReuseTimer(item->ID);
 			CastToBot()->SetIsUsingItemClick(false);
 		}
-		else {
-			GetOwner()->Message(Chat::Red, "%s says, 'Failed to set item reuse timer for %s.", GetCleanName());
-		}
 	}
 
 	if (IsNPC()) {
