@@ -565,47 +565,87 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 }
 
 
-Mob *HateList::GetRandomEntOnHateList(bool skip_mezzed)
+Mob *HateList::GetRandomMobOnHateList(EntityFilterType filter_type, bool skip_mezzed)
 {
 	int count = list.size();
-	if (count <= 0) //If we don't have any entries it'll crash getting a random 0, -1 position.
+	if (count <= 0) { // If we don't have any entries it'll crash getting a random 0, -1 position.
 		return nullptr;
+	}
 
-	if (count == 1) //No need to do all that extra work if we only have one hate entry
-	{
-		if (*list.begin() && (!skip_mezzed || !(*list.begin())->entity_on_hatelist->IsMezzed())) // Just in case tHateEntry is invalidated somehow...
-			return (*list.begin())->entity_on_hatelist;
+	if (count == 1) { // No need to do all that extra work if we only have one hate entry
+		auto c = *list.begin();
+		if (c) {
+			Mob *m = c->entity_on_hatelist;
+			if (m) {
+				if (
+					(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
+					(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
+					(filter_type == EntityFilterType::NPCs && !m->IsNPC())
+				) {
+					return nullptr;
+				}
+
+				if (!skip_mezzed || !m->IsMezzed()) {
+					return m;
+				}
+			}
+		}
 
 		return nullptr;
 	}
 
 	if (skip_mezzed) {
-
 		for (auto iter : list) {
-			if (iter->entity_on_hatelist->IsMezzed()) {
+			Mob *m = iter->entity_on_hatelist;
+			if (!m) {
+				continue;
+			}
+
+			if (
+				(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
+				(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
+				(filter_type == EntityFilterType::NPCs && !m->IsNPC())
+			) {
+				continue;
+			}
+
+			if (m->IsMezzed()) {
 				--count;
 			}
 		}
+
 		if (count <= 0) {
 			return nullptr;
 		}
 	}
 
-	int random = zone->random.Int(0, count - 1);
+	int random  = zone->random.Int(0, count - 1);
 	int counter = 0;
 
 	for (auto iter : list) {
-
-		if (skip_mezzed && iter->entity_on_hatelist->IsMezzed()) {
+		Mob *m = iter->entity_on_hatelist;
+		if (!m) {
 			continue;
 		}
-		if (counter < random) {
 
+		if (
+			(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
+			(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
+			(filter_type == EntityFilterType::NPCs && !m->IsNPC())
+		) {
+			continue;
+		}
+
+		if (skip_mezzed && m->IsMezzed()) {
+			continue;
+		}
+
+		if (counter < random) {
 			++counter;
 			continue;
 		}
 
-		return iter->entity_on_hatelist;
+		return m;
 	}
 
 	return nullptr;
@@ -851,153 +891,6 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 		}
 		++it;
 	}
-}
-
-Bot* HateList::GetRandomBotOnHateList(bool skip_mezzed)
-{
-	int count = list.size();
-	if (count <= 0) { //If we don't have any entries it'll crash getting a random 0, -1 position.
-		return nullptr;
-	}
-
-	if (count == 1) { //No need to do all that extra work if we only have one hate entry
-		if (*list.begin() && (*list.begin())->entity_on_hatelist->IsBot() && (!skip_mezzed || !(*list.begin())->entity_on_hatelist->IsMezzed())) {
-			return (*list.begin())->entity_on_hatelist->CastToBot();
-		}
-		return nullptr;
-	}
-
-	if (skip_mezzed) {
-		for (auto iter : list) {
-			if (iter->entity_on_hatelist->IsMezzed()) {
-				--count;
-			}
-		}
-
-		if (count <= 0) {
-			return nullptr;
-		}
-	}
-
-	int random = zone->random.Int(0, count - 1);
-	int counter = 0;
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist->IsBot()) {
-			continue;
-		}
-
-		if (skip_mezzed && iter->entity_on_hatelist->IsMezzed()) {
-			continue;
-		}
-
-		if (counter < random) {
-			++counter;
-			continue;
-		}
-
-		return iter->entity_on_hatelist->CastToBot();
-	}
-
-	return nullptr;
-}
-
-Client* HateList::GetRandomClientOnHateList(bool skip_mezzed)
-{
-	int count = list.size();
-	if (count <= 0) { //If we don't have any entries it'll crash getting a random 0, -1 position.
-		return nullptr;
-	}
-
-	if (count == 1) { //No need to do all that extra work if we only have one hate entry
-		if (*list.begin() && (*list.begin())->entity_on_hatelist->IsClient() && (!skip_mezzed || !(*list.begin())->entity_on_hatelist->IsMezzed())) {
-			return (*list.begin())->entity_on_hatelist->CastToClient();
-		}
-		return nullptr;
-	}
-
-	if (skip_mezzed) {
-		for (auto iter : list) {
-			if (iter->entity_on_hatelist->IsMezzed()) {
-				--count;
-			}
-		}
-
-		if (count <= 0) {
-			return nullptr;
-		}
-	}
-
-	int random = zone->random.Int(0, count - 1);
-	int counter = 0;
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist->IsClient()) {
-			continue;
-		}
-
-		if (skip_mezzed && iter->entity_on_hatelist->IsMezzed()) {
-			continue;
-		}
-
-		if (counter < random) {
-			++counter;
-			continue;
-		}
-
-		return iter->entity_on_hatelist->CastToClient();
-	}
-
-	return nullptr;
-}
-
-NPC* HateList::GetRandomNPCOnHateList(bool skip_mezzed)
-{
-	int count = list.size();
-	if (count <= 0) { //If we don't have any entries it'll crash getting a random 0, -1 position.
-		return nullptr;
-	}
-
-	if (count == 1) { //No need to do all that extra work if we only have one hate entry
-		if (*list.begin() && (*list.begin())->entity_on_hatelist->IsNPC() && (!skip_mezzed || !(*list.begin())->entity_on_hatelist->IsMezzed())) {
-			return (*list.begin())->entity_on_hatelist->CastToNPC();
-		}
-		return nullptr;
-	}
-
-	if (skip_mezzed) {
-		for (auto iter : list) {
-			if (iter->entity_on_hatelist->IsMezzed()) {
-				--count;
-			}
-		}
-
-		if (count <= 0) {
-			return nullptr;
-		}
-	}
-
-	int random = zone->random.Int(0, count - 1);
-	int counter = 0;
-
-	for (auto iter : list) {
-		if (!iter->entity_on_hatelist->IsNPC()) {
-			continue;
-		}
-
-		if (skip_mezzed && iter->entity_on_hatelist->IsMezzed()) {
-			continue;
-		}
-
-		if (counter < random) {
-			++counter;
-			continue;
-		}
-
-		return iter->entity_on_hatelist->CastToNPC();
-	}
-
-	return nullptr;
 }
 
 void HateList::DamageHateList(int64 damage, uint32 distance, EntityFilterType filter_type, bool is_percentage)

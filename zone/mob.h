@@ -751,10 +751,10 @@ public:
 	Mob* GetHateTop() { return hate_list.GetEntWithMostHateOnList(this);}
 	Mob* GetSecondaryHate(Mob *skip) { return hate_list.GetEntWithMostHateOnList(this, skip); }
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
-	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
-	Client* GetHateRandomClient() { return hate_list.GetRandomClientOnHateList(); }
-	NPC* GetHateRandomNPC() { return hate_list.GetRandomNPCOnHateList(); }
-	Bot* GetHateRandomBot() { return hate_list.GetRandomBotOnHateList(); }
+	Mob* GetHateRandom() { return hate_list.GetRandomMobOnHateList();}
+	Bot* GetHateRandomBot() { return hate_list.GetRandomMobOnHateList(EntityFilterType::Bots)->CastToBot(); }
+	Client* GetHateRandomClient() { return hate_list.GetRandomMobOnHateList(EntityFilterType::Clients)->CastToClient(); }
+	NPC* GetHateRandomNPC() { return hate_list.GetRandomMobOnHateList(EntityFilterType::NPCs)->CastToNPC(); }
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
 	Mob* GetHateClosest(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed); }
 	Bot* GetHateClosestBot(bool skip_mezzed = false) { return hate_list.GetClosestEntOnHateList(this, skip_mezzed, EntityFilterType::Bots)->CastToBot(); }
