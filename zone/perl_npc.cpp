@@ -559,6 +559,11 @@ void Perl_NPC_RemoveMeleeProc(NPC* self, uint16_t spell_id) // @categories Scrip
 	self->RemoveProcFromWeapon(spell_id, false);
 }
 
+void Perl_NPC_RemovePermaProc(NPC* self, uint16_t spell_id) // @categories Script Utility
+{
+	self->RemovePermaProcFromWeapon(spell_id);
+}
+
 void Perl_NPC_RemoveRangedProc(NPC* self, uint16_t spell_id) // @categories Script Utility
 {
 	self->RemoveRangedProc(spell_id, false);
@@ -906,6 +911,7 @@ void perl_register_npc()
 	package.add("RemoveItem", (void(*)(NPC*, uint32, uint16))&Perl_NPC_RemoveItem);
 	package.add("RemoveItem", (void(*)(NPC*, uint32, uint16, uint16))&Perl_NPC_RemoveItem);
 	package.add("RemoveMeleeProc", &Perl_NPC_RemoveMeleeProc);
+	package.add("RemovePermaProc", &Perl_NPC_RemovePermaProc);
 	package.add("RemoveRangedProc", &Perl_NPC_RemoveRangedProc);
 	package.add("ResumeWandering", &Perl_NPC_ResumeWandering);
 	package.add("SaveGuardSpot", (void(*)(NPC*))&Perl_NPC_SaveGuardSpot);
