@@ -4739,3 +4739,53 @@ bool Client::IsAugmentRestricted(uint8 item_type, uint32 augment_restriction)
 
 	return false;
 }
+
+void Client::SummonItemIntoInventory(
+	uint32 item_id,
+	int16 charges,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool is_attuned
+)
+{
+	auto *inst = database.CreateItem(
+		item_id,
+		charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6,
+		is_attuned
+	);
+
+	if (!inst) {
+		return;
+	}
+
+	const bool  is_arrow = inst->GetItem()->ItemType == EQ::item::ItemTypeArrow;
+	const int16 slot_id  = m_inv.FindFreeSlot(
+		inst->IsClassBag(),
+		true,
+		inst->GetItem()->Size,
+		is_arrow
+	);
+
+	SummonItem(
+		item_id,
+		charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6,
+		is_attuned,
+		slot_id
+	);
+}

@@ -289,12 +289,42 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			if (extra_dmg) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
+					Message(
+						Chat::Yellow,
+						fmt::format(
+							"Spell ID: {} Damage: {} Extra Damage: {} Duration: {} Damage Per Tic: {}",
+							spell_id,
+							value,
+							extra_dmg,
+							duration,
+							extra_dmg / duration
+						).c_str()
+					);
 					extra_dmg /= duration;
 				}
 			}
 		}
 
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Spell ID: {} Damage: {} Extra Damage: {}",
+				spell_id,
+				value,
+				extra_dmg
+			).c_str()
+		);
+
 		value -= extra_dmg;
+
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Spell ID: {} Damage: {}",
+				spell_id,
+				value
+			).c_str()
+		);
 	}
 	else {
 
@@ -335,12 +365,42 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			if (extra_dmg) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
+					Message(
+						Chat::Yellow,
+						fmt::format(
+							"Spell ID: {} Damage: {} Extra Damage: {} Duration: {} Damage Per Tic: {}",
+							spell_id,
+							value,
+							extra_dmg,
+							duration,
+							extra_dmg / duration
+						).c_str()
+					);
 					extra_dmg /= duration;
 				}
 			}
 		}
 
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Spell ID: {} Damage: {} Extra Damage: {}",
+				spell_id,
+				value,
+				extra_dmg
+			).c_str()
+		);
+
 		value -= extra_dmg;
+
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"Spell ID: {} Damage: {}",
+				spell_id,
+				value
+			).c_str()
+		);
 	}
 
 	return value;
@@ -527,11 +587,41 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			if (RuleB(Spells, HOTBonusHealingSplitOverDuration)) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
+					Message(
+						Chat::Yellow,
+						fmt::format(
+							"Spell ID: {} Heal: {} Extra Heal: {} Duration: {} Heal Per Tic: {}",
+							spell_id,
+							value,
+							extra_heal,
+							duration,
+							extra_heal / duration
+						).c_str()
+					);
 					extra_heal /= duration;
 				}
 			}
 
+			Message(
+				Chat::Yellow,
+				fmt::format(
+					"Spell ID: {} Heal: {} Extra Heal: {}",
+					spell_id,
+					value,
+					extra_heal
+				).c_str()
+			);
+
 			value += extra_heal;
+
+			Message(
+				Chat::Yellow,
+				fmt::format(
+					"Spell ID: {} Heal: {}",
+					spell_id,
+					value
+				).c_str()
+			);
 		}
 
 		value *= critical_modifier;
