@@ -1901,27 +1901,27 @@ struct GuildTributeUpdate {
 };
 
 struct GuildTributeMemberToggle {
-	uint32	guild_id;
-	uint32	char_id;
-	char	player_name[64];
-	uint32	tribute_toggle;
-	uint32	command;
-	uint32	time_remaining;
-	uint32	no_donations;
-	uint32  member_last_donated;
+	uint32 guild_id;
+	uint32 char_id;
+	char   player_name[64];
+	uint32 tribute_toggle;
+	uint32 command;
+	uint32 time_remaining;
+	uint32 no_donations;
+	uint32 member_last_donated;
 };
 
 struct ServerOP_GuildMessage_Struct {
-	uint32	guild_id			{ GUILD_NONE };
-	char	player_name[64]		{ 0 };
-	uint32	player_level		{ 0 };
-	uint32	player_class		{ 0 };
-	uint32	player_rank			{ GUILD_RANK_NONE };
-	uint32	player_zone_id		{ 0 };
-	bool	player_offline		{ false };
-	char	player_new_name[64]	{ 0 };
-	char	new_guild_name[64]	{ 0 };
-	char	note[256]			{ 0 };
+	uint32 guild_id{GUILD_NONE};
+	char   player_name[64]{0};
+	uint32 player_level{0};
+	uint32 player_class{0};
+	uint32 player_rank{GUILD_RANK_NONE};
+	uint32 player_zone_id{0};
+	bool   player_offline{false};
+	char   player_new_name[64]{0};
+	char   new_guild_name[64]{0};
+	char   note[256]{0};
 };
 
 #pragma pack()
