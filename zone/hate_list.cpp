@@ -565,86 +565,38 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 }
 
 
-Mob *HateList::GetRandomMobOnHateList(EntityFilterType filter_type, bool skip_mezzed)
+Mob *HateList::GetRandomMobOnHateList(EntityFilterType filter_type)
 {
-	int count = list.size();
+	const auto &l = GetFilteredHateList(filter_type);
+
+	int count = l.size();
 	if (count <= 0) { // If we don't have any entries it'll crash getting a random 0, -1 position.
 		return nullptr;
 	}
 
 	if (count == 1) { // No need to do all that extra work if we only have one hate entry
-		auto c = *list.begin();
+		auto c = *l.begin();
 		if (c) {
 			Mob *m = c->entity_on_hatelist;
-			if (m) {
-				if (
-					(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
-					(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
-					(filter_type == EntityFilterType::NPCs && !m->IsNPC())
-				) {
-					return nullptr;
-				}
-
-				if (!skip_mezzed || !m->IsMezzed()) {
-					return m;
-				}
+			if (!m) {
+				return nullptr;
 			}
+
+			return m;
 		}
 
 		return nullptr;
 	}
 
-	if (skip_mezzed) {
-		for (auto iter : list) {
-			Mob *m = iter->entity_on_hatelist;
-			if (!m) {
-				continue;
-			}
+	auto r            = l.begin();
+	int  random_index = rand() % count;
 
-			if (
-				(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
-				(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
-				(filter_type == EntityFilterType::NPCs && !m->IsNPC())
-			) {
-				continue;
-			}
+	std::advance(r, random_index);
 
-			if (m->IsMezzed()) {
-				--count;
-			}
-		}
+	auto e = *r;
 
-		if (count <= 0) {
-			return nullptr;
-		}
-	}
-
-	int random  = zone->random.Int(0, count - 1);
-	int counter = 0;
-
-	for (auto iter : list) {
-		Mob *m = iter->entity_on_hatelist;
-		if (!m) {
-			continue;
-		}
-
-		if (
-			(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
-			(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
-			(filter_type == EntityFilterType::NPCs && !m->IsNPC())
-		) {
-			continue;
-		}
-
-		if (skip_mezzed && m->IsMezzed()) {
-			continue;
-		}
-
-		if (counter < random) {
-			++counter;
-			continue;
-		}
-
+	Mob *m = e->entity_on_hatelist;
+	if (m) {
 		return m;
 	}
 
