@@ -3028,6 +3028,36 @@ void Perl_Client_RemoveRadiantCrystals(Client* self, uint32 amount)
 	self->RemoveRadiantCrystals(amount);
 }
 
+void Perl_Client_SummonItemIntoInventory(Client* self, perl::reference table_ref)
+{
+	perl::hash table = table_ref;
+	if (!table.exists("item_id") || !table.exists("charges")) {
+		return;
+	}
+
+	const uint32 item_id       = table["item_id"];
+	const int16 charges        = table["charges"];
+	const uint32 augment_one   = table.exists("augment_one") ? table["augment_one"] : 0;
+	const uint32 augment_two   = table.exists("augment_two") ? table["augment_two"] : 0;
+	const uint32 augment_three = table.exists("augment_three") ? table["augment_three"] : 0;
+	const uint32 augment_four  = table.exists("augment_four") ? table["augment_four"] : 0;
+	const uint32 augment_five  = table.exists("augment_five") ? table["augment_five"] : 0;
+	const uint32 augment_six   = table.exists("augment_six") ? table["augment_six"] : 0;
+	const bool attuned         = table.exists("attuned") ? table["attuned"] : false;
+
+	self->SummonItemIntoInventory(
+		item_id,
+		charges,
+		augment_one,
+		augment_two,
+		augment_three,
+		augment_four,
+		augment_five,
+		augment_six,
+		attuned
+	);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3535,6 +3565,7 @@ void perl_register_client()
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint16))&Perl_Client_SummonItem);
+	package.add("SummonItemIntoInventory", &Perl_Client_SummonItemIntoInventory);
 	package.add("TGB", &Perl_Client_TGB);
 	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t))&Perl_Client_TakeMoneyFromPP);
 	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t, bool))&Perl_Client_TakeMoneyFromPP);
