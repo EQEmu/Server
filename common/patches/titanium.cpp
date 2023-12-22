@@ -957,27 +957,27 @@ namespace Titanium
 	ENCODE(OP_LFGuild)
 	{
 		struct bit_mask_conversion {
-			uint32	ti_mask;
+			uint32	titanium_mask;
 			uint32	rof2_mask;
 		};
 
 		std::vector<bit_mask_conversion> bit_mask = {
-			{2, 256},
-			{4, 32768},
-			{8, 65536},
-			{16, 4},
-			{32, 64},
-			{64, 16384},
-			{128, 8192},
-			{256, 128},
-			{512, 2048},
-			{1024, 8},
-			{2048, 16},
-			{4096, 512},
-			{8192, 32},
-			{16384, 1024},
-			{32768, 2},
-			{65536, 4096},
+			{.titanium_mask = 2, .rof2_mask = 256},
+			{.titanium_mask = 4, .rof2_mask = 32768},
+			{.titanium_mask = 8, .rof2_mask = 65536},
+			{.titanium_mask = 16, .rof2_mask = 4},
+			{.titanium_mask = 32, .rof2_mask = 64},
+			{.titanium_mask = 64, .rof2_mask = 16384},
+			{.titanium_mask = 128, .rof2_mask = 8192},
+			{.titanium_mask = 256, .rof2_mask = 128},
+			{.titanium_mask = 512, .rof2_mask = 2048},
+			{.titanium_mask = 1024, .rof2_mask = 8},
+			{.titanium_mask = 2048, .rof2_mask = 16},
+			{.titanium_mask = 4096, .rof2_mask = 512},
+			{.titanium_mask = 8192, .rof2_mask = 32},
+			{.titanium_mask = 16384, .rof2_mask = 1024},
+			{.titanium_mask = 32768, .rof2_mask = 2},
+			{.titanium_mask = 65536, .rof2_mask = 4096},
 		};
 
 		EQApplicationPacket *in = *p;
@@ -1001,7 +1001,7 @@ namespace Titanium
 			uint32 emu_bitmask = emu->Classes;
 			uint32 ti_bitmask = 0;
 			for (auto const& b : bit_mask) {
-				(emu_bitmask & b.rof2_mask) != 0 ? ti_bitmask |= b.ti_mask : ti_bitmask &= ~b.ti_mask;
+				(emu_bitmask & b.rof2_mask) != 0 ? ti_bitmask |= b.titanium_mask : ti_bitmask &= ~b.titanium_mask;
 			}
 			eq->Classes = ti_bitmask;
 
@@ -2439,27 +2439,27 @@ namespace Titanium
 	DECODE(OP_LFGuild)
 	{
 		struct bit_mask_conversion {
-			uint32	ti_mask;
+			uint32	titanium_mask;
 			uint32	rof2_mask;
 		};
 
 		std::vector<bit_mask_conversion> bit_mask = {
-			{2, 256},
-			{4, 32768},
-			{8, 65536},
-			{16, 4},
-			{32, 64},
-			{64, 16384},
-			{128, 8192},
-			{256, 128},
-			{512, 2048},
-			{1024, 8},
-			{2048, 16},
-			{4096, 512},
-			{8192, 32},
-			{16384, 1024},
-			{32768, 2},
-			{65536, 4096},
+			{.titanium_mask = 2, .rof2_mask = 256},
+			{.titanium_mask = 4, .rof2_mask = 32768},
+			{.titanium_mask = 8, .rof2_mask = 65536},
+			{.titanium_mask = 16, .rof2_mask = 4},
+			{.titanium_mask = 32, .rof2_mask = 64},
+			{.titanium_mask = 64, .rof2_mask = 16384},
+			{.titanium_mask = 128, .rof2_mask = 8192},
+			{.titanium_mask = 256, .rof2_mask = 128},
+			{.titanium_mask = 512, .rof2_mask = 2048},
+			{.titanium_mask = 1024, .rof2_mask = 8},
+			{.titanium_mask = 2048, .rof2_mask = 16},
+			{.titanium_mask = 4096, .rof2_mask = 512},
+			{.titanium_mask = 8192, .rof2_mask = 32},
+			{.titanium_mask = 16384, .rof2_mask = 1024},
+			{.titanium_mask = 32768, .rof2_mask = 2},
+			{.titanium_mask = 65536, .rof2_mask = 4096},
 		};
 
 		uint32 Command = __packet->ReadUInt32();
@@ -2478,7 +2478,7 @@ namespace Titanium
 			uint32 new_bitmask = 0;
 			uint32 ti_bitmask = eq->Classes;
 			for (auto const& b : bit_mask) {
-				(ti_bitmask & b.ti_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
+				(ti_bitmask & b.titanium_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
 			}
 			emu->Classes = new_bitmask;
 			FINISH_DIRECT_DECODE();
@@ -2502,7 +2502,7 @@ namespace Titanium
 			uint32 new_bitmask = 0;
 			uint32 ti_bitmask = eq->Classes;
 			for (auto const& b : bit_mask) {
-				(ti_bitmask & b.ti_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
+				(ti_bitmask & b.titanium_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
 			}
 			emu->Classes = new_bitmask;
 			FINISH_DIRECT_DECODE();
