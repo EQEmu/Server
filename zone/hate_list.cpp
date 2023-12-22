@@ -149,7 +149,7 @@ Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 	return current;
 }
 
-Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType entity_type) {
+Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType filter_type) {
 	Mob* close_entity = nullptr;
 	float close_distance = 99999.9f;
 	float this_distance;
@@ -163,7 +163,7 @@ Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilte
 			continue;
 		}
 
-		switch (entity_type) {
+		switch (filter_type) {
 			case EntityFilterType::Bots:
 				if (!e->entity_on_hatelist->IsBot()) {
 					continue;
