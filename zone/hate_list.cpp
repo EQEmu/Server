@@ -344,191 +344,215 @@ int HateList::GetHateRatio(Mob *top, Mob *other)
 
 // skip is used to ignore a certain mob on the list
 // Currently used for getting 2nd on list for aggro meter
-Mob *HateList::GetEntWithMostHateOnList(Mob *center, Mob *skip, bool skip_mezzed)
+Mob *HateList::GetMobWithMostHateOnList(
+	Mob *center,
+	Mob *skip,
+	bool skip_mezzed,
+	EntityFilterType filter_type
+)
 {
-	// hack fix for zone shutdown crashes on some servers
-	if (!zone->IsLoaded())
+	if (!zone->IsLoaded()) { // hack fix for zone shutdown crashes on some servers
 		return nullptr;
+	}
 
-	Mob* top_hate = nullptr;
-	int64 hate = -1;
+	Mob   *top_hate = nullptr;
+	int64 hate      = -1;
 
-	if (center == nullptr)
+	if (!center) {
 		return nullptr;
+	}
 
-	if (RuleB(Aggro, SmartAggroList)){
-		Mob* top_client_type_in_range = nullptr;
+	if (RuleB(Aggro, SmartAggroList)) {
+		Mob   *top_client_type_in_range = nullptr;
 		int64 hate_client_type_in_range = -1;
-		int skipped_count = 0;
+		int   skipped_count             = 0;
 
 		auto iterator = list.begin();
-		while (iterator != list.end())
-		{
-			struct_HateList *cur = (*iterator);
-			int16 aggro_mod = 0;
+		while (iterator != list.end()) {
+			struct_HateList *cur      = (*iterator);
+			int16           aggro_mod = 0;
 
-			if (!cur){
+			if (!cur) {
 				++iterator;
 				continue;
 			}
 
-			if (!cur->entity_on_hatelist){
+			Mob *m = cur->entity_on_hatelist;
+
+			if (!m) {
 				++iterator;
 				continue;
 			}
 
-			if (cur->entity_on_hatelist == skip) {
+			if (m == skip) {
 				++iterator;
 				continue;
 			}
 
-			if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
+			if (skip_mezzed && m->IsMezzed()) {
 				++iterator;
 				continue;
 			}
 
-			if (cur->entity_on_hatelist->Sanctuary()) {
-				if (hate == -1)
-				{
-					top_hate = cur->entity_on_hatelist;
-					hate = 1;
+			if (
+				(filter_type == EntityFilterType::Bots && !m->IsBot()) ||
+				(filter_type == EntityFilterType::Clients && !m->IsClient()) ||
+				(filter_type == EntityFilterType::NPCs && !m->IsNPC())
+			) {
+				++iterator;
+				continue;
+			}
+
+			if (m->Sanctuary()) {
+				if (hate == -1) {
+					top_hate = m;
+					hate     = 1;
 				}
+
 				++iterator;
 				continue;
 			}
 
-			if (cur->entity_on_hatelist->DivineAura() || cur->entity_on_hatelist->IsMezzed() || cur->entity_on_hatelist->IsFeared()){
-				if (hate == -1)
-				{
-					top_hate = cur->entity_on_hatelist;
-					hate = 0;
+			if (m->DivineAura() || m->IsMezzed() || m->IsFeared()) {
+				if (hate == -1) {
+					top_hate = m;
+					hate     = 0;
 				}
+
 				++iterator;
 				continue;
 			}
 
 			int64 current_hate = cur->stored_hate_amount;
 
-			if (cur->entity_on_hatelist->IsClient() || cur->entity_on_hatelist->IsBot()){
-				if (cur->entity_on_hatelist->IsClient() && cur->entity_on_hatelist->CastToClient()->IsSitting()){
+			if (m->IsOfClientBot()) {
+				if (m->IsClient() && m->CastToClient()->IsSitting()) {
 					aggro_mod += RuleI(Aggro, SittingAggroMod);
 				}
 
-				if (center){
-					if (center->GetTarget() == cur->entity_on_hatelist)
+				if (center) {
+					if (center->GetTarget() == m) {
 						aggro_mod += RuleI(Aggro, CurrentTargetAggroMod);
-					if (RuleI(Aggro, MeleeRangeAggroMod) != 0)
-					{
-						if (center->CombatRange(cur->entity_on_hatelist)){
+					}
+
+					if (RuleI(Aggro, MeleeRangeAggroMod) != 0) {
+						if (center->CombatRange(m)) {
 							aggro_mod += RuleI(Aggro, MeleeRangeAggroMod);
 
-							if (current_hate > hate_client_type_in_range || cur->is_entity_frenzy){
+							if (current_hate > hate_client_type_in_range || cur->is_entity_frenzy) {
 								hate_client_type_in_range = current_hate;
-								top_client_type_in_range = cur->entity_on_hatelist;
+								top_client_type_in_range  = m;
 							}
 						}
 					}
 				}
-
-			}
-			else{
-				if (center){
-					if (center->GetTarget() == cur->entity_on_hatelist)
+			} else {
+				if (center) {
+					if (center->GetTarget() == m) {
 						aggro_mod += RuleI(Aggro, CurrentTargetAggroMod);
-					if (RuleI(Aggro, MeleeRangeAggroMod) != 0)
-					{
-						if (center->CombatRange(cur->entity_on_hatelist)){
+					}
+
+					if (RuleI(Aggro, MeleeRangeAggroMod) != 0) {
+						if (center->CombatRange(m)) {
 							aggro_mod += RuleI(Aggro, MeleeRangeAggroMod);
 						}
 					}
 				}
 			}
 
-			if (cur->entity_on_hatelist->GetMaxHP() != 0 && ((cur->entity_on_hatelist->GetHP() * 100 / cur->entity_on_hatelist->GetMaxHP()) < 20)){
+			if (m->GetMaxHP() != 0 && ((m->GetHP() * 100 / m->GetMaxHP()) < 20)) {
 				aggro_mod += RuleI(Aggro, CriticallyWoundedAggroMod);
 			}
 
-			if (aggro_mod){
+			if (aggro_mod) {
 				current_hate += (current_hate * aggro_mod / 100);
 			}
 
-			if (current_hate > hate || cur->is_entity_frenzy){
-				hate = current_hate;
-				top_hate = cur->entity_on_hatelist;
+			if (current_hate > hate || cur->is_entity_frenzy) {
+				hate     = current_hate;
+				top_hate = m;
 			}
 
 			++iterator;
 		}
 
-		if (top_client_type_in_range != nullptr && top_hate != nullptr) {
-			bool isTopClientType = top_hate->IsClient();
-			if (!isTopClientType) {
+		if (top_client_type_in_range && top_hate) {
+			bool is_top_client_type = top_hate->IsClient();
+			if (!is_top_client_type) {
 				if (top_hate->IsBot()) {
-					isTopClientType = true;
+					is_top_client_type          = true;
 					top_client_type_in_range = top_hate;
 				}
 			}
 
-			if (!isTopClientType) {
+			if (!is_top_client_type) {
 				if (top_hate->IsMerc()) {
-					isTopClientType = true;
+					is_top_client_type          = true;
 					top_client_type_in_range = top_hate;
 				}
 			}
 
-			if (!isTopClientType) {
-				if (top_hate->GetSpecialAbility(ALLOW_TO_TANK)){
-					isTopClientType = true;
+			if (!is_top_client_type) {
+				if (top_hate->GetSpecialAbility(ALLOW_TO_TANK)) {
+					is_top_client_type          = true;
 					top_client_type_in_range = top_hate;
 				}
 			}
 
-			if (!isTopClientType)
+			if (!is_top_client_type) {
 				return top_client_type_in_range ? top_client_type_in_range : nullptr;
+			}
 
 			return top_hate ? top_hate : nullptr;
-		}
-		else {
-			if (top_hate == nullptr && skipped_count > 0) {
+		} else {
+			if (!top_hate && skipped_count > 0) {
 				return center->GetTarget() ? center->GetTarget() : nullptr;
 			}
+
 			return top_hate ? top_hate : nullptr;
 		}
-	}
-	else{
-		auto iterator = list.begin();
-		int skipped_count = 0;
-		while (iterator != list.end())
-		{
+	} else {
+		auto iterator      = list.begin();
+		int  skipped_count = 0;
+		while (iterator != list.end()) {
 			struct_HateList *cur = (*iterator);
 			if (cur) {
-				if (cur->entity_on_hatelist == skip) {
+				Mob *m = cur->entity_on_hatelist;
+
+				if (!m) {
 					++iterator;
 					continue;
 				}
 
-				if (skip_mezzed && cur->entity_on_hatelist->IsMezzed()) {
+				if (m == skip) {
 					++iterator;
 					continue;
 				}
 
-				if (cur->entity_on_hatelist != nullptr && ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy))
-				{
-					top_hate = cur->entity_on_hatelist;
-					hate = cur->stored_hate_amount;
+				if (skip_mezzed && m->IsMezzed()) {
+					++iterator;
+					continue;
+				}
+
+				if ((cur->stored_hate_amount > hate) || cur->is_entity_frenzy) {
+					top_hate = m;
+					hate     = cur->stored_hate_amount;
 				}
 			}
 			++iterator;
 		}
-		if (top_hate == nullptr && skipped_count > 0) {
+
+		if (!top_hate && skipped_count > 0) {
 			return center->GetTarget() ? center->GetTarget() : nullptr;
 		}
+
 		return top_hate ? top_hate : nullptr;
 	}
+
 	return nullptr;
 }
 
-Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
+Mob *HateList::GetMobWithMostHateOnList(bool skip_mezzed){
 	Mob* top = nullptr;
 	int64 hate = -1;
 
@@ -539,7 +563,7 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 
 		if (cur) {
 			LogHateDetail(
-				"Looping GetEntWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
+				"Looping GetMobWithMostHateOnList1 [{}] cur [{}] hate [{}] calc [{}]",
 				cur->entity_on_hatelist->GetMobDescription(),
 				cur->stored_hate_amount,
 				hate,
@@ -549,7 +573,7 @@ Mob *HateList::GetEntWithMostHateOnList(bool skip_mezzed){
 			if (cur->entity_on_hatelist != nullptr && (cur->stored_hate_amount > hate))
 			{
 				LogHateDetail(
-					"Looping GetEntWithMostHateOnList2 [{}]",
+					"Looping GetMobWithMostHateOnList2 [{}]",
 					cur->entity_on_hatelist->GetMobDescription()
 				);
 
@@ -603,7 +627,7 @@ Mob *HateList::GetRandomMobOnHateList(EntityFilterType filter_type)
 	return nullptr;
 }
 
-Mob *HateList::GetEscapingEntOnHateList(Mob *center, float range, bool first) {
+Mob *HateList::GetEscapingMobOnHateList(Mob *center, float range, bool first) {
 	// function is still in design stage
 
 	if (!center)
