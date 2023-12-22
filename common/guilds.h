@@ -38,14 +38,14 @@
 
 //defines for standard ranks base on RoF2 definitions
 #define GUILD_RANK_NONE      0
-#define GUILD_LEADER		 1
+#define GUILD_LEADER         1
 #define GUILD_SENIOR_OFFICER 2
 #define GUILD_OFFICER        3
 #define GUILD_SENIOR_MEMBER  4
-#define GUILD_MEMBER		 5
+#define GUILD_MEMBER         5
 #define GUILD_JUNIOR_MEMBER  6
-#define GUILD_INITIATE		 7
-#define GUILD_RECRUIT		 8
+#define GUILD_INITIATE       7
+#define GUILD_RECRUIT        8
 
 typedef enum {
 	GUILD_ACTION_BANNER_CHANGE                        = 1,

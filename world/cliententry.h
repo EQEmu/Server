@@ -95,32 +95,32 @@ public:
 	inline void			SetAdmin(uint16 iAdmin)	{ padmin = iAdmin; }
 
 	// Character info
-	inline ZoneServer*	Server() const		{ return pzoneserver; }
-	inline void			ClearServer()		{ pzoneserver = 0; }
-	inline uint32		CharID() const		{ return pcharid; }
-	inline const char*	name() const		{ return pname; }
-	inline uint32		zone() const		{ return pzone; }
-	inline uint16		instance() const	{ return pinstance; }
-	inline uint8			level() const		{ return plevel; }
-	inline uint8			class_() const		{ return pclass_; }
-	inline uint16		race() const		{ return prace; }
-	inline uint8			Anon()				{ return panon; }
-	inline uint8			TellsOff() const	{ return ptellsoff; }
-	inline uint32		GuildID() const { return pguild_id; }
-	inline uint32		GuildRank() const { return pguild_rank; }
-	inline bool		    GuildTributeOptIn() const {	return pguild_tribute_opt_in; }
-	inline void			SetGuild(uint32 guild_id) { pguild_id = guild_id; }
-	inline void			SetGuildTributeOptIn(bool opt) { pguild_tribute_opt_in = opt; }
-	inline bool			LFG() const			{ return pLFG; }
-	inline uint8			GetGM() const		{ return gm; }
-	inline void			SetGM(uint8 igm)	{ gm = igm; }
-	inline void			SetZone(uint32 zone) { pzone = zone; }
-	inline bool	IsLocalClient() const { return plocal; }
-	inline uint8			GetLFGFromLevel() const { return pLFGFromLevel; }
-	inline uint8			GetLFGToLevel() const { return pLFGToLevel; }
-	inline bool			GetLFGMatchFilter() const { return pLFGMatchFilter; }
-	inline const char*		GetLFGComments() const { return pLFGComments; }
-	inline uint8	GetClientVersion() { return pClientVersion; }
+	inline ZoneServer *Server() const { return pzoneserver; }
+	inline void ClearServer() { pzoneserver = 0; }
+	inline uint32 CharID() const { return pcharid; }
+	inline const char *name() const { return pname; }
+	inline uint32 zone() const { return pzone; }
+	inline uint16 instance() const { return pinstance; }
+	inline uint8 level() const { return plevel; }
+	inline uint8 class_() const { return pclass_; }
+	inline uint16 race() const { return prace; }
+	inline uint8 Anon() { return panon; }
+	inline uint8 TellsOff() const { return ptellsoff; }
+	inline uint32 GuildID() const { return pguild_id; }
+	inline uint32 GuildRank() const { return pguild_rank; }
+	inline bool GuildTributeOptIn() const { return pguild_tribute_opt_in; }
+	inline void SetGuild(uint32 guild_id) { pguild_id = guild_id; }
+	inline void SetGuildTributeOptIn(bool opt) { pguild_tribute_opt_in = opt; }
+	inline bool LFG() const { return pLFG; }
+	inline uint8 GetGM() const { return gm; }
+	inline void SetGM(uint8 igm) { gm = igm; }
+	inline void SetZone(uint32 zone) { pzone = zone; }
+	inline bool IsLocalClient() const { return plocal; }
+	inline uint8 GetLFGFromLevel() const { return pLFGFromLevel; }
+	inline uint8 GetLFGToLevel() const { return pLFGToLevel; }
+	inline bool GetLFGMatchFilter() const { return pLFGMatchFilter; }
+	inline const char *GetLFGComments() const { return pLFGComments; }
+	inline uint8 GetClientVersion() { return pClientVersion; }
 
 	inline bool TellQueueFull() const { return tell_queue.size() >= RuleI(World, TellQueueSize); }
 	inline bool TellQueueEmpty() const { return tell_queue.empty(); }
