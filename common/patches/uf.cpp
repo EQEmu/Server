@@ -36,6 +36,7 @@
 #include "../classes.h"
 #include "../races.h"
 #include "../raid.h"
+#include "../guilds.h"
 
 #include <iostream>
 #include <sstream>
@@ -1135,10 +1136,32 @@ namespace UF
 				PutFieldN(banker);
 				PutFieldN(class_);
 				//Translate older ranks to new values* /
-				switch (emu_e->rank) {
-				case 8: case 7: case 6: case 5: case 4: { emu_e->rank = 0; break; }
-				case 3: case 2: { emu_e->rank = 1; break; }  // GUILD_OFFICER	1
-				case 1: { emu_e->rank = 2; break; }  // GUILD_LEADER	2
+				switch (emu_e->rank)
+				{
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT:
+				{
+					emu_e->rank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER:
+				{
+					emu_e->rank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER:
+				{
+					emu_e->rank = GUILD_LEADER_TI;
+					break;
+				}
+				default:
+				{
+					break;
+				}
 				}
 				PutFieldN(rank);
 				PutFieldN(time_last_on);
@@ -1868,10 +1891,32 @@ namespace UF
 		OUT(anon);
 		OUT(gm);
 		//Translate older ranks to new values* /
-		switch (emu->guildrank) {
-		case 8: case 7: case 6: case 5: case 4: { emu->guildrank = 0; break; }
-		case 3: case 2: { emu->guildrank = 1; break; }  // GUILD_OFFICER	1
-		case 1: { emu->guildrank = 2; break; }  // GUILD_LEADER	2
+		switch (emu->guildrank)
+		{
+		case GUILD_SENIOR_MEMBER:
+		case GUILD_MEMBER:
+		case GUILD_JUNIOR_MEMBER:
+		case GUILD_INITIATE:
+		case GUILD_RECRUIT:
+		{
+			emu->guildrank = GUILD_MEMBER_TI;
+			break;
+		}
+		case GUILD_OFFICER:
+		case GUILD_SENIOR_OFFICER:
+		{
+			emu->guildrank = GUILD_OFFICER_TI;
+			break;
+		}
+		case GUILD_LEADER:
+		{
+			emu->guildrank = GUILD_LEADER_TI;
+			break;
+		}
+		default:
+		{
+			break;
+		}
 		}
 		OUT(guildrank);
 		OUT(guildbanker);
@@ -2389,10 +2434,30 @@ namespace UF
 			//Translate new ranks to old values* /
 			switch (emu->parameter)
 			{
-			case 8: case 7: case 6: case 5: case 4: { eq->parameter = 0; break; }	// GUILD_MEMBER	 0
-			case 3: case 2: { eq->parameter = 1; break; }							// GUILD_OFFICER 1
-			case 1: { eq->parameter = 2; break; }									// GUILD_LEADER	 2
-			default: { break; }
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT:
+			{
+				emu->parameter = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER:
+			{
+				emu->parameter = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER:
+			{
+				emu->parameter = GUILD_LEADER_TI;
+				break;
+			}
+			default:
+			{
+				break;
+			}
 			}
 		}
 		default:
@@ -2413,10 +2478,32 @@ namespace UF
 		eq->Unknown04 = 0;
 
 		//Translate older ranks to new values* /
-		switch (emu->Rank) {
-		case 8: case 7: case 6: case 5: case 4: { eq->Rank = 0; break; }	// GUILD_MEMBER  0
-		case 3: case 2: { eq->Rank = 1; break; }							// GUILD_OFFICER 1
-		case 1: { eq->Rank = 2; break; }									// GUILD_LEADER	 2
+		switch (emu->Rank)
+		{
+		case GUILD_SENIOR_MEMBER:
+		case GUILD_MEMBER:
+		case GUILD_JUNIOR_MEMBER:
+		case GUILD_INITIATE:
+		case GUILD_RECRUIT:
+		{
+			emu->Rank = GUILD_MEMBER_TI;
+			break;
+		}
+		case GUILD_OFFICER:
+		case GUILD_SENIOR_OFFICER:
+		{
+			emu->Rank = GUILD_OFFICER_TI;
+			break;
+		}
+		case GUILD_LEADER:
+		{
+			emu->Rank = GUILD_LEADER_TI;
+			break;
+		}
+		default:
+		{
+			break;
+		}
 		}
 
 		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
@@ -3014,10 +3101,32 @@ namespace UF
 			{
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
 				//Translate older ranks to new values* /
-				switch (emu->guildrank) {
-				case 8: case 7: case 6: case 5: case 4: { emu->guildrank = 0; break; }
-				case 3: case 2: { emu->guildrank = 1; break; }  // GUILD_OFFICER	1
-				case 1: { emu->guildrank = 2; break; }  // GUILD_LEADER	2
+				switch (emu->guildrank)
+				{
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT:
+				{
+					emu->guildrank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER:
+				{
+					emu->guildrank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER:
+				{
+					emu->guildrank = GUILD_LEADER_TI;
+					break;
+				}
+				default:
+				{
+					break;
+				}
 				}
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
 			}

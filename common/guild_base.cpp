@@ -280,7 +280,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 	{
 		std::vector<BaseGuildRanksRepository::GuildRanks> out;
 		BaseGuildRanksRepository::GuildRanks gr;
-		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
+		for (int i = GUILD_LEADER; i <= GUILD_MAX_RANK; i++) {
 			gr.guild_id = guild_id;
 			gr.rank = i;
 			gr.title = in->rank_names[i];

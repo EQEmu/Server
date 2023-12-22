@@ -1791,9 +1791,9 @@ int EQ::ItemInstance::RemoveTaskDeliveredItems()
 	return count;
 }
 
-int EQ::ItemInstance::GetItemGuildFavor() const
+uint32 EQ::ItemInstance::GetItemGuildFavor() const
 {
-	int total = 0;
+	uint32 total = 0;
 	const auto item = GetItem();
 	if (item) {
 		return total = item->GuildFavor;

@@ -31,9 +31,9 @@
 #define GUILD_TRIBUTE_PLAT_CONVERSION      10
 
 //defines for standard ranks
-#define GUILD_MEMBER0	0
-#define GUILD_OFFICER0	1
-#define GUILD_LEADER0	2
+#define GUILD_MEMBER_TI	    0
+#define GUILD_OFFICER_TI    1
+#define GUILD_LEADER_TI     2
 #define GUILD_RANK_NONE (GUILD_MAX_RANK+1)
 
 //defines for standard ranks base on RoF2 definitions

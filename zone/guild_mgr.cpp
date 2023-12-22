@@ -176,10 +176,30 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		auto c = entity_list.GetClientByID(ci->char_id);
 		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
 			switch (ci->rank) {
-			case 8:case 7:case 6:case 5:case 4: { ci->rank = 0; break; }	//GUILD MEMBER 0
-			case 3:case 2: { ci->rank = 1; break; }							//GUILD OFFICER 1
-			case 1: { ci->rank = 2; break; }								//GUILD LEADER 2
-			default: { break; }
+			case GUILD_RECRUIT:
+			case GUILD_INITIATE:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_SENIOR_MEMBER:
+			{
+				ci->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER:
+			{
+				ci->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER:
+			{
+				ci->rank = GUILD_LEADER_TI;
+				break;
+			}
+			default:
+			{
+				break;
+			}
 			}
 		}
 		PutField(rank);
@@ -1752,7 +1772,7 @@ void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
 	{
 		auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
 		GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
-		for (int i = 1; i <= 8; i++)
+		for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++)
 		{
 			gucp->payload.rank_name.rank = i;
 			strcpy(gucp->payload.rank_name.rank_name, guild->second->rank_names[i].c_str());
@@ -1834,10 +1854,30 @@ uint8* ZoneGuildManager::MakeGuildMembers2(uint32 guild_id, const char* prefix_n
 		auto c = entity_list.GetClientByID(ci->char_id);
 		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
 			switch (ci->rank) {
-			case 8:case 7:case 6:case 5:case 4: { ci->rank = 0; break; }	//GUILD MEMBER 0
-			case 3:case 2: { ci->rank = 1; break; }							//GUILD OFFICER 1
-			case 1: { ci->rank = 2; break; }								//GUILD LEADER 2
-			default: { break; }
+			case GUILD_RECRUIT:
+			case GUILD_INITIATE:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_SENIOR_MEMBER:
+			{
+				ci->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER:
+			{
+				ci->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER:
+			{
+				ci->rank = GUILD_LEADER_TI;
+				break;
+			}
+			default:
+			{
+				break;
+			}
 			}
 		}
 		PutField(rank);

@@ -272,7 +272,7 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 	}
 	if (m == "get_reload_types") {
 		getReloadTypes(r);
-	}				
+	}
 	if (m == "reload") {
 		reload(r, args);
 	}

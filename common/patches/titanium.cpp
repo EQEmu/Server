@@ -34,6 +34,7 @@
 #include "titanium_structs.h"
 #include "../path_manager.h"
 #include "../raid.h"
+#include "../guilds.h"
 
 #include <sstream>
 
@@ -674,9 +675,26 @@ namespace Titanium
 
 		//Translate older ranks to new values* /
 		switch (emu->Rank) {
-		case 8: case 7: case 6: case 5: case 4: { eq->Rank = 0; break; }	// GUILD_MEMBER  0
-		case 3: case 2: { eq->Rank = 1; break; }							// GUILD_OFFICER 1
-		case 1: { eq->Rank = 2; break; }									// GUILD_LEADER	 2
+		case GUILD_SENIOR_MEMBER:
+		case GUILD_MEMBER:
+		case GUILD_JUNIOR_MEMBER:
+		case GUILD_INITIATE:
+		case GUILD_RECRUIT:
+		{ 
+			eq->Rank = GUILD_MEMBER_TI;
+			break; 
+		}
+		case GUILD_OFFICER:
+		case GUILD_SENIOR_OFFICER:
+		{ 
+			eq->Rank = GUILD_OFFICER_TI;
+			break; 
+		}
+		case GUILD_LEADER: 
+		{ 
+			eq->Rank = GUILD_LEADER_TI;
+			break; 
+		}
 		}
 
 		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
@@ -700,18 +718,33 @@ namespace Titanium
 			//Translate new ranks to old values* /
 			switch (emu->parameter)
 			{
-			case 8: case 7: case 6: case 5: case 4: { eq->parameter = 0; break; }	// GUILD_MEMBER	 0
-			case 3: case 2: { eq->parameter = 1; break; }							// GUILD_OFFICER 1
-			case 1: { eq->parameter = 2; break; }									// GUILD_LEADER	 2
-			default: { break; }
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT:
+			{
+				eq->parameter = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER:
+			{
+				eq->parameter = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER:
+			{
+				eq->parameter = GUILD_LEADER_TI;
+				break;
+			}
+			default:
+			{
+				break;
+			}
 			}
 		}
-		default:
-		{
-			break;
 		}
-		}
-
 		FINISH_ENCODE();
 	}
 
@@ -783,12 +816,32 @@ namespace Titanium
 				PutFieldN(level);
 				PutFieldN(banker);
 				PutFieldN(class_);
-//				PutFieldN(rank);
 				switch (emu_e->rank) {
-				case 8: case 7: case 6: case 5: case 4: { e->rank = htonl(0); break; }  // GUILD_MEMBER	0
-				case 3: case 2: { e->rank = htonl(1); break; }							// GUILD_OFFICER 1
-				case 1: { e->rank = htonl(2); break; }									// GUILD_LEADER	2
-				default: { e->rank = htonl(0); break; }						// GUILD_NONE
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT:
+				{
+					e->rank = htonl(GUILD_MEMBER_TI);
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER:
+				{
+					e->rank = htonl(GUILD_OFFICER_TI);
+					break;
+				}
+				case GUILD_LEADER:
+				{
+					e->rank = htonl(GUILD_LEADER_TI);
+					break;
+				}
+				default:
+				{
+					e->rank = htonl(GUILD_MEMBER_TI);
+					break;
+				}
 				}
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
@@ -1288,12 +1341,31 @@ namespace Titanium
 		OUT(anon);
 		OUT(gm);
 		switch (emu->guildrank) {
-		case 8: case 7: case 6: case 5: case 4: { eq->guildrank = 0; break; }  // GUILD_MEMBER	0
-		case 3: case 2: { eq->guildrank = 1; break; }       				   // GUILD_OFFICER 1
-		case 1: { eq->guildrank = 2; break; }								   // GUILD_LEADER	2
-		default: { break; }													   // GUILD_NONE
+		case GUILD_SENIOR_MEMBER:
+		case GUILD_MEMBER:
+		case GUILD_JUNIOR_MEMBER:
+		case GUILD_INITIATE:
+		case GUILD_RECRUIT:
+		{
+			eq->guildrank = GUILD_MEMBER_TI;
+			break;
 		}
-//		OUT(guildrank);
+		case GUILD_OFFICER:
+		case GUILD_SENIOR_OFFICER:
+		{
+			eq->guildrank = GUILD_OFFICER_TI;
+			break;
+		}
+		case GUILD_LEADER:
+		{
+			eq->guildrank = GUILD_LEADER_TI;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
 		OUT(guildbanker);
 		//	OUT(unknown13054[8]);
 		OUT(exp);
@@ -2009,12 +2081,31 @@ namespace Titanium
 			strcpy(eq->suffix, emu->suffix);
 			eq->petOwnerId = emu->petOwnerId;
 			switch (emu->guildrank) {
-			case 8: case 7: case 6: case 5: case 4: { eq->guildrank = 0; break; }  // GUILD_MEMBER	0
-			case 3: case 2: { eq->guildrank = 1; break; }       				   // GUILD_OFFICER 1
-			case 1: { eq->guildrank = 2; break; }								   // GUILD_LEADER	2
-			default: { break; }													   // GUILD_NONE
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT:
+			{
+				eq->guildrank = GUILD_MEMBER_TI;
+				break;
 			}
-//			eq->guildrank = emu->guildrank;
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER:
+			{
+				eq->guildrank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER:
+			{
+				eq->guildrank = GUILD_LEADER_TI;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+			}
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; k++) {
 				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
@@ -2362,7 +2453,7 @@ namespace Titanium
 
 		memcpy(emu->name, eq->name, sizeof(emu->name));
 		memcpy(emu->target, eq->target, sizeof(emu->target));
-		emu->rank = 5;
+		emu->rank = GUILD_MEMBER;
 
 		FINISH_DIRECT_DECODE();
 	}
