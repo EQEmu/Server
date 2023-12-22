@@ -1236,7 +1236,7 @@ namespace UF
 
 		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_GuildTributeDonateItem)");
 
-		OUT(quanity);
+		OUT(quantity);
 		OUT(favor);
 		eq->unknown8 = 0;
 		eq->slot = ServerToUFSlot(emu->slot);
@@ -2411,7 +2411,7 @@ namespace UF
 
 		eq->Unknown00 = 0;
 		eq->Unknown04 = 0;
-		
+
 		//Translate older ranks to new values* /
 		switch (emu->Rank) {
 		case 8: case 7: case 6: case 5: case 4: { eq->Rank = 0; break; }	// GUILD_MEMBER  0
@@ -3670,7 +3670,7 @@ namespace UF
 
 		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_GuildTributeDonateItem)");
 
-		IN(quanity);
+		IN(quantity);
 		IN(tribute_master_id);
 		IN(guild_id);
 

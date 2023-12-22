@@ -689,7 +689,7 @@ namespace Titanium
 	{
 		ENCODE_LENGTH_EXACT(SpawnAppearance_Struct);
 		SETUP_DIRECT_ENCODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
-		
+
 		OUT(spawn_id);
 		OUT(type);
 		OUT(parameter);
@@ -834,7 +834,7 @@ namespace Titanium
 
 		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_GuildTributeDonateItem)");
 
-		OUT(quanity);
+		OUT(quantity);
 		OUT(favor);
 		eq->unknown8 = 0;
 		eq->slot = ServerToTitaniumSlot(emu->slot);
@@ -978,8 +978,8 @@ namespace Titanium
 			{16384, 1024},
 			{32768, 2},
 			{65536, 4096},
-		}; 
-		
+		};
+
 		EQApplicationPacket *in = *p;
 
 		uint32 Command = in->ReadUInt32();
@@ -1004,7 +1004,7 @@ namespace Titanium
 				(emu_bitmask & b.rof2_mask) != 0 ? ti_bitmask |= b.ti_mask : ti_bitmask &= ~b.ti_mask;
 			}
 			eq->Classes = ti_bitmask;
-			
+
 			FINISH_ENCODE();
 			return;
 		}
@@ -1394,7 +1394,7 @@ namespace Titanium
 	{
 		ENCODE_LENGTH_EXACT(MarkNPC_Struct);
 		SETUP_DIRECT_ENCODE(MarkNPC_Struct, MarkNPC_Struct);
-	
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
 		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
 		mnpcs->TargetID = emu->TargetID;
@@ -1411,10 +1411,10 @@ namespace Titanium
 		*p = nullptr;
 		unsigned char* __emu_buffer = inapp->pBuffer;
 		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
-		
+
 		switch (raid_gen->action)
 		{
-		case raidAdd: 
+		case raidAdd:
 		{
 			RaidAddMember_Struct* emu = (RaidAddMember_Struct*)__emu_buffer;
 
@@ -1484,7 +1484,7 @@ namespace Titanium
 			dest->QueuePacket(inapp);
 			break;
 		}
-		default: 
+		default:
 		{
 			RaidGeneral_Struct* emu = (RaidGeneral_Struct*)__emu_buffer;
 
@@ -2374,7 +2374,7 @@ namespace Titanium
 
 		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_GuildTributeDonateItem)");
 
-		IN(quanity);
+		IN(quantity);
 		IN(tribute_master_id);
 		IN(guild_id);
 
@@ -2460,8 +2460,8 @@ namespace Titanium
 			{16384, 1024},
 			{32768, 2},
 			{65536, 4096},
-		}; 
-		
+		};
+
 		uint32 Command = __packet->ReadUInt32();
 
 		if (Command == 3) {
@@ -2648,7 +2648,7 @@ namespace Titanium
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			
+
 			auto len = 0;
 			if (__packet->size < sizeof(structs::RaidMOTD_Struct)) {
 				len = __packet->size - sizeof(structs::RaidGeneral_Struct);
@@ -2656,8 +2656,8 @@ namespace Titanium
 			else {
 				len = sizeof(eq->motd);
 			}
-			
-			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len); 
+
+			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len);
 			emu->motd[len - 1] = '\0';
 
 			FINISH_VAR_DECODE();
@@ -2675,7 +2675,7 @@ namespace Titanium
 
 			FINISH_VAR_DECODE();
 			break;
-		}		
+		}
 		default:
 		{
 			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);

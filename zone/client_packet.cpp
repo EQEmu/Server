@@ -8536,8 +8536,8 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket* app)
 void Client::Handle_OP_GuildRemove(const EQApplicationPacket* app)
 {
 	if (app->size != sizeof(GuildCommand_Struct)) {
-		LogGuilds("Wrong size: OP_GuildRemove, size = {} expected {}.", 
-			app->size, 
+		LogGuilds("Wrong size: OP_GuildRemove, size = {} expected {}.",
+			app->size,
 			sizeof(GuildCommand_Struct)
 		);
 		return;
@@ -16915,7 +16915,7 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 	auto in = (GuildTributeDonateItemRequest_Struct*)app->pBuffer;
 
 	const auto* inst = GetInv().GetItem(in->Slot);
-	auto favor = inst->GetItemGuildFavor() * in->quanity;
+	auto favor = inst->GetItemGuildFavor() * in->quantity;
 
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
@@ -16924,10 +16924,10 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
 
 		if (inst->IsStackable()) {
-			if (inst->GetCharges() < (int32)in->quanity) {
+			if (inst->GetCharges() < (int32)in->quantity) {
 				favor = 0;
 			}
-			DeleteItemInInventory(in->Slot, in->quanity, false, true);
+			DeleteItemInInventory(in->Slot, in->quantity, false, true);
 		}
 		else {
 			DeleteItemInInventory(in->Slot, 0, false, true);
@@ -16969,22 +16969,22 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
 
 	auto in = (GuildTributeDonatePlatRequest_Struct*)app->pBuffer;
 
-	auto quanity = in->quanity;
+	auto quantity = in->quantity;
 
-	auto favor = quanity * RuleI(Guild, TributePlatConversionRate);
+	auto favor = quantity * RuleI(Guild, TributePlatConversionRate);
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
 		guild->tribute.favor += favor;
 		guild_mgr.DBSetGuildFavor(GuildID(), guild->tribute.favor);
 		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
 
-		TakePlatinum(quanity, false);
+		TakePlatinum(quantity, false);
 		SendGuildTributeDonatePlatReply(in, favor);
 
 		if (RuleB(QueryServ, PlayerLogGuildTributePlatDonations)) {
 			auto event_desc = fmt::format("Guild Platinum Donation :: {} donated {} platinum for {} favor in zone {}\.",
 				GetName(),
-				quanity,
+				quantity,
 				favor,
 				GetZoneID()
 			);

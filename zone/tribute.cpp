@@ -326,7 +326,7 @@ void Client::SendTributes() {
 	}
 }
 
-bool ZoneDatabase::LoadTributes() {			
+bool ZoneDatabase::LoadTributes() {
 
 	TributeData tributeData;
 	memset(&tributeData.tiers, 0, sizeof(tributeData.tiers));
@@ -394,7 +394,7 @@ void Client::SendGuildTributes()
 
 		//guild tribute has an unknown uint32 at its begining, guild ID?
 		int len = t.second.name.length() + 1;
-			
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendGuildTributes, sizeof(GuildTributeAbility_Struct) + len);
 		GuildTributeAbility_Struct* gtas = (GuildTributeAbility_Struct*)outapp->pBuffer;
 
@@ -416,7 +416,7 @@ void Client::SendGuildTributes()
 	}
 }
 
-void Client::SendGuildTributeDetails(uint32 tribute_id, uint32 tier) 
+void Client::SendGuildTributeDetails(uint32 tribute_id, uint32 tier)
 {
 	if (tribute_list.count(tribute_id) != 1) {
 		LogError("Details request for invalid tribute [{}]", tribute_id);
@@ -442,7 +442,7 @@ void Client::DoGuildTributeUpdate()
 {
 	LogTribute("DoGuildTributeUpdate");
 	auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-	
+
 	if (guild && guild->tribute.enabled && GuildTributeOptIn()) {
 		TributeData& d1 = tribute_list[guild->tribute.id_1];
 		uint32 item_id1 = d1.tiers[guild->tribute.id_1_tier].tribute_item_id;
@@ -504,7 +504,7 @@ void Client::DoGuildTributeUpdate()
 	CalcBonuses();
 }
 
-void Client::SendGuildActiveTributes(uint32 guild_id) 
+void Client::SendGuildActiveTributes(uint32 guild_id)
 {
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 
@@ -594,7 +594,7 @@ void Client::SendGuildTributeDonateItemReply(GuildTributeDonateItemRequest_Struc
 	out->slot = in->Slot;
 	out->AugIndex = in->AugIndex;
 	out->SubIndex = in->SubIndex;
-	out->quanity = in->quanity;
+	out->quantity = in->quantity;
 	out->unknown10 = in->Unknown10;
 	out->unknown20 = in->unknown20;
 	out->favor = favor;
@@ -610,8 +610,8 @@ void Client::SendGuildTributeDonatePlatReply(GuildTributeDonatePlatRequest_Struc
 	auto out = (GuildTributeDonatePlatReply_Struct*)outapp->pBuffer;
 
 	out->favor = favor;
-	out->quanity = in->quanity;
-	
+	out->quantity = in->quantity;
+
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

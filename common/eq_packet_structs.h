@@ -3383,7 +3383,7 @@ struct GuildUpdateUCP {
 	}payload;
 };
 
-struct GuildPermission_Struct 
+struct GuildPermission_Struct
 {
 	uint32	Action;				// 5 = Update function permission
 	char	Unknown0004[76];	// not used
@@ -3608,7 +3608,7 @@ struct GuildTributeOptInOutReply_Struct {
 /*000*/uint32 	guild_id;
 /*004*/char		player_name[64];
 /*068*/uint32	tribute_toggle;//			0 off 1 on
-/*072*/uint32 	tribute_trophy_toggle;// 	0 off 1 on		not yet implemented		
+/*072*/uint32 	tribute_trophy_toggle;// 	0 off 1 on		not yet implemented
 /*076*/uint32	no_donations;
 /*080*/uint32	time;
 /*084*/uint32	command;
@@ -3656,7 +3656,7 @@ struct GuildTributeDonateItemRequest_Struct {
 /*006*/ uint16 	SubIndex;
 /*008*/ uint16 	AugIndex;
 /*010*/ uint16 	Unknown10;
-/*012*/ uint32 	quanity;
+/*012*/ uint32 	quantity;
 /*016*/ uint32	tribute_master_id;
 /*020*/ uint32 	unknown20;
 /*024*/ uint32	guild_id;
@@ -3670,21 +3670,21 @@ struct GuildTributeDonateItemReply_Struct {
 /*006*/ uint16 	SubIndex;
 /*008*/	uint16	AugIndex;
 /*010*/	uint16	unknown10;
-/*012*/ uint32	quanity;
+/*012*/ uint32	quantity;
 /*016*/ uint32	unknown20;
 /*020*/	uint32	favor;
 };
 
 struct GuildTributeDonatePlatRequest_Struct {
-/*000*/	uint32	quanity;
-/*004*/	uint32	tribute_master_id;
+/*000*/	uint32 quantity;
+/*004*/	uint32 tribute_master_id;
 /*008*/ uint32	unknown1;
 /*012*/	uint32  guild_id;
 /*016*/ uint32  unknown2;
 };
 
 struct GuildTributeDonatePlatReply_Struct {
-	/*000*/ uint32	quanity;
+	/*000*/ uint32	quantity;
 	/*004*/ uint32	unknown2;
 	/*008*/	uint32	favor;
 };

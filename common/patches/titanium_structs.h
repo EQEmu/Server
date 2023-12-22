@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -1425,7 +1425,7 @@ struct GuildUpdate_Struct {
 
 struct GuildTributeDonateItemRequest_Struct {
 	/*000*/ uint32 	Slot;
-	/*004*/ uint32 	quanity;
+	/*004*/ uint32 	quantity;
 	/*008*/ uint32	tribute_master_id;
 	/*012*/ uint32 	unknown8;
 	/*016*/ uint32	guild_id;
@@ -1435,7 +1435,7 @@ struct GuildTributeDonateItemRequest_Struct {
 
 struct GuildTributeDonateItemReply_Struct {
 	/*000*/ uint32	slot;
-	/*004*/ uint32	quanity;
+	/*004*/ uint32	quantity;
 	/*008*/ uint32	unknown8;
 	/*012*/	uint32	favor;
 };

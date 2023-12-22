@@ -1464,7 +1464,7 @@ namespace RoF2
 		OUT(Type);
 		OUT(SubIndex);
 		OUT(AugIndex);
-		OUT(quanity);
+		OUT(quantity);
 		OUT(unknown10);
 		OUT(unknown20);
 		OUT(favor);
@@ -5018,7 +5018,7 @@ namespace RoF2
 		IN(SubIndex);
 		IN(AugIndex);
 		IN(Unknown10);
-		IN(quanity);
+		IN(quantity);
 		IN(tribute_master_id);
 		IN(unknown20);
 		IN(guild_id);
