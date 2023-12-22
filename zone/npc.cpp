@@ -1058,7 +1058,7 @@ bool NPC::Process()
 	    NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
 		// Some cases like flash of light used for aggro haven't set target
 		if (!GetTarget()) {
-			SetTarget(hate_list.GetEntWithMostHateOnList(this));
+			SetTarget(hate_list.GetMobWithMostHateOnList(this));
 		}
 		AIYellForHelp(this, GetTarget());
 		if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled())

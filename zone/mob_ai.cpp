@@ -769,7 +769,7 @@ void Client::AI_Process()
 		{
 			if(AI_target_check_timer->Check())
 			{
-				SetTarget(hate_list.GetEntWithMostHateOnList(this));
+				SetTarget(hate_list.GetMobWithMostHateOnList(this));
 			}
 		}
 
@@ -1073,12 +1073,12 @@ void Mob::AI_Process() {
 
 				if (IsFocused()) {
 					if (!target) {
-						SetTarget(hate_list.GetEntWithMostHateOnList(this));
+						SetTarget(hate_list.GetMobWithMostHateOnList(this));
 					}
 				}
 				else {
 					if (!ImprovedTaunt())
-						SetTarget(hate_list.GetEntWithMostHateOnList(this));
+						SetTarget(hate_list.GetMobWithMostHateOnList(this));
 				}
 
 			}

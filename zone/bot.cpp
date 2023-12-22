@@ -2902,12 +2902,12 @@ void Bot::AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, fl
 			}
 		} else {
 			// This will keep bots on target for now..but, future updates will allow for rooting/stunning
-			if (auto escaping = hate_list.GetEscapingEntOnHateList(leash_owner, leash_distance)) {
+			if (auto escaping = hate_list.GetEscapingMobOnHateList(leash_owner, leash_distance)) {
 				SetTarget(escaping);
 			}
 
 			if (!GetTarget()) {
-				auto most_hate = hate_list.GetEntWithMostHateOnList(this, nullptr, true);
+				auto most_hate = hate_list.GetMobWithMostHateOnList(this, nullptr, true);
 				if (most_hate) {
 					SetTarget(most_hate);
 				}

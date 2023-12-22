@@ -225,6 +225,9 @@ public:
 	Lua_HateList GetHateListByDistance();
 	Lua_HateList GetHateListByDistance(uint32 distance);
 	Lua_Mob GetHateTop();
+	Lua_Bot GetHateTopBot();
+	Lua_Client GetHateTopClient();
+	Lua_NPC GetHateTopNPC();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
 	Lua_Bot GetHateRandomBot();

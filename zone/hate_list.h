@@ -43,10 +43,10 @@ public:
 
 	Mob *GetClosestEntOnHateList(Mob *hater, bool skip_mezzed = false, EntityFilterType entity_type = EntityFilterType::All);
 	Mob *GetDamageTopOnHateList(Mob *hater); // didn't add 'skip_mezzed' due to calls being in ::Death()
-	Mob *GetEntWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false);
-	Mob *GetRandomEntOnHateList(bool skip_mezzed = false);
-	Mob *GetEntWithMostHateOnList(bool skip_mezzed = false);
-	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
+	Mob *GetMobWithMostHateOnList(Mob *center, Mob *skip = nullptr, bool skip_mezzed = false, EntityFilterType entity_type = EntityFilterType::All);
+	Mob *GetRandomMobOnHateList(bool skip_mezzed = false);
+	Mob *GetMobWithMostHateOnList(bool skip_mezzed = false);
+	Mob *GetEscapingMobOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
 	Bot* GetRandomBotOnHateList(bool skip_mezzed = false);
 	Client *GetRandomClientOnHateList(bool skip_mezzed = false);
