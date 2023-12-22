@@ -221,8 +221,8 @@ void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 
 	t->client_id = client_id;
 	t->tribute_id = tribute_id;
-	memcpy(t->desc, td.description.c_str(), len);
-	t->desc[len] = '\0';
+	memcpy(t->description, td.description.c_str(), len);
+	t->description[len] = '\0';
 
 	QueuePacket(&outapp);
 }

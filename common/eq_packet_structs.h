@@ -3690,9 +3690,9 @@ struct GuildTributeDonatePlatReply_Struct {
 };
 
 struct SelectTributeReply_Struct {
-	uint32	client_id;	//echoed from request.
-	uint32	tribute_id;
-	char		desc[0];
+	uint32 client_id;    //echoed from request.
+	uint32 tribute_id;
+	char   description[0];
 };
 
 struct TributeInfo_Struct {
