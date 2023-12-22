@@ -215,6 +215,7 @@ RULE_BOOL(Character, EnableRaidEXPModifier, true, "Enable or disable the raid ex
 RULE_BOOL(Character, EnableRaidMemberEXPModifier, true, "Enable or disable the raid experience modifier based on members in raid, default is true")
 RULE_BOOL(Character, LeaveCursorMoneyOnCorpse, false, "Enable or disable leaving cursor money on player corpses")
 RULE_BOOL(Character, ItemExtraSkillDamageCalcAsPercent, false, "If enabled, apply Item Extra Skill Damage as Percentage-based modifiers")
+RULE_BOOL(Character, UseForageCommonFood, true, "If enabled, use the common foods specified in the code.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
