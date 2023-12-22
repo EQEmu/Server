@@ -1344,6 +1344,21 @@ Mob* Perl_Mob_GetHateTop(Mob* self) // @categories Hate and Aggro
 	return self->GetHateTop();
 }
 
+Bot* Perl_Mob_GetHateTopBot(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateTopBot();
+}
+
+Client* Perl_Mob_GetHateTopClient(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateTopClient();
+}
+
+NPC* Perl_Mob_GetHateTopNPC(Mob* self) // @categories Hate and Aggro
+{
+	return self->GetHateTopNPC();
+}
+
 Mob* Perl_Mob_GetHateDamageTop(Mob* self, Mob* other) // @categories Hate and Aggro
 {
 	return self->GetHateDamageTop(other);
@@ -3581,6 +3596,9 @@ void perl_register_mob()
 	package.add("GetHateRandomClient", &Perl_Mob_GetHateRandomClient);
 	package.add("GetHateRandomNPC", &Perl_Mob_GetHateRandomNPC);
 	package.add("GetHateTop", &Perl_Mob_GetHateTop);
+	package.add("GetHateTopBot", &Perl_Mob_GetHateTopBot);
+	package.add("GetHateTopClient", &Perl_Mob_GetHateTopClient);
+	package.add("GetHateTopNPC", &Perl_Mob_GetHateTopNPC);
 	package.add("GetHeading", &Perl_Mob_GetHeading);
 	package.add("GetHelmTexture", &Perl_Mob_GetHelmTexture);
 	package.add("GetHerosForgeModel", &Perl_Mob_GetHerosForgeModel);

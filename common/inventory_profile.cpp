@@ -801,34 +801,35 @@ int16 EQ::InventoryProfile::HasItemByLoreGroup(uint32 loregroup, uint8 where)
 // Returns slot_id when there's one available, else SLOT_INVALID
 int16 EQ::InventoryProfile::FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size, bool is_arrow)
 {
-	// Check basic inventory
-	for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
-		if ((((uint64)1 << i) & m_lookup->PossessionsBitmask) == 0)
-			continue;
+	const int16 last_bag_slot = RuleI(World, ExpansionSettings) & EQ::expansions::bitHoT ? EQ::invslot::slotGeneral10 : EQ::invslot::slotGeneral8;
 
-		if (!GetItem(i))
-			// Found available slot in personal inventory
-			return i;
+	for (int16 i = invslot::GENERAL_BEGIN; i <= last_bag_slot; i++) { // Check basic inventory
+		if ((((uint64) 1 << i) & m_lookup->PossessionsBitmask) == 0) {
+			continue;
+		}
+
+		if (!GetItem(i)) {
+			return i; // Found available slot in personal inventory
+		}
 	}
 
 	if (!for_bag) {
-		for (int16 i = invslot::GENERAL_BEGIN; i <= invslot::GENERAL_END; i++) {
-			if ((((uint64)1 << i) & m_lookup->PossessionsBitmask) == 0)
+		for (int16 i = invslot::GENERAL_BEGIN; i <= last_bag_slot; i++) {
+			if ((((uint64) 1 << i) & m_lookup->PossessionsBitmask) == 0) {
 				continue;
+			}
 
-			const ItemInstance* inst = GetItem(i);
-			if (inst && inst->IsClassBag() && inst->GetItem()->BagSize >= min_size)
-			{
-				if (inst->GetItem()->BagType == item::BagTypeQuiver && inst->GetItem()->ItemType != item::ItemTypeArrow)
-				{
+			const auto *inst = GetItem(i);
+			if (inst && inst->IsClassBag() && inst->GetItem()->BagSize >= min_size) {
+				if (inst->GetItem()->BagType == item::BagTypeQuiver &&
+					inst->GetItem()->ItemType != item::ItemTypeArrow) {
 					continue;
 				}
 
-				int16 base_slot_id = InventoryProfile::CalcSlotId(i, invbag::SLOT_BEGIN);
+				const int16 base_slot_id = InventoryProfile::CalcSlotId(i, invbag::SLOT_BEGIN);
 
-				uint8 slots = inst->GetItem()->BagSlots;
-				uint8 j;
-				for (j = invbag::SLOT_BEGIN; j<slots; j++) {
+				const uint8 slots = inst->GetItem()->BagSlots;
+				for (uint8 j = invbag::SLOT_BEGIN; j < slots; j++) {
 					if (!GetItem(base_slot_id + j)) {
 						// Found available slot within bag
 						return (base_slot_id + j);
