@@ -29,6 +29,7 @@ public:
 		uint8_t     banker;
 		std::string public_note;
 		uint8_t     alt;
+		uint8_t     online;
 	};
 
 	static std::string PrimaryKey()
@@ -48,6 +49,7 @@ public:
 			"banker",
 			"public_note",
 			"alt",
+			"online",
 		};
 	}
 
@@ -63,6 +65,7 @@ public:
 			"banker",
 			"public_note",
 			"alt",
+			"online",
 		};
 	}
 
@@ -112,6 +115,7 @@ public:
 		e.banker         = 0;
 		e.public_note    = "";
 		e.alt            = 0;
+		e.online         = 0;
 
 		return e;
 	}
@@ -157,6 +161,7 @@ public:
 			e.banker         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 			e.public_note    = row[7] ? row[7] : "";
 			e.alt            = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.online         = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
 
 			return e;
 		}
@@ -199,6 +204,7 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.banker));
 		v.push_back(columns[7] + " = '" + Strings::Escape(e.public_note) + "'");
 		v.push_back(columns[8] + " = " + std::to_string(e.alt));
+		v.push_back(columns[9] + " = " + std::to_string(e.online));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -229,6 +235,7 @@ public:
 		v.push_back(std::to_string(e.banker));
 		v.push_back("'" + Strings::Escape(e.public_note) + "'");
 		v.push_back(std::to_string(e.alt));
+		v.push_back(std::to_string(e.online));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -267,6 +274,7 @@ public:
 			v.push_back(std::to_string(e.banker));
 			v.push_back("'" + Strings::Escape(e.public_note) + "'");
 			v.push_back(std::to_string(e.alt));
+			v.push_back(std::to_string(e.online));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -309,6 +317,7 @@ public:
 			e.banker         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 			e.public_note    = row[7] ? row[7] : "";
 			e.alt            = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.online         = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -342,6 +351,7 @@ public:
 			e.banker         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
 			e.public_note    = row[7] ? row[7] : "";
 			e.alt            = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.online         = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
