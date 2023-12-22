@@ -1675,9 +1675,9 @@ void ClientList::SendCharacterMessageID(ClientListEntry* character,
 }
 
 void ClientList::GetGuildClientList(Json::Value& response, uint32 guild_id)
-{	
+{
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
-	
+
 	Iterator.Reset();
 
 	while (Iterator.MoreElements()) {
@@ -1688,62 +1688,62 @@ void ClientList::GetGuildClientList(Json::Value& response, uint32 guild_id)
 		}
 		Json::Value row;
 
-		row["account_id"] = cle->AccountID();
-		row["account_name"] = cle->AccountName();
-		row["admin"] = cle->Admin();
-		row["id"] = cle->GetID();
-		row["ip"] = cle->GetIP();
+		row["account_id"]             = cle->AccountID();
+		row["account_name"]           = cle->AccountName();
+		row["admin"]                  = cle->Admin();
+		row["id"]                     = cle->GetID();
+		row["ip"]                     = cle->GetIP();
 		row["loginserver_account_id"] = cle->LSAccountID();
-		row["loginserver_id"] = cle->LSID();
-		row["loginserver_name"] = cle->LSName();
-		row["online"] = cle->Online();
-		row["world_admin"] = cle->WorldAdmin();
+		row["loginserver_id"]         = cle->LSID();
+		row["loginserver_name"]       = cle->LSName();
+		row["online"]                 = cle->Online();
+		row["world_admin"]            = cle->WorldAdmin();
 
 		auto server = cle->Server();
 		if (server) {
-			row["server"]["client_address"] = server->GetCAddress();
+			row["server"]["client_address"]       = server->GetCAddress();
 			row["server"]["client_local_address"] = server->GetCLocalAddress();
-			row["server"]["client_port"] = server->GetCPort();
-			row["server"]["compile_time"] = server->GetCompileTime();
-			row["server"]["id"] = server->GetID();
-			row["server"]["instance_id"] = server->GetInstanceID();
-			row["server"]["ip"] = server->GetIP();
-			row["server"]["is_booting"] = server->IsBootingUp();
-			row["server"]["launch_name"] = server->GetLaunchName();
-			row["server"]["launched_name"] = server->GetLaunchedName();
-			row["server"]["number_players"] = server->NumPlayers();
-			row["server"]["port"] = server->GetPort();
-			row["server"]["previous_zone_id"] = server->GetPrevZoneID();
-			row["server"]["static_zone"] = server->IsStaticZone();
-			row["server"]["uui"] = server->GetUUID();
-			row["server"]["zone_id"] = server->GetZoneID();
-			row["server"]["zone_long_name"] = server->GetZoneLongName();
-			row["server"]["zone_name"] = server->GetZoneName();
-			row["server"]["zone_os_pid"] = server->GetZoneOSProcessID();
+			row["server"]["client_port"]          = server->GetCPort();
+			row["server"]["compile_time"]         = server->GetCompileTime();
+			row["server"]["id"]                   = server->GetID();
+			row["server"]["instance_id"]          = server->GetInstanceID();
+			row["server"]["ip"]                   = server->GetIP();
+			row["server"]["is_booting"]           = server->IsBootingUp();
+			row["server"]["launch_name"]          = server->GetLaunchName();
+			row["server"]["launched_name"]        = server->GetLaunchedName();
+			row["server"]["number_players"]       = server->NumPlayers();
+			row["server"]["port"]                 = server->GetPort();
+			row["server"]["previous_zone_id"]     = server->GetPrevZoneID();
+			row["server"]["static_zone"]          = server->IsStaticZone();
+			row["server"]["uui"]                  = server->GetUUID();
+			row["server"]["zone_id"]              = server->GetZoneID();
+			row["server"]["zone_long_name"]       = server->GetZoneLongName();
+			row["server"]["zone_name"]            = server->GetZoneName();
+			row["server"]["zone_os_pid"]          = server->GetZoneOSProcessID();
 		}
 		else {
 			row["server"] = Json::Value();
 		}
-		row["anon"] = cle->Anon();
-		row["character_id"] = cle->CharID();
-		row["class"] = cle->class_();
-		row["client_version"] = cle->GetClientVersion();
-		row["gm"] = cle->GetGM();
-		row["guild_id"] = cle->GuildID();
-		row["guild_rank"] = cle->GuildRank();
+		row["anon"]                 = cle->Anon();
+		row["character_id"]         = cle->CharID();
+		row["class"]                = cle->class_();
+		row["client_version"]       = cle->GetClientVersion();
+		row["gm"]                   = cle->GetGM();
+		row["guild_id"]             = cle->GuildID();
+		row["guild_rank"]           = cle->GuildRank();
 		row["guild_tribute_opt_in"] = cle->GuildTributeOptIn();
-		row["instance"] = cle->instance();
-		row["is_local_client"] = cle->IsLocalClient();
-		row["level"] = cle->level();
-		row["lfg"] = cle->LFG();
-		row["lfg_comments"] = cle->GetLFGComments();
-		row["lfg_from_level"] = cle->GetLFGFromLevel();
-		row["lfg_match_filter"] = cle->GetLFGMatchFilter();
-		row["lfg_to_level"] = cle->GetLFGToLevel();
-		row["name"] = cle->name();
-		row["race"] = cle->race();
-		row["tells_off"] = cle->TellsOff();
-		row["zone"] = cle->zone();
+		row["instance"]             = cle->instance();
+		row["is_local_client"]      = cle->IsLocalClient();
+		row["level"]                = cle->level();
+		row["lfg"]                  = cle->LFG();
+		row["lfg_comments"]         = cle->GetLFGComments();
+		row["lfg_from_level"]       = cle->GetLFGFromLevel();
+		row["lfg_match_filter"]     = cle->GetLFGMatchFilter();
+		row["lfg_to_level"]         = cle->GetLFGToLevel();
+		row["name"]                 = cle->name();
+		row["race"]                 = cle->race();
+		row["tells_off"]            = cle->TellsOff();
+		row["zone"]                 = cle->zone();
 
 		response.append(row);
 
@@ -1751,11 +1751,11 @@ void ClientList::GetGuildClientList(Json::Value& response, uint32 guild_id)
 	}
 }
 
-std::map<uint32, ClientListEntry*> ClientList::GetGuildClientsWithTributeOptIn(uint32 guild_id)
+std::map<uint32, ClientListEntry *> ClientList::GetGuildClientsWithTributeOptIn(uint32 guild_id)
 {
-	std::map<uint32, ClientListEntry*> guild_members;
+	std::map<uint32, ClientListEntry *> guild_members;
 
-	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
+	LinkedListIterator<ClientListEntry *> Iterator(clientlist);
 	Iterator.Reset();
 
 	while (Iterator.MoreElements()) {
@@ -1769,10 +1769,11 @@ std::map<uint32, ClientListEntry*> ClientList::GetGuildClientsWithTributeOptIn(u
 	return guild_members;
 }
 
-std::map<uint32, ClientListEntry*> ClientList::GetGuildClientList(uint32 guild_id) {
-	std::map<uint32, ClientListEntry*> guild_members;
+std::map<uint32, ClientListEntry *> ClientList::GetGuildClientList(uint32 guild_id)
+{
+	std::map<uint32, ClientListEntry *> guild_members;
 
-	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
+	LinkedListIterator<ClientListEntry *> Iterator(clientlist);
 	Iterator.Reset();
 
 	while (Iterator.MoreElements()) {
@@ -1786,7 +1787,7 @@ std::map<uint32, ClientListEntry*> ClientList::GetGuildClientList(uint32 guild_i
 	return guild_members;
 }
 
-//Client* ClientList::GetClient(uint32 char_id) 
+//Client* ClientList::GetClient(uint32 char_id)
 //{
 //	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
 //	Iterator.Reset();
