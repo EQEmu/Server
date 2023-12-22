@@ -63,7 +63,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "gm_commands/object_manipulation.h"
 #include "client.h"
 #include "../common/repositories/account_repository.h"
-#include "../common/repositories/guild_tributes_repository.h"
 
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
@@ -74,7 +73,7 @@ extern volatile bool is_zone_loaded;
 extern WorldServer worldserver;
 extern PetitionList petition_list;
 extern EntityList entity_list;
-typedef void (Client::* ClientPacketProc)(const EQApplicationPacket* app);
+typedef void (Client::*ClientPacketProc)(const EQApplicationPacket *app);
 
 
 //Use a map for connecting opcodes since it dosent get used a lot and is sparse
@@ -100,7 +99,8 @@ void MapOpcodes()
 	ConnectingOpcodes[OP_SendAAStats] = &Client::Handle_Connect_OP_SendAAStats;
 	ConnectingOpcodes[OP_SendAATable] = &Client::Handle_Connect_OP_SendAATable;
 	ConnectingOpcodes[OP_SendExpZonein] = &Client::Handle_Connect_OP_SendExpZonein;
-	ConnectingOpcodes[OP_RequestGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
+	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes;
+	ConnectingOpcodes[OP_SendGuildTributes] = &Client::Handle_Connect_OP_SendGuildTributes; // I guess it didn't believe us with the first assignment?
 	ConnectingOpcodes[OP_SendTributes] = &Client::Handle_Connect_OP_SendTributes;
 	ConnectingOpcodes[OP_SetServerFilter] = &Client::Handle_Connect_OP_SetServerFilter;
 	ConnectingOpcodes[OP_SpawnAppearance] = &Client::Handle_Connect_OP_SpawnAppearance;
@@ -260,13 +260,6 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
 	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
 	ConnectedOpcodes[OP_GuildWar] = &Client::Handle_OP_GuildWar;
-	ConnectedOpcodes[OP_GuildSelectTribute] = &Client::Handle_OP_GuildTributeSelect;
-	ConnectedOpcodes[OP_GuildModifyBenefits] = &Client::Handle_OP_GuildTributeModifyBenefits;
-	ConnectedOpcodes[OP_GuildOptInOut] = &Client::Handle_OP_GuildTributeOptInOut;
-	ConnectedOpcodes[OP_GuildSaveActiveTributes] = &Client::Handle_OP_GuildTributeSaveActiveTributes;
-	ConnectedOpcodes[OP_GuildTributeToggleReq] = &Client::Handle_OP_GuildTributeToggle;
-	ConnectedOpcodes[OP_GuildTributeDonateItem] = &Client::Handle_OP_GuildTributeDonateItem;
-	ConnectedOpcodes[OP_GuildTributeDonatePlat] = &Client::Handle_OP_GuildTributeDonatePlat;
 	ConnectedOpcodes[OP_Heartbeat] = &Client::Handle_OP_Heartbeat;
 	ConnectedOpcodes[OP_Hide] = &Client::Handle_OP_Hide;
 	ConnectedOpcodes[OP_HideCorpse] = &Client::Handle_OP_HideCorpse;
@@ -364,7 +357,6 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
 
-
 	// Use or Ignore sense heading based on rule.
 	bool train = RuleB(Skills, TrainSenseHeading);
 
@@ -426,13 +418,13 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_UnderWorld] = &Client::Handle_OP_UnderWorld;
 
 	// shared tasks
-	ConnectedOpcodes[OP_SharedTaskRemovePlayer] = &Client::Handle_OP_SharedTaskRemovePlayer;
-	ConnectedOpcodes[OP_SharedTaskAddPlayer] = &Client::Handle_OP_SharedTaskAddPlayer;
-	ConnectedOpcodes[OP_SharedTaskMakeLeader] = &Client::Handle_OP_SharedTaskMakeLeader;
+	ConnectedOpcodes[OP_SharedTaskRemovePlayer]   = &Client::Handle_OP_SharedTaskRemovePlayer;
+	ConnectedOpcodes[OP_SharedTaskAddPlayer]      = &Client::Handle_OP_SharedTaskAddPlayer;
+	ConnectedOpcodes[OP_SharedTaskMakeLeader]     = &Client::Handle_OP_SharedTaskMakeLeader;
 	ConnectedOpcodes[OP_SharedTaskInviteResponse] = &Client::Handle_OP_SharedTaskInviteResponse;
-	ConnectedOpcodes[OP_SharedTaskAcceptNew] = &Client::Handle_OP_SharedTaskAccept;
-	ConnectedOpcodes[OP_SharedTaskQuit] = &Client::Handle_OP_SharedTaskQuit;
-	ConnectedOpcodes[OP_SharedTaskPlayerList] = &Client::Handle_OP_SharedTaskPlayerList;
+	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
+	ConnectedOpcodes[OP_SharedTaskQuit]           = &Client::Handle_OP_SharedTaskQuit;
+	ConnectedOpcodes[OP_SharedTaskPlayerList]     = &Client::Handle_OP_SharedTaskPlayerList;
 
 	LogInfo("Mapped [{}] client opcode handlers", _maxEmuOpcode);
 }
@@ -450,7 +442,7 @@ void ClearMappedOpcode(EmuOpcode op)
 }
 
 // client methods
-int Client::HandlePacket(const EQApplicationPacket* app)
+int Client::HandlePacket(const EQApplicationPacket *app)
 {
 	auto o = eqs->GetOpcodeManager();
 	LogPacketClientServer(
@@ -474,7 +466,7 @@ int Client::HandlePacket(const EQApplicationPacket* app)
 	case CLIENT_CONNECTING: {
 		if (ConnectingOpcodes.count(opcode) != 1) {
 			if (parse->PlayerHasQuestSub(EVENT_UNHANDLED_OPCODE)) {
-				std::vector<std::any> args = { const_cast<EQApplicationPacket*>(app) };
+				std::vector<std::any> args = {const_cast<EQApplicationPacket *>(app)};
 				parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 1, &args);
 			}
 
@@ -499,7 +491,7 @@ int Client::HandlePacket(const EQApplicationPacket* app)
 		p = ConnectedOpcodes[opcode];
 		if (p == nullptr) {
 			if (parse->PlayerHasQuestSub(EVENT_UNHANDLED_OPCODE)) {
-				std::vector<std::any> args = { const_cast<EQApplicationPacket*>(app) };
+				std::vector<std::any> args = {const_cast<EQApplicationPacket *>(app)};
 				parse->EventPlayer(EVENT_UNHANDLED_OPCODE, this, "", 0, &args);
 			}
 
@@ -545,8 +537,16 @@ void Client::CompleteConnect()
 	LoadClientTaskState();
 
 	if (IsInAGuild()) {
-		guild_mgr.DBSetMemberOnline(CharacterID(), true);
 		uint8 rank = GuildRank();
+		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
+		{
+			switch (rank) {
+			case 0: { rank = 5; break; }	// GUILD_MEMBER	0
+			case 1: { rank = 3; break; }	// GUILD_OFFICER 1
+			case 2: { rank = 1; break; }	// GUILD_LEADER	2
+			default: { break; }				// GUILD_NONE
+			}
+		}
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
@@ -587,7 +587,7 @@ void Client::CompleteConnect()
 	}
 
 	uint32 raidid = database.GetRaidID(GetName());
-	Raid* raid = nullptr;
+	Raid *raid = nullptr;
 	if (raidid > 0) {
 		raid = entity_list.GetRaidByID(raidid);
 		if (!raid) {
@@ -648,7 +648,7 @@ void Client::CompleteConnect()
 		}
 	}
 	else {
-		Group* group = nullptr;
+		Group *group = nullptr;
 		group = GetGroup();
 		if (group)
 			group->SendHPManaEndPacketsTo(this);
@@ -663,7 +663,7 @@ void Client::CompleteConnect()
 		if (!IsValidSpell(buffs[j1].spellid))
 			continue;
 
-		const SPDat_Spell_Struct& spell = spells[buffs[j1].spellid];
+		const SPDat_Spell_Struct &spell = spells[buffs[j1].spellid];
 
 		int NimbusEffect = GetSpellNimbusEffect(buffs[j1].spellid);
 		if (NimbusEffect) {
@@ -675,7 +675,7 @@ void Client::CompleteConnect()
 			switch (spell.effect_id[x1]) {
 			case SE_Illusion: {
 				if (buffs[j1].persistant_buff) {
-					Mob* caster = entity_list.GetMobID(buffs[j1].casterid);
+					Mob *caster = entity_list.GetMobID(buffs[j1].casterid);
 					ApplySpellEffectIllusion(spell.id, caster, j1, spell.base_value[x1], spell.limit_value[x1], spell.max_value[x1]);
 				}
 				break;
@@ -760,7 +760,7 @@ void Client::CompleteConnect()
 
 	entity_list.SendTraders(this);
 
-	Mob* pet = GetPet();
+	Mob *pet = GetPet();
 	if (pet) {
 		pet->SendPetBuffsToClient();
 	}
@@ -852,36 +852,9 @@ void Client::CompleteConnect()
 		entity_list.SendFindableNPCList(this);
 
 	if (IsInAGuild()) {
+		SendGuildRanks();
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
-//		guild_mgr.RequestOnlineGuildMembers(CharacterID(), GuildID());
-		if (GetGuildListDirty()) {
-			SendGuildMembersList();
-		}
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-			SendGuildRanks();
-			SendGuildRankNames();
-		}
-		RequestGuildActiveTributes(GuildID());
-		RequestGuildFavorAndTimer(GuildID());
-
-		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-		if (guild) {
-			ServerPacket* out = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
-			GuildTributeMemberToggle* data = (GuildTributeMemberToggle*)out->pBuffer;
-			CharGuildInfo gci;
-			guild_mgr.GetCharInfo(CharacterID(), gci);
-
-			data->char_id = CharacterID();
-			data->command = 0x2fb;
-			data->tribute_toggle = GuildTributeOptIn();
-			data->guild_id = GuildID();
-			data->no_donations = gci.total_tribute;
-			strncpy(data->player_name, GetCleanName(), strlen(GetCleanName()));
-			data->time_remaining = guild->tribute.timer.GetRemainingTime();
-			worldserver.SendPacket(out);
-			safe_delete(out);
-		}
+		guild_mgr.RequestOnlineGuildMembers(CharacterID(), GuildID());
 	}
 
 	SendDynamicZoneUpdates();
@@ -893,7 +866,7 @@ void Client::CompleteConnect()
 	delete pack;
 
 	if (IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater) {
-		EQApplicationPacket* outapp = MakeBuffsPacket(false);
+		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);
 	}
 
@@ -921,8 +894,6 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	entity_list.SendAllGuildTitleDisplay(GuildID());
-
 	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}
@@ -936,11 +907,11 @@ void Client::CompleteConnect()
 			sizeof(ServerSharedTaskRequestMemberlist_Struct)
 		);
 
-		auto* r = (ServerSharedTaskRequestMemberlist_Struct*)p->pBuffer;
+		auto *r = (ServerSharedTaskRequestMemberlist_Struct *) p->pBuffer;
 
 		// fill
 		r->source_character_id = CharacterID();
-		r->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+		r->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
 
 		// send
 		worldserver.SendPacket(p);
@@ -973,7 +944,7 @@ return;
 }
 */
 
-void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ApproveZone_Struct)) {
 		LogError("Invalid size on OP_ApproveZone: Expected [{}], Got [{}]",
@@ -986,7 +957,7 @@ void Client::Handle_Connect_OP_ApproveZone(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientError_Struct)) {
 		LogError("Invalid size on OP_ClientError: Expected [{}], Got [{}]",
@@ -1004,7 +975,7 @@ void Client::Handle_Connect_OP_ClientError(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket *app)
 {
 	conn_state = ClientReadyReceived;
 	if (!Spawned())
@@ -1013,7 +984,7 @@ void Client::Handle_Connect_OP_ClientReady(const EQApplicationPacket* app)
 	SendHPUpdate();
 }
 
-void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket *app)
 {
 	//Once we get this, the client thinks it is connected
 	//So give it the benefit of the doubt and move to connected
@@ -1021,7 +992,7 @@ void Client::Handle_Connect_OP_ClientUpdate(const EQApplicationPacket* app)
 	Handle_Connect_OP_ClientReady(app);
 }
 
-void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket *app)
 {
 	conn_state = ClientSpawnRequested;
 
@@ -1066,7 +1037,7 @@ void Client::Handle_Connect_OP_ReqClientSpawn(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket *app)
 {
 	conn_state = NewZoneRequested;
 
@@ -1089,7 +1060,7 @@ void Client::Handle_Connect_OP_ReqNewZone(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket *app)
 {
 	SendAlternateAdvancementTimers();
 	auto outapp = new EQApplicationPacket(OP_SendAAStats, 0);
@@ -1098,13 +1069,13 @@ void Client::Handle_Connect_OP_SendAAStats(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SendAATable(const EQApplicationPacket *app)
 {
 	SendAlternateAdvancementTable();
 	return;
 }
 
-void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket *app)
 {
 	auto outapp = new EQApplicationPacket(OP_SendExpZonein, 0);
 	QueuePacket(outapp);
@@ -1119,19 +1090,19 @@ void Client::Handle_Connect_OP_SendExpZonein(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_SendGuildTributes(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SendGuildTributes(const EQApplicationPacket *app)
 {
 	SendGuildTributes();
 	return;
 }
 
-void Client::Handle_Connect_OP_SendTributes(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SendTributes(const EQApplicationPacket *app)
 {
 	SendTributes();
 	return;
 }
 
-void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SetServerFilter_Struct)) {
 		LogError("Received invalid sized OP_SetServerFilter");
@@ -1143,12 +1114,12 @@ void Client::Handle_Connect_OP_SetServerFilter(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_SpawnAppearance(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_Connect_OP_TGB(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_TGB(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		LogError("Invalid size on OP_TGB: Expected [{}], Got [{}]",
@@ -1159,18 +1130,18 @@ void Client::Handle_Connect_OP_TGB(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_UpdateAA(const EQApplicationPacket *app)
 {
 	SendAlternateAdvancementPoints();
 }
 
-void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_WearChange(const EQApplicationPacket *app)
 {
 	//not sure what these are supposed to mean to us.
 	return;
 }
 
-void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 {
 	// New for SoF+
 	auto outapp = new EQApplicationPacket(OP_WorldObjectsSent, 0);
@@ -1188,7 +1159,7 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
 {
 	auto outapp = new EQApplicationPacket(OP_0x0347, 0);
 	QueuePacket(outapp);
@@ -1196,11 +1167,11 @@ void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
+void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientZoneEntry_Struct))
 		return;
-	ClientZoneEntry_Struct* cze = (ClientZoneEntry_Struct*)app->pBuffer;
+	ClientZoneEntry_Struct *cze = (ClientZoneEntry_Struct *)app->pBuffer;
 
 	if (strlen(cze->char_name) > 63)
 		return;
@@ -1255,20 +1226,20 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 		strn0cpy(account_name, a.name.c_str(), sizeof(account_name));
 		strn0cpy(loginserver, a.ls_id.c_str(), sizeof(loginserver));
 
-		admin = a.status;
-		lsaccountid = a.lsaccount_id;
-		gmspeed = a.gmspeed;
-		revoked = a.revoked;
-		gm_hide_me = a.hideme;
+		admin            = a.status;
+		lsaccountid      = a.lsaccount_id;
+		gmspeed          = a.gmspeed;
+		revoked          = a.revoked;
+		gm_hide_me       = a.hideme;
 		account_creation = a.time_creation;
-		gminvul = a.invulnerable;
-		flymode = static_cast<GravityBehavior>(a.flymode);
-		tellsoff = gm_hide_me;
+		gminvul          = a.invulnerable;
+		flymode          = static_cast<GravityBehavior>(a.flymode);
+		tellsoff         = gm_hide_me;
 	}
 
 	/* Load Character Data */
 	query = fmt::format(
-		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled`, `tribute_enable` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
+		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
 		cid
 	);
 	auto results = database.QueryDatabase(query);
@@ -1276,7 +1247,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 		if (row[4] && Strings::ToInt(row[4]) > 0) {
 			guild_id = Strings::ToInt(row[4]);
 			guildrank = row[5] ? Strings::ToInt(row[5]) : GUILD_RANK_NONE;
-			guild_tribute_opt_in = row[7] ? Strings::ToBool(row[7]) : 0;
 		}
 
 		SetEXPEnabled(atobool(row[6]));
@@ -1314,7 +1284,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 	// this is remnants of the old way of doing things
 	auto mail_keys = database.GetMailKey(CharacterID());
 	m_mail_key_full = mail_keys.mail_key_full;
-	m_mail_key = mail_keys.mail_key;
+	m_mail_key      = mail_keys.mail_key;
 
 	/* Load AdventureStats */
 	AdventureStats_Struct as;
@@ -1405,8 +1375,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 	uint8 client_max_level = 0;
 	if (RuleB(Character, PerCharacterQglobalMaxLevel)) {
 		client_max_level = GetCharMaxLevelFromQGlobal();
-	}
-	else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
+	} else if (RuleB(Character, PerCharacterBucketMaxLevel)) {
 		client_max_level = GetCharMaxLevelFromBucket();
 	}
 	SetClientMaxLevel(client_max_level);
@@ -1423,16 +1392,26 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 	}
 	else {
 		m_pp.guild_id = GuildID();
-		CharGuildInfo cgi;
-		if (guild_mgr.GetCharInfo(CharacterID(), cgi)) {
-			m_pp.guildrank = cgi.rank;
+		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		// FIXME: RoF guild rank
+		if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+			switch (rank) {
+			case 0:
+				rank = 5;
+				break;
+			case 1:
+				rank = 3;
+				break;
+			case 2:
+				rank = 1;
+				break;
+			default:
+				break;
+			}
 		}
-		if (zone->GetZoneID() == Zones::GUILDHALL) {
-			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) ||
-				guild_mgr.GetBankerFlag(CharacterID()) ||
-				ClientVersion() >= EQ::versions::ClientVersion::RoF ? true : false
-				);
-		}
+		m_pp.guildrank = rank;
+		if (zone->GetZoneID() == Zones::GUILDHALL)
+			GuildBanker = (guild_mgr.IsGuildLeader(GuildID(), CharacterID()) || guild_mgr.GetBankerFlag(CharacterID()));
 	}
 	m_pp.guildbanker = GuildBanker;
 
@@ -1532,7 +1511,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 
 	}
 	else {	//no group id
-		//clear out the group junk in our PP
+			//clear out the group junk in our PP
 		uint32 xy = 0;
 		for (xy = 0; xy < MAX_GROUP_MEMBERS; xy++)
 			memset(m_pp.groupMembers[xy], 0, 64);
@@ -1552,7 +1531,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 		group->LearnMembers();
 
 		if (!group->GetLeader()) {
-			Client* c = entity_list.GetClientByName(ln);
+			Client *c = entity_list.GetClientByName(ln);
 			if (c) {
 				group->SetLeader(c);
 			}
@@ -1662,9 +1641,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 		database.LoadPetInfo(this);
 		if (m_petinfo.SpellID > 1 && !GetPet() && m_petinfo.SpellID <= SPDAT_RECORDS) {
 			MakePoweredPet(m_petinfo.SpellID, spells[m_petinfo.SpellID].teleport_zone, m_petinfo.petpower,
-				m_petinfo.Name, m_petinfo.size);
+						   m_petinfo.Name, m_petinfo.size);
 			if (GetPet() && GetPet()->IsNPC()) {
-				NPC* pet = GetPet()->CastToNPC();
+				NPC *pet = GetPet()->CastToNPC();
 				pet->SetPetState(m_petinfo.Buffs, m_petinfo.Items);
 				pet->CalcBonuses();
 				pet->SetHP(m_petinfo.HP);
@@ -1701,7 +1680,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 	entity_list.SendZoneCorpsesBulk(this);
 	entity_list.SendZonePVPUpdates(this);	//hack until spawn struct is fixed.
 
-	/* Time of Day packet */
+											/* Time of Day packet */
 	outapp = new EQApplicationPacket(OP_TimeOfDay, sizeof(TimeOfDay_Struct));
 	TimeOfDay_Struct* tod = (TimeOfDay_Struct*)outapp->pBuffer;
 	zone->zone_time.GetCurrentEQTimeOfDay(time(0), tod);
@@ -1730,7 +1709,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 			/* First item cursor is sent in bulk inventory packet */
 			if (iter == m_inv.cursor_cbegin())
 				continue;
-			const EQ::ItemInstance* inst = *iter;
+			const EQ::ItemInstance *inst = *iter;
 			SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 		}
 
@@ -1756,14 +1735,14 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 		auto& safereturn = dz->GetSafeReturnLocation();
 
 		auto safereturn_entry = CharacterInstanceSafereturnsRepository::NewEntity();
-		safereturn_entry.character_id = CharacterID();
+		safereturn_entry.character_id     = CharacterID();
 		safereturn_entry.instance_zone_id = zone->GetZoneID();
-		safereturn_entry.instance_id = zone->GetInstanceID();
-		safereturn_entry.safe_zone_id = safereturn.zone_id;
-		safereturn_entry.safe_x = safereturn.x;
-		safereturn_entry.safe_y = safereturn.y;
-		safereturn_entry.safe_z = safereturn.z;
-		safereturn_entry.safe_heading = safereturn.heading;
+		safereturn_entry.instance_id      = zone->GetInstanceID();
+		safereturn_entry.safe_zone_id     = safereturn.zone_id;
+		safereturn_entry.safe_x           = safereturn.x;
+		safereturn_entry.safe_y           = safereturn.y;
+		safereturn_entry.safe_z           = safereturn.z;
+		safereturn_entry.safe_heading     = safereturn.heading;
 
 		CharacterInstanceSafereturnsRepository::InsertOneOrUpdate(database, safereturn_entry);
 	}
@@ -1796,13 +1775,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 	uses to advance to the next state (sending ReqNewZone)
 	*/
 	outapp = new EQApplicationPacket(OP_Weather, 12);
-	Weather_Struct* ws = (Weather_Struct*)outapp->pBuffer;
+	Weather_Struct *ws = (Weather_Struct *)outapp->pBuffer;
 	ws->val1 = 0x000000FF;
 
 	if (zone->zone_weather == EQ::constants::WeatherTypes::Raining) {
 		ws->type = 0x31;
-	}
-	else if (zone->zone_weather == EQ::constants::WeatherTypes::Snowing) {
+	} else if (zone->zone_weather == EQ::constants::WeatherTypes::Snowing) {
 		outapp->pBuffer[8] = 0x01;
 		ws->type = EQ::constants::WeatherTypes::Snowing;
 	}
@@ -1822,7 +1800,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket* app)
 }
 
 // connected opcode handlers
-void Client::Handle_0x0193(const EQApplicationPacket* app)
+void Client::Handle_0x0193(const EQApplicationPacket *app)
 {
 	// Not sure what this opcode does. It started being sent when OP_ClientUpdate was
 	// changed to pump OP_ClientUpdate back out instead of OP_MobUpdate
@@ -1831,7 +1809,7 @@ void Client::Handle_0x0193(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_AAAction(const EQApplicationPacket* app)
+void Client::Handle_OP_AAAction(const EQApplicationPacket *app)
 {
 	LogAA("Received OP_AAAction");
 
@@ -1862,7 +1840,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket* app)
 		if (m_epp.perAA < 0 || m_epp.perAA > 100)
 			m_epp.perAA = 0;	// stop exploit with sanity check
 
-		// send an update
+								// send an update
 		SendAlternateAdvancementStats();
 		SendAlternateAdvancementTable();
 	}
@@ -1871,7 +1849,7 @@ void Client::Handle_OP_AAAction(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket* app)
+void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(AcceptNewTask_Struct)) {
@@ -1879,7 +1857,7 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	AcceptNewTask_Struct* ant = (AcceptNewTask_Struct*)app->pBuffer;
+	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
 	{
@@ -1891,7 +1869,7 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(EntityId_Struct))
 	{
@@ -1899,7 +1877,7 @@ void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket* app)
 		return;
 	}
 	EntityId_Struct* ent = (EntityId_Struct*)app->pBuffer;
-	Mob* m = entity_list.GetMob(ent->entity_id);
+	Mob * m = entity_list.GetMob(ent->entity_id);
 	if (m && m->IsNPC())
 	{
 		std::map<uint32, std::string>::iterator it;
@@ -1923,7 +1901,7 @@ void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(AdventureLeaderboardRequest_Struct))
 	{
@@ -1937,16 +1915,16 @@ void Client::Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket* ap
 
 	adventure_leaderboard_timer = new Timer(4000);
 	auto pack = new ServerPacket(ServerOP_AdventureLeaderboard, sizeof(ServerLeaderboardRequest_Struct));
-	ServerLeaderboardRequest_Struct* lr = (ServerLeaderboardRequest_Struct*)pack->pBuffer;
+	ServerLeaderboardRequest_Struct *lr = (ServerLeaderboardRequest_Struct*)pack->pBuffer;
 	strcpy(lr->player, GetName());
 
-	AdventureLeaderboardRequest_Struct* lrs = (AdventureLeaderboardRequest_Struct*)app->pBuffer;
+	AdventureLeaderboardRequest_Struct *lrs = (AdventureLeaderboardRequest_Struct*)app->pBuffer;
 	lr->type = 1 + (lrs->theme * 2) + lrs->type;
 	worldserver.SendPacket(pack);
 	delete pack;
 }
 
-void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Adventure_Purchase_Struct))
 	{
@@ -2017,26 +1995,22 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
 					cannot_afford = true;
 					ldon_theme = LDoNThemes::TAK;
 				}
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
 					ldon_theme = LDoNThemes::RUJ;
 				}
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
 					ldon_theme = LDoNThemes::MMC;
 				}
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
 					ldon_theme = LDoNThemes::MIR;
 				}
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
 					ldon_theme = LDoNThemes::GUK;
@@ -2049,8 +2023,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
 				item_cost != 1 ? "s" : ""
 			);
 		}
-	}
-	else if (aps->Type == DiscordMerchant) {
+	} else if (aps->Type == DiscordMerchant) {
 		if (GetPVPPoints() < item_cost) {
 			cannot_afford = true;
 			merchant_type = fmt::format(
@@ -2058,20 +2031,17 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
 				item_cost != 1 ? "s" : ""
 			);
 		}
-	}
-	else if (aps->Type == NorrathsKeepersMerchant) {
+	} else if (aps->Type == NorrathsKeepersMerchant) {
 		if (GetRadiantCrystals() < item_cost) {
 			cannot_afford = true;
 			merchant_type = database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID));
 		}
-	}
-	else if (aps->Type == DarkReignMerchant) {
+	} else if (aps->Type == DarkReignMerchant) {
 		if (GetEbonCrystals() < item_cost) {
 			cannot_afford = true;
 			merchant_type = database.CreateItemLink(RuleI(Zone, EbonCrystalItemID));
 		}
-	}
-	else {
+	} else {
 		Message(Chat::Red, "Unknown Adventure Merchant Type.");
 		return;
 	}
@@ -2128,7 +2098,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
 		DiscoverItem(item->ID);
 	}
 
-	EQ::ItemInstance* inst = database.CreateItem(item, charges);
+	EQ::ItemInstance *inst = database.CreateItem(item, charges);
 	if (!AutoPutLootInInventory(*inst, true, true))
 	{
 		PutLootInInventory(EQ::invslot::slotCursor, *inst);
@@ -2137,7 +2107,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket* app)
 	Save(1);
 }
 
-void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(AdventureMerchant_Struct))
 	{
@@ -2166,11 +2136,11 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket* app)
 
 	merchantid = tmp->CastToNPC()->MerchantType;
 
-	const EQ::ItemData* item = nullptr;
+	const EQ::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
 	std::list<MerchantList>::const_iterator itr;
-	for (itr = merlist.begin(); itr != merlist.end() && count < 255; ++itr) {
-		const MerchantList& ml = *itr;
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+		const MerchantList &ml = *itr;
 		if (GetLevel() < ml.level_required) {
 			continue;
 		}
@@ -2185,20 +2155,15 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket* app)
 			uint32 theme = LDoNThemes::Unused;
 			if (item->LDoNTheme > LDoNThemeBits::TAKBit) {
 				theme = LDoNThemes::Unused;
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
 				theme = LDoNThemes::TAK;
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				theme = LDoNThemes::RUJ;
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				theme = LDoNThemes::MMC;
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				theme = LDoNThemes::MIR;
-			}
-			else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				theme = LDoNThemes::GUK;
 			}
 			ss << "^" << item->Name << "|";
@@ -2220,7 +2185,7 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket* app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Adventure_Sell_Struct))
 	{
@@ -2229,7 +2194,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket* app)
 		return;
 	}
 
-	Adventure_Sell_Struct* ams_in = (Adventure_Sell_Struct*)app->pBuffer;
+	Adventure_Sell_Struct *ams_in = (Adventure_Sell_Struct*)app->pBuffer;
 
 	Mob* vendor = entity_list.GetMob(ams_in->npcid);
 	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != Class::AdventureMerchant) &&
@@ -2239,7 +2204,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket* app)
 		return;
 	}
 
-	if (DistanceSquared(m_Position, vendor->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
 	{
 		Message(Chat::Red, "Vendor is out of range.");
 		return;
@@ -2323,7 +2288,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket* app)
 	}
 
 	auto outapp = new EQApplicationPacket(OP_AdventureMerchantSell, sizeof(Adventure_Sell_Struct));
-	Adventure_Sell_Struct* ams = (Adventure_Sell_Struct*)outapp->pBuffer;
+	Adventure_Sell_Struct *ams = (Adventure_Sell_Struct*)outapp->pBuffer;
 	ams->slot = ams_in->slot;
 	ams->unknown000 = 1;
 	ams->npcid = ams->npcid;
@@ -2356,7 +2321,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket* app)
 	Save(1);
 }
 
-void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(AdventureRequest_Struct))
 	{
@@ -2381,8 +2346,8 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
 
 	AdventureRequest_Struct* ars = (AdventureRequest_Struct*)app->pBuffer;
 	uint8 group_members = 0;
-	Raid* r = nullptr;
-	Group* g = nullptr;
+	Raid *r = nullptr;
+	Group *g = nullptr;
 
 	if (IsRaidGrouped())
 	{
@@ -2417,7 +2382,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
 
 	auto packet =
 		new ServerPacket(ServerOP_AdventureRequest, sizeof(ServerAdventureRequest_Struct) + (64 * group_members));
-	ServerAdventureRequest_Struct* sar = (ServerAdventureRequest_Struct*)packet->pBuffer;
+	ServerAdventureRequest_Struct *sar = (ServerAdventureRequest_Struct*)packet->pBuffer;
 	sar->member_count = group_members;
 	sar->risk = ars->risk;
 	sar->type = ars->type;
@@ -2434,7 +2399,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
 				break;
 			}
 
-			const char* c_name = nullptr;
+			const char *c_name = nullptr;
 			c_name = r->GetClientNameByIndex(x);
 			if (c_name)
 			{
@@ -2453,7 +2418,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
 				break;
 			}
 
-			const char* c_name = nullptr;
+			const char *c_name = nullptr;
 			c_name = g->GetClientNameByIndex(x);
 			if (c_name)
 			{
@@ -2468,7 +2433,7 @@ void Client::Handle_OP_AdventureRequest(const EQApplicationPacket* app)
 	p_timers.Start(pTimerStartAdventureTimer, 5);
 }
 
-void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket *app)
 {
 	if (adventure_stats_timer)
 	{
@@ -2477,7 +2442,7 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket* app)
 
 	adventure_stats_timer = new Timer(8000);
 	auto outapp = new EQApplicationPacket(OP_AdventureStatsReply, sizeof(AdventureStats_Struct));
-	AdventureStats_Struct* as = (AdventureStats_Struct*)outapp->pBuffer;
+	AdventureStats_Struct *as = (AdventureStats_Struct*)outapp->pBuffer;
 
 	if (database.GetAdventureStats(CharacterID(), as))
 	{
@@ -2496,7 +2461,7 @@ void Client::Handle_OP_AdventureStatsRequest(const EQApplicationPacket* app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_AggroMeterLockTarget(const EQApplicationPacket* app)
+void Client::Handle_OP_AggroMeterLockTarget(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(uint32)) {
 		LogError("Handle_OP_AggroMeterLockTarget had a packet that was too small");
@@ -2507,13 +2472,13 @@ void Client::Handle_OP_AggroMeterLockTarget(const EQApplicationPacket* app)
 	ProcessAggroMeter();
 }
 
-void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyMerchantRequest, app, uint32);
 
 	auto target = entity_list.GetNPCByID(*((uint32*)app->pBuffer));
 	if (target) {
-		if (DistanceSquared(m_Position, target->GetPosition()) > USE_NPC_RANGE2) {
+		if (DistanceSquared(m_Position, target->GetPosition())  > USE_NPC_RANGE2) {
 			return;
 		}
 
@@ -2536,12 +2501,12 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket* app
 		ss << currency_id << "|1|" << currency_id;
 		uint32 count = 0;
 		uint32 merchant_id = target->MerchantType;
-		const EQ::ItemData* item = nullptr;
+		const EQ::ItemData *item = nullptr;
 
 		std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 		std::list<MerchantList>::const_iterator itr;
 		for (itr = merlist.begin(); itr != merlist.end() && count < 255; ++itr) {
-			const MerchantList& ml = *itr;
+			const MerchantList &ml = *itr;
 			if (GetLevel() < ml.level_required) {
 				continue;
 			}
@@ -2550,7 +2515,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket* app
 			if (
 				faction_id &&
 				GetModCharacterFactionLevel(faction_id) < ml.faction_required
-				) {
+			) {
 				continue;
 			}
 
@@ -2569,8 +2534,7 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket* app
 
 		if (count > 0) {
 			ss << "|" << count << item_ss.str();
-		}
-		else {
+		} else {
 			ss << "|0";
 		}
 
@@ -2580,13 +2544,13 @@ void Client::Handle_OP_AltCurrencyMerchantRequest(const EQApplicationPacket* app
 	}
 }
 
-void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket* app)
+void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyPurchase, app, AltCurrencyPurchaseItem_Struct);
-	AltCurrencyPurchaseItem_Struct* purchase = (AltCurrencyPurchaseItem_Struct*)app->pBuffer;
+	AltCurrencyPurchaseItem_Struct *purchase = (AltCurrencyPurchaseItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(purchase->merchant_entity_id);
 	if (tar) {
-		if (DistanceSquared(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
+		if (DistanceSquared(m_Position, tar->GetPosition())> USE_NPC_RANGE2)
 			return;
 
 		if (tar->GetClass() != Class::AlternateCurrencyMerchant) {
@@ -2689,7 +2653,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket* app)
 			DiscoverItem(item->ID);
 		}
 
-		EQ::ItemInstance* inst = database.CreateItem(item, charges);
+		EQ::ItemInstance *inst = database.CreateItem(item, charges);
 		if (!AutoPutLootInInventory(*inst, true, true))
 		{
 			PutLootInInventory(EQ::invslot::slotCursor, *inst);
@@ -2700,10 +2664,10 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket* app)
+void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencyReclaim, app, AltCurrencyReclaim_Struct);
-	AltCurrencyReclaim_Struct* reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
+	AltCurrencyReclaim_Struct *reclaim = (AltCurrencyReclaim_Struct*)app->pBuffer;
 	uint32 item_id = zone->GetCurrencyItemID(reclaim->currency_id);
 
 	if (!item_id) {
@@ -2747,11 +2711,11 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket* app)
+void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencySell, app, AltCurrencySellItem_Struct);
-	EQApplicationPacket* outapp = app->Copy();
-	AltCurrencySellItem_Struct* sell = (AltCurrencySellItem_Struct*)outapp->pBuffer;
+	EQApplicationPacket *outapp = app->Copy();
+	AltCurrencySellItem_Struct *sell = (AltCurrencySellItem_Struct*)outapp->pBuffer;
 
 	NPC* tar = entity_list.GetNPCByID(sell->merchant_entity_id);
 	if (tar) {
@@ -2884,11 +2848,11 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket* app)
+void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_AltCurrencySellSelection, app, AltCurrencySelectItem_Struct);
 
-	AltCurrencySelectItem_Struct* select = (AltCurrencySelectItem_Struct*)app->pBuffer;
+	AltCurrencySelectItem_Struct *select = (AltCurrencySelectItem_Struct*)app->pBuffer;
 	NPC* tar = entity_list.GetNPCByID(select->merchant_entity_id);
 	if (tar) {
 		if (DistanceSquared(m_Position, tar->GetPosition()) > USE_NPC_RANGE2)
@@ -2903,7 +2867,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket* app)
 			return;
 		}
 
-		EQ::ItemInstance* inst = m_inv.GetItem(select->slot_id);
+		EQ::ItemInstance *inst = m_inv.GetItem(select->slot_id);
 		if (!inst) {
 			return;
 		}
@@ -2957,7 +2921,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket* app)
 
 		auto outapp =
 			new EQApplicationPacket(OP_AltCurrencySellSelection, sizeof(AltCurrencySelectItemReply_Struct));
-		AltCurrencySelectItemReply_Struct* reply = (AltCurrencySelectItemReply_Struct*)outapp->pBuffer;
+		AltCurrencySelectItemReply_Struct *reply = (AltCurrencySelectItemReply_Struct*)outapp->pBuffer;
 		reply->unknown004 = 0xFF;
 		reply->unknown005 = 0xFF;
 		reply->unknown006 = 0xFFFF;
@@ -2968,7 +2932,7 @@ void Client::Handle_OP_AltCurrencySellSelection(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Animation(const EQApplicationPacket* app)
+void Client::Handle_OP_Animation(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Animation_Struct)) {
 		LogError("Received invalid sized OP_Animation: got [{}], expected [{}]", app->size, sizeof(Animation_Struct));
@@ -2976,7 +2940,7 @@ void Client::Handle_OP_Animation(const EQApplicationPacket* app)
 		return;
 	}
 
-	Animation_Struct* s = (Animation_Struct*)app->pBuffer;
+	Animation_Struct *s = (Animation_Struct *)app->pBuffer;
 
 	//might verify spawn ID, but it wouldent affect anything
 	DoAnim(s->action, s->speed);
@@ -2984,7 +2948,7 @@ void Client::Handle_OP_Animation(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ApplyPoison(const EQApplicationPacket* app)
+void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ApplyPoison_Struct)) {
 		LogError("Wrong size: OP_ApplyPoison, size=[{}], expected [{}]", app->size, sizeof(ApplyPoison_Struct));
@@ -3044,7 +3008,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket* app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_Assist(const EQApplicationPacket* app)
+void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(EntityId_Struct)) {
 		LogDebug("Size mismatch in OP_Assist expected [{}] got [{}]", sizeof(EntityId_Struct), app->size);
@@ -3059,19 +3023,17 @@ void Client::Handle_OP_Assist(const EQApplicationPacket* app)
 	if (RuleB(Combat, AssistNoTargetSelf))
 		eid->entity_id = GetID();
 	if (entity && entity->IsMob()) {
-		Mob* assistee = entity->CastToMob();
+		Mob *assistee = entity->CastToMob();
 		if (assistee->GetTarget()) {
-			Mob* new_target = assistee->GetTarget();
+			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
 				cheat_manager.SetExemptStatus(Assist, true);
 				eid->entity_id = new_target->GetID();
-			}
-			else {
+			} else {
 				eid->entity_id = 0;
 			}
-		}
-		else {
+		} else {
 			eid->entity_id = 0;
 		}
 	}
@@ -3080,7 +3042,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_AssistGroup(const EQApplicationPacket* app)
+void Client::Handle_OP_AssistGroup(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(EntityId_Struct)) {
 		LogDebug("Size mismatch in OP_AssistGroup expected [{}] got [{}]", sizeof(EntityId_Struct), app->size);
@@ -3104,7 +3066,7 @@ void Client::Handle_OP_AssistGroup(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AugmentInfo(const EQApplicationPacket* app)
+void Client::Handle_OP_AugmentInfo(const EQApplicationPacket *app)
 {
 	// This packet is sent by the client when an Augment item information window is opened.
 	// Some clients this seems to nuke the charm text (ex. Adventurer's Stone)
@@ -3116,7 +3078,7 @@ void Client::Handle_OP_AugmentInfo(const EQApplicationPacket* app)
 	}
 
 	AugmentInfo_Struct* AugInfo = (AugmentInfo_Struct*)app->pBuffer;
-	const EQ::ItemData* item = database.GetItem(AugInfo->itemid);
+	const EQ::ItemData * item = database.GetItem(AugInfo->itemid);
 
 	if (item) {
 		strn0cpy(AugInfo->augment_info, item->Name, 64);
@@ -3125,7 +3087,7 @@ void Client::Handle_OP_AugmentInfo(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_AugmentItem(const EQApplicationPacket* app)
+void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(AugmentItem_Struct)) {
 		LogError("Invalid size for AugmentItem_Struct: Expected: [{}], Got: [{}]", sizeof(AugmentItem_Struct), app->size);
@@ -3137,7 +3099,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket* app)
 		if (
 			(in_augment->container_slot < EQ::invslot::EQUIPMENT_BEGIN || in_augment->container_slot > EQ::invslot::GENERAL_END) &&
 			(in_augment->container_slot < EQ::invbag::GENERAL_BAGS_BEGIN || in_augment->container_slot > EQ::invbag::GENERAL_BAGS_END)
-			) {
+		) {
 			Message(Chat::Red, "The server does not allow augmentation actions from this slot.");
 			auto cursor_item = m_inv[EQ::invslot::slotCursor];
 			auto augmented_item = m_inv[in_augment->container_slot];
@@ -3147,9 +3109,9 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket* app)
 			return;
 		}
 
-		EQ::ItemInstance* item_one_to_push = nullptr, * item_two_to_push = nullptr;
+		EQ::ItemInstance *item_one_to_push = nullptr, *item_two_to_push = nullptr;
 
-		EQ::ItemInstance* tobe_auged = nullptr, * old_aug = nullptr, * new_aug = nullptr, * aug = nullptr, * solvent = nullptr;
+		EQ::ItemInstance *tobe_auged = nullptr, *old_aug = nullptr, *new_aug = nullptr, *aug = nullptr, *solvent = nullptr;
 		EQ::InventoryProfile& user_inv = GetInv();
 
 		uint16 item_slot = in_augment->container_slot;
@@ -3177,22 +3139,19 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket* app)
 					Message(Chat::Red, "Error: Missing an augmentation distiller for safely removing this augment.");
 					return;
 				}
-			}
-			else if (solvent->GetItem()->ItemType == EQ::item::ItemTypeAugmentationDistiller) {
+			} else if (solvent->GetItem()->ItemType == EQ::item::ItemTypeAugmentationDistiller) {
 				old_aug = tobe_auged->GetAugment(in_augment->augment_index);
 
 				if (!old_aug) {
 					LogError("Player tried to safely remove a nonexistent augment");
 					Message(Chat::Red, "Error: No augment found in slot %i for safely removing.", in_augment->augment_index);
 					return;
-				}
-				else if (solvent->GetItem()->ID != old_aug->GetItem()->AugDistiller) {
+				} else if (solvent->GetItem()->ID != old_aug->GetItem()->AugDistiller) {
 					LogError("Player tried to safely remove an augment with the wrong distiller (item [{}] vs expected [{}])", solvent->GetItem()->ID, old_aug->GetItem()->AugDistiller);
 					Message(Chat::Red, "Error: Wrong augmentation distiller for safely removing this augment.");
 					return;
 				}
-			}
-			else if (solvent->GetItem()->ItemType != EQ::item::ItemTypePerfectedAugmentationDistiller) {
+			} else if (solvent->GetItem()->ItemType != EQ::item::ItemTypePerfectedAugmentationDistiller) {
 				LogError("Player tried to safely remove an augment with a non-distiller item");
 				Message(Chat::Red, "Error: Invalid augmentation distiller for safely removing this augment.");
 				return;
@@ -3200,360 +3159,352 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket* app)
 		}
 
 		switch (in_augment->augment_action) {
-		case AugmentActions::Insert:
-		case AugmentActions::Swap:
-			new_aug = user_inv.GetItem(EQ::invslot::slotCursor);
+			case AugmentActions::Insert:
+			case AugmentActions::Swap:
+				new_aug = user_inv.GetItem(EQ::invslot::slotCursor);
 
-			if (!new_aug) { // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
-				LogError("AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor");
-				Message(Chat::Red, "Error: No augment found on cursor for inserting.");
-				return;
-			}
-			else {
-				if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(new_aug->GetID())) {
-					Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
+				if (!new_aug) { // Shouldn't get the OP code without the augment on the user's cursor, but maybe it's h4x.
+					LogError("AugmentItem OpCode with 'Insert' or 'Swap' action received, but no augment on client's cursor");
+					Message(Chat::Red, "Error: No augment found on cursor for inserting.");
 					return;
-				}
-
-				if (
-					((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
-					tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)
-					) {
-					old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
-					if (old_aug) { // An old augment was removed in order to be replaced with the new one (augment_action 2)
-						CalcBonuses();
-
-						std::vector<std::any> args;
-						args.push_back(old_aug);
-
-						if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-							parse->EventItem(
-								EVENT_UNAUGMENT_ITEM,
-								this,
-								tobe_auged,
-								nullptr,
-								"",
-								in_augment->augment_index,
-								&args
-							);
-						}
-
-						args.assign(1, tobe_auged);
-						args.push_back(false);
-
-						if (parse->ItemHasQuestSub(old_aug, EVENT_AUGMENT_REMOVE)) {
-							parse->EventItem(
-								EVENT_AUGMENT_REMOVE,
-								this,
-								old_aug,
-								nullptr,
-								"",
-								in_augment->augment_index,
-								&args
-							);
-						}
-
-						if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-							const auto& export_string = fmt::format(
-								"{} {} {} {} {}",
-								tobe_auged->GetID(),
-								item_slot,
-								old_aug->GetID(),
-								in_augment->augment_index,
-								false
-							);
-
-							args.push_back(old_aug);
-
-							parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
-						}
-					}
-
-					tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
-					tobe_auged->UpdateOrnamentationInfo();
-
-					aug = tobe_auged->GetAugment(in_augment->augment_index);
-					if (aug) {
-						std::vector<std::any> args;
-						args.push_back(aug);
-
-						if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
-							parse->EventItem(
-								EVENT_AUGMENT_ITEM,
-								this,
-								tobe_auged,
-								nullptr,
-								"",
-								in_augment->augment_index,
-								&args
-							);
-						}
-
-						args.assign(1, tobe_auged);
-
-						if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
-							parse->EventItem(
-								EVENT_AUGMENT_INSERT,
-								this,
-								aug,
-								nullptr,
-								"",
-								in_augment->augment_index,
-								&args
-							);
-						}
-
-						args.push_back(aug);
-
-						if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
-							const auto& export_string = fmt::format(
-								"{} {} {} {}",
-								tobe_auged->GetID(),
-								item_slot,
-								aug->GetID(),
-								in_augment->augment_index
-							);
-
-							parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, this, export_string, 0, &args);
-						}
-					}
-					else {
-						Message(
-							Chat::Red,
-							fmt::format(
-								"Error: Could not properly insert augmentation into augment slot {}. Aborting.",
-								in_augment->augment_index
-							).c_str()
-						);
+				} else {
+					if (!RuleB(Inventory, AllowMultipleOfSameAugment) && tobe_auged->ContainsAugmentByID(new_aug->GetID())) {
+						Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
 						return;
 					}
 
-					item_one_to_push = tobe_auged->Clone();
-					if (old_aug) {
-						item_two_to_push = old_aug->Clone();
-					}
-
-					if (item_one_to_push) { // Must push items after the items in inventory are deleted - necessary due to lore items...
-						DeleteItemInInventory(item_slot, 0, true);
-						DeleteItemInInventory(EQ::invslot::slotCursor, new_aug->IsStackable() ? 1 : 0, true);
-
-						if (solvent) { // Consume the augment distiller
-							DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
-						}
-
-						if (item_two_to_push) { // This is a swap. Return the old aug to the player's cursor.
-							if (!PutItemInInventory(EQ::invslot::slotCursor, *item_two_to_push, true)) {
-								LogError("Problem returning old augment to player's cursor after augmentation swap");
-								Message(Chat::Yellow, "Error: Failed to retrieve old augment after augmentation swap!");
-							}
-						}
-
-						if (PutItemInInventory(item_slot, *item_one_to_push, true)) { // Successfully added an augment to the item
+					if (
+						((tobe_auged->IsAugmentSlotAvailable(new_aug->GetAugmentType(), in_augment->augment_index)) != -1) &&
+						tobe_auged->AvailableWearSlot(new_aug->GetItem()->Slots)
+					) {
+						old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+						if (old_aug) { // An old augment was removed in order to be replaced with the new one (augment_action 2)
 							CalcBonuses();
-							if (material != EQ::textures::materialInvalid) { // Visible item augged while equipped. Send WC in case ornamentation changed.
-								SendWearChange(material);
+
+							std::vector<std::any> args;
+							args.push_back(old_aug);
+
+							if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
+								parse->EventItem(
+									EVENT_UNAUGMENT_ITEM,
+									this,
+									tobe_auged,
+									nullptr,
+									"",
+									in_augment->augment_index,
+									&args
+								);
+							}
+
+							args.assign(1, tobe_auged);
+							args.push_back(false);
+
+							if (parse->ItemHasQuestSub(old_aug, EVENT_AUGMENT_REMOVE)) {
+								parse->EventItem(
+									EVENT_AUGMENT_REMOVE,
+									this,
+									old_aug,
+									nullptr,
+									"",
+									in_augment->augment_index,
+									&args
+								);
+							}
+
+							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
+								const auto& export_string = fmt::format(
+									"{} {} {} {} {}",
+									tobe_auged->GetID(),
+									item_slot,
+									old_aug->GetID(),
+									in_augment->augment_index,
+									false
+								);
+
+								args.push_back(old_aug);
+
+								parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
 							}
 						}
-						else {
-							Message(Chat::Red, "Error: No available slot for end result. Please free up the augment slot.");
+
+						tobe_auged->PutAugment(in_augment->augment_index, *new_aug);
+						tobe_auged->UpdateOrnamentationInfo();
+
+						aug = tobe_auged->GetAugment(in_augment->augment_index);
+						if (aug) {
+							std::vector<std::any> args;
+							args.push_back(aug);
+
+							if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
+								parse->EventItem(
+									EVENT_AUGMENT_ITEM,
+									this,
+									tobe_auged,
+									nullptr,
+									"",
+									in_augment->augment_index,
+									&args
+								);
+							}
+
+							args.assign(1, tobe_auged);
+
+							if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
+								parse->EventItem(
+									EVENT_AUGMENT_INSERT,
+									this,
+									aug,
+									nullptr,
+									"",
+									in_augment->augment_index,
+									&args
+								);
+							}
+
+							args.push_back(aug);
+
+							if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
+								const auto& export_string = fmt::format(
+									"{} {} {} {}",
+									tobe_auged->GetID(),
+									item_slot,
+									aug->GetID(),
+									in_augment->augment_index
+								);
+
+								parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, this, export_string, 0, &args);
+							}
+						} else {
+							Message(
+								Chat::Red,
+								fmt::format(
+									"Error: Could not properly insert augmentation into augment slot {}. Aborting.",
+									in_augment->augment_index
+								).c_str()
+							);
+							return;
 						}
+
+						item_one_to_push = tobe_auged->Clone();
+						if (old_aug) {
+							item_two_to_push = old_aug->Clone();
+						}
+
+						if (item_one_to_push) { // Must push items after the items in inventory are deleted - necessary due to lore items...
+							DeleteItemInInventory(item_slot, 0, true);
+							DeleteItemInInventory(EQ::invslot::slotCursor, new_aug->IsStackable() ? 1 : 0, true);
+
+							if (solvent) { // Consume the augment distiller
+								DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true);
+							}
+
+							if (item_two_to_push) { // This is a swap. Return the old aug to the player's cursor.
+								if (!PutItemInInventory(EQ::invslot::slotCursor, *item_two_to_push, true)) {
+									LogError("Problem returning old augment to player's cursor after augmentation swap");
+									Message(Chat::Yellow, "Error: Failed to retrieve old augment after augmentation swap!");
+								}
+							}
+
+							if (PutItemInInventory(item_slot, *item_one_to_push, true)) { // Successfully added an augment to the item
+								CalcBonuses();
+								if (material != EQ::textures::materialInvalid) { // Visible item augged while equipped. Send WC in case ornamentation changed.
+									SendWearChange(material);
+								}
+							} else {
+								Message(Chat::Red, "Error: No available slot for end result. Please free up the augment slot.");
+							}
+						} else {
+							Message(Chat::Red, "Error in cloning item for augment. Aborted.");
+						}
+					} else {
+						Message(Chat::Red, "Error: No available slot for augment in that item.");
 					}
-					else {
-						Message(Chat::Red, "Error in cloning item for augment. Aborted.");
+				}
+				break;
+			case AugmentActions::Remove:
+				aug = tobe_auged->GetAugment(in_augment->augment_index);
+				if (aug) {
+					std::vector<std::any> args;
+					args.push_back(aug);
+
+					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
+						parse->EventItem(
+							EVENT_UNAUGMENT_ITEM,
+							this,
+							tobe_auged,
+							nullptr,
+							"",
+							in_augment->augment_index,
+							&args
+						);
+					}
+
+					args.assign(1, tobe_auged);
+					args.push_back(false);
+
+					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
+						parse->EventItem(
+							EVENT_AUGMENT_REMOVE,
+							this,
+							aug,
+							nullptr,
+							"",
+							in_augment->augment_index,
+							&args
+						);
+					}
+
+					args.push_back(aug);
+
+					if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
+						const auto& export_string = fmt::format(
+							"{} {} {} {} {}",
+							tobe_auged->GetID(),
+							item_slot,
+							aug->GetID(),
+							in_augment->augment_index,
+							false
+						);
+
+						parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
+					}
+				} else {
+					Message(Chat::Red, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
+					return;
+				}
+
+				old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
+				tobe_auged->UpdateOrnamentationInfo();
+
+				item_one_to_push = tobe_auged->Clone();
+				if (old_aug) {
+					item_two_to_push = old_aug->Clone();
+				}
+
+				if (item_one_to_push && item_two_to_push) {
+					if (solvent) {
+						DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true); // Consume the augment distiller
+					}
+
+					DeleteItemInInventory(item_slot, 0, true); // Remove the augmented item
+
+					if (!PutItemInInventory(item_slot, *item_one_to_push, true)) { // Replace it with the unaugmented item
+						LogError("Problem returning equipment item to player's inventory after safe augment removal");
+						Message(Chat::Yellow, "Error: Failed to return item after de-augmentation!");
+					}
+
+					CalcBonuses();
+
+					if (material != EQ::textures::materialInvalid) {
+						SendWearChange(material); // Visible item augged while equipped. Send WC in case ornamentation changed.
+					}
+
+					// Drop the removed augment on the player's cursor
+					if (!PutItemInInventory(EQ::invslot::slotCursor, *item_two_to_push, true)) {
+						LogError("Problem returning augment to player's cursor after safe removal");
+						Message(Chat::Yellow, "Error: Failed to return augment after removal from item!");
+						return;
 					}
 				}
-				else {
-					Message(Chat::Red, "Error: No available slot for augment in that item.");
-				}
-			}
-			break;
-		case AugmentActions::Remove:
-			aug = tobe_auged->GetAugment(in_augment->augment_index);
-			if (aug) {
-				std::vector<std::any> args;
-				args.push_back(aug);
+				break;
+			case AugmentActions::Destroy:
+				// RoF client does not require an augmentation solvent for destroying an augmentation in an item.
+				// Augments can be destroyed with a right click -> Destroy at any time.
+				aug = tobe_auged->GetAugment(in_augment->augment_index);
+				if (aug) {
+					std::vector<std::any> args;
+					args.push_back(aug);
 
-				if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-					parse->EventItem(
-						EVENT_UNAUGMENT_ITEM,
-						this,
-						tobe_auged,
-						nullptr,
-						"",
-						in_augment->augment_index,
-						&args
+					if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
+						parse->EventItem(
+							EVENT_UNAUGMENT_ITEM,
+							this,
+							tobe_auged,
+							nullptr,
+							"",
+							in_augment->augment_index,
+							&args
+						);
+					}
+
+					args.assign(1, tobe_auged);
+					args.push_back(true);
+
+					if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
+						parse->EventItem(
+							EVENT_AUGMENT_REMOVE,
+							this,
+							aug,
+							nullptr,
+							"",
+							in_augment->augment_index,
+							&args
+						);
+					}
+
+					args.push_back(aug);
+
+					if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
+						const auto& export_string = fmt::format(
+							"{} {} {} {} {}",
+							tobe_auged->GetID(),
+							item_slot,
+							aug->GetID(),
+							in_augment->augment_index,
+							true
+						);
+
+						parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
+					}
+				} else {
+					Message(
+						Chat::Red,
+						fmt::format(
+							"Error: Could not find augmentation to remove at index {}. Aborting.",
+							in_augment->augment_index
+						).c_str()
 					);
+					return;
 				}
 
-				args.assign(1, tobe_auged);
-				args.push_back(false);
+				tobe_auged->DeleteAugment(in_augment->augment_index);
+				tobe_auged->UpdateOrnamentationInfo();
 
-				if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-					parse->EventItem(
-						EVENT_AUGMENT_REMOVE,
-						this,
-						aug,
-						nullptr,
-						"",
-						in_augment->augment_index,
-						&args
-					);
-				}
+				item_one_to_push = tobe_auged->Clone();
+				if (item_one_to_push) {
+					DeleteItemInInventory(item_slot, 0, true);
 
-				args.push_back(aug);
-
-				if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-					const auto& export_string = fmt::format(
-						"{} {} {} {} {}",
-						tobe_auged->GetID(),
-						item_slot,
-						aug->GetID(),
-						in_augment->augment_index,
-						false
-					);
-
-					parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
-				}
-			}
-			else {
-				Message(Chat::Red, "Error: Could not find augmentation to remove at index %i. Aborting.", in_augment->augment_index);
-				return;
-			}
-
-			old_aug = tobe_auged->RemoveAugment(in_augment->augment_index);
-			tobe_auged->UpdateOrnamentationInfo();
-
-			item_one_to_push = tobe_auged->Clone();
-			if (old_aug) {
-				item_two_to_push = old_aug->Clone();
-			}
-
-			if (item_one_to_push && item_two_to_push) {
-				if (solvent) {
-					DeleteItemInInventory(solvent_slot, solvent->IsStackable() ? 1 : 0, true); // Consume the augment distiller
-				}
-
-				DeleteItemInInventory(item_slot, 0, true); // Remove the augmented item
-
-				if (!PutItemInInventory(item_slot, *item_one_to_push, true)) { // Replace it with the unaugmented item
-					LogError("Problem returning equipment item to player's inventory after safe augment removal");
-					Message(Chat::Yellow, "Error: Failed to return item after de-augmentation!");
+					if (!PutItemInInventory(item_slot, *item_one_to_push, true)) {
+						LogError("Problem returning equipment item to player's inventory after augment deletion");
+						Message(Chat::Yellow, "Error: Failed to return item after destroying augment!");
+					}
 				}
 
 				CalcBonuses();
 
 				if (material != EQ::textures::materialInvalid) {
-					SendWearChange(material); // Visible item augged while equipped. Send WC in case ornamentation changed.
+					SendWearChange(material);
 				}
-
-				// Drop the removed augment on the player's cursor
-				if (!PutItemInInventory(EQ::invslot::slotCursor, *item_two_to_push, true)) {
-					LogError("Problem returning augment to player's cursor after safe removal");
-					Message(Chat::Yellow, "Error: Failed to return augment after removal from item!");
-					return;
-				}
-			}
-			break;
-		case AugmentActions::Destroy:
-			// RoF client does not require an augmentation solvent for destroying an augmentation in an item.
-			// Augments can be destroyed with a right click -> Destroy at any time.
-			aug = tobe_auged->GetAugment(in_augment->augment_index);
-			if (aug) {
-				std::vector<std::any> args;
-				args.push_back(aug);
-
-				if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
-					parse->EventItem(
-						EVENT_UNAUGMENT_ITEM,
-						this,
-						tobe_auged,
-						nullptr,
-						"",
-						in_augment->augment_index,
-						&args
-					);
-				}
-
-				args.assign(1, tobe_auged);
-				args.push_back(true);
-
-				if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
-					parse->EventItem(
-						EVENT_AUGMENT_REMOVE,
-						this,
-						aug,
-						nullptr,
-						"",
-						in_augment->augment_index,
-						&args
-					);
-				}
-
-				args.push_back(aug);
-
-				if (parse->PlayerHasQuestSub(EVENT_AUGMENT_REMOVE_CLIENT)) {
-					const auto& export_string = fmt::format(
-						"{} {} {} {} {}",
-						tobe_auged->GetID(),
-						item_slot,
-						aug->GetID(),
-						in_augment->augment_index,
-						true
-					);
-
-					parse->EventPlayer(EVENT_AUGMENT_REMOVE_CLIENT, this, export_string, 0, &args);
-				}
-			}
-			else {
-				Message(
-					Chat::Red,
-					fmt::format(
-						"Error: Could not find augmentation to remove at index {}. Aborting.",
-						in_augment->augment_index
-					).c_str()
+				break;
+			default: // Unknown
+				LogInventory(
+					"Unrecognized augmentation action - cslot: [{}] aslot: [{}] cidx: [{}] aidx: [{}] act: [{}] dest: [{}]",
+					in_augment->container_slot,
+					in_augment->augment_slot,
+					in_augment->container_index,
+					in_augment->augment_index,
+					in_augment->augment_action,
+					in_augment->dest_inst_id
 				);
-				return;
-			}
-
-			tobe_auged->DeleteAugment(in_augment->augment_index);
-			tobe_auged->UpdateOrnamentationInfo();
-
-			item_one_to_push = tobe_auged->Clone();
-			if (item_one_to_push) {
-				DeleteItemInInventory(item_slot, 0, true);
-
-				if (!PutItemInInventory(item_slot, *item_one_to_push, true)) {
-					LogError("Problem returning equipment item to player's inventory after augment deletion");
-					Message(Chat::Yellow, "Error: Failed to return item after destroying augment!");
-				}
-			}
-
-			CalcBonuses();
-
-			if (material != EQ::textures::materialInvalid) {
-				SendWearChange(material);
-			}
-			break;
-		default: // Unknown
-			LogInventory(
-				"Unrecognized augmentation action - cslot: [{}] aslot: [{}] cidx: [{}] aidx: [{}] act: [{}] dest: [{}]",
-				in_augment->container_slot,
-				in_augment->augment_slot,
-				in_augment->container_index,
-				in_augment->augment_index,
-				in_augment->augment_action,
-				in_augment->dest_inst_id
-			);
-			break;
+				break;
 		}
-	}
-	else {
+	} else {
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object); // Delegate to tradeskill object to perform combine
 	}
 	return;
 }
 
-void Client::Handle_OP_AutoAttack(const EQApplicationPacket* app)
+void Client::Handle_OP_AutoAttack(const EQApplicationPacket *app)
 {
 	if (app->size != 4) {
 		LogError("OP size error: OP_AutoAttack expected:4 got:[{}]", app->size);
@@ -3569,41 +3520,41 @@ void Client::Handle_OP_AutoAttack(const EQApplicationPacket* app)
 		ranged_timer.Disable();
 		attack_dw_timer.Disable();
 
-		m_AutoAttackPosition = glm::vec4();
+		m_AutoAttackPosition       = glm::vec4();
 		m_AutoAttackTargetLocation = glm::vec3();
-		aa_los_them_mob = nullptr;
+		aa_los_them_mob            = nullptr;
 	}
 	else if (app->pBuffer[0] == 1) {
 		auto_attack = true;
-		auto_fire = false;
+		auto_fire   = false;
 		if (IsAIControlled()) {
 			return;
 		}
 		SetAttackTimer();
 
 		if (GetTarget()) {
-			aa_los_them_mob = GetTarget();
-			m_AutoAttackPosition = GetPosition();
+			aa_los_them_mob            = GetTarget();
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3(aa_los_them_mob->GetPosition());
-			los_status = CheckLosFN(aa_los_them_mob);
-			los_status_facing = IsFacingMob(aa_los_them_mob);
+			los_status                 = CheckLosFN(aa_los_them_mob);
+			los_status_facing          = IsFacingMob(aa_los_them_mob);
 		}
 		else {
-			m_AutoAttackPosition = GetPosition();
+			m_AutoAttackPosition       = GetPosition();
 			m_AutoAttackTargetLocation = glm::vec3();
-			aa_los_them_mob = nullptr;
-			los_status = false;
-			los_status_facing = false;
+			aa_los_them_mob            = nullptr;
+			los_status                 = false;
+			los_status_facing          = false;
 		}
 	}
 }
 
-void Client::Handle_OP_AutoAttack2(const EQApplicationPacket* app)
+void Client::Handle_OP_AutoAttack2(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_AutoFire(const EQApplicationPacket* app)
+void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(bool)) {
 		LogDebug("Size mismatch in OP_AutoFire expected [{}] got [{}]", sizeof(bool), app->size);
@@ -3617,16 +3568,16 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket* app)
 		return;
 	}
 
-	bool* af = (bool*)app->pBuffer;
+	bool *af = (bool*)app->pBuffer;
 	auto_fire = *af;
-	if (!RuleB(Character, EnableRangerAutoFire))
+	if(!RuleB(Character, EnableRangerAutoFire))
 		auto_fire = false;
 
 	auto_attack = false;
 	SetAttackTimer();
 }
 
-void Client::Handle_OP_Bandolier(const EQApplicationPacket* app)
+void Client::Handle_OP_Bandolier(const EQApplicationPacket *app)
 {
 	// Although there are three different structs for OP_Bandolier, they are all the same size.
 	//
@@ -3636,7 +3587,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket* app)
 		return;
 	}
 
-	BandolierCreate_Struct* bs = (BandolierCreate_Struct*)app->pBuffer;
+	BandolierCreate_Struct *bs = (BandolierCreate_Struct*)app->pBuffer;
 
 	switch (bs->Action)
 	{
@@ -3655,7 +3606,7 @@ void Client::Handle_OP_Bandolier(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_BankerChange(const EQApplicationPacket* app)
+void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BankerChange_Struct) && app->size != 4) //Titanium only sends 4 Bytes for this
 	{
@@ -3665,19 +3616,19 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket* app)
 	}
 
 	uint32 distance = 0;
-	NPC* banker = entity_list.GetClosestBanker(this, distance);
+	NPC *banker = entity_list.GetClosestBanker(this, distance);
 
 	if (!banker || distance > USE_NPC_RANGE2)
 	{
 		auto message = fmt::format(
-			"Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
-			banker ? banker->GetName() : "UNKNOWN NPC", distance);
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+		    "Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
+		    banker ? banker->GetName() : "UNKNOWN NPC", distance);
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_BankerChange, nullptr, sizeof(BankerChange_Struct));
-	BankerChange_Struct* bc = (BankerChange_Struct*)outapp->pBuffer;
+	BankerChange_Struct *bc = (BankerChange_Struct *)outapp->pBuffer;
 
 	if (m_pp.platinum < 0)
 		m_pp.platinum = 0;
@@ -3738,7 +3689,7 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Barter(const EQApplicationPacket* app)
+void Client::Handle_OP_Barter(const EQApplicationPacket *app)
 {
 
 	if (app->size < 4)
@@ -3748,7 +3699,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket* app)
 		return;
 	}
 
-	char* Buf = (char*)app->pBuffer;
+	char* Buf = (char *)app->pBuffer;
 
 	// The first 4 bytes of the packet determine the action. A lot of Barter packets require the
 	// packet the client sent, sent back to it as an acknowledgement.
@@ -3767,7 +3718,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket* app)
 
 	case Barter_SellerSearch:
 	{
-		BarterSearchRequest_Struct* bsr = (BarterSearchRequest_Struct*)app->pBuffer;
+		BarterSearchRequest_Struct *bsr = (BarterSearchRequest_Struct*)app->pBuffer;
 		SendBuyerResults(bsr->SearchString, bsr->SearchID);
 		break;
 	}
@@ -3778,7 +3729,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket* app)
 			ToggleBuyerMode(true);
 		}
 		else {
-			Buf = (char*)app->pBuffer;
+			Buf = (char *)app->pBuffer;
 			VARSTRUCT_ENCODE_TYPE(uint32, Buf, Barter_BuyerModeOff);
 			Message(Chat::Red, "You cannot be a Trader and Buyer at the same time.");
 		}
@@ -3822,7 +3773,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket* app)
 	case Barter_BuyerInspectEnd:
 	{
 		BuyerInspectRequest_Struct* bir = (BuyerInspectRequest_Struct*)app->pBuffer;
-		Client* Buyer = entity_list.GetClientByID(bir->BuyerID);
+		Client *Buyer = entity_list.GetClientByID(bir->BuyerID);
 		if (Buyer)
 			Buyer->WithCustomer(0);
 
@@ -3895,7 +3846,7 @@ void Client::Handle_OP_Barter(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_BazaarInspect(const EQApplicationPacket* app)
+void Client::Handle_OP_BazaarInspect(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BazaarInspect_Struct)) {
 		LogError("Invalid size for BazaarInspect_Struct: Expected [{}], Got [{}]",
@@ -3922,7 +3873,7 @@ void Client::Handle_OP_BazaarInspect(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_BazaarSearch(const EQApplicationPacket* app)
+void Client::Handle_OP_BazaarSearch(const EQApplicationPacket *app)
 {
 
 	if (app->size == sizeof(BazaarSearch_Struct)) {
@@ -3941,9 +3892,9 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket* app)
 	}
 	else if (app->size == sizeof(NewBazaarInspect_Struct)) {
 
-		NewBazaarInspect_Struct* nbis = (NewBazaarInspect_Struct*)app->pBuffer;
+		NewBazaarInspect_Struct *nbis = (NewBazaarInspect_Struct*)app->pBuffer;
 
-		Client* c = entity_list.GetClientByName(nbis->Name);
+		Client *c = entity_list.GetClientByName(nbis->Name);
 		if (c) {
 			EQ::ItemInstance* inst = c->FindTraderItemBySerialNumber(nbis->SerialNumber);
 			if (inst)
@@ -3959,14 +3910,14 @@ void Client::Handle_OP_BazaarSearch(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Begging(const EQApplicationPacket* app)
+void Client::Handle_OP_Begging(const EQApplicationPacket *app)
 {
 	if (!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
 	{
 		Message(Chat::Red, "Ability recovery time not yet met.");
 
 		auto outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
-		BeggingResponse_Struct* brs = (BeggingResponse_Struct*)outapp->pBuffer;
+		BeggingResponse_Struct *brs = (BeggingResponse_Struct*)outapp->pBuffer;
 		brs->Result = 0;
 		FastQueuePacket(&outapp);
 		return;
@@ -3981,7 +3932,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket* app)
 	p_timers.Start(pTimerBeggingPickPocket, 8);
 
 	auto outapp = new EQApplicationPacket(OP_Begging, sizeof(BeggingResponse_Struct));
-	BeggingResponse_Struct* brs = (BeggingResponse_Struct*)outapp->pBuffer;
+	BeggingResponse_Struct *brs = (BeggingResponse_Struct*)outapp->pBuffer;
 
 	brs->Result = 0; // Default, Fail.
 	if (GetTarget() == this)
@@ -4035,7 +3986,7 @@ void Client::Handle_OP_Begging(const EQApplicationPacket* app)
 	CheckIncreaseSkill(EQ::skills::SkillBegging, nullptr, -10);
 }
 
-void Client::Handle_OP_Bind_Wound(const EQApplicationPacket* app)
+void Client::Handle_OP_Bind_Wound(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BindWound_Struct)) {
 		LogError("Size mismatch for Bind wound packet");
@@ -4052,15 +4003,14 @@ void Client::Handle_OP_Bind_Wound(const EQApplicationPacket* app)
 	Mob* bindmob = entity_list.GetMob(bind_in->to);
 	if (!bindmob) {
 		LogError("Bindwound on non-exsistant mob from [{}]", GetName());
-	}
-	else {
+	} else {
 		LogDebug("BindWound in: to:\'[{}]\' from=\'[{}]\'", bindmob->GetName(), GetName());
 		BindWound(bindmob, true);
 	}
 	return;
 }
 
-void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket* app)
+void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket *app)
 {
 	if (!RuleB(Spells, EnableBlockedBuffs))
 		return;
@@ -4076,9 +4026,9 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket* app)
 
 	std::set<uint32>::iterator Iterator;
 
-	BlockedBuffs_Struct* bbs = (BlockedBuffs_Struct*)app->pBuffer;
+	BlockedBuffs_Struct *bbs = (BlockedBuffs_Struct*)app->pBuffer;
 
-	std::set<uint32>* BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
+	std::set<uint32> *BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
 
 	if (bbs->Initialise == 1)
 	{
@@ -4095,7 +4045,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket* app)
 
 		auto outapp = new EQApplicationPacket(OP_BlockedBuffs, sizeof(BlockedBuffs_Struct));
 
-		BlockedBuffs_Struct* obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
+		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
 
 		for (unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
 			obbs->SpellID[i] = -1;
@@ -4123,7 +4073,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket* app)
 	{
 		auto outapp = new EQApplicationPacket(OP_BlockedBuffs, sizeof(BlockedBuffs_Struct));
 
-		BlockedBuffs_Struct* obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
+		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
 
 		for (unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
 			obbs->SpellID[i] = -1;
@@ -4156,7 +4106,7 @@ void Client::Handle_OP_BlockedBuffs(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_BoardBoat(const EQApplicationPacket* app)
+void Client::Handle_OP_BoardBoat(const EQApplicationPacket *app)
 {
 	// this sends unclean mob name, so capped at 64
 	// a_boat006
@@ -4232,16 +4182,16 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 {
 	// In SoD, this is used for clicking off Pet Buffs only. In Underfoot, it is used both for Client and Pets
 	// The payload contains buffslot and EntityID only, so we must check if the EntityID is ours or our pets.
 	//
 	VERIFY_PACKET_LENGTH(OP_BuffRemoveRequest, app, BuffRemoveRequest_Struct);
 
-	BuffRemoveRequest_Struct* brrs = (BuffRemoveRequest_Struct*)app->pBuffer;
+	BuffRemoveRequest_Struct *brrs = (BuffRemoveRequest_Struct*)app->pBuffer;
 
-	Mob* m = nullptr;
+	Mob *m = nullptr;
 
 	if (brrs->EntityID == GetID()) {
 		m = this;
@@ -4255,7 +4205,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket* app)
 	}
 	else {
 		if (RuleB(Bots, Enabled)) {
-			Mob* bot_test = entity_list.GetMob(brrs->EntityID);
+			Mob *bot_test = entity_list.GetMob(brrs->EntityID);
 			if (bot_test && bot_test->IsBot() && bot_test->GetOwner() == this) {
 				m = bot_test;
 			}
@@ -4275,7 +4225,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Bug(const EQApplicationPacket* app)
+void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 {
 	if (!RuleB(Bugs, ReportingSystemActive)) {
 		Message(Chat::Red, "Bug reporting is disabled on this server.");
@@ -4287,11 +4237,11 @@ void Client::Handle_OP_Bug(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto* r = (BugReport_Struct*)app->pBuffer;
+	auto *r = (BugReport_Struct *) app->pBuffer;
 	RegisterBug(r);
 }
 
-void Client::Handle_OP_Camp(const EQApplicationPacket* app)
+void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
@@ -4305,7 +4255,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_CancelTask(const EQApplicationPacket* app)
+void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(CancelTask_Struct)) {
@@ -4313,13 +4263,13 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	CancelTask_Struct* cts = (CancelTask_Struct*)app->pBuffer;
+	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
 
 	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
 		task_state->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
 }
 
-void Client::Handle_OP_CancelTrade(const EQApplicationPacket* app)
+void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CancelTrade_Struct)) {
 		LogError("Wrong size: OP_CancelTrade, size=[{}], expected [{}]", app->size, sizeof(CancelTrade_Struct));
@@ -4354,7 +4304,7 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_CastSpell(const EQApplicationPacket* app)
+void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 {
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(CastSpell_Struct)) {
@@ -4405,14 +4355,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket* app)
 		{
 			// packet field types will be reviewed as packet transistions occur
 			const EQ::ItemInstance* inst = m_inv[castspell->inventoryslot]; //slot values are int16, need to check packet on this field
-			//bool cancast = true;
+																			   //bool cancast = true;
 			if (inst && inst->IsClassCommon())
 			{
 				const EQ::ItemData* item = inst->GetItem();
 				if (item->Click.Effect != (uint32)castspell->spell_id)
 				{
 					std::string message = fmt::format("OP_CastSpell with item, tried to cast a different spell than what was on item - item spell id [{}] attempted [{}]", item->Click.Effect, (uint32)castspell->spell_id);
-					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 					InterruptSpell(castspell->spell_id);	//CHEATER!!
 					return;
 				}
@@ -4423,7 +4373,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket* app)
 					{
 						if (GetLevel() >= item->Click.Level2)
 						{
-							auto* p_inst = (EQ::ItemInstance*)inst;
+							auto* p_inst = (EQ::ItemInstance*) inst;
 							int i = 0;
 
 							if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK_CAST)) {
@@ -4454,14 +4404,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket* app)
 						}
 						else
 						{
-							RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "OP_CastSpell with item, did not meet req level." });
+							RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_CastSpell with item, did not meet req level."});
 							Message(Chat::Red, "Error: level not high enough.", castspell->inventoryslot);
 							InterruptSpell(castspell->spell_id);
 						}
 					}
 					else
 					{
-						auto* p_inst = (EQ::ItemInstance*)inst;
+						auto* p_inst = (EQ::ItemInstance*) inst;
 
 						int i = 0;
 
@@ -4553,7 +4503,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ChannelMessage(const EQApplicationPacket* app)
+void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 {
 	ChannelMessage_Struct* cm = (ChannelMessage_Struct*)app->pBuffer;
 
@@ -4575,7 +4525,7 @@ void Client::Handle_OP_ChannelMessage(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket* app)
+void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket *app)
 {
 	if (!RuleB(Spells, EnableBlockedBuffs))
 		return;
@@ -4599,7 +4549,7 @@ void Client::Handle_OP_ClearBlockedBuffs(const EQApplicationPacket* app)
 	QueuePacket(app);
 }
 
-void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket* app)
+void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket *app)
 {
 
 	if (app->size != 0)
@@ -4611,18 +4561,18 @@ void Client::Handle_OP_ClearNPCMarks(const EQApplicationPacket* app)
 		return;
 	}
 
-	Group* g = GetGroup();
+	Group *g = GetGroup();
 
 	if (g)
 		g->ClearAllNPCMarks();
 }
 
-void Client::Handle_OP_ClearSurname(const EQApplicationPacket* app)
+void Client::Handle_OP_ClearSurname(const EQApplicationPacket *app)
 {
 	ChangeLastName("");
 }
 
-void Client::Handle_OP_ClickDoor(const EQApplicationPacket* app)
+void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClickDoor_Struct)) {
 		LogError("Wrong size: OP_ClickDoor, size=[{}], expected [{}]", app->size, sizeof(ClickDoor_Struct));
@@ -4665,7 +4615,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket* app)
 	if (within_distance) {
 		int quest_return = 0;
 		if (parse->PlayerHasQuestSub(EVENT_CLICK_DOOR)) {
-			std::vector<std::any> args = { currentdoor };
+			std::vector<std::any> args = {currentdoor};
 
 			quest_return = parse->EventPlayer(EVENT_CLICK_DOOR, this, std::to_string(cd->doorid), 0, &args);
 		}
@@ -4682,7 +4632,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_ClickObject(const EQApplicationPacket* app)
+void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClickObject_Struct)) {
 		LogError("Invalid size on ClickObject_Struct: Expected [{}], Got [{}]",
@@ -4690,7 +4640,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto* click_object = (ClickObject_Struct*)app->pBuffer;
+	auto* click_object = (ClickObject_Struct*) app->pBuffer;
 	auto* entity = entity_list.GetID(click_object->drop_id);
 	if (entity && entity->IsObject()) {
 		auto* object = entity->CastToObject();
@@ -4723,7 +4673,7 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket* app)
+void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket *app)
 {
 	if (app->size == 0) {
 		// RoF sends this packet 0 sized when switching from auto-combine to experiment windows.
@@ -4774,7 +4724,7 @@ void Client::Handle_OP_ClickObjectAction(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ClientError(const EQApplicationPacket* app)
+void Client::Handle_OP_ClientError(const EQApplicationPacket *app)
 {
 	ClientError_Struct* error = (ClientError_Struct*)app->pBuffer;
 	LogError("Client error: [{}]", error->character_name);
@@ -4782,12 +4732,12 @@ void Client::Handle_OP_ClientError(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket* app)
+void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
+void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (IsAIControlled())
 		return;
 
@@ -4797,17 +4747,17 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 	/* Invalid size check */
 	if (app->size != sizeof(PlayerPositionUpdateClient_Struct)
 		&& app->size != (sizeof(PlayerPositionUpdateClient_Struct) + 1)
-		) {
+			) {
 		LogError("OP size error: OP_ClientUpdate expected:[{}] got:[{}]",
 			sizeof(PlayerPositionUpdateClient_Struct), app->size);
 		return;
 	}
 
-	PlayerPositionUpdateClient_Struct* ppu = (PlayerPositionUpdateClient_Struct*)app->pBuffer;
+	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
 
 	/* Non PC handling like boats and eye of zomm */
 	if (ppu->spawn_id && ppu->spawn_id != GetID()) {
-		Mob* cmob = entity_list.GetMob(ppu->spawn_id);
+		Mob *cmob = entity_list.GetMob(ppu->spawn_id);
 
 		if (!cmob) {
 			return;
@@ -4819,7 +4769,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 			cmob->SetDelta(boat_delta);
 
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-			PlayerPositionUpdateServer_Struct* ppus = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 			cmob->MakeSpawnUpdate(ppus);
 			entity_list.QueueCloseClients(cmob, outapp, true, 300, this, false);
 			safe_delete(outapp);
@@ -4837,12 +4787,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 				cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
 				cmob->SetHeading(EQ12toFloat(ppu->heading));
 				mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0,
-					0.0, 0, ClientRangeAny, nullptr, this);
+						0.0, 0, ClientRangeAny, nullptr, this);
 				cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos,
-					ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
+						ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
 			}
 		}
-		return;
+	return;
 	}
 
 	// At this point, all that's left is a client update.
@@ -4862,7 +4812,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 	float 	new_heading = EQ12toFloat(ppu->heading);
 
 	if (on_boat) {
-		Mob* boat = entity_list.GetMob(ppu->vehicle_id);
+		Mob *boat = entity_list.GetMob(ppu->vehicle_id);
 		if (boat == 0) {
 			LogError("Can't find boat for client position offset.");
 		}
@@ -4870,7 +4820,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 			if (boat->turning) return;
 
 			// Calculate angle from boat heading to EQ heading
-			double theta = std::fmod(((boat->GetHeading() * 360.0) / 512.0), 360.0);
+			double theta = std::fmod(((boat->GetHeading() * 360.0) / 512.0),360.0);
 			double thetar = (theta * M_PI) / 180.0;
 
 			// Boat cx is inverted (positive to left)
@@ -4944,8 +4894,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 			improved_hidden = false;
 			if (!invisible) {
 				auto outapp =
-					new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-				SpawnAppearance_Struct* sa_out = (SpawnAppearance_Struct*)outapp->pBuffer;
+						new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+				SpawnAppearance_Struct *sa_out = (SpawnAppearance_Struct *) outapp->pBuffer;
 				sa_out->spawn_id = GetID();
 				sa_out->type = 0x03;
 				sa_out->parameter = 0;
@@ -4961,7 +4911,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 	/**
 	 * Client aggro scanning
 	 */
-	const uint16 client_scan_npc_aggro_timer_idle = RuleI(Aggro, ClientAggroCheckIdleInterval);
+	const uint16 client_scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
 	const uint16 client_scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
 
 	LogAggroDetail(
@@ -4989,7 +4939,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 	 * Client mob close list cache scan timer
 	 */
 	const uint16 client_mob_close_scan_timer_moving = 6000;
-	const uint16 client_mob_close_scan_timer_idle = 60000;
+	const uint16 client_mob_close_scan_timer_idle   = 60000;
 
 	LogAIScanCloseDetail(
 		"Client [{}] {}moving, scan timer [{}]",
@@ -5022,20 +4972,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 	 * to full stop when they are actually still pathing
 	 */
 
-	float distance_moved = DistanceNoZ(GetLastPositionBeforeBulkUpdate(), GetPosition());
+	float distance_moved                      = DistanceNoZ(GetLastPositionBeforeBulkUpdate(), GetPosition());
 	bool  moved_far_enough_before_bulk_update = distance_moved >= zone->GetNpcPositionUpdateDistance();
-	bool  is_ready_to_update = (
+	bool  is_ready_to_update                  = (
 		client_zone_wide_full_position_update_timer.Check() || moved_far_enough_before_bulk_update
-		);
+	);
 
 	if (IsMoving() && is_ready_to_update) {
 		LogDebug("[[{}]] Client Zone Wide Position Update NPCs", GetCleanName());
 
-		auto& mob_movement_manager = MobMovementManager::Get();
-		auto& mob_list = entity_list.GetMobList();
+		auto &mob_movement_manager = MobMovementManager::Get();
+		auto &mob_list             = entity_list.GetMobList();
 
-		for (auto& it : mob_list) {
-			Mob* entity = it.second;
+		for (auto &it : mob_list) {
+			Mob *entity = it.second;
 			if (!entity->IsNPC()) {
 				continue;
 			}
@@ -5078,26 +5028,24 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 
 		/* Broadcast update to other clients */
 		auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-		PlayerPositionUpdateServer_Struct* position_update = (PlayerPositionUpdateServer_Struct*)outapp->pBuffer;
+		PlayerPositionUpdateServer_Struct *position_update = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
 
 		MakeSpawnUpdate(position_update);
 
 		if (gm_hide_me) {
 			entity_list.QueueClientsStatus(this, outapp, true, Admin(), AccountStatus::Max);
-		}
-		else {
+		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
 
 
 		/* Always send position updates to group - send when beyond normal ClientPositionUpdate range */
-		Group* group = GetGroup();
-		Raid* raid = GetRaid();
+		Group *group = GetGroup();
+		Raid *raid = GetRaid();
 
 		if (raid) {
 			raid->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
-		}
-		else if (group) {
+		} else if (group) {
 			group->QueueClients(this, outapp, true, true, (RuleI(Range, ClientPositionUpdates) * -1));
 		}
 
@@ -5121,13 +5069,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket* app) {
 
 }
 
-void Client::Handle_OP_CombatAbility(const EQApplicationPacket* app)
+void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CombatAbility_Struct)) {
 		std::cout << "Wrong size on OP_CombatAbility. Got: " << app->size << ", Expected: " << sizeof(CombatAbility_Struct) << std::endl;
 		return;
 	}
-	auto ca_atk = (CombatAbility_Struct*)app->pBuffer;
+	auto ca_atk = (CombatAbility_Struct *)app->pBuffer;
 	OPCombatAbility(ca_atk);
 	return;
 }
@@ -5137,31 +5085,31 @@ void Client::Handle_OP_ConfirmDelete(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Consent(const EQApplicationPacket* app)
+void Client::Handle_OP_Consent(const EQApplicationPacket *app)
 {
-	if (app->size < 64) {
+	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
 		ConsentCorpses(c->name, false);
 	}
 }
 
-void Client::Handle_OP_ConsentDeny(const EQApplicationPacket* app)
+void Client::Handle_OP_ConsentDeny(const EQApplicationPacket *app)
 {
-	if (app->size < 64) {
+	if (app->size<64) {
 		Consent_Struct* c = (Consent_Struct*)app->pBuffer;
 		ConsentCorpses(c->name, true);
 	}
 }
 
-void Client::Handle_OP_Consider(const EQApplicationPacket* app)
+void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct)) {
 		LogDebug("Size mismatch in Consider expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
 
-	auto* conin = (Consider_Struct*)app->pBuffer;
-	auto* t = entity_list.GetMob(conin->targetid);
+	auto *conin = (Consider_Struct*) app->pBuffer;
+	auto *t     = entity_list.GetMob(conin->targetid);
 	if (!t) {
 		return;
 	}
@@ -5180,7 +5128,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 	}
 
 	auto outapp = new EQApplicationPacket(OP_Consider, sizeof(Consider_Struct));
-	auto* con = (Consider_Struct*)outapp->pBuffer;
+	auto* con = (Consider_Struct*) outapp->pBuffer;
 	con->playerid = GetID();
 	con->targetid = conin->targetid;
 	if (t->IsNPC()) {
@@ -5193,8 +5141,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 			(t->IsNPC()) ? t->CastToNPC()->GetPrimaryFaction() : 0,
 			t
 		);
-	}
-	else {
+	} else {
 		con->faction = 1;
 	}
 
@@ -5203,8 +5150,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 	if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
 		if (con->level == CON_GRAY) {
 			con->level = CON_GREEN;
-		}
-		else if (con->level == CON_WHITE) {
+		} else if (con->level == CON_WHITE) {
 			con->level = CON_WHITE_TITANIUM;
 		}
 	}
@@ -5232,14 +5178,11 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 
 	if (con->faction == FACTION_APPREHENSIVELY) {
 		con->faction = FACTION_SCOWLS;
-	}
-	else if (con->faction == FACTION_DUBIOUSLY) {
+	} else if (con->faction == FACTION_DUBIOUSLY) {
 		con->faction = FACTION_THREATENINGLY;
-	}
-	else if (con->faction == FACTION_SCOWLS) {
+	} else if (con->faction == FACTION_SCOWLS) {
 		con->faction = FACTION_APPREHENSIVELY;
-	}
-	else if (con->faction == FACTION_THREATENINGLY) {
+	} else if (con->faction == FACTION_THREATENINGLY) {
 		con->faction = FACTION_DUBIOUSLY;
 	}
 
@@ -5249,32 +5192,32 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 	if (t->IsRaidTarget()) {
 		uint32 color = 0;
 		switch (con->level) {
-		case CON_GREEN:
-			color = 2;
-			break;
-		case CON_LIGHTBLUE:
-			color = 10;
-			break;
-		case CON_BLUE:
-			color = 4;
-			break;
-		case CON_WHITE_TITANIUM:
-		case CON_WHITE:
-			color = 10;
-			break;
-		case CON_YELLOW:
-			color = 15;
-			break;
-		case CON_RED:
-			color = 13;
-			break;
-		case CON_GRAY:
-			color = 6;
-			break;
+			case CON_GREEN:
+				color = 2;
+				break;
+			case CON_LIGHTBLUE:
+				color = 10;
+				break;
+			case CON_BLUE:
+				color = 4;
+				break;
+			case CON_WHITE_TITANIUM:
+			case CON_WHITE:
+				color = 10;
+				break;
+			case CON_YELLOW:
+				color = 15;
+				break;
+			case CON_RED:
+				color = 13;
+				break;
+			case CON_GRAY:
+				color = 6;
+				break;
 		}
 
 		if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
-			if (color == 6) {
+			if (color == 6)	{
 				color = 2;
 			}
 		}
@@ -5286,8 +5229,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 	// Shroud of Stealth has a special message
 	if (improved_hidden && (!t->see_improved_hide && (t->SeeInvisible() || t->see_hide))) {
 		MessageString(Chat::NPCQuestSay, SOS_KEEPS_HIDDEN); // we are trying to hide but they can see us
-	}
-	else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(t)) {
+	} else if ((invisible || invisible_undead || hidden || invisible_animals) && !IsInvisible(t)) {
 		MessageString(Chat::NPCQuestSay, SUSPECT_SEES_YOU);
 	}
 
@@ -5296,7 +5238,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket* app)
+void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consider_Struct)) {
 		LogDebug("Size mismatch in Consider corpse expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
@@ -5337,13 +5279,12 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket* app)
 				).c_str()
 			);
 		}
-	}
-	else {
+	} else {
 		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 	}
 }
 
-void Client::Handle_OP_Consume(const EQApplicationPacket* app)
+void Client::Handle_OP_Consume(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Consume_Struct))
 	{
@@ -5355,7 +5296,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket* app)
 	{
 		if (m_pp.hunger_level > 6000)
 		{
-			EQApplicationPacket* outapp = nullptr;
+			EQApplicationPacket *outapp = nullptr;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -5370,7 +5311,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket* app)
 	{
 		if (m_pp.thirst_level > 6000)
 		{
-			EQApplicationPacket* outapp = nullptr;
+			EQApplicationPacket *outapp = nullptr;
 			outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 			Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 			sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -5382,7 +5323,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket* app)
 		}
 	}
 
-	EQ::ItemInstance* myitem = GetInv().GetItem(pcs->slot);
+	EQ::ItemInstance *myitem = GetInv().GetItem(pcs->slot);
 	if (myitem == nullptr) {
 		LogError("Consuming from empty slot [{}]", pcs->slot);
 		return;
@@ -5403,7 +5344,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket* app)
 		m_pp.hunger_level = 50000;
 	if (m_pp.thirst_level > 50000)
 		m_pp.thirst_level = 50000;
-	EQApplicationPacket* outapp = nullptr;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
 	Stamina_Struct* sta = (Stamina_Struct*)outapp->pBuffer;
 	sta->food = m_pp.hunger_level > 6000 ? 6000 : m_pp.hunger_level;
@@ -5414,7 +5355,7 @@ void Client::Handle_OP_Consume(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ControlBoat(const EQApplicationPacket* app)
+void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ControlBoat_Struct)) {
 		LogError("Wrong size: OP_ControlBoat, size=[{}], expected [{}]", app->size, sizeof(ControlBoat_Struct));
@@ -5432,7 +5373,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket* app)
 	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
 		auto message = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		return;
 	}
 
@@ -5460,7 +5401,7 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket* app)
 	boat->CastToNPC()->SignalNPC(0);
 }
 
-void Client::Handle_OP_CorpseDrag(const EQApplicationPacket* app)
+void Client::Handle_OP_CorpseDrag(const EQApplicationPacket *app)
 {
 	if (DraggedCorpses.size() >= (unsigned int)RuleI(Character, MaxDraggedCorpses))
 	{
@@ -5470,14 +5411,14 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket* app)
 
 	VERIFY_PACKET_LENGTH(OP_CorpseDrag, app, CorpseDrag_Struct);
 
-	CorpseDrag_Struct* cds = (CorpseDrag_Struct*)app->pBuffer;
+	CorpseDrag_Struct *cds = (CorpseDrag_Struct*)app->pBuffer;
 
 	Mob* corpse = entity_list.GetMob(cds->CorpseName);
 
 	if (!corpse || !corpse->IsPlayerCorpse() || corpse->CastToCorpse()->IsBeingLooted())
 		return;
 
-	Client* c = entity_list.FindCorpseDragger(corpse->GetID());
+	Client *c = entity_list.FindCorpseDragger(corpse->GetID());
 
 	if (c)
 	{
@@ -5497,7 +5438,7 @@ void Client::Handle_OP_CorpseDrag(const EQApplicationPacket* app)
 	MessageString(Chat::DefaultText, CORPSEDRAG_BEGIN, cds->CorpseName);
 }
 
-void Client::Handle_OP_CorpseDrop(const EQApplicationPacket* app)
+void Client::Handle_OP_CorpseDrop(const EQApplicationPacket *app)
 {
 	if (app->size == 1)
 	{
@@ -5508,7 +5449,7 @@ void Client::Handle_OP_CorpseDrop(const EQApplicationPacket* app)
 
 	for (auto Iterator = DraggedCorpses.begin(); Iterator != DraggedCorpses.end(); ++Iterator)
 	{
-		if (!strcasecmp(Iterator->first.c_str(), (const char*)app->pBuffer))
+		if (!strcasecmp(Iterator->first.c_str(), (const char *)app->pBuffer))
 		{
 			MessageString(Chat::DefaultText, CORPSEDRAG_STOP);
 			Iterator = DraggedCorpses.erase(Iterator);
@@ -5517,12 +5458,12 @@ void Client::Handle_OP_CorpseDrop(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_CrashDump(const EQApplicationPacket* app)
+void Client::Handle_OP_CrashDump(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_CreateObject(const EQApplicationPacket* app)
+void Client::Handle_OP_CreateObject(const EQApplicationPacket *app)
 {
 	if (LogSys.log_settings[Logs::Inventory].is_category_enabled)
 		LogInventory("Handle_OP_CreateObject() [psize: [{}]] [{}]", app->size, DumpPacketToString(app).c_str());
@@ -5531,7 +5472,7 @@ void Client::Handle_OP_CreateObject(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_CrystalCreate(const EQApplicationPacket* app)
+void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_CrystalCreate, app, CrystalReclaim_Struct);
 	auto *cr = (CrystalReclaim_Struct *) app->pBuffer;
@@ -5571,7 +5512,7 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket* app)
+void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app)
 {
 	const uint32 ebon    = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
 	const uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
@@ -5581,7 +5522,7 @@ void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Damage(const EQApplicationPacket* app)
+void Client::Handle_OP_Damage(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(CombatDamage_Struct)) {
 		LogError("Received invalid sized OP_Damage: got [{}], expected [{}]", app->size, sizeof(CombatDamage_Struct));
@@ -5596,7 +5537,7 @@ void Client::Handle_OP_Damage(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Death(const EQApplicationPacket* app)
+void Client::Handle_OP_Death(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Death_Struct))
 		return;
@@ -5616,7 +5557,7 @@ void Client::Handle_OP_Death(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DelegateAbility(const EQApplicationPacket* app)
+void Client::Handle_OP_DelegateAbility(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(DelegateAbility_Struct))
@@ -5630,7 +5571,7 @@ void Client::Handle_OP_DelegateAbility(const EQApplicationPacket* app)
 
 	DelegateAbility_Struct* das = (DelegateAbility_Struct*)app->pBuffer;
 
-	Group* g = GetGroup();
+	Group *g = GetGroup();
 
 	if (!g) return;
 
@@ -5661,7 +5602,7 @@ void Client::Handle_OP_DelegateAbility(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DeleteItem(const EQApplicationPacket* app)
+void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DeleteItem_Struct)) {
 		std::cout << "Wrong size on OP_DeleteItem. Got: " << app->size << ", Expected: " << sizeof(DeleteItem_Struct) << std::endl;
@@ -5669,7 +5610,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket* app)
 	}
 
 	DeleteItem_Struct* alc = (DeleteItem_Struct*)app->pBuffer;
-	const EQ::ItemInstance* inst = GetInv().GetItem(alc->from_slot);
+	const EQ::ItemInstance *inst = GetInv().GetItem(alc->from_slot);
 	if (inst && inst->GetItem()->ItemType == EQ::item::ItemTypeAlcohol) {
 		entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), inst->GetItem()->Name);
 		CheckIncreaseSkill(EQ::skills::SkillAlcoholTolerance, nullptr, 25);
@@ -5685,7 +5626,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket* app)
 		if (IntoxicationIncrease < 0)
 			IntoxicationIncrease = 1;
 
-		SetIntoxication(GetIntoxication() + IntoxicationIncrease);
+		SetIntoxication(GetIntoxication()+IntoxicationIncrease);
 
 	}
 	DeleteItemInInventory(alc->from_slot, 1);
@@ -5704,7 +5645,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket* app)
+void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
 {
 	// The client will send this with his id when he zones, maybe when he disconnects too?
 	//eqs->RemoveData(); // Flushing the queue of packet data to allow for proper zoning
@@ -5726,7 +5667,7 @@ void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Disarm(const EQApplicationPacket* app) {
+void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 	if (dead || bZoning) return;
 	if (!HasSkill(EQ::skills::SkillDisarm))
 		return;
@@ -5736,7 +5677,7 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket* app) {
 		return;
 	}
 
-	Disarm_Struct* disarm = (Disarm_Struct*)app->pBuffer;
+	Disarm_Struct *disarm = (Disarm_Struct *)app->pBuffer;
 
 	if (!p_timers.Expired(&database, pTimerCombatAbility2, false)) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
@@ -5753,7 +5694,7 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket* app) {
 	if (pmob->GetID() != GetID()) {
 		// Client sent a disarm request with an originator ID not matching their own ID.
 		auto message = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 
 		return;
 	}
@@ -5816,7 +5757,7 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket* app) {
 	return;
 }
 
-void Client::Handle_OP_DeleteSpell(const EQApplicationPacket* app)
+void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DeleteSpell_Struct))
 		return;
@@ -5839,7 +5780,7 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DisarmTraps(const EQApplicationPacket* app)
+void Client::Handle_OP_DisarmTraps(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillDisarmTraps))
 		return;
@@ -5900,7 +5841,7 @@ void Client::Handle_OP_DisarmTraps(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket* app)
+void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(DoGroupLeadershipAbility_Struct)) {
@@ -5929,13 +5870,13 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket* app)
 
 	case groupAAInspectBuffs:
 	{
-		Mob* Target = GetTarget();
+		Mob *Target = GetTarget();
 
 		if (!Target || !Target->IsClient())
 			return;
 
 		if (IsRaidGrouped()) {
-			Raid* raid = GetRaid();
+			Raid *raid = GetRaid();
 			if (!raid)
 				return;
 			uint32 group_id = raid->GetGroup(this);
@@ -5945,7 +5886,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket* app)
 			return;
 		}
 
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (!g || (g->GroupCount() < 3))
 			return;
@@ -5986,7 +5927,7 @@ void Client::Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DuelDecline(const EQApplicationPacket* app)
+void Client::Handle_OP_DuelDecline(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(DuelResponse_Struct)) {
 		return;
@@ -6009,14 +5950,13 @@ void Client::Handle_OP_DuelDecline(const EQApplicationPacket* app)
 	initiator->CastToClient()->SetDueling(false);
 	if (GetID() == initiator->GetID()) {
 		entity->CastToClient()->MessageString(Chat::NPCQuestSay, DUEL_DECLINE, initiator->GetName());
-	}
-	else {
+	} else {
 		initiator->CastToClient()->MessageString(Chat::NPCQuestSay, DUEL_DECLINE, entity->GetName());
 	}
 	return;
 }
 
-void Client::Handle_OP_DuelAccept(const EQApplicationPacket* app)
+void Client::Handle_OP_DuelAccept(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Duel_Struct)) {
 		return;
@@ -6067,12 +6007,12 @@ void Client::Handle_OP_DuelAccept(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DumpName(const EQApplicationPacket* app)
+void Client::Handle_OP_DumpName(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_Dye(const EQApplicationPacket* app)
+void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(EQ::TintProfile))
 		printf("Wrong size of DyeStruct, Got: %i, Expected: %zu\n", app->size, sizeof(EQ::TintProfile));
@@ -6083,7 +6023,7 @@ void Client::Handle_OP_Dye(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket* app)
+void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition)
@@ -6098,7 +6038,7 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket* app)
+void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 {
 	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
 
@@ -6125,7 +6065,7 @@ void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket* app)
+void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
 {
 	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
 	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
@@ -6138,12 +6078,12 @@ void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket* app
 	}
 }
 
-void Client::Handle_OP_DzListTimers(const EQApplicationPacket* app)
+void Client::Handle_OP_DzListTimers(const EQApplicationPacket *app)
 {
 	DzListTimers();
 }
 
-void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket* app)
+void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition)
@@ -6153,7 +6093,7 @@ void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzPlayerList(const EQApplicationPacket* app)
+void Client::Handle_OP_DzPlayerList(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition) {
@@ -6161,7 +6101,7 @@ void Client::Handle_OP_DzPlayerList(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket* app)
+void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition)
@@ -6171,7 +6111,7 @@ void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket* app)
+void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition)
@@ -6181,7 +6121,7 @@ void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_DzQuit(const EQApplicationPacket* app)
+void Client::Handle_OP_DzQuit(const EQApplicationPacket *app)
 {
 	auto expedition = GetExpedition();
 	if (expedition) {
@@ -6189,7 +6129,7 @@ void Client::Handle_OP_DzQuit(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Emote(const EQApplicationPacket* app)
+void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Emote_Struct)) {
 		LogError("Received invalid sized OP_Emote: got [{}], expected [{}]", app->size, sizeof(Emote_Struct));
@@ -6243,7 +6183,7 @@ void Client::Handle_OP_Emote(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_EndLootRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_EndLootRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_EndLootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
@@ -6272,7 +6212,7 @@ void Client::Handle_OP_EndLootRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_EnvDamage(const EQApplicationPacket* app)
+void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 {
 	if (!ClientFinishedLoading()) {
 		SetHP(GetHP() - 1);
@@ -6313,8 +6253,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket* app)
 		);
 		SetHP(GetHP() - 1);//needed or else the client wont acknowledge
 		return;
-	}
-	else if (GetInvul()) {
+	} else if (GetInvul()) {
 		Message(
 			Chat::Red,
 			fmt::format(
@@ -6330,15 +6269,13 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket* app)
 	else if (GetInvulnerableEnvironmentDamage()) {
 		SetHP(GetHP() - 1);
 		return;
-	}
-	else if (zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) { // Hard coded tutorial and load zones for no fall damage
+	} else if (zone->GetZoneID() == Zones::TUTORIAL || zone->GetZoneID() == Zones::LOAD) { // Hard coded tutorial and load zones for no fall damage
 		return;
-	}
-	else {
+	} else {
 		SetHP(GetHP() - (damage * RuleR(Character, EnvironmentDamageMulipliter)));
 
 		if (parse->PlayerHasQuestSub(EVENT_ENVIRONMENTAL_DAMAGE)) {
-			int         final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
+			int         final_damage  = (damage * RuleR(Character, EnvironmentDamageMulipliter));
 			const auto& export_string = fmt::format(
 				"{} {} {}",
 				ed->damage,
@@ -6361,7 +6298,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_FaceChange(const EQApplicationPacket* app)
+void Client::Handle_OP_FaceChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(FaceChange_Struct)) {
 		LogError("Invalid size for OP_FaceChange: Expected: [{}], Got: [{}]",
@@ -6389,7 +6326,7 @@ void Client::Handle_OP_FaceChange(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_FeignDeath(const EQApplicationPacket* app)
+void Client::Handle_OP_FeignDeath(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillFeignDeath)) {
 		return;
@@ -6433,7 +6370,7 @@ void Client::Handle_OP_FeignDeath(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(FindPersonRequest_Struct))
 		printf("Error in FindPersonRequest_Struct. Expected size of: %zu, but got: %i\n", sizeof(FindPersonRequest_Struct), app->size);
@@ -6446,7 +6383,7 @@ void Client::Handle_OP_FindPersonRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Fishing(const EQApplicationPacket* app)
+void Client::Handle_OP_Fishing(const EQApplicationPacket *app)
 {
 	if (!p_timers.Expired(&database, pTimerFishing, false)) {
 		Message(Chat::Red, "Ability recovery time not yet met.");
@@ -6467,7 +6404,7 @@ void Client::Handle_OP_Fishing(const EQApplicationPacket* app)
 	// forage for.
 }
 
-void Client::Handle_OP_Forage(const EQApplicationPacket* app)
+void Client::Handle_OP_Forage(const EQApplicationPacket *app)
 {
 
 	if (!p_timers.Expired(&database, pTimerForaging, false)) {
@@ -6488,14 +6425,14 @@ void Client::Handle_OP_Forage(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_FriendsWho(const EQApplicationPacket* app)
+void Client::Handle_OP_FriendsWho(const EQApplicationPacket *app)
 {
-	char* FriendsString = (char*)app->pBuffer;
+	char *FriendsString = (char*)app->pBuffer;
 	FriendsWho(FriendsString);
 	return;
 }
 
-void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket* app)
+void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GetGuildMOTD");
 
@@ -6508,18 +6445,18 @@ void Client::Handle_OP_GetGuildMOTD(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GetGuildsList(const EQApplicationPacket* app)
+void Client::Handle_OP_GetGuildsList(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GetGuildsList");
 
 	SendGuildList();
 }
 
-void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket* app)
+void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket *app)
 {
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /becomenpc when they shouldn't be able to" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /becomenpc when they shouldn't be able to"});
 		return;
 	}
 
@@ -6553,7 +6490,7 @@ void Client::Handle_OP_GMBecomeNPC(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket* app)
+void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMDelCorpse_Struct)) {
 		return;
@@ -6561,7 +6498,7 @@ void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket* app)
 
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /delcorpse" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /delcorpse"});
 		return;
 	}
 
@@ -6579,7 +6516,7 @@ void Client::Handle_OP_GMDelCorpse(const EQApplicationPacket* app)
 	Message(Chat::Red, fmt::format("Corpse {} deleted.", c->corpsename).c_str());
 }
 
-void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket* app)
+void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMEmoteZone_Struct)) {
 		LogError("Wrong size: OP_GMEmoteZone, size=[{}], expected [{}]", app->size, sizeof(GMEmoteZone_Struct));
@@ -6603,7 +6540,7 @@ void Client::Handle_OP_GMEmoteZone(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMEndTraining(const EQApplicationPacket* app)
+void Client::Handle_OP_GMEndTraining(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMTrainEnd_Struct)) {
 		LogDebug("Size mismatch in OP_GMEndTraining expected [{}] got [{}]", sizeof(GMTrainEnd_Struct), app->size);
@@ -6614,7 +6551,7 @@ void Client::Handle_OP_GMEndTraining(const EQApplicationPacket* app)
 	OPGMEndTraining(app);
 }
 
-void Client::Handle_OP_GMFind(const EQApplicationPacket* app)
+void Client::Handle_OP_GMFind(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMFind_Struct)) {
 		LogError("Wrong size: OP_GMFind, size=[{}], expected [{}]", app->size, sizeof(GMFind_Struct));
@@ -6646,7 +6583,7 @@ void Client::Handle_OP_GMFind(const EQApplicationPacket* app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_GMGoto(const EQApplicationPacket* app)
+void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSummon_Struct)) {
 		LogError("Wrong size: OP_GMGoto, size=[{}], expected [{}]", app->size, sizeof(GMSummon_Struct));
@@ -6655,7 +6592,7 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket* app)
 
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /goto" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /goto"});
 		return;
 	}
 
@@ -6677,7 +6614,7 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMHideMe(const EQApplicationPacket* app)
+void Client::Handle_OP_GMHideMe(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
 		LogError("Wrong size: OP_GMHideMe, size=[{}], expected [{}]", app->size, sizeof(SpawnAppearance_Struct));
@@ -6694,7 +6631,7 @@ void Client::Handle_OP_GMHideMe(const EQApplicationPacket* app)
 	SetHideMe(!sa->parameter);
 }
 
-void Client::Handle_OP_GMKick(const EQApplicationPacket* app)
+void Client::Handle_OP_GMKick(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMKick_Struct)) {
 		return;
@@ -6702,7 +6639,7 @@ void Client::Handle_OP_GMKick(const EQApplicationPacket* app)
 
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /kick" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /kick"});
 		return;
 	}
 
@@ -6725,7 +6662,7 @@ void Client::Handle_OP_GMKick(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMKill(const EQApplicationPacket* app)
+void Client::Handle_OP_GMKill(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMKill_Struct)) {
 		LogError("Wrong size: OP_GMKill, size=[{}], expected [{}]", app->size, sizeof(GMKill_Struct));
@@ -6762,7 +6699,7 @@ void Client::Handle_OP_GMKill(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMLastName(const EQApplicationPacket* app)
+void Client::Handle_OP_GMLastName(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMLastName_Struct)) {
 		std::cout << "Wrong size on OP_GMLastName. Got: " << app->size << ", Expected: " << sizeof(GMLastName_Struct) << std::endl;
@@ -6794,7 +6731,7 @@ void Client::Handle_OP_GMLastName(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GMNameChange(const EQApplicationPacket* app)
+void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMName_Struct)) {
 		LogError("Wrong size: OP_GMNameChange, size=[{}], expected [{}]", app->size, sizeof(GMName_Struct));
@@ -6804,7 +6741,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket* app)
 	auto *gmn = (GMName_Struct *) app->pBuffer;
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /name" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /name"});
 		return;
 	}
 
@@ -6845,7 +6782,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket* app)
 	UpdateWho();
 }
 
-void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket* app)
+void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket *app)
 {
 	// Could make this into a rule, although there is a hard limit since we are using a popup, of 4096 bytes that can
 	// be displayed in the window, including all the HTML formatting tags.
@@ -6859,7 +6796,7 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket* app)
 		return;
 	}
 
-	GMSearchCorpse_Struct* gmscs = (GMSearchCorpse_Struct*)app->pBuffer;
+	GMSearchCorpse_Struct *gmscs = (GMSearchCorpse_Struct *)app->pBuffer;
 	gmscs->Name[63] = '\0';
 
 	auto escSearchString = new char[129];
@@ -6919,11 +6856,11 @@ void Client::Handle_OP_GMSearchCorpse(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_GMServers(const EQApplicationPacket* app)
+void Client::Handle_OP_GMServers(const EQApplicationPacket *app)
 {
 	auto pack = new ServerPacket(ServerOP_ZoneStatus, sizeof(ServerZoneStatus_Struct));
 
-	auto z = (ServerZoneStatus_Struct*)pack->pBuffer;
+	auto z = (ServerZoneStatus_Struct *) pack->pBuffer;
 	z->admin = Admin();
 	strn0cpy(z->name, GetName(), sizeof(z->name));
 
@@ -6931,7 +6868,7 @@ void Client::Handle_OP_GMServers(const EQApplicationPacket* app)
 	delete pack;
 }
 
-void Client::Handle_OP_GMSummon(const EQApplicationPacket* app)
+void Client::Handle_OP_GMSummon(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSummon_Struct)) {
 		std::cout << "Wrong size on OP_GMSummon. Got: " << app->size << ", Expected: " << sizeof(GMSummon_Struct) << std::endl;
@@ -6942,7 +6879,7 @@ void Client::Handle_OP_GMSummon(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GMToggle(const EQApplicationPacket* app)
+void Client::Handle_OP_GMToggle(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMToggle_Struct)) {
 		std::cout << "Wrong size on OP_GMToggle. Got: " << app->size << ", Expected: " << sizeof(GMToggle_Struct) << std::endl;
@@ -6951,7 +6888,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket* app)
 
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /toggle" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /toggle"});
 		return;
 	}
 
@@ -6959,8 +6896,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket* app)
 	if (ts->toggle == 0) {
 		MessageString(Chat::White, TOGGLE_OFF);
 		tellsoff = true;
-	}
-	else if (ts->toggle == 1) {
+	} else if (ts->toggle == 1) {
 		MessageString(Chat::White, TOGGLE_ON);
 		tellsoff = false;
 	} else {
@@ -6970,7 +6906,7 @@ void Client::Handle_OP_GMToggle(const EQApplicationPacket* app)
 	UpdateWho();
 }
 
-void Client::Handle_OP_GMTraining(const EQApplicationPacket* app)
+void Client::Handle_OP_GMTraining(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMTrainee_Struct)) {
 		LogDebug("Size mismatch in OP_GMTraining expected [{}] got [{}]", sizeof(GMTrainee_Struct), app->size);
@@ -6982,7 +6918,7 @@ void Client::Handle_OP_GMTraining(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket* app)
+void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMSkillChange_Struct)) {
 		LogDebug("Size mismatch in OP_GMTrainSkill expected [{}] got [{}]", sizeof(GMSkillChange_Struct), app->size);
@@ -6994,7 +6930,7 @@ void Client::Handle_OP_GMTrainSkill(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GMZoneRequest_Struct)) {
 		std::cout << "Wrong size on OP_GMZoneRequest. Got: " << app->size << ", Expected: " << sizeof(GMZoneRequest_Struct) << std::endl;
@@ -7003,7 +6939,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket* app)
 
 	if (!GetGM()) {
 		Message(Chat::Red, "Your account has been reported for hacking.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "Used /zone" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "Used /zone"});
 		return;
 	}
 
@@ -7028,12 +6964,11 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket* app)
 	// this both loads the safe points and does a sanity check on zone name
 	auto z = GetZone(target_zone, 0);
 	if (z) {
-		target_x = z->safe_x;
-		target_y = z->safe_y;
-		target_z = z->safe_z;
+		target_x       = z->safe_x;
+		target_y       = z->safe_y;
+		target_z       = z->safe_z;
 		target_heading = z->safe_heading;
-	}
-	else {
+	} else {
 		target_zone[0] = 0;
 	}
 
@@ -7057,7 +6992,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket* app)
 	safe_delete(outapp);
 }
 
-void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket* app)
+void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(uint32)) {
 		LogError("OP size error: OP_GMZoneRequest2 expected:[{}] got:[{}]", sizeof(uint32), app->size);
@@ -7074,12 +7009,12 @@ void Client::Handle_OP_GMZoneRequest2(const EQApplicationPacket* app)
 	GoToSafeCoords(zonereq, 0);
 }
 
-void Client::Handle_OP_GroupAcknowledge(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupAcknowledge(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupCancel_Struct)) {
 		LogError("Invalid size for OP_GroupCancelInvite: Expected: [{}], Got: [{}]",
@@ -7110,7 +7045,7 @@ void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GroupDelete(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupDelete(const EQApplicationPacket *app)
 {
 	//should check for leader, only they should be able to do this..
 	Group* group = GetGroup();
@@ -7123,7 +7058,7 @@ void Client::Handle_OP_GroupDelete(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GroupDisband(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupDisband(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupGeneric_Struct)) {
 		LogError("Invalid size for GroupGeneric_Struct: Expected: [{}], Got: [{}]",
@@ -7135,14 +7070,13 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket* app)
 
 	GroupGeneric_Struct* gd = (GroupGeneric_Struct*)app->pBuffer;
 
-	Raid* raid = entity_list.GetRaidByClient(this);
+	Raid *raid = entity_list.GetRaidByClient(this);
 	if (raid) {
-		Mob* memberToDisband = nullptr;
+		Mob *memberToDisband = nullptr;
 
 		if (!raid->IsGroupLeader(GetName())) {
 			memberToDisband = this;
-		}
-		else {
+		} else {
 			memberToDisband = GetTarget();
 		}
 
@@ -7306,12 +7240,12 @@ void Client::Handle_OP_GroupDisband(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GroupFollow(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupFollow(const EQApplicationPacket *app)
 {
 	Handle_OP_GroupFollow2(app);
 }
 
-void Client::Handle_OP_GroupFollow2(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupGeneric_Struct)) {
 		LogError("Invalid size for OP_GroupFollow: Expected: [{}], Got: [{}]",
@@ -7345,7 +7279,7 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket* app)
 		LeaveGroup();
 
 		auto pack = new ServerPacket(ServerOP_GroupFollow, sizeof(ServerGroupFollow_Struct));
-		ServerGroupFollow_Struct* sgfs = (ServerGroupFollow_Struct*)pack->pBuffer;
+		ServerGroupFollow_Struct *sgfs = (ServerGroupFollow_Struct *)pack->pBuffer;
 		sgfs->CharacterID = CharacterID();
 		strn0cpy(sgfs->gf.name1, gf->name1, sizeof(sgfs->gf.name1));
 		strn0cpy(sgfs->gf.name2, gf->name2, sizeof(sgfs->gf.name2));
@@ -7354,13 +7288,13 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GroupInvite(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupInvite(const EQApplicationPacket *app)
 {
 	//this seems to be the initial invite to form a group
 	Handle_OP_GroupInvite2(app);
 }
 
-void Client::Handle_OP_GroupInvite2(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupInvite_Struct)) {
 		LogError("Invalid size for OP_GroupInvite: Expected: [{}], Got: [{}]",
@@ -7370,7 +7304,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket* app)
 
 	GroupInvite_Struct* gis = (GroupInvite_Struct*)app->pBuffer;
 
-	Mob* Invitee = entity_list.GetMob(gis->invitee_name);
+	Mob *Invitee = entity_list.GetMob(gis->invitee_name);
 
 	if (Invitee == this)
 	{
@@ -7416,8 +7350,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket* app)
 			}
 			else if (!Invitee->HasRaid()) {
 				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
-			}
-			else {
+			} else {
 				MessageString(Chat::LightGray, ALREADY_IN_RAID, Invitee->GetCleanName());
 			}
 		}
@@ -7432,11 +7365,11 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_GroupMakeLeader, app, GroupMakeLeader_Struct);
 
-	GroupMakeLeader_Struct* gmls = (GroupMakeLeader_Struct*)app->pBuffer;
+	GroupMakeLeader_Struct *gmls = (GroupMakeLeader_Struct *)app->pBuffer;
 
 	Mob* NewLeader = entity_list.GetClientByName(gmls->NewLeader);
 
@@ -7453,18 +7386,18 @@ void Client::Handle_OP_GroupMakeLeader(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GroupMentor(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupMentor(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupMentor_Struct)) {
 		LogError("Wrong size: OP_GroupMentor, size=[{}], expected [{}]", app->size, sizeof(GroupMentor_Struct));
 		DumpPacket(app);
 		return;
 	}
-	GroupMentor_Struct* gms = (GroupMentor_Struct*)app->pBuffer;
+	GroupMentor_Struct *gms = (GroupMentor_Struct *)app->pBuffer;
 	gms->name[63] = '\0';
 
 	if (IsRaidGrouped()) {
-		Raid* raid = GetRaid();
+		Raid *raid = GetRaid();
 		if (!raid)
 			return;
 		uint32 group_id = raid->GetGroup(this);
@@ -7477,7 +7410,7 @@ void Client::Handle_OP_GroupMentor(const EQApplicationPacket* app)
 		return;
 	}
 
-	Group* group = GetGroup();
+	Group *group = GetGroup();
 	if (!group)
 		return;
 
@@ -7489,16 +7422,16 @@ void Client::Handle_OP_GroupMentor(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GroupRoles(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupRoles(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupRole_Struct)) {
 		LogError("Wrong size: OP_GroupRoles, size=[{}], expected [{}]", app->size, sizeof(GroupRole_Struct));
 		DumpPacket(app);
 		return;
 	}
-	GroupRole_Struct* grs = (GroupRole_Struct*)app->pBuffer;
+	GroupRole_Struct *grs = (GroupRole_Struct*)app->pBuffer;
 
-	Group* g = GetGroup();
+	Group *g = GetGroup();
 
 	if (!g)
 		return;
@@ -7534,7 +7467,7 @@ void Client::Handle_OP_GroupRoles(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GroupUpdate(const EQApplicationPacket* app)
+void Client::Handle_OP_GroupUpdate(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GroupUpdate_Struct))
 	{
@@ -7572,7 +7505,7 @@ void Client::Handle_OP_GroupUpdate(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 {
 	if (!GuildBanks)
 		return;
@@ -7590,7 +7523,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 		return;
 	}
 
-	char* Buffer = (char*)app->pBuffer;
+	char *Buffer = (char *)app->pBuffer;
 
 	uint32 Action = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 	uint32 sentAction = Action;
@@ -7632,7 +7565,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 			return;
 		}
 
-		GuildBankPromote_Struct* gbps = (GuildBankPromote_Struct*)app->pBuffer;
+		GuildBankPromote_Struct *gbps = (GuildBankPromote_Struct*)app->pBuffer;
 
 		int Slot = GuildBanks->Promote(GuildID(), gbps->Slot);
 
@@ -7656,7 +7589,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 
 	case GuildBankViewItem:
 	{
-		GuildBankViewItem_Struct* gbvis = (GuildBankViewItem_Struct*)app->pBuffer;
+		GuildBankViewItem_Struct *gbvis = (GuildBankViewItem_Struct*)app->pBuffer;
 
 		EQ::ItemInstance* inst = GuildBanks->GetItem(GuildID(), gbvis->Area, gbvis->SlotID, 1);
 
@@ -7681,7 +7614,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 			return;
 		}
 
-		EQ::ItemInstance* CursorItemInst = GetInv().GetItem(EQ::invslot::slotCursor);
+		EQ::ItemInstance *CursorItemInst = GetInv().GetItem(EQ::invslot::slotCursor);
 
 		bool Allowed = true;
 
@@ -7721,9 +7654,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 		{
 			MessageString(Chat::Red, GUILD_BANK_CANNOT_DEPOSIT);
 			GuildBankDepositAck(true, sentAction);
-			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-				PushItemOnCursor(CursorItem, true);
-			}
+
 			return;
 		}
 
@@ -7739,7 +7670,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 
 	case GuildBankPermissions:
 	{
-		GuildBankPermissions_Struct* gbps = (GuildBankPermissions_Struct*)app->pBuffer;
+		GuildBankPermissions_Struct *gbps = (GuildBankPermissions_Struct*)app->pBuffer;
 
 		if (gbps->Permissions == 1)
 			GuildBanks->SetPermissions(GuildID(), gbps->SlotID, gbps->Permissions, gbps->MemberName);
@@ -7761,7 +7692,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 			break;
 		}
 
-		GuildBankWithdrawItem_Struct* gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
+		GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
 		EQ::ItemInstance* inst = GuildBanks->GetItem(GuildID(), gbwis->Area, gbwis->SlotID, gbwis->Quantity);
 
@@ -7769,14 +7700,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 		{
 			GuildBankAck();
 
-			break;
-		}
-
-		if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_BANK_WITHDRAW_ITEMS))
-		{
-			Message(Chat::Red, "You do not have permission to withdraw.");
-			GuildBankAck();
-			safe_delete(inst);
 			break;
 		}
 
@@ -7828,7 +7751,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 			MessageString(Chat::Red, GUILD_BANK_FULL);
 		else
 		{
-			GuildBankWithdrawItem_Struct* gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
+			GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
 			GuildBanks->SplitStack(GuildID(), gbwis->SlotID, gbwis->Quantity);
 		}
@@ -7840,7 +7763,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 
 	case GuildBankMergeStacks:
 	{
-		GuildBankWithdrawItem_Struct* gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
+		GuildBankWithdrawItem_Struct *gbwis = (GuildBankWithdrawItem_Struct*)app->pBuffer;
 
 		GuildBanks->MergeStacks(GuildID(), gbwis->SlotID);
 
@@ -7858,7 +7781,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GuildCreate(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 {
 	if (IsInAGuild())
 	{
@@ -7884,7 +7807,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket* app)
 	// name anway.
 	//
 
-	char* GuildName = (char*)app->pBuffer;
+	char *GuildName = (char *)app->pBuffer;
 #ifdef DARWIN
 #if __DARWIN_C_LEVEL < 200809L
 	if (strlen(GuildName) > 60)
@@ -7939,22 +7862,18 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket* app)
 
 			if (zone->GetZoneID() == Zones::GUILDHALL && GuildBanks)
 				GuildBanks->SendGuildBank(this);
-			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-				SendGuildRanks();
-			}
+			SendGuildRanks();
 		}
 	}
 }
 
-void Client::Handle_OP_GuildDelete(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildDelete");
 
-	if (!IsInAGuild() || !guild_mgr.IsGuildLeader(GuildID(), CharacterID())) {
+	if (!IsInAGuild() || !guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 		Message(Chat::Red, "You are not a guild leader or not in a guild.");
-	}
-	else
-	{
+	else {
 		LogGuilds("Deleting guild [{}] ([{}])", guild_mgr.GetGuildName(GuildID()), GuildID());
 		if (!guild_mgr.DeleteGuild(GuildID()))
 			Message(Chat::Red, "Guild delete failed.");
@@ -7964,7 +7883,7 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildDemote");
 
@@ -7973,77 +7892,49 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 		return;
 	}
 
-	if (!IsInAGuild()) {
+	if (!IsInAGuild())
 		Message(Chat::Red, "Error: You aren't in a guild!");
-		return;
-	}
+	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE))
+		Message(Chat::Red, "You don't have permission to demote.");
+	else if (!worldserver.Connected())
+		Message(Chat::Red, "Error: World server disconnected");
+	else {
+		GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
 
-	GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
-	auto rank = demote->rank;
-	auto target = demote->target;
-
-	CharGuildInfo gci;
-	if (!guild_mgr.GetCharInfo(demote->target, gci)) {
-		Message(Chat::Red, "Unable to find '%s'", demote->target);
-		return;
-	}
-
-	if (gci.guild_id != GuildID()) {
-		Message(Chat::Red, "You aren't in the same guild, what do you think you are doing?");
-		return;
-	}
-
-	if (rank > 8) {
-		Message(Chat::Red, "%s cannot be demoted any further!", demote->target);
-		return;
-	}
-
-	if ((strcasecmp(GetCleanName(), target) == 0 &&
-		guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE_SELF)) ||
-		(guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE)) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() <= GUILD_OFFICER))
-	{
-		LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}])",
-			demote->target, gci.char_id,
-			guild_mgr.GetRankName(GuildID(), gci.rank),
-			gci.rank,
-			guild_mgr.GetRankName(GuildID(), rank),
-			rank,
-			guild_mgr.GetGuildName(GuildID()), GuildID()
-		);
-		if (!guild_mgr.SetGuildRank(gci.char_id, rank))
-		{
-			Message(Chat::Red, "Error while setting rank %d on '%s'.", rank, demote->target);
-			LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}]) FAILED.",
-				demote->target, gci.char_id,
-				guild_mgr.GetRankName(GuildID(), gci.rank),
-				gci.rank,
-				guild_mgr.GetRankName(GuildID(), rank),
-				rank,
-				guild_mgr.GetGuildName(GuildID()), GuildID()
-			);
+		CharGuildInfo gci;
+		if (!guild_mgr.GetCharInfo(demote->target, gci)) {
+			Message(Chat::Red, "Unable to find '%s'", demote->target);
+			return;
+		}
+		if (gci.guild_id != GuildID()) {
+			Message(Chat::Red, "You aren't in the same guild, what do you think you are doing?");
 			return;
 		}
 
-		auto c = entity_list.GetClientByName(demote->target);
-		if (c) {
-			c->guildrank = rank;
-			c->SendAppearancePacket(AT_GuildRank, rank, false);
+		if (gci.rank < 1) {
+			Message(Chat::Red, "%s cannot be demoted any further!", demote->target);
+			return;
 		}
+		uint8 rank = gci.rank - 1;
 
-		auto outapp = new ServerPacket(ServerOP_GuildRankUpdate, sizeof(ServerGuildRankUpdate_Struct));
-		auto sr = (ServerGuildRankUpdate_Struct*)outapp->pBuffer;
-		sr->GuildID = GuildID();
-		strcpy(sr->MemberName, demote->target);
-		sr->Rank = rank;
-		sr->Banker = gci.banker + (gci.alt * 2);
-		sr->no_update = false;
-		worldserver.SendPacket(outapp);
-		safe_delete(outapp);
+
+		LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}])",
+			demote->target, gci.char_id,
+			guild_mgr.GetRankName(GuildID(), gci.rank), gci.rank,
+			guild_mgr.GetRankName(GuildID(), rank), rank,
+			guild_mgr.GetGuildName(GuildID()), GuildID());
+
+		if (!guild_mgr.SetGuildRank(gci.char_id, rank)) {
+			Message(Chat::Red, "Error while setting rank %d on '%s'.", rank, demote->target);
+			return;
+		}
+		Message(Chat::White, "Successfully demoted %s to rank %d", demote->target, rank);
 	}
+	//	SendGuildMembers(GuildID(), true);
+	return;
 }
 
-void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildInvite");
 
@@ -8053,12 +7944,10 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 	}
 
 	GuildCommand_Struct* gc = (GuildCommand_Struct*)app->pBuffer;
-	auto rank = gc->officer;
 
 	if (!IsInAGuild())
 		Message(Chat::Red, "Error: You are not in a guild!");
-	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_INVITE) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER))
+	else if (gc->officer > GUILD_MAX_RANK)
 		Message(Chat::Red, "Invalid rank.");
 	else if (!worldserver.Connected())
 		Message(Chat::Red, "Error: World server disconnected");
@@ -8076,19 +7965,11 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 			Client* client = invitee->CastToClient();
 
 			//ok, figure out what they are trying to do.
-			if (client && client->GuildID() == GuildID()) {
+			if (client->GuildID() == GuildID()) {
 				//they are already in this guild, must be a promotion or demotion
-				if (ClientVersion() < EQ::versions::ClientVersion::RoF) {
-					switch (gc->officer) {
-					case 0: { rank = 5; break; }
-					case 1: { rank = 3; break; }
-					case 2: { rank = 1; break; }
-					}
-				}
-				if (rank > client->GuildRank()) {
+				if (gc->officer < client->GuildRank()) {
 					//demotion
-					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE) ||
-						(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER)) {
+					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_DEMOTE)) {
 						Message(Chat::Red, "You don't have permission to demote.");
 						return;
 					}
@@ -8099,20 +7980,18 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 					LogGuilds("[{}] ([{}]) is demoting [{}] ([{}]) to rank [{}] in guild [{}] ([{}])",
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
-						rank,
+						gc->officer,
 						guild_mgr.GetGuildName(GuildID()), GuildID());
 
-					if (!guild_mgr.SetGuildRank(client->CharacterID(), rank)) {
+					if (!guild_mgr.SetGuildRank(client->CharacterID(), gc->officer)) {
 						Message(Chat::Red, "There was an error during the demotion, DB may now be inconsistent.");
 						return;
 					}
 
 				}
-				else if (rank < client->GuildRank()) {
+				else if (gc->officer > client->GuildRank()) {
 					//promotion
-					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_PROMOTE) ||
-						(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER)
-						) {
+					if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE)) {
 						Message(Chat::Red, "You don't have permission to demote.");
 						return;
 					}
@@ -8120,42 +7999,25 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 					LogGuilds("[{}] ([{}]) is asking to promote [{}] ([{}]) to rank [{}] in guild [{}] ([{}])",
 						GetName(), CharacterID(),
 						client->GetName(), client->CharacterID(),
-						rank,
+						gc->officer,
 						guild_mgr.GetGuildName(GuildID()), GuildID());
 
 					//record the promotion with guild manager so we know its valid when we get the reply
-					guild_mgr.RecordInvite(client->CharacterID(), GuildID(), rank);
+					guild_mgr.RecordInvite(client->CharacterID(), GuildID(), gc->officer);
 
 					if (gc->guildeqid == 0)
 						gc->guildeqid = GuildID();
 
 					LogGuilds("Sending OP_GuildInvite for promotion to [{}], length [{}]", client->GetName(), app->size);
-
-					// Convert Membership Level between RoF and previous clients.
-					if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF)
-					{
-						gc->officer = rank;
-						if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF && ClientVersion() < EQ::versions::ClientVersion::RoF)
-						{
-							auto outapp = new EQApplicationPacket(OP_GuildPromote, sizeof(GuildPromoteStruct));
-							GuildPromoteStruct* gps = (GuildPromoteStruct*)outapp->pBuffer;
-							strcpy(gps->name, gc->myname);
-							strcpy(gps->target, gc->othername);
-							gps->myrank = GuildRank();
-							gps->rank = rank;
-							Handle_OP_GuildPromote(outapp);
-							safe_delete(outapp);
-							return;
-						}
-					}
 					client->QueuePacket(app);
+
 				}
 				else {
 					Message(Chat::Red, "That member is already that rank.");
 					return;
 				}
 			}
-			else if (client && !client->IsInAGuild()) {
+			else if (!client->IsInAGuild()) {
 				//they are not in this or any other guild, this is an invite
 				//
 				if (client->GetPendingGuildInvitation())
@@ -8164,8 +8026,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 					return;
 				}
 
-				if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_INVITE) ||
-					(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER)) {
+				if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_INVITE)) {
 					Message(Chat::Red, "You don't have permission to invite.");
 					return;
 				}
@@ -8204,127 +8065,180 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildInviteAccept");
 
 	SetPendingGuildInvitation(false);
 
 	if (app->size != sizeof(GuildInviteAccept_Struct)) {
-		LogGuilds("Wrong size: OP_GuildInviteAccept, size={}, expected {}.", app->size, sizeof(GuildJoin_Struct));
+		std::cout << "Wrong size: OP_GuildInviteAccept, size=" << app->size << ", expected " << sizeof(GuildJoin_Struct) << std::endl;
 		return;
 	}
 
 	GuildInviteAccept_Struct* gj = (GuildInviteAccept_Struct*)app->pBuffer;
-	auto invitor = gj->inviter;
-	auto invitee = gj->newmember;
-	auto guild_id = gj->guildeqid;
-	auto response = gj->response;
 
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF) {
-		switch (response) {
-		case 0: { response = 8; break; }
-		case 1: { response = 3; break; }
-		default: {response = 9; break; }
+	uint32 guildrank = gj->response;
+
+	if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
+	{
+		if (gj->response > 9)
+		{
+			//dont care if the check fails (since we dont know the rank), just want to clear the entry.
+			guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
+			worldserver.SendEmoteMessage(
+				gj->inviter,
+				0,
+				Chat::White,
+				fmt::format(
+					"{} has declined to join the guild.",
+					GetCleanName()
+				).c_str()
+			);
+			return;
 		}
 	}
-
-	Client* c_invitor = entity_list.GetClientByName(invitor);
-	Client* c_invitee = entity_list.GetClientByName(invitee);
-	if (!c_invitee) {
+	if (gj->response == 5 || gj->response == 4) {
+		//dont care if the check fails (since we dont know the rank), just want to clear the entry.
+		guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, gj->response);
+		worldserver.SendEmoteMessage(
+			gj->inviter,
+			0,
+			Chat::White,
+			fmt::format(
+				"{} has declined to join the guild.",
+				GetCleanName()
+			).c_str()
+		);
 		return;
 	}
 
-	if (!c_invitee || !c_invitor) {
-		guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
-		Message(Chat::Yellow, "Both players must be in the same zone.");
-		if (c_invitor) {
-			c_invitor->Message(Chat::Yellow, "Both players must be in the same zone.");
+	//uint32 tmpeq = gj->guildeqid;
+	if (IsInAGuild() && gj->response == GuildRank())
+		Message(Chat::Red, "Error: You're already in a guild!");
+	else if (!worldserver.Connected())
+		Message(Chat::Red, "Error: World server disconnected");
+	else {
+		LogGuilds("Guild Invite Accept: guild [{}], response [{}], inviter [{}], person [{}]",
+			gj->guildeqid, gj->response, gj->inviter, gj->newmember);
+
+		//ok, the invite is also used for changing rank as well.
+		Mob* inviter = entity_list.GetMob(gj->inviter);
+
+		if (inviter && inviter->IsClient())
+		{
+			Client* client = inviter->CastToClient();
+			// Convert Membership Level between RoF and previous clients.
+			if (client->ClientVersion() < EQ::versions::ClientVersion::RoF && ClientVersion() >= EQ::versions::ClientVersion::RoF)
+			{
+				guildrank = 0;
+			}
+			if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF && ClientVersion() < EQ::versions::ClientVersion::RoF)
+			{
+				guildrank = 8;
+			}
 		}
-		return;
-	}
-
-	if (response == 9) {
-		guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
-		Message(Chat::Yellow, "You declined the guild invite.");
-		if (c_invitor) {
-			c_invitor->Message(Chat::Yellow, "The player declined the guild invite.");
+		//we dont really care a lot about what this packet means, as long as
+		//it has been authorized with the guild manager
+		if (!guild_mgr.VerifyAndClearInvite(CharacterID(), gj->guildeqid, guildrank)) {
+			worldserver.SendEmoteMessage(
+				gj->inviter,
+				0,
+				Chat::White,
+				fmt::format(
+					"{} has sent an invalid response to your invite!",
+					GetCleanName()
+				).c_str()
+			);
+			Message(Chat::Red, "Invalid invite response packet!");
+			return;
 		}
-		return;
+
+		if (gj->guildeqid == GuildID()) {
+			//only need to change rank.
+
+			LogGuilds("Changing guild rank of [{}] ([{}]) to rank [{}] in guild [{}] ([{}])",
+				GetName(), CharacterID(),
+				gj->response,
+				guild_mgr.GetGuildName(GuildID()), GuildID());
+
+			if (!guild_mgr.SetGuildRank(CharacterID(), gj->response)) {
+				Message(Chat::Red, "There was an error during the rank change, DB may now be inconsistent.");
+				return;
+			}
+		}
+		else {
+
+			LogGuilds("Adding [{}] ([{}]) to guild [{}] ([{}]) at rank [{}]",
+				GetName(), CharacterID(),
+				guild_mgr.GetGuildName(gj->guildeqid), gj->guildeqid,
+				gj->response);
+
+			//change guild and rank
+
+			guildrank = gj->response;
+
+			if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
+			{
+				if (gj->response == 8)
+				{
+					guildrank = 0;
+				}
+			}
+
+			if (!guild_mgr.SetGuild(CharacterID(), gj->guildeqid, guildrank)) {
+				Message(Chat::Red, "There was an error during the invite, DB may now be inconsistent.");
+				return;
+			}
+			if (zone->GetZoneID() == Zones::GUILDHALL && GuildBanks)
+				GuildBanks->SendGuildBank(this);
+		}
 	}
-
-	if (c_invitor && IsInAGuild() && GuildID() != c_invitor->GuildID()) {
-		guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
-		Message(Chat::Yellow, "You are already in a guild.  Please leave that guild first.");
-		c_invitor->Message(Chat::Yellow, "Player is already in a guild.");
-		return;
-	}
-
-
-	guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
-	guild_mgr.AddMember(guild_id, c_invitee->CharacterID(), c_invitee->GetLevel(), c_invitee->GetClass(), gj->response, c_invitee->GetZoneID(), std::string(c_invitee->GetCleanName()));
-
-	if (zone->GetZoneID() == Zones::GUILDHALL && GuildBanks) {
-		GuildBanks->SendGuildBank(this);
-	}
-
-//	c_invitee->guild_id = guild_id;
-//	c_invitee->guildrank = response;
-//	SendAppearancePacket(AT_GuildID, guild_id, true, false, c_invitee, false);
-//	SendAppearancePacket(AT_GuildRank, response, true, false, c_invitee, false);
-	if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		SendGuildRankNames();
-		entity_list.SendAllGuildTitleDisplay(GuildID());
-	}
-
-	LogGuilds("Adding [{}] ([{}]) to guild [{}] ([{}]) at rank [{}]",
-		GetName(),
-		CharacterID(),
-		guild_mgr.GetGuildName(guild_id),
-		guild_id,
-		response
-	);
 }
 
-void Client::Handle_OP_GuildLeader(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildLeader(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(GuildMakeLeader_Struct)) {
-		LogError("Received OP_Handle_GuildLeader packet of size {} which should be {}", app->size, sizeof(GuildMakeLeader_Struct));
+	LogGuilds("Received OP_GuildLeader");
+
+	if (app->size < 2) {
+		LogGuilds("Invalid length [{}] on OP_GuildLeader", app->size);
 		return;
 	}
 
-	GuildMakeLeader_Struct* gcl = (GuildMakeLeader_Struct*)app->pBuffer;
-	auto new_leader = entity_list.GetClientByName(gcl->new_leader);
-	if (!new_leader) {
-		Message(Chat::Red, "Both players must be in the same zone to transfer guild leadership.");
-		return;
-	}
+	app->pBuffer[app->size - 1] = 0;
+	GuildMakeLeader* gml = (GuildMakeLeader*)app->pBuffer;
+	if (!IsInAGuild())
+		Message(Chat::Red, "Error: You aren't in a guild!");
+	else if (GuildRank() != GUILD_LEADER)
+		Message(Chat::Red, "Error: You aren't the guild leader!");
+	else if (!worldserver.Connected())
+		Message(Chat::Red, "Error: World server disconnected");
+	else {
 
-	if (GuildRank() != GUILD_LEADER) {
-		Message(Chat::Red, "You must be the guild leader to reassign guild leadership.");
-		return;
-	}
+		//NOTE: we could do cross-zone lookups here...
 
-	if (guild_mgr.SetGuildLeader(GuildID(), new_leader->CharacterID())) {
-		Message(Chat::White, "Successfully Transfered Leadership to %s.", new_leader->GetCleanName());
-		new_leader->Message(Chat::Yellow, "%s has transfered the guild leadership into your hands.", GetName());
-		LogGuilds("Transfering leadership of [{}] ([{}]) to [{}] ([{}])",
-			guild_mgr.GetGuildName(GuildID()),
-			GuildID(),
-			new_leader->GetCleanName(),
-			new_leader->CharacterID()
-		);
-	}
-	else
-	{
-		Message(Chat::Red, "Could not change leadership at this time.");
-		LogGuilds("Tranfer of guild leadership for guild id {} failed.", GuildID());
-	}
+		Client* newleader = entity_list.GetClientByName(gml->target);
+		if (newleader) {
 
+			LogGuilds("Transfering leadership of [{}] ([{}]) to [{}] ([{}])",
+				guild_mgr.GetGuildName(GuildID()), GuildID(),
+				newleader->GetName(), newleader->CharacterID());
+
+			if (guild_mgr.SetGuildLeader(GuildID(), newleader->CharacterID())) {
+				Message(Chat::White, "Successfully Transfered Leadership to %s.", gml->target);
+				newleader->Message(Chat::Yellow, "%s has transfered the guild leadership into your hands.", GetName());
+			}
+			else
+				Message(Chat::Red, "Could not change leadership at this time.");
+		}
+		else
+			Message(Chat::Red, "Failed to change leader, could not find target.");
+	}
+	//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket *app)
 {
 
 	LogGuilds("Got OP_GuildManageBanker of len [{}]", app->size);
@@ -8346,7 +8260,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
 		Message(Chat::Red, "Unable to find '%s'", gmb->member);
 		return;
 	}
-	bool IsCurrentlyABanker = guild_mgr.GetBankerFlag(gci.char_id, true);
+	bool IsCurrentlyABanker = guild_mgr.GetBankerFlag(gci.char_id);
 
 	bool IsCurrentlyAnAlt = guild_mgr.GetAltFlag(gci.char_id);
 
@@ -8362,8 +8276,7 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
 
 	if (IsCurrentlyAnAlt != NewAltStatus)
 	{
-		bool IsAllowed = !strncasecmp(GetName(), gmb->member, strlen(GetName())) ||
-			guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_CHANGE_ALT_FLAG_FOR_OTHER);
+		bool IsAllowed = !strncasecmp(GetName(), gmb->member, strlen(GetName())) || (GuildRank() >= GUILD_OFFICER);
 
 		if (!IsAllowed)
 		{
@@ -8379,7 +8292,6 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
 
 	if (IsCurrentlyABanker != NewBankerStatus)
 	{
-		gci.banker = NewBankerStatus;
 		if (!guild_mgr.SetBankerFlag(gci.char_id, NewBankerStatus)) {
 			Message(Chat::Red, "Error setting guild banker flag.");
 			return;
@@ -8392,7 +8304,6 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
 	}
 	if (IsCurrentlyAnAlt != NewAltStatus)
 	{
-		gci.alt = NewAltStatus;
 		if (!guild_mgr.SetAltFlag(gci.char_id, NewAltStatus)) {
 			Message(Chat::Red, "Error setting guild alt flag.");
 			return;
@@ -8405,13 +8316,13 @@ void Client::Handle_OP_GuildManageBanker(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_GuildPeace(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildPeace(const EQApplicationPacket *app)
 {
 	LogGuilds("Got OP_GuildPeace of len [{}]", app->size);
 	return;
 }
 
-void Client::Handle_OP_GuildPromote(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildPromote");
 
@@ -8422,23 +8333,12 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket* app)
 
 	if (!IsInAGuild())
 		Message(Chat::Red, "Error: You aren't in a guild!");
-	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_PROMOTE) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER))
+	else if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_PROMOTE))
 		Message(Chat::Red, "You don't have permission to promote.");
 	else if (!worldserver.Connected())
 		Message(Chat::Red, "Error: World server disconnected");
 	else {
 		GuildPromoteStruct* promote = (GuildPromoteStruct*)app->pBuffer;
-
-		auto rank = promote->myrank;
-		//should move this to decode
-		if (ClientVersion() < EQ::versions::ClientVersion::RoF) {
-			switch (rank) {
-			case 0: { rank = 5; break; }
-			case 1: { rank = 3; break; }
-			case 2: { rank = 1; break; }
-			}
-		}
 
 		CharGuildInfo gci;
 		if (!guild_mgr.GetCharInfo(promote->target, gci)) {
@@ -8450,9 +8350,9 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket* app)
 			return;
 		}
 
-		//uint8 rank = gci.rank + 1;
+		uint8 rank = gci.rank + 1;
 
-		if (rank == GUILD_LEADER)
+		if (rank > GUILD_OFFICER)
 		{
 			Message(Chat::Red, "You cannot promote someone to be guild leader. You must use /guildleader.");
 			return;
@@ -8469,37 +8369,20 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket* app)
 			Message(Chat::Red, "Error while setting rank %d on '%s'.", rank, promote->target);
 			return;
 		}
-		//		Message(Chat::White, "Successfully promoted %s to rank %d", promote->target, rank);
-
-		auto c = entity_list.GetClientByName(promote->target);
-		if (c) {
-			c->guildrank = rank;
-			c->SendAppearancePacket(AT_GuildRank, rank, false);
-		}
-
-		auto outapp = new ServerPacket(ServerOP_GuildRankUpdate, sizeof(ServerGuildRankUpdate_Struct));
-		auto sr = (ServerGuildRankUpdate_Struct*)outapp->pBuffer;
-		sr->GuildID = GuildID();
-		strcpy(sr->MemberName, promote->target);
-		sr->Rank = rank;
-		sr->Banker = gci.banker + (gci.alt * 2);
-		sr->no_update = false;
-		worldserver.SendPacket(outapp);
-		safe_delete(outapp);
-
+		Message(Chat::White, "Successfully promoted %s to rank %d", promote->target, rank);
 	}
 	return;
 }
 
-void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_GuildPublicNote");
 
-	if (app->size != sizeof(GuildUpdate_PublicNote)) {
-		LogGuilds("Received packet to update a guild public note for {} of wrong size.", GetCleanName());
+	if (app->size < sizeof(GuildUpdate_PublicNote)) {
+		// client calls for a motd on login even if they arent in a guild
+		printf("Error: app size of %i < size of OP_GuildPublicNote of %zu\n", app->size, sizeof(GuildUpdate_PublicNote));
 		return;
 	}
-
 	GuildUpdate_PublicNote* gpn = (GuildUpdate_PublicNote*)app->pBuffer;
 
 	CharGuildInfo gci;
@@ -8512,48 +8395,38 @@ void Client::Handle_OP_GuildPublicNote(const EQApplicationPacket* app)
 		return;
 	}
 
-	if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_EDIT_PUBLIC_NOTES) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER))
-	{
-		Message(Chat::Red, "You do not have access to update public guild notes.");
-		return;
-	}
-
 	LogGuilds("Setting public note on [{}] ([{}]) in guild [{}] ([{}]) to: [{}]",
 		gpn->target, gci.char_id,
 		guild_mgr.GetGuildName(GuildID()), GuildID(),
 		gpn->note);
 
-	if (!guild_mgr.SetPublicNote(gci.char_id, std::string(gpn->note))) {
+	if (!guild_mgr.SetPublicNote(gci.char_id, gpn->note)) {
 		Message(Chat::Red, "Failed to set public note on %s", gpn->target);
 	}
 	else {
 		Message(Chat::White, "Successfully changed public note on %s", gpn->target);
-		guild_mgr.SendToWorldMemberPublicNote(GuildID(), gpn->target, gpn->note);
 	}
+	//	SendGuildMembers(GuildID(), true);
+	return;
 }
 
-void Client::Handle_OP_GuildRemove(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 {
+	LogGuilds("Received OP_GuildRemove");
+
 	if (app->size != sizeof(GuildCommand_Struct)) {
-		LogGuilds("Wrong size: OP_GuildRemove, size = {} expected {}.",
-			app->size,
-			sizeof(GuildCommand_Struct)
-		);
+		std::cout << "Wrong size: OP_GuildRemove, size=" << app->size << ", expected " << sizeof(GuildCommand_Struct) << std::endl;
 		return;
 	}
-
 	GuildCommand_Struct* gc = (GuildCommand_Struct*)app->pBuffer;
-
-	if (!IsInAGuild()) {
+	if (!IsInAGuild())
 		Message(Chat::Red, "Error: You aren't in a guild!");
-	}
-	else if ((strcasecmp(gc->othername, GetName()) != 0 &&
-		!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_REMOVE)) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER) &&
-		strcasecmp(gc->othername, GetName()) != 0) {
+	// we can always remove ourself, otherwise, our rank needs remove permissions
+	else if (strcasecmp(gc->othername, GetName()) != 0 &&
+		!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_REMOVE))
 		Message(Chat::Red, "You don't have permission to remove guild members.");
-	}
+	else if (!worldserver.Connected())
+		Message(Chat::Red, "Error: World server disconnected");
 	else {
 		uint32 char_id;
 		Client* client = entity_list.GetClientByName(gc->othername);
@@ -8563,7 +8436,8 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket* app)
 				Message(Chat::Red, "You aren't in the same guild, what do you think you are doing?");
 				return;
 			}
-			guild_mgr.RemoveMember(client->GuildID(), client->CharacterID(), std::string(client->GetCleanName()));
+			char_id = client->CharacterID();
+
 			LogGuilds("Removing [{}] ([{}]) from guild [{}] ([{}])",
 				client->GetName(), client->CharacterID(),
 				guild_mgr.GetGuildName(GuildID()), GuildID());
@@ -8583,13 +8457,25 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket* app)
 			LogGuilds("Removing remote/offline [{}] ([{}]) into guild [{}] ([{}])",
 				gci.char_name.c_str(), gci.char_id,
 				guild_mgr.GetGuildName(GuildID()), GuildID());
-			guild_mgr.RemoveMember(gci.guild_id, gci.char_id, gci.char_name);
 		}
+
+		if (!guild_mgr.SetGuild(char_id, GUILD_NONE, 0)) {
+			auto outapp = new EQApplicationPacket(OP_GuildManageRemove, sizeof(GuildManageRemove_Struct));
+			GuildManageRemove_Struct* gm = (GuildManageRemove_Struct*)outapp->pBuffer;
+			gm->guildeqid = GuildID();
+			strcpy(gm->member, gc->othername);
+			Message(Chat::White, "%s successfully removed from your guild.", gc->othername);
+			entity_list.QueueClientsGuild(this, outapp, false, GuildID());
+			safe_delete(outapp);
+		}
+		else
+			Message(Chat::Red, "Unable to remove %s from your guild.", gc->othername);
 	}
+	//	SendGuildMembers(GuildID(), true);
 	return;
 }
 
-void Client::Handle_OP_GuildStatus(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(GuildStatus_Struct))
 	{
@@ -8599,9 +8485,9 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket* app)
 
 		return;
 	}
-	GuildStatus_Struct* gss = (GuildStatus_Struct*)app->pBuffer;
+	GuildStatus_Struct *gss = (GuildStatus_Struct*)app->pBuffer;
 
-	Client* c = entity_list.GetClientByName(gss->Name);
+	Client *c = entity_list.GetClientByName(gss->Name);
 
 	if (!c) {
 		MessageString(Chat::LightGray, TARGET_PLAYER_FOR_GUILD_STATUS);
@@ -8616,103 +8502,75 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket* app)
 		return;
 	}
 
-	const char* GuildName = guild_mgr.GetGuildName(TargetGuildID);
+	const char *GuildName = guild_mgr.GetGuildName(TargetGuildID);
 
 	if (!GuildName)
 		return;
 
-	auto rank = c->GuildRank();
-	switch (rank) {
-	case 1: {
+	bool IsLeader = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_PROMOTE);
+	bool IsOfficer = guild_mgr.CheckPermission(TargetGuildID, c->GuildRank(), GUILD_INVITE);
+
+	if ((TargetGuildID == GuildID()) && (c != this))
+	{
+		if (IsLeader)
+			MessageString(Chat::LightGray, LEADER_OF_YOUR_GUILD, c->GetName());
+		else if (IsOfficer)
+			MessageString(Chat::LightGray, OFFICER_OF_YOUR_GUILD, c->GetName());
+		else
+			MessageString(Chat::LightGray, MEMBER_OF_YOUR_GUILD, c->GetName());
+
+		return;
+	}
+
+	if (IsLeader)
 		MessageString(Chat::LightGray, LEADER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
-	case 2:
-	case 3: {
+	else if (IsOfficer)
 		MessageString(Chat::LightGray, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8: {
+	else
 		MessageString(Chat::LightGray, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
-	}
 }
 
-void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 {
+	if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
+	{
+		LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
+
+		DumpPacket(app);
+
+		return;
+	}
+
+	GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*)app->pBuffer;
+
 	if (!IsInAGuild())
 		return;
 
-	GuildUpdateUCP* gup = (GuildUpdateUCP*)app->pBuffer;
-
-	switch (gup->action) {
-	case 0:
-	case 1: {
-		if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
-		{
-			LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
-			DumpPacket(app);
-			return;
-		}
-
-		if (gup->action == 0) {
-			guild_mgr.SetGuildURL(GuildID(), gup->payload.url_channel.text);
-		}
-		else if (gup->action) {
-			guild_mgr.SetGuildChannel(GuildID(), gup->payload.url_channel.text);
-		}
-		break;
-	}
-	case 4: {
-		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_RANK_NAMES)) {
-			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
-			return;
-		}
-		auto rank = gup->payload.rank_name.rank;
-		std::string rank_name(gup->payload.rank_name.rank_name);
-
-		if (rank > GUILD_MAX_RANK || rank < 0 || rank_name.empty()) {
-			LogGuilds("Received packet to update rank though rank {} or rank name {} was incorrect.", rank, rank_name.c_str());
-			return;
-		}
-		guild_mgr.UpdateRankName(guild_id, rank, rank_name);
-		guild_mgr.SendRankName(guild_id, rank, rank_name);
-
-		break;
-	}
-	case 5:
+	if (!guild_mgr.IsGuildLeader(GuildID(), CharacterID()))
 	{
-		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_PERMISSIONS)) {
-			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
-			return;
-		}
-		guild_mgr.UpdateRankPermission(guild_id, character_id, gup->payload.permissions.function_id, gup->payload.permissions.rank, gup->payload.permissions.value);
-		guild_mgr.SendPermissionUpdate(guild_id, gup->payload.permissions.rank, gup->payload.permissions.function_id, gup->payload.permissions.value);
+		Message(Chat::Red, "Only the guild leader can change the Channel or URL.!");
+		return;
+	}
 
-		break;
-	}
-	default:
-		break;
-	}
+	if (guuacs->Action == 0)
+		guild_mgr.SetGuildURL(GuildID(), guuacs->Text);
+	else
+		guild_mgr.SetGuildChannel(GuildID(), guuacs->Text);
+
 }
 
-void Client::Handle_OP_GuildWar(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildWar(const EQApplicationPacket *app)
 {
 	LogGuilds("Got OP_GuildWar of len [{}]", app->size);
 	return;
 }
 
-void Client::Handle_OP_Heartbeat(const EQApplicationPacket* app)
+void Client::Handle_OP_Heartbeat(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_Hide(const EQApplicationPacket* app)
+void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 {
 	// newer client respond to OP_CancelSneakHide with OP_Hide with a size of 4 and 0 data
 	if (app->size == 4) {
@@ -8760,9 +8618,9 @@ void Client::Handle_OP_Hide(const EQApplicationPacket* app)
 	}
 	if (GetClass() == Class::Rogue) {
 		auto outapp = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
-		SimpleMessage_Struct* msg = (SimpleMessage_Struct*)outapp->pBuffer;
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
-		Mob* evadetar = GetTarget();
+		Mob *evadetar = GetTarget();
 		if (!auto_attack && (evadetar && evadetar->CheckAggro(this)
 			&& evadetar->IsNPC())) {
 			if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
@@ -8786,7 +8644,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_HideCorpse(const EQApplicationPacket* app)
+void Client::Handle_OP_HideCorpse(const EQApplicationPacket *app)
 {
 	// New OPCode for SOD+ as /hidecorpse is handled serverside now.
 	//
@@ -8799,7 +8657,7 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket* app)
 		return;
 	}
 
-	HideCorpse_Struct* hcs = (HideCorpse_Struct*)app->pBuffer;
+	HideCorpse_Struct *hcs = (HideCorpse_Struct*)app->pBuffer;
 
 	if (hcs->Action == HideCorpseLooted)
 		return;
@@ -8812,12 +8670,12 @@ void Client::Handle_OP_HideCorpse(const EQApplicationPacket* app)
 	HideCorpseMode = hcs->Action;
 }
 
-void Client::Handle_OP_Ignore(const EQApplicationPacket* app)
+void Client::Handle_OP_Ignore(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_Illusion(const EQApplicationPacket* app)
+void Client::Handle_OP_Illusion(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Illusion_Struct)) {
 		LogError("Received invalid sized OP_Illusion: got [{}], expected [{}]", app->size, sizeof(Illusion_Struct));
@@ -8828,7 +8686,7 @@ void Client::Handle_OP_Illusion(const EQApplicationPacket* app)
 	if (!GetGM()) {
 		RecordPlayerEventLog(
 			PlayerEvent::POSSIBLE_HACK,
-			PlayerEvent::PossibleHackEvent{ .message = "OP_Illusion sent by non Game Master" }
+			PlayerEvent::PossibleHackEvent{.message = "OP_Illusion sent by non Game Master"}
 		);
 
 		return;
@@ -8848,7 +8706,7 @@ void Client::Handle_OP_Illusion(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_InspectAnswer(const EQApplicationPacket* app)
+void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(InspectResponse_Struct)) {
 		LogError("Wrong size: OP_InspectAnswer, size=[{}], expected [{}]", app->size, sizeof(InspectResponse_Struct));
@@ -8857,11 +8715,11 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket* app)
 
 	//Fills the app sent from client.
 	auto               outapp = app->Copy();
-	auto               insr = (InspectResponse_Struct*)outapp->pBuffer;
-	auto               tmp = entity_list.GetMob(insr->TargetID);
-	const EQ::ItemData* item = nullptr;
+	auto               insr   = (InspectResponse_Struct *) outapp->pBuffer;
+	auto               tmp    = entity_list.GetMob(insr->TargetID);
+	const EQ::ItemData *item  = nullptr;
 
-	for (int16 L = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
+	for (int16 L                    = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
 		const auto inst = GetInv().GetItem(L);
 		item = inst ? inst->GetItem() : nullptr;
 
@@ -8872,21 +8730,18 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket* app)
 
 				if (augment) {
 					insr->itemicons[L] = augment->GetItem()->Icon;
-				}
-				else if (inst->GetOrnamentationIcon()) {
+				} else if (inst->GetOrnamentationIcon()) {
 					insr->itemicons[L] = inst->GetOrnamentationIcon();
 				}
-			}
-			else {
+			} else {
 				insr->itemicons[L] = item->Icon;
 			}
-		}
-		else {
+		} else {
 			insr->itemicons[L] = 0xFFFFFFFF;
 		}
 	}
 
-	auto message = (InspectMessage_Struct*)insr->text;
+	auto message         = (InspectMessage_Struct *) insr->text;
 	auto inspect_message = GetInspectMessage();
 
 	memcpy(&inspect_message, message, sizeof(InspectMessage_Struct));
@@ -8895,12 +8750,12 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket* app)
 	if (
 		tmp &&
 		tmp->IsClient()
-		) {
+	) {
 		tmp->CastToClient()->QueuePacket(outapp);
 	} // Send answer to requester
 }
 
-void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket* app)
+void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(InspectMessage_Struct)) {
@@ -8914,7 +8769,7 @@ void Client::Handle_OP_InspectMessageUpdate(const EQApplicationPacket* app)
 	database.SaveCharacterInspectMessage(CharacterID(), &playermessage);
 }
 
-void Client::Handle_OP_InspectRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_InspectRequest(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(Inspect_Struct)) {
@@ -8927,7 +8782,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket* app)
 
 	if (tmp != 0 && tmp->IsClient()) {
 		if (tmp->CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) { tmp->CastToClient()->QueuePacket(app); } // Send request to target
-		// Inspecting an SoF or later client will make the server handle the request
+																																   // Inspecting an SoF or later client will make the server handle the request
 		else { ProcessInspectRequest(tmp->CastToClient(), this); }
 	}
 
@@ -8936,7 +8791,7 @@ void Client::Handle_OP_InspectRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_InstillDoubt(const EQApplicationPacket* app)
+void Client::Handle_OP_InstillDoubt(const EQApplicationPacket *app)
 {
 	//packet is empty as of 12/14/04
 
@@ -8950,7 +8805,7 @@ void Client::Handle_OP_InstillDoubt(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket* app)
+void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ItemViewRequest_Struct)) {
 		LogError("Wrong size on OP_ItemLinkClick. Got: [{}], Expected: [{}]", app->size,
@@ -8959,12 +8814,12 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket* app)
 		return;
 	}
 
-	ItemViewRequest_Struct* ivrs = (ItemViewRequest_Struct*)app->pBuffer;
+	ItemViewRequest_Struct *ivrs = (ItemViewRequest_Struct *)app->pBuffer;
 
 	// todo: verify ivrs->link_hash based on a rule, in case we don't care about people being able to sniff data
 	// from the item DB
 
-	const EQ::ItemData* item = database.GetItem(ivrs->item_id);
+	const EQ::ItemData *item = database.GetItem(ivrs->item_id);
 	if (!item) {
 		if (ivrs->item_id != SAYLINK_ITEM_ID) {
 			Message(Chat::Red, "Error: The item for the link you have clicked on does not exist!");
@@ -9008,7 +8863,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket* app)
 		}
 	}
 
-	EQ::ItemInstance* inst =
+	EQ::ItemInstance *inst =
 		database.CreateItem(item, item->MaxCharges, ivrs->augments[0], ivrs->augments[1], ivrs->augments[2],
 			ivrs->augments[3], ivrs->augments[4], ivrs->augments[5]);
 	if (inst) {
@@ -9017,7 +8872,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket* app)
+void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(LDONItemViewRequest_Struct)) {
 		LogError("OP size error: OP_ItemLinkResponse expected:[{}] got:[{}]", sizeof(LDONItemViewRequest_Struct), app->size);
@@ -9032,15 +8887,15 @@ void Client::Handle_OP_ItemLinkResponse(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ItemName(const EQApplicationPacket* app)
+void Client::Handle_OP_ItemName(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ItemNamePacket_Struct)) {
 		LogError("Invalid size for ItemNamePacket_Struct: Expected: [{}], Got: [{}]",
 			sizeof(ItemNamePacket_Struct), app->size);
 		return;
 	}
-	ItemNamePacket_Struct* p = (ItemNamePacket_Struct*)app->pBuffer;
-	const EQ::ItemData* item = nullptr;
+	ItemNamePacket_Struct *p = (ItemNamePacket_Struct*)app->pBuffer;
+	const EQ::ItemData *item = nullptr;
 	if ((item = database.GetItem(p->item_id)) != nullptr) {
 		auto outapp = new EQApplicationPacket(OP_ItemName, sizeof(ItemNamePacket_Struct));
 		p = (ItemNamePacket_Struct*)outapp->pBuffer;
@@ -9051,10 +8906,10 @@ void Client::Handle_OP_ItemName(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ItemPreview(const EQApplicationPacket* app)
+void Client::Handle_OP_ItemPreview(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_ItemPreview, app, ItemPreview_Struct);
-	ItemPreview_Struct* ips = (ItemPreview_Struct*)app->pBuffer;
+	ItemPreview_Struct *ips = (ItemPreview_Struct *)app->pBuffer;
 
 	const EQ::ItemData* item = database.GetItem(ips->itemid);
 
@@ -9230,7 +9085,7 @@ void Client::Handle_OP_ItemPreview(const EQApplicationPacket* app)
 		return;
 }
 
-void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 {
 	using EQ::spells::CastingSlot;
 	if (app->size != sizeof(ItemVerifyRequest_Struct))
@@ -9248,7 +9103,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 
 	cheat_manager.ProcessItemVerifyRequest(request->slot, request->target);
 
-	EQApplicationPacket* outapp = nullptr;
+	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
 	ItemVerifyReply_Struct* reply = (ItemVerifyReply_Struct*)outapp->pBuffer;
 	reply->slot = slot_id;
@@ -9329,7 +9184,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 
 	if (m_inv.SupportsClickCasting(slot_id) || ((item->ItemType == EQ::item::ItemTypePotion || item->PotionBelt) && m_inv.SupportsPotionBeltCasting(slot_id))) // sanity check
 	{
-		auto* p_inst = (EQ::ItemInstance*)inst;
+		auto* p_inst = (EQ::ItemInstance*) inst;
 
 		if (parse->ItemHasQuestSub(p_inst, EVENT_ITEM_CLICK)) {
 			parse->EventItem(EVENT_ITEM_CLICK, this, p_inst, nullptr, "", slot_id);
@@ -9382,8 +9237,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 				(
 					Strings::BeginsWith(item->Name, "Tome of ") ||
 					Strings::BeginsWith(item->Name, "Skill: ")
-					)
-				) {
+				)
+			) {
 				DeleteItemInInventory(slot_id, 1, true);
 				TrainDiscipline(item->ID);
 			}
@@ -9398,8 +9253,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 						if (spells[spell_id].rank > spells[highest_spell_id].rank)
 						{
 							std::string message = fmt::format("{} will replace {} in your spellbook", GetSpellName(spell_id), GetSpellName(highest_spell_id));
-							SetEntityVariable("slot_id", itoa(slot_id));
-							SetEntityVariable("spell_id", itoa(item->ID));
+							SetEntityVariable("slot_id",itoa(slot_id));
+							SetEntityVariable("spell_id",itoa(item->ID));
 							SendPopupToClient("", message.c_str(), 1000001, 1, 10);
 							return;
 						}
@@ -9412,8 +9267,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 					DeleteItemInInventory(slot_id, 1, true);
 					MemorizeSpellFromItem(item->ID);
 					return;
-				}
-				else {
+				} else {
 					return;
 				}
 			}
@@ -9424,8 +9278,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 					(item->Click.Type == EQ::item::ItemEffectExpendable) ||
 					(item->Click.Type == EQ::item::ItemEffectEquipClick) ||
 					(item->Click.Type == EQ::item::ItemEffectClick2)
-					)
-				) {
+				)
+			) {
 				if (inst->GetCharges() == 0)
 				{
 					//Message(Chat::White, "This item is out of charges.");
@@ -9441,8 +9295,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 							SendSpellBarEnable(item->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
 							return;
-						}
-						else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item->ID), false)) {
+						} else if (item->RecastType == RECAST_TYPE_UNLINKED_ITEM  && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item->ID), false)) {
 							SetItemCooldown(item->ID, true);
 							SendSpellBarEnable(item->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
@@ -9484,8 +9337,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 						else {
 							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 						}
-					}
-					else {
+					} else {
 						InterruptSpell(item->Click.Effect);
 						SendSpellBarEnable(item->Click.Effect);
 						return;
@@ -9514,8 +9366,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(augitem->Click.Effect);
 							return;
-						}
-						else if (augitem->RecastType == RECAST_TYPE_UNLINKED_ITEM && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * augitem->ID), false)) {
+						} else if (augitem->RecastType == RECAST_TYPE_UNLINKED_ITEM  && !GetPTimers().Expired(&database, (pTimerNegativeItemReuse * augitem->ID), false)) {
 							MessageString(Chat::Red, SPELL_RECAST);
 							SendSpellBarEnable(augitem->Click.Effect);
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
@@ -9558,8 +9409,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 						else {
 							CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
 						}
-					}
-					else {
+					} else {
 						InterruptSpell(item->Click.Effect);
 						SendSpellBarEnable(item->Click.Effect);
 						return;
@@ -9599,18 +9449,18 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Jump(const EQApplicationPacket* app)
+void Client::Handle_OP_Jump(const EQApplicationPacket *app)
 {
-	SetEndurance(GetEndurance() - (GetLevel() < 20 ? (225 * GetLevel() / 100) : 50));
+	SetEndurance(GetEndurance() - (GetLevel()<20 ? (225 * GetLevel() / 100) : 50));
 	return;
 }
 
-void Client::Handle_OP_KeyRing(const EQApplicationPacket* app)
+void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 {
 	KeyRingList();
 }
 
-void Client::Handle_OP_KickPlayers(const EQApplicationPacket* app)
+void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
 {
 	auto buf = reinterpret_cast<KickPlayers_Struct*>(app->pBuffer);
 	if (buf->kick_expedition)
@@ -9627,7 +9477,7 @@ void Client::Handle_OP_KickPlayers(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LDoNButton(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(bool))
 	{
@@ -9650,7 +9500,7 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket* app)
 		auto pack =
 			new ServerPacket(ServerOP_AdventureRequestCreate,
 				sizeof(ServerAdventureRequestCreate_Struct) + (64 * adv_requested_member_count));
-		ServerAdventureRequestCreate_Struct* sac = (ServerAdventureRequestCreate_Struct*)pack->pBuffer;
+		ServerAdventureRequestCreate_Struct *sac = (ServerAdventureRequestCreate_Struct*)pack->pBuffer;
 		strcpy(sac->leader, GetName());
 		sac->id = adv_requested_id;
 		sac->theme = adv_requested_theme;
@@ -9667,9 +9517,9 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app)
 {
-	Mob* target = GetTarget();
+	Mob * target = GetTarget();
 	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillDisarmTraps))
@@ -9686,7 +9536,7 @@ void Client::Handle_OP_LDoNDisarmTraps(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LDoNInspect(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNInspect(const EQApplicationPacket *app)
 {
 	auto* t = GetTarget();
 	if (t && t->GetClass() == Class::LDoNTreasure && !t->IsAura()) {
@@ -9699,17 +9549,17 @@ void Client::Handle_OP_LDoNInspect(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LDoNOpen(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNOpen(const EQApplicationPacket *app)
 {
-	Mob* target = GetTarget();
+	Mob * target = GetTarget();
 	if (target && target->IsNPC() && !target->IsAura()) {
 		HandleLDoNOpen(target->CastToNPC());
 	}
 }
 
-void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket *app)
 {
-	Mob* target = GetTarget();
+	Mob * target = GetTarget();
 	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillPickLock))
@@ -9726,9 +9576,9 @@ void Client::Handle_OP_LDoNPickLock(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket* app)
+void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket *app)
 {
-	Mob* target = GetTarget();
+	Mob * target = GetTarget();
 	if (target && target->IsNPC() && !target->IsAura())
 	{
 		if (HasSkill(EQ::skills::SkillSenseTraps))
@@ -9745,14 +9595,14 @@ void Client::Handle_OP_LDoNSenseTraps(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LeadershipExpToggle(const EQApplicationPacket* app)
+void Client::Handle_OP_LeadershipExpToggle(const EQApplicationPacket *app)
 {
 	if (app->size != 1) {
 		LogDebug("Size mismatch in OP_LeadershipExpToggle expected [{}] got [{}]", 1, app->size);
 		DumpPacket(app);
 		return;
 	}
-	uint8* mode = (uint8*)app->pBuffer;
+	uint8 *mode = (uint8 *)app->pBuffer;
 	if (*mode) {
 		m_pp.leadAAActive = 1;
 		Save();
@@ -9765,7 +9615,7 @@ void Client::Handle_OP_LeadershipExpToggle(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LeaveAdventure(const EQApplicationPacket* app)
+void Client::Handle_OP_LeaveAdventure(const EQApplicationPacket *app)
 {
 	if (!IsOnAdventure())
 	{
@@ -9774,7 +9624,7 @@ void Client::Handle_OP_LeaveAdventure(const EQApplicationPacket* app)
 	LeaveAdventure();
 }
 
-void Client::Handle_OP_LeaveBoat(const EQApplicationPacket* app)
+void Client::Handle_OP_LeaveBoat(const EQApplicationPacket *app)
 {
 	Mob* boat = entity_list.GetMob(controlling_boat_id);	// find the mob corresponding to the boat id
 	if (boat) {
@@ -9788,7 +9638,7 @@ void Client::Handle_OP_LeaveBoat(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_LFGCommand(const EQApplicationPacket* app)
+void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(LFG_Struct)) {
 		std::cout << "Wrong size on OP_LFGCommand. Got: " << app->size << ", Expected: " << sizeof(LFG_Struct) << std::endl;
@@ -9834,7 +9684,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(LFGGetMatchesRequest_Struct)) {
@@ -9860,19 +9710,19 @@ void Client::Handle_OP_LFGGetMatchesRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LFGuild(const EQApplicationPacket* app)
+void Client::Handle_OP_LFGuild(const EQApplicationPacket *app)
 {
 	if (app->size < 4)
 		return;
 
-	uint32 Command = *((uint32*)app->pBuffer);
+	uint32 Command = *((uint32 *)app->pBuffer);
 
 	switch (Command)
 	{
 	case 0:
 	{
 		VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_PlayerToggle_Struct);
-		LFGuild_PlayerToggle_Struct* pts = (LFGuild_PlayerToggle_Struct*)app->pBuffer;
+		LFGuild_PlayerToggle_Struct *pts = (LFGuild_PlayerToggle_Struct *)app->pBuffer;
 
 #ifdef DARWIN
 #if __DARWIN_C_LEVEL < 200809L
@@ -9907,7 +9757,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket* app)
 	case 1:
 	{
 		VERIFY_PACKET_LENGTH(OP_LFGuild, app, LFGuild_GuildToggle_Struct);
-		LFGuild_GuildToggle_Struct* gts = (LFGuild_GuildToggle_Struct*)app->pBuffer;
+		LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *)app->pBuffer;
 
 #ifdef DARWIN
 #if __DARWIN_C_LEVEL < 200809L
@@ -9955,7 +9805,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket* app)
 		pack->WriteUInt32(QSG_LFGuild);
 		pack->WriteUInt32(QSG_LFGuild_PlayerMatches);
 
-		LFGuild_SearchPlayer_Struct* sps = (LFGuild_SearchPlayer_Struct*)app->pBuffer;
+		LFGuild_SearchPlayer_Struct *sps = (LFGuild_SearchPlayer_Struct *)app->pBuffer;
 		pack->WriteUInt32(sps->FromLevel);
 		pack->WriteUInt32(sps->ToLevel);
 		pack->WriteUInt32(sps->MinAA);
@@ -9979,7 +9829,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket* app)
 		pack->WriteUInt32(QSG_LFGuild);
 		pack->WriteUInt32(QSG_LFGuild_GuildMatches);
 
-		LFGuild_SearchGuild_Struct* sgs = (LFGuild_SearchGuild_Struct*)app->pBuffer;
+		LFGuild_SearchGuild_Struct *sgs = (LFGuild_SearchGuild_Struct *)app->pBuffer;
 
 		pack->WriteUInt32(sgs->Level);
 		pack->WriteUInt32(sgs->AAPoints);
@@ -9996,7 +9846,7 @@ void Client::Handle_OP_LFGuild(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_LFPCommand(const EQApplicationPacket* app)
+void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(LFP_Struct)) {
@@ -10004,7 +9854,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	LFP_Struct* lfp = (LFP_Struct*)app->pBuffer;
+	LFP_Struct *lfp = (LFP_Struct*)app->pBuffer;
 
 	LFP = lfp->Action != LFPOff;
 	database.SetLFP(CharacterID(), LFP);
@@ -10016,7 +9866,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket* app)
 
 	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
 
-	for (unsigned int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+	for (unsigned int i = 0; i<MAX_GROUP_MEMBERS; i++) {
 		LFPMembers[i].Name[0] = '\0';
 		LFPMembers[i].Class = Class::None;
 		LFPMembers[i].Level = 0;
@@ -10024,7 +9874,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket* app)
 		LFPMembers[i].GuildID = 0xFFFF;
 	}
 
-	Group* g = GetGroup();
+	Group *g = GetGroup();
 
 	// Slot 0 is always for the group leader, or the player if not in a group
 	strcpy(LFPMembers[0].Name, GetName());
@@ -10058,7 +9908,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(LFPGetMatchesRequest_Struct)) {
@@ -10086,7 +9936,7 @@ void Client::Handle_OP_LFPGetMatchesRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket* app)
+void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(LoadSpellSet_Struct)) {
 		printf("Wrong size of LoadSpellSet_Struct! Expected: %zu, Got: %i\n", sizeof(LoadSpellSet_Struct), app->size);
@@ -10100,7 +9950,7 @@ void Client::Handle_OP_LoadSpellSet(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Logout(const EQApplicationPacket* app)
+void Client::Handle_OP_Logout(const EQApplicationPacket *app)
 {
 	LogDebug("[{}] sent a logout packet", GetName());
 
@@ -10113,14 +9963,14 @@ void Client::Handle_OP_Logout(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_LootItem(const EQApplicationPacket* app)
+void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(LootingItem_Struct)) {
 		LogError("Wrong size: OP_LootItem, size=[{}], expected [{}]", app->size, sizeof(LootingItem_Struct));
 		return;
 	}
 
-	auto* l = (LootingItem_Struct*)app->pBuffer;
+	auto* l = (LootingItem_Struct*) app->pBuffer;
 	auto entity = entity_list.GetID(static_cast<uint16>(l->lootee));
 	if (!entity) {
 		auto outapp = new EQApplicationPacket(OP_LootComplete, 0);
@@ -10137,7 +9987,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket* app)
 	entity->CastToCorpse()->LootItem(this, app);
 }
 
-void Client::Handle_OP_LootRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_LootRequest, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
@@ -10165,7 +10015,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ManaChange(const EQApplicationPacket* app)
+void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 {
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
@@ -10182,7 +10032,7 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket* app)
 		with a length, just the 0 len ones for stopping songs
 		ManaChange_Struct* p = (ManaChange_Struct*)app->pBuffer;
 	*/
-	else {
+	else{
 		printf("OP_ManaChange from client:\n");
 		DumpPacket(app);
 	}
@@ -10203,14 +10053,14 @@ return;
 #endif
 */
 
-void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket* app)
+void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
 	cheat_manager.CheckMemTimer();
 	OPMemorizeSpell(app);
 	return;
 }
 
-void Client::Handle_OP_Mend(const EQApplicationPacket* app)
+void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillMend))
 		return;
@@ -10258,7 +10108,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(MercenaryCommand_Struct))
 	{
@@ -10313,7 +10163,7 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 {
 	// The payload is 4 bytes. The EntityID of the Mercenary Liason which are of class 71.
 	if (app->size != sizeof(MercenaryMerchantShopRequest_Struct))
@@ -10390,7 +10240,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket* app)
 		if (mercTypeCount > 0)
 		{
 			for (auto mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end();
-				++mercTypeListItr) {
+			++mercTypeListItr) {
 				mml->MercGrades[i] = mercTypeListItr->Type;	// DBStringID for Type
 				i++;
 			}
@@ -10401,7 +10251,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket* app)
 		{
 			i = 0;
 			for (auto mercListIter = mercDataList.begin(); mercListIter != mercDataList.end();
-				++mercListIter) {
+			++mercListIter) {
 				mml->Mercs[i].MercID = mercListIter->MercTemplateID;
 				mml->Mercs[i].MercType = mercListIter->MercType;
 				mml->Mercs[i].MercSubType = mercListIter->MercSubType;
@@ -10444,7 +10294,7 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app)
 {
 	// The payload is 0 bytes.
 	if (app->size != 0)
@@ -10463,7 +10313,7 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket* app
 	}
 }
 
-void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket *app)
 {
 	// The payload is 0 or 1 bytes.
 	if (app->size > 1)
@@ -10477,7 +10327,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket* app)
 	uint8 Command = 0;
 	if (app->size > 0)
 	{
-		char* InBuffer = (char*)app->pBuffer;
+		char *InBuffer = (char *)app->pBuffer;
 		Command = VARSTRUCT_DECODE_TYPE(uint8, InBuffer);
 	}
 
@@ -10488,7 +10338,7 @@ void Client::Handle_OP_MercenaryDismiss(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_MercenaryHire(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 {
 	// The payload is 16 bytes. First four bytes are the Merc ID (Template ID)
 	if (app->size != sizeof(MercenaryMerchantRequest_Struct))
@@ -10559,7 +10409,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SuspendMercenary_Struct))
 	{
@@ -10581,7 +10431,7 @@ void Client::Handle_OP_MercenarySuspendRequest(const EQApplicationPacket* app)
 	SuspendMercCommand();
 }
 
-void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 {
 	// The payload is 0 bytes.
 	if (app->size > 1)
@@ -10621,7 +10471,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_MoveCoin(const EQApplicationPacket* app)
+void Client::Handle_OP_MoveCoin(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(MoveCoin_Struct)) {
 		LogError("Wrong size on OP_MoveCoin. Got: [{}], Expected: [{}]", app->size, sizeof(MoveCoin_Struct));
@@ -10632,7 +10482,7 @@ void Client::Handle_OP_MoveCoin(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_MoveItem(const EQApplicationPacket* app)
+void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 {
 	if (!CharacterID())
 	{
@@ -10649,15 +10499,15 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket* app)
 	{
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
-			const EQ::ItemInstance* itm_from = GetInv().GetItem(mi->from_slot);
-			const EQ::ItemInstance* itm_to = GetInv().GetItem(mi->to_slot);
+			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
+			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
 			auto message = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
-			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
@@ -10700,12 +10550,12 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket* app)
+void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	Kick("Unimplemented move multiple items"); // TODO: lets not desync though
 }
 
-void Client::Handle_OP_OpenContainer(const EQApplicationPacket* app)
+void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
 {
 	// Does not exist in Ti client
 	// SoF, SoD and UF clients send a 4-byte packet indicating the 'parent' slot
@@ -10724,7 +10574,7 @@ void Client::Handle_OP_OpenContainer(const EQApplicationPacket* app)
 	// Manually looting a corpse results in a from '34' to '68' value for equipment items, '0' to '0' for inventory.
 }
 
-void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket* app)
+void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_OpenGuildTributeMaster of length [{}]", app->size);
 
@@ -10739,6 +10589,7 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket* app)
 			st->response = 1;
 			QueuePacket(app);
 			tribute_master_id = st->tribute_master_id;
+			DoTributeUpdate();
 		}
 		else {
 			st->response = 0;
@@ -10748,13 +10599,13 @@ void Client::Handle_OP_OpenGuildTributeMaster(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_OpenInventory(const EQApplicationPacket* app)
+void Client::Handle_OP_OpenInventory(const EQApplicationPacket *app)
 {
 	// Does not exist in Ti, UF or RoF clients
 	// SoF and SoD both send a 4-byte packet with a uint32 value of '8'
 }
 
-void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket* app)
+void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_OpenTributeMaster of length [{}]", app->size);
 
@@ -10779,7 +10630,7 @@ void Client::Handle_OP_OpenTributeMaster(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PDeletePetition(const EQApplicationPacket* app)
+void Client::Handle_OP_PDeletePetition(const EQApplicationPacket *app)
 {
 	if (app->size < 2) {
 		LogError("Wrong size: OP_PDeletePetition, size=[{}], expected [{}]", app->size, 2);
@@ -10792,7 +10643,7 @@ void Client::Handle_OP_PDeletePetition(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
+void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PetCommand_Struct)) {
 		LogError("Wrong size: OP_PetCommands, size=[{}], expected [{}]", app->size, sizeof(PetCommand_Struct));
@@ -10801,7 +10652,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 	char val1[20] = { 0 };
 	PetCommand_Struct* pet = (PetCommand_Struct*)app->pBuffer;
 	Mob* mypet = GetPet();
-	Mob* target = entity_list.GetMob(pet->target);
+	Mob *target = entity_list.GetMob(pet->target);
 
 	if (!mypet || pet->command == PET_LEADER) {
 		if (pet->command == PET_LEADER) {
@@ -10812,8 +10663,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 					target->SayString(PET_LEADERIS, owner->GetCleanName());
 				else
 					target->SayString(I_FOLLOW_NOONE);
-			}
-			else if (mypet) {
+			} else if (mypet) {
 				mypet->SayString(PET_LEADERIS, GetName());
 			}
 		}
@@ -10866,7 +10716,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange) * RuleR(Pets, AttackCommandRange))) {
+			if (target != this && DistanceSquaredNoZ(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
@@ -10913,7 +10763,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 		}
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange) * RuleR(Pets, AttackCommandRange))) {
+			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
 				mypet->SetFeigned(false);
 				if (mypet->IsPetStop()) {
 					mypet->SetPetStop(false);
@@ -11186,8 +11036,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
 					MessageString(Chat::PetResponse, PET_ON_GHOLD);
 					mypet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
-				}
-				else {
+				} else {
 					mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
 				}
 				mypet->SetGHeld(true);
@@ -11202,8 +11051,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
 				MessageString(Chat::PetResponse, PET_ON_GHOLD);
 				mypet->SayString(this, Chat::PetResponse, PET_GHOLD_ON_MSG);
-			}
-			else {
+			} else {
 				mypet->SayString(this, Chat::PetResponse, PET_ON_HOLD);
 			}
 			mypet->SetGHeld(true);
@@ -11348,8 +11196,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
-			}
-			else {
+			} else {
 				mypet->SetPetStop(true);
 				mypet->StopNavigation();
 				mypet->SetTarget(nullptr);
@@ -11393,8 +11240,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 			if (mypet->IsPetRegroup()) {
 				mypet->SetPetRegroup(false);
 				mypet->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
-			}
-			else {
+			} else {
 				mypet->SetPetRegroup(true);
 				mypet->SetTarget(nullptr);
 				mypet->SayString(this, Chat::PetResponse, PET_ON_REGROUPING);
@@ -11435,7 +11281,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Petition(const EQApplicationPacket* app)
+void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 {
 	if (app->size <= 1)
 		return;
@@ -11483,14 +11329,14 @@ void Client::Handle_OP_Petition(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionBug(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionBug(const EQApplicationPacket *app)
 {
 	Message(Chat::White, "Petition Bugs are not supported, please use /bug.");
 
 	return;
 }
 
-void Client::Handle_OP_PetitionCheckIn(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionCheckIn(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Petition_Struct)) {
 		LogError("Wrong size: OP_PetitionCheckIn, size=[{}], expected [{}]", app->size, sizeof(Petition_Struct));
@@ -11511,7 +11357,7 @@ void Client::Handle_OP_PetitionCheckIn(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_PetitionCheckout, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
@@ -11534,7 +11380,7 @@ void Client::Handle_OP_PetitionCheckout(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionDelete(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionDelete(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PetitionUpdate_Struct)) {
 		LogError("Wrong size: OP_PetitionDelete, size=[{}], expected [{}]", app->size, sizeof(PetitionUpdate_Struct));
@@ -11561,7 +11407,7 @@ void Client::Handle_OP_PetitionDelete(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionQue(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionQue(const EQApplicationPacket *app)
 {
 #ifdef _EQDEBUG
 	printf("%s looking at petitions..\n", GetName());
@@ -11569,7 +11415,7 @@ void Client::Handle_OP_PetitionQue(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionRefresh(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionRefresh(const EQApplicationPacket *app)
 {
 	// This is When Client Asks for Petition Again and Again...
 	// break is here because it floods the zones and causes lag if it
@@ -11577,12 +11423,12 @@ void Client::Handle_OP_PetitionRefresh(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PetitionResolve(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionResolve(const EQApplicationPacket *app)
 {
 	Handle_OP_PetitionDelete(app);
 }
 
-void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket* app)
+void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		std::cout << "Wrong size: OP_PetitionUnCheckout, size=" << app->size << ", expected " << sizeof(uint32) << std::endl;
@@ -11603,32 +11449,32 @@ void Client::Handle_OP_PetitionUnCheckout(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket* app)
+void Client::Handle_OP_PlayerStateAdd(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PlayerState_Struct)) {
 		std::cout << "Wrong size: OP_PlayerStateAdd, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
 		return;
 	}
 
-	PlayerState_Struct* ps = (PlayerState_Struct*)app->pBuffer;
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
 	AddPlayerState(ps->state);
 
 	entity_list.QueueClients(this, app, true);
 }
 
-void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket* app)
+void Client::Handle_OP_PlayerStateRemove(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PlayerState_Struct)) {
 		std::cout << "Wrong size: OP_PlayerStateRemove, size=" << app->size << ", expected " << sizeof(PlayerState_Struct) << std::endl;
 		return;
 	}
-	PlayerState_Struct* ps = (PlayerState_Struct*)app->pBuffer;
+	PlayerState_Struct *ps = (PlayerState_Struct *)app->pBuffer;
 	RemovePlayerState(ps->state);
 
 	entity_list.QueueClients(this, app, true);
 }
 
-void Client::Handle_OP_PickPocket(const EQApplicationPacket* app)
+void Client::Handle_OP_PickPocket(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(PickPocket_Struct))
 	{
@@ -11644,7 +11490,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket* app)
 	if (!p_timers.Expired(&database, pTimerBeggingPickPocket, false))
 	{
 		Message(Chat::Red, "Ability recovery time not yet met.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "OP_PickPocket was sent again too quickly." });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent again too quickly."});
 		return;
 	}
 	PickPocket_Struct* pick_in = (PickPocket_Struct*)app->pBuffer;
@@ -11666,7 +11512,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket* app)
 	}
 	else if (Distance(GetPosition(), victim->GetPosition()) > 20) {
 		Message(Chat::Red, "Attempt to pickpocket out of range detected.");
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = "OP_PickPocket was sent from outside combat range" });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = "OP_PickPocket was sent from outside combat range"});
 	}
 	else if (victim->IsNPC()) {
 		auto body = victim->GetBodyType();
@@ -11680,7 +11526,7 @@ void Client::Handle_OP_PickPocket(const EQApplicationPacket* app)
 	SendPickPocketResponse(victim, 0, PickPocketFailed);
 }
 
-void Client::Handle_OP_PopupResponse(const EQApplicationPacket* app)
+void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(PopupResponse_Struct)) {
@@ -11690,7 +11536,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket* app)
 		return;
 	}
 
-	PopupResponse_Struct* popup_response = (PopupResponse_Struct*)app->pBuffer;
+	PopupResponse_Struct *popup_response = (PopupResponse_Struct *) app->pBuffer;
 
 	//Get Item Details if POPUPID_REPLACE_SPELLWINDOW was used
 
@@ -11699,46 +11545,45 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket* app)
 	 */
 	std::string response;
 	switch (popup_response->popupid) {
-	case POPUPID_REPLACE_SPELLWINDOW:
-		DeleteItemInInventory(Strings::ToInt(GetEntityVariable("slot_id")), 1, true);
-		MemorizeSpellFromItem(Strings::ToInt(GetEntityVariable("spell_id")));
-		return;
-		break;
+		case POPUPID_REPLACE_SPELLWINDOW:
+			DeleteItemInInventory(Strings::ToInt(GetEntityVariable("slot_id")), 1, true);
+			MemorizeSpellFromItem(Strings::ToInt(GetEntityVariable("spell_id")));
+			return;
+			break;
 
-	case POPUPID_UPDATE_SHOWSTATSWINDOW:
-		if (GetTarget() && GetTarget()->IsOfClientBot()) {
-			GetTarget()->SendStatsWindow(this, true);
-		}
-		else {
-			SendStatsWindow(this, true);
-		}
-		return;
-		break;
-
-	case POPUPID_DIAWIND_ONE:
-		if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY)) {
-			response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY);
-			if (!response.empty()) {
-				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+		case POPUPID_UPDATE_SHOWSTATSWINDOW:
+			if (GetTarget() && GetTarget()->IsOfClientBot()) {
+				GetTarget()->SendStatsWindow(this, true);
+			} else {
+				SendStatsWindow(this, true);
 			}
-		}
-		break;
+			return;
+			break;
 
-	case POPUPID_DIAWIND_TWO:
-		if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY)) {
-			response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY);
-			if (!response.empty()) {
-				ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+		case POPUPID_DIAWIND_ONE:
+			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY)) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY);
+				if (!response.empty()) {
+					ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+				}
 			}
-		}
-		break;
+			break;
 
-	case EQ::popupresponse::MOB_INFO_DISMISS:
-		SetDisplayMobInfoWindow(false);
-		Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
-		break;
-	default:
-		break;
+		case POPUPID_DIAWIND_TWO:
+			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY)) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY);
+				if (!response.empty()) {
+					ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+				}
+			}
+			break;
+
+		case EQ::popupresponse::MOB_INFO_DISMISS:
+			SetDisplayMobInfoWindow(false);
+			Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
+			break;
+		default:
+			break;
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_POPUP_RESPONSE)) {
@@ -11751,8 +11596,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket* app)
 			if (parse->HasQuestSub(t->GetNPCTypeID(), EVENT_POPUP_RESPONSE)) {
 				parse->EventNPC(EVENT_POPUP_RESPONSE, t->CastToNPC(), this, std::to_string(popup_response->popupid), 0);
 			}
-		}
-		else if (t->IsBot()) {
+		} else if (t->IsBot()) {
 			if (parse->BotHasQuestSub(EVENT_POPUP_RESPONSE)) {
 				parse->EventBot(EVENT_POPUP_RESPONSE, t->CastToBot(), this, std::to_string(popup_response->popupid), 0);
 			}
@@ -11760,7 +11604,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_PotionBelt(const EQApplicationPacket* app)
+void Client::Handle_OP_PotionBelt(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(MovePotionToBelt_Struct)) {
 		LogDebug("Size mismatch in OP_PotionBelt expected [{}] got [{}]", sizeof(MovePotionToBelt_Struct), app->size);
@@ -11768,14 +11612,14 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket* app)
 		return;
 	}
 
-	MovePotionToBelt_Struct* mptbs = (MovePotionToBelt_Struct*)app->pBuffer;
+	MovePotionToBelt_Struct *mptbs = (MovePotionToBelt_Struct*)app->pBuffer;
 	if (!EQ::ValueWithin(mptbs->SlotNumber, 0U, 3U)) {
 		LogDebug("Client::Handle_OP_PotionBelt mptbs->SlotNumber out of range");
 		return;
 	}
 
 	if (mptbs->Action == 0) {
-		const EQ::ItemData* BaseItem = database.GetItem(mptbs->ItemID);
+		const EQ::ItemData *BaseItem = database.GetItem(mptbs->ItemID);
 		if (BaseItem) {
 			m_pp.potionbelt.Items[mptbs->SlotNumber].ID = BaseItem->ID;
 			m_pp.potionbelt.Items[mptbs->SlotNumber].Icon = BaseItem->Icon;
@@ -11790,14 +11634,14 @@ void Client::Handle_OP_PotionBelt(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket* app)
+void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(uint32)) {
 		LogDebug("Size mismatch in OP_LeadershipExpToggle expected [{}] got [{}]", 1, app->size);
 		DumpPacket(app);
 		return;
 	}
-	uint32 aaid = *((uint32*)app->pBuffer);
+	uint32 aaid = *((uint32 *)app->pBuffer);
 
 	if (aaid >= _maxLeaderAA)
 		return;
@@ -11845,7 +11689,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket* app)
 
 	//success, send them an update
 	auto outapp = new EQApplicationPacket(OP_UpdateLeadershipAA, sizeof(UpdateLeadershipAA_Struct));
-	UpdateLeadershipAA_Struct* u = (UpdateLeadershipAA_Struct*)outapp->pBuffer;
+	UpdateLeadershipAA_Struct *u = (UpdateLeadershipAA_Struct *)outapp->pBuffer;
 	u->ability_id = aaid;
 	u->new_rank = m_pp.leader_abilities.ranks[aaid];
 	if (aaid >= raidAAMarkNPC) // raid AA
@@ -11856,7 +11700,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket* app)
 
 	// Update all group members with the new AA the leader has purchased.
 	if (IsRaidGrouped()) {
-		Raid* r = GetRaid();
+		Raid *r = GetRaid();
 		if (!r)
 			return;
 		if (aaid >= raidAAMarkNPC) {
@@ -11870,7 +11714,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket* app)
 		}
 	}
 	else if (IsGrouped()) {
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 		if (!g)
 			return;
 		g->UpdateGroupAAs();
@@ -11879,7 +11723,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *app)
 {
 	// This opcode is sent by the client when the player right clicks a name on the PVP leaderboard and sends
 	// further details about the selected player, e.g. Race/Class/AAs/Guild etc.
@@ -11894,7 +11738,7 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket* a
 	}
 
 	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
-	PVPLeaderBoardDetailsReply_Struct* pvplbdrs = (PVPLeaderBoardDetailsReply_Struct*)outapp->pBuffer;
+	PVPLeaderBoardDetailsReply_Struct *pvplbdrs = (PVPLeaderBoardDetailsReply_Struct *)outapp->pBuffer;
 
 	// TODO: Record and send this data.
 
@@ -11902,7 +11746,7 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket* a
 	safe_delete(outapp);
 }
 
-void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 {
 	// This Opcode is sent by the client when the Leaderboard button on the PVP Stats window is pressed.
 	//
@@ -11929,7 +11773,7 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket* app)
 	safe_delete(outapp);
 }
 
-void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket* app)
+void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
 {
 	if (zone->IsUCSServerAvailable()) {
 		EQApplicationPacket* outapp = nullptr;
@@ -12041,8 +11885,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			Bot::ProcessRaidInvite(player_to_invite, this);
 			break;
 
-		}
-		else {
+		} else {
 			Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 			if (!player_to_invite) {
 				break;
@@ -12440,8 +12283,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						raid->DisbandRaid();
 					}
 					break;
-				}
-				else if (b_to_disband) {
+				} else if (b_to_disband) {
 					uint32 gid = raid->GetGroup(b_to_disband->GetName());
 
 					if (gid < 12 && (raid->IsGroupLeader(b_to_disband->GetName()) || raid->GroupCount(gid) < 2)) {
@@ -12449,13 +12291,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 						raid->RemoveRaidDelegates(raid_command_packet->leader_name);
 						raid->UpdateRaidXTargets();
 						raid->HandleBotGroupDisband(owner_id, gid);
-
-					}
-					else if (b_to_disband && raid->IsRaidMember(b_to_disband->GetName())) {
+					} else if (b_to_disband && raid->IsRaidMember(b_to_disband->GetName())) {
+						raid->RemoveRaidDelegates(raid_command_packet->leader_name);
+						raid->UpdateRaidXTargets();
 						Bot::RemoveBotFromRaid(b_to_disband);
-
-					}
-					else if (gid < 12 && raid->GetGroupLeader(gid) && raid->GetGroupLeader(gid)->IsBot()) {
+					} else if (gid < 12 && raid->GetGroupLeader(gid) && raid->GetGroupLeader(gid)->IsBot()) {
 						c_doing_disband->Message(
 							Chat::Yellow,
 							fmt::format(
@@ -12772,7 +12612,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 
 
 
-void Client::Handle_OP_RandomReq(const EQApplicationPacket* app)
+void Client::Handle_OP_RandomReq(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RandomReq_Struct)) {
 		LogError("Wrong size: OP_RandomReq, size=[{}], expected [{}]", app->size, sizeof(RandomReq_Struct));
@@ -12801,7 +12641,7 @@ void Client::Handle_OP_RandomReq(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ReadBook(const EQApplicationPacket* app)
+void Client::Handle_OP_ReadBook(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(BookRequest_Struct)) {
 		LogError("Wrong size: OP_ReadBook, size=[{}], expected [{}]", app->size, sizeof(BookRequest_Struct));
@@ -12817,7 +12657,7 @@ void Client::Handle_OP_ReadBook(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket* app)
+void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipeAutoCombine_Struct)) {
 		LogError("Invalid size for RecipeAutoCombine_Struct: Expected: [{}], Got: [{}]",
@@ -12831,25 +12671,25 @@ void Client::Handle_OP_RecipeAutoCombine(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_RecipeDetails(const EQApplicationPacket* app)
+void Client::Handle_OP_RecipeDetails(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(uint32)) {
 		LogError("Invalid size for RecipeDetails Request: Expected: [{}], Got: [{}]",
 			sizeof(uint32), app->size);
 		return;
 	}
-	uint32* recipe_id = (uint32*)app->pBuffer;
+	uint32 *recipe_id = (uint32*)app->pBuffer;
 
 	SendTradeskillDetails(*recipe_id);
 
 	return;
 }
 
-void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket* app)
+void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeskillFavorites_Struct)) {
 		LogError("Invalid size for TradeskillFavorites_Struct: Expected: [{}], Got: [{}]",
-			sizeof(TradeskillFavorites_Struct), app->size);
+				 sizeof(TradeskillFavorites_Struct), app->size);
 		return;
 	}
 
@@ -12901,7 +12741,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket* app)
 
 	// TODO: Clean this up
 	const std::string query = StringFormat(
-		SQL(
+		SQL (
 			SELECT
 			tr.id,
 			tr.name,
@@ -12909,36 +12749,36 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket* app)
 			SUM(tre.componentcount),
 			tr.tradeskill,
 			tr.must_learn
-			FROM
-			tradeskill_recipe AS tr
-			LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
-			WHERE
-			tr.enabled < > 0
-			AND tr.id IN(% s)
-			AND tr.must_learn & 0x20 < > 0x20
-			AND(
-				(
-					tr.must_learn & 0x3 < > 0
-					)
-				OR(tr.must_learn & 0x3 = 0)
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				tr.enabled <> 0
+				AND tr.id IN (%s)
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+			(
+				tr.must_learn & 0x3 <> 0
 			)
-			% s
-			GROUP BY
-			tr.id
-			HAVING
-			sum(
-				if (
-					tre.item_id % s
-					AND tre.iscontainer > 0,
-					1,
-					0
-					)
-					) > 0
-			AND SUM(tre.componentcount) <= % u
+				OR (tr.must_learn & 0x3 = 0)
+			)
+				%s
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if(
+				tre.item_id %s
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= %u
 
-					LIMIT
-					100
-					),
+				LIMIT
+				100
+		),
 		favoriteIDs.c_str(),
 		ContentFilterCriteria::apply().c_str(),
 		containers.c_str(),
@@ -12948,7 +12788,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket* app)
 	SendTradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 }
 
-void Client::Handle_OP_RecipesSearch(const EQApplicationPacket* app)
+void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipesSearch_Struct)) {
 		LogError(
@@ -13010,36 +12850,36 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket* app)
 			SUM(tre.componentcount),
 			tr.tradeskill,
 			tr.must_learn
-			FROM
-			tradeskill_recipe AS tr
-			LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
-			WHERE
-			{} tr.trivial >= {}
-	AND tr.trivial <= {}
-	AND tr.enabled < > 0
-		AND tr.must_learn & 0x20 < > 0x20
-		AND(
-			(
-				tr.must_learn & 0x3 < > 0
-				)
-			OR(tr.must_learn & 0x3 = 0)
-		)
-	{}
-	GROUP BY
-		tr.id
-		HAVING
-		sum(
-			if (
-				tre.item_id{}
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				{} tr.trivial >= {}
+				AND tr.trivial <= {}
+				AND tr.enabled <> 0
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+					(
+						tr.must_learn & 0x3 <> 0
+					)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+			{}
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if (
+				tre.item_id {}
 				AND tre.iscontainer > 0,
 				1,
 				0
-				)
-				) > 0
-		AND SUM(tre.componentcount) <= {}
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= {}
 
-	LIMIT
-		200
+				LIMIT
+				200
 		),
 		search_clause,
 		p_recipes_search_struct->mintrivial,
@@ -13052,20 +12892,17 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket* app)
 	SendTradeskillSearchResults(query, p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
 }
 
-void Client::Handle_OP_ReloadUI(const EQApplicationPacket* app)
+void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
 {
 	if (IsInAGuild())
 	{
 		SendGuildRanks();
-		//SendGuildMembers();
-		if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-			SendGuildRankNames();
-		}
+		SendGuildMembers();
 	}
 	return;
 }
 
-void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket* app)
+void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket *app)
 {
 	if (!RuleB(Spells, EnableBlockedBuffs))
 		return;
@@ -13078,9 +12915,9 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket* app)
 
 		return;
 	}
-	BlockedBuffs_Struct* bbs = (BlockedBuffs_Struct*)app->pBuffer;
+	BlockedBuffs_Struct *bbs = (BlockedBuffs_Struct*)app->pBuffer;
 
-	std::set<uint32>* BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
+	std::set<uint32> *BlockedBuffs = bbs->Pet ? &PetBlockedBuffs : &PlayerBlockedBuffs;
 
 	std::set<uint32> RemovedBuffs;
 
@@ -13090,7 +12927,7 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket* app)
 
 		auto outapp = new EQApplicationPacket(OP_RemoveBlockedBuffs, sizeof(BlockedBuffs_Struct));
 
-		BlockedBuffs_Struct* obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
+		BlockedBuffs_Struct *obbs = (BlockedBuffs_Struct*)outapp->pBuffer;
 
 		for (unsigned int i = 0; i < BLOCKED_BUFF_COUNT; ++i)
 			obbs->SpellID[i] = 0;
@@ -13126,7 +12963,7 @@ void Client::Handle_OP_RemoveBlockedBuffs(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_RemoveTrap(const EQApplicationPacket* app)
+void Client::Handle_OP_RemoveTrap(const EQApplicationPacket *app)
 {
 	if (app->size != 4) {// just an int
 		LogDebug("Size mismatch in OP_RemoveTrap expected 4 got [{}]", app->size);
@@ -13148,7 +12985,7 @@ void Client::Handle_OP_RemoveTrap(const EQApplicationPacket* app)
 		MessageString(Chat::SpellFailure, NOT_YOUR_TRAP); // pretty sure this was red
 }
 
-void Client::Handle_OP_Report(const EQApplicationPacket* app)
+void Client::Handle_OP_Report(const EQApplicationPacket *app)
 {
 	if (!CanUseReport)
 	{
@@ -13207,7 +13044,7 @@ void Client::Handle_OP_Report(const EQApplicationPacket* app)
 	database.AddReport(reporter, reported, current_string);
 }
 
-void Client::Handle_OP_RequestDuel(const EQApplicationPacket* app)
+void Client::Handle_OP_RequestDuel(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Duel_Struct)) {
 		return;
@@ -13229,7 +13066,7 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket* app)
 		entity->IsClient() &&
 		entity->CastToClient()->IsDueling() &&
 		entity->CastToClient()->GetDuelTarget()
-		) {
+	) {
 		MessageString(Chat::NPCQuestSay, DUEL_CONSIDERING, entity->GetName());
 		return;
 	}
@@ -13246,31 +13083,30 @@ void Client::Handle_OP_RequestDuel(const EQApplicationPacket* app)
 		!IsDueling() &&
 		!entity->CastToClient()->IsDueling() &&
 		!entity->CastToClient()->GetDuelTarget()
-		) {
+	) {
 		SetDuelTarget(ds->duel_target);
 		entity->CastToClient()->SetDuelTarget(GetID());
 		ds->duel_target = ds->duel_initiator;
 		entity->CastToClient()->FastQueuePacket(&outapp);
 		entity->CastToClient()->SetDueling(false);
 		SetDueling(false);
-	}
-	else {
+	} else {
 		safe_delete(outapp);
 	}
 
 	return;
 }
 
-void Client::Handle_OP_RequestTitles(const EQApplicationPacket* app)
+void Client::Handle_OP_RequestTitles(const EQApplicationPacket *app)
 {
 
-	EQApplicationPacket* outapp = title_manager.MakeTitlesPacket(this);
+	EQApplicationPacket *outapp = title_manager.MakeTitlesPacket(this);
 
 	if (outapp != nullptr)
 		FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_RespawnWindow(const EQApplicationPacket* app)
+void Client::Handle_OP_RespawnWindow(const EQApplicationPacket *app)
 {
 	// This opcode is sent by the client when the player choses which bind to return to.
 	// The client sends just a 4 byte packet with the selection number in it
@@ -13281,13 +13117,13 @@ void Client::Handle_OP_RespawnWindow(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	char* Buffer = (char*)app->pBuffer;
+	char *Buffer = (char *)app->pBuffer;
 
 	uint32 Option = VARSTRUCT_DECODE_TYPE(uint32, Buffer);
 	HandleRespawnFromHover(Option);
 }
 
-void Client::Handle_OP_Rewind(const EQApplicationPacket* app)
+void Client::Handle_OP_Rewind(const EQApplicationPacket *app)
 {
 	if ((rewind_timer.GetRemainingTime() > 1 && rewind_timer.Enabled())) {
 		MessageString(Chat::System, REWIND_WAIT);
@@ -13298,11 +13134,11 @@ void Client::Handle_OP_Rewind(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_RezzAnswer(const EQApplicationPacket* app)
+void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 {
 	VERIFY_PACKET_LENGTH(OP_RezzAnswer, app, Resurrect_Struct);
 
-	const auto* r = (const Resurrect_Struct*)app->pBuffer;
+	const auto* r = (const Resurrect_Struct*) app->pBuffer;
 
 	LogSpells(
 		"[Client::Handle_OP_RezzAnswer] Received OP_RezzAnswer from client. Pendingrezzexp is [{}] action is [{}]",
@@ -13332,7 +13168,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_Sacrifice(const EQApplicationPacket* app)
+void Client::Handle_OP_Sacrifice(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(Sacrifice_Struct)) {
@@ -13340,7 +13176,7 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	Sacrifice_Struct* ss = (Sacrifice_Struct*)app->pBuffer;
+	Sacrifice_Struct *ss = (Sacrifice_Struct*)app->pBuffer;
 
 	if (!PendingSacrifice) {
 		LogError("Unexpected OP_Sacrifice reply");
@@ -13349,37 +13185,37 @@ void Client::Handle_OP_Sacrifice(const EQApplicationPacket* app)
 	}
 
 	if (ss->Confirm) {
-		Client* Caster = entity_list.GetClientByName(SacrificeCaster.c_str());
+		Client *Caster = entity_list.GetClientByName(SacrificeCaster.c_str());
 		if (Caster) Sacrifice(Caster);
 	}
 	PendingSacrifice = false;
 	SacrificeCaster.clear();
 }
 
-void Client::Handle_OP_SafeFallSuccess(const EQApplicationPacket* app)	// bit of a misnomer, sent whenever safe fall is used (success of fail)
+void Client::Handle_OP_SafeFallSuccess(const EQApplicationPacket *app)	// bit of a misnomer, sent whenever safe fall is used (success of fail)
 {
 	if (HasSkill(EQ::skills::SkillSafeFall)) //this should only get called if the client has safe fall, but just in case...
 		CheckIncreaseSkill(EQ::skills::SkillSafeFall, nullptr); //check for skill up
 }
 
-void Client::Handle_OP_SafePoint(const EQApplicationPacket* app)
+void Client::Handle_OP_SafePoint(const EQApplicationPacket *app)
 {
 	return;
 }
 
-void Client::Handle_OP_Save(const EQApplicationPacket* app)
+void Client::Handle_OP_Save(const EQApplicationPacket *app)
 {
 	// The payload is 192 bytes - Not sure what is contained in payload
 	Save();
 	return;
 }
 
-void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket* app)
+void Client::Handle_OP_SaveOnZoneReq(const EQApplicationPacket *app)
 {
 	Handle_OP_Save(app);
 }
 
-void Client::Handle_OP_SelectTribute(const EQApplicationPacket* app)
+void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_SelectTribute of length [{}]", app->size);
 
@@ -13388,13 +13224,13 @@ void Client::Handle_OP_SelectTribute(const EQApplicationPacket* app)
 	if (app->size != sizeof(SelectTributeReq_Struct))
 		LogError("Invalid size on OP_SelectTribute packet");
 	else {
-		SelectTributeReq_Struct* t = (SelectTributeReq_Struct*)app->pBuffer;
+		SelectTributeReq_Struct *t = (SelectTributeReq_Struct *)app->pBuffer;
 		SendTributeDetails(t->client_id, t->tribute_id);
 	}
 	return;
 }
 
-void Client::Handle_OP_SenseHeading(const EQApplicationPacket* app)
+void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillSenseHeading))
 		return;
@@ -13406,7 +13242,7 @@ void Client::Handle_OP_SenseHeading(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SenseTraps(const EQApplicationPacket* app)
+void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillSenseTraps))
 		return;
@@ -13430,7 +13266,7 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket* app)
 
 	if (trap && trap->skill > 0) {
 		int uskill = GetSkill(EQ::skills::SkillSenseTraps);
-		if ((zone->random.Int(0, 99) + uskill) >= (zone->random.Int(0, 99) + trap->skill * 0.75))
+		if ((zone->random.Int(0, 99) + uskill) >= (zone->random.Int(0, 99) + trap->skill*0.75))
 		{
 			auto diff = trap->m_Position - glm::vec3(GetPosition());
 
@@ -13468,7 +13304,7 @@ void Client::Handle_OP_SenseTraps(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket* app)
+void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket *app)
 {
 	LogGuilds("Received OP_SetGuildMOTD");
 
@@ -13481,9 +13317,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket* app)
 		Message(Chat::Red, "You are not in a guild!");
 		return;
 	}
-	if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_CHANGE_THE_MOTD) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER))
-	{
+	if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_MOTD)) {
 		Message(Chat::Red, "You do not have permissions to edit your guild's MOTD.");
 		return;
 	}
@@ -13500,7 +13334,7 @@ void Client::Handle_OP_SetGuildMOTD(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SetRunMode(const EQApplicationPacket* app)
+void Client::Handle_OP_SetRunMode(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(SetRunMode_Struct)) {
 		LogError("Received invalid sized OP_SetRunMode: got [{}], expected [{}]", app->size, sizeof(SetRunMode_Struct));
@@ -13515,7 +13349,7 @@ void Client::Handle_OP_SetRunMode(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SetServerFilter(const EQApplicationPacket* app)
+void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SetServerFilter_Struct)) {
 		LogError("Received invalid sized OP_SetServerFilter: got [{}], expected [{}]", app->size, sizeof(SetServerFilter_Struct));
@@ -13527,7 +13361,7 @@ void Client::Handle_OP_SetServerFilter(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SetStartCity(const EQApplicationPacket* app)
+void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
 	if (m_pp.binds[4].zone_id != 0 && m_pp.binds[4].zone_id != 189) {
@@ -13556,7 +13390,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket* app)
 			player_deity = {}
 			AND
 			player_race = {} {}
-	),
+		),
 		m_pp.class_,
 		m_pp.deity,
 		m_pp.race,
@@ -13626,7 +13460,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_SetTitle(const EQApplicationPacket* app)
+void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SetTitle_Struct)) {
 		LogDebug("Size mismatch in OP_SetTitle expected [{}] got [{}]", sizeof(SetTitle_Struct), app->size);
@@ -13634,7 +13468,7 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto sts = (SetTitle_Struct*)app->pBuffer;
+	auto sts = (SetTitle_Struct *) app->pBuffer;
 
 	if (sts->title_id && !title_manager.HasTitle(this, sts->title_id)) {
 		return;
@@ -13646,19 +13480,18 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket* app)
 			!sts->is_suffix ?
 			title_manager.GetPrefix(sts->title_id) :
 			title_manager.GetSuffix(sts->title_id)
-			) :
+		) :
 		""
-		);
+	);
 
 	if (!sts->is_suffix) {
 		SetAATitle(title);
-	}
-	else {
+	} else {
 		SetTitleSuffix(title);
 	}
 }
 
-void Client::Handle_OP_Shielding(const EQApplicationPacket* app)
+void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 {
 	/*
 		/shield command mechanics
@@ -13710,7 +13543,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto shield = (Shielding_Struct*)app->pBuffer;
+	auto shield = (Shielding_Struct*) app->pBuffer;
 	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
 		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
@@ -13718,14 +13551,14 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ShopEnd(const EQApplicationPacket* app)
+void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
 	EQApplicationPacket empty(OP_ShopEndConfirm);
 	QueuePacket(&empty);
 	return;
 }
 
-void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket* app)
+void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Sell_Struct)) {
 		LogError("Invalid size on OP_ShopPlayerBuy: Expected [{}], Got [{}]",
@@ -13827,7 +13660,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket* app)
 	int16 charges = 0;
 	if (item->Stackable || tmpmer_used)
 		charges = mp->quantity;
-	else if (item->MaxCharges >= 1)
+	else if ( item->MaxCharges >= 1)
 		charges = item->MaxCharges;
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
@@ -13867,7 +13700,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket* app)
 			m_pp.copper
 		);
 
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -14041,7 +13874,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket* app)
 	std::cout << "At 1: " << t1.getDuration() << std::endl;
 	return;
 }
-void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
+void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Purchase_Struct)) {
 		LogError("Invalid size on OP_ShopPlayerSell: Expected [{}], Got [{}]",
@@ -14089,7 +13922,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 
 	if (RuleB(Merchant, UsePriceMod)) {
 		for (i = 1; i <= cost_quantity; i++) {
-			price = (uint32)((item->Price * i) * (RuleR(Merchant, BuyCostMod)) * Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(vendor, true) + 0.5); // need to round up, because client does it automatically when displaying price
 			if (price > 4000000000) {
 				cost_quantity = i;
 				mp->quantity = i;
@@ -14099,7 +13932,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 	}
 	else {
 		for (i = 1; i <= cost_quantity; i++) {
-			price = (uint32)((item->Price * i) * (RuleR(Merchant, BuyCostMod)) + 0.5); // need to round up, because client does it automatically when displaying price
+			price = (uint32)((item->Price * i)*(RuleR(Merchant, BuyCostMod)) + 0.5); // need to round up, because client does it automatically when displaying price
 			if (price > 4000000000) {
 				cost_quantity = i;
 				mp->quantity = i;
@@ -14131,8 +13964,8 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 				charges,
 				true
 			)
-				) > 0) {
-			EQ::ItemInstance* inst2 = inst->Clone();
+			) > 0) {
+			EQ::ItemInstance *inst2 = inst->Clone();
 
 			while (true) {
 				if (!inst2) {
@@ -14143,7 +13976,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 					item->Price *
 					RuleR(Merchant, SellCostMod) *
 					item->SellRate
-					);
+				);
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					price *= Client::CalcPriceMod(vendor, false);
@@ -14240,7 +14073,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 			!inst->IsStackable() ?
 			0 :
 			mp->quantity
-			)
+		)
 	);
 
 
@@ -14264,7 +14097,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_ShopRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Merchant_Click_Struct)) {
 		LogError("Wrong size: OP_ShopRequest, size=[{}], expected [{}]", app->size, sizeof(Merchant_Click_Struct));
@@ -14331,7 +14164,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket* app)
 	mco->playerid = 0;
 	mco->command = action; // Merchant command 0x01 = open
 	if (RuleB(Merchant, UsePriceMod)) {
-		mco->rate = 1 / ((RuleR(Merchant, BuyCostMod)) * Client::CalcPriceMod(tmp, true)); // works
+		mco->rate = 1 / ((RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(tmp, true)); // works
 	}
 	else
 		mco->rate = 1 / (RuleR(Merchant, BuyCostMod));
@@ -14346,7 +14179,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Sneak(const EQApplicationPacket* app)
+void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 {
 	if (!HasSkill(EQ::skills::SkillSneak) && GetSkill(EQ::skills::SkillSneak) == 0) {
 		return; //You cannot sneak if you do not have sneak
@@ -14388,7 +14221,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket* app)
 	safe_delete(outapp);
 	if (GetClass() == Class::Rogue) {
 		outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
-		SimpleMessage_Struct* msg = (SimpleMessage_Struct*)outapp->pBuffer;
+		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
 		if (sneaking) {
 			msg->string_id = 347;
@@ -14401,7 +14234,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket* app)
+void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SpawnAppearance_Struct)) {
 		std::cout << "Wrong size on OP_SpawnAppearance. Got: " << app->size << ", Expected: " << sizeof(SpawnAppearance_Struct) << std::endl;
@@ -14422,7 +14255,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket* app)
 				if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 				{
 					auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Invis [{}]", sa->parameter);
-					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 				}
 			}
 			return;
@@ -14522,7 +14355,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket* app)
 			if (!HasSkill(EQ::skills::SkillSneak))
 			{
 				auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak [{}]", sa->parameter);
-				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+				RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			}
 			return;
 		}
@@ -14532,7 +14365,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket* app)
 	else if (sa->type == AT_Size)
 	{
 		auto message = fmt::format("Player sent OP_SpawnAppearance with AT_Size [{}]", sa->parameter);
-		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
@@ -14572,7 +14405,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Split(const EQApplicationPacket* app)
+void Client::Handle_OP_Split(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Split_Struct)) {
 		LogError("Wrong size: OP_Split, size=[{}], expected [{}]", app->size, sizeof(Split_Struct));
@@ -14581,12 +14414,12 @@ void Client::Handle_OP_Split(const EQApplicationPacket* app)
 	// The client removes the money on its own, but we have to
 	// update our state anyway, and make sure they had enough to begin
 	// with.
-	Split_Struct* split = (Split_Struct*)app->pBuffer;
+	Split_Struct *split = (Split_Struct *)app->pBuffer;
 	//Per the note above, Im not exactly sure what to do on error
 	//to notify the client of the error...
 
-	Group* group = nullptr;
-	Raid* raid = nullptr;
+	Group *group = nullptr;
+	Raid *raid = nullptr;
 
 	if (IsRaidGrouped())
 		raid = GetRaid();
@@ -14616,7 +14449,7 @@ void Client::Handle_OP_Split(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_Surname(const EQApplicationPacket* app)
+void Client::Handle_OP_Surname(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Surname_Struct))
 	{
@@ -14638,7 +14471,7 @@ void Client::Handle_OP_Surname(const EQApplicationPacket* app)
 
 	Surname_Struct* surname = (Surname_Struct*)app->pBuffer;
 
-	char* c = nullptr;
+	char *c = nullptr;
 	bool first = true;
 	for (c = surname->lastname; *c; c++)
 	{
@@ -14675,7 +14508,7 @@ void Client::Handle_OP_Surname(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_SwapSpell(const EQApplicationPacket* app)
+void Client::Handle_OP_SwapSpell(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(SwapSpell_Struct)) {
@@ -14710,7 +14543,7 @@ void Client::Handle_OP_SwapSpell(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TargetCommand(const EQApplicationPacket* app)
+void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientTarget_Struct)) {
 		LogError("OP size error: OP_TargetCommand expected:[{}] got:[{}]", sizeof(ClientTarget_Struct), app->size);
@@ -14720,11 +14553,11 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket* app)
 	// Locate and cache new target
 	ClientTarget_Struct* ct = (ClientTarget_Struct*)app->pBuffer;
 
-	bool can_target = false;
-	Mob* nt = entity_list.GetMob(ct->new_target);
+	bool can_target=false;
+	Mob *nt = entity_list.GetMob(ct->new_target);
 
 	if (nt) {
-		if (GetGM() || (!nt->IsInvisible(this) && (DistanceSquared(m_Position, nt->GetPosition()) <= TARGETING_RANGE * TARGETING_RANGE))) {
+		if (GetGM() || (!nt->IsInvisible(this) && (DistanceSquared(m_Position, nt->GetPosition()) <= TARGETING_RANGE*TARGETING_RANGE))) {
 			if (nt->GetBodyType() == BT_NoTarget2 ||
 				nt->GetBodyType() == BT_Special ||
 				nt->GetBodyType() == BT_NoTarget) {
@@ -14750,7 +14583,7 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
+void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientTarget_Struct)) {
 		LogError("OP size error: OP_TargetMouse expected:[{}] got:[{}]", sizeof(ClientTarget_Struct), app->size);
@@ -14767,7 +14600,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 	pClientSideTarget = ct->new_target;
 	if (!IsAIControlled())
 	{
-		Mob* nt = entity_list.GetMob(ct->new_target);
+		Mob *nt = entity_list.GetMob(ct->new_target);
 		if (nt)
 		{
 			SetTarget(nt);
@@ -14775,7 +14608,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 			// rank 1 gives you ability to see NPC buffs in target window (SoD+)
 			if (nt->IsNPC()) {
 				if (IsRaidGrouped()) {
-					Raid* raid = GetRaid();
+					Raid *raid = GetRaid();
 					if (raid) {
 						uint32 gid = raid->GetGroup(this);
 						if (gid < 12 && raid->GroupCount(gid) > 2)
@@ -14783,7 +14616,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 					}
 				}
 				else {
-					Group* group = GetGroup();
+					Group *group = GetGroup();
 					if (group && group->GroupCount() > 2)
 						inspect_buffs = group->GetLeadershipAA(groupAAInspectBuffs);
 				}
@@ -14802,7 +14635,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 			SetHoTT(0);
 			UpdateXTargetType(TargetsTarget, nullptr);
 
-			Group* g = GetGroup();
+			Group *g = GetGroup();
 
 			if (g && g->HasRole(this, RoleAssist))
 				g->SetGroupAssistTarget(0);
@@ -14836,7 +14669,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 		UpdateXTargetType(TargetsTarget, nullptr);
 	}
 
-	Group* g = GetGroup();
+	Group *g = GetGroup();
 
 	if (g && g->HasRole(this, RoleAssist))
 		g->SetGroupAssistTarget(GetTarget());
@@ -14877,9 +14710,9 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 				"[{}] attempting to target something untargetable [{}] bodytype [{}]",
 				GetName(),
 				GetTarget()->GetName(),
-				(int)GetTarget()->GetBodyType()
+				(int) GetTarget()->GetBodyType()
 			);
-			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 
 			SetTarget((Mob*)nullptr);
 			return;
@@ -14905,9 +14738,9 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 		}
 		else if (GetBindSightTarget())
 		{
-			if (DistanceSquared(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip * zone->newzone_data.maxclip))
+			if (DistanceSquared(GetBindSightTarget()->GetPosition(), GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
-				if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip * zone->newzone_data.maxclip))
+				if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 				{
 					auto message = fmt::format(
 						"[{}] attempting to target something beyond the clip plane of {:.2f} "
@@ -14918,13 +14751,13 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 						GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
 						GetTarget()->GetY(), GetTarget()->GetZ());
 
-					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 					SetTarget(nullptr);
 					return;
 				}
 			}
 		}
-		else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip * zone->newzone_data.maxclip))
+		else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 		{
 			auto message = fmt::format(
 				"{} attempting to target something beyond the clip plane of {:.2f} "
@@ -14940,7 +14773,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 				GetTarget()->GetZ()
 			);
 
-			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{ .message = message });
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 			SetTarget(nullptr);
 			return;
 		}
@@ -14949,7 +14782,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket* app)
 	}
 	return;
 }
-void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(TaskHistoryRequest_Struct)) {
@@ -14957,13 +14790,13 @@ void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket* app)
 		DumpPacket(app);
 		return;
 	}
-	TaskHistoryRequest_Struct* ths = (TaskHistoryRequest_Struct*)app->pBuffer;
+	TaskHistoryRequest_Struct *ths = (TaskHistoryRequest_Struct*)app->pBuffer;
 
 	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
 		task_state->SendTaskHistory(this, ths->TaskIndex);
 }
 
-void Client::Handle_OP_Taunt(const EQApplicationPacket* app)
+void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(ClientTarget_Struct)) {
 		std::cout << "Wrong size on OP_Taunt. Got: " << app->size << ", Expected: " << sizeof(ClientTarget_Struct) << std::endl;
@@ -14992,7 +14825,7 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TestBuff(const EQApplicationPacket* app)
+void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
 {
 	if (!RuleB(Character, EnableTestBuff)) {
 		return;
@@ -15003,13 +14836,13 @@ void Client::Handle_OP_TestBuff(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_TGB(const EQApplicationPacket* app)
+void Client::Handle_OP_TGB(const EQApplicationPacket *app)
 {
 	OPTGB(app);
 	return;
 }
 
-void Client::Handle_OP_Track(const EQApplicationPacket* app)
+void Client::Handle_OP_Track(const EQApplicationPacket *app)
 {
 	if (!CanThisClassTrack()) {
 		return;
@@ -15026,7 +14859,7 @@ void Client::Handle_OP_Track(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TrackTarget(const EQApplicationPacket* app)
+void Client::Handle_OP_TrackTarget(const EQApplicationPacket *app)
 {
 	if (!CanThisClassTrack()) {
 		return;
@@ -15037,18 +14870,18 @@ void Client::Handle_OP_TrackTarget(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto* t = (TrackTarget_Struct*)app->pBuffer;
+	auto *t = (TrackTarget_Struct*) app->pBuffer;
 
 	SetTrackingID(t->EntityID);
 }
 
-void Client::Handle_OP_TrackUnknown(const EQApplicationPacket* app)
+void Client::Handle_OP_TrackUnknown(const EQApplicationPacket *app)
 {
 	// size 0 send right after OP_Track
 	return;
 }
 
-void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket *app)
 {
 	Mob* with = trade->With();
 	trade->state = TradeAccepted;
@@ -15118,7 +14951,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket* app)
 					int offset = 0;
 
 					for (auto iter = event_details.begin(); iter != event_details.end();
-						++iter, ++offset) {
+					++iter, ++offset) {
 						PlayerLogTradeItemsEntry_Struct* detail = reinterpret_cast<PlayerLogTradeItemsEntry_Struct*>(*iter);
 						qs_buf->item_entries[offset] = *detail;
 						safe_delete(detail);
@@ -15200,7 +15033,7 @@ void Client::Handle_OP_TradeAcceptClick(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TradeBusy(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeBusy(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeBusy_Struct)) {
 		LogError("Wrong size: OP_TradeBusy, size=[{}], expected [{}]", app->size, sizeof(TradeBusy_Struct));
@@ -15218,7 +15051,7 @@ void Client::Handle_OP_TradeBusy(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Trader(const EQApplicationPacket* app)
+void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 {
 	// Bazaar Trader:
 	//
@@ -15296,7 +15129,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket* app)
 					TradeItemsValid = false;
 					break;
 				}
-				const EQ::ItemData* Item = database.GetItem(gis->Items[i]);
+				const EQ::ItemData *Item = database.GetItem(gis->Items[i]);
 
 				if (!Item) {
 					Message(Chat::Red, "Unexpected error. Unable to start trader mode");
@@ -15394,7 +15227,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TraderBuy(const EQApplicationPacket* app)
+void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 {
 	// Bazaar Trader:
 	//
@@ -15419,7 +15252,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TradeRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeRequest_Struct)) {
 		LogError("Wrong size: OP_TradeRequest, size=[{}], expected [{}]", app->size, sizeof(TradeRequest_Struct));
@@ -15445,20 +15278,20 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket* app)
 		tradee->CastToClient()->QueuePacket(app);
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
-		if (!tradee->IsEngaged()) {
-			trade->Start(msg->to_mob_id);
-			EQApplicationPacket* outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
-			TradeRequest_Struct* acc = (TradeRequest_Struct*)outapp->pBuffer;
-			acc->from_mob_id = msg->to_mob_id;
-			acc->to_mob_id = msg->from_mob_id;
-			FastQueuePacket(&outapp);
-			safe_delete(outapp);
-		}
-	}
+        if (!tradee->IsEngaged()) {
+            trade->Start(msg->to_mob_id);
+            EQApplicationPacket *outapp = new EQApplicationPacket(OP_TradeRequestAck, sizeof(TradeRequest_Struct));
+            TradeRequest_Struct *acc = (TradeRequest_Struct *) outapp->pBuffer;
+            acc->from_mob_id = msg->to_mob_id;
+            acc->to_mob_id = msg->from_mob_id;
+            FastQueuePacket(&outapp);
+            safe_delete(outapp);
+        }
+    }
 	return;
-}
+	}
 
-void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeRequest_Struct)) {
 		LogError("Wrong size: OP_TradeRequestAck, size=[{}], expected [{}]", app->size, sizeof(TradeRequest_Struct));
@@ -15477,7 +15310,7 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TraderShop(const EQApplicationPacket* app)
+void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 {
 	// Bazaar Trader:
 
@@ -15569,7 +15402,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket* app)
 	{
 		// RoF+
 		// Customer has closed the trade window
-		uint32 Command = *((uint32*)app->pBuffer);
+		uint32 Command = *((uint32 *)app->pBuffer);
 
 		if (Command == 4)
 		{
@@ -15601,7 +15434,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket* app)
+void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(NewCombine_Struct)) {
 		LogError("Invalid size for NewCombine_Struct: Expected: [{}], Got: [{}]",
@@ -15621,7 +15454,7 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_Translocate(const EQApplicationPacket* app)
+void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Translocate_Struct)) {
 		LogDebug("Size mismatch in OP_Translocate expected [{}] got [{}]", sizeof(Translocate_Struct), app->size);
@@ -15629,7 +15462,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket* app)
 		return;
 	}
 
-	Translocate_Struct* its = (Translocate_Struct*)app->pBuffer;
+	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
 	if (!PendingTranslocate) {
 		return;
@@ -15639,7 +15472,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket* app)
 	if (
 		translocate_time_limit &&
 		time(nullptr) > (TranslocateTime + translocate_time_limit)
-		) {
+	) {
 		Message(Chat::Red, "You did not accept the Translocate within the required time limit.");
 		PendingTranslocate = false;
 		return;
@@ -15650,7 +15483,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket* app)
 		bool in_translocate_zone = (
 			zone->GetZoneID() == PendingTranslocateData.zone_id &&
 			zone->GetInstanceID() == PendingTranslocateData.instance_id
-			);
+		);
 
 		int quest_return = 0;
 		if (parse->SpellHasQuestSub(spell_id, EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)) {
@@ -15689,7 +15522,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket* app)
 	PendingTranslocate = false;
 }
 
-void Client::Handle_OP_TributeItem(const EQApplicationPacket* app)
+void Client::Handle_OP_TributeItem(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_TributeItem of length [{}]", app->size);
 
@@ -15716,7 +15549,7 @@ void Client::Handle_OP_TributeItem(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TributeMoney(const EQApplicationPacket* app)
+void Client::Handle_OP_TributeMoney(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_TributeMoney of length [{}]", app->size);
 
@@ -15743,27 +15576,27 @@ void Client::Handle_OP_TributeMoney(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_TributeNPC(const EQApplicationPacket* app)
+void Client::Handle_OP_TributeNPC(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_TributeNPC of length [{}]", app->size);
 
 	return;
 }
 
-void Client::Handle_OP_TributeToggle(const EQApplicationPacket* app)
+void Client::Handle_OP_TributeToggle(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_TributeToggle of length [{}]", app->size);
 
 	if (app->size != sizeof(uint32))
 		LogError("Invalid size on OP_TributeToggle packet");
 	else {
-		uint32* val = (uint32*)app->pBuffer;
+		uint32 *val = (uint32 *)app->pBuffer;
 		ToggleTribute(*val ? true : false);
 	}
 	return;
 }
 
-void Client::Handle_OP_TributeUpdate(const EQApplicationPacket* app)
+void Client::Handle_OP_TributeUpdate(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_TributeUpdate of length [{}]", app->size);
 
@@ -15771,13 +15604,13 @@ void Client::Handle_OP_TributeUpdate(const EQApplicationPacket* app)
 	if (app->size != sizeof(TributeInfo_Struct))
 		LogError("Invalid size on OP_TributeUpdate packet");
 	else {
-		TributeInfo_Struct* t = (TributeInfo_Struct*)app->pBuffer;
+		TributeInfo_Struct *t = (TributeInfo_Struct *)app->pBuffer;
 		ChangeTributeSettings(t);
 	}
 	return;
 }
 
-void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(VeteranClaim)) {
 		LogDebug("OP_VetClaimRequest size lower than expected: got [{}] expected at least [{}]", app->size, sizeof(VeteranClaim));
@@ -15785,7 +15618,7 @@ void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket* app)
 		return;
 	}
 
-	VeteranClaim* vcr = (VeteranClaim*)app->pBuffer;
+	VeteranClaim *vcr = (VeteranClaim *)app->pBuffer;
 
 	if (vcr->claim_id == 0xFFFFFFFF) { // request update packet
 		SendRewards();
@@ -15793,7 +15626,7 @@ void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket* app)
 	}
 	// try to claim something!
 	auto vetapp = new EQApplicationPacket(OP_VetClaimReply, sizeof(VeteranClaim));
-	VeteranClaim* cr = (VeteranClaim*)vetapp->pBuffer;
+	VeteranClaim *cr = (VeteranClaim *)vetapp->pBuffer;
 	strcpy(cr->name, GetName());
 	cr->claim_id = vcr->claim_id;
 
@@ -15805,7 +15638,7 @@ void Client::Handle_OP_VetClaimRequest(const EQApplicationPacket* app)
 	FastQueuePacket(&vetapp);
 }
 
-void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket* app)
+void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket *app)
 {
 
 	if (app->size != sizeof(VoiceMacroIn_Struct)) {
@@ -15825,7 +15658,7 @@ void Client::Handle_OP_VoiceMacroIn(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_UpdateAura(const EQApplicationPacket* app)
+void Client::Handle_OP_UpdateAura(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(AuraDestory_Struct)) {
 		LogDebug("Size mismatch in OP_UpdateAura expected [{}] got [{}]", sizeof(AuraDestory_Struct), app->size);
@@ -15833,7 +15666,7 @@ void Client::Handle_OP_UpdateAura(const EQApplicationPacket* app)
 	}
 
 	// client only sends this for removing
-	auto aura = (AuraDestory_Struct*)app->pBuffer;
+	auto aura = (AuraDestory_Struct *)app->pBuffer;
 	if (aura->action != 1)
 		return; // could log I guess, but should only ever get this action
 
@@ -15842,7 +15675,7 @@ void Client::Handle_OP_UpdateAura(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_WearChange(const EQApplicationPacket* app)
+void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(WearChange_Struct)) {
 		std::cout << "Wrong size: OP_WearChange, size=" << app->size << ", expected " << sizeof(WearChange_Struct) << std::endl;
@@ -15861,7 +15694,7 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket* app)
 	entity_list.QueueClients(this, app, true);
 }
 
-void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Who_All_Struct)) {
 		std::cout << "Wrong size on OP_WhoAll. Got: " << app->size << ", Expected: " << sizeof(Who_All_Struct) << std::endl;
@@ -15876,7 +15709,7 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket* app)
+void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket *app)
 {
 	if (app->size != 1)
 	{
@@ -15889,7 +15722,7 @@ void Client::Handle_OP_XTargetAutoAddHaters(const EQApplicationPacket* app)
 	SetDirtyAutoHaters();
 }
 
-void Client::Handle_OP_XTargetOpen(const EQApplicationPacket* app)
+void Client::Handle_OP_XTargetOpen(const EQApplicationPacket *app)
 {
 	if (app->size != 4) {
 		LogDebug("Size mismatch in OP_XTargetOpen, expected 1, got [{}]", app->size);
@@ -15901,7 +15734,7 @@ void Client::Handle_OP_XTargetOpen(const EQApplicationPacket* app)
 	FastQueuePacket(&outapp);
 }
 
-void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
+void Client::Handle_OP_XTargetRequest(const EQApplicationPacket *app)
 {
 	if (app->size < 12)
 	{
@@ -15939,7 +15772,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 		char Name[65];
 
 		app->ReadString(Name, 12, 64);
-		Client* c = entity_list.GetClientByName(Name);
+		Client *c = entity_list.GetClientByName(Name);
 		if (c)
 		{
 			XTargets[Slot].ID = c->GetID();
@@ -15958,7 +15791,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	{
 		char Name[65];
 		app->ReadString(Name, 12, 64);
-		Mob* m = entity_list.GetMob(Name);
+		Mob *m = entity_list.GetMob(Name);
 		if (m)
 		{
 			XTargets[Slot].ID = m->GetID();
@@ -15979,11 +15812,11 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 
 	case GroupTank:
 	{
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 		{
-			Client* c = entity_list.GetClientByName(g->GetMainTankName());
+			Client *c = entity_list.GetClientByName(g->GetMainTankName());
 
 			if (c)
 			{
@@ -16000,7 +15833,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	}
 	case GroupTankTarget:
 	{
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 			g->NotifyTankTarget(this);
@@ -16010,11 +15843,11 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 
 	case GroupAssist:
 	{
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 		{
-			Client* c = entity_list.GetClientByName(g->GetMainAssistName());
+			Client *c = entity_list.GetClientByName(g->GetMainAssistName());
 
 			if (c)
 			{
@@ -16033,7 +15866,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	case GroupAssistTarget:
 	{
 
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 			g->NotifyAssistTarget(this);
@@ -16043,11 +15876,11 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 
 	case Puller:
 	{
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 		{
-			Client* c = entity_list.GetClientByName(g->GetPullerName());
+			Client *c = entity_list.GetClientByName(g->GetPullerName());
 
 			if (c)
 			{
@@ -16066,7 +15899,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	case PullerTarget:
 	{
 
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 			g->NotifyPullerTarget(this);
@@ -16078,7 +15911,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	case GroupMarkTarget2:
 	case GroupMarkTarget3:
 	{
-		Group* g = GetGroup();
+		Group *g = GetGroup();
 
 		if (g)
 			g->SendMarkedNPCsToMember(this);
@@ -16175,7 +16008,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 
 	case MyPet:
 	{
-		Mob* m = GetPet();
+		Mob *m = GetPet();
 		if (m)
 		{
 			XTargets[Slot].ID = m->GetID();
@@ -16186,7 +16019,7 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 	}
 	case MyPetTarget:
 	{
-		Mob* m = GetPet();
+		Mob *m = GetPet();
 
 		if (m)
 			m = m->GetTarget();
@@ -16207,16 +16040,16 @@ void Client::Handle_OP_XTargetRequest(const EQApplicationPacket* app)
 
 }
 
-void Client::Handle_OP_YellForHelp(const EQApplicationPacket* app)
+void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
 {
 	auto outapp = new EQApplicationPacket(OP_YellForHelp, 4);
-	*(uint32*)outapp->pBuffer = GetID();
+	*(uint32 *)outapp->pBuffer = GetID();
 	entity_list.QueueCloseClients(this, outapp, true, 100.0);
 	safe_delete(outapp);
 	return;
 }
 
-void Client::Handle_OP_ResetAA(const EQApplicationPacket* app)
+void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 {
 	if (Admin() >= AccountStatus::Guide) {
 		Message(Chat::White, "Resetting AA points.");
@@ -16225,14 +16058,14 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app)
+void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket *app)
 {
 	cheat_manager.ProcessMovementHistory(app);
 }
 
-void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app)
+void Client::Handle_OP_UnderWorld(const EQApplicationPacket *app)
 {
-	UnderWorld* m_UnderWorld = (UnderWorld*)app->pBuffer;
+	UnderWorld *m_UnderWorld = (UnderWorld *) app->pBuffer;
 	if (app->size != sizeof(UnderWorld)) {
 		LogDebug("Size mismatch in OP_UnderWorld, expected {}, got [{}]", sizeof(UnderWorld), app->size);
 		DumpPacket(app);
@@ -16247,7 +16080,7 @@ void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket* app)
+void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SharedTaskRemovePlayer_Struct)) {
 		LogPacketClientServer(
@@ -16257,7 +16090,7 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket* app)
 		);
 		return;
 	}
-	auto* r = (SharedTaskRemovePlayer_Struct*)app->pBuffer;
+	auto *r = (SharedTaskRemovePlayer_Struct *) app->pBuffer;
 
 	LogTasks(
 		"field1 [{}] field2 [{}] player_name [{}]",
@@ -16274,11 +16107,11 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket* app)
 			sizeof(ServerSharedTaskRemovePlayer_Struct)
 		);
 
-		auto* rp = (ServerSharedTaskRemovePlayer_Struct*)p->pBuffer;
+		auto *rp = (ServerSharedTaskRemovePlayer_Struct *) p->pBuffer;
 
 		// fill
 		rp->source_character_id = CharacterID();
-		rp->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
@@ -16294,7 +16127,7 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket* app)
+void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SharedTaskAddPlayer_Struct)) {
 		LogPacketClientServer(
@@ -16304,7 +16137,7 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket* app)
 		);
 		return;
 	}
-	auto* r = (SharedTaskAddPlayer_Struct*)app->pBuffer;
+	auto *r = (SharedTaskAddPlayer_Struct *) app->pBuffer;
 
 	LogTasks(
 		"field1 [{}] field2 [{}] player_name [{}]",
@@ -16324,11 +16157,11 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket* app)
 			sizeof(ServerSharedTaskAddPlayer_Struct)
 		);
 
-		auto* rp = (ServerSharedTaskAddPlayer_Struct*)p->pBuffer;
+		auto *rp = (ServerSharedTaskAddPlayer_Struct *) p->pBuffer;
 
 		// fill
 		rp->source_character_id = CharacterID();
-		rp->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
@@ -16344,7 +16177,7 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket* app)
+void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SharedTaskMakeLeader_Struct)) {
 		LogPacketClientServer(
@@ -16355,7 +16188,7 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto* r = (SharedTaskMakeLeader_Struct*)app->pBuffer;
+	auto *r = (SharedTaskMakeLeader_Struct *) app->pBuffer;
 	LogTasks(
 		"field1 [{}] field2 [{}] player_name [{}]",
 		r->field1,
@@ -16371,11 +16204,11 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket* app)
 			sizeof(ServerSharedTaskMakeLeader_Struct)
 		);
 
-		auto* rp = (ServerSharedTaskMakeLeader_Struct*)p->pBuffer;
+		auto *rp = (ServerSharedTaskMakeLeader_Struct *) p->pBuffer;
 
 		// fill
 		rp->source_character_id = CharacterID();
-		rp->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
 		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
 
 		LogTasks(
@@ -16391,7 +16224,7 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket* app)
 	}
 }
 
-void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket* app)
+void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(SharedTaskInviteResponse_Struct)) {
 		LogPacketClientServer(
@@ -16402,7 +16235,7 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto* r = (SharedTaskInviteResponse_Struct*)app->pBuffer;
+	auto *r = (SharedTaskInviteResponse_Struct *) app->pBuffer;
 	LogTasks(
 		"unknown00 [{}] invite_id [{}] accepted [{}]",
 		r->unknown00,
@@ -16416,12 +16249,12 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket* app)
 		sizeof(ServerSharedTaskInviteAccepted_Struct)
 	);
 
-	auto* c = (ServerSharedTaskInviteAccepted_Struct*)p->pBuffer;
+	auto *c = (ServerSharedTaskInviteAccepted_Struct *) p->pBuffer;
 
 	// fill
 	c->source_character_id = CharacterID();
-	c->shared_task_id = r->invite_id;
-	c->accepted = r->accepted;
+	c->shared_task_id      = r->invite_id;
+	c->accepted            = r->accepted;
 	strn0cpy(c->player_name, GetName(), sizeof(c->player_name));
 
 	LogTasks(
@@ -16496,19 +16329,19 @@ void Client::SetSharedTaskId(int64 shared_task_id)
 
 bool Client::CanTradeFVNoDropItem()
 {
-	const int16 admin_status = Admin();
-	const int   no_drop_flag = RuleI(World, FVNoDropFlag);
+	const int16 admin_status             = Admin();
+	const int   no_drop_flag             = RuleI(World, FVNoDropFlag);
 	const int   no_drop_min_admin_status = RuleI(Character, MinStatusForNoDropExemptions);
 	switch (no_drop_flag) {
-	case FVNoDropFlagRule::Disabled:
-		return false;
-	case FVNoDropFlagRule::Enabled:
-		return true;
-	case FVNoDropFlagRule::AdminOnly:
-		return admin_status >= no_drop_min_admin_status;
-	default:
-		LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
-		return false;
+		case FVNoDropFlagRule::Disabled:
+			return false;
+		case FVNoDropFlagRule::Enabled:
+			return true;
+		case FVNoDropFlagRule::AdminOnly:
+			return admin_status >= no_drop_min_admin_status;
+		default:
+			LogWarning("Invalid value {0} set for FVNoDropFlag", no_drop_flag);
+			return false;
 	}
 
 	return false;
@@ -16516,9 +16349,9 @@ bool Client::CanTradeFVNoDropItem()
 
 void Client::SendMobPositions()
 {
-	auto      p = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
-	auto* s = (PlayerPositionUpdateServer_Struct*)p->pBuffer;
-	for (auto& m : entity_list.GetMobList()) {
+	auto      p  = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
+	auto      *s = (PlayerPositionUpdateServer_Struct *) p->pBuffer;
+	for (auto &m: entity_list.GetMobList()) {
 		m.second->MakeSpawnUpdate(s);
 		QueuePacket(p, false);
 	}
@@ -16530,7 +16363,7 @@ struct RecordKillCheck {
 	bool                   check;
 };
 
-void Client::RecordKilledNPCEvent(NPC* n)
+void Client::RecordKilledNPCEvent(NPC *n)
 {
 	bool is_named = Strings::Contains(n->GetName(), "#") && !n->IsRaidTarget();
 
@@ -16540,7 +16373,7 @@ void Client::RecordKilledNPCEvent(NPC* n)
 		RecordKillCheck{.event = PlayerEvent::KILLED_RAID_NPC, .check = n->IsRaidTarget()},
 	};
 
-	for (auto& c : checks) {
+	for (auto &c: checks) {
 		if (c.check && player_event_logs.IsEventEnabled(c.event)) {
 			auto e = PlayerEvent::KilledNPCEvent{
 				.npc_id = n->GetNPCTypeID(),
@@ -16698,308 +16531,5 @@ void Client::ReloadExpansionProfileSetting()
 	}
 	else {
 		m_pp.expansions = RuleI(World, ExpansionSettings);
-	}
-}
-
-void Client::Handle_OP_GuildTributeSelect(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_GuildSelectTribute of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeSelectReq_Struct))
-		LogError("Invalid size on OP_GuildSelectTribute packet");
-	else {
-		GuildTributeSelectReq_Struct* t = (GuildTributeSelectReq_Struct*)app->pBuffer;
-		SendGuildTributeDetails(t->tribute_id, t->tier);
-	}
-	return;
-}
-
-void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildModifyBenefits of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeModifyBenefits_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildModifyBenefits packet");
-	}
-	else {
-		GuildTributeModifyBenefits_Struct* t = (GuildTributeModifyBenefits_Struct*)app->pBuffer;
-
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildModifyBenefits, sizeof(GuildTributeModifyBenefits_Struct));
-		GuildTributeModifyBenefits_Struct* gmbs = (GuildTributeModifyBenefits_Struct*)outapp->pBuffer;
-
-		switch (t->command) {
-		case 0: {
-			gmbs->command = 0;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = t->tribute_id_1;
-			gmbs->tribute_id_2 = t->tribute_id_2;
-			gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
-			gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
-			gmbs->tribute_master_id = t->tribute_master_id;
-			QueuePacket(outapp);
-
-			auto sp = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
-			auto out = (GuildTributeUpdate*)sp->pBuffer;
-			out->guild_id = GuildID();
-			out->enabled = false;
-			worldserver.SendPacket(sp);
-			safe_delete(sp);
-			break;
-		}
-		case 1: {
-			gmbs->command = 1;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = t->tribute_id_1;
-			gmbs->tribute_id_2 = t->tribute_id_2;
-			gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
-			gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
-			gmbs->tribute_master_id = t->tribute_master_id;
-			QueuePacket(outapp);
-			break;
-		}
-		default: {
-			gmbs->command = 0;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = 0;
-			gmbs->tribute_id_2 = 0;
-			gmbs->tribute_id_1_tier = 0;
-			gmbs->tribute_id_2_tier = 0;
-			gmbs->tribute_master_id = 0;
-			QueuePacket(outapp);
-			break;
-		}
-		}
-		safe_delete(outapp);
-	}
-	return;
-}
-
-void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildTributeOptInOut of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeOptInOutReq_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildTributeOptInOut packet");
-		return;
-	}
-
-	GuildTributeOptInOutReq_Struct* in = (GuildTributeOptInOutReq_Struct*)app->pBuffer;
-
-	CharGuildInfo gci;
-	guild_mgr.GetCharInfo(in->player, gci);
-
-	guild_mgr.DBSetMemberTributeEnabled(GuildID(), gci.char_id, in->tribute_toggle);
-
-	ServerPacket* sout = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
-	GuildTributeMemberToggle* out = (GuildTributeMemberToggle*)sout->pBuffer;
-
-	out->guild_id = GuildID();
-	out->char_id = gci.char_id;
-	strncpy(out->player_name, in->player, strlen(in->player));
-	out->tribute_toggle = in->tribute_toggle;
-	out->command = in->command;
-
-	worldserver.SendPacket(sout);
-
-	safe_delete(sout);
-}
-
-void Client::Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildTributeSaveActive of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeSaveActive_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildTributeOptInOut packet");
-		return;
-	}
-
-	GuildTributeSaveActive_Struct* data = (GuildTributeSaveActive_Struct*)app->pBuffer;
-	auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-	if (guild) {
-		GuildTributesRepository::GuildTributes gt{};
-
-		gt.guild_id = GuildID();
-		gt.tribute_id_1 = data->tribute_id_1;
-		gt.tribute_id_2 = data->tribute_id_2;
-		gt.tribute_id_1_tier = data->tribute_1_tier;
-		gt.tribute_id_2_tier = data->tribute_2_tier;
-		gt.enabled = 0;
-		gt.time_remaining = RuleI(Guild, TributeTime);
-		GuildTributesRepository::ReplaceOne(database, gt);
-
-		guild->tribute.enabled = 0;
-		guild->tribute.id_1 = data->tribute_id_1;
-		guild->tribute.id_2 = data->tribute_id_2;
-		guild->tribute.id_1_tier = data->tribute_1_tier;
-		guild->tribute.id_2_tier = data->tribute_2_tier;
-		guild->tribute.time_remaining = RuleI(Guild, TributeTime);
-
-		ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeUpdate, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* gtu = (GuildTributeUpdate*)sp->pBuffer;
-
-		gtu->guild_id = GuildID();
-		gtu->tribute_id_1 = data->tribute_id_1;
-		gtu->tribute_id_2 = data->tribute_id_2;
-		gtu->tribute_id_1_tier = data->tribute_1_tier;
-		gtu->tribute_id_2_tier = data->tribute_2_tier;
-		gtu->enabled = 0;
-		gtu->favor = guild->tribute.favor;
-		gtu->time_remaining = RuleI(Guild, TributeTime);
-
-		worldserver.SendPacket(sp);
-		safe_delete(sp);
-	}
-}
-
-void Client::Handle_OP_GuildTributeToggle(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildTributeToggle of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeToggleReq_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildModifyBenefits packet");
-	}
-	else {
-		GuildTributeToggleReq_Struct* gt = (GuildTributeToggleReq_Struct*)app->pBuffer;
-
-		ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* gtu = (GuildTributeUpdate*)sp->pBuffer;
-		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-		if (guild) {
-			switch (gt->command) {
-			case 0: {
-				gtu->guild_id = GuildID();
-				gtu->enabled = 0;
-				gtu->favor = guild->tribute.favor;
-				gtu->tribute_id_1 = guild->tribute.id_1;
-				gtu->tribute_id_2 = guild->tribute.id_2;
-				gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
-				gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
-				gtu->time_remaining = guild->tribute.time_remaining;
-
-				worldserver.SendPacket(sp);
-				break;
-			}
-			case 1: {
-				gtu->guild_id = GuildID();
-				gtu->enabled = 1;
-				gtu->favor = guild->tribute.favor;
-				gtu->tribute_id_1 = guild->tribute.id_1;
-				gtu->tribute_id_2 = guild->tribute.id_2;
-				gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
-				gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
-				gtu->time_remaining = guild->tribute.time_remaining;
-
-				worldserver.SendPacket(sp);
-				break;
-			}
-			default: {
-				LogError("Unknown GuildTributeUpdate to WorldServer command received.");
-				break;
-			}
-			}
-		}
-		safe_delete(sp);
-	}
-	return;
-}
-
-void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildTributeDonateItem of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeDonateItemRequest_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildTributeDonateItemRequest packet");
-		return;
-	}
-
-	auto in = (GuildTributeDonateItemRequest_Struct*)app->pBuffer;
-
-	const auto* inst = GetInv().GetItem(in->Slot);
-	auto favor = inst->GetItemGuildFavor() * in->quantity;
-
-	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
-	if (guild) {
-		guild->tribute.favor += favor;
-		guild_mgr.DBSetGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
-
-		if (inst->IsStackable()) {
-			if (inst->GetCharges() < (int32)in->quantity) {
-				favor = 0;
-			}
-			DeleteItemInInventory(in->Slot, in->quantity, false, true);
-		}
-		else {
-			DeleteItemInInventory(in->Slot, 0, false, true);
-		}
-
-		SendGuildTributeDonateItemReply(in, favor);
-
-		if (RuleB(QueryServ, PlayerLogGuildTributeItemDonations)) {
-			auto event_desc = fmt::format("Guild Item Donation :: {} donated item id {} for {} favor in zone {}\.",
-				GetName(),
-				inst->GetID(),
-				favor,
-				GetZoneID()
-			);
-			QServ->PlayerLogEvent(Player_Log_Guild_Tribute_Item_Donation, CharacterID(), event_desc);
-		}
-
-		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* out = (GuildTributeUpdate*)outapp->pBuffer;
-		out->guild_id = GuildID();
-		out->favor = guild->tribute.favor;
-		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
-		out->member_time = time(nullptr);
-		out->member_enabled = GuildTributeOptIn();
-		out->member_favor = member_favor;
-		worldserver.SendPacket(outapp);
-		safe_delete(outapp);
-	}
-}
-
-void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
-{
-	LogTribute("Received OP_Handle_OP_GuildTributeToggle of length [{}]", app->size);
-
-	if (app->size != sizeof(GuildTributeDonatePlatRequest_Struct)) {
-		LogError("Invalid size on Handle_OP_GuildTributeDonatePlatRequest_Struct packet");
-		return;
-	}
-
-	auto in = (GuildTributeDonatePlatRequest_Struct*)app->pBuffer;
-
-	auto quantity = in->quantity;
-
-	auto favor = quantity * RuleI(Guild, TributePlatConversionRate);
-	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
-	if (guild) {
-		guild->tribute.favor += favor;
-		guild_mgr.DBSetGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
-
-		TakePlatinum(quantity, false);
-		SendGuildTributeDonatePlatReply(in, favor);
-
-		if (RuleB(QueryServ, PlayerLogGuildTributePlatDonations)) {
-			auto event_desc = fmt::format("Guild Platinum Donation :: {} donated {} platinum for {} favor in zone {}\.",
-				GetName(),
-				quantity,
-				favor,
-				GetZoneID()
-			);
-			QServ->PlayerLogEvent(Player_Log_Guild_Tribute_Plat_Donation, CharacterID(), event_desc);
-		}
-
-		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* out = (GuildTributeUpdate*)outapp->pBuffer;
-		out->guild_id = GuildID();
-		out->favor = guild->tribute.favor;
-		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
-		out->member_time = time(nullptr);
-		out->member_enabled = GuildTributeOptIn();
-		out->member_favor = member_favor;
-		worldserver.SendPacket(outapp);
-		safe_delete(outapp);
 	}
 }
