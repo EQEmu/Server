@@ -183,20 +183,19 @@ class BaseGuildManager
 			uint32 perm_value;
 		};
 	public:
-		class GuildInfo
-		{
-			public:
-				GuildInfo();
-				std::string name;
-				std::string motd;
-				std::string motd_setter;
-				std::string url;
-				std::string channel;
-				uint32		leader;
-				uint8		minstatus;
-				std::string		rank_names[GUILD_MAX_RANK + 1];
-				Functions		functions[GUILD_MAX_FUNCTIONS + 1];
-				Guild_Tribute	tribute;
+		class GuildInfo {
+		public:
+			GuildInfo();
+			std::string   name;
+			std::string   motd;
+			std::string   motd_setter;
+			std::string   url;
+			std::string   channel;
+			uint32        leader;
+			uint8         minstatus;
+			std::string   rank_names[GUILD_MAX_RANK + 1];
+			Functions     functions[GUILD_MAX_FUNCTIONS + 1];
+			Guild_Tribute tribute;
 		};
 	virtual BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
 
