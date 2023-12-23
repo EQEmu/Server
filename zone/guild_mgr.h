@@ -57,9 +57,7 @@ public:
 	void ListGuilds(Client *c, std::string search_criteria = std::string()) const;
 	void ListGuilds(Client *c, uint32 guild_id = 0) const;
 	void DescribeGuild(Client *c, uint32 guild_id) const;
-
-
-//	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
+	bool IsActionABankAction(GuildAction action);
 
 	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
 	uint8 *MakeGuildMembers2(uint32 guild_id, const char* prefix_name, uint32& length);

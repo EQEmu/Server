@@ -31,6 +31,9 @@
 #include "../common/repositories/guild_members_repository.h"
 #include "../common/repositories/guild_bank_repository.h"
 #include "../common/repositories/guild_tributes_repository.h"
+#include "../common/repositories/tributes_repository.h"
+#include "../common/repositories/tribute_levels_repository.h"
+
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -331,38 +334,28 @@ uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 
 bool WorldGuildManager::LoadTributes() {
 
-	TributeData tributeData;
-	memset(&tributeData.tiers, 0, sizeof(tributeData.tiers));
-	tributeData.tier_count = 0;
+	TributeData td{};
+	td.tier_count = 0;
 
 	tribute_list.clear();
 
-	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
-	auto results = m_db->QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
+	auto tributes = TributesRepository::All(*m_db);
+
+	for (auto const& t : tributes) {
+		td.name = t.name;
+		td.description = t.descr;
+		td.unknown = t.unknown;
+		td.is_guild = t.isguild == 0 ? false : true;
+
+		tribute_list[t.id] = td;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = Strings::ToUnsignedInt(row[0]);
-		tributeData.name = row[1];
-		tributeData.description = row[2];
-		tributeData.unknown = strtoul(row[3], nullptr, 10);
-		tributeData.is_guild = atol(row[4]) == 0 ? false : true;
+	LogInfo("Loaded [{}] tributes", Strings::Commify(tributes.size()));
 
-		tribute_list[id] = tributeData;
-	}
+	auto tribute_levels = TributeLevelsRepository::GetWhere(*m_db, "TRUE ORDER BY tribute_id, level");
 
-	LogInfo("Loaded [{}] tributes", Strings::Commify(results.RowCount()));
-
-	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
-	results = m_db->QueryDatabase(query2);
-	if (!results.Success()) {
-		return false;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = Strings::ToUnsignedInt(row[0]);
+	for (auto const& t : tribute_levels) {
+		uint32 id = t.tribute_id;
 
 		if (tribute_list.count(id) != 1) {
 			LogError("Error in LoadTributes: unknown tribute [{}] in tribute_levels", (unsigned long)id);
@@ -370,21 +363,21 @@ bool WorldGuildManager::LoadTributes() {
 		}
 
 		TributeData& cur = tribute_list[id];
-
 		if (cur.tier_count >= MAX_TRIBUTE_TIERS) {
-			LogError("Error in LoadTributes: on tribute [{}]: more tiers defined than permitted", (unsigned long)id);
+			LogError("Error in LoadTributes: on tribute [{}] more tiers defined than permitted", (unsigned long)id);
 			continue;
 		}
 
 		TributeLevel_Struct& s = cur.tiers[cur.tier_count];
 
-		s.level = Strings::ToUnsignedInt(row[1]);
-		s.cost = Strings::ToUnsignedInt(row[2]);
-		s.tribute_item_id = Strings::ToUnsignedInt(row[3]);
+		s.level = t.level;
+		s.cost = t.cost;
+		s.tribute_item_id = t.item_id;
+
 		cur.tier_count++;
 	}
 
-	LogInfo("Loaded [{}] tribute levels", Strings::Commify(results.RowCount()));
+	LogInfo("Loaded [{}] tribute levels", Strings::Commify(tribute_levels.size()));
 
 	return true;
 }
@@ -413,28 +406,28 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 	_CreateGuild(db_guild.id, db_guild.name.c_str(), db_guild.leader, db_guild.minstatus, db_guild.motd.c_str(), db_guild.motd_setter.c_str(), db_guild.channel.c_str(), db_guild.url.c_str(), db_guild.favor);
 	auto guild = GetGuildByGuildID(guild_id);
 	auto where_filter = fmt::format("guild_id = '{}'", guild_id);
-	auto g_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);
-	for (auto const& r : g_ranks) {
+	auto guild_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);
+	for (auto const& r : guild_ranks) {
 		guild->rank_names[r.rank] = r.title;
 	}
 
 	where_filter = fmt::format("guild_id = '{}'", guild_id);
-	auto g_permissions = BaseGuildPermissionsRepository::GetWhere(*m_db, where_filter);
-	for (auto const& p : g_permissions) {
-		guild->functions[p.perm_id].id = p.id;
-		guild->functions[p.perm_id].guild_id = p.guild_id;
-		guild->functions[p.perm_id].perm_id = p.perm_id;
+	auto guild_permissions = BaseGuildPermissionsRepository::GetWhere(*m_db, where_filter);
+	for (auto const& p : guild_permissions) {
+		guild->functions[p.perm_id].id         = p.id;
+		guild->functions[p.perm_id].guild_id   = p.guild_id;
+		guild->functions[p.perm_id].perm_id    = p.perm_id;
 		guild->functions[p.perm_id].perm_value = p.permission;
 	}
 
-	auto g_tributes = BaseGuildTributesRepository::FindOne(*m_db, guild_id);
-	if (g_tributes.guild_id) {
-		guild->tribute.id_1 = g_tributes.tribute_id_1;
-		guild->tribute.id_2 = g_tributes.tribute_id_2;
-		guild->tribute.id_1_tier = g_tributes.tribute_id_1_tier;
-		guild->tribute.id_2_tier = g_tributes.tribute_id_2_tier;
-		guild->tribute.enabled = g_tributes.enabled;
-		guild->tribute.time_remaining = g_tributes.time_remaining;
+	auto guild_tributes = BaseGuildTributesRepository::FindOne(*m_db, guild_id);
+	if (guild_tributes.guild_id) {
+		guild->tribute.id_1           = guild_tributes.tribute_id_1;
+		guild->tribute.id_2           = guild_tributes.tribute_id_2;
+		guild->tribute.id_1_tier      = guild_tributes.tribute_id_1_tier;
+		guild->tribute.id_2_tier      = guild_tributes.tribute_id_2_tier;
+		guild->tribute.enabled        = guild_tributes.enabled;
+		guild->tribute.time_remaining = guild_tributes.time_remaining;
 	}
 	if (temp_guild_detail.tribute.enabled == 1) {
 		guild->tribute = temp_guild_detail.tribute;

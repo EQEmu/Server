@@ -1098,17 +1098,6 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 		if(update_db)
 			database.SaveCursor(character_id, s, e);
 	}
-	//else if (slot_id >= EQ::invslot::GUILD_TRIBUTE_BEGIN && slot_id <= EQ::invslot::GUILD_TRIBUTE_END) {
-	//	EQApplicationPacket* outapp;
-	//	outapp = new EQApplicationPacket(OP_DeleteItem, sizeof(DeleteItem_Struct));
-	//	DeleteItem_Struct* delitem = (DeleteItem_Struct*)outapp->pBuffer;
-	//	delitem->from_slot = slot_id;
-	//	delitem->to_slot = 0xFFFFFFFF;
-	//	delitem->number_in_stack = 0xFFFFFFFF;
-	//	QueuePacket(outapp);
-	//	safe_delete(outapp);
-	//	return;
-	//}
 	else {
 		// Save change to database
 		inst = m_inv[slot_id];

@@ -3767,7 +3767,7 @@ namespace UF
 
 		memcpy(emu->name, eq->name, sizeof(emu->name));
 		memcpy(emu->target, eq->target, sizeof(emu->target));
-		emu->rank = 5;
+		emu->rank = GUILD_MEMBER;
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -490,15 +490,14 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 		Client* c = entity_list.GetClientByCharID(s->char_id);
 
-		if (c != nullptr) {
+		if (!c) {
 			//this reloads the char's guild info from the database and sends appearance updates
 			c->RefreshGuildInfo();
 		}
 
 		//it would be nice if we had the packet to send just a one-person update
 		if (s->guild_id == GUILD_NONE) {
-			if (c != nullptr) {
-				//c->SendGuildMembers();	//only need to update this player's list (trying to clear it)
+			if (!c) {
 				c->SendGuildMOTD();
 			}
 		}
@@ -509,7 +508,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 		if (s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
 			entity_list.SendGuildMembers(s->old_guild_id);
-		else if (c != nullptr && s->guild_id != GUILD_NONE) {
+		else if (!c && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
 			if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -517,29 +516,11 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				c->SendGuildRanks();
 			}
 		}
-
-
 		break;
 	}
 
 	case ServerOP_GuildRankUpdate:
 	{
-		auto IsActionABankAction = [&](GuildAction action) -> bool {
-			std::vector<GuildAction> Guild_Bank_Actions =
-			{
-			GUILD_ACTION_BANK_DEPOSIT_ITEMS,
-			GUILD_ACTION_BANK_PROMOTE_ITEMS,
-			GUILD_ACTION_BANK_VIEW_ITEMS,
-			GUILD_ACTION_BANK_WITHDRAW_ITEMS
-			};
-			for (auto const& a : Guild_Bank_Actions) {
-				if (a == action) {
-					return true;
-				}
-			}
-			return false;
-			};
-
 		ServerGuildRankUpdate_Struct* sgrus = (ServerGuildRankUpdate_Struct*)pack->pBuffer;
 
 		if (is_zone_loaded)
@@ -572,29 +553,6 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 			else if (!guild_bank_status && !sgrus->no_update) {
 				entity_list.GuildSetPreRoFBankerFlag(sgrus->GuildID, sgrus->Rank, false);
 			}
-			//auto client_list = entity_list.GetClientList();
-			//for (auto const& c : client_list) {
-			//	if (c.second->GuildID() == sgrus->GuildID) {
-			//		CharGuildInfo cgi;
-			//		guild_mgr.GetCharInfo(c.second->CharacterID(), cgi);
-			//		if (guild_bank_status && !cgi.banker) {
-			//			guild_mgr.SetBankerFlag(c.second->CharacterID(), true);
-			//			gsrs->Banker = 1 + (cgi.alt ? 2 : 0);
-			//		}
-			//		else if (!guild_bank_status && cgi.banker) {
-			//			guild_mgr.SetBankerFlag(c.second->CharacterID(), false);
-			//			gsrs->Banker = 0 + (cgi.alt ? 2 : 0);
-			//		}
-			//	}
-			//	c.second->QueuePacket(outapp);
-			//}
-			//safe_delete(outapp);
-
-//		Client* c = entity_list.GetClientByName(sgrus->MemberName);
-//		if (c) {
-//			c->SendAppearancePacket(AT_GuildRank, sgrus->Rank, false);
-//		}
-//		entity_list.SendAllGuildTitleDisplay(sgrus->GuildID);
 		}
 		break;
 	}
@@ -622,7 +580,6 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					c.second->SetGuildTributeOptIn(false);
 					c.second->SendGuildActiveTributes(c.second->GuildID());
 					c.second->RefreshGuildInfo();
-					//c.second->SendGuildMembers();
 					c.second->MessageString(Chat::Guild, GUILD_DISBANDED);
 				}
 			}
@@ -632,7 +589,6 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				delete res->second;
 				m_guilds.erase(res);
 			}
-			//			LoadGuilds();
 		}
 		break;
 	}
@@ -737,22 +693,6 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 	}
 	case ServerOP_GuildPermissionUpdate:
 	{
-		auto IsActionABankAction = [&](GuildAction action) -> bool {
-			std::vector<GuildAction> Guild_Bank_Actions =
-			{
-			GUILD_ACTION_BANK_DEPOSIT_ITEMS,
-			GUILD_ACTION_BANK_PROMOTE_ITEMS,
-			GUILD_ACTION_BANK_VIEW_ITEMS,
-			GUILD_ACTION_BANK_WITHDRAW_ITEMS
-			};
-			for (auto const& a : Guild_Bank_Actions) {
-				if (a == action) {
-					return true;
-				}
-			}
-			return false;
-			};
-
 		if (is_zone_loaded)
 		{
 			ServerGuildPermissionUpdate_Struct* sgpus = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
@@ -811,35 +751,9 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				gucp->payload.rank_name.rank = s->rank;
 				strcpy(gucp->payload.rank_name.rank_name, s->rank_name);
 				gucp->action = 4;
+
 				entity_list.QueueClientsGuild(outapp, s->guild_id);
 				safe_delete(outapp);
-
-				//for (auto const& gm : guild_mgr.GetGuildMembers(s->guild_id)) {
-				//	auto outapp = new EQApplicationPacket(OP_GuildMemberUpdate, sizeof(GuildMemberUpdate_Struct));
-				//	GuildMemberUpdate_Struct* gmus = (GuildMemberUpdate_Struct*)outapp->pBuffer;
-				//	gmus->GuildID = s->guild_id;
-				//	CharGuildInfo cgi;
-				//	guild_mgr.GetCharInfo(gm.char_id, cgi);
-				//	if (cgi.rank == s->rank) {
-				//		safe_delete(outapp);
-				//		continue;
-				//	}
-
-				//	strn0cpy(gmus->MemberName, cgi.char_name.c_str(), sizeof(cgi.char_name.c_str()));
-				//	auto client = entity_list.GetClientByCharID(gm.char_id);
-				//	if (client) {
-				//		gmus->ZoneID = client->GetZoneID();
-				//		gmus->InstanceID = client->GetInstanceID();
-				//		gmus->LastSeen = time(nullptr);
-				//	}
-				//	else {
-				//		gmus->ZoneID = 0;
-				//		gmus->InstanceID = 0;
-				//		gmus->LastSeen = 0;
-				//	}
-				//	entity_list.QueueClientsGuild(outapp, s->guild_id);
-				//	safe_delete(outapp);
-				//}
 			}
 		}
 		break;
@@ -1960,18 +1874,33 @@ bool ZoneGuildManager::RemoveMember(uint32 guild_id, uint32 char_id, std::string
 
 void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name)
 {
-	BaseGuildMembersRepository::GuildMembers member;
-	member.alt = 0;
-	member.banker = 0;
-	member.char_id = char_id;
-	member.guild_id = guild_id;
-	member.last_tribute = 0;
-	member.public_note.clear();
-	member.rank = rank;
-	member.total_tribute = 0;
-	member.tribute_enable = 0;
+	BaseGuildMembersRepository::GuildMembers m;
+	m.alt            = 0;
+	m.banker         = 0;
+	m.char_id        = char_id;
+	m.guild_id       = guild_id;
+	m.last_tribute   = 0;
+	m.rank           = rank;
+	m.total_tribute  = 0;
+	m.tribute_enable = 0;
+	m.public_note.clear();
 
-	GuildMembersRepository::InsertOne(*m_db, member);
+	GuildMembersRepository::InsertOne(*m_db, m);
 	DBSetMemberOnline(char_id, true);
 	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
+}
+
+bool ZoneGuildManager::IsActionABankAction(GuildAction action)
+{
+	std::vector<GuildAction> Guild_Bank_Actions = {GUILD_ACTION_BANK_DEPOSIT_ITEMS,
+                                                   GUILD_ACTION_BANK_PROMOTE_ITEMS,
+                                                   GUILD_ACTION_BANK_VIEW_ITEMS,
+                                                   GUILD_ACTION_BANK_WITHDRAW_ITEMS};
+
+	for (auto const& a : Guild_Bank_Actions) {
+		if (a == action) {
+			return true;
+		}
+	}
+	return false;
 }

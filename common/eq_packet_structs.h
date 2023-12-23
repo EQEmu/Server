@@ -3539,9 +3539,9 @@ struct StartTribute_Struct {
 };
 
 struct TributeLevel_Struct {
-	uint32 level;    //backwards byte order!
+	uint32 level;              //backwards byte order!
 	uint32 tribute_item_id;    //backwards byte order!
-	uint32 cost;    //backwards byte order!
+	uint32 cost;               //backwards byte order!
 };
 
 struct TributeAbility_Struct {
