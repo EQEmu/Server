@@ -4920,7 +4920,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				FormatMSGID = 5023; // 5023 %T1[ANONYMOUS] %2 %3 %4
 			uint32 PlayerClass = Class::None;
 			uint32 PlayerLevel = 0;
-			uint32 PlayerRace = RACE_DOUG_0;
+			uint32 PlayerRace = Race::Doug;
 			uint32 ZoneMSGID = 0xFFFFFFFF;
 
 			if (ClientEntry->GetAnon()==0) {
@@ -5750,7 +5750,7 @@ void EntityList::DespawnGridNodes(int32 grid_id) {
 		Mob *mob = m.second;
 		if (
 			mob->IsNPC() &&
-			mob->GetRace() == RACE_NODE_2254 &&
+			mob->GetRace() == Race::Node &&
 			mob->EntityVariableExists("grid_id") &&
 			Strings::ToInt(mob->GetEntityVariable("grid_id")) == grid_id)
 		{

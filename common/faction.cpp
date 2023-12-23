@@ -96,12 +96,12 @@ bool IsOfEqualRace(int r1, int r2)
 	// TODO: add more values
 	switch (r1) {
 		case DARK_ELF:
-			if (r2 == RACE_NERIAK_CITIZEN_77) {
+			if (r2 == Race::NeriakCitizen) {
 				return true;
 			}
 			break;
 		case BARBARIAN:
-			if (r2 == RACE_HALAS_CITIZEN_90) {
+			if (r2 == Race::HalasCitizen) {
 				return true;
 			}
 	}

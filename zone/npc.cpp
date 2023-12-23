@@ -155,10 +155,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
-	if (race == RACE_LAVA_DRAGON_49) {
+	if (race == Race::LavaDragon) {
 		size = 5;
 	}
-	if (race == RACE_WURM_158) {
+	if (race == Race::Wurm) {
 		size = 15;
 	}
 
@@ -3691,25 +3691,25 @@ void NPC::ScaleNPC(uint8 npc_level, bool always_scale, bool override_special_abi
 bool NPC::IsGuard()
 {
 	switch (GetRace()) {
-	case RT_GUARD:
+	case Race::FreeportGuard:
 		if (GetTexture() == 1 || GetTexture() == 2)
 			return true;
 		break;
-	case RT_IKSAR_2:
+	case Race::IksarCitizen:
 		if (GetTexture() == 1)
 			return true;
 		break;
-	case RT_GUARD_2:
-	case RT_GUARD_3:
-	case RT_GUARD_4:
-	case RT_HUMAN_3:
-	case RT_HALFLING_2:
-	case RT_ERUDITE_2:
-	case RT_BARBARIAN_2:
-	case RT_DARK_ELF_2:
-	case RT_TROLL_2:
+	case Race::Felguard:
+	case Race::Fayguard:
+	case Race::VahShirGuard:
+	case Race::QeynosCitizen:
+	case Race::RivervaleCitizen:
+	case Race::EruditeCitizen:
+	case Race::HalasCitizen:
+	case Race::NeriakCitizen:
+	case Race::GrobbCitizen:
 	case OGGOK_CITIZEN:
-	case RT_DWARF_2:
+	case Race::KaladimCitizen:
 		return true;
 	default:
 		break;

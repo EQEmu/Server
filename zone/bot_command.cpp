@@ -5913,11 +5913,11 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	};
 
 	const uint16 race_values[17] = {
-		RACE_DOUG_0,
-		RACE_HUMAN_1, RACE_BARBARIAN_2, RACE_ERUDITE_3, RACE_WOOD_ELF_4,
-		RACE_HIGH_ELF_5, RACE_DARK_ELF_6, RACE_HALF_ELF_7, RACE_DWARF_8,
-		RACE_TROLL_9, RACE_OGRE_10, RACE_HALFLING_11, RACE_GNOME_12,
-		RACE_IKSAR_128, RACE_VAH_SHIR_130, RACE_FROGLOK_330, RACE_DRAKKIN_522
+		Race::Doug,
+		Race::Human, Race::Barbarian, Race::Erudite, Race::WoodElf,
+		Race::HighElf, Race::DarkElf, Race::HalfElf, Race::Dwarf,
+		Race::Troll, Race::Ogre, Race::Halfling, Race::Gnome,
+		Race::Iksar, Race::VahShir, Race::Froglok2, Race::Drakkin
 	};
 
 	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos")) {
@@ -6028,11 +6028,11 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 	};
 
 	const uint16 race_values[17] = {
-		RACE_DOUG_0,
-		RACE_HUMAN_1, RACE_BARBARIAN_2, RACE_ERUDITE_3, RACE_WOOD_ELF_4,
-		RACE_HIGH_ELF_5, RACE_DARK_ELF_6, RACE_HALF_ELF_7, RACE_DWARF_8,
-		RACE_TROLL_9, RACE_OGRE_10, RACE_HALFLING_11, RACE_GNOME_12,
-		RACE_IKSAR_128, RACE_VAH_SHIR_130, RACE_FROGLOK_330, RACE_DRAKKIN_522
+		Race::Doug,
+		Race::Human, Race::Barbarian, Race::Erudite, Race::WoodElf,
+		Race::HighElf, Race::DarkElf, Race::HalfElf, Race::Dwarf,
+		Race::Troll, Race::Ogre, Race::Halfling, Race::Gnome,
+		Race::Iksar, Race::VahShir, Race::Froglok2, Race::Drakkin
 	};
 
 	const std::string gender_substrs[2] = {

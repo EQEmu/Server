@@ -7430,42 +7430,42 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_BIXIE:
 		case IS_BIXIE2:
-			if ((GetRace() == RT_BIXIE) ||(GetRace() == RT_BIXIE_2))
+			if ((GetRace() == Race::Bixie) ||(GetRace() == Race::Bixie2))
 				return true;
 			break;
 
 		case IS_HARPY:
-			if ((GetRace() == RT_HARPY) ||(GetRace() == RT_HARPY_2))
+			if ((GetRace() == Race::Harpy) ||(GetRace() == Race::Harpy2))
 				return true;
 			break;
 
 		case IS_GNOLL:
-			if ((GetRace() == RT_GNOLL) || (GetRace() == RT_GNOLL_2) || (GetRace() == RT_GNOLL_3))
+			if ((GetRace() == Race::Gnoll) || (GetRace() == Race::Gnoll2) || (GetRace() == Race::Gnoll3))
 				return true;
 			break;
 
 		case IS_SPORALI:
-			if ((GetRace() == RT_SPORALI) ||(GetRace() == RT_FUNGUSMAN))
+			if ((GetRace() == Race::Sporali) ||(GetRace() == Race::Fungusman))
 				return true;
 			break;
 
 		case IS_KOBOLD:
-			if ((GetRace() == RT_KOBOLD) ||(GetRace() == RT_KOBOLD_2))
+			if ((GetRace() == Race::Kobold) ||(GetRace() == Race::Kobold2))
 				return true;
 			break;
 
 		case IS_FROSTCRYPT_SHADE:
-			if (GetRace() == RT_GIANT_SHADE)
+			if (GetRace() == Race::GiantShade)
 				return true;
 			break;
 
 		case IS_DRAKKIN:
-			if (GetRace() == RT_DRAKKIN)
+			if (GetRace() == Race::Drakkin)
 				return true;
 			break;
 
 		case IS_UNDEAD_OR_VALDEHOLM_GIANT:
-			if (GetBodyType() == BT_Undead || GetRace() == RT_GIANT_12 || GetRace() == RT_GIANT_13)
+			if (GetBodyType() == BT_Undead || GetRace() == Race::Giant2 || GetRace() == Race::Giant3)
 				return true;
 			break;
 
@@ -7496,7 +7496,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_FAE_OR_PIXIE:
-			if ((GetRace() == RT_PIXIE) || (GetRace() == RT_FAY_DRAKE))
+			if ((GetRace() == Race::Pixie) || (GetRace() == Race::FayDrake))
 				return  true;
 			break;
 
@@ -7511,12 +7511,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLOCKWORK_AND_HP_LESS_THAN_45_PCT:
-			if ((GetRace() == RT_GNOMEWORK || GetRace() == RACE_CLOCKWORK_GNOME_88) && (GetHPRatio() < 45))
+			if ((GetRace() == Race::Gnomework || GetRace() == Race::ClockworkGnome) && (GetHPRatio() < 45))
 				return true;
 			break;
 
 		case IS_WISP_AND_HP_LESS_THAN_10_PCT:
-			if ((GetRace() == RT_WILL_O_WISP) && (GetHPRatio() < 10))
+			if ((GetRace() == Race::Wisp) && (GetHPRatio() < 10))
 				return true;
 			break;
 
@@ -7889,12 +7889,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_TREANT:
-			if (GetRace() == RT_TREANT || GetRace() == RT_TREANT_2 || GetRace() == RT_TREANT_3)
+			if (GetRace() == Race::Treant || GetRace() == Race::Treant2 || GetRace() == Race::Treant3)
 				return true;
 			break;
 
 		case IS_SCARECROW:
-			if (GetRace() == RT_SCARECROW || GetRace() == RT_SCARECROW_2)
+			if (GetRace() == Race::Scarecrow || GetRace() == Race::Scarecrow2)
 				return true;
 			break;
 
@@ -10263,7 +10263,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			gender_id
 		);
 
-		if (base != RACE_ELEMENTAL_75 && base != RACE_DRAKKIN_522) {
+		if (base != Race::Elemental && base != Race::Drakkin) {
 			if (max > 0) {
 				if (limit == 0) {
 					SendIllusionPacket(
@@ -10303,7 +10303,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					}
 				);
 			}
-		} else if (base == RACE_ELEMENTAL_75){
+		} else if (base == Race::Elemental){
 			SendIllusionPacket(
 				AppearanceStruct{
 					.gender_id = static_cast<uint8>(gender_id),
@@ -10311,7 +10311,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 					.texture = static_cast<uint8>(limit),
 				}
 			);
-		} else if (base == RACE_DRAKKIN_522) {
+		} else if (base == Race::Drakkin) {
 			FaceChange_Struct f{
 				.haircolor = GetHairColor(),
 				.beardcolor = GetBeardColor(),

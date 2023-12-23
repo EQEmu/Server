@@ -2867,7 +2867,7 @@ void Mob::ShowStats(Client* c)
 		);
 
 		// Drakkin Features
-		if (t->GetRace() == RACE_DRAKKIN_522) {
+		if (t->GetRace() == Race::Drakkin) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -3526,7 +3526,7 @@ void Mob::GMMove(const glm::vec4 &position, bool save_guard_spot) {
 void Mob::SendIllusionPacket(const AppearanceStruct& a)
 {
 	uint16 new_race = (
-		a.race_id != RACE_DOUG_0 ?
+		a.race_id != Race::Doug ?
 		a.race_id :
 		(use_model ? use_model : GetBaseRace())
 	);
@@ -3558,7 +3558,7 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	uint32 new_drakkin_tattoo   = a.drakkin_tattoo == UINT32_MAX ? GetDrakkinTattoo() : a.drakkin_tattoo;
 
 	// Reset features to Base from the Player Profile
-	if (IsClient() && a.race_id == RACE_DOUG_0) {
+	if (IsClient() && a.race_id == Race::Doug) {
 		new_beard            = CastToClient()->GetBaseBeard();
 		new_beard_color      = CastToClient()->GetBaseBeardColor();
 		new_drakkin_details  = CastToClient()->GetBaseDetails();
@@ -3918,48 +3918,48 @@ uint16 Mob::GetFactionRace() {
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (
 		IsPlayerRace(in_race) ||
-		in_race == RACE_BROWNIE_15 ||
-		in_race == RACE_KERRAN_23 ||
-		in_race == RACE_LION_50 ||
-		in_race == RACE_DRACNID_57 ||
-		in_race == RACE_ZOMBIE_70 ||
-		in_race == RACE_QEYNOS_CITIZEN_71 ||
-		in_race == RACE_RIVERVALE_CITIZEN_81 ||
-		in_race == RACE_HALAS_CITIZEN_90 ||
-		in_race == RACE_GROBB_CITIZEN_92 ||
-		in_race == RACE_OGGOK_CITIZEN_93 ||
-		in_race == RACE_KALADIM_CITIZEN_94 ||
-		in_race == RACE_ELF_VAMPIRE_98 ||
-		in_race == RACE_FELGUARD_106 ||
-		in_race == RACE_FAYGUARD_112 ||
-		in_race == RACE_ERUDITE_GHOST_118 ||
-		in_race == RACE_IKSAR_CITIZEN_139 ||
-		in_race == RACE_SHADE_224 ||
-		in_race == RACE_TROLL_CREW_MEMBER_331 ||
-		in_race == RACE_PIRATE_DECKHAND_332 ||
-		in_race == RACE_GNOME_PIRATE_338 ||
-		in_race == RACE_DARK_ELF_PIRATE_339 ||
-		in_race == RACE_OGRE_PIRATE_340 ||
-		in_race == RACE_HUMAN_PIRATE_341 ||
-		in_race == RACE_ERUDITE_PIRATE_342 ||
-		in_race == RACE_UNDEAD_PIRATE_344 ||
-		in_race == RACE_KNIGHT_OF_HATE_351 ||
-		in_race == RACE_WARLOCK_OF_HATE_352 ||
-		in_race == RACE_UNDEAD_VAMPIRE_359 ||
-		in_race == RACE_VAMPIRE_360 ||
-		in_race == RACE_SAND_ELF_364 ||
-		in_race == RACE_TAELOSIAN_NATIVE_385 ||
-		in_race == RACE_TAELOSIAN_EVOKER_386 ||
-		in_race == RACE_DRACHNID_461 ||
-		in_race == RACE_ZOMBIE_471 ||
-		in_race == RACE_ELDDAR_489 ||
-		in_race == RACE_VAMPIRE_497 ||
-		in_race == RACE_KERRAN_562 ||
-		in_race == RACE_BROWNIE_568 ||
-		in_race == RACE_HUMAN_566 ||
-		in_race == RACE_ELVEN_GHOST_587 ||
-		in_race == RACE_HUMAN_GHOST_588 ||
-		in_race == RACE_COLDAIN_645
+		in_race == Race::Brownie ||
+		in_race == Race::Kerran ||
+		in_race == Race::Lion ||
+		in_race == Race::Drachnid ||
+		in_race == Race::Zombie ||
+		in_race == Race::QeynosCitizen ||
+		in_race == Race::RivervaleCitizen ||
+		in_race == Race::HalasCitizen ||
+		in_race == Race::GrobbCitizen ||
+		in_race == Race::OggokCitizen ||
+		in_race == Race::KaladimCitizen ||
+		in_race == Race::ElfVampire ||
+		in_race == Race::Felguard ||
+		in_race == Race::Fayguard ||
+		in_race == Race::EruditeGhost ||
+		in_race == Race::IksarCitizen ||
+		in_race == Race::Shade ||
+		in_race == Race::TrollCrewMember ||
+		in_race == Race::PirateDeckhand ||
+		in_race == Race::GnomePirate ||
+		in_race == Race::DarkElfPirate ||
+		in_race == Race::OgrePirate ||
+		in_race == Race::HumanPirate ||
+		in_race == Race::EruditePirate ||
+		in_race == Race::TrollZombie ||
+		in_race == Race::KnightOfHate ||
+		in_race == Race::ArcanistOfHate ||
+		in_race == Race::UndeadVampire ||
+		in_race == Race::Vampire3 ||
+		in_race == Race::SandElf ||
+		in_race == Race::Nihil ||
+		in_race == Race::Trusik ||
+		in_race == Race::Drachnid2 ||
+		in_race == Race::Zombie2 ||
+		in_race == Race::Elddar ||
+		in_race == Race::Vampire4 ||
+		in_race == Race::Kerran2 ||
+		in_race == Race::Brownie2 ||
+		in_race == Race::Human2 ||
+		in_race == Race::ElvenGhost ||
+		in_race == Race::HumanGhost ||
+		in_race == Race::Coldain2
 	) {
 		if (in_gender >= 2) { // Male default for PC Races
 			return 0;
@@ -3967,33 +3967,33 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 			return in_gender;
 		}
 	} else if (
-		in_race == RACE_FREEPORT_GUARD_44 ||
-		in_race == RACE_MIMIC_52 ||
-		in_race == RACE_HUMAN_BEGGAR_55 ||
-		in_race == RACE_VAMPIRE_65 ||
-		in_race == RACE_HIGHPASS_CITIZEN_67 ||
-		in_race == RACE_NERIAK_CITIZEN_77 ||
-		in_race == RACE_ERUDITE_CITIZEN_78 ||
-		in_race == RACE_CLOCKWORK_GNOME_88 ||
-		in_race == RACE_DWARF_GHOST_117 ||
-		in_race == RACE_SPECTRAL_IKSAR_147 ||
-		in_race == RACE_INVISIBLE_MAN_127 ||
-		in_race == RACE_VAMPYRE_208 ||
-		in_race == RACE_RECUSO_237 ||
-		in_race == RACE_BROKEN_SKULL_PIRATE_333 ||
-		in_race == RACE_INVISIBLE_MAN_OF_ZOMM_600 ||
-		in_race == RACE_OGRE_NPC_MALE_624 ||
-		in_race == RACE_BEEFEATER_667 ||
-		in_race == RACE_ERUDITE_678
+		in_race == Race::FreeportGuard ||
+		in_race == Race::Mimic ||
+		in_race == Race::HumanBeggar ||
+		in_race == Race::Vampire ||
+		in_race == Race::HighpassCitizen ||
+		in_race == Race::NeriakCitizen ||
+		in_race == Race::EruditeCitizen ||
+		in_race == Race::ClockworkGnome ||
+		in_race == Race::DwarfGhost ||
+		in_race == Race::IksarSpirit ||
+		in_race == Race::InvisibleMan ||
+		in_race == Race::Vampire2 ||
+		in_race == Race::Recuso ||
+		in_race == Race::BrokenSkullPirate ||
+		in_race == Race::InvisibleManOfZomm ||
+		in_race == Race::Ogre2 ||
+		in_race == Race::RoyalGuard ||
+		in_race == Race::Erudite2
 	) { // Male only races
 		return 0;
 	} else if (
-		in_race == RACE_FAIRY_25 ||
-		in_race == RACE_PIXIE_56 ||
-		in_race == RACE_BANSHEE_487 ||
-		in_race == RACE_BANSHEE_488 ||
-		in_race == RACE_AYONAE_RO_498 ||
-		in_race == RACE_SULLON_ZEK_499
+		in_race == Race::Fairy ||
+		in_race == Race::Pixie ||
+		in_race == Race::Banshee2 ||
+		in_race == Race::Banshee3 ||
+		in_race == Race::AyonaeRo ||
+		in_race == Race::SullonZek
 	) { // Female only races
 		return 1;
 	} else { // Neutral default for NPC Races
@@ -6867,22 +6867,22 @@ void Mob::RemoveAllNimbusEffects()
 bool Mob::IsBoat() const {
 
 	return (
-		race == RACE_SHIP_72 ||
-		race == RACE_LAUNCH_73 ||
-		race == RACE_GHOST_SHIP_114 ||
-		race == RACE_SHIP_404 ||
-		race == RACE_MERCHANT_SHIP_550 ||
-		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552 ||
-		race == RACE_BOAT_533
+		race == Race::Ship ||
+		race == Race::Launch ||
+		race == Race::GhostShip ||
+		race == Race::DiscordShip ||
+		race == Race::MerchantShip ||
+		race == Race::PirateShip ||
+		race == Race::GhostShip2 ||
+		race == Race::Boat2
 	);
 }
 
 bool Mob::IsControllableBoat() const {
 
 	return (
-		race == RACE_BOAT_141 ||
-		race == RACE_ROWBOAT_502
+		race == Race::Boat ||
+		race == Race::Rowboat
 	);
 }
 
@@ -8218,37 +8218,37 @@ int Mob::DispatchZoneControllerEvent(
 std::string Mob::GetRacePlural()
 {
 	switch (GetBaseRace()) {
-		case RACE_HUMAN_1:
+		case Race::Human:
 			return "Humans";
-		case RACE_BARBARIAN_2:
+		case Race::Barbarian:
 			return "Barbarians";
-		case RACE_ERUDITE_3:
+		case Race::Erudite:
 			return "Erudites";
-		case RACE_WOOD_ELF_4:
+		case Race::WoodElf:
 			return "Wood Elves";
-		case RACE_HIGH_ELF_5:
+		case Race::HighElf:
 			return "High Elves";
-		case RACE_DARK_ELF_6:
+		case Race::DarkElf:
 			return "Dark Elves";
-		case RACE_HALF_ELF_7:
+		case Race::HalfElf:
 			return "Half Elves";
-		case RACE_DWARF_8:
+		case Race::Dwarf:
 			return "Dwarves";
-		case RACE_TROLL_9:
+		case Race::Troll:
 			return "Trolls";
-		case RACE_OGRE_10:
+		case Race::Ogre:
 			return "Ogres";
-		case RACE_HALFLING_11:
+		case Race::Halfling:
 			return "Halflings";
-		case RACE_GNOME_12:
+		case Race::Gnome:
 			return "Gnomes";
-		case RACE_IKSAR_128:
+		case Race::Iksar:
 			return "Iksar";
-		case RACE_VAH_SHIR_130:
+		case Race::VahShir:
 			return "Vah Shir";
-		case RACE_FROGLOK_330:
+		case Race::Froglok2:
 			return "Frogloks";
-		case RACE_DRAKKIN_522:
+		case Race::Drakkin:
 			return "Drakkin";
 		default:
 			return "Races";
