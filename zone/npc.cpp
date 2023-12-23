@@ -3046,42 +3046,70 @@ void NPC::SendPayload(int payload_id, std::string payload_value)
 }
 
 NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
-	LinkedListIterator<NPC_Emote_Struct*> iterator(zone->NPCEmoteList);
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		NPC_Emote_Struct* nes = iterator.GetData();
+	std::vector<NPC_Emote_Struct*> Emotes;
+	for (auto& i : zone->NPCEmoteList) {
+		NPC_Emote_Struct* nes = i;
 		if (emoteid == nes->emoteid && event_ == nes->event_) {
-			return nes;
+			Emotes.push_back(i);
 		}
-		iterator.Advance();
 	}
-	return nullptr;
+
+	if (Emotes.size() == 0) {
+		return nullptr;
+	}
+	else if (Emotes.size() == 1) {
+		return Emotes[0];
+	}
+	else {
+		int index = zone->random.Roll0(Emotes.size());
+		return Emotes[index];
+	}
 }
 
-void NPC::DoNPCEmote(uint8 event_, uint32 emoteid)
+void NPC::DoNPCEmote(uint8 event_, uint32 emoteid, Mob* target)
 {
-	if (emoteid == 0)
-	{
+	if (this == nullptr || emoteid == 0) {
 		return;
 	}
 
 	NPC_Emote_Struct* nes = GetNPCEmote(emoteid,event_);
-	if(nes == nullptr)
-	{
+	if(nes == nullptr) {
 		return;
 	}
 
-	if(emoteid == nes->emoteid)
+	std::string processed = nes->text;
+	Strings::FindReplace(processed, "$mname", GetCleanName());
+	Strings::FindReplace(processed, "$mracep", GetRacePlural() = GetClass());
+	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
+	if (target)
 	{
+		Strings::FindReplace(processed, "$name", target->GetCleanName());
+		Strings::FindReplace(processed, "$racep", GetRacePlural() = target->GetClass());
+		Strings::FindReplace(processed, "$race", GetPlayerRaceName(target->GetRace()));
+		Strings::FindReplace(processed, "$class", GetClassIDName(target->GetClass()));
+	}
+	else
+	{
+		Strings::FindReplace(processed, "$name", "foe");
+		Strings::FindReplace(processed, "$race", "race");
+		Strings::FindReplace(processed, "$racep", "races");
+		Strings::FindReplace(processed, "$class", "class");
+	}
+
+	if(emoteid == nes->emoteid) {
+		if (event_ == EQ::constants::EmoteEventTypes::Hailed && target) {
+			DoQuestPause(target);
+		}
+
 		if(nes->type == 1)
-			Emote("%s",nes->text);
+			Emote("%s", processed.c_str());
 		else if(nes->type == 2)
-			Shout("%s",nes->text);
+			Shout("%s", processed.c_str());
 		else if(nes->type == 3)
-			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, nes->text);
+			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, processed.c_str());
 		else
-			Say("%s",nes->text);
+			Say("%s", processed.c_str());
 	}
 }
 

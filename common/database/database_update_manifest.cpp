@@ -5134,7 +5134,16 @@ CHANGE COLUMN `slot` `inventory_slot` mediumint(9) NOT NULL DEFAULT -1 AFTER `st
 ALTER TABLE `starting_items`
 CHANGE COLUMN `temporary` `class_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `id`;
 )"
-	}
+	},
+			ManifestEntry{
+					.version = 9248,
+					.description = "2023_12_22_drop_npc_emotes_index.sql",
+					.check = "show index from npc_emotes where key_name = 'emoteid'",
+					.condition = "not_empty",
+					.match = "",
+					.sql = R"(
+ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
+)" }
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

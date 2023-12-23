@@ -185,7 +185,7 @@ public:
 	DynamicZone *GetDynamicZone();
 
 	IPathfinder                                   *pathing;
-	LinkedList<NPC_Emote_Struct *>                NPCEmoteList;
+	std::vector<NPC_Emote_Struct *>               NPCEmoteList;
 	LinkedList<Spawn2 *>                          spawn2_list;
 	LinkedList<ZonePoint *>                       zone_point_list;
 	std::vector<ZonePointsRepository::ZonePoints> virtual_zone_point_list;
@@ -282,7 +282,7 @@ public:
 	void LoadMercSpells();
 	void LoadMercTemplates();
 	void LoadNewMerchantData(uint32 merchantid);
-	void LoadNPCEmotes(LinkedList<NPC_Emote_Struct *> *NPCEmoteList);
+	void LoadNPCEmotes(std::vector<NPC_Emote_Struct *> *NPCEmoteList);
 	void LoadTempMerchantData();
 	void LoadTickItems();
 	void LoadVeteranRewards();

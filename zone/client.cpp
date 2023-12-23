@@ -6172,7 +6172,7 @@ void Client::CheckEmoteHail(NPC* n, const char* message)
 
 	const auto emote_id = n->GetEmoteID();
 	if (emote_id) {
-		n->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emote_id);
+		n->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emote_id, this);
 	}
 }
 

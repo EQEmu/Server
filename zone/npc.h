@@ -476,7 +476,7 @@ public:
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
 	NPC_Emote_Struct* GetNPCEmote(uint32 emoteid, uint8 event_);
-	void DoNPCEmote(uint8 event_, uint32 emoteid);
+	void DoNPCEmote(uint8 event_, uint32 emoteid, Mob* target = nullptr);
 	bool CanTalk();
 	void DoQuestPause(Mob *other);
 
