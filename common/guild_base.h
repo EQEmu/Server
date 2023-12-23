@@ -10,26 +10,26 @@
 
 #define GOUT(x) out.x = in->x;
 
-struct default_permission_struct {
-	GuildAction	id;
-	uint32		value;
+struct DefaultPermissionStruct {
+	GuildAction id;
+	uint32      value;
 };
 
-struct default_rank_names_struct {
-	uint32		id;
-	std::string	name;
+struct DefaultRankNamesStruct {
+	uint32      id;
+	std::string name;
 };
 
-struct Guild_Tribute {
-	Timer		timer;
-	uint32		id_1;
-	uint32		id_2;
-	uint32		id_1_tier;
-	uint32		id_2_tier;
-	uint32		favor;
-	uint32		time_remaining;
-	uint32		enabled;
-	bool		send_timer;
+struct GuildTributeStruct {
+	Timer    timer;
+	uint32   id_1;
+	uint32   id_2;
+	uint32   id_1_tier;
+	uint32   id_2_tier;
+	uint32   favor;
+	uint32   time_remaining;
+	uint32   enabled;
+	bool     send_timer;
 };
 
 class TributeData {
@@ -195,7 +195,7 @@ class BaseGuildManager
 			uint8         minstatus;
 			std::string   rank_names[GUILD_MAX_RANK + 1];
 			Functions     functions[GUILD_MAX_FUNCTIONS + 1];
-			Guild_Tribute tribute;
+			GuildTributeStruct tribute;
 		};
 	virtual BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
 

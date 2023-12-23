@@ -35,7 +35,7 @@
 //until we move MAX_NUMBER_GUILDS
 #include "eq_packet_structs.h"
 
-std::vector<default_permission_struct> default_permissions = {
+std::vector<DefaultPermissionStruct> default_permissions = {
 	{GUILD_ACTION_BANK_CHANGE_ITEM_PERMISSIONS,         128},
 	{GUILD_ACTION_BANK_DEPOSIT_ITEMS,                   248},
 	{GUILD_ACTION_BANK_PROMOTE_ITEMS,                   128},
@@ -68,7 +68,7 @@ std::vector<default_permission_struct> default_permissions = {
 	{GUILD_ACTION_TROPHY_TRIBUTE_CHANGE_FOR_OTHERS,     224}
 };
 
-std::vector<default_rank_names_struct> default_rank_names = {
+std::vector<DefaultRankNamesStruct> default_rank_names = {
 	{1, "Leader"},
 	{2, "Senior Officer"},
 	{3, "Officer"},
