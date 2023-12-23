@@ -275,23 +275,7 @@ void WorldGuildManager::Process() {
 			guild_mgr.DBSetGuildFavor(g.first, g.second->tribute.favor);
 			guild_mgr.DBSetTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
 
-			LogGuilds("Timer reset.  Do tribute work - Points, send timer restart to zones, etc.");
-
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
-			//ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeFavAndTimer, sizeof(GuildTributeFavorTimer_Struct));
-			//GuildTributeFavorTimer_Struct* data = (GuildTributeFavorTimer_Struct*)sp->pBuffer;
-			//data->guild_id = g.first;
-			//data->guild_favor = g.second->tribute.favor;
-			//data->tribute_timer = g.second->tribute.time_remaining;
-			//data->trophy_timer = 0;
-			//
-			//for (auto const& z : zoneserver_list.getZoneServerList()) {
-			//	auto r = z.get();
-			//	if (r->GetZoneID() > 0) {
-			//		r->SendPacket(sp);
-			//	}
-			//}
-			//safe_delete(sp);
 
 		}
 		else if (g.second->tribute.send_timer && 

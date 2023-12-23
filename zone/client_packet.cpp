@@ -8029,9 +8029,9 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				//they are already in this guild, must be a promotion or demotion
 				if (ClientVersion() < EQ::versions::ClientVersion::RoF) {
 					switch (gc->officer) {
-					case 0: { rank = 5; break; }
-					case 1: { rank = 3; break; }
-					case 2: { rank = 1; break; }
+					case GUILD_MEMBER_TI: { rank = GUILD_MEMBER; break; }
+					case GUILD_OFFICER_TI: { rank = GUILD_OFFICER; break; }
+					case GUILD_LEADER_TI: { rank = GUILD_LEADER; break; }
 					}
 				}
 				if (rank > client->GuildRank()) {
