@@ -2474,11 +2474,11 @@ namespace UF
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->Unknown00 = 0;
-		eq->Unknown04 = 0;
+		eq->unknown00 = 0;
+		eq->unknown04 = 0;
 
 		//Translate older ranks to new values* /
-		switch (emu->Rank)
+		switch (emu->rank)
 		{
 		case GUILD_SENIOR_MEMBER:
 		case GUILD_MEMBER:
@@ -2486,18 +2486,18 @@ namespace UF
 		case GUILD_INITIATE:
 		case GUILD_RECRUIT:
 		{
-			emu->Rank = GUILD_MEMBER_TI;
+			emu->rank = GUILD_MEMBER_TI;
 			break;
 		}
 		case GUILD_OFFICER:
 		case GUILD_SENIOR_OFFICER:
 		{
-			emu->Rank = GUILD_OFFICER_TI;
+			emu->rank = GUILD_OFFICER_TI;
 			break;
 		}
 		case GUILD_LEADER:
 		{
-			emu->Rank = GUILD_LEADER_TI;
+			emu->rank = GUILD_LEADER_TI;
 			break;
 		}
 		default:
@@ -2506,8 +2506,8 @@ namespace UF
 		}
 		}
 
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
 
 		FINISH_ENCODE();
 	}
@@ -3783,7 +3783,7 @@ namespace UF
 		IN(tribute_master_id);
 		IN(guild_id);
 
-		emu->Slot = UFToServerSlot(eq->Slot);
+		emu->slot = UFToServerSlot(eq->slot);
 
 		FINISH_DIRECT_DECODE();
 	}

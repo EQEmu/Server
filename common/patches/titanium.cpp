@@ -670,35 +670,35 @@ namespace Titanium
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->Unknown00 = 0;
-		eq->Unknown04 = 0;
+		eq->unknown00 = 0;
+		eq->unknown04 = 0;
 
 		//Translate older ranks to new values* /
-		switch (emu->Rank) {
+		switch (emu->rank) {
 		case GUILD_SENIOR_MEMBER:
 		case GUILD_MEMBER:
 		case GUILD_JUNIOR_MEMBER:
 		case GUILD_INITIATE:
 		case GUILD_RECRUIT:
 		{ 
-			eq->Rank = GUILD_MEMBER_TI;
+			eq->rank = GUILD_MEMBER_TI;
 			break; 
 		}
 		case GUILD_OFFICER:
 		case GUILD_SENIOR_OFFICER:
 		{ 
-			eq->Rank = GUILD_OFFICER_TI;
+			eq->rank = GUILD_OFFICER_TI;
 			break; 
 		}
 		case GUILD_LEADER: 
 		{ 
-			eq->Rank = GUILD_LEADER_TI;
+			eq->rank = GUILD_LEADER_TI;
 			break; 
 		}
 		}
 
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
 
 		FINISH_ENCODE();
 	}
@@ -2469,7 +2469,7 @@ namespace Titanium
 		IN(tribute_master_id);
 		IN(guild_id);
 
-		emu->Slot = TitaniumToServerSlot(eq->Slot);
+		emu->slot = TitaniumToServerSlot(eq->slot);
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -1767,9 +1767,9 @@ struct GuildSetRank_Struct
 {
 /*00*/	uint32	Unknown00;
 /*04*/	uint32	Unknown04;
-/*08*/	uint32	Rank;
-/*12*/	char	MemberName[64];
-/*76*/	uint32	Banker;
+/*08*/	uint32	rank;
+/*12*/	char	member_name[64];
+/*76*/	uint32	banker;
 /*80*/
 };
 
@@ -3651,11 +3651,11 @@ struct GuildTributeToggleReq_Struct {
 };
 
 struct GuildTributeDonateItemRequest_Struct {
-/*000*/    uint32 Type;
-/*004*/ uint16    Slot;
-/*006*/ uint16    SubIndex;
-/*008*/ uint16    AugIndex;
-/*010*/ uint16    Unknown10;
+/*000*/ uint32    type;
+/*004*/ uint16    slot;
+/*006*/ uint16    sub_index;
+/*008*/ uint16    aug_index;
+/*010*/ uint16    unknown10;
 /*012*/ uint32    quantity;
 /*016*/ uint32    tribute_master_id;
 /*020*/ uint32    unknown20;
@@ -3665,28 +3665,28 @@ struct GuildTributeDonateItemRequest_Struct {
 };
 
 struct GuildTributeDonateItemReply_Struct {
-/*000*/ uint32    Type;
-/*004*/ uint16    slot;
-/*006*/ uint16    SubIndex;
-/*008*/    uint16 AugIndex;
-/*010*/    uint16 unknown10;
-/*012*/ uint32    quantity;
-/*016*/ uint32    unknown20;
-/*020*/    uint32 favor;
+/*000*/ uint32 type;
+/*004*/ uint16 slot;
+/*006*/ uint16 sub_index;
+/*008*/ uint16 aug_index;
+/*010*/ uint16 unknown10;
+/*012*/ uint32 quantity;
+/*016*/ uint32 unknown20;
+/*020*/ uint32 favor;
 };
 
 struct GuildTributeDonatePlatRequest_Struct {
-/*000*/    uint32 quantity;
-/*004*/    uint32 tribute_master_id;
-/*008*/ uint32    unknown1;
-/*012*/    uint32 guild_id;
-/*016*/ uint32    unknown2;
+/*000*/ uint32 quantity;
+/*004*/ uint32 tribute_master_id;
+/*008*/ uint32 unknown08;
+/*012*/ uint32 guild_id;
+/*016*/ uint32 unknown16;
 };
 
 struct GuildTributeDonatePlatReply_Struct {
-	/*000*/ uint32    quantity;
-	/*004*/ uint32    unknown2;
-	/*008*/    uint32 favor;
+	/*000*/ uint32 quantity;
+	/*004*/ uint32 unknown4;
+	/*008*/ uint32 favor;
 };
 
 struct SelectTributeReply_Struct {

@@ -259,9 +259,9 @@ void Client::RefreshGuildInfo()
 
 			GuildSetRank_Struct *gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
 
-			gsrs->Rank = guildrank;
-			strn0cpy(gsrs->MemberName, GetName(), sizeof(gsrs->MemberName));
-			gsrs->Banker = GuildBanker;
+			gsrs->rank = guildrank;
+			strn0cpy(gsrs->member_name, GetName(), sizeof(gsrs->member_name));
+			gsrs->banker = GuildBanker;
 
 			FastQueuePacket(&outapp);
 		}

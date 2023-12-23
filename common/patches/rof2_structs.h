@@ -2012,11 +2012,11 @@ struct GuildBankClear_Struct
 };
 
 struct GuildTributeDonateItemRequest_Struct {
-	/*000*/	uint32	Type;
-	/*004*/ uint16 	Slot;
-	/*006*/ uint16 	SubIndex;
-	/*008*/ uint16 	AugIndex;
-	/*010*/ uint16 	Unknown10;
+	/*000*/	uint32	type;
+	/*004*/ uint16 	slot;
+	/*006*/ uint16 	sub_index;
+	/*008*/ uint16 	aug_index;
+	/*010*/ uint16 	unknown10;
 	/*012*/ uint32 	quantity;
 	/*016*/ uint32	tribute_master_id;
 	/*020*/ uint32 	unknown20;
@@ -2026,10 +2026,10 @@ struct GuildTributeDonateItemRequest_Struct {
 };
 
 struct GuildTributeDonateItemReply_Struct {
-	/*000*/ uint32	Type;
+	/*000*/ uint32	type;
 	/*004*/ uint16	slot;
-	/*006*/ uint16 	SubIndex;
-	/*008*/	uint16	AugIndex;
+	/*006*/ uint16 	sub_index;
+	/*008*/	uint16	aug_index;
 	/*010*/	uint16	unknown10;
 	/*012*/ uint32	quantity;
 	/*016*/ uint32	unknown20;
@@ -3625,11 +3625,11 @@ struct GuildMakeLeader {
 // Update a guild members rank and banker status
 struct GuildSetRank_Struct
 {
-/*00*/	uint32	GuildID;	// Was Unknown00
-/*04*/	uint32	Rank;
-/*08*/	char	MemberName[64];
-/*72*/	uint32	Banker;
-/*76*/	uint32	Unknown76;	// Seen 1 - Maybe Banker?
+/*00*/	uint32	guild_id;	// Was Unknown00
+/*04*/	uint32	rank;
+/*08*/	char	member_name[64];
+/*72*/	uint32	banker;
+/*76*/	uint32	unknown76;	// Seen 1 - Maybe Banker?
 /*80*/
 };
 
@@ -3747,15 +3747,15 @@ struct TributeItem_Struct
 
 struct TributePoint_Struct {
 	int32   tribute_points;
-	uint32   unknown04;
+	uint32  unknown04;
 	int32   career_tribute_points;
-	uint32   unknown12;
+	uint32  unknown12;
 };
 
 struct TributeMoney_Struct {
 	uint32   platinum;
 	uint32   tribute_master_id;
-	int32   tribute_points;
+	int32    tribute_points;
 };
 
 

@@ -1461,9 +1461,9 @@ namespace RoF2
 
 		Log(Logs::Detail, Logs::Netcode, "RoF2::ENCODE(OP_GuildTributeDonateItem)");
 
-		OUT(Type);
-		OUT(SubIndex);
-		OUT(AugIndex);
+		OUT(type);
+		OUT(sub_index);
+		OUT(aug_index);
 		OUT(quantity);
 		OUT(unknown10);
 		OUT(unknown20);
@@ -1473,7 +1473,7 @@ namespace RoF2
 		iss = ServerToRoF2Slot(emu->slot);
 
 		eq->slot = iss.Slot;
-		eq->SubIndex = iss.SubIndex;
+		eq->sub_index = iss.SubIndex;
 
 		FINISH_ENCODE();
 	}
@@ -3125,20 +3125,12 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->GuildID = emu->Unknown00;
+		eq->guild_id= emu->Unknown00;
+		eq->rank = emu->rank;
 
-		/* Translate older ranks to new values */
-		//switch (emu->Rank) {
-		//case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
-		//case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
-		//case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2
-		//default: { eq->Rank = emu->Rank; break; }
-		//}
-		eq->Rank = emu->Rank;
-
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
-		eq->Unknown76 = 1;
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
+		eq->unknown76 = 1;
 
 		FINISH_ENCODE();
 	}
@@ -5013,11 +5005,11 @@ namespace RoF2
 
 		Log(Logs::Detail, Logs::Netcode, "RoF2::DECODE(OP_GuildTributeDonateItem)");
 
-		IN(Type);
-		IN(Slot);
-		IN(SubIndex);
-		IN(AugIndex);
-		IN(Unknown10);
+		IN(type);
+		IN(slot);
+		IN(sub_index);
+		IN(aug_index);
+		IN(unknown10);
 		IN(quantity);
 		IN(tribute_master_id);
 		IN(unknown20);
@@ -5026,14 +5018,14 @@ namespace RoF2
 		IN(unknown32);
 
 		structs::InventorySlot_Struct iss;
-		iss.Slot = eq->Slot;
-		iss.SubIndex = eq->SubIndex;
-		iss.AugIndex = eq->AugIndex;
-		iss.Type = eq->Type;
+		iss.Slot = eq->slot;
+		iss.SubIndex = eq->sub_index;
+		iss.AugIndex = eq->aug_index;
+		iss.Type = eq->type;
 		iss.Unknown01 = 0;
 		iss.Unknown02 = 0;
 
-		emu->Slot = RoF2ToServerSlot(iss);
+		emu->slot = RoF2ToServerSlot(iss);
 
 		FINISH_DIRECT_DECODE();
 	}

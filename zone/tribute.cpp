@@ -590,14 +590,14 @@ void Client::SendGuildTributeDonateItemReply(GuildTributeDonateItemRequest_Struc
 	auto outapp = new EQApplicationPacket(OP_GuildTributeDonateItem, sizeof(GuildTributeDonateItemReply_Struct));
 	auto out = (GuildTributeDonateItemReply_Struct*)outapp->pBuffer;
 
-	out->Type = in->Type;
-	out->slot = in->Slot;
-	out->AugIndex = in->AugIndex;
-	out->SubIndex = in->SubIndex;
-	out->quantity = in->quantity;
-	out->unknown10 = in->Unknown10;
+	out->type      = in->type;
+	out->slot      = in->slot;
+	out->aug_index = in->aug_index;
+	out->sub_index = in->sub_index;
+	out->quantity  = in->quantity;
+	out->unknown10 = in->unknown10;
 	out->unknown20 = in->unknown20;
-	out->favor = favor;
+	out->favor     = favor;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);

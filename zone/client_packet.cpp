@@ -16834,7 +16834,7 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 
 	auto in = (GuildTributeDonateItemRequest_Struct*)app->pBuffer;
 
-	const auto* inst = GetInv().GetItem(in->Slot);
+	const auto* inst = GetInv().GetItem(in->slot);
 	auto favor = inst->GetItemGuildFavor() * in->quantity;
 
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
@@ -16847,10 +16847,10 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 			if (inst->GetCharges() < (int32)in->quantity) {
 				favor = 0;
 			}
-			DeleteItemInInventory(in->Slot, in->quantity, false, true);
+			DeleteItemInInventory(in->slot, in->quantity, false, true);
 		}
 		else {
-			DeleteItemInInventory(in->Slot, 0, false, true);
+			DeleteItemInInventory(in->slot, 0, false, true);
 		}
 
 		SendGuildTributeDonateItemReply(in, favor);

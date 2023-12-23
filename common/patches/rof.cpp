@@ -3051,19 +3051,12 @@ namespace RoF
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->GuildID = emu->Unknown00;
+		eq->guild_id = emu->Unknown00;
+		eq->rank = emu->rank;
 
-		/* Translate older ranks to new values */
-		switch (emu->Rank) {
-		case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
-		case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
-		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2
-		default: { eq->Rank = emu->Rank; break; }
-		}
-
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
-		eq->Unknown76 = 1;
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
+		eq->unknown76 = 1;
 
 		FINISH_ENCODE();
 	}

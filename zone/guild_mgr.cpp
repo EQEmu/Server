@@ -535,9 +535,9 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 			auto outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
 			GuildSetRank_Struct* gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
-			gsrs->Rank = sgrus->Rank;
-			strn0cpy(gsrs->MemberName, sgrus->MemberName, sizeof(gsrs->MemberName));
-			gsrs->Banker = sgrus->Banker;
+			gsrs->rank = sgrus->Rank;
+			strn0cpy(gsrs->member_name, sgrus->MemberName, sizeof(gsrs->member_name));
+			gsrs->banker = sgrus->Banker;
 			entity_list.QueueClientsGuild(outapp, sgrus->GuildID);
 
 			auto c = entity_list.GetClientByName(sgrus->MemberName);
