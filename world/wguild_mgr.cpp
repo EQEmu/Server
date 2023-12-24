@@ -277,8 +277,8 @@ void WorldGuildManager::Process() {
 			g.second->tribute.time_remaining = RuleI(Guild, TributeTime);
 			g.second->tribute.timer.Start(RuleI(Guild, TributeTime));
 
-			guild_mgr.DBSetGuildFavor(g.first, g.second->tribute.favor);
-			guild_mgr.DBSetTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
+			guild_mgr.UpdateDbGuildFavor(g.first, g.second->tribute.favor);
+			guild_mgr.UpdateDbTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
 
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
 
@@ -290,7 +290,7 @@ void WorldGuildManager::Process() {
 			g.second->tribute.send_timer = false;
 			g.second->tribute.time_remaining = g.second->tribute.timer.GetRemainingTime();
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.time_remaining);
-			guild_mgr.DBSetTributeTimeRemaining(g.first, g.second->tribute.time_remaining);
+			guild_mgr.UpdateDbTributeTimeRemaining(g.first, g.second->tribute.time_remaining);
 			LogGuilds("Timer Frequency [{}] ms hit\.  Sending time [{}] to guild clients\.",
 				RuleI(Guild, TributeTimeRefreshInterval),
 				g.second->tribute.time_remaining

@@ -403,7 +403,6 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		return members;
 	};
 	
-//	auto guild_bank_status = guild_mgr.GetGuildBankerStatus(guild_id, guild_rank);
 	for (auto const& c : g_members()) {
 		CharGuildInfo cgi;
 		guild_mgr.GetCharInfo(c->CharacterID(), cgi);
@@ -413,27 +412,12 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		sgrus->GuildID = guild_id;
 		sgrus->Rank = guild_rank;
 		strcpy(sgrus->MemberName, c->GetCleanName());
-		guild_mgr.DBSetBankerFlag(c->CharacterID(), bank_status);
+		guild_mgr.UpdateDbBankerFlag(c->CharacterID(), bank_status);
 		sgrus->Banker = (bank_status ? 1 : 0) + (cgi.alt ? 2 : 0);
 		sgrus->no_update = true;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp);
 	}
-	//	auto outapp = new EQApplicationPacket(OP_SetGuildRank, sizeof(GuildSetRank_Struct));
-	//	GuildSetRank_Struct* gsrs = (GuildSetRank_Struct*)outapp->pBuffer;
-	//	gsrs->Rank = c->GuildRank();
-	//	strn0cpy(gsrs->MemberName, c->GetCleanName(), sizeof(c->GetCleanName()));
-	//	if (guild_bank_status && !cgi.banker) {
-	//		guild_mgr.DBSetBankerFlag(c->CharacterID(), true);
-	//		gsrs->Banker = 1 + (cgi.alt ? 2 : 0);
-	//	}
-	//	else if (!guild_bank_status && cgi.banker) {
-	//		guild_mgr.DBSetBankerFlag(c->CharacterID(), true);
-	//		gsrs->Banker = 0 + (cgi.alt ? 2 : 0);
-	//	}
-	//	c->QueuePacket(outapp);
-	//	safe_delete(outapp);
-	//}
 }
 
 void Client::SetGuildRank(uint32 rank) 

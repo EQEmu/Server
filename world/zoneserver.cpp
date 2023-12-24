@@ -1593,9 +1593,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					LogInfo("Guild Tribute Timer Stopped with {} ms remaining.", data->time_remaining);
 					guild->tribute.timer.Disable();
 				}
-				guild_mgr.DBSetGuildTributeEnabled(data->guild_id, data->enabled);
-				guild_mgr.DBSetGuildFavor(data->guild_id, data->favor);
-				guild_mgr.DBSetTributeTimeRemaining(data->guild_id, data->time_remaining);
+				guild_mgr.UpdateDbGuildTributeEnabled(data->guild_id, data->enabled);
+				guild_mgr.UpdateDbGuildFavor(data->guild_id, data->favor);
+				guild_mgr.UpdateDbTributeTimeRemaining(data->guild_id, data->time_remaining);
 
 				for (auto const& z : zoneserver_list.getZoneServerList()) {
 					auto r = z.get();

@@ -1677,11 +1677,7 @@ void ZoneGuildManager::SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32
 
 void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string rank_name) 
 {
-	GuildRanksRepository::GuildRanks out;
-	out.guild_id = guild_id;
-	out.rank = rank;
-	out.title = rank_name;
-	GuildRanksRepository::UpdateTitle(*m_db, out);
+	GuildRanksRepository::UpdateTitle(*m_db, guild_id, rank, rank_name);
 }
 
 void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string rank_name)
@@ -1936,7 +1932,7 @@ void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, 
     m.public_note.clear();
 
 	GuildMembersRepository::InsertOne(*m_db, m);
-	DBSetMemberOnline(char_id, true);
+	UpdateDbMemberOnline(char_id, true);
 	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
 }
 

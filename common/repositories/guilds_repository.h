@@ -45,50 +45,17 @@ public:
 
 	 // Custom extended repository methods here
 
-	static int ReplaceOne(
-		Database& db,
-		const Guilds& e
-	)
-	{
-		std::vector<std::string> v;
-
-		auto columns = Columns();
-
-		v.push_back(std::to_string(e.id));
-		v.push_back("'" + Strings::Escape(e.name) + "'");
-		v.push_back(std::to_string(e.leader));
-		v.push_back(std::to_string(e.minstatus));
-		v.push_back("'" + Strings::Escape(e.motd) + "'");
-		v.push_back(std::to_string(e.tribute));
-		v.push_back("'" + Strings::Escape(e.motd_setter) + "'");
-		v.push_back("'" + Strings::Escape(e.channel) + "'");
-		v.push_back("'" + Strings::Escape(e.url) + "'");
-		v.push_back(std::to_string(e.favor));
-
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"REPLACE INTO {} ({}) VALUES({})",
-				TableName(),
-				ColumnsRaw(),
-				Strings::Implode(", ", v)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
 	static int UpdateFavor(Database& db, uint32 guild_id, uint32 favor)
 	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET `favor` = '{}' WHERE `id` = {}",
-				TableName(),
-				favor,
-				guild_id
-				)
-		);
+        auto const guild = GetWhere(db, fmt::format("guild_id = '{}'", guild_id));
+        if (guild.empty()) {
+            return 0;
+        }
 
-		return (results.Success() ? results.RowsAffected() : 0);
+        auto g = guild[0];
+        g.favor = favor;
+
+        return UpdateOne(db, g);
 	}
 };
 

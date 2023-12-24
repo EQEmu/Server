@@ -544,7 +544,7 @@ void Client::CompleteConnect()
 	LoadClientTaskState();
 
 	if (IsInAGuild()) {
-		guild_mgr.DBSetMemberOnline(CharacterID(), true);
+		guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 		uint8 rank = GuildRank();
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
@@ -16719,7 +16719,7 @@ void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app)
 	CharGuildInfo gci;
 	guild_mgr.GetCharInfo(in->player, gci);
 
-	guild_mgr.DBSetMemberTributeEnabled(GuildID(), gci.char_id, in->tribute_toggle);
+	guild_mgr.UpdateDbMemberTributeEnabled(GuildID(), gci.char_id, in->tribute_toggle);
 
 	ServerPacket* sout = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
 	GuildTributeMemberToggle* out = (GuildTributeMemberToggle*)sout->pBuffer;
@@ -16851,8 +16851,8 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
 		guild->tribute.favor += favor;
-		guild_mgr.DBSetGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
+		guild_mgr.UpdateDbGuildFavor(GuildID(), guild->tribute.favor);
+		auto member_favor = guild_mgr.UpdateDbMemberFavor(GuildID(), CharacterID(), favor);
 
 		if (inst->IsStackable()) {
 			if (inst->GetCharges() < (int32)in->quantity) {
@@ -16906,8 +16906,8 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
 		guild->tribute.favor += favor;
-		guild_mgr.DBSetGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.DBSetMemberFavor(GuildID(), CharacterID(), favor);
+		guild_mgr.UpdateDbGuildFavor(GuildID(), guild->tribute.favor);
+		auto member_favor = guild_mgr.UpdateDbMemberFavor(GuildID(), CharacterID(), favor);
 
 		TakePlatinum(quantity, false);
 		SendGuildTributeDonatePlatReply(in, favor);

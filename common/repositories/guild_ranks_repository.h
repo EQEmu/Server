@@ -45,85 +45,20 @@ public:
 
 	// Custom extended repository methods here
 	
-	static int ReplaceOne(
-		Database& db,
-		const GuildRanks& e
-	)
+	static int UpdateTitle(Database& db, uint32 guild_id, uint32 rank, std::string title)
 	{
-		std::vector<std::string> v;
+        auto guild_rank = GetWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
+        if (guild_rank.empty()) {
+            return 0;
+        }
 
-		std::vector<std::string> columns = { "guild_id", "rank", "title"};
+        auto r = guild_rank[0];
+        r.title = title;
 
-		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.rank));
-		v.push_back("'" + Strings::Escape(e.title) + "'");
+        DeleteWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
+        InsertOne(db, r);
 
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"REPLACE INTO {} ({}) VALUES({})",
-				TableName(),
-				Strings::Implode(", ", columns),
-				Strings::Implode(", ", v)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int ReplaceMany(
-		Database& db,
-		const std::vector<GuildRanks>& entries
-	)
-	{
-		std::vector<std::string> insert_chunks;
-		std::vector<std::string> columns = { "guild_id", "rank", "title" };
-
-		for (auto& e : entries) {
-			std::vector<std::string> v;
-
-			v.push_back(std::to_string(e.guild_id));
-			v.push_back(std::to_string(e.rank));
-			v.push_back("'" + Strings::Escape(e.title) + "'");
-
-			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
-		}
-
-		std::vector<std::string> v;
-
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"REPLACE INTO {} ({}) VALUES{}",
-				TableName(),
-				Strings::Implode(", ", columns),
-				Strings::Implode(", ", insert_chunks)
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
-	}
-
-	static int UpdateTitle(
-		Database& db,
-		const GuildRanks& e
-	)
-	{
-		std::vector<std::string> v;
-
-		auto columns = Columns();
-		
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
-
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE {} SET {} WHERE `guild_id` = {} AND `rank` = {}",
-				TableName(),
-				Strings::Implode(", ", v),
-				e.guild_id,
-				e.rank
-			)
-		);
-
-		return (results.Success() ? results.RowsAffected() : 0);
+        return 1;
 	}
 };
 

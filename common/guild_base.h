@@ -7,8 +7,7 @@
 #include <vector>
 #include "timer.h"
 #include "../common/repositories/guild_members_repository.h"
-
-#define GOUT(x) out.x = in->x;
+#include "../common/repositories/guilds_repository.h"
 
 struct DefaultPermissionStruct {
 	GuildAction id;
@@ -36,11 +35,11 @@ class TributeData {
 public:
 	//this level data stored in regular byte order and must be flipped before sending
 	TributeLevel_Struct tiers[MAX_TRIBUTE_TIERS];
-	uint8 tier_count;
-	uint32 unknown;
+	uint8       tier_count;
+	uint32      unknown;
 	std::string name;
 	std::string description;
-	bool is_guild;	//is a guild tribute item
+	bool        is_guild;	//is a guild tribute item
 };
 
 class Database;
@@ -49,23 +48,23 @@ class CharGuildInfo
 {
 	public:
 		//fields from `characer_`
-		uint32	char_id;
+		uint32	    char_id;
 		std::string	char_name;
-		uint8	class_;
-		uint16	level;
-		uint32	time_last_on;
-		uint32	zone_id;
+		uint8	    class_;
+		uint16	    level;
+		uint32	    time_last_on;
+		uint32	    zone_id;
 
 		//fields from `guild_members`
-		uint32	guild_id;
-		uint8	rank;
-		bool	tribute_enable;
-		uint32	total_tribute;
-		uint32	last_tribute;		//timestamp
-		bool	banker;
-		bool	alt;
+		uint32	    guild_id;
+		uint8	    rank;
+		bool	    tribute_enable;
+		uint32	    total_tribute;
+		uint32	    last_tribute;		//timestamp
+		bool	    banker;
+		bool	    alt;
 		std::string	public_note;
-		bool	online;
+		bool	    online;
 };
 
 //this object holds guild functionality shared between world and zone.
@@ -105,12 +104,12 @@ class BaseGuildManager
 		bool    GetGuildBankerStatus(uint32 guild_id, uint32 guild_rank);
 		bool	SetTributeFlag(uint32 charid, bool enabled);
 		bool	SetPublicNote(uint32 charid, std::string public_note);
-		uint32  DBSetGuildFavor(uint32 guild_id, uint32 enabled);
-		bool    DBSetGuildTributeEnabled(uint32 guild_id, uint32 enabled);
-		bool    DBSetMemberTributeEnabled(uint32 guild_id, uint32 char_id, uint32 enabled);
-		bool    DBSetTributeTimeRemaining(uint32 guild_id, uint32 enabled);
-		uint32	DBSetMemberFavor(uint32 guild_id, uint32 char_id, uint32 favor);
-		bool    DBSetMemberOnline(uint32 char_id, bool status);
+		uint32  UpdateDbGuildFavor(uint32 guild_id, uint32 enabled);
+		bool    UpdateDbGuildTributeEnabled(uint32 guild_id, uint32 enabled);
+		bool    UpdateDbMemberTributeEnabled(uint32 guild_id, uint32 char_id, uint32 enabled);
+		bool    UpdateDbTributeTimeRemaining(uint32 guild_id, uint32 enabled);
+		uint32	UpdateDbMemberFavor(uint32 guild_id, uint32 char_id, uint32 favor);
+		bool    UpdateDbMemberOnline(uint32 char_id, bool status);
 
 		//queries
 		bool	GetCharInfo(const char *char_name, CharGuildInfo &into);
@@ -120,31 +119,24 @@ class BaseGuildManager
 		bool	GetGuildMOTD(uint32 guild_id, char *motd_buffer, char *setter_buffer) const;
 		bool	GetGuildURL(uint32 GuildID, char *URLBuffer) const;
 		bool	GetGuildChannel(uint32 GuildID, char *ChannelBuffer) const;
-		const char *GetRankName(uint32 guild_id, uint8 rank) const;
-		const char *GetGuildName(uint32 guild_id) const;
-		std::string GetGuildNameByID(uint32 guild_id) const;
-		std::string GetGuildRankName(uint32 guild_id, uint8 rank) const;
-		bool IsCharacterInGuild(uint32 character_id, uint32 guild_id = 0);
-		bool	GetGuildNameByID(uint32 guild_id, std::string &into) const;
-		uint32	GetGuildIDByName(const char *GuildName);
-		uint32 GetGuildIDByCharacterID(uint32 character_id);
-		bool	IsGuildLeader(uint32 guild_id, uint32 char_id) const;
-		uint8	GetDisplayedRank(uint32 guild_id, uint8 rank, uint32 char_id) const;
-		bool	CheckGMStatus(uint32 guild_id, uint8 status) const;
-		bool	CheckPermission(uint32 guild_id, uint8 rank, GuildAction act) const;
-		std::vector<BaseGuildMembersRepository::GuildMembers> GetGuildMembers(uint32 guild_id);
-//	uint32	Getguild_id(uint32 eqid);
-		uint32	FindGuildByLeader(uint32 leader) const;
-//	void	GetGuildMembers(uint32 guild_id,GuildMember_Struct* gms);
-		uint32	NumberInGuild(uint32 guild_id);
-//	bool	GetGuildRanks(uint32 guildeqid, GuildRanks_Struct* gr);
-//	bool	EditGuild(uint32 guild_id, uint8 ranknum, GuildRankLevel_Struct* grl);
-
-		uint8 *MakeGuildList(const char *head_name, uint32 &length) const;	//make a guild list packet, returns ownership of the buffer.
-
-//		static const char *const GuildActionNames[_MaxGuildAction];
-		uint32	DoesAccountContainAGuildLeader(uint32 AccountID);
-		bool	DBSetBankerFlag(uint32 charid, bool is_banker);
+        bool    IsCharacterInGuild(uint32 character_id, uint32 guild_id = 0);
+        bool	GetGuildNameByID(uint32 guild_id, std::string& into) const;
+        bool	IsGuildLeader(uint32 guild_id, uint32 char_id) const;
+        bool	CheckGMStatus(uint32 guild_id, uint8 status) const;
+        bool	CheckPermission(uint32 guild_id, uint8 rank, GuildAction act) const;
+        bool	UpdateDbBankerFlag(uint32 charid, bool is_banker);
+        uint8*  MakeGuildList(const char* head_name, uint32& length) const;	//make a guild list packet, returns ownership of the buffer.
+        uint8	GetDisplayedRank(uint32 guild_id, uint8 rank, uint32 char_id) const;
+        uint32	GetGuildIDByName(const char *GuildName);
+		uint32  GetGuildIDByCharacterID(uint32 character_id);
+        uint32	FindGuildByLeader(uint32 leader) const;
+        uint32	NumberInGuild(uint32 guild_id);
+        uint32	DoesAccountContainAGuildLeader(uint32 AccountID);
+        const char* GetRankName(uint32 guild_id, uint8 rank) const;
+        const char* GetGuildName(uint32 guild_id) const;
+        std::string GetGuildNameByID(uint32 guild_id) const;
+        std::string GetGuildRankName(uint32 guild_id, uint8 rank) const;
+        std::vector<BaseGuildMembersRepository::GuildMembers> GetGuildMembers(uint32 guild_id);
 
 	protected:
 		//the methods which must be defined by base classes.
@@ -153,21 +145,19 @@ class BaseGuildManager
 		virtual void SendRankUpdate(uint32 CharID) = 0;
 		virtual void SendGuildDelete(uint32 guild_id) = 0;
 
-		uint32	DBCreateGuild(std::string name, uint32 leader_char_id);
-		bool    DBDeleteGuild(uint32 guild_id, bool local_delete = true, bool db_delete = true);
-		bool	DBRenameGuild(uint32 guild_id, std::string name);
-		bool	DBSetGuildLeader(uint32 guild_id, uint32 leader_char_id);
-		bool	DBSetGuildMOTD(uint32 guild_id, std::string motd, std::string setter);
-		bool	DBSetGuildURL(uint32 GuildID, std::string URL);
-		bool	DBSetGuildChannel(uint32 GuildID, std::string Channel);
-		bool	DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank);
-		bool	DBSetGuildRank(uint32 charid, uint8 rank);
-		bool	DBSetAltFlag(uint32 charid, bool is_alt);
-		bool	DBSetTributeFlag(uint32 charid, bool enabled);
-		bool	DBSetPublicNote(uint32 charid, std::string public_note);
+		uint32	UpdateDbCreateGuild(std::string name, uint32 leader_char_id);
+		bool    UpdateDbDeleteGuild(uint32 guild_id, bool local_delete = true, bool db_delete = true);
+		bool	UpdateDbRenameGuild(uint32 guild_id, std::string name);
+		bool	UpdateDbGuildLeader(uint32 guild_id, uint32 leader_char_id);
+		bool	UpdateDbGuildMOTD(uint32 guild_id, std::string motd, std::string setter);
+		bool	UpdateDbGuildURL(uint32 GuildID, std::string URL);
+		bool	UpdateDbGuildChannel(uint32 GuildID, std::string Channel);
+		bool	UpdateDbGuild(uint32 charid, uint32 guild_id, uint8 rank);
+		bool	UpdateDbGuildRank(uint32 charid, uint8 rank);
+		bool	UpdateDbAltFlag(uint32 charid, bool is_alt);
+		bool	UpdateDbTributeFlag(uint32 charid, bool enabled);
+		bool	UpdateDbPublicNote(uint32 charid, std::string public_note);
 		bool	QueryWithLogging(std::string query, const char *errmsg);
-//	void	DBSetPublicNote(uint32 guild_id,char* charname, char* note);
-
 		bool	LocalDeleteGuild(uint32 guild_id);
 
 		struct RankInfo
@@ -208,10 +198,8 @@ class BaseGuildManager
 		bool _StoreGuildDB(uint32 guild_id);
 		GuildInfo* _CreateGuild(uint32 guild_id, std::string& guild_name, uint32 leader_char_id, uint8 minstatus, std::string& guild_motd, std::string& motd_setter, std::string& Channel, std::string& URL, uint32 favour);
 		uint32 _GetFreeGuildID();
-
+        BaseGuildsRepository::Guilds CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in);
 };
-
-
 #endif /*GUILD_BASE_H_*/
 
 

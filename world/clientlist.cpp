@@ -1761,43 +1761,9 @@ std::map<uint32, ClientListEntry *> ClientList::GetGuildClientsWithTributeOptIn(
 	while (Iterator.MoreElements()) {
 		auto c = Iterator.GetData();
 		if (c->GuildID() == guild_id && c->GuildTributeOptIn()) {
-			//guild_members.push_back(FindByAccountID(c->AccountID()));
 			guild_members.emplace(c->CharID(), c);
 		}
 		Iterator.Advance();
 	}
 	return guild_members;
 }
-
-std::map<uint32, ClientListEntry *> ClientList::GetGuildClientList(uint32 guild_id)
-{
-	std::map<uint32, ClientListEntry *> guild_members;
-
-	LinkedListIterator<ClientListEntry *> Iterator(clientlist);
-	Iterator.Reset();
-
-	while (Iterator.MoreElements()) {
-		auto c = Iterator.GetData();
-		if (c->GuildID() == guild_id) {
-			//guild_members.push_back(FindByAccountID(c->AccountID()));
-			guild_members.emplace(c->CharID(), c);
-		}
-		Iterator.Advance();
-	}
-	return guild_members;
-}
-
-//Client* ClientList::GetClient(uint32 char_id)
-//{
-//	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
-//	Iterator.Reset();
-//
-//	while (Iterator.MoreElements()) {
-//		auto c = Iterator.GetData();
-//		if (c->CharID() == char_id) {
-//			return FindByAccountID(c->AccountID());
-//		}
-//		Iterator.Advance();
-//	}
-//	return nullptr;
-//}
