@@ -237,8 +237,10 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		break;
 	}
 	case ServerOP_GuildMemberLevelUpdate:
-	case ServerOP_GuildMemberPublicNote:
-	case ServerOP_GuildMemberRemove:
+    case ServerOP_GuildMemberPublicNote:
+    case ServerOP_GuildChannel:
+    case ServerOP_GuildURL:
+    case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
 	{
 		for (auto const& z : zoneserver_list.getZoneServerList()) {
@@ -403,7 +405,7 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 	}
 
 	LogGuilds("Found guild id [{}].  Loading details.....", db_guild.id);
-	_CreateGuild(db_guild.id, db_guild.name.c_str(), db_guild.leader, db_guild.minstatus, db_guild.motd.c_str(), db_guild.motd_setter.c_str(), db_guild.channel.c_str(), db_guild.url.c_str(), db_guild.favor);
+	_CreateGuild(db_guild.id, db_guild.name, db_guild.leader, db_guild.minstatus, db_guild.motd, db_guild.motd_setter, db_guild.channel, db_guild.url, db_guild.favor);
 	auto guild = GetGuildByGuildID(guild_id);
 	auto where_filter = fmt::format("guild_id = '{}'", guild_id);
 	auto guild_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);

@@ -75,7 +75,7 @@ void Client::SendGuildURL()
 
 		if(guild_mgr.GetGuildURL(GuildID(), guuacs->Text))
 		{
-			guuacs->Action = 0;
+			guuacs->Action = GuildUpdateURL;
 			FastQueuePacket(&outapp);
 		}
 		else
@@ -97,7 +97,7 @@ void Client::SendGuildChannel()
 
 		if(guild_mgr.GetGuildChannel(GuildID(), guuacs->Text))
 		{
-			guuacs->Action = 1;
+			guuacs->Action = GuildUpdateChannel;
 
 			FastQueuePacket(&outapp);
 		}
@@ -111,8 +111,8 @@ void Client::SendGuildRanks()
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF)
 		return;
 
-	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
-	int ranks = 8 + 1; // Static number of RoF+ ranks as of May 2014
+	int permissions = GUILD_MAX_FUNCTIONS + 1; //Static number of permissions in all EQ clients as of May 2014
+	int ranks = GUILD_RECRUIT + 1; // Static number of RoF+ ranks as of May 2014
 	int j = 1;
 	int i = 1;
 	if(IsInAGuild())
@@ -126,7 +126,7 @@ void Client::SendGuildRanks()
 					GuildUpdateRanks_Struct* guuacs = (GuildUpdateRanks_Struct*)outapp->pBuffer;
 					//guuacs->Unknown0008 = GuildID();
 					strncpy(guuacs->Unknown0012, GetCleanName(), 64);
-					guuacs->Action = 5;
+					guuacs->Action = GuildUpdatePermissions;
 					guuacs->RankID = j;
 					guuacs->GuildID = GuildID();
 					guuacs->PermissionID = i;
@@ -151,8 +151,8 @@ void Client::SendGuildRankNames()
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
 		for (int i = 1; i <= 8; i++)
 		{
-			auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
-			GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
+			auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
+			GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 
 			gucp->payload.rank_name.rank = i;
 			strcpy(gucp->payload.rank_name.rank_name, guild->rank_names[i].c_str());

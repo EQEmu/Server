@@ -746,8 +746,8 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 			if (guild) {
 				guild->rank_names[s->rank] = s->rank_name;
 
-				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
-				GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
+				auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
+				GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 				gucp->payload.rank_name.rank = s->rank;
 				strcpy(gucp->payload.rank_name.rank_name, s->rank_name);
 				gucp->action = 4;
@@ -776,7 +776,25 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 		}
 		break;
 	}
-	case ServerOP_GuildMemberRemove:
+    case ServerOP_GuildChannel:
+    {
+        if (is_zone_loaded)
+        {
+            auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+            entity_list.SendGuildChannel(s_in->guild_id);
+        }
+        break;
+    }
+    case ServerOP_GuildURL:
+    {
+        if (is_zone_loaded)
+        {
+            auto s_in = (ServerOP_GuildMessage_Struct*)pack->pBuffer;
+            entity_list.SendGuildURL(s_in->guild_id);
+        }
+        break;
+    }
+    case ServerOP_GuildMemberRemove:
 	{
 		if (is_zone_loaded)
 		{
@@ -1684,8 +1702,8 @@ void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
 	auto c = entity_list.GetClientByCharID(char_id);
 	if (c)
 	{
-		auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCP));
-		GuildUpdateUCP* gucp = (GuildUpdateUCP*)outapp->pBuffer;
+		auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
+		GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 		for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++)
 		{
 			gucp->payload.rank_name.rank = i;
@@ -1823,10 +1841,12 @@ void ZoneGuildManager::SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 leve
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberLevelUpdate, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	s_out->guild_id = guild_id;
+	
+    s_out->guild_id     = guild_id;
 	s_out->player_level = level;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	worldserver.SendPacket(s_outapp);
+	
+    worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
 
@@ -1834,20 +1854,48 @@ void ZoneGuildManager::SendToWorldMemberPublicNote(uint32 guild_id, std::string 
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberPublicNote, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	s_out->guild_id = guild_id;
+	
+    s_out->guild_id = guild_id;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
 	strn0cpy(s_out->note, public_note.c_str(), sizeof(s_out->note));
-	worldserver.SendPacket(s_outapp);
+	
+    worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
+}
+
+void ZoneGuildManager::SendToWorldGuildChannel(uint32 guild_id, std::string channel)
+{
+    auto s_outapp = new ServerPacket(ServerOP_GuildChannel, sizeof(ServerOP_GuildMessage_Struct));
+    ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+
+    s_out->guild_id = guild_id;
+    strn0cpy(s_out->channel, channel.c_str(), sizeof(s_out->channel));
+
+    worldserver.SendPacket(s_outapp);
+    safe_delete(s_outapp);
+}
+
+void ZoneGuildManager::SendToWorldGuildURL(uint32 guild_id, std::string url)
+{
+    auto s_outapp = new ServerPacket(ServerOP_GuildURL, sizeof(ServerOP_GuildMessage_Struct));
+    ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+
+    s_out->guild_id = guild_id;
+    strn0cpy(s_out->url, url.c_str(), sizeof(s_out->url));
+
+    worldserver.SendPacket(s_outapp);
+    safe_delete(s_outapp);
 }
 
 void ZoneGuildManager::SendToWorldMemberRemove(uint32 guild_id, std::string player_name)
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberRemove, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	s_out->guild_id = guild_id;
+	
+    s_out->guild_id = guild_id;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	worldserver.SendPacket(s_outapp);
+	
+    worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
 
@@ -1855,13 +1903,15 @@ void ZoneGuildManager::SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uin
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberAdd, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	s_out->guild_id = guild_id;
-	s_out->player_level = level;
-	s_out->player_rank = rank;
+	
+    s_out->guild_id       = guild_id;
+	s_out->player_level   = level;
+	s_out->player_rank    = rank;
 	s_out->player_zone_id = zone_id;
-	s_out->player_class = _class;
+	s_out->player_class   = _class;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	worldserver.SendPacket(s_outapp);
+	
+    worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
 
@@ -1877,13 +1927,13 @@ void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, 
 	BaseGuildMembersRepository::GuildMembers m;
 	m.alt            = 0;
 	m.banker         = 0;
-	m.char_id        = char_id;
-	m.guild_id       = guild_id;
 	m.last_tribute   = 0;
-	m.rank           = rank;
-	m.total_tribute  = 0;
-	m.tribute_enable = 0;
-	m.public_note.clear();
+    m.total_tribute  = 0;
+    m.tribute_enable = 0;
+    m.rank           = rank;
+    m.char_id        = char_id;
+    m.guild_id       = guild_id;
+    m.public_note.clear();
 
 	GuildMembersRepository::InsertOne(*m_db, m);
 	DBSetMemberOnline(char_id, true);

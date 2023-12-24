@@ -1754,6 +1754,14 @@ struct PopupResponse_Struct {
 /*0004*/	uint32	popupid;
 };
 
+enum GuildInformationActions
+{
+    GuildUpdateURL          = 0,
+    GuildUpdateChannel      = 1,
+    GuildUpdateRanks        = 4,
+    GuildUpdatePermissions  = 5
+};
+
 struct GuildManageBanker_Struct {
 	uint32 unknown0;
 	char myname[64];
@@ -3357,29 +3365,29 @@ struct GuildUpdate_PublicNote{
 	char	note[256];
 };
 
-struct GuildUpdateURLAndChannel {
+struct GuildUpdateURLAndChannelStruct {
 	char text[512];
 };
 
-struct GuildUpdatePermissions {
+struct GuildUpdatePermissionsStruct {
 	uint32	rank;				// the rank that is being changed
 	uint32	function_id;		// the id of the guild function
 	uint32	value;				// 1 is on, 0 is off
 
 };
 
-struct GuildUpdateRankNames {
+struct GuildUpdateRankNamesStruct {
 	uint32	rank;				// the rank that is being updated
 	char	rank_name[76];		// the rank name
 };
 
-struct GuildUpdateUCP {
+struct GuildUpdateUCPStruct {
 	uint32	action;				// 0 and 1 use url and channel payload.  5 uses permissions payload
 	char	unknown[76];
 	union {
-		GuildUpdateURLAndChannel url_channel;
-		GuildUpdatePermissions permissions;
-		GuildUpdateRankNames rank_name;
+		GuildUpdateURLAndChannelStruct  url_channel;
+		GuildUpdatePermissionsStruct    permissions;
+		GuildUpdateRankNamesStruct      rank_name;
 	}payload;
 };
 
@@ -3408,7 +3416,7 @@ struct GuildUpdateURLAndChannel_Struct
 //The client sends this struct on changing a guild rank. The server sends each rank in 32 or less packets upon zonein if you are in a guild.
 struct GuildUpdateRanks_Struct
 {
-/*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel, 5 = RoF Ranks
+/*0000*/	uint32	Action;	// 0 = Update URL, 1 = Update Channel, 4 = Ranks 5 = Permissions
 /*0004*/	uint32	Unknown0004; //Seen 00 00 00 00
 /*0008*/	uint32	Unknown0008; //Seen 96 29 00 00
 /*0008*/	char	Unknown0012[64]; //Seen "CharacterName"

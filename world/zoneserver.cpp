@@ -985,7 +985,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RefreshGuild: 
 		case ServerOP_GuildMemberLevelUpdate: 
 		case ServerOP_GuildMemberPublicNote:
-		case ServerOP_GuildMemberRemove:
+        case ServerOP_GuildChannel:
+        case ServerOP_GuildURL:
+        case ServerOP_GuildMemberRemove:
 		case ServerOP_GuildMemberAdd:
 		{
 			guild_mgr.ProcessZonePacket(pack);

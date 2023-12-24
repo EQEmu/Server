@@ -8589,11 +8589,25 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 	if (!IsInAGuild())
 		return;
 
-	GuildUpdateUCP* gup = (GuildUpdateUCP*)app->pBuffer;
+	GuildUpdateUCPStruct* gup = (GuildUpdateUCPStruct*)app->pBuffer;
 
 	switch (gup->action) {
-	case 0:
-	case 1: {
+	case GuildUpdateURL:
+    {
+        if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
+        {
+            LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
+            DumpPacket(app);
+            return;
+        }
+
+        guild_mgr.SetGuildURL(GuildID(), gup->payload.url_channel.text);
+        guild_mgr.SendToWorldGuildURL(GuildID(), gup->payload.url_channel.text);
+
+        break;
+    }
+    case GuildUpdateChannel:
+    {
 		if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
 		{
 			LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
@@ -8601,15 +8615,12 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 			return;
 		}
 
-		if (gup->action == 0) {
-			guild_mgr.SetGuildURL(GuildID(), gup->payload.url_channel.text);
-		}
-		else if (gup->action) {
-			guild_mgr.SetGuildChannel(GuildID(), gup->payload.url_channel.text);
-		}
-		break;
+        guild_mgr.SetGuildChannel(GuildID(), gup->payload.url_channel.text);
+        guild_mgr.SendToWorldGuildChannel(GuildID(), gup->payload.url_channel.text);
+        break;
 	}
-	case 4: {
+	case GuildUpdateRanks: 
+    {
 		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_RANK_NAMES)) {
 			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
 			return;
@@ -8626,7 +8637,7 @@ void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 
 		break;
 	}
-	case 5:
+	case GuildUpdatePermissions:
 	{
 		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_PERMISSIONS)) {
 			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);

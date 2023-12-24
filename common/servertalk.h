@@ -107,6 +107,8 @@
 #define ServerOP_GuildMemberPublicNote            0x0079
 #define ServerOP_GuildMemberRemove                0x007A
 #define ServerOP_GuildMemberAdd                   0x007B
+#define ServerOP_GuildChannel                     0x007C
+#define ServerOP_GuildURL                         0x007D
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -1922,6 +1924,8 @@ struct ServerOP_GuildMessage_Struct {
 	char   player_new_name[64]{0};
 	char   new_guild_name[64]{0};
 	char   note[256]{0};
+    char   channel[2048]{0};
+    char   url[2048]{0};
 };
 
 #pragma pack()
