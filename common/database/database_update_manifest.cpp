@@ -5202,7 +5202,18 @@ ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
 				ADD COLUMN `online` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `alt`;
 
 			ALTER TABLE `guilds`
-				ADD COLUMN `favor` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `url`;				
+				ADD COLUMN `favor` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `url`;
+
+			CREATE TABLE guild_tributes (
+			  guild_id int(11) unsigned NOT NULL DEFAULT 0,
+			  tribute_id_1 int(11) unsigned NOT NULL DEFAULT 0,
+			  tribute_id_1_tier int(11) unsigned NOT NULL DEFAULT 0,
+			  tribute_id_2 int(11) unsigned NOT NULL DEFAULT 0,
+			  tribute_id_2_tier int(11) unsigned NOT NULL DEFAULT 0,
+			  time_remaining int(11) unsigned NOT NULL DEFAULT 0,
+			  enabled int(11) unsigned NOT NULL DEFAULT 0,
+			  PRIMARY KEY (guild_id) USING BTREE
+			) ENGINE=InnoDB;
 			)"
 	}
 // -- template; copy/paste this when you need to create a new entry

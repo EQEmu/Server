@@ -148,6 +148,7 @@ namespace DatabaseSchema {
 			"guild_members",
 			"guild_ranks",
 			"guild_relations",
+			"guild_tributes",
 			"guilds",
 			"instance_list_player",
 			"inventory",
