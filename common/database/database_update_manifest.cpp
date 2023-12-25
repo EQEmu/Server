@@ -5163,57 +5163,57 @@ ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-			CREATE TABLE `guild_permissions` (
-				`id` INT(11) NOT NULL AUTO_INCREMENT,
-				`perm_id` INT(11) NOT NULL DEFAULT '0',
-				`guild_id` INT(11) NOT NULL DEFAULT '0',
-				`permission` INT(11) NOT NULL DEFAULT '0',
-				PRIMARY KEY (`id`) USING BTREE
-			)
-			ENGINE=InnoDB
-			AUTO_INCREMENT=1
-			;
-			UPDATE guild_ranks SET title = 'Leader' WHERE `rank` = '1';
-			UPDATE guild_ranks SET title = 'Senior Officer' WHERE `rank` = '2';
-			UPDATE guild_ranks SET title = 'Officer' WHERE `rank` = '3';
-			UPDATE guild_ranks SET title = 'Senior Member' WHERE `rank` = '4';
-			UPDATE guild_ranks SET title = 'Member' WHERE `rank` = '5';
-			UPDATE guild_ranks SET title = 'Junior Member' WHERE `rank` = '6';
-			UPDATE guild_ranks SET title = 'Initiate' WHERE `rank` = '7';
-			UPDATE guild_ranks SET title = 'Recruit' WHERE `rank` = '8';
+CREATE TABLE `guild_permissions` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`perm_id` INT(11) NOT NULL DEFAULT '0',
+	`guild_id` INT(11) NOT NULL DEFAULT '0',
+	`permission` INT(11) NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE
+)
+ENGINE=InnoDB
+AUTO_INCREMENT=1;
 
-			DELETE FROM guild_ranks WHERE `rank` = 0;
+UPDATE guild_ranks SET title = 'Leader' WHERE `rank` = '1';
+UPDATE guild_ranks SET title = 'Senior Officer' WHERE `rank` = '2';
+UPDATE guild_ranks SET title = 'Officer' WHERE `rank` = '3';
+UPDATE guild_ranks SET title = 'Senior Member' WHERE `rank` = '4';
+UPDATE guild_ranks SET title = 'Member' WHERE `rank` = '5';
+UPDATE guild_ranks SET title = 'Junior Member' WHERE `rank` = '6';
+UPDATE guild_ranks SET title = 'Initiate' WHERE `rank` = '7';
+UPDATE guild_ranks SET title = 'Recruit' WHERE `rank` = '8';
 
-			ALTER TABLE `guild_ranks`
-				DROP COLUMN `can_hear`,
-				DROP COLUMN `can_speak`,
-				DROP COLUMN `can_invite`,
-				DROP COLUMN `can_remove`,
-				DROP COLUMN `can_promote`,
-				DROP COLUMN `can_demote`,
-				DROP COLUMN `can_motd`,
-				DROP COLUMN `can_warpeace`;
+DELETE FROM guild_ranks WHERE `rank` = 0;
 
-			UPDATE guild_members SET `rank` = '5' WHERE `rank` = '0';
-			UPDATE guild_members SET `rank` = '3' WHERE `rank` = '1';
-			UPDATE guild_members SET `rank` = '1' WHERE `rank` = '2';
+ALTER TABLE `guild_ranks`
+	DROP COLUMN `can_hear`,
+	DROP COLUMN `can_speak`,
+	DROP COLUMN `can_invite`,
+	DROP COLUMN `can_remove`,
+	DROP COLUMN `can_promote`,
+	DROP COLUMN `can_demote`,
+	DROP COLUMN `can_motd`,
+	DROP COLUMN `can_warpeace`;
 
-			ALTER TABLE `guild_members`
-				ADD COLUMN `online` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `alt`;
+UPDATE guild_members SET `rank` = '5' WHERE `rank` = '0';
+UPDATE guild_members SET `rank` = '3' WHERE `rank` = '1';
+UPDATE guild_members SET `rank` = '1' WHERE `rank` = '2';
 
-			ALTER TABLE `guilds`
-				ADD COLUMN `favor` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `url`;
+ALTER TABLE `guild_members`
+	ADD COLUMN `online` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0' AFTER `alt`;
 
-			CREATE TABLE guild_tributes (
-			  guild_id int(11) unsigned NOT NULL DEFAULT 0,
-			  tribute_id_1 int(11) unsigned NOT NULL DEFAULT 0,
-			  tribute_id_1_tier int(11) unsigned NOT NULL DEFAULT 0,
-			  tribute_id_2 int(11) unsigned NOT NULL DEFAULT 0,
-			  tribute_id_2_tier int(11) unsigned NOT NULL DEFAULT 0,
-			  time_remaining int(11) unsigned NOT NULL DEFAULT 0,
-			  enabled int(11) unsigned NOT NULL DEFAULT 0,
-			  PRIMARY KEY (guild_id) USING BTREE
-			) ENGINE=InnoDB;
+ALTER TABLE `guilds`
+	ADD COLUMN `favor` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `url`;
+
+CREATE TABLE guild_tributes (
+  guild_id int(11) unsigned NOT NULL DEFAULT 0,
+  tribute_id_1 int(11) unsigned NOT NULL DEFAULT 0,
+  tribute_id_1_tier int(11) unsigned NOT NULL DEFAULT 0,
+  tribute_id_2 int(11) unsigned NOT NULL DEFAULT 0,
+  tribute_id_2_tier int(11) unsigned NOT NULL DEFAULT 0,
+  time_remaining int(11) unsigned NOT NULL DEFAULT 0,
+  enabled int(11) unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (guild_id) USING BTREE
+) ENGINE=InnoDB;
 			)"
 	}
 // -- template; copy/paste this when you need to create a new entry
