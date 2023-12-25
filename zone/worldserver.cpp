@@ -2015,7 +2015,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("NPC Emotes");
-			zone->LoadNPCEmotes(&zone->NPCEmoteList);
+			zone->LoadNPCEmotes(&zone->npc_emote_list);
 		}
 		break;
 	}

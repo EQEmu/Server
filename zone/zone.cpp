@@ -1056,7 +1056,7 @@ Zone::~Zone() {
 	safe_delete_array(short_name);
 	safe_delete_array(long_name);
 	safe_delete(Weather_Timer);
-	NPCEmoteList.Clear();
+	npc_emote_list.clear();
 	zone_point_list.Clear();
 	entity_list.Clear();
 	ClearBlockedSpells();
@@ -1152,7 +1152,7 @@ bool Zone::Init(bool is_static) {
 	LoadLDoNTrapEntries();
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
-	LoadNPCEmotes(&NPCEmoteList);
+	LoadNPCEmotes(&npc_emote_list);
 
 	LoadAlternateAdvancement();
 
@@ -1233,8 +1233,8 @@ void Zone::ReloadStaticData() {
 
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
-	NPCEmoteList.Clear();
-	LoadNPCEmotes(&NPCEmoteList);
+	npc_emote_list.clear();
+	LoadNPCEmotes(&npc_emote_list);
 
 	//load the zone config file.
 	if (!LoadZoneCFG(GetShortName(), GetInstanceVersion())) { // try loading the zone name...
@@ -2548,10 +2548,10 @@ void Zone::DoAdventureActions()
 
 }
 
-void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
+void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* NPCEmoteList)
 {
 
-	NPCEmoteList->Clear();
+	NPCEmoteList->clear();
     const std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
     auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
@@ -2565,7 +2565,7 @@ void Zone::LoadNPCEmotes(LinkedList<NPC_Emote_Struct*>* NPCEmoteList)
 	    nes->event_ = Strings::ToInt(row[1]);
 	    nes->type = Strings::ToInt(row[2]);
 	    strn0cpy(nes->text, row[3], sizeof(nes->text));
-	    NPCEmoteList->Insert(nes);
+	    NPCEmoteList->push_back(nes);
     }
 
 	LogInfo("Loaded [{}] npc emotes", Strings::Commify(results.RowCount()));

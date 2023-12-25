@@ -12,10 +12,7 @@ void ShowEmotes(Client *c, const Seperator *sep)
 	uint32       emote_count = 0;
 	const uint32 emote_id    = t->GetEmoteID();
 
-	LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		const auto& e = iterator.GetData();
+	for (auto& e : zone->npc_emote_list) {
 		if (emote_id == e->emoteid) {
 			c->Message(
 				Chat::White,
@@ -41,7 +38,6 @@ void ShowEmotes(Client *c, const Seperator *sep)
 			emote_count++;
 		}
 
-		iterator.Advance();
 	}
 
 	c->Message(

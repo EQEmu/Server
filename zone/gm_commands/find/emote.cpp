@@ -7,10 +7,7 @@ void FindEmote(Client *c, const Seperator *sep)
 	if (sep->IsNumber(2)) {
 		auto emote_id = Strings::ToUnsignedInt(sep->arg[2]);
 
-		LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
-		iterator.Reset();
-		while (iterator.MoreElements()) {
-			auto &e = iterator.GetData();
+		for (auto& e : zone->npc_emote_list) {
 			if (emote_id == e->emoteid) {
 				c->Message(
 					Chat::White,
@@ -40,7 +37,6 @@ void FindEmote(Client *c, const Seperator *sep)
 				break;
 			}
 
-			iterator.Advance();
 		}
 
 		if (found_count == 50) {
@@ -70,10 +66,7 @@ void FindEmote(Client *c, const Seperator *sep)
 
 	const std::string& search_criteria = sep->argplus[2];
 
-	LinkedListIterator<NPC_Emote_Struct *> iterator(zone->NPCEmoteList);
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		auto &e = iterator.GetData();
+	for (auto& e : zone->npc_emote_list) {
 
 		const std::string& current_text = Strings::ToLower(e->text);
 
@@ -106,7 +99,6 @@ void FindEmote(Client *c, const Seperator *sep)
 			break;
 		}
 
-		iterator.Advance();
 	}
 
 	if (found_count == 50) {
