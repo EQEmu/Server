@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H
@@ -410,6 +410,80 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GuildMembers &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.tribute_enable));
+		v.push_back(std::to_string(e.total_tribute));
+		v.push_back(std::to_string(e.last_tribute));
+		v.push_back(std::to_string(e.banker));
+		v.push_back("'" + Strings::Escape(e.public_note) + "'");
+		v.push_back(std::to_string(e.alt));
+		v.push_back(std::to_string(e.online));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GuildMembers> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.tribute_enable));
+			v.push_back(std::to_string(e.total_tribute));
+			v.push_back(std::to_string(e.last_tribute));
+			v.push_back(std::to_string(e.banker));
+			v.push_back("'" + Strings::Escape(e.public_note) + "'");
+			v.push_back(std::to_string(e.alt));
+			v.push_back(std::to_string(e.online));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H

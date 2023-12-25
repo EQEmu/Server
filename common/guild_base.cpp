@@ -721,44 +721,50 @@ bool BaseGuildManager::UpdateDbGuildChannel(uint32 guild_id, std::string Channel
 
 bool BaseGuildManager::UpdateDbGuild(uint32 char_id, uint32 guild_id, uint8 rank)
 {
-    if(m_db == nullptr) {
-        LogGuilds("Requested to set char [{}] to guild [{}] when we have no database object", char_id, guild_id);
-        return false;
-    }
-    if (guild_id == GUILD_NONE) {
-        if (!GuildMembersRepository::DeleteOne(*m_db, char_id)) {
-            LogError("Request to remove a character id {} from guild_members who is not in a guild {}.", char_id, guild_id);
-                return false;
-        }
-        else {
-            LogGuilds("Removed character id {} from guild id {}", char_id, guild_id);
-                return true;
-        }
-    }
+	if (m_db == nullptr) {
+		LogGuilds("Requested to set char [{}] to guild [{}] when we have no database object", char_id, guild_id);
+		return false;
+	}
+	if (guild_id == GUILD_NONE) {
+		if (!GuildMembersRepository::DeleteOne(*m_db, char_id)) {
+			LogError(
+				"Request to remove a character id {} from guild_members who is not in a guild {}.",
+				char_id,
+				guild_id
+			);
+			return false;
+		}
+		else {
+			LogGuilds("Removed character id {} from guild id {}", char_id, guild_id);
+			return true;
+		}
+	}
 
-    BaseGuildMembersRepository::GuildMembers out;
-    out.alt = 0;
-    out.banker = 0;
-    out.char_id = char_id;
-    out.guild_id = guild_id;
-    out.last_tribute = 0;
-    out.public_note = "";
-    out.rank = rank;
-    out.total_tribute = 0;
-    out.tribute_enable = 0;
+	auto members = GuildMembersRepository::GetWhere(
+		*m_db,
+		fmt::format(
+			"char_id = {} and guild_id = {} LIMIT 1",
+			char_id,
+			guild_id
+		)
+	);
 
-    auto result = GuildMembersRepository::UpdateOne(*m_db, out);
-    if (!result) {
-        auto m = GuildMembersRepository::InsertOne(*m_db, out);
-        if (!m.char_id) {
-            LogGuilds("Error adding character id [{}] to guild id [{}]", char_id, guild_id);
-            return false;
-        }
-    }
+	auto e = GuildMembersRepository::NewEntity();
+	if (!members.empty()) {
+		e = members[0];
+	}
+	e.char_id  = (int32_t) char_id;
+	e.guild_id = guild_id;
+	e.rank     = rank;
 
-    LogGuilds("Set char [{}] to guild [{}] and rank [{}] in the database", char_id, guild_id, rank);
+	auto r = GuildMembersRepository::ReplaceOne(*m_db, e);
+	if (!r) {
+		LogGuilds("Error updating or inserting character id [{}] to guild id [{}]", char_id, guild_id);
+		return false;
+	}
 
-    return true;
+	LogGuilds("Set char [{}] to guild [{}] and rank [{}] in the database", char_id, guild_id, rank);
+	return true;
 }
 
 bool BaseGuildManager::UpdateDbGuildRank(uint32 char_id, uint8 rank_id)
@@ -1412,7 +1418,7 @@ bool BaseGuildManager::UpdateDbMemberOnline(uint32 char_id, bool status)
     return true;
 }
 
-BaseGuildsRepository::Guilds BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in) 
+BaseGuildsRepository::Guilds BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in)
 {
     GuildsRepository::Guilds out{};
 

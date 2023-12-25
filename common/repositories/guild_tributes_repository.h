@@ -44,48 +44,6 @@ public:
      */
 
 	// Custom extended repository methods here
-	static std::string BaseReplace()
-	{
-		return fmt::format(
-			"REPLACE INTO {} ({}) ",
-			TableName(),
-			ColumnsRaw()
-		);
-	}
-	
-	static GuildTributes ReplaceOne(
-		Database& db,
-		GuildTributes e
-	)
-	{
-		std::vector<std::string> v;
-
-		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.tribute_id_1));
-		v.push_back(std::to_string(e.tribute_id_1_tier));
-		v.push_back(std::to_string(e.tribute_id_2));
-		v.push_back(std::to_string(e.tribute_id_2_tier));
-		v.push_back(std::to_string(e.time_remaining));
-		v.push_back(std::to_string(e.enabled));
-
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"{} VALUES ({})",
-				BaseReplace(),
-				Strings::Implode(",", v)
-			)
-		);
-
-		if (results.Success()) {
-			e.guild_id = results.LastInsertedID();
-			return e;
-		}
-
-		e = NewEntity();
-
-		return e;
-	}
-
 	static int UpdateEnabled(Database& db, uint32 guild_id, uint32 enabled)
 	{
 		auto results = db.QueryDatabase(
