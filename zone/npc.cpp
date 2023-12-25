@@ -3068,12 +3068,12 @@ NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
 
 void NPC::DoNPCEmote(uint8 event_, uint32 emoteid, Mob* target)
 {
-	if (this == nullptr || emoteid == 0) {
+	if (emoteid == 0) {
 		return;
 	}
 
-	NPC_Emote_Struct* nes = GetNPCEmote(emoteid,event_);
-	if(nes == nullptr) {
+	NPC_Emote_Struct *nes = GetNPCEmote(emoteid, event_);
+	if (nes == nullptr) {
 		return;
 	}
 
@@ -3082,34 +3082,36 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emoteid, Mob* target)
 	Strings::FindReplace(processed, "$mracep", GetRacePlural() = GetClass());
 	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
-	if (target)
-	{
+	if (target) {
 		Strings::FindReplace(processed, "$name", target->GetCleanName());
 		Strings::FindReplace(processed, "$racep", GetRacePlural() = target->GetClass());
 		Strings::FindReplace(processed, "$race", GetPlayerRaceName(target->GetRace()));
 		Strings::FindReplace(processed, "$class", GetClassIDName(target->GetClass()));
 	}
-	else
-	{
+	else {
 		Strings::FindReplace(processed, "$name", "foe");
 		Strings::FindReplace(processed, "$race", "race");
 		Strings::FindReplace(processed, "$racep", "races");
 		Strings::FindReplace(processed, "$class", "class");
 	}
 
-	if(emoteid == nes->emoteid) {
+	if (emoteid == nes->emoteid) {
 		if (event_ == EQ::constants::EmoteEventTypes::Hailed && target) {
 			DoQuestPause(target);
 		}
 
-		if(nes->type == 1)
+		if (nes->type == 1) {
 			Emote("%s", processed.c_str());
-		else if(nes->type == 2)
+		}
+		else if (nes->type == 2) {
 			Shout("%s", processed.c_str());
-		else if(nes->type == 3)
+		}
+		else if (nes->type == 3) {
 			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, processed.c_str());
-		else
+		}
+		else {
 			Say("%s", processed.c_str());
+		}
 	}
 }
 
