@@ -329,8 +329,9 @@ void ZoneGuildManager::ListGuilds(Client *c, std::string search_criteria) const 
 }
 
 
-void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
-	std::map<uint32, GuildInfo *>::const_iterator res;
+void ZoneGuildManager::DescribeGuild(Client* c, uint32 guild_id) const
+{
+    std::map<uint32, GuildInfo *>::const_iterator res;
 	res = m_guilds.find(guild_id);
 	if (res == m_guilds.end()) {
 		c->Message(
@@ -344,72 +345,46 @@ void ZoneGuildManager::DescribeGuild(Client *c, uint32 guild_id) const {
 	}
 
 	const GuildInfo *info = res->second;
-
+    auto membership = GuildMembersRepository::GetGuildMembershipStats(*m_db, guild_id);
+    
 	auto leader_name = database.GetCharNameByID(info->leader);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(
-		"<tr><td>Name</td><td>{}</td><td>Guild ID</td><td>{}</td></tr>",
-		info->name,
+		"<tr><td>Name</td><td><c \"#00FF00\">{}</c></td><td>Guild ID</td><td><c \"#00FF00\">{}</c></td></tr>",
+        info->name,
 		guild_id
 	);
 	popup_text += fmt::format(
-		"<tr><td>Leader</td><td>{}</td><td>Character ID</td><td>{}</td></tr>",
+		"<tr><td>Leader</td><td><c \"#F62217\">{}</c></td><td>Character ID</td><td><c \"#00FF00\">{}</c></td></tr>",
 		leader_name,
 		info->leader
 	);
-	popup_text += "<br><br>";
-	popup_text += "<tr>";
-	popup_text += "<td>Rank</td>";
-	popup_text += "<td>Demote</td>";
-	popup_text += "<td>Hear Guild Chat</td>";
-	popup_text += "<td>Invite</td>";
-	popup_text += "<td>Promote</td>";
-	popup_text += "<td>Remove</td>";
-	popup_text += "<td>Set MOTD</td>";
-	popup_text += "<td>Speak Guild Chat</td>";
-	popup_text += "<td>War/Peace</td>";
-	popup_text += "</tr>";
-					
-	//for (uint8 guild_rank = 0; guild_rank <= GUILD_MAX_RANK; guild_rank++) {
-	//	auto can_hear_guild_chat = info->rank_s[guild_rank].permissions[GUILD_HEAR] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_speak_guild_chat = info->ranks[guild_rank].permissions[GUILD_SPEAK] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_invite = info->ranks[guild_rank].permissions[GUILD_INVITE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_remove = info->ranks[guild_rank].permissions[GUILD_REMOVE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_promote = info->ranks[guild_rank].permissions[GUILD_PROMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_demote = info->ranks[guild_rank].permissions[GUILD_DEMOTE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_set_motd = info->ranks[guild_rank].permissions[GUILD_MOTD] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	auto can_war_peace = info->ranks[guild_rank].permissions[GUILD_WARPEACE] ? "<c \"#00FF00\">Y</c>" : "<c \"#F62217\">N</c>";
-	//	popup_text += fmt::format(
-	//		"<tr>"
-	//		"<td>{} ({})</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"<td>{}</td>"
-	//		"</tr>",
-	//		!info->ranks[guild_rank].name.empty() ? info->ranks[guild_rank].name : "Nameless",
-	//		guild_rank,
-	//		can_demote,
-	//		can_hear_guild_chat,
-	//		can_invite,
-	//		can_promote,
-	//		can_remove,
-	//		can_set_motd,
-	//		can_speak_guild_chat,
-	//		can_war_peace
-	//	);
-	//}
 
-	popup_text += "</table>";
+    popup_text += "<tr><td>.</td></tr>";
+    popup_text += "<tr><td>Ranks</td><td>Quantity</td></tr>";
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[1].c_str(), membership.leaders);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[2].c_str(), membership.senior_officers);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[3].c_str(), membership.officers);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[4].c_str(), membership.senior_members);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[5].c_str(), membership.members);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[6].c_str(), membership.junior_members);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[7].c_str(), membership.initates);
+    popup_text += fmt::format("<tr><td>{}</td><td><c \"#00FF00\">{}</c></td></tr>", info->rank_names[8].c_str(), membership.recruits);
+
+    popup_text += "<tr><td>.</td></tr>";
+    popup_text += fmt::format("<tr><td>Tribute On</td><td><c \"#F62217\">{}</c></td></tr>", membership.tribute_enabled);
+    popup_text += fmt::format("<tr><td>Total Tribute</td><td><c \"#F62217\">{}</c></td></tr>", info->tribute.favor);
+
+    popup_text += "</table>";
+
+    auto text = new char[4096];
+    strn0cpy(text, popup_text.c_str(), 4096);
 
 	c->SendPopupToClient(
 		"Guild Information",
-		popup_text.c_str()
+		text
 	);
+    safe_delete(text);
 }
 
 //in theory, we could get a pile of unused entries in this array, but only if
