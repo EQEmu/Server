@@ -3046,23 +3046,23 @@ void NPC::SendPayload(int payload_id, std::string payload_value)
 }
 
 NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
-	std::vector<NPC_Emote_Struct*> Emotes;
-	for (auto& i : zone->NPCEmoteList) {
-		NPC_Emote_Struct* nes = i;
+	std::vector<NPC_Emote_Struct*> emotes;
+	for (auto& e : zone->npc_emote_list) {
+		NPC_Emote_Struct* nes = e;
 		if (emoteid == nes->emoteid && event_ == nes->event_) {
-			Emotes.push_back(i);
+			emotes.push_back(e);
 		}
 	}
 
-	if (Emotes.size() == 0) {
+	if (emotes.size() == 0) {
 		return nullptr;
 	}
-	else if (Emotes.size() == 1) {
-		return Emotes[0];
+	else if (emotes.size() == 1) {
+		return emotes[0];
 	}
 	else {
-		int index = zone->random.Roll0(Emotes.size());
-		return Emotes[index];
+		int index = zone->random.Roll0(emotes.size());
+		return emotes[index];
 	}
 }
 

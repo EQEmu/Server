@@ -12,8 +12,7 @@ void ShowEmotes(Client *c, const Seperator *sep)
 	uint32       emote_count = 0;
 	const uint32 emote_id    = t->GetEmoteID();
 
-	for (auto& i : zone->NPCEmoteList) {
-		const auto& e = i;
+	for (auto& e : zone->npc_emote_list) {
 		if (emote_id == e->emoteid) {
 			c->Message(
 				Chat::White,

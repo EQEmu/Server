@@ -185,7 +185,7 @@ public:
 	DynamicZone *GetDynamicZone();
 
 	IPathfinder                                   *pathing;
-	std::vector<NPC_Emote_Struct *>               NPCEmoteList;
+	std::vector<NPC_Emote_Struct *>               npc_emote_list;
 	LinkedList<Spawn2 *>                          spawn2_list;
 	LinkedList<ZonePoint *>                       zone_point_list;
 	std::vector<ZonePointsRepository::ZonePoints> virtual_zone_point_list;
