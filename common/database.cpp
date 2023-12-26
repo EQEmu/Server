@@ -2279,6 +2279,10 @@ bool Database::CopyCharacter(
 				std::string column = columns[column_index];
 				std::string value  = row[column_index] ? row[column_index] : "null";
 
+				if (table_name == "keyring" && column == "id") {
+					value = "0";
+				}
+
 				if (column == character_id_column_name) {
 					value = new_character_id;
 				}
