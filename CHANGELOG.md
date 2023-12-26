@@ -1,3 +1,42 @@
+## [22.38.0] - 12/26/2023
+
+### Bots
+
+* Remove unnecessary error on SetItemReuse ([#3795](https://github.com/EQEmu/Server/pull/3795)) @nytmyr 2023-12-20
+
+### Code
+
+* Consolidate GetHateRandom(), GetHateRandomBot(), GetHateRandomClient(), and GetHateRandomNPC() ([#3794](https://github.com/EQEmu/Server/pull/3794)) @Kinglykrab 2023-12-25
+* Race constants refactor ([#3782](https://github.com/EQEmu/Server/pull/3782)) @Akkadius 2023-12-23
+
+### Database
+
+* Fix issue with saylinks query in MySQL 8.0+ ([#3800](https://github.com/EQEmu/Server/pull/3800)) @Akkadius 2023-12-24
+* Update faction mods with Live data ([#3799](https://github.com/EQEmu/Server/pull/3799)) @joligario 2023-12-23
+
+### Fixes
+
+* Disable Hide/Improved Hide on Trap damage ([#3791](https://github.com/EQEmu/Server/pull/3791)) @Kinglykrab 2023-12-19
+* Fix Bard Invisibility Songs breaking every 4 ticks ([#3783](https://github.com/EQEmu/Server/pull/3783)) @Kinglykrab 2023-12-19
+* Fix can_riposte parameter in DoMeleeSkillAttackDmg ([#3792](https://github.com/EQEmu/Server/pull/3792)) @Kinglykrab 2023-12-19
+
+### Forage
+
+* Add a rule to disabled using common_food_ids from the list in forage.cpp.  currently set to enabled. ([#3796](https://github.com/EQEmu/Server/pull/3796)) @regneq 2023-12-22
+
+### NPC
+
+* Support for multiple emotes per type, emote variables ([#3801](https://github.com/EQEmu/Server/pull/3801)) @regneq 2023-12-25
+
+### Quest API
+
+* Add GetHateTopBot(), GetHateTopClient(), and GetHateTopNPC() to Perl/Lua ([#3793](https://github.com/EQEmu/Server/pull/3793)) @Kinglykrab 2023-12-22
+* Add SummonItemIntoInventory() to Perl/Lua ([#3797](https://github.com/EQEmu/Server/pull/3797)) @Kinglykrab 2023-12-22
+
+### Repositories
+
+* Add ReplaceOne and ReplaceMany ([#3802](https://github.com/EQEmu/Server/pull/3802)) @Akkadius 2023-12-26
+
 ## [22.37.0] - 12/18/2023
 
 ### Bots
