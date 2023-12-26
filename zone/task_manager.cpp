@@ -52,6 +52,8 @@ bool TaskManager::LoadTasks(int single_task)
 		task_query_filter = fmt::format("id > 0");
 	}
 
+	task_query_filter += " AND enabled = 1";
+
 	// load task level data
 	auto repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
 	m_task_data.reserve(repo_tasks.size());

@@ -460,7 +460,7 @@ void SharedTaskManager::LoadSharedTaskState()
 
 SharedTaskManager *SharedTaskManager::LoadTaskData()
 {
-	m_task_data          = TasksRepository::All(*m_content_database);
+	m_task_data          = TasksRepository::GetWhere(*m_content_database, "enabled = 1");
 	m_task_activity_data = TaskActivitiesRepository::All(*m_content_database);
 
 	LogTasks("Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
