@@ -129,7 +129,7 @@ bool TaskManager::LoadTasks(int single_task)
 		);
 	}
 
-	LogInfo("Loaded [{}] Tasks", repo_tasks.size());
+	LogInfo("Loaded [{}] task(s)", repo_tasks.size());
 
 	std::string activities_query_filter = fmt::format(
 		"taskid = {} and activityid < {} ORDER BY taskid, activityid ASC",
@@ -258,7 +258,7 @@ bool TaskManager::LoadTasks(int single_task)
 		task_data->activity_count++;
 	}
 
-	LogInfo("Loaded [{}] Task Activities", task_activities.size());
+	LogInfo("Loaded [{}] task activities", task_activities.size());
 
 	return true;
 }
