@@ -278,8 +278,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
             gr.title = in->rank_names[i];
             out.push_back(gr);
         }
-        GuildRanksRepository::DeleteOne(*m_db, guild_id);
-        if (!GuildRanksRepository::InsertMany(*m_db, out)) {
+        if (!GuildRanksRepository::ReplaceMany(*m_db, out)) {
             LogGuilds("Error storing guild [{}] ranks in the database", guild_id);
             return false;
         }
@@ -296,8 +295,8 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
             gp.permission   = in->functions[i].perm_value;
             out.push_back(gp);
         }
-        GuildPermissionsRepository::DeleteWhere(*m_db, fmt::format("guild_id = '{}'", guild_id));
-        if (!GuildPermissionsRepository::InsertMany(*m_db, out)) {
+        
+        if (!GuildPermissionsRepository::ReplaceMany(*m_db, out)) {
             LogGuilds("Error storing guild [{}] permissions in the database", guild_id);
             return false;
         }

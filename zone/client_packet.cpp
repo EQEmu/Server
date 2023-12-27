@@ -7931,6 +7931,7 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 	GuildDemoteStruct* demote = (GuildDemoteStruct*)app->pBuffer;
 	auto rank = demote->rank;
 	auto target = demote->target;
+	auto target_client = entity_list.GetClientByName(target);
 
 	CharGuildInfo gci;
 	if (!guild_mgr.GetCharInfo(demote->target, gci)) {
@@ -7942,34 +7943,39 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 		return;
 	}
 
-	if (rank > 8) {
+	if (rank > GUILD_RECRUIT) {
 		Message(Chat::Red, "%s cannot be demoted any further!", demote->target);
 		return;
 	}
 
-	if ((strcasecmp(GetCleanName(), target) == 0 &&
+	if (((strcasecmp(GetCleanName(), target) == 0 &&
 		guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE_SELF)) ||
 		(guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE)) ||
-		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() <= GUILD_OFFICER))
+		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() <= GUILD_OFFICER)) &&
+		target_client->GuildRank() < GuildRank())
 	{
 		LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}])",
-			demote->target, gci.char_id,
+			demote->target, 
+			gci.char_id,
 			guild_mgr.GetRankName(GuildID(), gci.rank),
 			gci.rank,
 			guild_mgr.GetRankName(GuildID(), rank),
 			rank,
-			guild_mgr.GetGuildName(GuildID()), GuildID()
+			guild_mgr.GetGuildName(GuildID()), 
+			GuildID()
 		);
 		if (!guild_mgr.SetGuildRank(gci.char_id, rank))
 		{
 			Message(Chat::Red, "Error while setting rank %d on '%s'.", rank, demote->target);
 			LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}]) FAILED.",
-				demote->target, gci.char_id,
+				demote->target, 
+				gci.char_id,
 				guild_mgr.GetRankName(GuildID(), gci.rank),
 				gci.rank,
 				guild_mgr.GetRankName(GuildID(), rank),
 				rank,
-				guild_mgr.GetGuildName(GuildID()), GuildID()
+				guild_mgr.GetGuildName(GuildID()), 
+				GuildID()
 			);
 			return;
 		}
@@ -7989,6 +7995,9 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 		sr->no_update = false;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp);
+	}
+	else {
+		Message(Chat::Red, "You do not have sufficient privileges to demote {}.", target);
 	}
 }
 
@@ -8132,11 +8141,11 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				// Convert Membership Level between RoF and previous clients.
 				if (client->ClientVersion() < EQ::versions::ClientVersion::RoF && ClientVersion() >= EQ::versions::ClientVersion::RoF)
 				{
-					gc->officer = 0;
+					gc->officer = GUILD_MEMBER_TI;
 				}
 				if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF && ClientVersion() < EQ::versions::ClientVersion::RoF)
 				{
-					gc->officer = 8;
+					gc->officer = GUILD_RECRUIT;
 				}
 
 				LogGuilds("Sending OP_GuildInvite for invite to [{}], length [{}]", client->GetName(), app->size);
@@ -8172,9 +8181,9 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF) {
 		switch (response) {
-		case 0: { response = 8; break; }
-		case 1: { response = 3; break; }
-		default: {response = 9; break; }
+		case GUILD_MEMBER_TI: { response = GUILD_RECRUIT; break; }
+		case GUILD_OFFICER_TI: { response = GUILD_OFFICER; break; }
+		default: {response = GUILD_RANK_NONE; break; }
 		}
 	}
 

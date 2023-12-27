@@ -465,14 +465,14 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 		Client* c = entity_list.GetClientByCharID(s->char_id);
 
-		if (!c) {
+		if (c) {
 			//this reloads the char's guild info from the database and sends appearance updates
 			c->RefreshGuildInfo();
 		}
 
 		//it would be nice if we had the packet to send just a one-person update
 		if (s->guild_id == GUILD_NONE) {
-			if (!c) {
+			if (c) {
 				c->SendGuildMOTD();
 			}
 		}
@@ -483,7 +483,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 		if (s->old_guild_id != 0 && s->old_guild_id != GUILD_NONE && s->old_guild_id != s->guild_id)
 			entity_list.SendGuildMembers(s->old_guild_id);
-		else if (!c && s->guild_id != GUILD_NONE) {
+		else if (c && s->guild_id != GUILD_NONE) {
 			//char is in zone, and has changed into a new guild, send MOTD.
 			c->SendGuildMOTD();
 			if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -1906,7 +1906,7 @@ void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, 
     m.guild_id       = guild_id;
     m.public_note.clear();
 
-	GuildMembersRepository::InsertOne(*m_db, m);
+	GuildMembersRepository::ReplaceOne(*m_db, m);
 	UpdateDbMemberOnline(char_id, true);
 	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
 }

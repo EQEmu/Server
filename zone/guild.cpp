@@ -521,6 +521,7 @@ void Client::SendGuildMembersList()
 
 	FastQueuePacket(&outapp);
 
+	SendGuildMOTD();
 	SendGuildChannel();
 	SendGuildURL();
 
