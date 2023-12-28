@@ -414,9 +414,11 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		CharGuildInfo cgi;
 		guild_mgr.GetCharInfo(c->CharacterID(), cgi);
 
-		auto                         outapp = new ServerPacket(
+		auto outapp = new ServerPacket(
 			ServerOP_GuildRankUpdate,
-			sizeof(ServerGuildRankUpdate_Struct));
+			sizeof(ServerGuildRankUpdate_Struct)
+		);
+
 		ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct *) outapp->pBuffer;
 		sgrus->GuildID = guild_id;
 		sgrus->Rank    = guild_rank;
