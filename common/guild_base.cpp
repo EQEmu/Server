@@ -97,8 +97,8 @@ bool BaseGuildManager::LoadGuilds()
         return false;
     }
 
-    auto guilds             = BaseGuildsRepository::All(*m_db);
-	auto guilds_ranks       = GuildRanksRepository::All(*m_db);
+    auto guilds             = GuildsRepository::All(*m_db);
+    auto guilds_ranks       = GuildRanksRepository::All(*m_db);
 	auto guilds_permissions = GuildPermissionsRepository::All(*m_db);
 	auto guilds_tributes    = GuildTributesRepository::All(*m_db);
 
@@ -139,11 +139,11 @@ bool BaseGuildManager::LoadGuilds()
 
         for (auto const& gt : guilds_tributes) {
             if (gt.guild_id == g.id) {
-                m_guilds[g.id]->tribute.id_1 = gt.tribute_id_1;
-                m_guilds[g.id]->tribute.id_2 = gt.tribute_id_2;
+                m_guilds[g.id]->tribute.id_1      = gt.tribute_id_1;
+                m_guilds[g.id]->tribute.id_2      = gt.tribute_id_2;
                 m_guilds[g.id]->tribute.id_1_tier = gt.tribute_id_1_tier;
                 m_guilds[g.id]->tribute.id_2_tier = gt.tribute_id_2_tier;
-                m_guilds[g.id]->tribute.enabled = gt.enabled;
+                m_guilds[g.id]->tribute.enabled   = gt.enabled;
                 if (gt.time_remaining > RuleI(Guild, TributeTime) || gt.time_remaining <= 0) {
                     m_guilds[g.id]->tribute.time_remaining = RuleI(Guild, TributeTime);
                 }
