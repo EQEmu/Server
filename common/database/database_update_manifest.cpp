@@ -5016,7 +5016,8 @@ CREATE TABLE `spawn2_disabled` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE enabled = 0;
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9242,
@@ -5028,7 +5029,8 @@ ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 ALTER TABLE `spawnentry`
 ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9243,
@@ -5082,7 +5084,8 @@ INSERT INTO
 
 DROP TABLE `starting_items`;
 RENAME TABLE `starting_items_new` TO `starting_items`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9244,
@@ -5092,7 +5095,8 @@ RENAME TABLE `starting_items_new` TO `starting_items`;
 		.match = "0000-00-00 00:00:00",
 		.sql = R"(
 ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
-		)"
+		)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9245,
@@ -5104,7 +5108,8 @@ ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
 ALTER TABLE `object` CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL DEFAULT 0 AFTER `icon`;
 ALTER TABLE `object` CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`;
 ALTER TABLE `object` CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9246,
@@ -5133,7 +5138,8 @@ CHANGE COLUMN `slot` `inventory_slot` mediumint(9) NOT NULL DEFAULT -1 AFTER `st
 
 ALTER TABLE `starting_items`
 CHANGE COLUMN `temporary` `class_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `id`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9248,
@@ -5143,7 +5149,8 @@ CHANGE COLUMN `temporary` `class_list` text CHARACTER SET latin1 COLLATE latin1_
 		.match = "",
 		.sql = R"(
 ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9249,
@@ -5154,7 +5161,8 @@ ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
 		.sql = R"(
 ALTER TABLE `tasks`
 ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
-)"
+)",
+		.content_schema_update = true
 	}
 
 // -- template; copy/paste this when you need to create a new entry
