@@ -2621,7 +2621,7 @@ namespace RoF
 		general->parameter = RaidCommandAcceptInvite;
 		strn0cpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
 		strn0cpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
-		
+
 		dest->FastQueuePacket(&outapp);
 
 		safe_delete(inapp);
@@ -3966,10 +3966,22 @@ namespace RoF
 
 				/* Translate older ranks to new values */
 				switch (emu->guildrank) {
-				case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
-				case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
-				case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
-				default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
+					case 0: {
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);
+						break;
+					}  // GUILD_MEMBER	0
+					case 1: {
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);
+						break;
+					}  // GUILD_OFFICER	1
+					case 2: {
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);
+						break;
+					}  // GUILD_LEADER	2
+					default: {
+						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
+						break;
+					}  //
 				}
 			}
 

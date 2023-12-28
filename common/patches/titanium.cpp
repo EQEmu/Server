@@ -680,20 +680,20 @@ namespace Titanium
 		case GUILD_JUNIOR_MEMBER:
 		case GUILD_INITIATE:
 		case GUILD_RECRUIT:
-		{ 
+		{
 			eq->rank = GUILD_MEMBER_TI;
-			break; 
+			break;
 		}
 		case GUILD_OFFICER:
 		case GUILD_SENIOR_OFFICER:
-		{ 
+		{
 			eq->rank = GUILD_OFFICER_TI;
-			break; 
+			break;
 		}
-		case GUILD_LEADER: 
-		{ 
+		case GUILD_LEADER:
+		{
 			eq->rank = GUILD_LEADER_TI;
-			break; 
+			break;
 		}
 		}
 
@@ -817,31 +817,27 @@ namespace Titanium
 				PutFieldN(banker);
 				PutFieldN(class_);
 				switch (emu_e->rank) {
-				case GUILD_SENIOR_MEMBER:
-				case GUILD_MEMBER:
-				case GUILD_JUNIOR_MEMBER:
-				case GUILD_INITIATE:
-				case GUILD_RECRUIT:
-				{
-					e->rank = htonl(GUILD_MEMBER_TI);
-					break;
-				}
-				case GUILD_OFFICER:
-				case GUILD_SENIOR_OFFICER:
-				{
-					e->rank = htonl(GUILD_OFFICER_TI);
-					break;
-				}
-				case GUILD_LEADER:
-				{
-					e->rank = htonl(GUILD_LEADER_TI);
-					break;
-				}
-				default:
-				{
-					e->rank = htonl(GUILD_MEMBER_TI);
-					break;
-				}
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						e->rank = htonl(GUILD_MEMBER_TI);
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						e->rank = htonl(GUILD_OFFICER_TI);
+						break;
+					}
+					case GUILD_LEADER: {
+						e->rank = htonl(GUILD_LEADER_TI);
+						break;
+					}
+					default: {
+						e->rank = htonl(GUILD_MEMBER_TI);
+						break;
+					}
 				}
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
@@ -1341,30 +1337,26 @@ namespace Titanium
 		OUT(anon);
 		OUT(gm);
 		switch (emu->guildrank) {
-		case GUILD_SENIOR_MEMBER:
-		case GUILD_MEMBER:
-		case GUILD_JUNIOR_MEMBER:
-		case GUILD_INITIATE:
-		case GUILD_RECRUIT:
-		{
-			eq->guildrank = GUILD_MEMBER_TI;
-			break;
-		}
-		case GUILD_OFFICER:
-		case GUILD_SENIOR_OFFICER:
-		{
-			eq->guildrank = GUILD_OFFICER_TI;
-			break;
-		}
-		case GUILD_LEADER:
-		{
-			eq->guildrank = GUILD_LEADER_TI;
-			break;
-		}
-		default:
-		{
-			break;
-		}
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->guildrank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->guildrank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->guildrank = GUILD_LEADER_TI;
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 		OUT(guildbanker);
 		//	OUT(unknown13054[8]);
@@ -2081,30 +2073,26 @@ namespace Titanium
 			strcpy(eq->suffix, emu->suffix);
 			eq->petOwnerId = emu->petOwnerId;
 			switch (emu->guildrank) {
-			case GUILD_SENIOR_MEMBER:
-			case GUILD_MEMBER:
-			case GUILD_JUNIOR_MEMBER:
-			case GUILD_INITIATE:
-			case GUILD_RECRUIT:
-			{
-				eq->guildrank = GUILD_MEMBER_TI;
-				break;
-			}
-			case GUILD_OFFICER:
-			case GUILD_SENIOR_OFFICER:
-			{
-				eq->guildrank = GUILD_OFFICER_TI;
-				break;
-			}
-			case GUILD_LEADER:
-			{
-				eq->guildrank = GUILD_LEADER_TI;
-				break;
-			}
-			default:
-			{
-				break;
-			}
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT: {
+					eq->guildrank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER: {
+					eq->guildrank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER: {
+					eq->guildrank = GUILD_LEADER_TI;
+					break;
+				}
+				default: {
+					break;
+				}
 			}
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; k++) {

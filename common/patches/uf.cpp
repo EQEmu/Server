@@ -3097,32 +3097,27 @@ namespace UF
 			{
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
 				//Translate older ranks to new values* /
-				switch (emu->guildrank)
-				{
-				case GUILD_SENIOR_MEMBER:
-				case GUILD_MEMBER:
-				case GUILD_JUNIOR_MEMBER:
-				case GUILD_INITIATE:
-				case GUILD_RECRUIT:
-				{
-					emu->guildrank = GUILD_MEMBER_TI;
-					break;
-				}
-				case GUILD_OFFICER:
-				case GUILD_SENIOR_OFFICER:
-				{
-					emu->guildrank = GUILD_OFFICER_TI;
-					break;
-				}
-				case GUILD_LEADER:
-				{
-					emu->guildrank = GUILD_LEADER_TI;
-					break;
-				}
-				default:
-				{
-					break;
-				}
+				switch (emu->guildrank) {
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						emu->guildrank = GUILD_MEMBER_TI;
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						emu->guildrank = GUILD_OFFICER_TI;
+						break;
+					}
+					case GUILD_LEADER: {
+						emu->guildrank = GUILD_LEADER_TI;
+						break;
+					}
+					default: {
+						break;
+					}
 				}
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
 			}
