@@ -1421,7 +1421,7 @@ bool BaseGuildManager::UpdateDbMemberOnline(uint32 char_id, bool status)
     return true;
 }
 
-GuildsRepository::Guilds GuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in)
+GuildsRepository::Guilds BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in)
 {
     GuildsRepository::Guilds out{};
 
