@@ -182,10 +182,6 @@ bool Zone::LoadZoneObjects()
 			ContentFilterCriteria::apply()
 		)
 	);
-	if (l.empty()) {
-		LogWarning("No Objects to load for Zone [{}] Version [{}]", zoneid, instanceversion);
-		return false;
-	}
 
 	for (const auto &e : l) {
 		if (e.type == ObjectTypes::StaticLocked) {
