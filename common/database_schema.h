@@ -71,7 +71,7 @@ namespace DatabaseSchema {
 			{"character_tasks",                "charid"},
 			{"character_tribute",              "character_id"},
 			{"completed_tasks",                "charid"},
-			{"data_buckets",                   "id"},
+			{"data_buckets",                   "character_id"},
 			{"faction_values",                 "char_id"},
 			{"friends",                        "charid"},
 			{"guild_members",                  "char_id"},
