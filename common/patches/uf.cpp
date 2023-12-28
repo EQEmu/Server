@@ -2440,22 +2440,18 @@ namespace UF
 			case GUILD_INITIATE:
 			case GUILD_RECRUIT:
 			{
-				emu->parameter = GUILD_MEMBER_TI;
+				eq->parameter = GUILD_MEMBER_TI;
 				break;
 			}
 			case GUILD_OFFICER:
 			case GUILD_SENIOR_OFFICER:
 			{
-				emu->parameter = GUILD_OFFICER_TI;
+				eq->parameter = GUILD_OFFICER_TI;
 				break;
 			}
 			case GUILD_LEADER:
 			{
-				emu->parameter = GUILD_LEADER_TI;
-				break;
-			}
-			default:
-			{
+				eq->parameter = GUILD_LEADER_TI;
 				break;
 			}
 			}

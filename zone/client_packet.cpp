@@ -7875,6 +7875,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	}
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
+	SetGuildID(NewGuildID);
 
 	LogGuilds("[{}]: Creating guild [{}] with leader [{}] via UF+ GUI. It was given id [{}]", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
@@ -7894,6 +7895,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 				SendGuildRanks();
 			}
+			SendGuildMembersList();
 		}
 	}
 }

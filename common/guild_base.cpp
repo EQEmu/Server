@@ -97,7 +97,11 @@ bool BaseGuildManager::LoadGuilds()
         return false;
     }
 
-    auto guilds = BaseGuildsRepository::All(*m_db);
+    auto guilds             = BaseGuildsRepository::All(*m_db);
+	auto guilds_ranks       = GuildRanksRepository::All(*m_db);
+	auto guilds_permissions = GuildPermissionsRepository::All(*m_db);
+	auto guilds_tributes    = GuildTributesRepository::All(*m_db);
+
     if (guilds.empty()) {
         LogGuilds("No Guilds found in database.");
         return false;
@@ -105,47 +109,47 @@ bool BaseGuildManager::LoadGuilds()
 
     LogGuilds("Found {} guilds.  Loading.....", guilds.size());
     for (auto& g : guilds) {
+        bool store_to_db = false;
+
         _CreateGuild(g.id, g.name, g.leader, g.minstatus, g.motd, g.motd_setter, g.channel, g.url, g.favor);
-    }
 
-    bool store_to_db = false;
-    for (auto guild : m_guilds) {
-        auto where_filter = fmt::format("guild_id = '{}'", guild.first);
-        auto guild_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);
-        for (auto const& r : guild_ranks) {
-            guild.second->rank_names[r.rank] = r.title;
-        }
+        for (auto const& r : guilds_ranks) {
+            if (r.guild_id == g.id) {
+				m_guilds[g.id]->rank_names[r.rank] = r.title;
+			}
+		}
 
-        auto guild_permissions = BaseGuildPermissionsRepository::GetWhere(*m_db, where_filter);
-        if (guild_permissions.size() < GUILD_MAX_FUNCTIONS) {
+        if (guilds_permissions.size() < GUILD_MAX_FUNCTIONS) {
             store_to_db = true;
         }
 
-        for (auto const& p : guild_permissions) {
-            guild.second->functions[p.perm_id].id           = p.id;
-            guild.second->functions[p.perm_id].guild_id     = p.guild_id;
-            guild.second->functions[p.perm_id].perm_id      = p.perm_id;
-            guild.second->functions[p.perm_id].perm_value   = p.permission;
+        for (auto const& p : guilds_permissions) {
+            m_guilds[g.id]->functions[p.perm_id].id         = p.id;
+            m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
+            m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
+            m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
         }
-        LogGuilds("Loaded guild id [{}]", guild.first);
+        LogGuilds("Loaded guild id [{}]", g.id);
+
         if (store_to_db) {
-            LogGuilds("Found missing permissions for guild id [{}].  Setting missing to default values.", guild.first);
-            _StoreGuildDB(guild.first);
+            LogGuilds("Found missing permissions for guild id [{}].  Setting missing to default values.", g.id);
+            _StoreGuildDB(g.id);
             store_to_db = false;
         }
-        auto guild_tributes = BaseGuildTributesRepository::FindOne(*m_db, guild.first);
-        if (guild_tributes.guild_id) {
-            guild.second->tribute.id_1			 = guild_tributes.tribute_id_1;
-            guild.second->tribute.id_2			 = guild_tributes.tribute_id_2;
-            guild.second->tribute.id_1_tier		 = guild_tributes.tribute_id_1_tier;
-            guild.second->tribute.id_2_tier		 = guild_tributes.tribute_id_2_tier;
-            guild.second->tribute.enabled		 = guild_tributes.enabled;
-            if (guild_tributes.time_remaining > RuleI(Guild, TributeTime) ||
-                guild_tributes.time_remaining <= 0) {
-                guild_tributes.time_remaining = RuleI(Guild, TributeTime);
+
+        for (auto const& gt : guilds_tributes) {
+            if (gt.guild_id == g.id) {
+                m_guilds[g.id]->tribute.id_1 = gt.tribute_id_1;
+                m_guilds[g.id]->tribute.id_2 = gt.tribute_id_2;
+                m_guilds[g.id]->tribute.id_1_tier = gt.tribute_id_1_tier;
+                m_guilds[g.id]->tribute.id_2_tier = gt.tribute_id_2_tier;
+                m_guilds[g.id]->tribute.enabled = gt.enabled;
+                if (gt.time_remaining > RuleI(Guild, TributeTime) || gt.time_remaining <= 0) {
+                    m_guilds[g.id]->tribute.time_remaining = RuleI(Guild, TributeTime);
+                }
+                m_guilds[g.id]->tribute.time_remaining = gt.time_remaining;
+                LogGuilds("Timer has [{}] time remaining from the load function.", m_guilds[g.id]->tribute.time_remaining);
             }
-            guild.second->tribute.time_remaining = guild_tributes.time_remaining;
-            LogGuilds("Timer has [{}] time remaining from the load function.", guild.second->tribute.time_remaining);
         }
     }
     LogGuilds("Completed loading {} guilds.", guilds.size());
