@@ -45,17 +45,17 @@ public:
 
 	 // Custom extended repository methods here
 
-	static int UpdateFavor(Database& db, uint32 guild_id, uint32 favor)
+	static int UpdateFavor(Database &db, uint32 guild_id, uint32 favor)
 	{
-        auto const guild = GetWhere(db, fmt::format("guild_id = '{}'", guild_id));
-        if (guild.empty()) {
-            return 0;
-        }
+		auto const guild = GetWhere(db, fmt::format("guild_id = '{}'", guild_id));
+		if (guild.empty()) {
+			return 0;
+		}
 
-        auto g = guild[0];
-        g.favor = favor;
+		auto g = guild[0];
+		g.favor = favor;
 
-        return UpdateOne(db, g);
+		return UpdateOne(db, g);
 	}
 };
 

@@ -675,26 +675,23 @@ namespace Titanium
 
 		//Translate older ranks to new values* /
 		switch (emu->rank) {
-		case GUILD_SENIOR_MEMBER:
-		case GUILD_MEMBER:
-		case GUILD_JUNIOR_MEMBER:
-		case GUILD_INITIATE:
-		case GUILD_RECRUIT:
-		{
-			eq->rank = GUILD_MEMBER_TI;
-			break;
-		}
-		case GUILD_OFFICER:
-		case GUILD_SENIOR_OFFICER:
-		{
-			eq->rank = GUILD_OFFICER_TI;
-			break;
-		}
-		case GUILD_LEADER:
-		{
-			eq->rank = GUILD_LEADER_TI;
-			break;
-		}
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank = GUILD_LEADER_TI;
+				break;
+			}
 		}
 
 		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
@@ -711,39 +708,32 @@ namespace Titanium
 		OUT(spawn_id);
 		OUT(type);
 		OUT(parameter);
-		switch (emu->type)
-		{
-		case AT_GuildRank:
-		{
-			//Translate new ranks to old values* /
-			switch (emu->parameter)
-			{
-			case GUILD_SENIOR_MEMBER:
-			case GUILD_MEMBER:
-			case GUILD_JUNIOR_MEMBER:
-			case GUILD_INITIATE:
-			case GUILD_RECRUIT:
-			{
-				eq->parameter = GUILD_MEMBER_TI;
-				break;
+		switch (emu->type) {
+			case AT_GuildRank: {
+				//Translate new ranks to old values* /
+				switch (emu->parameter) {
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						eq->parameter = GUILD_MEMBER_TI;
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						eq->parameter = GUILD_OFFICER_TI;
+						break;
+					}
+					case GUILD_LEADER: {
+						eq->parameter = GUILD_LEADER_TI;
+						break;
+					}
+					default: {
+						break;
+					}
+				}
 			}
-			case GUILD_OFFICER:
-			case GUILD_SENIOR_OFFICER:
-			{
-				eq->parameter = GUILD_OFFICER_TI;
-				break;
-			}
-			case GUILD_LEADER:
-			{
-				eq->parameter = GUILD_LEADER_TI;
-				break;
-			}
-			default:
-			{
-				break;
-			}
-			}
-		}
 		}
 		FINISH_ENCODE();
 	}

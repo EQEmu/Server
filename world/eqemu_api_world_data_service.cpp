@@ -315,19 +315,19 @@ void EQEmuApiWorldDataService::callGetGuildDetails(Json::Value& response, const 
 	}
 
 	for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
-		row["functions"][i]["db_id"]		= guild->functions[i].id;
-		row["functions"][i]["perm_id"]		= guild->functions[i].perm_id;
-		row["functions"][i]["guild_id"]		= guild->functions[i].guild_id;
-		row["functions"][i]["perm_value"]	= guild->functions[i].perm_value;
+		row["functions"][i]["db_id"]      = guild->functions[i].id;
+		row["functions"][i]["perm_id"]    = guild->functions[i].perm_id;
+		row["functions"][i]["guild_id"]   = guild->functions[i].guild_id;
+		row["functions"][i]["perm_value"] = guild->functions[i].perm_value;
 	}
 
-	row["tribute"]["favor"]			 = guild->tribute.favor;
-	row["tribute"]["id1"]			 = guild->tribute.id_1;
-	row["tribute"]["id1_tier"]		 = guild->tribute.id_1_tier;
-	row["tribute"]["id2"]			 = guild->tribute.id_2;
-	row["tribute"]["id2_tier"]		 = guild->tribute.id_2_tier;
+	row["tribute"]["favor"]          = guild->tribute.favor;
+	row["tribute"]["id1"]            = guild->tribute.id_1;
+	row["tribute"]["id1_tier"]       = guild->tribute.id_1_tier;
+	row["tribute"]["id2"]            = guild->tribute.id_2;
+	row["tribute"]["id2_tier"]       = guild->tribute.id_2_tier;
 	row["tribute"]["time_remaining"] = guild->tribute.time_remaining;
-	row["tribute"]["enabled"]		 = guild->tribute.enabled;
+	row["tribute"]["enabled"]        = guild->tribute.enabled;
 
 	client_list.GetGuildClientList(response, guild_id);
 

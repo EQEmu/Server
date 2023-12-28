@@ -1136,32 +1136,27 @@ namespace UF
 				PutFieldN(banker);
 				PutFieldN(class_);
 				//Translate older ranks to new values* /
-				switch (emu_e->rank)
-				{
-				case GUILD_SENIOR_MEMBER:
-				case GUILD_MEMBER:
-				case GUILD_JUNIOR_MEMBER:
-				case GUILD_INITIATE:
-				case GUILD_RECRUIT:
-				{
-					emu_e->rank = GUILD_MEMBER_TI;
-					break;
-				}
-				case GUILD_OFFICER:
-				case GUILD_SENIOR_OFFICER:
-				{
-					emu_e->rank = GUILD_OFFICER_TI;
-					break;
-				}
-				case GUILD_LEADER:
-				{
-					emu_e->rank = GUILD_LEADER_TI;
-					break;
-				}
-				default:
-				{
-					break;
-				}
+				switch (emu_e->rank) {
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						emu_e->rank = GUILD_MEMBER_TI;
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						emu_e->rank = GUILD_OFFICER_TI;
+						break;
+					}
+					case GUILD_LEADER: {
+						emu_e->rank = GUILD_LEADER_TI;
+						break;
+					}
+					default: {
+						break;
+					}
 				}
 				PutFieldN(rank);
 				PutFieldN(time_last_on);
@@ -1891,32 +1886,27 @@ namespace UF
 		OUT(anon);
 		OUT(gm);
 		//Translate older ranks to new values* /
-		switch (emu->guildrank)
-		{
-		case GUILD_SENIOR_MEMBER:
-		case GUILD_MEMBER:
-		case GUILD_JUNIOR_MEMBER:
-		case GUILD_INITIATE:
-		case GUILD_RECRUIT:
-		{
-			emu->guildrank = GUILD_MEMBER_TI;
-			break;
-		}
-		case GUILD_OFFICER:
-		case GUILD_SENIOR_OFFICER:
-		{
-			emu->guildrank = GUILD_OFFICER_TI;
-			break;
-		}
-		case GUILD_LEADER:
-		{
-			emu->guildrank = GUILD_LEADER_TI;
-			break;
-		}
-		default:
-		{
-			break;
-		}
+		switch (emu->guildrank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				emu->guildrank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				emu->guildrank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				emu->guildrank = GUILD_LEADER_TI;
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 		OUT(guildrank);
 		OUT(guildbanker);
@@ -2432,28 +2422,24 @@ namespace UF
 		case AT_GuildRank:
 		{
 			//Translate new ranks to old values* /
-			switch (emu->parameter)
-			{
-			case GUILD_SENIOR_MEMBER:
-			case GUILD_MEMBER:
-			case GUILD_JUNIOR_MEMBER:
-			case GUILD_INITIATE:
-			case GUILD_RECRUIT:
-			{
-				eq->parameter = GUILD_MEMBER_TI;
-				break;
-			}
-			case GUILD_OFFICER:
-			case GUILD_SENIOR_OFFICER:
-			{
-				eq->parameter = GUILD_OFFICER_TI;
-				break;
-			}
-			case GUILD_LEADER:
-			{
-				eq->parameter = GUILD_LEADER_TI;
-				break;
-			}
+			switch (emu->parameter) {
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT: {
+					eq->parameter = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER: {
+					eq->parameter = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER: {
+					eq->parameter = GUILD_LEADER_TI;
+					break;
+				}
 			}
 		}
 		default:
@@ -2474,32 +2460,27 @@ namespace UF
 		eq->unknown04 = 0;
 
 		//Translate older ranks to new values* /
-		switch (emu->rank)
-		{
-		case GUILD_SENIOR_MEMBER:
-		case GUILD_MEMBER:
-		case GUILD_JUNIOR_MEMBER:
-		case GUILD_INITIATE:
-		case GUILD_RECRUIT:
-		{
-			emu->rank = GUILD_MEMBER_TI;
-			break;
-		}
-		case GUILD_OFFICER:
-		case GUILD_SENIOR_OFFICER:
-		{
-			emu->rank = GUILD_OFFICER_TI;
-			break;
-		}
-		case GUILD_LEADER:
-		{
-			emu->rank = GUILD_LEADER_TI;
-			break;
-		}
-		default:
-		{
-			break;
-		}
+		switch (emu->rank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				emu->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				emu->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				emu->rank = GUILD_LEADER_TI;
+				break;
+			}
+			default: {
+				break;
+			}
 		}
 
 		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));

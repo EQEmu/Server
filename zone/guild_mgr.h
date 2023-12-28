@@ -65,9 +65,9 @@ public:
 	void  SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note);
 	void  SendToWorldMemberRemove(uint32 guild_id, std::string player_name);
 	void  SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
-    void  SendToWorldGuildChannel(uint32 guild_id, std::string channel);
-    void  SendToWorldGuildURL(uint32 guild_id, std::string url);
-    bool  RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name);
+	void  SendToWorldGuildChannel(uint32 guild_id, std::string channel);
+	void  SendToWorldGuildURL(uint32 guild_id, std::string url);
+	bool  RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name);
 	void  AddMember(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
 
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);

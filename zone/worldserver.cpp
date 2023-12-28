@@ -3396,25 +3396,25 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
 		if (guild) {
-			guild->tribute.favor = in->favor;
-			guild->tribute.id_1 = in->tribute_id_1;
-			guild->tribute.id_2 = in->tribute_id_2;
-			guild->tribute.id_1_tier = in->tribute_id_1_tier;
-			guild->tribute.id_2_tier = in->tribute_id_2_tier;
+			guild->tribute.favor          = in->favor;
+			guild->tribute.id_1           = in->tribute_id_1;
+			guild->tribute.id_2           = in->tribute_id_2;
+			guild->tribute.id_1_tier      = in->tribute_id_1_tier;
+			guild->tribute.id_2_tier      = in->tribute_id_2_tier;
 			guild->tribute.time_remaining = in->time_remaining;
-			guild->tribute.enabled = in->enabled;
+			guild->tribute.enabled        = in->enabled;
 		}
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildSendActiveTributes, sizeof(GuildTributeSendActive_Struct));
 		GuildTributeSendActive_Struct* out = (GuildTributeSendActive_Struct*)outapp->pBuffer;
 
-		out->not_used			= in->guild_id;
-		out->guild_favor		= in->favor;
-		out->tribute_enabled	= in->enabled;
-		out->tribute_timer		= in->time_remaining;
-		out->tribute_id_1		= in->tribute_id_1;
-		out->tribute_id_2		= in->tribute_id_2;
-		out->tribute_id_1_tier  = in->tribute_id_1_tier;
-		out->tribute_id_2_tier  = in->tribute_id_2_tier;
+		out->not_used          = in->guild_id;
+		out->guild_favor       = in->favor;
+		out->tribute_enabled   = in->enabled;
+		out->tribute_timer     = in->time_remaining;
+		out->tribute_id_1      = in->tribute_id_1;
+		out->tribute_id_2      = in->tribute_id_2;
+		out->tribute_id_1_tier = in->tribute_id_1_tier;
+		out->tribute_id_2_tier = in->tribute_id_2_tier;
 
 		entity_list.QueueClientsGuild(outapp, in->guild_id);
 		safe_delete(outapp);
