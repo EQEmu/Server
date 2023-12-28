@@ -5144,6 +5144,17 @@ CHANGE COLUMN `temporary` `class_list` text CHARACTER SET latin1 COLLATE latin1_
 		.sql = R"(
 ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
 )"
+	},
+	ManifestEntry{
+		.version = 9249,
+		.description = "2023_12_26_add_tasks_enabled_column.sql",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'enabled'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `tasks`
+ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
+)"
 	}
 
 // -- template; copy/paste this when you need to create a new entry

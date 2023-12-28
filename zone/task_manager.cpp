@@ -52,6 +52,8 @@ bool TaskManager::LoadTasks(int single_task)
 		task_query_filter = fmt::format("id > 0");
 	}
 
+	task_query_filter += " AND enabled = 1";
+
 	// load task level data
 	auto repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
 	m_task_data.reserve(repo_tasks.size());
@@ -127,7 +129,7 @@ bool TaskManager::LoadTasks(int single_task)
 		);
 	}
 
-	LogTasks("Loaded [{}] Tasks", repo_tasks.size());
+	LogInfo("Loaded [{}] task(s)", repo_tasks.size());
 
 	std::string activities_query_filter = fmt::format(
 		"taskid = {} and activityid < {} ORDER BY taskid, activityid ASC",
@@ -256,7 +258,7 @@ bool TaskManager::LoadTasks(int single_task)
 		task_data->activity_count++;
 	}
 
-	LogTasks("Loaded [{}] Task Activities", task_activities.size());
+	LogInfo("Loaded [{}] task activities", task_activities.size());
 
 	return true;
 }
