@@ -37,6 +37,8 @@ void PlayerEventLogs::Init()
 		db.emplace_back(e.id);
 	}
 
+	std::vector<PlayerEventLogSettingsRepository::PlayerEventLogSettings> settings_to_insert{};
+
 	// insert entries that don't exist in database
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		bool is_in_database = std::find(db.begin(), db.end(), i) != db.end();
@@ -56,19 +58,19 @@ void PlayerEventLogs::Init()
 
 		bool is_missing_in_database = std::find(db.begin(), db.end(), i) == db.end();
 		if (is_missing_in_database && is_implemented && !is_deprecated) {
-			LogInfo(
-				"[New] PlayerEvent [{}] ({})",
-				PlayerEvent::EventName[i],
-				i
-			);
+			LogInfo("[New] PlayerEvent [{}] ({})", PlayerEvent::EventName[i], i);
 
 			auto c = PlayerEventLogSettingsRepository::NewEntity();
 			c.id             = i;
 			c.event_name     = PlayerEvent::EventName[i];
 			c.event_enabled  = m_settings[i].event_enabled;
 			c.retention_days = m_settings[i].retention_days;
-			PlayerEventLogSettingsRepository::InsertOne(*m_database, c);
+			settings_to_insert.emplace_back(c);
 		}
+	}
+
+	if (!settings_to_insert.empty()) {
+		PlayerEventLogSettingsRepository::ReplaceMany(*m_database, settings_to_insert);
 	}
 
 	bool processing_in_world = !RuleB(Logging, PlayerEventsQSProcess) && IsWorld();
