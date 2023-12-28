@@ -546,6 +546,7 @@ void Client::CompleteConnect()
 	if (IsInAGuild()) {
 		guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 		uint8 rank = GuildRank();
+		SendGuildList();
 		SendAppearancePacket(AT_GuildID, GuildID(), false);
 		SendAppearancePacket(AT_GuildRank, rank, false);
 	}
@@ -7876,7 +7877,6 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
 	SetGuildID(NewGuildID);
-	guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 	
 	LogGuilds("[{}]: Creating guild [{}] with leader [{}] via UF+ GUI. It was given id [{}]", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
@@ -7896,6 +7896,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 				SendGuildRanks();
 			}
+			guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 			SendGuildMembersList();
 		}
 	}

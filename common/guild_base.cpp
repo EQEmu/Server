@@ -119,16 +119,19 @@ bool BaseGuildManager::LoadGuilds()
 			}
 		}
 
-        if (guilds_permissions.size() < GUILD_MAX_FUNCTIONS) {
-            store_to_db = true;
-        }
-
+        auto count = 0;
         for (auto const& p : guilds_permissions) {
             m_guilds[g.id]->functions[p.perm_id].id         = p.id;
             m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
             m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
             m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
+            count++;
         }
+
+        if (count < GUILD_MAX_FUNCTIONS) {
+            store_to_db = true;
+        }
+
         LogGuilds("Loaded guild id [{}]", g.id);
 
         if (store_to_db) {
