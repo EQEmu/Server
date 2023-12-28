@@ -7876,7 +7876,8 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
 	SetGuildID(NewGuildID);
-
+	guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
+	
 	LogGuilds("[{}]: Creating guild [{}] with leader [{}] via UF+ GUI. It was given id [{}]", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
 
