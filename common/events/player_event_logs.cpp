@@ -611,7 +611,7 @@ void PlayerEventLogs::Process()
 
 void PlayerEventLogs::ProcessRetentionTruncation()
 {
-	LogInfo("Running truncation");
+	LogPlayerEvents("Running truncation");
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		if (m_settings[i].retention_days > 0) {
