@@ -237,10 +237,10 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		break;
 	}
 	case ServerOP_GuildMemberLevelUpdate:
-    case ServerOP_GuildMemberPublicNote:
-    case ServerOP_GuildChannel:
-    case ServerOP_GuildURL:
-    case ServerOP_GuildMemberRemove:
+	case ServerOP_GuildMemberPublicNote:
+	case ServerOP_GuildChannel:
+	case ServerOP_GuildURL:
+	case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
 	{
 		for (auto const& z : zoneserver_list.getZoneServerList()) {

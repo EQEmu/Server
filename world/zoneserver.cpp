@@ -985,9 +985,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RefreshGuild:
 		case ServerOP_GuildMemberLevelUpdate:
 		case ServerOP_GuildMemberPublicNote:
-        case ServerOP_GuildChannel:
-        case ServerOP_GuildURL:
-        case ServerOP_GuildMemberRemove:
+		case ServerOP_GuildChannel:
+		case ServerOP_GuildURL:
+		case ServerOP_GuildMemberRemove:
 		case ServerOP_GuildMemberAdd:
 		{
 			guild_mgr.ProcessZonePacket(pack);
@@ -1540,16 +1540,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
 
 			if (guild) {
-				guild->tribute.enabled		  = 0;
-				guild->tribute.id_1			  = data->tribute_id_1;
-				guild->tribute.id_2			  = data->tribute_id_2;
-				guild->tribute.id_1_tier	  = data->tribute_id_1_tier;
-				guild->tribute.id_2_tier	  = data->tribute_id_2_tier;
+				guild->tribute.enabled        = 0;
+				guild->tribute.id_1           = data->tribute_id_1;
+				guild->tribute.id_2           = data->tribute_id_2;
+				guild->tribute.id_1_tier      = data->tribute_id_1_tier;
+				guild->tribute.id_2_tier      = data->tribute_id_2_tier;
 				guild->tribute.time_remaining = RuleI(Guild, TributeTime);
 
 				guild->tribute.timer.Disable();
 
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
+				for (auto const &z: zoneserver_list.getZoneServerList()) {
 					auto r = z.get();
 					if (r->GetZoneID() > 0) {
 						r->SendPacket(pack);
@@ -1563,16 +1563,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
 
 			if (guild) {
-				guild->tribute.enabled		  = data->enabled;
+				guild->tribute.enabled = data->enabled;
 
 				if (guild->tribute.enabled) {
-					data->enabled			= 1;
+					data->enabled           = 1;
 					if (guild->tribute.time_remaining == RuleI(Guild, TributeTime)) {
 						data->favor = (guild->tribute.favor -= guild_mgr.GetGuildTributeCost(data->guild_id));
 					}
-					data->time_remaining	= guild->tribute.time_remaining;
-					data->tribute_id_1		= guild->tribute.id_1;
-					data->tribute_id_2		= guild->tribute.id_2;
+					data->time_remaining    = guild->tribute.time_remaining;
+					data->tribute_id_1      = guild->tribute.id_1;
+					data->tribute_id_2      = guild->tribute.id_2;
 					data->tribute_id_1_tier = guild->tribute.id_1_tier;
 					data->tribute_id_2_tier = guild->tribute.id_2_tier;
 
@@ -1583,11 +1583,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					if (guild->tribute.timer.Enabled()) {
 						guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
 					}
-					data->enabled = 0;
-					data->favor				= guild->tribute.favor;
-					data->time_remaining	= guild->tribute.time_remaining;
-					data->tribute_id_1		= guild->tribute.id_1;
-					data->tribute_id_2		= guild->tribute.id_2;
+					data->enabled           = 0;
+					data->favor             = guild->tribute.favor;
+					data->time_remaining    = guild->tribute.time_remaining;
+					data->tribute_id_1      = guild->tribute.id_1;
+					data->tribute_id_2      = guild->tribute.id_2;
 					data->tribute_id_1_tier = guild->tribute.id_1_tier;
 					data->tribute_id_2_tier = guild->tribute.id_2_tier;
 					LogInfo("Guild Tribute Timer Stopped with {} ms remaining.", data->time_remaining);

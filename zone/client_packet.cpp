@@ -7877,7 +7877,7 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 
 	uint32 NewGuildID = guild_mgr.CreateGuild(GuildName, CharacterID());
 	SetGuildID(NewGuildID);
-	
+
 	LogGuilds("[{}]: Creating guild [{}] with leader [{}] via UF+ GUI. It was given id [{}]", GetName(),
 		GuildName, CharacterID(), (unsigned long)NewGuildID);
 
@@ -7959,26 +7959,26 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 		target_client->GuildRank() < GuildRank())
 	{
 		LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}])",
-			demote->target, 
+			demote->target,
 			gci.char_id,
 			guild_mgr.GetRankName(GuildID(), gci.rank),
 			gci.rank,
 			guild_mgr.GetRankName(GuildID(), rank),
 			rank,
-			guild_mgr.GetGuildName(GuildID()), 
+			guild_mgr.GetGuildName(GuildID()),
 			GuildID()
 		);
 		if (!guild_mgr.SetGuildRank(gci.char_id, rank))
 		{
 			Message(Chat::Red, "Error while setting rank %d on '%s'.", rank, demote->target);
 			LogGuilds("Demoting [{}] ([{}]) from rank [{}] ([{}]) to [{}] ([{}]) in [{}] ([{}]) FAILED.",
-				demote->target, 
+				demote->target,
 				gci.char_id,
 				guild_mgr.GetRankName(GuildID(), gci.rank),
 				gci.rank,
 				guild_mgr.GetRankName(GuildID(), rank),
 				rank,
-				guild_mgr.GetGuildName(GuildID()), 
+				guild_mgr.GetGuildName(GuildID()),
 				GuildID()
 			);
 			return;
@@ -8496,7 +8496,7 @@ void Client::Handle_OP_GuildRemove(const EQApplicationPacket *app)
 		);
 		return;
 	}
-	
+
 	GuildCommand_Struct* gc = (GuildCommand_Struct*)app->pBuffer;
 
 	if (!IsInAGuild()) {
@@ -8577,92 +8577,104 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 
 	auto rank = c->GuildRank();
 	switch (rank) {
-	case GUILD_LEADER: {
-		MessageString(Chat::LightGray, LEADER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
-	case GUILD_SENIOR_OFFICER:
-	case GUILD_OFFICER: {
-		MessageString(Chat::LightGray, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
-	case GUILD_SENIOR_MEMBER:
-	case GUILD_MEMBER:
-	case GUILD_JUNIOR_MEMBER:
-	case GUILD_INITIATE:
-	case GUILD_RECRUIT: {
-		MessageString(Chat::LightGray, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
-		break;
-	}
+		case GUILD_LEADER: {
+			MessageString(Chat::LightGray, LEADER_OF_X_GUILD, c->GetName(), GuildName);
+			break;
+		}
+		case GUILD_SENIOR_OFFICER:
+		case GUILD_OFFICER: {
+			MessageString(Chat::LightGray, OFFICER_OF_X_GUILD, c->GetName(), GuildName);
+			break;
+		}
+		case GUILD_SENIOR_MEMBER:
+		case GUILD_MEMBER:
+		case GUILD_JUNIOR_MEMBER:
+		case GUILD_INITIATE:
+		case GUILD_RECRUIT: {
+			MessageString(Chat::LightGray, MEMBER_OF_X_GUILD, c->GetName(), GuildName);
+			break;
+		}
 	}
 }
 
 void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
 {
-	if (!IsInAGuild())
+	if (!IsInAGuild()) {
 		return;
+	}
 
-	GuildUpdateUCPStruct* gup = (GuildUpdateUCPStruct*)app->pBuffer;
+	GuildUpdateUCPStruct *gup = (GuildUpdateUCPStruct *) app->pBuffer;
 
 	switch (gup->action) {
-	case GuildUpdateURL:
-    {
-        if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
-        {
-            LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
-            DumpPacket(app);
-            return;
-        }
+		case GuildUpdateURL: {
+			if (app->size != sizeof(GuildUpdateURLAndChannel_Struct)) {
+				LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]",
+						 sizeof(GuildUpdateURLAndChannel_Struct),
+						 app->size);
+				DumpPacket(app);
+				return;
+			}
 
-        guild_mgr.SetGuildURL(GuildID(), gup->payload.url_channel.text);
-        guild_mgr.SendToWorldGuildURL(GuildID(), gup->payload.url_channel.text);
+			guild_mgr.SetGuildURL(GuildID(), gup->payload.url_channel.text);
+			guild_mgr.SendToWorldGuildURL(GuildID(), gup->payload.url_channel.text);
 
-        break;
-    }
-    case GuildUpdateChannel:
-    {
-		if (app->size != sizeof(GuildUpdateURLAndChannel_Struct))
-		{
-			LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]", sizeof(GuildUpdateURLAndChannel_Struct), app->size);
-			DumpPacket(app);
-			return;
+			break;
 		}
+		case GuildUpdateChannel: {
+			if (app->size != sizeof(GuildUpdateURLAndChannel_Struct)) {
+				LogDebug("Size mismatch in OP_GuildUpdateURLAndChannel expected [{}] got [{}]",
+						 sizeof(GuildUpdateURLAndChannel_Struct),
+						 app->size);
+				DumpPacket(app);
+				return;
+			}
 
-        guild_mgr.SetGuildChannel(GuildID(), gup->payload.url_channel.text);
-        guild_mgr.SendToWorldGuildChannel(GuildID(), gup->payload.url_channel.text);
-        break;
-	}
-	case GuildUpdateRanks: 
-    {
-		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_RANK_NAMES)) {
-			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
-			return;
+			guild_mgr.SetGuildChannel(GuildID(), gup->payload.url_channel.text);
+			guild_mgr.SendToWorldGuildChannel(GuildID(), gup->payload.url_channel.text);
+			break;
 		}
-		auto rank = gup->payload.rank_name.rank;
-		std::string rank_name(gup->payload.rank_name.rank_name);
+		case GuildUpdateRanks: {
+			if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_RANK_NAMES)) {
+				MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
+				return;
+			}
+			auto        rank = gup->payload.rank_name.rank;
+			std::string rank_name(gup->payload.rank_name.rank_name);
 
-		if (rank > GUILD_MAX_RANK || rank < 0 || rank_name.empty()) {
-			LogGuilds("Received packet to update rank though rank {} or rank name {} was incorrect.", rank, rank_name.c_str());
-			return;
+			if (rank > GUILD_MAX_RANK || rank < 0 || rank_name.empty()) {
+				LogGuilds("Received packet to update rank though rank {} or rank name {} was incorrect.",
+						  rank,
+						  rank_name.c_str());
+				return;
+			}
+			guild_mgr.UpdateRankName(guild_id, rank, rank_name);
+			guild_mgr.SendRankName(guild_id, rank, rank_name);
+
+			break;
 		}
-		guild_mgr.UpdateRankName(guild_id, rank, rank_name);
-		guild_mgr.SendRankName(guild_id, rank, rank_name);
+		case GuildUpdatePermissions: {
+			if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_PERMISSIONS)) {
+				MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
+				return;
+			}
+			guild_mgr.UpdateRankPermission(
+				guild_id,
+				character_id,
+				gup->payload.permissions.function_id,
+				gup->payload.permissions.rank,
+				gup->payload.permissions.value
+			);
+			guild_mgr.SendPermissionUpdate(
+				guild_id,
+				gup->payload.permissions.rank,
+				gup->payload.permissions.function_id,
+				gup->payload.permissions.value
+			);
 
-		break;
-	}
-	case GuildUpdatePermissions:
-	{
-		if (!guild_mgr.CheckPermission(guild_id, guildrank, GUILD_ACTION_RANKS_CHANGE_PERMISSIONS)) {
-			MessageString(Chat::Yellow, GUILD_PERMISSION_FAILED);
-			return;
+			break;
 		}
-		guild_mgr.UpdateRankPermission(guild_id, character_id, gup->payload.permissions.function_id, gup->payload.permissions.rank, gup->payload.permissions.value);
-		guild_mgr.SendPermissionUpdate(guild_id, gup->payload.permissions.rank, gup->payload.permissions.function_id, gup->payload.permissions.value);
-
-		break;
-	}
-	default:
-		break;
+		default:
+			break;
 	}
 }
 
@@ -16645,20 +16657,20 @@ void Client::ReloadExpansionProfileSetting()
 	}
 }
 
-void Client::Handle_OP_GuildTributeSelect(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeSelect(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_GuildSelectTribute of length [{}]", app->size);
 
 	if (app->size != sizeof(GuildTributeSelectReq_Struct))
 		LogError("Invalid size on OP_GuildSelectTribute packet");
 	else {
-		GuildTributeSelectReq_Struct* t = (GuildTributeSelectReq_Struct*)app->pBuffer;
+		GuildTributeSelectReq_Struct *t = (GuildTributeSelectReq_Struct *) app->pBuffer;
 		SendGuildTributeDetails(t->tribute_id, t->tier);
 	}
 	return;
 }
 
-void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildModifyBenefits of length [{}]", app->size);
 
@@ -16666,59 +16678,61 @@ void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket* app
 		LogError("Invalid size on Handle_OP_GuildModifyBenefits packet");
 	}
 	else {
-		GuildTributeModifyBenefits_Struct* t = (GuildTributeModifyBenefits_Struct*)app->pBuffer;
+		GuildTributeModifyBenefits_Struct *t = (GuildTributeModifyBenefits_Struct *) app->pBuffer;
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildModifyBenefits, sizeof(GuildTributeModifyBenefits_Struct));
-		GuildTributeModifyBenefits_Struct* gmbs = (GuildTributeModifyBenefits_Struct*)outapp->pBuffer;
+		EQApplicationPacket               *outapp = new EQApplicationPacket(
+			OP_GuildModifyBenefits,
+			sizeof(GuildTributeModifyBenefits_Struct));
+		GuildTributeModifyBenefits_Struct *gmbs   = (GuildTributeModifyBenefits_Struct *) outapp->pBuffer;
 
 		switch (t->command) {
-		case 0: {
-			gmbs->command = 0;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = t->tribute_id_1;
-			gmbs->tribute_id_2 = t->tribute_id_2;
-			gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
-			gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
-			gmbs->tribute_master_id = t->tribute_master_id;
-			QueuePacket(outapp);
+			case 0: {
+				gmbs->command           = 0;
+				gmbs->data              = 1;
+				gmbs->tribute_id_1      = t->tribute_id_1;
+				gmbs->tribute_id_2      = t->tribute_id_2;
+				gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
+				gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
+				gmbs->tribute_master_id = t->tribute_master_id;
+				QueuePacket(outapp);
 
-			auto sp = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
-			auto out = (GuildTributeUpdate*)sp->pBuffer;
-			out->guild_id = GuildID();
-			out->enabled = false;
-			worldserver.SendPacket(sp);
-			safe_delete(sp);
-			break;
-		}
-		case 1: {
-			gmbs->command = 1;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = t->tribute_id_1;
-			gmbs->tribute_id_2 = t->tribute_id_2;
-			gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
-			gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
-			gmbs->tribute_master_id = t->tribute_master_id;
-			QueuePacket(outapp);
-			break;
-		}
-		default: {
-			gmbs->command = 0;
-			gmbs->data = 1;
-			gmbs->tribute_id_1 = 0;
-			gmbs->tribute_id_2 = 0;
-			gmbs->tribute_id_1_tier = 0;
-			gmbs->tribute_id_2_tier = 0;
-			gmbs->tribute_master_id = 0;
-			QueuePacket(outapp);
-			break;
-		}
+				auto sp  = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
+				auto out = (GuildTributeUpdate *) sp->pBuffer;
+				out->guild_id = GuildID();
+				out->enabled  = false;
+				worldserver.SendPacket(sp);
+				safe_delete(sp);
+				break;
+			}
+			case 1: {
+				gmbs->command           = 1;
+				gmbs->data              = 1;
+				gmbs->tribute_id_1      = t->tribute_id_1;
+				gmbs->tribute_id_2      = t->tribute_id_2;
+				gmbs->tribute_id_1_tier = t->tribute_id_1_tier;
+				gmbs->tribute_id_2_tier = t->tribute_id_2_tier;
+				gmbs->tribute_master_id = t->tribute_master_id;
+				QueuePacket(outapp);
+				break;
+			}
+			default: {
+				gmbs->command           = 0;
+				gmbs->data              = 1;
+				gmbs->tribute_id_1      = 0;
+				gmbs->tribute_id_2      = 0;
+				gmbs->tribute_id_1_tier = 0;
+				gmbs->tribute_id_2_tier = 0;
+				gmbs->tribute_master_id = 0;
+				QueuePacket(outapp);
+				break;
+			}
 		}
 		safe_delete(outapp);
 	}
 	return;
 }
 
-void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildTributeOptInOut of length [{}]", app->size);
 
@@ -16727,28 +16741,30 @@ void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app)
 		return;
 	}
 
-	GuildTributeOptInOutReq_Struct* in = (GuildTributeOptInOutReq_Struct*)app->pBuffer;
+	GuildTributeOptInOutReq_Struct *in = (GuildTributeOptInOutReq_Struct *) app->pBuffer;
 
 	CharGuildInfo gci;
 	guild_mgr.GetCharInfo(in->player, gci);
 
 	guild_mgr.UpdateDbMemberTributeEnabled(GuildID(), gci.char_id, in->tribute_toggle);
 
-	ServerPacket* sout = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
-	GuildTributeMemberToggle* out = (GuildTributeMemberToggle*)sout->pBuffer;
+	ServerPacket             *sout = new ServerPacket(
+		ServerOP_GuildTributeOptInToggle,
+		sizeof(GuildTributeMemberToggle));
+	GuildTributeMemberToggle *out  = (GuildTributeMemberToggle *) sout->pBuffer;
 
 	out->guild_id = GuildID();
-	out->char_id = gci.char_id;
+	out->char_id  = gci.char_id;
 	strncpy(out->player_name, in->player, strlen(in->player));
 	out->tribute_toggle = in->tribute_toggle;
-	out->command = in->command;
+	out->command        = in->command;
 
 	worldserver.SendPacket(sout);
 
 	safe_delete(sout);
 }
 
-void Client::Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildTributeSaveActive of length [{}]", app->size);
 
@@ -16757,45 +16773,45 @@ void Client::Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket*
 		return;
 	}
 
-	GuildTributeSaveActive_Struct* data = (GuildTributeSaveActive_Struct*)app->pBuffer;
+	GuildTributeSaveActive_Struct *data = (GuildTributeSaveActive_Struct *) app->pBuffer;
 	auto guild = guild_mgr.GetGuildByGuildID(GuildID());
 	if (guild) {
 		GuildTributesRepository::GuildTributes gt{};
 
-		gt.guild_id = GuildID();
-		gt.tribute_id_1 = data->tribute_id_1;
-		gt.tribute_id_2 = data->tribute_id_2;
+		gt.guild_id          = GuildID();
+		gt.tribute_id_1      = data->tribute_id_1;
+		gt.tribute_id_2      = data->tribute_id_2;
 		gt.tribute_id_1_tier = data->tribute_1_tier;
 		gt.tribute_id_2_tier = data->tribute_2_tier;
-		gt.enabled = 0;
-		gt.time_remaining = RuleI(Guild, TributeTime);
+		gt.enabled           = 0;
+		gt.time_remaining    = RuleI(Guild, TributeTime);
 		GuildTributesRepository::ReplaceOne(database, gt);
 
-		guild->tribute.enabled = 0;
-		guild->tribute.id_1 = data->tribute_id_1;
-		guild->tribute.id_2 = data->tribute_id_2;
-		guild->tribute.id_1_tier = data->tribute_1_tier;
-		guild->tribute.id_2_tier = data->tribute_2_tier;
+		guild->tribute.enabled        = 0;
+		guild->tribute.id_1           = data->tribute_id_1;
+		guild->tribute.id_2           = data->tribute_id_2;
+		guild->tribute.id_1_tier      = data->tribute_1_tier;
+		guild->tribute.id_2_tier      = data->tribute_2_tier;
 		guild->tribute.time_remaining = RuleI(Guild, TributeTime);
 
-		ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeUpdate, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* gtu = (GuildTributeUpdate*)sp->pBuffer;
+		ServerPacket       *sp  = new ServerPacket(ServerOP_GuildTributeUpdate, sizeof(GuildTributeUpdate));
+		GuildTributeUpdate *gtu = (GuildTributeUpdate *) sp->pBuffer;
 
-		gtu->guild_id = GuildID();
-		gtu->tribute_id_1 = data->tribute_id_1;
-		gtu->tribute_id_2 = data->tribute_id_2;
+		gtu->guild_id          = GuildID();
+		gtu->tribute_id_1      = data->tribute_id_1;
+		gtu->tribute_id_2      = data->tribute_id_2;
 		gtu->tribute_id_1_tier = data->tribute_1_tier;
 		gtu->tribute_id_2_tier = data->tribute_2_tier;
-		gtu->enabled = 0;
-		gtu->favor = guild->tribute.favor;
-		gtu->time_remaining = RuleI(Guild, TributeTime);
+		gtu->enabled           = 0;
+		gtu->favor             = guild->tribute.favor;
+		gtu->time_remaining    = RuleI(Guild, TributeTime);
 
 		worldserver.SendPacket(sp);
 		safe_delete(sp);
 	}
 }
 
-void Client::Handle_OP_GuildTributeToggle(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeToggle(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildTributeToggle of length [{}]", app->size);
 
@@ -16803,43 +16819,43 @@ void Client::Handle_OP_GuildTributeToggle(const EQApplicationPacket* app)
 		LogError("Invalid size on Handle_OP_GuildModifyBenefits packet");
 	}
 	else {
-		GuildTributeToggleReq_Struct* gt = (GuildTributeToggleReq_Struct*)app->pBuffer;
+		GuildTributeToggleReq_Struct *gt = (GuildTributeToggleReq_Struct *) app->pBuffer;
 
-		ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* gtu = (GuildTributeUpdate*)sp->pBuffer;
+		ServerPacket       *sp  = new ServerPacket(ServerOP_GuildTributeActivate, sizeof(GuildTributeUpdate));
+		GuildTributeUpdate *gtu = (GuildTributeUpdate *) sp->pBuffer;
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
 		if (guild) {
 			switch (gt->command) {
-			case 0: {
-				gtu->guild_id = GuildID();
-				gtu->enabled = 0;
-				gtu->favor = guild->tribute.favor;
-				gtu->tribute_id_1 = guild->tribute.id_1;
-				gtu->tribute_id_2 = guild->tribute.id_2;
-				gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
-				gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
-				gtu->time_remaining = guild->tribute.time_remaining;
+				case 0: {
+					gtu->guild_id          = GuildID();
+					gtu->enabled           = 0;
+					gtu->favor             = guild->tribute.favor;
+					gtu->tribute_id_1      = guild->tribute.id_1;
+					gtu->tribute_id_2      = guild->tribute.id_2;
+					gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
+					gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
+					gtu->time_remaining    = guild->tribute.time_remaining;
 
-				worldserver.SendPacket(sp);
-				break;
-			}
-			case 1: {
-				gtu->guild_id = GuildID();
-				gtu->enabled = 1;
-				gtu->favor = guild->tribute.favor;
-				gtu->tribute_id_1 = guild->tribute.id_1;
-				gtu->tribute_id_2 = guild->tribute.id_2;
-				gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
-				gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
-				gtu->time_remaining = guild->tribute.time_remaining;
+					worldserver.SendPacket(sp);
+					break;
+				}
+				case 1: {
+					gtu->guild_id          = GuildID();
+					gtu->enabled           = 1;
+					gtu->favor             = guild->tribute.favor;
+					gtu->tribute_id_1      = guild->tribute.id_1;
+					gtu->tribute_id_2      = guild->tribute.id_2;
+					gtu->tribute_id_1_tier = guild->tribute.id_1_tier;
+					gtu->tribute_id_2_tier = guild->tribute.id_2_tier;
+					gtu->time_remaining    = guild->tribute.time_remaining;
 
-				worldserver.SendPacket(sp);
-				break;
-			}
-			default: {
-				LogError("Unknown GuildTributeUpdate to WorldServer command received.");
-				break;
-			}
+					worldserver.SendPacket(sp);
+					break;
+				}
+				default: {
+					LogError("Unknown GuildTributeUpdate to WorldServer command received.");
+					break;
+				}
 			}
 		}
 		safe_delete(sp);
@@ -16847,7 +16863,7 @@ void Client::Handle_OP_GuildTributeToggle(const EQApplicationPacket* app)
 	return;
 }
 
-void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildTributeDonateItem of length [{}]", app->size);
 
@@ -16856,9 +16872,9 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto in = (GuildTributeDonateItemRequest_Struct*)app->pBuffer;
+	auto in = (GuildTributeDonateItemRequest_Struct *) app->pBuffer;
 
-	const auto* inst = GetInv().GetItem(in->slot);
+	const auto *inst = GetInv().GetItem(in->slot);
 	auto favor = inst->GetItemGuildFavor() * in->quantity;
 
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
@@ -16868,7 +16884,7 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 		auto member_favor = guild_mgr.UpdateDbMemberFavor(GuildID(), CharacterID(), favor);
 
 		if (inst->IsStackable()) {
-			if (inst->GetCharges() < (int32)in->quantity) {
+			if (inst->GetCharges() < (int32) in->quantity) {
 				favor = 0;
 			}
 			DeleteItemInInventory(in->slot, in->quantity, false, true);
@@ -16880,7 +16896,8 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 		SendGuildTributeDonateItemReply(in, favor);
 
 		if (RuleB(QueryServ, PlayerLogGuildTributeItemDonations)) {
-			auto event_desc = fmt::format("Guild Item Donation :: {} donated item id {} for {} favor in zone {}\.",
+			auto event_desc = fmt::format(
+				"Guild Item Donation :: {} donated item id {} for {} favor in zone {}\.",
 				GetName(),
 				inst->GetID(),
 				favor,
@@ -16890,19 +16907,19 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app)
 		}
 
 		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* out = (GuildTributeUpdate*)outapp->pBuffer;
+		GuildTributeUpdate *out = (GuildTributeUpdate *) outapp->pBuffer;
 		out->guild_id = GuildID();
-		out->favor = guild->tribute.favor;
+		out->favor    = guild->tribute.favor;
 		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
-		out->member_time = time(nullptr);
+		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
-		out->member_favor = member_favor;
+		out->member_favor   = member_favor;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp);
 	}
 }
 
-void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
+void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 {
 	LogTribute("Received OP_Handle_OP_GuildTributeToggle of length [{}]", app->size);
 
@@ -16911,7 +16928,7 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
 		return;
 	}
 
-	auto in = (GuildTributeDonatePlatRequest_Struct*)app->pBuffer;
+	auto in = (GuildTributeDonatePlatRequest_Struct *) app->pBuffer;
 
 	auto quantity = in->quantity;
 
@@ -16926,7 +16943,8 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
 		SendGuildTributeDonatePlatReply(in, favor);
 
 		if (RuleB(QueryServ, PlayerLogGuildTributePlatDonations)) {
-			auto event_desc = fmt::format("Guild Platinum Donation :: {} donated {} platinum for {} favor in zone {}\.",
+			auto event_desc = fmt::format(
+				"Guild Platinum Donation :: {} donated {} platinum for {} favor in zone {}\.",
 				GetName(),
 				quantity,
 				favor,
@@ -16936,13 +16954,13 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app)
 		}
 
 		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
-		GuildTributeUpdate* out = (GuildTributeUpdate*)outapp->pBuffer;
+		GuildTributeUpdate *out = (GuildTributeUpdate *) outapp->pBuffer;
 		out->guild_id = GuildID();
-		out->favor = guild->tribute.favor;
+		out->favor    = guild->tribute.favor;
 		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
-		out->member_time = time(nullptr);
+		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
-		out->member_favor = member_favor;
+		out->member_favor   = member_favor;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp);
 	}
