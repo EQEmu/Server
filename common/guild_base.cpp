@@ -92,12 +92,6 @@ BaseGuildManager::~BaseGuildManager()
 bool BaseGuildManager::LoadGuilds()
 {
 	ClearGuilds();
-
-	if (m_db == nullptr) {
-		LogError("Requested to load guilds from the database however there is no database connectivity.");
-		return false;
-	}
-
 	auto guilds             = GuildsRepository::All(*m_db);
 	auto guilds_ranks       = GuildRanksRepository::All(*m_db);
 	auto guilds_permissions = GuildPermissionsRepository::All(*m_db);
@@ -279,11 +273,6 @@ BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(
 
 bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 {
-	if (m_db == nullptr) {
-		LogError("Requested to store guild [{}] however there is no database object", guild_id);
-		return false;
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to save guild id [{}] to the database however guild could not be found.", guild_id);
@@ -352,10 +341,6 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 
 uint32 BaseGuildManager::_GetFreeGuildID()
 {
-	if (m_db == nullptr) {
-		LogError("Requested to find a free guild ID however there is no database object");
-		return GUILD_NONE;
-	}
 	GuildsRepository::DeleteWhere(*m_db, "`name` = ''");
 
 	GuildsRepository::Guilds out;
@@ -607,11 +592,6 @@ bool BaseGuildManager::UpdateDbDeleteGuild(uint32 guild_id, bool local_delete, b
 	}
 
 	if (db_delete) {
-		if (m_db == nullptr) {
-			LogError("Requested to delete guild [{}] when we have no database object", guild_id);
-			return (false);
-		}
-
 		auto where_filter = fmt::format("guildid = {}", guild_id);
 		auto bank_items   = GuildBankRepository::GetWhere(*m_db, where_filter);
 		if (!bank_items.empty()) {
@@ -642,11 +622,6 @@ bool BaseGuildManager::UpdateDbDeleteGuild(uint32 guild_id, bool local_delete, b
 
 bool BaseGuildManager::UpdateDbRenameGuild(uint32 guild_id, std::string new_name)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to rename guild [{}] when we have no database object", guild_id);
-		return false;
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to rename guild id [{}] though guild could not be found", guild_id);
@@ -666,11 +641,6 @@ bool BaseGuildManager::UpdateDbRenameGuild(uint32 guild_id, std::string new_name
 
 bool BaseGuildManager::UpdateDbGuildLeader(uint32 guild_id, uint32 leader)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to appoint new guild leader for guild [{}] when we have no database object", guild_id);
-		return false;
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to appoint new guild leader for guild id [{}] though guild could not be found", guild_id);
@@ -701,11 +671,6 @@ bool BaseGuildManager::UpdateDbGuildLeader(uint32 guild_id, uint32 leader)
 
 bool BaseGuildManager::UpdateDbGuildMOTD(uint32 guild_id, std::string motd, std::string setter)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to set the MOTD for guild [{}] however there is no database object", guild_id);
-		return (false);
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to rename guild id [{}] though guild could not be found", guild_id);
@@ -725,11 +690,6 @@ bool BaseGuildManager::UpdateDbGuildMOTD(uint32 guild_id, std::string motd, std:
 
 bool BaseGuildManager::UpdateDbGuildURL(uint32 guild_id, std::string URL)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to set the URL for guild [{}] however there is no database object", guild_id);
-		return (false);
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to update url for guild id [{}] though guild could not be found", guild_id);
@@ -747,11 +707,6 @@ bool BaseGuildManager::UpdateDbGuildURL(uint32 guild_id, std::string URL)
 
 bool BaseGuildManager::UpdateDbGuildChannel(uint32 guild_id, std::string Channel)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to set the Channel for guild [{}] however there is no database object", guild_id);
-		return (false);
-	}
-
 	auto in = GetGuildByGuildID(guild_id);
 	if (!in) {
 		LogGuilds("Request to update channel message for guild id [{}] though guild could not be found", guild_id);
@@ -770,10 +725,6 @@ bool BaseGuildManager::UpdateDbGuildChannel(uint32 guild_id, std::string Channel
 
 bool BaseGuildManager::UpdateDbGuild(uint32 char_id, uint32 guild_id, uint8 rank)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to set char [{}] to guild [{}] when we have no database object", char_id, guild_id);
-		return false;
-	}
 	if (guild_id == GUILD_NONE) {
 		if (!GuildMembersRepository::DeleteOne(*m_db, char_id)) {
 			LogError(
@@ -892,10 +843,6 @@ bool BaseGuildManager::UpdateDbTributeFlag(uint32 charid, bool enabled)
 
 bool BaseGuildManager::UpdateDbPublicNote(uint32 charid, std::string public_note)
 {
-	if (m_db == nullptr) {
-		return false;
-	}
-
 	auto result = GuildMembersRepository::UpdateNote(*m_db, charid, public_note);
 	if (!result) {
 		LogGuilds("Set public not for char [{}]", charid);
@@ -906,10 +853,6 @@ bool BaseGuildManager::UpdateDbPublicNote(uint32 charid, std::string public_note
 
 bool BaseGuildManager::QueryWithLogging(std::string query, const char *errmsg)
 {
-	if (m_db == nullptr) {
-		return (false);
-	}
-
 	auto results = m_db->QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -959,10 +902,6 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 {
 	members.clear();
 
-	if (m_db == nullptr) {
-		return (false);
-	}
-
 	//load up the rank info for each guild.
 	std::string query   = StringFormat(GuildMemberBaseQuery " WHERE g.guild_id=%d AND c.deleted_at IS NULL", guild_id);
 	auto        results = m_db->QueryDatabase(query);
@@ -983,11 +922,6 @@ bool BaseGuildManager::GetEntireGuild(uint32 guild_id, std::vector<CharGuildInfo
 
 bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested char info on [{}] when we have no database object", char_name);
-		return (false);
-	}
-
 	//escape our strings.
 	uint32 nl  = strlen(char_name);
 	auto   esc = new char[nl * 2 + 1];
@@ -1014,11 +948,6 @@ bool BaseGuildManager::GetCharInfo(const char *char_name, CharGuildInfo &into)
 
 bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested char info on [{}] when we have no database object", char_id);
-		return false;
-	}
-
 	//load up the rank info for each guild.
 	std::string query   = StringFormat(GuildMemberBaseQuery " WHERE c.id=%d AND c.deleted_at IS NULL", char_id);
 	auto        results = m_db->QueryDatabase(query);
@@ -1401,11 +1330,6 @@ bool BaseGuildManager::StoreGuildDB(uint32 guild_id)
 
 uint32 BaseGuildManager::UpdateDbGuildFavor(uint32 guild_id, uint32 favor)
 {
-	if (m_db == nullptr) {
-		LogGuilds("Requested to set favor [{}] to guild [{}] when we have no database object", favor, guild_id);
-		return false;
-	}
-
 	if (!GuildsRepository::UpdateFavor(*m_db, guild_id, favor)) {
 		LogError("Error updating guild favor [{}] for guild id [{}] in database.", favor, guild_id);
 		return false;
@@ -1418,15 +1342,6 @@ uint32 BaseGuildManager::UpdateDbGuildFavor(uint32 guild_id, uint32 favor)
 
 bool BaseGuildManager::UpdateDbGuildTributeEnabled(uint32 guild_id, uint32 enabled)
 {
-	if (m_db == nullptr) {
-		LogGuilds(
-			"Requested to set tribute enabled [{}] to guild [{}] when we have no database object",
-			enabled,
-			guild_id
-		);
-		return false;
-	}
-
 	if (!GuildTributesRepository::UpdateEnabled(*m_db, guild_id, enabled)) {
 		LogError("Error updating tribute enabled [{}] for guild id [{}] in database.", enabled, guild_id);
 		return false;
@@ -1439,15 +1354,6 @@ bool BaseGuildManager::UpdateDbGuildTributeEnabled(uint32 guild_id, uint32 enabl
 
 bool BaseGuildManager::UpdateDbTributeTimeRemaining(uint32 guild_id, uint32 time_remaining)
 {
-	if (m_db == nullptr) {
-		LogGuilds(
-			"Requested to set tribute time_remaining [{}] to guild [{}] when we have no database object",
-			time_remaining,
-			guild_id
-		);
-		return false;
-	}
-
 	if (!GuildTributesRepository::UpdateTimeRemaining(*m_db, guild_id, time_remaining)) {
 		LogError("Error updating tribute time_remaining [{}] for guild id [{}] in database.", time_remaining, guild_id);
 		return false;
@@ -1466,16 +1372,6 @@ bool BaseGuildManager::UpdateDbMemberTributeEnabled(uint32 guild_id, uint32 char
 		LogGuilds(
 			"Requested to set member id {} tribute to enabled [{}] in guild [{}] but we could not find the character.",
 			char_id,
-			enabled,
-			guild_id
-		);
-		return false;
-	}
-
-	if (m_db == nullptr) {
-		LogGuilds(
-			"Requested to set member id {} tribute enabled [{}] in guild [{}] when we have no database object",
-			gci.char_name.c_str(),
 			enabled,
 			guild_id
 		);
@@ -1518,16 +1414,6 @@ uint32 BaseGuildManager::UpdateDbMemberFavor(uint32 guild_id, uint32 char_id, ui
 		return false;
 	}
 
-	if (m_db == nullptr) {
-		LogGuilds(
-			"Requested to set member id {} tribute favor [{}] in guild [{}] when we have no database object",
-			gci.char_name.c_str(),
-			favor,
-			guild_id
-		);
-		return false;
-	}
-
 	gci.total_tribute += favor;
 	if (!GuildMembersRepository::UpdateFavor(*m_db, guild_id, char_id, gci.total_tribute)) {
 		LogError(
@@ -1559,15 +1445,6 @@ bool BaseGuildManager::UpdateDbMemberOnline(uint32 char_id, bool status)
 		LogGuilds(
 			"Requested to set member id {} online status [{}] but could not find the character.",
 			char_id,
-			status
-		);
-		return false;
-	}
-
-	if (m_db == nullptr) {
-		LogGuilds(
-			"Requested to set member {} online status [{}] but there is no database object",
-			gci.char_name.c_str(),
 			status
 		);
 		return false;
