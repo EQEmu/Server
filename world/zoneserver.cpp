@@ -982,8 +982,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_GuildMemberUpdate:
 		case ServerOP_GuildPermissionUpdate:
 		case ServerOP_GuildRankNameChange:
-		case ServerOP_RefreshGuild: 
-		case ServerOP_GuildMemberLevelUpdate: 
+		case ServerOP_RefreshGuild:
+		case ServerOP_GuildMemberLevelUpdate:
 		case ServerOP_GuildMemberPublicNote:
         case ServerOP_GuildChannel:
         case ServerOP_GuildURL:
@@ -1620,9 +1620,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (cle) {
 				cle->SetGuildTributeOptIn(in->tribute_toggle ? true : false);
 			}
-			
+
 			if (guild) {
-			
+
 				CharGuildInfo gci;
 				guild_mgr.GetCharInfo(in->char_id, gci);
 
@@ -1655,12 +1655,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (guild) {
 				ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
 				GuildTributeUpdate* out = (GuildTributeUpdate*)sp->pBuffer;
-				
-				out->guild_id		   = in->guild_id;
-				out->enabled	       = guild->tribute.enabled;
-				out->favor			   = guild->tribute.favor;
-				out->tribute_id_1	   = guild->tribute.id_1;
-				out->tribute_id_2	   = guild->tribute.id_2;
+
+				out->guild_id          = in->guild_id;
+				out->enabled           = guild->tribute.enabled;
+				out->favor             = guild->tribute.favor;
+				out->tribute_id_1      = guild->tribute.id_1;
+				out->tribute_id_2      = guild->tribute.id_2;
 				out->tribute_id_1_tier = guild->tribute.id_1_tier;
 				out->tribute_id_2_tier = guild->tribute.id_2_tier;
 				if (guild->tribute.timer.Enabled()) {
