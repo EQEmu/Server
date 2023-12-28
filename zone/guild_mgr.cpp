@@ -176,30 +176,26 @@ uint8 *ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char *prefix_na
 		auto c = entity_list.GetClientByID(ci->char_id);
 		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
 			switch (ci->rank) {
-			case GUILD_RECRUIT:
-			case GUILD_INITIATE:
-			case GUILD_JUNIOR_MEMBER:
-			case GUILD_MEMBER:
-			case GUILD_SENIOR_MEMBER:
-			{
-				ci->rank = GUILD_MEMBER_TI;
-				break;
-			}
-			case GUILD_OFFICER:
-			case GUILD_SENIOR_OFFICER:
-			{
-				ci->rank = GUILD_OFFICER_TI;
-				break;
-			}
-			case GUILD_LEADER:
-			{
-				ci->rank = GUILD_LEADER_TI;
-				break;
-			}
-			default:
-			{
-				break;
-			}
+				case GUILD_RECRUIT:
+				case GUILD_INITIATE:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_SENIOR_MEMBER: {
+					ci->rank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER: {
+					ci->rank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER: {
+					ci->rank = GUILD_LEADER_TI;
+					break;
+				}
+				default: {
+					break;
+				}
 			}
 		}
 		PutField(rank);
@@ -1757,30 +1753,26 @@ uint8* ZoneGuildManager::MakeGuildMembers2(uint32 guild_id, const char* prefix_n
 		auto c = entity_list.GetClientByID(ci->char_id);
 		if (c && c->ClientVersion() < EQ::versions::ClientVersion::RoF) {
 			switch (ci->rank) {
-			case GUILD_RECRUIT:
-			case GUILD_INITIATE:
-			case GUILD_JUNIOR_MEMBER:
-			case GUILD_MEMBER:
-			case GUILD_SENIOR_MEMBER:
-			{
-				ci->rank = GUILD_MEMBER_TI;
-				break;
-			}
-			case GUILD_OFFICER:
-			case GUILD_SENIOR_OFFICER:
-			{
-				ci->rank = GUILD_OFFICER_TI;
-				break;
-			}
-			case GUILD_LEADER:
-			{
-				ci->rank = GUILD_LEADER_TI;
-				break;
-			}
-			default:
-			{
-				break;
-			}
+				case GUILD_RECRUIT:
+				case GUILD_INITIATE:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_SENIOR_MEMBER: {
+					ci->rank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER: {
+					ci->rank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER: {
+					ci->rank = GUILD_LEADER_TI;
+					break;
+				}
+				default: {
+					break;
+				}
 			}
 		}
 		PutField(rank);
