@@ -136,7 +136,7 @@ class BaseGuildManager
         const char* GetGuildName(uint32 guild_id) const;
         std::string GetGuildNameByID(uint32 guild_id) const;
         std::string GetGuildRankName(uint32 guild_id, uint8 rank) const;
-        std::vector<BaseGuildMembersRepository::GuildMembers> GetGuildMembers(uint32 guild_id);
+        std::vector<GuildMembersRepository::GuildMembers> GetGuildMembers(uint32 guild_id);
 
 	protected:
 		//the methods which must be defined by base classes.
@@ -198,7 +198,7 @@ class BaseGuildManager
 		bool _StoreGuildDB(uint32 guild_id);
 		GuildInfo* _CreateGuild(uint32 guild_id, std::string& guild_name, uint32 leader_char_id, uint8 minstatus, std::string& guild_motd, std::string& motd_setter, std::string& Channel, std::string& URL, uint32 favour);
 		uint32 _GetFreeGuildID();
-        BaseGuildsRepository::Guilds CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in);
+        GuildsRepository::Guilds CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in);
 };
 #endif /*GUILD_BASE_H_*/
 

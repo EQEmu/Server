@@ -113,21 +113,21 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		break;
 	}
 
-	case ServerOP_DeleteGuild: 
+	case ServerOP_DeleteGuild:
 	{
 		if(pack->size != sizeof(ServerGuildID_Struct)) {
 			LogGuilds("Received ServerOP_DeleteGuild of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildID_Struct));
 			return;
 		}
-			
+
 		ServerGuildID_Struct *s = (ServerGuildID_Struct *) pack->pBuffer;
-		
+
 		auto res = m_guilds.find(s->guild_id);
 		if (res != m_guilds.end()) {
 			delete res->second;
 			m_guilds.erase(res);
 		}
-		
+
 		LogGuilds("Received and broadcasting guild delete for guild [{}]", s->guild_id);
 
 		//broadcast this packet to all zones.
@@ -151,7 +151,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 
 		break;
 	}
-	case ServerOP_GuildPermissionUpdate: 
+	case ServerOP_GuildPermissionUpdate:
 	{
 		if (pack->size != sizeof(ServerGuildPermissionUpdate_Struct))
 		{
@@ -261,7 +261,7 @@ void WorldGuildManager::Process() {
 	for (auto& g : m_guilds) {
 		if (!g.second->tribute.enabled) {
 			continue;
-		} 
+		}
 		else if (g.second->tribute.enabled && !g.second->tribute.timer.Enabled()) {
 			g.second->tribute.timer.Start(g.second->tribute.time_remaining);
 			LogGuilds("Found a Guild Tribute Timer for guild [{}]\. that was not started.  Started it with {} time remaining before restart.",
@@ -283,7 +283,7 @@ void WorldGuildManager::Process() {
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
 
 		}
-		else if (g.second->tribute.send_timer && 
+		else if (g.second->tribute.send_timer &&
 			((g.second->tribute.timer.GetRemainingTime()/1000) % (RuleI(Guild, TributeTimeRefreshInterval) /1000)) == 0 &&
 			!g.second->tribute.timer.Check()
 			){
@@ -398,7 +398,7 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 		return false;
 	}
 
-	auto db_guild = BaseGuildsRepository::FindOne(*m_db, guild_id);
+	auto db_guild = GuildsRepository::FindOne(*m_db, guild_id);
 	if (!db_guild.id) {
 		LogGuilds("Guild ID [{}] not found in database.", db_guild.id);
 		return false;
@@ -408,13 +408,13 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 	_CreateGuild(db_guild.id, db_guild.name, db_guild.leader, db_guild.minstatus, db_guild.motd, db_guild.motd_setter, db_guild.channel, db_guild.url, db_guild.favor);
 	auto guild = GetGuildByGuildID(guild_id);
 	auto where_filter = fmt::format("guild_id = '{}'", guild_id);
-	auto guild_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);
+	auto guild_ranks = GuildRanksRepository::GetWhere(*m_db, where_filter);
 	for (auto const& r : guild_ranks) {
 		guild->rank_names[r.rank] = r.title;
 	}
 
 	where_filter = fmt::format("guild_id = '{}'", guild_id);
-	auto guild_permissions = BaseGuildPermissionsRepository::GetWhere(*m_db, where_filter);
+	auto guild_permissions = GuildPermissionsRepository::GetWhere(*m_db, where_filter);
 	for (auto const& p : guild_permissions) {
 		guild->functions[p.perm_id].id         = p.id;
 		guild->functions[p.perm_id].guild_id   = p.guild_id;
@@ -422,7 +422,7 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 		guild->functions[p.perm_id].perm_value = p.permission;
 	}
 
-	auto guild_tributes = BaseGuildTributesRepository::FindOne(*m_db, guild_id);
+	auto guild_tributes = GuildTributesRepository::FindOne(*m_db, guild_id);
 	if (guild_tributes.guild_id) {
 		guild->tribute.id_1           = guild_tributes.tribute_id_1;
 		guild->tribute.id_2           = guild_tributes.tribute_id_2;
@@ -441,7 +441,7 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 	return true;
 }
 
-void WorldGuildManager::SendGuildTributeFavorAndTimer(uint32 guild_id, uint32 favor, uint32 time) 
+void WorldGuildManager::SendGuildTributeFavorAndTimer(uint32 guild_id, uint32 favor, uint32 time)
 {
 	ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeFavAndTimer, sizeof(GuildTributeFavorTimer_Struct));
 	GuildTributeFavorTimer_Struct* data = (GuildTributeFavorTimer_Struct*)sp->pBuffer;

@@ -346,7 +346,7 @@ void ZoneGuildManager::DescribeGuild(Client* c, uint32 guild_id) const
 
 	const GuildInfo *info = res->second;
     auto membership = GuildMembersRepository::GetGuildMembershipStats(*m_db, guild_id);
-    
+
 	auto leader_name = database.GetCharNameByID(info->leader);
 	std::string popup_text = "<table>";
 	popup_text += fmt::format(
@@ -406,7 +406,7 @@ bool ZoneGuildManager::VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uin
 	return(valid);
 }
 
-void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack) 
+void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 {
 	switch (pack->opcode)
 	{
@@ -1622,7 +1622,7 @@ bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 Slo
 	return false;
 }
 
-void ZoneGuildManager::UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value) 
+void ZoneGuildManager::UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value)
 {
 	auto res = m_guilds.find(gid);
 	if (value) {
@@ -1650,7 +1650,7 @@ void ZoneGuildManager::SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32
 	safe_delete(pack);
 }
 
-void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string rank_name) 
+void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string rank_name)
 {
 	GuildRanksRepository::UpdateTitle(*m_db, guild_id, rank, rank_name);
 }
@@ -1663,7 +1663,7 @@ void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string ra
 	sgpus->guild_id = guild_id;
 	sgpus->rank = rank;
 	strn0cpy(sgpus->rank_name, rank_name.c_str(), sizeof(sgpus->rank_name));
-	worldserver.SendPacket(pack);	
+	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
 
@@ -1812,11 +1812,11 @@ void ZoneGuildManager::SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 leve
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberLevelUpdate, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	
+
     s_out->guild_id     = guild_id;
 	s_out->player_level = level;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	
+
     worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
@@ -1825,11 +1825,11 @@ void ZoneGuildManager::SendToWorldMemberPublicNote(uint32 guild_id, std::string 
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberPublicNote, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	
+
     s_out->guild_id = guild_id;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
 	strn0cpy(s_out->note, public_note.c_str(), sizeof(s_out->note));
-	
+
     worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
@@ -1862,10 +1862,10 @@ void ZoneGuildManager::SendToWorldMemberRemove(uint32 guild_id, std::string play
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberRemove, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	
+
     s_out->guild_id = guild_id;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	
+
     worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
@@ -1874,14 +1874,14 @@ void ZoneGuildManager::SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uin
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberAdd, sizeof(ServerOP_GuildMessage_Struct));
 	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
-	
+
     s_out->guild_id       = guild_id;
 	s_out->player_level   = level;
 	s_out->player_rank    = rank;
 	s_out->player_zone_id = zone_id;
 	s_out->player_class   = _class;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
-	
+
     worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
@@ -1895,7 +1895,7 @@ bool ZoneGuildManager::RemoveMember(uint32 guild_id, uint32 char_id, std::string
 
 void ZoneGuildManager::AddMember(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name)
 {
-	BaseGuildMembersRepository::GuildMembers m;
+	GuildMembersRepository::GuildMembers m;
 	m.alt            = 0;
 	m.banker         = 0;
 	m.last_tribute   = 0;

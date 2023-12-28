@@ -164,7 +164,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id)
         return false;
     }
 
-    auto db_guild = BaseGuildsRepository::FindOne(*m_db, guild_id);
+    auto db_guild = GuildsRepository::FindOne(*m_db, guild_id);
     if (!db_guild.id) {
         LogGuilds("Guild ID [{}] not found in database.", db_guild.id);
         return false;
@@ -174,13 +174,13 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id)
     _CreateGuild(db_guild.id, db_guild.name, db_guild.leader, db_guild.minstatus, db_guild.motd, db_guild.motd_setter, db_guild.channel, db_guild.url, db_guild.favor);
     auto guild = GetGuildByGuildID(guild_id);
     auto where_filter = fmt::format("guild_id = '{}'", guild_id);
-    auto guild_ranks = BaseGuildRanksRepository::GetWhere(*m_db, where_filter);
+    auto guild_ranks = GuildRanksRepository::GetWhere(*m_db, where_filter);
     for (auto const& r : guild_ranks) {
         guild->rank_names[r.rank] = r.title;
     }
 
     where_filter = fmt::format("guild_id = '{}'", guild_id);
-    auto guild_permissions = BaseGuildPermissionsRepository::GetWhere(*m_db, where_filter);
+    auto guild_permissions = GuildPermissionsRepository::GetWhere(*m_db, where_filter);
     for (auto const& p : guild_permissions) {
         guild->functions[p.perm_id].id          = p.id;
         guild->functions[p.perm_id].guild_id    = p.guild_id;
@@ -188,7 +188,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id)
         guild->functions[p.perm_id].perm_value  = p.permission;
     }
 
-    auto guild_tributes = BaseGuildTributesRepository::FindOne(*m_db, guild_id);
+    auto guild_tributes = GuildTributesRepository::FindOne(*m_db, guild_id);
     if (guild_tributes.guild_id) {
         guild->tribute.id_1			  = guild_tributes.tribute_id_1;
         guild->tribute.id_2			  = guild_tributes.tribute_id_2;
@@ -262,7 +262,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
     }
 
     {
-        BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+        GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
         GuildsRepository::DeleteOne(*m_db, guild_id);
         auto result = GuildsRepository::InsertOne(*m_db, out);
         if (!result.id) {
@@ -274,8 +274,8 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
     }
 
     {
-        std::vector<BaseGuildRanksRepository::GuildRanks> out;
-        BaseGuildRanksRepository::GuildRanks gr;
+        std::vector<GuildRanksRepository::GuildRanks> out;
+        GuildRanksRepository::GuildRanks gr;
         for (int i = GUILD_LEADER; i <= GUILD_MAX_RANK; i++) {
             gr.guild_id = guild_id;
             gr.rank = i;
@@ -290,8 +290,8 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
     }
 
     {
-        std::vector<BaseGuildPermissionsRepository::GuildPermissions> out;
-        BaseGuildPermissionsRepository::GuildPermissions gp;
+        std::vector<GuildPermissionsRepository::GuildPermissions> out;
+        GuildPermissionsRepository::GuildPermissions gp;
         for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
             gp.id           = in->functions[i].id;
             gp.guild_id     = in->functions[i].guild_id;
@@ -299,14 +299,14 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
             gp.permission   = in->functions[i].perm_value;
             out.push_back(gp);
         }
-        
+
         if (!GuildPermissionsRepository::ReplaceMany(*m_db, out)) {
             LogGuilds("Error storing guild [{}] permissions in the database", guild_id);
             return false;
         }
         LogGuilds("Stored guild [{}] permissions in the database", guild_id);
 
-        BaseGuildTributesRepository::GuildTributes gt{};
+        GuildTributesRepository::GuildTributes gt{};
         gt.tribute_id_1		 = in->tribute.id_1;
         gt.tribute_id_2		 = in->tribute.id_2;
         gt.tribute_id_1_tier = in->tribute.id_1_tier;
@@ -327,9 +327,9 @@ uint32 BaseGuildManager::_GetFreeGuildID()
         LogError("Requested to find a free guild ID however there is no database object");
         return GUILD_NONE;
     }
-    BaseGuildsRepository::DeleteWhere(*m_db, "`name` = ''");
+    GuildsRepository::DeleteWhere(*m_db, "`name` = ''");
 
-    BaseGuildsRepository::Guilds out;
+    GuildsRepository::Guilds out;
     out.id          = 0;
     out.leader      = 0;
     out.minstatus   = 0;
@@ -339,7 +339,7 @@ uint32 BaseGuildManager::_GetFreeGuildID()
     out.motd_setter = "";
     out.url         = "";
     out.channel     = "";
-    auto last_insert_id = BaseGuildsRepository::InsertOne(*m_db, out);
+    auto last_insert_id = GuildsRepository::InsertOne(*m_db, out);
     if (last_insert_id.id > 0) {
         LogGuilds("Located a free guild ID [{}] in the database", last_insert_id.id);
         return last_insert_id.id;
@@ -533,7 +533,7 @@ bool BaseGuildManager::UpdateDbDeleteGuild(uint32 guild_id, bool local_delete, b
 {
     if (local_delete) {
         auto where_filter = fmt::format("guildid = {}", guild_id);
-        auto bank_items = BaseGuildBankRepository::GetWhere(*m_db, where_filter);
+        auto bank_items = GuildBankRepository::GetWhere(*m_db, where_filter);
         if (!bank_items.empty()) {
             LogError("Attempt to delete guild id [{}] that still has [{}] items in the bank. Please remove them and try again.",
                 guild_id,
@@ -567,7 +567,7 @@ bool BaseGuildManager::UpdateDbDeleteGuild(uint32 guild_id, bool local_delete, b
         }
 
         auto where_filter = fmt::format("guildid = {}", guild_id);
-        auto bank_items = BaseGuildBankRepository::GetWhere(*m_db, where_filter);
+        auto bank_items = GuildBankRepository::GetWhere(*m_db, where_filter);
         if (!bank_items.empty()) {
             LogError("Attempt to delete guild id [{}] that still has [{}] items in the bank. Please remove them and try again.",
                 guild_id,
@@ -582,11 +582,11 @@ bool BaseGuildManager::UpdateDbDeleteGuild(uint32 guild_id, bool local_delete, b
         else
         {
             auto where_filter = fmt::format("guild_id = {}", guild_id);
-            BaseGuildTributesRepository::DeleteOne(*m_db, guild_id);
-            BaseGuildsRepository::DeleteOne(*m_db, guild_id);
-            BaseGuildRanksRepository::DeleteWhere(*m_db, where_filter);
-            BaseGuildPermissionsRepository::DeleteWhere(*m_db, where_filter);
-            BaseGuildMembersRepository::DeleteWhere(*m_db, where_filter);
+            GuildTributesRepository::DeleteOne(*m_db, guild_id);
+            GuildsRepository::DeleteOne(*m_db, guild_id);
+            GuildRanksRepository::DeleteWhere(*m_db, where_filter);
+            GuildPermissionsRepository::DeleteWhere(*m_db, where_filter);
+            GuildMembersRepository::DeleteWhere(*m_db, where_filter);
             LogGuilds("Deleted guild [{}] from the database", guild_id);
         }
     }
@@ -608,9 +608,9 @@ bool BaseGuildManager::UpdateDbRenameGuild(uint32 guild_id, std::string new_name
 
     auto old_name = in->name;
     in->name = new_name;
-    BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+    GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
 
-    if (BaseGuildsRepository::UpdateOne(*m_db, out)) {
+    if (GuildsRepository::UpdateOne(*m_db, out)) {
         LogGuilds("Renamed guild id [{}] ([{}]) to [{}] in database", guild_id, old_name.c_str(), in->name.c_str());
         return true;
     }
@@ -632,9 +632,9 @@ bool BaseGuildManager::UpdateDbGuildLeader(uint32 guild_id, uint32 leader)
 
     auto old_leader = in->leader;
     in->leader = leader;
-    BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+    GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
 
-    if (!BaseGuildsRepository::UpdateOne(*m_db, out)) {
+    if (!GuildsRepository::UpdateOne(*m_db, out)) {
         LogGuilds("Could not make character id [{}] the leader for guild id [{}] in database", leader, guild_id);
         return false;
     }
@@ -668,9 +668,9 @@ bool BaseGuildManager::UpdateDbGuildMOTD(uint32 guild_id, std::string motd, std:
 
     in->motd = motd;
     in->motd_setter = setter;
-    BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+    GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
 
-    if (BaseGuildsRepository::UpdateOne(*m_db, out)) {
+    if (GuildsRepository::UpdateOne(*m_db, out)) {
         LogGuilds("Updated the motd for guild id [{}] in database", guild_id);
         return true;
     }
@@ -691,8 +691,8 @@ bool BaseGuildManager::UpdateDbGuildURL(uint32 guild_id, std::string URL)
     }
 
     in->url = URL;
-    BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
-    if (BaseGuildsRepository::UpdateOne(*m_db, out)) {
+    GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+    if (GuildsRepository::UpdateOne(*m_db, out)) {
         LogGuilds("Updated the url for guild id [{}] in database", guild_id);
         return true;
     }
@@ -713,9 +713,9 @@ bool BaseGuildManager::UpdateDbGuildChannel(uint32 guild_id, std::string Channel
     }
 
     in->channel = Channel;
-    BaseGuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
+    GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
 
-    if (BaseGuildsRepository::UpdateOne(*m_db, out)) {
+    if (GuildsRepository::UpdateOne(*m_db, out)) {
         LogGuilds("Updated the channel message for guild id [{}] in database", guild_id);
         return true;
     }
@@ -1284,7 +1284,7 @@ bool BaseGuildManager::GetGuildBankerStatus(uint32 guild_id, uint32 guild_rank)
     return false;
 }
 
-std::vector<BaseGuildMembersRepository::GuildMembers> BaseGuildManager::GetGuildMembers(uint32 guild_id)
+std::vector<GuildMembersRepository::GuildMembers> BaseGuildManager::GetGuildMembers(uint32 guild_id)
 {
     std::string where_filter = fmt::format("`guild_id` = '{}'", guild_id);
     auto guild_members = GuildMembersRepository::GetWhere(*m_db, where_filter);
@@ -1421,7 +1421,7 @@ bool BaseGuildManager::UpdateDbMemberOnline(uint32 char_id, bool status)
     return true;
 }
 
-BaseGuildsRepository::Guilds BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in)
+GuildsRepository::Guilds GuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in)
 {
     GuildsRepository::Guilds out{};
 
