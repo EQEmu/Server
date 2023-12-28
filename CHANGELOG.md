@@ -1,3 +1,34 @@
+## [22.39.0] - 12/27/2023
+
+### Character
+
+* Fix character copier due to schema change ([#3805](https://github.com/EQEmu/Server/pull/3805)) @Akkadius 2023-12-28
+
+### Combat
+
+* Disarm was not dropping item to ground due to bug ([#3811](https://github.com/EQEmu/Server/pull/3811)) @noudess 2023-12-27
+
+### Logs
+
+* Bulk insert new log settings ([#3810](https://github.com/EQEmu/Server/pull/3810)) @Akkadius 2023-12-28
+* Reclassify unhelpful Info message ([#3809](https://github.com/EQEmu/Server/pull/3809)) @Akkadius 2023-12-28
+
+### MySQL
+
+* Fix MySQL Query error formatting ([#3808](https://github.com/EQEmu/Server/pull/3808)) @Akkadius 2023-12-28
+
+### Objects
+
+* Remove "No objects to load for zone" error message ([#3807](https://github.com/EQEmu/Server/pull/3807)) @Akkadius 2023-12-28
+
+### Player Events
+
+* Bulk replace settings on boot ([#3806](https://github.com/EQEmu/Server/pull/3806)) @Akkadius 2023-12-28
+
+### Tasks
+
+* Add enabled column ([#3804](https://github.com/EQEmu/Server/pull/3804)) @Akkadius 2023-12-28
+
 ## [22.38.0] - 12/26/2023
 
 ### Bots
