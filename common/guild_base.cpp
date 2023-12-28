@@ -114,7 +114,8 @@ bool BaseGuildManager::LoadGuilds()
 			}
 		}
 
-		auto            count = 0;
+		auto count = 0;
+
 		for (auto const &p: guilds_permissions) {
 			m_guilds[g.id]->functions[p.perm_id].id         = p.id;
 			m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
