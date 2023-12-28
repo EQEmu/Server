@@ -5153,7 +5153,7 @@ ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
 		.match = "",
 		.sql = R"(
 ALTER TABLE `tasks`
-ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
+ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`;
 )"
 	}
 
