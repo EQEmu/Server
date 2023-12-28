@@ -97,8 +97,8 @@ bool BaseGuildManager::LoadGuilds()
         return false;
     }
 
-    auto guilds             = GuildsRepository::All(*m_db);
-    auto guilds_ranks       = GuildRanksRepository::All(*m_db);
+	auto guilds             = GuildsRepository::All(*m_db);
+	auto guilds_ranks       = GuildRanksRepository::All(*m_db);
 	auto guilds_permissions = GuildPermissionsRepository::All(*m_db);
 	auto guilds_tributes    = GuildTributesRepository::All(*m_db);
 
