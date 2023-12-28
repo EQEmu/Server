@@ -1189,14 +1189,14 @@ namespace UF
 
 		unsigned char *__emu_buffer = in->pBuffer;
 		char *InBuffer = (char *)__emu_buffer;
-		uint32 HighestGuildID = 0;
+		uint32 actual_no_guilds = 0;
 
 		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
 		{
 			if (InBuffer[0])
 			{
 				PacketSize += (5 + strlen(InBuffer));
-				HighestGuildID = i - 1;
+                actual_no_guilds++;
 			}
 			InBuffer += 64;
 		}
@@ -1212,7 +1212,7 @@ namespace UF
 		memset(OutBuffer, 0, 64);
 		OutBuffer += 64;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, HighestGuildID);
+		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, actual_no_guilds);
 
 		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
 		{
