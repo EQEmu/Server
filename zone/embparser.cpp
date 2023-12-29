@@ -1891,6 +1891,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			ExportVar(package_name.c_str(), "killed_entity_id", sep.arg[4]);
 
 			if (extra_pointers && extra_pointers->size() >= 1) {
 				Corpse *corpse = std::any_cast<Corpse *>(extra_pointers->at(0));
@@ -1902,7 +1903,6 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() >= 2) {
 				NPC *killed = std::any_cast<NPC *>(extra_pointers->at(1));
 				if (killed) {
-					ExportVar(package_name.c_str(), "killed_entity_id", killed->GetID());
 					ExportVar(package_name.c_str(), "killed_bot_id", killed->IsBot() ? killed->CastToBot()->GetBotID() : 0);
 					ExportVar(package_name.c_str(), "killed_npc_id", killed->IsNPC() ? killed->GetNPCTypeID() : 0);
 					ExportVar(package_name.c_str(), "killed_x", killed->GetX());

@@ -289,12 +289,13 @@ void handle_npc_death(
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
 ) {
+	Seperator sep(data.c_str());
+
 	Lua_Mob l_mob(init);
 	luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	Seperator sep(data.c_str());
 	lua_pushinteger(L, Strings::ToInt(sep.arg[0]));
 	lua_setfield(L, -2, "killer_id");
 
@@ -316,6 +317,9 @@ void handle_npc_death(
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
+	lua_setfield(L, -2, "killed_entity_id");
 
 	if (extra_pointers && extra_pointers->size() >= 1) {
 		Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(0)));
@@ -600,14 +604,14 @@ void handle_player_death(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
 	lua_setfield(L, -2, "killer_id");
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[2]));
+	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
-	int spell_id = Strings::ToInt(sep.arg[3]);
-	if(IsValidSpell(spell_id)) {
+	const uint32 spell_id = Strings::ToUnsignedInt(sep.arg[2]);
+	if (IsValidSpell(spell_id)) {
 		Lua_Spell l_spell(&spells[spell_id]);
 		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
 		l_spell_o.push(L);
@@ -619,8 +623,11 @@ void handle_player_death(
 		lua_setfield(L, -2, "spell");
 	}
 
-	lua_pushinteger(L, Strings::ToInt(sep.arg[4]));
+	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
+	lua_setfield(L, -2, "killed_entity_id");
 }
 
 void handle_player_timer(
@@ -2136,6 +2143,9 @@ void handle_bot_death(
 	l_mob_o.push(L);
 	lua_setfield(L, -2, "other");
 
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "killer_id");
+
 	lua_pushinteger(L, Strings::ToInt(sep.arg[1]));
 	lua_setfield(L, -2, "damage");
 
@@ -2154,6 +2164,9 @@ void handle_bot_death(
 
 	lua_pushinteger(L, Strings::ToInt(sep.arg[3]));
 	lua_setfield(L, -2, "skill");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
+	lua_setfield(L, -2, "killed_entity_id");
 }
 
 void handle_bot_popup_response(
