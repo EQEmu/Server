@@ -16680,14 +16680,12 @@ void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket *app
 	else {
 		GuildTributeModifyBenefits_Struct *t = (GuildTributeModifyBenefits_Struct *) app->pBuffer;
 
-		EQApplicationPacket               *outapp = new EQApplicationPacket(
-			OP_GuildModifyBenefits,
-			sizeof(GuildTributeModifyBenefits_Struct));
+		EQApplicationPacket               *outapp = new EQApplicationPacket(OP_GuildModifyBenefits, sizeof(GuildTributeModifyBenefits_Struct));
 		GuildTributeModifyBenefits_Struct *gmbs   = (GuildTributeModifyBenefits_Struct *) outapp->pBuffer;
 
 		switch (t->command) {
-			case 0: {
-				gmbs->command           = 0;
+			case GUILD_TRIBUTES_SAVE: {
+				gmbs->command           = GUILD_TRIBUTES_SAVE;
 				gmbs->data              = 1;
 				gmbs->tribute_id_1      = t->tribute_id_1;
 				gmbs->tribute_id_2      = t->tribute_id_2;
@@ -16704,8 +16702,8 @@ void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket *app
 				safe_delete(sp);
 				break;
 			}
-			case 1: {
-				gmbs->command           = 1;
+			case GUILD_TRIBUTES_MODIFY: {
+				gmbs->command           = GUILD_TRIBUTES_MODIFY;
 				gmbs->data              = 1;
 				gmbs->tribute_id_1      = t->tribute_id_1;
 				gmbs->tribute_id_2      = t->tribute_id_2;
@@ -16716,7 +16714,7 @@ void Client::Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket *app
 				break;
 			}
 			default: {
-				gmbs->command           = 0;
+				gmbs->command           = GUILD_TRIBUTES_MODIFY;
 				gmbs->data              = 1;
 				gmbs->tribute_id_1      = 0;
 				gmbs->tribute_id_2      = 0;
@@ -16748,9 +16746,7 @@ void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket *app)
 
 	guild_mgr.UpdateDbMemberTributeEnabled(GuildID(), gci.char_id, in->tribute_toggle);
 
-	ServerPacket             *sout = new ServerPacket(
-		ServerOP_GuildTributeOptInToggle,
-		sizeof(GuildTributeMemberToggle));
+	ServerPacket *sout = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
 	GuildTributeMemberToggle *out  = (GuildTributeMemberToggle *) sout->pBuffer;
 
 	out->guild_id = GuildID();

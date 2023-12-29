@@ -149,14 +149,14 @@ void Client::SendGuildRankNames()
 	if (IsInAGuild() && (ClientVersion() >= EQ::versions::ClientVersion::RoF))
 	{
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-		for (int i = 1; i <= 8; i++)
+		for (int i = 1; i <= GUILD_MAX_RANK; i++)
 		{
 			auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
 			GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 
 			gucp->payload.rank_name.rank = i;
 			strcpy(gucp->payload.rank_name.rank_name, guild->rank_names[i].c_str());
-			gucp->action = 4;
+			gucp->action = GuildUpdateRanks;
 
 			QueuePacket(outapp);
 			safe_delete(outapp);
@@ -810,6 +810,7 @@ void EntityList::SendGuildMemberAdd(
 			c.second->SendGuildMembersList();
 			c.second->SendGuildRanks();
 			c.second->SendGuildRankNames();
+			c.second->SendGuildActiveTributes(guild_id);
 			c.second->SendAppearancePacket(AT_GuildID, guild_id, true, false, c.second, false);
 			c.second->SendAppearancePacket(AT_GuildRank, rank, true, false, c.second, false);
 		}
@@ -863,6 +864,7 @@ void EntityList::SendGuildMemberRemove(uint32 guild_id, std::string player_name)
 				c.second->SetGuildID(GUILD_NONE);
 				c.second->SetGuildRank(GUILD_RANK_NONE);
 				c.second->SetGuildTributeOptIn(false);
+				c.second->SendGuildActiveTributes(0);
 				c.second->SetGuildListDirty(false);
 				c.second->SendGuildList();
 				c.second->SendAppearancePacket(AT_GuildID, GUILD_NONE, true);

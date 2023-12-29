@@ -672,9 +672,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				}
 
 				auto                   client  = entity_list.GetMob(sgpus->MemberName);
-				auto                   outapp  = new EQApplicationPacket(
-					OP_GuildUpdateURLAndChannel,
-					sizeof(GuildPermission_Struct));
+				auto                   outapp  = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildPermission_Struct));
 				GuildPermission_Struct *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
 				guuacs->Action      = 5;
 				guuacs->rank        = sgpus->Rank;
@@ -716,10 +714,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				auto guild = guild_mgr.GetGuildByGuildID(s->guild_id);
 				if (guild) {
 					guild->rank_names[s->rank] = s->rank_name;
-
-					auto                 outapp = new EQApplicationPacket(
-						OP_GuildUpdateURLAndChannel,
-						sizeof(GuildUpdateUCPStruct));
+					auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildUpdateUCPStruct));
 					GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
 					gucp->payload.rank_name.rank = s->rank;
 					strcpy(gucp->payload.rank_name.rank_name, s->rank_name);

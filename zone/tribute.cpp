@@ -419,7 +419,7 @@ void Client::SendGuildTributes()
 void Client::SendGuildTributeDetails(uint32 tribute_id, uint32 tier)
 {
 	if (tribute_list.count(tribute_id) != 1) {
-		LogError("Details request for invalid tribute [{}]", tribute_id);
+		LogGuilds("Details request for invalid tribute [{}]", tribute_id);
 		return;
 	}
 
@@ -450,15 +450,15 @@ void Client::DoGuildTributeUpdate()
 		uint32 item_id2 = d2.tiers[guild->tribute.id_2_tier].tribute_item_id;
 
 		if (item_id1) {
-			LogInfo("Guild Tribute Item 1 is {}", item_id1);
+			LogGuilds("Guild Tribute Item 1 is {}", item_id1);
 			const EQ::ItemInstance* inst = database.CreateItem(item_id1, 1);
-			if (inst == nullptr) {
-				LogError("Guild Tribute Item 1 was not found. {}", item_id1);
+			if (!inst) {
+				LogGuilds("Guild Tribute Item 1 was not found. {}", item_id1);
 				return;
 			}
 			auto inst_level = d1.tiers[guild->tribute.id_1_tier].level;
 			if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN]) {
-				LogInfo("Guild Tribute DELETE Item in Slot 450");
+				LogGuilds("Guild Tribute DELETE Item in Slot 450");
 				DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN);
 			}
 
@@ -474,14 +474,14 @@ void Client::DoGuildTributeUpdate()
 		if (item_id2) {
 			LogInfo("Guild Tribute Item 2 is {}", item_id2);
 			const EQ::ItemInstance* inst = database.CreateItem(item_id2, 1);
-			if (inst == nullptr) {
-				LogError("Guild Tribute Item 1 was not found. {}", item_id2);
+			if (!inst) {
+				LogGuilds("Guild Tribute Item 1 was not found. {}", item_id2);
 				return;
 			}
 			auto inst_level = d2.tiers[guild->tribute.id_2_tier].level;
 			if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN + 1]) {
 				DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN + 1);
-				LogInfo("Guild Tribute DELETE Item in Slot 451");
+				LogGuilds("Guild Tribute DELETE Item in Slot 451");
 			}
 
 			if ((RuleB(Guild, UseCharacterMaxLevelForGuildTributes) && RuleI(Character, MaxLevel) >= inst_level && GetLevel() >= inst_level) ||

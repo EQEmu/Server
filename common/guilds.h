@@ -29,6 +29,8 @@
 #define GUILD_TRIBUTE_DEFAULT_TIMEROLD        60000	// 60 secs for testing. 10 mins 600000
 #define GUILD_TRIBUTE_SEND_TIME_INTERVALOLD   20000	// 20 secs for testing.  3 mins 180000
 #define GUILD_TRIBUTE_PLAT_CONVERSION      10
+#define GUILD_TRIBUTES_MODIFY              1
+#define GUILD_TRIBUTES_SAVE                0
 
 //defines for standard ranks
 #define GUILD_MEMBER_TI	    0
