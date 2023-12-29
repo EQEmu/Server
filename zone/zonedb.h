@@ -340,7 +340,7 @@ namespace BeastlordPetData {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
 		uint8 helm_texture = 0;
-		uint8 gender = NEUTER;
+		uint8 gender = Gender::Neuter;
 		float size_modifier = 1.0f;
 		uint8 face = 0;
 	};

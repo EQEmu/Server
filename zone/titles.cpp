@@ -152,11 +152,11 @@ bool TitleManager::IsClientEligibleForTitle(Client *client, TitleEntry title)
 		return false;
 	}
 
-	if (title.gender_id >= 0 && client->GetBaseGender() != title.gender_id) {
+	if (title.gender_id >= Gender::Male && client->GetBaseGender() != title.gender_id) {
 		return false;
 	}
 
-	if (title.class_id >= 0 && client->GetBaseClass() != title.class_id) {
+	if (title.class_id >= Class::None && client->GetBaseClass() != title.class_id) {
 		return false;
 	}
 

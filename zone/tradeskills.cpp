@@ -1147,7 +1147,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		LogTradeskills("Tradeskill failed");
 			if (GetGroup())
 		{
-			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),GetGender() == 0 ? "his" : GetGender() == 1 ? "her" : "its");
+			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),GetGender() == Gender::Male ? "his" : GetGender() == Gender::Female ? "her" : "its");
 
 		}
 

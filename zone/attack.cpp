@@ -5015,7 +5015,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				hit.damage_done = (hit.damage_done * SlayDmgBonus) / 100;
 
 				/* Female */
-				if (GetGender() == 1) {
+				if (GetGender() == Gender::Female) {
 					entity_list.FilteredMessageCloseString(
 						this, /* Sender */
 						false, /* Skip Sender */
