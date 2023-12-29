@@ -16882,15 +16882,13 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 
 		SendGuildTributeDonateItemReply(in, favor);
 
-		if (RuleB(QueryServ, PlayerLogGuildTributeItemDonations)) {
-			auto event_desc = fmt::format(
-				"Guild Item Donation :: {} donated item id {} for {} favor in zone {}\.",
-				GetName(),
-				inst->GetID(),
-				favor,
-				GetZoneID()
-			);
-			QServ->PlayerLogEvent(Player_Log_Guild_Tribute_Item_Donation, CharacterID(), event_desc);
+		if(player_event_logs.IsEventEnabled(PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM)) {
+			auto e = PlayerEvent::GuildTributeDonateItem {
+				.item_id = inst->GetID(),
+				.guild_favor = favor
+			};
+
+			RecordPlayerEventLog(PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM, e);
 		}
 
 		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
@@ -16927,15 +16925,13 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 		TakePlatinum(quantity, false);
 		SendGuildTributeDonatePlatReply(in, favor);
 
-		if (RuleB(QueryServ, PlayerLogGuildTributePlatDonations)) {
-			auto event_desc = fmt::format(
-				"Guild Platinum Donation :: {} donated {} platinum for {} favor in zone {}\.",
-				GetName(),
-				quantity,
-				favor,
-				GetZoneID()
-			);
-			QServ->PlayerLogEvent(Player_Log_Guild_Tribute_Plat_Donation, CharacterID(), event_desc);
+		if(player_event_logs.IsEventEnabled(PlayerEvent::GUILD_TRIBUTE_DONATE_PLAT)) {
+			auto e = PlayerEvent::GuildTributeDonatePlat {
+				.plat = quantity,
+				.guild_favor = favor
+			};
+
+			RecordPlayerEventLog(PlayerEvent::GUILD_TRIBUTE_DONATE_PLAT, e);
 		}
 
 		auto outapp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
