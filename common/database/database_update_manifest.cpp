@@ -5017,7 +5017,6 @@ CREATE TABLE `spawn2_disabled` (
 INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE enabled = 0;
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 )",
-		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9242,
