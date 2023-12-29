@@ -117,11 +117,13 @@ bool BaseGuildManager::LoadGuilds()
 		auto count = 0;
 
 		for (auto const &p: guilds_permissions) {
-			m_guilds[g.id]->functions[p.perm_id].id         = p.id;
-			m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
-			m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
-			m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
-			count++;
+			if (p.guild_id == g.id) {
+				m_guilds[g.id]->functions[p.perm_id].id         = p.id;
+				m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
+				m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
+				m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
+				count++;
+			}
 		}
 
 		if (count < GUILD_MAX_FUNCTIONS) {
