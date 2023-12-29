@@ -789,10 +789,6 @@ bool BaseGuildManager::UpdateDbBankerFlag(uint32 charid, bool is_banker)
 
 bool BaseGuildManager::GetBankerFlag(uint32 CharID, bool compat_mode)
 {
-	if (!m_db) {
-		return false;
-	}
-
 	auto db_banker = 0;
 	auto member    = GuildMembersRepository::FindOne(*m_db, CharID);
 
@@ -816,10 +812,6 @@ bool BaseGuildManager::UpdateDbAltFlag(uint32 charid, bool is_alt)
 
 bool BaseGuildManager::GetAltFlag(uint32 CharID)
 {
-	if (!m_db) {
-		return false;
-	}
-
 	std::string query   = StringFormat("SELECT `alt` FROM `guild_members` WHERE char_id=%i LIMIT 1", CharID);
 	auto        results = m_db->QueryDatabase(query);
 	if (!results.Success()) {
@@ -1207,8 +1199,6 @@ void BaseGuildManager::ClearGuilds()
 BaseGuildManager::RankInfo::RankInfo()
 {
 	uint8 r;
-//	for(r = 0; r < _MaxGuildAction; r++)
-//		permissions[r] = false;
 }
 
 BaseGuildManager::GuildInfo::GuildInfo()
@@ -1265,10 +1255,6 @@ std::string BaseGuildManager::GetGuildRankName(uint32 guild_id, uint8 rank) cons
 
 uint32 BaseGuildManager::GetGuildIDByCharacterID(uint32 character_id)
 {
-	if (!m_db) {
-		return GUILD_NONE;
-	}
-
 	std::string query   = fmt::format(
 		"SELECT `guild_id` FROM `guild_members` WHERE char_id = {} LIMIT 1",
 		character_id
