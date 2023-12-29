@@ -541,7 +541,6 @@ SET(common_headers
     events/player_event_logs.h
     events/player_event_discord_formatter.h
     events/player_events.h
-    errmsg.h
     event_sub.h
     expedition_lockout_timer.h
     extprofile.h
