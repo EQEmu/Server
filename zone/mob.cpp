@@ -4038,21 +4038,6 @@ void Mob::SendLevelAppearance(){
 	safe_delete(outapp);
 }
 
-void Mob::SendStunAppearance()
-{
-	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
-	la->parm1 = 58;
-	la->parm2 = 60;
-	la->spawn_id = GetID();
-	la->value1a = 2;
-	la->value1b = 0;
-	la->value2a = 2;
-	la->value2b = 0;
-	entity_list.QueueCloseClients(this,outapp);
-	safe_delete(outapp);
-}
-
 void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target,
 	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground,
 	uint32 value4slot, uint32 value4ground, uint32 value5slot, uint32 value5ground){
