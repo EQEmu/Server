@@ -3632,7 +3632,7 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	SendArmorAppearance();
 
 	if (a.send_effects) {
-		SendSavedAppearenceEffects(nullptr);
+		SendSavedAppearanceEffects(nullptr);
 	}
 
 	LogSpells(
@@ -4092,19 +4092,19 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	}
 
 	if (!value1ground && parm1) {
-		SetAppearenceEffects(value1slot, parm1);
+		SetAppearanceEffects(value1slot, parm1);
 	}
 	if (!value2ground && parm2) {
-		SetAppearenceEffects(value2slot, parm2);
+		SetAppearanceEffects(value2slot, parm2);
 	}
 	if (!value3ground && parm3) {
-		SetAppearenceEffects(value3slot, parm3);
+		SetAppearanceEffects(value3slot, parm3);
 	}
 	if (!value4ground && parm4) {
-		SetAppearenceEffects(value4slot, parm4);
+		SetAppearanceEffects(value4slot, parm4);
 	}
 	if (!value5ground && parm5) {
-		SetAppearenceEffects(value5slot, parm5);
+		SetAppearanceEffects(value5slot, parm5);
 	}
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
@@ -4135,7 +4135,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
-void Mob::SetAppearenceEffects(int32 slot, int32 value)
+void Mob::SetAppearanceEffects(int32 slot, int32 value)
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		if (!appearance_effects_id[i]) {
@@ -4173,7 +4173,7 @@ void Mob::ListAppearanceEffects(Client* c)
 	}
 }
 
-void Mob::ClearAppearenceEffects()
+void Mob::ClearAppearanceEffects()
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		appearance_effects_id[i] = 0;
@@ -4181,7 +4181,7 @@ void Mob::ClearAppearenceEffects()
 	}
 }
 
-void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
+void Mob::SendSavedAppearanceEffects(Client *receiver = nullptr)
 {
 	if (!appearance_effects_id[0]) {
 		return;

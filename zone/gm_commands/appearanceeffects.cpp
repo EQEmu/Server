@@ -86,7 +86,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep)
 				.texture = t->GetTexture(),
 			}
 		);
-		t->ClearAppearenceEffects();
+		t->ClearAppearanceEffects();
 		c->Message(
 			Chat::White,
 			fmt::format(

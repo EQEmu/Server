@@ -495,10 +495,10 @@ public:
 	inline bool HasEndurUpkeep() const { return endur_upkeep; }
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 	bool HasBuffWithSpellGroup(int spell_group);
-	void SetAppearenceEffects(int32 slot, int32 value);
+	void SetAppearanceEffects(int32 slot, int32 value);
 	void ListAppearanceEffects(Client* c);
-	void ClearAppearenceEffects();
-	void SendSavedAppearenceEffects(Client *receiver);
+	void ClearAppearanceEffects();
+	void SendSavedAppearanceEffects(Client *receiver);
 	void SetBuffDuration(int spell_id, int duration = 0, int level_override = -1);
 	void ApplySpellBuff(int spell_id, int duration = 0, int level_override = -1);
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
