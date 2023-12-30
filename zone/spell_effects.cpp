@@ -8077,33 +8077,33 @@ bool Mob::PassCastRestriction(int value)
 		}
 
 		case IS_CLIENT_AND_MALE_PLATE_USER:
-			if (IsClient() && GetGender() == MALE && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Male && IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == MALE && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Male && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-			if (IsClient() && GetGender() == MALE &&
+			if (IsClient() && GetGender() == Gender::Male &&
 				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_PLATE_USER:
-			if (IsClient() && GetGender() == FEMALE && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Female && IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == FEMALE && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Female && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-			if (IsClient() && GetGender() == FEMALE &&
+			if (IsClient() && GetGender() == Gender::Female &&
 				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
 				return true;
 			break;
@@ -10219,7 +10219,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 	if (base == -1) {
 		// Specific Gender Illusions
 		if (spell_id == SPELL_ILLUSION_MALE || spell_id == SPELL_ILLUSION_FEMALE) {
-			uint8 specific_gender = spell_id == SPELL_ILLUSION_MALE ? MALE : FEMALE;
+			uint8 specific_gender = spell_id == SPELL_ILLUSION_MALE ? Gender::Male : Gender::Female;
 
 			if (caster && caster->GetTarget()) {
 				SendIllusionPacket(
@@ -10234,7 +10234,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			// Change Gender Illusions
 		else {
 			if (caster && caster->GetTarget()) {
-				uint8 opposite_gender = caster->GetTarget()->GetGender() == MALE ? FEMALE : MALE;
+				uint8 opposite_gender = caster->GetTarget()->GetGender() == Gender::Male ? Gender::Female : Gender::Male;
 
 				SendIllusionPacket(
 					AppearanceStruct{

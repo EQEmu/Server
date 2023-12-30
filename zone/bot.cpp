@@ -281,10 +281,10 @@ Bot::Bot(
 				case SE_IllusionCopy:
 				case SE_Illusion: {
 					if (spell.base_value[x1] == -1) {
-						if (gender == FEMALE) {
-							gender = MALE;
-						} else if (gender == MALE) {
-							gender = FEMALE;
+						if (gender == Gender::Female) {
+							gender = Gender::Male;
+						} else if (gender == Gender::Male) {
+							gender = Gender::Female;
 						}
 
 						SendIllusionPacket(

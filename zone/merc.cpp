@@ -4323,7 +4323,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->race = merc_template->RaceID;
 
 			// Use the Gender and Size of the Merchant if possible
-			uint8 tmpgender = MALE;
+			uint8 tmpgender = Gender::Male;
 			float tmpsize = 6.0f;
 			if(merchant_id > 0)
 			{
@@ -5624,7 +5624,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().myTemplate = nullptr;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
-		GetMercInfo().Gender = MALE;
+		GetMercInfo().Gender = Gender::Male;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
 		Log(Logs::General, Logs::Mercenaries, "SetMerc No Merc for %s.", GetName());

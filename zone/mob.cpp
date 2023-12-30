@@ -3703,11 +3703,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case HUMAN:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3716,21 +3716,21 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 				new_hair_color = zone->random.Int(0, 19);
 				new_luclin_face = zone->random.Int(0, 87);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
 				break;
 			case ERUDITE:
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard_color = zone->random.Int(0, 19);
 					new_beard = zone->random.Int(0, 5);
 					new_luclin_face = zone->random.Int(0, 57);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_luclin_face = zone->random.Int(0, 87);
 				}
 
@@ -3738,9 +3738,9 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case WOOD_ELF:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_hair_style = zone->random.Int(0, 3);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3748,11 +3748,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case HIGH_ELF:
 				new_hair_color = zone->random.Int(0, 14);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3760,11 +3760,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case DARK_ELF:
 				new_hair_color = zone->random.Int(13, 18);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3772,11 +3772,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case HALF_ELF:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_luclin_face = zone->random.Int(0, 37);
 					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3785,10 +3785,10 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 				new_hair_color = zone->random.Int(0, 19);
 				new_beard_color = new_hair_color;
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 					new_luclin_face = zone->random.Int(0, 17);
 				}
@@ -3798,14 +3798,14 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 				new_eye_color_one = zone->random.Int(0, 10);
 				new_eye_color_two = zone->random.Int(0, 10);
 
-				if (current_gender == FEMALE) {
+				if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_hair_color = zone->random.Int(0, 23);
 				}
 
 				break;
 			case OGRE:
-				if (current_gender == FEMALE) {
+				if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 3);
 					new_hair_color = zone->random.Int(0, 23);
 				}
@@ -3814,11 +3814,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case HALFLING:
 				new_hair_color = zone->random.Int(0, 19);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3826,11 +3826,11 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 			case GNOME:
 				new_hair_color = zone->random.Int(0, 24);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard_color = new_hair_color;
 					new_hair_style = zone->random.Int(0, 3);
 					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_hair_style = zone->random.Int(0, 2);
 				}
 
@@ -3852,10 +3852,10 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 				new_drakkin_tattoo = zone->random.Int(0, 7);
 				new_drakkin_details = zone->random.Int(0, 7);
 
-				if (current_gender == MALE) {
+				if (current_gender == Gender::Male) {
 					new_beard = zone->random.Int(0, 12);
 					new_hair_style = zone->random.Int(0, 8);
-				} else if (current_gender == FEMALE) {
+				} else if (current_gender == Gender::Female) {
 					new_beard = zone->random.Int(0, 3);
 					new_hair_style = zone->random.Int(0, 7);
 				}
@@ -3961,8 +3961,8 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == Race::HumanGhost ||
 		in_race == Race::Coldain2
 	) {
-		if (in_gender >= 2) { // Male default for PC Races
-			return 0;
+		if (in_gender >= Gender::Neuter) { // Male default for PC Races
+			return Gender::Male;
 		} else {
 			return in_gender;
 		}
@@ -3986,7 +3986,7 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == Race::RoyalGuard ||
 		in_race == Race::Erudite2
 	) { // Male only races
-		return 0;
+		return Gender::Male;
 	} else if (
 		in_race == Race::Fairy ||
 		in_race == Race::Pixie ||
@@ -3995,9 +3995,9 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == Race::AyonaeRo ||
 		in_race == Race::SullonZek
 	) { // Female only races
-		return 1;
+		return Gender::Female;
 	} else { // Neutral default for NPC Races
-		return 2;
+		return Gender::Neuter;
 	}
 }
 

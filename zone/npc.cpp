@@ -1220,7 +1220,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = NEUTER;
+	npc_type->gender = Gender::Neuter;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 200;

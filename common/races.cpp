@@ -1598,7 +1598,7 @@ float GetRaceGenderDefaultHeight(int race, int gender)
 		return 6.0f;
 	}
 
-	if (gender == FEMALE) {
+	if (gender == Gender::Female) {
 		return female_height[race];
 	}
 
@@ -1606,38 +1606,38 @@ float GetRaceGenderDefaultHeight(int race, int gender)
 }
 
 // PlayerAppearance prep
-#define HUMAN_MALE ((HUMAN << 8) | MALE)
-#define HUMAN_FEMALE ((HUMAN << 8) | FEMALE)
-#define BARBARIAN_MALE ((BARBARIAN << 8) | MALE)
-#define BARBARIAN_FEMALE ((BARBARIAN << 8) | FEMALE)
-#define ERUDITE_MALE ((ERUDITE << 8) | MALE)
-#define ERUDITE_FEMALE ((ERUDITE << 8) | FEMALE)
-#define WOOD_ELF_MALE ((WOOD_ELF << 8) | MALE)
-#define WOOD_ELF_FEMALE ((WOOD_ELF << 8) | FEMALE)
-#define HIGH_ELF_MALE ((HIGH_ELF << 8) | MALE)
-#define HIGH_ELF_FEMALE ((HIGH_ELF << 8) | FEMALE)
-#define DARK_ELF_MALE ((DARK_ELF << 8) | MALE)
-#define DARK_ELF_FEMALE ((DARK_ELF << 8) | FEMALE)
-#define HALF_ELF_MALE ((HALF_ELF << 8) | MALE)
-#define HALF_ELF_FEMALE ((HALF_ELF << 8) | FEMALE)
-#define DWARF_MALE ((DWARF << 8) | MALE)
-#define DWARF_FEMALE ((DWARF << 8) | FEMALE)
-#define TROLL_MALE ((TROLL << 8) | MALE)
-#define TROLL_FEMALE ((TROLL << 8) | FEMALE)
-#define OGRE_MALE ((OGRE << 8) | MALE)
-#define OGRE_FEMALE ((OGRE << 8) | FEMALE)
-#define HALFLING_MALE ((HALFLING << 8) | MALE)
-#define HALFLING_FEMALE ((HALFLING << 8) | FEMALE)
-#define GNOME_MALE ((GNOME << 8) | MALE)
-#define GNOME_FEMALE ((GNOME << 8) | FEMALE)
-#define IKSAR_MALE ((IKSAR << 8) | MALE)
-#define IKSAR_FEMALE ((IKSAR << 8) | FEMALE)
-#define VAHSHIR_MALE ((VAHSHIR << 8) | MALE)
-#define VAHSHIR_FEMALE ((VAHSHIR << 8) | FEMALE)
-#define FROGLOK_MALE ((FROGLOK << 8) | MALE)
-#define FROGLOK_FEMALE ((FROGLOK << 8) | FEMALE)
-#define DRAKKIN_MALE ((DRAKKIN << 8) | MALE)
-#define DRAKKIN_FEMALE ((DRAKKIN << 8) | FEMALE)
+#define HUMAN_MALE ((HUMAN << 8) | Gender::Male)
+#define HUMAN_FEMALE ((HUMAN << 8) | Gender::Female)
+#define BARBARIAN_MALE ((BARBARIAN << 8) | Gender::Male)
+#define BARBARIAN_FEMALE ((BARBARIAN << 8) | Gender::Female)
+#define ERUDITE_MALE ((ERUDITE << 8) | Gender::Male)
+#define ERUDITE_FEMALE ((ERUDITE << 8) | Gender::Female)
+#define WOOD_ELF_MALE ((WOOD_ELF << 8) | Gender::Male)
+#define WOOD_ELF_FEMALE ((WOOD_ELF << 8) | Gender::Female)
+#define HIGH_ELF_MALE ((HIGH_ELF << 8) | Gender::Male)
+#define HIGH_ELF_FEMALE ((HIGH_ELF << 8) | Gender::Female)
+#define DARK_ELF_MALE ((DARK_ELF << 8) | Gender::Male)
+#define DARK_ELF_FEMALE ((DARK_ELF << 8) | Gender::Female)
+#define HALF_ELF_MALE ((HALF_ELF << 8) | Gender::Male)
+#define HALF_ELF_FEMALE ((HALF_ELF << 8) | Gender::Female)
+#define DWARF_MALE ((DWARF << 8) | Gender::Male)
+#define DWARF_FEMALE ((DWARF << 8) | Gender::Female)
+#define TROLL_MALE ((TROLL << 8) | Gender::Male)
+#define TROLL_FEMALE ((TROLL << 8) | Gender::Female)
+#define OGRE_MALE ((OGRE << 8) | Gender::Male)
+#define OGRE_FEMALE ((OGRE << 8) | Gender::Female)
+#define HALFLING_MALE ((HALFLING << 8) | Gender::Male)
+#define HALFLING_FEMALE ((HALFLING << 8) | Gender::Female)
+#define GNOME_MALE ((GNOME << 8) | Gender::Male)
+#define GNOME_FEMALE ((GNOME << 8) | Gender::Female)
+#define IKSAR_MALE ((IKSAR << 8) | Gender::Male)
+#define IKSAR_FEMALE ((IKSAR << 8) | Gender::Female)
+#define VAHSHIR_MALE ((VAHSHIR << 8) | Gender::Male)
+#define VAHSHIR_FEMALE ((VAHSHIR << 8) | Gender::Female)
+#define FROGLOK_MALE ((FROGLOK << 8) | Gender::Male)
+#define FROGLOK_FEMALE ((FROGLOK << 8) | Gender::Female)
+#define DRAKKIN_MALE ((DRAKKIN << 8) | Gender::Male)
+#define DRAKKIN_FEMALE ((DRAKKIN << 8) | Gender::Female)
 
 #define BINDRG(r, g) (((int)r << 8) | g)
 
@@ -2238,11 +2238,11 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 
 const char* GetGenderName(uint32 gender_id) {
 	const char* gender_name = "Unknown";
-	if (gender_id == MALE) {
+	if (gender_id == Gender::Male) {
 		gender_name = "Male";
-	} else if (gender_id == FEMALE) {
+	} else if (gender_id == Gender::Female) {
 		gender_name = "Female";
-	} else if (gender_id == NEUTER) {
+	} else if (gender_id == Gender::Neuter) {
 		gender_name = "Neuter";
 	}
 	return gender_name;
