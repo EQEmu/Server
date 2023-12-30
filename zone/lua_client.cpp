@@ -3679,7 +3679,7 @@ luabind::scope lua_register_client() {
 	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int))&Lua_Client::SetBotSpawnLimit)
 	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int,uint8))&Lua_Client::SetBotSpawnLimit)
 	.def("SetBucket", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetBucket)
-	.def("SetBucketExpires", (void(Lua_Client::*)(std::string,std::string,std::string))&Lua_Client::SetBucket)
+	.def("SetBucket", (void(Lua_Client::*)(std::string,std::string,std::string))&Lua_Client::SetBucket)
 	.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
 	.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 	.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
