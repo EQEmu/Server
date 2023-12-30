@@ -14,6 +14,9 @@
 #include <string.h>
 #include <mutex>
 
+#define CR_SERVER_GONE_ERROR    2006
+#define CR_SERVER_LOST          2013
+
 class DBcore {
 public:
 	enum eStatus {

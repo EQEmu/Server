@@ -191,7 +191,6 @@ SET(zone_headers
     embperl.h
     encounter.h
     entity.h
-    errmsg.h
     event_codes.h
     expedition.h
     expedition_database.h
