@@ -488,6 +488,7 @@ public:
 	void RemoveRadiantCrystals(uint32 amount);
 	void SummonItemIntoInventory(luabind::object item_table);
 	bool HasItemOnCorpse(uint32 item_id);
+	void ClearXTargets();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

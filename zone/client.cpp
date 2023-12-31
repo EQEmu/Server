@@ -11944,3 +11944,26 @@ std::string GetZoneModeString(ZoneMode mode)
 			return "Unknown";
 	}
 }
+
+void Client::ClearXTargets()
+{
+	if (!XTargettingAvailable()) {
+		return;
+	}
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].ID) {
+			Mob* m = entity_list.GetMob(XTargets[i].ID);
+
+			if (m) {
+				RemoveXTarget(m, false);
+			}
+
+			XTargets[i].ID      = 0;
+			XTargets[i].Name[0] = 0;
+			XTargets[i].dirty   = false;
+
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
