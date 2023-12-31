@@ -13,7 +13,6 @@ SET(common_sources
     crc32.cpp
     database/database_dump_service.cpp
     database.cpp
-    database_conversions.cpp
     database_instances.cpp
     database/database_update_manifest.cpp
     database/database_update_manifest_bots.cpp
