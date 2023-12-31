@@ -567,9 +567,8 @@ Mob::~Mob()
 	LeaveHealRotationTargetPool();
 }
 
-uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
-	switch (iAppearance) {
-		// 0 standing, 1 sitting, 2 ducking, 3 lieing down, 4 looting
+uint32 Mob::GetAppearanceValue(EmuAppearance in_appearance) {
+	switch (in_appearance) {
 		case eaStanding: {
 			return Animation::Standing;
 		}
@@ -585,11 +584,12 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 		case eaLooting: {
 			return Animation::Looting;
 		}
-		//to shup up compiler:
-		case _eaMaxAppearance:
+		case _eaMaxAppearance: {
 			break;
+		}
 	}
-	return(Animation::Standing);
+
+	return Animation::Standing;
 }
 
 
@@ -4352,15 +4352,17 @@ const int64& Mob::SetMana(int64 amount)
 }
 
 
-void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
+void Mob::SetAppearance(EmuAppearance app, bool ignore_self) {
 	if (_appearance == app) {
 		return;
 	}
 
 	_appearance = app;
-	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(app), true, iIgnoreSelf);
+
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(app), true, ignore_self);
+
 	if (IsClient() && IsAIControlled()) {
-		SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false, false);
+		SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false);
 	}
 }
 

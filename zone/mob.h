@@ -1021,9 +1021,9 @@ public:
 	void SetFlurryChance(uint8 value) { SetSpecialAbilityParam(SPECATK_FLURRY, 0, value); }
 	uint8 GetFlurryChance() { return GetSpecialAbilityParam(SPECATK_FLURRY, 0); }
 
-	static uint32 GetAppearanceValue(EmuAppearance iAppearance);
+	static uint32 GetAppearanceValue(EmuAppearance in_appearance);
 	void SendAppearancePacket(uint32 type, uint32 value, bool whole_zone = true, bool ignore_self = false, Client* target = nullptr);
-	void SetAppearance(EmuAppearance app, bool iIgnoreSelf = true);
+	void SetAppearance(EmuAppearance app, bool ignore_self = true);
 	inline EmuAppearance GetAppearance() const { return _appearance; }
 	inline const int GetAnimation() const { return animation; }
 	inline void SetAnimation(int a) { animation = a; }
