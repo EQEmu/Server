@@ -582,7 +582,7 @@ std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
 
 const std::map<uint32, std::string>& EQ::constants::GetAppearanceTypeMap()
 {
-	static const std::map<uint32, std::string> animation_type_map = {
+	static const std::map<uint32, std::string> appearance_type_map = {
 		{ AppearanceType::Die, "Die" },
 		{ AppearanceType::WhoLevel, "Who Level" },
 		{ AppearanceType::MaxHealth, "Max Health" },
@@ -627,7 +627,7 @@ const std::map<uint32, std::string>& EQ::constants::GetAppearanceTypeMap()
 		{ AppearanceType::OfflineMode, "Offline Mode" }
 	};
 
-	return animation_type_map;
+	return appearance_type_map;
 }
 
 std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
