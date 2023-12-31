@@ -716,7 +716,6 @@ public:
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool save_guard_spot = true);
 	virtual void GMMove(const glm::vec4 &position, bool save_guard_spot = true);
 	void SetDelta(const glm::vec4& delta);
-	void MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct* spu);
 	void MakeSpawnUpdate(PlayerPositionUpdateServer_Struct* spu);
 	void SentPositionPacket(float dx, float dy, float dz, float dh, int anim, bool send_to_self = false);
 	virtual void StopMoving();
