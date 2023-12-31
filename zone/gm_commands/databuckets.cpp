@@ -221,7 +221,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Bucket {} | Key: {} | Value: {} | Character ID: {} | NPC ID: {} Bot ID: {} | {}",
+					"Bucket {} | Key: {} | Value: {} | Character ID: {} NPC ID: {} Bot ID: {} | {}",
 					bucket_number,
 					e.key_,
 					e.value,
