@@ -3246,6 +3246,12 @@ void Lua_Client::SummonItemIntoInventory(luabind::object item_table) {
 	);
 }
 
+bool Lua_Client::HasItemOnCorpse(uint32 item_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->HasItemOnCorpse(item_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3508,6 +3514,7 @@ luabind::scope lua_register_client() {
 	.def("HasDisciplineLearned", (bool(Lua_Client::*)(uint16))&Lua_Client::HasDisciplineLearned)
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
+	.def("HasItemOnCorpse", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemOnCorpse)
 	.def("HasPEQZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasPEQZoneFlag)
 	.def("HasRecipeLearned", (bool(Lua_Client::*)(uint32))&Lua_Client::HasRecipeLearned)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
