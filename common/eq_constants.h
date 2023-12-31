@@ -23,61 +23,59 @@
 #include "skills.h"
 #include "types.h"
 
+namespace AppearanceType {
+	constexpr uint32 Die                   = 0; // Causes the client to keel over and zone to bind point (default action)
+	constexpr uint32 WhoLevel              = 1; // Level that shows up on /who
+	constexpr uint32 MaxHealth             = 2;
+	constexpr uint32 Invisibility          = 3; // 0 = Visible, 1 = Invisible
+	constexpr uint32 PVP                   = 4; // 0 = Non-PVP, 1 = PVP
+	constexpr uint32 Light                 = 5; // Light type emitted by player (lightstone, shiny shield)
+	constexpr uint32 Animation             = 14; // 100 = Standing, 102 = Freeze, 105 = Looting, 110 = Sitting, 111 = Crouching, 115 = Lying
+	constexpr uint32 Sneak                 = 15; // 0 = Normal, 1 = Sneaking
+	constexpr uint32 SpawnID               = 16; // Server -> Client, sets player spawn ID
+	constexpr uint32 Health                = 17; // Client->Server, my HP has changed (like regen tic)
+	constexpr uint32 Linkdead              = 18; // 0 = Normal, 1 = Linkdead
+	constexpr uint32 FlyMode               = 19; // 0 = Off, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating while Running
+	constexpr uint32 GM                    = 20; // 0 = Non-GM, 1 = GM
+	constexpr uint32 Anonymous             = 21; // 0 = Non-Anonymous, 1 = Anonymous, 2 = Roleplaying
+	constexpr uint32 GuildID               = 22;
+	constexpr uint32 GuildRank             = 23;
+	constexpr uint32 AFK                   = 24; // 0 = Non-AFK, 1 = AFK
+	constexpr uint32 Pet                   = 25; // Parameter is Entity ID of owner, or 0 for when charm breaks
+	constexpr uint32 Summoned              = 27;
+	constexpr uint32 Split                 = 28; // 0 = No Split, 1 = Auto Split
+	constexpr uint32 Size                  = 29; // Spawn's Size
+	constexpr uint32 SetType               = 30; // 0 = PC, 1 = NPC, 2 = Corpse
+	constexpr uint32 NPCName               = 31; // Change PC name color to NPC name color
+	constexpr uint32 AARank                = 32; // AA Rank Title ID, title in /who?
+	constexpr uint32 CancelSneakHide       = 33; // Turns off Hide and Sneak
+	constexpr uint32 AreaHealthRegen       = 35; // Guild Hall Regeneration Pool sets to value * 0.001
+	constexpr uint32 AreaManaRegen         = 36; // Guild Hall Regeneration Pool sets to value * 0.001
+	constexpr uint32 AreaEnduranceRegen    = 37; // Guild Hall Regeneration Pool sets to value * 0.001
+	constexpr uint32 FreezeBeneficialBuffs = 38; // Freezes beneficial buff timers for PCs
+	constexpr uint32 NPCTintIndex          = 39;
+	constexpr uint32 GroupAutoConsent      = 40; // Auto Consent Group
+	constexpr uint32 RaidAutoConsent       = 41; // Auto Consent Raid
+	constexpr uint32 GuildAutoConsent      = 42; // Auto Consent Guild
+	constexpr uint32 ShowHelm              = 43; // 0 = Hide, 1 = Show
+	constexpr uint32 DamageState           = 44; // The damage state of a destructible object (0 through 10) plays sound IDs, most only have 2 or 4 states though
+	constexpr uint32 EQPlayers             = 45; // EQ Players Update
+	constexpr uint32 FindBits              = 46; // Set Find Bits?
+	constexpr uint32 TextureType           = 48; // Texture Type?
+	constexpr uint32 FacePick              = 49; // Turns off face pick window?
+	constexpr uint32 AntiCheat             = 51; // Sent by the client randomly telling the server how long since last action has occurred
+	constexpr uint32 GuildShow             = 52;
+	constexpr uint32 OfflineMode           = 53; // Offline Mode
+}
 
-//SpawnAppearance types: (compared two clients for server-originating types: SoF & RoF2)
-#define AT_Die 0			// this causes the client to keel over and zone to bind point (default action)
-#define AT_WhoLevel 1		// the level that shows up on /who
-#define AT_HPMax 2			// idk
-#define AT_Invis 3			// 0 = visible, 1 = invisible
-#define AT_PVP 4			// 0 = blue, 1 = pvp (red)
-#define AT_Light 5			// light type emitted by player (lightstone, shiny shield)
-#define AT_Anim 14			// 100=standing, 110=sitting, 111=ducking, 115=feigned, 105=looting
-#define AT_Sneak 15			// 0 = normal, 1 = sneaking
-#define AT_SpawnID 16		// server to client, sets player spawn id
-#define AT_HP 17			// Client->Server, my HP has changed (like regen tic)
-#define AT_Linkdead 18		// 0 = normal, 1 = linkdead
-#define AT_Levitate 19		// 0=off, 1=flymode, 2=levitate max 5, see GravityBehavior enum
-#define AT_GM 20			// 0 = normal, 1 = GM - all odd numbers seem to make it GM
-#define AT_Anon 21			// 0 = normal, 1 = anon, 2 = roleplay
-#define AT_GuildID 22
-#define AT_GuildRank 23		// 0=member, 1=officer, 2=leader
-#define AT_AFK 24			// 0 = normal, 1 = afk
-#define AT_Pet 25			// Param is EntityID of owner, or 0 for when charm breaks
-#define AT_Summoned 27		// Unsure
-#define AT_Split 28			// 0 = normal, 1 = autosplit on (not showing in SoF+) (client-to-server only)
-#define AT_Size 29			// spawn's size (present: SoF, absent: RoF2)
-#define AT_SetType 30		// 0 = PC, 1 = NPC, 2 <= = corpse
-#define AT_NPCName 31		// change PC's name's color to NPC color 0 = normal, 1 = npc name, Trader on RoF2?
-#define AT_AARank 32		// AA Rank Title ID thingy, does is this the title in /who?
-#define AT_CancelSneakHide 33	// Turns off Hide and Sneak
-//#define AT_34 34			// unknown (present: SoF, absent: RoF2)
-#define AT_AreaHPRegen 35	// guild hall regen pool sets to value * 0.001
-#define AT_AreaManaRegen 36	// guild hall regen pool sets to value * 0.001
-#define AT_AreaEndRegen 37	// guild hall regen pool sets to value * 0.001
-#define AT_FreezeBuffs 38	// Freezes beneficial buff timers
-#define AT_NpcTintIndex 39	// not 100% sure
-#define AT_GroupConsent 40	// auto consent group
-#define AT_RaidConsent 41	// auto consent raid
-#define AT_GuildConsent 42	// auto consent guild
-#define AT_ShowHelm 43		// 0 = hide graphic, 1 = show graphic
-#define AT_DamageState 44	// The damage state of a destructible object (0 through 10) plays soundids most only have 2 or 4 states though
-#define AT_EQPlayers 45		// /eqplayersupdate
-#define AT_FindBits 46		// set FindBits, whatever those are!
-#define AT_TextureType 48	// TextureType
-#define AT_FacePick 49		// Turns off face pick window? maybe ...
-#define AT_AntiCheat 51		// sent by the client randomly telling the server how long since last action has occured
-#define AT_GuildShow 52		// this is what MQ2 call sit, not sure
-#define AT_Offline 53		// Offline mode
-
-//#define AT_Trader 300		// Bazaar Trader Mode (not present in SoF or RoF2)
-
-// animations for AT_Anim
-#define ANIM_FREEZE	    102
-#define	ANIM_STAND		0x64
-#define	ANIM_SIT		0x6e
-#define	ANIM_CROUCH		0x6f
-#define	ANIM_DEATH		0x73
-#define ANIM_LOOT		0x69
+namespace Animation {
+	constexpr uint32 Standing  = 100;
+	constexpr uint32 Freeze    = 102;
+	constexpr uint32 Looting   = 105;
+	constexpr uint32 Sitting   = 110;
+	constexpr uint32 Crouching = 111;
+	constexpr uint32 Lying     = 115;
+}
 
 constexpr int16 RECAST_TYPE_UNLINKED_ITEM = -1;
 

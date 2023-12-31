@@ -602,14 +602,14 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			itemlist.erase(cur);
 			UpdateEquipmentLight();
-			if (UpdateActiveLight()) { SendAppearancePacket(AT_Light, GetActiveLightType()); }
+			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
 			if (item->charges <= quantity) {
 				itemlist.erase(cur);
 				UpdateEquipmentLight();
-				if (UpdateActiveLight()) { SendAppearancePacket(AT_Light, GetActiveLightType()); }
+				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			}
 			else {
 				item->charges -= quantity;
@@ -655,7 +655,7 @@ void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight()) {
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 }
 
@@ -671,7 +671,7 @@ void NPC::ClearItemList() {
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight())
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 }
 
 void NPC::QueryLoot(Client* to, bool is_pet_query)
@@ -2439,7 +2439,7 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	if(in_level > level)
 		SendLevelAppearance();
 	level = in_level;
-	SendAppearancePacket(AT_WhoLevel, in_level);
+	SendAppearancePacket(AppearanceType::WhoLevel, in_level);
 }
 
 void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)

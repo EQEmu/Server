@@ -810,7 +810,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					entity_list.QueueClients(this, app);
 					safe_delete(app);
 					SendPetBuffsToClient();
-					SendAppearancePacket(AT_Pet, caster->GetID(), true, true);
+					SendAppearancePacket(AppearanceType::Pet, caster->GetID(), true, true);
 				}
 
 				if (IsClient())
@@ -1435,10 +1435,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				//this sends the levitate packet to everybody else
 				//who does not otherwise receive the buff packet.
 				if (spells[spell_id].limit_value[i] == 1) {
-					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
+					SendAppearancePacket(AppearanceType::FlyMode, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
 				}
 				else {
-					SendAppearancePacket(AT_Levitate, EQ::constants::GravityBehavior::Levitating, true, true);
+					SendAppearancePacket(AppearanceType::FlyMode, EQ::constants::GravityBehavior::Levitating, true, true);
 				}
 				break;
 			}
@@ -1482,7 +1482,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								.texture = caster->GetTarget()->GetTexture(),
 							}
 						);
-						caster->SendAppearancePacket(AT_Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
+						caster->SendAppearancePacket(AppearanceType::Size, static_cast<uint32>(caster->GetTarget()->GetSize()));
 
 						for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++)
 							caster->SendWearChange(x);
@@ -4278,7 +4278,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			{
 				SendIllusionPacket(AppearanceStruct{});
 				// The GetSize below works because the above setting race to zero sets size back.
-				SendAppearancePacket(AT_Size, GetSize());
+				SendAppearancePacket(AppearanceType::Size, GetSize());
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
 					SendWearChange(x);
@@ -4290,7 +4290,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Levitate:
 			{
 				if (!AffectedBySpellExcludingSlot(slot, SE_Levitate))
-					SendAppearancePacket(AT_Levitate, 0);
+					SendAppearancePacket(AppearanceType::FlyMode, 0);
 				break;
 			}
 
@@ -4337,7 +4337,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_Mez:
 			{
-				SendAppearancePacket(AT_Anim, ANIM_STAND);	// unfreeze
+				SendAppearancePacket(AppearanceType::Animation, Animation::Standing);	// unfreeze
 				mezzed = false;
 				break;
 			}
@@ -4350,7 +4350,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					CastToNPC()->ModifyStatsOnCharm(true);
 				}
 
-				SendAppearancePacket(AT_Pet, 0, true, true);
+				SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				Mob* owner = GetOwner();
 				SetOwnerID(0);
 				SetPetType(petNone);
@@ -4437,7 +4437,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 							SetSpecialAbility(IMMUNE_AGGRO, 0);
 						}
 					}
-					SendAppearancePacket(AT_Anim, ANIM_STAND);
+					SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 				}
 				if(owner && owner->IsClient())
 				{
@@ -10335,7 +10335,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			SetFaceAppearance(f);
 		}
 
-		SendAppearancePacket(AT_Size, race_size);
+		SendAppearancePacket(AppearanceType::Size, race_size);
 	}
 
 	for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {

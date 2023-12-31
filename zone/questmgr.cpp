@@ -3538,12 +3538,12 @@ void QuestManager::FlyMode(GravityBehavior flymode)
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		initiator->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		initiator->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		initiator->SetFlyMode(flymode);
 	}
 	else if(owner)
 	{
-		owner->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		owner->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		owner->SetFlyMode(flymode);
 	}
 }

@@ -3911,11 +3911,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		if (IsClient() && CastToClient()->sneaking) {
 			CastToClient()->sneaking = false;
-			SendAppearancePacket(AT_Sneak, 0);
+			SendAppearancePacket(AppearanceType::Sneak, 0);
 		}
 		if (attacker && attacker->IsClient() && attacker->CastToClient()->sneaking) {
 			attacker->CastToClient()->sneaking = false;
-			attacker->SendAppearancePacket(AT_Sneak, 0);
+			attacker->SendAppearancePacket(AppearanceType::Sneak, 0);
 		}
 
 		//final damage has been determined.

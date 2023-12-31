@@ -26,7 +26,7 @@ void SetGodMode(Client *c, const Seperator *sep)
 	}
 
 	c->SetInvul(god_mode);
-	c->SendAppearancePacket(AT_Levitate, god_mode);
+	c->SendAppearancePacket(AppearanceType::FlyMode, god_mode);
 	c->SetHideMe(god_mode);
 
 	c->Message(

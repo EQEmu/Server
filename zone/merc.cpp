@@ -4626,7 +4626,7 @@ void Merc::UpdateMercAppearance() {
 	}
 
 	if (UpdateActiveLight())
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 }
 
 void Merc::UpdateEquipmentLight()
@@ -5653,7 +5653,7 @@ void Client::UpdateMercLevel() {
 	if (merc)
 	{
 		merc->UpdateMercStats(this, false);
-		merc->SendAppearancePacket(AT_WhoLevel, GetLevel(), true, true);
+		merc->SendAppearancePacket(AppearanceType::WhoLevel, GetLevel(), true, true);
 	}
 }
 

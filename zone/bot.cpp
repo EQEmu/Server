@@ -325,30 +325,30 @@ Bot::Bot(
 
 					switch (spell.base_value[x1]) {
 					case OGRE:
-						SendAppearancePacket(AT_Size, 9);
+						SendAppearancePacket(AppearanceType::Size, 9);
 						break;
 					case TROLL:
-						SendAppearancePacket(AT_Size, 8);
+						SendAppearancePacket(AppearanceType::Size, 8);
 						break;
 					case VAHSHIR:
 					case BARBARIAN:
-						SendAppearancePacket(AT_Size, 7);
+						SendAppearancePacket(AppearanceType::Size, 7);
 						break;
 					case HALF_ELF:
 					case WOOD_ELF:
 					case DARK_ELF:
 					case FROGLOK:
-						SendAppearancePacket(AT_Size, 5);
+						SendAppearancePacket(AppearanceType::Size, 5);
 						break;
 					case DWARF:
-						SendAppearancePacket(AT_Size, 4);
+						SendAppearancePacket(AppearanceType::Size, 4);
 						break;
 					case HALFLING:
 					case GNOME:
-						SendAppearancePacket(AT_Size, 3);
+						SendAppearancePacket(AppearanceType::Size, 3);
 						break;
 					default:
-						SendAppearancePacket(AT_Size, 6);
+						SendAppearancePacket(AppearanceType::Size, 6);
 						break;
 					}
 					break;
@@ -372,18 +372,18 @@ Bot::Bot(
 				case SE_Invisibility:
 				{
 					invisible = true;
-					SendAppearancePacket(AT_Invis, 1);
+					SendAppearancePacket(AppearanceType::Invisibility, 1);
 					break;
 				}
 				case SE_Levitate:
 				{
 					if (!zone->CanLevitate())
 					{
-							SendAppearancePacket(AT_Levitate, 0);
+							SendAppearancePacket(AppearanceType::FlyMode, 0);
 							BuffFadeByEffect(SE_Levitate);
 					}
 					else {
-						SendAppearancePacket(AT_Levitate, 2);
+						SendAppearancePacket(AppearanceType::FlyMode, 2);
 					}
 					break;
 				}
@@ -3674,7 +3674,7 @@ void Bot::LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance) {
 				}
 
 				e->SendHPUpdate();
-				e->SendAppearancePacket(AT_WhoLevel, new_level, true, true); // who level change
+				e->SendAppearancePacket(AppearanceType::WhoLevel, new_level, true, true); // who level change
 				e->AI_AddBotSpells(e->GetBotSpellID());
 			}
 		}
@@ -3706,7 +3706,7 @@ void Bot::BotAddEquipItem(uint16 slot_id, uint32 item_id) {
 
 		UpdateEquipmentLight();
 		if (UpdateActiveLight() && GetID()) { // temp hack fix
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+			SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 		}
 	}
 }
@@ -3726,7 +3726,7 @@ void Bot::BotRemoveEquipItem(uint16 slot_id)
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight()) {
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 }
 

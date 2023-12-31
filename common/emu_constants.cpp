@@ -509,7 +509,6 @@ std::string EQ::constants::GetObjectTypeName(int object_type)
 {
 	if (!EQ::ValueWithin(object_type, ObjectTypes::SmallBag, ObjectTypes::NoDeposit)) {
 		return std::string();
-
 	}
 
 	return EQ::constants::GetObjectTypeMap().find(object_type)->second;
@@ -579,4 +578,64 @@ std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
 	}
 
 	return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
+}
+
+const std::map<uint32, std::string>& EQ::constants::GetAppearanceTypeMap()
+{
+	static const std::map<uint32, std::string> animation_type_map = {
+		{ AppearanceType::Die, "Die" },
+		{ AppearanceType::WhoLevel, "Who Level" },
+		{ AppearanceType::MaxHealth, "Max Health" },
+		{ AppearanceType::Invisibility, "Invisibility" },
+		{ AppearanceType::PVP, "PVP" },
+		{ AppearanceType::Light, "Light" },
+		{ AppearanceType::Animation, "Animation" },
+		{ AppearanceType::Sneak, "Sneak" },
+		{ AppearanceType::SpawnID, "Spawn ID" },
+		{ AppearanceType::Health, "Health" },
+		{ AppearanceType::Linkdead, "Linkdead" },
+		{ AppearanceType::FlyMode, "Fly Mode" },
+		{ AppearanceType::GM, "GM" },
+		{ AppearanceType::Anonymous, "Anonymous" },
+		{ AppearanceType::GuildID, "Guild ID" },
+		{ AppearanceType::GuildRank, "Guild Rank" },
+		{ AppearanceType::AFK, "AFK" },
+		{ AppearanceType::Pet, "Pet" },
+		{ AppearanceType::Summoned, "Summoned" },
+		{ AppearanceType::Split, "Split" },
+		{ AppearanceType::Size, "Size" },
+		{ AppearanceType::SetType, "Set Type" },
+		{ AppearanceType::NPCName, "NPCName" },
+		{ AppearanceType::AARank, "AARank" },
+		{ AppearanceType::CancelSneakHide, "Cancel Sneak Hide" },
+		{ AppearanceType::AreaHealthRegen, "Area Health Regeneration" },
+		{ AppearanceType::AreaManaRegen, "Area Mana Regeneration" },
+		{ AppearanceType::AreaEnduranceRegen, "Area Endurance Regeneration" },
+		{ AppearanceType::FreezeBeneficialBuffs, "Freeze Beneficial Buffs" },
+		{ AppearanceType::NPCTintIndex, "NPC Tint Index" },
+		{ AppearanceType::GroupAutoConsent, "Group Auto Consent" },
+		{ AppearanceType::RaidAutoConsent, "Raid Auto Consent" },
+		{ AppearanceType::GuildAutoConsent, "Guild Auto Consent" },
+		{ AppearanceType::ShowHelm, "Show Helm" },
+		{ AppearanceType::DamageState, "Damage State" },
+		{ AppearanceType::EQPlayers, "EQ Players" },
+		{ AppearanceType::FindBits, "Find Bits" },
+		{ AppearanceType::TextureType, "Texture Type" },
+		{ AppearanceType::FacePick, "Face Pick" },
+		{ AppearanceType::AntiCheat, "Anti Cheat" },
+		{ AppearanceType::GuildShow, "Guild Show" },
+		{ AppearanceType::OfflineMode, "Offline Mode" }
+	};
+
+	return animation_type_map;
+}
+
+std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
+{
+	const auto& a = EQ::constants::GetAppearanceTypeMap().find(appearance_type);
+	if (a != EQ::constants::GetAppearanceTypeMap().end()) {
+		return a->second;
+	}
+
+	return std::string();
 }

@@ -1411,7 +1411,7 @@ void EntityList::SendZonePVPUpdates(Client *to)
 	while (it != client_list.end()) {
 		Client *c = it->second;
 		if(c->GetPVP())
-			c->SendAppearancePacket(AT_PVP, c->GetPVP(), true, false, to);
+			c->SendAppearancePacket(AppearanceType::PVP, c->GetPVP(), true, false, to);
 		++it;
 	}
 }
@@ -4704,10 +4704,10 @@ void EntityList::SendZoneAppearance(Client *c)
 				continue;
 			}
 			if (cur->GetAppearance() != eaStanding) {
-				cur->SendAppearancePacket(AT_Anim, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
+				cur->SendAppearancePacket(AppearanceType::Animation, cur->GetAppearanceValue(cur->GetAppearance()), false, true, c);
 			}
 			if (cur->GetSize() != cur->GetBaseSize()) {
-				cur->SendAppearancePacket(AT_Size, (uint32) cur->GetSize(), false, true, c);
+				cur->SendAppearancePacket(AppearanceType::Size, (uint32) cur->GetSize(), false, true, c);
 			}
 		}
 		++it;

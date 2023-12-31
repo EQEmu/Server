@@ -571,25 +571,25 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	switch (iAppearance) {
 		// 0 standing, 1 sitting, 2 ducking, 3 lieing down, 4 looting
 		case eaStanding: {
-			return ANIM_STAND;
+			return Animation::Standing;
 		}
 		case eaSitting: {
-			return ANIM_SIT;
+			return Animation::Sitting;
 		}
 		case eaCrouching: {
-			return ANIM_CROUCH;
+			return Animation::Crouching;
 		}
 		case eaDead: {
-			return ANIM_DEATH;
+			return Animation::Lying;
 		}
 		case eaLooting: {
-			return ANIM_LOOT;
+			return Animation::Looting;
 		}
 		//to shup up compiler:
 		case _eaMaxAppearance:
 			break;
 	}
-	return(ANIM_STAND);
+	return(Animation::Standing);
 }
 
 
@@ -638,14 +638,14 @@ void Mob::CalcInvisibleLevel()
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
 	if (state == Invisibility::Visible) {
-		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Visible);
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	} else {
 		if (!set_on_bonus_calc) {
 			nobuff_invisible = state;
 			CalcInvisibleLevel();
 		}
-		SendAppearancePacket(AT_Invis, invisible);
+		SendAppearancePacket(AppearanceType::Invisibility, invisible);
 	}
 
 	BreakCharmPetIfConditionsMet();
@@ -1531,30 +1531,30 @@ void Mob::SendHPUpdate(bool force_update_all)
 	if (IsNPC() && IsDestructibleObject()) {
 		if (GetHPRatio() > 74) {
 			if (GetAppearance() != eaStanding) {
-				SendAppearancePacket(AT_DamageState, eaStanding);
+				SendAppearancePacket(AppearanceType::DamageState, eaStanding);
 				_appearance = eaStanding;
 			}
 		}
 		else if (GetHPRatio() > 49) {
 			if (GetAppearance() != eaSitting) {
-				SendAppearancePacket(AT_DamageState, eaSitting);
+				SendAppearancePacket(AppearanceType::DamageState, eaSitting);
 				_appearance = eaSitting;
 			}
 		}
 		else if (GetHPRatio() > 24) {
 			if (GetAppearance() != eaCrouching) {
-				SendAppearancePacket(AT_DamageState, eaCrouching);
+				SendAppearancePacket(AppearanceType::DamageState, eaCrouching);
 				_appearance = eaCrouching;
 			}
 		}
 		else if (GetHPRatio() > 0) {
 			if (GetAppearance() != eaDead) {
-				SendAppearancePacket(AT_DamageState, eaDead);
+				SendAppearancePacket(AppearanceType::DamageState, eaDead);
 				_appearance = eaDead;
 			}
 		}
 		else if (GetAppearance() != eaLooting) {
-			SendAppearancePacket(AT_DamageState, eaLooting);
+			SendAppearancePacket(AppearanceType::DamageState, eaLooting);
 			_appearance = eaLooting;
 		}
 	}
@@ -4001,20 +4001,33 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	}
 }
 
-void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool iIgnoreSelf, Client *specific_target) {
-	if (!GetID())
+void Mob::SendAppearancePacket(
+	uint32 type,
+	uint32 value,
+	bool whole_zone,
+	bool ignore_self,
+	Client* target
+)
+{
+	if (!GetID()) {
 		return;
+	}
+
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
-	appearance->spawn_id = GetID();
-	appearance->type = type;
-	appearance->parameter = value;
-	if (WholeZone)
-		entity_list.QueueClients(this, outapp, iIgnoreSelf);
-	else if(specific_target != nullptr)
-		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	else if (IsClient())
+	auto* a = (SpawnAppearance_Struct*)outapp->pBuffer;
+
+	a->spawn_id  = GetID();
+	a->type      = type;
+	a->parameter = value;
+
+	if (whole_zone) {
+		entity_list.QueueClients(this, outapp, ignore_self);
+	} else if (target) {
+		target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	} else if (IsClient()) {
 		CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	}
+
 	safe_delete(outapp);
 }
 
@@ -4345,9 +4358,9 @@ void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
 	}
 
 	_appearance = app;
-	SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(app), true, iIgnoreSelf);
 	if (IsClient() && IsAIControlled()) {
-		SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
+		SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false, false);
 	}
 }
 
@@ -4373,7 +4386,7 @@ void Mob::SendWearChangeAndLighting(int8 last_texture) {
 		SendWearChange(i);
 	}
 	UpdateActiveLight();
-	SendAppearancePacket(AT_Light, GetActiveLightType());
+	SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 
 }
 
@@ -4399,7 +4412,7 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 		in_size = 255.0;
 	//End of Size Code
 	size = in_size;
-	SendAppearancePacket(AT_Size, (uint32) in_size);
+	SendAppearancePacket(AppearanceType::Size, (uint32) in_size);
 }
 
 Mob* Mob::GetOwnerOrSelf() {

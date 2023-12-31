@@ -397,6 +397,9 @@ namespace EQ
 		extern const std::map<uint8, std::string>& GetEmoteTypeMap();
 		std::string GetEmoteTypeName(uint8 emote_type);
 
+		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
+		std::string GetAppearanceTypeName(uint32 animation_type);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
