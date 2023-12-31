@@ -6598,17 +6598,26 @@ void Client::Handle_OP_GMGoto(const EQApplicationPacket *app)
 
 	auto *gmg = (GMSummon_Struct *) app->pBuffer;
 	Mob  *gt  = entity_list.GetMob(gmg->charname);
-	if (!gt) {
-		MovePC(zone->GetZoneID(), zone->GetInstanceID(), gt->GetX(), gt->GetY(), gt->GetZ(), gt->GetHeading());
+	if (gt) {
+		MovePC(
+			zone->GetZoneID(),
+			zone->GetInstanceID(),
+			gt->GetX(),
+			gt->GetY(),
+			gt->GetZ(),
+			gt->GetHeading()
+		);
 	} else if (!worldserver.Connected()) {
 		Message(Chat::Red, "Error: World server disconnected.");
 	} else {
 		auto pack = new ServerPacket(ServerOP_GMGoto, sizeof(ServerGMGoto_Struct));
 		memset(pack->pBuffer, 0, pack->size);
-		ServerGMGoto_Struct *wsgmg = (ServerGMGoto_Struct *) pack->pBuffer;
-		strcpy(wsgmg->myname, GetName());
-		strcpy(wsgmg->gotoname, gmg->charname);
-		wsgmg->admin = admin;
+
+		auto* g = (ServerGMGoto_Struct *) pack->pBuffer;
+		strcpy(g->myname, GetName());
+		strcpy(g->gotoname, gmg->charname);
+		g->admin = admin;
+
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
