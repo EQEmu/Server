@@ -35,6 +35,7 @@ void SendNPCEditSubCommands(Client *c);
 void SendRuleSubCommands(Client *c);
 void SendGuildSubCommands(Client *c);
 void SendShowInventorySubCommands(Client *c);
+void SendFixMobSubCommands(Client *c);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
