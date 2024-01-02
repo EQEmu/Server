@@ -188,6 +188,7 @@ class BaseGuildManager
 			GuildTributeStruct tribute;
 		};
 	virtual BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
+	uint32 GetGuildTributeTimeRemaining(uint32 guild_id);
 
 	protected:
 		std::map<uint32, GuildInfo *> m_guilds;	//we own the pointers in this map

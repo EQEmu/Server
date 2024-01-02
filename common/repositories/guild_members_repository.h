@@ -201,5 +201,31 @@ public:
 
 		return gmss;
 	}
+
+	static int UpdateBankerFlag(Database &db, uint32 char_id, bool status)
+	{
+		const auto guild_members = GetWhere(db, fmt::format("char_id = '{}'", char_id));
+		if (guild_members.empty()) {
+			return 0;
+		}
+
+		auto m = guild_members[0];
+		m.banker = status ? 1 : 0;
+
+		return UpdateOne(db, m);
+	}
+
+	static int UpdateAltFlag(Database &db, uint32 char_id, bool status)
+	{
+		const auto guild_members = GetWhere(db, fmt::format("char_id = '{}'", char_id));
+		if (guild_members.empty()) {
+			return 0;
+		}
+
+		auto m = guild_members[0];
+		m.alt = status ? 1 : 0;
+
+		return UpdateOne(db, m);
+	}
 };
 #endif //EQEMU_GUILD_MEMBERS_REPOSITORY_H

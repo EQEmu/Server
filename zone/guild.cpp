@@ -370,29 +370,25 @@ void EntityList::SendGuildMembers(uint32 guild_id)
 
 void EntityList::SendGuildList()
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		Client *client = it->second;
-		client->SendGuildList();
-		++it;
+	for (auto const& c : client_list) {
+		c.second->SendGuildList();
 	}
 }
 
 void Client::SendGuildJoin(GuildJoin_Struct *gj)
 {
-	auto             outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
-	GuildJoin_Struct *outgj = (GuildJoin_Struct *) outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_GuildManageAdd, sizeof(GuildJoin_Struct));
+	auto outgj  = (GuildJoin_Struct *) outapp->pBuffer;
 	outgj->class_   = gj->class_;
 	outgj->guild_id = gj->guild_id;
 	outgj->level    = gj->level;
+	outgj->rank     = gj->rank;
+	outgj->zoneid   = gj->zoneid;
 	strcpy(outgj->name, gj->name);
-	outgj->rank   = gj->rank;
-	outgj->zoneid = gj->zoneid;
 
 	LogGuilds("Sending OP_GuildManageAdd for join of length [{}]", outapp->size);
 
 	FastQueuePacket(&outapp);
-
 }
 
 void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bool bank_status)
@@ -420,11 +416,11 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		);
 
 		ServerGuildRankUpdate_Struct *sgrus = (ServerGuildRankUpdate_Struct *) outapp->pBuffer;
-		sgrus->GuildID = guild_id;
-		sgrus->Rank    = guild_rank;
-		strcpy(sgrus->MemberName, c->GetCleanName());
+		sgrus->guild_id = guild_id;
+		sgrus->rank    = guild_rank;
+		strcpy(sgrus->member_name, c->GetCleanName());
 		guild_mgr.UpdateDbBankerFlag(c->CharacterID(), bank_status);
-		sgrus->Banker    = (bank_status ? 1 : 0) + (cgi.alt ? 2 : 0);
+		sgrus->banker    = (bank_status ? 1 : 0) + (cgi.alt ? 2 : 0);
 		sgrus->no_update = true;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp);
@@ -519,7 +515,7 @@ void Client::SendGuildMembersList()
 {
 	auto   guild_name = guild_mgr.GetGuildName(GuildID());
 	uint32 len;
-	uint8 *data = guild_mgr.MakeGuildMembers2(GuildID(), guild_name, len);
+	uint8 *data = guild_mgr.MakeGuildMembers(GuildID(), guild_name, len);
 	if (data == nullptr) {
 		return;
 	}
@@ -740,7 +736,7 @@ void EntityList::SendGuildMembersList(uint32 guild_id)
 {
 	auto   guild_name = guild_mgr.GetGuildName(guild_id);
 	uint32 len;
-	uint8 *data = guild_mgr.MakeGuildMembers2(guild_id, guild_name, len);
+	uint8 *data = guild_mgr.MakeGuildMembers(guild_id, guild_name, len);
 	if (data == nullptr) {
 		return;
 	}
@@ -768,28 +764,13 @@ void EntityList::SendGuildMemberAdd(
 	std::string player_name
 )
 {
-	//correct
-	struct GuildMemberAdd_Struct {
-		/*000*/ uint32 guild_id;
-		/*004*/ uint32 unknown04;
-		/*008*/ uint32 unknown08;
-		/*012*/ uint32 unknown12;
-		/*016*/ uint32 level;
-		/*020*/ uint32 _class;
-		/*024*/ uint32 rank;
-		/*028*/ uint32 spirt; //not confirmed single byte 0x000000FF
-		/*032*/ uint32 zone_id;
-		/*036*/ uint32 last_on;
-		/*040*/ char   player_name[64];
-	};
-
 	for (auto &c: client_list) {
 		if (c.second->GuildID() == guild_id && c.second->GetGuildListDirty()) {
 			c.second->SendGuildMembersList();
 		}
 		else if (c.second->GuildID() == guild_id && !c.second->GetGuildListDirty()) {
 			auto outapp = new EQApplicationPacket(OP_GuildMemberAdd, sizeof(GuildMemberAdd_Struct));
-			GuildMemberAdd_Struct *out = (GuildMemberAdd_Struct *) outapp->pBuffer;
+			auto out = (GuildMemberAdd_Struct *) outapp->pBuffer;
 
 			out->guild_id = guild_id;
 			out->last_on  = time(nullptr);
@@ -803,16 +784,26 @@ void EntityList::SendGuildMemberAdd(
 			c.second->QueuePacket(outapp);
 			safe_delete(outapp);
 		}
+
 		if (player_name.compare(c.second->GetCleanName()) == 0) {
 			c.second->SetGuildID(guild_id);
 			c.second->SetGuildRank(rank);
+			c.second->SendGuildList();
 			c.second->SetGuildTributeOptIn(false);
 			c.second->SendGuildMembersList();
-			c.second->SendGuildRanks();
-			c.second->SendGuildRankNames();
+			if (c.second->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+				c.second->SendGuildRanks();
+				c.second->SendGuildRankNames();
+			}
+
+			if (zone->GetZoneID() == Zones::GUILDHALL && GuildBanks) {
+				GuildBanks->SendGuildBank(c.second);
+			}
+
 			c.second->SendGuildActiveTributes(guild_id);
 			c.second->SendAppearancePacket(AT_GuildID, guild_id, true, false, c.second, false);
 			c.second->SendAppearancePacket(AT_GuildRank, rank, true, false, c.second, false);
+			c.second->DoGuildTributeUpdate();
 		}
 	}
 }
@@ -876,12 +867,6 @@ void EntityList::SendGuildMemberRemove(uint32 guild_id, std::string player_name)
 
 void EntityList::SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string player_name)
 {
-	struct GuildMemberLevel_Struct {
-		/*000*/ uint32 guild_id;
-		/*004*/ char   player_name[64];
-		/*068*/ uint32 level;
-	};
-
 	for (auto const &c: client_list) {
 		if (c.second->GuildID() == guild_id) {
 			auto outapp = new EQApplicationPacket(OP_GuildMemberLevel, sizeof(GuildMemberLevel_Struct));
@@ -899,17 +884,10 @@ void EntityList::SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string
 
 void EntityList::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std::string player_name, bool alt, bool banker)
 {
-	struct GuildMemberRank_Struct {
-		/*000*/ uint32 guild_id;
-		/*004*/ uint32 rank;
-		/*008*/ char   player_name[64];
-		/*072*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
-	};
-
 	for (auto const &c: client_list) {
 		if (c.second->GuildID() == guild_id) {
 			auto outapp = new EQApplicationPacket(OP_GuildMemberRankAltBanker, sizeof(GuildMemberRank_Struct));
-			GuildMemberRank_Struct *out = (GuildMemberRank_Struct *) outapp->pBuffer;
+			auto out = (GuildMemberRank_Struct *) outapp->pBuffer;
 
 			out->guild_id   = guild_id;
 			out->rank       = rank;
@@ -919,21 +897,20 @@ void EntityList::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std:
 			c.second->QueuePacket(outapp);
 			safe_delete(outapp);
 		}
+
+		if (player_name.compare(c.second->GetName()) == 0) {
+			c.second->SetGuildRank(rank);
+			c.second->SendAppearancePacket(AT_GuildRank, rank, false);
+		}
 	}
 }
 
 void EntityList::SendGuildMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note)
 {
-	struct GuildMemberPublicNote_Struct {
-		/*000*/ uint32 guild_id;
-		/*004*/ char   player_name[64];
-		/*068*/ char   public_note[256]; //RoF2 256
-	};
-
 	for (auto const &c: client_list) {
 		if (c.second->GuildID() == guild_id) {
 			auto outapp = new EQApplicationPacket(OP_GuildMemberPublicNote, sizeof(GuildMemberPublicNote_Struct));
-			GuildMemberPublicNote_Struct *out = (GuildMemberPublicNote_Struct *) outapp->pBuffer;
+			auto out = (GuildMemberPublicNote_Struct *) outapp->pBuffer;
 
 			out->guild_id = guild_id;
 			strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
@@ -991,4 +968,13 @@ void EntityList::SendGuildRenameGuild(uint32 guild_id, std::string new_guild_nam
 			safe_delete(outapp);
 		}
 	}
+}
+
+void Client::SendGuildDeletePacket(uint32 guild_id)
+{
+	auto outapp = new EQApplicationPacket(OP_GuildDeleteGuild, sizeof(GuildDelete_Struct));
+	auto data = (GuildDelete_Struct*)outapp->pBuffer;
+
+	data->guild_id = guild_id;
+	FastQueuePacket(&outapp);
 }

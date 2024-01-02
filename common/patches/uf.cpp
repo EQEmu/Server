@@ -1230,22 +1230,87 @@ namespace UF
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_GuildMemberAdd)
+	{
+		ENCODE_LENGTH_EXACT(GuildMemberAdd_Struct)
+		SETUP_DIRECT_ENCODE(GuildMemberAdd_Struct, structs::GuildMemberAdd_Struct)
+
+		OUT(guild_id)
+		OUT(level)
+		OUT(_class)
+		switch (emu->rank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank = GUILD_LEADER_TI;
+				break;
+			}
+		}
+		OUT(zone_id)
+		OUT(last_on)
+		OUT_str(player_name)
+
+		FINISH_ENCODE()
+	}
+
+	ENCODE(OP_GuildMemberRankAltBanker)
+	{
+		ENCODE_LENGTH_EXACT(GuildMemberRank_Struct)
+		SETUP_DIRECT_ENCODE(GuildMemberRank_Struct, structs::GuildMemberRank_Struct)
+
+		OUT(guild_id)
+		OUT(alt_banker)
+		OUT_str(player_name)
+
+		switch (emu->rank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank = GUILD_LEADER_TI;
+				break;
+			}
+		}
+		FINISH_ENCODE()
+	}
+
 	ENCODE(OP_SendGuildTributes)
 	{
-		ENCODE_LENGTH_ATLEAST(structs::GuildTributeAbility_Struct);
-		SETUP_VAR_ENCODE(GuildTributeAbility_Struct);
-		ALLOC_VAR_ENCODE(structs::GuildTributeAbility_Struct, sizeof(GuildTributeAbility_Struct) + strlen(emu->ability.name));
+		ENCODE_LENGTH_ATLEAST(structs::GuildTributeAbility_Struct)
+		SETUP_VAR_ENCODE(GuildTributeAbility_Struct)
+		ALLOC_VAR_ENCODE(structs::GuildTributeAbility_Struct, sizeof(GuildTributeAbility_Struct) + strlen(emu->ability.name))
 
-		eq->guild_id			= emu->guild_id;;
+		eq->guild_id           = emu->guild_id;
+		eq->ability.tribute_id = emu->ability.tribute_id;
+		eq->ability.tier_count = emu->ability.tier_count;
 		strncpy(eq->ability.name, emu->ability.name, strlen(emu->ability.name));
-		eq->ability.tribute_id  = emu->ability.tribute_id;
-		eq->ability.tier_count  = emu->ability.tier_count;
 		for (int i = 0; i < ntohl(emu->ability.tier_count); i++) {
-			eq->ability.tiers[i].cost = emu->ability.tiers[i].cost;
-			eq->ability.tiers[i].level = emu->ability.tiers[i].level;
+			eq->ability.tiers[i].cost            = emu->ability.tiers[i].cost;
+			eq->ability.tiers[i].level           = emu->ability.tiers[i].level;
 			eq->ability.tiers[i].tribute_item_id = emu->ability.tiers[i].tribute_item_id;
 		}
-		FINISH_ENCODE();
+		FINISH_ENCODE()
 	}
 
 	ENCODE(OP_GuildTributeDonateItem)
@@ -1254,12 +1319,12 @@ namespace UF
 
 		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_GuildTributeDonateItem)");
 
-		OUT(quantity);
-		OUT(favor);
+		OUT(quantity)
+		OUT(favor)
 		eq->unknown8 = 0;
-		eq->slot = ServerToUFSlot(emu->slot);
+		eq->slot     = ServerToUFSlot(emu->slot);
 
-		FINISH_ENCODE();
+		FINISH_ENCODE()
 	}
 
 	ENCODE(OP_Illusion)
@@ -2456,7 +2521,6 @@ namespace UF
 		eq->unknown00 = 0;
 		eq->unknown04 = 0;
 
-		//Translate older ranks to new values* /
 		switch (emu->rank) {
 			case GUILD_SENIOR_MEMBER:
 			case GUILD_MEMBER:

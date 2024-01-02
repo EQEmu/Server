@@ -161,23 +161,23 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 
 		ServerGuildPermissionUpdate_Struct* sg = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
 
-		auto guild = GetGuildByGuildID(sg->GuildID);
+		auto guild = GetGuildByGuildID(sg->guild_id);
 		if (!guild) {
 			guild_mgr.LoadGuilds();
-			guild = GetGuildByGuildID(sg->GuildID);
+			guild = GetGuildByGuildID(sg->guild_id);
 		}
 		if (guild) {
-			if (sg->FunctionValue) {
-				guild->functions[sg->FunctionID].perm_value |= (1UL << (8 - sg->Rank));
+			if (sg->function_value) {
+				guild->functions[sg->function_id].perm_value |= (1UL << (8 - sg->rank));
 			}
 			else {
-				guild->functions[sg->FunctionID].perm_value &= ~(1UL << (8 - sg->Rank));
+				guild->functions[sg->function_id].perm_value &= ~(1UL << (8 - sg->rank));
 			}
 
 			LogGuilds("World Received ServerOP_GuildPermissionUpdate for guild [{}] function id {} with value of {}",
-				sg->GuildID,
-				sg->FunctionID,
-				sg->FunctionValue
+				sg->guild_id,
+				sg->function_id,
+				sg->function_value
 			);
 
 			for (auto const& z : zoneserver_list.getZoneServerList()) {
@@ -189,9 +189,9 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		}
 		else {
 			LogError("World Received ServerOP_GuildPermissionUpdate for guild [{}] function id {} with value of {} but guild could not be found.",
-				sg->GuildID,
-				sg->FunctionID,
-				sg->FunctionValue
+				sg->guild_id,
+				sg->function_id,
+				sg->function_value
 			);
 		}
 
@@ -242,6 +242,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildURL:
 	case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
+	case ServerOP_GuildSendGuildList:
 	{
 		for (auto const& z : zoneserver_list.getZoneServerList()) {
 			auto r = z.get();
@@ -460,5 +461,5 @@ void WorldGuildManager::SendGuildTributeFavorAndTimer(uint32 guild_id, uint32 fa
 			r->SendPacket(sp);
 		}
 	}
-	safe_delete(sp);
+	safe_delete(sp)
 }

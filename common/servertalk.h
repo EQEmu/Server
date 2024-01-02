@@ -109,6 +109,7 @@
 #define ServerOP_GuildMemberAdd                   0x007B
 #define ServerOP_GuildChannel                     0x007C
 #define ServerOP_GuildURL                         0x007D
+#define ServerOP_GuildSendGuildList				  0x007E
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -1020,43 +1021,34 @@ struct ServerGuildCharRefresh_Struct {
 	uint32 char_id;
 };
 
-struct ServerGuildCharRefresh2_Struct {
+struct ServerGuildRankUpdate_Struct {
 	uint32 guild_id;
-	uint32 old_guild_id;
-	uint32 char_id;
+	char   member_name[64];
 	uint32 rank;
-};
-
-struct ServerGuildRankUpdate_Struct
-{
-	uint32 GuildID;
-	char   MemberName[64];
-	uint32 Rank;
-	uint32 Banker;
+	uint32 banker;
+	uint32 alt;
 	bool   no_update;
 };
 
 struct ServerGuildMemberUpdate_Struct {
-	uint32 GuildID;
-	char MemberName[64];
-	uint32 ZoneID;
-	uint32 LastSeen;
+	uint32 guild_id;
+	char   member_name[64];
+	uint32 zone_id;
+	uint32 last_seen;
 };
 
-struct ServerGuildPermissionUpdate_Struct
-{
-	uint32 GuildID;
-	char   MemberName[64];
-	uint32 Rank;
-	uint32 FunctionID;
-	uint32 FunctionValue;
+struct ServerGuildPermissionUpdate_Struct {
+	uint32 guild_id;
+	char   member_name[64];
+	uint32 rank;
+	uint32 function_id;
+	uint32 function_value;
 };
 
-struct ServerGuildRankNameChange
-{
-	uint32		guild_id;
-	uint32		rank;
-	char		rank_name[51]; //RoF2 has 51 max.
+struct ServerGuildRankNameChange {
+	uint32 guild_id;
+	uint32 rank;
+	char   rank_name[51]; //RoF2 has 51 max.
 };
 
 struct SpawnPlayerCorpse_Struct {

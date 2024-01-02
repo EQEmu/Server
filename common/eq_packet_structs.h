@@ -1671,6 +1671,44 @@ struct GuildUpdate_Struct {
 	GuildsListEntry_Struct entry;
 };
 
+struct GuildMemberAdd_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown04;
+	/*008*/ uint32 unknown08;
+	/*012*/ uint32 unknown12;
+	/*016*/ uint32 level;
+	/*020*/ uint32 _class;
+	/*024*/ uint32 rank;
+	/*028*/ uint32 spirt; //not confirmed single byte 0x000000FF
+	/*032*/ uint32 zone_id;
+	/*036*/ uint32 last_on;
+	/*040*/ char   player_name[64];
+};
+
+struct GuildMemberLevel_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ char   player_name[64];
+	/*068*/ uint32 level;
+};
+
+struct GuildMemberRank_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 rank;
+	/*008*/ char   player_name[64];
+	/*072*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
+	/*076*/ uint32 offline;
+};
+
+struct GuildMemberPublicNote_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ char   player_name[64];
+	/*068*/ char   public_note[256]; //RoF2 256
+};
+
+struct GuildDelete_Struct {
+	/*000*/ uint32 guild_id;
+};
+
 /*
 ** Money Loot
 ** Length: 22 Bytes
@@ -1719,10 +1757,10 @@ struct GuildJoin_Struct{
 /*092*/
 };
 struct GuildInviteAccept_Struct {
-	char inviter[64];
-	char newmember[64];
+	char   inviter[64];
+	char   new_member[64];
 	uint32 response;
-	uint32 guildeqid;
+	uint32 guild_id;
 };
 struct GuildManageRemove_Struct {
 	uint32 guildeqid;
@@ -3626,7 +3664,7 @@ struct GuildTributeSaveActive_Struct {
 /*000*/ uint32    command;
 /*004*/ char      unknown04[16];
 /*020*/ uint32    master_tribute_id;
-/*024*/    uint32 tribute_id_1;
+/*024*/ uint32    tribute_id_1;
 /*028*/ uint32    tribute_id_2;
 /*032*/ uint32    tribute_1_tier;
 /*036*/ uint32    tribute_2_tier;

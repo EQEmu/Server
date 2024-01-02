@@ -792,6 +792,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_GuildURL:
 	case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
+	case ServerOP_GuildSendGuildList:
 	{
 		guild_mgr.ProcessWorldPacket(pack);
 		break;
@@ -3469,9 +3470,27 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		data->tribute_toggle = in->member_enabled ? true : false;
 		data->tribute_trophy_toggle = 0; //not yet implemented
 		data->time = in->member_time;
+		data->command = 1;
 
 		entity_list.QueueClientsGuild(outapp, in->guild_id);
 		safe_delete(outapp);
+
+		//my new items
+		outapp = new EQApplicationPacket(OP_GuildTributeToggleReply, sizeof(GuildTributeSendActive_Struct));
+		GuildTributeSendActive_Struct *out = (GuildTributeSendActive_Struct *) outapp->pBuffer;
+
+		auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+		out->not_used          = in->guild_id;
+		out->guild_favor       = guild->tribute.favor;
+		out->tribute_enabled   = guild->tribute.enabled;
+		out->tribute_timer     = guild->tribute.time_remaining;
+		out->tribute_id_1      = guild->tribute.id_1;
+		out->tribute_id_2      = guild->tribute.id_2;
+		out->tribute_id_1_tier = guild->tribute.id_1_tier;
+		out->tribute_id_2_tier = guild->tribute.id_2_tier;
+
+		entity_list.QueueClientsGuild(outapp, in->guild_id);
+		safe_delete(outapp)
 
 		break;
 	}
@@ -3494,10 +3513,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		safe_delete(outapp);
 
 		auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
-		if (guild) {
-			guild->tribute.time_remaining = in->time_remaining;
-		}
-
 		auto client = entity_list.GetClientByCharID(in->char_id);
 		if (guild && client) {
 			client->SetGuildTributeOptIn(in->tribute_toggle ? true : false);

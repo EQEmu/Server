@@ -1694,6 +1694,27 @@ struct GuildUpdate_Struct {
 	GuildsListEntry_Struct entry;
 };
 
+struct GuildMemberAdd_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown04;
+	/*008*/ uint32 unknown08;
+	/*012*/ uint32 unknown12;
+	/*016*/ uint32 level;
+	/*020*/ uint32 _class;
+	/*024*/ uint32 rank;
+	/*028*/ uint32 zone_id;
+	/*032*/ uint32 last_on;
+	/*036*/ char   player_name[64];
+};
+
+struct GuildMemberRank_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown_004;
+	/*008*/ uint32 rank;
+	/*012*/ char   player_name[64];
+	/*076*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
+};
+
 /*
 ** Money Loot
 ** Length: 22 Bytes

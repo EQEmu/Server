@@ -47,7 +47,7 @@ public:
 
 	static int UpdateFavor(Database &db, uint32 guild_id, uint32 favor)
 	{
-		auto const guild = GetWhere(db, fmt::format("guild_id = '{}'", guild_id));
+		auto const guild = GetWhere(db, fmt::format("id = '{}'", guild_id));
 		if (guild.empty()) {
 			return 0;
 		}

@@ -750,6 +750,7 @@ public:
 	void SendGuildMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note);
 	void SendGuildMemberDetails(uint32 guild_id, uint32 zone_id, uint32 offline_mode, std::string player_name);
 	void SendGuildRenameGuild(uint32 guild_id, std::string new_guild_name);
+	void SendGuildDeletePacket(uint32 guild_id);
 
 	uint8 GetClientMaxLevel() const { return client_max_level; }
 	void SetClientMaxLevel(uint8 max_level) { client_max_level = max_level; }

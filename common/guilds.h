@@ -29,6 +29,7 @@
 #define GUILD_TRIBUTES_SAVE                0
 #define GUILD_TRIBUTES_OFF                 0
 #define GUILD_TRIBUTES_ON                  1
+#define GUILD_INVITE_DECLINE               9
 
 //defines for standard ranks
 #define GUILD_MEMBER_TI	    0

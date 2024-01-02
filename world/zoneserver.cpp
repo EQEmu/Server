@@ -989,6 +989,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_GuildURL:
 		case ServerOP_GuildMemberRemove:
 		case ServerOP_GuildMemberAdd:
+		case ServerOP_GuildSendGuildList:
 		{
 			guild_mgr.ProcessZonePacket(pack);
 			break;
@@ -1636,7 +1637,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				data->member_last_donated = gci.last_tribute;
 				data->guild_id = in->guild_id;
 				strncpy(data->player_name, in->player_name, strlen(in->player_name));
-				data->time_remaining = guild->tribute.timer.GetRemainingTime();
+				data->time_remaining = in->time_remaining;
 
 				for (auto const& z : zoneserver_list.getZoneServerList()) {
 					if (z.get()->GetZoneID() > 0) {
@@ -1663,13 +1664,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->tribute_id_2      = guild->tribute.id_2;
 				out->tribute_id_1_tier = guild->tribute.id_1_tier;
 				out->tribute_id_2_tier = guild->tribute.id_2_tier;
-				if (guild->tribute.timer.Enabled()) {
-					out->time_remaining = guild->tribute.timer.GetRemainingTime();
-					guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
-				}
-				else {
-					out->time_remaining = guild->tribute.time_remaining;
-				}
+				out->time_remaining    = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
+
 
 				for (auto const& z : zoneserver_list.getZoneServerList()) {
 					auto r = z.get();
@@ -1688,18 +1684,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
 
 			if (guild) {
-				ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
-				GuildTributeFavorTimer_Struct* out = (GuildTributeFavorTimer_Struct*)sp->pBuffer;
+				auto sp  = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
+				auto out = (GuildTributeFavorTimer_Struct *) sp->pBuffer;
 
-				out->guild_id	   = in->guild_id;
+				out->guild_id      = in->guild_id;
 				out->guild_favor   = guild->tribute.favor;
-				if (guild->tribute.timer.Enabled()) {
-					out->tribute_timer = guild->tribute.timer.GetRemainingTime();
-					guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
-				}
-				else {
-					out->tribute_timer = guild->tribute.time_remaining;
-				}
+				out->tribute_timer = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
 				out->trophy_timer  = 0;
 
 				for (auto const& z : zoneserver_list.getZoneServerList()) {
@@ -1715,22 +1705,22 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_GuildTributeUpdateDonations:
 		{
-			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+			auto in = (GuildTributeUpdate*)pack->pBuffer;
 
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
 			if (guild) {
 				guild->tribute.favor = in->favor;
 
-				guild_mgr.SendGuildTributeFavorAndTimer(in->guild_id, guild->tribute.favor, guild->tribute.timer.GetRemainingTime());
+				guild_mgr.SendGuildTributeFavorAndTimer(in->guild_id, guild->tribute.favor, guild_mgr.GetGuildTributeTimeRemaining(in->guild_id)/*guild->tribute.timer.GetRemainingTime()*/);
 
-				ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
-				GuildTributeUpdate* out = (GuildTributeUpdate*)sp->pBuffer;
+				auto sp  = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
+				auto out = (GuildTributeUpdate *) sp->pBuffer;
 
-				out->guild_id = in->guild_id;
-				strncpy(out->player_name, in->player_name, strlen(in->player_name));
-				out->member_favor = in->member_favor;
+				out->guild_id       = in->guild_id;
+				out->member_favor   = in->member_favor;
 				out->member_enabled = in->member_enabled ? true : false;
-				out->member_time = in->member_time;
+				out->member_time    = in->member_time;
+				strncpy(out->player_name, in->player_name, strlen(in->player_name));
 
 				for (auto const& z : zoneserver_list.getZoneServerList()) {
 					auto r = z.get();
@@ -1738,7 +1728,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						r->SendPacket(sp);
 					}
 				}
-				safe_delete(sp);
+				safe_delete(sp)
 			}
 			break;
 		}

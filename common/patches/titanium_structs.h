@@ -3725,6 +3725,25 @@ struct GuildSetRank_Struct
 	/*76*/	uint32	banker;
 };
 
+struct GuildMemberAdd_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown04;
+	/*008*/ uint32 level;
+	/*012*/ uint32 _class;
+	/*016*/ uint32 rank;
+	/*020*/ uint32 zone_id;
+	/*024*/ uint32 last_on;
+	/*028*/ char   player_name[64];
+};
+
+struct GuildMemberRank_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown_004;
+	/*008*/ uint32 rank;
+	/*012*/ char   player_name[64];
+	/*076*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
+};
+
 	}; /*structs*/
 
 }; /*Titanium*/

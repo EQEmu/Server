@@ -509,41 +509,42 @@ void Client::SendGuildActiveTributes(uint32 guild_id)
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 
 	auto outapp = new EQApplicationPacket(OP_GuildSendActiveTributes, sizeof(GuildTributeSendActive_Struct));
-	GuildTributeSendActive_Struct* gtsa = (GuildTributeSendActive_Struct*)outapp->pBuffer;
+	auto gtsa   = (GuildTributeSendActive_Struct *) outapp->pBuffer;
 
 	if (guild) {
-		gtsa->guild_favor = guild->tribute.favor;
-		gtsa->tribute_timer = guild->tribute.time_remaining;
-		gtsa->tribute_enabled = guild->tribute.enabled;
-		gtsa->tribute_id_1 = guild->tribute.id_1;
+		gtsa->guild_favor       = guild->tribute.favor;
+		gtsa->tribute_timer     = guild->tribute.time_remaining;
+		gtsa->tribute_enabled   = guild->tribute.enabled;
+		gtsa->tribute_id_1      = guild->tribute.id_1;
 		gtsa->tribute_id_1_tier = guild->tribute.id_1_tier;
-		gtsa->tribute_id_2 = guild->tribute.id_2;
+		gtsa->tribute_id_2      = guild->tribute.id_2;
 		gtsa->tribute_id_2_tier = guild->tribute.id_2_tier;
 	}
 	else {
-		gtsa->guild_favor = 0;
-		gtsa->tribute_timer = 0;
-		gtsa->tribute_enabled = 0;
-		gtsa->tribute_id_1 = 0xffffffff;
+		gtsa->guild_favor       = 0;
+		gtsa->tribute_timer     = 0;
+		gtsa->tribute_enabled   = 0;
+		gtsa->tribute_id_1      = 0xffffffff;
 		gtsa->tribute_id_1_tier = 0;
-		gtsa->tribute_id_2 = 0xffffffff;
+		gtsa->tribute_id_2      = 0xffffffff;
 		gtsa->tribute_id_2_tier = 0;
 	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
 
+	QueuePacket(outapp);
+	safe_delete(outapp)
 }
 
 void Client::SendGuildFavorAndTimer(uint32 guild_id)
 {
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
+
 	if (guild) {
 		auto outapp = new EQApplicationPacket(OP_GuildTributeFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
-		GuildTributeFavorTimer_Struct* gtsa = (GuildTributeFavorTimer_Struct*)outapp->pBuffer;
+		auto gtsa   = (GuildTributeFavorTimer_Struct *) outapp->pBuffer;
 
-		gtsa->guild_favor = guild->tribute.favor;
+		gtsa->guild_favor   = guild->tribute.favor;
 		gtsa->tribute_timer = guild->tribute.time_remaining;
-		gtsa->trophy_timer = 0; //not yet implemented
+		gtsa->trophy_timer  = 0; //not yet implemented
 
 		QueuePacket(outapp);
 		safe_delete(outapp);
@@ -555,32 +556,36 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle* in)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
 	GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
 
-	data->guild_id = in->guild_id;
 	strncpy(data->player_name, in->player_name, 64);
-	data->no_donations = in->no_donations;
-	data->tribute_toggle = in->tribute_toggle;
+	data->guild_id              = in->guild_id;
+	data->no_donations          = in->no_donations;
+	data->tribute_toggle        = in->tribute_toggle;
 	data->tribute_trophy_toggle = 0; //not yet implemented
-	data->time = time(nullptr);
-	data->command = in->command;
+	data->time                  = time(nullptr);
+	data->command               = in->command;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
 
-void Client::RequestGuildActiveTributes(uint32 guild_id) {
-	ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
-	GuildTributeUpdate* data = (GuildTributeUpdate*)sp->pBuffer;
+void Client::RequestGuildActiveTributes(uint32 guild_id)
+{
+	auto sp   = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
+	auto data = (GuildTributeUpdate *) sp->pBuffer;
 
 	data->guild_id = GuildID();
+
 	worldserver.SendPacket(sp);
 	safe_delete(sp);
 }
 
-void Client::RequestGuildFavorAndTimer(uint32 guild_id) {
-	ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeUpdate));
-	GuildTributeUpdate* data = (GuildTributeUpdate*)sp->pBuffer;
+void Client::RequestGuildFavorAndTimer(uint32 guild_id)
+{
+	auto sp   = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeUpdate));
+	auto data = (GuildTributeUpdate *) sp->pBuffer;
 
 	data->guild_id = GuildID();
+
 	worldserver.SendPacket(sp);
 	safe_delete(sp);
 }
@@ -609,12 +614,11 @@ void Client::SendGuildTributeDonatePlatReply(GuildTributeDonatePlatRequest_Struc
 	auto outapp = new EQApplicationPacket(OP_GuildTributeDonatePlat, sizeof(GuildTributeDonatePlatReply_Struct));
 	auto out = (GuildTributeDonatePlatReply_Struct*)outapp->pBuffer;
 
-	out->favor = favor;
+	out->favor    = favor;
 	out->quantity = in->quantity;
 
-
 	QueuePacket(outapp);
-	safe_delete(outapp);
+	safe_delete(outapp)
 
 }
 

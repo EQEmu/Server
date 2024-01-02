@@ -297,7 +297,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 	{
 		std::vector<GuildRanksRepository::GuildRanks> out;
 		GuildRanksRepository::GuildRanks              gr;
-		for (int                                      i = GUILD_LEADER; i <= GUILD_MAX_RANK; i++) {
+		for (int i = GUILD_LEADER; i <= GUILD_MAX_RANK; i++) {
 			gr.guild_id = guild_id;
 			gr.rank     = i;
 			gr.title    = in->rank_names[i];
@@ -372,9 +372,9 @@ uint32 BaseGuildManager::CreateGuild(std::string name, uint32 leader_char_id)
 	if (guild_id == GUILD_NONE) {
 		return (GUILD_NONE);
 	}
-	RefreshGuild(guild_id);
-	SendGuildRefresh(guild_id, true, false, false, false);
-	SendCharRefresh(GUILD_NONE, guild_id, leader_char_id);
+	//RefreshGuild(guild_id);
+	//SendGuildRefresh(guild_id, true, false, false, false);
+	//SendCharRefresh(GUILD_NONE, guild_id, leader_char_id);
 
 	return guild_id;
 }
@@ -472,8 +472,8 @@ bool BaseGuildManager::SetGuild(uint32 charid, uint32 guild_id, uint8 rank)
 		return false;
 	}
 
-	SendGuildRefresh(guild_id, false, false, false, false);
-	SendCharRefresh(old_guild, guild_id, charid);
+	//SendGuildRefresh(guild_id, false, false, false, false);
+	//SendCharRefresh(old_guild, guild_id, charid);
 
 	return true;
 }
@@ -481,18 +481,15 @@ bool BaseGuildManager::SetGuild(uint32 charid, uint32 guild_id, uint8 rank)
 bool BaseGuildManager::SetGuildRank(uint32 charid, uint8 rank)
 {
 	if (rank > GUILD_MAX_RANK) {
-		return (false);
+		return false;
 	}
 
 	if (!UpdateDbGuildRank(charid, rank)) {
-		return (false);
+		return false;
 	}
 
 	auto guild_id = GetGuildIDByCharacterID(charid);
-
-	SendGuildRefresh(guild_id, false, false, false, false);
-
-	return (true);
+	return true;
 }
 
 
@@ -501,8 +498,6 @@ bool BaseGuildManager::SetBankerFlag(uint32 charid, bool is_banker)
 	if (!UpdateDbBankerFlag(charid, is_banker)) {
 		return (false);
 	}
-
-	SendRankUpdate(charid);
 
 	return (true);
 }
@@ -518,8 +513,7 @@ bool BaseGuildManager::SetAltFlag(uint32 charid, bool is_alt)
 	if (!UpdateDbAltFlag(charid, is_alt)) {
 		return (false);
 	}
-
-	SendRankUpdate(charid);
+	//SendRankUpdate(charid);
 
 	return (true);
 }
@@ -778,13 +772,12 @@ bool BaseGuildManager::UpdateDbGuildRank(uint32 char_id, uint8 rank_id)
 	return true;
 }
 
-bool BaseGuildManager::UpdateDbBankerFlag(uint32 charid, bool is_banker)
+bool BaseGuildManager::UpdateDbBankerFlag(uint32 char_id, bool status)
 {
-	std::string query = StringFormat(
-		"UPDATE guild_members SET banker=%d WHERE char_id=%d",
-		is_banker ? 1 : 0, charid
-	);
-	return (QueryWithLogging(query, "setting a guild member's banker flag"));
+	if(!GuildMembersRepository::UpdateBankerFlag(*m_db, char_id, status)) {
+		return false;
+	}
+	return true;
 }
 
 bool BaseGuildManager::GetBankerFlag(uint32 CharID, bool compat_mode)
@@ -1297,10 +1290,15 @@ bool BaseGuildManager::GetGuildBankerStatus(uint32 guild_id, uint32 guild_rank)
 {
 	auto guild = m_guilds.find(guild_id);
 	if (guild != m_guilds.end()) {
-		return (CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_DEPOSIT_ITEMS) &&
-				CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_PROMOTE_ITEMS) &&
-				CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_VIEW_ITEMS) &&
-				CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_WITHDRAW_ITEMS)) ? true : false;
+		if (guild_rank == GUILD_LEADER) {
+			return true;
+		}
+		else {
+			return (CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_DEPOSIT_ITEMS) &&
+					CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_PROMOTE_ITEMS) &&
+					CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_VIEW_ITEMS) &&
+					CheckPermission(guild_id, guild_rank, GUILD_ACTION_BANK_WITHDRAW_ITEMS));
+		}
 	}
 	return false;
 }
@@ -1465,4 +1463,14 @@ BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager
 	out.favor       = in.tribute.favor;
 
 	return out;
+}
+
+uint32 BaseGuildManager::GetGuildTributeTimeRemaining(uint32 guild_id)
+{
+	auto guild = GetGuildByGuildID(guild_id);
+	if (guild && guild->tribute.timer.Enabled()) {
+		guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
+	}
+
+	return guild->tribute.time_remaining;
 }
