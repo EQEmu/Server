@@ -86,9 +86,9 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	"", // in_lastname
 	0, // in_cur_hp
 	0, // in_max_hp
-	0, // in_gender
-	0, // in_race
-	0, // in_class
+	Gender::Male, // in_gender
+	Race::Doug, // in_race
+	Class::None, // in_class
 	BT_Humanoid, // in_bodytype
 	0, // in_deity
 	0, // in_level

@@ -226,11 +226,6 @@ public:
 
 	void    PurgeAllDeletedDataBuckets();
 
-	/* Database Conversions 'database_conversions.cpp' */
-
-	bool	CheckDatabaseConversions();
-	bool	CheckDatabaseConvertCorpseDeblob();
-	bool	CheckDatabaseConvertPPDeblob();
 
 	/* Database Variables */
 

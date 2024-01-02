@@ -37,9 +37,9 @@ Encounter::Encounter(const char *enc_name) : Mob(
 	nullptr, // in_lastname
 	0, // in_cur_hp
 	0, // in_max_hp
-	MALE, // in_gender
-	INVISIBLE_MAN, // in_race
-	0, // in_class
+	Gender::Male, // in_gender
+	Race::InvisibleMan, // in_race
+	Class::None, // in_class
 	BT_NoTarget, // in_bodytype
 	0, // in_deity
 	0, // in_level

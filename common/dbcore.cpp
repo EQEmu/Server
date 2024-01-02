@@ -8,7 +8,6 @@
 
 #include "dbcore.h"
 
-#include <errmsg.h>
 #include <fstream>
 #include <iostream>
 #include <mysqld_error.h>

@@ -513,6 +513,13 @@ foreach my $table_to_generate (@tables) {
     #############################################
     if ($repository_generation_option eq "all" || $repository_generation_option eq "extended") {
         my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
+
+        # check if file exists firsts
+        if (-e $generated_repository) {
+            print "File [$generated_repository] already exists! Can't overwrite extended once created!\n";
+            next;
+        }
+
         my $cmake_generated_reference = $generated_repository;
         $cmake_generated_reference =~ s/.\/common\///g;
         $generated_repository_files .= $cmake_generated_reference . "\n";

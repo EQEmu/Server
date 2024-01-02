@@ -4123,15 +4123,16 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 		return 0;
 }
 
-uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
-	Corpse* tmp = LoadCharacterCorpse(corpse_id);
-	uint32 itemid = 0;
+uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id) {
+	Corpse* c = LoadCharacterCorpse(corpse_id);
+	uint32 item_id = 0;
 
-	if (tmp) {
-		itemid = tmp->GetWornItem(slotid);
-		tmp->DepopPlayerCorpse();
+	if (c) {
+		item_id = c->GetWornItem(slot_id);
+		c->DepopPlayerCorpse();
 	}
-	return itemid;
+
+	return item_id;
 }
 
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse){

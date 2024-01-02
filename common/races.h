@@ -21,9 +21,11 @@
 #include "../common/types.h"
 #include <string>
 
-#define MALE 0
-#define FEMALE 1
-#define NEUTER 2
+namespace Gender {
+	constexpr uint8 Male   = 0;
+	constexpr uint8 Female = 1;
+	constexpr uint8 Neuter = 2;
+}
 
 //theres a big list straight from the client below.
 

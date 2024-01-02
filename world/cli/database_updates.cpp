@@ -9,5 +9,7 @@ void WorldserverCLI::DatabaseUpdates(int argc, char **argv, argh::parser &cmd, s
 	}
 
 	DatabaseUpdate update;
-	update.SetDatabase(&database)->CheckDbUpdates();
+	update.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
+		->CheckDbUpdates();
 }

@@ -1859,7 +1859,7 @@ void Perl_Mob_RemoveAllAppearanceEffects(Mob* self) // @categories Script Utilit
 			.texture = self->GetTexture(),
 		}
 	);
-	self->ClearAppearenceEffects();
+	self->ClearAppearanceEffects();
 }
 
 void Perl_Mob_SetFlyMode(Mob* self, int flymode) // @categories Script Utility
