@@ -4782,7 +4782,7 @@ void EntityList::SendAppearanceEffects(Client *c)
 				++it;
 				continue;
 			}
-			cur->SendSavedAppearenceEffects(c);
+			cur->SendSavedAppearanceEffects(c);
 		}
 		++it;
 	}

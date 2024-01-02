@@ -76,9 +76,9 @@ void DatabaseUpdate::CheckDbUpdates()
 	}
 }
 
-std::string DatabaseUpdate::GetQueryResult(std::string query)
+std::string DatabaseUpdate::GetQueryResult(const ManifestEntry& e)
 {
-	auto results = m_database->QueryDatabase(query);
+	auto results = (e.content_schema_update ? m_content_database : m_database)->QueryDatabase(e.check);
 
 	std::vector<std::string> result_lines = {};
 
@@ -121,6 +121,16 @@ bool DatabaseUpdate::ShouldRunMigration(ManifestEntry &e, std::string query_resu
 	return false;
 }
 
+// check if we are running in a terminal
+bool is_atty()
+{
+#ifdef _WINDOWS
+	return ::_isatty(_fileno(stdin));
+#else
+	return isatty(fileno(stdin));
+#endif
+}
+
 // return true if we ran updates
 bool DatabaseUpdate::UpdateManifest(
 	std::vector<ManifestEntry> entries,
@@ -136,7 +146,7 @@ bool DatabaseUpdate::UpdateManifest(
 			for (auto &e: entries) {
 				if (e.version == version) {
 					bool        has_migration = true;
-					std::string r             = GetQueryResult(e.check);
+					std::string r             = GetQueryResult(e);
 					if (ShouldRunMigration(e, r)) {
 						has_migration = false;
 						missing_migrations.emplace_back(e.version);
@@ -179,7 +189,7 @@ bool DatabaseUpdate::UpdateManifest(
 				if (e.version == m) {
 					bool errored_migration = false;
 
-					auto r = m_database->QueryDatabaseMulti(e.sql);
+					auto r = (e.content_schema_update ? m_content_database : m_database)->QueryDatabaseMulti(e.sql);
 
 					// ignore empty query result "errors"
 					if (r.ErrorNumber() != 1065 && !r.ErrorMessage().empty()) {
@@ -187,31 +197,38 @@ bool DatabaseUpdate::UpdateManifest(
 						errored_migration = true;
 
 						LogInfo("Required database update failed. This could be a problem");
-						LogInfo("Would you like to skip this update? [y/n] (Timeout 60s)");
 
-						// user input
-						std::string input;
-						bool        gave_input        = false;
-						time_t      start_time        = time(nullptr);
-						time_t      wait_time_seconds = 60;
+						// if terminal attached then prompt for skip
+						if (is_atty()) {
+							LogInfo("Would you like to skip this update? [y/n] (Timeout 60s)");
 
-						// spawn a concurrent thread that waits for input from std::cin
-						std::thread t1(
-							[&]() {
-								std::cin >> input;
-								gave_input = true;
+							// user input
+							std::string input;
+							bool        gave_input        = false;
+							time_t      start_time        = time(nullptr);
+							time_t      wait_time_seconds = 60;
+
+							// spawn a concurrent thread that waits for input from std::cin
+							std::thread t1(
+								[&]() {
+									std::cin >> input;
+									gave_input = true;
+								}
+							);
+							t1.detach();
+
+							// check the inputReceived flag once every 50ms for 10 seconds
+							while (time(nullptr) < start_time + wait_time_seconds && !gave_input) {
+								std::this_thread::sleep_for(std::chrono::milliseconds(50));
 							}
-						);
-						t1.detach();
 
-						// check the inputReceived flag once every 50ms for 10 seconds
-						while (time(nullptr) < start_time + wait_time_seconds && !gave_input) {
-							std::this_thread::sleep_for(std::chrono::milliseconds(50));
-						}
-
-						// prompt for user skip
-						if (Strings::Trim(input) == "y") {
-							errored_migration = false;
+							// prompt for user skip
+							if (Strings::Trim(input) == "y") {
+								errored_migration = false;
+								LogInfo("Skipping update [{}] [{}]", e.version, e.description);
+							}
+						} else {
+							errored_migration = true;
 							LogInfo("Skipping update [{}] [{}]", e.version, e.description);
 						}
 					}
@@ -243,6 +260,13 @@ bool DatabaseUpdate::UpdateManifest(
 DatabaseUpdate *DatabaseUpdate::SetDatabase(Database *db)
 {
 	m_database = db;
+
+	return this;
+}
+
+DatabaseUpdate *DatabaseUpdate::SetContentDatabase(Database *db)
+{
+	m_content_database = db;
 
 	return this;
 }

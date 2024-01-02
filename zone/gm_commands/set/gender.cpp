@@ -15,7 +15,7 @@ void SetGender(Client *c, const Seperator *sep)
 	}
 
 	const uint8 gender_id = Strings::ToUnsignedInt(sep->arg[2]);
-	if (!EQ::ValueWithin(gender_id, MALE, NEUTER)) {
+	if (!EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter)) {
 		c->Message(Chat::White, "Usage: #set gender [Gender ID]");
 		c->Message(Chat::White, "Genders: 0 = Male, 1 = Female, 2 = Neuter");
 		return;

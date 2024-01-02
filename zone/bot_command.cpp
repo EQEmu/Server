@@ -2870,7 +2870,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 	}
 	if (my_rogue_bot->GetLevel() < 18) {
 
-		c->Message(Chat::White, "Your rogue bot must be level 18 before %s can apply poison!", (my_rogue_bot->GetGender() == 1 ? "she" : "he"));
+		c->Message(Chat::White, "Your rogue bot must be level 18 before %s can apply poison!", (my_rogue_bot->GetGender() == Gender::Female ? "she" : "he"));
 		return;
 	}
 
@@ -5633,7 +5633,7 @@ void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep)
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
+	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != DWARF)
 		fail_type = BCEnum::AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeardColor(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -5670,7 +5670,7 @@ void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep)
 	uint8 uvalue = Strings::ToInt(sep->arg[1]);
 
 	auto fail_type = BCEnum::AFT_None;
-	if (my_bot->GetGender() != MALE && my_bot->GetRace() != DWARF)
+	if (my_bot->GetGender() != Gender::Male && my_bot->GetRace() != DWARF)
 		fail_type = BCEnum::AFT_GenderRace;
 	else if (!PlayerAppearance::IsValidBeard(my_bot->GetRace(), my_bot->GetGender(), uvalue))
 		fail_type = BCEnum::AFT_Value;
@@ -6171,18 +6171,18 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		return;
 	}
 
-	auto bot_gender = MALE;
+	auto bot_gender = Gender::Male;
 
 	if (sep->IsNumber(4)) {
 		bot_gender = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[4]));
-		if (bot_gender == NEUTER) {
-			bot_gender = MALE;
+		if (bot_gender == Gender::Neuter) {
+			bot_gender = Gender::Male;
 		}
 	} else {
 		if (!strcasecmp(sep->arg[4], "m") || !strcasecmp(sep->arg[4], "male")) {
-			bot_gender = MALE;
+			bot_gender = Gender::Male;
 		} else if (!strcasecmp(sep->arg[4], "f") || !strcasecmp(sep->arg[4], "female")) {
-			bot_gender = FEMALE;
+			bot_gender = Gender::Female;
 		}
 	}
 
@@ -9561,15 +9561,15 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	if (!EQ::ValueWithin(bot_gender, MALE, FEMALE)) {
+	if (!EQ::ValueWithin(bot_gender, Gender::Male, Gender::Female)) {
 		bot_owner->Message(
 			Chat::White,
 			fmt::format(
 				"Gender: {} ({}) or {} ({})",
-				GetGenderName(MALE),
-				MALE,
-				GetGenderName(FEMALE),
-				FEMALE
+				GetGenderName(Gender::Male),
+				Gender::Male,
+				GetGenderName(Gender::Female),
+				Gender::Female
 			).c_str()
 		);
 		return bot_id;

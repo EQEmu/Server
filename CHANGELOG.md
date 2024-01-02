@@ -1,3 +1,32 @@
+## [22.39.1] - 12/31/2023
+
+### Code
+
+* Appearance not appearence ([#3819](https://github.com/EQEmu/Server/pull/3819)) @Kinglykrab 2023-12-30
+* Delete errmsg.h in common and zone ([#3821](https://github.com/EQEmu/Server/pull/3821)) @Kinglykrab 2023-12-30
+* Gender constants cleanup ([#3817](https://github.com/EQEmu/Server/pull/3817)) @Kinglykrab 2023-12-30
+* Remove MakeSpawnUpdateNoDelta from mob.cpp/mob.h ([#3816](https://github.com/EQEmu/Server/pull/3816)) @Kinglykrab 2023-12-31
+* Remove SendStunAppearance from mob.cpp/mob.h ([#3818](https://github.com/EQEmu/Server/pull/3818)) @Kinglykrab 2023-12-31
+* Remove unused PlotPosition methods from mob.cpp/mob.h ([#3820](https://github.com/EQEmu/Server/pull/3820)) @Kinglykrab 2023-12-31
+
+### Database
+
+* Database update improvements, content db and terminal checks ([#3814](https://github.com/EQEmu/Server/pull/3814)) @Akkadius 2023-12-31
+
+### Fixes
+
+* Client:SetBucket Overload Incorrectly Named ([#3825](https://github.com/EQEmu/Server/pull/3825)) @fryguy503 2023-12-30
+* Fix crash in Client::Handle_OP_GMGoto ([#3832](https://github.com/EQEmu/Server/pull/3832)) @Kinglykrab 2023-12-31
+
+### Quest API
+
+* Add HasItemOnCorpse() to Perl/Lua ([#3824](https://github.com/EQEmu/Server/pull/3824)) @Kinglykrab 2023-12-31
+* Fix issue with death events. ([#3823](https://github.com/EQEmu/Server/pull/3823)) @Kinglykrab 2023-12-31
+
+### Repositories
+
+* Protected extended repositories from being overwritten if exists ([#3815](https://github.com/EQEmu/Server/pull/3815)) @Akkadius 2023-12-31
+
 ## [22.39.0] - 12/27/2023
 
 ### Character

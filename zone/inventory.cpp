@@ -4796,3 +4796,31 @@ void Client::SummonItemIntoInventory(
 		slot_id
 	);
 }
+
+bool Client::HasItemOnCorpse(uint32 item_id)
+{
+	const uint32 corpse_count = GetCorpseCount();
+	if (!corpse_count) {
+		return EQ::invslot::SLOT_INVALID;
+	}
+
+	for (int i = 0; i < corpse_count; i++) {
+		const uint32 corpse_id = GetCorpseID(i);
+
+		for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id < EQ::invslot::POSSESSIONS_END; slot_id++) {
+			const uint32 current_item_id = GetCorpseItemAt(corpse_id, slot_id);
+			if (current_item_id && current_item_id == item_id) {
+				return true;
+			}
+		}
+
+		for (int16 slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id < EQ::invbag::GENERAL_BAGS_END; slot_id++) {
+			const uint32 current_item_id = GetCorpseItemAt(corpse_id, slot_id);
+			if (current_item_id && current_item_id == item_id) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}

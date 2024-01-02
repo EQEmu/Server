@@ -26,6 +26,7 @@
 #include "../common/ip_util.h"
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
+#include "../common/database/database_update.h"
 
 extern ZSList      zoneserver_list;
 extern WorldConfig Config;
@@ -293,7 +294,18 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {
 		LogInfo("Checking Database Conversions");
-		database.CheckDatabaseConversions();
+
+		auto *r = RuleManager::Instance();
+		r->LoadRules(&database, "default", false);
+		if (!RuleB(Bots, Enabled) && database.DoesTableExist("bot_data")) {
+			LogInfo("Bot tables found but rule not enabled, enabling");
+			r->SetRule("Bots:Enabled", "true", &database, true, true);
+		}
+
+		DatabaseUpdate update{};
+		update.SetDatabase(&database)
+			->SetContentDatabase(&content_db)
+			->CheckDbUpdates();
 	}
 
 	if (RuleB(Logging, WorldGMSayLogging)) {

@@ -340,7 +340,7 @@ namespace BeastlordPetData {
 		uint16 race_id = WOLF;
 		uint8 texture = 0;
 		uint8 helm_texture = 0;
-		uint8 gender = NEUTER;
+		uint8 gender = Gender::Neuter;
 		float size_modifier = 1.0f;
 		uint8 face = 0;
 	};
@@ -498,7 +498,7 @@ public:
 	uint32		GetFirstCorpseID(uint32 char_id);
 	uint32		GetCharacterCorpseCount(uint32 char_id);
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
-	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid);
+	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id);
 	uint32		GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
 	void        SendCharacterCorpseToNonInstance(uint32 corpse_db_id);
 

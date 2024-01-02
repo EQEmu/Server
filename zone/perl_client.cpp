@@ -3058,6 +3058,11 @@ void Perl_Client_SummonItemIntoInventory(Client* self, perl::reference table_ref
 	);
 }
 
+bool Perl_Client_HasItemOnCorpse(Client* self, uint32 item_id)
+{
+	return self->HasItemOnCorpse(item_id);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3320,6 +3325,7 @@ void perl_register_client()
 	package.add("HasDisciplineLearned", &Perl_Client_HasDisciplineLearned);
 	package.add("HasExpeditionLockout", &Perl_Client_HasExpeditionLockout);
 	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
+	package.add("HasItemOnCorpse", &Perl_Client_HasItemOnCorpse);
 	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
 	package.add("HasRecipeLearned", &Perl_Client_HasRecipeLearned);
 	package.add("HasSkill", &Perl_Client_HasSkill);
