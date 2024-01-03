@@ -7963,9 +7963,9 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket* app)
 
 	if (((strcasecmp(GetCleanName(), target) == 0 &&
 		guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE_SELF)) ||
-		(guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE)) ||
+		((guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_DEMOTE)) ||
 		(ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() <= GUILD_OFFICER)) &&
-		gci.rank > GuildRank())
+		gci.rank > GuildRank()))
 	{
 		if (!guild_mgr.SetGuildRank(gci.char_id, rank))
 		{
@@ -8240,7 +8240,7 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (response == GUILD_INVITE_DECLINE) {
+	if (response >= GUILD_INVITE_DECLINE) {
 		guild_mgr.VerifyAndClearInvite(CharacterID(), guild_id, gj->response);
 		Message(Chat::Yellow, "You declined the guild invite.");
 		if (c_invitor) {
