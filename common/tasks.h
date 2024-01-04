@@ -75,6 +75,7 @@ struct ActivityInformation {
 	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
 	int              zone_version;
 	bool             optional;
+	uint8_t          list_group; // element group in window list (groups separated by dividers), valid values are 0-19
 	bool             has_area; // non-database field
 
 	inline bool CheckZone(int zone_id, int version) const

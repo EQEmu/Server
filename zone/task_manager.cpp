@@ -214,6 +214,8 @@ bool TaskManager::LoadTasks(int single_task)
 		ad->max_y                = a.max_y;
 		ad->max_z                = a.max_z;
 		ad->zone_version         = a.zone_version >= 0 ? a.zone_version : -1;
+		ad->optional             = a.optional;
+		ad->list_group           = a.list_group;
 		ad->has_area             = false;
 
 		if (std::abs(a.max_x - a.min_x) > 0.0f &&
@@ -235,8 +237,6 @@ bool TaskManager::LoadTasks(int single_task)
 				ad->zone_ids.push_back(Strings::ToInt(e));
 			}
 		}
-
-		ad->optional = a.optional;
 
 		LogTasksDetail(
 			"(Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_method [{}] goal_count [{}] zones [{}]"
@@ -950,7 +950,7 @@ void TaskManager::SendTaskActivityShort(Client *client, int task_id, int activit
 	outapp->WriteUInt32(static_cast<uint32>(task_data->type));
 	outapp->WriteUInt32(task_id);
 	outapp->WriteUInt32(activity_id);
-	outapp->WriteUInt32(0);
+	outapp->WriteUInt32(task_data->activity_information[activity_id].list_group);
 	outapp->WriteUInt32(0xffffffff);
 	outapp->WriteUInt8(task_data->activity_information[activity_id].optional ? 1 : 0);
 	client->QueuePacket(outapp.get());
@@ -972,7 +972,7 @@ void TaskManager::SendTaskActivityLong(
 	buf.WriteUInt32(static_cast<uint32>(task_data->type)); // task type
 	buf.WriteUInt32(task_id);
 	buf.WriteUInt32(activity_id);
-	buf.WriteUInt32(0);        // unknown3
+	buf.WriteUInt32(task_data->activity_information[activity_id].list_group);
 
 	const auto& activity = task_data->activity_information[activity_id];
 	int done_count = client->GetTaskActivityDoneCount(task_data->type, client_task_index, activity_id);
