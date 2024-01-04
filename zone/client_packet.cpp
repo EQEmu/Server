@@ -12053,6 +12053,11 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			{
 				auto player_sending_invite_group = player_sending_invite->GetGroup();
 				Group* group = GetGroup();
+
+				if (group && group == player_sending_invite_group) {
+					break;
+				}
+
 				if (group) //if our target has a group
 				{
 					raid = new Raid(player_sending_invite);
