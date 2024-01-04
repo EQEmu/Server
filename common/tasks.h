@@ -359,9 +359,11 @@ namespace Tasks {
 			if (activity_states[i].activity_state != ActivityCompleted)
 			{
 				completed_ids[i] = false;
-				current_step = std::min(current_step, el.step);
+
+				// step system advances to next step if only optionals active
 				if (!el.optional)
 				{
+					current_step = std::min(current_step, el.step);
 					result.is_task_complete = false;
 				}
 			}
