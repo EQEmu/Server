@@ -793,6 +793,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
 	case ServerOP_GuildSendGuildList:
+	case ServerOP_GuildMembersList:
 	{
 		guild_mgr.ProcessWorldPacket(pack);
 		break;

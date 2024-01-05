@@ -390,11 +390,6 @@ Client::~Client() {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
-	if (IsInAGuild()) {
-		guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
-	}
-
 	Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 	if (horse)
 		horse->Depop();

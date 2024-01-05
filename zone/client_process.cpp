@@ -177,6 +177,10 @@ bool Client::Process() {
 			if (myraid) {
 				myraid->MemberZoned(this);
 			}
+			if (IsInAGuild()) {
+				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
+				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+			}
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
@@ -196,6 +200,11 @@ bool Client::Process() {
 			}
 			LeaveGroup();
 			Save();
+			if (IsInAGuild()) {
+				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
+				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+			}
+
 			if (GetMerc())
 			{
 				GetMerc()->Save();
@@ -565,6 +574,10 @@ bool Client::Process() {
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
+			}
+			if (IsInAGuild()) {
+				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
+				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
 			}
 			return false;
 		}

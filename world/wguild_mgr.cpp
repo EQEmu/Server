@@ -243,6 +243,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildMemberRemove:
 	case ServerOP_GuildMemberAdd:
 	case ServerOP_GuildSendGuildList:
+	case ServerOP_GuildMembersList:
 	{
 		for (auto const& z : zoneserver_list.getZoneServerList()) {
 			auto r = z.get();

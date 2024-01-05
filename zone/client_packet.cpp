@@ -844,7 +844,11 @@ void Client::CompleteConnect()
 		entity_list.SendFindableNPCList(this);
 
 	if (IsInAGuild()) {
-		guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
+		if (firstlogon == 1) {
+			guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
+			guild_mgr.SendToWorldSendGuildMembersList(GuildID());
+		}
+
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 
 		SendGuildList();

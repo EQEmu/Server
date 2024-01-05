@@ -734,24 +734,12 @@ void Client::SendGuildRenameGuild(uint32 guild_id, std::string new_guild_name)
 
 void EntityList::SendGuildMembersList(uint32 guild_id)
 {
-	auto   guild_name = guild_mgr.GetGuildName(guild_id);
-	uint32 len;
-	uint8 *data = guild_mgr.MakeGuildMembers(guild_id, guild_name, len);
-	if (data == nullptr) {
-		return;
+	for (auto const& c : client_list) {
+		if (c.second->GuildID() == guild_id) {
+			c.second->SendGuildMembersList();
+			c.second->SetGuildListDirty(false);
+		}
 	}
-
-	auto outapp = new EQApplicationPacket(OP_GuildMemberList, len);
-	outapp->pBuffer = data;
-	data = nullptr;
-
-	LogGuilds("Sending OP_GuildMemberList of length [{}]", outapp->size);
-
-	entity_list.QueueClientsGuild(outapp, guild_id);
-	safe_delete(outapp);
-
-	entity_list.SendGuildChannel(guild_id);
-	entity_list.SendGuildURL(guild_id);
 }
 
 void EntityList::SendGuildMemberAdd(

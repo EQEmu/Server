@@ -31,6 +31,7 @@ void command_guild(Client* c, const Seperator* sep)
 	bool is_set_rank = !strcasecmp(sep->arg[1], "setrank");
 	bool is_status = !strcasecmp(sep->arg[1], "status");
 	bool is_details = !strcasecmp(sep->arg[1], "details");
+	bool is_test = !strcasecmp(sep->arg[1], "test");
 	if (
 		!is_create &&
 		!is_delete &&
@@ -43,7 +44,8 @@ void command_guild(Client* c, const Seperator* sep)
 		!is_set_leader &&
 		!is_set_rank &&
 		!is_status &&
-		!is_details
+		!is_details &&
+		!is_test
 		) {
 		SendGuildSubCommands(c);
 		return;
@@ -505,8 +507,7 @@ void command_guild(Client* c, const Seperator* sep)
 			}
 		}
 	}
-	else if (is_details)
-	{
+	else if (is_details) {
 		if (!sep->IsNumber(2)) {
 			c->Message(Chat::White, "Usage: #guild details [Guild ID]");
 		}
@@ -525,7 +526,12 @@ void command_guild(Client* c, const Seperator* sep)
 
 			auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 			if (!guild) {
-				c->Message(Chat::Yellow, fmt::format("Guild {} not found.  #guild list can be used to get guild ids.", guild_id).c_str());
+				c->Message(
+					Chat::Yellow,
+					fmt::format(
+						"Guild {} not found.  #guild list can be used to get guild ids.",
+						guild_id
+					).c_str());
 				return;
 			}
 
@@ -540,41 +546,61 @@ void command_guild(Client* c, const Seperator* sep)
 				c->Message(Chat::Yellow, fmt::format("Guild URL:        {}.", guild->url.c_str()).c_str());
 
 				for (int i = 1; i <= GUILD_MAX_RANK; i++) {
-					c->Message(Chat::Yellow, fmt::format("Guild Rank:       {} - {}.", i, guild->rank_names[i].c_str()).c_str());
+					c->Message(
+						Chat::Yellow,
+						fmt::format("Guild Rank:       {} - {}.", i, guild->rank_names[i].c_str()).c_str());
 				}
 
 				c->Message(Chat::Yellow, "Guild Functions:   {db_id} - {guild_id} - {perm_id} - {perm_value}.");
 				for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
-					c->Message(Chat::Yellow, fmt::format("Guild Function:   {} - {} - {} - {}.",
-						guild->functions[i].id,
-						guild->functions[i].guild_id,
-						guild->functions[i].perm_id,
-						guild->functions[i].perm_value
-					).c_str());
+					c->Message(
+						Chat::Yellow, fmt::format(
+							"Guild Function:   {} - {} - {} - {}.",
+							guild->functions[i].id,
+							guild->functions[i].guild_id,
+							guild->functions[i].perm_id,
+							guild->functions[i].perm_value
+						).c_str());
 				}
 				c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Favor     {}", guild->tribute.favor).c_str());
-				c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Tribute 1 {}/{}   - Tribute 2 {}/{}",
-					guild->tribute.id_1,
-					guild->tribute.id_1_tier,
-					guild->tribute.id_2,
-					guild->tribute.id_2_tier
-				).c_str());
-				c->Message(Chat::Yellow, fmt::format("Guild Tribute:  Time Remaining {} - Enabled {}",
-					guild->tribute.time_remaining,
-					guild->tribute.enabled
-				).c_str());
-			}
-			for (auto& c1 : entity_list.GetClientList()) {
-				if (c1.second->GuildID() == guild_id) {
-					c->Message(Chat::Yellow, fmt::format("PlayerName: {} ID: {} Rank: {} OptIn: {} DirtyList: {}.",
-						c1.second->GetCleanName(),
-						c1.second->GuildID(),
-						c1.second->GuildRank(),
-						c1.second->GuildTributeOptIn(),
-						c1.second->GetGuildListDirty()
+				c->Message(
+					Chat::Yellow, fmt::format(
+						"Guild Tribute:  Tribute 1 {}/{}   - Tribute 2 {}/{}",
+						guild->tribute.id_1,
+						guild->tribute.id_1_tier,
+						guild->tribute.id_2,
+						guild->tribute.id_2_tier
 					).c_str());
+				c->Message(
+					Chat::Yellow, fmt::format(
+						"Guild Tribute:  Time Remaining {} - Enabled {}",
+						guild->tribute.time_remaining,
+						guild->tribute.enabled
+					).c_str());
+			}
+			for (auto &c1: entity_list.GetClientList()) {
+				if (c1.second->GuildID() == guild_id) {
+					c->Message(
+						Chat::Yellow, fmt::format(
+							"PlayerName: {} ID: {} Rank: {} OptIn: {} DirtyList: {}.",
+							c1.second->GetCleanName(),
+							c1.second->GuildID(),
+							c1.second->GuildRank(),
+							c1.second->GuildTributeOptIn(),
+							c1.second->GetGuildListDirty()
+						).c_str());
 				}
 			}
+		}
+	}
+	else if (is_test) {
+		if (!sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #guild test [Guild ID]");
+		}
+		else {
+			auto guild_id = Strings::ToUnsignedInt(sep->arg[2]);
+			auto guild    = guild_mgr.GetGuildByGuildID(guild_id);
+			c->SendGuildMembersList();
 		}
 	}
 }

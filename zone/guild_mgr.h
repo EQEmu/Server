@@ -68,6 +68,7 @@ public:
 	void  SendToWorldGuildURL(uint32 guild_id, std::string url);
 	void  SendToWorldSendGuildList();
 	void  SendToWorldMemberRankUpdate(uint32 guild_id, uint32 rank, uint32 banker, uint32 alt, bool no_update, const char *player_name);
+	void  SendToWorldSendGuildMembersList(uint32 guild_id);
 	bool  RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name);
 	void  MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
 	bool  MemberRankUpdate(uint32 guild_id, uint32 rank, uint32 banker, uint32 alt, bool no_update, const char *player_name);

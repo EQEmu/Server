@@ -110,6 +110,7 @@
 #define ServerOP_GuildChannel                     0x007C
 #define ServerOP_GuildURL                         0x007D
 #define ServerOP_GuildSendGuildList				  0x007E
+#define ServerOP_GuildMembersList                 0x007F
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use

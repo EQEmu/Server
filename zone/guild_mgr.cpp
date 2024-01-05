@@ -605,6 +605,13 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 			}
 			break;
 		}
+		case ServerOP_GuildMembersList: {
+			if (is_zone_loaded) {
+				auto s_in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
+				entity_list.SendGuildMembersList(s_in->guild_id);
+			}
+			break;
+		}
 		case ServerOP_GuildURL: {
 			if (is_zone_loaded) {
 				auto s_in = (ServerOP_GuildMessage_Struct *) pack->pBuffer;
@@ -1798,4 +1805,15 @@ bool ZoneGuildManager::MemberRankUpdate(uint32 guild_id, uint32 rank, uint32 ban
 {
 	SendToWorldMemberRankUpdate(guild_id, rank, banker, alt, no_update, player_name);
 	return true;
+}
+
+void ZoneGuildManager::SendToWorldSendGuildMembersList(uint32 guild_id)
+{
+	auto outapp = new ServerPacket(ServerOP_GuildMembersList, sizeof(ServerOP_GuildMessage_Struct));
+	auto sr     = (ServerOP_GuildMessage_Struct *) outapp->pBuffer;
+
+	sr->guild_id  = guild_id;
+
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp)
 }
