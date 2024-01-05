@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_DATA_REPOSITORY_H
@@ -1339,6 +1339,266 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterData &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.account_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.last_name) + "'");
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back("'" + Strings::Escape(e.suffix) + "'");
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.zone_instance));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.birthday));
+		v.push_back(std::to_string(e.last_login));
+		v.push_back(std::to_string(e.time_played));
+		v.push_back(std::to_string(e.level2));
+		v.push_back(std::to_string(e.anon));
+		v.push_back(std::to_string(e.gm));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.hair_color));
+		v.push_back(std::to_string(e.hair_style));
+		v.push_back(std::to_string(e.beard));
+		v.push_back(std::to_string(e.beard_color));
+		v.push_back(std::to_string(e.eye_color_1));
+		v.push_back(std::to_string(e.eye_color_2));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.ability_time_seconds));
+		v.push_back(std::to_string(e.ability_number));
+		v.push_back(std::to_string(e.ability_time_minutes));
+		v.push_back(std::to_string(e.ability_time_hours));
+		v.push_back(std::to_string(e.exp));
+		v.push_back(std::to_string(e.exp_enabled));
+		v.push_back(std::to_string(e.aa_points_spent));
+		v.push_back(std::to_string(e.aa_exp));
+		v.push_back(std::to_string(e.aa_points));
+		v.push_back(std::to_string(e.group_leadership_exp));
+		v.push_back(std::to_string(e.raid_leadership_exp));
+		v.push_back(std::to_string(e.group_leadership_points));
+		v.push_back(std::to_string(e.raid_leadership_points));
+		v.push_back(std::to_string(e.points));
+		v.push_back(std::to_string(e.cur_hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.endurance));
+		v.push_back(std::to_string(e.intoxication));
+		v.push_back(std::to_string(e.str));
+		v.push_back(std::to_string(e.sta));
+		v.push_back(std::to_string(e.cha));
+		v.push_back(std::to_string(e.dex));
+		v.push_back(std::to_string(e.int_));
+		v.push_back(std::to_string(e.agi));
+		v.push_back(std::to_string(e.wis));
+		v.push_back(std::to_string(e.zone_change_count));
+		v.push_back(std::to_string(e.toxicity));
+		v.push_back(std::to_string(e.hunger_level));
+		v.push_back(std::to_string(e.thirst_level));
+		v.push_back(std::to_string(e.ability_up));
+		v.push_back(std::to_string(e.ldon_points_guk));
+		v.push_back(std::to_string(e.ldon_points_mir));
+		v.push_back(std::to_string(e.ldon_points_mmc));
+		v.push_back(std::to_string(e.ldon_points_ruj));
+		v.push_back(std::to_string(e.ldon_points_tak));
+		v.push_back(std::to_string(e.ldon_points_available));
+		v.push_back(std::to_string(e.tribute_time_remaining));
+		v.push_back(std::to_string(e.career_tribute_points));
+		v.push_back(std::to_string(e.tribute_points));
+		v.push_back(std::to_string(e.tribute_active));
+		v.push_back(std::to_string(e.pvp_status));
+		v.push_back(std::to_string(e.pvp_kills));
+		v.push_back(std::to_string(e.pvp_deaths));
+		v.push_back(std::to_string(e.pvp_current_points));
+		v.push_back(std::to_string(e.pvp_career_points));
+		v.push_back(std::to_string(e.pvp_best_kill_streak));
+		v.push_back(std::to_string(e.pvp_worst_death_streak));
+		v.push_back(std::to_string(e.pvp_current_kill_streak));
+		v.push_back(std::to_string(e.pvp2));
+		v.push_back(std::to_string(e.pvp_type));
+		v.push_back(std::to_string(e.show_helm));
+		v.push_back(std::to_string(e.group_auto_consent));
+		v.push_back(std::to_string(e.raid_auto_consent));
+		v.push_back(std::to_string(e.guild_auto_consent));
+		v.push_back(std::to_string(e.leadership_exp_on));
+		v.push_back(std::to_string(e.RestTimer));
+		v.push_back(std::to_string(e.air_remaining));
+		v.push_back(std::to_string(e.autosplit_enabled));
+		v.push_back(std::to_string(e.lfp));
+		v.push_back(std::to_string(e.lfg));
+		v.push_back("'" + Strings::Escape(e.mailkey) + "'");
+		v.push_back(std::to_string(e.xtargets));
+		v.push_back(std::to_string(e.firstlogon));
+		v.push_back(std::to_string(e.e_aa_effects));
+		v.push_back(std::to_string(e.e_percent_to_aa));
+		v.push_back(std::to_string(e.e_expended_aa_spent));
+		v.push_back(std::to_string(e.aa_points_spent_old));
+		v.push_back(std::to_string(e.aa_points_old));
+		v.push_back(std::to_string(e.e_last_invsnapshot));
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterData> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.account_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.last_name) + "'");
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back("'" + Strings::Escape(e.suffix) + "'");
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.zone_instance));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.birthday));
+			v.push_back(std::to_string(e.last_login));
+			v.push_back(std::to_string(e.time_played));
+			v.push_back(std::to_string(e.level2));
+			v.push_back(std::to_string(e.anon));
+			v.push_back(std::to_string(e.gm));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.hair_color));
+			v.push_back(std::to_string(e.hair_style));
+			v.push_back(std::to_string(e.beard));
+			v.push_back(std::to_string(e.beard_color));
+			v.push_back(std::to_string(e.eye_color_1));
+			v.push_back(std::to_string(e.eye_color_2));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.ability_time_seconds));
+			v.push_back(std::to_string(e.ability_number));
+			v.push_back(std::to_string(e.ability_time_minutes));
+			v.push_back(std::to_string(e.ability_time_hours));
+			v.push_back(std::to_string(e.exp));
+			v.push_back(std::to_string(e.exp_enabled));
+			v.push_back(std::to_string(e.aa_points_spent));
+			v.push_back(std::to_string(e.aa_exp));
+			v.push_back(std::to_string(e.aa_points));
+			v.push_back(std::to_string(e.group_leadership_exp));
+			v.push_back(std::to_string(e.raid_leadership_exp));
+			v.push_back(std::to_string(e.group_leadership_points));
+			v.push_back(std::to_string(e.raid_leadership_points));
+			v.push_back(std::to_string(e.points));
+			v.push_back(std::to_string(e.cur_hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.endurance));
+			v.push_back(std::to_string(e.intoxication));
+			v.push_back(std::to_string(e.str));
+			v.push_back(std::to_string(e.sta));
+			v.push_back(std::to_string(e.cha));
+			v.push_back(std::to_string(e.dex));
+			v.push_back(std::to_string(e.int_));
+			v.push_back(std::to_string(e.agi));
+			v.push_back(std::to_string(e.wis));
+			v.push_back(std::to_string(e.zone_change_count));
+			v.push_back(std::to_string(e.toxicity));
+			v.push_back(std::to_string(e.hunger_level));
+			v.push_back(std::to_string(e.thirst_level));
+			v.push_back(std::to_string(e.ability_up));
+			v.push_back(std::to_string(e.ldon_points_guk));
+			v.push_back(std::to_string(e.ldon_points_mir));
+			v.push_back(std::to_string(e.ldon_points_mmc));
+			v.push_back(std::to_string(e.ldon_points_ruj));
+			v.push_back(std::to_string(e.ldon_points_tak));
+			v.push_back(std::to_string(e.ldon_points_available));
+			v.push_back(std::to_string(e.tribute_time_remaining));
+			v.push_back(std::to_string(e.career_tribute_points));
+			v.push_back(std::to_string(e.tribute_points));
+			v.push_back(std::to_string(e.tribute_active));
+			v.push_back(std::to_string(e.pvp_status));
+			v.push_back(std::to_string(e.pvp_kills));
+			v.push_back(std::to_string(e.pvp_deaths));
+			v.push_back(std::to_string(e.pvp_current_points));
+			v.push_back(std::to_string(e.pvp_career_points));
+			v.push_back(std::to_string(e.pvp_best_kill_streak));
+			v.push_back(std::to_string(e.pvp_worst_death_streak));
+			v.push_back(std::to_string(e.pvp_current_kill_streak));
+			v.push_back(std::to_string(e.pvp2));
+			v.push_back(std::to_string(e.pvp_type));
+			v.push_back(std::to_string(e.show_helm));
+			v.push_back(std::to_string(e.group_auto_consent));
+			v.push_back(std::to_string(e.raid_auto_consent));
+			v.push_back(std::to_string(e.guild_auto_consent));
+			v.push_back(std::to_string(e.leadership_exp_on));
+			v.push_back(std::to_string(e.RestTimer));
+			v.push_back(std::to_string(e.air_remaining));
+			v.push_back(std::to_string(e.autosplit_enabled));
+			v.push_back(std::to_string(e.lfp));
+			v.push_back(std::to_string(e.lfg));
+			v.push_back("'" + Strings::Escape(e.mailkey) + "'");
+			v.push_back(std::to_string(e.xtargets));
+			v.push_back(std::to_string(e.firstlogon));
+			v.push_back(std::to_string(e.e_aa_effects));
+			v.push_back(std::to_string(e.e_percent_to_aa));
+			v.push_back(std::to_string(e.e_expended_aa_spent));
+			v.push_back(std::to_string(e.aa_points_spent_old));
+			v.push_back(std::to_string(e.aa_points_old));
+			v.push_back(std::to_string(e.e_last_invsnapshot));
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_DATA_REPOSITORY_H
