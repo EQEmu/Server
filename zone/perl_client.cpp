@@ -464,14 +464,14 @@ void Perl_Client_IncreaseSkill(Client* self, int skill_id, int value) // @catego
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(skill_id);
+	self->IncreaseLanguageSkill(language_id);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id, uint8 increase) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(skill_id, value);
+	self->IncreaseLanguageSkill(language_id, increase);
 }
 
 uint32_t Perl_Client_GetRawSkill(Client* self, int skill_id) // @categories Skills and Recipes
@@ -514,9 +514,9 @@ bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id, int chance_modif
 	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr, chance_modifier);
 }
 
-void Perl_Client_SetLanguageSkill(Client* self, int language_id, int value) // @categories Account and Character, Skills and Recipes, Stats and Attributes
+void Perl_Client_SetLanguageSkill(Client* self, uint8 language_id, uint8 language_skill) // @categories Account and Character, Skills and Recipes, Stats and Attributes
 {
-	self->SetLanguageSkill(language_id, value);
+	self->SetLanguageSkill(language_id, language_skill);
 }
 
 int Perl_Client_MaxSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
@@ -1591,7 +1591,7 @@ void Perl_Client_SilentMessage(Client* self, const char* message) // @categories
 				if (self->GetTarget()->CastToNPC()->IsMoving() &&
 					  !self->GetTarget()->CastToNPC()->IsOnHatelist(self->GetTarget()))
 					self->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-				self->ChannelMessageReceived(ChatChannel_Say, 0, 100, message, nullptr, true);
+				self->ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, message, nullptr, true);
 			}
 		}
 	}
@@ -3334,8 +3334,8 @@ void perl_register_client()
 	package.add("Hungry", &Perl_Client_Hungry);
 	package.add("InZone", &Perl_Client_InZone);
 	package.add("IncStats", &Perl_Client_IncStats);
-	package.add("IncreaseLanguageSkill", (void(*)(Client*, int))&Perl_Client_IncreaseLanguageSkill);
-	package.add("IncreaseLanguageSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8, uint8))&Perl_Client_IncreaseLanguageSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
 	package.add("IncrementAA", &Perl_Client_IncrementAA);

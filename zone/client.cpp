@@ -915,15 +915,19 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	// Garble the message based on drunkness
 	if (GetIntoxication() > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
 		GarbleMessage(message, (int)(GetIntoxication() / 3));
-		language = 0; // No need for language when drunk
-		lang_skill = 100;
+		language   = Language::CommonTongue; // No need for language when drunk
+		lang_skill = Language::MaxValue;
 	}
 
 	// some channels don't use languages
-	if (chan_num == ChatChannel_OOC || chan_num == ChatChannel_GMSAY || chan_num == ChatChannel_Broadcast || chan_num == ChatChannel_Petition)
-	{
-		language = 0;
-		lang_skill = 100;
+	if (
+		chan_num == ChatChannel_OOC ||
+		chan_num == ChatChannel_GMSAY ||
+		chan_num == ChatChannel_Broadcast ||
+		chan_num == ChatChannel_Petition
+	) {
+		language   = Language::CommonTongue;
+		lang_skill = Language::MaxValue;
 	}
 
 	// Censor the message
@@ -1274,69 +1278,88 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 }
 
-void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...) {
-	if ((chan_num==11 && !(GetGM())) || (chan_num==10 && Admin() < AccountStatus::QuestTroupe)) // dont need to send /pr & /petition to everybody
+void Client::ChannelMessageSend(
+	const char *from,
+	const char *to,
+	uint8 channel_id,
+	uint8 language_id,
+	uint8 language_skill,
+	const char *message,
+	...
+)
+{
+	if (
+		(channel_id == ChatChannel_Petition && Admin() < AccountStatus::QuestTroupe) ||
+		(channel_id == ChatChannel_GMSAY && !GetGM())
+	) {
 		return;
+	}
+
 	va_list argptr;
-	char buffer[4096];
-	char message_sender[64];
+	char    buffer[4096];
+	char    message_sender[64];
 
 	va_start(argptr, message);
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	EQApplicationPacket app(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+strlen(buffer)+1);
-	ChannelMessage_Struct* cm = (ChannelMessage_Struct*)app.pBuffer;
+	EQApplicationPacket app(OP_ChannelMessage, sizeof(ChannelMessage_Struct) + strlen(buffer) + 1);
 
-	if (from == 0)
+	auto* cm = (ChannelMessage_Struct *) app.pBuffer;
+
+	if (from == 0) {
 		strcpy(cm->sender, "ZServer");
-	else if (from[0] == 0)
+	} else if (from[0] == 0) {
 		strcpy(cm->sender, "ZServer");
-	else {
+	} else {
 		CleanMobName(from, message_sender);
 		strcpy(cm->sender, message_sender);
 	}
-	if (to != 0)
+
+	if (to != 0) {
 		strcpy((char *) cm->targetname, to);
-	else if (chan_num == ChatChannel_Tell)
+	} else if (channel_id == ChatChannel_Tell) {
 		strcpy(cm->targetname, m_pp.name);
-	else
+	} else {
 		cm->targetname[0] = 0;
-
-	uint8 ListenerSkill;
-
-	if (language < MAX_PP_LANGUAGE) {
-		ListenerSkill = m_pp.languages[language];
-		if (ListenerSkill < 24) {
-			cm->language = (MAX_PP_LANGUAGE - 1); // in an unknown tongue
-		}
-		else {
-			cm->language = language;
-		}
 	}
-	else {
-		ListenerSkill = m_pp.languages[0];
-		cm->language = 0;
+
+	uint8 listener_skill;
+
+	const bool is_valid_language = EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27);
+
+	if (is_valid_language) {
+		listener_skill = m_pp.languages[language_id];
+		cm->language   = listener_skill < 24 ? Language::Unknown27 : language_id;
+	} else {
+		listener_skill = m_pp.languages[Language::CommonTongue];
+		cm->language   = Language::CommonTongue;
 	}
 
 	// set effective language skill = lower of sender and receiver skills
-	int32 EffSkill = (lang_skill < ListenerSkill ? lang_skill : ListenerSkill);
-	if (EffSkill > 100)	// maximum language skill is 100
-		EffSkill = 100;
-	cm->skill_in_language = EffSkill;
+	uint8 effective_skill = (language_skill < listener_skill ? language_skill : listener_skill);
+	if (effective_skill > Language::MaxValue) {
+		effective_skill = Language::MaxValue;
+	}
 
-	cm->chan_num = chan_num;
+	cm->skill_in_language = effective_skill;
+
+	cm->chan_num = channel_id;
 	strcpy(&cm->message[0], buffer);
 
 	QueuePacket(&app);
 
-	bool senderCanTrainSelf = RuleB(Client, SelfLanguageLearning);
-	bool weAreNotSender = strcmp(GetCleanName(), cm->sender);
+	const bool can_train_self = RuleB(Client, SelfLanguageLearning);
+	const bool is_not_sender  = strcmp(GetCleanName(), cm->sender);
 
-	if (senderCanTrainSelf || weAreNotSender) {
-		if ((chan_num == ChatChannel_Group) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-			if (language < MAX_PP_LANGUAGE && m_pp.languages[language] <= lang_skill)
-				CheckLanguageSkillIncrease(language, lang_skill);
+	if (can_train_self || is_not_sender) {
+		if (
+			channel_id == ChatChannel_Group &&
+			listener_skill < Language::MaxValue
+		) { // group message in non-mastered language, check for skill up
+			if (is_valid_language && m_pp.languages[language_id] <= language_skill) {
+				CheckLanguageSkillIncrease(language_id, language_skill);
+			}
 		}
 	}
 }
@@ -1637,26 +1660,30 @@ void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
 	safe_delete(outapp);
 }
 
-void Client::IncreaseLanguageSkill(int skill_id, int value) {
+void Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase)
+{
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (skill_id >= MAX_PP_LANGUAGE)
-		return; //Invalid lang id
+	m_pp.languages[language_id] += increase;
 
-	m_pp.languages[skill_id] += value;
+	if (m_pp.languages[language_id] > Language::MaxValue) {
+		m_pp.languages[language_id] = Language::MaxValue;
+	}
 
-	if (m_pp.languages[skill_id] > 100) //Lang skill above max
-		m_pp.languages[skill_id] = 100;
-
-	database.SaveCharacterLanguage(CharacterID(), skill_id, m_pp.languages[skill_id]);
+	database.SaveCharacterLanguage(CharacterID(), language_id, m_pp.languages[language_id]);
 
 	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
-	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId = 100 + skill_id;
-	skill->value = m_pp.languages[skill_id];
+	auto* s = (SkillUpdate_Struct*) outapp->pBuffer;
+
+	s->skillId = 100 + language_id;
+	s->value   = m_pp.languages[language_id];
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify client
+	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
 }
 
 void Client::AddSkill(EQ::skills::SkillType skillid, uint16 value) {
@@ -2272,9 +2299,9 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		memcpy(out->booktext, booktxt2.c_str(), length);
 
-		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
-			if (m_pp.languages[book_language] < 100) {
-				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[book_language] < Language::MaxValue) {
+				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
 			}
 		}
 
@@ -2673,38 +2700,43 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	return false;
 }
 
-void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
-	if (IsDead() || IsUnconscious())
+void Client::CheckLanguageSkillIncrease(uint8 language_id, uint8 teacher_skill) {
+	if (IsDead() || IsUnconscious()) {
 		return;
-	if (IsAIControlled())
+	}
+
+	if (IsAIControlled()) {
 		return;
-	if (langid >= MAX_PP_LANGUAGE)
-		return;		// do nothing if langid is an invalid language
+	}
 
-	int LangSkill = m_pp.languages[langid];		// get current language skill
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (LangSkill < 100) {	// if the language isn't already maxed
-		int32 Chance = 5 + ((TeacherSkill - LangSkill)/10);	// greater chance to learn if teacher's skill is much higher than yours
-		Chance = (Chance * RuleI(Character, SkillUpModifier)/100);
+	const uint8 language_skill = m_pp.languages[language_id]; // get current language skill
 
-		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
-			IncreaseLanguageSkill(langid);	// increase the language skill by 1
+	if (language_skill < Language::MaxValue) { // if the language isn't already maxed
+		int chance = 5 + ((teacher_skill - language_skill) / 10); // greater chance to learn if teacher's skill is much higher than yours
+		chance = (chance * RuleI(Character, SkillUpModifier) / 100);
+
+		if (zone->random.Real(0, 100) < chance) { // if they make the roll
+			IncreaseLanguageSkill(language_id);
 
 			if (parse->PlayerHasQuestSub(EVENT_LANGUAGE_SKILL_UP)) {
-				const auto& export_string = fmt::format(
+				const auto &export_string = fmt::format(
 					"{} {} {}",
-					langid,
-					LangSkill + 1,
-					100
+					language_id,
+					language_skill + 1,
+					Language::MaxValue
 				);
 
 				parse->EventPlayer(EVENT_LANGUAGE_SKILL_UP, this, export_string, 0);
 			}
 
-			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", langid, LangSkill, Chance);
+			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", language_id, language_skill, chance);
+		} else {
+			LogSkills("Language [{}] at value [{}] failed to gain with [{}] % chance", language_id, language_skill, chance);
 		}
-		else
-			LogSkills("Language [{}] at value [{}] failed to gain with [{}] % chance", langid, LangSkill, Chance);
 	}
 }
 
@@ -3566,25 +3598,30 @@ void Client::SetHideMe(bool flag)
 	UpdateWho();
 }
 
-void Client::SetLanguageSkill(int langid, int value)
+void Client::SetLanguageSkill(uint8 language_id, uint8 language_skill)
 {
-	if (langid >= MAX_PP_LANGUAGE)
-		return; //Invalid Language
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (value > 100)
-		value = 100; //Max lang value
+	if (language_skill > Language::MaxValue) {
+		language_skill = Language::MaxValue;
+	}
 
-	m_pp.languages[langid] = value;
-	database.SaveCharacterLanguage(CharacterID(), langid, value);
+	m_pp.languages[language_id] = language_skill;
+
+	database.SaveCharacterLanguage(CharacterID(), language_id, language_skill);
 
 	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
-	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId = 100 + langid;
-	skill->value = m_pp.languages[langid];
+	auto* s = (SkillUpdate_Struct*) outapp->pBuffer;
+
+	s->skillId = 100 + language_id;
+	s->value   = m_pp.languages[language_id];
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify the client
+	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
 }
 
 void Client::LinkDead()
@@ -10546,9 +10583,9 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 
 		memcpy(out->booktext, book_text.c_str(), length);
 
-		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
-			if (m_pp.languages[book_language] < 100) {
-				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[book_language] < Language::MaxValue) {
+				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
 			}
 		}
 

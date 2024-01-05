@@ -358,8 +358,8 @@ namespace EQ
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
-		extern const std::map<int, std::string>& GetLanguageMap();
-		std::string GetLanguageName(int language_id);
+		extern const std::map<uint8, std::string>& GetLanguageMap();
+		std::string GetLanguageName(uint8 language_id);
 
 		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
 		std::string GetLDoNThemeName(uint32 theme_id);

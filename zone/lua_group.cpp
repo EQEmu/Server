@@ -39,12 +39,12 @@ void Lua_Group::SplitExp(uint64 exp, Lua_Mob other) {
 
 void Lua_Group::GroupMessage(Lua_Mob sender, const char* message) {
 	Lua_Safe_Call_Void();
-	self->GroupMessage(sender, 0, 100, message);
+	self->GroupMessage(sender, Language::CommonTongue, Language::MaxValue, message);
 }
 
 void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char* message) {
 	Lua_Safe_Call_Void();
-	self->GroupMessage(sender, language, 100, message);
+	self->GroupMessage(sender, language, Language::MaxValue, message);
 }
 
 uint32 Lua_Group::GetTotalGroupDamage(Lua_Mob other) {

@@ -7894,7 +7894,7 @@ void Bot::BotGroupSay(Mob *speaker, const char *msg, ...) {
 	if (speaker->HasGroup()) {
 		Group *g = speaker->GetGroup();
 		if (g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
 	} else
 		speaker->Say("%s", buf);
 }

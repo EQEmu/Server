@@ -494,14 +494,14 @@ void Lua_Client::IncreaseSkill(int skill_id, int value) {
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id);
+	self->IncreaseLanguageSkill(language_id);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id, int value) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id, value);
+	self->IncreaseLanguageSkill(language_id, increase);
 }
 
 int Lua_Client::GetRawSkill(int skill_id) {
@@ -544,9 +544,9 @@ void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod
 	self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), target, chance_mod);
 }
 
-void Lua_Client::SetLanguageSkill(int language, int value) {
+void Lua_Client::SetLanguageSkill(uint8 language_id, uint8 language_skill) {
 	Lua_Safe_Call_Void();
-	self->SetLanguageSkill(language, value);
+	self->SetLanguageSkill(language_id, language_skill);
 }
 
 int Lua_Client::MaxSkill(int skill_id) {
@@ -3523,8 +3523,8 @@ luabind::scope lua_register_client() {
 	.def("Hungry", (bool(Lua_Client::*)(void))&Lua_Client::Hungry)
 	.def("InZone", (bool(Lua_Client::*)(void))&Lua_Client::InZone)
 	.def("IncStats", (void(Lua_Client::*)(int,int))&Lua_Client::IncStats)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseLanguageSkill)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8,uint8))&Lua_Client::IncreaseLanguageSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseSkill)
 	.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)

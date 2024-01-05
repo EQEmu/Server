@@ -120,7 +120,7 @@ public:
 	std::string getskillname(int skill_id);
 	std::string getldonthemename(uint32 theme_id);
 	std::string getfactionname(int faction_id);
-	std::string getlanguagename(int language_id);
+	std::string getlanguagename(uint8 language_id);
 	std::string getbodytypename(uint32 bodytype_id);
 	std::string getconsiderlevelname(uint8 consider_level);
 	void safemove();
@@ -142,7 +142,7 @@ public:
 	void movegrp(int zoneid, float x, float y, float z);
 	void doanim(int animation_id, int animation_speed = 0, bool ackreq = true, eqFilterType filter = FilterNone);
 	void addskill(int skill_id, int value);
-	void setlanguage(int skill_id, int value);
+	void setlanguage(uint8 language_id, uint8 language_skill);
 	void setskill(int skill_id, int value);
 	void setallskill(int value);
 	void attack(const char *client_name);

@@ -561,7 +561,6 @@ SET(common_headers
     item_fieldlist.h
     item_instance.h
     json_config.h
-    languages.h
     light_source.h
     linked_list.h
     loottable.h

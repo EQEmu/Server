@@ -798,7 +798,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message) {
 	Journal::Options journal_opts;
 	journal_opts.speak_mode = Journal::SpeakMode::Say;
 	journal_opts.journal_mode = RuleB(NPC, EnableNPCQuestJournal) ? Journal::Mode::Log2 : Journal::Mode::None;
-	journal_opts.language = 0;
+	journal_opts.language = Language::CommonTongue;
 	journal_opts.message_type = Chat::NPCQuestSay;
 	journal_opts.target_spawn_id = 0;
 	self->QuestJournalledSay(client, message, journal_opts);
@@ -811,7 +811,7 @@ void Lua_Mob::QuestSay(Lua_Client client, const char *message, luabind::adl::obj
 	// defaults
 	journal_opts.speak_mode = Journal::SpeakMode::Say;
 	journal_opts.journal_mode = Journal::Mode::Log2;
-	journal_opts.language = 0;
+	journal_opts.language = Language::CommonTongue;
 	journal_opts.message_type = Chat::NPCQuestSay;
 	journal_opts.target_spawn_id = 0;
 
