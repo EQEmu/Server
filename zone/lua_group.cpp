@@ -42,7 +42,7 @@ void Lua_Group::GroupMessage(Lua_Mob sender, const char* message) {
 	self->GroupMessage(sender, Language::CommonTongue, Language::MaxValue, message);
 }
 
-void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char* message) {
+void Lua_Group::GroupMessage(Lua_Mob sender, uint8 language, const char* message) {
 	Lua_Safe_Call_Void();
 	self->GroupMessage(sender, language, Language::MaxValue, message);
 }
@@ -158,7 +158,7 @@ luabind::scope lua_register_group() {
 	.def("GetTotalGroupDamage", (uint32(Lua_Group::*)(Lua_Mob))&Lua_Group::GetTotalGroupDamage)
 	.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
 	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,const char*))&Lua_Group::GroupMessage)
-	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,int,const char*))&Lua_Group::GroupMessage)
+	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,uint8,const char*))&Lua_Group::GroupMessage)
 	.def("IsGroupMember", (bool(Lua_Group::*)(const char*))&Lua_Group::IsGroupMember)
 	.def("IsGroupMember", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsGroupMember)
 	.def("IsLeader", (bool(Lua_Group::*)(const char*))&Lua_Group::IsLeader)
