@@ -28,6 +28,7 @@
 #include "../common/repositories/character_material_repository.h"
 #include "../common/repositories/character_memmed_spells_repository.h"
 #include "../common/repositories/character_spells_repository.h"
+#include "../common/repositories/character_skills_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -782,24 +783,24 @@ bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_S
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat(
-		"SELECT				"
-		"skill_id,			"
-		"`value`			"
-		"FROM				"
-		"`character_skills` "
-		"WHERE `id` = %u ORDER BY `skill_id`", character_id);
-	auto results = database.QueryDatabase(query);
-	int i = 0;
-	/* Initialize Skill */
-	for (i = 0; i < MAX_PP_SKILL; ++i)
-		pp->skills[i] = 0;
+bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterSkillsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`id` = {} ORDER BY `skill_id",
+			character_id
+		)
+	);
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = Strings::ToInt(row[0]);
-		if (i < MAX_PP_SKILL)
-			pp->skills[i] = Strings::ToInt(row[1]);
+	for (int i = 0; i < MAX_PP_SKILL; ++i) { // Initialize Skills
+		pp->skills[i] = 0;
+	}
+
+	for (const auto& e : l) {
+		if (e.skill_id < MAX_PP_SKILL) {
+			pp->skills[e.skill_id] = e.value;
+		}
 	}
 
 	return true;
@@ -1003,10 +1004,18 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id
 	);
 }
 
-bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
-	std::string query = StringFormat("REPLACE INTO `character_skills` (id, skill_id, value) VALUES (%u, %u, %u)", character_id, skill_id, value); auto results = QueryDatabase(query);
+bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value)
+{
+	auto e = CharacterSkillsRepository::NewEntity();
+
+	e.id       = character_id;
+	e.skill_id = skill_id;
+	e.value    = value;
+
+	const int replaced = CharacterSkillsRepository::ReplaceOne(*this, e);
+
 	LogDebug("ZoneDatabase::SaveCharacterSkill for character ID: [{}], skill_id:[{}] value:[{}] done", character_id, skill_id, value);
-	return true;
+	return replaced;
 }
 
 bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
