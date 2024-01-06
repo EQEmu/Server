@@ -10756,8 +10756,8 @@ void Client::SaveDisciplines()
 		}
 	}
 
-	if (!l.empty()) {
-		CharacterDisciplinesRepository::ReplaceMany(database, l);
+	if (!v.empty()) {
+		CharacterDisciplinesRepository::ReplaceMany(database, v);
 	}
 }
 
