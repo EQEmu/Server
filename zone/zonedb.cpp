@@ -26,6 +26,7 @@
 #include "../common/repositories/spawn2_disabled_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
 #include "../common/repositories/character_material_repository.h"
+#include "../common/repositories/character_memmed_spells_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -658,26 +659,26 @@ bool ZoneDatabase::LoadCharacterFactionValues(uint32 character_id, faction_map &
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat(
-		"SELECT							"
-		"slot_id,						"
-		"`spell_id`						"
-		"FROM							"
-		"`character_memmed_spells`		"
-		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
-	auto results = database.QueryDatabase(query);
-	int i = 0;
-	/* Initialize Spells */
-	for (i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++){
-		pp->mem_spells[i] = 0xFFFFFFFF;
+bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterMemmedSpellsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} ORDER BY `slot_id`",
+			character_id
+		)
+	);
+
+	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) { // Initialize Spells
+		pp->mem_spells[i] = UINT32_MAX;
 	}
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = Strings::ToInt(row[0]);
-		if (i < EQ::spells::SPELL_GEM_COUNT && Strings::ToInt(row[1]) <= SPDAT_RECORDS){
-			pp->mem_spells[i] = Strings::ToInt(row[1]);
+
+	for (const auto& e : l) {
+		if (e.slot_id < EQ::spells::SPELL_GEM_COUNT && IsValidSpell(e.spell_id)) {
+			pp->mem_spells[e.slot_id] = e.spell_id;
 		}
 	}
+
 	return true;
 }
 
@@ -1267,9 +1268,22 @@ bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 cur
 }
 
 bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	if (spell_id > SPDAT_RECORDS){ return false; }
-	std::string query = StringFormat("REPLACE INTO `character_memmed_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id);
-	QueryDatabase(query);
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	auto e = CharacterMemmedSpellsRepository::NewEntity();
+
+	e.id       = character_id;
+	e.slot_id  = slot_id;
+	e.spell_id = spell_id;
+
+	const int replaced = CharacterMemmedSpellsRepository::ReplaceOne(*this, e);
+
+	if (!replaced) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -1314,9 +1328,21 @@ bool ZoneDatabase::DeleteCharacterMaterialColor(uint32 character_id)
 	return CharacterMaterialRepository::DeleteOne(*this, character_id);
 }
 
-bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	std::string query = StringFormat("DELETE FROM `character_memmed_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id);
-	QueryDatabase(query);
+bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slot_id)
+{
+	const int deleted = CharacterMemmedSpellsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `slot_id` = {}",
+			character_id,
+			slot_id
+		)
+	);
+
+	if (!deleted) {
+		return false;
+	}
+
 	return true;
 }
 
