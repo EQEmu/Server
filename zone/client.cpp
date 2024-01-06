@@ -10744,17 +10744,19 @@ void Client::SaveDisciplines()
 {
 	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> v;
 
-	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
-		if (IsValidSpell(m_pp.disciplines.values[index])) {
+	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
+		if (IsValidSpell(m_pp.disciplines.values[slot_id])) {
 			auto e = CharacterDisciplinesRepository::NewEntity();
 
 			e.id      = CharacterID();
-			e.slot_id = index;
-			e.disc_id = m_pp.disciplines.values[index];
+			e.slot_id = slot_id;
+			e.disc_id = m_pp.disciplines.values[slot_id];
 
 			v.emplace_back(e);
 		}
 	}
+
+	CharacterDisciplinesRepository::DeleteOne(database, CharacterID());
 
 	if (!v.empty()) {
 		CharacterDisciplinesRepository::ReplaceMany(database, v);
