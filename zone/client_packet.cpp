@@ -12053,6 +12053,13 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 			{
 				auto player_sending_invite_group = player_sending_invite->GetGroup();
 				Group* group = GetGroup();
+
+				/* Prevent scenario where player had joined group with Raid invitor before accepting Raid invite */
+				if (group && group == player_sending_invite_group) {
+					player_sending_invite->MessageString(Chat::Red, INVITE_GROUP_LEADER);
+					return;
+				}
+
 				if (group) //if our target has a group
 				{
 					raid = new Raid(player_sending_invite);
