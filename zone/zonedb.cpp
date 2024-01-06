@@ -4501,39 +4501,6 @@ bool ZoneDatabase::DeleteCharacterCorpse(uint32 db_id) {
 	return false;
 }
 
-uint32 ZoneDatabase::LoadSaylinkID(const char* saylink_text, bool auto_insert)
-{
-	if (!saylink_text || saylink_text[0] == '\0')
-		return 0;
-
-	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1", saylink_text);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
-	if (!results.RowCount()) {
-		if (auto_insert)
-			return SaveSaylinkID(saylink_text);
-		else
-			return 0;
-	}
-
-	auto& row = results.begin();
-	return Strings::ToInt(row[0]);
-}
-
-uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
-{
-	if (!saylink_text || saylink_text[0] == '\0')
-		return 0;
-
-	std::string query = StringFormat("INSERT INTO `saylink` (`phrase`) VALUES ('%s')", saylink_text);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
-
-	return results.LastInsertedID();
-}
-
 double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
 	const std::string query = fmt::format(
 		SQL(

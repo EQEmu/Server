@@ -4003,8 +4003,6 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		}
 	}
 
-	std::string text_link;
-
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
@@ -4050,15 +4048,6 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 			continue;
 		}
 
-		text_link = bot_iter->CreateSayLink(
-			c,
-			fmt::format(
-				"^inventorygive byname {}",
-				bot_iter->GetCleanName()
-			).c_str(),
-			bot_iter->GetCleanName()
-		);
-
 		for (const auto& slot_iter : equipable_slot_list) {
 			// needs more failure criteria - this should cover the bulk for now
 			if (slot_iter == EQ::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
@@ -4074,7 +4063,13 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					Chat::Say,
 					fmt::format(
 						"{} says, 'I can use that for my {} instead of my {}! Would you like to {} my {}?'",
-						text_link,
+						Saylink::Silent(
+							fmt::format(
+								"^inventorygive byname {}",
+								bot_iter->GetCleanName()
+							),
+							bot_iter->GetCleanName()
+						),
 						EQ::invslot::GetInvPossessionsSlotName(slot_iter),
 						linker.GenerateLink(),
 						Saylink::Silent(
@@ -4096,7 +4091,13 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					Chat::Say,
 					fmt::format(
 						"{} says, 'I can use that for my {}! Would you like to {} it to me?'",
-						text_link,
+						Saylink::Silent(
+							fmt::format(
+								"^inventorygive byname {}",
+								bot_iter->GetCleanName()
+							),
+							bot_iter->GetCleanName()
+						),
 						EQ::invslot::GetInvPossessionsSlotName(slot_iter),
 						Saylink::Silent(
 							fmt::format(
@@ -9542,10 +9543,6 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const std::string bot_race_name = GetRaceIDName(bot_race);
 		const std::string bot_class_name = GetClassIDName(bot_class);
-		const auto view_saylink = Saylink::Silent(
-			fmt::format("^viewcombos {}", bot_race),
-			"view"
-		);
 
 		bot_owner->Message(
 			Chat::White,
@@ -9553,7 +9550,10 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
 				bot_race_name,
 				bot_class_name,
-				view_saylink,
+				Saylink::Silent(
+					fmt::format("^viewcombos {}", bot_race),
+					"view"
+				),
 				bot_race_name
 			).c_str()
 		);
@@ -9871,9 +9871,6 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 		return;
 	}
 
-	std::string msg;
-	std::string text_link;
-
 	auto destination_count = 0;
 	auto destination_number = 1;
 	for (auto list_iter : *local_list) {
@@ -9891,24 +9888,19 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 				continue;
 			}
 
-			msg = fmt::format(
-				"^circle {}{}",
-				spells[local_entry->spell_id].teleport_zone,
-				single_flag ? " single" : ""
-			);
-
-			text_link = druid_bot->CreateSayLink(
-				bot_owner,
-				msg.c_str(),
-				"Goto"
-			);
-
 			druid_bot->OwnerMessage(
 				fmt::format(
 					"Destination {} | {} | {}",
 					destination_number,
 					local_entry->long_name,
-					text_link
+					Saylink::Silent(
+						fmt::format(
+							"^circle {}{}",
+							spells[local_entry->spell_id].teleport_zone,
+							single_flag ? " single" : ""
+						),
+						"Goto"
+					)
 				)
 			);
 
@@ -9926,24 +9918,19 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 				continue;
 			}
 
-			msg = fmt::format(
-				"^portal {}{}",
-				spells[local_entry->spell_id].teleport_zone,
-				single_flag ? " single" : ""
-			);
-
-			text_link = wizard_bot->CreateSayLink(
-				bot_owner,
-				msg.c_str(),
-				"Goto"
-			);
-
 			wizard_bot->OwnerMessage(
 				fmt::format(
 					"Destination {} | {} | {}",
 					destination_number,
 					local_entry->long_name,
-					text_link
+					Saylink::Silent(
+						fmt::format(
+							"^portal {}{}",
+							spells[local_entry->spell_id].teleport_zone,
+							single_flag ? " single" : ""
+						),
+						"Goto"
+					)
 				)
 			);
 

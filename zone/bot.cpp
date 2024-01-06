@@ -8138,28 +8138,6 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 	return true;
 }
 
-std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
-{
-	// TODO: review
-
-	int saylink_size = strlen(message);
-	char* escaped_string = new char[saylink_size * 2];
-
-	database.DoEscapeString(escaped_string, message, saylink_size);
-
-	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
-	safe_delete_array(escaped_string);
-
-	EQ::SayLinkEngine linker;
-	linker.SetLinkType(EQ::saylink::SayLinkItemData);
-	linker.SetProxyItemID(SAYLINK_ITEM_ID);
-	linker.SetProxyAugment1ID(saylink_id);
-	linker.SetProxyText(name);
-
-	auto saylink = linker.GenerateLink();
-	return saylink;
-}
-
 void Bot::Signal(int signal_id)
 {
 	if (parse->BotHasQuestSub(EVENT_SIGNAL)) {
