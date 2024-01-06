@@ -1280,11 +1280,7 @@ bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell
 
 	const int replaced = CharacterMemmedSpellsRepository::ReplaceOne(*this, e);
 
-	if (!replaced) {
-		return false;
-	}
-
-	return true;
+	return replaced;
 }
 
 bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
