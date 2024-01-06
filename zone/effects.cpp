@@ -690,7 +690,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return false;
 		} else if (m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
-			database.DeleteCharacterDiscipline(CharacterID(), r, spell_id);
+			database.SaveCharacterDiscipline(CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(Chat::White, "You have learned a new discipline!");
 			return true;
@@ -789,7 +789,7 @@ void Client::TrainDiscBySpellID(int32 spell_id)
 	for(i = 0; i < MAX_PP_DISCIPLINES; i++) {
 		if(m_pp.disciplines.values[i] == 0) {
 			m_pp.disciplines.values[i] = spell_id;
-			database.DeleteCharacterDiscipline(CharacterID(), i, spell_id);
+			database.SaveCharacterDiscipline(CharacterID(), i, spell_id);
 			SendDisciplineUpdate();
 			Message(Chat::Yellow, "You have learned a new combat ability!");
 			return;
