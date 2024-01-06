@@ -1025,25 +1025,29 @@ bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struc
 
 bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Struct *pp)
 {
-	std::string query = StringFormat("SELECT `slot`, `zone_id`, `instance_id`, `x`, `y`, `z`, `heading` FROM "
-					 "`character_bind` WHERE `id` = %u LIMIT 5",
-					 character_id);
-	auto results = database.QueryDatabase(query);
+	const auto& l = CharacterBindRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} LIMIT 5",
+			character_id
+		)
+	);
 
-	if (!results.RowCount()) // SHIT -- this actually isn't good
+	if (l.empty()) {
 		return true;
+	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int index = Strings::ToInt(row[0]);
-		if (index < 0 || index > 4)
+	for (const auto& e : l) {
+		if (!EQ::ValueWithin(e.slot, 0, 4)) {
 			continue;
+		}
 
-		pp->binds[index].zone_id = Strings::ToInt(row[1]);
-		pp->binds[index].instance_id = Strings::ToInt(row[2]);
-		pp->binds[index].x = Strings::ToFloat(row[3]);
-		pp->binds[index].y = Strings::ToFloat(row[4]);
-		pp->binds[index].z = Strings::ToFloat(row[5]);
-		pp->binds[index].heading = Strings::ToFloat(row[6]);
+		pp->binds[e.slot].zone_id     = e.zone_id;
+		pp->binds[e.slot].instance_id = e.instance_id;
+		pp->binds[e.slot].x           = e.x;
+		pp->binds[e.slot].y           = e.y;
+		pp->binds[e.slot].z           = e.z;
+		pp->binds[e.slot].heading     = e.heading;
 	}
 
 	return true;
@@ -4646,47 +4650,39 @@ void ZoneDatabase::UpdateGMStatus(uint32 accID, int newStatus)
 
 void ZoneDatabase::SaveCharacterBinds(Client *c)
 {
-	// bulk save character binds
-	std::vector<CharacterBindRepository::CharacterBind> binds = {};
-	CharacterBindRepository::CharacterBind bind = {};
+	std::vector<CharacterBindRepository::CharacterBind> v;
 
-	// count character binds
-	int bind_count = 0;
-	for (auto & b : c->GetPP().binds) {
+	auto e = CharacterBindRepository::NewEntity();
+
+	uint32 bind_count = 0;
+	for (const auto &b : c->GetPP().binds) {
 		if (b.zone_id) {
 			bind_count++;
 		}
 	}
 
-	// allocate memory for binds
-	binds.reserve(bind_count);
+	v.reserve(bind_count);
 
-	// copy binds to vector
-	int i = 0;
-	for (auto &b: c->GetPP().binds) {
+	int slot_id = 0;
+
+	for (const auto &b : c->GetPP().binds) {
 		if (b.zone_id) {
-			// copy bind data
-			bind.id          = c->CharacterID();
-			bind.zone_id     = b.zone_id;
-			bind.instance_id = b.instance_id;
-			bind.x           = b.x;
-			bind.y           = b.y;
-			bind.z           = b.z;
-			bind.heading     = b.heading;
-			bind.slot        = i;
+			e.id          = c->CharacterID();
+			e.zone_id     = b.zone_id;
+			e.instance_id = b.instance_id;
+			e.x           = b.x;
+			e.y           = b.y;
+			e.z           = b.z;
+			e.heading     = b.heading;
+			e.slot        = slot_id;
 
-			// add bind to vector
-			binds.emplace_back(bind);
+			v.emplace_back(e);
 
-			i++;
+			slot_id++;
 		}
 	}
 
-	// save binds
 	if (bind_count > 0) {
-		// delete old binds
-		CharacterBindRepository::DeleteWhere(database, fmt::format("id = {}", c->CharacterID()));
-		// save new binds
-		CharacterBindRepository::InsertMany(database, binds);
+		CharacterBindRepository::ReplaceMany(database, v);
 	}
 }
