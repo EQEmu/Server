@@ -423,7 +423,7 @@ public:
 	void DeleteItemRecast(uint32 char_id, uint32 recast_type);
 
 	bool DeleteCharacterAAs(uint32 character_id);
-	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
+	bool DeleteCharacterBandolier(uint32 character_id, uint32 bandolier_id);
 	bool DeleteCharacterDisc(uint32 character_id, uint32 slot_id);
 	bool DeleteCharacterMaterialColor(uint32 character_id);
 	bool DeleteCharacterLeadershipAbilities(uint32 character_id);
