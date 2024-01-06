@@ -32,6 +32,7 @@
 #include "../common/repositories/character_potionbelt_repository.h"
 #include "../common/repositories/character_bandolier_repository.h"
 #include "../common/repositories/character_currency_repository.h"
+#include "../common/repositories/character_alternate_abilities_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -1272,15 +1273,6 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 	);
 }
 
-bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges){
-	std::string rquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, aa_id, aa_value, charges)"
-		" VALUES (%u, %u, %u, %u)",
-		character_id, aa_id, current_level, charges);
-	auto results = QueryDatabase(rquery);
-	LogDebug("Saving AA for character ID: [{}], aa_id: [{}] current_level: [{}]", character_id, aa_id, current_level);
-	return true;
-}
-
 bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
 	if (!IsValidSpell(spell_id)) {
 		return false;
@@ -1347,10 +1339,15 @@ bool ZoneDatabase::DeleteCharacterLeadershipAbilities(uint32 character_id)
 	return CharacterLeadershipAbilitiesRepository::DeleteOne(*this, character_id);
 }
 
-bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `aa_id` NOT IN(SELECT a.first_rank_id FROM aa_ability a WHERE a.grant_only != 0)", character_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id)
+{
+	return CharacterAlternateAbilitiesRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `aa_id` NOT IN (SELECT a.first_rank_id FROM aa_ability a WHERE a.grant_only != 0)",
+			character_id
+		)
+	);
 }
 
 bool ZoneDatabase::DeleteCharacterMaterialColor(uint32 character_id)

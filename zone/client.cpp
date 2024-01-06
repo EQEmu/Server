@@ -58,6 +58,7 @@ extern volatile bool RunLoops;
 #include "mob_movement_manager.h"
 #include "cheat_manager.h"
 
+#include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/account_flags_repository.h"
 #include "../common/repositories/bug_reports_repository.h"
 #include "../common/repositories/char_recipe_list_repository.h"
@@ -586,45 +587,52 @@ void Client::ReportConnectingState() {
 	};
 }
 
-bool Client::SaveAA() {
-	std::string iquery;
-	int spentpoints = 0;
-	int i = 0;
-	for(auto &rank : aa_ranks) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank.first);
-		if(!ability)
+bool Client::SaveAA()
+{
+	std::vector<CharacterAlternateAbilitiesRepository::CharacterAlternateAbilities> v;
+
+	uint32 aa_points_spent = 0;
+
+	auto e = CharacterAlternateAbilitiesRepository::NewEntity();
+
+	for (auto &rank : aa_ranks) {
+		auto a = zone->GetAlternateAdvancementAbility(rank.first);
+		if (!a) {
 			continue;
+		}
 
-		if(rank.second.first > 0) {
-			AA::Rank *r = ability->GetRankByPointsSpent(rank.second.first);
-
-			if(!r)
+		if (rank.second.first > 0) {
+			auto r = a->GetRankByPointsSpent(rank.second.first);
+			if (!r) {
 				continue;
-
-			spentpoints += r->total_cost;
-
-			if(i == 0) {
-				iquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, aa_id, aa_value, charges)"
-									  " VALUES (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
-			} else {
-				iquery += StringFormat(", (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			}
-			i++;
+
+			aa_points_spent += r->total_cost;
+
+			e.id       = character_id;
+			e.aa_id    = a->first_rank_id;
+			e.aa_value = rank.second.first;
+			e.charges  = rank.second.second;
+
+			v.emplace_back(e);
 		}
 	}
 
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+	m_pp.aapoints_spent = aa_points_spent + m_epp.expended_aa;
 
-	if(iquery.length() > 0) {
-		database.QueryDatabase(iquery);
-	}
-
-	return true;
+	return CharacterAlternateAbilitiesRepository::ReplaceMany(database, v);
 }
 
 void Client::RemoveExpendedAA(int aa_id)
 {
-	database.QueryDatabase(StringFormat("DELETE from `character_alternate_abilities` WHERE `id` = %d and `aa_id` = %d", character_id, aa_id));
+	CharacterAlternateAbilitiesRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`id` = {} AND `aa_id` = {}",
+			CharacterID(),
+			aa_id
+		)
+	);
 }
 
 bool Client::Save(uint8 iCommitNow) {
