@@ -440,7 +440,7 @@ public:
 	bool LoadCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp);
-	bool LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
+	bool LoadCharacterPotionBelt(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp);
 
