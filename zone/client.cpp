@@ -10742,22 +10742,22 @@ void Client::SaveSpells()
 
 void Client::SaveDisciplines()
 {
-	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> character_discs = {};
+	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> v;
 
 	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
 		if (IsValidSpell(m_pp.disciplines.values[index])) {
-			auto discipline = CharacterDisciplinesRepository::NewEntity();
-			discipline.id      = CharacterID();
-			discipline.slot_id = index;
-			discipline.disc_id = m_pp.disciplines.values[index];
-			character_discs.emplace_back(discipline);
+			auto e = CharacterDisciplinesRepository::NewEntity();
+
+			e.id      = CharacterID();
+			e.slot_id = index;
+			e.disc_id = m_pp.disciplines.values[index];
+
+			v.emplace_back(e);
 		}
 	}
 
-	CharacterDisciplinesRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
-
-	if (!character_discs.empty()) {
-		CharacterDisciplinesRepository::InsertMany(database, character_discs);
+	if (!l.empty()) {
+		CharacterDisciplinesRepository::ReplaceMany(database, l);
 	}
 }
 

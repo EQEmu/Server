@@ -5761,7 +5761,7 @@ void Client::UntrainDisc(int slot, bool update_client, bool defer_save)
 	m_pp.disciplines.values[slot] = 0;
 
 	if (!defer_save) {
-		database.DeleteCharacterDisc(CharacterID(), slot);
+		database.DeleteCharacterDiscipline(CharacterID(), slot);
 	}
 
 	if (update_client) {

@@ -424,7 +424,7 @@ public:
 
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 bandolier_id);
-	bool DeleteCharacterDisc(uint32 character_id, uint32 slot_id);
+	bool DeleteCharacterDiscipline(uint32 character_id, uint32 slot_id);
 	bool DeleteCharacterMaterialColor(uint32 character_id);
 	bool DeleteCharacterLeadershipAbilities(uint32 character_id);
 	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slot_id);
@@ -447,7 +447,7 @@ public:
 	bool SaveCharacterBandolier(uint32 character_id, uint8 bandolier_id, uint8 bandolier_slot, uint32 item_id, uint32 icon, const char* bandolier_name);
 	bool SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
-	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
+	bool SaveCharacterDiscipline(uint32 character_id, uint32 slot_id, uint32 disc_id);
 	bool SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
 	bool SaveCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id, uint32 color);

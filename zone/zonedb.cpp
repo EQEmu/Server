@@ -766,24 +766,27 @@ bool ZoneDatabase::LoadCharacterLeadershipAbilities(uint32 character_id, PlayerP
 
 bool ZoneDatabase::LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp){
 
-	auto character_disciplines = CharacterDisciplinesRepository::GetWhere(
+	const auto& l = CharacterDisciplinesRepository::GetWhere(
 		database, fmt::format(
 			"`id` = {} ORDER BY `slot_id`",
 			character_id
 		)
 	);
 
-	if (character_disciplines.empty()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	/* Initialize Disciplines */
-	memset(pp->disciplines.values, 0, (sizeof(pp->disciplines.values[0]) * MAX_PP_DISCIPLINES));
-	for (auto& row : character_disciplines) {
-		if (row.slot_id < MAX_PP_DISCIPLINES && IsValidSpell(row.disc_id)) {
-			pp->disciplines.values[row.slot_id] = row.disc_id;
+	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) { // Initialize Disciplines
+		pp->disciplines.values[slot_id] = 0;
+	}
+
+	for (const auto& e : l) {
+		if (IsValidSpell(e.disc_id) && e.slot_id < MAX_PP_DISCIPLINES) {
+			pp->disciplines.values[e.slot_id] = e.disc_id;
 		}
 	}
+
 	return true;
 }
 
@@ -1018,11 +1021,15 @@ bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint
 	);
 }
 
-bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
-	std::string query = StringFormat("REPLACE INTO `character_disciplines` (id, slot_id, disc_id) VALUES (%u, %u, %u)", character_id, slot_id, disc_id);
-	auto results = QueryDatabase(query);
-	LogDebug("ZoneDatabase::SaveCharacterDisc for character ID: [{}], slot:[{}] disc_id:[{}] done", character_id, slot_id, disc_id);
-	return true;
+bool ZoneDatabase::SaveCharacterDiscipline(uint32 character_id, uint32 slot_id, uint32 disc_id)
+{
+	auto e = CharacterDisciplinesRepository::NewEntity();
+
+	e.id      = character_id;
+	e.slot_id = slot_id;
+	e.disc_id = disc_id;
+
+	return CharacterDisciplinesRepository::ReplaceOne(*this, e);
 }
 
 void ZoneDatabase::SaveCharacterTribute(Client* c)
@@ -1316,10 +1323,16 @@ bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 slot_id)
 	);
 }
 
-bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
-	std::string query = StringFormat("DELETE FROM `character_disciplines` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::DeleteCharacterDiscipline(uint32 character_id, uint32 slot_id)
+{
+	return CharacterDisciplinesRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `slot_id` = {}",
+			character_id,
+			slot_id
+		)
+	);
 }
 
 bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 bandolier_id)
