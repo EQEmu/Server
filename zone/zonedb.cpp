@@ -27,6 +27,7 @@
 #include "../common/repositories/character_leadership_abilities_repository.h"
 #include "../common/repositories/character_material_repository.h"
 #include "../common/repositories/character_memmed_spells_repository.h"
+#include "../common/repositories/character_spells_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -682,35 +683,33 @@ bool ZoneDatabase::LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat(
-		"SELECT					"
-		"slot_id,				"
-		"`spell_id`				"
-		"FROM					"
-		"`character_spells`		"
-		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
-	auto results = database.QueryDatabase(query);
+bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterSpellsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} ORDER BY `slot_id`",
+			character_id
+		)
+	);
 
-	/* Initialize Spells */
-
-	memset(pp->spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
+	memset(pp->spell_book, UINT8_MAX, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
 
 	// We have the ability to block loaded spells by max id on a per-client basis..
 	// but, we do not have to ability to keep players from using older clients after
 	// they have scribed spells on a newer one that exceeds the older one's limit.
 	// Load them all so that server actions are valid..but, nix them in translators.
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		int idx = Strings::ToInt(row[0]);
-		int id = Strings::ToInt(row[1]);
-
-		if (idx < 0 || idx >= EQ::spells::SPELLBOOK_SIZE)
+	for (const auto& e : l) {
+		if (!EQ::ValueWithin(e.slot_id, 0, EQ::spells::SPELLBOOK_SIZE)) {
 			continue;
-		if (id < 3 || id > SPDAT_RECORDS) // 3 ("Summon Corpse") is the first scribable spell in spells_us.txt
-			continue;
+		}
 
-		pp->spell_book[idx] = id;
+		if (!IsValidSpell(e.spell_id)) {
+			continue;
+		}
+
+		pp->spell_book[e.slot_id] = e.spell_id;
 	}
 
 	return true;
@@ -1282,17 +1281,35 @@ bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell
 	);
 }
 
-bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	if (spell_id > SPDAT_RECORDS){ return false; }
-	std::string query = StringFormat("REPLACE INTO `character_spells` (id, slot_id, spell_id) VALUES (%u, %u, %u)", character_id, slot_id, spell_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id)
+{
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	auto e = CharacterSpellsRepository::NewEntity();
+
+	e.id       = character_id;
+	e.slot_id  = slot_id;
+	e.spell_id = spell_id;
+
+	const int replaced = CharacterSpellsRepository::ReplaceOne(*this, e);
+
+	return replaced;
 }
 
-bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
-	std::string query = StringFormat("DELETE FROM `character_spells` WHERE `slot_id` = %u AND `id` = %u", slot_id, character_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 slot_id)
+{
+	const int deleted = CharacterSpellsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `slot_id` = {}",
+			character_id,
+			slot_id
+		)
+	);
+
+	return deleted;
 }
 
 bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
