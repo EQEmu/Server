@@ -541,7 +541,7 @@ void Client::ResetAA() {
 	m_pp.raid_leadership_exp = 0;
 
 	database.DeleteCharacterAAs(CharacterID());
-	database.DeleteCharacterLeadershipAAs(CharacterID());
+	database.DeleteCharacterLeadershipAbilities(CharacterID());
 }
 
 void Client::SendClearAA()

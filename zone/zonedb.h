@@ -426,7 +426,7 @@ public:
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
 	bool DeleteCharacterDisc(uint32 character_id, uint32 slot_id);
 	bool DeleteCharacterDye(uint32 character_id);
-	bool DeleteCharacterLeadershipAAs(uint32 character_id);
+	bool DeleteCharacterLeadershipAbilities(uint32 character_id);
 	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 
@@ -437,7 +437,7 @@ public:
 	bool LoadCharacterDisciplines(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterFactionValues(uint32 character_id, faction_map & val_list);
 	bool LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp);
-	bool LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+	bool LoadCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterMemmedSpells(uint32 character_id, PlayerProfile_Struct* pp);
 	bool LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct* pp);
@@ -450,7 +450,7 @@ public:
 	bool SaveCharacterData(Client* c, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp);
 	bool SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id);
 	bool SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value);
-	bool SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp);
+	bool SaveCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp);
 	bool SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color);
 	bool SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon);

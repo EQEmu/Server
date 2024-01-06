@@ -4599,7 +4599,7 @@ void Client::ClearGroupAAs() {
 	m_pp.raid_leadership_exp = 0;
 
 	Save();
-	database.SaveCharacterLeadershipAA(CharacterID(), &m_pp);
+	database.SaveCharacterLeadershipAbilities(CharacterID(), &m_pp);
 }
 
 void Client::UpdateGroupAAs(int32 points, uint32 type) {
