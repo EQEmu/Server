@@ -425,7 +425,7 @@ public:
 	bool DeleteCharacterAAs(uint32 character_id);
 	bool DeleteCharacterBandolier(uint32 character_id, uint32 band_id);
 	bool DeleteCharacterDisc(uint32 character_id, uint32 slot_id);
-	bool DeleteCharacterDye(uint32 character_id);
+	bool DeleteCharacterMaterialColor(uint32 character_id);
 	bool DeleteCharacterLeadershipAbilities(uint32 character_id);
 	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
