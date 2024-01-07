@@ -62,6 +62,11 @@ namespace EQ
 	class ItemInstance;
 }
 
+namespace DeathSave {
+    constexpr uint32 HP300  = 1;
+    constexpr uint32 HP8000 = 2;
+}
+
 enum class eSpecialAttacks : int {
 	None,
 	Rampage,

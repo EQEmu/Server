@@ -4037,7 +4037,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			}
 		}
 		else {
-			if (GetHPRatio() < 16 and previous_hp_ratio >= 16) {
+			if (GetHPRatio() < 16 && previous_hp_ratio >= 16) {
 				TryDeathSave();
 			}
 		}
