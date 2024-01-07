@@ -1006,16 +1006,14 @@ bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value)
 {
-	auto e = CharacterSkillsRepository::NewEntity();
-
-	e.id       = character_id;
-	e.skill_id = skill_id;
-	e.value    = value;
-
-	const int replaced = CharacterSkillsRepository::ReplaceOne(*this, e);
-
-	LogDebug("ZoneDatabase::SaveCharacterSkill for character ID: [{}], skill_id:[{}] value:[{}] done", character_id, skill_id, value);
-	return replaced;
+	return CharacterSkillsRepository::ReplaceOne(
+		*this,
+		CharacterSkillsRepository::CharacterSkills{
+			.id = character_id,
+			.skill_id = static_cast<uint16_t>(skill_id),
+			.value = static_cast<uint16_t>(value)
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterDisc(uint32 character_id, uint32 slot_id, uint32 disc_id){
