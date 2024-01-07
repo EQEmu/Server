@@ -918,14 +918,7 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-```cpp
-namespace DeathSave {
-	constexpr uint32 HP300  = 1;
-	constexpr uint32 HP8000 = 2;
-}
-```
-
-	void ZoneDatabase::LoadCharacterTribute(Client* c){
+void ZoneDatabase::LoadCharacterTribute(Client* c){
 	const auto& l = CharacterTributeRepository::GetWhere(database, fmt::format("character_id = {}", c->CharacterID()));
 
 	for (auto& t : c->GetPP().tributes) {
