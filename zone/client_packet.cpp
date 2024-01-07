@@ -4887,8 +4887,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			CheckIncreaseSkill(EQ::skills::SkillTracking, nullptr, -20);
 	}
 
-	/* Break Hide if moving without sneaking and set rewind timer if moved */
 	if (cy != m_Position.y || cx != m_Position.x) {
+		// End trader mode if we move
+		if(Trader) {
+			Trader_EndTrader();
+		}
+
+		/* Break Hide if moving without sneaking and set rewind timer if moved */
 		if ((hidden || improved_hidden) && !sneaking) {
 			hidden = false;
 			improved_hidden = false;
