@@ -3291,6 +3291,25 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		sp1_value = CalcSpellEffectValue(spellid1, i, caster_level1);
 		sp2_value = CalcSpellEffectValue(spellid2, i, caster_level2);
 
+		// Spells like SoW won't stack if a snare effect is already in place.
+		if (effect2 == SE_MovementSpeed && effect1 == SE_MovementSpeed) {
+			if (sp1_value < 0 && sp2_value > 0) {
+				return -1;
+			} else if (sp2_value < 0 && sp1_value > 0) {
+				continue;
+			}
+		}
+
+		// DoTs won't overwrite regeneration but will block regeneration spells.
+		if (spells[spellid1].buff_duration > 0 && spells[spellid2].buff_duration > 0 &&
+			effect1 == SE_CurrentHP && effect2 == SE_CurrentHP) {
+			if (!sp1_detrimental && sp2_detrimental) {
+				continue;
+			} else if (sp1_detrimental && !sp2_detrimental) {
+				return -1;
+			}
+		}
+
 		// some spells are hard to compare just on value. attack speed spells
 		// have a value that's a percentage for instance
 		if
