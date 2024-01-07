@@ -1607,7 +1607,7 @@ public:
 	void SetAccountFlag(const std::string& flag, const std::string& value);
 	std::string GetAccountFlag(const std::string& flag);
 	std::vector<std::string> GetAccountFlags();
-	void SetGMStatus(int16 new_status);
+	void SetGMStatus(int new_status);
 	void Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto_consume);
 	void PlayMP3(const char* fname);
 	void ExpeditionSay(const char *str, int ExpID);

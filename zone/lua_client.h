@@ -439,7 +439,7 @@ public:
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
-	void SetGMStatus(int16 new_status);
+	void SetGMStatus(int new_status);
 	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
