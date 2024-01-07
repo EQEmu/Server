@@ -5134,8 +5134,6 @@ struct GroupMakeLeader_Struct
 //ex for a blank crowns window you would send:
 //999999|1|999999|0
 //any items come after in much the same way adventure merchant items do except there is no theme included
-#define ALT_CURRENCY_OP_POPULATE 8
-#define ALT_CURRENCY_OP_UPDATE 7
 
 //Server -> Client
 //Populates the initial Alternate Currency Window

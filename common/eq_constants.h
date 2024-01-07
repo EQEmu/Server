@@ -727,6 +727,11 @@ namespace BuffEffectType {
 	constexpr uint8 InverseBuff = 4;
 }
 
+namespace AlternateCurrencyMode {
+	constexpr uint32 Update   = 7;
+	constexpr uint32 Populate = 8;
+}
+
 typedef enum {
 	FilterNone = 0,
 	FilterGuildChat = 1,		//0=hide, 1=show

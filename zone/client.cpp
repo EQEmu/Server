@@ -6564,27 +6564,33 @@ void Client::RemoveFromInstance(uint16 instance_id)
 
 void Client::SendAltCurrencies() {
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
-		uint32 count = zone->AlternateCurrencies.size();
-		if(count == 0) {
+		const uint32 currency_count = zone->AlternateCurrencies.size();
+		if (!currency_count) {
 			return;
 		}
+			
+		auto outapp = new EQApplicationPacket(
+			OP_AltCurrency,
+			sizeof(AltCurrencyPopulate_Struct) +
+			sizeof(AltCurrencyPopulateEntry_Struct) * currency_count
+		);
 
-		auto outapp =
-		    new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyPopulate_Struct) +
-								sizeof(AltCurrencyPopulateEntry_Struct) * count);
-		AltCurrencyPopulate_Struct *altc = (AltCurrencyPopulate_Struct*)outapp->pBuffer;
-		altc->opcode = ALT_CURRENCY_OP_POPULATE;
-		altc->count = count;
+		auto a = (AltCurrencyPopulate_Struct*) outapp->pBuffer;
+
+		a->opcode = AlternateCurrencyMode::Populate;
+		a->count  = currency_count;
 
 		uint32 currency_id = 0;
-		for (const auto& alternate_currency : zone->AlternateCurrencies) {
-			const EQ::ItemData* item = database.GetItem(alternate_currency.item_id);
-			altc->entries[currency_id].currency_number = alternate_currency.id;
-			altc->entries[currency_id].unknown00 = 1;
-			altc->entries[currency_id].currency_number2 = alternate_currency.id;
-			altc->entries[currency_id].item_id = alternate_currency.item_id;
-			altc->entries[currency_id].item_icon = item ? item->Icon : 1000;
-			altc->entries[currency_id].stack_size = item ? item->StackSize : 1000;
+		for (const auto& c : zone->AlternateCurrencies) {
+			const auto* item = database.GetItem(c.item_id);
+
+			a->entries[currency_id].currency_number  = c.id;
+			a->entries[currency_id].unknown00        = 1;
+			a->entries[currency_id].currency_number2 = c.id;
+			a->entries[currency_id].item_id          = c.item_id;
+			a->entries[currency_id].item_icon        = item ? item->Icon : 1000;
+			a->entries[currency_id].stack_size       = item ? item->StackSize : 1000;
+
 			currency_id++;
 		}
 
@@ -6681,11 +6687,8 @@ void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 uint32 Client::GetAlternateCurrencyValue(uint32 currency_id) const
 {
 	auto iter = alternate_currency.find(currency_id);
-	if(iter == alternate_currency.end()) {
-		return 0;
-	} else {
-		return (*iter).second;
-	}
+
+	return iter == alternate_currency.end() ? 0 : (*iter).second;
 }
 
 void Client::ProcessAlternateCurrencyQueue() {
