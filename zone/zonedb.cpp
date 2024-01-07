@@ -1075,26 +1075,24 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color)
+bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id, uint32 color)
 {
 	const uint8 red   = (color & 0x00FF0000) >> 16;
 	const uint8 green = (color & 0x0000FF00) >> 8;
 	const uint8 blue  = (color & 0x000000FF);
 
-	auto e = CharacterMaterialRepository::NewEntity();
-
-	e.id       = character_id;
-	e.slot     = slot_id;
-	e.blue     = blue;
-	e.green    = green;
-	e.red      = red;
-	e.use_tint = UINT8_MAX;
-	e.color    = color;
-
-	const int replaced = CharacterMaterialRepository::ReplaceOne(*this, e);
-
-	LogDebug("ZoneDatabase::SaveCharacterMaterialColor for character ID: [{}], slot_id: [{}] color: [{}] done", character_id, slot_id, color);
-	return replaced;
+	return CharacterMaterialRepository::ReplaceOne(
+		*this,
+		CharacterMaterialRepository::CharacterMaterial{
+			.id       = character_id,
+			.slot     = slot_id,
+			.blue     = blue,
+			.green    = green,
+			.red      = red,
+			.use_tint = UINT8_MAX,
+			.color    = color
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
