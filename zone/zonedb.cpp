@@ -23,6 +23,7 @@
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
+#include "../common/repositories/character_leadership_abilities_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -832,13 +833,20 @@ bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT slot, `rank` FROM character_leadership_abilities WHERE `id` = %u", character_id);
-	auto results = database.QueryDatabase(query); uint32 slot = 0;
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		slot = Strings::ToInt(row[0]);
-		pp->leader_abilities.ranks[slot] = Strings::ToInt(row[1]);
+bool ZoneDatabase::LoadCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterLeadershipAbilitiesRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {}",
+			character_id
+		)
+	);
+
+	for (const auto& e : l) {
+		pp->leader_abilities.ranks[e.slot] = e.rank;
 	}
+
 	return true;
 }
 
@@ -1131,19 +1139,23 @@ bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id,
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_Struct* pp){
-	uint8 first_entry = 0; std::string query = "";
-	for (int i = 0; i < MAX_LEADERSHIP_AA_ARRAY; i++){
-		if (pp->leader_abilities.ranks[i] > 0){
-			if (first_entry != 1){
-				query = StringFormat("REPLACE INTO `character_leadership_abilities` (id, slot, `rank`) VALUES (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
-				first_entry = 1;
-			}
-			query = query + StringFormat(", (%i, %u, %u)", character_id, i, pp->leader_abilities.ranks[i]);
+bool ZoneDatabase::SaveCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	std::vector<CharacterLeadershipAbilitiesRepository::CharacterLeadershipAbilities> v;
+
+	auto e = CharacterLeadershipAbilitiesRepository::NewEntity();
+
+	for (int slot_id = 0; slot_id < MAX_LEADERSHIP_AA_ARRAY; slot_id++) {
+		if (pp->leader_abilities.ranks[slot_id] > 0) {
+			e.id   = character_id;
+			e.slot = slot_id;
+			e.rank = pp->leader_abilities.ranks[slot_id];
+
+			v.emplace_back(e);
 		}
 	}
-	auto results = QueryDatabase(query);
-	return true;
+
+	return CharacterLeadershipAbilitiesRepository::ReplaceMany(*this, v);
 }
 
 bool ZoneDatabase::SaveCharacterData(
@@ -1546,10 +1558,9 @@ bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 band_id)
 	return true;
 }
 
-bool ZoneDatabase::DeleteCharacterLeadershipAAs(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_leadership_abilities` WHERE `id` = %u", character_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::DeleteCharacterLeadershipAbilities(uint32 character_id)
+{
+	return CharacterLeadershipAbilitiesRepository::DeleteOne(*this, character_id);
 }
 
 bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id){

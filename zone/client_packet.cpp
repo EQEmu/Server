@@ -1277,7 +1277,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
 	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
-	database.LoadCharacterLeadershipAA(cid, &m_pp); /* Load Character Leadership AA's */
+	database.LoadCharacterLeadershipAbilities(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(this); /* Load CharacterTribute */
 
 	// this pattern is strange
@@ -11681,7 +11681,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 		m_pp.raid_leadership_points -= cost;
 		m_pp.leader_abilities.ranks[aaid]++;
 
-		database.SaveCharacterLeadershipAA(CharacterID(), &m_pp);
+		database.SaveCharacterLeadershipAbilities(CharacterID(), &m_pp);
 	}
 	else {
 		//it is a group ability.
@@ -11694,7 +11694,7 @@ void Client::Handle_OP_PurchaseLeadershipAA(const EQApplicationPacket *app)
 		m_pp.group_leadership_points -= cost;
 		m_pp.leader_abilities.ranks[aaid]++;
 
-		database.SaveCharacterLeadershipAA(CharacterID(), &m_pp);
+		database.SaveCharacterLeadershipAbilities(CharacterID(), &m_pp);
 	}
 
 	//success, send them an update
