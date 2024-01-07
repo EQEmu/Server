@@ -9699,7 +9699,7 @@ void Client::BreakSneakWhenCastOn(Mob *caster, bool IsResisted)
 
 void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 {
-	if (GetFeigned()){
+	if (GetFeigned()) {
 		int chance = spellbonuses.FeignedCastOnChance + itembonuses.FeignedCastOnChance + aabonuses.FeignedCastOnChance;
 
 		if (IsResisted) {
