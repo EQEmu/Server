@@ -64,6 +64,7 @@
 ### Fixes
 
 * Add locations where melee can be bound outside of a city. ([#3887](https://github.com/EQEmu/Server/pull/3887)) @fryguy503 2024-01-07
+* Amplification should not benefit from instrument mods ([#3898](https://github.com/EQEmu/Server/pull/3898)) @fryguy503 2024-01-07
 * Bard Caster Level Fixes ([#3883](https://github.com/EQEmu/Server/pull/3883)) @fryguy503 2024-01-07
 * Buff Sync ([#3896](https://github.com/EQEmu/Server/pull/3896)) @fryguy503 2024-01-07
 * Cancel Magic SE fix ([#3890](https://github.com/EQEmu/Server/pull/3890)) @fryguy503 2024-01-07
