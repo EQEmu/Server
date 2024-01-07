@@ -463,6 +463,7 @@ RULE_INT(Spells, DefensiveProcPenaltyLevelGap, 6, "Defensive Proc Penalty Level 
 RULE_REAL(Spells, DefensiveProcPenaltyLevelGapModifier, 10.0f, "Defensive Proc Penalty Level Gap Modifier where procs start losing their proc rate at defined % after RuleI(Spells, DefensiveProcLevelGap) level difference")
 RULE_BOOL(Spells, DOTBonusDamageSplitOverDuration, true, "Disable to have Damage Over Time total bonus damage added to each tick instead of divided across duration")
 RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal Over Time total bonus healing added to each tick instead of divided across duration")
+RULE_BOOL(Spells, UseLegacyFizzleCode, false, "Enable will turn on the legacy fizzle code which is far stricter and more accurate to 2001/2002 testing.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
