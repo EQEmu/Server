@@ -1814,14 +1814,14 @@ void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 	}
 }
 
-Client *EntityList::GetClientByName(const char *checkname)
+Client *EntityList::GetClientByName(const char* name)
 {
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (strcasecmp(it->second->GetName(), checkname) == 0)
-			return it->second;
-		++it;
+	for (const auto& e : client_list) {
+		if (e.second && Strings::EqualFold(e.second->GetName(), name)) {
+			return e.second;
+		}
 	}
+
 	return nullptr;
 }
 
