@@ -31,6 +31,7 @@
 #include "../common/repositories/character_skills_repository.h"
 #include "../common/repositories/character_potionbelt_repository.h"
 #include "../common/repositories/character_bandolier_repository.h"
+#include "../common/repositories/character_currency_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -808,47 +809,30 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat(
-		"SELECT                  "
-		"platinum,               "
-		"gold,                   "
-		"silver,                 "
-		"copper,                 "
-		"platinum_bank,          "
-		"gold_bank,              "
-		"silver_bank,            "
-		"copper_bank,            "
-		"platinum_cursor,        "
-		"gold_cursor,            "
-		"silver_cursor,          "
-		"copper_cursor,          "
-		"radiant_crystals,       "
-		"career_radiant_crystals,"
-		"ebon_crystals,          "
-		"career_ebon_crystals    "
-		"FROM                    "
-		"character_currency      "
-		"WHERE `id` = %i         ", character_id);
-	auto results = database.QueryDatabase(query);
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		pp->platinum = Strings::ToInt(row[0]);
-		pp->gold = Strings::ToInt(row[1]);
-		pp->silver = Strings::ToInt(row[2]);
-		pp->copper = Strings::ToInt(row[3]);
-		pp->platinum_bank = Strings::ToInt(row[4]);
-		pp->gold_bank = Strings::ToInt(row[5]);
-		pp->silver_bank = Strings::ToInt(row[6]);
-		pp->copper_bank = Strings::ToInt(row[7]);
-		pp->platinum_cursor = Strings::ToInt(row[8]);
-		pp->gold_cursor = Strings::ToInt(row[9]);
-		pp->silver_cursor = Strings::ToInt(row[10]);
-		pp->copper_cursor = Strings::ToInt(row[11]);
-		pp->currentRadCrystals = Strings::ToInt(row[12]);
-		pp->careerRadCrystals = Strings::ToInt(row[13]);
-		pp->currentEbonCrystals = Strings::ToInt(row[14]);
-		pp->careerEbonCrystals = Strings::ToInt(row[15]);
+bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& e = CharacterCurrencyRepository::FindOne(*this, character_id);
+	if (!e.id) {
+		return false;
 	}
+
+	pp->platinum            = e.platinum;
+	pp->platinum_bank       = e.platinum_bank;
+	pp->platinum_cursor     = e.platinum_cursor;
+	pp->gold                = e.gold;
+	pp->gold_bank           = e.gold_bank;
+	pp->gold_cursor         = e.gold_cursor;
+	pp->silver              = e.silver;
+	pp->silver_bank         = e.silver_bank;
+	pp->silver_cursor       = e.silver_cursor;
+	pp->copper              = e.copper;
+	pp->copper_bank         = e.copper_bank;
+	pp->copper_cursor       = e.copper_cursor;
+	pp->currentRadCrystals  = e.radiant_crystals;
+	pp->careerRadCrystals   = e.career_radiant_crystals;
+	pp->currentEbonCrystals = e.ebon_crystals;
+	pp->careerEbonCrystals  = e.career_ebon_crystals;
+
 	return true;
 }
 
@@ -1258,45 +1242,34 @@ bool ZoneDatabase::SaveCharacterData(
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp){
-	if (pp->copper < 0) { pp->copper = 0; }
-	if (pp->silver < 0) { pp->silver = 0; }
-	if (pp->gold < 0) { pp->gold = 0; }
-	if (pp->platinum < 0) { pp->platinum = 0; }
-	if (pp->copper_bank < 0) { pp->copper_bank = 0; }
-	if (pp->silver_bank < 0) { pp->silver_bank = 0; }
-	if (pp->gold_bank < 0) { pp->gold_bank = 0; }
-	if (pp->platinum_bank < 0) { pp->platinum_bank = 0; }
-	if (pp->platinum_cursor < 0) { pp->platinum_cursor = 0; }
-	if (pp->gold_cursor < 0) { pp->gold_cursor = 0; }
-	if (pp->silver_cursor < 0) { pp->silver_cursor = 0; }
-	if (pp->copper_cursor < 0) { pp->copper_cursor = 0; }
-	std::string query = StringFormat(
-		"REPLACE INTO `character_currency` (id, platinum, gold, silver, copper,"
-		"platinum_bank, gold_bank, silver_bank, copper_bank,"
-		"platinum_cursor, gold_cursor, silver_cursor, copper_cursor, "
-		"radiant_crystals, career_radiant_crystals, ebon_crystals, career_ebon_crystals)"
-		"VALUES (%u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u)",
-		character_id,
-		pp->platinum,
-		pp->gold,
-		pp->silver,
-		pp->copper,
-		pp->platinum_bank,
-		pp->gold_bank,
-		pp->silver_bank,
-		pp->copper_bank,
-		pp->platinum_cursor,
-		pp->gold_cursor,
-		pp->silver_cursor,
-		pp->copper_cursor,
-		pp->currentRadCrystals,
-		pp->careerRadCrystals,
-		pp->currentEbonCrystals,
-		pp->careerEbonCrystals);
-	auto results = database.QueryDatabase(query);
-	LogDebug("Saving Currency for character ID: [{}], done", character_id);
-	return true;
+bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	ZeroPlayerProfileCurrency(pp);
+
+	auto e = CharacterCurrencyRepository::NewEntity();
+
+	return CharacterCurrencyRepository::ReplaceOne(
+		*this,
+		CharacterCurrencyRepository::CharacterCurrency{
+			.id                      = character_id,
+			.platinum                = static_cast<uint32_t>(pp->platinum),
+			.gold                    = static_cast<uint32_t>(pp->gold),
+			.silver                  = static_cast<uint32_t>(pp->silver),
+			.copper                  = static_cast<uint32_t>(pp->copper),
+			.platinum_bank           = static_cast<uint32_t>(pp->platinum_bank),
+			.gold_bank               = static_cast<uint32_t>(pp->gold_bank),
+			.silver_bank             = static_cast<uint32_t>(pp->silver_bank),
+			.copper_bank             = static_cast<uint32_t>(pp->copper_bank),
+			.platinum_cursor         = static_cast<uint32_t>(pp->platinum_cursor),
+			.gold_cursor             = static_cast<uint32_t>(pp->gold_cursor),
+			.silver_cursor           = static_cast<uint32_t>(pp->silver_cursor),
+			.copper_cursor           = static_cast<uint32_t>(pp->copper_cursor),
+			.radiant_crystals        = pp->currentRadCrystals,
+			.career_radiant_crystals = pp->careerRadCrystals,
+			.ebon_crystals           = pp->currentEbonCrystals,
+			.career_ebon_crystals    = pp->careerEbonCrystals
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges){
@@ -4520,5 +4493,56 @@ void ZoneDatabase::SaveCharacterBinds(Client *c)
 		CharacterBindRepository::DeleteWhere(database, fmt::format("id = {}", c->CharacterID()));
 		// save new binds
 		CharacterBindRepository::InsertMany(database, binds);
+	}
+}
+
+void ZoneDatabase::ZeroPlayerProfileCurrency(PlayerProfile_Struct* pp)
+{
+	if (pp->copper < 0) {
+		pp->copper = 0;
+	}
+
+	if (pp->silver < 0) {
+		pp->silver = 0;
+	}
+
+	if (pp->gold < 0) {
+		pp->gold = 0;
+	}
+
+	if (pp->platinum < 0) {
+		pp->platinum = 0;
+	}
+
+	if (pp->copper_bank < 0) {
+		pp->copper_bank = 0;
+	}
+
+	if (pp->silver_bank < 0) {
+		pp->silver_bank = 0;
+	}
+
+	if (pp->gold_bank < 0) {
+		pp->gold_bank = 0;
+	}
+
+	if (pp->platinum_bank < 0) {
+		pp->platinum_bank = 0;
+	}
+
+	if (pp->platinum_cursor < 0) {
+		pp->platinum_cursor = 0;
+	}
+
+	if (pp->gold_cursor < 0) {
+		pp->gold_cursor = 0;
+	}
+
+	if (pp->silver_cursor < 0) {
+		pp->silver_cursor = 0;
+	}
+
+	if (pp->copper_cursor < 0) {
+		pp->copper_cursor = 0;
 	}
 }
