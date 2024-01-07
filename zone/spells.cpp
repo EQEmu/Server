@@ -5187,14 +5187,14 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Add our level, resist and -spell resist modifier to our roll chance
 	resist_chance += level_mod;
-	int softCapLvlMod;
+	int soft_cap_level_modifier;
 
 	if (GetLevel() > 60) {
-		softCapLvlMod = (GetLevel() - 60) * 10;
+		soft_cap_level_modifier = (GetLevel() - 60) * 10;
 	}
 
-	if ((target_resist + resist_modifier) > (RuleI(Spells, SpellResistSoftCap) + softCapLvlMod)) {
-		resist_chance += RuleI(Spells, SpellResistSoftCap) + softCapLvlMod;
+	if ((target_resist + resist_modifier) > (RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier)) {
+		resist_chance += RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier;
 	} else {
 		resist_chance += target_resist + resist_modifier;
 	}
