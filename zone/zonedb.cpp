@@ -1272,15 +1272,14 @@ bool ZoneDatabase::SaveCharacterMemorizedSpell(uint32 character_id, uint32 spell
 		return false;
 	}
 
-	auto e = CharacterMemmedSpellsRepository::NewEntity();
-
-	e.id       = character_id;
-	e.slot_id  = slot_id;
-	e.spell_id = spell_id;
-
-	const int replaced = CharacterMemmedSpellsRepository::ReplaceOne(*this, e);
-
-	return replaced;
+	return CharacterMemmedSpellsRepository::ReplaceOne(
+		*this,
+		CharacterMemmedSpellsRepository::CharacterMemmedSpells{
+			.id = character_id,
+			.slot_id = static_cast<uint16_t>(slot_id),
+			.spell_id = static_cast<uint16_t>(spell_id)
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
@@ -1326,7 +1325,7 @@ bool ZoneDatabase::DeleteCharacterMaterialColor(uint32 character_id)
 
 bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slot_id)
 {
-	const int deleted = CharacterMemmedSpellsRepository::DeleteWhere(
+	return CharacterMemmedSpellsRepository::DeleteWhere(
 		*this,
 		fmt::format(
 			"`id` = {} AND `slot_id` = {}",
@@ -1334,12 +1333,6 @@ bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slo
 			slot_id
 		)
 	);
-
-	if (!deleted) {
-		return false;
-	}
-
-	return true;
 }
 
 bool ZoneDatabase::NoRentExpired(const char* name){
