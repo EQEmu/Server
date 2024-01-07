@@ -572,12 +572,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
-							if(IsClient())
+							if (IsClient()) {
 								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
-							else
+							} else {
 								GMMove(x, y, z, heading);
-					}
-					else {
+							}
+
+							if (RuleB(Spells, EvacClearAggroInSameZone)) {
+								entity_list.ClearAggro(this);
+							}
+					} else {
 #ifdef SPELL_EFFECT_SPAM
 						LogDebug("Succor/Evacuation Spell To Another Zone");
 #endif
@@ -1513,6 +1517,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				int wipechance = 0;
+
+				if (RuleB(Spells, EvacClearAggroInSameZone) && !wipechance && IsClient()) {
+					entity_list.ClearAggro(this);
+				}
 
 				if (caster) {
 					wipechance = caster->GetMemoryBlurChance(effect_value);
