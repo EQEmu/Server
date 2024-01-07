@@ -681,8 +681,11 @@ void Client::CompleteConnect()
 				break;
 			}
 			case SE_SummonHorse: {
-				SummonHorse(buffs[j1].spellid);
-				//hasmount = true;	//this was false, is that the correct thing?
+				if (RuleB(Character, PreventMountsFromZoning)) {
+					BuffFadeByEffect(SE_SummonHorse);
+				} else {
+					SummonHorse(buffs[j1].spellid);
+				}
 				break;
 			}
 			case SE_Silence:
