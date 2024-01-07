@@ -466,6 +466,7 @@ RULE_INT(Spells, DefensiveProcPenaltyLevelGap, 6, "Defensive Proc Penalty Level 
 RULE_REAL(Spells, DefensiveProcPenaltyLevelGapModifier, 10.0f, "Defensive Proc Penalty Level Gap Modifier where procs start losing their proc rate at defined % after RuleI(Spells, DefensiveProcLevelGap) level difference")
 RULE_BOOL(Spells, DOTBonusDamageSplitOverDuration, true, "Disable to have Damage Over Time total bonus damage added to each tick instead of divided across duration")
 RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal Over Time total bonus healing added to each tick instead of divided across duration")
+RULE_BOOL(Spells, RequireMnemonicRetention, false, "Enabling will require spell slots 9-12 to have the appropriate Mnemonic Retention AA learned.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
