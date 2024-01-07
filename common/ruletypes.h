@@ -470,6 +470,7 @@ RULE_REAL(Spells, DefensiveProcPenaltyLevelGapModifier, 10.0f, "Defensive Proc P
 RULE_BOOL(Spells, DOTBonusDamageSplitOverDuration, true, "Disable to have Damage Over Time total bonus damage added to each tick instead of divided across duration")
 RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal Over Time total bonus healing added to each tick instead of divided across duration")
 RULE_BOOL(Spells, UseLegacyFizzleCode, false, "Enable will turn on the legacy fizzle code which is far stricter and more accurate to 2001/2002 testing.")
+RULE_BOOL(Spells, LegacyManaburn, false, "Enable to have the legacy manaburn system from 2003 and earlier.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
