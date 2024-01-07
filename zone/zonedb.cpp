@@ -3280,13 +3280,14 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 
 void ZoneDatabase::UpdateItemRecast(uint32 character_id, uint32 recast_type, uint32 timestamp)
 {
-	auto e = CharacterItemRecastRepository::NewEntity();
-
-	e.id          = character_id;
-	e.recast_type = recast_type;
-	e.timestamp   = timestamp;
-
-	CharacterItemRecastRepository::ReplaceOne(*this, e);
+	CharacterItemRecastRepository::ReplaceOne(
+		*this,
+		CharacterItemRecastRepository::CharacterItemRecast{
+			.id = character_id,
+			.recast_type = recast_type,
+			.timestamp = timestamp,
+		}
+	);
 }
 
 void ZoneDatabase::DeleteItemRecast(uint32 character_id, uint32 recast_type)
