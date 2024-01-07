@@ -3545,14 +3545,20 @@ void EntityList::HalveAggro(Mob *who)
 }
 
 //removes "targ" from all hate lists, including feigned, in the zone
-void EntityList::ClearAggro(Mob* targ)
+void EntityList::ClearAggro(Mob* targ, bool clear_caster_id)
 {
 	Client *c = nullptr;
+
 	if (targ->IsClient()) {
 		c = targ->CastToClient();
 	}
+
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
+		if (clear_caster_id) {
+			it->second->BuffDetachCaster(targ);
+		}
+
 		if (it->second->CheckAggro(targ)) {
 			if (c) {
 				c->RemoveXTarget(it->second, false);

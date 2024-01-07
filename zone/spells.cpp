@@ -4843,6 +4843,26 @@ bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
 	return false;
 }
 
+void Mob::BuffDetachCaster(Mob *caster) {
+	if (!caster) {
+		return;
+	}
+
+	int buff_count = GetMaxTotalSlots();
+	for (int j = 0; j < buff_count; j++) {
+		if (buffs[j].spellid != SPELL_UNKNOWN) {
+			if (IsDetrimentalSpell(buffs[j].spellid)) {
+				//this is a pretty terrible way to do this but
+				//there really isn't another way till I rewrite the basics
+				Mob* c = entity_list.GetMob(buffs[j].casterid);
+				if (c && c == caster) {
+					buffs[j].casterid = 0;
+				}
+			}
+		}
+	}
+}
+
 // checks if 'this' can be affected by spell_id from caster
 // returns true if the spell should fail, false otherwise
 bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
