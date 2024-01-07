@@ -4329,6 +4329,14 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
+	if (RuleB(Spells, RequireMnemonicRetention)) {
+		if (EQ::ValueWithin(castspell->slot, 8, 11) && GetAA(aaMnemonicRetention) < (castspell->slot - 7)) {
+			InterruptSpell(castspell->spell_id);
+			Message(Chat::Red, "You do not have the required AA to use this spell slot.");
+			return;
+		}
+	}
+
 	/* Memorized Spell */
 	if (m_pp.mem_spells[castspell->slot] && m_pp.mem_spells[castspell->slot] == castspell->spell_id) {
 		uint16 spell_to_cast = 0;
