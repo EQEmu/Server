@@ -4198,7 +4198,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 		a->target = GetID();
 
-		if (attacker == nullptr) {
+		if (!attacker) {
 			a->source = 0;
 		} else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe()) {
 			a->source = 0;
@@ -4225,11 +4225,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
 
 			if (RuleR(Combat, MeleePushForceClient) && IsClient()) {
-				a->force += a->force * RuleR(Combat, MeleePushForceClient);
+				a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
 			}
 
 			if (RuleR(Combat, MeleePushForcePet) && IsPet()) {
-				a->force += a->force * RuleR(Combat, MeleePushForcePet);
+				a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
 			}
 
 			if (IsNPC()) {
