@@ -573,9 +573,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
 						if (IsClient()) {
-							// break charmed pets before moving to not poof pet (exploitable otherwise)
 							if (HasPet()) {
-								if (GetPet()->IsCharmed()) {
+								if (RuleB(Spells, EvacClearCharmPet) && GetPet()->IsCharmed()) {
 									GetPet()->BuffFadeByEffect(SE_Charm);
 								}
 							}
@@ -2221,7 +2220,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						// clear aggro when summoned in zone and further than aggro clear distance rule.
 						if (RuleR(Spells, CallOfTheHeroAggroClearDist) == 0 || caster->CalculateDistance(GetX(), GetY(), GetZ()) >= RuleR(Spells, CallOfTheHeroAggroClearDist)) {
-							entity_list.ClearAggro(this, true);
+							if (RuleB(Spells, EvacClearCharmPet)) {
+								entity_list.ClearAggro(this, true);
+							} else {
+								entity_list.ClearAggro(this);
+							}
 						}
 					} else if (!RuleB(Combat, SummonMeleeRange) && caster->GetZoneID() == GetZoneID() && caster->CombatRange(this)) {
 						break;

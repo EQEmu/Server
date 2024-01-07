@@ -474,6 +474,7 @@ RULE_BOOL(Spells, LegacyManaburn, false, "Enable to have the legacy manaburn sys
 RULE_BOOL(Spells, EvacClearAggroInSameZone, false, "Enable to clear aggro on clients when evacing in same zone.")
 RULE_BOOL(Spells, CharmAggroOverLevel, false, "Enabling this rule will cause Charm casts over level to show resisted and cause aggro. Early EQ style.")
 RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell slots 9-12 to have the appropriate Mnemonic Retention AA learned.")
+RULE_BOOL(Spells, EvacClearCharmPet, false, "Enable to have evac in zone clear charm from charm pets and detach buffs.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
