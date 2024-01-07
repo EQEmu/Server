@@ -5188,7 +5188,6 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	float hp_limit = 10.0f;
-
 	auto fb_hp_limit = std::max(
 		{
 			aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
@@ -5200,20 +5199,21 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 	if (fb_hp_limit) {
 		hp_limit = fb_hp_limit/10.0f;
 	}
-	if (defender && !defender->IsClient() && defender->GetHPRatio() < hp_limit) {
 
-		uint32 FB_Dmg =
+	if (defender && !defender->IsClient() && defender->GetHPRatio() < hp_limit) {
+		uint32 finishing_blow_damage =
 				   aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG];
 
-		uint32 FB_Level = 0;
-		FB_Level = aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
-		if (FB_Level < spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX])
-			FB_Level = spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
-		else if (FB_Level < itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX])
-			FB_Level = itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		uint32 finishing_blow_level = 0;
+		finishing_blow_level = aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		if (finishing_blow_level < spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]) {
+			finishing_blow_level = spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		} else if (finishing_blow_level < itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]) {
+			finishing_blow_level = itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		}
 
 		// modern AA description says rank 1 (500) is 50% chance
-		int ProcChance = (
+		int proc_chance = (
 			aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
 			itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
 			spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE]
@@ -5224,10 +5224,10 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 				(RuleB(Combat, FinishingBlowOnlyWhenFleeing) && !defender->currently_fleeing) ||
 				!RuleB(Combat, FinishingBlowOnlyWhenFleeing)
 			) &&
-			FB_Level && 
-			FB_Dmg && 
-			defender->GetLevel() <= FB_Level &&
-			ProcChance >= zone->random.Int(1, 1000)
+			finishing_blow_level && 
+			finishing_blow_damage && 
+			defender->GetLevel() <= finishing_blow_level &&
+			proc_chance >= zone->random.Int(1, 1000)
 		) {
 			/* Finishing Blow Critical Message */
 			entity_list.FilteredMessageCloseString(
@@ -5241,7 +5241,7 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 				GetCleanName() /* Message1 */
 			);
 
-			damage = FB_Dmg;
+			damage = finishing_blow_damage;
 			return true;
 		}
 	}
