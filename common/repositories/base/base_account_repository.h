@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_ACCOUNT_REPOSITORY_H
@@ -15,6 +15,7 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
+
 
 class BaseAccountRepository {
 public:
@@ -196,8 +197,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				account_id
 			)
 		);
@@ -547,6 +549,108 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Account &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back(std::to_string(e.sharedplat));
+		v.push_back("'" + Strings::Escape(e.password) + "'");
+		v.push_back(std::to_string(e.status));
+		v.push_back("'" + Strings::Escape(e.ls_id) + "'");
+		v.push_back(std::to_string(e.lsaccount_id));
+		v.push_back(std::to_string(e.gmspeed));
+		v.push_back(std::to_string(e.invulnerable));
+		v.push_back(std::to_string(e.flymode));
+		v.push_back(std::to_string(e.ignore_tells));
+		v.push_back(std::to_string(e.revoked));
+		v.push_back(std::to_string(e.karma));
+		v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
+		v.push_back(std::to_string(e.hideme));
+		v.push_back(std::to_string(e.rulesflag));
+		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(std::to_string(e.time_creation));
+		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
+		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
+		v.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Account> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back(std::to_string(e.sharedplat));
+			v.push_back("'" + Strings::Escape(e.password) + "'");
+			v.push_back(std::to_string(e.status));
+			v.push_back("'" + Strings::Escape(e.ls_id) + "'");
+			v.push_back(std::to_string(e.lsaccount_id));
+			v.push_back(std::to_string(e.gmspeed));
+			v.push_back(std::to_string(e.invulnerable));
+			v.push_back(std::to_string(e.flymode));
+			v.push_back(std::to_string(e.ignore_tells));
+			v.push_back(std::to_string(e.revoked));
+			v.push_back(std::to_string(e.karma));
+			v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
+			v.push_back(std::to_string(e.hideme));
+			v.push_back(std::to_string(e.rulesflag));
+			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+			v.push_back(std::to_string(e.time_creation));
+			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
+			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_eqgame) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_skillcaps) + "'");
+			v.push_back("'" + Strings::Escape(e.crc_basedata) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_ACCOUNT_REPOSITORY_H

@@ -36,6 +36,7 @@
 #include "../common/repositories/character_auras_repository.h"
 #include "../common/repositories/character_alt_currency_repository.h"
 #include "../common/repositories/character_item_recast_repository.h"
+#include "../common/repositories/account_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2748,24 +2749,26 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
     return z ? z->shutdowndelay : RuleI(Zone, AutoShutdownDelay);
 }
 
-uint32 ZoneDatabase::GetKarma(uint32 acct_id)
+uint32 ZoneDatabase::GetKarma(uint32 account_id)
 {
-    std::string query = StringFormat("SELECT `karma` FROM `account` WHERE `id` = '%i' LIMIT 1", acct_id);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
+	const auto& e = AccountRepository::FindOne(*this, account_id);
+	if (!e.id) {
 		return 0;
-
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToInt(row[0]);
 	}
 
-	return 0;
+	return e.karma;
 }
 
-void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
+void ZoneDatabase::UpdateKarma(uint32 account_id, uint32 amount)
 {
-	std::string query = StringFormat("UPDATE account SET karma = %i WHERE id = %i", amount, acct_id);
-    QueryDatabase(query);
+	auto e = AccountRepository::FindOne(*this, account_id);
+	if (!e.id) {
+		return;
+	}
+
+	e.karma = amount;
+
+	AccountRepository::UpdateOne(*this, e);
 }
 
 void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
