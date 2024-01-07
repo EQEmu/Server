@@ -2062,6 +2062,33 @@ void Mob::ClearRampage()
 	RampageArray.clear();
 }
 
+// if force is false, it will not remove feigned clients
+void Mob::RemoveFromRampageList(Mob* mob, bool force)
+{
+	if (!mob) {
+		return;
+	}
+
+	if (
+		IsNPC() &&
+		GetSpecialAbility(SPECATK_RAMPAGE) &&
+		(
+			force ||
+			mob->IsNPC() ||
+			(
+				mob->IsClient() &&
+				!mob->CastToClient()->GetFeigned()
+			)
+		)
+	) {
+		for (int i = 0; i < RampageArray.size(); i++) {
+			if (mob->GetID() == RampageArray[i]) {
+				RampageArray[i] = 0;
+			}
+		}
+	}
+}
+
 bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
@@ -2083,8 +2110,16 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		// range is important
 		Mob *m_target = entity_list.GetMob(RampageArray[i]);
 		if (m_target) {
-			if (m_target == GetTarget())
+			if (m_target == GetTarget()) {
 				continue;
+			}
+			
+			if (m_target->IsCorpse()) {
+				LogAggroDetail("[{}] is on [{}]'s rampage list", m_target->GetCleanName(), GetCleanName());
+				RemoveFromRampageList(m_target, true);
+				continue;
+			}
+
 			if (DistanceSquaredNoZ(GetPosition(), m_target->GetPosition()) <= NPC_RAMPAGE_RANGE2) {
 				ProcessAttackRounds(m_target, opts);
 				index_hit++;
