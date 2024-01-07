@@ -35,6 +35,7 @@
 #include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/character_auras_repository.h"
 #include "../common/repositories/character_alt_currency_repository.h"
+#include "../common/repositories/character_item_recast_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -3279,23 +3280,26 @@ void ZoneDatabase::RemoveTempFactions(Client *client) {
 
 void ZoneDatabase::UpdateItemRecast(uint32 character_id, uint32 recast_type, uint32 timestamp)
 {
-	const auto query = fmt::format(
-		"REPLACE INTO character_item_recast (id, recast_type, timestamp) VALUES ({}, {}, {})",
-		character_id,
-		recast_type,
-		timestamp
+	CharacterItemRecastRepository::ReplaceOne(
+		*this,
+		CharacterItemRecastRepository::CharacterItemRecast{
+			.id = character_id,
+			.recast_type = recast_type,
+			.timestamp = timestamp,
+		}
 	);
-	QueryDatabase(query);
 }
 
 void ZoneDatabase::DeleteItemRecast(uint32 character_id, uint32 recast_type)
 {
-	const auto query = fmt::format(
-		"DELETE FROM character_item_recast WHERE id = {} AND recast_type = {}",
-		character_id,
-		recast_type
+	CharacterItemRecastRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `recast_type` = {}",
+			character_id,
+			recast_type
+		)
 	);
-	QueryDatabase(query);
 }
 
 void ZoneDatabase::LoadPetInfo(Client *client)

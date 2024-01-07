@@ -44,6 +44,7 @@
 #include "repositories/starting_items_repository.h"
 #include "path_manager.h"
 #include "repositories/loottable_repository.h"
+#include "repositories/character_item_recast_repository.h"
 
 namespace ItemField
 {
@@ -882,34 +883,49 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 std::map<uint32, uint32> SharedDatabase::GetItemRecastTimestamps(uint32 char_id)
 {
 	std::map<uint32, uint32> timers;
-	const std::string query = StringFormat("SELECT recast_type,timestamp FROM character_item_recast WHERE id=%u", char_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowCount() == 0)
-		return timers;
 
-	for (auto& row = results.begin(); row != results.end(); ++row)
-		timers[Strings::ToUnsignedInt(row[0])] = Strings::ToUnsignedInt(row[1]);
-	return timers; // RVO or move assigned
+	const auto& l = CharacterItemRecastRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`id` = {}",
+			char_id
+		)
+	);
+
+	if (l.empty()) {
+		return timers;
+	}
+
+	for (const auto& e : l) {
+		timers[e.recast_type] = e.timestamp;
+	}
+
+	return timers;
 }
 
 uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type)
 {
-	const std::string query = StringFormat("SELECT timestamp FROM character_item_recast WHERE id=%u AND recast_type=%u",
-	                                       char_id, recast_type);
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowCount() == 0)
-		return 0;
+	const auto& l = CharacterItemRecastRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `recast_type` = {}",
+			char_id,
+			recast_type
+		)
+	);
 
-	auto& row = results.begin();
-	return Strings::ToUnsignedInt(row[0]);
+	return l.empty() ? 0 : l[0].timestamp;
 }
 
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 {
-	// This actually isn't strictly live-like. Live your recast timestamps are forever
-	const std::string query =
-	    StringFormat("DELETE FROM character_item_recast WHERE id = %u and timestamp < UNIX_TIMESTAMP()", char_id);
-	QueryDatabase(query);
+	CharacterItemRecastRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `timestamp` < UNIX_TIMESTAMP()",
+			char_id
+		)
+	);
 }
 
 void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
