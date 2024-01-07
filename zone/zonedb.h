@@ -464,7 +464,7 @@ public:
 	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
 
 	/* Character Inventory  */
-	bool	NoRentExpired(const char* name);
+	bool	NoRentExpired(const std::string& name);
 	bool	SaveCharacterInvSnapshot(uint32 character_id);
 	int		CountCharacterInvSnapshots(uint32 character_id);
 	void	ClearCharacterInvSnapshots(uint32 character_id, bool from_now = false);

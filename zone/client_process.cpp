@@ -763,10 +763,12 @@ void Client::BulkSendInventoryItems()
 		}
 	}
 
-	bool deletenorent = database.NoRentExpired(GetName());
-	if (deletenorent) { //client was offline for more than 30 minutes, delete no rent items
-		if (RuleB(Inventory, TransformSummonedBags))
+	const bool delete_no_rent = database.NoRentExpired(GetName());
+	if (delete_no_rent) { //client was offline for more than 30 minutes, delete no rent items
+		if (RuleB(Inventory, TransformSummonedBags)) {
 			DisenchantSummonedBags(false);
+		}
+
 		RemoveNoRent(false);
 	}
 
