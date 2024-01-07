@@ -316,7 +316,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	Mob* pMob = nullptr;
 	int32 orgcasttime;
 
-	if(!IsValidSpell(spell_id)) {
+	if (!IsValidSpell(spell_id)) {
 		InterruptSpell();
 		return(false);
 	}
