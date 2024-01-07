@@ -7322,51 +7322,69 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 
 	GroupInvite_Struct* gis = (GroupInvite_Struct*)app->pBuffer;
 	
-	Mob* Invitee = nullptr;
+	Mob* invitee = nullptr;
 
 	if (RuleB(Character, GroupInvitesRequireTarget)) {
 		// We can only invite the current target.
-		Invitee = GetTarget();
+		invitee = GetTarget();
 	} else {
-		Invitee = entity_list.GetMob(gis->invitee_name);
+		invitee = entity_list.GetMob(gis->invitee_name);
 	}
 
-	if (Invitee == this) {
+	if (invitee == this) {
 		MessageString(Chat::LightGray, GROUP_INVITEE_SELF);
 		return;
 	}
 
-	if (Invitee) {
-		if (Invitee->IsClient()) {
-			if (Invitee->CastToClient()->MercOnlyOrNoGroup() && !Invitee->IsRaidGrouped()) {
+	if (invitee) {
+		if (invitee->IsClient()) {
+			if (invitee->CastToClient()->MercOnlyOrNoGroup() && !invitee->IsRaidGrouped()) {
 				if (app->GetOpcode() == OP_GroupInvite2) {
 					//Make a new packet using all the same information but make sure it's a fixed GroupInvite opcode so we
 					//Don't have to deal with GroupFollow2 crap.
 					auto outapp =
 						new EQApplicationPacket(OP_GroupInvite, sizeof(GroupInvite_Struct));
 					memcpy(outapp->pBuffer, app->pBuffer, outapp->size);
-					Invitee->CastToClient()->QueuePacket(outapp);
+					invitee->CastToClient()->QueuePacket(outapp);
 					safe_delete(outapp);
 					return;
 				} else {
 					//The correct opcode, no reason to bother wasting time reconstructing the packet
-					Invitee->CastToClient()->QueuePacket(app);
+					invitee->CastToClient()->QueuePacket(app);
 				}
+			} else if (invitee->IsRaidGrouped()) {
+				Raid* inviter_raid = GetRaid();
+				Raid* invitee_raid = invitee->CastToClient()->GetRaid();
+
+				bool leader = false;
+
+				if (invitee_raid) {
+					leader = invitee_raid->IsGroupLeader(invitee->GetName());
+				}
+
+				if (inviter_raid != invitee_raid || leader) {
+					MessageString(Chat::Default, ALREADY_IN_GRP_RAID, invitee->GetCleanName());
+				} else {
+					MessageString(Chat::Default, TARGET_ALREADY_IN_GROUP, invitee->GetCleanName());
+				}
+
+				return;
+				
 			} else {
 				if (RuleB(Character, OnInviteReceiveAlreadyinGroupMessage)) {
-					if (!Invitee->CastToClient()->MercOnlyOrNoGroup()) {
-						Message(Chat::LightGray, "%s is already in another group.", Invitee->GetCleanName());
+					if (!invitee->CastToClient()->MercOnlyOrNoGroup()) {
+						MessageString(Chat::Default, TARGET_ALREADY_IN_GROUP, invitee->GetCleanName());
 					}
 				}
 			}
-		} else if (Invitee->IsBot()) {
+		} else if (invitee->IsBot()) {
 			Client* inviter = entity_list.GetClientByName(gis->inviter_name);
-			if (inviter && inviter->IsRaidGrouped() && !Invitee->HasRaid()) {
-				Bot::ProcessRaidInvite(Invitee->CastToBot(), inviter, true);
-			} else if (!Invitee->HasRaid()) {
-				Bot::ProcessBotGroupInvite(this, std::string(Invitee->GetName()));
+			if (inviter && inviter->IsRaidGrouped() && !invitee->HasRaid()) {
+				Bot::ProcessRaidInvite(invitee->CastToBot(), inviter, true);
+			} else if (!invitee->HasRaid()) {
+				Bot::ProcessBotGroupInvite(this, std::string(invitee->GetName()));
 			} else {
-				MessageString(Chat::LightGray, ALREADY_IN_RAID, Invitee->GetCleanName());
+				MessageString(Chat::LightGray, ALREADY_IN_RAID, invitee->GetCleanName());
 			}
 		}
 	} else {

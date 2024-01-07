@@ -373,6 +373,7 @@
 #define ALREADY_IN_YOUR_RAID		5077	//%1 is already in your raid.
 #define NOT_IN_YOUR_RAID            5082	//%1 is not in your raid.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
+#define ALREADY_IN_GRP_RAID			5088	//% 1 rejects your invite because they are in a raid and you are not in theirs, or they are a raid group leader
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!
