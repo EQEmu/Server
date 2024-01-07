@@ -2064,8 +2064,7 @@ void Mob::ClearRampage()
 	RampageArray.clear();
 }
 
-// if force is false, it will not remove feigned clients
-void Mob::RemoveFromRampageList(Mob* mob, bool force)
+void Mob::RemoveFromRampageList(Mob* mob, bool remove_feigned)
 {
 	if (!mob) {
 		return;
@@ -2075,7 +2074,7 @@ void Mob::RemoveFromRampageList(Mob* mob, bool force)
 		IsNPC() &&
 		GetSpecialAbility(SPECATK_RAMPAGE) &&
 		(
-			force ||
+			remove_feigned  ||
 			mob->IsNPC() ||
 			(
 				mob->IsClient() &&
