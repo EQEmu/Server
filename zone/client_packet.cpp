@@ -4889,7 +4889,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 
 	if (cy != m_Position.y || cx != m_Position.x) {
 		// End trader mode if we move
-		if(Trader) {
+		if (Trader) {
 			Trader_EndTrader();
 		}
 
