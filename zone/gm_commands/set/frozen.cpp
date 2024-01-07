@@ -21,7 +21,7 @@ void SetFrozen(Client *c, const Seperator *sep)
 		return;
 	}
 
-	t->SendAppearancePacket(AT_Anim, is_frozen ? ANIM_FREEZE : ANIM_STAND);
+	t->SendAppearancePacket(AppearanceType::Animation, is_frozen ? Animation::Freeze : Animation::Standing);
 
 	c->Message(
 		Chat::White,

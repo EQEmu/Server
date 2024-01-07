@@ -248,7 +248,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	npc->UpdateEquipmentLight();
 	// no wearchange associated with this function..so, this should not be needed
 	//if (npc->UpdateActiveLightValue())
-	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
+	//	npc->SendAppearancePacket(AppearanceType::Light, npc->GetActiveLightValue());
 }
 
 bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose)
@@ -558,7 +558,7 @@ void NPC::AddLootDrop(
 	UpdateEquipmentLight();
 
 	if (UpdateActiveLight()) {
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 }
 

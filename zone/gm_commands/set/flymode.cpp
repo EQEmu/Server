@@ -51,7 +51,7 @@ void SetFlymode(Client *c, const Seperator *sep)
 	}
 
 	t->SetFlyMode(static_cast<GravityBehavior>(flymode_id));
-	t->SendAppearancePacket(AT_Levitate, flymode_id);
+	t->SendAppearancePacket(AppearanceType::FlyMode, flymode_id);
 
 	const uint32 account = c->AccountID();
 

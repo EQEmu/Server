@@ -483,7 +483,7 @@ void Client::SendZoneInPackets()
 	// Spawn Appearance Packet
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
+	sa->type = AppearanceType::SpawnID;			// Is 0x10 used to set the player id?
 	sa->parameter = GetID();	// Four bytes for this parameter...
 	outapp->priority = 6;
 	QueuePacket(outapp);
@@ -498,7 +498,7 @@ void Client::SendZoneInPackets()
 	safe_delete(outapp);
 	SetSpawned();
 	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
+		SendAppearancePacket(AppearanceType::PVP, GetPVP(false), true, false);
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -2248,7 +2248,7 @@ void Client::SetGM(bool toggle) {
 			m_pp.gm ? "now" : "no longer"
 		).c_str()
 	);
-	SendAppearancePacket(AT_GM, m_pp.gm);
+	SendAppearancePacket(AppearanceType::GM, m_pp.gm);
 	Save();
 	UpdateWho();
 }
@@ -2871,7 +2871,7 @@ void Client::SetPVP(bool toggle, bool message) {
 		}
 	}
 
-	SendAppearancePacket(AT_PVP, GetPVP());
+	SendAppearancePacket(AppearanceType::PVP, GetPVP());
 	Save();
 }
 
@@ -3644,7 +3644,7 @@ void Client::LinkDead()
 
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
-	SendAppearancePacket(AT_Linkdead, 1);
+	SendAppearancePacket(AppearanceType::Linkdead, 1);
 	client_state = CLIENT_LINKDEAD;
 	AI_Start(CLIENT_LD_TIMEOUT);
 }
@@ -3787,7 +3787,7 @@ void Client::EnteringMessages(Client* client)
 				).c_str()
 			);
 
-			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+			client->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 		}
 	}
 }
@@ -8602,37 +8602,37 @@ bool Client::CanMedOnHorse()
 void Client::EnableAreaHPRegen(int value)
 {
 	AreaHPRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaHPRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaHealthRegen, value, false);
 }
 
 void Client::DisableAreaHPRegen()
 {
 	AreaHPRegen = 1.0f;
-	SendAppearancePacket(AT_AreaHPRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaHealthRegen, 1000, false);
 }
 
 void Client::EnableAreaManaRegen(int value)
 {
 	AreaManaRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaManaRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaManaRegen, value, false);
 }
 
 void Client::DisableAreaManaRegen()
 {
 	AreaManaRegen = 1.0f;
-	SendAppearancePacket(AT_AreaManaRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaManaRegen, 1000, false);
 }
 
 void Client::EnableAreaEndRegen(int value)
 {
 	AreaEndRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaEndRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaEnduranceRegen, value, false);
 }
 
 void Client::DisableAreaEndRegen()
 {
 	AreaEndRegen = 1.0f;
-	SendAppearancePacket(AT_AreaEndRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaEnduranceRegen, 1000, false);
 }
 
 void Client::EnableAreaRegens(int value)
@@ -10048,7 +10048,7 @@ void Client::SetAnon(uint8 anon_flag) {
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
 	spawn_appearance->spawn_id = GetID();
-	spawn_appearance->type = AT_Anon;
+	spawn_appearance->type = AppearanceType::Anonymous;
 	spawn_appearance->parameter = anon_flag;
 	entity_list.QueueClients(this, outapp);
 	Save();
@@ -10061,7 +10061,7 @@ void Client::SetAFK(uint8 afk_flag) {
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
 	spawn_appearance->spawn_id = GetID();
-	spawn_appearance->type = AT_AFK;
+	spawn_appearance->type = AppearanceType::AFK;
 	spawn_appearance->parameter = afk_flag;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);

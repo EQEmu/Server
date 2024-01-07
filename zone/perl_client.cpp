@@ -1440,12 +1440,12 @@ void Perl_Client_RemoveFromInstance(Client* self, uint16 instance_id) // @catego
 
 void Perl_Client_Freeze(Client* self)
 {
-	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 }
 
 void Perl_Client_UnFreeze(Client* self)
 {
-	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
 
 uint32 Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro

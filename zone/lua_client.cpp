@@ -1458,12 +1458,12 @@ void Lua_Client::AssignToInstance(int instance_id) {
 
 void Lua_Client::Freeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 }
 
 void Lua_Client::UnFreeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
 
 uint32 Lua_Client::GetAggroCount() {

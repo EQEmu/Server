@@ -349,10 +349,10 @@ void CheatManager::ProcessMovementHistory(const EQApplicationPacket *app)
 
 void CheatManager::ProcessSpawnApperance(uint16 spawn_id, uint16 type, uint32 parameter)
 {
-	if (type == AT_Anim && parameter == ANIM_SIT) {
+	if (type == AppearanceType::Animation && parameter == Animation::Sitting) {
 		m_time_since_last_memorization = Timer::GetCurrentTime();
 	}
-	else if (spawn_id == 0 && type == AT_AntiCheat) {
+	else if (spawn_id == 0 && type == AppearanceType::AntiCheat) {
 		m_time_since_last_action = parameter;
 	}
 }

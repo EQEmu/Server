@@ -7594,7 +7594,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 			SpawnAppearance_Struct* saptr = (SpawnAppearance_Struct*)outapp->pBuffer;
 			saptr->spawn_id = bot_iter->GetID();
-			saptr->type = AT_ShowHelm;
+			saptr->type = AppearanceType::ShowHelm;
 			saptr->parameter = bot_iter->GetShowHelm();
 
 			entity_list.QueueClients(bot_iter, outapp);
@@ -7667,7 +7667,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	[10-16-2015 :: 22:15:40] [Packet :: Server -> Client (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10]
 	0: A2 02 2B 00 00 00 00 00 - showhelm = false
 
-	*** Bot did not update using the OP_SpawnAppearance packet with AT_ShowHelm appearance type ***
+	*** Bot did not update using the OP_SpawnAppearance packet with AppearanceType::ShowHelm appearance type ***
 	*/
 }
 
@@ -7694,7 +7694,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 
 		bot_iter->SetPetChooser(false);
 		bot_iter->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
-		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
+		bot_iter->SendAppearancePacket(AppearanceType::WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
 
