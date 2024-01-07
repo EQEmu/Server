@@ -914,11 +914,7 @@ uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type
 		)
 	);
 
-	if (l.empty()) {
-		return 0;
-	}
-
-	return l[0].timestamp;
+	return l.empty() ? 0 : l[0].timestamp;
 }
 
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
