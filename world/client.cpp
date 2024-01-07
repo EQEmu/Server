@@ -1691,14 +1691,15 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.hunger_level = 6000;
 	pp.thirst_level = 6000;
 
+	/* Set default skills for everybody */
+	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+
 	/* Set Racial and Class specific language and skills */
 	SetRacialLanguages(&pp);
 	SetRaceStartingSkills(&pp);
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
-
-	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
-	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
@@ -2143,7 +2144,9 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case FROGLOK:
 		{
-			pp->skills[EQ::skills::SkillSwimming] = 125;
+			if (RuleI(Skills, SwimmingStartValue) > 125) {
+				pp->skills[EQ::skills::SkillSwimming] = 125;
+			}
 			break;
 		}
 	case GNOME:
@@ -2160,7 +2163,9 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	case IKSAR:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
-			pp->skills[EQ::skills::SkillSwimming] = 100;
+			if (RuleI(Skills, SwimmingStartValue) > 100) {
+				pp->skills[EQ::skills::SkillSwimming] = 100;
+			}
 			break;
 		}
 	case WOOD_ELF:
