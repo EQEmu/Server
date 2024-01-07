@@ -1812,7 +1812,9 @@ void NPC::DoClassAttacks(Mob *target) {
 		HasOwner() &&
 		target->IsNPC() &&
 		target->GetBodyType() != BT_Undead &&
-		taunt_time
+		taunt_time &&
+		type_of_pet &&
+		type_of_pet != petTargetLock
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
