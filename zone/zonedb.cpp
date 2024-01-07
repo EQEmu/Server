@@ -1023,13 +1023,14 @@ bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint
 
 bool ZoneDatabase::SaveCharacterDiscipline(uint32 character_id, uint32 slot_id, uint32 disc_id)
 {
-	auto e = CharacterDisciplinesRepository::NewEntity();
-
-	e.id      = character_id;
-	e.slot_id = slot_id;
-	e.disc_id = disc_id;
-
-	return CharacterDisciplinesRepository::ReplaceOne(*this, e);
+	return CharacterDisciplinesRepository::ReplaceOne(
+		*this,
+		CharacterDisciplinesRepository::CharacterDisciplines{
+			.id = character_id,
+			.slot_id = static_cast<uint16_t>(slot_id),
+			.disc_id = static_cast<uint16_t>(disc_id)
+		}
+	);
 }
 
 void ZoneDatabase::SaveCharacterTribute(Client* c)
