@@ -4224,11 +4224,11 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
 			a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
 
-			if (RuleR(Combat, MeleePushForceClient) && IsClient()) {
+			if (RuleR(Combat, MeleePushForceClientPercent) && IsClient()) {
 				a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
 			}
 
-			if (RuleR(Combat, MeleePushForcePet) && IsPet()) {
+			if (RuleR(Combat, MeleePushForcePetPercent) && IsPet()) {
 				a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
 			}
 
