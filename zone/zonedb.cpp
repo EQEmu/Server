@@ -2930,160 +2930,150 @@ void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, ui
 
 }
 
-void ZoneDatabase::SaveBuffs(Client *client) {
+void ZoneDatabase::SaveBuffs(Client *client)
+{
+	CharacterBuffsRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`character_id` = {}",
+			client->CharacterID()
+		)
+	);
 
-	// delete the character buffs
-	CharacterBuffsRepository::DeleteWhere(database, fmt::format("character_id = {}", client->CharacterID()));
+	auto      buffs          = client->GetBuffs();
+	const int max_buff_slots = client->GetMaxBuffSlots();
 
-	// get the character buffs
-	uint32 buff_count = client->GetMaxBuffSlots();
-	Buffs_Struct *buffs = client->GetBuffs();
+	std::vector<CharacterBuffsRepository::CharacterBuffs> v;
 
-	// character buffs struct
-	auto b = CharacterBuffsRepository::NewEntity();
+	auto e = CharacterBuffsRepository::NewEntity();
 
-	// vector of character buffs
-	std::vector<CharacterBuffsRepository::CharacterBuffs> character_buffs = {};
+	uint32 character_buff_count = 0;
 
-	// count the number of buffs that are valid
-	int character_buff_count = 0;
-	for (int index = 0; index < buff_count; index++) {
-		if (!IsValidSpell(buffs[index].spellid)) {
+	for (int slot_id = 0; slot_id < max_buff_slots; slot_id++) {
+		if (!IsValidSpell(buffs[slot_id].spellid)) {
 			continue;
 		}
+
 		character_buff_count++;
 	}
 
-	// allocate memory for the character buffs
-	character_buffs.reserve(character_buff_count);
+	v.reserve(character_buff_count);
 
-	for (int index = 0; index < buff_count; index++) {
-		if (!IsValidSpell(buffs[index].spellid)) {
+	for (int slot_id = 0; slot_id < max_buff_slots; slot_id++) {
+		if (!IsValidSpell(buffs[slot_id].spellid)) {
 			continue;
 		}
 
-		// fill in the buff struct
-		b.character_id   = client->CharacterID();
-		b.slot_id        = index;
-		b.spell_id       = buffs[index].spellid;
-		b.caster_level   = buffs[index].casterlevel;
-		b.caster_name    = buffs[index].caster_name;
-		b.ticsremaining  = buffs[index].ticsremaining;
-		b.counters       = buffs[index].counters;
-		b.numhits        = buffs[index].hit_number;
-		b.melee_rune     = buffs[index].melee_rune;
-		b.magic_rune     = buffs[index].magic_rune;
-		b.persistent     = buffs[index].persistant_buff;
-		b.dot_rune       = buffs[index].dot_rune;
-		b.caston_x       = buffs[index].caston_x;
-		b.caston_y       = buffs[index].caston_y;
-		b.caston_z       = buffs[index].caston_z;
-		b.ExtraDIChance  = buffs[index].ExtraDIChance;
-		b.instrument_mod = buffs[index].instrument_mod;
+		e.character_id   = client->CharacterID();
+		e.slot_id        = slot_id;
+		e.spell_id       = buffs[slot_id].spellid;
+		e.caster_level   = buffs[slot_id].casterlevel;
+		e.caster_name    = buffs[slot_id].caster_name;
+		e.ticsremaining  = buffs[slot_id].ticsremaining;
+		e.counters       = buffs[slot_id].counters;
+		e.numhits        = buffs[slot_id].hit_number;
+		e.melee_rune     = buffs[slot_id].melee_rune;
+		e.magic_rune     = buffs[slot_id].magic_rune;
+		e.persistent     = buffs[slot_id].persistant_buff;
+		e.dot_rune       = buffs[slot_id].dot_rune;
+		e.caston_x       = buffs[slot_id].caston_x;
+		e.caston_y       = buffs[slot_id].caston_y;
+		e.caston_z       = buffs[slot_id].caston_z;
+		e.ExtraDIChance  = buffs[slot_id].ExtraDIChance;
+		e.instrument_mod = buffs[slot_id].instrument_mod;
 
-		// add the buff to the vector
-		character_buffs.emplace_back(b);
+		v.emplace_back(e);
 	}
 
-	// insert the buffs into the database
-	if (!character_buffs.empty()) {
-		CharacterBuffsRepository::InsertMany(database, character_buffs);
+	if (!v.empty()) {
+		CharacterBuffsRepository::ReplaceMany(database, v);
 	}
 }
 
 void ZoneDatabase::LoadBuffs(Client *client)
 {
+	auto buffs          = client->GetBuffs();
+	int  max_buff_slots = client->GetMaxBuffSlots();
 
-	Buffs_Struct *buffs = client->GetBuffs();
-	uint32 max_slots = client->GetMaxBuffSlots();
+	for (int slot_id = 0; slot_id < max_buff_slots; ++slot_id) {
+		buffs[slot_id].spellid = SPELL_UNKNOWN;
+	}
 
-	for (int index = 0; index < max_slots; ++index)
-		buffs[index].spellid = SPELL_UNKNOWN;
+	const auto& l = CharacterBuffsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`character_id` = {}",
+			client->CharacterID()
+		)
+	);
 
-	std::string query = StringFormat("SELECT spell_id, slot_id, caster_level, caster_name, ticsremaining, "
-					 "counters, numhits, melee_rune, magic_rune, persistent, dot_rune, "
-					 "caston_x, caston_y, caston_z, ExtraDIChance, instrument_mod "
-					 "FROM `character_buffs` WHERE `character_id` = '%u'",
-					 client->CharacterID());
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return;
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		uint32 slot_id = Strings::ToUnsignedInt(row[1]);
-		if (slot_id >= client->GetMaxBuffSlots())
+	for (const auto& e : l) {
+		if (e.slot_id >= max_buff_slots) {
 			continue;
-
-		uint32 spell_id = Strings::ToUnsignedInt(row[0]);
-		if (!IsValidSpell(spell_id))
-			continue;
-
-		Client *caster = entity_list.GetClientByName(row[3]);
-		uint32 caster_level = Strings::ToInt(row[2]);
-		int32 ticsremaining = Strings::ToInt(row[4]);
-		uint32 counters = Strings::ToUnsignedInt(row[5]);
-		uint32 hit_number = Strings::ToUnsignedInt(row[6]);
-		uint32 melee_rune = Strings::ToUnsignedInt(row[7]);
-		uint32 magic_rune = Strings::ToUnsignedInt(row[8]);
-		uint8 persistent = Strings::ToUnsignedInt(row[9]);
-		uint32 dot_rune = Strings::ToUnsignedInt(row[10]);
-		int32 caston_x = Strings::ToUnsignedInt(row[11]);
-		int32 caston_y = Strings::ToUnsignedInt(row[12]);
-		int32 caston_z = Strings::ToUnsignedInt(row[13]);
-		int32 ExtraDIChance = Strings::ToUnsignedInt(row[14]);
-		uint32 instrument_mod = Strings::ToUnsignedInt(row[15]);
-
-		buffs[slot_id].spellid = spell_id;
-		buffs[slot_id].casterlevel = caster_level;
-
-		if (caster) {
-			buffs[slot_id].casterid = caster->GetID();
-			strcpy(buffs[slot_id].caster_name, caster->GetName());
-			buffs[slot_id].client = true;
-		} else {
-			buffs[slot_id].casterid = 0;
-			strcpy(buffs[slot_id].caster_name, "");
-			buffs[slot_id].client = false;
 		}
 
-		buffs[slot_id].ticsremaining = ticsremaining;
-		buffs[slot_id].counters = counters;
-		buffs[slot_id].hit_number = hit_number;
-		buffs[slot_id].melee_rune = melee_rune;
-		buffs[slot_id].magic_rune = magic_rune;
-		buffs[slot_id].persistant_buff = persistent ? true : false;
-		buffs[slot_id].dot_rune = dot_rune;
-		buffs[slot_id].caston_x = caston_x;
-		buffs[slot_id].caston_y = caston_y;
-		buffs[slot_id].caston_z = caston_z;
-		buffs[slot_id].ExtraDIChance = ExtraDIChance;
-		buffs[slot_id].RootBreakChance = 0;
-		buffs[slot_id].virus_spread_time = 0;
-		buffs[slot_id].UpdateClient = false;
-		buffs[slot_id].instrument_mod = instrument_mod;
+		if (!IsValidSpell(e.spell_id)) {
+			continue;
+		}
+
+		Client* c = entity_list.GetClientByName(e.caster_name.c_str());
+
+		buffs[e.slot_id].spellid = e.spell_id;
+		buffs[e.slot_id].casterlevel = e.caster_level;
+
+		if (c) {
+			buffs[e.slot_id].casterid = c->GetID();
+			buffs[e.slot_id].client   = true;
+
+			strncpy(buffs[e.slot_id].caster_name, c->GetName(), 64);
+		} else {
+			buffs[e.slot_id].casterid = 0;
+			buffs[e.slot_id].client   = false;
+
+			strncpy(buffs[e.slot_id].caster_name, "", 64);
+		}
+
+		buffs[e.slot_id].ticsremaining     = e.ticsremaining;
+		buffs[e.slot_id].counters          = e.counters;
+		buffs[e.slot_id].hit_number        = e.numhits;
+		buffs[e.slot_id].melee_rune        = e.melee_rune;
+		buffs[e.slot_id].magic_rune        = e.magic_rune;
+		buffs[e.slot_id].persistant_buff   = e.persistent ? true : false;
+		buffs[e.slot_id].dot_rune          = e.dot_rune;
+		buffs[e.slot_id].caston_x          = e.caston_x;
+		buffs[e.slot_id].caston_y          = e.caston_y;
+		buffs[e.slot_id].caston_z          = e.caston_z;
+		buffs[e.slot_id].ExtraDIChance     = e.ExtraDIChance;
+		buffs[e.slot_id].RootBreakChance   = 0;
+		buffs[e.slot_id].virus_spread_time = 0;
+		buffs[e.slot_id].UpdateClient      = false;
+		buffs[e.slot_id].instrument_mod    = e.instrument_mod;
 	}
 
 	// We load up to the most our client supports
-	max_slots = EQ::spells::StaticLookup(client->ClientVersion())->LongBuffs;
-	for (int index = 0; index < max_slots; ++index) {
-		if (!IsValidSpell(buffs[index].spellid))
+	max_buff_slots = EQ::spells::StaticLookup(client->ClientVersion())->LongBuffs;
+
+	for (int slot_id = 0; slot_id < max_buff_slots; ++slot_id) {
+		if (!IsValidSpell(buffs[slot_id].spellid)) {
 			continue;
+		}
 
-		for (int effectIndex = 0; effectIndex < EFFECT_COUNT; ++effectIndex) {
+		if (IsEffectInSpell(buffs[slot_id].spellid, SE_Charm)) {
+			buffs[slot_id].spellid = SPELL_UNKNOWN;
+			break;
+		}
 
-			if (spells[buffs[index].spellid].effect_id[effectIndex] == SE_Charm) {
-				buffs[index].spellid = SPELL_UNKNOWN;
+		if (IsEffectInSpell(buffs[slot_id].spellid, SE_Illusion)) {
+			if (buffs[slot_id].persistant_buff) {
 				break;
 			}
 
-			if (spells[buffs[index].spellid].effect_id[effectIndex] == SE_Illusion) {
-				if (buffs[index].persistant_buff)
-					break;
-
-				buffs[index].spellid = SPELL_UNKNOWN;
-				break;
-			}
+			buffs[slot_id].spellid = SPELL_UNKNOWN;
+			break;
 		}
 	}
 }

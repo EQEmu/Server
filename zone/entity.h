@@ -171,7 +171,7 @@ public:
 			return it->second;
 		return nullptr;
 	}
-	Client *GetClientByName(const char *name);
+	Client *GetClientByName(const char* name);
 	Client *GetClientByAccID(uint32 accid);
 	inline Client *GetClientByID(uint16 id)
 	{
