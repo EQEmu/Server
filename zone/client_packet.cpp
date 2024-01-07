@@ -15553,6 +15553,8 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 				return;
 			}
 
+			entity_list.ClearAggro(this);
+
 			////Was sending the packet back to initiate client zone...
 			////but that could be abusable, so lets go through proper channels
 			MovePC(
