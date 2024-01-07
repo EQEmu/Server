@@ -33,6 +33,7 @@
 #include "../common/repositories/character_bandolier_repository.h"
 #include "../common/repositories/character_currency_repository.h"
 #include "../common/repositories/character_alternate_abilities_repository.h"
+#include "../common/repositories/character_auras_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -3090,33 +3091,47 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 void ZoneDatabase::SaveAuras(Client *c)
 {
-	auto query = StringFormat("DELETE FROM `character_auras` WHERE `id` = %u", c->CharacterID());
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	CharacterAurasRepository::DeleteOne(database, c->CharacterID());
 
-	const auto &auras = c->GetAuraMgr();
-	for (int i = 0; i < auras.count; ++i) {
-		auto aura = auras.auras[i].aura;
-		if (aura && aura->AuraZones()) {
-			query = StringFormat("INSERT INTO `character_auras` (id, slot, spell_id) VALUES(%u, %d, %d)",
-					     c->CharacterID(), i, aura->GetAuraID());
-			auto results = database.QueryDatabase(query);
-			if (!results.Success())
-				return;
+	std::vector<CharacterAurasRepository::CharacterAuras> v;
+
+	auto e = CharacterAurasRepository::NewEntity();
+
+	const auto& auras = c->GetAuraMgr();
+
+	for (int slot_id = 0; slot_id < auras.count; ++slot_id) {
+		Aura* a = auras.auras[slot_id].aura;
+		if (a && a->AuraZones()) {
+			e.id       = c->CharacterID();
+			e.slot     = slot_id;
+			e.spell_id = a->GetAuraID();
+
+			v.emplace_back(e);
 		}
+	}
+
+	if (!v.empty()) {
+		CharacterAurasRepository::InsertMany(database, v);
 	}
 }
 
 void ZoneDatabase::LoadAuras(Client *c)
 {
-	auto query = StringFormat("SELECT `spell_id` FROM `character_auras` WHERE `id` = %u ORDER BY `slot`", c->CharacterID());
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		return;
+	const auto& l = CharacterAurasRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} ORDER BY `slot`",
+			c->CharacterID()
+		)
+	);
 
-	for (auto& row = results.begin(); row != results.end(); ++row)
-		c->MakeAura(Strings::ToInt(row[0]));
+	if (l.empty()) {
+		return;
+	}
+
+	for (const auto& e : l) {
+		c->MakeAura(e.spell_id);
+	}
 }
 
 void ZoneDatabase::SavePetInfo(Client *client)
