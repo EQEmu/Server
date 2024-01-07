@@ -3718,6 +3718,10 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (3 * caster_level / 4);
 			break;
 
+		case 144:	// Level 40+ Harm Touch
+			result = ubase + (caster_level * 10) + (caster_level - 40) * 20;
+			break;
+			
 		//these are used in stacking effects... formula unknown
 		case 201:
 		case 203:
