@@ -341,7 +341,6 @@ RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a z
 RULE_INT(Zone, SecondsBeforeIdle, 60, "Seconds before Zone:ZonesIdleWhenEmpty define kicks in")
 RULE_INT(Zone, SpawnEventMin, 3, "When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.")
 RULE_INT(Zone, ForageChance, 25, "Chance of foraging from zone table vs global table")
-RULE_BOOL(Zone, ZonesIdleWhenEmpty, true, "Disable to stop zones idling when empty")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
