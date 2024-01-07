@@ -1287,20 +1287,19 @@ bool ZoneDatabase::SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint
 		return false;
 	}
 
-	auto e = CharacterSpellsRepository::NewEntity();
-
-	e.id       = character_id;
-	e.slot_id  = slot_id;
-	e.spell_id = spell_id;
-
-	const int replaced = CharacterSpellsRepository::ReplaceOne(*this, e);
-
-	return replaced;
+	return CharacterSpellsRepository::ReplaceOne(
+		*this,
+		CharacterSpellsRepository::CharacterSpells{
+			.id = character_id,
+			.slot_id = static_cast<uint16_t>(slot_id),
+			.spell_id = static_cast<uint16_t>(spell_id)
+		}
+	);
 }
 
 bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 slot_id)
 {
-	const int deleted = CharacterSpellsRepository::DeleteWhere(
+	return CharacterSpellsRepository::DeleteWhere(
 		*this,
 		fmt::format(
 			"`id` = {} AND `slot_id` = {}",
@@ -1308,8 +1307,6 @@ bool ZoneDatabase::DeleteCharacterSpell(uint32 character_id, uint32 slot_id)
 			slot_id
 		)
 	);
-
-	return deleted;
 }
 
 bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
