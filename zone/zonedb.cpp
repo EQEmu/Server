@@ -2752,11 +2752,8 @@ int ZoneDatabase::getZoneShutDownDelay(uint32 zoneID, uint32 version)
 uint32 ZoneDatabase::GetKarma(uint32 account_id)
 {
 	const auto& e = AccountRepository::FindOne(*this, account_id);
-	if (!e.id) {
-		return 0;
-	}
 
-	return e.karma;
+	return !e.id ? 0 : e.karma;
 }
 
 void ZoneDatabase::UpdateKarma(uint32 account_id, uint32 amount)
