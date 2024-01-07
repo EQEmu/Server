@@ -115,6 +115,7 @@ public:
 		int32_t     underworld_teleport_index;
 		int32_t     lava_damage;
 		int32_t     min_lava_damage;
+		uint8_t     idle_when_empty;
 	};
 
 	static std::string PrimaryKey()
@@ -221,6 +222,7 @@ public:
 			"underworld_teleport_index",
 			"lava_damage",
 			"min_lava_damage",
+			"idle_when_empty",
 		};
 	}
 
@@ -323,6 +325,7 @@ public:
 			"underworld_teleport_index",
 			"lava_damage",
 			"min_lava_damage",
+			"idle_when_empty",
 		};
 	}
 
@@ -459,6 +462,7 @@ public:
 		e.underworld_teleport_index = 0;
 		e.lava_damage               = 50;
 		e.min_lava_damage           = 10;
+		e.idle_when_empty           = 1;
 
 		return e;
 	}
@@ -591,6 +595,7 @@ public:
 			e.underworld_teleport_index = static_cast<int32_t>(atoi(row[93]));
 			e.lava_damage               = static_cast<int32_t>(atoi(row[94]));
 			e.min_lava_damage           = static_cast<int32_t>(atoi(row[95]));
+			e.idle_when_empty           = static_cast<uint8_t>(strtoul(row[96], nullptr, 10));
 
 			return e;
 		}
@@ -719,6 +724,7 @@ public:
 		v.push_back(columns[93] + " = " + std::to_string(e.underworld_teleport_index));
 		v.push_back(columns[94] + " = " + std::to_string(e.lava_damage));
 		v.push_back(columns[95] + " = " + std::to_string(e.min_lava_damage));
+		v.push_back(columns[96] + " = " + std::to_string(e.idle_when_empty));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -836,6 +842,7 @@ public:
 		v.push_back(std::to_string(e.underworld_teleport_index));
 		v.push_back(std::to_string(e.lava_damage));
 		v.push_back(std::to_string(e.min_lava_damage));
+		v.push_back(std::to_string(e.idle_when_empty));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -961,6 +968,7 @@ public:
 			v.push_back(std::to_string(e.underworld_teleport_index));
 			v.push_back(std::to_string(e.lava_damage));
 			v.push_back(std::to_string(e.min_lava_damage));
+			v.push_back(std::to_string(e.idle_when_empty));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1090,6 +1098,7 @@ public:
 			e.underworld_teleport_index = static_cast<int32_t>(atoi(row[93]));
 			e.lava_damage               = static_cast<int32_t>(atoi(row[94]));
 			e.min_lava_damage           = static_cast<int32_t>(atoi(row[95]));
+			e.idle_when_empty           = static_cast<uint8_t>(strtoul(row[96], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -1210,6 +1219,7 @@ public:
 			e.underworld_teleport_index = static_cast<int32_t>(atoi(row[93]));
 			e.lava_damage               = static_cast<int32_t>(atoi(row[94]));
 			e.min_lava_damage           = static_cast<int32_t>(atoi(row[95]));
+			e.idle_when_empty           = static_cast<uint8_t>(strtoul(row[96], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -1380,6 +1390,7 @@ public:
 		v.push_back(std::to_string(e.underworld_teleport_index));
 		v.push_back(std::to_string(e.lava_damage));
 		v.push_back(std::to_string(e.min_lava_damage));
+		v.push_back(std::to_string(e.idle_when_empty));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1498,6 +1509,7 @@ public:
 			v.push_back(std::to_string(e.underworld_teleport_index));
 			v.push_back(std::to_string(e.lava_damage));
 			v.push_back(std::to_string(e.min_lava_damage));
+			v.push_back(std::to_string(e.idle_when_empty));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

@@ -1341,3 +1341,20 @@ int ZoneStore::GetZoneMinimumLavaDamage(uint32 zone_id, int version)
 
 	return 0;
 }
+
+uint8 ZoneStore::GetZoneIdleWhenEmpty(uint32 zone_id, int version)
+{
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id && z.version == version) {
+			return z.idle_when_empty;
+		}
+	}
+
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id && z.version == 0) {
+			return z.idle_when_empty;
+		}
+	}
+
+	return 1;
+}
