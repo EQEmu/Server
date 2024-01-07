@@ -1056,10 +1056,10 @@ public:
 	void SetPetType(PetType p) { type_of_pet = p; }
 	inline int16 GetPetPower() const { return (petpower < 0) ? 0 : petpower; }
 	void SetPetPower(int16 p) { if (p < 0) petpower = 0; else petpower = p; }
-	bool IsFamiliar() const { return(type_of_pet == petFamiliar); }
-	bool IsAnimation() const { return(type_of_pet == petAnimation); }
-	bool IsCharmed() const { return(type_of_pet == petCharmed); }
-	bool IsTargetLockPet() const { return(type_of_pet == petTargetLock); }
+	bool IsFamiliar() const { return type_of_pet == petFamiliar; }
+	bool IsAnimation() const { return type_of_pet == petAnimation; }
+	bool IsCharmed() const { return type_of_pet == petCharmed; }
+	bool IsTargetLockPet() const { return type_of_pet == petTargetLock; }
 	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
 	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
 	void SetOwnerID(uint16 NewOwnerID);
