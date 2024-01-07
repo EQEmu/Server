@@ -1094,22 +1094,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Cancel Magic: %d", effect_value);
 #endif
 				if(GetSpecialAbility(UNDISPELLABLE)){
-					if (caster)
+					if (caster) {
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
+					}
 					break;
 				}
-				int buff_count = GetMaxTotalSlots();
-				for(int slot = 0; slot < buff_count; slot++) {
-					if(IsValidSpell(buffs[slot].spellid) &&
-						spells[buffs[slot].spellid].dispel_flag == 0 &&
-						!IsDiscipline(buffs[slot].spellid))
-					{
-						if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, effect_value)){
-							BuffFadeBySlot(slot);
-							slot = buff_count;
-						}
-					}
-				}
+				
+				DispelMagic(caster, spell_id, effect_value);
 				break;
 			}
 
@@ -7298,6 +7289,22 @@ bool Mob::PassLimitClass(uint32 Classes_, uint16 Class_)
 		Classes_ >>= 1;
 	}
 	return false;
+}
+
+void Mob::DispelMagic(Mob* caster, uint16 spell_id, int effect_value) 
+{
+	for (int slot = 0; slot < GetMaxTotalSlots(); slot++) {
+		if (
+			buffs[slot].spellid != SPELL_UNKNOWN &&
+			spells[buffs[slot].spellid].dispel_flag == 0 &&
+			!IsDiscipline(buffs[slot].spellid)
+		) {
+			if (caster && TryDispel(caster->GetCasterLevel(spell_id), buffs[slot].casterlevel, effect_value)) {
+				BuffFadeBySlot(slot);
+				break;
+			}
+		}
+	}
 }
 
 uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
