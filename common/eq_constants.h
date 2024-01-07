@@ -716,6 +716,16 @@ namespace Language {
 
 	constexpr uint8 MaxValue = 100;
 }
+namespace PetInfoType {
+	constexpr int Current   = 0;
+	constexpr int Suspended = 1;
+}
+
+namespace BuffEffectType {
+	constexpr uint8 None        = 0;
+	constexpr uint8 Buff        = 2;
+	constexpr uint8 InverseBuff = 4;
+}
 
 typedef enum {
 	FilterNone = 0,
