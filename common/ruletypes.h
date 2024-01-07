@@ -605,6 +605,7 @@ RULE_INT(Aggro, ClientAggroCheckIdleInterval, 6000, "Interval in which clients a
 RULE_REAL(Aggro, PetAttackRange, 40000.0, "Maximum squared range /pet attack works at default is 200")
 RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true, "If enabled, NPC's will drop aggro beyond 600 units or what is defined at the zone level")
 RULE_BOOL(Aggro, AggroPlayerPets, false, "If enabled, NPCs will aggro player pets")
+RULE_BOOL(Aggro, UndeadAlwaysAggro, true, "should undead always aggro?")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)
