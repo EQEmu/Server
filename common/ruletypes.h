@@ -217,6 +217,7 @@ RULE_BOOL(Character, LeaveCursorMoneyOnCorpse, false, "Enable or disable leaving
 RULE_BOOL(Character, ItemExtraSkillDamageCalcAsPercent, false, "If enabled, apply Item Extra Skill Damage as Percentage-based modifiers")
 RULE_BOOL(Character, UseForageCommonFood, true, "If enabled, use the common foods specified in the code.")
 RULE_INT(Character, ClearXTargetDelay, 10, "Seconds between uses of the #clearxtargets command (Set to 0 to disable)")
+RULE_BOOL(Character, PreventMountsFromZoning, false, "Enable to prevent mounts from zoning - Prior to December 15, 2004 this is enabled.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
