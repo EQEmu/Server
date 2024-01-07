@@ -20,9 +20,12 @@
 #include "eqemu_config.h"
 #include "misc_functions.h"
 #include "strings.h"
+#include "eqemu_logsys.h"
+#include "json/json.hpp"
 
 #include <iostream>
 #include <sstream>
+#include <filesystem>
 
 std::string EQEmuConfig::ConfigFile = "eqemu_config.json";
 EQEmuConfig *EQEmuConfig::_config = nullptr;
@@ -111,13 +114,12 @@ void EQEmuConfig::parse_config()
 		DisableConfigChecks = true;
 	}
 
-	/**
-	 * UCS
-	 */
-	ChatHost = _root["server"]["chatserver"].get("host", "eqchat.eqemulator.net").asString();
-	ChatPort = Strings::ToUnsignedInt(_root["server"]["chatserver"].get("port", "7778").asString());
-	MailHost = _root["server"]["mailserver"].get("host", "eqmail.eqemulator.net").asString();
-	MailPort = Strings::ToUnsignedInt(_root["server"]["mailserver"].get("port", "7778").asString());
+
+
+	CheckUcsConfigConversion();
+
+	m_ucs_host = _root["server"]["ucs"].get("host", "eqchat.eqemulator.net").asString();
+	m_ucs_port = Strings::ToUnsignedInt(_root["server"]["ucs"].get("port", "7778").asString());
 
 	/**
 	 * Database
@@ -246,16 +248,16 @@ std::string EQEmuConfig::GetByName(const std::string &var_name) const
 		return (WorldHTTPEnabled ? "true" : "false");
 	}
 	if (var_name == "ChatHost") {
-		return (ChatHost);
+		return (m_ucs_host);
 	}
 	if (var_name == "ChatPort") {
-		return (itoa(ChatPort));
+		return (itoa(m_ucs_port));
 	}
 	if (var_name == "MailHost") {
-		return (MailHost);
+		return (m_ucs_host);
 	}
 	if (var_name == "MailPort") {
-		return (itoa(MailPort));
+		return (itoa(m_ucs_port));
 	}
 	if (var_name == "DatabaseHost") {
 		return (DatabaseHost);
@@ -362,10 +364,8 @@ void EQEmuConfig::Dump() const
 	std::cout << "WorldHTTPPort = " << WorldHTTPPort << std::endl;
 	std::cout << "WorldHTTPMimeFile = " << WorldHTTPMimeFile << std::endl;
 	std::cout << "WorldHTTPEnabled = " << WorldHTTPEnabled << std::endl;
-	std::cout << "ChatHost = " << ChatHost << std::endl;
-	std::cout << "ChatPort = " << ChatPort << std::endl;
-	std::cout << "MailHost = " << MailHost << std::endl;
-	std::cout << "MailPort = " << MailPort << std::endl;
+	std::cout << "UCSHost = " << m_ucs_host << std::endl;
+	std::cout << "UCSPort = " << m_ucs_port << std::endl;
 	std::cout << "DatabaseHost = " << DatabaseHost << std::endl;
 	std::cout << "DatabaseUsername = " << DatabaseUsername << std::endl;
 	std::cout << "DatabasePassword = " << DatabasePassword << std::endl;
@@ -391,4 +391,99 @@ void EQEmuConfig::Dump() const
 	std::cout << "ZonePortHigh = " << ZonePortHigh << std::endl;
 	std::cout << "DefaultStatus = " << (int) DefaultStatus << std::endl;
 //	std::cout << "DynamicCount = " << DynamicCount << std::endl;
+}
+
+const std::string &EQEmuConfig::GetUCSHost() const
+{
+	return m_ucs_host;
+}
+
+uint16 EQEmuConfig::GetUCSPort() const
+{
+	return m_ucs_port;
+}
+
+void EQEmuConfig::CheckUcsConfigConversion()
+{
+	std::string chat_host = _root["server"]["chatserver"].get("host", "").asString();
+	uint32      chat_port = Strings::ToUnsignedInt(_root["server"]["chatserver"].get("port", "0").asString());
+	std::string mail_host = _root["server"]["mailserver"].get("host", "").asString();
+	uint32      mail_port = Strings::ToUnsignedInt(_root["server"]["mailserver"].get("port", "0").asString());
+	std::string ucs_host  = _root["server"]["ucs"].get("host", "").asString();
+
+	// automatic ucs legacy configuration migration
+	// if old configuration values are set, let's backup the existing configuration
+	// and migrate to to use the new fields and write the new config
+	if ((!chat_host.empty() || !mail_host.empty()) && ucs_host.empty()) {
+		LogInfo("Migrating old [eqemu_config] UCS configuration to new configuration");
+
+		std::string config_file_path = std::filesystem::path{
+			path.GetServerPath() + "/eqemu_config.json"
+		}.string();
+
+		std::string config_file_bak_path = std::filesystem::path{
+			path.GetServerPath() + "/eqemu_config.ucs-migrate-json.bak"
+		}.string();
+
+		// copy eqemu_config.json to eqemu_config.json.bak
+		std::ifstream src(config_file_path, std::ios::binary);
+		std::ofstream dst(config_file_bak_path, std::ios::binary);
+		dst << src.rdbuf();
+		src.close();
+
+		LogInfo("Old configuration backed up to [{}]", config_file_bak_path);
+
+		// read eqemu_config.json, transplant new fields and write to eqemu_config.json
+		Json::Value   root;
+		Json::Reader  reader;
+		std::ifstream file(config_file_path);
+		if (!reader.parse(file, root)) {
+			LogError("Failed to parse configuration file");
+			return;
+		}
+		file.close();
+
+		// get old fields
+		std::string host = !chat_host.empty() ? chat_host : mail_host;
+		if (host.empty()) {
+			host = "eqchat.eqemulator.net";
+		}
+		std::string port = chat_port > 0 ? std::to_string(chat_port) : std::to_string(mail_port);
+		if (port.empty()) {
+			port = "7778";
+		}
+
+		// set new fields
+		root["server"]["ucs"]["host"] = host;
+		root["server"]["ucs"]["port"] = port;
+
+		// unset old fields
+		root["server"].removeMember("chatserver");
+		root["server"].removeMember("mailserver");
+
+		// get Json::Value raw string
+		std::string config = root.toStyledString();
+
+		// format using more modern json library
+		nlohmann::json data = nlohmann::json::parse(config);
+
+		// write to file
+		std::ofstream o(config_file_path);
+		o << std::setw(1) << data << std::endl;
+		o.close();
+
+		// write new config
+		LogInfo("New configuration written to [{}]", config_file_path);
+		LogInfo("Migration complete, please review the new configuration file");
+
+		// reload config internally
+		try {
+			std::ifstream fconfig(config_file_path, std::ifstream::binary);
+			fconfig >> _config->_root;
+			_config->parse_config();
+		}
+		catch (std::exception &) {
+			return;
+		}
+	}
 }

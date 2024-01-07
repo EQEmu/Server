@@ -634,8 +634,7 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 
 	// ucs (public)
 	if (
-		(!config_address.empty() && c->MailHost != config_address) ||
-		(!config_address.empty() && c->ChatHost != config_address)
+		(!config_address.empty() && c->GetUCSHost() != config_address)
 		) {
 		LogWarning("# UCS Address Mailhost (Configuration)");
 		LogWarning("");
@@ -647,14 +646,9 @@ void WorldBoot::CheckForPossibleConfigurationIssues()
 		LogWarning("Docs [https://docs.eqemu.io/server/installation/configure-your-eqemu_config/#mailserver]");
 		LogWarning("");
 		LogWarning(
-			"[server.world.address] value [{}] [server.chatserver.host] [{}]",
+			"[server.world.address] value [{}] [server.ucs.host] [{}]",
 			config_address,
-			c->ChatHost
-		);
-		LogWarning(
-			"[server.world.address] value [{}] [server.mailserver.host] [{}]",
-			config_address,
-			c->MailHost
+			c->GetUCSHost()
 		);
 		std::cout << std::endl;
 	}
