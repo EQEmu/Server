@@ -34,6 +34,7 @@
 #include "../common/repositories/character_currency_repository.h"
 #include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/character_auras_repository.h"
+#include "../common/repositories/character_alt_currency_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2908,27 +2909,34 @@ void ZoneDatabase::QGlobalPurge()
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency) {
+void ZoneDatabase::LoadAltCurrencyValues(uint32 char_id, std::map<uint32, uint32> &currency)
+{
+	const auto& l = CharacterAltCurrencyRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`char_id` = {}",
+			char_id
+		)
+	);
 
-	std::string query = StringFormat("SELECT currency_id, amount "
-                                    "FROM character_alt_currency "
-                                    "WHERE char_id = '%u'", char_id);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	if (l.empty()) {
+		return;
+	}
 
-    for (auto& row = results.begin(); row != results.end(); ++row)
-        currency[Strings::ToInt(row[0])] = Strings::ToInt(row[1]);
-
+	for (const auto& e : l) {
+		currency[e.currency_id] = e.amount;
+	}
 }
 
-void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value) {
+void ZoneDatabase::UpdateAltCurrencyValue(uint32 char_id, uint32 currency_id, uint32 value)
+{
+	auto e = CharacterAltCurrencyRepository::NewEntity();
 
-	std::string query = StringFormat("REPLACE INTO character_alt_currency (char_id, currency_id, amount) "
-                                    "VALUES('%u', '%u', '%u')", char_id, currency_id, value);
-	database.QueryDatabase(query);
+	e.char_id     = char_id;
+	e.currency_id = currency_id;
+	e.amount      = value;
 
+	CharacterAltCurrencyRepository::ReplaceOne(*this, e);
 }
 
 void ZoneDatabase::SaveBuffs(Client *client)
