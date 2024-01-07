@@ -900,17 +900,15 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].ID   = item_data->ID;
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Icon = e.icon;
 
-			strn0cpy(
+			strcpy(
 				pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Name,
-				item_data->Name,
-				sizeof(pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Name)
+				item_data->Name
 			);
 		} else {
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].ID   = 0;
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Icon = 0;
 
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Name[0] = '\0';
-
 		}
 	}
 
@@ -1079,19 +1077,17 @@ bool ZoneDatabase::SaveCharacterBandolier(
 	const char* bandolier_name
 )
 {
-	auto e = CharacterBandolierRepository::NewEntity();
-
-	e.id             = character_id;
-	e.bandolier_id   = bandolier_id;
-	e.bandolier_slot = bandolier_slot;
-	e.item_id        = item_id;
-	e.icon           = icon;
-	e.bandolier_name = Strings::Escape(bandolier_name);
-
-	const int replaced = CharacterBandolierRepository::ReplaceOne(*this, e);
-
-	LogDebug("ZoneDatabase::SaveCharacterBandolier for character ID: [{}], bandolier_id: [{}], bandolier_slot: [{}] item_id: [{}], icon:[{}] band_name:[{}]  done", character_id, bandolier_id, bandolier_slot, item_id, icon, bandolier_name);
-	return replaced;
+	return CharacterBandolierRepository::ReplaceOne(
+		*this,
+		CharacterBandolierRepository::CharacterBandolier{
+			.id = character_id,
+			.bandolier_id = bandolier_id,
+			.bandolier_slot = bandolier_slot,
+			.item_id = item_id,
+			.icon = icon,
+			.bandolier_name = bandolier_name
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon)
@@ -1360,7 +1356,7 @@ bool ZoneDatabase::DeleteCharacterDisc(uint32 character_id, uint32 slot_id){
 
 bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 bandolier_id)
 {
-	const int deleted = CharacterBandolierRepository::DeleteWhere(
+	return CharacterBandolierRepository::DeleteWhere(
 		*this,
 		fmt::format(
 			"`id` = {} AND `bandolier_id` = {}",
@@ -1368,8 +1364,6 @@ bool ZoneDatabase::DeleteCharacterBandolier(uint32 character_id, uint32 bandolie
 			bandolier_id
 		)
 	);
-
-	return deleted;
 }
 
 bool ZoneDatabase::DeleteCharacterLeadershipAbilities(uint32 character_id)
