@@ -4329,25 +4329,10 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	LogSpells("OP CastSpell: slot [{}] spell [{}] target [{}] inv [{}]", castspell->slot, castspell->spell_id, castspell->target_id, (unsigned long)castspell->inventoryslot);
 	CastingSlot slot = static_cast<CastingSlot>(castspell->slot);
 
-	if (RuleB(Spells, RequireMnemonicRetention)) {
-		// casting from slot 9, 10, 11 or 12, we disable cause not classic.
-		if (castspell->slot == 8 && GetAA(aaMnemonicRetention) < 1) {
-			InterruptSpell(castspell->spell_id);
-			Message(Chat::Red, "You do not have the required AA to use this spell slot.");
-			return;
-		} else if(castspell->slot == 9 && GetAA(aaMnemonicRetention) < 2) {
-			InterruptSpell(castspell->spell_id);
-			Message(Chat::Red, "You do not have the required AA to use this spell slot.");
-			return;
-		} else if(castspell->slot == 10 && GetAA(aaMnemonicRetention) < 3) {
-			InterruptSpell(castspell->spell_id);
-			Message(Chat::Red, "You do not have the required AA to use this spell slot.");
-			return;
-		} else if(castspell->slot == 11 && GetAA(aaMnemonicRetention) < 4) {
-			InterruptSpell(castspell->spell_id);
-			Message(Chat::Red, "You do not have the required AA to use this spell slot.");
-			return;
-		}
+	if (EQ::ValueWithin(castspell->slot, 8, 11) && GetAA(aaMnemonicRetention) < (castspell->slot - 7)) {
+		InterruptSpell(castspell->spell_id);
+		Message(Chat::Red, "You do not have the required AA to use this spell slot.");
+		return;
 	}
 
 	/* Memorized Spell */
