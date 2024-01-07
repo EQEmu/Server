@@ -4961,6 +4961,13 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			if(GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0)
 			{
 				LogSpells("Our level ([{}]) is higher than the limit of this Charm spell ([{}])", GetLevel(), spells[spell_id].max_value[effect_index]);
+				if (RuleB(Spells, CharmAggroOverLevel)) {
+					int64 aggro = caster->CheckAggroAmount(spell_id, this);
+					aggro > 0 ? AddToHateList(caster, aggro) : AddToHateList(caster, 1, 0, true, false, false, spell_id);
+					caster->MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					return true;
+				}
+				
 				caster->MessageString(Chat::Red, CANNOT_CHARM_YET);	// need to verify message type, not in MQ2Cast for easy look up<Paste>
 				AddToHateList(caster, 1,0,true,false,false,spell_id);
 				return true;

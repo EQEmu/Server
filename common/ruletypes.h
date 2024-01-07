@@ -472,6 +472,7 @@ RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal 
 RULE_BOOL(Spells, UseLegacyFizzleCode, false, "Enable will turn on the legacy fizzle code which is far stricter and more accurate to 2001/2002 testing.")
 RULE_BOOL(Spells, LegacyManaburn, false, "Enable to have the legacy manaburn system from 2003 and earlier.")
 RULE_BOOL(Spells, EvacClearAggroInSameZone, false, "Enable to clear aggro on clients when evacing in same zone.")
+RULE_BOOL(Spells, CharmAggroOverLevel, false, "Enabling this rule will cause Charm casts over level to show resisted and cause aggro. Early EQ style.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
