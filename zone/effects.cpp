@@ -596,13 +596,13 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 	if (
 		IsDiscipline(spell_id) && 
 		(
-			!spell_id == SPELL_BATTLE_CRY || 
-			!spell_id == SPELL_WAR_CRY || 
-			!spell_id == SPELL_BATTLE_CRY_OF_DRAVEL || 
-			!spell_id == SPELL_WAR_CRY_OF_DRAVEL || 
-			!spell_id == SPELL_BATTLE_CRY_OF_THE_MASTRUQ || 
-			!spell_id == SPELL_ANCIENT_CRY_OF_CHAOS || 
-			!spell_id == SPELL_BLOODTHIRST
+			spell_id != SPELL_BATTLE_CRY &&
+			spell_id != SPELL_WAR_CRY &&
+			spell_id != SPELL_BATTLE_CRY_OF_DRAVEL &&
+			spell_id != SPELL_WAR_CRY_OF_DRAVEL &&
+			spell_id != SPELL_BATTLE_CRY_OF_THE_MASTRUQ &&
+			spell_id != SPELL_ANCIENT_CRY_OF_CHAOS &&
+			spell_id != SPELL_BLOODTHIRST
 		)
 	) {
 		return duration;
