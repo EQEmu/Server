@@ -9682,11 +9682,13 @@ void Client::BreakSneakWhenCastOn(Mob *caster, bool IsResisted)
 				IsCastersTarget = true;
 			}
 		}
+
 		if (!IsCastersTarget) {
 			int chance = spellbonuses.NoBreakAESneak + itembonuses.NoBreakAESneak + aabonuses.NoBreakAESneak;
 			if (IsResisted) {
-				chance *= 2;
+				chance *= RuleR(Spells, BreakSneakWhenCastOn);
 			}
+
 			if (chance && zone->random.Roll(chance)) {
 				return; // Do not drop Sneak/Hide
 			}
@@ -9697,12 +9699,12 @@ void Client::BreakSneakWhenCastOn(Mob *caster, bool IsResisted)
 
 void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 {
-	if(GetFeigned()){
-
+	if (GetFeigned()) {
 		int chance = spellbonuses.FeignedCastOnChance + itembonuses.FeignedCastOnChance + aabonuses.FeignedCastOnChance;
 
-		if (IsResisted)
-			chance *= 2;
+		if (IsResisted) {
+			chance *= RuleR(Spells, BreakFeignDeathWhenCastOn);
+		}
 
 		if(chance && (zone->random.Roll(chance))){
 			MessageString(Chat::SpellFailure,FD_CAST_ON_NO_BREAK);
