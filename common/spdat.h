@@ -1326,7 +1326,6 @@ typedef enum {
 //
 #define SPELL_LOAD_FIELD_COUNT 236
 
-
 struct SPDat_Spell_Struct
 {
 /* 000 */	int id;	// not used -- SPELLINDEX
