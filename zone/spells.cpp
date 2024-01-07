@@ -1058,7 +1058,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 		// calculates minimum level this spell is available - ensures similar casting difficulty for all classes
 
 		int minimum_level = UINT8_MAX;
-		for (int a = 0; a < Class::PLAYER_CLASS_COUNT; a = a + 1) {
+		for (int a = 0; a < Class::PLAYER_CLASS_COUNT; a++) {
 			int this_lvl = spells[spell_id].classes[a];
 			if (this_lvl < minimum_level) {
 				minimum_level = this_lvl;
@@ -1121,81 +1121,74 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 		LogSpells("Check Fizzle [{}]  spell: [{}]  fizzle_chance: [{}]  roll: [{}]", GetName(), spell_id, fizzle_chance, fizzle_roll);
 
-		if (fizzle_roll > fizzle_chance) {
-			return true;
-		}
-
-		return false;
-	} else {
-		//is there any sort of focus that affects fizzling?
-
-		int par_skill;
-		int act_skill;
-
-		par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10;//IIRC even if you are lagging behind the skill levels you don't fizzle much
-		if (par_skill > 235) {
-			par_skill = 235;
-		}
-
-		par_skill += spells[spell_id].classes[GetClass()-1]; // maximum of 270 for level 65 spell
-
-		act_skill = GetSkill(spells[spell_id].skill);
-		act_skill += GetLevel(); // maximum of whatever the client can cheat
-		act_skill += itembonuses.adjusted_casting_skill + spellbonuses.adjusted_casting_skill + aabonuses.adjusted_casting_skill;
-		LogSpellsDetail("Adjusted casting skill: [{}]+[{}]+[{}]+[{}]+[{}]=[{}]", GetSkill(spells[spell_id].skill), GetLevel(), itembonuses.adjusted_casting_skill, spellbonuses.adjusted_casting_skill, aabonuses.adjusted_casting_skill, act_skill);
-
-		//spell specialization
-		float specialize = GetSpecializeSkillValue(spell_id);
-		if (specialize > 0) {
-			switch (GetAA(aaSpellCastingMastery)) {
-			case 1:
-				specialize = specialize * 1.05;
-				break;
-			case 2:
-				specialize = specialize * 1.15;
-				break;
-			case 3:
-				specialize = specialize * 1.3;
-				break;
-			}
-			if (((specialize/6.0f) + 15.0f) < zone->random.Real(0, 100)) {
-				specialize *= SPECIALIZE_FIZZLE / 200.0f;
-			} else {
-				specialize = 0.0f;
-			}
-		}
-
-		// == 0 --> on par
-		// > 0 --> skill is lower, higher chance of fizzle
-		// < 0 --> skill is better, lower chance of fizzle
-		// the max that diff can be is +- 235
-		float diff = par_skill + static_cast<float>(spells[spell_id].base_difficulty) - act_skill;
-
-		// if you have high int/wis you fizzle less, you fizzle more if you are stupid
-		if (GetClass() == Class::Bard) {
-			diff -= (GetCHA() - 110) / 20.0;
-		} else if (GetCasterClass() == 'W') {
-			diff -= (GetWIS() - 125) / 20.0;
-		} else if (GetCasterClass() == 'I') {
-			diff -= (GetINT() - 125) / 20.0;
-		}
-
-		// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
-		float base_fizzle = 10;
-		float fizzle_chance = base_fizzle - specialize + diff / 5.0;
-
-		// always at least 1% chance to fail or 5% to succeed
-		fizzle_chance = fizzle_chance < 1 ? 1 : (fizzle_chance > 95 ? 95 : fizzle_chance);
-
-		float fizzle_roll = zone->random.Real(0, 100);
-
-		LogSpells("Check Fizzle [{}] spell [{}] fizzlechance: [{}]  diff: [{}] roll: [{}]", GetName(), spell_id, fizzle_chance, diff, fizzle_roll);
-
-		if (fizzle_roll > fizzle_chance) {
-			return true;
-		}
-		return false;
+		return fizzle_roll > fizzle_chance;
 	}
+
+	//is there any sort of focus that affects fizzling?
+
+	int par_skill;
+	int act_skill;
+
+	par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10;//IIRC even if you are lagging behind the skill levels you don't fizzle much
+	if (par_skill > 235) {
+		par_skill = 235;
+	}
+
+	par_skill += spells[spell_id].classes[GetClass()-1]; // maximum of 270 for level 65 spell
+
+	act_skill = GetSkill(spells[spell_id].skill);
+	act_skill += GetLevel(); // maximum of whatever the client can cheat
+	act_skill += itembonuses.adjusted_casting_skill + spellbonuses.adjusted_casting_skill + aabonuses.adjusted_casting_skill;
+	LogSpellsDetail("Adjusted casting skill: [{}]+[{}]+[{}]+[{}]+[{}]=[{}]", GetSkill(spells[spell_id].skill), GetLevel(), itembonuses.adjusted_casting_skill, spellbonuses.adjusted_casting_skill, aabonuses.adjusted_casting_skill, act_skill);
+
+	//spell specialization
+	float specialize = GetSpecializeSkillValue(spell_id);
+	if (specialize > 0) {
+		switch (GetAA(aaSpellCastingMastery)) {
+		case 1:
+			specialize = specialize * 1.05;
+			break;
+		case 2:
+			specialize = specialize * 1.15;
+			break;
+		case 3:
+			specialize = specialize * 1.3;
+			break;
+		}
+		if (((specialize / 6.0f) + 15.0f) < zone->random.Real(0, 100)) {
+			specialize *= SPECIALIZE_FIZZLE / 200.0f;
+		} else {
+			specialize = 0.0f;
+		}
+	}
+
+	// == 0 --> on par
+	// > 0 --> skill is lower, higher chance of fizzle
+	// < 0 --> skill is better, lower chance of fizzle
+	// the max that diff can be is +- 235
+	float diff = par_skill + static_cast<float>(spells[spell_id].base_difficulty) - act_skill;
+
+	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
+	if (GetClass() == Class::Bard) {
+		diff -= (GetCHA() - 110) / 20.0;
+	} else if (GetCasterClass() == 'W') {
+		diff -= (GetWIS() - 125) / 20.0;
+	} else if (GetCasterClass() == 'I') {
+		diff -= (GetINT() - 125) / 20.0;
+	}
+
+	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
+	float base_fizzle = 10;
+	float fizzle_chance = base_fizzle - specialize + diff / 5.0;
+
+	// always at least 1% chance to fail or 5% to succeed
+	fizzle_chance = fizzle_chance < 1 ? 1 : (fizzle_chance > 95 ? 95 : fizzle_chance);
+
+	float fizzle_roll = zone->random.Real(0, 100);
+
+	LogSpells("Check Fizzle [{}] spell [{}] fizzlechance: [{}]  diff: [{}] roll: [{}]", GetName(), spell_id, fizzle_chance, diff, fizzle_roll);
+
+	return fizzle_roll > fizzle_chance;
 }
 
 void Mob::ZeroCastingVars()
