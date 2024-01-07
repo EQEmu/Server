@@ -953,7 +953,7 @@ bool ZoneDatabase::LoadCharacterPotionBelt(uint32 character_id, PlayerProfile_St
 		pp->potionbelt.Items[e.potion_id].ID   = item_data->ID;
 		pp->potionbelt.Items[e.potion_id].Icon = e.icon;
 
-		strn0cpy(pp->potionbelt.Items[e.potion_id].Name, item_data->Name, sizeof(pp->potionbelt.Items[e.potion_id].Name));
+		strcpy(pp->potionbelt.Items[e.potion_id].Name, item_data->Name);
 	}
 
 	return true;
@@ -1073,16 +1073,15 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 
 bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon)
 {
-	auto e = CharacterPotionbeltRepository::NewEntity();
-
-	e.id        = character_id;
-	e.potion_id = potion_id;
-	e.item_id   = item_id;
-	e.icon      = icon;
-
-	const int replaced = CharacterPotionbeltRepository::ReplaceOne(*this, e);
-
-	return replaced;
+	return CharacterPotionbeltRepository::ReplaceOne(
+		*this,
+		CharacterPotionbeltRepository::CharacterPotionbelt{
+			.id = character_id,
+			.potion_id = potion_id,
+			.item_id = item_id,
+			.icon = icon
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp)
