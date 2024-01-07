@@ -912,7 +912,7 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Name[0] = '\0';
 		}
 
-		strncpy(pp->bandoliers[e.bandolier_id].Name, e.bandolier_name, 32);
+		strncpy(pp->bandoliers[e.bandolier_id].Name, e.bandolier_name.c_str(), 32);
 	}
 
 	return true;
