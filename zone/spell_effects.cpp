@@ -568,19 +568,26 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					// Greater Decession = 3244
 					// Egress = 1566
 
-					if(!target_zone) {
+					if (!target_zone) {
 #ifdef SPELL_EFFECT_SPAM
 						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
-							if (IsClient()) {
-								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
-							} else {
-								GMMove(x, y, z, heading);
+						if (IsClient()) {
+							// break charmed pets before moving to not poof pet (exploitable otherwise)
+							if (HasPet()) {
+								if (GetPet()->IsCharmed()) {
+									GetPet()->BuffFadeByEffect(SE_Charm);
+								}
 							}
-
-							if (RuleB(Spells, EvacClearAggroInSameZone)) {
-								entity_list.ClearAggro(this);
-							}
+							
+							CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
+						} else {
+							GMMove(x, y, z, heading);
+						}
+						
+						if (RuleB(Spells, EvacClearAggroInSameZone)) {
+							entity_list.ClearAggro(this);
+						}
 					} else {
 #ifdef SPELL_EFFECT_SPAM
 						LogDebug("Succor/Evacuation Spell To Another Zone");
@@ -2214,7 +2221,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 						// clear aggro when summoned in zone and further than aggro clear distance rule.
 						if (RuleR(Spells, CallOfTheHeroAggroClearDist) == 0 || caster->CalculateDistance(GetX(), GetY(), GetZ()) >= RuleR(Spells, CallOfTheHeroAggroClearDist)) {
-							entity_list.ClearAggro(this);
+							entity_list.ClearAggro(this, true);
 						}
 					} else if (!RuleB(Combat, SummonMeleeRange) && caster->GetZoneID() == GetZoneID() && caster->CombatRange(this)) {
 						break;
