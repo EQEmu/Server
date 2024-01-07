@@ -2144,7 +2144,7 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case FROGLOK:
 		{
-			if (RuleI(Skills, SwimmingStartValue) > 125) {
+			if (RuleI(Skills, SwimmingStartValue) < 125) {
 				pp->skills[EQ::skills::SkillSwimming] = 125;
 			}
 			break;
@@ -2163,7 +2163,7 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	case IKSAR:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
-			if (RuleI(Skills, SwimmingStartValue) > 100) {
+			if (RuleI(Skills, SwimmingStartValue) < 100) {
 				pp->skills[EQ::skills::SkillSwimming] = 100;
 			}
 			break;
