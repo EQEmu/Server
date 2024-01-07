@@ -204,6 +204,7 @@ bool Perl_NPC_IsOnHatelist(NPC* self, Mob* mob) // @categories Hate and Aggro
 void Perl_NPC_RemoveFromHateList(NPC* self, Mob* mob) // @categories Hate and Aggro
 {
 	self->RemoveFromHateList(mob);
+	self->RemoveFromRampageList(mob);
 }
 
 void Perl_NPC_SetNPCFactionID(NPC* self, int faction_id) // @categories Faction
