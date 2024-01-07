@@ -1877,11 +1877,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
-				uint16 procid = GetProcID(spell_id, i);
+				uint16 proc_id = GetProcID(spell_id, i);
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddProcToWeapon(procid, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetSpellProcLimitTimer(spell_id, ProcType::MELEE_PROC));
+				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
+				if (proc_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
+					proc_id = PI_VampEmbraceShadow;
+				}
+
+				AddProcToWeapon(proc_id, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetSpellProcLimitTimer(spell_id, ProcType::MELEE_PROC));
 				break;
 			}
 
@@ -4246,8 +4251,14 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
-				uint16 procid = GetProcID(buffs[slot].spellid, i);
-				RemoveProcFromWeapon(procid, false);
+				uint16 proc_id = GetProcID(buffs[slot].spellid, i);
+
+				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
+				if (proc_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
+					proc_id = PI_VampEmbraceShadow;
+				}
+
+				RemoveProcFromWeapon(proc_id, false);
 				break;
 			}
 

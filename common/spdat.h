@@ -1324,6 +1324,10 @@ typedef enum {
 //
 #define SPELL_LOAD_FIELD_COUNT 236
 
+// Vampiric Embrace procs ID.
+#define PI_VampEmbraceNecro 821
+#define PI_VampEmbraceShadow 822
+
 struct SPDat_Spell_Struct
 {
 /* 000 */	int id;	// not used -- SPELLINDEX

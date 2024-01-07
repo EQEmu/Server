@@ -6083,8 +6083,14 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 }
 
 bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id, int level_override, uint32 proc_reuse_time) {
-	if(!IsValidSpell(spell_id))
-		return(false);
+	if(!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
+	if (spell_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
+		spell_id = PI_VampEmbraceShadow;
+	}
 
 	int i;
 	if (bPerma) {
@@ -6137,6 +6143,11 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 }
 
 bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
+	// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
+	if (spell_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
+		spell_id = PI_VampEmbraceShadow;
+	}
+
 	for (int i = 0; i < m_max_procs; i++) {
 		if (bAll || SpellProcs[i].spellID == spell_id) {
 			SpellProcs[i].spellID = SPELL_UNKNOWN;
