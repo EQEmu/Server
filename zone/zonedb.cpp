@@ -3327,7 +3327,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 			continue;
 		}
 
-		strn0cpy(p->Name, e.petname.c_str(), sizeof(c->Name));
+		strn0cpy(p->Name, e.petname.c_str(), sizeof(p->Name));
 
 		p->petpower = e.petpower;
 		p->SpellID  = e.spell_id;
