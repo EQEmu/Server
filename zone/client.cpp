@@ -10756,8 +10756,6 @@ void Client::SaveDisciplines()
 		}
 	}
 
-	CharacterDisciplinesRepository::DeleteOne(database, CharacterID());
-
 	if (!v.empty()) {
 		CharacterDisciplinesRepository::ReplaceMany(database, v);
 	}
