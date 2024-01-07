@@ -922,10 +922,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Bind Affinity");
 #endif
-				if (IsClient())
-				{
-					if(CastToClient()->GetGM() || RuleB(Character, BindAnywhere))
-					{
+				if (IsClient()) {
+					if (CastToClient()->GetGM() || RuleB(Character, BindAnywhere)) {
 						auto action_packet =
 						    new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 						Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
@@ -949,34 +947,32 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						cd->hit_heading = action->hit_heading;
 
 						CastToClient()->QueuePacket(action_packet);
-						if(caster && caster->IsClient() && caster != this)
+
+						if (caster && caster->IsClient() && caster != this) {
 							caster->CastToClient()->QueuePacket(action_packet);
+						}
 
 						CastToClient()->QueuePacket(message_packet);
-						if(caster && caster->IsClient() && caster != this)
+
+						if (caster && caster->IsClient() && caster != this) {
 							caster->CastToClient()->QueuePacket(message_packet);
+						}
 
 						CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 						Save();
 						safe_delete(action_packet);
 						safe_delete(message_packet);
-					}
-					else
-					{
-						if(!zone->CanBind())
-						{
+					} else {
+						if (!zone->CanBind()) {
 							MessageString(Chat::SpellFailure, CANNOT_BIND);
 							break;
 						}
-						if(!zone->IsCity())
-						{
-							if(caster != this)
-							{
+
+						if (!zone->IsCity()) {
+							if (caster != this && !zone->IsSpecialBindLocation(GetPosition())) {
 								MessageString(Chat::SpellFailure, CANNOT_BIND);
 								break;
-							}
-							else
-							{
+							} else {
 								auto action_packet = new EQApplicationPacket(
 								    OP_Action, sizeof(Action_Struct));
 								Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
@@ -1000,21 +996,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 								cd->hit_heading = action->hit_heading;
 
 								CastToClient()->QueuePacket(action_packet);
-								if(caster->IsClient() && caster != this)
+
+								if (caster->IsClient() && caster != this) {
 									caster->CastToClient()->QueuePacket(action_packet);
+								}
 
 								CastToClient()->QueuePacket(message_packet);
-								if(caster->IsClient() && caster != this)
+
+								if (caster->IsClient() && caster != this) {
 									caster->CastToClient()->QueuePacket(message_packet);
+								}
 
 								CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 								Save();
 								safe_delete(action_packet);
 								safe_delete(message_packet);
 							}
-						}
-						else
-						{
+						} else {
 							auto action_packet =
 							    new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 							Action_Struct* action = (Action_Struct*) action_packet->pBuffer;
@@ -1038,13 +1036,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							cd->hit_heading = action->hit_heading;
 
 							CastToClient()->QueuePacket(action_packet);
-							if(caster->IsClient() && caster != this)
+							
+							if (caster->IsClient() && caster != this) {
 								caster->CastToClient()->QueuePacket(action_packet);
+							}
 
 							CastToClient()->QueuePacket(message_packet);
-							if(caster->IsClient() && caster != this)
-								caster->CastToClient()->QueuePacket(message_packet);
 
+							if (caster->IsClient() && caster != this) {
+								caster->CastToClient()->QueuePacket(message_packet);
+							}
+							
 							CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 							Save();
 							safe_delete(action_packet);
