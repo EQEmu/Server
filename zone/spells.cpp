@@ -6504,10 +6504,13 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool in
 
 	if (recast_delay) {
 		auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
-		ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
-		ird->recast_delay = recast_delay;
-		ird->recast_type = static_cast<uint32>(recast_type);
+
+		auto ird = (ItemRecastDelay_Struct *) outapp->pBuffer;
+
+		ird->recast_delay               = recast_delay;
+		ird->recast_type                = static_cast<uint32>(recast_type);
 		ird->ignore_casting_requirement = in_ignore_casting_requirement; //True allows reset of item cast timers
+
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
@@ -6515,150 +6518,157 @@ void Client::SendItemRecastTimer(int32 recast_type, uint32 recast_delay, bool in
 
 void Client::SetItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
-	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
-
-	int recast_delay = 0;
-	int recast_type = 0;
-	bool from_augment = false;
-	int item_casting = 0;
+	auto item = CastToClient()->GetInv().GetItem(inventory_slot);
 
 	if (!item) {
 		return;
 	}
-	item_casting = item->GetItem()->ID;
 
-	//Check primary item.
-	if (item->GetItem()->RecastDelay > 0) {
+	uint32 recast_delay = 0;
+	int    recast_type  = 0;
+	uint32 item_id      = item->GetItem()->ID;
+	bool   from_augment = false;
+
+	if (item->GetItem()->RecastDelay > 0) { // Check item
 		recast_type = item->GetItem()->RecastType;
 		recast_delay = item->GetItem()->RecastDelay;
-	}
-	//Check augmenent
-	else{
+	} else { // Check augments
 		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+			const auto aug = item->GetAugment(r);
 
-			if (!aug_i) {
-				continue;
-			}
-			const EQ::ItemData* aug = aug_i->GetItem();
 			if (!aug) {
 				continue;
 			}
 
-			if (aug->Click.Effect == spell_id) {
-				recast_delay = aug_i->GetItem()->RecastDelay;
-				recast_type = aug_i->GetItem()->RecastType;
+			const auto aug_data = aug->GetItem();
+			if (!aug_data) {
+				continue;
+			}
+
+			if (aug_data->Click.Effect == spell_id) {
+				recast_delay = aug->GetItem()->RecastDelay;
+				recast_type  = aug->GetItem()->RecastType;
 				from_augment = true;
-				item_casting = aug_i->GetItem()->ID;
+				item_id      = aug->GetItem()->ID;
 				break;
 			}
 		}
 	}
+
 	//must use SPA 415 with focus (SPA 310) to reduce item recast
 	int reduction = GetFocusEffect(focusReduceRecastTime, spell_id);
 	if (reduction) {
 		recast_delay -= reduction;
 	}
 
-	recast_delay = std::max(recast_delay, 0);
+	recast_delay = std::max(recast_delay, static_cast<uint32>(0));
 
 	if (recast_delay > 0) {
-
 		if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
-			GetPTimers().Start((pTimerItemStart + recast_type), static_cast<uint32>(recast_delay));
+			GetPTimers().Start((pTimerItemStart + recast_type), recast_delay);
 			database.UpdateItemRecast(
 				CharacterID(),
 				recast_type,
 				GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
 			);
 		} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM) {
-			GetPTimers().Start((pTimerNegativeItemReuse * item_casting), static_cast<uint32>(recast_delay));
+			GetPTimers().Start((pTimerNegativeItemReuse * item_id), recast_delay);
 			database.UpdateItemRecast(
 				CharacterID(),
-				item_casting,
-				GetPTimers().Get(pTimerNegativeItemReuse * item_casting)->GetReadyTimestamp()
+				item_id,
+				GetPTimers().Get(pTimerNegativeItemReuse * item_id)->GetReadyTimestamp()
 			);
 		}
 
 		if (!from_augment) {
-			SendItemRecastTimer(recast_type, static_cast<uint32>(recast_delay));
+			SendItemRecastTimer(recast_type, recast_delay);
 		}
 	}
 }
 
 void Client::DeleteItemRecastTimer(uint32 item_id)
 {
-    const auto* d = database.GetItem(item_id);
+	const auto item = database.GetItem(item_id);
 
-    if (!d) {
-        return;
-    }
+	if (!item) {
+		return;
+	}
 
-    const auto recast_type = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? d->RecastType : item_id;
-    const int timer_id = d->RecastType != RECAST_TYPE_UNLINKED_ITEM ? (pTimerItemStart + recast_type) : (pTimerNegativeItemReuse * item_id);
+	const auto recast_type = (
+		item->RecastType != RECAST_TYPE_UNLINKED_ITEM ?
+		item->RecastType :
+		item_id
+	);
 
-    database.DeleteItemRecast(CharacterID(), recast_type);
-    GetPTimers().Clear(&database, timer_id);
+	const int  timer_id    = (
+		item->RecastType != RECAST_TYPE_UNLINKED_ITEM ?
+		(pTimerItemStart + recast_type) :
+		(pTimerNegativeItemReuse * item_id)
+	);
 
-    if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
-        SendItemRecastTimer(recast_type, 1, true);
-    }
+	database.DeleteItemRecast(CharacterID(), recast_type);
+	GetPTimers().Clear(&database, timer_id);
+
+	if (recast_type != RECAST_TYPE_UNLINKED_ITEM) {
+		SendItemRecastTimer(recast_type, 1, true);
+	}
 }
 
 bool Client::HasItemRecastTimer(int32 spell_id, uint32 inventory_slot)
 {
-	EQ::ItemInstance *item = CastToClient()->GetInv().GetItem(inventory_slot);
+	auto item = CastToClient()->GetInv().GetItem(inventory_slot);
 
-	int recast_delay = 0;
-	int recast_type = 0;
-	int item_id = 0;
-	bool from_augment = false;
-
-	if (!item) {
+	if (!item || !item->GetItem()) {
 		return false;
 	}
 
-	if (!item->GetItem()) {
-		return false;
-	}
+	uint32 recast_delay = 0;
+	int    recast_type  = 0;
+	uint32 item_id      = 0;
+	bool   from_augment = false;
 
-	//Check primary item.
-	if (item->GetItem()->RecastDelay > 0) {
-		recast_type = item->GetItem()->RecastType;
+	if (item->GetItem()->RecastDelay > 0) { // Check item
+		recast_type  = item->GetItem()->RecastType;
 		recast_delay = item->GetItem()->RecastDelay;
-		item_id = item->GetItem()->ID;
-	}
-	//Check augmenent
-	else {
+		item_id      = item->GetItem()->ID;
+	} else { // Check augments
 		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
-			const EQ::ItemInstance* aug_i = item->GetAugment(r);
+			const auto aug = item->GetAugment(r);
 
-			if (!aug_i) {
-				continue;
-			}
-			const EQ::ItemData* aug = aug_i->GetItem();
 			if (!aug) {
 				continue;
 			}
 
-			if (aug->Click.Effect == spell_id) {
-				if (aug_i->GetItem() && aug_i->GetItem()->RecastDelay > 0) {
-					recast_delay = aug_i->GetItem()->RecastDelay;
-					recast_type = aug_i->GetItem()->RecastType;
-					item_id = aug_i->GetItem()->ID;
+			const auto aug_data = aug->GetItem();
+			if (!aug_data) {
+				continue;
+			}
+
+			if (aug_data->Click.Effect == spell_id) {
+				if (aug->GetItem() && aug->GetItem()->RecastDelay > 0) {
+					recast_delay = aug->GetItem()->RecastDelay;
+					recast_type  = aug->GetItem()->RecastType;
+					item_id      = aug->GetItem()->ID;
 				}
+
 				break;
 			}
 		}
 	}
-	//do not check if item has no recast delay.
+
 	if (!recast_delay) {
 		return false;
 	}
-	//if time is not expired, then it exists and therefore we have a recast on this item.
-	if (recast_type != RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)) {
+
+	if (
+		recast_type != RECAST_TYPE_UNLINKED_ITEM &&
+		!CastToClient()->GetPTimers().Expired(&database, (pTimerItemStart + recast_type), false)
+	) {
 		return true;
-	} else if (recast_type == RECAST_TYPE_UNLINKED_ITEM && !CastToClient()->GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item_id), false)) {
+	} else if (
+		recast_type == RECAST_TYPE_UNLINKED_ITEM &&
+		!CastToClient()->GetPTimers().Expired(&database, (pTimerNegativeItemReuse * item_id), false)
+	) {
 		return true;
 	}
 
