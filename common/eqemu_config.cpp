@@ -119,11 +119,12 @@ void EQEmuConfig::parse_config()
 	uint32      chat_port = Strings::ToUnsignedInt(_root["server"]["chatserver"].get("port", "0").asString());
 	std::string mail_host = _root["server"]["mailserver"].get("host", "").asString();
 	uint32      mail_port = Strings::ToUnsignedInt(_root["server"]["mailserver"].get("port", "0").asString());
+	std::string ucs_host  = _root["server"]["ucs"].get("host", "").asString();
 
 	// automatic ucs legacy configuration migration
 	// if old configuration values are set, let's backup the existing configuration
 	// and migrate to to use the new fields and write the new config
-	if (!chat_host.empty() || !mail_host.empty()) {
+	if ((!chat_host.empty() || !mail_host.empty()) && ucs_host.empty()) {
 		LogInfo("Migrating old [eqemu_config] UCS configuration to new configuration");
 
 		std::string config_file_path = std::filesystem::path{
@@ -157,14 +158,14 @@ void EQEmuConfig::parse_config()
 		if (host.empty()) {
 			host = "eqchat.eqemulator.net";
 		}
-		uint32 port = chat_port > 0 ? chat_port : mail_port;
-		if (port == 0) {
-			port = 7778;
+		std::string port = chat_port > 0 ? std::to_string(chat_port) : std::to_string(mail_port);
+		if (port.empty()) {
+			port = "7778";
 		}
 
 		// set new fields
 		root["server"]["ucs"]["host"] = host;
-		root["server"]["ucs"]["port"] = chat_port ? chat_port : mail_port;
+		root["server"]["ucs"]["port"] = port;
 
 		// unset old fields
 		root["server"].removeMember("chatserver");
