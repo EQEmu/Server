@@ -326,32 +326,45 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
-
 				int64 dmg = effect_value;
 
 				//hardcoded for manaburn and life burn
-				if (spell_id == SPELL_MANA_BURN || spell_id == SPELL_LIFE_BURN)
-				{
-					if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
-					{
-						dmg = caster->GetMana()*-3;
-						caster->SetMana(0);
-					}
-					else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
-					{
-						dmg = caster->GetHP(); // just your current HP
-						caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
-						dmg = -dmg;
-					}
+				if (spell_id == SPELL_MANA_BURN || spell_id == SPELL_LIFE_BURN) {
+					if (RuleB(Spells, LegacyManaburn)) {
+						if (spell_id == SPELL_MANA_BURN && caster) { //Manaburn
+							int manaburn_multiplier = zone->random.Int(150, 200); //Manaburn deals 150-200% of mana
+							dmg = caster->GetMana() * manaburn_multiplier / 100;
+							dmg *= -1;	//Damage should be negative
+							dmg = caster->GetActSpellDamage(spell_id, dmg, this); // Spell can crit, so need this.  Damage cap handled in this function.
+							LogSpells("manaburn_multiplier [{}], Mana [{}], Damage [{}]", manaburn_multiplier, caster->GetMana(), dmg);
+							caster->SetMana(0);
+						} else if (spell_id == SPELL_LIFE_BURN && caster) { //Lifeburn
+							dmg = caster->GetHP() * (-1);
+							caster->SetHP(1);
+							if (caster->IsClient()) {
+								caster->CastToClient()->SetFeigned(true);
+								caster->SendAppearancePacket(AppearanceType::Die, 115);
+							}
+						}
+					} else {
+						if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
+						{
+							dmg = caster->GetMana()*-3;
+							caster->SetMana(0);
+						} else if (spell_id == SPELL_LIFE_BURN && caster) { //Lifeburn
+							dmg = caster->GetHP(); // just your current HP
+							caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
+							dmg = -dmg;
+						}
 
-					if (dmg < 0) {
-						dmg = -dmg;
-						Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+						if (dmg < 0) {
+							dmg = -dmg;
+							Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
+						} else {
+							HealDamage(dmg, caster);
+						}
+						break;
 					}
-					else {
-						HealDamage(dmg, caster);
-					}
-					break;
 				}
 				//normal effects
 				else {
