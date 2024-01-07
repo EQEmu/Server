@@ -50,7 +50,8 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT (UNIX_TIMESTAMP(NOW()) - last_login) FROM `character_data` WHERE name = '{}'",
+				"SELECT (UNIX_TIMESTAMP(NOW()) - last_login) FROM {} WHERE name = '{}'",
+				TableName(),
 				Strings::Escape(name)
 			)
 		);
