@@ -3633,7 +3633,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			it->second->RemoveFromHateList(targ);
 
 			if (it->second->GetSpecialAbility(SPECATK_RAMPAGE)) {
-						it->second->RemoveFromRampageList(targ, true);
+				it->second->RemoveFromRampageList(targ, true);
 			}
 
 			if (targ->IsClient()) {
