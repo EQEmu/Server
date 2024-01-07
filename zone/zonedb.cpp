@@ -3121,7 +3121,7 @@ void ZoneDatabase::LoadAuras(Client *c)
 
 void ZoneDatabase::SavePetInfo(Client *client)
 {
-	PetInfo* c = nullptr;
+	PetInfo* p = nullptr;
 
 	std::vector<CharacterPetInfoRepository::CharacterPetInfo> pet_infos;
 	auto pet_info = CharacterPetInfoRepository::NewEntity();
@@ -3133,20 +3133,20 @@ void ZoneDatabase::SavePetInfo(Client *client)
 	auto item = CharacterPetInventoryRepository::NewEntity();
 
 	for (int pet_info_type = PetInfoType::Current; pet_info_type <= PetInfoType::Suspended; pet_info_type++) {
-		c = client->GetPetInfo(pet_info_type);
-		if (!c) {
+		p = client->GetPetInfo(pet_info_type);
+		if (!p) {
 			continue;
 		}
 
 		pet_info.char_id  = client->CharacterID();
 		pet_info.pet      = pet_info_type;
-		pet_info.petname  = c->Name;
-		pet_info.petpower = c->petpower;
-		pet_info.spell_id = c->SpellID;
-		pet_info.hp       = c->HP;
-		pet_info.mana     = c->Mana;
-		pet_info.size     = c->size;
-		pet_info.taunting = c->taunting ? 1 : 0;
+		pet_info.petname  = p->Name;
+		pet_info.petpower = p->petpower;
+		pet_info.spell_id = p->SpellID;
+		pet_info.hp       = p->HP;
+		pet_info.mana     = p->Mana;
+		pet_info.size     = p->size;
+		pet_info.taunting = p->taunting ? 1 : 0;
 
 		pet_infos.push_back(pet_info);
 
@@ -3159,7 +3159,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		);
 
 		for (int slot_id = 0; slot_id < max_slots; slot_id++) {
-			if (!IsValidSpell(c->Buffs[slot_id].spellid)) {
+			if (!IsValidSpell(p->Buffs[slot_id].spellid)) {
 				continue;
 			}
 
@@ -3169,18 +3169,18 @@ void ZoneDatabase::SavePetInfo(Client *client)
 		pet_buffs.reserve(pet_buff_count);
 
 		for (int slot_id = 0; slot_id < max_slots; slot_id++) {
-			if (!IsValidSpell(c->Buffs[slot_id].spellid)) {
+			if (!IsValidSpell(p->Buffs[slot_id].spellid)) {
 				continue;
 			}
 
 			pet_buff.char_id        = client->CharacterID();
 			pet_buff.pet            = pet_info_type;
 			pet_buff.slot           = slot_id;
-			pet_buff.spell_id       = c->Buffs[slot_id].spellid;
-			pet_buff.caster_level   = c->Buffs[slot_id].level;
-			pet_buff.ticsremaining  = c->Buffs[slot_id].duration;
-			pet_buff.counters       = c->Buffs[slot_id].counters;
-			pet_buff.instrument_mod = c->Buffs[slot_id].bard_modifier;
+			pet_buff.spell_id       = p->Buffs[slot_id].spellid;
+			pet_buff.caster_level   = p->Buffs[slot_id].level;
+			pet_buff.ticsremaining  = p->Buffs[slot_id].duration;
+			pet_buff.counters       = p->Buffs[slot_id].counters;
+			pet_buff.instrument_mod = p->Buffs[slot_id].bard_modifier;
 
 			pet_buffs.push_back(pet_buff);
 		}
@@ -3192,7 +3192,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			slot_id <= EQ::invslot::EQUIPMENT_END;
 			slot_id++
 		) {
-			if (!c->Items[slot_id]) {
+			if (!p->Items[slot_id]) {
 				continue;
 			}
 
@@ -3206,14 +3206,14 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			slot_id <= EQ::invslot::EQUIPMENT_END;
 			slot_id++
 		) {
-			if (!c->Items[slot_id]) {
+			if (!p->Items[slot_id]) {
 				continue;
 			}
 
 			item.char_id = client->CharacterID();
 			item.pet     = pet_info_type;
 			item.slot    = slot_id;
-			item.item_id = c->Items[slot_id];
+			item.item_id = p->Items[slot_id];
 
 			inventory.push_back(item);
 		}
@@ -3306,25 +3306,25 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		return;
 	}
 
-	PetInfo* c;
+	PetInfo* p;
 
 	for (const auto& e : info) {
 		if (e.pet == PetInfoType::Current) {
-			c = pet_info;
+			p = pet_info;
 		} else if (e.pet == PetInfoType::Suspended) {
-			c = suspended_pet_info;
+			p = suspended_pet_info;
 		} else {
 			continue;
 		}
 
-		strn0cpy(c->Name, e.petname.c_str(), sizeof(c->Name));
+		strn0cpy(p->Name, e.petname.c_str(), sizeof(c->Name));
 
-		c->petpower = e.petpower;
-		c->SpellID  = e.spell_id;
-		c->HP       = e.hp;
-		c->Mana     = e.mana;
-		c->size     = e.size;
-		c->taunting = e.taunting;
+		p->petpower = e.petpower;
+		p->SpellID  = e.spell_id;
+		p->HP       = e.hp;
+		p->Mana     = e.mana;
+		p->size     = e.size;
+		p->taunting = e.taunting;
 	}
 
 	const auto& buffs = CharacterPetBuffsRepository::GetWhere(
@@ -3338,9 +3338,9 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	if (!buffs.empty()) {
 		for (const auto& e : buffs) {
 			if (e.pet == PetInfoType::Current) {
-				c = pet_info;
+				p = pet_info;
 			} else if (e.pet == PetInfoType::Suspended) {
-				c = suspended_pet_info;
+				p = suspended_pet_info;
 			} else {
 				continue;
 			}
@@ -3353,13 +3353,13 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 				continue;
 			}
 
-			c->Buffs[e.slot].spellid       = e.spell_id;
-			c->Buffs[e.slot].level         = e.caster_level;
-			c->Buffs[e.slot].player_id     = 0;
-			c->Buffs[e.slot].effect_type   = BuffEffectType::Buff;
-			c->Buffs[e.slot].duration      = e.ticsremaining;
-			c->Buffs[e.slot].counters      = e.counters;
-			c->Buffs[e.slot].bard_modifier = e.instrument_mod;
+			p->Buffs[e.slot].spellid       = e.spell_id;
+			p->Buffs[e.slot].level         = e.caster_level;
+			p->Buffs[e.slot].player_id     = 0;
+			p->Buffs[e.slot].effect_type   = BuffEffectType::Buff;
+			p->Buffs[e.slot].duration      = e.ticsremaining;
+			p->Buffs[e.slot].counters      = e.counters;
+			p->Buffs[e.slot].bard_modifier = e.instrument_mod;
 		}
 	}
 
@@ -3374,9 +3374,9 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	if (!inventory.empty()) {
 		for (const auto& e : inventory) {
 			if (e.pet == PetInfoType::Current) {
-				c = pet_info;
+				p = pet_info;
 			} else if (e.pet == PetInfoType::Suspended) {
-				c = suspended_pet_info;
+				p = suspended_pet_info;
 			} else {
 				continue;
 			}
@@ -3385,7 +3385,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 				continue;
 			}
 
-			c->Items[e.slot] = e.item_id;
+			p->Items[e.slot] = e.item_id;
 		}
 	}
 }
