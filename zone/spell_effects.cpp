@@ -339,17 +339,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							LogSpells("manaburn_multiplier [{}], Mana [{}], Damage [{}]", manaburn_multiplier, caster->GetMana(), dmg);
 							caster->SetMana(0);
 						} else if (spell_id == SPELL_LIFE_BURN && caster) { //Lifeburn
-							dmg = caster->GetHP() * (-1);
+							dmg = caster->GetHP() * -1;
 							caster->SetHP(1);
 							if (caster->IsClient()) {
 								caster->CastToClient()->SetFeigned(true);
-								caster->SendAppearancePacket(AppearanceType::Die, 115);
+								caster->SendAppearancePacket(AppearanceType::Die, Animation::Lying);
 							}
 						}
 					} else {
-						if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
-						{
-							dmg = caster->GetMana()*-3;
+						if (spell_id == SPELL_MANA_BURN && caster) { //Manaburn
+							dmg = caster->GetMana() * -3;
 							caster->SetMana(0);
 						} else if (spell_id == SPELL_LIFE_BURN && caster) { //Lifeburn
 							dmg = caster->GetHP(); // just your current HP
