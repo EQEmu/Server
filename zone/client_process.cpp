@@ -1696,7 +1696,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 
 		uint16 skilllevel = GetRawSkill(skill);
 
-		if(skilllevel == 0 || (skilllevel == 254 && SkillTrainLevel(skill, GetClass()) <= GetLevel())) {
+		if (skilllevel == 0) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
 
