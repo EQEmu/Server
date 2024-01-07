@@ -3111,7 +3111,7 @@ void ZoneDatabase::SaveAuras(Client *c)
 	}
 
 	if (!v.empty()) {
-		CharacterAurasRepository::InsertMany(database, v);
+		CharacterAurasRepository::ReplaceMany(database, v);
 	}
 }
 
