@@ -5707,7 +5707,7 @@ void Client::UnscribeSpell(int slot, bool update_client, bool defer_save)
 	LogSpells("Spell [{}] erased from spell book slot [{}]", m_pp.spell_book[slot], slot);
 
 	if (!defer_save) {
-		database.DeleteCharacterSpell(CharacterID(), m_pp.spell_book[slot], slot);
+		database.DeleteCharacterSpell(CharacterID(), slot);
 	}
 
 	if (update_client && slot < EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize) {
