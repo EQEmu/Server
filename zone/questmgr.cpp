@@ -1081,7 +1081,7 @@ std::string QuestManager::getfactionname(int faction_id) {
 	return content_db.GetFactionName(faction_id);
 }
 
-std::string QuestManager::getlanguagename(int language_id) {
+std::string QuestManager::getlanguagename(uint8 language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }
 
@@ -1331,14 +1331,14 @@ void QuestManager::addskill(int skill_id, int value) {
 	initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
-void QuestManager::setlanguage(int skill_id, int value) {
+void QuestManager::setlanguage(uint8 language_id, uint8 language_skill) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
 		return;
 	}
 
-	initiator->SetLanguageSkill(skill_id, value);
+	initiator->SetLanguageSkill(language_id, language_skill);
 }
 
 void QuestManager::setskill(int skill_id, int value) {

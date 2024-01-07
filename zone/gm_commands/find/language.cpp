@@ -1,11 +1,10 @@
 #include "../../client.h"
-#include "../../common/languages.h"
 
 void FindLanguage(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const auto language_id = Strings::ToInt(sep->arg[2]);
-		if (EQ::ValueWithin(language_id, LANG_COMMON_TONGUE, LANG_UNKNOWN)) {
+		if (EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
 			c->Message(
 				Chat::White,
 				fmt::format(

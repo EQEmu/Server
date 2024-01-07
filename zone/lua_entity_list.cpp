@@ -570,9 +570,9 @@ void Lua_EntityList::SignalAllClients(int signal_id) {
 	self->SignalAllClients(signal_id);
 }
 
-void Lua_EntityList::ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message) {
+void Lua_EntityList::ChannelMessage(Lua_Mob from, int channel_num, uint8 language_id, const char *message) {
 	Lua_Safe_Call_Void();
-	self->ChannelMessage(from, channel_num, language, message);
+	self->ChannelMessage(from, channel_num, language_id, message);
 }
 
 Lua_Mob Lua_EntityList::GetRandomMob() {
@@ -686,7 +686,7 @@ luabind::scope lua_register_entity_list() {
 	.property("null", &Lua_EntityList::Null)
 	.property("valid", &Lua_EntityList::Valid)
 	.def("CanAddHateForMob", (bool(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::CanAddHateForMob)
-	.def("ChannelMessage", (void(Lua_EntityList::*)(Lua_Mob, int, int, const char*))&Lua_EntityList::ChannelMessage)
+	.def("ChannelMessage", (void(Lua_EntityList::*)(Lua_Mob, int, uint8, const char*))&Lua_EntityList::ChannelMessage)
 	.def("ClearClientPetitionQueue", (void(Lua_EntityList::*)(void))&Lua_EntityList::ClearClientPetitionQueue)
 	.def("ClearFeignAggro", (void(Lua_EntityList::*)(Lua_Mob))&Lua_EntityList::ClearFeignAggro)
 	.def("DeleteNPCCorpses", (uint32(Lua_EntityList::*)(void))&Lua_EntityList::DeleteNPCCorpses)

@@ -165,8 +165,8 @@ public:
 	void SetSkillPoints(int skill);
 	void IncreaseSkill(int skill_id);
 	void IncreaseSkill(int skill_id, int value);
-	void IncreaseLanguageSkill(int skill_id);
-	void IncreaseLanguageSkill(int skill_id, int value);
+	void IncreaseLanguageSkill(uint8 language_id);
+	void IncreaseLanguageSkill(uint8 language_id, uint8 increase);
 	int GetRawSkill(int skill_id);
 	bool HasSkill(int skill_id);
 	bool CanHaveSkill(int skill_id);
@@ -175,7 +175,7 @@ public:
 	void CheckSpecializeIncrease(int spell_id);
 	void CheckIncreaseSkill(int skill_id, Lua_Mob target);
 	void CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod);
-	void SetLanguageSkill(int language, int value);
+	void SetLanguageSkill(uint8 language_id, uint8 language_skill);
 	int MaxSkill(int skill_id);
 	bool IsMedding();
 	int GetDuelTarget();

@@ -3546,7 +3546,7 @@ void Merc::MercGroupSay(Mob *speaker, const char *msg, ...)
 		Group *g = speaker->GetGroup();
 
 		if(g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
 	}
 }
 

@@ -4505,23 +4505,24 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ChannelMessage(const EQApplicationPacket *app)
 {
-	ChannelMessage_Struct* cm = (ChannelMessage_Struct*)app->pBuffer;
+	auto* cm = (ChannelMessage_Struct*) app->pBuffer;
 
 	if (app->size < sizeof(ChannelMessage_Struct)) {
-		std::cout << "Wrong size " << app->size << ", should be " << sizeof(ChannelMessage_Struct) << "+ on 0x" << std::hex << std::setfill('0') << std::setw(4) << app->GetOpcode() << std::dec << std::endl;
-		return;
-	}
-	if (IsAIControlled() && !GetGM()) {
-		Message(Chat::Red, "You try to speak but cant move your mouth!");
+		LogDebug("Size mismatch in OP_ChannelMessage expected [{}] got [{}]", sizeof(ChannelMessage_Struct), app->size);
 		return;
 	}
 
-	uint8 skill_in_language = 100;
-	if (cm->language < MAX_PP_LANGUAGE)
-	{
-		skill_in_language = m_pp.languages[cm->language];
+	if (IsAIControlled() && !GetGM()) {
+		Message(Chat::Red, "You try to speak but can't move your mouth!");
+		return;
 	}
-	ChannelMessageReceived(cm->chan_num, cm->language, skill_in_language, cm->message, cm->targetname);
+
+	uint8 language_skill = Language::MaxValue;
+	if (EQ::ValueWithin(cm->language, Language::CommonTongue, Language::Unknown27)) {
+		language_skill = m_pp.languages[cm->language];
+	}
+
+	ChannelMessageReceived(cm->chan_num, cm->language, language_skill, cm->message, cm->targetname);
 	return;
 }
 
@@ -8862,7 +8863,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				Message(Chat::LightGray, "You say, '%s'", response.c_str());
 			}
 
-			ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+			ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, response.c_str(), nullptr, true);
 
 			return;
 		}
@@ -11573,7 +11574,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY)) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY);
 				if (!response.empty()) {
-					ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+					ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, response.c_str(), nullptr, true);
 				}
 			}
 			break;
@@ -11582,7 +11583,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY)) {
 				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY);
 				if (!response.empty()) {
-					ChannelMessageReceived(ChatChannel_Say, 0, 100, response.c_str(), nullptr, true);
+					ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, response.c_str(), nullptr, true);
 				}
 			}
 			break;

@@ -3,7 +3,6 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "../common/languages.h"
 #include "masterentity.h"
 #include "lua_iteminst.h"
 #include "lua_item.h"
@@ -309,13 +308,13 @@ std::string Lua_ItemInst::GetName() {
 void Lua_ItemInst::ItemSay(const char* text) // @categories Inventory and Items
 {
 	Lua_Safe_Call_Void();
-	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, LANG_COMMON_TONGUE, MAX_LANGUAGE_SKILL, text);
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, Language::CommonTongue, Language::MaxValue, text);
 }
 
 void Lua_ItemInst::ItemSay(const char* text, uint8 language_id) // @categories Inventory and Items
 {
 	Lua_Safe_Call_Void();
-	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, language_id, MAX_LANGUAGE_SKILL, text);
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, language_id, Language::MaxValue, text);
 }
 
 luabind::scope lua_register_iteminst() {

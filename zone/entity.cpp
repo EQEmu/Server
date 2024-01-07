@@ -1282,7 +1282,7 @@ uint16 EntityList::GetFreeID()
 // if no language skill is specified, sent with 100 skill
 void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language, const char *message, ...)
 {
-	ChannelMessage(from, chan_num, language, 100, message);
+	ChannelMessage(from, chan_num, language, Language::MaxValue, message);
 }
 
 void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
@@ -4588,7 +4588,7 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 			g = it->second->GetGroup();
 			if (g) {
 				if (g->GetID() == gid)
-					it->second->ChannelMessageSend(from, it->second->GetName(), ChatChannel_Group, 0, 100, message);
+					it->second->ChannelMessageSend(from, it->second->GetName(), ChatChannel_Group, Language::CommonTongue, Language::MaxValue, message);
 			}
 		}
 		++it;

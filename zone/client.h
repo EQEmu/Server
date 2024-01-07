@@ -335,7 +335,7 @@ public:
 	void QueuePacket(const EQApplicationPacket* app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL, eqFilterType filter=FilterNone);
 	void FastQueuePacket(EQApplicationPacket** app, bool ack_req = true, CLIENT_CONN_STATUS = CLIENT_CONNECTINGALL);
 	void ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_skill, const char* orig_message, const char* targetname = nullptr, bool is_silent = false);
-	void ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...);
+	void ChannelMessageSend(const char* from, const char* to, uint8 channel_id, uint8 language_id, uint8 language_skill, const char* message, ...);
 	void Message(uint32 type, const char* message, ...);
 	void FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...);
 	void VoiceMacroReceived(uint32 Type, char *Target, uint32 MacroNumber);
@@ -452,7 +452,7 @@ public:
 	void SendSingleTraderItem(uint32 char_id, int uniqueid);
 	void BulkSendMerchantInventory(int merchant_id, int npcid);
 
-	inline uint8 GetLanguageSkill(uint16 n) const { return m_pp.languages[n]; }
+	inline uint8 GetLanguageSkill(uint8 language_id) const { return m_pp.languages[language_id]; }
 
 	void SendPickPocketResponse(Mob *from, uint32 amt, int type, const EQ::ItemData* item = nullptr);
 
@@ -767,7 +767,7 @@ public:
 	void SetSkillPoints(int inp) { m_pp.points = inp;}
 
 	void IncreaseSkill(int skill_id, int value = 1) { if (skill_id <= EQ::skills::HIGHEST_SKILL) { m_pp.skills[skill_id] += value; } }
-	void IncreaseLanguageSkill(int skill_id, int value = 1);
+	void IncreaseLanguageSkill(uint8 language_id, uint8 increase = 1);
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_id) const { if (skill_id <= EQ::skills::HIGHEST_SKILL) { return(itembonuses.skillmod[skill_id] > 0 ? (itembonuses.skillmodmax[skill_id] > 0 ? std::min(m_pp.skills[skill_id] + itembonuses.skillmodmax[skill_id], m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100) : m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100) : m_pp.skills[skill_id]); } return 0; }
 	uint32 GetRawSkill(EQ::skills::SkillType skill_id) const { if (skill_id <= EQ::skills::HIGHEST_SKILL) { return(m_pp.skills[skill_id]); } return 0; }
 	bool HasSkill(EQ::skills::SkillType skill_id) const;
@@ -777,8 +777,8 @@ public:
 	void CheckSpecializeIncrease(uint16 spell_id);
 	void CheckSongSkillIncrease(uint16 spell_id);
 	bool CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who, int chancemodi = 0);
-	void CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill);
-	void SetLanguageSkill(int langid, int value);
+	void CheckLanguageSkillIncrease(uint8 language_id, uint8 teacher_skill);
+	void SetLanguageSkill(uint8 language_id, uint8 language_skill);
 	void SetHoTT(uint32 mobid);
 	void ShowSkillsWindow();
 
