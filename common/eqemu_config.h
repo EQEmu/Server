@@ -184,6 +184,7 @@ class EQEmuConfig
 		}
 
 		void Dump() const;
+		void CheckUcsConfigConversion();
 };
 
 #endif
