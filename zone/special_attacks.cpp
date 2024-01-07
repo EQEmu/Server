@@ -653,8 +653,14 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 	}
 
 	int32 ht = 0;
-	if (max_dmg > 0)
+	if (max_dmg > 0) {
 		ht = max_dmg;
+	}
+
+	// aggro should never be negative else it does massive aggro
+	if (ht < 0)	{
+		ht = 0;
+	}
 
 	DoSpecialAttackDamage(other, skill_type, max_dmg, min_dmg, ht, reuse);
 
