@@ -1248,26 +1248,28 @@ bool ZoneDatabase::SaveCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 
 	auto e = CharacterCurrencyRepository::NewEntity();
 
-	e.id                      = character_id;
-	e.platinum                = pp->platinum;
-	e.platinum_bank           = pp->platinum_bank;
-	e.platinum_cursor         = pp->platinum_cursor;
-	e.gold                    = pp->gold;
-	e.gold_bank               = pp->gold_bank;
-	e.gold_cursor             = pp->gold_cursor;
-	e.silver                  = pp->silver;
-	e.silver_bank             = pp->silver_bank;
-	e.silver_cursor           = pp->silver_cursor;
-	e.copper                  = pp->copper;
-	e.copper_bank             = pp->copper_bank;
-	e.copper_cursor           = pp->copper_cursor;
-	e.radiant_crystals        = pp->currentRadCrystals;
-	e.career_radiant_crystals = pp->careerRadCrystals;
-	e.ebon_crystals           = pp->currentEbonCrystals;
-	e.career_ebon_crystals    = pp->careerEbonCrystals;
-
-	LogDebug("Saving Currency for character ID: [{}], done", character_id);
-	return CharacterCurrencyRepository::ReplaceOne(*this, e);
+	return CharacterCurrencyRepository::ReplaceOne(
+		*this,
+		CharacterCurrencyRepository::CharacterCurrency{
+			.id                      = character_id,
+			.platinum                = static_cast<uint32_t>(pp->platinum),
+			.gold                    = static_cast<uint32_t>(pp->gold),
+			.silver                  = static_cast<uint32_t>(pp->silver),
+			.copper                  = static_cast<uint32_t>(pp->copper),
+			.platinum_bank           = static_cast<uint32_t>(pp->platinum_bank),
+			.gold_bank               = static_cast<uint32_t>(pp->gold_bank),
+			.silver_bank             = static_cast<uint32_t>(pp->silver_bank),
+			.copper_bank             = static_cast<uint32_t>(pp->copper_bank),
+			.platinum_cursor         = static_cast<uint32_t>(pp->platinum_cursor),
+			.gold_cursor             = static_cast<uint32_t>(pp->gold_cursor),
+			.silver_cursor           = static_cast<uint32_t>(pp->silver_cursor),
+			.copper_cursor           = static_cast<uint32_t>(pp->copper_cursor),
+			.radiant_crystals        = pp->currentRadCrystals,
+			.career_radiant_crystals = pp->careerRadCrystals,
+			.ebon_crystals           = pp->currentEbonCrystals,
+			.career_ebon_crystals    = pp->careerEbonCrystals
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterAA(uint32 character_id, uint32 aa_id, uint32 current_level, uint32 charges){
