@@ -37,6 +37,7 @@
 #include "../common/repositories/character_alt_currency_repository.h"
 #include "../common/repositories/character_item_recast_repository.h"
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/character_data_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -1389,19 +1390,11 @@ bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slo
 	);
 }
 
-bool ZoneDatabase::NoRentExpired(const char* name){
-	std::string query = StringFormat("SELECT (UNIX_TIMESTAMP(NOW()) - last_login) FROM `character_data` WHERE name = '%s'", name);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-        return false;
+bool ZoneDatabase::NoRentExpired(const std::string& name)
+{
+	const uint32 seconds = CharacterDataRepository::GetSecondsSinceLastLogin(*this, name);
 
-    if (results.RowCount() != 1)
-        return false;
-
-	auto& row = results.begin();
-	uint32 seconds = Strings::ToInt(row[0]);
-
-	return (seconds>1800);
+	return seconds > 1800;
 }
 
 bool ZoneDatabase::SaveCharacterInvSnapshot(uint32 character_id) {
