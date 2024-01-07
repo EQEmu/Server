@@ -6243,8 +6243,8 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 	if (ed->dmgtype == EQ::constants::EnvironmentalDamage::Falling) {
 		if (zone->HasWaterMap()) {
-			auto targetPosition = glm::vec3(this->GetX(), this->GetY(), this->GetZ());
-			if (!zone->watermap->InLiquid(targetPosition)) {
+			auto target_position = glm::vec3(GetX(), GetY(), GetZ());
+			if (!zone->watermap->InLiquid(target_position)) {
 				return;
 			}
 		}
