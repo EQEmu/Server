@@ -923,7 +923,13 @@ uint32 SharedDatabase::GetItemRecastTimestamp(uint32 char_id, uint32 recast_type
 
 void SharedDatabase::ClearOldRecastTimestamps(uint32 char_id)
 {
-	CharacterItemRecastRepository::DeleteOne(*this, char_id);
+	CharacterItemRecastRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`id` = {} AND `timestamp` < UNIX_TIMESTAMP()",
+			char_id
+		)
+	);
 }
 
 void SharedDatabase::GetItemsCount(int32 &item_count, uint32 &max_id)
