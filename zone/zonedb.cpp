@@ -29,6 +29,7 @@
 #include "../common/repositories/character_memmed_spells_repository.h"
 #include "../common/repositories/character_spells_repository.h"
 #include "../common/repositories/character_skills_repository.h"
+#include "../common/repositories/character_potionbelt_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -926,27 +927,33 @@ void ZoneDatabase::LoadCharacterTribute(Client* c){
 	}
 }
 
-bool ZoneDatabase::LoadCharacterPotions(uint32 character_id, PlayerProfile_Struct *pp)
+bool ZoneDatabase::LoadCharacterPotionBelt(uint32 character_id, PlayerProfile_Struct *pp)
 {
-	std::string query =
-	    StringFormat("SELECT `potion_id`, `item_id`, `icon` FROM `character_potionbelt` WHERE `id` = %u LIMIT %u",
-		character_id, EQ::profile::POTION_BELT_SIZE);
-	auto results = database.QueryDatabase(query);
-	int i = 0;
-	for (i = 0; i < EQ::profile::POTION_BELT_SIZE; i++) {
+	const auto& l = CharacterPotionbeltRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} LIMIT {}",
+			character_id,
+			EQ::profile::POTION_BELT_SIZE
+		)
+	);
+
+	for (int i = 0; i < EQ::profile::POTION_BELT_SIZE; i++) { // Initialize Potion Belt
 		pp->potionbelt.Items[i].Icon = 0;
-		pp->potionbelt.Items[i].ID = 0;
+		pp->potionbelt.Items[i].ID   = 0;
 		pp->potionbelt.Items[i].Name[0] = '\0';
 	}
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = Strings::ToInt(row[0]);
-		const EQ::ItemData *item_data = database.GetItem(Strings::ToInt(row[1]));
-		if (!item_data)
+	for (const auto& e : l) {
+		const auto* item_data = database.GetItem(e.item_id);
+		if (!item_data) {
 			continue;
-		pp->potionbelt.Items[i].ID = item_data->ID;
-		pp->potionbelt.Items[i].Icon = Strings::ToInt(row[2]);
-		strncpy(pp->potionbelt.Items[i].Name, item_data->Name, 64);
+		}
+
+		pp->potionbelt.Items[e.potion_id].ID   = item_data->ID;
+		pp->potionbelt.Items[e.potion_id].Icon = e.icon;
+
+		strncpy(pp->potionbelt.Items[e.potion_id].Name, item_data->Name, 64);
 	}
 
 	return true;
@@ -1066,9 +1073,15 @@ bool ZoneDatabase::SaveCharacterBandolier(uint32 character_id, uint8 bandolier_i
 
 bool ZoneDatabase::SaveCharacterPotionBelt(uint32 character_id, uint8 potion_id, uint32 item_id, uint32 icon)
 {
-	std::string query = StringFormat("REPLACE INTO `character_potionbelt` (id, potion_id, item_id, icon) VALUES (%u, %u, %u, %u)", character_id, potion_id, item_id, icon);
-	auto results = QueryDatabase(query);
-	return true;
+	return CharacterPotionbeltRepository::ReplaceOne(
+		*this,
+		CharacterPotionbeltRepository::CharacterPotionbelt{
+			.id = character_id,
+			.potion_id = potion_id,
+			.item_id = item_id,
+			.icon = icon
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterLeadershipAbilities(uint32 character_id, PlayerProfile_Struct* pp)
