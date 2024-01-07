@@ -427,7 +427,7 @@ public:
 	bool DeleteCharacterDisc(uint32 character_id, uint32 slot_id);
 	bool DeleteCharacterMaterialColor(uint32 character_id);
 	bool DeleteCharacterLeadershipAbilities(uint32 character_id);
-	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
+	bool DeleteCharacterMemorizedSpell(uint32 character_id, uint32 slot_id);
 	bool DeleteCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 
 	bool LoadCharacterBandolier(uint32 character_id, PlayerProfile_Struct* pp);
