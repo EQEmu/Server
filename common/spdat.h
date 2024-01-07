@@ -202,6 +202,8 @@
 #define SPELL_GUIDE_LEVITATION 39852
 #define SPELL_GUIDE_SPELL_HASTE 39853
 #define SPELL_GUIDE_HASTE 39854
+#define SPELL_VAMPIRIC_EMBRACE 821
+#define SPELL_VAMPIRIC_EMBRACE_OF_SHADOW 822
 
 //spellgroup ids
 #define SPELLGROUP_FRENZIED_BURNOUT 2754
@@ -1324,9 +1326,6 @@ typedef enum {
 //
 #define SPELL_LOAD_FIELD_COUNT 236
 
-// Vampiric Embrace procs ID.
-#define PI_VampEmbraceNecro 821
-#define PI_VampEmbraceShadow 822
 
 struct SPDat_Spell_Struct
 {

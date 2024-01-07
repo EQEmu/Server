@@ -1882,8 +1882,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
 				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
-					proc_id = PI_VampEmbraceShadow;
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && GetClass() == Class::ShadowKnight) {
+					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
 				AddProcToWeapon(proc_id, false, 100 + spells[spell_id].limit_value[i], spell_id, caster_level, GetSpellProcLimitTimer(spell_id, ProcType::MELEE_PROC));
@@ -3726,7 +3726,7 @@ snare has both of them negative, yet their range should work the same:
 		case 144:	// Level 40+ Harm Touch
 			result = ubase + (caster_level * 10) + (caster_level - 40) * 20;
 			break;
-			
+
 		//these are used in stacking effects... formula unknown
 		case 201:
 		case 203:
@@ -4254,8 +4254,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				uint16 proc_id = GetProcID(buffs[slot].spellid, i);
 
 				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == PI_VampEmbraceNecro && GetClass() == Class::ShadowKnight) {
-					proc_id = PI_VampEmbraceShadow;
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && GetClass() == Class::ShadowKnight) {
+					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
 				RemoveProcFromWeapon(proc_id, false);
@@ -7110,7 +7110,7 @@ bool Mob::TryDeathSave() {
 					} else {
 						entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, DEATH_PACT, GetCleanName());
 					}
-					
+
 					SendHPUpdate();
 					BuffFadeBySlot(buffSlot);
 					return true;
