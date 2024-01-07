@@ -3166,7 +3166,7 @@ void ZoneDatabase::SaveBuffs(Client *client)
 	}
 
 	if (!v.empty()) {
-		CharacterBuffsRepository::InsertMany(database, v);
+		CharacterBuffsRepository::ReplaceMany(database, v);
 	}
 }
 
@@ -3209,12 +3209,12 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			buffs[e.slot_id].casterid = c->GetID();
 			buffs[e.slot_id].client   = true;
 
-			strn0cpy(buffs[e.slot_id].caster_name, c->GetName(), sizeof(buffs[e.slot_id].caster_name));
+			strncpy(buffs[e.slot_id].caster_name, c->GetName(), 64);
 		} else {
 			buffs[e.slot_id].casterid = 0;
 			buffs[e.slot_id].client   = false;
 
-			strn0cpy(buffs[e.slot_id].caster_name, "", sizeof(buffs[e.slot_id].caster_name));
+			strncpy(buffs[e.slot_id].caster_name, "", 64);
 		}
 
 		buffs[e.slot_id].ticsremaining     = e.ticsremaining;
