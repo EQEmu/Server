@@ -11261,7 +11261,7 @@ void Client::Undye()
 		SendWearChange(slot);
 	}
 
-	database.DeleteCharacterDye(CharacterID());
+	database.DeleteCharacterMaterialColor(CharacterID());
 }
 
 void Client::SetTrackingID(uint32 entity_id)

@@ -24,6 +24,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
+#include "../common/repositories/character_material_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -940,17 +941,23 @@ bool ZoneDatabase::LoadCharacterCurrency(uint32 character_id, PlayerProfile_Stru
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat("SELECT slot, blue, green, red, use_tint, color FROM `character_material` WHERE `id` = %u LIMIT 9", character_id);
-	auto results = database.QueryDatabase(query); int i = 0; int r = 0;
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		r = 0;
-		i = Strings::ToInt(row[r]); /* Slot */ r++;
-		pp->item_tint.Slot[i].Blue = Strings::ToInt(row[r]); r++;
-		pp->item_tint.Slot[i].Green = Strings::ToInt(row[r]); r++;
-		pp->item_tint.Slot[i].Red = Strings::ToInt(row[r]); r++;
-		pp->item_tint.Slot[i].UseTint = Strings::ToInt(row[r]);
+bool ZoneDatabase::LoadCharacterMaterialColor(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterMaterialRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} LIMIT 9",
+			character_id
+		)
+	);
+
+	for (const auto& e : l) {
+		pp->item_tint.Slot[e.slot].Blue    = e.blue;
+		pp->item_tint.Slot[e.slot].Green   = e.green;
+		pp->item_tint.Slot[e.slot].Red     = e.red;
+		pp->item_tint.Slot[e.slot].UseTint = e.use_tint;
 	}
+
 	return true;
 }
 
@@ -1068,14 +1075,24 @@ bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, ui
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint32 slot_id, uint32 color){
-	uint8 red = (color & 0x00FF0000) >> 16;
-	uint8 green = (color & 0x0000FF00) >> 8;
-	uint8 blue = (color & 0x000000FF);
+bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id, uint32 color)
+{
+	const uint8 red   = (color & 0x00FF0000) >> 16;
+	const uint8 green = (color & 0x0000FF00) >> 8;
+	const uint8 blue  = (color & 0x000000FF);
 
-	std::string query = StringFormat("REPLACE INTO `character_material` (id, slot, red, green, blue, color, use_tint) VALUES (%u, %u, %u, %u, %u, %u, 255)", character_id, slot_id, red, green, blue, color); auto results = QueryDatabase(query);
-	LogDebug("ZoneDatabase::SaveCharacterMaterialColor for character ID: [{}], slot_id: [{}] color: [{}] done", character_id, slot_id, color);
-	return true;
+	return CharacterMaterialRepository::ReplaceOne(
+		*this,
+		CharacterMaterialRepository::CharacterMaterial{
+			.id       = character_id,
+			.slot     = slot_id,
+			.blue     = blue,
+			.green    = green,
+			.red      = red,
+			.use_tint = UINT8_MAX,
+			.color    = color
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value){
@@ -1569,10 +1586,9 @@ bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id){
 	return true;
 }
 
-bool ZoneDatabase::DeleteCharacterDye(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_material` WHERE `id` = %u", character_id);
-	QueryDatabase(query);
-	return true;
+bool ZoneDatabase::DeleteCharacterMaterialColor(uint32 character_id)
+{
+	return CharacterMaterialRepository::DeleteOne(*this, character_id);
 }
 
 bool ZoneDatabase::DeleteCharacterMemorizedSpell(uint32 character_id, uint32 spell_id, uint32 slot_id){
