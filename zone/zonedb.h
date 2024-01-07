@@ -401,7 +401,7 @@ public:
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
 
-	void UpdateGMStatus(uint32 accID, int newStatus);
+	void UpdateGMStatus(uint32 account_id, int new_status);
 
 	/**
 	 ************************************************

@@ -4439,22 +4439,16 @@ void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double ex
 	database.QueryDatabase(query);
 }
 
-void ZoneDatabase::UpdateGMStatus(uint32 accID, int newStatus)
+void ZoneDatabase::UpdateGMStatus(uint32 account_id, int new_status)
 {
-	if (accID) {
-		std::string query = fmt::format(
-			SQL(
-				UPDATE
-				`account`
-				SET `status` = {}
-				WHERE
-				`id` = {}
-			),
-			newStatus,
-			accID
-		);
-		database.QueryDatabase(query);
+	auto e = AccountRepository::FindOne(*this, account_id);
+	if (!e.id) {
+		return;
 	}
+
+	e.status = new_status;
+
+	AccountRepository::UpdateOne(*this, e);
 }
 
 void ZoneDatabase::SaveCharacterBinds(Client *c)

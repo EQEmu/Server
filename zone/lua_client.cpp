@@ -2279,7 +2279,7 @@ void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	self->RemoveItem(item_id, quantity);
 }
 
-void Lua_Client::SetGMStatus(int16 new_status) {
+void Lua_Client::SetGMStatus(int new_status) {
 	Lua_Safe_Call_Void();
 	self->SetGMStatus(new_status);
 }
@@ -3711,7 +3711,7 @@ luabind::scope lua_register_client() {
 	.def("SetFactionLevel2", (void(Lua_Client::*)(uint32,int,int,int,int,int,int))&Lua_Client::SetFactionLevel2)
 	.def("SetFeigned", (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned)
 	.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
-	.def("SetGMStatus", (void(Lua_Client::*)(int16))&Lua_Client::SetGMStatus)
+	.def("SetGMStatus", (void(Lua_Client::*)(int))&Lua_Client::SetGMStatus)
 	.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
 	.def("SetHorseId", (void(Lua_Client::*)(int))&Lua_Client::SetHorseId)
 	.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)
