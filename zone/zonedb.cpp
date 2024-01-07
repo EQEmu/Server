@@ -900,9 +900,10 @@ bool ZoneDatabase::LoadCharacterBandolier(uint32 character_id, PlayerProfile_Str
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].ID   = item_data->ID;
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Icon = e.icon;
 
-			strcpy(
+			strncpy(
 				pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].Name,
-				item_data->Name
+				item_data->Name,
+				64
 			);
 		} else {
 			pp->bandoliers[e.bandolier_id].Items[e.bandolier_slot].ID   = 0;
