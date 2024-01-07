@@ -336,7 +336,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							dmg = caster->GetMana() * manaburn_multiplier / 100;
 							dmg *= -1;	//Damage should be negative
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this); // Spell can crit, so need this.  Damage cap handled in this function.
-							LogSpells("manaburn_multiplier [{}], Mana [{}], Damage [{}]", manaburn_multiplier, caster->GetMana(), dmg);
+							LogSpellsDetail("manaburn_multiplier [{}], Mana [{}], Damage [{}]", manaburn_multiplier, caster->GetMana(), dmg);
 							caster->SetMana(0);
 						} else if (spell_id == SPELL_LIFE_BURN && caster) { //Lifeburn
 							dmg = caster->GetHP() * -1;
