@@ -2783,10 +2783,12 @@ bool Bot::IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distanc
 		// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
 		if (HasPet()) {
 			GetPet()->RemoveFromHateList(tar);
+			GetPet()->RemoveFromRampageList(tar);
 			GetPet()->SetTarget(nullptr);
 		}
 
 		RemoveFromHateList(tar);
+		RemoveFromRampageList(tar);
 		SetTarget(nullptr);
 
 		SetAttackFlag(false);

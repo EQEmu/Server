@@ -2119,6 +2119,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		RemoveFromHateList(other);
+		RemoveFromRampageList(other);
 		LogCombat("I am not allowed to attack [{}]", other->GetName());
 		return false;
 	}

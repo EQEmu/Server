@@ -778,6 +778,7 @@ void Client::AI_Process()
 
 		if (GetTarget()->IsCorpse()) {
 			RemoveFromHateList(this);
+			RemoveFromRampageList(this);
 			return;
 		}
 
@@ -1089,6 +1090,7 @@ void Mob::AI_Process() {
 
 		if (target->IsCorpse()) {
 			RemoveFromHateList(this);
+			RemoveFromRampageList(this);
 			return;
 		}
 

@@ -3585,6 +3585,7 @@ void EntityList::ClearWaterAggro(Mob* targ)
 					c->RemoveXTarget(it->second, false);
 				}
 				it->second->RemoveFromHateList(targ);
+				it->second->RemoveFromRampageList(targ);
 			}
 			if (c && it->second->IsOnFeignMemory(c)) {
 				it->second->RemoveFromFeignMemory(c); //just in case we feigned
@@ -3630,7 +3631,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			}
 
 			it->second->RemoveFromHateList(targ);
-			
+
 			if (it->second->GetSpecialAbility(SPECATK_RAMPAGE)) {
 						it->second->RemoveFromRampageList(targ, true);
 			}
