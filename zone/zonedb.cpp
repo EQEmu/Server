@@ -953,7 +953,7 @@ bool ZoneDatabase::LoadCharacterPotionBelt(uint32 character_id, PlayerProfile_St
 		pp->potionbelt.Items[e.potion_id].ID   = item_data->ID;
 		pp->potionbelt.Items[e.potion_id].Icon = e.icon;
 
-		strcpy(pp->potionbelt.Items[e.potion_id].Name, item_data->Name);
+		strncpy(pp->potionbelt.Items[e.potion_id].Name, item_data->Name, 64);
 	}
 
 	return true;
