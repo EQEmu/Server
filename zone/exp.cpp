@@ -950,7 +950,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	SendAppearancePacket(AT_WhoLevel, set_level); // who level change
+	SendAppearancePacket(AppearanceType::WhoLevel, set_level); // who level change
 
 	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 

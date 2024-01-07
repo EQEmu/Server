@@ -1,5 +1,4 @@
 #include "../common/features.h"
-#include "../common/languages.h"
 #include "client.h"
 
 #ifdef EMBPERL_XS_CLASSES
@@ -21,12 +20,12 @@ void Perl_QuestItem_SetScale(EQ::ItemInstance* self, float scale_multiplier) // 
 
 void Perl_QuestItem_ItemSay(EQ::ItemInstance* self, const char* text) // @categories Inventory and Items
 {
-	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, LANG_COMMON_TONGUE, MAX_LANGUAGE_SKILL, text);
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, Language::CommonTongue, Language::MaxValue, text);
 }
 
 void Perl_QuestItem_ItemSay(EQ::ItemInstance* self, const char* text, uint8 language_id) // @categories Inventory and Items
 {
-	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, language_id, MAX_LANGUAGE_SKILL, text);
+	quest_manager.GetInitiator()->ChannelMessageSend(self->GetItem()->Name, 0, ChatChannel_Say, language_id, Language::MaxValue, text);
 }
 
 bool Perl_QuestItem_IsType(EQ::ItemInstance* self, int type) // @categories Inventory and Items

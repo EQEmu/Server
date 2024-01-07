@@ -927,7 +927,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 
 		UpdateEquipmentLight();
 		if (UpdateActiveLight())
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+			SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 
 		safe_delete(sitem);
 		return;

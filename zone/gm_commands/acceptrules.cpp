@@ -8,6 +8,6 @@ void command_acceptrules(Client *c, const Seperator *sep)
 	}
 
 	database.SetAgreementFlag(c->AccountID());
-	c->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	c->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 	c->Message(Chat::White, "It is recorded you have agreed to the rules.");
 }

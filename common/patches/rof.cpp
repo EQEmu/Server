@@ -2621,7 +2621,7 @@ namespace RoF
 		general->parameter = RaidCommandAcceptInvite;
 		strn0cpy(general->leader_name, emu->leader_name, sizeof(emu->leader_name));
 		strn0cpy(general->player_name, emu->leader_name, sizeof(emu->leader_name));
-		
+
 		dest->FastQueuePacket(&outapp);
 
 		safe_delete(inapp);
@@ -3165,7 +3165,7 @@ namespace RoF
 
 		SpawnAppearance_Struct *sas = (SpawnAppearance_Struct *)emu_buffer;
 
-		if (sas->type != AT_Size)
+		if (sas->type != AppearanceType::Size)
 		{
 			dest->FastQueuePacket(&in, ack_req);
 			return;

@@ -93,13 +93,13 @@ void Perl__say(const char* message)
 	// we currently default to these
 	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
-	opts.language     = 0;
+	opts.language     = Language::CommonTongue;
 	opts.message_type = Chat::NPCQuestSay;
 
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id)
+void Perl__say(const char* message, uint8 language_id)
 {
 	Journal::Options opts;
 	opts.speak_mode   = Journal::SpeakMode::Say;
@@ -110,7 +110,7 @@ void Perl__say(const char* message, int language_id)
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type)
+void Perl__say(const char* message, uint8 language_id, int message_type)
 {
 	Journal::Options opts;
 	opts.speak_mode   = Journal::SpeakMode::Say;
@@ -121,7 +121,7 @@ void Perl__say(const char* message, int language_id, int message_type)
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type, int speak_mode)
+void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode)
 {
 	Journal::Options opts;
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
@@ -132,7 +132,7 @@ void Perl__say(const char* message, int language_id, int message_type, int speak
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type, int speak_mode, int journal_mode)
+void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode, int journal_mode)
 {
 	Journal::Options opts;
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
@@ -674,9 +674,9 @@ void Perl__addskill(int skill_id, int value)
 	quest_manager.addskill(skill_id, value);
 }
 
-void Perl__setlanguage(int skill_id, int value)
+void Perl__setlanguage(uint8 language_id, uint8 language_skill)
 {
-	quest_manager.setlanguage(skill_id, value);
+	quest_manager.setlanguage(language_id, language_skill);
 }
 
 void Perl__setskill(int skill_id, int value)
@@ -4713,7 +4713,7 @@ std::string Perl__getfactionname(int faction_id)
 	return quest_manager.getfactionname(faction_id);
 }
 
-std::string Perl__getlanguagename(int language_id)
+std::string Perl__getlanguagename(uint8 language_id)
 {
 	return quest_manager.getlanguagename(language_id);
 }
@@ -6532,10 +6532,10 @@ void perl_register_quest()
 	package.add("safemove", &Perl__safemove);
 	package.add("save", &Perl__save);
 	package.add("say", (void(*)(const char*))&Perl__say);
-	package.add("say", (void(*)(const char*, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int, int, int))&Perl__say);
 	package.add("saylink", (std::string(*)(const char*))&Perl__saylink);
 	package.add("saylink", (std::string(*)(const char*, bool))&Perl__saylink);
 	package.add("saylink", (std::string(*)(const char*, bool, const char*))&Perl__saylink);

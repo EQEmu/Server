@@ -572,7 +572,7 @@ bool Client::Process() {
 			linkdead_timer.Start(RuleI(Zone, ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
-			SendAppearancePacket(AT_Linkdead, 1);
+			SendAppearancePacket(AppearanceType::Linkdead, 1);
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
@@ -1184,10 +1184,10 @@ void Client::CancelSneakHide()
 	if (hidden || improved_hidden) {
 		auto app = new EQApplicationPacket(OP_CancelSneakHide, 0);
 		FastQueuePacket(&app);
-		// SoF and Tit send back a OP_SpawnAppearance turning off AT_Invis
+		// SoF and Tit send back a OP_SpawnAppearance turning off AppearanceType::Invisibility
 		// so we need to handle our sneaking flag only
 		// The later clients send back a OP_Hide (this has a size but data is 0)
-		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
+		// as well as OP_SpawnAppearance with AppearanceType::Invisibility and one with AppearanceType::Sneak
 		// So we don't have to handle any of those flags
 		if (ClientVersionBit() & EQ::versions::maskSoFAndEarlier)
 			sneaking = false;

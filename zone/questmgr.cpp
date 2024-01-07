@@ -1081,7 +1081,7 @@ std::string QuestManager::getfactionname(int faction_id) {
 	return content_db.GetFactionName(faction_id);
 }
 
-std::string QuestManager::getlanguagename(int language_id) {
+std::string QuestManager::getlanguagename(uint8 language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }
 
@@ -1331,14 +1331,14 @@ void QuestManager::addskill(int skill_id, int value) {
 	initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
-void QuestManager::setlanguage(int skill_id, int value) {
+void QuestManager::setlanguage(uint8 language_id, uint8 language_skill) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
 		return;
 	}
 
-	initiator->SetLanguageSkill(skill_id, value);
+	initiator->SetLanguageSkill(language_id, language_skill);
 }
 
 void QuestManager::setskill(int skill_id, int value) {
@@ -3538,12 +3538,12 @@ void QuestManager::FlyMode(GravityBehavior flymode)
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		initiator->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		initiator->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		initiator->SetFlyMode(flymode);
 	}
 	else if(owner)
 	{
-		owner->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		owner->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		owner->SetFlyMode(flymode);
 	}
 }

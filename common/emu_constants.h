@@ -358,8 +358,8 @@ namespace EQ
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
-		extern const std::map<int, std::string>& GetLanguageMap();
-		std::string GetLanguageName(int language_id);
+		extern const std::map<uint8, std::string>& GetLanguageMap();
+		std::string GetLanguageName(uint8 language_id);
 
 		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
 		std::string GetLDoNThemeName(uint32 theme_id);
@@ -396,6 +396,9 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetEmoteTypeMap();
 		std::string GetEmoteTypeName(uint8 emote_type);
+
+		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
+		std::string GetAppearanceTypeName(uint32 animation_type);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;

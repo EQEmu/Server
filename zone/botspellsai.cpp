@@ -367,7 +367,7 @@ bool Bot::BotCastSlow(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 		if (casted_spell && GetClass() != Class::Bard) {
 			if (raid) {
 				const auto msg = fmt::format("Attempting to slow {}.", tar->GetCleanName());
-				raid->RaidSay(msg.c_str(), GetCleanName(), 0, 100);
+				raid->RaidSay(msg.c_str(), GetCleanName(), Language::CommonTongue, Language::MaxValue);
 			} else {
 				BotGroupSay(
 					this,
@@ -1159,7 +1159,7 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 						} else if (IsRaidGrouped()) {
 							uint32 r_group = raid->GetGroup(GetName());
 							const auto msg = fmt::format("Casting {}.", spells[botSpell.SpellId].name);
-							raid->RaidGroupSay(msg.c_str(), GetCleanName(), 0, 100);
+							raid->RaidGroupSay(msg.c_str(), GetCleanName(), Language::CommonTongue, Language::MaxValue);
 							std::vector<RaidMember> raid_group_members = raid->GetRaidGroupMembers(r_group);
 							for (const auto& rgm : raid_group_members) {
 								if (rgm.member && !rgm.member->qglobal) {

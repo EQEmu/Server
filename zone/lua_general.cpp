@@ -3789,7 +3789,7 @@ std::string lua_get_faction_name(int faction_id) {
 	return quest_manager.getfactionname(faction_id);
 }
 
-std::string lua_get_language_name(int language_id) {
+std::string lua_get_language_name(uint8 language_id) {
 	return quest_manager.getlanguagename(language_id);
 }
 

@@ -36,6 +36,7 @@ void SendRuleSubCommands(Client *c);
 void SendGuildSubCommands(Client *c);
 void SendShowInventorySubCommands(Client *c);
 void SendFixMobSubCommands(Client *c);
+void SendDataBucketsSubCommands(Client *c);
 
 // Commands
 void command_acceptrules(Client *c, const Seperator *sep);
@@ -52,6 +53,7 @@ void command_bugs(Client *c, const Seperator *sep);
 void command_camerashake(Client *c, const Seperator *sep);
 void command_castspell(Client *c, const Seperator *sep);
 void command_chat(Client *c, const Seperator *sep);
+void command_clearxtargets(Client *c, const Seperator *sep);
 void command_copycharacter(Client *c, const Seperator *sep);
 void command_corpse(Client *c, const Seperator *sep);
 void command_corpsefix(Client *c, const Seperator *sep);

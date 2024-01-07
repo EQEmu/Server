@@ -404,38 +404,38 @@ public:
 
 						for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
 							int effect_index = EFFECTIDTOINDEX(i);
-							if (spells[spell_id].base_value[effect_index] <= 0)
+							if (spells[spell_id].max_value[effect_index] <= 0)
 								continue;
 
 							switch (spells[spell_id].effect_id[effect_index]) {
 								case SE_ResistFire:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Fire)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Fire)] += spells[spell_id].max_value[effect_index];
 									break;
 								case SE_ResistCold:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Cold)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Cold)] += spells[spell_id].max_value[effect_index];
 									break;
 								case SE_ResistPoison:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Poison)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Poison)] += spells[spell_id].max_value[effect_index];
 									break;
 								case SE_ResistDisease:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Disease)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Disease)] += spells[spell_id].max_value[effect_index];
 									break;
 								case SE_ResistMagic:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Magic)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Magic)] += spells[spell_id].max_value[effect_index];
 									break;
 								case SE_ResistCorruption:
 									entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(
-										BCEnum::RT_Corruption)] += spells[spell_id].base_value[effect_index];
+										BCEnum::RT_Corruption)] += spells[spell_id].max_value[effect_index];
 									break;
 								default:
 									continue;
 							}
-							entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base_value[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].max_value[effect_index];
 							valid_spell = true;
 						}
 						if (!valid_spell) {
@@ -7594,7 +7594,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 			SpawnAppearance_Struct* saptr = (SpawnAppearance_Struct*)outapp->pBuffer;
 			saptr->spawn_id = bot_iter->GetID();
-			saptr->type = AT_ShowHelm;
+			saptr->type = AppearanceType::ShowHelm;
 			saptr->parameter = bot_iter->GetShowHelm();
 
 			entity_list.QueueClients(bot_iter, outapp);
@@ -7667,7 +7667,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 	[10-16-2015 :: 22:15:40] [Packet :: Server -> Client (Dump)] [OP_SpawnAppearance - 0x01d1] [Size: 10]
 	0: A2 02 2B 00 00 00 00 00 - showhelm = false
 
-	*** Bot did not update using the OP_SpawnAppearance packet with AT_ShowHelm appearance type ***
+	*** Bot did not update using the OP_SpawnAppearance packet with AppearanceType::ShowHelm appearance type ***
 	*/
 }
 
@@ -7694,7 +7694,7 @@ void bot_subcommand_bot_update(Client *c, const Seperator *sep)
 
 		bot_iter->SetPetChooser(false);
 		bot_iter->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
-		bot_iter->SendAppearancePacket(AT_WhoLevel, bot_iter->GetLevel(), true, true);
+		bot_iter->SendAppearancePacket(AppearanceType::WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;
 	}
 

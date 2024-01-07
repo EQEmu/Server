@@ -164,13 +164,7 @@ int main() {
 
 	database.ExpireMail();
 
-	if(Config->ChatPort != Config->MailPort)
-	{
-		LogInfo("MailPort and CharPort must be the same in eqemu_config.json for UCS");
-		exit(1);
-	}
-
-	g_Clientlist = new Clientlist(Config->ChatPort);
+	g_Clientlist = new Clientlist(Config->GetUCSPort());
 
 	ChannelList = new ChatChannelList();
 

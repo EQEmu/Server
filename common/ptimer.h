@@ -44,9 +44,10 @@ enum : int {	//values for pTimerType
 	pTimerBeggingPickPocket = 27,
 	pTimerLinkedSpellReuseStart = 28,
 	pTimerLinkedSpellReuseEnd = 48,
+	pTimerClearXTarget = 50,
 
-	pTimerShieldAbility = 86,	
-	
+	pTimerShieldAbility = 86,
+
 	pTimerLayHands = 87,		//these IDs are used by client too
 	pTimerHarmTouch = 89,		//so dont change them
 

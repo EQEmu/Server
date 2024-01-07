@@ -472,8 +472,8 @@ void Client::AI_Start(uint32 iMoveDelay) {
 		return;
 
 	pClientSideTarget = GetTarget() ? GetTarget()->GetID() : 0;
-	SendAppearancePacket(AT_Anim, ANIM_FREEZE);	// this freezes the client
-	SendAppearancePacket(AT_Linkdead, 1); // Sending LD packet so *LD* appears by the player name when charmed/feared -Kasai
+	SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);	// this freezes the client
+	SendAppearancePacket(AppearanceType::Linkdead, 1); // Sending LD packet so *LD* appears by the player name when charmed/feared -Kasai
 	SetAttackTimer();
 	SetFeigned(false);
 }
@@ -537,8 +537,8 @@ void Client::AI_Stop() {
 	safe_delete(app);
 
 	SetTarget(entity_list.GetMob(pClientSideTarget));
-	SendAppearancePacket(AT_Anim, GetAppearanceValue(GetAppearance()));
-	SendAppearancePacket(AT_Linkdead, 0); // Removing LD packet so *LD* no longer appears by the player name when charmed/feared -Kasai
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(GetAppearance()));
+	SendAppearancePacket(AppearanceType::Linkdead, 0); // Removing LD packet so *LD* no longer appears by the player name when charmed/feared -Kasai
 	if (!auto_attack) {
 		attack_timer.Disable();
 		attack_dw_timer.Disable();

@@ -146,12 +146,12 @@ void Client::SendGuildRanks()
 void Client::SendGuildSpawnAppearance() {
 	if (!IsInAGuild()) {
 		// clear guildtag
-		SendAppearancePacket(AT_GuildID, GUILD_NONE);
+		SendAppearancePacket(AppearanceType::GuildID, GUILD_NONE);
 		LogGuilds("Sending spawn appearance for no guild tag");
 	} else {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		LogGuilds("Sending spawn appearance for guild [{}] at rank [{}]", GuildID(), rank);
-		SendAppearancePacket(AT_GuildID, GuildID());
+		SendAppearancePacket(AppearanceType::GuildID, GuildID());
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
 		{
 			switch (rank) {
@@ -161,7 +161,7 @@ void Client::SendGuildSpawnAppearance() {
 				default: { break; }				// GUILD_NONE
 			}
 		}
-		SendAppearancePacket(AT_GuildRank, rank);
+		SendAppearancePacket(AppearanceType::GuildRank, rank);
 	}
 	UpdateWho();
 }
@@ -372,8 +372,8 @@ void EntityList::SendGuildJoin(GuildJoin_Struct* gj){
 			return false;
 		// clear guildtag
 		guild_id = GUILD_NONE;
-		SendAppearancePacket(AT_GuildID, GUILD_NONE);
-		SendAppearancePacket(AT_GuildRank, GUILD_RANK_NONE);
+		SendAppearancePacket(AppearanceType::GuildID, GUILD_NONE);
+		SendAppearancePacket(AppearanceType::GuildRank, GUILD_RANK_NONE);
 		UpdateWho();
 		return true;
 	} else {
@@ -382,9 +382,9 @@ void EntityList::SendGuildJoin(GuildJoin_Struct* gj){
 		guildrank = in_rank;
 		if (guild_id != in_guild_id) {
 			guild_id = in_guild_id;
-			SendAppearancePacket(AT_GuildID, in_guild_id);
+			SendAppearancePacket(AppearanceType::GuildID, in_guild_id);
 		}
-		SendAppearancePacket(AT_GuildRank, in_rank);
+		SendAppearancePacket(AppearanceType::GuildRank, in_rank);
 		UpdateWho();
 		return true;
 	}

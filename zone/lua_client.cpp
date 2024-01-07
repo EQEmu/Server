@@ -494,14 +494,14 @@ void Lua_Client::IncreaseSkill(int skill_id, int value) {
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id);
+	self->IncreaseLanguageSkill(language_id);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id, int value) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id, value);
+	self->IncreaseLanguageSkill(language_id, increase);
 }
 
 int Lua_Client::GetRawSkill(int skill_id) {
@@ -544,9 +544,9 @@ void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod
 	self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), target, chance_mod);
 }
 
-void Lua_Client::SetLanguageSkill(int language, int value) {
+void Lua_Client::SetLanguageSkill(uint8 language_id, uint8 language_skill) {
 	Lua_Safe_Call_Void();
-	self->SetLanguageSkill(language, value);
+	self->SetLanguageSkill(language_id, language_skill);
 }
 
 int Lua_Client::MaxSkill(int skill_id) {
@@ -1458,12 +1458,12 @@ void Lua_Client::AssignToInstance(int instance_id) {
 
 void Lua_Client::Freeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 }
 
 void Lua_Client::UnFreeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
 
 uint32 Lua_Client::GetAggroCount() {
@@ -3246,6 +3246,18 @@ void Lua_Client::SummonItemIntoInventory(luabind::object item_table) {
 	);
 }
 
+bool Lua_Client::HasItemOnCorpse(uint32 item_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->HasItemOnCorpse(item_id);
+}
+
+void Lua_Client::ClearXTargets()
+{
+	Lua_Safe_Call_Void();
+	self->ClearXTargets();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3317,6 +3329,7 @@ luabind::scope lua_register_client() {
 	.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 	.def("ClearAccountFlag", (void(Lua_Client::*)(const std::string&))&Lua_Client::ClearAccountFlag)
 	.def("ClearPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearPEQZoneFlag)
+	.def("ClearXTargets", (void(Lua_Client::*)(void))&Lua_Client::ClearXTargets)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
 	.def("CountAugmentEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
@@ -3508,6 +3521,7 @@ luabind::scope lua_register_client() {
 	.def("HasDisciplineLearned", (bool(Lua_Client::*)(uint16))&Lua_Client::HasDisciplineLearned)
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
+	.def("HasItemOnCorpse", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemOnCorpse)
 	.def("HasPEQZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasPEQZoneFlag)
 	.def("HasRecipeLearned", (bool(Lua_Client::*)(uint32))&Lua_Client::HasRecipeLearned)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
@@ -3516,8 +3530,8 @@ luabind::scope lua_register_client() {
 	.def("Hungry", (bool(Lua_Client::*)(void))&Lua_Client::Hungry)
 	.def("InZone", (bool(Lua_Client::*)(void))&Lua_Client::InZone)
 	.def("IncStats", (void(Lua_Client::*)(int,int))&Lua_Client::IncStats)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseLanguageSkill)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8,uint8))&Lua_Client::IncreaseLanguageSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseSkill)
 	.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)

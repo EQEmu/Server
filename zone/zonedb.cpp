@@ -20,6 +20,7 @@
 #include "../common/repositories/character_pet_inventory_repository.h"
 #include "../common/repositories/character_pet_info_repository.h"
 #include "../common/repositories/character_buffs_repository.h"
+#include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
 
@@ -804,23 +805,27 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp){
-	std::string query = StringFormat(
-		"SELECT					"
-		"lang_id,				"
-		"`value`				"
-		"FROM					"
-		"`character_languages`	"
-		"WHERE `id` = %u ORDER BY `lang_id`", character_id);
-	auto results = database.QueryDatabase(query); int i = 0;
-	/* Initialize Languages */
-	for (i = 0; i < MAX_PP_LANGUAGE; ++i)
-		pp->languages[i] = 0;
+bool ZoneDatabase::LoadCharacterLanguages(uint32 character_id, PlayerProfile_Struct* pp)
+{
+	const auto& l = CharacterLanguagesRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {} ORDER BY `lang_id`",
+			character_id
+		)
+	);
 
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		i = Strings::ToInt(row[0]);
-		if (i < MAX_PP_LANGUAGE){
-			pp->languages[i] = Strings::ToInt(row[1]);
+	if (l.empty()) {
+		return false;
+	}
+
+	for (int i = 0; i < MAX_PP_LANGUAGE; ++i) { // Initialize Languages
+		pp->languages[i] = 0;
+	}
+
+	for (const auto& e : l) {
+		if (EQ::ValueWithin(e.lang_id, Language::CommonTongue, Language::Unknown27)) {
+			pp->languages[e.lang_id] = e.value;
 		}
 	}
 
@@ -4123,15 +4128,16 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 char_id, uint8 corpse) {
 		return 0;
 }
 
-uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid) {
-	Corpse* tmp = LoadCharacterCorpse(corpse_id);
-	uint32 itemid = 0;
+uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id) {
+	Corpse* c = LoadCharacterCorpse(corpse_id);
+	uint32 item_id = 0;
 
-	if (tmp) {
-		itemid = tmp->GetWornItem(slotid);
-		tmp->DepopPlayerCorpse();
+	if (c) {
+		item_id = c->GetWornItem(slot_id);
+		c->DepopPlayerCorpse();
 	}
-	return itemid;
+
+	return item_id;
 }
 
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse){

@@ -567,29 +567,29 @@ Mob::~Mob()
 	LeaveHealRotationTargetPool();
 }
 
-uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
-	switch (iAppearance) {
-		// 0 standing, 1 sitting, 2 ducking, 3 lieing down, 4 looting
+uint32 Mob::GetAppearanceValue(EmuAppearance in_appearance) {
+	switch (in_appearance) {
 		case eaStanding: {
-			return ANIM_STAND;
+			return Animation::Standing;
 		}
 		case eaSitting: {
-			return ANIM_SIT;
+			return Animation::Sitting;
 		}
 		case eaCrouching: {
-			return ANIM_CROUCH;
+			return Animation::Crouching;
 		}
 		case eaDead: {
-			return ANIM_DEATH;
+			return Animation::Lying;
 		}
 		case eaLooting: {
-			return ANIM_LOOT;
+			return Animation::Looting;
 		}
-		//to shup up compiler:
-		case _eaMaxAppearance:
+		case _eaMaxAppearance: {
 			break;
+		}
 	}
-	return(ANIM_STAND);
+
+	return Animation::Standing;
 }
 
 
@@ -638,14 +638,14 @@ void Mob::CalcInvisibleLevel()
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
 	if (state == Invisibility::Visible) {
-		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Visible);
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	} else {
 		if (!set_on_bonus_calc) {
 			nobuff_invisible = state;
 			CalcInvisibleLevel();
 		}
-		SendAppearancePacket(AT_Invis, invisible);
+		SendAppearancePacket(AppearanceType::Invisibility, invisible);
 	}
 
 	BreakCharmPetIfConditionsMet();
@@ -1531,30 +1531,30 @@ void Mob::SendHPUpdate(bool force_update_all)
 	if (IsNPC() && IsDestructibleObject()) {
 		if (GetHPRatio() > 74) {
 			if (GetAppearance() != eaStanding) {
-				SendAppearancePacket(AT_DamageState, eaStanding);
+				SendAppearancePacket(AppearanceType::DamageState, eaStanding);
 				_appearance = eaStanding;
 			}
 		}
 		else if (GetHPRatio() > 49) {
 			if (GetAppearance() != eaSitting) {
-				SendAppearancePacket(AT_DamageState, eaSitting);
+				SendAppearancePacket(AppearanceType::DamageState, eaSitting);
 				_appearance = eaSitting;
 			}
 		}
 		else if (GetHPRatio() > 24) {
 			if (GetAppearance() != eaCrouching) {
-				SendAppearancePacket(AT_DamageState, eaCrouching);
+				SendAppearancePacket(AppearanceType::DamageState, eaCrouching);
 				_appearance = eaCrouching;
 			}
 		}
 		else if (GetHPRatio() > 0) {
 			if (GetAppearance() != eaDead) {
-				SendAppearancePacket(AT_DamageState, eaDead);
+				SendAppearancePacket(AppearanceType::DamageState, eaDead);
 				_appearance = eaDead;
 			}
 		}
 		else if (GetAppearance() != eaLooting) {
-			SendAppearancePacket(AT_DamageState, eaLooting);
+			SendAppearancePacket(AppearanceType::DamageState, eaLooting);
 			_appearance = eaLooting;
 		}
 	}
@@ -1597,21 +1597,6 @@ void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, b
 	spu->animation = anim;
 
 	entity_list.QueueClients(this, &outapp, send_to_self == false, false);
-}
-
-// this is for SendPosition()
-void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
-	memset(spu, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
-	spu->spawn_id = GetID();
-	spu->x_pos = FloatToEQ19(m_Position.x);
-	spu->y_pos = FloatToEQ19(m_Position.y);
-	spu->z_pos = FloatToEQ19(m_Position.z);
-	spu->delta_x = FloatToEQ13(0);
-	spu->delta_y = FloatToEQ13(0);
-	spu->delta_z = FloatToEQ13(0);
-	spu->heading = FloatToEQ12(m_Position.w);
-	spu->animation = 0;
-	spu->delta_heading = FloatToEQ10(0);
 }
 
 // this is for SendPosUpdate()
@@ -4001,20 +3986,33 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	}
 }
 
-void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool iIgnoreSelf, Client *specific_target) {
-	if (!GetID())
+void Mob::SendAppearancePacket(
+	uint32 type,
+	uint32 value,
+	bool whole_zone,
+	bool ignore_self,
+	Client* target
+)
+{
+	if (!GetID()) {
 		return;
+	}
+
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
-	appearance->spawn_id = GetID();
-	appearance->type = type;
-	appearance->parameter = value;
-	if (WholeZone)
-		entity_list.QueueClients(this, outapp, iIgnoreSelf);
-	else if(specific_target != nullptr)
-		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	else if (IsClient())
+	auto* a = (SpawnAppearance_Struct*)outapp->pBuffer;
+
+	a->spawn_id  = GetID();
+	a->type      = type;
+	a->parameter = value;
+
+	if (whole_zone) {
+		entity_list.QueueClients(this, outapp, ignore_self);
+	} else if (target) {
+		target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	} else if (IsClient()) {
 		CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	}
+
 	safe_delete(outapp);
 }
 
@@ -4034,21 +4032,6 @@ void Mob::SendLevelAppearance(){
 	la->value4a = 1;
 	la->value4b = 1;
 	la->value5a = 2;
-	entity_list.QueueCloseClients(this,outapp);
-	safe_delete(outapp);
-}
-
-void Mob::SendStunAppearance()
-{
-	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
-	la->parm1 = 58;
-	la->parm2 = 60;
-	la->spawn_id = GetID();
-	la->value1a = 2;
-	la->value1b = 0;
-	la->value2a = 2;
-	la->value2b = 0;
 	entity_list.QueueCloseClients(this,outapp);
 	safe_delete(outapp);
 }
@@ -4339,15 +4322,17 @@ const int64& Mob::SetMana(int64 amount)
 }
 
 
-void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
+void Mob::SetAppearance(EmuAppearance app, bool ignore_self) {
 	if (_appearance == app) {
 		return;
 	}
 
 	_appearance = app;
-	SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
+
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(app), true, ignore_self);
+
 	if (IsClient() && IsAIControlled()) {
-		SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
+		SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false);
 	}
 }
 
@@ -4373,7 +4358,7 @@ void Mob::SendWearChangeAndLighting(int8 last_texture) {
 		SendWearChange(i);
 	}
 	UpdateActiveLight();
-	SendAppearancePacket(AT_Light, GetActiveLightType());
+	SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 
 }
 
@@ -4399,7 +4384,7 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 		in_size = 255.0;
 	//End of Size Code
 	size = in_size;
-	SendAppearancePacket(AT_Size, (uint32) in_size);
+	SendAppearancePacket(AppearanceType::Size, (uint32) in_size);
 }
 
 Mob* Mob::GetOwnerOrSelf() {
@@ -4720,27 +4705,6 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 	}
 
 	return Result;
-}
-
-bool Mob::PlotPositionOnArcInFrontOfTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance, float min_deg, float max_deg)
-{
-
-
-	return false;
-}
-
-bool Mob::PlotPositionOnArcBehindTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance)
-{
-
-
-	return false;
-}
-
-bool Mob::PlotPositionBehindMeFacingTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_dist, float max_dist)
-{
-
-
-	return false;
 }
 
 bool Mob::HateSummon() {

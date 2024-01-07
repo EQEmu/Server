@@ -3546,7 +3546,7 @@ void Merc::MercGroupSay(Mob *speaker, const char *msg, ...)
 		Group *g = speaker->GetGroup();
 
 		if(g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
 	}
 }
 
@@ -4626,7 +4626,7 @@ void Merc::UpdateMercAppearance() {
 	}
 
 	if (UpdateActiveLight())
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 }
 
 void Merc::UpdateEquipmentLight()
@@ -5653,7 +5653,7 @@ void Client::UpdateMercLevel() {
 	if (merc)
 	{
 		merc->UpdateMercStats(this, false);
-		merc->SendAppearancePacket(AT_WhoLevel, GetLevel(), true, true);
+		merc->SendAppearancePacket(AppearanceType::WhoLevel, GetLevel(), true, true);
 	}
 }
 
