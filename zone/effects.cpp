@@ -592,6 +592,22 @@ int32 Mob::GetActSpellCost(uint16 spell_id, int32 cost)
 
 int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 {
+	// focuses don't affect discipline duration (Except War Cries)
+	if (
+		IsDiscipline(spell_id) && 
+		(
+			!spell_id == SPELL_BATTLE_CRY || 
+			!spell_id == SPELL_WAR_CRY || 
+			!spell_id == SPELL_BATTLE_CRY_OF_DRAVEL || 
+			!spell_id == SPELL_WAR_CRY_OF_DRAVEL || 
+			!spell_id == SPELL_BATTLE_CRY_OF_THE_MASTRUQ || 
+			!spell_id == SPELL_ANCIENT_CRY_OF_CHAOS || 
+			!spell_id == SPELL_BLOODTHIRST
+		)
+	) {
+		return duration;
+	}
+
 	int increase = 100;
 	increase += GetFocusEffect(focusSpellDuration, spell_id);
 	int tic_inc = 0;
