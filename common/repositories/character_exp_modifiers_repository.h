@@ -44,7 +44,123 @@ public:
      */
 
 	// Custom extended repository methods here
+	static float GetEXPModifier(
+		Database& db,
+		uint32 character_id,
+		uint32 zone_id,
+		int16 instance_version
+	)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					SELECT `exp_modifier` WHERE
+					`character_id` = {}
+					AND
+					(`zone_id` = {} OR `zone_id` = 0) AND
+					(`instance_version` = {} OR `instance_version` = -1)
+					ORDER BY `zone_id`, `instance_version` DESC
+					LIMIT 1
+				),
+				character_id,
+				zone_id,
+				instance_version
+			)
+		);
 
+		if (!results.Success() || !results.RowCount()) {
+			return 1.0f;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToFloat(row[0]);
+	}
+
+	static float GetAAEXPModifier(
+		Database& db,
+		uint32 character_id,
+		uint32 zone_id,
+		int16 instance_version
+	)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					SELECT `aa_modifier` WHERE
+					`character_id` = {}
+					AND
+					(`zone_id` = {} OR `zone_id` = 0) AND
+					(`instance_version` = {} OR `instance_version` = -1)
+					ORDER BY `zone_id`, `instance_version` DESC
+					LIMIT 1
+				),
+				character_id,
+				zone_id,
+				instance_version
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 1.0f;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToFloat(row[0]);
+	}
+
+	static void SetAAEXPModifier(
+		Database& db,
+		uint32 character_id,
+		uint32 zone_id,
+		float aa_modifier,
+		int16 instance_version
+	)
+	{
+		const float exp_modifier = GetEXPModifier(
+			db,
+			character_id,
+			zone_id,
+			instance_version
+		);
+
+		auto e = NewEntity();
+
+		e.character_id     = character_id;
+		e.zone_id          = zone_id;
+		e.instance_version = instance_version;
+		e.aa_modifier      = aa_modifier;
+		e.exp_modifier     = exp_modifier;
+
+		CharacterExpModifiersRepository::ReplaceOne(db, e);
+	}
+
+	static void SetEXPModifier(
+		Database& db,
+		uint32 character_id,
+		uint32 zone_id,
+		float exp_modifier,
+		int16 instance_version
+	)
+	{
+		const float aa_modifier = GetAAEXPModifier(
+			db,
+			character_id,
+			zone_id,
+			instance_version
+		);
+
+		auto e = NewEntity();
+
+		e.character_id     = character_id;
+		e.zone_id          = zone_id;
+		e.instance_version = instance_version;
+		e.aa_modifier      = aa_modifier;
+		e.exp_modifier     = exp_modifier;
+
+		CharacterExpModifiersRepository::ReplaceOne(db, e);
+	}
 };
 
 #endif //EQEMU_CHARACTER_EXP_MODIFIERS_REPOSITORY_H

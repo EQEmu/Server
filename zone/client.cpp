@@ -742,6 +742,8 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
+	database.SaveCharacterEXPModifiers(this);
+
 	return true;
 }
 
@@ -11950,4 +11952,80 @@ void Client::ClearXTargets()
 			SendXTargetPacket(i, nullptr);
 		}
 	}
+}
+
+std::vector<EXPModifier> Client::GetEXPModifiers()
+{
+	return m_exp_modifiers;
+}
+
+void Client::SetEXPModifiers(std::vector<EXPModifier> v)
+{
+	m_exp_modifiers = v;
+}
+
+float Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1)
+{
+	for (const auto& e : m_exp_modifiers) {
+		if (
+			e.zone_id == zone_id &&
+			e.instance_version == instance_version
+		) {
+			return e.aa_modifier;
+		}
+	}
+
+	return 1.0f;
+}
+
+float Client::GetEXPModifier(uint32 zone_id, int16 instance_version = -1)
+{
+	for (const auto& e : m_exp_modifiers) {
+		if (
+			e.zone_id == zone_id &&
+			e.instance_version == instance_version
+		) {
+			return e.exp_modifier;
+		}
+	}
+
+	return 1.0f;
+}
+
+void Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version = -1)
+{
+	for (auto& e : m_exp_modifiers) {
+		if (
+			e.zone_id == zone_id &&
+			e.instance_version == instance_version
+		) {
+			e.aa_modifier = aa_modifier;
+		}
+	}
+
+	database.SetAAEXPModifier(
+		this,
+		zone_id,
+		aa_modifier,
+		instance_version
+	);
+}
+
+void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version = -1)
+{
+	for (auto& e : m_exp_modifiers) {
+		if (
+			e.zone_id == zone_id &&
+			e.instance_version == instance_version
+		) {
+			e.exp_modifier = aa_modifier;
+		}
+	}
+
+	database.SetEXPModifier(
+		this,
+		zone_id,
+		exp_modifier,
+		instance_version
+	);
 }
