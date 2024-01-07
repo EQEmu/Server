@@ -6970,8 +6970,9 @@ bool Mob::TryDivineSave()
 	-If desired, additional spells can be triggered from the AA/item/spell effect, generally a heal.
 	*/
 
-	int32 SuccessChance = aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE];
-	if (SuccessChance && zone->random.Roll(SuccessChance))
+	int32 success_chance = aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE];
+
+	if (success_chance && zone->random.Roll(success_chance))
 	{
 		SetHP(1);
 
@@ -7016,36 +7017,37 @@ bool Mob::TryDeathSave() {
 
 	if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE]){
 
-		int SuccessChance = 0;
+		int success_chance = 0;
 		int buffSlot = spellbonuses.DeathSave[SBIndex::DEATH_SAVE_BUFFSLOT];
 		int32 UD_HealMod = 0;
 		int64 HealAmt = 300; //Death Pact max Heal
 
 		if(buffSlot >= 0){
-
 			UD_HealMod = buffs[buffSlot].ExtraDIChance;
+			success_chance = ((GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10; //(CHA Mod Default = 3)
 
-			SuccessChance = ( (GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10; //(CHA Mod Default = 3)
+			if (success_chance > 95) {
+				success_chance = 95;
+			}
 
-			if (SuccessChance > 95)
-				SuccessChance = 95;
-
-			if(zone->random.Roll(SuccessChance)) {
-
-				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
+			if(zone->random.Roll(success_chance)) {
+				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == DeathSave::HP8000) {
 					HealAmt = RuleI(Spells, DivineInterventionHeal); //8000HP is how much LIVE Divine Intervention max heals
+				}
 
 				//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL])) {
 					HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
+				}
 
-				if ((GetMaxHP() - GetHP()) < HealAmt)
+				if ((GetMaxHP() - GetHP()) < HealAmt) {
 					HealAmt = GetMaxHP() - GetHP();
+				}
 
 				SetHP((GetHP()+HealAmt));
 				Message(Chat::Emote, "The gods have healed you for %i points of damage.", HealAmt);
 
-				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
+				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == DeathSave::HP8000) {
 					entity_list.MessageCloseString(
 						this,
 						false,
@@ -7053,38 +7055,40 @@ bool Mob::TryDeathSave() {
 						Chat::MeleeCrit,
 						DIVINE_INTERVENTION,
 						GetCleanName());
-				else
+				} else {
 					entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, DEATH_PACT, GetCleanName());
+				}
 
 				SendHPUpdate();
-				BuffFadeBySlot(buffSlot);
 				return true;
 			}
 			else if (UD_HealMod) {
+				success_chance = ((GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10;
 
-				SuccessChance = ((GetCHA() * (RuleI(Spells, DeathSaveCharismaMod))) + 1) / 10;
+				if (success_chance > 95) {
+					success_chance = 95;
+				}
 
-				if (SuccessChance > 95)
-					SuccessChance = 95;
-
-				if(zone->random.Roll(SuccessChance)) {
-
-					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
+				if (zone->random.Roll(success_chance)) {
+					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == DeathSave::HP8000) {
 						HealAmt = RuleI(Spells, DivineInterventionHeal);
+					}
 
 					//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL])) {
 						HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
+					}
 
 					HealAmt = HealAmt*UD_HealMod/100;
 
-					if ((GetMaxHP() - GetHP()) < HealAmt)
+					if ((GetMaxHP() - GetHP()) < HealAmt) {
 						HealAmt = GetMaxHP() - GetHP();
+					}
 
 					SetHP((GetHP()+HealAmt));
 					Message(Chat::Emote, "The gods have healed you for %i points of damage.", HealAmt);
 
-					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
+					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == DeathSave::HP8000) {
 						entity_list.MessageCloseString(
 							this,
 							false,
@@ -7092,9 +7096,10 @@ bool Mob::TryDeathSave() {
 							Chat::MeleeCrit,
 							DIVINE_INTERVENTION,
 							GetCleanName());
-					else
+					} else {
 						entity_list.MessageCloseString(this, false, 200, Chat::MeleeCrit, DEATH_PACT, GetCleanName());
-
+					}
+					
 					SendHPUpdate();
 					BuffFadeBySlot(buffSlot);
 					return true;
