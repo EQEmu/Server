@@ -304,7 +304,8 @@ bool Zone::LoadZoneObjects()
 	return true;
 }
 
-bool Zone::IsSpecialBindLocation(const glm::vec4& location) {
+bool Zone::IsSpecialBindLocation(const glm::vec4& location)
+{
 	glm::vec2 corner1;
 	glm::vec2 corner2;
 	switch (GetZoneID()) {
