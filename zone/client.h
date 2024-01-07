@@ -1528,6 +1528,7 @@ public:
 	void JoinGroupXTargets(Group *g);
 	void LeaveGroupXTargets(Group *g);
 	void LeaveRaidXTargets(Raid *r);
+	void ClearXTargets();
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
