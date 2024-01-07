@@ -7389,7 +7389,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 		}
 	} else {
 		if (RuleB(Character, GroupInvitesRequireTarget)) {
-			Message(Chat::White, "Invalid target!");
+			Message(Chat::White, "You must target a player first to invite to join your group.");
 		} else {
 			auto pack = new ServerPacket(ServerOP_GroupInvite, sizeof(GroupInvite_Struct));
 			memcpy(pack->pBuffer, gis, sizeof(GroupInvite_Struct));
