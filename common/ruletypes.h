@@ -434,6 +434,7 @@ RULE_BOOL(Spells, IgnoreSpellDmgLvlRestriction, false, "Ignore the 5 level sprea
 RULE_BOOL(Spells, ItemExtraSpellAmtCalcAsPercent, false, "Apply the Item stats Spell Dmg and Heal Amount as Percentage-based modifiers instead of flat additions")
 RULE_REAL(Spells, BreakFeignDeathWhenCastOn, 2.0, "Percentage that Feign Death will break when you resist a spell")
 RULE_REAL(Spells, BreakSneakWhenCastOn, 2.0, "Percentage that Sneak will break when you resist a spell")
+RULE_BOOL(Spells, EnableResistSoftCap, false, "Enabled resist softcap and can be adjusted by rule, SpellResistSoftCap")
 RULE_INT(Spells, SpellResistSoftCap, 255, "Softcap for spell resists.")
 RULE_BOOL(Spells, AllowItemTGB, false, "Target group buff (/tgb) doesn't work with items on live, custom servers want it though")
 RULE_BOOL(Spells, NPCInnateProcOverride, true, "NPC innate procs override the target type to single target")

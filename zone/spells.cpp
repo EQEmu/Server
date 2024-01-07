@@ -5187,16 +5187,21 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Add our level, resist and -spell resist modifier to our roll chance
 	resist_chance += level_mod;
-	int soft_cap_level_modifier;
+	if (RuleB(Spells, EnableResistSoftCap)) {
+		int soft_cap_level_modifier;
 
-	if (GetLevel() > 60) {
-		soft_cap_level_modifier = (GetLevel() - 60) * 10;
-	}
+		if (GetLevel() > 60) {
+			soft_cap_level_modifier = (GetLevel() - 60) * 10;
+		}
 
-	if ((target_resist + resist_modifier) > (RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier)) {
-		resist_chance += RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier;
+		if ((target_resist + resist_modifier) > (RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier)) {
+			resist_chance += RuleI(Spells, SpellResistSoftCap) + soft_cap_level_modifier;
+		} else {
+			resist_chance += target_resist + resist_modifier;
+		}
 	} else {
-		resist_chance += target_resist + resist_modifier;
+		resist_chance += resist_modifier;
+		resist_chance += target_resist;
 	}
 
 	//Do our min and max resist checks.
@@ -5230,13 +5235,11 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Finally our roll
-	int roll = zone->random.Int(0, RuleI(Spells, SpellResistSoftCap));
-	if(roll > resist_chance)
-	{
+	int roll = zone->random.Int(0, RuleB(Spells, EnableResistSoftCap) ? RuleI(Spells, SpellResistSoftCap) : 200);
+
+	if(roll > resist_chance) {
 		return 100;
-	}
-	else
-	{
+	} else {
 		//This is confusing but it's basically right
 		//It skews partial resists up over 100 more often than not
 		if(!IsPartialResistableSpell(spell_id))
