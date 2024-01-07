@@ -338,9 +338,10 @@ RULE_BOOL(Zone, UseZoneController, true, "Enables the ability to use persistent 
 RULE_BOOL(Zone, EnableZoneControllerGlobals, false, "Enables the ability to use quest globals with the zone controller NPC")
 RULE_INT(Zone, GlobalLootMultiplier, 1, "Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc")
 RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a zone and has hit its zone shut down timer, it will hard kill the process to free memory back to the OS")
-RULE_INT(Zone, SecondsBeforeIdle, 60, "Seconds before IDLE_WHEN_EMPTY define kicks in")
+RULE_INT(Zone, SecondsBeforeIdle, 60, "Seconds before Zone:ZonesIdleWhenEmpty define kicks in")
 RULE_INT(Zone, SpawnEventMin, 3, "When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.")
 RULE_INT(Zone, ForageChance, 25, "Chance of foraging from zone table vs global table")
+RULE_BOOL(Zone, ZonesIdleWhenEmpty, true, "Disable to stop zones idling when empty")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)
