@@ -1072,8 +1072,8 @@ bool ZoneDatabase::SaveCharacterData(
 
 	e.id                      = c->CharacterID();
 	e.account_id              = c->AccountID();
-	e.name                    = Strings::Escape(pp->name);
-	e.last_name               = Strings::Escape(pp->last_name);
+	e.name                    = pp->name;
+	e.last_name               = pp->last_name;
 	e.gender                  = pp->gender;
 	e.race                    = pp->race;
 	e.class_                  = pp->class_;
@@ -1097,8 +1097,8 @@ bool ZoneDatabase::SaveCharacterData(
 	e.ability_number          = pp->ability_number;
 	e.ability_time_minutes    = pp->ability_time_minutes;
 	e.ability_time_hours      = pp->ability_time_hours;
-	e.title                   = Strings::Escape(pp->title);
-	e.suffix                  = Strings::Escape(pp->suffix);
+	e.title                   = pp->title;
+	e.suffix                  = pp->suffix;
 	e.exp                     = pp->exp;
 	e.exp_enabled             = c->IsEXPEnabled();
 	e.points                  = pp->points;
