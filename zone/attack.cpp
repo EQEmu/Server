@@ -6405,7 +6405,7 @@ bool Client::CheckDualWield()
 	return zone->random.Int(1, 375) <= chance;
 }
 
-void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool Rampage)
+void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool rampage)
 {
 	if (!target) {
 		return;
@@ -6429,7 +6429,7 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool Ram
 
 	if (IsNPC()) {
 		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
-		if (n_atk <= 1 || Rampage) {
+		if (n_atk <= 1 || rampage) {
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 		} else {
 			for (int i = 0; i < n_atk; ++i) {
@@ -6462,7 +6462,7 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool Ram
 	}
 }
 
-void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool Rampage)
+void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool rampage)
 {
 	if (!target) {
 		return;
@@ -6475,7 +6475,7 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool Ramp
 		GetEquippedItemFromTextureSlot(EQ::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);
-			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack() && !Rampage) {
+			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack() && !rampage) {
 				Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);
 
 				if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
