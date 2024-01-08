@@ -1395,7 +1395,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	bool IsFromItem = false;
 	EQ::ItemInstance *item = nullptr;
-	
+
 	if(IsClient() && slot != CastingSlot::Item && slot != CastingSlot::PotionBelt && spells[spell_id].recast_time > 1000) { // 10 is item
 		if(!CastToClient()->GetPTimers().Expired(&database, pTimerSpellStart + spell_id, false)) {
 			//should we issue a message or send them a spell gem packet?
@@ -3798,8 +3798,6 @@ bool Mob::SpellOnTarget(
 	LogSpells("Casting spell [{}] on [{}] with effective caster level [{}]", spell_id, spelltar->GetName(), caster_level);
 
 	if (IsClient() && (IsDiscipline(spell_id) || spells[spell_id].is_discipline)) {
-		std::string msg = "%s";
-		msg += spells[spell_id].cast_on_other;
 		entity_list.MessageClose(this, false, 200, 0, fmt::format("{}{}", GetCleanName(), spells[spell_id].cast_on_other).c_str());
 	}
 
