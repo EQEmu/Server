@@ -2619,74 +2619,75 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 		case GroupSpell:
 		{
-			if(IsBot()) {
-				bool StopLogic = false;
-				if(!CastToBot()->DoFinishedSpellGroupTarget(spell_id, spell_target, slot, StopLogic))
+			if (IsBot()) {
+				bool stop_logic = false;
+				if (!CastToBot()->DoFinishedSpellGroupTarget(spell_id, spell_target, slot, stop_logic)) {
 					return false;
-				if(StopLogic)
+				}
+
+				if(stop_logic) {
 					break;
+				}
 			}
 
 			// We hold off turning MBG off so we can still use it to calc the mana cost
-			if(spells[spell_id].can_mgb && HasMGB())
-			{
+			if (spells[spell_id].can_mgb && HasMGB()) {
 				SpellOnTarget(spell_id, this);
 				entity_list.MassGroupBuff(this, this, spell_id, true);
-			}
-			else
-			{
+			} else {
 				// at this point spell_target is a member of the other group, or the
 				// caster if they're not using TGB
 				// NOTE: this will always hit the caster, plus the target's group so
 				// it can affect up to 7 people if the targeted group is not our own
 
 				// Allow pets who cast group spells to affect the group.
-				if (spell_target->IsPetOwnerClient() && IsPetOwnerClient()){
+				if (spell_target->IsPetOwnerClient() && IsPetOwnerClient()) {
 					Mob* owner =  spell_target->GetOwner();
 
-					if (owner)
+					if (owner) {
 						spell_target = owner;
+					}
 				}
 
-				if(spell_target->IsGrouped())
-				{
+				if (spell_target->IsGrouped()) {
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
-					if(target_group)
-					{
+					if (target_group) {
 						target_group->CastGroupSpell(this, spell_id);
+						if (GetClass() != Class::Bard) {
+							SpellOnTarget(spell_id, this);
+						}
 					}
-				}
-				else if(spell_target->IsRaidGrouped() && spell_target->IsClient())
-				{
+				} else if (spell_target->IsRaidGrouped() && spell_target->IsClient()) {
 					Raid *target_raid = entity_list.GetRaidByClient(spell_target->CastToClient());
 					uint32 gid = 0xFFFFFFFF;
-					if(target_raid){
+					if (target_raid) {
 						gid = target_raid->GetGroup(spell_target->GetName());
-						if(gid < 12)
+						if (gid < 12) {
 							target_raid->CastGroupSpell(this, spell_id, gid);
-						else
+						} else {
 							SpellOnTarget(spell_id, spell_target);
+						}
 					}
-				}
-				else
-				{
+				} else {
 					// if target is grouped, CastGroupSpell will cast it on the caster
 					// too, but if not then we have to do that here.
 
-					if(spell_target != this){
+					if (spell_target != this) {
 						SpellOnTarget(spell_id, this);
 	#ifdef GROUP_BUFF_PETS
 						//pet too
-						if (spells[spell_id].target_type != ST_GroupNoPets && GetPet() && HasPetAffinity() && !GetPet()->IsCharmed())
+						if (spells[spell_id].target_type != ST_GroupNoPets && GetPet() && HasPetAffinity() && !GetPet()->IsCharmed()) {
 							SpellOnTarget(spell_id, GetPet());
+						}
 	#endif
 					}
 
 					SpellOnTarget(spell_id, spell_target);
 	#ifdef GROUP_BUFF_PETS
 					//pet too
-					if (spells[spell_id].target_type != ST_GroupNoPets && spell_target->GetPet() && spell_target->HasPetAffinity() && !spell_target->GetPet()->IsCharmed())
+					if (spells[spell_id].target_type != ST_GroupNoPets && spell_target->GetPet() && spell_target->HasPetAffinity() && !spell_target->GetPet()->IsCharmed()) {
 						SpellOnTarget(spell_id, spell_target->GetPet());
+					}
 	#endif
 				}
 			}
