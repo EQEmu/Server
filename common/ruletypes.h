@@ -555,6 +555,11 @@ RULE_BOOL(Combat, WaterMatchRequiredForAutoFireLoS, true, "Enable/Disable the re
 RULE_INT(Combat, ExtraAllowedKickClassesBitmask, 0, "Bitmask for allowing extra classes beyond Warrior, Ranger, Beastlord, and Berserker to kick, No Extra Classes (0) by default")
 RULE_INT(Combat, MaxProcs, 4, "Adjustable maximum number of procs per round, the hard cap is MAX_PROCS (11). Requires mob repop or client zone when changed")
 RULE_BOOL(Combat, FinishingBlowOnlyWhenFleeing, false, "Enable to only allow Finishing Blow when fleeing (Original Style Finishing Blow)")
+RULE_BOOL(Combat, ClassicTripleAttack, false, "enable to use non-skill based classic triple attack. Originally it was Warrior Only but was expanded, can use the TripleAttackChance to tune the classes out.")
+RULE_INT(Combat, ClassicTripleAttackChanceWarrior, 100, "Innate Chance for Warrior to Triple Attack after a Double Attack (125 = 12.5%). DEFAULT: 100")
+RULE_INT(Combat, ClassicTripleAttackChanceMonk, 100, "Innate Chance for Monk to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
+RULE_INT(Combat, ClassicTripleAttackChanceBerserker, 100, "Innate Chance for Berserker to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
+RULE_INT(Combat, ClassicTripleAttackChanceRanger, 100, "Innate Chance for Ranger to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
