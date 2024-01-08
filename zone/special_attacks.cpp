@@ -2207,7 +2207,12 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 
 		if (success) {
 			if (hate_top && hate_top != this) {
-				int64 new_hate = ((who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + bonus_hate + RuleI(Combat, TauntOverAggro));
+				int64 new_hate = (
+					(who->GetNPCHate(hate_top) - who->GetNPCHate(this)) +
+					bonus_hate +
+					RuleI(Combat, TauntOverAggro) +
+					1
+				);
 
 				LogHate(
 					"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
