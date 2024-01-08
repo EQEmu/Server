@@ -2127,9 +2127,9 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 }
 
-void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell, int32 bonus_hate)
+void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
-	if (who == nullptr || DivineAura() || (!FromSpell && !CombatRange(who))) {
+	if (!who || DivineAura() || (!from_spell && !CombatRange(who))) {
 		return;
 	}
 
@@ -2144,7 +2144,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 
 	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if (
-		RuleB(Combat, TauntOverLevel) == false && 
+		!RuleB(Combat, TauntOverLevel) && 
 		level_difference < 0 ||
 	    who->GetSpecialAbility(IMMUNE_TAUNT)
 	) {
@@ -2155,27 +2155,27 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 	// All values used based on live parses after taunt was updated in 2006.
 	if (
 		(hate_top && hate_top->GetHPRatio() >= 20) ||
-		hate_top == nullptr ||
+		!hate_top ||
 		chance_bonus
 	) {
 		// SE_Taunt this is flat chance
 		if (chance_bonus) {
 			success = zone->random.Roll(chance_bonus);
 		} else {
-			float tauntchance = 50.0f;
+			float taunt_chance = 50.0f;
 
 			if (always_succeed) {
-				tauntchance = 101.0f;
+				taunt_chance = 101.0f;
 			} else {
 				if (level_difference < 0) {
-					tauntchance += static_cast<float>(level_difference) * 3.0f;
-					if (tauntchance < 20) {
-						tauntchance = 20.0f;
+					taunt_chance += static_cast<float>(level_difference) * 3.0f;
+					if (taunt_chance < 20) {
+						taunt_chance = 20.0f;
 					}
 				} else {
-					tauntchance += static_cast<float>(level_difference) * 5.0f;
-					if (tauntchance > 65) {
-						tauntchance = 65.0f;
+					taunt_chance += static_cast<float>(level_difference) * 5.0f;
+					if (taunt_chance > 65) {
+						taunt_chance = 65.0f;
 					}
 				}
 			}
@@ -2183,23 +2183,23 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 			// TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable
 			// result.
 			if (IsClient() && !always_succeed) {
-				tauntchance -= (RuleR(Combat, TauntSkillFalloff) *
+				taunt_chance -= (RuleR(Combat, TauntSkillFalloff) *
 						(CastToClient()->MaxSkill(EQ::skills::SkillTaunt) -
 						 GetSkill(EQ::skills::SkillTaunt)));
 			}
 
-			if (tauntchance < 1) {
-				tauntchance = 1.0f;
+			if (taunt_chance < 1) {
+				taunt_chance = 1.0f;
 			}
 
-			tauntchance /= 100.0f;
-			success = tauntchance > zone->random.Real(0, 1);
+			taunt_chance /= 100.0f;
+			success = taunt_chance > zone->random.Real(0, 1);
 
 			LogHate(
-				"Taunter mob {} target npc {} tauntchance [{}] success [{}] hate_top [{}]",
+				"Taunter mob {} target npc {} taunt_chance [{}] success [{}] hate_top [{}]",
 				GetMobDescription(),
 				who->GetMobDescription(),
-				tauntchance,
+				taunt_chance,
 				success ? "true" : "false",
 				hate_top ? hate_top->GetMobDescription() : "not found"
 			);
@@ -2207,7 +2207,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 
 		if (success) {
 			if (hate_top && hate_top != this) {
-				int64 newhate = ((who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + bonus_hate + RuleI(Combat, TauntOverAggro));
+				int64 new_hate = ((who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + bonus_hate + RuleI(Combat, TauntOverAggro));
 
 				LogHate(
 					"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
@@ -2218,10 +2218,10 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 					who->GetNPCHate(this),
 					bonus_hate,
 					RuleI(Combat, TauntOverAggro),
-					newhate
+					new_hate
 				);
 
-				who->CastToNPC()->AddToHateList(this, newhate);
+				who->CastToNPC()->AddToHateList(this, new_hate);
 				success = true;
 			} else {
 				who->CastToNPC()->AddToHateList(this, 12);
