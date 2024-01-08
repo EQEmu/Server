@@ -2144,9 +2144,9 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 
 	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if (
-		!RuleB(Combat, TauntOverLevel) && 
+		!RuleB(Combat, TauntOverLevel) &&
 		level_difference < 0 ||
-	    who->GetSpecialAbility(IMMUNE_TAUNT)
+		who->GetSpecialAbility(IMMUNE_TAUNT)
 	) {
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		return;
