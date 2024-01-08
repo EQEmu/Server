@@ -7094,6 +7094,7 @@ bool Mob::TryDeathSave() {
 				}
 
 				SendHPUpdate();
+				BuffFadeBySlot(buffSlot);
 				return true;
 			}
 			else if (UD_HealMod) {
