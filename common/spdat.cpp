@@ -769,6 +769,13 @@ bool IsValidSpell(uint32 spell_id)
 	return false;
 }
 
+bool Mob::IsHarmTouchSpell(uint16 spell_id)
+{
+	return spell_id == SPELL_HARM_TOUCH ||
+		   spell_id == SPELL_HARM_TOUCH2 ||
+		   spell_id == SPELL_IMP_HARM_TOUCH;
+}
+
 // returns the lowest level of any caster which can use the spell
 uint8 GetSpellMinimumLevel(uint16 spell_id)
 {
