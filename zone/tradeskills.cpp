@@ -952,10 +952,16 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 //returns true on success
 bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
-	if(spec == nullptr)
-		return(false);
+	if (!spec) {
+		return false;
+	}
 
 	uint16 user_skill = GetSkill(spec->tradeskill);
+
+	if (RuleI(Skills, TradeSkillClamp) != 0 && user_skill > RuleI(Skills, TradeSkillClamp)) {
+		user_skill = RuleI(Skills, TradeSkillClamp);
+	}
+
 	float chance = 0.0;
 	float skillup_modifier = 0.0;
 	int16 thirdstat = 0;
