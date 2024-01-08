@@ -5360,24 +5360,26 @@ void Mob::DoRiposte(Mob *defender)
 
 void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, ExtraAttackOptions *opts)
 {
-	int64 dmgbonusmod = 0;
+	int64 damage_bonus_mod = 0;
+	damage_bonus_mod += GetMeleeDamageMod_SE(skill);
+	damage_bonus_mod += GetMeleeDmgPositionMod(defender);
 
-	dmgbonusmod += GetMeleeDamageMod_SE(skill);
-	dmgbonusmod += GetMeleeDmgPositionMod(defender);
-	if (opts)
-		dmgbonusmod += opts->melee_damage_bonus_flat;
+	if (opts) {
+		damage_bonus_mod += opts->melee_damage_bonus_flat;
+	}
 
 	if (defender) {
 		if (defender->IsOfClientBotMerc() && defender->GetClass() == Class::Warrior) {
-			dmgbonusmod -= 5;
+			damage_bonus_mod -= 5;
 		}
-		// 168 defensive
-		dmgbonusmod += (defender->spellbonuses.MeleeMitigationEffect +
-		                defender->itembonuses.MeleeMitigationEffect +
-		                defender->aabonuses.MeleeMitigationEffect);
+
+		if (defender->IsOfClientBotMerc()) {
+			damage_bonus_mod -= (defender->spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect +
+				aabonuses.MeleeMitigationEffect);
+		}
 	}
 
-	damage += damage * dmgbonusmod / 100;
+	damage += damage * damage_bonus_mod / 100;
 }
 
 bool Mob::HasDied() {
