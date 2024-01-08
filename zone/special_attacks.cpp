@@ -2129,17 +2129,13 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell, int32 bonus_hate)
 {
-	if (who == nullptr)
+	if (who == nullptr || DivineAura() || (!FromSpell && !CombatRange(who))) {
 		return;
+	}
 
-	if (DivineAura())
-		return;
-
-	if (!FromSpell && !CombatRange(who))
-		return;
-
-	if (!always_succeed && IsClient())
+	if (!always_succeed && IsClient()) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillTaunt, who, 10);
+	}
 
 	Mob *hate_top = who->GetHateMost();
 
@@ -2147,50 +2143,56 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 	bool success = false;
 
 	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
-	if ((RuleB(Combat, TauntOverLevel) == false) && (level_difference < 0) ||
-	    who->GetSpecialAbility(IMMUNE_TAUNT)) {
+	if (
+		RuleB(Combat, TauntOverLevel) == false && 
+		level_difference < 0 ||
+	    who->GetSpecialAbility(IMMUNE_TAUNT)
+	) {
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		return;
 	}
 
 	// All values used based on live parses after taunt was updated in 2006.
-	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == nullptr || chance_bonus) {
+	if (
+		(hate_top && hate_top->GetHPRatio() >= 20) ||
+		hate_top == nullptr ||
+		chance_bonus
+	) {
 		// SE_Taunt this is flat chance
 		if (chance_bonus) {
 			success = zone->random.Roll(chance_bonus);
 		} else {
 			float tauntchance = 50.0f;
 
-			if (always_succeed)
+			if (always_succeed) {
 				tauntchance = 101.0f;
-
-			else {
-
+			} else {
 				if (level_difference < 0) {
 					tauntchance += static_cast<float>(level_difference) * 3.0f;
-					if (tauntchance < 20)
+					if (tauntchance < 20) {
 						tauntchance = 20.0f;
-				}
-
-				else {
+					}
+				} else {
 					tauntchance += static_cast<float>(level_difference) * 5.0f;
-					if (tauntchance > 65)
+					if (tauntchance > 65) {
 						tauntchance = 65.0f;
+					}
 				}
 			}
 
 			// TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable
 			// result.
-			if (IsClient() && !always_succeed)
+			if (IsClient() && !always_succeed) {
 				tauntchance -= (RuleR(Combat, TauntSkillFalloff) *
 						(CastToClient()->MaxSkill(EQ::skills::SkillTaunt) -
 						 GetSkill(EQ::skills::SkillTaunt)));
+			}
 
-			if (tauntchance < 1)
+			if (tauntchance < 1) {
 				tauntchance = 1.0f;
+			}
 
 			tauntchance /= 100.0f;
-
 			success = tauntchance > zone->random.Real(0, 1);
 
 			LogHate(
@@ -2205,17 +2207,18 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 
 		if (success) {
 			if (hate_top && hate_top != this) {
-				int64 newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1 + bonus_hate;
+				int64 newhate = ((who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + bonus_hate + RuleI(Combat, TauntOverAggro));
 
 				LogHate(
-					"Taunter mob {} target npc {} newhate [{}] hated_top {} hate_of_top [{}] this_hate [{}] bonus_hate [{}]",
+					"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
 					GetMobDescription(),
 					who->GetMobDescription(),
-					newhate,
 					hate_top->GetMobDescription(),
 					who->GetNPCHate(hate_top),
 					who->GetNPCHate(this),
-					bonus_hate
+					bonus_hate,
+					RuleI(Combat, TauntOverAggro),
+					newhate
 				);
 
 				who->CastToNPC()->AddToHateList(this, newhate);
@@ -2224,8 +2227,9 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 				who->CastToNPC()->AddToHateList(this, 12);
 			}
 
-			if (who->CanTalk())
+			if (who->CanTalk()) {
 				who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
+			}
 		} else {
 			MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		}
