@@ -220,6 +220,23 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
+	// check to see if target is a caster mob before performing a mana tap
+	if(GetTarget() && IsManaTapSpell(spell_id)) {
+		if (
+			GetTarget()->GetCasterClass() == 'N' &&
+			(
+				!RuleB(Spells, ManaTapsRequireNPCMana) ||
+				(
+					RuleB(Spells, ManaTapsRequireNPCMana) && 
+					GetTarget()->GetMana() == 0
+				)
+			)
+		) {
+			InterruptSpell(TARGET_NO_MANA, 0x121, spell_id);
+			return false;
+		}
+	}
+
 	//Casting a spell from an item click will also stop bard pulse.
 	if (HasActiveSong() && (IsBardSong(spell_id) || slot == CastingSlot::Item)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
@@ -2479,14 +2496,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		LogSpells("Spell [{}]: cannot see target [{}]", spell_id, spell_target->GetName());
 		MessageString(Chat::Red,CANT_SEE_TARGET);
 		return false;
-	}
-
-	// check to see if target is a caster mob before performing a mana tap
-	if(spell_target && IsManaTapSpell(spell_id)) {
-		if(spell_target->GetCasterClass() == 'N') {
-			MessageString(Chat::Red, TARGET_NO_MANA);
-			return false;
-		}
 	}
 
 	//range check our target, if we have one and it is not us
