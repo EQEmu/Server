@@ -91,7 +91,7 @@ void command_summon(Client *c, const Seperator *sep)
 			c->GetZ(),
 			c->GetHeading(),
 			2,
-			GMSummon
+			c->GetHideMe() ? GMHiddenSummon : GMSummon
 		);
 		return;
 	}

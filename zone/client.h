@@ -112,14 +112,15 @@ enum { //scribing argument to MemorizeSpell
 
 //Modes for the zoning state of the client.
 typedef enum {
-	ZoneToSafeCoords, // Always send ZonePlayerToBind_Struct to client: Succor/Evac
-	GMSummon, // Always send ZonePlayerToBind_Struct to client: Only a GM Summon
-	ZoneToBindPoint, // Always send ZonePlayerToBind_Struct to client: Death Only
-	ZoneSolicited, // Always send ZonePlayerToBind_Struct to client: Portal, Translocate, Evac spells that have a x y z coord in the spell data
+	ZoneToSafeCoords,	// Always send ZonePlayerToBind_Struct to client: Succor/Evac
+	GMSummon,			// Always send ZonePlayerToBind_Struct to client: Only a GM Summon
+	GMHiddenSummon,		// Always send ZonePlayerToBind_Struct to client silently: Only a GM Summon
+	ZoneToBindPoint,	// Always send ZonePlayerToBind_Struct to client: Death Only
+	ZoneSolicited,		// Always send ZonePlayerToBind_Struct to client: Portal, Translocate, Evac spells that have a x y z coord in the spell data
 	ZoneUnsolicited,
-	GateToBindPoint, // Always send RequestClientZoneChange_Struct to client: Gate spell or Translocate To Bind Point spell
-	SummonPC, // In-zone GMMove() always: Call of the Hero spell or some other type of in zone only summons
-	Rewind, // Summon to /rewind location.
+	GateToBindPoint,	// Always send RequestClientZoneChange_Struct to client: Gate spell or Translocate To Bind Point spell
+	SummonPC,			// In-zone GMMove() always: Call of the Hero spell or some other type of in zone only summons
+	Rewind,				// Summon to /rewind location.
 	EvacToSafeCoords
 } ZoneMode;
 

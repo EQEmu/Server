@@ -88,6 +88,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				target_zone_id = zone->GetZoneID();
 				break;
 			case GMSummon:
+			case GMHiddenSummon:
 			case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 				target_zone_id = zonesummon_id;
 				break;
@@ -276,6 +277,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			target_heading = safe_heading;
 			break;
 		case GMSummon:
+		case GMHiddenSummon:
 			target_x = m_ZoneSummonLocation.x;
 			target_y = m_ZoneSummonLocation.y;
 			target_z = m_ZoneSummonLocation.z;
@@ -694,9 +696,10 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case GMSummon:
-			if (RuleB(World, SendGMSummonMessageToClient)){
-				Message(Chat::Yellow, "You have been summoned by a GM!");
-			}
+			Message(Chat::Yellow, "You have been summoned by a GM!");
+			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
+			break;
+		case GMHiddenSummon:
 			ZonePC(zoneID, instance_id, x, y, z, heading, ignorerestrictions, zm);
 			break;
 		case ZoneToBindPoint:
@@ -763,6 +766,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			heading = zone_safe_point.w;
 			break;
 		case GMSummon:
+		case GMHiddenSummon:
 			m_Position = glm::vec4(x, y, z, heading);
 			m_ZoneSummonLocation = m_Position;
 			zonesummon_id = zoneID;

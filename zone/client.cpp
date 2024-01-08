@@ -11974,6 +11974,8 @@ std::string GetZoneModeString(ZoneMode mode)
 			return "ZoneToSafeCoords";
 		case GMSummon:
 			return "GMSummon";
+		case GMHiddenSummon:
+			return "GMHiddenSummon";
 		case ZoneToBindPoint:
 			return "ZoneToBindPoint";
 		case ZoneSolicited:
