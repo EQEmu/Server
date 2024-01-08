@@ -17,7 +17,7 @@ void command_worldshutdown(Client *c, const Seperator *sep)
 			) {
 			int time_minutes = (time / 60);
 			quest_manager.WorldWideMessage(
-				Chat::Yellow,
+				Chat::System,
 				fmt::format(
 					"[SYSTEM] World will be shutting down in {} minutes.",
 					time_minutes

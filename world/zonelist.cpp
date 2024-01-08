@@ -111,7 +111,7 @@ void ZSList::Process() {
 			0,
 			0,
 			AccountStatus::Player,
-			Chat::Yellow,
+			Chat::System,
 			fmt::format(
 				"[SYSTEM] World will be shutting down in {} minutes.",
 				((shutdowntimer->GetRemainingTime() / 1000) / 60)
@@ -759,7 +759,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 			0,
 			0,
 			AccountStatus::Player,
-			Chat::Yellow,
+			Chat::System,
 			fmt::format(
 				"[SYSTEM] World will be shutting down in {} minutes.",
 				(time / 60)
