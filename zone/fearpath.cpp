@@ -50,7 +50,7 @@ void Mob::CheckFlee()
 	}
 
 	// Undead do not flee
-	if(GetBodyType() == BT_Undead) {
+	if (GetBodyType() == BT_Undead) {
 		return;
 	}
 
