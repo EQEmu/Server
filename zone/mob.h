@@ -260,16 +260,17 @@ public:
 	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	bool HasDied();
 	virtual bool CheckDualWield();
-	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
-	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr);
+	void DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, bool ramp = false);
+	void DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, bool ramp = false);
 	virtual bool CheckDoubleAttack();
 	// inline process for places where we need to do them outside of the AI_Process
-	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr)
+	void ProcessAttackRounds(Mob *target, ExtraAttackOptions *opts = nullptr, bool ramp = false)
 	{
 		if (target) {
-			DoMainHandAttackRounds(target, opts);
-			if (CanThisClassDualWield())
-				DoOffHandAttackRounds(target, opts);
+			DoMainHandAttackRounds(target, opts, ramp);
+			if (CanThisClassDualWield()) {
+				DoOffHandAttackRounds(target, opts, ramp);
+			}
 		}
 		return;
 	}
