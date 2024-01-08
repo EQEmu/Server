@@ -254,6 +254,7 @@ RULE_BOOL(Skills, TrainSenseHeading, false, "Switch whether SenseHeading is trai
 RULE_INT(Skills, SenseHeadingStartValue, 200, "Start value of sense heading skill")
 RULE_BOOL(Skills, SelfLanguageLearning, true, "Enabling self-learning of languages")
 RULE_BOOL(Skills, RequireTomeHandin, false, "Disable click-to-learn and force hand in to Guild Master")
+RULE_INT(Skills, TradeSkillClamp, 0, "Legacy tradeskills would clamp at 252 regardless of item modifiers and skill combination. DEFAULT: 0 will bypass clamp. Legacy value 252")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
