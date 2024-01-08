@@ -769,7 +769,7 @@ bool IsValidSpell(uint32 spell_id)
 	return false;
 }
 
-bool Mob::IsHarmTouchSpell(uint16 spell_id)
+bool IsHarmTouchSpell(uint16 spell_id)
 {
 	return spell_id == SPELL_HARM_TOUCH ||
 		   spell_id == SPELL_HARM_TOUCH2 ||
