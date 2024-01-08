@@ -5374,8 +5374,11 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 		}
 
 		if (defender->IsOfClientBotMerc()) {
-			damage_bonus_mod += (defender->spellbonuses.MeleeMitigationEffect + itembonuses.MeleeMitigationEffect +
-				aabonuses.MeleeMitigationEffect);
+			damage_bonus_mod += (
+				defender->spellbonuses.MeleeMitigationEffect +
+				defender->itembonuses.MeleeMitigationEffect +
+				defender->aabonuses.MeleeMitigationEffect
+			);
 		}
 	}
 
