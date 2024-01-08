@@ -24,6 +24,7 @@
 #include "mob.h"
 #include "string_ids.h"
 #include "lua_parser.h"
+#include "npc.h"
 
 #include <string.h>
 
@@ -182,7 +183,7 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				}
 			} else if (IsNPC()) {
 				auto *npc = CastToNPC();
-				base = std::max(base, npc->GetBaseDamage());
+				base = round((npc->GetMaxDMG() - npc->GetMinDMG()) / RuleR(NPC, NPCBackstabMod));
 				// parses show relatively low BS mods from lots of NPCs, so either their BS skill is super low
 				// or their mod is divided again, this is probably not the right mod, but it's better
 				skill_bonus /= 3.0f;
