@@ -221,14 +221,14 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	// check to see if target is a caster mob before performing a mana tap
-	if(spell_target && IsManaTapSpell(spell_id)) {
+	if(GetTarget() && IsManaTapSpell(spell_id)) {
 		if (
-			spell_target->GetCasterClass() == 'N' &&
+			GetTarget()->GetCasterClass() == 'N' &&
 			(
 				!RuleB(Spells, ManaTapsRequireNPCMana) ||
 				(
 					RuleB(Spells, ManaTapsRequireNPCMana) && 
-					target->GetMana() == 0
+					GetTarget()->GetMana() == 0
 				)
 			)
 		) {
