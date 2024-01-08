@@ -3702,22 +3702,38 @@ bool Mob::HasRangedProcs() const
 
 bool Client::CheckDoubleAttack()
 {
-	int chance = 0;
-	int skill = GetSkill(EQ::skills::SkillDoubleAttack);
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
-	int bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
-	if (skill > 0)
-		chance = skill + GetLevel();
-	else if (!bonusGiveDA)
+	uint32 bonus_give_double_attack = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
+
+	if (!HasSkill(EQ::skills::SkillDoubleAttack) && !bonus_give_double_attack) {
 		return false;
+	}
 
-	if (bonusGiveDA)
-		chance += bonusGiveDA / 100.0f * 500; // convert to skill value
-	int per_inc = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
-	if (per_inc)
-		chance += chance * per_inc / 100;
+	float chance = 0.0f;
+	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
 
-	return zone->random.Int(1, 500) <= chance;
+	int32 bonus_double_attack = 0;
+	if ((GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (!HasTwoHanderEquipped())) {
+		LogCombatDetail("Knight class without a 2 hand weapon equipped = No DA Bonus!");
+	} else {
+		bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	}
+
+	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
+	if (skill) {
+		chance = (float(skill + GetLevel()) * (float(100.0f + bonus_double_attack + bonus_give_double_attack) / 100.0f)) / 500.0f;
+	} else {
+		chance = (float(bonus_give_double_attack + bonus_double_attack) / 100.0f);
+	}
+
+	LogCombatDetail("DA Skill = [{}] - GiveDoubleAttack = [{}] - DoubleAttackChance = [{}] - Final Double Attack Chance = [{}]",
+		skill,
+		bonus_give_double_attack,
+		bonus_double_attack,
+		chance
+	);
+
+	return zone->random.Roll(chance);
 }
 
 // Admittedly these parses were short, but this check worked for 3 toons across multiple levels
