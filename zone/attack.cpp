@@ -3727,18 +3727,32 @@ bool Client::CheckTripleAttack()
 	int chance;
 
 	if (RuleB(Combat, ClassicTripleAttack)) {
-		if (IsClient() && (GetLevel() >= 60) && (GetClass() == Class::Warrior)) {
-			chance = RuleI(Combat, ClassicTripleAttackChanceWarrior);
-		}
-		if (IsClient() && (GetLevel() >= 60) && (GetClass() == Class::Monk)) {
-			chance = RuleI(Combat, ClassicTripleAttackChanceMonk);
-		}
-		if (IsClient() && (GetLevel() >= 60) && (GetClass() == Class::Berserker)) {
-			chance = RuleI(Combat, ClassicTripleAttackChanceBerserker);
-		}
-
-		if (IsClient() && (GetLevel() >= 60) && (GetClass() == Class::Ranger)) {
-			chance = RuleI(Combat, ClassicTripleAttackChanceRanger);
+		if (
+			IsClient() &&
+			GetLevel() >= 60 &&
+			(
+				GetClass() == Class::Warrior ||
+				GetClass() == Class::Ranger ||
+				GetClass() == Class::Monk ||
+				GetClass() == Class::Berserker
+			)
+		) {
+			switch (GetClass()) {
+				case Class::Warrior:
+					chance = RuleI(Combat, ClassicTripleAttackChanceWarrior);
+					break;
+				case Class::Ranger:
+					chance = RuleI(Combat, ClassicTripleAttackChanceRanger);
+					break;
+				case Class::Monk:
+					chance = RuleI(Combat, ClassicTripleAttackChanceMonk);
+					break;
+				case Class::Berserker:
+					chance = RuleI(Combat, ClassicTripleAttackChanceBerserker);
+					break;
+				default:
+					break;
+			}
 		}
 	} else {
 		chance = GetSkill(EQ::skills::SkillTripleAttack);
@@ -6346,7 +6360,7 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
-					auto flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
+					int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
 							    itembonuses.FlurryChance;
 
 					if (flurry_chance && zone->random.Roll(flurry_chance)) {
