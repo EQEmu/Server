@@ -907,25 +907,32 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 bool Client::CheckTradeLoreConflict(Client* other)
 {
-	if (!other)
+	if (!other) {
 		return true;
+	}
 
 	for (int16 index = EQ::invslot::TRADE_BEGIN; index <= EQ::invslot::TRADE_END; ++index) {
 		const EQ::ItemInstance* inst = m_inv[index];
-		if (!inst || !inst->GetItem())
+		if (!inst || !inst->GetItem()) {
 			continue;
+		}
 
-		if (other->CheckLoreConflict(inst->GetItem()))
+		if (other->CheckLoreConflict(inst->GetItem())) {
+			Message(Chat::Lime, "Lore Item: %s", inst->GetItem()->Name);
 			return true;
+		}
 	}
 
 	for (int16 index = EQ::invbag::TRADE_BAGS_BEGIN; index <= EQ::invbag::TRADE_BAGS_END; ++index) {
 		const EQ::ItemInstance* inst = m_inv[index];
-		if (!inst || !inst->GetItem())
+		if (!inst || !inst->GetItem()) {
 			continue;
+		}
 
-		if (other->CheckLoreConflict(inst->GetItem()))
+		if (other->CheckLoreConflict(inst->GetItem())) {
+			Message(Chat::Lime, "Lore Item: %s", inst->GetItem()->Name);
 			return true;
+		}
 	}
 
 	return false;
