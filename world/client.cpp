@@ -538,12 +538,12 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
-	if (race < 0 || race > 255) {
+	if (!IsPlayerRace(race)) {
 		LogInfo("Client::HandleNameApprovalPacket Race was less then zero or over 255");
 		return false;
 	}
 
-	if (clas < 0 || clas > 255) {
+	if (if (!EQ::ValueWithin(class, Class::Warrior, Class::Berserker))) {
 		LogInfo("Client::HandleNameApprovalPacket Class was less then zero or over 255");
 		return false;
 	}
