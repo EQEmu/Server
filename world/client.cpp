@@ -538,6 +538,16 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
+	if (race < 0 || race > 255) {
+		LogInfo("Client::HandleNameApprovalPacket Race was less then zero or over 255");
+		return false;
+	}
+
+	if (clas < 0 || clas > 255) {
+		LogInfo("Client::HandleNameApprovalPacket Class was less then zero or over 255");
+		return false;
+	}
+	
 	LogInfo("Name approval request. Name=[{}], race=[{}], class=[{}]", char_name, GetRaceIDName(race), GetClassIDName(clas));
 
 	EQApplicationPacket *outapp;
