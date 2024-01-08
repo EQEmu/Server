@@ -137,12 +137,16 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				if (HasShieldEquipped()) {
 					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 				} else if (HasTwoHanderEquipped()) {
-					inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+					if (RuleB(Combat, BashTwoHanderUseShoulderAC)) {
+						inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotShoulders);
+					} else {
+						inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+					}
 				}
 			}
 
 			if (inst) {
-				ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
+				ac_bonus = inst->GetItemArmorClass(true) / RuleR(Combat, BashACBonusDivisor);
 			} else {
 				return 0;
 			} // return 0 in cases where we don't have an item
