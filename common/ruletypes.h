@@ -471,6 +471,7 @@ RULE_BOOL(Spells, DOTBonusDamageSplitOverDuration, true, "Disable to have Damage
 RULE_BOOL(Spells, HOTBonusHealingSplitOverDuration, true, "Disable to have Heal Over Time total bonus healing added to each tick instead of divided across duration")
 RULE_BOOL(Spells, UseLegacyFizzleCode, false, "Enable will turn on the legacy fizzle code which is far stricter and more accurate to 2001/2002 testing.")
 RULE_BOOL(Spells, LegacyManaburn, false, "Enable to have the legacy manaburn system from 2003 and earlier.")
+RULE_INT(Spells, LegacyManaburnCap, 9492, "Adjusted the hard cap (Normal or Crit) for the Legacy Manaburn system. DEFAULT: 9492")
 RULE_BOOL(Spells, EvacClearAggroInSameZone, false, "Enable to clear aggro on clients when evacing in same zone.")
 RULE_BOOL(Spells, CharmAggroOverLevel, false, "Enabling this rule will cause Charm casts over level to show resisted and cause aggro. Early EQ style.")
 RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell slots 9-12 to have the appropriate Mnemonic Retention AA learned.")

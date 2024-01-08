@@ -60,6 +60,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	bool Critical = false;
 	int64 base_value = value;
 	int chance = 0;
+	int legacy_manaburn_cap = RuleI(Spells, LegacyManaburnCap);
 
 	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
 	if ((spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
@@ -138,12 +139,20 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
 			}
 
+			// legacy manaburn can crit, but is still held to the same cap
+			if (RuleB(Spells, LegacyManaburn) && spell_id == SPELL_MANA_BURN) {
+				if (value < -legacy_manaburn_cap) {
+					value = -legacy_manaburn_cap;
+				}
+			}
+
 			entity_list.FilteredMessageCloseString(
 				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
 				OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
 
-			if (IsClient())
+			if (IsClient()) {
 				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
+			}
 
 			return value;
 		}
@@ -181,6 +190,13 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
 	) {
 		value -= GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+	}
+
+	// Apply Manaburn Damage Cap
+	if (RuleB(Spells, LegacyManaburn) && spell_id == SPELL_MANA_BURN) {
+		if (value < -legacy_manaburn_cap) {
+			value = -legacy_manaburn_cap;
+		}
 	}
 
 	return value;
