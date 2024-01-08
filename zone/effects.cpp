@@ -40,7 +40,6 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 }
 
 int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
-
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -94,6 +93,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 		if (IsOfClientBot() && GetClass() == Class::Wizard) {
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
+		}
+
+		if (IsClient() && (spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH )) {
+			ratio += RuleI(Spells, HarmTouchCritRatio); //Default is zero
 		}
 
 		if (Critical) {

@@ -478,6 +478,7 @@ RULE_BOOL(Spells, CharmAggroOverLevel, false, "Enabling this rule will cause Cha
 RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell slots 9-12 to have the appropriate Mnemonic Retention AA learned.")
 RULE_BOOL(Spells, EvacClearCharmPet, false, "Enable to have evac in zone clear charm from charm pets and detach buffs.")
 RULE_BOOL(Spells, ManaTapsRequireNPCMana, false, "Enabling will require target to have mana to tap. Default off as many npc's are caster class with 0 mana and need fixed.")
+RULE_INT(Spells, HarmTouchCritRatio, 200, "Harmtouch crit bonus, on top of BaseCritRatio")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
