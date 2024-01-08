@@ -4539,10 +4539,23 @@ bool Mob::CanThisClassDoubleAttack(void) const
 
 bool Mob::CanThisClassTripleAttack() const
 {
-	if (!IsClient())
+	if (!IsClient()) {
 		return false; // When they added the real triple attack skill, mobs lost the ability to triple
-	else
-		return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
+	} else {
+		if (RuleB(Combat, ClassicTripleAttack)) {
+			return (
+				GetLevel() >= 60 &&
+				(
+					GetClass() == Class::Warrior ||
+					GetClass() == Class::Ranger ||
+					GetClass() == Class::Monk ||
+					GetClass() == Class::Berserker
+				)
+			);
+		} else {
+			return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
+		}
+	}
 }
 
 bool Mob::IsWarriorClass(void) const

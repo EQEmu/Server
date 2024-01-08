@@ -3724,9 +3724,43 @@ bool Client::CheckDoubleAttack()
 // with varying triple attack skill (1-3% error at least)
 bool Client::CheckTripleAttack()
 {
-	int chance = GetSkill(EQ::skills::SkillTripleAttack);
-	if (chance < 1)
+	int chance;
+
+	if (RuleB(Combat, ClassicTripleAttack)) {
+		if (
+			IsClient() &&
+			GetLevel() >= 60 &&
+			(
+				GetClass() == Class::Warrior ||
+				GetClass() == Class::Ranger ||
+				GetClass() == Class::Monk ||
+				GetClass() == Class::Berserker
+			)
+		) {
+			switch (GetClass()) {
+				case Class::Warrior:
+					chance = RuleI(Combat, ClassicTripleAttackChanceWarrior);
+					break;
+				case Class::Ranger:
+					chance = RuleI(Combat, ClassicTripleAttackChanceRanger);
+					break;
+				case Class::Monk:
+					chance = RuleI(Combat, ClassicTripleAttackChanceMonk);
+					break;
+				case Class::Berserker:
+					chance = RuleI(Combat, ClassicTripleAttackChanceBerserker);
+					break;
+				default:
+					break;
+			}
+		}
+	} else {
+		chance = GetSkill(EQ::skills::SkillTripleAttack);
+	}
+
+	if (chance < 1) {
 		return false;
+	}
 
 	int inc = aabonuses.TripleAttackChance + spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
 	chance = static_cast<int>(chance * (1 + inc / 100.0f));
@@ -6320,15 +6354,21 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 
 			// you can only triple from the main hand
 			if (hand == EQ::invslot::slotPrimary && CanThisClassTripleAttack()) {
-				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+				if (!RuleB(Combat, ClassicTripleAttack)) {
+					CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+				}
+
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
-					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
+					int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
 							    itembonuses.FlurryChance;
-					if (flurrychance && zone->random.Roll(flurrychance)) {
+
+					if (flurry_chance && zone->random.Roll(flurry_chance)) {
 						Attack(target, hand, false, false, IsFromSpell);
-						if (zone->random.Roll(flurrychance))
+						
+						if (zone->random.Roll(flurry_chance)) {
 							Attack(target, hand, false, false, IsFromSpell);
+						}
 						MessageString(Chat::NPCFlurry, YOU_FLURRY);
 					}
 				}
