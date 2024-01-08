@@ -244,7 +244,8 @@ RULE_INT(Guild, PlayerCreationRequiredTime, 0, "Time needed online on the accoun
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Skills)
-RULE_INT(Skills, MaxTrainTradeskills, 21, "Highest level for trading skills that can be learnt by the trainer")
+RULE_INT(Skills, MaxTrainTradeskills, 21, "Highest level for trade skills that can be learnt by the trainer")
+RULE_INT(Skills, MaxTrainResearch, 21, "Highest level for training research from a GM.")
 RULE_BOOL(Skills, UseLimitTradeskillSearchSkillDiff, true, "Enables the limit for the maximum difference between trivial and skill for recipe searches and favorites")
 RULE_BOOL(Skills, TrivialTradeskillCombinesNoFail, false, "Enable to make all trivial tradeskill combines unable to fail")
 RULE_INT(Skills, MaxTradeskillSearchSkillDiff, 50, "The maximum difference in skill between the trivial of an item and the skill of the player if the trivial is higher than the skill. Recipes that have not been learnt or made at least once via the Experiment mode will be removed from searches based on this criteria.")
