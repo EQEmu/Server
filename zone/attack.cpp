@@ -2281,49 +2281,51 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
 			//pets do half damage to clients in pvp
 			my_hit.damage_done /= 2;
-			if (my_hit.damage_done < 1)
+			if (my_hit.damage_done < 1) {
 				my_hit.damage_done = 1;
+			}
 		}
-	}
-	else {
+	} else {
 		my_hit.damage_done = DMG_INVULNERABLE;
 	}
 
 	if (GetHP() > 0 && !other->HasDied()) {
 		other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks); // Not avoidable client already had thier chance to Avoid
+	} else {
+		return false;
 	}
-	else
-		return false;
 
-	if (HasDied()) //killed by damage shield ect
+	if (HasDied()) { //killed by damage shield ect
 		return false;
+	}
 
 	MeleeLifeTap(my_hit.damage_done);
 
 	CommonBreakInvisibleFromCombat();
 
 	//I doubt this works...
-	if (!GetTarget())
+	if (!GetTarget()) {
 		return true; //We killed them
-
-	if (!bRiposte && !other->HasDied()) {
-		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
-
-		if (!other->HasDied())
-			TrySpellProc(nullptr, weapon, other, Hand);
-
-		if (my_hit.damage_done > 0 && HasSkillProcSuccess() && !other->HasDied())
-			TrySkillProc(other, my_hit.skill, 0, true, Hand);
 	}
 
-	if (GetHP() > 0 && !other->HasDied())
+	bool has_hit = my_hit.damage_done > 0;
+	if (has_hit && !bRiposte && !other->HasDied()) {
+		TryWeaponProc(nullptr, weapon, other, Hand);
+
+		if (!other->HasDied()) {
+			TrySpellProc(nullptr, weapon, other, Hand);
+		}
+
+		if (HasSkillProcSuccess() && !other->HasDied()) {
+			TrySkillProc(other, my_hit.skill, 0, true, Hand);
+		}
+	}
+
+	if (GetHP() > 0 && !other->HasDied()) {
 		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
+	}
 
-	if (my_hit.damage_done > 0)
-		return true;
-
-	else
-		return false;
+	return has_hit;
 }
 
 void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
