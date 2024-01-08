@@ -3800,7 +3800,7 @@ bool Mob::SpellOnTarget(
 	if (IsClient() && (IsDiscipline(spell_id) || spells[spell_id].is_discipline)) {
 		std::string msg = "%s";
 		msg += spells[spell_id].cast_on_other;
-		entity_list.MessageClose(this, false, 200, 0, msg.c_str(), this->GetCleanName());
+		entity_list.MessageClose(this, false, 200, 0, fmt::format("{}{}", GetCleanName(), spells[spell_id].cast_on_other).c_str());
 	}
 
 	// Actual cast action - this causes the caster animation and the particles
