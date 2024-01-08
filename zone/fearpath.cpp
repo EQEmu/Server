@@ -49,6 +49,11 @@ void Mob::CheckFlee()
 		return;
 	}
 
+	// Undead do not flee
+	if(GetBodyType() == BT_Undead) {
+		return;
+	}
+
 	// Check if Flee Timer is cleared
 	if (!flee_timer.Check()) {
 		return;
