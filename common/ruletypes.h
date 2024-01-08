@@ -476,6 +476,7 @@ RULE_BOOL(Spells, EvacClearAggroInSameZone, false, "Enable to clear aggro on cli
 RULE_BOOL(Spells, CharmAggroOverLevel, false, "Enabling this rule will cause Charm casts over level to show resisted and cause aggro. Early EQ style.")
 RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell slots 9-12 to have the appropriate Mnemonic Retention AA learned.")
 RULE_BOOL(Spells, EvacClearCharmPet, false, "Enable to have evac in zone clear charm from charm pets and detach buffs.")
+RULE_BOOL(Spells, ManaTapsRequireNPCMana, false, "Enabling will require target to have mana to tap. Default off as many npc's are caster class with 0 mana and need fixed.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
