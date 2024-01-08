@@ -2484,14 +2484,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	// check to see if target is a caster mob before performing a mana tap
 	if(spell_target && IsManaTapSpell(spell_id)) {
 		if (
+			spell_target->GetCasterClass() == 'N' &&
 			(
-				RuleB(Spells, ManaTapsRequireNPCMana) && 
-				spell_target->GetCasterClass() == 'N' && 
-				target->GetMana() == 0
-			) ||
-			(
-				!RuleB(Spells, ManaTapsRequireNPCMana) &&
-				spell_target->GetCasterClass() == 'N'
+				!RuleB(Spells, ManaTapsRequireNPCMana) ||
+				(
+					RuleB(Spells, ManaTapsRequireNPCMana) && 
+					target->GetMana() == 0
+				)
 			)
 		) {
 			MessageString(Chat::Red, TARGET_NO_MANA);
