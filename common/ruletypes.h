@@ -562,6 +562,7 @@ RULE_INT(Combat, ClassicTripleAttackChanceWarrior, 100, "Innate Chance for Warri
 RULE_INT(Combat, ClassicTripleAttackChanceMonk, 100, "Innate Chance for Monk to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
 RULE_INT(Combat, ClassicTripleAttackChanceBerserker, 100, "Innate Chance for Berserker to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
 RULE_INT(Combat, ClassicTripleAttackChanceRanger, 100, "Innate Chance for Ranger to Triple Attack after a Double Attack (200 = 20%). DEFAULT: 100")
+RULE_INT(Combat, StunChance, 12, "Percent chance that client will be stunned when mob is behind player. DEFAULT: 12")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
