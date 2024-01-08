@@ -2653,7 +2653,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
 					if (target_group) {
 						target_group->CastGroupSpell(this, spell_id);
-						if (GetClass() != Class::Bard)
+						if (GetClass() != Class::Bard) {
 							SpellOnTarget(spell_id, this);
 						}
 					}
