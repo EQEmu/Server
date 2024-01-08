@@ -3761,7 +3761,7 @@ bool Mob::SpellOnTarget(
 		!IsResurrectionEffects(spell_id) &&
 		!IsEffectInSpell(spell_id, SE_BindSight)
 	) {
-		if (!IsClient() || !CastToClient()->GetGM()) {
+		if ((!IsClient() || !CastToClient()->GetGM()) && spell_id != SPELL_ALENIAS_DISENCHANTING_MELODY) {
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
 			return false;
 		}
@@ -4101,7 +4101,8 @@ bool Mob::SpellOnTarget(
 		} else if (
 			!IsAttackAllowed(spelltar, true) &&
 			!IsResurrectionEffects(spell_id) &&
-			!IsEffectInSpell(spell_id, SE_BindSight)
+			!IsEffectInSpell(spell_id, SE_BindSight) &&
+			spell_id != SPELL_ALENIAS_DISENCHANTING_MELODY
 		) { // Detrimental spells - PVP check
 			LogSpells(
 				"Detrimental spell [{}] can't take hold [{}] -> [{}]",
