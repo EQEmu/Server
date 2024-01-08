@@ -617,6 +617,7 @@ RULE_REAL(Aggro, PetAttackRange, 40000.0, "Maximum squared range /pet attack wor
 RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true, "If enabled, NPC's will drop aggro beyond 600 units or what is defined at the zone level")
 RULE_BOOL(Aggro, AggroPlayerPets, false, "If enabled, NPCs will aggro player pets")
 RULE_BOOL(Aggro, UndeadAlwaysAggro, true, "should undead always aggro?")
+RULE_INT(Aggro, BardAggroCap, 40, "per song bard aggro cap.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)
