@@ -35,6 +35,7 @@
 #include "../common/random.h"
 #include "../common/shareddb.h"
 #include "../common/opcodemgr.h"
+#include "../common/data_verification.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -535,20 +536,21 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	}
 
 	auto length = snprintf(char_name, 64, "%s", (char*)app->pBuffer);
-	uchar race = app->pBuffer[64];
-	uchar clas = app->pBuffer[68];
 
-	if (!IsPlayerRace(race)) {
+	uchar race_selection  = app->pBuffer[64];
+	uchar class_selection = app->pBuffer[68];
+
+	if (!IsPlayerRace(race_selection)) {
 		LogInfo("Invalid Race ID.");
 		return false;
 	}
 
-	if (!EQ::ValueWithin(class, Class::Warrior, Class::Berserker))) {
+	if (!EQ::ValueWithin(class_selection, Class::Warrior, Class::Berserker)) {
 		LogInfo("Invalid Class ID.");
 		return false;
 	}
 	
-	LogInfo("Name approval request. Name=[{}], race=[{}], class=[{}]", char_name, GetRaceIDName(race), GetClassIDName(clas));
+	LogInfo("Name approval request. Name=[{}], race_selection=[{}], class=[{}]", char_name, GetRaceIDName(race_selection), GetClassIDName(class_selection));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
