@@ -482,6 +482,7 @@ RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell s
 RULE_BOOL(Spells, EvacClearCharmPet, false, "Enable to have evac in zone clear charm from charm pets and detach buffs.")
 RULE_BOOL(Spells, ManaTapsRequireNPCMana, false, "Enabling will require target to have mana to tap. Default off as many npc's are caster class with 0 mana and need fixed.")
 RULE_INT(Spells, HarmTouchCritRatio, 200, "Harmtouch crit bonus, on top of BaseCritRatio")
+RULE_BOOL(Spells, UseClassicSpellFocus, false, "Enabling will tell the server to handle random focus damage as classic spell imports lack the limit values.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
