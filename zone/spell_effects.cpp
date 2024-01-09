@@ -5919,13 +5919,14 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						value = GetFocusRandomEffectivenessValue(focus_spell.base_value[i], focus_spell.limit_value[i], best_focus);
 					}
 					break;
-				} else {
-					if (best_focus) {
-						value = focus_spell.base_value[i];
-					} else {
-						value = zone->random.Int(1, focus_spell.base_value[i]);
-					}
 				}
+
+				if (best_focus) {
+					value = focus_spell.base_value[i];
+				} else {
+					value = zone->random.Int(1, focus_spell.base_value[i]);
+				}
+				break;
 
 			case SE_IncreaseSpellHaste:
 				if (type == focusSpellHaste && focus_spell.base_value[i] > value) {
@@ -5978,11 +5979,12 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						value = GetFocusRandomEffectivenessValue(focus_spell.base_value[i], focus_spell.limit_value[i], best_focus);
 					}
 					break;
-				} else {
-					if (type == focusReagentCost && focus_spell.base_value[i] > value) {
-						value = focus_spell.base_value[i];
-					}
 				}
+
+				if (type == focusReagentCost && focus_spell.base_value[i] > value) {
+					value = focus_spell.base_value[i];
+				}
+				break;
 
 			case SE_PetPowerIncrease:
 				if (type == focusPetPower && focus_spell.base_value[i] > value) {
@@ -6008,15 +6010,16 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						value = GetFocusRandomEffectivenessValue(focus_spell.base_value[i], focus_spell.limit_value[i], best_focus);
 					}
 					break;
-				} else {
-					if (type == focusSpellHateMod) {
-						if (best_focus) {
-							value = focus_spell.base_value[i];
-						} else {
-							value = zone->random.Int(1, focus_spell.base_value[i]);
-						}
+				}
+
+				if (type == focusSpellHateMod) {
+					if (best_focus) {
+						value = focus_spell.base_value[i];
+					} else {
+						value = zone->random.Int(1, focus_spell.base_value[i]);
 					}
 				}
+				break;
 
 			case SE_ReduceReuseTimer:
 				if (type == focusReduceRecastTime) {
