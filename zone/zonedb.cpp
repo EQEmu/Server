@@ -3963,8 +3963,8 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 
 	for (const auto& e : l) {
 		CharacterCorpseItemEntry item{
-			.equip_slot = static_cast<int16>(e.equip_slot),
 			.item_id = e.item_id,
+			.equip_slot = static_cast<int16>(e.equip_slot),
 			.charges = static_cast<uint16>(e.charges),
 			.aug_1 = e.aug_1,
 			.aug_2 = e.aug_2,
