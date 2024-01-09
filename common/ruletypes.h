@@ -516,6 +516,8 @@ RULE_REAL(Combat, DefProcPerMinAgiContrib, 0.075, "How much agility contributes 
 RULE_INT(Combat, NPCFlurryChance, 20, "Chance for NPC to flurry")
 RULE_BOOL(Combat, TauntOverLevel, 1, "Allows you to taunt NPC's over warriors level")
 RULE_INT(Combat, TauntOverAggro, 0, "+ amount over hate_top it will add before any bonus hate.")
+RULE_INT(Combat, TauntChanceBonus, 0, "Bonus to taunt chance")
+RULE_BOOL(Combat, ClassicTauntSystem, false, "Enable to use the pre 2006 taunt system.")
 RULE_REAL(Combat, TauntSkillFalloff, 0.33, "For every taunt skill point that's not maxed you lose this percentage chance to taunt")
 RULE_BOOL(Combat, EXPFromDmgShield, false, "Determine if damage from a damage shield counts for experience gain")
 RULE_INT(Combat, QuiverHasteCap, 1000, "Quiver haste cap 1000 on live for a while, currently 700 on live")
