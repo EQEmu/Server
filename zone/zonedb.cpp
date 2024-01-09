@@ -3768,7 +3768,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpse(
 
 uint32 ZoneDatabase::UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_consent_id)
 {
-	CharacterCorpsesRepository::SetGuildConsentID(*this, character_id, guild_consent_id);
+	return CharacterCorpsesRepository::SetGuildConsentID(*this, character_id, guild_consent_id);
 }
 
 void ZoneDatabase::MarkCorpseAsResurrected(uint32 corpse_id)
