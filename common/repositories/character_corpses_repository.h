@@ -49,7 +49,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE `{}` SET `is_buried` = 1 WHERE `{}` = {}",
+				"UPDATE {} SET `is_buried` = 1 WHERE `{}` = {}",
 				TableName(),
 				PrimaryKey(),
 				corpse_id
