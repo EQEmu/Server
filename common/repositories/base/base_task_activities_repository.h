@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_TASK_ACTIVITIES_REPOSITORY_H
@@ -15,6 +15,7 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
+
 
 class BaseTaskActivitiesRepository {
 public:
@@ -43,6 +44,7 @@ public:
 		std::string zones;
 		int32_t     zone_version;
 		int8_t      optional;
+		uint8_t     list_group;
 	};
 
 	static std::string PrimaryKey()
@@ -77,6 +79,7 @@ public:
 			"zones",
 			"zone_version",
 			"optional",
+			"list_group",
 		};
 	}
 
@@ -107,6 +110,7 @@ public:
 			"zones",
 			"zone_version",
 			"optional",
+			"list_group",
 		};
 	}
 
@@ -171,6 +175,7 @@ public:
 		e.zones                = "";
 		e.zone_version         = -1;
 		e.optional             = 0;
+		e.list_group           = 0;
 
 		return e;
 	}
@@ -196,8 +201,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				task_activities_id
 			)
 		);
@@ -230,6 +236,7 @@ public:
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
+			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
 
 			return e;
 		}
@@ -287,6 +294,7 @@ public:
 		v.push_back(columns[21] + " = '" + Strings::Escape(e.zones) + "'");
 		v.push_back(columns[22] + " = " + std::to_string(e.zone_version));
 		v.push_back(columns[23] + " = " + std::to_string(e.optional));
+		v.push_back(columns[24] + " = " + std::to_string(e.list_group));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -332,6 +340,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.zones) + "'");
 		v.push_back(std::to_string(e.zone_version));
 		v.push_back(std::to_string(e.optional));
+		v.push_back(std::to_string(e.list_group));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -385,6 +394,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.zones) + "'");
 			v.push_back(std::to_string(e.zone_version));
 			v.push_back(std::to_string(e.optional));
+			v.push_back(std::to_string(e.list_group));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -442,6 +452,7 @@ public:
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
+			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -490,6 +501,7 @@ public:
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
+			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
 
 			all_entries.push_back(e);
 		}
@@ -548,6 +560,110 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const TaskActivities &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.taskid));
+		v.push_back(std::to_string(e.activityid));
+		v.push_back(std::to_string(e.req_activity_id));
+		v.push_back(std::to_string(e.step));
+		v.push_back(std::to_string(e.activitytype));
+		v.push_back("'" + Strings::Escape(e.target_name) + "'");
+		v.push_back(std::to_string(e.goalmethod));
+		v.push_back(std::to_string(e.goalcount));
+		v.push_back("'" + Strings::Escape(e.description_override) + "'");
+		v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
+		v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
+		v.push_back("'" + Strings::Escape(e.item_list) + "'");
+		v.push_back(std::to_string(e.dz_switch_id));
+		v.push_back(std::to_string(e.min_x));
+		v.push_back(std::to_string(e.min_y));
+		v.push_back(std::to_string(e.min_z));
+		v.push_back(std::to_string(e.max_x));
+		v.push_back(std::to_string(e.max_y));
+		v.push_back(std::to_string(e.max_z));
+		v.push_back("'" + Strings::Escape(e.skill_list) + "'");
+		v.push_back("'" + Strings::Escape(e.spell_list) + "'");
+		v.push_back("'" + Strings::Escape(e.zones) + "'");
+		v.push_back(std::to_string(e.zone_version));
+		v.push_back(std::to_string(e.optional));
+		v.push_back(std::to_string(e.list_group));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<TaskActivities> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.taskid));
+			v.push_back(std::to_string(e.activityid));
+			v.push_back(std::to_string(e.req_activity_id));
+			v.push_back(std::to_string(e.step));
+			v.push_back(std::to_string(e.activitytype));
+			v.push_back("'" + Strings::Escape(e.target_name) + "'");
+			v.push_back(std::to_string(e.goalmethod));
+			v.push_back(std::to_string(e.goalcount));
+			v.push_back("'" + Strings::Escape(e.description_override) + "'");
+			v.push_back("'" + Strings::Escape(e.npc_match_list) + "'");
+			v.push_back("'" + Strings::Escape(e.item_id_list) + "'");
+			v.push_back("'" + Strings::Escape(e.item_list) + "'");
+			v.push_back(std::to_string(e.dz_switch_id));
+			v.push_back(std::to_string(e.min_x));
+			v.push_back(std::to_string(e.min_y));
+			v.push_back(std::to_string(e.min_z));
+			v.push_back(std::to_string(e.max_x));
+			v.push_back(std::to_string(e.max_y));
+			v.push_back(std::to_string(e.max_z));
+			v.push_back("'" + Strings::Escape(e.skill_list) + "'");
+			v.push_back("'" + Strings::Escape(e.spell_list) + "'");
+			v.push_back("'" + Strings::Escape(e.zones) + "'");
+			v.push_back(std::to_string(e.zone_version));
+			v.push_back(std::to_string(e.optional));
+			v.push_back(std::to_string(e.list_group));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_TASK_ACTIVITIES_REPOSITORY_H

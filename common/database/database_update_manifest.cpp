@@ -5162,7 +5162,19 @@ ALTER TABLE `tasks`
 ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
 )",
 		.content_schema_update = true
-	}
+	},
+	ManifestEntry{
+		.version = 9250,
+		.description = "2023_01_06_task_activities_list_group.sql",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'list_group'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `task_activities`
+	ADD COLUMN `list_group` TINYINT UNSIGNED NOT NULL DEFAULT '0' AFTER `optional`;
+)",
+		.content_schema_update = true
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
