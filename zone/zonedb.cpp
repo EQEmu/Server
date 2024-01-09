@@ -4527,17 +4527,15 @@ void ZoneDatabase::SetAAEXPModifierByCharID(
 	int16 instance_version
 )
 {
-	EXPModifier m{
-		.aa_modifier = aa_modifier,
-		.exp_modifier = -1.0f
-	};
-
 	CharacterExpModifiersRepository::SetEXPModifier(
 		database,
 		character_id,
 		zone_id,
 		instance_version,
-		m
+		EXPModifier{
+			.aa_modifier = aa_modifier,
+			.exp_modifier = -1.0f
+		}
 	);
 }
 
@@ -4548,17 +4546,15 @@ void ZoneDatabase::SetEXPModifierByCharID(
 	int16 instance_version
 )
 {
-	EXPModifier m{
-		.aa_modifier = -1.0f,
-		.exp_modifier = exp_modifier
-	};
-
 	CharacterExpModifiersRepository::SetEXPModifier(
 		database,
 		character_id,
 		zone_id,
 		instance_version,
-		m
+		EXPModifier{
+			.aa_modifier = -1.0f,
+			.exp_modifier = exp_modifier
+		}
 	);
 }
 
@@ -4586,13 +4582,14 @@ void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
 
 	EXPModifier m = zone->exp_modifiers[c->CharacterID()];
 
-	auto e = CharacterExpModifiersRepository::NewEntity();
-
-	e.character_id     = c->CharacterID();
-	e.zone_id          = zone->GetZoneID();
-	e.instance_version = zone->GetInstanceVersion();
-	e.aa_modifier      = m.aa_modifier;
-	e.exp_modifier     = m.exp_modifier;
-
-	CharacterExpModifiersRepository::ReplaceOne(*this, e);
+	CharacterExpModifiersRepository::ReplaceOne(
+		*this,
+		CharacterExpModifiersRepository::CharacterExpModifiers{
+			.character_id = static_cast<int32_t>(c->CharacterID()),
+			.zone_id = static_cast<int32_t>(zone->GetZoneID()),
+			.instance_version = zone->GetInstanceVersion(),
+			.aa_modifier = m.aa_modifier,
+			.exp_modifier = m.exp_modifier
+		}
+	);
 }
