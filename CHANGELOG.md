@@ -1,3 +1,34 @@
+## [22.41.0] - 1/8/2024
+
+### Bug
+
+* DI Buff Fade ([#3919](https://github.com/EQEmu/Server/pull/3919)) @fryguy503 2024-01-08
+* NPCs will now only proc on hit ([#3913](https://github.com/EQEmu/Server/pull/3913)) @fryguy503 2024-01-08
+* Pets should not ignore Z axis ([#3912](https://github.com/EQEmu/Server/pull/3912)) @fryguy503 2024-01-08
+
+### Fixes
+
+* Disciplines should show when someone casts them. ([#3901](https://github.com/EQEmu/Server/pull/3901)) @fryguy503 2024-01-08
+* Fix Typo in Character Skills loading ([#3937](https://github.com/EQEmu/Server/pull/3937)) @Kinglykrab 2024-01-09
+* Fix for HasLockoutByCharacterID ([#3927](https://github.com/EQEmu/Server/pull/3927)) @fryguy503 2024-01-08
+* Harm Touch, Improved Harm Touch, and Unholy Touch ([#3904](https://github.com/EQEmu/Server/pull/3904)) @fryguy503 2024-01-08
+* Legacy Manaburn should have hard cap. ([#3905](https://github.com/EQEmu/Server/pull/3905)) @fryguy503 2024-01-08
+* TGB - Added logic to stop bard errors on group songs. ([#3906](https://github.com/EQEmu/Server/pull/3906)) @fryguy503 2024-01-08
+* World Shutdown Filter ([#3930](https://github.com/EQEmu/Server/pull/3930)) @fryguy503 2024-01-08
+
+### Info
+
+* Adding textual feedback when trying to sell alt items back to … ([#3917](https://github.com/EQEmu/Server/pull/3917)) @fryguy503 2024-01-08
+
+### Rules
+
+* Backstab Damage Modifier ([#3908](https://github.com/EQEmu/Server/pull/3908)) @fryguy503 2024-01-08
+* Classic Tradeskill Skill Clamp ([#3914](https://github.com/EQEmu/Server/pull/3914)) @fryguy503 2024-01-08
+* Classic Triple Attack ([#3903](https://github.com/EQEmu/Server/pull/3903)) @fryguy503 2024-01-08
+* Ensure mana taps only effect NPC's that have mana. ([#3907](https://github.com/EQEmu/Server/pull/3907)) @fryguy503 2024-01-08
+* Over Taunt Hate ([#3900](https://github.com/EQEmu/Server/pull/3900)) @fryguy503 2024-01-08
+* Stun Chance Percent Rule ([#3922](https://github.com/EQEmu/Server/pull/3922)) @fryguy503 2024-01-08
+
 ## [22.40.0] - 1/7/2024
 
 ### Account
