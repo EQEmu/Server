@@ -800,7 +800,7 @@ bool ZoneDatabase::LoadCharacterSkills(uint32 character_id, PlayerProfile_Struct
 	const auto& l = CharacterSkillsRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`id` = {} ORDER BY `skill_id",
+			"`id` = {} ORDER BY `skill_id`",
 			character_id
 		)
 	);
