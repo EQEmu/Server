@@ -1024,7 +1024,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 	{
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
-		database.MarkCorpseAsRezzed(PendingRezzDBID);
+		database.MarkCorpseAsResurrected(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz spellid [{}] in zone[{}] instance id [{}]",
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);

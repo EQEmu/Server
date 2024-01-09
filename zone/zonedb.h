@@ -476,32 +476,31 @@ public:
 	bool	RestoreCharacterInvSnapshot(uint32 character_id, uint32 timestamp);
 
 	/* Corpses  */
-	bool		DeleteItemOffCharacterCorpse(uint32 db_id, uint32 equip_slot, uint32 item_id);
-	bool		LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
-	Corpse*		LoadCharacterCorpse(uint32 player_corpse_id);
-	Corpse*		SummonBuriedCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
-	void		MarkCorpseAsRezzed(uint32 dbid);
-	bool		GetDecayTimes(npcDecayTimes_Struct* npcCorpseDecayTimes);
-	bool		BuryCharacterCorpse(uint32 dbid);
-	bool		BuryAllCharacterCorpses(uint32 charid);
-	bool		DeleteCharacterCorpse(uint32 dbid);
-	bool		SummonAllCharacterCorpses(uint32 char_id, uint32 dest_zoneid, uint16 dest_instanceid, const glm::vec4& position);
-	int			CountCharacterCorpses(uint32 char_id);
-	int			CountCharacterCorpsesByZoneID(uint32 char_id, uint32 zone_id);
-	bool		UnburyCharacterCorpse(uint32 dbid, uint32 new_zoneid, uint16 dest_instanceid, const glm::vec4& position);
-	bool		LoadCharacterCorpses(uint32 iZoneID, uint16 iInstanceID);
-	uint32		GetCharacterCorpseDecayTimer(uint32 corpse_db_id);
-	uint32		GetCharacterBuriedCorpseCount(uint32 char_id);
-	uint32		SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zoneid, uint16 instanceid, const glm::vec4& position);
-	uint32		SaveCharacterCorpse(uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guildid);
-	uint32		UpdateCharacterCorpse(uint32 dbid, uint32 charid, const char* charname, uint32 zoneid, uint16 instanceid, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guildid, bool rezzed = false);
-	uint32		UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid);
-	uint32		GetFirstCorpseID(uint32 char_id);
-	uint32		GetCharacterCorpseCount(uint32 char_id);
-	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
-	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id);
-	uint32		GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
-	void        SendCharacterCorpseToNonInstance(uint32 corpse_db_id);
+	bool BuryAllCharacterCorpses(uint32 character_id);
+	bool	BuryCharacterCorpse(uint32 corpse_id);
+	int		CountCharacterCorpses(uint32 character_id);
+	int		CountCharacterCorpsesByZoneID(uint32 character_id, uint32 zone_id);
+	bool	DeleteCharacterCorpse(uint32 corpse_id);
+	bool	DeleteItemOffCharacterCorpse(uint32 corpse_id, uint32 slot_id, uint32 item_id);
+	uint32	GetCharacterBuriedCorpseCount(uint32 character_id);
+	uint32	GetCharacterCorpseCount(uint32 character_id);
+	uint32	GetCharacterCorpseDecayTimer(uint32 corpse_id);
+	uint32 GetCharacterCorpseID(uint32 character_id, uint8 corpse_limit);
+	uint32 GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id);
+	bool GetDecayTimes(npcDecayTimes_Struct* npc_decay_times);
+	uint32	GetFirstCorpseID(uint32 character_id);
+	Corpse*	LoadCharacterCorpse(uint32 corpse_id);
+	bool	LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
+	bool	LoadCharacterCorpses(uint32 zone_id, uint16 instance_id);
+	void	MarkCorpseAsResurrected(uint32 corpse_id);
+	uint32	SaveCharacterCorpse(uint32 character_id, const char* name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id);
+	uint32	SendCharacterCorpseToGraveyard(uint32 corpse_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	void	SendCharacterCorpseToNonInstance(uint32 corpse_id);
+	Corpse*	SummonBuriedCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	bool	SummonAllCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	bool	UnburyCharacterCorpse(uint32 corpse_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	uint32	UpdateCharacterCorpse(uint32 corpse_id, uint32 character_id, const char* name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id, bool resurrected = false);
+	uint32	UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_id);
 
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);

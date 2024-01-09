@@ -45,6 +45,8 @@
 #include "../common/repositories/merc_subtypes_repository.h"
 #include "../common/repositories/npc_types_tint_repository.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
+#include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/character_corpses_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -3755,7 +3757,7 @@ uint32 ZoneDatabase::UpdateCharacterCorpseConsent(uint32 charid, uint32 guildid)
 	return results.RowsAffected();
 }
 
-void ZoneDatabase::MarkCorpseAsRezzed(uint32 db_id) {
+void ZoneDatabase::MarkCorpseAsResurrected(uint32 db_id) {
 	std::string query = StringFormat("UPDATE `character_corpses` SET `is_rezzed` = 1 WHERE `id` = %i", db_id);
 	auto results = QueryDatabase(query);
 }
@@ -4309,7 +4311,9 @@ bool ZoneDatabase::BuryAllCharacterCorpses(uint32 char_id) {
 	return false;
 }
 
-bool ZoneDatabase::DeleteCharacterCorpse(uint32 db_id) {
+bool ZoneDatabase::DeleteCharacterCorpse(uint32 corpse_id)
+{
+	return CharacterCorpsesRepository::DeleteOne(*this, db_id);
 	std::string query = StringFormat("DELETE FROM `character_corpses` WHERE `id` = %d", db_id);
 	auto results = QueryDatabase(query);
 	if (results.Success() && results.RowsAffected() != 0)
