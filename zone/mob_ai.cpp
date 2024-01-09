@@ -2098,16 +2098,22 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 	} else {
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
 	}
+
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
-	if (rampage_targets == 0) // if set to 0 or not set in the DB
+
+	if (rampage_targets == 0) { // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
-	if (rampage_targets > RuleI(Combat, MaxRampageTargets))
+	}
+
+	if (rampage_targets > RuleI(Combat, MaxRampageTargets)) {
 		rampage_targets = RuleI(Combat, MaxRampageTargets);
+	}
 
 	m_specialattacks = eSpecialAttacks::Rampage;
 	for (int i = 0; i < RampageArray.size(); i++) {
-		if (index_hit >= rampage_targets)
+		if (index_hit >= rampage_targets) {
 			break;
+		}
 		// range is important
 		Mob *m_target = entity_list.GetMob(RampageArray[i]);
 		if (m_target) {
@@ -2122,7 +2128,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			}
 
 			if (DistanceSquaredNoZ(GetPosition(), m_target->GetPosition()) <= NPC_RAMPAGE_RANGE2) {
-				ProcessAttackRounds(m_target, opts);
+				ProcessAttackRounds(m_target, opts, true);
 				index_hit++;
 			}
 		}
@@ -2130,20 +2136,22 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 
 	if (RuleB(Combat, RampageHitsTarget)) {
 		if (index_hit < rampage_targets)
-			ProcessAttackRounds(GetTarget(), opts);
+			ProcessAttackRounds(GetTarget(), opts, true);
 	} else { // let's do correct behavior here, if they set above rule we can assume they want non-live like behavior
 		if (index_hit < rampage_targets) {
 			// so we go over in reverse order and skip range check
 			// lets do it this way to still support non-live-like >1 rampage targets
 			// likely live is just a fall through of the last valid mob
 			for (auto i = RampageArray.crbegin(); i != RampageArray.crend(); ++i) {
-				if (index_hit >= rampage_targets)
+				if (index_hit >= rampage_targets) {
 					break;
+				}
 				auto m_target = entity_list.GetMob(*i);
 				if (m_target) {
-					if (m_target == GetTarget())
+					if (m_target == GetTarget()) {
 						continue;
-					ProcessAttackRounds(m_target, opts);
+					}
+					ProcessAttackRounds(m_target, opts, true);
 					index_hit++;
 				}
 			}
