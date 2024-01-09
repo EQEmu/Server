@@ -37,7 +37,6 @@
 #include "../common/repositories/character_alt_currency_repository.h"
 #include "../common/repositories/character_item_recast_repository.h"
 #include "../common/repositories/account_repository.h"
-#include "../common/repositories/character_data_repository.h"
 
 #include <ctime>
 #include <iostream>
