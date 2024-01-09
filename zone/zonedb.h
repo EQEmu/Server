@@ -633,10 +633,6 @@ public:
 
 	/* Group   */
 	void RefreshGroupFromDB(Client *c);
-	uint8 GroupCount(uint32 groupid);
-
-	/* Raid   */
-	uint8 RaidGroupCount(uint32 raidid, uint32 groupid);
 
 	/* Instancing   */
 	void ListAllInstances(Client* c, uint32 character_id);
