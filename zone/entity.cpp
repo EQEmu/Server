@@ -485,40 +485,44 @@ void EntityList::MobProcess()
 		static int   old_client_count  = 0;
 		static Timer *mob_settle_timer = new Timer();
 
-		if (
-			numclients == 0 &&
-			old_client_count > 0 &&
-			RuleI(Zone, SecondsBeforeIdle) > 0
-		) {
-			// Start Timer to allow any mobs that chased chars from zone
-			// to return home.
-			mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
-		}
+		if (zone->idle_when_empty) {
+			if (
+				numclients == 0 &&
+				old_client_count > 0 &&
+				RuleI(Zone, SecondsBeforeIdle) > 0
+			) {
+				// Start Timer to allow any mobs that chased chars from zone
+				// to return home.
+				mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
+			}
 
-		old_client_count = numclients;
+			old_client_count = numclients;
 
-		// Disable settle timer if someone zones into empty zone
-		if (numclients > 0 || mob_settle_timer->Check()) {
-			mob_settle_timer->Disable();
-		}
+			// Disable settle timer if someone zones into empty zone
+			if (numclients > 0 || mob_settle_timer->Check()) {
+				mob_settle_timer->Disable();
+			}
 
-		Spawn2* s2 = mob->CastToNPC()->respawn2;
+			Spawn2* s2 = mob->CastToNPC()->respawn2;
 
-		// Perform normal mob processing if any of these are true:
-		//	-- zone is not empty
-		//	-- a quest has turned it on for this zone while zone is idle
-		//	-- the entity's spawn2 point is marked as path_while_zone_idle
-		//	-- the zone is newly empty and we're allowing mobs to settle
-		if (
-			numclients > 0 ||
-			(s2 && s2->PathWhenZoneIdle()) ||
-			mob_settle_timer->Enabled()
-		) {
-			mob_dead = !mob->Process();
+			// Perform normal mob processing if any of these are true:
+			//	-- zone is not empty
+			//	-- a quest has turned it on for this zone while zone is idle
+			//	-- the entity's spawn2 point is marked as path_while_zone_idle
+			//	-- the zone is newly empty and we're allowing mobs to settle
+			if (
+				numclients > 0 ||
+				(s2 && s2->PathWhenZoneIdle()) ||
+				mob_settle_timer->Enabled()
+			) {
+				mob_dead = !mob->Process();
+			} else {
+				// spawn_events can cause spawns and deaths while zone empty.
+				// At the very least, process that.
+				mob_dead = mob->CastToNPC()->GetDepop();
+			}
 		} else {
-			// spawn_events can cause spawns and deaths while zone empty.
-			// At the very least, process that.
-			mob_dead = mob->CastToNPC()->GetDepop();
+			mob_dead = !mob->Process();
 		}
 
 		size_t a_sz = mob_list.size();
