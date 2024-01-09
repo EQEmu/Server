@@ -579,16 +579,16 @@ void lua_summon_all_player_corpses(uint32 char_id, float x, float y, float z, fl
 	quest_manager.summonallplayercorpses(char_id, glm::vec4(x, y, z, h));
 }
 
-int lua_get_player_corpse_count(uint32 char_id) {
-	return database.CountCharacterCorpses(char_id);
+int64 lua_get_player_corpse_count(uint32 character_id) {
+	return database.CountCharacterCorpses(character_id);
 }
 
-int lua_get_player_corpse_count_by_zone_id(uint32 char_id, uint32 zone_id) {
-	return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
+int64 lua_get_player_corpse_count_by_zone_id(uint32 character_id, uint32 zone_id) {
+	return database.CountCharacterCorpsesByZoneID(character_id, zone_id);
 }
 
-int lua_get_player_buried_corpse_count(uint32 char_id) {
-	return quest_manager.getplayerburiedcorpsecount(char_id);
+int64 lua_get_player_buried_corpse_count(uint32 character_id) {
+	return quest_manager.getplayerburiedcorpsecount(character_id);
 }
 
 bool lua_bury_player_corpse(uint32 char_id) {

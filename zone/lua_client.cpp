@@ -1436,7 +1436,7 @@ void Lua_Client::EndSharedTask(bool send_fail) {
 	self->EndSharedTask(send_fail);
 }
 
-int Lua_Client::GetCorpseCount() {
+int64 Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
 }
@@ -3427,7 +3427,7 @@ luabind::scope lua_register_client() {
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
 	.def("GetClientVersion", (int(Lua_Client::*)(void))&Lua_Client::GetClientVersion)
 	.def("GetClientVersionBit", (uint32(Lua_Client::*)(void))&Lua_Client::GetClientVersionBit)
-	.def("GetCorpseCount", (int(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
+	.def("GetCorpseCount", (int64(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
 	.def("GetCorpseID", (int(Lua_Client::*)(int))&Lua_Client::GetCorpseID)
 	.def("GetCorpseItemAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetCorpseItemAt)
 	.def("GetDiscSlotBySpellID", (int(Lua_Client::*)(int32))&Lua_Client::GetDiscSlotBySpellID)

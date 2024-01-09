@@ -2101,28 +2101,17 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const glm::vec4& posit
 	return true;
 }
 
-int QuestManager::getplayercorpsecount(uint32 char_id) {
-	if (char_id > 0) {
-		return database.CountCharacterCorpses(char_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecount(uint32 character_id) {
+	return character_id ? database.CountCharacterCorpses(character_id) : 0;
 
 }
 
-int QuestManager::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id) {
-	if (char_id > 0 && zone_id > 0) {
-		return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecountbyzoneid(uint32 character_id, uint32 zone_id) {
+	return (character_id && zone_id) ? database.CountCharacterCorpsesByZoneID(character_id, zone_id) : 0;
 }
 
-uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
-	uint32 Result = 0;
-
-	if(char_id > 0) {
-		Result = database.GetCharacterBuriedCorpseCount(char_id);
-	}
-	return Result;
+int64 QuestManager::getplayerburiedcorpsecount(uint32 character_id) {
+	return character_id ? database.GetCharacterBuriedCorpseCount(character_id) : 0;
 }
 
 bool QuestManager::buryplayercorpse(uint32 char_id)

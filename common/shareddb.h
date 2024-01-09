@@ -72,7 +72,7 @@ public:
 	bool SetGMSpeed(uint32 account_id, uint8 gmspeed);
 	uint8 GetGMSpeed(uint32 account_id);
 	bool SetHideMe(uint32 account_id, uint8 hideme);
-	int32 DeleteStalePlayerCorpses();
+	int DeleteStalePlayerCorpses();
 	void LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct *message);
 	void SaveCharacterInspectMessage(uint32 character_id, const InspectMessage_Struct *message);
 	bool GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings);

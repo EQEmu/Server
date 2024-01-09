@@ -982,17 +982,17 @@ bool Perl__summonallplayercorpses(uint32 char_id, float dest_x, float dest_y, fl
 	return quest_manager.summonallplayercorpses(char_id, position);
 }
 
-int Perl__getplayercorpsecount(uint32 char_id)
+int64 Perl__getplayercorpsecount(uint32 character_id)
 {
-	return quest_manager.getplayercorpsecount(char_id);
+	return quest_manager.getplayercorpsecount(character_id);
 }
 
-int Perl__getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)
+int64 Perl__getplayercorpsecountbyzoneid(uint32 character_id, uint32 zone_id)
 {
-	return quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
+	return quest_manager.getplayercorpsecountbyzoneid(character_id, zone_id);
 }
 
-int Perl__getplayerburiedcorpsecount(uint32 char_id)
+int64 Perl__getplayerburiedcorpsecount(uint32 char_id)
 {
 	return quest_manager.getplayerburiedcorpsecount(char_id);
 }

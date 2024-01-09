@@ -477,30 +477,30 @@ public:
 
 	/* Corpses  */
 	bool BuryAllCharacterCorpses(uint32 character_id);
-	bool	BuryCharacterCorpse(uint32 corpse_id);
-	int		CountCharacterCorpses(uint32 character_id);
-	int		CountCharacterCorpsesByZoneID(uint32 character_id, uint32 zone_id);
-	bool	DeleteCharacterCorpse(uint32 corpse_id);
-	bool	DeleteItemOffCharacterCorpse(uint32 corpse_id, uint32 slot_id, uint32 item_id);
-	uint32	GetCharacterBuriedCorpseCount(uint32 character_id);
-	uint32	GetCharacterCorpseCount(uint32 character_id);
-	uint32	GetCharacterCorpseDecayTimer(uint32 corpse_id);
+	bool BuryCharacterCorpse(uint32 corpse_id);
+	int64 CountCharacterCorpses(uint32 character_id);
+	int64 CountCharacterCorpsesByZoneID(uint32 character_id, uint32 zone_id);
+	bool DeleteCharacterCorpse(uint32 corpse_id);
+	bool DeleteItemOffCharacterCorpse(uint32 corpse_id, uint32 slot_id, uint32 item_id);
+	uint32 GetCharacterBuriedCorpseCount(uint32 character_id);
+	int64 GetCharacterCorpseCount(uint32 character_id);
+	uint32 GetCharacterCorpseDecayTimer(uint32 corpse_id);
 	uint32 GetCharacterCorpseID(uint32 character_id, uint8 corpse_limit);
 	uint32 GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id);
 	bool GetDecayTimes(npcDecayTimes_Struct* npc_decay_times);
-	uint32	GetFirstCorpseID(uint32 character_id);
-	Corpse*	LoadCharacterCorpse(uint32 corpse_id);
-	bool	LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
-	bool	LoadCharacterCorpses(uint32 zone_id, uint16 instance_id);
-	void	MarkCorpseAsResurrected(uint32 corpse_id);
-	uint32	SaveCharacterCorpse(uint32 character_id, const char* name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id);
-	uint32	SendCharacterCorpseToGraveyard(uint32 corpse_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
-	void	SendCharacterCorpseToNonInstance(uint32 corpse_id);
-	Corpse*	SummonBuriedCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
-	bool	SummonAllCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
-	bool	UnburyCharacterCorpse(uint32 corpse_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
-	uint32	UpdateCharacterCorpse(uint32 corpse_id, uint32 character_id, const char* name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& corpse, const glm::vec4& position, uint32 guild_id, bool resurrected = false);
-	uint32	UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_id);
+	uint32 GetFirstCorpseID(uint32 character_id);
+	Corpse* LoadCharacterCorpse(uint32 corpse_id);
+	bool LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
+	bool LoadCharacterCorpses(uint32 zone_id, uint16 instance_id);
+	void MarkCorpseAsResurrected(uint32 corpse_id);
+	uint32 SaveCharacterCorpse(uint32 character_id, const std::string& name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& c, const glm::vec4& position, uint32 guild_consent_id);
+	uint32 SendCharacterCorpseToGraveyard(uint32 corpse_id, uint32 zone_id, uint16 instance_id, glm::vec4& position);
+	void SendCharacterCorpseToNonInstance(uint32 corpse_id);
+	Corpse* SummonBuriedCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	bool SummonAllCharacterCorpses(uint32 character_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	bool UnburyCharacterCorpse(uint32 corpse_id, uint32 zone_id, uint16 instance_id, const glm::vec4& position);
+	uint32 UpdateCharacterCorpse(uint32 corpse_id, uint32 character_id, const std::string& name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& c, const glm::vec4& position, uint32 guild_consent_id, bool is_resurrected = false);
+	uint32 UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_consent_id);
 
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);

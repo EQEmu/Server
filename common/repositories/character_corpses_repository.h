@@ -1,6 +1,7 @@
 #ifndef EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 #define EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 
+#include <glm/vec4.hpp>
 #include "../database.h"
 #include "../strings.h"
 #include "base/base_character_corpses_repository.h"
@@ -44,7 +45,35 @@ public:
      */
 
 	// Custom extended repository methods here
-	static int BuryInstance(Database& db, uint16 instance_id) {
+	static int BuryCorpse(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `is_buried` = 1 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int BuryDecayedCorpses(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `is_buried` = 1 WHERE `is_buried` = 0 AND (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
+				TableName(),
+				RuleI(Character, CorpseDecayTimeMS) / 1000
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int BuryInstance(Database& db, uint16 instance_id)
+	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
@@ -53,7 +82,7 @@ public:
 			)
 		);
 
-		return (results.Success() ? results.RowsAffected() : 0);
+		return results.Success() ? results.RowsAffected() : 0;
 	}
 
 	static int BuryInstances(Database& db, const std::string& joined_instance_ids)
@@ -66,7 +95,141 @@ public:
 			)
 		);
 
-		return (results.Success() ? results.RowsAffected() : 0);
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static uint32 GetDecayTimer(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `id` = {} AND `time_of_death` != 0",
+				TableName(),
+				corpse_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToUnsignedInt(row[0]);
+	}
+
+	static uint32 ResurrectCorpse(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `is_rezzed` = 1 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static void SendAdventureCorpsesToGraveyard(
+		Database& db,
+		uint32 graveyard_zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `zone_id` = {}, `instance_id` = 0, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `instance_id` = {}",
+				TableName(),
+				graveyard_zone_id,
+				position.x,
+				position.y,
+				position.z,
+				position.w,
+				PrimaryKey(),
+				instance_id
+			)
+		);
+	}
+
+	static int SendToGraveyard(
+		Database& db,
+		uint32 corpse_id,
+		uint32 zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
+				TableName(),
+				zone_id,
+				instance_id,
+				position.x,
+				position.y,
+				position.z,
+				position.w,
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return corpse_id;
+	}
+
+	static void SendToNonInstance(Database& db, uint32 corpse_id)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `instance_id` = 0 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+	}
+
+	static uint32 SetGuildConsentID(Database& db, uint32 character_id, uint32 guild_consent_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `guild_consent_id` = {} WHERE `charid` = {}",
+				TableName(),
+				guild_consent_id,
+				character_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int UnburyCorpse(
+		Database& db,
+		uint32 corpse_id,
+		uint32 zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `is_buried` = 0, `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `time_of_death` = {}, `was_at_graveyard` = 0 WHERE `{}` = {}",
+				TableName(),
+				zone_id,
+				instance_id,
+				position.x,
+				position.y,
+				position.z,
+				position.w,
+				std::time(nullptr),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
 	}
 };
 
