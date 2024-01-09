@@ -227,14 +227,6 @@ struct ClientReward
 	uint32 amount;
 };
 
-struct EXPModifier
-{
-	uint32 zone_id;
-	int16  instance_version;
-	float  aa_modifier;
-	float  exp_modifier;
-};
-
 class Client : public Mob
 {
 public:
@@ -613,10 +605,10 @@ public:
 
 	inline uint32 GetEXP() const { return m_pp.exp; }
 
-	double GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1) const;
-	double GetEXPModifier(uint32 zone_id, int16 instance_version = -1) const;
-	void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version = -1);
-	void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version = -1);
+	float GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1);
+	float GetEXPModifier(uint32 zone_id, int16 instance_version = -1);
+	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version = -1);
+	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version = -1);
 
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetLDoNPoints(uint32 theme_id, uint32 points);

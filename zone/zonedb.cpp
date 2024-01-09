@@ -4488,59 +4488,111 @@ void ZoneDatabase::ZeroPlayerProfileCurrency(PlayerProfile_Struct* pp)
 	}
 }
 
-void ZoneDatabase::LoadCharacterEXPModifiers(Client* c)
+float ZoneDatabase::GetAAEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	int16 instance_version
+)
 {
-	const auto& l = CharacterExpModifiersRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`character_id` = {}",
-			c->CharacterID()
-		)
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version
 	);
 
-	std::vector<EXPModifier> v;
-
-	if (!l.empty()) {
-		v.reserve(l.size());
-
-		for (const auto &e: l) {
-			auto m = EXPModifier{
-				.zone_id = static_cast<uint32>(e.zone_id),
-				.instance_version = static_cast<int16>(e.instance_version),
-				.aa_modifier = e.aa_modifier,
-				.exp_modifier = e.exp_modifier
-			};
-
-			v.emplace_back(m);
-		}
-	}
-
-	c->SetEXPModifiers(v);
+	return m.aa_modifier;
 }
 
-void ZoneDatabase::SaveCharacterEXPModifiers(Client* c)
+float ZoneDatabase::GetEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	int16 instance_version
+)
 {
-	const auto& l = c->GetEXPModifiers();
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version
+	);
 
-	if (l.empty()) {
+	return m.exp_modifier;
+}
+
+void ZoneDatabase::SetAAEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	float aa_modifier,
+	int16 instance_version
+)
+{
+	EXPModifier m{
+		.aa_modifier = aa_modifier,
+		.exp_modifier = -1.0f
+	};
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version,
+		m
+	);
+}
+
+void ZoneDatabase::SetEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	float exp_modifier,
+	int16 instance_version
+)
+{
+	EXPModifier m{
+		.aa_modifier = -1.0f,
+		.exp_modifier = exp_modifier
+	};
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version,
+		m
+	);
+}
+
+void ZoneDatabase::LoadCharacterEXPModifier(Client* c)
+{
+	if (!zone) {
 		return;
 	}
 
-	std::vector<CharacterExpModifiersRepository::CharacterExpModifiers> v;
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		*this,
+		c->CharacterID(),
+		zone->GetZoneID(),
+		zone->GetInstanceVersion()
+	);
 
-	v.reserve(l.size());
+	zone->exp_modifiers[c->CharacterID()] = m;
+}
 
-	auto m = CharacterExpModifiersRepository::NewEntity();
-
-	for (const auto& e : l) {
-		m.character_id     = c->CharacterID();
-		m.zone_id          = e.zone_id;
-		m.instance_version = e.instance_version;
-		m.aa_modifier      = e.aa_modifier;
-		m.exp_modifier     = e.exp_modifier;
-
-		v.emplace_back(m);
+void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
+{
+	if (!zone) {
+		return;
 	}
 
-	CharacterExpModifiersRepository::ReplaceMany(*this, v);
+	EXPModifier m = zone->exp_modifiers[c->CharacterID()];
+
+	auto e = CharacterExpModifiersRepository::NewEntity();
+
+	e.character_id     = c->CharacterID();
+	e.zone_id          = zone->GetZoneID();
+	e.instance_version = zone->GetInstanceVersion();
+	e.aa_modifier      = m.aa_modifier;
+	e.exp_modifier     = m.exp_modifier;
+
+	CharacterExpModifiersRepository::ReplaceOne(*this, e);
 }

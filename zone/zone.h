@@ -39,6 +39,12 @@
 #include "../common/discord/discord.h"
 #include "../common/repositories/dynamic_zone_templates_repository.h"
 
+struct EXPModifier
+{
+	float  aa_modifier;
+	float  exp_modifier;
+};
+
 class DynamicZone;
 
 struct ZonePoint {
@@ -221,6 +227,8 @@ public:
 	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
 
+	std::unordered_map<uint32, EXPModifier> exp_modifiers;
+
 	time_t weather_timer;
 	Timer  spawn2_timer;
 	Timer  hot_reload_timer;
@@ -247,6 +255,12 @@ public:
 
 	std::string GetZoneDescription();
 	void SendReloadMessage(std::string reload_type);
+
+	void ClearEXPModifier(Client* c);
+	float GetAAEXPModifier(Client* c);
+	float GetEXPModifier(Client* c);
+	void SetAAEXPModifier(Client* c, float aa_modifier);
+	void SetEXPModifier(Client* c, float exp_modifier);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);

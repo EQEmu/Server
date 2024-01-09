@@ -388,6 +388,10 @@ Client::~Client() {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
+	if (zone) {
+		zone->ClearEXPModifier(this);
+	}
+
 	if(IsInAGuild())
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
@@ -742,7 +746,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
-	database.SaveCharacterEXPModifiers(this);
+	database.SaveCharacterEXPModifier(this);
 
 	return true;
 }
@@ -11954,78 +11958,44 @@ void Client::ClearXTargets()
 	}
 }
 
-std::vector<EXPModifier> Client::GetEXPModifiers()
+float Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version)
 {
-	return m_exp_modifiers;
+	return database.GetAAEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
 }
 
-void Client::SetEXPModifiers(std::vector<EXPModifier> v)
+float Client::GetEXPModifier(uint32 zone_id, int16 instance_version)
 {
-	m_exp_modifiers = v;
+	return database.GetEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
 }
 
-float Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1)
+void Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version)
 {
-	for (const auto& e : m_exp_modifiers) {
-		if (
-			e.zone_id == zone_id &&
-			e.instance_version == instance_version
-		) {
-			return e.aa_modifier;
-		}
-	}
-
-	return 1.0f;
-}
-
-float Client::GetEXPModifier(uint32 zone_id, int16 instance_version = -1)
-{
-	for (const auto& e : m_exp_modifiers) {
-		if (
-			e.zone_id == zone_id &&
-			e.instance_version == instance_version
-		) {
-			return e.exp_modifier;
-		}
-	}
-
-	return 1.0f;
-}
-
-void Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version = -1)
-{
-	for (auto& e : m_exp_modifiers) {
-		if (
-			e.zone_id == zone_id &&
-			e.instance_version == instance_version
-		) {
-			e.aa_modifier = aa_modifier;
-		}
-	}
-
-	database.SetAAEXPModifier(
-		this,
+	database.SetAAEXPModifierByCharID(
+		CharacterID(),
 		zone_id,
 		aa_modifier,
 		instance_version
 	);
+
+	database.LoadCharacterEXPModifier(this);
 }
 
-void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version = -1)
+void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version)
 {
-	for (auto& e : m_exp_modifiers) {
-		if (
-			e.zone_id == zone_id &&
-			e.instance_version == instance_version
-		) {
-			e.exp_modifier = aa_modifier;
-		}
-	}
-
-	database.SetEXPModifier(
-		this,
+	database.SetEXPModifierByCharID(
+		CharacterID(),
 		zone_id,
 		exp_modifier,
 		instance_version
 	);
+
+	database.LoadCharacterEXPModifier(this);
 }

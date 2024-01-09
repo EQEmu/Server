@@ -2164,6 +2164,11 @@ void Lua_Client::Fling(float value, float target_x, float target_y, float target
 	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
 }
 
+float Lua_Client::GetAAEXPModifier() {
+	Lua_Safe_Call_Real();
+	return zone->GetAAEXPModifier(self);
+}
+
 float Lua_Client::GetAAEXPModifier(uint32 zone_id) {
 	Lua_Safe_Call_Real();
 	return self->GetAAEXPModifier(zone_id);
@@ -2172,6 +2177,11 @@ float Lua_Client::GetAAEXPModifier(uint32 zone_id) {
 float Lua_Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version) {
 	Lua_Safe_Call_Real();
 	return self->GetAAEXPModifier(zone_id, instance_version);
+}
+
+float Lua_Client::GetEXPModifier() {
+	Lua_Safe_Call_Real();
+	return zone->GetEXPModifier(self);
 }
 
 float Lua_Client::GetEXPModifier(uint32 zone_id) {
@@ -2184,6 +2194,11 @@ float Lua_Client::GetEXPModifier(uint32 zone_id, int16 instance_version) {
 	return self->GetEXPModifier(zone_id, instance_version);
 }
 
+void Lua_Client::SetAAEXPModifier(float aa_modifier) {
+	Lua_Safe_Call_Void();
+	zone->SetAAEXPModifier(self, aa_modifier);
+}
+
 void Lua_Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier) {
 	Lua_Safe_Call_Void();
 	self->SetAAEXPModifier(zone_id, aa_modifier);
@@ -2192,6 +2207,11 @@ void Lua_Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier) {
 void Lua_Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version) {
 	Lua_Safe_Call_Void();
 	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
+}
+
+void Lua_Client::SetEXPModifier(float exp_modifier) {
+	Lua_Safe_Call_Void();
+	zone->SetEXPModifier(self, exp_modifier);
 }
 
 void Lua_Client::SetEXPModifier(uint32 zone_id, float exp_modifier) {
@@ -3377,6 +3397,7 @@ luabind::scope lua_register_client() {
 	.def("ForageItem", (void(Lua_Client::*)(bool))&Lua_Client::ForageItem)
 	.def("ForageItem", (void(Lua_Client::*)(void))&Lua_Client::ForageItem)
 	.def("Freeze", (void(Lua_Client::*)(void))&Lua_Client::Freeze)
+	.def("GetAAEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
@@ -3435,6 +3456,7 @@ luabind::scope lua_register_client() {
 	.def("GetDuelTarget", (int(Lua_Client::*)(void))&Lua_Client::GetDuelTarget)
 	.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 	.def("GetEXPForLevel", (uint32(Lua_Client::*)(uint16))&Lua_Client::GetEXPForLevel)
+	.def("GetEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
@@ -3667,6 +3689,7 @@ luabind::scope lua_register_client() {
 	.def("SendPayload", (void(Lua_Client::*)(int,std::string))&Lua_Client::SendPayload)
 	.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 	.def("SendZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendZoneFlagInfo)
+	.def("SetAAEXPModifier", (void(Lua_Client::*)(float))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float,int16))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAPoints", (void(Lua_Client::*)(int))&Lua_Client::SetAAPoints)
@@ -3702,6 +3725,7 @@ luabind::scope lua_register_client() {
 	.def("SetEXP", (void(Lua_Client::*)(uint64,uint64))&Lua_Client::SetEXP)
 	.def("SetEXP", (void(Lua_Client::*)(uint64,uint64,bool))&Lua_Client::SetEXP)
 	.def("SetEXPEnabled", (void(Lua_Client::*)(bool))&Lua_Client::SetEXPEnabled)
+	.def("SetEXPModifier", (void(Lua_Client::*)(float))&Lua_Client::SetEXPModifier)
 	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,float))&Lua_Client::SetEXPModifier)
 	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,float,int16))&Lua_Client::SetEXPModifier)
 	.def("SetEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::SetEbonCrystals)

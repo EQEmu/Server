@@ -71,12 +71,16 @@ public:
 	int GetBaseWIS();
 	int GetWeight();
 	uint32 GetEXP();
+	float GetEXPModifier();
 	float GetEXPModifier(uint32 zone_id);
 	float GetEXPModifier(uint32 zone_id, int16 instance_version);
+	float GetAAEXPModifier();
 	float GetAAEXPModifier(uint32 zone_id);
 	float GetAAEXPModifier(uint32 zone_id, int16 instance_version);
+	void SetAAEXPModifier(float aa_modifier);
 	void SetAAEXPModifier(uint32 zone_id, float aa_modifier);
 	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version);
+	void SetEXPModifier(float exp_modifier);
 	void SetEXPModifier(uint32 zone_id, float exp_modifier);
 	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version);
 	uint32 GetAAExp();

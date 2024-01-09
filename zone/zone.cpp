@@ -55,6 +55,7 @@
 #include "../common/data_verification.h"
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/character_exp_modifiers_repository.h"
 #include "../common/repositories/merchantlist_repository.h"
 #include "../common/repositories/object_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
@@ -3159,4 +3160,73 @@ void Zone::ReloadContentFlags()
 	}
 
 	safe_delete(pack);
+}
+
+void Zone::ClearEXPModifier(Client* c)
+{
+	exp_modifiers.erase(c->CharacterID());
+}
+
+float Zone::GetAAEXPModifier(Client* c)
+{
+	const auto& l = exp_modifiers.find(c->CharacterID());
+	if (l == exp_modifiers.end()) {
+		return 1.0f;
+	}
+
+	const auto& v = l->second;
+
+	return v.aa_modifier;
+}
+
+float Zone::GetEXPModifier(Client* c)
+{
+	const auto& l = exp_modifiers.find(c->CharacterID());
+	if (l == exp_modifiers.end()) {
+		return 1.0f;
+	}
+
+	const auto& v = l->second;
+
+	return v.exp_modifier;
+}
+
+void Zone::SetAAEXPModifier(Client* c, float aa_modifier)
+{
+	auto l = exp_modifiers.find(c->CharacterID());
+	if (l == exp_modifiers.end()) {
+		return;
+	}
+
+	auto& m = l->second;
+
+	m.aa_modifier = aa_modifier;
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		c->CharacterID(),
+		GetZoneID(),
+		GetInstanceVersion(),
+		m
+	);
+}
+
+void Zone::SetEXPModifier(Client* c, float exp_modifier)
+{
+	auto l = exp_modifiers.find(c->CharacterID());
+	if (l == exp_modifiers.end()) {
+		return;
+	}
+
+	auto& m = l->second;
+
+	m.exp_modifier = exp_modifier;
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		c->CharacterID(),
+		GetZoneID(),
+		GetInstanceVersion(),
+		m
+	);
 }

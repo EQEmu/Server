@@ -44,122 +44,60 @@ public:
      */
 
 	// Custom extended repository methods here
-	static float GetEXPModifier(
+	static EXPModifier GetEXPModifier(
 		Database& db,
 		uint32 character_id,
 		uint32 zone_id,
 		int16 instance_version
 	)
 	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				SQL(
-					SELECT `exp_modifier` WHERE
-					`character_id` = {}
-					AND
-					(`zone_id` = {} OR `zone_id` = 0) AND
-					(`instance_version` = {} OR `instance_version` = -1)
-					ORDER BY `zone_id`, `instance_version` DESC
-					LIMIT 1
-				),
-				character_id,
-				zone_id,
-				instance_version
-			)
-		);
-
-		if (!results.Success() || !results.RowCount()) {
-			return 1.0f;
-		}
-
-		auto row = results.begin();
-
-		return Strings::ToFloat(row[0]);
-	}
-
-	static float GetAAEXPModifier(
-		Database& db,
-		uint32 character_id,
-		uint32 zone_id,
-		int16 instance_version
-	)
-	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				SQL(
-					SELECT `aa_modifier` WHERE
-					`character_id` = {}
-					AND
-					(`zone_id` = {} OR `zone_id` = 0) AND
-					(`instance_version` = {} OR `instance_version` = -1)
-					ORDER BY `zone_id`, `instance_version` DESC
-					LIMIT 1
-				),
-				character_id,
-				zone_id,
-				instance_version
-			)
-		);
-
-		if (!results.Success() || !results.RowCount()) {
-			return 1.0f;
-		}
-
-		auto row = results.begin();
-
-		return Strings::ToFloat(row[0]);
-	}
-
-	static void SetAAEXPModifier(
-		Database& db,
-		uint32 character_id,
-		uint32 zone_id,
-		float aa_modifier,
-		int16 instance_version
-	)
-	{
-		const float exp_modifier = GetEXPModifier(
+		const auto& l = CharacterExpModifiersRepository::GetWhere(
 			db,
-			character_id,
-			zone_id,
-			instance_version
+			fmt::format(
+				SQL(
+					`character_id` = {} AND
+					(`zone_id` = {} OR `zone_id` = 0) AND
+					(`instance_version` = {} OR `instance_version` = -1)
+					ORDER BY `zone_id`, `instance_version` DESC
+					LIMIT 1
+				),
+				character_id,
+				zone_id,
+				instance_version
+			)
 		);
 
-		auto e = NewEntity();
+		if (l.empty()) {
+			return EXPModifier{
+				.aa_modifier = 1.0f,
+				.exp_modifier = 1.0f
+			};
+		}
 
-		e.character_id     = character_id;
-		e.zone_id          = zone_id;
-		e.instance_version = instance_version;
-		e.aa_modifier      = aa_modifier;
-		e.exp_modifier     = exp_modifier;
-
-		CharacterExpModifiersRepository::ReplaceOne(db, e);
+		return EXPModifier{
+			.aa_modifier = l[0].aa_modifier,
+			.exp_modifier = l[0].exp_modifier
+		};
 	}
 
 	static void SetEXPModifier(
 		Database& db,
 		uint32 character_id,
 		uint32 zone_id,
-		float exp_modifier,
-		int16 instance_version
+		int16 instance_version,
+		EXPModifier m
 	)
 	{
-		const float aa_modifier = GetAAEXPModifier(
+		CharacterExpModifiersRepository::ReplaceOne(
 			db,
-			character_id,
-			zone_id,
-			instance_version
+			CharacterExpModifiersRepository::CharacterExpModifiers{
+				.character_id = static_cast<int32_t>(character_id),
+				.zone_id = static_cast<int32_t>(zone_id),
+				.instance_version = instance_version,
+				.aa_modifier = m.aa_modifier,
+				.exp_modifier = m.exp_modifier
+			}
 		);
-
-		auto e = NewEntity();
-
-		e.character_id     = character_id;
-		e.zone_id          = zone_id;
-		e.instance_version = instance_version;
-		e.aa_modifier      = aa_modifier;
-		e.exp_modifier     = exp_modifier;
-
-		CharacterExpModifiersRepository::ReplaceOne(db, e);
 	}
 };
 
