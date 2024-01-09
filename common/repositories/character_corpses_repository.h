@@ -49,7 +49,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `is_buried` = 1 WHERE `{}` = {}",
+				"UPDATE `{}` SET `is_buried` = 1 WHERE `{}` = {}",
 				TableName(),
 				PrimaryKey(),
 				corpse_id
@@ -63,7 +63,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `is_buried` = 1 WHERE `is_buried` = 0 AND (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
+				"UPDATE `{}` SET `is_buried` = 1 WHERE `is_buried` = 0 AND (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
 				TableName(),
 				RuleI(Character, CorpseDecayTimeMS) / 1000
 			)
@@ -76,7 +76,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
+				"UPDATE `{}` SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
 				TableName(),
 				instance_id
 			)
@@ -89,7 +89,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
+				"UPDATE `{}` SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
 				TableName(),
 				joined_instance_ids
 			)
@@ -102,7 +102,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `id` = {} AND `time_of_death` != 0",
+				"SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `id` = {} AND `time_of_death` != 0",
 				TableName(),
 				corpse_id
 			)
@@ -121,7 +121,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `is_rezzed` = 1 WHERE `{}` = {}",
+				"UPDATE `{}` SET `is_rezzed` = 1 WHERE `{}` = {}",
 				TableName(),
 				PrimaryKey(),
 				corpse_id
@@ -140,7 +140,7 @@ public:
 	{
 		db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `zone_id` = {}, `instance_id` = 0, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `instance_id` = {}",
+				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = 0, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `instance_id` = {}",
 				TableName(),
 				graveyard_zone_id,
 				position.x,
@@ -163,7 +163,7 @@ public:
 	{
 		db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
+				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
 				TableName(),
 				zone_id,
 				instance_id,
@@ -183,7 +183,7 @@ public:
 	{
 		db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `instance_id` = 0 WHERE `{}` = {}",
+				"UPDATE `{}` SET `instance_id` = 0 WHERE `{}` = {}",
 				TableName(),
 				PrimaryKey(),
 				corpse_id
@@ -195,7 +195,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `guild_consent_id` = {} WHERE `charid` = {}",
+				"UPDATE `{}` SET `guild_consent_id` = {} WHERE `charid` = {}",
 				TableName(),
 				guild_consent_id,
 				character_id
@@ -215,7 +215,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"UPDATE {} SET `is_buried` = 0, `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `time_of_death` = {}, `was_at_graveyard` = 0 WHERE `{}` = {}",
+				"UPDATE `{}` SET `is_buried` = 0, `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `time_of_death` = {}, `was_at_graveyard` = 0 WHERE `{}` = {}",
 				TableName(),
 				zone_id,
 				instance_id,
