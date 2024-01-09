@@ -541,10 +541,6 @@ public:
 	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
 	bool		GridExistsInZone(uint32 zone_id, uint32 grid_id);
 	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const glm::vec3& location, uint32 script = 0, uint16 zoneid = 0);
-	uint8		GetGridType(uint32 grid, uint32 zoneid);
-	uint8		GetGridType2(uint32 grid, uint16 zoneid);
-	bool		GetWaypoints(uint32 grid, uint16 zoneid, uint32 num, wplist* wp);
-	void        AssignGrid(Client *client, uint32 grid_id, uint32 entity_id);
 	int			GetHighestGrid(uint32 zoneid);
 	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
 	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
