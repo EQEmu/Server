@@ -171,7 +171,11 @@
 #define PET_REPORT_HP				488		//I have %1 percent of my hit points left.
 #define PET_NO_TAUNT				489		//No longer taunting attackers, Master.
 #define PET_DO_TAUNT				490		//Taunting attackers as normal, Master.
-#define CORPSE_DECAY1				495		//This corpse will decay in %1 minute(s) %2 seconds.
+#define CORPSE_REZ_TIME_HOUR        491     //This corpse's resurrection time will expire in %1 hour(s) %2 minute(s) %3 seconds.
+#define CORPSE_REZ_TIME_MINUTE      492     //This corpse's resurrection time will expire in %1 minute(s) %2 seconds.
+#define CORPSE_DECAY_TIME_DAY       493     //This corpse will decay in %1 day(s) %2 hour(s) %3 minute(s) %4 seconds.
+#define CORPSE_DECAY_TIME_HOUR      494     //This corpse will decay in %1 hour(s) %2 minute(s) %3 seconds.
+#define CORPSE_DECAY_TIME_MINUTE    495		//This corpse will decay in %1 minute(s) %2 seconds.
 #define DISC_LEVEL_ERROR			503		//You must be a level %1 ... to use this discipline.
 #define DISCIPLINE_CANUSEIN			504		//You can use a new discipline in %1 minutes %2 seconds.
 #define PVP_ON						552		//You are now player kill and follow the ways of Discord.

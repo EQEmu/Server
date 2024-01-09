@@ -4544,23 +4544,44 @@ bool Mob::SpellOnTarget(
 	return true;
 }
 
-void Corpse::CastRezz(uint16 spellid, Mob* Caster)
+void Corpse::CastRezz(uint16 spell_id, Mob* Caster)
 {
-	LogSpells("Corpse::CastRezz spellid [{}], Rezzed() is [{}], rezzexp is [{}]", spellid,IsRezzed(),rez_experience);
+	LogSpells("Corpse::CastRezz spell_id [{}], Rezzed() is [{}], rezzexp is [{}], rez_timer enabled:: [{}]", spell_id,IsRezzed(),rez_experience, corpse_rez_timer.Enabled());
 
-	if(IsRezzed()){
-		if(Caster && Caster->IsClient())
-			Caster->Message(Chat::Red,"This character has already been resurrected.");
-
+	// refresh rezzed state from database
+	uint32 db_exp, db_gm_exp;
+	bool db_rezzable, db_is_rezzed;
+	if (!database.LoadCharacterCorpseRezData(corpse_db_id, &db_exp, &db_gm_exp, &db_rezzable, &db_is_rezzed)) {
+		// db error, corpse disappeared?
+		Caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
 		return;
 	}
-	/*
-	if(!can_rez) {
-		if(Caster && Caster->IsClient())
+
+	rezzable = db_rezzable;
+	IsRezzed(db_is_rezzed);
+	rez_experience = db_exp;
+	gm_rez_experience = db_gm_exp;
+
+	// Rez timer has expired, only GMs can rez at this point. (uses rezzable)
+	if (!IsRezzable()) {
+		if (Caster && Caster->IsClient() && !Caster->CastToClient()->GetGM()) {
+			Caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
 			Caster->MessageString(Chat::White, CORPSE_TOO_OLD);
-		return;
+			return;
+		}
 	}
-	*/
+
+	// Corpse has been rezzed, but timer is still active. Players can corpse gate, GMs can rez for XP. (uses is_rezzed)
+	if (IsRezzed()) {
+		if (Caster && Caster->IsClient()) {
+			if (Caster->CastToClient()->GetGM()) {
+				rez_experience = gm_rez_experience;
+				gm_rez_experience = 0;
+			} else {
+				rez_experience = 0;
+			}
+		}
+	}
 
 	auto outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
 	Resurrect_Struct* rezz = (Resurrect_Struct*) outapp->pBuffer;
@@ -4568,15 +4589,17 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	memcpy(rezz->your_name,corpse_name,30);
 	memcpy(rezz->corpse_name,name,30);
 	memcpy(rezz->rezzer_name,Caster->GetName(),30);
-	rezz->zone_id = zone->GetZoneID();
+
+	rezz->zone_id     = zone->GetZoneID();
 	rezz->instance_id = zone->GetInstanceID();
-	rezz->spellid = spellid;
-	rezz->x = m_Position.x;
-	rezz->y = m_Position.y;
-	rezz->z = GetFixedZ(m_Position);
-	rezz->unknown000 = 0x00000000;
-	rezz->unknown020 = 0x00000000;
-	rezz->unknown088 = 0x00000000;
+	rezz->spellid     = spell_id;
+	rezz->x           = m_Position.x;
+	rezz->y           = m_Position.y;
+	rezz->z           = GetFixedZ(m_Position);
+	rezz->unknown000  = 0x00000000;
+	rezz->unknown020  = 0x00000000;
+	rezz->unknown088  = 0x00000000;
+
 	// We send this to world, because it needs to go to the player who may not be in this zone.
 	worldserver.RezzPlayer(outapp, rez_experience, corpse_db_id, OP_RezzRequest);
 	safe_delete(outapp);

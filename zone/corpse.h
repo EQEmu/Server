@@ -45,14 +45,14 @@ class Corpse : public Mob {
 	static void SendLootReqErrorPacket(Client* client, LootResponse response = LootResponse::NotAtThisTime);
 
 	Corpse(NPC* in_npc, LootItems* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
-	Corpse(Client* client, int32 in_rezexp);
-	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
+	Corpse(Client* client, int32 in_rez_exp, KilledByTypes killed_by = KilledByTypes::Killed_NPC);
+	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rez_exp, uint32 in_gm_rez_exp, KilledByTypes in_killed_by, bool in_rezzable, uint32 in_rez_time, bool wasAtGraveyard = false);
 
 	~Corpse();
 	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id);
 
 	/* Corpse: General */
-	virtual bool	Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
+	virtual bool	Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, uint8 killed_by = 0) { return true; }
 	virtual void	Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
 	bool			Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) override {
@@ -129,8 +129,10 @@ class Corpse : public Mob {
 	/* Corpse: Resurrection */
 	bool	IsRezzed() { return rez; }
 	void	IsRezzed(bool in_rez) { rez = in_rez; }
-	void	CastRezz(uint16 spellid, Mob* Caster);
-	void	CompleteResurrection();
+	void	CastRezz(uint16 spell_id, Mob* Caster);
+	void	CompleteResurrection(bool timer_expired = false);
+	bool	IsRezzable() { return rezzable; }
+	void	SetRezTimer(bool initial_timer = false);
 
 	/* Corpse: Loot */
 	void	QueryLoot(Client* to);
@@ -159,43 +161,57 @@ class Corpse : public Mob {
 	bool Summon(Client* client, bool spell, bool CheckDistance);
 	void Spawn();
 
-	char		corpse_name[64];
-	uint32		GetEquippedItemFromTextureSlot(uint8 material_slot) const;
-	uint32		GetEquipmentColor(uint8 material_slot) const;
-	inline int	GetRezExp() { return rez_experience; }
+	char			corpse_name[64];
+	uint32			GetEquippedItemFromTextureSlot(uint8 material_slot) const;
+	uint32			GetEquipmentColor(uint8 material_slot) const;
+	inline int64	GetRezExp() { return rez_experience; }
+	inline int64	GetGMRezExp() { return gm_rez_experience; }
+	uint8			GetKilledBy() { return killed_by; }
+	uint32			GetRemainingRezTime() { return rez_time; }
 
 	virtual void UpdateEquipmentLight();
+
+	void		IsOwnerOnline();
+	void		SetOwnerOnline(bool value) { is_owner_online = value; }
+	bool		GetOwnerOnline() { return is_owner_online; }
 
 protected:
 	void MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
-	bool      is_player_corpse; /* Determines if Player Corpse or not */
-	bool      is_corpse_changed; /* Determines if corpse has changed or not */
-	bool      is_locked; /* Determines if corpse is locked */
-	int32     player_kill_item; /* Determines if Player Kill Item */
-	uint32    corpse_db_id; /* Corpse Database ID (Player Corpse) */
-	uint32    char_id; /* Character ID */
-	uint32    consented_group_id = 0;
-	uint32    consented_raid_id  = 0;
-	uint32    consented_guild_id = 0;
-	LootItems itemlist; /* Internal Item list used for corpses */
-	uint32    copper;
-	uint32    silver;
-	uint32    gold;
-	uint32    platinum;
-	bool      player_corpse_depop; /* Sets up Corpse::Process to depop the player corpse */
-	uint32    being_looted_by; /* Determines what the corpse is being looted by internally for logic */
-	uint32    rez_experience; /* Amount of experience that the corpse would rez for */
-	bool      rez;
-	bool      become_npc;
-	int       allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
+	bool		is_player_corpse; /* Determines if Player Corpse or not */
+	bool		is_corpse_changed; /* Determines if corpse has changed or not */
+	bool		is_locked; /* Determines if corpse is locked */
+	int32		player_kill_item; /* Determines if Player Kill Item */
+	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
+	uint32		char_id; /* Character ID */
+	uint32		consented_group_id = 0;
+	uint32		consented_raid_id  = 0;
+	uint32		consented_guild_id = 0;
+	LootItems	itemlist; /* Internal Item list used for corpses */
+	uint32		copper;
+	uint32		silver;
+	uint32		gold;
+	uint32		platinum;
+	bool		player_corpse_depop; /* Sets up Corpse::Process to depop the player corpse */
+	uint32		being_looted_by; /* Determines what the corpse is being looted by internally for logic */
+	uint64		rez_experience; /* Amount of experience that the corpse would rez for */
+	uint64		gm_rez_experience; /* Amount of experience that the corpse would rez for from a GM*/
+	uint64		gm_exp;
+	bool		rez;
+	bool		become_npc;
+	int			allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
 	Timer		corpse_decay_timer; /* The amount of time in millseconds in which a corpse will take to decay (Depop/Poof) */
 	Timer		corpse_rez_timer; /* The amount of time in millseconds in which a corpse can be rezzed */
 	Timer		corpse_delay_timer;
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
+	Timer		owner_online_timer; /* How often in milliseconds in which a corpse will check if its owner is online */
+	uint8		killed_by;
+	bool		rezzable; /* Determines if the corpse is still rezzable */
 	EQ::TintProfile item_tint;
+	uint32		rez_time; /* How much of the rez timer remains */
+	bool		is_owner_online;
 	std::vector<std::string> consented_player_names;
 
 	LootRequestType	loot_request_type;

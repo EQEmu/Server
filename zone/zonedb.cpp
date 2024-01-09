@@ -3824,6 +3824,9 @@ uint32 ZoneDatabase::SaveCharacterCorpse(
 	e.wc_7             = corpse.item_tint.Feet.Color;
 	e.wc_8             = corpse.item_tint.Primary.Color;
 	e.wc_9             = corpse.item_tint.Secondary.Color;
+	e.killed_by        = corpse.killed_by;
+	e.rezzable         = corpse.rezzable;
+	e.rez_time         = corpse.rez_time;
 
 	e = CharacterCorpsesRepository::InsertOne(*this, e);
 
@@ -3907,6 +3910,34 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id)
 	}
 
 	return item_id;
+}
+
+bool ZoneDatabase::LoadCharacterCorpseRezData(uint32 corpse_id, uint32 *exp, uint32 *gm_exp, bool *rezzable, bool *is_rezzed)
+{
+	std::string query = StringFormat(
+		"SELECT           \n"
+		"exp,             \n"
+		"gm_exp,		  \n"
+		"rezzable,		  \n"
+		"is_rezzed		  \n"
+		"FROM             \n"
+		"character_corpses\n"
+		"WHERE `id` = %u  LIMIT 1\n",
+		corpse_id
+	);
+
+	auto results = QueryDatabase(query);
+	uint16 i = 0;
+
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		*exp       = Strings::ToUnsignedInt(row[i++]);	// exp,
+		*gm_exp    = Strings::ToUnsignedInt(row[i++]);	// gm_exp,
+		*rezzable  = Strings::ToInt(row[i++]);			// rezzable
+		*is_rezzed = Strings::ToInt(row[i++]);			// is_rezzed
+
+		return true;
+	}
+	return false;
 }
 
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse)

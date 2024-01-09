@@ -5280,28 +5280,60 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 
-	uint32 decay_time = t->GetDecayTime();
-	if (decay_time) {
-		const std::string& time_string = Strings::SecondsToTime(decay_time, true);
-		Message(
-			Chat::NPCQuestSay,
-			fmt::format(
-				"This corpse will decay in {}.",
-				Strings::ToLower(time_string)
-			).c_str()
-		);
-
-		if (t->IsPlayerCorpse()) {
-			Message(
-				Chat::NPCQuestSay,
-				fmt::format(
-					"This corpse {} be resurrected.",
-					t->IsRezzed() ? "cannot" : "can"
-				).c_str()
-			);
+	if (t && t->IsNPCCorpse()) {
+		uint32 min; uint32 sec; uint32 ttime;
+		if ((ttime = t->GetDecayTime()) != 0) {
+			sec = (ttime / 1000) % 60; // Total seconds
+			min = (ttime / 60000) % 60; // Total seconds / 60 drop .00
+			char val1[20] = { 0 };
+			char val2[20] = { 0 };
+			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_TIME_MINUTE, ConvertArray(min, val1), ConvertArray(sec, val2));
+		} else {
+			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 		}
-	} else {
-		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
+	} else if (t && t->IsPlayerCorpse()) {
+		uint32 day, hour, min, sec, ttime;
+		if (!t->IsRezzed()) {
+			if ((ttime = t->GetRemainingRezTime()) > 0) {
+				sec = (ttime / 1000) % 60;     // Total seconds
+				min = (ttime / 60000) % 60;    // Total seconds
+				hour = (ttime / 3600000) % 24; // Total hours
+				char val1[20] = { 0 };
+				char val2[20] = { 0 };
+				char val3[20] = { 0 };
+				if (hour) {
+					MessageString(Chat::White, CORPSE_REZ_TIME_HOUR, ConvertArray(hour, val1), ConvertArray(min, val2), ConvertArray(sec, val3));
+				} else {
+					MessageString(Chat::White, CORPSE_REZ_TIME_MINUTE, ConvertArray(min, val1), ConvertArray(sec, val2));
+				}
+				hour = 0;
+			} else {
+				MessageString(Chat::White, CORPSE_TOO_OLD);
+			}
+		} else {
+			Message(Chat::White, "This corpse has already accepted a resurrection.");	
+		}
+
+		if ((ttime = t->GetDecayTime()) != 0) {
+			sec = (ttime / 1000) % 60; // Total seconds
+			min = (ttime / 60000) % 60; // Total seconds
+			hour = (ttime / 3600000) % 24; // Total hours
+			day = ttime / 86400000; // Total Days
+			char val1[20] = { 0 };
+			char val2[20] = { 0 };
+			char val3[20] = { 0 };
+			char val4[20] = { 0 };
+			if (day) {
+				MessageString(Chat::White, CORPSE_DECAY_TIME_DAY, ConvertArray(day, val1), ConvertArray(hour, val2), ConvertArray(min, val3), ConvertArray(sec, val4));
+			} else if (hour) {
+				MessageString(Chat::White, CORPSE_DECAY_TIME_HOUR, ConvertArray(hour, val1), ConvertArray(min, val2), ConvertArray(sec, val3));
+			} else {
+				MessageString(Chat::White, CORPSE_DECAY_TIME_MINUTE, ConvertArray(min, val1), ConvertArray(sec, val2));
+			}
+			hour = 0;
+		} else {
+			MessageString(Chat::White, CORPSE_DECAY_NOW);
+		}
 	}
 }
 
