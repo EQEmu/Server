@@ -40,7 +40,6 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 }
 
 int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
-
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -96,6 +95,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
 		}
 
+		if (IsClient() && IsHarmTouchSpell(spell_id)) {
+			ratio += RuleI(Spells, HarmTouchCritRatio); //Default is zero
+		}
+
 		if (Critical) {
 
 			value = base_value*ratio/100;
@@ -146,7 +149,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 			}
 
 			// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
-			if ((spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH) && GetLevel() > 40) {
+			if (IsHarmTouchSpell(spell_id) && GetLevel() > 40) {
 				value -= (GetLevel() - 40) * 20;
 			}
 
