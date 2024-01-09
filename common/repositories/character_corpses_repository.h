@@ -102,8 +102,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `id` = {} AND `time_of_death` != 0",
+				"SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `{}` = {} AND `time_of_death` != 0",
 				TableName(),
+				PrimaryKey(),
 				corpse_id
 			)
 		);
@@ -147,7 +148,6 @@ public:
 				position.y,
 				position.z,
 				position.w,
-				PrimaryKey(),
 				instance_id
 			)
 		);
