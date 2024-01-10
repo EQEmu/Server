@@ -44,7 +44,20 @@ public:
      */
 
 	// Custom extended repository methods here
+	static bool SetTimeZone(Database& db, uint32 zone_id, uint32 instance_version, uint32 timezone)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `timezone` = {} WHERE `zoneidnumber` = {} AND `version` = {}",
+				TableName(),
+				timezone,
+				zone_id,
+				instance_version
+			)
+		);
 
+		return results.Success();
+	}
 };
 
 #endif //EQEMU_ZONE_REPOSITORY_H
