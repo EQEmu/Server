@@ -44,7 +44,37 @@ public:
      */
 
 	// Custom extended repository methods here
+	static void ClearExpiredRespawnTimers(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())",
+				TableName()
+			)
+		);
+	}
 
+	static uint32 GetTimeRemaining(Database& db, uint32 spawn2_id, uint16 instance_id, time_t time_seconds)
+	{
+		const auto& l = RespawnTimesRepository::GetWhere(
+			db,
+			fmt::format(
+				"`id` = {} AND `instance_id` = {}",
+				spawn2_id,
+				instance_id
+			)
+		);
+
+		if (l.empty()) {
+			return 0;
+		}
+
+		if ((l[0].start + l[0].duration) <= time_seconds) {
+			return 0;
+		}
+
+		return ((l[0].start + l[0].duration) - time_seconds);
+	}
 };
 
 #endif //EQEMU_RESPAWN_TIMES_REPOSITORY_H

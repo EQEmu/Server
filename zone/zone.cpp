@@ -61,6 +61,7 @@
 #include "../common/repositories/level_exp_mods_repository.h"
 #include "../common/repositories/ldon_trap_entries_repository.h"
 #include "../common/repositories/ldon_trap_templates_repository.h"
+#include "../common/repositories/respawn_times_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
@@ -1167,7 +1168,7 @@ bool Zone::Init(bool is_static) {
 		LogError("Loading World Objects failed. continuing");
 	}
 
-	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
+	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
