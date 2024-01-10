@@ -991,10 +991,16 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 	return true;
 }
 
-bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 lang_id, uint32 value){
-	std::string query = StringFormat("REPLACE INTO `character_languages` (id, lang_id, value) VALUES (%u, %u, %u)", character_id, lang_id, value); QueryDatabase(query);
-	LogDebug("ZoneDatabase::SaveCharacterLanguage for character ID: [{}], lang_id:[{}] value:[{}] done", character_id, lang_id, value);
-	return true;
+bool ZoneDatabase::SaveCharacterLanguage(uint32 character_id, uint32 language_id, uint32 value)
+{
+	return CharacterLanguagesRepository::ReplaceOne(
+		*this,
+		CharacterLanguagesRepository::CharacterLanguages{
+			.id = character_id,
+			.lang_id = static_cast<uint16_t>(language_id),
+			.value = static_cast<uint16_t>(value)
+		}
+	);
 }
 
 bool ZoneDatabase::SaveCharacterMaterialColor(uint32 character_id, uint8 slot_id, uint32 color)
