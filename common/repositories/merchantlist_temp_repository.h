@@ -47,8 +47,10 @@ public:
 	static void ClearTemporaryMerchantLists(Database& db)
 	{
 		db.QueryDatabase(
-			"TRUNCATE {}",
-			TableName()
+			fmt::format(
+				"TRUNCATE {}",
+				TableName()
+			)
 		);
 	}
 };
