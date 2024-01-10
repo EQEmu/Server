@@ -44,7 +44,38 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<MercStanceEntriesRepository::MercStanceEntries> GetAllOrdered(Database& db)
+	{
+		std::vector<MercStanceEntriesRepository::MercStanceEntries> v;
 
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT {} FROM {} ORDER BY `class_id`, `proficiency_id`, `stance_id`",
+				SelectColumnsRaw(),
+				TableName()
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return v;
+		}
+
+		v.reserve(results.RowCount());
+
+		auto e = MercStanceEntriesRepository::NewEntity();
+
+		for (auto row : results) {
+			e.merc_stance_entry_id = Strings::ToUnsignedInt(row[0]);
+			e.class_id             = Strings::ToUnsignedInt(row[1]);
+			e.proficiency_id       = static_cast<uint8_t>(Strings::ToUnsignedInt(row[2]));
+			e.stance_id            = static_cast<uint8_t>(Strings::ToUnsignedInt(row[3]));
+			e.isdefault            = static_cast<int8_t>(Strings::ToInt(row[4]));
+
+			v.emplace_back(e);
+		}
+
+		return v;
+	}
 };
 
 #endif //EQEMU_MERC_STANCE_ENTRIES_REPOSITORY_H

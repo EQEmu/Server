@@ -39,6 +39,11 @@
 #include "../common/repositories/account_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
 #include "../common/repositories/object_contents_repository.h"
+#include "../common/repositories/mercs_repository.h"
+#include "../common/repositories/merc_buffs_repository.h"
+#include "../common/repositories/merc_inventory_repository.h"
+#include "../common/repositories/merc_subtypes_repository.h"
+#include "../common/repositories/npc_types_tint_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -1959,545 +1964,574 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	return npc;
 }
 
-const NPCType* ZoneDatabase::GetMercType(uint32 id, uint16 raceid, uint32 clientlevel)
+const NPCType* ZoneDatabase::GetMercenaryType(uint32 merc_npc_type_id, uint16 race_id, uint32 owner_level)
 {
-	//need to save based on merc_npc_type & client level
-	uint32 merc_type_id = id * 100 + clientlevel;
+	const uint32 merc_type_id = merc_npc_type_id * 100 + owner_level;
 
-	// If Merc is already in tree, return it.
-	auto itr = zone->merctable.find(merc_type_id);
-	if(itr != zone->merctable.end())
-		return itr->second;
+	auto i = zone->merctable.find(merc_type_id);
+	if (i != zone->merctable.end()) {
+		return i->second;
+	}
 
-	//If the id is 0, return nullptr. (sanity check)
-	if(id == 0)
-        return nullptr;
-
-	// Otherwise, load Merc data on demand
-	std::string query = StringFormat("SELECT "
-		"m_stats.merc_npc_type_id, "
-		"'' AS name, "
-		"m_stats.level, "
-		"m_types.race_id, "
-		"m_subtypes.class_id, "
-		"m_stats.hp, "
-		"m_stats.mana, "
-		"0 AS gender, "
-		"m_armorinfo.texture, "
-		"m_armorinfo.helmtexture, "
-		"m_stats.attack_delay, "
-		"m_stats.STR, "
-		"m_stats.STA, "
-		"m_stats.DEX, "
-		"m_stats.AGI, "
-		"m_stats._INT, "
-		"m_stats.WIS, "
-		"m_stats.CHA, "
-		"m_stats.MR, "
-		"m_stats.CR, "
-		"m_stats.DR, "
-		"m_stats.FR, "
-		"m_stats.PR, "
-		"m_stats.Corrup, "
-		"m_stats.mindmg, "
-		"m_stats.maxdmg, "
-		"m_stats.attack_count, "
-		"m_stats.special_abilities, "
-		"m_weaponinfo.d_melee_texture1, "
-		"m_weaponinfo.d_melee_texture2, "
-		"m_weaponinfo.prim_melee_type, "
-		"m_weaponinfo.sec_melee_type, "
-		"m_stats.runspeed, "
-		"m_stats.hp_regen_rate, "
-		"m_stats.mana_regen_rate, "
-		"1 AS bodytype, "
-		"m_armorinfo.armortint_id, "
-		"m_armorinfo.armortint_red, "
-		"m_armorinfo.armortint_green, "
-		"m_armorinfo.armortint_blue, "
-		"m_stats.AC, "
-		"m_stats.ATK, "
-		"m_stats.Accuracy, "
-		"m_stats.statscale, "
-		"m_stats.spellscale, "
-		"m_stats.healscale "
-		"FROM merc_stats m_stats "
-		"INNER JOIN merc_armorinfo m_armorinfo "
-		"ON m_stats.merc_npc_type_id = m_armorinfo.merc_npc_type_id "
-		"AND m_armorinfo.minlevel <= m_stats.level AND m_armorinfo.maxlevel >= m_stats.level "
-		"INNER JOIN merc_weaponinfo m_weaponinfo "
-		"ON m_stats.merc_npc_type_id = m_weaponinfo.merc_npc_type_id "
-		"AND m_weaponinfo.minlevel <= m_stats.level AND m_weaponinfo.maxlevel >= m_stats.level "
-		"INNER JOIN merc_templates m_templates "
-		"ON m_templates.merc_npc_type_id = m_stats.merc_npc_type_id "
-		"INNER JOIN merc_types m_types "
-		"ON m_templates.merc_type_id = m_types.merc_type_id "
-		"INNER JOIN merc_subtypes m_subtypes "
-		"ON m_templates.merc_subtype_id = m_subtypes.merc_subtype_id "
-		"WHERE m_templates.merc_npc_type_id = %d AND m_stats.clientlevel = %d AND m_types.race_id = %d",
-		id, clientlevel, raceid); //dual primary keys. one is ID, one is level.
-
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!merc_npc_type_id) {
 		return nullptr;
 	}
 
-	const NPCType *npc = nullptr;
+	const std::string& query = fmt::format(
+		SQL(
+			SELECT
+			m_stats.merc_npc_type_id,
+			'' AS name,
+			m_stats.level,
+			m_types.race_id,
+			m_subtypes.class_id,
+			m_stats.hp,
+			m_stats.mana,
+			0 AS gender,
+			m_armorinfo.texture,
+			m_armorinfo.helmtexture,
+			m_stats.attack_delay,
+			m_stats.STR,
+			m_stats.STA,
+			m_stats.DEX,
+			m_stats.AGI,
+			m_stats._INT,
+			m_stats.WIS,
+			m_stats.CHA,
+			m_stats.MR,
+			m_stats.CR,
+			m_stats.DR,
+			m_stats.FR,
+			m_stats.PR,
+			m_stats.Corrup,
+			m_stats.mindmg,
+			m_stats.maxdmg,
+			m_stats.attack_count,
+			m_stats.special_abilities,
+			m_weaponinfo.d_melee_texture1,
+			m_weaponinfo.d_melee_texture2,
+			m_weaponinfo.prim_melee_type,
+			m_weaponinfo.sec_melee_type,
+			m_stats.runspeed,
+			m_stats.hp_regen_rate,
+			m_stats.mana_regen_rate,
+			1 AS bodytype,
+			m_armorinfo.armortint_id,
+			m_armorinfo.armortint_red,
+			m_armorinfo.armortint_green,
+			m_armorinfo.armortint_blue,
+			m_stats.AC,
+			m_stats.ATK,
+			m_stats.Accuracy,
+			m_stats.statscale,
+			m_stats.spellscale,
+			m_stats.healscale
+			FROM merc_stats m_stats
+			INNER JOIN merc_armorinfo m_armorinfo
+			ON m_stats.merc_npc_type_id = m_armorinfo.merc_npc_type_id
+			AND m_armorinfo.minlevel <= m_stats.level AND m_armorinfo.maxlevel >= m_stats.level
+			INNER JOIN merc_weaponinfo m_weaponinfo
+			ON m_stats.merc_npc_type_id = m_weaponinfo.merc_npc_type_id
+			AND m_weaponinfo.minlevel <= m_stats.level AND m_weaponinfo.maxlevel >= m_stats.level
+			INNER JOIN merc_templates m_templates
+			ON m_templates.merc_npc_type_id = m_stats.merc_npc_type_id
+			INNER JOIN merc_types m_types
+			ON m_templates.merc_type_id = m_types.merc_type_id
+			INNER JOIN merc_subtypes m_subtypes
+			ON m_templates.merc_subtype_id = m_subtypes.merc_subtype_id
+			WHERE m_templates.merc_npc_type_id = {} AND m_types.race_id = {} AND m_stats.clientlevel = {}
+		),
+		merc_npc_type_id,
+		race_id,
+		owner_level
+	);
 
-	// Process each row returned.
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		NPCType *tmpNPCType;
-		tmpNPCType = new NPCType;
-		memset(tmpNPCType, 0, sizeof *tmpNPCType);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return nullptr;
+	}
 
-		tmpNPCType->npc_id = Strings::ToInt(row[0]);
+	const NPCType* n = nullptr;
 
-		strn0cpy(tmpNPCType->name, row[1], 50);
+	auto row = results.begin();
 
-		tmpNPCType->level = Strings::ToInt(row[2]);
-		tmpNPCType->race = Strings::ToInt(row[3]);
-		tmpNPCType->class_ = Strings::ToInt(row[4]);
-		tmpNPCType->max_hp = Strings::ToInt(row[5]);
-		tmpNPCType->current_hp = tmpNPCType->max_hp;
-		tmpNPCType->Mana = Strings::ToInt(row[6]);
-		tmpNPCType->gender = Strings::ToInt(row[7]);
-		tmpNPCType->texture = Strings::ToInt(row[8]);
-		tmpNPCType->helmtexture = Strings::ToInt(row[9]);
-		tmpNPCType->attack_delay = Strings::ToInt(row[10]) * 100; // TODO: fix DB
-		tmpNPCType->STR = Strings::ToInt(row[11]);
-		tmpNPCType->STA = Strings::ToInt(row[12]);
-		tmpNPCType->DEX = Strings::ToInt(row[13]);
-		tmpNPCType->AGI = Strings::ToInt(row[14]);
-		tmpNPCType->INT = Strings::ToInt(row[15]);
-		tmpNPCType->WIS = Strings::ToInt(row[16]);
-		tmpNPCType->CHA = Strings::ToInt(row[17]);
-		tmpNPCType->MR = Strings::ToInt(row[18]);
-		tmpNPCType->CR = Strings::ToInt(row[19]);
-		tmpNPCType->DR = Strings::ToInt(row[20]);
-		tmpNPCType->FR = Strings::ToInt(row[21]);
-		tmpNPCType->PR = Strings::ToInt(row[22]);
-		tmpNPCType->Corrup = Strings::ToInt(row[23]);
-		tmpNPCType->min_dmg = Strings::ToInt(row[24]);
-		tmpNPCType->max_dmg = Strings::ToInt(row[25]);
-		tmpNPCType->attack_count = Strings::ToInt(row[26]);
+	NPCType* t = new NPCType;
 
-		if (row[27] != nullptr)
-			strn0cpy(tmpNPCType->special_abilities, row[27], 512);
-		else
-			tmpNPCType->special_abilities[0] = '\0';
+	memset(t, 0, sizeof *t);
 
-		tmpNPCType->d_melee_texture1 = Strings::ToUnsignedInt(row[28]);
-		tmpNPCType->d_melee_texture2 = Strings::ToUnsignedInt(row[29]);
-		tmpNPCType->prim_melee_type = Strings::ToInt(row[30]);
-		tmpNPCType->sec_melee_type = Strings::ToInt(row[31]);
-		tmpNPCType->runspeed = Strings::ToFloat(row[32]);
+	t->npc_id = Strings::ToInt(row[0]);
 
-		tmpNPCType->hp_regen = Strings::ToInt(row[33]);
-		tmpNPCType->mana_regen = Strings::ToInt(row[34]);
+	strn0cpy(t->name, row[1], sizeof(t->name));
 
-		tmpNPCType->aggroradius = RuleI(Mercs, AggroRadius);
+	t->level        = Strings::ToInt(row[2]);
+	t->race         = Strings::ToInt(row[3]);
+	t->class_       = Strings::ToInt(row[4]);
+	t->max_hp       = Strings::ToInt(row[5]);
+	t->current_hp   = t->max_hp;
+	t->Mana         = Strings::ToInt(row[6]);
+	t->gender       = Strings::ToInt(row[7]);
+	t->texture      = Strings::ToInt(row[8]);
+	t->helmtexture  = Strings::ToInt(row[9]);
+	t->attack_delay = Strings::ToInt(row[10]) * 100; // TODO: fix DB
+	t->STR          = Strings::ToInt(row[11]);
+	t->STA          = Strings::ToInt(row[12]);
+	t->DEX          = Strings::ToInt(row[13]);
+	t->AGI          = Strings::ToInt(row[14]);
+	t->INT          = Strings::ToInt(row[15]);
+	t->WIS          = Strings::ToInt(row[16]);
+	t->CHA          = Strings::ToInt(row[17]);
+	t->MR           = Strings::ToInt(row[18]);
+	t->CR           = Strings::ToInt(row[19]);
+	t->DR           = Strings::ToInt(row[20]);
+	t->FR           = Strings::ToInt(row[21]);
+	t->PR           = Strings::ToInt(row[22]);
+	t->Corrup       = Strings::ToInt(row[23]);
+	t->min_dmg      = Strings::ToInt(row[24]);
+	t->max_dmg      = Strings::ToInt(row[25]);
+	t->attack_count = Strings::ToInt(row[26]);
 
-		if (row[35] && strlen(row[35]))
-			tmpNPCType->bodytype = (uint8)Strings::ToInt(row[35]);
-		else
-			tmpNPCType->bodytype = 1;
+	if (row[27]) {
+		strn0cpy(t->special_abilities, row[27], sizeof(t->special_abilities));
+	} else {
+		t->special_abilities[0] = '\0';
+	}
 
-		uint32 armor_tint_id = Strings::ToInt(row[36]);
-		tmpNPCType->armor_tint.Slot[0].Color = (Strings::ToInt(row[37]) & 0xFF) << 16;
-		tmpNPCType->armor_tint.Slot[0].Color |= (Strings::ToInt(row[38]) & 0xFF) << 8;
-		tmpNPCType->armor_tint.Slot[0].Color |= (Strings::ToInt(row[39]) & 0xFF);
-		tmpNPCType->armor_tint.Slot[0].Color |= (tmpNPCType->armor_tint.Slot[0].Color) ? (0xFF << 24) : 0;
+	t->d_melee_texture1 = Strings::ToUnsignedInt(row[28]);
+	t->d_melee_texture2 = Strings::ToUnsignedInt(row[29]);
+	t->prim_melee_type  = Strings::ToInt(row[30]);
+	t->sec_melee_type   = Strings::ToInt(row[31]);
+	t->runspeed         = Strings::ToFloat(row[32]);
+	t->hp_regen         = Strings::ToInt(row[33]);
+	t->mana_regen       = Strings::ToInt(row[34]);
+	t->aggroradius      = RuleI(Mercs, AggroRadius);
+	t->bodytype         = row[35] && strlen(row[35]) ? static_cast<uint8>(Strings::ToUnsignedInt(row[35])) : 1;
 
-		if (armor_tint_id == 0)
-			for (int index = EQ::textures::armorChest; index <= EQ::textures::LastTexture; index++)
-				tmpNPCType->armor_tint.Slot[index].Color = tmpNPCType->armor_tint.Slot[0].Color;
-		else if (tmpNPCType->armor_tint.Slot[0].Color == 0) {
-			std::string armorTint_query = StringFormat("SELECT red1h, grn1h, blu1h, "
-								   "red2c, grn2c, blu2c, "
-								   "red3a, grn3a, blu3a, "
-								   "red4b, grn4b, blu4b, "
-								   "red5g, grn5g, blu5g, "
-								   "red6l, grn6l, blu6l, "
-								   "red7f, grn7f, blu7f, "
-								   "red8x, grn8x, blu8x, "
-								   "red9x, grn9x, blu9x "
-								   "FROM npc_types_tint WHERE id = %d",
-								   armor_tint_id);
-			auto armorTint_results = QueryDatabase(armorTint_query);
-			if (!results.Success() || results.RowCount() == 0)
-				armor_tint_id = 0;
-			else {
-				auto& armorTint_row = results.begin();
+	uint32 armor_tint_id = Strings::ToInt(row[36]);
 
-				for (int index = EQ::textures::textureBegin; index <= EQ::textures::LastTexture; index++) {
-					tmpNPCType->armor_tint.Slot[index].Color = Strings::ToInt(armorTint_row[index * 3]) << 16;
-					tmpNPCType->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 1]) << 8;
-					tmpNPCType->armor_tint.Slot[index].Color |= Strings::ToInt(armorTint_row[index * 3 + 2]);
-					tmpNPCType->armor_tint.Slot[index].Color |= (tmpNPCType->armor_tint.Slot[index].Color) ? (0xFF << 24) : 0;
-				}
-			}
-		} else
+	t->armor_tint.Slot[0].Color = (Strings::ToInt(row[37]) & 0xFF) << 16;
+	t->armor_tint.Slot[0].Color |= (Strings::ToInt(row[38]) & 0xFF) << 8;
+	t->armor_tint.Slot[0].Color |= (Strings::ToInt(row[39]) & 0xFF);
+	t->armor_tint.Slot[0].Color |= (t->armor_tint.Slot[0].Color) ? (0xFF << 24) : 0;
+
+	if (armor_tint_id == 0) {
+		for (int index = EQ::textures::armorChest; index <= EQ::textures::LastTexture; index++) {
+			t->armor_tint.Slot[index].Color = t->armor_tint.Slot[0].Color;
+		}
+	} else if (t->armor_tint.Slot[0].Color == 0) {
+		const auto& e = NpcTypesTintRepository::FindOne(*this, armor_tint_id);
+		if (!e.id) {
 			armor_tint_id = 0;
+		} else {
+			t->armor_tint.Slot[EQ::textures::armorHead].Color = e.red1h << 16;
+			t->armor_tint.Slot[EQ::textures::armorHead].Color = e.grn1h << 8;
+			t->armor_tint.Slot[EQ::textures::armorHead].Color = e.blu1h;
 
-		tmpNPCType->AC = Strings::ToInt(row[40]);
-		tmpNPCType->ATK = Strings::ToInt(row[41]);
-		tmpNPCType->accuracy_rating = Strings::ToInt(row[42]);
-		tmpNPCType->scalerate = Strings::ToInt(row[43]);
-		tmpNPCType->spellscale = Strings::ToInt(row[44]);
-		tmpNPCType->healscale = Strings::ToInt(row[45]);
-		tmpNPCType->skip_global_loot = true;
-		tmpNPCType->skip_auto_scale = true;
+			t->armor_tint.Slot[EQ::textures::armorChest].Color = e.red2c << 16;
+			t->armor_tint.Slot[EQ::textures::armorChest].Color = e.grn2c << 8;
+			t->armor_tint.Slot[EQ::textures::armorChest].Color = e.blu2c;
 
-		// If Merc with duplicate NPC id already in table,
-		// free item we attempted to add.
-		if (zone->merctable.find(merc_type_id) != zone->merctable.end()) {
-			delete tmpNPCType;
-			return nullptr;
+			t->armor_tint.Slot[EQ::textures::armorArms].Color = e.red3a << 16;
+			t->armor_tint.Slot[EQ::textures::armorArms].Color = e.grn3a << 8;
+			t->armor_tint.Slot[EQ::textures::armorArms].Color = e.blu3a;
+
+			t->armor_tint.Slot[EQ::textures::armorWrist].Color = e.red4b << 16;
+			t->armor_tint.Slot[EQ::textures::armorWrist].Color = e.grn4b << 8;
+			t->armor_tint.Slot[EQ::textures::armorWrist].Color = e.blu4b;
+
+			t->armor_tint.Slot[EQ::textures::armorHands].Color = e.red5g << 16;
+			t->armor_tint.Slot[EQ::textures::armorHands].Color = e.grn5g << 8;
+			t->armor_tint.Slot[EQ::textures::armorHands].Color = e.blu5g;
+
+			t->armor_tint.Slot[EQ::textures::armorLegs].Color = e.red6l << 16;
+			t->armor_tint.Slot[EQ::textures::armorLegs].Color = e.grn6l << 8;
+			t->armor_tint.Slot[EQ::textures::armorLegs].Color = e.blu6l;
+
+			t->armor_tint.Slot[EQ::textures::armorFeet].Color = e.red7f << 16;
+			t->armor_tint.Slot[EQ::textures::armorFeet].Color = e.grn7f << 8;
+			t->armor_tint.Slot[EQ::textures::armorFeet].Color = e.blu7f;
+
+			t->armor_tint.Slot[EQ::textures::weaponPrimary].Color = e.red8x << 16;
+			t->armor_tint.Slot[EQ::textures::weaponPrimary].Color = e.grn8x << 8;
+			t->armor_tint.Slot[EQ::textures::weaponPrimary].Color = e.blu8x;
+
+			t->armor_tint.Slot[EQ::textures::weaponSecondary].Color = e.red9x << 16;
+			t->armor_tint.Slot[EQ::textures::weaponSecondary].Color = e.grn9x << 8;
+			t->armor_tint.Slot[EQ::textures::weaponSecondary].Color = e.blu9x;
 		}
-
-		zone->merctable[merc_type_id] = tmpNPCType;
-		npc = tmpNPCType;
 	}
 
-	return npc;
+	t->AC               = Strings::ToInt(row[40]);
+	t->ATK              = Strings::ToInt(row[41]);
+	t->accuracy_rating  = Strings::ToInt(row[42]);
+	t->scalerate        = Strings::ToInt(row[43]);
+	t->spellscale       = Strings::ToInt(row[44]);
+	t->healscale        = Strings::ToInt(row[45]);
+	t->skip_global_loot = true;
+	t->skip_auto_scale  = true;
+
+	// If Merc with duplicate NPC id already in table,
+	// free item we attempted to add.
+	if (zone->merctable.find(merc_type_id) != zone->merctable.end()) {
+		delete t;
+		return nullptr;
+	}
+
+	zone->merctable[merc_type_id] = t;
+	n = t;
+
+	return n;
 }
 
-bool ZoneDatabase::LoadMercInfo(Client *client) {
+bool ZoneDatabase::LoadMercenaryInfo(Client* c)
+{
+	const auto& l = MercsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`OwnerCharacterID` = {} ORDER BY `Slot`",
+			c->CharacterID()
+		)
+	);
 
-	std::string query = StringFormat("SELECT MercID, Slot, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, Mana, "
-                                    "Endurance, Face, LuclinHairStyle, LuclinHairColor, "
-                                    "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
-                                    "DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
-                                    "FROM mercs WHERE OwnerCharacterID = '%i' ORDER BY Slot", client->CharacterID());
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-        return false;
-
-	if(results.RowCount() == 0)
-		return false;
-
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-        uint8 slot = Strings::ToInt(row[1]);
-
-        if(slot >= MAXMERCS)
-            continue;
-
-        client->GetMercInfo(slot).mercid = Strings::ToInt(row[0]);
-        client->GetMercInfo(slot).slot = slot;
-        snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[2]);
-        client->GetMercInfo(slot).MercTemplateID = Strings::ToInt(row[3]);
-        client->GetMercInfo(slot).SuspendedTime = Strings::ToInt(row[4]);
-        client->GetMercInfo(slot).IsSuspended = Strings::ToInt(row[5]) == 1 ? true : false;
-		client->GetMercInfo(slot).MercTimerRemaining = Strings::ToInt(row[6]);
-		client->GetMercInfo(slot).Gender = Strings::ToInt(row[7]);
-		client->GetMercInfo(slot).MercSize = Strings::ToFloat(row[8]);
-		client->GetMercInfo(slot).State = 5;
-		client->GetMercInfo(slot).Stance = Strings::ToInt(row[9]);
-		client->GetMercInfo(slot).hp = Strings::ToInt(row[10]);
-		client->GetMercInfo(slot).mana = Strings::ToInt(row[11]);
-		client->GetMercInfo(slot).endurance = Strings::ToInt(row[12]);
-		client->GetMercInfo(slot).face = Strings::ToInt(row[13]);
-		client->GetMercInfo(slot).luclinHairStyle = Strings::ToInt(row[14]);
-		client->GetMercInfo(slot).luclinHairColor = Strings::ToInt(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor = Strings::ToInt(row[16]);
-		client->GetMercInfo(slot).luclinEyeColor2 = Strings::ToInt(row[17]);
-		client->GetMercInfo(slot).luclinBeardColor = Strings::ToInt(row[18]);
-		client->GetMercInfo(slot).luclinBeard = Strings::ToInt(row[19]);
-		client->GetMercInfo(slot).drakkinHeritage = Strings::ToInt(row[20]);
-		client->GetMercInfo(slot).drakkinTattoo = Strings::ToInt(row[21]);
-		client->GetMercInfo(slot).drakkinDetails = Strings::ToInt(row[22]);
-    }
-
-	return true;
-}
-
-bool ZoneDatabase::LoadCurrentMerc(Client *client) {
-
-	uint8 slot = client->GetMercSlot();
-
-	if(slot > MAXMERCS)
-        return false;
-
-    std::string query = StringFormat("SELECT MercID, Name, TemplateID, SuspendedTime, "
-                                    "IsSuspended, TimerRemaining, Gender, MercSize, StanceID, HP, "
-                                    "Mana, Endurance, Face, LuclinHairStyle, LuclinHairColor, "
-                                    "LuclinEyeColor, LuclinEyeColor2, LuclinBeardColor, "
-                                    "LuclinBeard, DrakkinHeritage, DrakkinTattoo, DrakkinDetails "
-                                    "FROM mercs WHERE OwnerCharacterID = '%i' AND Slot = '%u'",
-                                    client->CharacterID(), slot);
-    auto results = database.QueryDatabase(query);
-
-    if(!results.Success())
-		return false;
-
-	if(results.RowCount() == 0)
-		return false;
-
-
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-        client->GetMercInfo(slot).mercid = Strings::ToInt(row[0]);
-        client->GetMercInfo(slot).slot = slot;
-        snprintf(client->GetMercInfo(slot).merc_name, 64, "%s", row[1]);
-        client->GetMercInfo(slot).MercTemplateID = Strings::ToInt(row[2]);
-        client->GetMercInfo(slot).SuspendedTime = Strings::ToInt(row[3]);
-        client->GetMercInfo(slot).IsSuspended = Strings::ToInt(row[4]) == 1? true: false;
-        client->GetMercInfo(slot).MercTimerRemaining = Strings::ToInt(row[5]);
-		client->GetMercInfo(slot).Gender = Strings::ToInt(row[6]);
-		client->GetMercInfo(slot).MercSize = Strings::ToFloat(row[7]);
-		client->GetMercInfo(slot).State = Strings::ToInt(row[8]);
-		client->GetMercInfo(slot).hp = Strings::ToInt(row[9]);
-		client->GetMercInfo(slot).mana = Strings::ToInt(row[10]);
-		client->GetMercInfo(slot).endurance = Strings::ToInt(row[11]);
-		client->GetMercInfo(slot).face = Strings::ToInt(row[12]);
-		client->GetMercInfo(slot).luclinHairStyle = Strings::ToInt(row[13]);
-		client->GetMercInfo(slot).luclinHairColor = Strings::ToInt(row[14]);
-		client->GetMercInfo(slot).luclinEyeColor = Strings::ToInt(row[15]);
-		client->GetMercInfo(slot).luclinEyeColor2 = Strings::ToInt(row[16]);
-		client->GetMercInfo(slot).luclinBeardColor = Strings::ToInt(row[17]);
-		client->GetMercInfo(slot).luclinBeard = Strings::ToInt(row[18]);
-		client->GetMercInfo(slot).drakkinHeritage = Strings::ToInt(row[19]);
-		client->GetMercInfo(slot).drakkinTattoo = Strings::ToInt(row[20]);
-		client->GetMercInfo(slot).drakkinDetails = Strings::ToInt(row[21]);
-	}
-
-	return true;
-}
-
-bool ZoneDatabase::SaveMerc(Merc *merc) {
-	Client *owner = merc->GetMercOwner();
-
-	if(!owner)
-		return false;
-
-	if(merc->GetMercID() == 0)
-	{
-		// New merc record
-		std::string query = StringFormat("INSERT INTO mercs "
-		"(OwnerCharacterID, Slot, Name, TemplateID, "
-		"SuspendedTime, IsSuspended, TimerRemaining, "
-		"Gender, MercSize, StanceID, HP, Mana, Endurance, Face, "
-		"LuclinHairStyle, LuclinHairColor, LuclinEyeColor, "
-		"LuclinEyeColor2, LuclinBeardColor, LuclinBeard, "
-		"DrakkinHeritage, DrakkinTattoo, DrakkinDetails) "
-		"VALUES('%u', '%u', '%s', '%u', '%u', '%u', '%u', "
-		"'%u', '%u', '%f', '%u', '%u', '%u', '%i', '%i', '%i', "
-		"'%i', '%i', '%i', '%i', '%i', '%i', '%i')",
-		merc->GetMercCharacterID(), owner->GetNumMercs(),
-		merc->GetCleanName(), merc->GetMercTemplateID(),
-		owner->GetMercInfo().SuspendedTime, merc->IsSuspended(),
-		owner->GetMercInfo().MercTimerRemaining, merc->GetGender(),
-		merc->GetSize(), merc->GetStance(), merc->GetHP(),
-		merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
-		merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
-		merc->GetEyeColor2(), merc->GetBeardColor(),
-		merc->GetBeard(), merc->GetDrakkinHeritage(),
-		merc->GetDrakkinTattoo(), merc->GetDrakkinDetails());
-
-		auto results = database.QueryDatabase(query);
-		if(!results.Success()) {
-			owner->Message(Chat::Red, results.ErrorMessage().c_str());
-			return false;
-		} else if (results.RowsAffected() != 1) {
-			owner->Message(Chat::Red, "Unable to save merc to the database.");
-			return false;
-		}
-
-		merc->SetMercID(results.LastInsertedID());
-		merc->UpdateMercInfo(owner);
-		database.SaveMercBuffs(merc);
-		return true;
-	}
-
-	// Update existing merc record
-	std::string query = StringFormat("UPDATE mercs SET OwnerCharacterID = '%u', Slot = '%u', "
-	"Name = '%s', TemplateID = '%u', SuspendedTime = '%u', "
-	"IsSuspended = '%u', TimerRemaining = '%u', Gender = '%u', MercSize = '%f', "
-	"StanceID = '%u', HP = '%u', Mana = '%u', Endurance = '%u', "
-	"Face = '%i', LuclinHairStyle = '%i', LuclinHairColor = '%i', "
-	"LuclinEyeColor = '%i', LuclinEyeColor2 = '%i', LuclinBeardColor = '%i', "
-	"LuclinBeard = '%i', DrakkinHeritage = '%i', DrakkinTattoo = '%i', "
-	"DrakkinDetails = '%i' WHERE MercID = '%u'",
-	merc->GetMercCharacterID(), owner->GetMercSlot(), merc->GetCleanName(),
-	merc->GetMercTemplateID(), owner->GetMercInfo().SuspendedTime,
-	merc->IsSuspended(), owner->GetMercInfo().MercTimerRemaining,
-	merc->GetGender(), merc->GetSize(), merc->GetStance(), merc->GetHP(),
-	merc->GetMana(), merc->GetEndurance(), merc->GetLuclinFace(),
-	merc->GetHairStyle(), merc->GetHairColor(), merc->GetEyeColor1(),
-	merc->GetEyeColor2(), merc->GetBeardColor(), merc->GetBeard(),
-	merc->GetDrakkinHeritage(), merc->GetDrakkinTattoo(), merc->GetDrakkinDetails(),
-	merc->GetMercID());
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		owner->Message(Chat::Red, results.ErrorMessage().c_str());
-		return false;
-	} else if (results.RowsAffected() != 1) {
-		owner->Message(Chat::Red, "Unable to save merc to the database.");
+	if (l.empty()) {
 		return false;
 	}
 
-	merc->UpdateMercInfo(owner);
-	database.SaveMercBuffs(merc);
-
-	return true;
-}
-
-void ZoneDatabase::SaveMercBuffs(Merc *merc) {
-
-	Buffs_Struct *buffs = merc->GetBuffs();
-
-	// Remove any existing buff saves
-	std::string query   = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
-	auto        results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error While Deleting Merc Buffs before save: [{}]", results.ErrorMessage().c_str());
-		return;
-	}
-
-	for (int buffCount = 0; buffCount <= BUFF_COUNT; buffCount++) {
-		if (!IsValidSpell(buffs[buffCount].spellid)) {
+	for (const auto& e : l) {
+		if (e.Slot >= MAXMERCS) {
 			continue;
 		}
 
-        int IsPersistent = buffs[buffCount].persistant_buff? 1: 0;
+		auto& m = c->GetMercInfo(e.Slot);
 
-        query = StringFormat("INSERT INTO merc_buffs (MercId, SpellId, CasterLevel, DurationFormula, "
-                            "TicsRemaining, PoisonCounters, DiseaseCounters, CurseCounters, "
-                            "CorruptionCounters, HitCount, MeleeRune, MagicRune, dot_rune, "
-                            "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
-                            "VALUES (%u, %u, %u, %u, %u, %d, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
-                            merc->GetMercID(), buffs[buffCount].spellid, buffs[buffCount].casterlevel,
-                            spells[buffs[buffCount].spellid].buff_duration_formula, buffs[buffCount].ticsremaining,
-                            CalculatePoisonCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
-                            CalculateDiseaseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
-                            CalculateCurseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
-                            CalculateCorruptionCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
-                            buffs[buffCount].hit_number, buffs[buffCount].melee_rune, buffs[buffCount].magic_rune,
-                            buffs[buffCount].dot_rune, buffs[buffCount].caston_x, IsPersistent, buffs[buffCount].caston_y,
-                            buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
-        results = database.QueryDatabase(query);
-        if(!results.Success()) {
-      LogError("Error Saving Merc Buffs: [{}]", results.ErrorMessage().c_str());
-            break;
-        }
+		strn0cpy(m.merc_name, e.Name.c_str(), sizeof(m.merc_name));
+
+		m.mercid             = e.MercID;
+		m.slot               = e.Slot;
+		m.MercTemplateID     = e.TemplateID;
+		m.SuspendedTime      = e.SuspendedTime;
+		m.IsSuspended        = e.IsSuspended;
+		m.MercTimerRemaining = e.TimerRemaining;
+		m.Gender             = e.Gender;
+		m.MercSize           = e.MercSize;
+		m.State              = 5;
+		m.Stance             = e.StanceID;
+		m.hp                 = e.HP;
+		m.mana               = e.Mana;
+		m.endurance          = e.Endurance;
+		m.face               = e.Face;
+		m.luclinHairStyle    = e.LuclinHairStyle;
+		m.luclinHairColor    = e.LuclinHairColor;
+		m.luclinEyeColor     = e.LuclinEyeColor;
+		m.luclinEyeColor2    = e.LuclinEyeColor2;
+		m.luclinBeardColor   = e.LuclinBeardColor;
+		m.luclinBeard        = e.LuclinBeard;
+		m.drakkinHeritage    = e.DrakkinHeritage;
+		m.drakkinTattoo      = e.DrakkinTattoo;
+		m.drakkinDetails     = e.DrakkinDetails;
 	}
+
+	return true;
 }
 
-void ZoneDatabase::LoadMercBuffs(Merc *merc) {
-	Buffs_Struct *buffs = merc->GetBuffs();
-	uint32 max_slots = merc->GetMaxBuffSlots();
+bool ZoneDatabase::LoadCurrentMercenary(Client* c)
+{
+	const uint8 mercenary_slot = c->GetMercSlot();
 
+	if (mercenary_slot > MAXMERCS) {
+		return false;
+	}
 
-	bool BuffsLoaded = false;
-    std::string query = StringFormat("SELECT SpellId, CasterLevel, DurationFormula, TicsRemaining, "
-                                    "PoisonCounters, DiseaseCounters, CurseCounters, CorruptionCounters, "
-                                    "HitCount, MeleeRune, MagicRune, dot_rune, caston_x, Persistent, "
-                                    "caston_y, caston_z, ExtraDIChance FROM merc_buffs WHERE MercId = %u",
-                                    merc->GetMercID());
-    auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		LogError("Error Loading Merc Buffs: [{}]", results.ErrorMessage().c_str());
+	const auto& e = MercsRepository::GetMercenaryBySlot(*this, c);
+
+	if (!e.MercID) {
+		return false;
+	}
+
+	auto& m = c->GetMercInfo(mercenary_slot);
+
+	strn0cpy(m.merc_name, e.Name.c_str(), sizeof(m.merc_name));
+
+	m.mercid             = e.MercID;
+	m.slot               = e.Slot;
+	m.MercTemplateID     = e.TemplateID;
+	m.SuspendedTime      = e.SuspendedTime;
+	m.IsSuspended        = e.IsSuspended;
+	m.MercTimerRemaining = e.TimerRemaining;
+	m.Gender             = e.Gender;
+	m.MercSize           = e.MercSize;
+	m.State              = e.StanceID;
+	m.hp                 = e.HP;
+	m.mana               = e.Mana;
+	m.endurance          = e.Endurance;
+	m.face               = e.Face;
+	m.luclinHairStyle    = e.LuclinHairStyle;
+	m.luclinHairColor    = e.LuclinHairColor;
+	m.luclinEyeColor     = e.LuclinEyeColor;
+	m.luclinEyeColor2    = e.LuclinEyeColor2;
+	m.luclinBeardColor   = e.LuclinBeardColor;
+	m.luclinBeard        = e.LuclinBeard;
+	m.drakkinHeritage    = e.DrakkinHeritage;
+	m.drakkinTattoo      = e.DrakkinTattoo;
+	m.drakkinDetails     = e.DrakkinDetails;
+
+	return true;
+}
+
+bool ZoneDatabase::SaveMercenary(Merc* m)
+{
+	Client* c = m->GetMercenaryOwner();
+
+	if (!c) {
+		return false;
+	}
+
+	if (!m->GetMercenaryID()) {
+		auto e = MercsRepository::NewEntity();
+
+		e.OwnerCharacterID = m->GetMercenaryCharacterID();
+		e.Slot             = c->GetNumberOfMercenaries();
+		e.Name             = m->GetCleanName();
+		e.TemplateID       = m->GetMercenaryTemplateID();
+		e.SuspendedTime    = c->GetMercInfo().SuspendedTime;
+		e.IsSuspended      = m->IsSuspended();
+		e.TimerRemaining   = c->GetMercInfo().MercTimerRemaining;
+		e.Gender           = m->GetGender();
+		e.MercSize         = m->GetSize();
+		e.StanceID         = m->GetStance();
+		e.HP               = m->GetHP();
+		e.Mana             = m->GetMana();
+		e.Endurance        = m->GetEndurance();
+		e.Face             = m->GetLuclinFace();
+		e.LuclinHairStyle  = m->GetHairStyle();
+		e.LuclinHairColor  = m->GetHairColor();
+		e.LuclinEyeColor   = m->GetEyeColor1();
+		e.LuclinEyeColor2  = m->GetEyeColor2();
+		e.LuclinBeardColor = m->GetBeardColor();
+		e.LuclinBeard      = m->GetBeard();
+		e.DrakkinHeritage  = m->GetDrakkinHeritage();
+		e.DrakkinTattoo    = m->GetDrakkinTattoo();
+		e.DrakkinDetails   = m->GetDrakkinDetails();
+
+		e = MercsRepository::InsertOne(*this, e);
+
+		if (!e.MercID) {
+			c->Message(Chat::Red, "Unable to save mercenary to the database.");
+			return false;
+		}
+
+		m->SetMercID(e.MercID);
+		m->UpdateMercInfo(c);
+
+		database.SaveMercenaryBuffs(m);
+
+		return true;
+	}
+
+	auto e = MercsRepository::FindOne(*this, m->GetMercenaryID());
+
+	e.OwnerCharacterID = m->GetMercenaryCharacterID();
+	e.Slot             = c->GetNumberOfMercenaries();
+	e.Name             = m->GetCleanName();
+	e.TemplateID       = m->GetMercenaryTemplateID();
+	e.SuspendedTime    = c->GetMercInfo().SuspendedTime;
+	e.IsSuspended      = m->IsSuspended();
+	e.TimerRemaining   = c->GetMercInfo().MercTimerRemaining;
+	e.Gender           = m->GetGender();
+	e.MercSize         = m->GetSize();
+	e.StanceID         = m->GetStance();
+	e.HP               = m->GetHP();
+	e.Mana             = m->GetMana();
+	e.Endurance        = m->GetEndurance();
+	e.Face             = m->GetLuclinFace();
+	e.LuclinHairStyle  = m->GetHairStyle();
+	e.LuclinHairColor  = m->GetHairColor();
+	e.LuclinEyeColor   = m->GetEyeColor1();
+	e.LuclinEyeColor2  = m->GetEyeColor2();
+	e.LuclinBeardColor = m->GetBeardColor();
+	e.LuclinBeard      = m->GetBeard();
+	e.DrakkinHeritage  = m->GetDrakkinHeritage();
+	e.DrakkinTattoo    = m->GetDrakkinTattoo();
+	e.DrakkinDetails   = m->GetDrakkinDetails();
+
+	const int updated = MercsRepository::UpdateOne(*this, e);
+
+	if (!updated) {
+		c->Message(Chat::Red, "Unable to save mercenary to the database.");
+		return false;
+	}
+
+	m->UpdateMercInfo(c);
+
+	database.SaveMercenaryBuffs(m);
+
+	return true;
+}
+
+void ZoneDatabase::SaveMercenaryBuffs(Merc* m)
+{
+	auto buffs = m->GetBuffs();
+
+	MercBuffsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`MercID` = {}",
+			m->GetMercenaryID()
+		)
+	);
+
+	std::vector<MercBuffsRepository::MercBuffs> v;
+
+	auto e = MercBuffsRepository::NewEntity();
+
+	for (uint32 slot_id = 0; slot_id <= BUFF_COUNT; slot_id++) {
+		if (!IsValidSpell(buffs[slot_id].spellid)) {
+			continue;
+		}
+
+		e.MercId             = m->GetMercenaryID();
+		e.SpellId            = buffs[slot_id].spellid;
+		e.CasterLevel        = buffs[slot_id].casterlevel;
+		e.DurationFormula    = spells[buffs[slot_id].spellid].buff_duration_formula;
+		e.TicsRemaining      = buffs[slot_id].ticsremaining;
+		e.PoisonCounters     = CalculatePoisonCounters(buffs[slot_id].spellid) > 0 ? buffs[slot_id].counters : 0;
+		e.DiseaseCounters    = CalculateDiseaseCounters(buffs[slot_id].spellid) > 0 ? buffs[slot_id].counters : 0;
+		e.CurseCounters      = CalculateCurseCounters(buffs[slot_id].spellid) > 0 ? buffs[slot_id].counters : 0;
+		e.CorruptionCounters = CalculateCorruptionCounters(buffs[slot_id].spellid) > 0 ? buffs[slot_id].counters : 0;
+		e.HitCount           = buffs[slot_id].hit_number;
+		e.MeleeRune          = buffs[slot_id].melee_rune;
+		e.MagicRune          = buffs[slot_id].magic_rune;
+		e.dot_rune           = buffs[slot_id].dot_rune;
+		e.caston_x           = buffs[slot_id].caston_x;
+		e.caston_y           = buffs[slot_id].caston_y;
+		e.caston_z           = buffs[slot_id].caston_z;
+		e.Persistent         = buffs[slot_id].persistant_buff ? 1 : 0;
+		e.ExtraDIChance      = buffs[slot_id].ExtraDIChance;
+
+		v.emplace_back(e);
+	}
+
+	MercBuffsRepository::InsertMany(*this, v);
+}
+
+void ZoneDatabase::LoadMercenaryBuffs(Merc* m)
+{
+	auto      buffs     = m->GetBuffs();
+	const int max_slots = m->GetMaxBuffSlots();
+
+	const auto& l = MercBuffsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`MercID` = {}",
+			m->GetMercenaryID()
+		)
+	);
+
+	if (l.empty()) {
 		return;
 	}
 
-    int buffCount = 0;
-    for (auto& row = results.begin(); row != results.end(); ++row, ++buffCount) {
-        if(buffCount == BUFF_COUNT)
-            break;
+	uint32 slot_id = 0;
 
-        buffs[buffCount].spellid = Strings::ToInt(row[0]);
-        buffs[buffCount].casterlevel = Strings::ToInt(row[1]);
-        buffs[buffCount].ticsremaining = Strings::ToInt(row[3]);
+	for (const auto& e : l) {
+		if (slot_id == BUFF_COUNT) {
+			break;
+		}
 
-        if(CalculatePoisonCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = Strings::ToInt(row[4]);
+		buffs[slot_id].spellid         = e.SpellId;
+		buffs[slot_id].casterlevel     = e.CasterLevel;
+		buffs[slot_id].ticsremaining   = e.TicsRemaining;
+		buffs[slot_id].hit_number      = e.HitCount;
+		buffs[slot_id].melee_rune      = e.MeleeRune;
+		buffs[slot_id].magic_rune      = e.MagicRune;
+		buffs[slot_id].dot_rune        = e.dot_rune;
+		buffs[slot_id].caston_x        = e.caston_x;
+		buffs[slot_id].caston_y        = e.caston_y;
+		buffs[slot_id].caston_z        = e.caston_z;
+		buffs[slot_id].casterid        = 0;
+		buffs[slot_id].ExtraDIChance   = e.ExtraDIChance;
+		buffs[slot_id].persistant_buff = e.Persistent;
 
-        if(CalculateDiseaseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = Strings::ToInt(row[5]);
+		if (CalculatePoisonCounters(buffs[slot_id].spellid) > 0) {
+			buffs[slot_id].counters = e.PoisonCounters;
+		}
 
-        if(CalculateCurseCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = Strings::ToInt(row[6]);
+		if (CalculateDiseaseCounters(buffs[slot_id].spellid) > 0) {
+			buffs[slot_id].counters = e.DiseaseCounters;
+		}
 
-		if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
-            buffs[buffCount].counters = Strings::ToInt(row[7]);
+		if (CalculateCurseCounters(buffs[slot_id].spellid) > 0) {
+			buffs[slot_id].counters = e.CurseCounters;
+		}
 
-        buffs[buffCount].hit_number = Strings::ToInt(row[8]);
-		buffs[buffCount].melee_rune = Strings::ToInt(row[9]);
-		buffs[buffCount].magic_rune = Strings::ToInt(row[10]);
-		buffs[buffCount].dot_rune = Strings::ToInt(row[11]);
-		buffs[buffCount].caston_x = Strings::ToInt(row[12]);
-		buffs[buffCount].casterid = 0;
-
-        bool IsPersistent = Strings::ToInt(row[13])? true: false;
-
-        buffs[buffCount].caston_y = Strings::ToInt(row[13]);
-        buffs[buffCount].caston_z = Strings::ToInt(row[14]);
-        buffs[buffCount].ExtraDIChance = Strings::ToInt(row[15]);
-
-        buffs[buffCount].persistant_buff = IsPersistent;
-
-    }
-
-	query = StringFormat("DELETE FROM merc_buffs WHERE MercId = %u", merc->GetMercID());
-    results = database.QueryDatabase(query);
-    if(!results.Success())
-    LogError("Error Loading Merc Buffs: [{}]", results.ErrorMessage().c_str());
-
-}
-
-bool ZoneDatabase::DeleteMerc(uint32 merc_id) {
-
-	if(merc_id == 0)
-		return false;
-
-	// TODO: These queries need to be ran together as a transaction.. ie,
-	// if one or more fail then they all will fail to commit to the database.
-	// ...Not all mercs will have buffs, so why is it required that both deletes succeed?
-	std::string query = StringFormat("DELETE FROM merc_buffs WHERE MercId = '%u'", merc_id);
-	auto results = database.QueryDatabase(query);
-	if(!results.Success())
-	{
-		LogError("Error Deleting Merc Buffs: [{}]", results.ErrorMessage().c_str());
+		if (CalculateCorruptionCounters(buffs[slot_id].spellid) > 0) {
+			buffs[slot_id].counters = e.CorruptionCounters;
+		}
 	}
 
-	query = StringFormat("DELETE FROM mercs WHERE MercID = '%u'", merc_id);
-	results = database.QueryDatabase(query);
-	if(!results.Success())
-	{
-		LogError("Error Deleting Merc: [{}]", results.ErrorMessage().c_str());
+	MercBuffsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`MercID` = {}",
+			m->GetMercenaryID()
+		)
+	);
+}
+
+bool ZoneDatabase::DeleteMercenary(uint32 mercenary_id)
+{
+	if (!mercenary_id) {
+		return false;
+	}
+
+	MercBuffsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`MercID` = {}",
+			mercenary_id
+		)
+	);
+
+	const int deleted = MercsRepository::DeleteOne(*this, mercenary_id);
+	if (!deleted) {
 		return false;
 	}
 
 	return true;
 }
 
-void ZoneDatabase::LoadMercEquipment(Merc *merc) {
+void ZoneDatabase::LoadMercenaryEquipment(Merc* m)
+{
+	const int merc_subtype_id = MercSubtypesRepository::GetSubtype(*this, m->GetClass(), m->GetTierID());
 
-	std::string query = StringFormat("SELECT item_id FROM merc_inventory "
-                                    "WHERE merc_subtype_id = ("
-                                    "SELECT merc_subtype_id FROM merc_subtypes "
-                                    "WHERE class_id = '%u' AND tier_id = '%u') "
-                                    "AND min_level <= %u AND max_level >= %u",
-                                    merc->GetClass(), merc->GetTierID(),
-                                    merc->GetLevel(), merc->GetLevel());
-    auto results = database.QueryDatabase(query);
-	if(!results.Success()) {
-		LogError("Error Loading Merc Inventory: [{}]", results.ErrorMessage().c_str());
+	const auto& l = MercInventoryRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`merc_subtype_id` = {} AND `min_level` <= {} AND `max_level` >= {}",
+			merc_subtype_id,
+			m->GetLevel(),
+			m->GetLevel()
+		)
+	);
+
+	if (l.empty()) {
 		return;
 	}
 
-    int itemCount = 0;
-    for(auto& row = results.begin(); row != results.end(); ++row) {
-		if (itemCount == EQ::invslot::EQUIPMENT_COUNT)
-            break;
+	uint32 item_count = 0;
 
-        if(Strings::ToInt(row[0]) == 0)
-            continue;
+	for (const auto& e: l) {
+		if (item_count == EQ::invslot::EQUIPMENT_COUNT) {
+			break;
+		}
 
-        merc->AddItem(itemCount, Strings::ToInt(row[0]));
-        itemCount++;
-    }
+		if (!e.item_id) {
+			continue;
+		}
+
+		m->AddItem(item_count, e.item_id);
+
+		item_count++;
+	}
 }
 
 uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {

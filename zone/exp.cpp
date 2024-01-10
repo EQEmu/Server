@@ -665,7 +665,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 		level_count++;
 
-		if(GetMercID())
+		if(GetMercenaryID())
 			UpdateMercLevel();
 	}
 	//see if we lost any levels
@@ -676,7 +676,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			break;
 		}
 		level_increase = false;
-		if(GetMercID())
+		if(GetMercenaryID())
 			UpdateMercLevel();
 	}
 	check_level--;

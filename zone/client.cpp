@@ -395,7 +395,7 @@ Client::~Client() {
 	if (horse)
 		horse->Depop();
 
-	Mob* merc = entity_list.GetMob(GetMercID());
+	Mob* merc = entity_list.GetMob(GetMercenaryID());
 	if (merc)
 		merc->Depop();
 
