@@ -1219,7 +1219,7 @@ bool Zone::Init(bool is_static) {
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
 
 	LoadGrids();
-	LoadTickItems();
+	LoadItemTicks();
 
 	npc_scale_manager->LoadScaleData();
 
@@ -2664,32 +2664,32 @@ void Zone::ClearSpawnTimers()
 	);
 }
 
-void Zone::LoadTickItems()
+void Zone::LoadItemTicks()
 {
 	tick_items.clear();
 
-    const std::string query = "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	const auto& l = ItemTickRepository::All(database);
 
+	for (const auto& e : l) {
+		if (!e.it_itemid) {
+			continue;
+		}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        if(Strings::ToInt(row[0]) == 0)
-            continue;
+		ItemTickStruct i{
+			.itemid = static_cast<uint32>(e.it_itemid),
+			.chance = static_cast<uint32>(e.it_chance),
+			.level =static_cast<uint32>(e.it_level),
+			.bagslot = e.it_bagslot,
+			.qglobal = e.it_qglobal,
+		};
 
-        item_tick_struct ti_tmp;
-		ti_tmp.itemid = Strings::ToInt(row[0]);
-		ti_tmp.chance = Strings::ToInt(row[1]);
-		ti_tmp.level = Strings::ToInt(row[2]);
-		ti_tmp.bagslot = (int16)Strings::ToInt(row[4]);
-		ti_tmp.qglobal = std::string(row[3]);
-		tick_items[Strings::ToInt(row[0])] = ti_tmp;
+	}
 
-    }
-
-	LogInfo("Loaded [{}] item_tick entries", Strings::Commify(results.RowCount()));
+	LogInfo(
+		"Loaded [{}] item_tick entr{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "ies" : "y"
+	);
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {

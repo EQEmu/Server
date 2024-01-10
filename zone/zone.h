@@ -77,7 +77,7 @@ struct ZoneEXPModInfo {
 	float AAExpMod;
 };
 
-struct item_tick_struct {
+struct ItemTickStruct {
 	uint32      itemid;
 	uint32      chance;
 	uint32      level;
@@ -219,7 +219,7 @@ public:
 
 	std::pair<AA::Ability *, AA::Rank *> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
 
-	std::unordered_map<int, item_tick_struct>             tick_items;
+	std::unordered_map<int, ItemTickStruct>             tick_items;
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
@@ -285,7 +285,7 @@ public:
 	void LoadNewMerchantData(uint32 merchantid);
 	void LoadNPCEmotes(std::vector<NPC_Emote_Struct *> *NPCEmoteList);
 	void LoadTempMerchantData();
-	void LoadTickItems();
+	void LoadItemTicks();
 	void LoadVeteranRewards();
 	void LoadZoneDoors();
 	void ReloadStaticData();
