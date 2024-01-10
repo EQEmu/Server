@@ -2643,14 +2643,18 @@ void Zone::ReloadWorld(uint8 global_repop)
 void Zone::ClearSpawnTimers()
 {
 	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
+
 	iterator.Reset();
+
 	while (iterator.MoreElements()) {
-		auto query = fmt::format(
-			"DELETE FROM respawn_times WHERE id = {} AND instance_id = {}",
-			iterator.GetData()->GetID(),
-			GetInstanceID()
+		RespawnTimesRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`id` = {} AND `instance_id` = {}",
+				iterator.GetData()->GetID(),
+				GetInstanceID()
+			)
 		);
-		auto results = database.QueryDatabase(query);
 
 		iterator.Advance();
 	}

@@ -120,7 +120,6 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_S
 
 void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint32 time_left)
 {
-
 	timeval tv;
 	gettimeofday(&tv, nullptr);
 	uint32 current_time = tv.tv_sec;
@@ -129,7 +128,7 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 			otherwise we update with a REPLACE INTO
 	*/
 
-	if (time_left == 0) {
+	if (!time_left) {
 		RespawnTimesRepository::DeleteWhere(
 			*this,
 			fmt::format(
@@ -138,30 +137,18 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 				instance_id
 			)
 		);
-        std::string query = StringFormat("DELETE FROM `respawn_times` WHERE `id` = %u AND `instance_id` = %u", spawn2_id, instance_id);
-        QueryDatabase(query);
 		return;
 	}
 
-    std::string query = StringFormat(
-		"REPLACE INTO `respawn_times` "
-		"(id, "
-		"start, "
-		"duration, "
-		"instance_id) "
-		"VALUES "
-		"(%u, "
-		"%u, "
-		"%u, "
-		"%u)",
-		spawn2_id,
-		current_time,
-		time_left,
-		instance_id
+	RespawnTimesRepository::ReplaceOne(
+		*this,
+		RespawnTimesRepository::RespawnTimes{
+			.id = static_cast<int32_t>(spawn2_id),
+			.start = static_cast<int32_t>(current_time),
+			.duration = static_cast<int32_t>(time_left),
+			.instance_id = static_cast<int16_t>(instance_id)
+		}
 	);
-    QueryDatabase(query);
-
-	return;
 }
 
 //Gets the respawn time left in the database for the current spawn id
