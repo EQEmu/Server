@@ -96,7 +96,7 @@ public:
 		return e;
 	}
 
-	static MercSubtypes GetMercenarySubTypes(
+	static MercSubtypes GetMercSubTypes(
 		const std::vector<MercSubtypes> &merc_subtypess,
 		int merc_subtypes_id
 	)
