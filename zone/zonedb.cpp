@@ -84,37 +84,39 @@ ZoneDatabase::~ZoneDatabase() {
 	}
 }
 
-bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd) {
-	std::string query = fmt::format(
-		"UPDATE zone SET underworld = {:.2f}, minclip = {:.2f}, "
-		"maxclip = {:.2f}, fog_minclip = {:.2f}, fog_maxclip = {:.2f}, "
-		"fog_blue = {}, fog_red = {}, fog_green = {}, "
-		"sky = {}, ztype = {}, zone_exp_multiplier = {:.2f}, "
-		"safe_x = {:.2f}, safe_y = {:.2f}, safe_z = {:.2f} "
-		"WHERE zoneidnumber = {} AND version = {}",
-		zd->underworld,
-		zd->minclip,
-		zd->maxclip,
-		zd->fog_minclip[0],
-		zd->fog_maxclip[0],
-		zd->fog_blue[0],
-		zd->fog_red[0],
-		zd->fog_green[0],
-		zd->sky,
-		zd->ztype,
-		zd->zone_exp_multiplier,
-		zd->safe_x,
-		zd->safe_y,
-		zd->safe_z,
-		zoneid,
-		instance_version
+bool ZoneDatabase::SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_Struct* zd)
+{
+	const auto& l = ZoneRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`zoneidnumber` = {} AND `version` = {}",
+			zone_id,
+			instance_version
+		)
 	);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        return false;
+
+	if (l.empty()) {
+		return false;
 	}
 
-	return true;
+	auto e = l[0];
+
+	e.underworld          = zd->underworld;
+	e.minclip             = zd->minclip;
+	e.maxclip             = zd->maxclip;
+	e.fog_minclip         = zd->fog_minclip[0];
+	e.fog_maxclip         = zd->fog_maxclip[0];
+	e.fog_blue            = zd->fog_blue[0];
+	e.fog_red             = zd->fog_red[0];
+	e.fog_green           = zd->fog_green[0];
+	e.sky                 = zd->sky;
+	e.ztype               = zd->ztype;
+	e.zone_exp_multiplier = zd->zone_exp_multiplier;
+	e.safe_x              = zd->safe_x;
+	e.safe_y              = zd->safe_y;
+	e.safe_z              = zd->safe_z;
+
+	return ZoneRepository::UpdateOne(*this, e);
 }
 
 void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint32 time_left)
