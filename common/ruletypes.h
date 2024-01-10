@@ -219,6 +219,7 @@ RULE_BOOL(Character, UseForageCommonFood, true, "If enabled, use the common food
 RULE_INT(Character, ClearXTargetDelay, 10, "Seconds between uses of the #clearxtargets command (Set to 0 to disable)")
 RULE_BOOL(Character, PreventMountsFromZoning, false, "Enable to prevent mounts from zoning - Prior to December 15, 2004 this is enabled.")
 RULE_BOOL(Character, GroupInvitesRequireTarget, false, "Enable to require players to have invitee on target (Disables /invite name) - Classic Style")
+RULE_BOOL(Character, PlayerTradingLoreFeedback, true, "If enabled, during a player to player trade, if lore items exist, it will output which items.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

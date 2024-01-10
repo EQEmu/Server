@@ -911,31 +911,49 @@ bool Client::CheckTradeLoreConflict(Client* other)
 		return true;
 	}
 
+	bool has_lore_item = false;
+	std::vector<uint32> lore_item_ids;
+
 	for (int16 index = EQ::invslot::TRADE_BEGIN; index <= EQ::invslot::TRADE_END; ++index) {
-		const EQ::ItemInstance* inst = m_inv[index];
+		const auto inst = m_inv[index];
 		if (!inst || !inst->GetItem()) {
 			continue;
 		}
 
 		if (other->CheckLoreConflict(inst->GetItem())) {
-			Message(Chat::Lime, "Lore Item: %s", inst->GetItem()->Name);
-			return true;
+			lore_item_ids.emplace_back(inst->GetItem()->ID);
+
+			has_lore_item = true;
 		}
 	}
 
 	for (int16 index = EQ::invbag::TRADE_BAGS_BEGIN; index <= EQ::invbag::TRADE_BAGS_END; ++index) {
-		const EQ::ItemInstance* inst = m_inv[index];
+		const auto inst = m_inv[index];
 		if (!inst || !inst->GetItem()) {
 			continue;
 		}
 
 		if (other->CheckLoreConflict(inst->GetItem())) {
-			Message(Chat::Lime, "Lore Item: %s", inst->GetItem()->Name);
-			return true;
+			lore_item_ids.emplace_back(inst->GetItem()->ID);
+
+			has_lore_item = true;
 		}
 	}
 
-	return false;
+	if (has_lore_item && RuleB(Character, PlayerTradingLoreFeedback)) {
+		for (const uint32 lore_item_id : lore_item_ids) {
+			Message(
+				Chat::Red,
+				fmt::format(
+					"{} already has a lore {} in their inventory.",
+					other->GetCleanName(),
+					database.CreateItemLink(lore_item_id)
+				).c_str()
+			);
+		}
+	}
+
+	return has_lore_item;
 }
 
 bool Client::CheckTradeNonDroppable()
