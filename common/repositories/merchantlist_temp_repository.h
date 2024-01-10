@@ -44,7 +44,13 @@ public:
      */
 
 	// Custom extended repository methods here
-
+	static void ClearTemporaryMerchantLists(Database& db)
+	{
+		db.QueryDatabase(
+			"TRUNCATE {}",
+			TableName()
+		);
+	}
 };
 
 #endif //EQEMU_MERCHANTLIST_TEMP_REPOSITORY_H

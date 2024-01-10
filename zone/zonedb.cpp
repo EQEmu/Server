@@ -44,6 +44,7 @@
 #include "../common/repositories/merc_inventory_repository.h"
 #include "../common/repositories/merc_subtypes_repository.h"
 #include "../common/repositories/npc_types_tint_repository.h"
+#include "../common/repositories/merchantlist_temp_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2534,17 +2535,39 @@ void ZoneDatabase::LoadMercenaryEquipment(Merc* m)
 	}
 }
 
-void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id, uint32 item, uint32 charges){
+void ZoneDatabase::SaveMerchantTemp(
+	uint32 npc_id,
+	uint32 slot_id,
+	uint32 zone_id,
+	uint32 instance_id,
+	uint32 item_id,
+	uint32 charges
+)
+{
+	auto e = MerchantlistTempRepository::NewEntity();
 
-	std::string query = StringFormat("REPLACE INTO merchantlist_temp (npcid, slot, zone_id, instance_id, itemid, charges) "
-                                    "VALUES(%d, %d, %d, %d, %d, %d)", npcid, slot, zone_id, instance_id, item, charges);
-    QueryDatabase(query);
+	e.npcid       = npc_id;
+	e.slot        = slot_id;
+	e.zone_id     = zone_id;
+	e.instance_id = instance_id;
+	e.itemid      = item_id;
+	e.charges     = charges;
+
+	MerchantlistTempRepository::ReplaceOne(*this, e);
 }
 
-void ZoneDatabase::DeleteMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id) {
-	std::string query = StringFormat("DELETE FROM merchantlist_temp WHERE npcid=%d AND slot=%d AND zone_id=%d AND instance_id=%d",
-			npcid, slot, zone_id, instance_id);
-	QueryDatabase(query);
+void ZoneDatabase::DeleteMerchantTemp(uint32 npc_id, uint32 slot_id, uint32 zone_id, uint32 instance_id)
+{
+	MerchantlistTempRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`npcid` = {} AND `slot` = {} AND `zone_id` = {} AND `instance_id` = {}",
+			npc_id,
+			slot_id,
+			zone_id,
+			instance_id
+		)
+	);
 }
 
 //New functions for timezone
