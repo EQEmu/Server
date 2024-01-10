@@ -264,13 +264,13 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
 				.bagidx = index,
 				.itemid = inst->GetItem()->ID,
 				.charges = inst->GetCharges(),
+				.droptime = std::time(nullptr),
 				.augslot1 = augments[0],
 				.augslot2 = augments[1],
 				.augslot3 = augments[2],
 				.augslot4 = augments[3],
 				.augslot5 = augments[4],
-				.augslot6 = augments[5],
-				.droptime = std::time(nullptr)
+				.augslot6 = static_cast<int32_t>(augments[5])
 			}
 		);
 	}
