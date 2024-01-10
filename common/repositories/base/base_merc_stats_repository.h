@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_MERC_STATS_REPOSITORY_H
@@ -640,6 +640,126 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const MercStats &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.merc_npc_type_id));
+		v.push_back(std::to_string(e.clientlevel));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.AC));
+		v.push_back(std::to_string(e.ATK));
+		v.push_back(std::to_string(e.STR));
+		v.push_back(std::to_string(e.STA));
+		v.push_back(std::to_string(e.DEX));
+		v.push_back(std::to_string(e.AGI));
+		v.push_back(std::to_string(e._INT));
+		v.push_back(std::to_string(e.WIS));
+		v.push_back(std::to_string(e.CHA));
+		v.push_back(std::to_string(e.MR));
+		v.push_back(std::to_string(e.CR));
+		v.push_back(std::to_string(e.DR));
+		v.push_back(std::to_string(e.FR));
+		v.push_back(std::to_string(e.PR));
+		v.push_back(std::to_string(e.Corrup));
+		v.push_back(std::to_string(e.mindmg));
+		v.push_back(std::to_string(e.maxdmg));
+		v.push_back(std::to_string(e.attack_count));
+		v.push_back(std::to_string(e.attack_speed));
+		v.push_back(std::to_string(e.attack_delay));
+		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(std::to_string(e.Accuracy));
+		v.push_back(std::to_string(e.hp_regen_rate));
+		v.push_back(std::to_string(e.mana_regen_rate));
+		v.push_back(std::to_string(e.runspeed));
+		v.push_back(std::to_string(e.statscale));
+		v.push_back(std::to_string(e.spellscale));
+		v.push_back(std::to_string(e.healscale));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<MercStats> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.merc_npc_type_id));
+			v.push_back(std::to_string(e.clientlevel));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.AC));
+			v.push_back(std::to_string(e.ATK));
+			v.push_back(std::to_string(e.STR));
+			v.push_back(std::to_string(e.STA));
+			v.push_back(std::to_string(e.DEX));
+			v.push_back(std::to_string(e.AGI));
+			v.push_back(std::to_string(e._INT));
+			v.push_back(std::to_string(e.WIS));
+			v.push_back(std::to_string(e.CHA));
+			v.push_back(std::to_string(e.MR));
+			v.push_back(std::to_string(e.CR));
+			v.push_back(std::to_string(e.DR));
+			v.push_back(std::to_string(e.FR));
+			v.push_back(std::to_string(e.PR));
+			v.push_back(std::to_string(e.Corrup));
+			v.push_back(std::to_string(e.mindmg));
+			v.push_back(std::to_string(e.maxdmg));
+			v.push_back(std::to_string(e.attack_count));
+			v.push_back(std::to_string(e.attack_speed));
+			v.push_back(std::to_string(e.attack_delay));
+			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+			v.push_back(std::to_string(e.Accuracy));
+			v.push_back(std::to_string(e.hp_regen_rate));
+			v.push_back(std::to_string(e.mana_regen_rate));
+			v.push_back(std::to_string(e.runspeed));
+			v.push_back(std::to_string(e.statscale));
+			v.push_back(std::to_string(e.spellscale));
+			v.push_back(std::to_string(e.healscale));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_MERC_STATS_REPOSITORY_H
