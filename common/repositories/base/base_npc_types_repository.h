@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_NPC_TYPES_REPOSITORY_H
@@ -1579,6 +1579,314 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const NpcTypes &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.lastname) + "'");
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.bodytype));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helmtexture));
+		v.push_back(std::to_string(e.herosforgemodel));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.hp_regen_rate));
+		v.push_back(std::to_string(e.hp_regen_per_second));
+		v.push_back(std::to_string(e.mana_regen_rate));
+		v.push_back(std::to_string(e.loottable_id));
+		v.push_back(std::to_string(e.merchant_id));
+		v.push_back(std::to_string(e.alt_currency_id));
+		v.push_back(std::to_string(e.npc_spells_id));
+		v.push_back(std::to_string(e.npc_spells_effects_id));
+		v.push_back(std::to_string(e.npc_faction_id));
+		v.push_back(std::to_string(e.adventure_template_id));
+		v.push_back(std::to_string(e.trap_template));
+		v.push_back(std::to_string(e.mindmg));
+		v.push_back(std::to_string(e.maxdmg));
+		v.push_back(std::to_string(e.attack_count));
+		v.push_back("'" + Strings::Escape(e.npcspecialattks) + "'");
+		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+		v.push_back(std::to_string(e.aggroradius));
+		v.push_back(std::to_string(e.assistradius));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.luclin_hairstyle));
+		v.push_back(std::to_string(e.luclin_haircolor));
+		v.push_back(std::to_string(e.luclin_eyecolor));
+		v.push_back(std::to_string(e.luclin_eyecolor2));
+		v.push_back(std::to_string(e.luclin_beardcolor));
+		v.push_back(std::to_string(e.luclin_beard));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.armortint_id));
+		v.push_back(std::to_string(e.armortint_red));
+		v.push_back(std::to_string(e.armortint_green));
+		v.push_back(std::to_string(e.armortint_blue));
+		v.push_back(std::to_string(e.d_melee_texture1));
+		v.push_back(std::to_string(e.d_melee_texture2));
+		v.push_back("'" + Strings::Escape(e.ammo_idfile) + "'");
+		v.push_back(std::to_string(e.prim_melee_type));
+		v.push_back(std::to_string(e.sec_melee_type));
+		v.push_back(std::to_string(e.ranged_type));
+		v.push_back(std::to_string(e.runspeed));
+		v.push_back(std::to_string(e.MR));
+		v.push_back(std::to_string(e.CR));
+		v.push_back(std::to_string(e.DR));
+		v.push_back(std::to_string(e.FR));
+		v.push_back(std::to_string(e.PR));
+		v.push_back(std::to_string(e.Corrup));
+		v.push_back(std::to_string(e.PhR));
+		v.push_back(std::to_string(e.see_invis));
+		v.push_back(std::to_string(e.see_invis_undead));
+		v.push_back(std::to_string(e.qglobal));
+		v.push_back(std::to_string(e.AC));
+		v.push_back(std::to_string(e.npc_aggro));
+		v.push_back(std::to_string(e.spawn_limit));
+		v.push_back(std::to_string(e.attack_speed));
+		v.push_back(std::to_string(e.attack_delay));
+		v.push_back(std::to_string(e.findable));
+		v.push_back(std::to_string(e.STR));
+		v.push_back(std::to_string(e.STA));
+		v.push_back(std::to_string(e.DEX));
+		v.push_back(std::to_string(e.AGI));
+		v.push_back(std::to_string(e._INT));
+		v.push_back(std::to_string(e.WIS));
+		v.push_back(std::to_string(e.CHA));
+		v.push_back(std::to_string(e.see_hide));
+		v.push_back(std::to_string(e.see_improved_hide));
+		v.push_back(std::to_string(e.trackable));
+		v.push_back(std::to_string(e.isbot));
+		v.push_back(std::to_string(e.exclude));
+		v.push_back(std::to_string(e.ATK));
+		v.push_back(std::to_string(e.Accuracy));
+		v.push_back(std::to_string(e.Avoidance));
+		v.push_back(std::to_string(e.slow_mitigation));
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.maxlevel));
+		v.push_back(std::to_string(e.scalerate));
+		v.push_back(std::to_string(e.private_corpse));
+		v.push_back(std::to_string(e.unique_spawn_by_name));
+		v.push_back(std::to_string(e.underwater));
+		v.push_back(std::to_string(e.isquest));
+		v.push_back(std::to_string(e.emoteid));
+		v.push_back(std::to_string(e.spellscale));
+		v.push_back(std::to_string(e.healscale));
+		v.push_back(std::to_string(e.no_target_hotkey));
+		v.push_back(std::to_string(e.raid_target));
+		v.push_back(std::to_string(e.armtexture));
+		v.push_back(std::to_string(e.bracertexture));
+		v.push_back(std::to_string(e.handtexture));
+		v.push_back(std::to_string(e.legtexture));
+		v.push_back(std::to_string(e.feettexture));
+		v.push_back(std::to_string(e.light));
+		v.push_back(std::to_string(e.walkspeed));
+		v.push_back(std::to_string(e.peqid));
+		v.push_back(std::to_string(e.unique_));
+		v.push_back(std::to_string(e.fixed));
+		v.push_back(std::to_string(e.ignore_despawn));
+		v.push_back(std::to_string(e.show_name));
+		v.push_back(std::to_string(e.untargetable));
+		v.push_back(std::to_string(e.charm_ac));
+		v.push_back(std::to_string(e.charm_min_dmg));
+		v.push_back(std::to_string(e.charm_max_dmg));
+		v.push_back(std::to_string(e.charm_attack_delay));
+		v.push_back(std::to_string(e.charm_accuracy_rating));
+		v.push_back(std::to_string(e.charm_avoidance_rating));
+		v.push_back(std::to_string(e.charm_atk));
+		v.push_back(std::to_string(e.skip_global_loot));
+		v.push_back(std::to_string(e.rare_spawn));
+		v.push_back(std::to_string(e.stuck_behavior));
+		v.push_back(std::to_string(e.model));
+		v.push_back(std::to_string(e.flymode));
+		v.push_back(std::to_string(e.always_aggro));
+		v.push_back(std::to_string(e.exp_mod));
+		v.push_back(std::to_string(e.heroic_strikethrough));
+		v.push_back(std::to_string(e.faction_amount));
+		v.push_back(std::to_string(e.keeps_sold_items));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<NpcTypes> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.lastname) + "'");
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.bodytype));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helmtexture));
+			v.push_back(std::to_string(e.herosforgemodel));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.hp_regen_rate));
+			v.push_back(std::to_string(e.hp_regen_per_second));
+			v.push_back(std::to_string(e.mana_regen_rate));
+			v.push_back(std::to_string(e.loottable_id));
+			v.push_back(std::to_string(e.merchant_id));
+			v.push_back(std::to_string(e.alt_currency_id));
+			v.push_back(std::to_string(e.npc_spells_id));
+			v.push_back(std::to_string(e.npc_spells_effects_id));
+			v.push_back(std::to_string(e.npc_faction_id));
+			v.push_back(std::to_string(e.adventure_template_id));
+			v.push_back(std::to_string(e.trap_template));
+			v.push_back(std::to_string(e.mindmg));
+			v.push_back(std::to_string(e.maxdmg));
+			v.push_back(std::to_string(e.attack_count));
+			v.push_back("'" + Strings::Escape(e.npcspecialattks) + "'");
+			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+			v.push_back(std::to_string(e.aggroradius));
+			v.push_back(std::to_string(e.assistradius));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.luclin_hairstyle));
+			v.push_back(std::to_string(e.luclin_haircolor));
+			v.push_back(std::to_string(e.luclin_eyecolor));
+			v.push_back(std::to_string(e.luclin_eyecolor2));
+			v.push_back(std::to_string(e.luclin_beardcolor));
+			v.push_back(std::to_string(e.luclin_beard));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.armortint_id));
+			v.push_back(std::to_string(e.armortint_red));
+			v.push_back(std::to_string(e.armortint_green));
+			v.push_back(std::to_string(e.armortint_blue));
+			v.push_back(std::to_string(e.d_melee_texture1));
+			v.push_back(std::to_string(e.d_melee_texture2));
+			v.push_back("'" + Strings::Escape(e.ammo_idfile) + "'");
+			v.push_back(std::to_string(e.prim_melee_type));
+			v.push_back(std::to_string(e.sec_melee_type));
+			v.push_back(std::to_string(e.ranged_type));
+			v.push_back(std::to_string(e.runspeed));
+			v.push_back(std::to_string(e.MR));
+			v.push_back(std::to_string(e.CR));
+			v.push_back(std::to_string(e.DR));
+			v.push_back(std::to_string(e.FR));
+			v.push_back(std::to_string(e.PR));
+			v.push_back(std::to_string(e.Corrup));
+			v.push_back(std::to_string(e.PhR));
+			v.push_back(std::to_string(e.see_invis));
+			v.push_back(std::to_string(e.see_invis_undead));
+			v.push_back(std::to_string(e.qglobal));
+			v.push_back(std::to_string(e.AC));
+			v.push_back(std::to_string(e.npc_aggro));
+			v.push_back(std::to_string(e.spawn_limit));
+			v.push_back(std::to_string(e.attack_speed));
+			v.push_back(std::to_string(e.attack_delay));
+			v.push_back(std::to_string(e.findable));
+			v.push_back(std::to_string(e.STR));
+			v.push_back(std::to_string(e.STA));
+			v.push_back(std::to_string(e.DEX));
+			v.push_back(std::to_string(e.AGI));
+			v.push_back(std::to_string(e._INT));
+			v.push_back(std::to_string(e.WIS));
+			v.push_back(std::to_string(e.CHA));
+			v.push_back(std::to_string(e.see_hide));
+			v.push_back(std::to_string(e.see_improved_hide));
+			v.push_back(std::to_string(e.trackable));
+			v.push_back(std::to_string(e.isbot));
+			v.push_back(std::to_string(e.exclude));
+			v.push_back(std::to_string(e.ATK));
+			v.push_back(std::to_string(e.Accuracy));
+			v.push_back(std::to_string(e.Avoidance));
+			v.push_back(std::to_string(e.slow_mitigation));
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.maxlevel));
+			v.push_back(std::to_string(e.scalerate));
+			v.push_back(std::to_string(e.private_corpse));
+			v.push_back(std::to_string(e.unique_spawn_by_name));
+			v.push_back(std::to_string(e.underwater));
+			v.push_back(std::to_string(e.isquest));
+			v.push_back(std::to_string(e.emoteid));
+			v.push_back(std::to_string(e.spellscale));
+			v.push_back(std::to_string(e.healscale));
+			v.push_back(std::to_string(e.no_target_hotkey));
+			v.push_back(std::to_string(e.raid_target));
+			v.push_back(std::to_string(e.armtexture));
+			v.push_back(std::to_string(e.bracertexture));
+			v.push_back(std::to_string(e.handtexture));
+			v.push_back(std::to_string(e.legtexture));
+			v.push_back(std::to_string(e.feettexture));
+			v.push_back(std::to_string(e.light));
+			v.push_back(std::to_string(e.walkspeed));
+			v.push_back(std::to_string(e.peqid));
+			v.push_back(std::to_string(e.unique_));
+			v.push_back(std::to_string(e.fixed));
+			v.push_back(std::to_string(e.ignore_despawn));
+			v.push_back(std::to_string(e.show_name));
+			v.push_back(std::to_string(e.untargetable));
+			v.push_back(std::to_string(e.charm_ac));
+			v.push_back(std::to_string(e.charm_min_dmg));
+			v.push_back(std::to_string(e.charm_max_dmg));
+			v.push_back(std::to_string(e.charm_attack_delay));
+			v.push_back(std::to_string(e.charm_accuracy_rating));
+			v.push_back(std::to_string(e.charm_avoidance_rating));
+			v.push_back(std::to_string(e.charm_atk));
+			v.push_back(std::to_string(e.skip_global_loot));
+			v.push_back(std::to_string(e.rare_spawn));
+			v.push_back(std::to_string(e.stuck_behavior));
+			v.push_back(std::to_string(e.model));
+			v.push_back(std::to_string(e.flymode));
+			v.push_back(std::to_string(e.always_aggro));
+			v.push_back(std::to_string(e.exp_mod));
+			v.push_back(std::to_string(e.heroic_strikethrough));
+			v.push_back(std::to_string(e.faction_amount));
+			v.push_back(std::to_string(e.keeps_sold_items));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_NPC_TYPES_REPOSITORY_H
