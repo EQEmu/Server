@@ -4362,29 +4362,19 @@ void Mob::SendWearChangeAndLighting(int8 last_texture) {
 
 }
 
-void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
-	// Size Code
-	if (!bNoRestriction)
-	{
-		if (IsClient() || petid != 0)
-			if (in_size < 3.0)
-				in_size = 3.0;
-
-
-			if (IsClient() || petid != 0)
-				if (in_size > 15.0)
-					in_size = 15.0;
+void Mob::ChangeSize(float in_size = 0, bool unrestricted)
+{
+	if (!unrestricted) {
+		if (IsClient() || petid != 0) {
+			EQ::Clamp(in_size, 3.0f, 15.0f);
+		}
 	}
 
+	EQ::Clamp(in_size, 1.0f, 255.0f);
 
-	if (in_size < 1.0)
-		in_size = 1.0;
-
-	if (in_size > 255.0)
-		in_size = 255.0;
-	//End of Size Code
 	size = in_size;
-	SendAppearancePacket(AppearanceType::Size, (uint32) in_size);
+
+	SendAppearancePacket(AppearanceType::Size, static_cast<uint32>(in_size));
 }
 
 Mob* Mob::GetOwnerOrSelf() {

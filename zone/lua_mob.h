@@ -74,7 +74,7 @@ public:
 	void DoAnim(int animation_id, int animation_speed, bool ackreq);
 	void DoAnim(int animation_id, int animation_speed, bool ackreq, int filter);
 	void ChangeSize(double in_size);
-	void ChangeSize(double in_size, bool no_restriction);
+	void ChangeSize(double in_size, bool unrestricted);
 	bool RandomizeFeatures();
 	bool RandomizeFeatures(bool send_illusion);
 	bool RandomizeFeatures(bool send_illusion, bool save_variables);
