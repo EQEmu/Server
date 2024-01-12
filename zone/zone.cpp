@@ -58,6 +58,7 @@
 #include "../common/repositories/merchantlist_repository.h"
 #include "../common/repositories/object_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
+#include "../common/repositories/level_exp_mods_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
@@ -811,24 +812,16 @@ void Zone::LoadMercTemplates(){
 
 }
 
-void Zone::LoadLevelEXPMods(){
-
+void Zone::LoadLevelEXPMods()
+{
 	level_exp_mod.clear();
-    const std::string query = "SELECT level, exp_mod, aa_exp_mod FROM level_exp_mods";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-    LogError("Error in ZoneDatabase::LoadEXPLevelMods()");
-        return;
-    }
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 index = Strings::ToInt(row[0]);
-		float exp_mod = Strings::ToFloat(row[1]);
-		float aa_exp_mod = Strings::ToFloat(row[2]);
-		level_exp_mod[index].ExpMod = exp_mod;
-		level_exp_mod[index].AAExpMod = aa_exp_mod;
-    }
+	const auto& l = LevelExpModsRepository::All(database);
 
+	for (const auto& e : l) {
+		level_exp_mod[e.level].ExpMod   = e.exp_mod;
+		level_exp_mod[e.level].AAExpMod = e.aa_exp_mod;
+	}
 }
 
 void Zone::LoadMercSpells(){
