@@ -379,8 +379,8 @@ public:
 	void	SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ::ItemInstance* container);
 	void	DeleteWorldContainer(uint32 parent_id,uint32 zone_id);
 	uint32	AddObject(uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst);
-	void	UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst);
-	void	DeleteObject(uint32 id);
+	void	UpdateObject(uint32 object_id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst);
+	void	DeleteObject(uint32 object_id);
 	GroundSpawns*	LoadGroundSpawns(uint32 zone_id, int16 instance_version, GroundSpawns* gs);
 
 	/* Traders  */
