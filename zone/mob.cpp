@@ -3663,230 +3663,226 @@ void Mob::SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender)
 
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
-	if (IsPlayerRace(GetRace())) {
-		uint8 current_gender = GetGender();
-		uint8 new_texture = 0xFF;
-		uint8 new_helm_texture = 0xFF;
-		uint8 new_hair_color = 0xFF;
-		uint8 new_beard_color = 0xFF;
-		uint8 new_eye_color_one = 0xFF;
-		uint8 new_eye_color_two = 0xFF;
-		uint8 new_hair_style = 0xFF;
-		uint8 new_luclin_face = 0xFF;
-		uint8 new_beard = 0xFF;
-		uint32 new_drakkin_heritage = 0xFFFFFFFF;
-		uint32 new_drakkin_tattoo = 0xFFFFFFFF;
-		uint32 new_drakkin_details = 0xFFFFFFFF;
-
-		// Set some common feature settings
-		new_eye_color_one = zone->random.Int(0, 9);
-		new_eye_color_two = zone->random.Int(0, 9);
-		new_luclin_face = zone->random.Int(0, 7);
-
-		// Adjust all settings based on the min and max for each feature of each race and gender
-		switch (GetRace()) {
-			case HUMAN:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == Gender::Male) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case BARBARIAN:
-				new_hair_color = zone->random.Int(0, 19);
-				new_luclin_face = zone->random.Int(0, 87);
-
-				if (current_gender == Gender::Male) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case ERUDITE:
-				if (current_gender == Gender::Male) {
-					new_beard_color = zone->random.Int(0, 19);
-					new_beard = zone->random.Int(0, 5);
-					new_luclin_face = zone->random.Int(0, 57);
-				} else if (current_gender == Gender::Female) {
-					new_luclin_face = zone->random.Int(0, 87);
-				}
-
-				break;
-			case WOOD_ELF:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == Gender::Male) {
-					new_hair_style = zone->random.Int(0, 3);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case HIGH_ELF:
-				new_hair_color = zone->random.Int(0, 14);
-
-				if (current_gender == Gender::Male) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case DARK_ELF:
-				new_hair_color = zone->random.Int(13, 18);
-
-				if (current_gender == Gender::Male) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case HALF_ELF:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == Gender::Male) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case DWARF:
-				new_hair_color = zone->random.Int(0, 19);
-				new_beard_color = new_hair_color;
-
-				if (current_gender == Gender::Male) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-					new_luclin_face = zone->random.Int(0, 17);
-				}
-
-				break;
-			case TROLL:
-				new_eye_color_one = zone->random.Int(0, 10);
-				new_eye_color_two = zone->random.Int(0, 10);
-
-				if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_hair_color = zone->random.Int(0, 23);
-				}
-
-				break;
-			case OGRE:
-				if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_hair_color = zone->random.Int(0, 23);
-				}
-
-				break;
-			case HALFLING:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == Gender::Male) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case GNOME:
-				new_hair_color = zone->random.Int(0, 24);
-
-				if (current_gender == Gender::Male) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == Gender::Female) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case IKSAR:
-			case VAHSHIR:
-				new_luclin_face = zone->random.Int(0, 7);
-				break;
-			case FROGLOK:
-				new_luclin_face = zone->random.Int(0, 9);
-				break;
-			case DRAKKIN:
-				new_hair_color = zone->random.Int(0, 3);
-				new_beard_color = new_hair_color;
-				new_eye_color_one = zone->random.Int(0, 11);
-				new_eye_color_two = zone->random.Int(0, 11);
-				new_luclin_face = zone->random.Int(0, 6);
-				new_drakkin_heritage = zone->random.Int(0, 6);
-				new_drakkin_tattoo = zone->random.Int(0, 7);
-				new_drakkin_details = zone->random.Int(0, 7);
-
-				if (current_gender == Gender::Male) {
-					new_beard = zone->random.Int(0, 12);
-					new_hair_style = zone->random.Int(0, 8);
-				} else if (current_gender == Gender::Female) {
-					new_beard = zone->random.Int(0, 3);
-					new_hair_style = zone->random.Int(0, 7);
-				}
-
-				break;
-			default:
-				break;
-		}
-
-		if (set_variables) {
-			haircolor = new_hair_color;
-			beardcolor = new_beard_color;
-			eyecolor1 = new_eye_color_one;
-			eyecolor2 = new_eye_color_two;
-			hairstyle = new_hair_style;
-			luclinface = new_luclin_face;
-			beard = new_beard;
-			drakkin_heritage = new_drakkin_heritage;
-			drakkin_tattoo = new_drakkin_tattoo;
-			drakkin_details = new_drakkin_details;
-		}
-
-		if (send_illusion) {
-			SendIllusionPacket(
-				AppearanceStruct{
-					.beard = new_beard,
-					.beard_color = new_beard_color,
-					.drakkin_details = new_drakkin_details,
-					.drakkin_heritage = new_drakkin_heritage,
-					.drakkin_tattoo = new_drakkin_tattoo,
-					.eye_color_one = new_eye_color_one,
-					.eye_color_two = new_eye_color_two,
-					.face = new_luclin_face,
-					.gender_id = current_gender,
-					.hair = new_hair_style,
-					.hair_color = new_hair_color,
-					.helmet_texture = new_helm_texture,
-					.race_id = GetRace(),
-					.texture = new_texture,
-				}
-			);
-		}
-
-		return true;
+	if (!IsPlayerRace(GetRace())) {
+		return false;
 	}
-	return false;
+
+	uint8  current_gender       = GetGender();
+	uint8  new_texture          = UINT8_MAX;
+	uint8  new_helm_texture     = UINT8_MAX;
+	uint8  new_hair_color       = UINT8_MAX;
+	uint8  new_beard_color      = UINT8_MAX;
+	uint8  new_eye_color_one    = zone->random.Int(0, 9);
+	uint8  new_eye_color_two    = zone->random.Int(0, 9);
+	uint8  new_hair_style       = UINT8_MAX;
+	uint8  new_luclin_face      = zone->random.Int(0, 7);
+	uint8  new_beard            = UINT8_MAX;
+	uint32 new_drakkin_heritage = UINT32_MAX;
+	uint32 new_drakkin_tattoo   = UINT32_MAX;
+	uint32 new_drakkin_details  = UINT32_MAX;
+
+	// Adjust all settings based on the min and max for each feature of each race and gender
+	switch (GetRace()) {
+		case HUMAN:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case BARBARIAN:
+			new_hair_color  = zone->random.Int(0, 19);
+			new_luclin_face = zone->random.Int(0, 87);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case ERUDITE:
+			if (current_gender == Gender::Male) {
+				new_beard_color = zone->random.Int(0, 19);
+				new_beard       = zone->random.Int(0, 5);
+				new_luclin_face = zone->random.Int(0, 57);
+			} else if (current_gender == Gender::Female) {
+				new_luclin_face = zone->random.Int(0, 87);
+			}
+
+			break;
+		case WOOD_ELF:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style = zone->random.Int(0, 3);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case HIGH_ELF:
+			new_hair_color = zone->random.Int(0, 14);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case DARK_ELF:
+			new_hair_color = zone->random.Int(13, 18);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case HALF_ELF:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case DWARF:
+			new_hair_color  = zone->random.Int(0, 19);
+			new_beard_color = new_hair_color;
+
+			if (current_gender == Gender::Male) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_beard      = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style  = zone->random.Int(0, 2);
+				new_luclin_face = zone->random.Int(0, 17);
+			}
+
+			break;
+		case TROLL:
+			new_eye_color_one = zone->random.Int(0, 10);
+			new_eye_color_two = zone->random.Int(0, 10);
+
+			if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_hair_color = zone->random.Int(0, 23);
+			}
+
+			break;
+		case OGRE:
+			if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_hair_color = zone->random.Int(0, 23);
+			}
+
+			break;
+		case HALFLING:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case GNOME:
+			new_hair_color = zone->random.Int(0, 24);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case IKSAR:
+		case VAHSHIR:
+			new_luclin_face = zone->random.Int(0, 7);
+			break;
+		case FROGLOK:
+			new_luclin_face = zone->random.Int(0, 9);
+			break;
+		case DRAKKIN:
+			new_hair_color       = zone->random.Int(0, 3);
+			new_beard_color      = new_hair_color;
+			new_eye_color_one    = zone->random.Int(0, 11);
+			new_eye_color_two    = zone->random.Int(0, 11);
+			new_luclin_face      = zone->random.Int(0, 6);
+			new_drakkin_heritage = zone->random.Int(0, 6);
+			new_drakkin_tattoo   = zone->random.Int(0, 7);
+			new_drakkin_details  = zone->random.Int(0, 7);
+
+			if (current_gender == Gender::Male) {
+				new_beard      = zone->random.Int(0, 12);
+				new_hair_style = zone->random.Int(0, 8);
+			} else if (current_gender == Gender::Female) {
+				new_beard      = zone->random.Int(0, 3);
+				new_hair_style = zone->random.Int(0, 7);
+			}
+
+			break;
+		default:
+			break;
+	}
+
+	if (set_variables) {
+		haircolor        = new_hair_color;
+		beardcolor       = new_beard_color;
+		eyecolor1        = new_eye_color_one;
+		eyecolor2        = new_eye_color_two;
+		hairstyle        = new_hair_style;
+		luclinface       = new_luclin_face;
+		beard            = new_beard;
+		drakkin_heritage = new_drakkin_heritage;
+		drakkin_tattoo   = new_drakkin_tattoo;
+		drakkin_details  = new_drakkin_details;
+	}
+
+	if (send_illusion) {
+		SendIllusionPacket(
+			AppearanceStruct{
+				.beard = new_beard,
+				.beard_color = new_beard_color,
+				.drakkin_details = new_drakkin_details,
+				.drakkin_heritage = new_drakkin_heritage,
+				.drakkin_tattoo = new_drakkin_tattoo,
+				.eye_color_one = new_eye_color_one,
+				.eye_color_two = new_eye_color_two,
+				.face = new_luclin_face,
+				.gender_id = current_gender,
+				.hair = new_hair_style,
+				.hair_color = new_hair_color,
+				.helmet_texture = new_helm_texture,
+				.race_id = GetRace(),
+				.texture = new_texture,
+			}
+		);
+	}
+
+	return true;
 }
 
 uint16 Mob::GetFactionRace() {
