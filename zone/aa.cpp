@@ -40,6 +40,10 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "bot.h"
 
 #include "../common/repositories/character_alternate_abilities_repository.h"
+#include "../common/repositories/aa_ability_repository.h"
+#include "../common/repositories/aa_ranks_repository.h"
+#include "../common/repositories/aa_rank_effects_repository.h"
+#include "../common/repositories/aa_rank_prereqs_repository.h"
 
 extern WorldServer worldserver;
 extern QueryServ* QServ;
@@ -1794,126 +1798,141 @@ void Zone::LoadAlternateAdvancement() {
 	}
 }
 
-bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
-													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
+bool ZoneDatabase::LoadAlternateAdvancementAbilities(
+	std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
+	std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks
+)
 {
 	abilities.clear();
-	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
-		"grant_only, reset_on_death, auto_grant_enabled, first_rank_id FROM aa_ability WHERE enabled = 1";
-	auto results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			auto ability = new AA::Ability;
-			ability->id = Strings::ToUnsignedInt(row[0]);
-			ability->name = row[1];
-			ability->category = Strings::ToInt(row[2]);
-			//EQ client has classes left shifted by one bit for some odd reason
-			ability->classes = Strings::ToInt(row[3]) << 1;
-			ability->races = Strings::ToInt(row[4]);
-			ability->deities = Strings::ToInt(row[5]);
-			ability->drakkin_heritage = Strings::ToInt(row[6]);
-			ability->status = Strings::ToInt(row[7]);
-			ability->type = Strings::ToInt(row[8]);
-			ability->charges = Strings::ToInt(row[9]);
-			ability->grant_only = Strings::ToBool(row[10]);
-			ability->reset_on_death = Strings::ToBool(row[11]);
-			ability->auto_grant_enabled = Strings::ToBool(row[12]);
-			ability->first_rank_id = Strings::ToInt(row[13]);
-			ability->first = nullptr;
 
-			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Abilities");
+	const auto& aa_abilities = AaAbilityRepository::GetWhere(*this, "`enabled` = 1");
+
+	if (aa_abilities.empty()) {
+		LogError("Failed to load Alternate Advancement Abilities.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
+	for (const auto& e : aa_abilities) {
+		auto a = new AA::Ability;
+
+		a->id                 = e.id;
+		a->name               = e.name;
+		a->category           = e.category;
+		a->classes            = e.classes << 1; // EQ client has classes left shifted by one bit
+		a->races              = e.races;
+		a->deities            = e.deities;
+		a->drakkin_heritage   = e.drakkin_heritage;
+		a->status             = e.status;
+		a->type               = e.type;
+		a->charges            = e.charges;
+		a->grant_only         = e.grant_only;
+		a->reset_on_death     = e.reset_on_death;
+		a->auto_grant_enabled = e.auto_grant_enabled;
+		a->first_rank_id      = e.first_rank_id;
+		a->first              = nullptr;
+
+		abilities[a->id] = std::unique_ptr<AA::Ability>(a);
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Abilit{}.",
+		Strings::Commify(abilities.size()),
+		abilities.size() != 1 ? "ies" : "y"
+	);
+
 	ranks.clear();
 
-	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"next_id, expansion FROM aa_ranks";
+	const auto& aa_ranks = AaRanksRepository::All(*this);
 
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			auto rank = new AA::Rank;
-			rank->id = Strings::ToUnsignedInt(row[0]);
-			rank->upper_hotkey_sid = Strings::ToInt(row[1]);
-			rank->lower_hotkey_sid = Strings::ToInt(row[2]);
-			rank->title_sid = Strings::ToInt(row[3]);
-			rank->desc_sid = Strings::ToInt(row[4]);
-			rank->cost = Strings::ToInt(row[5]);
-			rank->level_req = Strings::ToInt(row[6]);
-			rank->spell = Strings::ToInt(row[7]);
-			rank->spell_type = Strings::ToInt(row[8]);
-			rank->recast_time = Strings::ToInt(row[9]);
-			rank->next_id = Strings::ToInt(row[10]);
-			rank->expansion = Strings::ToInt(row[11]);
-			rank->base_ability = nullptr;
-			rank->total_cost = 0;
-			rank->prev_id = -1;
-			rank->next = nullptr;
-			rank->prev = nullptr;
-
-			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Ranks");
+	if (aa_ranks.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Ranks.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", Strings::Commify((int)ranks.size()));
+	for (const auto &e : aa_ranks) {
+		auto r = new AA::Rank;
 
-	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			AA::RankEffect effect;
-			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
-			effect.slot = Strings::ToUnsignedInt(row[1]);
-			effect.effect_id = Strings::ToInt(row[2]);
-			effect.base_value = Strings::ToInt(row[3]);
-			effect.limit_value = Strings::ToInt(row[4]);
+		r->id               = e.id;
+		r->upper_hotkey_sid = e.upper_hotkey_sid;
+		r->lower_hotkey_sid = e.lower_hotkey_sid;
+		r->title_sid        = e.title_sid;
+		r->desc_sid         = e.desc_sid;
+		r->cost             = e.cost;
+		r->level_req        = e.level_req;
+		r->spell            = e.spell;
+		r->spell_type       = e.spell_type;
+		r->recast_time      = e.recast_time;
+		r->next_id          = e.next_id;
+		r->expansion        = e.expansion;
+		r->base_ability     = nullptr;
+		r->total_cost       = 0;
+		r->prev_id          = -1;
+		r->next             = nullptr;
+		r->prev             = nullptr;
 
-			if(effect.slot < 1)
-				continue;
+		ranks[r->id] = std::unique_ptr<AA::Rank>(r);
+	}
 
-			if(ranks.count(rank_id) > 0) {
-				AA::Rank *rank = ranks[rank_id].get();
-				rank->effects.push_back(effect);
-			}
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Rank Effects");
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank{}.",
+		Strings::Commify(ranks.size()),
+		ranks.size() != 1 ? "s" : ""
+	);
+
+	const auto& aa_rank_effects = AaRankEffectsRepository::All(*this);
+
+	if (aa_rank_effects.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Rank Effects.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Effects", Strings::Commify(results.RowCount()));
+	for (const auto &e : aa_rank_effects) {
+		AA::RankEffect f;
 
-	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
-			int aa_id = Strings::ToInt(row[1]);
-			int points = Strings::ToInt(row[2]);
+		f.slot        = e.slot;
+		f.effect_id   = e.effect_id;
+		f.base_value  = e.base1;
+		f.limit_value = e.base2;
 
-			if(aa_id <= 0 || points <= 0) {
-				continue;
-			}
-
-			if(ranks.count(rank_id) > 0) {
-				AA::Rank *rank = ranks[rank_id].get();
-				rank->prereqs[aa_id] = points;
-			}
+		if (f.slot < 1) {
+			continue;
 		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Rank Prereqs");
+
+		if (ranks.count(e.rank_id)) {
+			AA::Rank* r = ranks[e.rank_id].get();
+			r->effects.push_back(f);
+		}
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank Effect{}.",
+		Strings::Commify(aa_rank_effects.size()),
+		aa_rank_effects.size() != 1 ? "s" : ""
+	);
+
+	const auto& aa_rank_prereqs = AaRankPrereqsRepository::All(*this);
+
+	if (aa_rank_prereqs.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Rank Prerequisites.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Prereqs", Strings::Commify(results.RowCount()));
+	for (const auto& e : aa_rank_prereqs) {
+		if (e.aa_id <= 0 || e.points <= 0) {
+			continue;
+		}
+
+		if (ranks.count(e.rank_id) > 0) {
+			AA::Rank* rank = ranks[e.rank_id].get();
+			rank->prereqs[e.aa_id] = e.points;
+		}
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank Prerequisite{}.",
+		Strings::Commify(aa_rank_prereqs.size()),
+		aa_rank_prereqs.size() != 1 ? "s" : ""
+	);
 
 	return true;
 }
