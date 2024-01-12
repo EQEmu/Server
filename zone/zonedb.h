@@ -560,8 +560,8 @@ public:
 	uint32		AddNPCTypes(const char* zone, uint32 zone_version, Client *client, NPC* spawn, uint32 spawnGroupID);
 	uint32		UpdateNPCTypeAppearance(Client *client, NPC* spawn);
 	bool		SetSpecialAttkFlag(uint8 id, const char* flag);
-	bool		GetPetEntry(const char *pet_type, PetRecord *into);
-	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
+	bool		GetPetEntry(const std::string& pet_type, PetRecord* r);
+	bool		GetPoweredPetEntry(const std::string& pet_type, int16 pet_power, PetRecord* r);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
 	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);

@@ -20,6 +20,8 @@
 #include "../common/spdat.h"
 #include "../common/strings.h"
 
+#include "../common/repositories/pets_repository.h"
+
 #include "entity.h"
 #include "client.h"
 #include "mob.h"
@@ -369,38 +371,33 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	// Class should use npc constructor to set light properties
 }
 
-bool ZoneDatabase::GetPetEntry(const char *pet_type, PetRecord *into) {
-	return GetPoweredPetEntry(pet_type, 0, into);
+bool ZoneDatabase::GetPetEntry(const std::string& pet_type, PetRecord *p)
+{
+	return GetPoweredPetEntry(pet_type, 0, p);
 }
 
-bool ZoneDatabase::GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into) {
-	std::string query;
+bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_power, PetRecord* r)
+{
+	const auto& l = PetsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`type` = '{}' AND `petpower` <= {} ORDER BY `petpower` DESC LIMIT 1",
+			pet_type,
+			pet_power <= 0 ? 0 : pet_power
+		)
+	);
 
-	if (petpower <= 0)
-		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
-							"FROM pets WHERE type='%s' AND petpower<=0", pet_type);
-	else
-		query = StringFormat("SELECT npcID, temp, petpower, petcontrol, petnaming, monsterflag, equipmentset "
-							"FROM pets WHERE type='%s' AND petpower<=%d ORDER BY petpower DESC LIMIT 1",
-							pet_type, petpower);
-
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	if (results.RowCount() != 1)
-		return false;
-
-	auto row = results.begin();
-
-	into->npc_type = Strings::ToInt(row[0]);
-	into->temporary = Strings::ToInt(row[1]);
-	into->petpower = Strings::ToInt(row[2]);
-	into->petcontrol = Strings::ToInt(row[3]);
-	into->petnaming = Strings::ToInt(row[4]);
-	into->monsterflag = Strings::ToInt(row[5]);
-	into->equipmentset = Strings::ToInt(row[6]);
+	r->npc_type     = l[0].npcID;
+	r->temporary    = l[0].temp;
+	r->petpower     = l[0].petpower;
+	r->petcontrol   = l[0].petcontrol;
+	r->petnaming    = l[0].petnaming;
+	r->monsterflag  = l[0].monsterflag;
+	r->equipmentset = l[0].equipmentset;
 
 	return true;
 }
