@@ -345,7 +345,7 @@ bool Zone::IsSpecialBindLocation(const glm::vec4& location)
 
 //this also just loads into entity_list, not really into zone
 bool Zone::LoadGroundSpawns() {
-	Ground_Spawns groundspawn;
+	GroundSpawns groundspawn;
 
 	memset(&groundspawn, 0, sizeof(groundspawn));
 	int gsindex=0;

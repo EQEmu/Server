@@ -29,6 +29,7 @@
 #include "zonedb.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/ground_spawns_repository.h"
 
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
@@ -748,39 +749,44 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	}
 }
 
-//
-Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
-
-	std::string query = StringFormat(
-		"SELECT max_x, max_y, max_z, "
-		"min_x, min_y, heading, name, "
-		"item, max_allowed, respawn_timer "
-		"FROM ground_spawns "
-		"WHERE zoneid = %i AND (version = %u OR version = -1) %s "
-		"LIMIT 50",
-		zone_id,
-		version,
-		ContentFilterCriteria::apply().c_str()
+GroundSpawns* ZoneDatabase::LoadGroundSpawns(
+	uint32 zone_id,
+	int16 instance_version,
+	GroundSpawns* gs
+)
+{
+	const auto& l = GroundSpawnsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`zoneid` = {} AND (`version` = {} OR `version` = -1) {} LIMIT 50",
+			zone_id,
+			instance_version,
+			ContentFilterCriteria::apply()
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return gs;
 	}
 
-	int spawnIndex=0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++spawnIndex) {
-        gs->spawn[spawnIndex].max_x=Strings::ToFloat(row[0]);
-        gs->spawn[spawnIndex].max_y=Strings::ToFloat(row[1]);
-        gs->spawn[spawnIndex].max_z=Strings::ToFloat(row[2]);
-        gs->spawn[spawnIndex].min_x=Strings::ToFloat(row[3]);
-        gs->spawn[spawnIndex].min_y=Strings::ToFloat(row[4]);
-        gs->spawn[spawnIndex].heading=Strings::ToFloat(row[5]);
-        strcpy(gs->spawn[spawnIndex].name,row[6]);
-        gs->spawn[spawnIndex].item=Strings::ToInt(row[7]);
-        gs->spawn[spawnIndex].max_allowed=Strings::ToInt(row[8]);
-        gs->spawn[spawnIndex].respawntimer=Strings::ToInt(row[9]);
-    }
+	uint32 slot_id = 0;
+
+	for (const auto& e : l) {
+		strcpy(gs->spawn[slot_id].name, e.name.c_str());
+
+		gs->spawn[slot_id].max_x        = e.max_x;
+		gs->spawn[slot_id].max_y        = e.max_y;
+		gs->spawn[slot_id].max_z        = e.max_z;
+		gs->spawn[slot_id].min_x        = e.min_x;
+		gs->spawn[slot_id].min_y        = e.min_y;
+		gs->spawn[slot_id].heading      = e.heading;
+		gs->spawn[slot_id].item         = e.item;
+		gs->spawn[slot_id].max_allowed  = e.max_allowed;
+		gs->spawn[slot_id].respawntimer = e.respawn_timer;
+
+		slot_id++;
+	}
+
 	return gs;
 }
 
