@@ -820,32 +820,22 @@ uint16 NPC::GetFirstSlotByItemID(uint32 item_id) {
 	return 0;
 }
 
-void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
-	if(in_copper >= 0)
-		copper = in_copper;
-	else
-		copper = 0;
-
-	if(in_silver >= 0)
-		silver = in_silver;
-	else
-		silver = 0;
-
-	if(in_gold >= 0)
-		gold = in_gold;
-	else
-		gold = 0;
-
-	if(in_platinum >= 0)
-		platinum = in_platinum;
-	else
-		platinum = 0;
+void NPC::AddCash(
+	uint32 in_copper,
+	uint32 in_silver,
+	uint32 in_gold,
+	uint32 in_platinum
+) {
+	copper   = in_copper >= 0 ? in_copper : 0;
+	silver   = in_silver >= 0 ? in_silver : 0;
+	gold     = in_gold >= 0 ? in_gold : 0;
+	platinum = in_platinum >= 0 ? in_platinum : 0;
 }
 
 void NPC::RemoveCash() {
-	copper = 0;
-	silver = 0;
-	gold = 0;
+	copper   = 0;
+	silver   = 0;
+	gold     = 0;
 	platinum = 0;
 }
 
