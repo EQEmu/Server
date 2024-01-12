@@ -138,6 +138,7 @@
 #define SONG_NEEDS_BRASS			408		//You need to play a brass instrument for this song
 #define AA_GAIN_ABILITY				410		//You have gained the ability "%T1" at a cost of %2 ability %T3.
 #define AA_IMPROVE					411		//You have improved %T1 %2 at a cost of %3 ability %T4.
+#define TAUNT_SUCCESS				412		//You taunt %1 to ignore others and attack you!
 #define AA_REUSE_MSG				413		//You can use the ability %B1(1) again in %2 hour(s) %3 minute(s) %4 seconds.
 #define AA_REUSE_MSG2				414		//You can use the ability %B1(1) again in %2 minute(s) %3 seconds.
 #define YOU_HEALED					419		//%1 has healed you for %2 points of damage.

@@ -2128,6 +2128,19 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	}
 }
 
+	/* Classic Taunt Methodology
+	* This is not how Sony did it.  This is a guess that fits the very limited data available.
+	* Low level players with maxed taunt for their level taunted about 50% on white cons.
+	* A 65 ranger with 150 taunt skill (max) taunted about 50% on level 60 and under NPCs.
+	* A 65 warrior with maxed taunt (230) was taunting around 50% on SSeru NPCs.		*/
+
+	/* Rashere in 2006: "your taunt skill was irrelevant if you were above level 60 and taunting
+	* something that was also above level 60."
+	* Also: "The chance to taunt an NPC higher level than yourself dropped off at double the rate
+	* if you were above level 60 than if you were below level 60 making it very hard to taunt creature
+	* higher level than yourself if you were above level 60."
+	* 
+	* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
 	if (who == nullptr || DivineAura() || (!from_spell && !CombatRange(who)) || (IsNPC() && IsCharmed()) || !CombatRange(who)) {
@@ -2138,9 +2151,10 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillTaunt, who, 10);
 	}
 
-	Mob *hate_top = who->GetHateMost();
-
+	Mob *hate_top        = who->GetHateMost();
 	int level_difference = GetLevel() - who->GetLevel();
+	bool success         = false;
+	int taunt_chance     = 0;
 
 	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if (
@@ -2152,99 +2166,124 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 		return;
 	}
 
-	if (RuleB(Combat, ClassicTauntSystem)) {
-		// All values used based on live parses after taunt was updated in 2006.
-		bool success = false;
-
+	if (always_succeed) {
+		taunt_chance = 100;
+	}
+		
+	// Modern Taunt
+	if (!RuleB(Combat, ClassicTauntSystem)) {
 		if (
 			(hate_top && hate_top->GetHPRatio() >= 20) ||
 			!hate_top ||
 			chance_bonus
 		) {
-			// SE_Taunt this is flat chance
 			if (chance_bonus) {
-				success = zone->random.Roll(chance_bonus);
+				taunt_chance = chance_bonus;
 			} else {
-				float taunt_chance = 50.0f;
-
-				if (always_succeed) {
-					taunt_chance = 101.0f;
-				} else {
-					if (level_difference < 0) {
-						taunt_chance += static_cast<float>(level_difference) * 3.0f;
-						if (taunt_chance < 20) {
-							taunt_chance = 20.0f;
-						}
-					} else {
-						taunt_chance += static_cast<float>(level_difference) * 5.0f;
-						if (taunt_chance > 65) {
-							taunt_chance = 65.0f;
-						}
-					}
-				}
-
-				// TauntSkillFalloff rate is not based on any real data. Default of 33% gives a reasonable
-				// result.
-				if (IsClient() && !always_succeed) {
-					taunt_chance -= (RuleR(Combat, TauntSkillFalloff) *
-							(CastToClient()->MaxSkill(EQ::skills::SkillTaunt) -
-							GetSkill(EQ::skills::SkillTaunt)));
-				}
-
-				if (taunt_chance < 1) {
-					taunt_chance = 1.0f;
-				}
-
-				taunt_chance /= 100.0f;
-				success = taunt_chance > zone->random.Real(0, 1);
-
-				LogHate(
-					"Taunter mob {} target npc {} taunt_chance [{}] success [{}] hate_top [{}]",
-					GetMobDescription(),
-					who->GetMobDescription(),
-					taunt_chance,
-					success ? "true" : "false",
-					hate_top ? hate_top->GetMobDescription() : "not found"
-				);
-			}
-
-			if (success) {
-				if (hate_top && hate_top != this) {
-					int64 new_hate = (
-						(who->GetNPCHate(hate_top) - who->GetNPCHate(this)) +
-						bonus_hate +
-						RuleI(Combat, TauntOverAggro) +
-						1
-					);
-
-					LogHate(
-						"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
-						GetMobDescription(),
-						who->GetMobDescription(),
-						hate_top->GetMobDescription(),
-						who->GetNPCHate(hate_top),
-						who->GetNPCHate(this),
-						bonus_hate,
-						RuleI(Combat, TauntOverAggro),
-						new_hate
-					);
-
-					who->CastToNPC()->AddToHateList(this, new_hate);
-					success = true;
-				} else {
-					who->CastToNPC()->AddToHateList(this, 12);
-				}
-
-				if (who->CanTalk()) {
-					who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
-				}
-			} else {
-				MessageString(Chat::SpellFailure, FAILED_TAUNT);
+				taunt_chance = 50;
 			}
 		} else {
-			MessageString(Chat::SpellFailure, FAILED_TAUNT);
+			if (level_difference < 0) {
+				taunt_chance += level_difference * 3;
+				if (taunt_chance < 20) {
+					taunt_chance = 20;
+				}
+			} else {
+				taunt_chance += level_difference * 5;
+				if (taunt_chance > 65) {
+					taunt_chance = 65;
+				}
+			}
+
+			if (IsClient() && !always_succeed) {
+				taunt_chance -= (RuleR(Combat, TauntSkillFalloff) *
+					(CastToClient()->MaxSkill(EQ::skills::SkillTaunt) -
+					GetSkill(EQ::skills::SkillTaunt)));
+			}
+
+			if (taunt_chance < 1) {
+				taunt_chance = 1;
+			}
+		}
+	} else { // Classic Taunt
+		if (GetLevel() >= 60 && level_difference < 0) {
+			if (level_difference < -5) {
+				taunt_chance = 0;
+			} else if (level_difference == -5) {
+				taunt_chance = 10;
+			} else {
+				taunt_chance = 50 + level_difference * 10;
+			}
+		} else {
+			// this will make the skill difference between the tank classes actually affect success rates
+			// but only for NPCs near the player's level.  Mid to low blues will start to taunt at 50%
+			// even with lower skill
+			taunt_chance = 50 * GetSkill(EQ::skills::SkillTaunt) / (who->GetLevel() * 5 + 5);
+			taunt_chance += level_difference * 5;
+
+			if (taunt_chance > 50) {
+				taunt_chance = 50;
+			} else if (taunt_chance < 10) {
+				taunt_chance = 10;
+			}
 		}
 
+		// Taunt Chance Rule Bonus
+		taunt_chance += RuleI(Combat, TauntChanceBonus);
+	}
+
+	//success roll
+	success = zone->random.Roll(taunt_chance);
+
+	// Log result
+	LogHate(
+		"Taunter mob {} target npc {} taunt_chance [{}] success [{}] hate_top [{}]",
+		GetMobDescription(),
+		who->GetMobDescription(),
+		taunt_chance,
+		success ? "true" : "false",
+		hate_top ? hate_top->GetMobDescription() : "not found"
+	);
+
+	// Actual Taunting
+	if (success) {
+		if (hate_top && hate_top != this) {
+			int64 new_hate = (
+				(who->GetNPCHate(hate_top) - who->GetNPCHate(this)) +
+				bonus_hate +
+				RuleI(Combat, TauntOverAggro) +
+				1
+			);
+
+			LogHate(
+				"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
+				GetMobDescription(),
+				who->GetMobDescription(),
+				hate_top->GetMobDescription(),
+				who->GetNPCHate(hate_top),
+				who->GetNPCHate(this),
+				bonus_hate,
+				RuleI(Combat, TauntOverAggro),
+				new_hate
+			);
+
+			who->CastToNPC()->AddToHateList(this, new_hate);
+		} else {
+			LogHate("Already Hate Top");
+			who->CastToNPC()->AddToHateList(this, 12);
+		}
+
+		if (who->CanTalk()) {
+			who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
+		}
+
+		MessageString(Chat::Skills, TAUNT_SUCCESS, who->GetCleanName());
+	} else {
+		MessageString(Chat::Skills, FAILED_TAUNT);
+	}
+
+	// Modern Abilities
+	if (RuleB(Combat, ClassicTauntSystem)) {
 		TryCastOnSkillUse(who, EQ::skills::SkillTaunt);
 
 		if (HasSkillProcs()) {
@@ -2253,77 +2292,6 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 
 		if (success && HasSkillProcSuccess()) {
 			TrySkillProc(who, EQ::skills::SkillTaunt, TauntReuseTime * 1000, true);
-		}
-	} else {
-		int taunt_chance = 50;
-
-		if (always_succeed)	{
-			taunt_chance = 100;
-		} else {
-			/* This is not how Sony did it.  This is a guess that fits the very limited data available.
-			* Low level players with maxed taunt for their level taunted about 50% on white cons.
-			* A 65 ranger with 150 taunt skill (max) taunted about 50% on level 60 and under NPCs.
-			* A 65 warrior with maxed taunt (230) was taunting around 50% on SSeru NPCs.		*/
-
-			/* Rashere in 2006: "your taunt skill was irrelevant if you were above level 60 and taunting
-			* something that was also above level 60."
-			* Also: "The chance to taunt an NPC higher level than yourself dropped off at double the rate
-			* if you were above level 60 than if you were below level 60 making it very hard to taunt creature
-			* higher level than yourself if you were above level 60."
-			* 
-			* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
-			if (GetLevel() >= 60 && level_difference < 0) {
-				if (level_difference < -5) {
-					taunt_chance = 0;
-				} else if (level_difference == -5) {
-					taunt_chance = 10;
-				} else {
-					taunt_chance = 50 + level_difference * 10;
-				}
-			} else {
-				// this will make the skill difference between the tank classes actually affect success rates
-				// but only for NPCs near the player's level.  Mid to low blues will start to taunt at 50%
-				// even with lower skill
-				taunt_chance = 50 * GetSkill(EQ::skills::SkillTaunt) / (who->GetLevel() * 5 + 5);
-				taunt_chance += level_difference * 5;
-
-				if (taunt_chance > 50) {
-					taunt_chance = 50;
-				} else if (taunt_chance < 10) {
-					taunt_chance = 10;
-				}
-			}
-		}
-
-		taunt_chance += RuleI(Combat, TauntChanceBonus);
-
-		if (zone->random.Roll(taunt_chance)) {
-			if (hate_top && hate_top != this) {
-				int64 new_hate = ((who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + bonus_hate + RuleI(Combat, TauntOverAggro));
-
-				LogHate(
-					"Not Top Hate - Taunter [{}] Target [{}] Hated Top [{}] Hate Top Amt [{}] This Character Amt [{}] Bonus_Hate Amt [{}] TauntOverAggro Amt [{}] - Total [{}]",
-					GetMobDescription(),
-					who->GetMobDescription(),
-					hate_top->GetMobDescription(),
-					who->GetNPCHate(hate_top),
-					who->GetNPCHate(this),
-					bonus_hate,
-					RuleI(Combat, TauntOverAggro),
-					new_hate
-				);
-
-				who->CastToNPC()->AddToHateList(this, new_hate);
-			} else {
-				LogHate("Already Hate Top");
-				who->CastToNPC()->AddToHateList(this, 12);
-			}
-
-			if (who->CanTalk()) {
-					who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
-			}
-		} else {
-			MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		}
 	}
 }
