@@ -4387,58 +4387,78 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 	SendAppearancePacket(AppearanceType::Size, (uint32) in_size);
 }
 
-Mob* Mob::GetOwnerOrSelf() {
-	if (!GetOwnerID())
+Mob* Mob::GetOwnerOrSelf()
+{
+	if (!GetOwnerID()) {
 		return this;
-	Mob* owner = entity_list.GetMob(GetOwnerID());
-	if (!owner) {
+	}
+
+	Mob* m = entity_list.GetMob(GetOwnerID());
+
+	if (!m) {
 		SetOwnerID(0);
-		return(this);
+		return this;
 	}
-	if (owner->GetPetID() == GetID()) {
-		return owner;
+
+	if (m->GetPetID() == GetID()) {
+		return m;
 	}
-	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
-		return (CastToNPC()->GetSwarmInfo()->GetOwner());
+
+	if (IsNPC() && CastToNPC()->GetSwarmInfo()){
+		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
+
 	SetOwnerID(0);
 	return this;
 }
 
 Mob* Mob::GetOwner() {
-	Mob* owner = entity_list.GetMob(GetOwnerID());
-	if (owner && owner->GetPetID() == GetID()) {
+	Mob* m = entity_list.GetMob(GetOwnerID());
 
-		return owner;
+	if (m && m->GetPetID() == GetID()) {
+		return m;
 	}
+
 	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
-		return (CastToNPC()->GetSwarmInfo()->GetOwner());
+		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
+
 	SetOwnerID(0);
 	return 0;
 }
 
 Mob* Mob::GetUltimateOwner()
 {
-	Mob* Owner = GetOwner();
+	Mob* m = GetOwner();
 
-	if(!Owner)
+	if (!m) {
 		return this;
+	}
 
-	while(Owner && Owner->HasOwner())
-		Owner = Owner->GetOwner();
+	while (m && m->HasOwner()) {
+		m = m->GetOwner();
+	}
 
-	return Owner ? Owner : this;
+	return m ? m : this;
 }
 
-void Mob::SetOwnerID(uint16 NewOwnerID) {
-	if (NewOwnerID == GetID() && NewOwnerID != 0) // ok, no charming yourself now =p
+void Mob::SetOwnerID(uint16 new_owner_id) {
+	if (new_owner_id == GetID() && new_owner_id) {
 		return;
-	ownerid = NewOwnerID;
+	}
+
+	ownerid = new_owner_id;
+
 	// if we're setting the owner ID to 0 and they're not either charmed or not-a-pet then
 	// they're a normal pet and should be despawned
-	if (ownerid == 0 && IsNPC() && GetPetType() != petCharmed && GetPetType() != petNone)
+	if (
+		!ownerid &&
+		IsNPC() &&
+		GetPetType() != petCharmed &&
+		GetPetType() != petNone
+	) {
 		Depop();
+	}
 }
 
 // used in checking for behind (backstab) and checking in front (melee LoS)
