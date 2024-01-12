@@ -270,9 +270,9 @@ void Lua_Mob::ChangeSize(double in_size) {
 	self->ChangeSize(static_cast<float>(in_size));
 }
 
-void Lua_Mob::ChangeSize(double in_size, bool no_restriction) {
+void Lua_Mob::ChangeSize(double in_size, bool unrestricted) {
 	Lua_Safe_Call_Void();
-	self->ChangeSize(static_cast<float>(in_size), no_restriction);
+	self->ChangeSize(static_cast<float>(in_size), unrestricted);
 }
 
 void Lua_Mob::GMMove(double x, double y, double z) {
