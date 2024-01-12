@@ -21,169 +21,153 @@
 #include "../common/linked_list.h"
 #include "../common/strings.h"
 
+#include "../common/repositories/horses_repository.h"
+
 #include "client.h"
 #include "entity.h"
 #include "horse.h"
 #include "mob.h"
+#include "string_ids.h"
 
 std::map<uint16, const NPCType *> Horse::horse_types;
-LinkedList<NPCType *> horses_auto_delete;
 
-Horse::Horse(Client *_owner, uint16 spell_id, const glm::vec4& position)
- : NPC(GetHorseType(spell_id), nullptr, position, GravityBehavior::Water)
+Horse::Horse(
+	Client *c,
+	uint16 spell_id,
+	const glm::vec4& position
+) : NPC(
+	GetHorseType(spell_id),
+	nullptr,
+	position,
+	GravityBehavior::Water
+)
 {
-	//give the horse its proper name.
-	strn0cpy(name, _owner->GetCleanName(), 55);
-	strcat(name,"`s_Mount00");
+	strn0cpy(name, fmt::format("{}`s_Mount00", c->GetCleanName()).c_str(), sizeof(name));
 
 	is_horse = true;
-
-	owner = _owner;
+	owner    = c;
 }
 
-void Horse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
-	NPC::FillSpawnStruct(ns, ForWho);
+void Horse::FillSpawnStruct(NewSpawn_Struct* ns, Mob* m) {
+	NPC::FillSpawnStruct(ns, m);
 
-//	ns->spawn.texture = NPCTypedata->mount_color;
 	ns->spawn.petOwnerId = 0;
-
-	//dunno why we do these, they should allready be set right.
-	ns->spawn.runspeed = NPCTypedata->runspeed;
+	ns->spawn.runspeed   = NPCTypedata->runspeed;
 }
 
-bool Horse::IsHorseSpell(uint16 spell_id) {
-	//written in terms of a function which does a ton more work
-	//than we need to to figure out if this is a horse spell.
-	//the logic is that people calling this function will post
-	//likely immediately summon the horse, so we need the extra anyways.
-	return(GetHorseType(spell_id) != nullptr);
+bool Horse::IsHorseSpell(uint16 spell_id)
+{
+	return GetHorseType(spell_id);
 }
 
-const NPCType *Horse::GetHorseType(uint16 spell_id) {
-	if(horse_types.count(spell_id) == 1)
-		return(horse_types[spell_id]);
-	//cache invalid spell IDs as nullptr entries
-	const NPCType *ret;
-	horse_types[spell_id] = ret = BuildHorseType(spell_id);
-	return(ret);
+const NPCType *Horse::GetHorseType(uint16 spell_id)
+{
+	if (horse_types.count(spell_id)) {
+		return horse_types[spell_id];
+	}
+
+	const NPCType* n;
+
+	horse_types[spell_id] = n = BuildHorseType(spell_id);
+
+	return n;
 }
 
-const NPCType *Horse::BuildHorseType(uint16 spell_id) {
+const NPCType *Horse::BuildHorseType(uint16 spell_id)
+{
+	const auto& l = HorsesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"`filename` = '{}'",
+			Strings::Escape(spells[spell_id].teleport_zone)
+		)
+	);
 
-	const char* fileName = spells[spell_id].teleport_zone;
-
-	std::string query = StringFormat("SELECT race, gender, texture, mountspeed FROM horses WHERE filename = '%s'", fileName);
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
+		LogError("No Database entry for mount: [{}], check the horses table.", spells[spell_id].teleport_zone);
 		return nullptr;
 	}
 
-	if (results.RowCount() != 1) {
-		LogError("No Database entry for mount: [{}], check the horses table", fileName);
-		return nullptr;
-	}
+	auto n = new NPCType;
 
-    auto row = results.begin();
+	memset(n, 0, sizeof(NPCType));
 
-    auto npc_type = new NPCType;
-    memset(npc_type, 0, sizeof(NPCType));
-    strcpy(npc_type->name, "Unclaimed_Mount"); // this should never get used
+	strn0cpy(n->name, "Unclaimed_Mount", sizeof(n->name));
 
-    strcpy(npc_type->special_abilities, "19,1^20,1^24,1");
-    npc_type->current_hp = 1;
-    npc_type->max_hp = 1;
-    npc_type->race = Strings::ToInt(row[0]);
-    npc_type->gender = Strings::ToInt(row[1]); // Drogmor's are female horses. Yuck.
-    npc_type->class_ = 1;
-    npc_type->deity = 1;
-    npc_type->level = 1;
-    npc_type->npc_id = 0;
-    npc_type->loottable_id = 0;
-    npc_type->texture = Strings::ToInt(row[2]);     // mount color
-    npc_type->helmtexture = Strings::ToInt(row[2]); // mount color
-    npc_type->runspeed = Strings::ToFloat(row[3]);
+	strn0cpy(n->special_abilities, "19,1^20,1^24,1", sizeof(n->special_abilities));
 
-    npc_type->light = 0;
-    npc_type->STR = 75;
-    npc_type->STA = 75;
-    npc_type->DEX = 75;
-    npc_type->AGI = 75;
-    npc_type->INT = 75;
-    npc_type->WIS = 75;
-    npc_type->CHA = 75;
-    horses_auto_delete.Insert(npc_type);
+	n->current_hp   = 1;
+	n->max_hp       = 1;
+	n->race         = l[0].race;
+	n->gender       = l[0].gender;
+	n->class_       = Class::Warrior;
+	n->deity        = 1;
+	n->level        = 1;
+	n->npc_id       = 0;
+	n->loottable_id = 0;
+	n->texture      = l[0].texture;
+	n->helmtexture  = l[0].texture;
+	n->runspeed     = l[0].mountspeed;
+	n->light        = 0;
+	n->STR          = 75;
+	n->STA          = 75;
+	n->DEX          = 75;
+	n->AGI          = 75;
+	n->INT          = 75;
+	n->WIS          = 75;
+	n->CHA          = 75;
 
-    return npc_type;
+	return n;
 }
 
-void Client::SummonHorse(uint16 spell_id) {
-	if (GetHorseId() != 0) {
-		Message(Chat::Red,"You already have a Horse. Get off, Fatbutt!");
-		return;
-	}
-	if(!Horse::IsHorseSpell(spell_id)) {
-		LogError("[{}] tried to summon an unknown horse, spell id [{}]", GetName(), spell_id);
+void Client::SummonHorse(uint16 spell_id)
+{
+	if (GetHorseId()) {
+		MessageString(Chat::Red, ALREADY_ON_A_MOUNT);
 		return;
 	}
 
-	// No Horse, lets get them one.
+	if (!Horse::IsHorseSpell(spell_id)) {
+		LogError("[{}] tried to summon an unknown horse, spell_id [{}].", GetName(), spell_id);
+		return;
+	}
 
-	auto horse = new Horse(this, spell_id, GetPosition());
+	Horse* h = new Horse(this, spell_id, GetPosition());
 
-	//we want to manage the spawn packet ourself.
-	//another reason is we dont want quests executing on it.
-	entity_list.AddNPC(horse, false);
-
-	// Okay, lets say they have a horse now.
-
+	entity_list.AddNPC(h, false);
 
 	EQApplicationPacket outapp;
-	horse->CreateHorseSpawnPacket(&outapp, GetName(), GetID());
-/*	// Doodman: Kludged in here instead of adding a field to PCType. FIXME!
-	NewSpawn_Struct* ns=(NewSpawn_Struct*)outapp->pBuffer;
-	ns->spawn.texture=mount_color;
-	ns->spawn.pet_owner_id=0;
-	ns->spawn.walkspeed=npc_type->walkspeed;
-	ns->spawn.runspeed=npc_type->runspeed;
-*/
-	entity_list.QueueClients(horse, &outapp);
 
+	h->CreateHorseSpawnPacket(&outapp);
 
-	uint16 tmpID = horse->GetID();
-	SetHorseId(tmpID);
+	entity_list.QueueClients(h, &outapp);
+
+	SetHorseId(h->GetID());
 	BuffFadeBySitModifier();
-
 }
 
-void Client::SetHorseId(uint16 horseid_in) {
-	//if its the same, do nothing
-	if(horseId == horseid_in)
+void Client::SetHorseId(uint16 in_horse_id)
+{
+	if (horseId == in_horse_id) {
 		return;
-
-	//otherwise it changed.
-	//if we have a horse, get rid of it no matter what.
-	if(horseId) {
-		Mob *horse = entity_list.GetMob(horseId);
-		if(horse != nullptr)
-			horse->Depop();
 	}
 
-	//now we take whatever they gave us.
-	horseId = horseid_in;
+	if (horseId) {
+		Mob* h = entity_list.GetMob(horseId);
+		if (h) {
+			h->Depop();
+		}
+	}
+
+	horseId = in_horse_id;
 }
 
-void Mob::CreateHorseSpawnPacket(EQApplicationPacket* app, const char* ownername, uint16 ownerid, Mob* ForWho) {
+void Mob::CreateHorseSpawnPacket(EQApplicationPacket* app, Mob* m) {
 	app->SetOpcode(OP_NewSpawn);
 	safe_delete_array(app->pBuffer);
 	app->pBuffer = new uchar[sizeof(NewSpawn_Struct)];
 	app->size = sizeof(NewSpawn_Struct);
 	memset(app->pBuffer, 0, sizeof(NewSpawn_Struct));
-	NewSpawn_Struct* ns = (NewSpawn_Struct*)app->pBuffer;
-	FillSpawnStruct(ns, ForWho);
-
-#if (EQDEBUG >= 11)
-	printf("Horse Spawn Packet - Owner: %s\n", ownername);
-	DumpPacket(app);
-#endif
+	auto* ns = (NewSpawn_Struct*) app->pBuffer;
+	FillSpawnStruct(ns, m);
 }
-
