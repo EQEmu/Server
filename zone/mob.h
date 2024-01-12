@@ -729,7 +729,7 @@ public:
 	void SetSpawned() { spawned = true; };
 	bool Spawned() { return spawned; };
 	virtual bool ShouldISpawnFor(Client *c) { return true; }
-	void SetFlyMode(GravityBehavior flymode);
+	void SetFlyMode(GravityBehavior in_flymode);
 	void Teleport(const glm::vec3 &pos);
 	void Teleport(const glm::vec4 &pos);
 	void TryMoveAlong(float distance, float angle, bool send = true);

@@ -5612,9 +5612,9 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 	m_EntityVariables[variable_name] = variable_value;
 }
 
-void Mob::SetFlyMode(GravityBehavior flymode)
+void Mob::SetFlyMode(GravityBehavior in_flymode)
 {
-	flymode = flymode;
+	flymode = in_flymode;
 }
 
 void Mob::Teleport(const glm::vec3 &pos)
