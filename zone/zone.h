@@ -105,8 +105,10 @@ public:
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
-	bool idle_when_empty;
-	uint32 seconds_before_idle;
+	bool IsIdleWhenEmpty() const;
+	void SetIdleWhenEmpty(bool idle_when_empty);
+	uint32 GetSecondsBeforeIdle() const;
+	void SetSecondsBeforeIdle(uint32 seconds_before_idle);
 	bool AggroLimitReached() { return (aggroedmobs > 10) ? true : false; }
 	bool AllowMercs() const { return (allow_mercs); }
 	bool CanBind() const { return (can_bind); }
@@ -437,6 +439,8 @@ private:
 	uint32    m_max_clients;
 	uint32    zoneid;
 	uint32    m_last_ucss_update;
+	bool      m_idle_when_empty;
+	uint32    m_seconds_before_idle;
 
 	GlobalLootManager                   m_global_loot;
 	LinkedList<ZoneClientAuth_Struct *> client_auth_list;

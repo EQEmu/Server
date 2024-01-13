@@ -411,7 +411,7 @@ void EntityList::RaidProcess()
 
 void EntityList::DoorProcess()
 {
-	if (zone && zone->idle_when_empty) {
+	if (zone && zone->IsIdleWhenEmpty()) {
 		if (numclients < 1) {
 			return;
 		}
@@ -485,15 +485,15 @@ void EntityList::MobProcess()
 		static int   old_client_count  = 0;
 		static Timer *mob_settle_timer = new Timer();
 
-		if (zone->idle_when_empty) {
+		if (zone->IsIdleWhenEmpty()) {
 			if (
 				numclients == 0 &&
 				old_client_count > 0 &&
-				zone->seconds_before_idle > 0
+				zone->GetSecondsBeforeIdle() > 0
 			) {
 				// Start Timer to allow any mobs that chased chars from zone
 				// to return home.
-				mob_settle_timer->Start(zone->seconds_before_idle * 1000);
+				mob_settle_timer->Start(zone->GetSecondsBeforeIdle() * 1000);
 			}
 
 			old_client_count = numclients;

@@ -935,7 +935,7 @@ void QuestManager::repopzone() {
 
 void QuestManager::processmobswhilezoneempty(bool idle_when_empty) {
 	if (zone) {
-		zone->idle_when_empty = idle_when_empty;
+		zone->SetIdleWhenEmpty(idle_when_empty);
 	} else {
 		LogQuests(
 			"QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file"

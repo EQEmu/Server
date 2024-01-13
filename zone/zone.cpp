@@ -983,14 +983,16 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);
 	strlwr(short_name);
 	memset(file_name, 0, sizeof(file_name));
-	long_name           = 0;
-	aggroedmobs         = 0;
-	m_graveyard_id      = 0;
-	pgraveyard_zoneid   = 0;
-	m_max_clients       = 0;
-	pvpzone             = false;
-	idle_when_empty     = true;
-	seconds_before_idle = 60;
+
+	long_name         = 0;
+	aggroedmobs       = 0;
+	m_graveyard_id    = 0;
+	pgraveyard_zoneid = 0;
+	m_max_clients     = 0;
+	pvpzone           = false;
+
+	SetIdleWhenEmpty(true);
+	SetSecondsBeforeIdle(60);
 
 	if (database.GetServerType() == 1) {
 		pvpzone = true;
@@ -1004,10 +1006,11 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		m_safe_points.y = z->safe_y;
 		m_safe_points.z = z->safe_z;
 		m_safe_points.w = z->safe_heading;
-		m_graveyard_id      = z->graveyard_id;
-		m_max_clients       = z->maxclients;
-		idle_when_empty     = z->idle_when_empty;
-		seconds_before_idle = z->seconds_before_idle;
+		m_graveyard_id = z->graveyard_id;
+		m_max_clients  = z->maxclients;
+
+		SetIdleWhenEmpty(z->idle_when_empty);
+		SetSecondsBeforeIdle(z->seconds_before_idle);
 
 		if (z->file_name.empty()) {
 			strcpy(file_name, short_name);
@@ -1393,7 +1396,9 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	allow_mercs               = true;
 	m_graveyard_id            = z->graveyard_id;
 	m_max_clients             = z->maxclients;
-	idle_when_empty           = z->idle_when_empty;
+
+	SetIdleWhenEmpty(z->idle_when_empty);
+	SetSecondsBeforeIdle(z->seconds_before_idle);
 
 	// safe coordinates
 	m_safe_points.x = z->safe_x;
@@ -3233,4 +3238,24 @@ void Zone::SetEXPModifier(Client* c, float exp_modifier)
 		GetInstanceVersion(),
 		m
 	);
+}
+
+bool Zone::IsIdleWhenEmpty() const
+{
+	return m_idle_when_empty;
+}
+
+void Zone::SetIdleWhenEmpty(bool idle_when_empty)
+{
+	Zone::m_idle_when_empty = idle_when_empty;
+}
+
+uint32 Zone::GetSecondsBeforeIdle() const
+{
+	return m_seconds_before_idle;
+}
+
+void Zone::SetSecondsBeforeIdle(uint32 seconds_before_idle)
+{
+	Zone::m_seconds_before_idle = seconds_before_idle;
 }
