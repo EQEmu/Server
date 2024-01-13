@@ -37,6 +37,7 @@
 #include "../common/repositories/character_alt_currency_repository.h"
 #include "../common/repositories/character_item_recast_repository.h"
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/respawn_times_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -119,7 +120,6 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_S
 
 void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint32 time_left)
 {
-
 	timeval tv;
 	gettimeofday(&tv, nullptr);
 	uint32 current_time = tv.tv_sec;
@@ -128,63 +128,36 @@ void ZoneDatabase::UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id, uint3
 			otherwise we update with a REPLACE INTO
 	*/
 
-	if(time_left == 0) {
-        std::string query = StringFormat("DELETE FROM `respawn_times` WHERE `id` = %u AND `instance_id` = %u", spawn2_id, instance_id);
-        QueryDatabase(query);
+	if (!time_left) {
+		RespawnTimesRepository::DeleteWhere(
+			*this,
+			fmt::format(
+				"`id` = {} AND `instance_id` = {}",
+				spawn2_id,
+				instance_id
+			)
+		);
 		return;
 	}
 
-    std::string query = StringFormat(
-		"REPLACE INTO `respawn_times` "
-		"(id, "
-		"start, "
-		"duration, "
-		"instance_id) "
-		"VALUES "
-		"(%u, "
-		"%u, "
-		"%u, "
-		"%u)",
-		spawn2_id,
-		current_time,
-		time_left,
-		instance_id
+	RespawnTimesRepository::ReplaceOne(
+		*this,
+		RespawnTimesRepository::RespawnTimes{
+			.id = static_cast<int32_t>(spawn2_id),
+			.start = static_cast<int32_t>(current_time),
+			.duration = static_cast<int32_t>(time_left),
+			.instance_id = static_cast<int16_t>(instance_id)
+		}
 	);
-    QueryDatabase(query);
-
-	return;
 }
 
 //Gets the respawn time left in the database for the current spawn id
-uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 id, uint16 instance_id)
+uint32 ZoneDatabase::GetSpawnTimeLeft(uint32 spawn2_id, uint16 instance_id)
 {
-	std::string query = StringFormat("SELECT start, duration FROM respawn_times "
-                                    "WHERE id = %lu AND instance_id = %lu",
-                                    (unsigned long)id, (unsigned long)zone->GetInstanceID());
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return 0;
-    }
+	timeval tv;
+	gettimeofday(&tv, nullptr);
 
-    if (results.RowCount() != 1)
-        return 0;
-
-    auto& row = results.begin();
-
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    uint32 resStart = Strings::ToInt(row[0]);
-    uint32 resDuration = Strings::ToInt(row[1]);
-
-    //compare our values to current time
-    if((resStart + resDuration) <= tv.tv_sec) {
-        //our current time was expired
-        return 0;
-    }
-
-    //we still have time left on this timer
-    return ((resStart + resDuration) - tv.tv_sec);
-
+	return RespawnTimesRepository::GetTimeRemaining(*this, spawn2_id, instance_id, tv.tv_sec);
 }
 
 void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id)

@@ -528,8 +528,8 @@ public:
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
 	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
-	void		UpdateRespawnTime(uint32 id, uint16 instance_id,uint32 timeleft);
-	uint32		GetSpawnTimeLeft(uint32 id, uint16 instance_id);
+	void		UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id,uint32 timeleft);
+	uint32		GetSpawnTimeLeft(uint32 spawn2_id, uint16 instance_id);
 	void        UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id);
 
 	/* Grids/Paths  */

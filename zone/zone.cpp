@@ -61,6 +61,7 @@
 #include "../common/repositories/level_exp_mods_repository.h"
 #include "../common/repositories/ldon_trap_entries_repository.h"
 #include "../common/repositories/ldon_trap_templates_repository.h"
+#include "../common/repositories/respawn_times_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
@@ -1167,7 +1168,7 @@ bool Zone::Init(bool is_static) {
 		LogError("Loading World Objects failed. continuing");
 	}
 
-	database.QueryDatabase("DELETE FROM `respawn_times` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())");
+	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
@@ -2642,17 +2643,25 @@ void Zone::ReloadWorld(uint8 global_repop)
 void Zone::ClearSpawnTimers()
 {
 	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
+
 	iterator.Reset();
+
+	std::vector<std::string> respawn_ids;
+
 	while (iterator.MoreElements()) {
-		auto query = fmt::format(
-			"DELETE FROM respawn_times WHERE id = {} AND instance_id = {}",
-			iterator.GetData()->GetID(),
-			GetInstanceID()
-		);
-		auto results = database.QueryDatabase(query);
+		respawn_ids.emplace_back(std::to_string(iterator.GetData()->GetID()));
 
 		iterator.Advance();
 	}
+
+	RespawnTimesRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`instance_id` = {} AND `id` IN ({})",
+			GetInstanceID(),
+			Strings::Implode(", ", respawn_ids)
+		)
+	);
 }
 
 void Zone::LoadTickItems()
