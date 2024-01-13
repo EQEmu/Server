@@ -99,7 +99,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_
 		return false;
 	}
 
-	auto e = l[0];
+	auto e = l.front();
 
 	e.underworld          = zd->underworld;
 	e.minclip             = zd->minclip;
