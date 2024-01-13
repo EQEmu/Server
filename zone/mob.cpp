@@ -4443,7 +4443,7 @@ Mob* Mob::GetUltimateOwner()
 }
 
 void Mob::SetOwnerID(uint16 new_owner_id) {
-	if (new_owner_id == GetID() && new_owner_id) {
+	if (new_owner_id && new_owner_id == GetID()) {
 		return;
 	}
 
