@@ -132,9 +132,22 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			)
 		);
 
-		const bool object_found = l.empty();
+		for (const auto& e : l) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"ID: {} Name: {} XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
+					e.id,
+					e.objectname,
+					e.xpos,
+					e.ypos,
+					e.zpos,
+					e.heading
+				).c_str()
+			);
+		}
 
-		if (object_found) {
+		if (!l.empty()) {
 			c->Message(Chat::White, "An object already exists at this location.");
 			return;
 		}
