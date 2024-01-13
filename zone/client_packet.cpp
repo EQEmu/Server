@@ -6257,7 +6257,7 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 				return;
 			}
 		}
-		
+
 		uint32 mod = spellbonuses.ReduceFallDamage + itembonuses.ReduceFallDamage + aabonuses.ReduceFallDamage;
 		damage -= damage * mod / 100;
 	}
@@ -7337,7 +7337,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	}
 
 	GroupInvite_Struct* gis = (GroupInvite_Struct*)app->pBuffer;
-	
+
 	Mob* invitee = nullptr;
 
 	if (RuleB(Character, GroupInvitesRequireTarget)) {
@@ -7385,7 +7385,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 				}
 
 				return;
-				
+
 			} else {
 				if (RuleB(Character, OnInviteReceiveAlreadyinGroupMessage)) {
 					if (!invitee->CastToClient()->MercOnlyOrNoGroup()) {
@@ -10191,14 +10191,14 @@ void Client::Handle_OP_MercenaryCommand(const EQApplicationPacket *app)
 			uint8 numStances = 0;
 
 			//get number of available stances for the current merc
-			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercTemplateID()];
+			std::list<MercStanceInfo> mercStanceList = zone->merc_stance_list[merc->GetMercenaryTemplateID()];
 			auto iter = mercStanceList.begin();
 			while (iter != mercStanceList.end()) {
 				numStances++;
 				++iter;
 			}
 
-			MercTemplate* mercTemplate = zone->GetMercTemplate(GetMerc()->GetMercTemplateID());
+			MercTemplate* mercTemplate = zone->GetMercTemplate(GetMerc()->GetMercenaryTemplateID());
 			if (mercTemplate)
 			{
 				//check to see if selected option is a valid stance slot (option is the slot the stance is in, not the actual stance)
@@ -10264,14 +10264,14 @@ void Client::Handle_OP_MercenaryDataRequest(const EQApplicationPacket *app)
 			return;
 		}
 
-		mercTypeCount = tar->GetNumMercTypes(static_cast<unsigned int>(ClientVersion()));
-		mercCount = tar->GetNumMercs(static_cast<unsigned int>(ClientVersion()));
+		mercTypeCount = tar->GetNumMercenaryTypes(static_cast<unsigned int>(ClientVersion()));
+		mercCount = tar->GetNumberOfMercenaries(static_cast<unsigned int>(ClientVersion()));
 
 		if (mercCount > MAX_MERC)
 			return;
 
-		std::list<MercType> mercTypeList = tar->GetMercTypesList(static_cast<unsigned int>(ClientVersion()));
-		std::list<MercData> mercDataList = tar->GetMercsList(static_cast<unsigned int>(ClientVersion()));
+		std::list<MercType> mercTypeList = tar->GetMercenaryTypesList(static_cast<unsigned int>(ClientVersion()));
+		std::list<MercData> mercDataList = tar->GetMercenariesList(static_cast<unsigned int>(ClientVersion()));
 
 		int i = 0;
 		int StanceCount = 0;
@@ -10358,7 +10358,7 @@ void Client::Handle_OP_MercenaryDataUpdateRequest(const EQApplicationPacket *app
 
 	Log(Logs::General, Logs::Mercenaries, "Data Update Request Received for %s.", GetName());
 
-	if (GetMercID())
+	if (GetMercenaryID())
 	{
 		SendMercPersonalInfo();
 	}
@@ -10431,7 +10431,7 @@ void Client::Handle_OP_MercenaryHire(const EQApplicationPacket *app)
 		GetMercInfo().MercTimerRemaining = RuleI(Mercs, UpkeepIntervalMS);
 
 		// Get merc, assign it to client & spawn
-		Merc* merc = Merc::LoadMerc(this, merc_template, merchant_id, false);
+		Merc* merc = Merc::LoadMercenary(this, merc_template, merchant_id, false);
 
 		if (merc)
 		{
@@ -10504,7 +10504,7 @@ void Client::Handle_OP_MercenaryTimerRequest(const EQApplicationPacket *app)
 	uint32 entityID = 0;
 	uint32 mercState = 5;
 	uint32 suspendedTime = 0;
-	if (GetMercID()) {
+	if (GetMercenaryID()) {
 		Merc* merc = GetMerc();
 
 		if (merc) {

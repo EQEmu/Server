@@ -581,14 +581,14 @@ public:
 	void ClearBotSpells() { bot_spells_cache.clear(); bot_spells_loadtried.clear(); }
 
 	/* Mercs   */
-	const	NPCType*	GetMercType(uint32 id, uint16 raceid, uint32 clientlevel);
-	void	LoadMercEquipment(Merc *merc);
-	void	SaveMercBuffs(Merc *merc);
-	void	LoadMercBuffs(Merc *merc);
-	bool	LoadMercInfo(Client *c);
-	bool	LoadCurrentMerc(Client *c);
-	bool	SaveMerc(Merc *merc);
-	bool	DeleteMerc(uint32 merc_id);
+	const NPCType* GetMercenaryType(uint32 id, uint16 race_id, uint32 owner_level);
+	void LoadMercenaryEquipment(Merc* m);
+	void SaveMercenaryBuffs(Merc* m);
+	void LoadMercenaryBuffs(Merc* m);
+	bool LoadMercenaryInfo(Client* c);
+	bool LoadCurrentMercenary(Client* c);
+	bool SaveMercenary(Merc* m);
+	bool DeleteMercenary(uint32 mercenary_id);
 
 	/* Petitions   */
 	void	DeletePetitionFromDB(Petition* wpet);

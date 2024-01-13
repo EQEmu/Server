@@ -300,8 +300,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	m_record_loot_stats  = false;
 
 	if (GetClass() == Class::MercenaryLiaison && RuleB(Mercs, AllowMercs)) {
-		LoadMercTypes();
-		LoadMercs();
+		LoadMercenaryTypes();
+		LoadMercenaries();
 	}
 
 	SpellFocusDMG  = 0;

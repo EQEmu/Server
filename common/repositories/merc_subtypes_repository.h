@@ -44,7 +44,27 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int GetSubtype(
+		Database& db,
+		uint8 class_id,
+		uint8 tier_id
+	)
+	{
+		const auto& l = GetWhere(
+			db,
+			fmt::format(
+				"`class_id` = {} AND `tier_id` = {}",
+				class_id,
+				tier_id
+			)
+		);
 
+		if (l.empty()) {
+			return 0;
+		}
+
+		return l[0].merc_subtype_id;
+	}
 };
 
 #endif //EQEMU_MERC_SUBTYPES_REPOSITORY_H

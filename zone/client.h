@@ -1554,14 +1554,14 @@ public:
 	bool CheckCanUnsuspendMerc();
 	bool DismissMerc(uint32 MercID);
 	bool MercOnlyOrNoGroup();
-	inline uint32 GetMercID() const { return mercid; }
+	inline uint32 GetMercenaryID() const { return mercid; }
 	inline uint8 GetMercSlot() const { return mercSlot; }
 	void SetMercID( uint32 newmercid) { mercid = newmercid; }
 	void SetMercSlot( uint8 newmercslot) { mercSlot = newmercslot; }
 	Merc* GetMerc();
 	MercInfo& GetMercInfo(uint8 slot) { return m_mercinfo[slot]; }
 	MercInfo& GetMercInfo() { return m_mercinfo[mercSlot]; }
-	uint8 GetNumMercs();
+	uint8 GetNumberOfMercenaries();
 	void SetMerc(Merc* newmerc);
 	void SendMercResponsePackets(uint32 ResponseType);
 	void SendMercMerchantResponsePacket(int32 response_type);
