@@ -59,6 +59,8 @@
 #include "../common/repositories/object_repository.h"
 #include "../common/repositories/rule_sets_repository.h"
 #include "../common/repositories/level_exp_mods_repository.h"
+#include "../common/repositories/ldon_trap_entries_repository.h"
+#include "../common/repositories/ldon_trap_templates_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
@@ -2344,55 +2346,46 @@ void Zone::SetInstanceTimer(uint32 new_duration)
 
 void Zone::LoadLDoNTraps()
 {
-	const std::string query   = "SELECT id, type, spell_id, skill, locked FROM ldon_trap_templates";
-	auto              results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		return;
-	}
+	const auto& l = LdonTrapTemplatesRepository::All(content_db);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto lt = new LDoNTrapTemplate;
-		lt->id       = Strings::ToInt(row[0]);
-		lt->type     = (LDoNChestTypes) Strings::ToInt(row[1]);
-		lt->spell_id = Strings::ToInt(row[2]);
-		lt->skill    = Strings::ToInt(row[3]);
-		lt->locked   = Strings::ToInt(row[4]);
-		ldon_trap_list[lt->id] = lt;
-	}
+	for (const auto& e : l) {
+		auto t = new LDoNTrapTemplate;
 
+		t->id       = e.id;
+		t->type     = static_cast<LDoNChestTypes>(e.type);
+		t->spell_id = static_cast<uint32>(e.spell_id);
+		t->skill    = e.skill;
+		t->locked   = e.locked;
+
+		ldon_trap_list[e.id] = t;
+	}
 }
 
 void Zone::LoadLDoNTrapEntries()
 {
-	const std::string query = "SELECT id, trap_id FROM ldon_trap_entries";
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-		return;
-    }
+	const auto& l = LdonTrapEntriesRepository::All(content_db);
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
-        uint32 id = Strings::ToInt(row[0]);
-        uint32 trap_id = Strings::ToInt(row[1]);
+	for (const auto& e : l) {
+		auto t = new LDoNTrapTemplate;
 
-        LDoNTrapTemplate *trapTemplate = nullptr;
-        auto it = ldon_trap_list.find(trap_id);
+		auto i = ldon_trap_list.find(e.trap_id);
+		if (i == ldon_trap_list.end()) {
+			continue;
+		}
 
-        if(it == ldon_trap_list.end())
-            continue;
+		t = ldon_trap_list[e.trap_id];
 
-        trapTemplate = ldon_trap_list[trap_id];
+		std::list<LDoNTrapTemplate*> tl;
 
-        std::list<LDoNTrapTemplate*> temp;
-        auto iter = ldon_trap_entry_list.find(id);
+		auto ei = ldon_trap_entry_list.find(e.id);
+		if (ei != ldon_trap_entry_list.end()) {
+			tl = ldon_trap_entry_list[e.id];
+		}
 
-        if(iter != ldon_trap_entry_list.end())
-            temp = ldon_trap_entry_list[id];
+		tl.emplace_back(t);
 
-        temp.push_back(trapTemplate);
-        ldon_trap_entry_list[id] = temp;
-    }
-
+		ldon_trap_entry_list[e.id] = tl;
+	}
 }
 
 void Zone::LoadVeteranRewards()
