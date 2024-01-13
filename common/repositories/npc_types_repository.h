@@ -48,9 +48,10 @@ public:
 	{
 		const uint32 min_id = zone_id * 1000;
 		const uint32 max_id = min_id + 999;
+
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT MAX({}) FROM `{}` WHERE `{}` BETWEEN `{}` AND `{}`",
+				"SELECT MAX({}) FROM `{}` WHERE `{}` BETWEEN {} AND {}",
 				PrimaryKey(),
 				TableName(),
 				PrimaryKey(),
@@ -65,7 +66,7 @@ public:
 
 		auto row = results.begin();
 
-		const uint32 npc_id = Strings::ToUnsignedInt(row[0]) + 1;
+		const uint32 npc_id = row[0] ? Strings::ToUnsignedInt(row[0]) + 1 : 0;
 
 		return npc_id < max_id ? npc_id : 0;
 	}

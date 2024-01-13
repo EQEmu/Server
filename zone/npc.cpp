@@ -1481,7 +1481,6 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	uint32 extra
 )
 {
-
 	auto e = NpcTypesRepository::NewEntity();
 
 	e.id              = NpcTypesRepository::GetOpenIDInZoneRange(*this, c->GetZoneID());
@@ -1509,7 +1508,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	auto sg = SpawngroupRepository::NewEntity();
 
 	sg.name = fmt::format(
-		"'{}-{}'",
+		"{}-{}",
 		zone,
 		n->GetName()
 	);
@@ -1579,15 +1578,13 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 		return 0;
 	}
 
-	uint32 respawn_time = 0;
+	uint32 respawn_time = 1200;
 	uint32 spawn_id     = 0;
 
 	if (in_respawn_time) {
 		respawn_time = in_respawn_time;
 	} else if (n->respawn2 && n->respawn2->RespawnTimer()) {
 		respawn_time = n->respawn2->RespawnTimer();
-	} else {
-		respawn_time = 1200;
 	}
 
 	auto s2 = Spawn2Repository::NewEntity();
@@ -1612,6 +1609,8 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 	se.spawngroupID = sg.id;
 	se.npcID        = n->GetNPCTypeID();
 	se.chance       = 100;
+
+	se = SpawnentryRepository::InsertOne(*this, se);
 
 	if (!se.spawngroupID) {
 		return 0;
@@ -1657,15 +1656,17 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Cli
 		return 0;
 	}
 
-	if (!Spawn2Repository::DeleteOne(*this, l[0].id)) {
+	auto e = l.front();
+
+	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
 	}
 
-	if (!SpawngroupRepository::DeleteOne(*this, l[0].spawngroupID)) {
+	if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
 	}
 
-	if (!SpawnentryRepository::DeleteOne(*this, l[0].spawngroupID)) {
+	if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
 	}
 
@@ -1693,15 +1694,17 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(
 		return 0;
 	}
 
-	if (!Spawn2Repository::DeleteOne(*this, l[0].id)) {
+	auto e = l.front();
+
+	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
 	}
 
-	if (!SpawngroupRepository::DeleteOne(*this, l[0].spawngroupID)) {
+	if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
 	}
 
-	if (!SpawnentryRepository::DeleteOne(*this, l[0].spawngroupID)) {
+	if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
 	}
 
