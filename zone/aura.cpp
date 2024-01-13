@@ -942,17 +942,19 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord& r)
 		return false;
 	}
 
-	strn0cpy(r.name, l[0].name.c_str(), sizeof(r.name));
+	auto e = l.front();
 
-	r.npc_type   = l[0].npc_type;
+	strn0cpy(r.name, e.name.c_str(), sizeof(r.name));
+
+	r.npc_type   = e.npc_type;
 	r.spell_id   = spell_id;
-	r.distance   = l[0].distance * l[0].distance;
-	r.aura_type  = l[0].aura_type;
-	r.spawn_type = l[0].spawn_type;
-	r.movement   = l[0].movement;
-	r.duration   = l[0].duration * 1000; // Database is in seconds
-	r.icon       = l[0].icon;
-	r.cast_time  = l[0].cast_time * 1000; // Database is in seconds
+	r.distance   = e.distance * e.distance;
+	r.aura_type  = e.aura_type;
+	r.spawn_type = e.spawn_type;
+	r.movement   = e.movement;
+	r.duration   = e.duration * 1000; // Database is in seconds
+	r.icon       = e.icon;
+	r.cast_time  = e.cast_time * 1000; // Database is in seconds
 
 	return true;
 }
