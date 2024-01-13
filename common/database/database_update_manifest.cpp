@@ -5195,7 +5195,8 @@ ALTER TABLE `instance_list`
 		.sql = R"(
 ALTER TABLE `zone`
 ADD COLUMN `idle_when_empty` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `min_lava_damage`
-)"
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
