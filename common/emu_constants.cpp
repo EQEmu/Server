@@ -562,6 +562,7 @@ std::string EQ::constants::GetEmoteEventTypeName(uint8 emote_event_type)
 const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
 {
 	static const std::map<uint8, std::string> emote_type_map = {
+		{ EmoteTypes::Say, "Say" },
 		{ EmoteTypes::Emote, "Emote" },
 		{ EmoteTypes::Shout, "Shout" },
 		{ EmoteTypes::Proximity, "Proximity" }
@@ -572,7 +573,7 @@ const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
 
 std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
 {
-	if (!EQ::ValueWithin(emote_type, EmoteTypes::Emote, EmoteTypes::Proximity)) {
+	if (!EQ::ValueWithin(emote_type, EmoteTypes::Say, EmoteTypes::Proximity)) {
 		return std::string();
 	}
 

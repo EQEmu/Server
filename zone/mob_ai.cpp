@@ -1800,9 +1800,9 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 						parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					}
 
-					auto emote_id = GetEmoteID();
+					const uint32 emote_id = GetEmoteID();
 					if (emote_id) {
-						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid, attacker);
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emote_id, attacker);
 					}
 
 					std::string mob_name = GetCleanName();
@@ -1843,14 +1843,13 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 			if (entity_list.GetNPCByID(GetID())) {
-				auto emote_id = CastToNPC()->GetEmoteID();
-
 				if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 				}
 
+				const uint32 emote_id = CastToNPC()->GetEmoteID();
 				if (emote_id) {
-					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
+					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emote_id);
 				}
 
 				m_combat_record.Stop();
@@ -2120,7 +2119,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 			if (m_target == GetTarget()) {
 				continue;
 			}
-			
+
 			if (m_target->IsCorpse()) {
 				LogAggroDetail("[{}] is on [{}]'s rampage list", m_target->GetCleanName(), GetCleanName());
 				RemoveFromRampageList(m_target, true);

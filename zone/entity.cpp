@@ -680,8 +680,8 @@ void EntityList::AddNPC(NPC *npc, bool send_spawn_packet, bool dont_queue)
 		parse->EventNPC(EVENT_SPAWN, npc, nullptr, "", 0);
 	}
 
-	const auto emote_id = npc->GetEmoteID();
-	if (emote_id != 0) {
+	const uint32 emote_id = npc->GetEmoteID();
+	if (emote_id) {
 		npc->DoNPCEmote(EQ::constants::EmoteEventTypes::OnSpawn, emote_id);
 	}
 

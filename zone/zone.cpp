@@ -2580,12 +2580,12 @@ void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v)
 		auto n = new NPC_Emote_Struct;
 
 		n->emoteid = e.emoteid;
-		n->event_ = e.event_;
-		n->type = e.type;
+		n->event_  = e.event_;
+		n->type    = e.type;
 
 		strn0cpy(n->text, e.text.c_str(), sizeof(n->text));
 
-		v->emplace_back(n);
+		v->push_back(n);
 	}
 
 	LogInfo(
