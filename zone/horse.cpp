@@ -96,18 +96,20 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id)
 
 	strn0cpy(n->special_abilities, "19,1^20,1^24,1", sizeof(n->special_abilities));
 
+	auto e = l.front();
+
 	n->current_hp   = 1;
 	n->max_hp       = 1;
-	n->race         = l[0].race;
-	n->gender       = l[0].gender;
+	n->race         = e.race;
+	n->gender       = e.gender;
 	n->class_       = Class::Warrior;
 	n->deity        = 1;
 	n->level        = 1;
 	n->npc_id       = 0;
 	n->loottable_id = 0;
-	n->texture      = l[0].texture;
-	n->helmtexture  = l[0].texture;
-	n->runspeed     = l[0].mountspeed;
+	n->texture      = e.texture;
+	n->helmtexture  = e.texture;
+	n->runspeed     = e.mountspeed;
 	n->light        = 0;
 	n->STR          = 75;
 	n->STA          = 75;
