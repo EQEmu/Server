@@ -30,6 +30,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/ground_spawns_repository.h"
+#include "../common/repositories/object_repository.h"
 
 
 const char DEFAULT_OBJECT_NAME[] = "IT63_ACTORDEF";
@@ -669,50 +670,57 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 	return true;
 }
 
-// Add new Zone Object (theoretically only called for items dropped to ground)
-uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
+uint32 ZoneDatabase::AddObject(
+	uint32 type,
+	uint32 icon,
+	const Object_Struct& o,
+	const EQ::ItemInstance* inst
+)
 {
-	uint32 database_id = 0;
 	uint32 item_id = 0;
-	int16 charges = 0;
+	int16  charges = 0;
 
 	if (inst && inst->GetItem()) {
 		item_id = inst->GetItem()->ID;
 		charges = inst->GetCharges();
 	}
 
-	// SQL Escape object_name
-	uint32 len = strlen(object.object_name) * 2 + 1;
-	auto object_name = new char[len];
-	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
+	auto e = ObjectRepository::NewEntity();
 
-    // Save new record for object
-	std::string query = StringFormat("INSERT INTO object "
-                                    "(zoneid, xpos, ypos, zpos, heading, "
-                                    "itemid, charges, objectname, type, icon) "
-                                    "values (%i, %f, %f, %f, %f, %i, %i, '%s', %i, %i)",
-                                    object.zone_id, object.x, object.y, object.z, object.heading,
-                                    item_id, charges, object_name, type, icon);
-    safe_delete_array(object_name);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Unable to insert object: [{}]", results.ErrorMessage().c_str());
+	e.zoneid     = o.zone_id;
+	e.xpos       = o.x;
+	e.ypos       = o.y;
+	e.zpos       = o.z;
+	e.heading    = o.heading;
+	e.itemid     = item_id;
+	e.charges    = charges;
+	e.objectname = o.object_name;
+	e.type       = type;
+	e.icon       = icon;
+
+	e = ObjectRepository::InsertOne(*this, e);
+
+	if (!e.id) {
 		return 0;
 	}
 
-	// Save container contents, if container
 	if (inst && inst->IsType(EQ::item::ItemClassBag)) {
-		SaveWorldContainer(object.zone_id, database_id, inst);
+		SaveWorldContainer(o.zone_id, e.id, inst);
 	}
 
-	return database_id;
+	return e.id;
 }
 
-// Update information about existing object in database
-void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Object_Struct& object, const EQ::ItemInstance* inst)
+void ZoneDatabase::UpdateObject(
+	uint32 object_id,
+	uint32 type,
+	uint32 icon,
+	const Object_Struct& o,
+	const EQ::ItemInstance* inst
+)
 {
 	uint32 item_id = 0;
-	int16 charges = 0;
+	int16  charges = 0;
 
 	if (inst && inst->GetItem()) {
 		item_id = inst->GetItem()->ID;
@@ -720,32 +728,31 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 	}
 
 	if (inst && !inst->IsType(EQ::item::ItemClassBag)) {
-		uint32 len         = strlen(object.object_name) * 2 + 1;
-		auto   object_name = new char[len];
-		DoEscapeString(object_name, object.object_name, strlen(object.object_name));
+		auto e = ObjectRepository::FindOne(*this, object_id);
 
-		// Save new record for object
-		std::string query = StringFormat(
-			"UPDATE object SET "
-			"zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
-			"itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
-			"size = %f, tilt_x = %f, tilt_y = %f "
-			"WHERE id = %i",
-			object.zone_id, object.x, object.y, object.z, object.heading,
-			item_id, charges, object_name, type, icon,
-			object.size, object.tilt_x, object.tilt_y, id
-		);
-		safe_delete_array(object_name);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
+		e.zoneid     = o.zone_id;
+		e.xpos       = o.x;
+		e.ypos       = o.y;
+		e.zpos       = o.z;
+		e.heading    = o.heading;
+		e.itemid     = item_id;
+		e.charges    = charges;
+		e.objectname = o.object_name;
+		e.type       = type;
+		e.icon       = icon;
+		e.size       = o.size;
+		e.tilt_x     = o.tilt_x;
+		e.tilt_y     = o.tilt_y;
+
+		const int updated = ObjectRepository::UpdateOne(*this, e);
+
+		if (!updated) {
 			return;
 		}
 	}
 
-	// Save container contents, if container
 	if (inst && inst->IsType(EQ::item::ItemClassBag)) {
-		SaveWorldContainer(object.zone_id, id, inst);
+		SaveWorldContainer(o.zone_id, object_id, inst);
 	}
 }
 
@@ -790,17 +797,13 @@ GroundSpawns* ZoneDatabase::LoadGroundSpawns(
 	return gs;
 }
 
-void ZoneDatabase::DeleteObject(uint32 id)
+void ZoneDatabase::DeleteObject(uint32 object_id)
 {
-	if (id == 0) {
+	if (!object_id) {
 		return;
 	}
 
-	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Unable to delete object: [{}]", results.ErrorMessage().c_str());
-	}
+	ObjectRepository::DeleteOne(*this, object_id);
 }
 
 uint32 Object::GetDBID()
