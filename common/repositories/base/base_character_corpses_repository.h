@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_CORPSES_REPOSITORY_H
@@ -288,8 +288,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_corpses_id
 			)
 		);
@@ -298,53 +299,53 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterCorpses e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
 			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
-			e.instance_id      = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.x                = strtof(row[5], nullptr);
-			e.y                = strtof(row[6], nullptr);
-			e.z                = strtof(row[7], nullptr);
-			e.heading          = strtof(row[8], nullptr);
+			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading          = row[8] ? strtof(row[8], nullptr) : 0;
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			e.guild_consent_id = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.is_rezzed        = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
 			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
 			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
-			e.exp              = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size             = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.level            = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.race             = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.gender           = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.class_           = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.deity            = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.texture          = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.helm_texture     = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.copper           = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.silver           = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
-			e.gold             = static_cast<uint32_t>(strtoul(row[26], nullptr, 10));
-			e.platinum         = static_cast<uint32_t>(strtoul(row[27], nullptr, 10));
-			e.hair_color       = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.beard_color      = static_cast<uint32_t>(strtoul(row[29], nullptr, 10));
-			e.eye_color_1      = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
-			e.eye_color_2      = static_cast<uint32_t>(strtoul(row[31], nullptr, 10));
-			e.hair_style       = static_cast<uint32_t>(strtoul(row[32], nullptr, 10));
-			e.face             = static_cast<uint32_t>(strtoul(row[33], nullptr, 10));
-			e.beard            = static_cast<uint32_t>(strtoul(row[34], nullptr, 10));
-			e.drakkin_heritage = static_cast<uint32_t>(strtoul(row[35], nullptr, 10));
-			e.drakkin_tattoo   = static_cast<uint32_t>(strtoul(row[36], nullptr, 10));
-			e.drakkin_details  = static_cast<uint32_t>(strtoul(row[37], nullptr, 10));
-			e.wc_1             = static_cast<uint32_t>(strtoul(row[38], nullptr, 10));
-			e.wc_2             = static_cast<uint32_t>(strtoul(row[39], nullptr, 10));
-			e.wc_3             = static_cast<uint32_t>(strtoul(row[40], nullptr, 10));
-			e.wc_4             = static_cast<uint32_t>(strtoul(row[41], nullptr, 10));
-			e.wc_5             = static_cast<uint32_t>(strtoul(row[42], nullptr, 10));
-			e.wc_6             = static_cast<uint32_t>(strtoul(row[43], nullptr, 10));
-			e.wc_7             = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.wc_8             = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.wc_9             = static_cast<uint32_t>(strtoul(row[46], nullptr, 10));
+			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.race             = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.gender           = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.class_           = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.deity            = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.texture          = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.helm_texture     = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.copper           = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.silver           = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.gold             = row[26] ? static_cast<uint32_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.platinum         = row[27] ? static_cast<uint32_t>(strtoul(row[27], nullptr, 10)) : 0;
+			e.hair_color       = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.beard_color      = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 0;
+			e.eye_color_1      = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
+			e.eye_color_2      = row[31] ? static_cast<uint32_t>(strtoul(row[31], nullptr, 10)) : 0;
+			e.hair_style       = row[32] ? static_cast<uint32_t>(strtoul(row[32], nullptr, 10)) : 0;
+			e.face             = row[33] ? static_cast<uint32_t>(strtoul(row[33], nullptr, 10)) : 0;
+			e.beard            = row[34] ? static_cast<uint32_t>(strtoul(row[34], nullptr, 10)) : 0;
+			e.drakkin_heritage = row[35] ? static_cast<uint32_t>(strtoul(row[35], nullptr, 10)) : 0;
+			e.drakkin_tattoo   = row[36] ? static_cast<uint32_t>(strtoul(row[36], nullptr, 10)) : 0;
+			e.drakkin_details  = row[37] ? static_cast<uint32_t>(strtoul(row[37], nullptr, 10)) : 0;
+			e.wc_1             = row[38] ? static_cast<uint32_t>(strtoul(row[38], nullptr, 10)) : 0;
+			e.wc_2             = row[39] ? static_cast<uint32_t>(strtoul(row[39], nullptr, 10)) : 0;
+			e.wc_3             = row[40] ? static_cast<uint32_t>(strtoul(row[40], nullptr, 10)) : 0;
+			e.wc_4             = row[41] ? static_cast<uint32_t>(strtoul(row[41], nullptr, 10)) : 0;
+			e.wc_5             = row[42] ? static_cast<uint32_t>(strtoul(row[42], nullptr, 10)) : 0;
+			e.wc_6             = row[43] ? static_cast<uint32_t>(strtoul(row[43], nullptr, 10)) : 0;
+			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -601,53 +602,53 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpses e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
 			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
-			e.instance_id      = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.x                = strtof(row[5], nullptr);
-			e.y                = strtof(row[6], nullptr);
-			e.z                = strtof(row[7], nullptr);
-			e.heading          = strtof(row[8], nullptr);
+			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading          = row[8] ? strtof(row[8], nullptr) : 0;
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			e.guild_consent_id = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.is_rezzed        = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
 			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
 			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
-			e.exp              = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size             = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.level            = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.race             = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.gender           = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.class_           = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.deity            = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.texture          = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.helm_texture     = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.copper           = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.silver           = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
-			e.gold             = static_cast<uint32_t>(strtoul(row[26], nullptr, 10));
-			e.platinum         = static_cast<uint32_t>(strtoul(row[27], nullptr, 10));
-			e.hair_color       = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.beard_color      = static_cast<uint32_t>(strtoul(row[29], nullptr, 10));
-			e.eye_color_1      = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
-			e.eye_color_2      = static_cast<uint32_t>(strtoul(row[31], nullptr, 10));
-			e.hair_style       = static_cast<uint32_t>(strtoul(row[32], nullptr, 10));
-			e.face             = static_cast<uint32_t>(strtoul(row[33], nullptr, 10));
-			e.beard            = static_cast<uint32_t>(strtoul(row[34], nullptr, 10));
-			e.drakkin_heritage = static_cast<uint32_t>(strtoul(row[35], nullptr, 10));
-			e.drakkin_tattoo   = static_cast<uint32_t>(strtoul(row[36], nullptr, 10));
-			e.drakkin_details  = static_cast<uint32_t>(strtoul(row[37], nullptr, 10));
-			e.wc_1             = static_cast<uint32_t>(strtoul(row[38], nullptr, 10));
-			e.wc_2             = static_cast<uint32_t>(strtoul(row[39], nullptr, 10));
-			e.wc_3             = static_cast<uint32_t>(strtoul(row[40], nullptr, 10));
-			e.wc_4             = static_cast<uint32_t>(strtoul(row[41], nullptr, 10));
-			e.wc_5             = static_cast<uint32_t>(strtoul(row[42], nullptr, 10));
-			e.wc_6             = static_cast<uint32_t>(strtoul(row[43], nullptr, 10));
-			e.wc_7             = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.wc_8             = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.wc_9             = static_cast<uint32_t>(strtoul(row[46], nullptr, 10));
+			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.race             = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.gender           = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.class_           = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.deity            = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.texture          = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.helm_texture     = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.copper           = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.silver           = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.gold             = row[26] ? static_cast<uint32_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.platinum         = row[27] ? static_cast<uint32_t>(strtoul(row[27], nullptr, 10)) : 0;
+			e.hair_color       = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.beard_color      = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 0;
+			e.eye_color_1      = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
+			e.eye_color_2      = row[31] ? static_cast<uint32_t>(strtoul(row[31], nullptr, 10)) : 0;
+			e.hair_style       = row[32] ? static_cast<uint32_t>(strtoul(row[32], nullptr, 10)) : 0;
+			e.face             = row[33] ? static_cast<uint32_t>(strtoul(row[33], nullptr, 10)) : 0;
+			e.beard            = row[34] ? static_cast<uint32_t>(strtoul(row[34], nullptr, 10)) : 0;
+			e.drakkin_heritage = row[35] ? static_cast<uint32_t>(strtoul(row[35], nullptr, 10)) : 0;
+			e.drakkin_tattoo   = row[36] ? static_cast<uint32_t>(strtoul(row[36], nullptr, 10)) : 0;
+			e.drakkin_details  = row[37] ? static_cast<uint32_t>(strtoul(row[37], nullptr, 10)) : 0;
+			e.wc_1             = row[38] ? static_cast<uint32_t>(strtoul(row[38], nullptr, 10)) : 0;
+			e.wc_2             = row[39] ? static_cast<uint32_t>(strtoul(row[39], nullptr, 10)) : 0;
+			e.wc_3             = row[40] ? static_cast<uint32_t>(strtoul(row[40], nullptr, 10)) : 0;
+			e.wc_4             = row[41] ? static_cast<uint32_t>(strtoul(row[41], nullptr, 10)) : 0;
+			e.wc_5             = row[42] ? static_cast<uint32_t>(strtoul(row[42], nullptr, 10)) : 0;
+			e.wc_6             = row[43] ? static_cast<uint32_t>(strtoul(row[43], nullptr, 10)) : 0;
+			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -672,53 +673,53 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpses e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
 			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
-			e.instance_id      = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.x                = strtof(row[5], nullptr);
-			e.y                = strtof(row[6], nullptr);
-			e.z                = strtof(row[7], nullptr);
-			e.heading          = strtof(row[8], nullptr);
+			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading          = row[8] ? strtof(row[8], nullptr) : 0;
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
-			e.guild_consent_id = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.is_rezzed        = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
+			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
 			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
 			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
-			e.exp              = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size             = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.level            = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.race             = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.gender           = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.class_           = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.deity            = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.texture          = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.helm_texture     = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.copper           = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.silver           = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
-			e.gold             = static_cast<uint32_t>(strtoul(row[26], nullptr, 10));
-			e.platinum         = static_cast<uint32_t>(strtoul(row[27], nullptr, 10));
-			e.hair_color       = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.beard_color      = static_cast<uint32_t>(strtoul(row[29], nullptr, 10));
-			e.eye_color_1      = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
-			e.eye_color_2      = static_cast<uint32_t>(strtoul(row[31], nullptr, 10));
-			e.hair_style       = static_cast<uint32_t>(strtoul(row[32], nullptr, 10));
-			e.face             = static_cast<uint32_t>(strtoul(row[33], nullptr, 10));
-			e.beard            = static_cast<uint32_t>(strtoul(row[34], nullptr, 10));
-			e.drakkin_heritage = static_cast<uint32_t>(strtoul(row[35], nullptr, 10));
-			e.drakkin_tattoo   = static_cast<uint32_t>(strtoul(row[36], nullptr, 10));
-			e.drakkin_details  = static_cast<uint32_t>(strtoul(row[37], nullptr, 10));
-			e.wc_1             = static_cast<uint32_t>(strtoul(row[38], nullptr, 10));
-			e.wc_2             = static_cast<uint32_t>(strtoul(row[39], nullptr, 10));
-			e.wc_3             = static_cast<uint32_t>(strtoul(row[40], nullptr, 10));
-			e.wc_4             = static_cast<uint32_t>(strtoul(row[41], nullptr, 10));
-			e.wc_5             = static_cast<uint32_t>(strtoul(row[42], nullptr, 10));
-			e.wc_6             = static_cast<uint32_t>(strtoul(row[43], nullptr, 10));
-			e.wc_7             = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.wc_8             = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.wc_9             = static_cast<uint32_t>(strtoul(row[46], nullptr, 10));
+			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.race             = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.gender           = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.class_           = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.deity            = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.texture          = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.helm_texture     = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.copper           = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.silver           = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.gold             = row[26] ? static_cast<uint32_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.platinum         = row[27] ? static_cast<uint32_t>(strtoul(row[27], nullptr, 10)) : 0;
+			e.hair_color       = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.beard_color      = row[29] ? static_cast<uint32_t>(strtoul(row[29], nullptr, 10)) : 0;
+			e.eye_color_1      = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
+			e.eye_color_2      = row[31] ? static_cast<uint32_t>(strtoul(row[31], nullptr, 10)) : 0;
+			e.hair_style       = row[32] ? static_cast<uint32_t>(strtoul(row[32], nullptr, 10)) : 0;
+			e.face             = row[33] ? static_cast<uint32_t>(strtoul(row[33], nullptr, 10)) : 0;
+			e.beard            = row[34] ? static_cast<uint32_t>(strtoul(row[34], nullptr, 10)) : 0;
+			e.drakkin_heritage = row[35] ? static_cast<uint32_t>(strtoul(row[35], nullptr, 10)) : 0;
+			e.drakkin_tattoo   = row[36] ? static_cast<uint32_t>(strtoul(row[36], nullptr, 10)) : 0;
+			e.drakkin_details  = row[37] ? static_cast<uint32_t>(strtoul(row[37], nullptr, 10)) : 0;
+			e.wc_1             = row[38] ? static_cast<uint32_t>(strtoul(row[38], nullptr, 10)) : 0;
+			e.wc_2             = row[39] ? static_cast<uint32_t>(strtoul(row[39], nullptr, 10)) : 0;
+			e.wc_3             = row[40] ? static_cast<uint32_t>(strtoul(row[40], nullptr, 10)) : 0;
+			e.wc_4             = row[41] ? static_cast<uint32_t>(strtoul(row[41], nullptr, 10)) : 0;
+			e.wc_5             = row[42] ? static_cast<uint32_t>(strtoul(row[42], nullptr, 10)) : 0;
+			e.wc_6             = row[43] ? static_cast<uint32_t>(strtoul(row[43], nullptr, 10)) : 0;
+			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -777,6 +778,154 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterCorpses &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.charid));
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(std::to_string(e.guild_consent_id));
+		v.push_back(std::to_string(e.is_rezzed));
+		v.push_back(std::to_string(e.is_buried));
+		v.push_back(std::to_string(e.was_at_graveyard));
+		v.push_back(std::to_string(e.is_locked));
+		v.push_back(std::to_string(e.exp));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.helm_texture));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.hair_color));
+		v.push_back(std::to_string(e.beard_color));
+		v.push_back(std::to_string(e.eye_color_1));
+		v.push_back(std::to_string(e.eye_color_2));
+		v.push_back(std::to_string(e.hair_style));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.beard));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.wc_1));
+		v.push_back(std::to_string(e.wc_2));
+		v.push_back(std::to_string(e.wc_3));
+		v.push_back(std::to_string(e.wc_4));
+		v.push_back(std::to_string(e.wc_5));
+		v.push_back(std::to_string(e.wc_6));
+		v.push_back(std::to_string(e.wc_7));
+		v.push_back(std::to_string(e.wc_8));
+		v.push_back(std::to_string(e.wc_9));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterCorpses> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.charid));
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+			v.push_back(std::to_string(e.guild_consent_id));
+			v.push_back(std::to_string(e.is_rezzed));
+			v.push_back(std::to_string(e.is_buried));
+			v.push_back(std::to_string(e.was_at_graveyard));
+			v.push_back(std::to_string(e.is_locked));
+			v.push_back(std::to_string(e.exp));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.helm_texture));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.hair_color));
+			v.push_back(std::to_string(e.beard_color));
+			v.push_back(std::to_string(e.eye_color_1));
+			v.push_back(std::to_string(e.eye_color_2));
+			v.push_back(std::to_string(e.hair_style));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.beard));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.wc_1));
+			v.push_back(std::to_string(e.wc_2));
+			v.push_back(std::to_string(e.wc_3));
+			v.push_back(std::to_string(e.wc_4));
+			v.push_back(std::to_string(e.wc_5));
+			v.push_back(std::to_string(e.wc_6));
+			v.push_back(std::to_string(e.wc_7));
+			v.push_back(std::to_string(e.wc_8));
+			v.push_back(std::to_string(e.wc_9));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_CORPSES_REPOSITORY_H

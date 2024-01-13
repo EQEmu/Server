@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H
@@ -160,8 +160,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				char_create_point_allocations_id
 			)
 		);
@@ -170,21 +171,21 @@ public:
 		if (results.RowCount() == 1) {
 			CharCreatePointAllocations e{};
 
-			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.base_str  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.base_sta  = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.base_dex  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.base_agi  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.base_int  = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.base_wis  = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.base_cha  = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.alloc_str = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.alloc_sta = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.alloc_dex = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.alloc_agi = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.alloc_int = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.alloc_wis = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.alloc_cha = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -346,21 +347,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreatePointAllocations e{};
 
-			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.base_str  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.base_sta  = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.base_dex  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.base_agi  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.base_int  = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.base_wis  = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.base_cha  = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.alloc_str = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.alloc_sta = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.alloc_dex = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.alloc_agi = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.alloc_int = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.alloc_wis = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.alloc_cha = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -385,21 +386,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharCreatePointAllocations e{};
 
-			e.id        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.base_str  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.base_sta  = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.base_dex  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.base_agi  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.base_int  = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.base_wis  = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.base_cha  = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.alloc_str = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.alloc_sta = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.alloc_dex = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.alloc_agi = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.alloc_int = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.alloc_wis = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.alloc_cha = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -458,6 +459,90 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharCreatePointAllocations &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.base_str));
+		v.push_back(std::to_string(e.base_sta));
+		v.push_back(std::to_string(e.base_dex));
+		v.push_back(std::to_string(e.base_agi));
+		v.push_back(std::to_string(e.base_int));
+		v.push_back(std::to_string(e.base_wis));
+		v.push_back(std::to_string(e.base_cha));
+		v.push_back(std::to_string(e.alloc_str));
+		v.push_back(std::to_string(e.alloc_sta));
+		v.push_back(std::to_string(e.alloc_dex));
+		v.push_back(std::to_string(e.alloc_agi));
+		v.push_back(std::to_string(e.alloc_int));
+		v.push_back(std::to_string(e.alloc_wis));
+		v.push_back(std::to_string(e.alloc_cha));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharCreatePointAllocations> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.base_str));
+			v.push_back(std::to_string(e.base_sta));
+			v.push_back(std::to_string(e.base_dex));
+			v.push_back(std::to_string(e.base_agi));
+			v.push_back(std::to_string(e.base_int));
+			v.push_back(std::to_string(e.base_wis));
+			v.push_back(std::to_string(e.base_cha));
+			v.push_back(std::to_string(e.alloc_str));
+			v.push_back(std::to_string(e.alloc_sta));
+			v.push_back(std::to_string(e.alloc_dex));
+			v.push_back(std::to_string(e.alloc_agi));
+			v.push_back(std::to_string(e.alloc_int));
+			v.push_back(std::to_string(e.alloc_wis));
+			v.push_back(std::to_string(e.alloc_cha));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H

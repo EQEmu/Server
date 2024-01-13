@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_STATS_RECORD_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseCharacterStatsRecordRepository {
 public:
@@ -415,9 +414,9 @@ public:
 			e.class_                   = static_cast<int32_t>(atoi(row[4]));
 			e.race                     = static_cast<int32_t>(atoi(row[5]));
 			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
 			e.ac                       = static_cast<int32_t>(atoi(row[10]));
 			e.strength                 = static_cast<int32_t>(atoi(row[11]));
 			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
@@ -827,9 +826,9 @@ public:
 			e.class_                   = static_cast<int32_t>(atoi(row[4]));
 			e.race                     = static_cast<int32_t>(atoi(row[5]));
 			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
 			e.ac                       = static_cast<int32_t>(atoi(row[10]));
 			e.strength                 = static_cast<int32_t>(atoi(row[11]));
 			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
@@ -925,9 +924,9 @@ public:
 			e.class_                   = static_cast<int32_t>(atoi(row[4]));
 			e.race                     = static_cast<int32_t>(atoi(row[5]));
 			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
 			e.ac                       = static_cast<int32_t>(atoi(row[10]));
 			e.strength                 = static_cast<int32_t>(atoi(row[11]));
 			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
@@ -1050,6 +1049,208 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterStatsRecord &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.character_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.aa_points));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.endurance));
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.strength));
+		v.push_back(std::to_string(e.stamina));
+		v.push_back(std::to_string(e.dexterity));
+		v.push_back(std::to_string(e.agility));
+		v.push_back(std::to_string(e.intelligence));
+		v.push_back(std::to_string(e.wisdom));
+		v.push_back(std::to_string(e.charisma));
+		v.push_back(std::to_string(e.magic_resist));
+		v.push_back(std::to_string(e.fire_resist));
+		v.push_back(std::to_string(e.cold_resist));
+		v.push_back(std::to_string(e.poison_resist));
+		v.push_back(std::to_string(e.disease_resist));
+		v.push_back(std::to_string(e.corruption_resist));
+		v.push_back(std::to_string(e.heroic_strength));
+		v.push_back(std::to_string(e.heroic_stamina));
+		v.push_back(std::to_string(e.heroic_dexterity));
+		v.push_back(std::to_string(e.heroic_agility));
+		v.push_back(std::to_string(e.heroic_intelligence));
+		v.push_back(std::to_string(e.heroic_wisdom));
+		v.push_back(std::to_string(e.heroic_charisma));
+		v.push_back(std::to_string(e.heroic_magic_resist));
+		v.push_back(std::to_string(e.heroic_fire_resist));
+		v.push_back(std::to_string(e.heroic_cold_resist));
+		v.push_back(std::to_string(e.heroic_poison_resist));
+		v.push_back(std::to_string(e.heroic_disease_resist));
+		v.push_back(std::to_string(e.heroic_corruption_resist));
+		v.push_back(std::to_string(e.haste));
+		v.push_back(std::to_string(e.accuracy));
+		v.push_back(std::to_string(e.attack));
+		v.push_back(std::to_string(e.avoidance));
+		v.push_back(std::to_string(e.clairvoyance));
+		v.push_back(std::to_string(e.combat_effects));
+		v.push_back(std::to_string(e.damage_shield_mitigation));
+		v.push_back(std::to_string(e.damage_shield));
+		v.push_back(std::to_string(e.dot_shielding));
+		v.push_back(std::to_string(e.hp_regen));
+		v.push_back(std::to_string(e.mana_regen));
+		v.push_back(std::to_string(e.endurance_regen));
+		v.push_back(std::to_string(e.shielding));
+		v.push_back(std::to_string(e.spell_damage));
+		v.push_back(std::to_string(e.spell_shielding));
+		v.push_back(std::to_string(e.strikethrough));
+		v.push_back(std::to_string(e.stun_resist));
+		v.push_back(std::to_string(e.backstab));
+		v.push_back(std::to_string(e.wind));
+		v.push_back(std::to_string(e.brass));
+		v.push_back(std::to_string(e.string));
+		v.push_back(std::to_string(e.percussion));
+		v.push_back(std::to_string(e.singing));
+		v.push_back(std::to_string(e.baking));
+		v.push_back(std::to_string(e.alchemy));
+		v.push_back(std::to_string(e.tailoring));
+		v.push_back(std::to_string(e.blacksmithing));
+		v.push_back(std::to_string(e.fletching));
+		v.push_back(std::to_string(e.brewing));
+		v.push_back(std::to_string(e.jewelry));
+		v.push_back(std::to_string(e.pottery));
+		v.push_back(std::to_string(e.research));
+		v.push_back(std::to_string(e.alcohol));
+		v.push_back(std::to_string(e.fishing));
+		v.push_back(std::to_string(e.tinkering));
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterStatsRecord> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.character_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.aa_points));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.endurance));
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.strength));
+			v.push_back(std::to_string(e.stamina));
+			v.push_back(std::to_string(e.dexterity));
+			v.push_back(std::to_string(e.agility));
+			v.push_back(std::to_string(e.intelligence));
+			v.push_back(std::to_string(e.wisdom));
+			v.push_back(std::to_string(e.charisma));
+			v.push_back(std::to_string(e.magic_resist));
+			v.push_back(std::to_string(e.fire_resist));
+			v.push_back(std::to_string(e.cold_resist));
+			v.push_back(std::to_string(e.poison_resist));
+			v.push_back(std::to_string(e.disease_resist));
+			v.push_back(std::to_string(e.corruption_resist));
+			v.push_back(std::to_string(e.heroic_strength));
+			v.push_back(std::to_string(e.heroic_stamina));
+			v.push_back(std::to_string(e.heroic_dexterity));
+			v.push_back(std::to_string(e.heroic_agility));
+			v.push_back(std::to_string(e.heroic_intelligence));
+			v.push_back(std::to_string(e.heroic_wisdom));
+			v.push_back(std::to_string(e.heroic_charisma));
+			v.push_back(std::to_string(e.heroic_magic_resist));
+			v.push_back(std::to_string(e.heroic_fire_resist));
+			v.push_back(std::to_string(e.heroic_cold_resist));
+			v.push_back(std::to_string(e.heroic_poison_resist));
+			v.push_back(std::to_string(e.heroic_disease_resist));
+			v.push_back(std::to_string(e.heroic_corruption_resist));
+			v.push_back(std::to_string(e.haste));
+			v.push_back(std::to_string(e.accuracy));
+			v.push_back(std::to_string(e.attack));
+			v.push_back(std::to_string(e.avoidance));
+			v.push_back(std::to_string(e.clairvoyance));
+			v.push_back(std::to_string(e.combat_effects));
+			v.push_back(std::to_string(e.damage_shield_mitigation));
+			v.push_back(std::to_string(e.damage_shield));
+			v.push_back(std::to_string(e.dot_shielding));
+			v.push_back(std::to_string(e.hp_regen));
+			v.push_back(std::to_string(e.mana_regen));
+			v.push_back(std::to_string(e.endurance_regen));
+			v.push_back(std::to_string(e.shielding));
+			v.push_back(std::to_string(e.spell_damage));
+			v.push_back(std::to_string(e.spell_shielding));
+			v.push_back(std::to_string(e.strikethrough));
+			v.push_back(std::to_string(e.stun_resist));
+			v.push_back(std::to_string(e.backstab));
+			v.push_back(std::to_string(e.wind));
+			v.push_back(std::to_string(e.brass));
+			v.push_back(std::to_string(e.string));
+			v.push_back(std::to_string(e.percussion));
+			v.push_back(std::to_string(e.singing));
+			v.push_back(std::to_string(e.baking));
+			v.push_back(std::to_string(e.alchemy));
+			v.push_back(std::to_string(e.tailoring));
+			v.push_back(std::to_string(e.blacksmithing));
+			v.push_back(std::to_string(e.fletching));
+			v.push_back(std::to_string(e.brewing));
+			v.push_back(std::to_string(e.jewelry));
+			v.push_back(std::to_string(e.pottery));
+			v.push_back(std::to_string(e.research));
+			v.push_back(std::to_string(e.alcohol));
+			v.push_back(std::to_string(e.fishing));
+			v.push_back(std::to_string(e.tinkering));
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_STATS_RECORD_REPOSITORY_H

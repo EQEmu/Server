@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterPetInfoRepository {
 public:
 	struct CharacterPetInfo {
@@ -155,7 +154,7 @@ public:
 			e.spell_id = static_cast<int32_t>(atoi(row[4]));
 			e.hp       = static_cast<int32_t>(atoi(row[5]));
 			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
 			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			return e;
@@ -307,7 +306,7 @@ public:
 			e.spell_id = static_cast<int32_t>(atoi(row[4]));
 			e.hp       = static_cast<int32_t>(atoi(row[5]));
 			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
 			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);
@@ -340,7 +339,7 @@ public:
 			e.spell_id = static_cast<int32_t>(atoi(row[4]));
 			e.hp       = static_cast<int32_t>(atoi(row[5]));
 			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
 			e.taunting = static_cast<int8_t>(atoi(row[8]));
 
 			all_entries.push_back(e);

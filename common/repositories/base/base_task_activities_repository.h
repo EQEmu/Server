@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseTaskActivitiesRepository {
 public:
 	struct TaskActivities {
@@ -212,31 +211,31 @@ public:
 		if (results.RowCount() == 1) {
 			TaskActivities e{};
 
-			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.activityid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
-			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.activitytype         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.target_name          = row[5] ? row[5] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalmethod           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
 			e.npc_match_list       = row[9] ? row[9] : "";
 			e.item_id_list         = row[10] ? row[10] : "";
 			e.item_list            = row[11] ? row[11] : "";
 			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
-			e.min_x                = strtof(row[13], nullptr);
-			e.min_y                = strtof(row[14], nullptr);
-			e.min_z                = strtof(row[15], nullptr);
-			e.max_x                = strtof(row[16], nullptr);
-			e.max_y                = strtof(row[17], nullptr);
-			e.max_z                = strtof(row[18], nullptr);
+			e.min_x                = row[13] ? strtof(row[13], nullptr) : 0;
+			e.min_y                = row[14] ? strtof(row[14], nullptr) : 0;
+			e.min_z                = row[15] ? strtof(row[15], nullptr) : 0;
+			e.max_x                = row[16] ? strtof(row[16], nullptr) : 0;
+			e.max_y                = row[17] ? strtof(row[17], nullptr) : 0;
+			e.max_z                = row[18] ? strtof(row[18], nullptr) : 0;
 			e.skill_list           = row[19] ? row[19] : "";
 			e.spell_list           = row[20] ? row[20] : "";
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
-			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
+			e.list_group           = row[24] ? static_cast<uint8_t>(strtoul(row[24], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -428,31 +427,31 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TaskActivities e{};
 
-			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.activityid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
-			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.activitytype         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.target_name          = row[5] ? row[5] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalmethod           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
 			e.npc_match_list       = row[9] ? row[9] : "";
 			e.item_id_list         = row[10] ? row[10] : "";
 			e.item_list            = row[11] ? row[11] : "";
 			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
-			e.min_x                = strtof(row[13], nullptr);
-			e.min_y                = strtof(row[14], nullptr);
-			e.min_z                = strtof(row[15], nullptr);
-			e.max_x                = strtof(row[16], nullptr);
-			e.max_y                = strtof(row[17], nullptr);
-			e.max_z                = strtof(row[18], nullptr);
+			e.min_x                = row[13] ? strtof(row[13], nullptr) : 0;
+			e.min_y                = row[14] ? strtof(row[14], nullptr) : 0;
+			e.min_z                = row[15] ? strtof(row[15], nullptr) : 0;
+			e.max_x                = row[16] ? strtof(row[16], nullptr) : 0;
+			e.max_y                = row[17] ? strtof(row[17], nullptr) : 0;
+			e.max_z                = row[18] ? strtof(row[18], nullptr) : 0;
 			e.skill_list           = row[19] ? row[19] : "";
 			e.spell_list           = row[20] ? row[20] : "";
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
-			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
+			e.list_group           = row[24] ? static_cast<uint8_t>(strtoul(row[24], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -477,31 +476,31 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TaskActivities e{};
 
-			e.taskid               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.activityid           = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.taskid               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.activityid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.req_activity_id      = static_cast<int32_t>(atoi(row[2]));
 			e.step                 = static_cast<int32_t>(atoi(row[3]));
-			e.activitytype         = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.activitytype         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.target_name          = row[5] ? row[5] : "";
-			e.goalmethod           = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.goalmethod           = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.goalcount            = static_cast<int32_t>(atoi(row[7]));
 			e.description_override = row[8] ? row[8] : "";
 			e.npc_match_list       = row[9] ? row[9] : "";
 			e.item_id_list         = row[10] ? row[10] : "";
 			e.item_list            = row[11] ? row[11] : "";
 			e.dz_switch_id         = static_cast<int32_t>(atoi(row[12]));
-			e.min_x                = strtof(row[13], nullptr);
-			e.min_y                = strtof(row[14], nullptr);
-			e.min_z                = strtof(row[15], nullptr);
-			e.max_x                = strtof(row[16], nullptr);
-			e.max_y                = strtof(row[17], nullptr);
-			e.max_z                = strtof(row[18], nullptr);
+			e.min_x                = row[13] ? strtof(row[13], nullptr) : 0;
+			e.min_y                = row[14] ? strtof(row[14], nullptr) : 0;
+			e.min_z                = row[15] ? strtof(row[15], nullptr) : 0;
+			e.max_x                = row[16] ? strtof(row[16], nullptr) : 0;
+			e.max_y                = row[17] ? strtof(row[17], nullptr) : 0;
+			e.max_z                = row[18] ? strtof(row[18], nullptr) : 0;
 			e.skill_list           = row[19] ? row[19] : "";
 			e.spell_list           = row[20] ? row[20] : "";
 			e.zones                = row[21] ? row[21] : "";
 			e.zone_version         = static_cast<int32_t>(atoi(row[22]));
 			e.optional             = static_cast<int8_t>(atoi(row[23]));
-			e.list_group           = static_cast<uint8_t>(strtoul(row[24], nullptr, 10));
+			e.list_group           = row[24] ? static_cast<uint8_t>(strtoul(row[24], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}

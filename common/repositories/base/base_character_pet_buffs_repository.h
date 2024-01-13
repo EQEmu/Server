@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterPetBuffsRepository {
 public:
 	struct CharacterPetBuffs {
@@ -166,7 +165,7 @@ public:
 			e.counters       = static_cast<int32_t>(atoi(row[7]));
 			e.numhits        = static_cast<int32_t>(atoi(row[8]));
 			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			return e;
 		}
@@ -326,7 +325,7 @@ public:
 			e.counters       = static_cast<int32_t>(atoi(row[7]));
 			e.numhits        = static_cast<int32_t>(atoi(row[8]));
 			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -361,7 +360,7 @@ public:
 			e.counters       = static_cast<int32_t>(atoi(row[7]));
 			e.numhits        = static_cast<int32_t>(atoi(row[8]));
 			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);
 		}

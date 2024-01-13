@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_NPC_SCALE_GLOBAL_BASE_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseNpcScaleGlobalBaseRepository {
 public:
@@ -249,7 +248,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = strtoll(row[5], nullptr, 10);
+			e.hp                    = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -269,12 +268,12 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
-			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.hp_regen_rate         = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.hp_regen_per_second   = row[26] ? strtoll(row[26], nullptr, 10) : 0;
 			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
 			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
-			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.avoidance             = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
 			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
 			e.special_abilities     = row[32] ? row[32] : "";
 
@@ -497,7 +496,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = strtoll(row[5], nullptr, 10);
+			e.hp                    = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -517,12 +516,12 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
-			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.hp_regen_rate         = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.hp_regen_per_second   = row[26] ? strtoll(row[26], nullptr, 10) : 0;
 			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
 			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
-			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.avoidance             = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
 			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
 			e.special_abilities     = row[32] ? row[32] : "";
 
@@ -554,7 +553,7 @@ public:
 			e.zone_id_list          = row[2] ? row[2] : "";
 			e.instance_version_list = row[3] ? row[3] : "";
 			e.ac                    = static_cast<int32_t>(atoi(row[4]));
-			e.hp                    = strtoll(row[5], nullptr, 10);
+			e.hp                    = row[5] ? strtoll(row[5], nullptr, 10) : 0;
 			e.accuracy              = static_cast<int32_t>(atoi(row[6]));
 			e.slow_mitigation       = static_cast<int32_t>(atoi(row[7]));
 			e.attack                = static_cast<int32_t>(atoi(row[8]));
@@ -574,12 +573,12 @@ public:
 			e.physical_resist       = static_cast<int32_t>(atoi(row[22]));
 			e.min_dmg               = static_cast<int32_t>(atoi(row[23]));
 			e.max_dmg               = static_cast<int32_t>(atoi(row[24]));
-			e.hp_regen_rate         = strtoll(row[25], nullptr, 10);
-			e.hp_regen_per_second   = strtoll(row[26], nullptr, 10);
+			e.hp_regen_rate         = row[25] ? strtoll(row[25], nullptr, 10) : 0;
+			e.hp_regen_per_second   = row[26] ? strtoll(row[26], nullptr, 10) : 0;
 			e.attack_delay          = static_cast<int32_t>(atoi(row[27]));
 			e.spell_scale           = static_cast<int32_t>(atoi(row[28]));
 			e.heal_scale            = static_cast<int32_t>(atoi(row[29]));
-			e.avoidance             = static_cast<uint32_t>(strtoul(row[30], nullptr, 10));
+			e.avoidance             = row[30] ? static_cast<uint32_t>(strtoul(row[30], nullptr, 10)) : 0;
 			e.heroic_strikethrough  = static_cast<int32_t>(atoi(row[31]));
 			e.special_abilities     = row[32] ? row[32] : "";
 
@@ -640,6 +639,126 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const NpcScaleGlobalBase &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.level));
+		v.push_back("'" + Strings::Escape(e.zone_id_list) + "'");
+		v.push_back("'" + Strings::Escape(e.instance_version_list) + "'");
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.accuracy));
+		v.push_back(std::to_string(e.slow_mitigation));
+		v.push_back(std::to_string(e.attack));
+		v.push_back(std::to_string(e.strength));
+		v.push_back(std::to_string(e.stamina));
+		v.push_back(std::to_string(e.dexterity));
+		v.push_back(std::to_string(e.agility));
+		v.push_back(std::to_string(e.intelligence));
+		v.push_back(std::to_string(e.wisdom));
+		v.push_back(std::to_string(e.charisma));
+		v.push_back(std::to_string(e.magic_resist));
+		v.push_back(std::to_string(e.cold_resist));
+		v.push_back(std::to_string(e.fire_resist));
+		v.push_back(std::to_string(e.poison_resist));
+		v.push_back(std::to_string(e.disease_resist));
+		v.push_back(std::to_string(e.corruption_resist));
+		v.push_back(std::to_string(e.physical_resist));
+		v.push_back(std::to_string(e.min_dmg));
+		v.push_back(std::to_string(e.max_dmg));
+		v.push_back(std::to_string(e.hp_regen_rate));
+		v.push_back(std::to_string(e.hp_regen_per_second));
+		v.push_back(std::to_string(e.attack_delay));
+		v.push_back(std::to_string(e.spell_scale));
+		v.push_back(std::to_string(e.heal_scale));
+		v.push_back(std::to_string(e.avoidance));
+		v.push_back(std::to_string(e.heroic_strikethrough));
+		v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<NpcScaleGlobalBase> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.level));
+			v.push_back("'" + Strings::Escape(e.zone_id_list) + "'");
+			v.push_back("'" + Strings::Escape(e.instance_version_list) + "'");
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.accuracy));
+			v.push_back(std::to_string(e.slow_mitigation));
+			v.push_back(std::to_string(e.attack));
+			v.push_back(std::to_string(e.strength));
+			v.push_back(std::to_string(e.stamina));
+			v.push_back(std::to_string(e.dexterity));
+			v.push_back(std::to_string(e.agility));
+			v.push_back(std::to_string(e.intelligence));
+			v.push_back(std::to_string(e.wisdom));
+			v.push_back(std::to_string(e.charisma));
+			v.push_back(std::to_string(e.magic_resist));
+			v.push_back(std::to_string(e.cold_resist));
+			v.push_back(std::to_string(e.fire_resist));
+			v.push_back(std::to_string(e.poison_resist));
+			v.push_back(std::to_string(e.disease_resist));
+			v.push_back(std::to_string(e.corruption_resist));
+			v.push_back(std::to_string(e.physical_resist));
+			v.push_back(std::to_string(e.min_dmg));
+			v.push_back(std::to_string(e.max_dmg));
+			v.push_back(std::to_string(e.hp_regen_rate));
+			v.push_back(std::to_string(e.hp_regen_per_second));
+			v.push_back(std::to_string(e.attack_delay));
+			v.push_back(std::to_string(e.spell_scale));
+			v.push_back(std::to_string(e.heal_scale));
+			v.push_back(std::to_string(e.avoidance));
+			v.push_back(std::to_string(e.heroic_strikethrough));
+			v.push_back("'" + Strings::Escape(e.special_abilities) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_NPC_SCALE_GLOBAL_BASE_REPOSITORY_H

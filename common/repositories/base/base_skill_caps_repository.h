@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SKILL_CAPS_REPOSITORY_H
@@ -120,8 +120,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				skill_caps_id
 			)
 		);
@@ -130,11 +131,11 @@ public:
 		if (results.RowCount() == 1) {
 			SkillCaps e{};
 
-			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.skillID = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_  = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.level   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.cap     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.class_  = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -266,11 +267,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SkillCaps e{};
 
-			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.skillID = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_  = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.level   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.cap     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.class_  = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +296,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SkillCaps e{};
 
-			e.skillID = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.level   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.cap     = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.class_  = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
+			e.skillID = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_  = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.level   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.cap     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.class_  = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -358,6 +359,70 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SkillCaps &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.skillID));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.cap));
+		v.push_back(std::to_string(e.class_));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SkillCaps> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.skillID));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.cap));
+			v.push_back(std::to_string(e.class_));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SKILL_CAPS_REPOSITORY_H

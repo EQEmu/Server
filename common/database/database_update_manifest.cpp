@@ -5175,6 +5175,17 @@ ALTER TABLE `task_activities`
 )",
 		.content_schema_update = true
 	},
+	ManifestEntry{
+		.version = 9251,
+		.description = "2023_01_12_instance_list_notes.sql",
+		.check = "SHOW COLUMNS FROM `instance_list` LIKE 'notes'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `instance_list`
+	ADD COLUMN `notes` varchar(50) NOT NULL DEFAULT '' AFTER `never_expires`;
+)",
+	},
 
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

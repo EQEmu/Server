@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPELLS_NEW_REPOSITORY_H
@@ -28,7 +28,7 @@ public:
 		std::string cast_on_you;
 		std::string cast_on_other;
 		std::string spell_fades;
-		int32_t     range;
+		int32_t     range_;
 		int32_t     aoerange;
 		int32_t     pushback;
 		int32_t     pushup;
@@ -275,7 +275,7 @@ public:
 			"cast_on_you",
 			"cast_on_other",
 			"spell_fades",
-			"range",
+			"`range`",
 			"aoerange",
 			"pushback",
 			"pushup",
@@ -518,7 +518,7 @@ public:
 			"cast_on_you",
 			"cast_on_other",
 			"spell_fades",
-			"range",
+			"`range`",
 			"aoerange",
 			"pushback",
 			"pushup",
@@ -795,7 +795,7 @@ public:
 		e.cast_on_you          = "";
 		e.cast_on_other        = "";
 		e.spell_fades          = "";
-		e.range                = 100;
+		e.range_               = 100;
 		e.aoerange             = 0;
 		e.pushback             = 0;
 		e.pushup               = 0;
@@ -1048,8 +1048,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spells_new_id
 			)
 		);
@@ -1067,7 +1068,7 @@ public:
 			e.cast_on_you          = row[6] ? row[6] : "";
 			e.cast_on_other        = row[7] ? row[7] : "";
 			e.spell_fades          = row[8] ? row[8] : "";
-			e.range                = static_cast<int32_t>(atoi(row[9]));
+			e.range_               = static_cast<int32_t>(atoi(row[9]));
 			e.aoerange             = static_cast<int32_t>(atoi(row[10]));
 			e.pushback             = static_cast<int32_t>(atoi(row[11]));
 			e.pushup               = static_cast<int32_t>(atoi(row[12]));
@@ -1285,10 +1286,10 @@ public:
 			e.persistdeath         = static_cast<int32_t>(atoi(row[224]));
 			e.field225             = static_cast<int32_t>(atoi(row[225]));
 			e.field226             = static_cast<int32_t>(atoi(row[226]));
-			e.min_dist             = strtof(row[227], nullptr);
-			e.min_dist_mod         = strtof(row[228], nullptr);
-			e.max_dist             = strtof(row[229], nullptr);
-			e.max_dist_mod         = strtof(row[230], nullptr);
+			e.min_dist             = row[227] ? strtof(row[227], nullptr) : 0;
+			e.min_dist_mod         = row[228] ? strtof(row[228], nullptr) : 0;
+			e.max_dist             = row[229] ? strtof(row[229], nullptr) : 0;
+			e.max_dist_mod         = row[230] ? strtof(row[230], nullptr) : 0;
 			e.min_range            = static_cast<int32_t>(atoi(row[231]));
 			e.field232             = static_cast<int32_t>(atoi(row[232]));
 			e.field233             = static_cast<int32_t>(atoi(row[233]));
@@ -1337,7 +1338,7 @@ public:
 		v.push_back(columns[6] + " = '" + Strings::Escape(e.cast_on_you) + "'");
 		v.push_back(columns[7] + " = '" + Strings::Escape(e.cast_on_other) + "'");
 		v.push_back(columns[8] + " = '" + Strings::Escape(e.spell_fades) + "'");
-		v.push_back(columns[9] + " = " + std::to_string(e.range));
+		v.push_back(columns[9] + " = " + std::to_string(e.range_));
 		v.push_back(columns[10] + " = " + std::to_string(e.aoerange));
 		v.push_back(columns[11] + " = " + std::to_string(e.pushback));
 		v.push_back(columns[12] + " = " + std::to_string(e.pushup));
@@ -1595,7 +1596,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.cast_on_you) + "'");
 		v.push_back("'" + Strings::Escape(e.cast_on_other) + "'");
 		v.push_back("'" + Strings::Escape(e.spell_fades) + "'");
-		v.push_back(std::to_string(e.range));
+		v.push_back(std::to_string(e.range_));
 		v.push_back(std::to_string(e.aoerange));
 		v.push_back(std::to_string(e.pushback));
 		v.push_back(std::to_string(e.pushup));
@@ -1861,7 +1862,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.cast_on_you) + "'");
 			v.push_back("'" + Strings::Escape(e.cast_on_other) + "'");
 			v.push_back("'" + Strings::Escape(e.spell_fades) + "'");
-			v.push_back(std::to_string(e.range));
+			v.push_back(std::to_string(e.range_));
 			v.push_back(std::to_string(e.aoerange));
 			v.push_back(std::to_string(e.pushback));
 			v.push_back(std::to_string(e.pushup));
@@ -2131,7 +2132,7 @@ public:
 			e.cast_on_you          = row[6] ? row[6] : "";
 			e.cast_on_other        = row[7] ? row[7] : "";
 			e.spell_fades          = row[8] ? row[8] : "";
-			e.range                = static_cast<int32_t>(atoi(row[9]));
+			e.range_               = static_cast<int32_t>(atoi(row[9]));
 			e.aoerange             = static_cast<int32_t>(atoi(row[10]));
 			e.pushback             = static_cast<int32_t>(atoi(row[11]));
 			e.pushup               = static_cast<int32_t>(atoi(row[12]));
@@ -2349,10 +2350,10 @@ public:
 			e.persistdeath         = static_cast<int32_t>(atoi(row[224]));
 			e.field225             = static_cast<int32_t>(atoi(row[225]));
 			e.field226             = static_cast<int32_t>(atoi(row[226]));
-			e.min_dist             = strtof(row[227], nullptr);
-			e.min_dist_mod         = strtof(row[228], nullptr);
-			e.max_dist             = strtof(row[229], nullptr);
-			e.max_dist_mod         = strtof(row[230], nullptr);
+			e.min_dist             = row[227] ? strtof(row[227], nullptr) : 0;
+			e.min_dist_mod         = row[228] ? strtof(row[228], nullptr) : 0;
+			e.max_dist             = row[229] ? strtof(row[229], nullptr) : 0;
+			e.max_dist_mod         = row[230] ? strtof(row[230], nullptr) : 0;
 			e.min_range            = static_cast<int32_t>(atoi(row[231]));
 			e.field232             = static_cast<int32_t>(atoi(row[232]));
 			e.field233             = static_cast<int32_t>(atoi(row[233]));
@@ -2392,7 +2393,7 @@ public:
 			e.cast_on_you          = row[6] ? row[6] : "";
 			e.cast_on_other        = row[7] ? row[7] : "";
 			e.spell_fades          = row[8] ? row[8] : "";
-			e.range                = static_cast<int32_t>(atoi(row[9]));
+			e.range_               = static_cast<int32_t>(atoi(row[9]));
 			e.aoerange             = static_cast<int32_t>(atoi(row[10]));
 			e.pushback             = static_cast<int32_t>(atoi(row[11]));
 			e.pushup               = static_cast<int32_t>(atoi(row[12]));
@@ -2610,10 +2611,10 @@ public:
 			e.persistdeath         = static_cast<int32_t>(atoi(row[224]));
 			e.field225             = static_cast<int32_t>(atoi(row[225]));
 			e.field226             = static_cast<int32_t>(atoi(row[226]));
-			e.min_dist             = strtof(row[227], nullptr);
-			e.min_dist_mod         = strtof(row[228], nullptr);
-			e.max_dist             = strtof(row[229], nullptr);
-			e.max_dist_mod         = strtof(row[230], nullptr);
+			e.min_dist             = row[227] ? strtof(row[227], nullptr) : 0;
+			e.min_dist_mod         = row[228] ? strtof(row[228], nullptr) : 0;
+			e.max_dist             = row[229] ? strtof(row[229], nullptr) : 0;
+			e.max_dist_mod         = row[230] ? strtof(row[230], nullptr) : 0;
 			e.min_range            = static_cast<int32_t>(atoi(row[231]));
 			e.field232             = static_cast<int32_t>(atoi(row[232]));
 			e.field233             = static_cast<int32_t>(atoi(row[233]));
@@ -2678,6 +2679,534 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpellsNew &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.player_1) + "'");
+		v.push_back("'" + Strings::Escape(e.teleport_zone) + "'");
+		v.push_back("'" + Strings::Escape(e.you_cast) + "'");
+		v.push_back("'" + Strings::Escape(e.other_casts) + "'");
+		v.push_back("'" + Strings::Escape(e.cast_on_you) + "'");
+		v.push_back("'" + Strings::Escape(e.cast_on_other) + "'");
+		v.push_back("'" + Strings::Escape(e.spell_fades) + "'");
+		v.push_back(std::to_string(e.range_));
+		v.push_back(std::to_string(e.aoerange));
+		v.push_back(std::to_string(e.pushback));
+		v.push_back(std::to_string(e.pushup));
+		v.push_back(std::to_string(e.cast_time));
+		v.push_back(std::to_string(e.recovery_time));
+		v.push_back(std::to_string(e.recast_time));
+		v.push_back(std::to_string(e.buffdurationformula));
+		v.push_back(std::to_string(e.buffduration));
+		v.push_back(std::to_string(e.AEDuration));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.effect_base_value1));
+		v.push_back(std::to_string(e.effect_base_value2));
+		v.push_back(std::to_string(e.effect_base_value3));
+		v.push_back(std::to_string(e.effect_base_value4));
+		v.push_back(std::to_string(e.effect_base_value5));
+		v.push_back(std::to_string(e.effect_base_value6));
+		v.push_back(std::to_string(e.effect_base_value7));
+		v.push_back(std::to_string(e.effect_base_value8));
+		v.push_back(std::to_string(e.effect_base_value9));
+		v.push_back(std::to_string(e.effect_base_value10));
+		v.push_back(std::to_string(e.effect_base_value11));
+		v.push_back(std::to_string(e.effect_base_value12));
+		v.push_back(std::to_string(e.effect_limit_value1));
+		v.push_back(std::to_string(e.effect_limit_value2));
+		v.push_back(std::to_string(e.effect_limit_value3));
+		v.push_back(std::to_string(e.effect_limit_value4));
+		v.push_back(std::to_string(e.effect_limit_value5));
+		v.push_back(std::to_string(e.effect_limit_value6));
+		v.push_back(std::to_string(e.effect_limit_value7));
+		v.push_back(std::to_string(e.effect_limit_value8));
+		v.push_back(std::to_string(e.effect_limit_value9));
+		v.push_back(std::to_string(e.effect_limit_value10));
+		v.push_back(std::to_string(e.effect_limit_value11));
+		v.push_back(std::to_string(e.effect_limit_value12));
+		v.push_back(std::to_string(e.max1));
+		v.push_back(std::to_string(e.max2));
+		v.push_back(std::to_string(e.max3));
+		v.push_back(std::to_string(e.max4));
+		v.push_back(std::to_string(e.max5));
+		v.push_back(std::to_string(e.max6));
+		v.push_back(std::to_string(e.max7));
+		v.push_back(std::to_string(e.max8));
+		v.push_back(std::to_string(e.max9));
+		v.push_back(std::to_string(e.max10));
+		v.push_back(std::to_string(e.max11));
+		v.push_back(std::to_string(e.max12));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.memicon));
+		v.push_back(std::to_string(e.components1));
+		v.push_back(std::to_string(e.components2));
+		v.push_back(std::to_string(e.components3));
+		v.push_back(std::to_string(e.components4));
+		v.push_back(std::to_string(e.component_counts1));
+		v.push_back(std::to_string(e.component_counts2));
+		v.push_back(std::to_string(e.component_counts3));
+		v.push_back(std::to_string(e.component_counts4));
+		v.push_back(std::to_string(e.NoexpendReagent1));
+		v.push_back(std::to_string(e.NoexpendReagent2));
+		v.push_back(std::to_string(e.NoexpendReagent3));
+		v.push_back(std::to_string(e.NoexpendReagent4));
+		v.push_back(std::to_string(e.formula1));
+		v.push_back(std::to_string(e.formula2));
+		v.push_back(std::to_string(e.formula3));
+		v.push_back(std::to_string(e.formula4));
+		v.push_back(std::to_string(e.formula5));
+		v.push_back(std::to_string(e.formula6));
+		v.push_back(std::to_string(e.formula7));
+		v.push_back(std::to_string(e.formula8));
+		v.push_back(std::to_string(e.formula9));
+		v.push_back(std::to_string(e.formula10));
+		v.push_back(std::to_string(e.formula11));
+		v.push_back(std::to_string(e.formula12));
+		v.push_back(std::to_string(e.LightType));
+		v.push_back(std::to_string(e.goodEffect));
+		v.push_back(std::to_string(e.Activated));
+		v.push_back(std::to_string(e.resisttype));
+		v.push_back(std::to_string(e.effectid1));
+		v.push_back(std::to_string(e.effectid2));
+		v.push_back(std::to_string(e.effectid3));
+		v.push_back(std::to_string(e.effectid4));
+		v.push_back(std::to_string(e.effectid5));
+		v.push_back(std::to_string(e.effectid6));
+		v.push_back(std::to_string(e.effectid7));
+		v.push_back(std::to_string(e.effectid8));
+		v.push_back(std::to_string(e.effectid9));
+		v.push_back(std::to_string(e.effectid10));
+		v.push_back(std::to_string(e.effectid11));
+		v.push_back(std::to_string(e.effectid12));
+		v.push_back(std::to_string(e.targettype));
+		v.push_back(std::to_string(e.basediff));
+		v.push_back(std::to_string(e.skill));
+		v.push_back(std::to_string(e.zonetype));
+		v.push_back(std::to_string(e.EnvironmentType));
+		v.push_back(std::to_string(e.TimeOfDay));
+		v.push_back(std::to_string(e.classes1));
+		v.push_back(std::to_string(e.classes2));
+		v.push_back(std::to_string(e.classes3));
+		v.push_back(std::to_string(e.classes4));
+		v.push_back(std::to_string(e.classes5));
+		v.push_back(std::to_string(e.classes6));
+		v.push_back(std::to_string(e.classes7));
+		v.push_back(std::to_string(e.classes8));
+		v.push_back(std::to_string(e.classes9));
+		v.push_back(std::to_string(e.classes10));
+		v.push_back(std::to_string(e.classes11));
+		v.push_back(std::to_string(e.classes12));
+		v.push_back(std::to_string(e.classes13));
+		v.push_back(std::to_string(e.classes14));
+		v.push_back(std::to_string(e.classes15));
+		v.push_back(std::to_string(e.classes16));
+		v.push_back(std::to_string(e.CastingAnim));
+		v.push_back(std::to_string(e.TargetAnim));
+		v.push_back(std::to_string(e.TravelType));
+		v.push_back(std::to_string(e.SpellAffectIndex));
+		v.push_back(std::to_string(e.disallow_sit));
+		v.push_back(std::to_string(e.deities0));
+		v.push_back(std::to_string(e.deities1));
+		v.push_back(std::to_string(e.deities2));
+		v.push_back(std::to_string(e.deities3));
+		v.push_back(std::to_string(e.deities4));
+		v.push_back(std::to_string(e.deities5));
+		v.push_back(std::to_string(e.deities6));
+		v.push_back(std::to_string(e.deities7));
+		v.push_back(std::to_string(e.deities8));
+		v.push_back(std::to_string(e.deities9));
+		v.push_back(std::to_string(e.deities10));
+		v.push_back(std::to_string(e.deities11));
+		v.push_back(std::to_string(e.deities12));
+		v.push_back(std::to_string(e.deities13));
+		v.push_back(std::to_string(e.deities14));
+		v.push_back(std::to_string(e.deities15));
+		v.push_back(std::to_string(e.deities16));
+		v.push_back(std::to_string(e.field142));
+		v.push_back(std::to_string(e.field143));
+		v.push_back(std::to_string(e.new_icon));
+		v.push_back(std::to_string(e.spellanim));
+		v.push_back(std::to_string(e.uninterruptable));
+		v.push_back(std::to_string(e.ResistDiff));
+		v.push_back(std::to_string(e.dot_stacking_exempt));
+		v.push_back(std::to_string(e.deleteable));
+		v.push_back(std::to_string(e.RecourseLink));
+		v.push_back(std::to_string(e.no_partial_resist));
+		v.push_back(std::to_string(e.field152));
+		v.push_back(std::to_string(e.field153));
+		v.push_back(std::to_string(e.short_buff_box));
+		v.push_back(std::to_string(e.descnum));
+		v.push_back(std::to_string(e.typedescnum));
+		v.push_back(std::to_string(e.effectdescnum));
+		v.push_back(std::to_string(e.effectdescnum2));
+		v.push_back(std::to_string(e.npc_no_los));
+		v.push_back(std::to_string(e.field160));
+		v.push_back(std::to_string(e.reflectable));
+		v.push_back(std::to_string(e.bonushate));
+		v.push_back(std::to_string(e.field163));
+		v.push_back(std::to_string(e.field164));
+		v.push_back(std::to_string(e.ldon_trap));
+		v.push_back(std::to_string(e.EndurCost));
+		v.push_back(std::to_string(e.EndurTimerIndex));
+		v.push_back(std::to_string(e.IsDiscipline));
+		v.push_back(std::to_string(e.field169));
+		v.push_back(std::to_string(e.field170));
+		v.push_back(std::to_string(e.field171));
+		v.push_back(std::to_string(e.field172));
+		v.push_back(std::to_string(e.HateAdded));
+		v.push_back(std::to_string(e.EndurUpkeep));
+		v.push_back(std::to_string(e.numhitstype));
+		v.push_back(std::to_string(e.numhits));
+		v.push_back(std::to_string(e.pvpresistbase));
+		v.push_back(std::to_string(e.pvpresistcalc));
+		v.push_back(std::to_string(e.pvpresistcap));
+		v.push_back(std::to_string(e.spell_category));
+		v.push_back(std::to_string(e.pvp_duration));
+		v.push_back(std::to_string(e.pvp_duration_cap));
+		v.push_back(std::to_string(e.pcnpc_only_flag));
+		v.push_back(std::to_string(e.cast_not_standing));
+		v.push_back(std::to_string(e.can_mgb));
+		v.push_back(std::to_string(e.nodispell));
+		v.push_back(std::to_string(e.npc_category));
+		v.push_back(std::to_string(e.npc_usefulness));
+		v.push_back(std::to_string(e.MinResist));
+		v.push_back(std::to_string(e.MaxResist));
+		v.push_back(std::to_string(e.viral_targets));
+		v.push_back(std::to_string(e.viral_timer));
+		v.push_back(std::to_string(e.nimbuseffect));
+		v.push_back(std::to_string(e.ConeStartAngle));
+		v.push_back(std::to_string(e.ConeStopAngle));
+		v.push_back(std::to_string(e.sneaking));
+		v.push_back(std::to_string(e.not_extendable));
+		v.push_back(std::to_string(e.field198));
+		v.push_back(std::to_string(e.field199));
+		v.push_back(std::to_string(e.suspendable));
+		v.push_back(std::to_string(e.viral_range));
+		v.push_back(std::to_string(e.songcap));
+		v.push_back(std::to_string(e.field203));
+		v.push_back(std::to_string(e.field204));
+		v.push_back(std::to_string(e.no_block));
+		v.push_back(std::to_string(e.field206));
+		v.push_back(std::to_string(e.spellgroup));
+		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.field209));
+		v.push_back(std::to_string(e.field210));
+		v.push_back(std::to_string(e.CastRestriction));
+		v.push_back(std::to_string(e.allowrest));
+		v.push_back(std::to_string(e.InCombat));
+		v.push_back(std::to_string(e.OutofCombat));
+		v.push_back(std::to_string(e.field215));
+		v.push_back(std::to_string(e.field216));
+		v.push_back(std::to_string(e.field217));
+		v.push_back(std::to_string(e.aemaxtargets));
+		v.push_back(std::to_string(e.maxtargets));
+		v.push_back(std::to_string(e.field220));
+		v.push_back(std::to_string(e.field221));
+		v.push_back(std::to_string(e.field222));
+		v.push_back(std::to_string(e.field223));
+		v.push_back(std::to_string(e.persistdeath));
+		v.push_back(std::to_string(e.field225));
+		v.push_back(std::to_string(e.field226));
+		v.push_back(std::to_string(e.min_dist));
+		v.push_back(std::to_string(e.min_dist_mod));
+		v.push_back(std::to_string(e.max_dist));
+		v.push_back(std::to_string(e.max_dist_mod));
+		v.push_back(std::to_string(e.min_range));
+		v.push_back(std::to_string(e.field232));
+		v.push_back(std::to_string(e.field233));
+		v.push_back(std::to_string(e.field234));
+		v.push_back(std::to_string(e.field235));
+		v.push_back(std::to_string(e.field236));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpellsNew> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.player_1) + "'");
+			v.push_back("'" + Strings::Escape(e.teleport_zone) + "'");
+			v.push_back("'" + Strings::Escape(e.you_cast) + "'");
+			v.push_back("'" + Strings::Escape(e.other_casts) + "'");
+			v.push_back("'" + Strings::Escape(e.cast_on_you) + "'");
+			v.push_back("'" + Strings::Escape(e.cast_on_other) + "'");
+			v.push_back("'" + Strings::Escape(e.spell_fades) + "'");
+			v.push_back(std::to_string(e.range_));
+			v.push_back(std::to_string(e.aoerange));
+			v.push_back(std::to_string(e.pushback));
+			v.push_back(std::to_string(e.pushup));
+			v.push_back(std::to_string(e.cast_time));
+			v.push_back(std::to_string(e.recovery_time));
+			v.push_back(std::to_string(e.recast_time));
+			v.push_back(std::to_string(e.buffdurationformula));
+			v.push_back(std::to_string(e.buffduration));
+			v.push_back(std::to_string(e.AEDuration));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.effect_base_value1));
+			v.push_back(std::to_string(e.effect_base_value2));
+			v.push_back(std::to_string(e.effect_base_value3));
+			v.push_back(std::to_string(e.effect_base_value4));
+			v.push_back(std::to_string(e.effect_base_value5));
+			v.push_back(std::to_string(e.effect_base_value6));
+			v.push_back(std::to_string(e.effect_base_value7));
+			v.push_back(std::to_string(e.effect_base_value8));
+			v.push_back(std::to_string(e.effect_base_value9));
+			v.push_back(std::to_string(e.effect_base_value10));
+			v.push_back(std::to_string(e.effect_base_value11));
+			v.push_back(std::to_string(e.effect_base_value12));
+			v.push_back(std::to_string(e.effect_limit_value1));
+			v.push_back(std::to_string(e.effect_limit_value2));
+			v.push_back(std::to_string(e.effect_limit_value3));
+			v.push_back(std::to_string(e.effect_limit_value4));
+			v.push_back(std::to_string(e.effect_limit_value5));
+			v.push_back(std::to_string(e.effect_limit_value6));
+			v.push_back(std::to_string(e.effect_limit_value7));
+			v.push_back(std::to_string(e.effect_limit_value8));
+			v.push_back(std::to_string(e.effect_limit_value9));
+			v.push_back(std::to_string(e.effect_limit_value10));
+			v.push_back(std::to_string(e.effect_limit_value11));
+			v.push_back(std::to_string(e.effect_limit_value12));
+			v.push_back(std::to_string(e.max1));
+			v.push_back(std::to_string(e.max2));
+			v.push_back(std::to_string(e.max3));
+			v.push_back(std::to_string(e.max4));
+			v.push_back(std::to_string(e.max5));
+			v.push_back(std::to_string(e.max6));
+			v.push_back(std::to_string(e.max7));
+			v.push_back(std::to_string(e.max8));
+			v.push_back(std::to_string(e.max9));
+			v.push_back(std::to_string(e.max10));
+			v.push_back(std::to_string(e.max11));
+			v.push_back(std::to_string(e.max12));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.memicon));
+			v.push_back(std::to_string(e.components1));
+			v.push_back(std::to_string(e.components2));
+			v.push_back(std::to_string(e.components3));
+			v.push_back(std::to_string(e.components4));
+			v.push_back(std::to_string(e.component_counts1));
+			v.push_back(std::to_string(e.component_counts2));
+			v.push_back(std::to_string(e.component_counts3));
+			v.push_back(std::to_string(e.component_counts4));
+			v.push_back(std::to_string(e.NoexpendReagent1));
+			v.push_back(std::to_string(e.NoexpendReagent2));
+			v.push_back(std::to_string(e.NoexpendReagent3));
+			v.push_back(std::to_string(e.NoexpendReagent4));
+			v.push_back(std::to_string(e.formula1));
+			v.push_back(std::to_string(e.formula2));
+			v.push_back(std::to_string(e.formula3));
+			v.push_back(std::to_string(e.formula4));
+			v.push_back(std::to_string(e.formula5));
+			v.push_back(std::to_string(e.formula6));
+			v.push_back(std::to_string(e.formula7));
+			v.push_back(std::to_string(e.formula8));
+			v.push_back(std::to_string(e.formula9));
+			v.push_back(std::to_string(e.formula10));
+			v.push_back(std::to_string(e.formula11));
+			v.push_back(std::to_string(e.formula12));
+			v.push_back(std::to_string(e.LightType));
+			v.push_back(std::to_string(e.goodEffect));
+			v.push_back(std::to_string(e.Activated));
+			v.push_back(std::to_string(e.resisttype));
+			v.push_back(std::to_string(e.effectid1));
+			v.push_back(std::to_string(e.effectid2));
+			v.push_back(std::to_string(e.effectid3));
+			v.push_back(std::to_string(e.effectid4));
+			v.push_back(std::to_string(e.effectid5));
+			v.push_back(std::to_string(e.effectid6));
+			v.push_back(std::to_string(e.effectid7));
+			v.push_back(std::to_string(e.effectid8));
+			v.push_back(std::to_string(e.effectid9));
+			v.push_back(std::to_string(e.effectid10));
+			v.push_back(std::to_string(e.effectid11));
+			v.push_back(std::to_string(e.effectid12));
+			v.push_back(std::to_string(e.targettype));
+			v.push_back(std::to_string(e.basediff));
+			v.push_back(std::to_string(e.skill));
+			v.push_back(std::to_string(e.zonetype));
+			v.push_back(std::to_string(e.EnvironmentType));
+			v.push_back(std::to_string(e.TimeOfDay));
+			v.push_back(std::to_string(e.classes1));
+			v.push_back(std::to_string(e.classes2));
+			v.push_back(std::to_string(e.classes3));
+			v.push_back(std::to_string(e.classes4));
+			v.push_back(std::to_string(e.classes5));
+			v.push_back(std::to_string(e.classes6));
+			v.push_back(std::to_string(e.classes7));
+			v.push_back(std::to_string(e.classes8));
+			v.push_back(std::to_string(e.classes9));
+			v.push_back(std::to_string(e.classes10));
+			v.push_back(std::to_string(e.classes11));
+			v.push_back(std::to_string(e.classes12));
+			v.push_back(std::to_string(e.classes13));
+			v.push_back(std::to_string(e.classes14));
+			v.push_back(std::to_string(e.classes15));
+			v.push_back(std::to_string(e.classes16));
+			v.push_back(std::to_string(e.CastingAnim));
+			v.push_back(std::to_string(e.TargetAnim));
+			v.push_back(std::to_string(e.TravelType));
+			v.push_back(std::to_string(e.SpellAffectIndex));
+			v.push_back(std::to_string(e.disallow_sit));
+			v.push_back(std::to_string(e.deities0));
+			v.push_back(std::to_string(e.deities1));
+			v.push_back(std::to_string(e.deities2));
+			v.push_back(std::to_string(e.deities3));
+			v.push_back(std::to_string(e.deities4));
+			v.push_back(std::to_string(e.deities5));
+			v.push_back(std::to_string(e.deities6));
+			v.push_back(std::to_string(e.deities7));
+			v.push_back(std::to_string(e.deities8));
+			v.push_back(std::to_string(e.deities9));
+			v.push_back(std::to_string(e.deities10));
+			v.push_back(std::to_string(e.deities11));
+			v.push_back(std::to_string(e.deities12));
+			v.push_back(std::to_string(e.deities13));
+			v.push_back(std::to_string(e.deities14));
+			v.push_back(std::to_string(e.deities15));
+			v.push_back(std::to_string(e.deities16));
+			v.push_back(std::to_string(e.field142));
+			v.push_back(std::to_string(e.field143));
+			v.push_back(std::to_string(e.new_icon));
+			v.push_back(std::to_string(e.spellanim));
+			v.push_back(std::to_string(e.uninterruptable));
+			v.push_back(std::to_string(e.ResistDiff));
+			v.push_back(std::to_string(e.dot_stacking_exempt));
+			v.push_back(std::to_string(e.deleteable));
+			v.push_back(std::to_string(e.RecourseLink));
+			v.push_back(std::to_string(e.no_partial_resist));
+			v.push_back(std::to_string(e.field152));
+			v.push_back(std::to_string(e.field153));
+			v.push_back(std::to_string(e.short_buff_box));
+			v.push_back(std::to_string(e.descnum));
+			v.push_back(std::to_string(e.typedescnum));
+			v.push_back(std::to_string(e.effectdescnum));
+			v.push_back(std::to_string(e.effectdescnum2));
+			v.push_back(std::to_string(e.npc_no_los));
+			v.push_back(std::to_string(e.field160));
+			v.push_back(std::to_string(e.reflectable));
+			v.push_back(std::to_string(e.bonushate));
+			v.push_back(std::to_string(e.field163));
+			v.push_back(std::to_string(e.field164));
+			v.push_back(std::to_string(e.ldon_trap));
+			v.push_back(std::to_string(e.EndurCost));
+			v.push_back(std::to_string(e.EndurTimerIndex));
+			v.push_back(std::to_string(e.IsDiscipline));
+			v.push_back(std::to_string(e.field169));
+			v.push_back(std::to_string(e.field170));
+			v.push_back(std::to_string(e.field171));
+			v.push_back(std::to_string(e.field172));
+			v.push_back(std::to_string(e.HateAdded));
+			v.push_back(std::to_string(e.EndurUpkeep));
+			v.push_back(std::to_string(e.numhitstype));
+			v.push_back(std::to_string(e.numhits));
+			v.push_back(std::to_string(e.pvpresistbase));
+			v.push_back(std::to_string(e.pvpresistcalc));
+			v.push_back(std::to_string(e.pvpresistcap));
+			v.push_back(std::to_string(e.spell_category));
+			v.push_back(std::to_string(e.pvp_duration));
+			v.push_back(std::to_string(e.pvp_duration_cap));
+			v.push_back(std::to_string(e.pcnpc_only_flag));
+			v.push_back(std::to_string(e.cast_not_standing));
+			v.push_back(std::to_string(e.can_mgb));
+			v.push_back(std::to_string(e.nodispell));
+			v.push_back(std::to_string(e.npc_category));
+			v.push_back(std::to_string(e.npc_usefulness));
+			v.push_back(std::to_string(e.MinResist));
+			v.push_back(std::to_string(e.MaxResist));
+			v.push_back(std::to_string(e.viral_targets));
+			v.push_back(std::to_string(e.viral_timer));
+			v.push_back(std::to_string(e.nimbuseffect));
+			v.push_back(std::to_string(e.ConeStartAngle));
+			v.push_back(std::to_string(e.ConeStopAngle));
+			v.push_back(std::to_string(e.sneaking));
+			v.push_back(std::to_string(e.not_extendable));
+			v.push_back(std::to_string(e.field198));
+			v.push_back(std::to_string(e.field199));
+			v.push_back(std::to_string(e.suspendable));
+			v.push_back(std::to_string(e.viral_range));
+			v.push_back(std::to_string(e.songcap));
+			v.push_back(std::to_string(e.field203));
+			v.push_back(std::to_string(e.field204));
+			v.push_back(std::to_string(e.no_block));
+			v.push_back(std::to_string(e.field206));
+			v.push_back(std::to_string(e.spellgroup));
+			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.field209));
+			v.push_back(std::to_string(e.field210));
+			v.push_back(std::to_string(e.CastRestriction));
+			v.push_back(std::to_string(e.allowrest));
+			v.push_back(std::to_string(e.InCombat));
+			v.push_back(std::to_string(e.OutofCombat));
+			v.push_back(std::to_string(e.field215));
+			v.push_back(std::to_string(e.field216));
+			v.push_back(std::to_string(e.field217));
+			v.push_back(std::to_string(e.aemaxtargets));
+			v.push_back(std::to_string(e.maxtargets));
+			v.push_back(std::to_string(e.field220));
+			v.push_back(std::to_string(e.field221));
+			v.push_back(std::to_string(e.field222));
+			v.push_back(std::to_string(e.field223));
+			v.push_back(std::to_string(e.persistdeath));
+			v.push_back(std::to_string(e.field225));
+			v.push_back(std::to_string(e.field226));
+			v.push_back(std::to_string(e.min_dist));
+			v.push_back(std::to_string(e.min_dist_mod));
+			v.push_back(std::to_string(e.max_dist));
+			v.push_back(std::to_string(e.max_dist_mod));
+			v.push_back(std::to_string(e.min_range));
+			v.push_back(std::to_string(e.field232));
+			v.push_back(std::to_string(e.field233));
+			v.push_back(std::to_string(e.field234));
+			v.push_back(std::to_string(e.field235));
+			v.push_back(std::to_string(e.field236));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPELLS_NEW_REPOSITORY_H

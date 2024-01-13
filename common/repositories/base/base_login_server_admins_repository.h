@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOGIN_SERVER_ADMINS_REPOSITORY_H
@@ -132,8 +132,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				login_server_admins_id
 			)
 		);
@@ -142,7 +143,7 @@ public:
 		if (results.RowCount() == 1) {
 			LoginServerAdmins e{};
 
-			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";
@@ -289,7 +290,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginServerAdmins e{};
 
-			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";
@@ -321,7 +322,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginServerAdmins e{};
 
-			e.id                      = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_name            = row[1] ? row[1] : "";
 			e.account_password        = row[2] ? row[2] : "";
 			e.first_name              = row[3] ? row[3] : "";
@@ -387,6 +388,76 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LoginServerAdmins &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.account_name) + "'");
+		v.push_back("'" + Strings::Escape(e.account_password) + "'");
+		v.push_back("'" + Strings::Escape(e.first_name) + "'");
+		v.push_back("'" + Strings::Escape(e.last_name) + "'");
+		v.push_back("'" + Strings::Escape(e.email) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LoginServerAdmins> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.account_name) + "'");
+			v.push_back("'" + Strings::Escape(e.account_password) + "'");
+			v.push_back("'" + Strings::Escape(e.first_name) + "'");
+			v.push_back("'" + Strings::Escape(e.last_name) + "'");
+			v.push_back("'" + Strings::Escape(e.email) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOGIN_SERVER_ADMINS_REPOSITORY_H

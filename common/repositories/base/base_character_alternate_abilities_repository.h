@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterAlternateAbilitiesRepository {
 public:
 	struct CharacterAlternateAbilities {
@@ -128,10 +127,10 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.aa_id    = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.aa_value = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges  = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -260,10 +259,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.aa_id    = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.aa_value = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges  = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -288,10 +287,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAlternateAbilities e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.aa_id    = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.aa_value = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.charges  = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.aa_id    = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.aa_value = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges  = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}

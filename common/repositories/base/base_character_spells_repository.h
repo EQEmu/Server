@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterSpellsRepository {
 public:
 	struct CharacterSpells {
@@ -124,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterSpells e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot_id  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -251,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterSpells e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot_id  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -278,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterSpells e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot_id  = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot_id  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
