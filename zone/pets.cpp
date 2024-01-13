@@ -391,13 +391,15 @@ bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_pow
 		return false;
 	}
 
-	r->npc_type     = l[0].npcID;
-	r->temporary    = l[0].temp;
-	r->petpower     = l[0].petpower;
-	r->petcontrol   = l[0].petcontrol;
-	r->petnaming    = l[0].petnaming;
-	r->monsterflag  = l[0].monsterflag;
-	r->equipmentset = l[0].equipmentset;
+	auto e = l.front();
+
+	r->npc_type     = e.npcID;
+	r->temporary    = e.temp;
+	r->petpower     = e.petpower;
+	r->petcontrol   = e.petcontrol;
+	r->petnaming    = e.petnaming;
+	r->monsterflag  = e.monsterflag;
+	r->equipmentset = e.equipmentset;
 
 	return true;
 }
