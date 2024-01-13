@@ -2534,22 +2534,6 @@ void ZoneDatabase::LoadMercenaryEquipment(Merc* m)
 	}
 }
 
-uint8 ZoneDatabase::GetGridType(uint32 grid, uint32 zoneid ) {
-
-	std::string query = StringFormat("SELECT type FROM grid WHERE id = %i AND zoneid = %i", grid, zoneid);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        return 0;
-	}
-
-    if (results.RowCount() != 1)
-        return 0;
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
-}
-
 void ZoneDatabase::SaveMerchantTemp(uint32 npcid, uint32 slot, uint32 zone_id, uint32 instance_id, uint32 item, uint32 charges){
 
 	std::string query = StringFormat("REPLACE INTO merchantlist_temp (npcid, slot, zone_id, instance_id, itemid, charges) "
