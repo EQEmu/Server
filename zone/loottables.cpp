@@ -637,7 +637,7 @@ void ZoneDatabase::LoadGlobalLoot()
 	const auto& l = GlobalLootRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`enabled` = 1{}",
+			"`enabled` = 1 {}",
 			ContentFilterCriteria::apply()
 		)
 	);
