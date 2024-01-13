@@ -489,11 +489,11 @@ void EntityList::MobProcess()
 			if (
 				numclients == 0 &&
 				old_client_count > 0 &&
-				RuleI(Zone, SecondsBeforeIdle) > 0
+				zone->seconds_before_idle > 0
 			) {
 				// Start Timer to allow any mobs that chased chars from zone
 				// to return home.
-				mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
+				mob_settle_timer->Start(zone->seconds_before_idle * 1000);
 			}
 
 			old_client_count = numclients;

@@ -4753,6 +4753,16 @@ uint8 lua_get_zone_idle_when_empty(uint32 zone_id, int version)
 	return zone_store.GetZoneIdleWhenEmpty(zone_id, version);
 }
 
+uint32 lua_get_zone_seconds_before_idle(uint32 zone_id)
+{
+	return zone_store.GetZoneSecondsBeforeIdle(zone_id);
+}
+
+uint32 lua_get_zone_seconds_before_idle(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSecondsBeforeIdle(zone_id, version);
+}
+
 void lua_send_channel_message(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
 {
 	quest_manager.SendChannelMessage(channel_number, guild_id, language_id, language_skill, message);
@@ -6046,6 +6056,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_minimum_lava_damage", (int(*)(uint32,int))&lua_get_zone_minimum_lava_damage),
 		luabind::def("get_zone_idle_when_empty", (uint8(*)(uint32))&lua_get_zone_idle_when_empty),
 		luabind::def("get_zone_idle_when_empty", (uint8(*)(uint32,int))&lua_get_zone_idle_when_empty),
+		luabind::def("get_zone_seconds_before_idle", (uint32(*)(uint32))&lua_get_zone_seconds_before_idle),
+		luabind::def("get_zone_seconds_before_idle", (uint32(*)(uint32,int))&lua_get_zone_seconds_before_idle),
 		luabind::def("send_channel_message", (void(*)(uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
 		luabind::def("send_channel_message", (void(*)(Lua_Client,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),
 		luabind::def("send_channel_message", (void(*)(Lua_Client,const char*,uint8,uint32,uint8,uint8,const char*))&lua_send_channel_message),

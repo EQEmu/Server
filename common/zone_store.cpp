@@ -1358,3 +1358,20 @@ uint8 ZoneStore::GetZoneIdleWhenEmpty(uint32 zone_id, int version)
 
 	return 1;
 }
+
+uint32 ZoneStore::GetZoneSecondsBeforeIdle(uint32 zone_id, int version)
+{
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id && z.version == version) {
+			return z.seconds_before_idle;
+		}
+	}
+
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id && z.version == 0) {
+			return z.seconds_before_idle;
+		}
+	}
+
+	return 60;
+}

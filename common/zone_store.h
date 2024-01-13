@@ -101,6 +101,7 @@ public:
 	int GetZoneLavaDamage(uint32 zone_id, int version = 0);
 	int GetZoneMinimumLavaDamage(uint32 zone_id, int version = 0);
 	uint8 GetZoneIdleWhenEmpty(uint32 zone_id, int version = 0);
+	uint32 GetZoneSecondsBeforeIdle(uint32 zone_id, int version = 0);
 
 private:
 	std::vector<ZoneRepository::Zone> m_zones;
