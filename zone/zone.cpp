@@ -1003,8 +1003,8 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		m_safe_points.y = z->safe_y;
 		m_safe_points.z = z->safe_z;
 		m_safe_points.w = z->safe_heading;
-		m_graveyard_id    = z->graveyard_id;
-		m_max_clients     = z->maxclients;
+		m_graveyard_id  = z->graveyard_id;
+		m_max_clients   = z->maxclients;
 		idle_when_empty = z->idle_when_empty;
 
 		if (z->file_name.empty()) {
