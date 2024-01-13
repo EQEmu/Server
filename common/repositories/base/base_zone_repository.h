@@ -466,7 +466,7 @@ public:
 		e.lava_damage               = 50;
 		e.min_lava_damage           = 10;
 		e.idle_when_empty           = 1;
-		e.seconds_before_idle       = 1;
+		e.seconds_before_idle       = 60;
 
 		return e;
 	}
@@ -600,7 +600,7 @@ public:
 			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
 
 			return e;
 		}
@@ -1107,7 +1107,7 @@ public:
 			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
 
 			all_entries.push_back(e);
 		}
@@ -1229,7 +1229,7 @@ public:
 			e.lava_damage               = row[94] ? static_cast<int32_t>(atoi(row[94])) : 50;
 			e.min_lava_damage           = row[95] ? static_cast<int32_t>(atoi(row[95])) : 10;
 			e.idle_when_empty           = row[96] ? static_cast<uint8_t>(strtoul(row[96], nullptr, 10)) : 1;
-			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 1;
+			e.seconds_before_idle       = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 60;
 
 			all_entries.push_back(e);
 		}
