@@ -2636,40 +2636,6 @@ void ZoneDatabase::RefreshGroupFromDB(Client *client){
 	group->SendMarkedNPCsToMember(client);
 }
 
-uint8 ZoneDatabase::GroupCount(uint32 groupid) {
-
-	std::string query = StringFormat("SELECT count(charid) FROM group_id WHERE groupid = %d", groupid);
-	auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return 0;
-    }
-
-    if (results.RowCount() == 0)
-        return 0;
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
-}
-
-uint8 ZoneDatabase::RaidGroupCount(uint32 raidid, uint32 groupid) {
-
-	std::string query = StringFormat("SELECT count(charid) FROM raid_members "
-                                    "WHERE raidid = %d AND groupid = %d;", raidid, groupid);
-    auto results = QueryDatabase(query);
-
-    if (!results.Success()) {
-        return 0;
-    }
-
-    if (results.RowCount() == 0)
-        return 0;
-
-    auto& row = results.begin();
-
-	return Strings::ToInt(row[0]);
- }
-
 int64 ZoneDatabase::GetBlockedSpellsCount(uint32 zone_id)
 {
 	return BlockedSpellsRepository::Count(
