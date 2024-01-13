@@ -1065,10 +1065,10 @@ public:
 	bool IsTargetLockPet() const { return type_of_pet == petTargetLock; }
 	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
 	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
-	void SetOwnerID(uint16 NewOwnerID);
+	void SetOwnerID(uint16 new_owner_id);
 	inline uint16 GetOwnerID() const { return ownerid; }
-	inline virtual bool HasOwner() { if(GetOwnerID()==0){return false;} return( entity_list.GetMob(GetOwnerID()) != 0); }
-	inline virtual bool IsPet() { return(HasOwner() && !IsMerc()); }
+	inline virtual bool HasOwner() { if (!GetOwnerID()){ return false; } return entity_list.GetMob(GetOwnerID()) != 0; }
+	inline virtual bool IsPet() { return HasOwner() && !IsMerc(); }
 	bool HasPet() const;
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
