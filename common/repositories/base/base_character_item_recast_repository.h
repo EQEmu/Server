@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterItemRecastRepository {
 public:
 	struct CharacterItemRecast {
@@ -124,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterItemRecast e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.recast_type = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.recast_type = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -252,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterItemRecast e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.recast_type = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.recast_type = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -279,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterItemRecast e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.recast_type = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.recast_type = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}

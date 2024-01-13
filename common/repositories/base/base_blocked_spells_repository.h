@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BLOCKED_SPELLS_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseBlockedSpellsRepository {
 public:
@@ -177,15 +176,15 @@ public:
 			BlockedSpells e{};
 
 			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.spellid                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.spellid                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.type                   = static_cast<int8_t>(atoi(row[2]));
 			e.zoneid                 = static_cast<int32_t>(atoi(row[3]));
-			e.x                      = strtof(row[4], nullptr);
-			e.y                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.x_diff                 = strtof(row[7], nullptr);
-			e.y_diff                 = strtof(row[8], nullptr);
-			e.z_diff                 = strtof(row[9], nullptr);
+			e.x                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.x_diff                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.y_diff                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.z_diff                 = row[9] ? strtof(row[9], nullptr) : 0;
 			e.message                = row[10] ? row[10] : "";
 			e.description            = row[11] ? row[11] : "";
 			e.min_expansion          = static_cast<int8_t>(atoi(row[12]));
@@ -356,15 +355,15 @@ public:
 			BlockedSpells e{};
 
 			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.spellid                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.spellid                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.type                   = static_cast<int8_t>(atoi(row[2]));
 			e.zoneid                 = static_cast<int32_t>(atoi(row[3]));
-			e.x                      = strtof(row[4], nullptr);
-			e.y                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.x_diff                 = strtof(row[7], nullptr);
-			e.y_diff                 = strtof(row[8], nullptr);
-			e.z_diff                 = strtof(row[9], nullptr);
+			e.x                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.x_diff                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.y_diff                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.z_diff                 = row[9] ? strtof(row[9], nullptr) : 0;
 			e.message                = row[10] ? row[10] : "";
 			e.description            = row[11] ? row[11] : "";
 			e.min_expansion          = static_cast<int8_t>(atoi(row[12]));
@@ -396,15 +395,15 @@ public:
 			BlockedSpells e{};
 
 			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.spellid                = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.spellid                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.type                   = static_cast<int8_t>(atoi(row[2]));
 			e.zoneid                 = static_cast<int32_t>(atoi(row[3]));
-			e.x                      = strtof(row[4], nullptr);
-			e.y                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.x_diff                 = strtof(row[7], nullptr);
-			e.y_diff                 = strtof(row[8], nullptr);
-			e.z_diff                 = strtof(row[9], nullptr);
+			e.x                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.x_diff                 = row[7] ? strtof(row[7], nullptr) : 0;
+			e.y_diff                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.z_diff                 = row[9] ? strtof(row[9], nullptr) : 0;
 			e.message                = row[10] ? row[10] : "";
 			e.description            = row[11] ? row[11] : "";
 			e.min_expansion          = static_cast<int8_t>(atoi(row[12]));
@@ -469,6 +468,92 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BlockedSpells &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.spellid));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.x_diff));
+		v.push_back(std::to_string(e.y_diff));
+		v.push_back(std::to_string(e.z_diff));
+		v.push_back("'" + Strings::Escape(e.message) + "'");
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BlockedSpells> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.spellid));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.x_diff));
+			v.push_back(std::to_string(e.y_diff));
+			v.push_back(std::to_string(e.z_diff));
+			v.push_back("'" + Strings::Escape(e.message) + "'");
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BLOCKED_SPELLS_REPOSITORY_H

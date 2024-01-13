@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterMaterialRepository {
 public:
 	struct CharacterMaterial {
@@ -140,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterMaterial e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.blue     = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.green    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.red      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.use_tint = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.color    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -283,13 +282,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMaterial e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.blue     = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.green    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.red      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.use_tint = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.color    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -314,13 +313,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterMaterial e{};
 
-			e.id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot     = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.blue     = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.green    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.red      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.use_tint = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.color    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			e.id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.blue     = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.green    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.red      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.use_tint = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.color    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}

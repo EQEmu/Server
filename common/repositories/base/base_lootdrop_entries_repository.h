@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOOTDROP_ENTRIES_REPOSITORY_H
@@ -144,8 +144,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				lootdrop_entries_id
 			)
 		);
@@ -154,17 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id           = static_cast<int32_t>(atoi(row[1]));
-			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.chance            = strtof(row[4], nullptr);
-			e.disabled_chance   = strtof(row[5], nullptr);
-			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
-			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
-			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
+			e.item_charges      = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.equip_item        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.chance            = row[4] ? strtof(row[4], nullptr) : 1;
+			e.disabled_chance   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.trivial_min_level = row[6] ? static_cast<uint16_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.trivial_max_level = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.multiplier        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 1;
+			e.npc_min_level     = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_max_level     = row[10] ? static_cast<uint16_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -314,17 +315,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id           = static_cast<int32_t>(atoi(row[1]));
-			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.chance            = strtof(row[4], nullptr);
-			e.disabled_chance   = strtof(row[5], nullptr);
-			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
-			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
-			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
+			e.item_charges      = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.equip_item        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.chance            = row[4] ? strtof(row[4], nullptr) : 1;
+			e.disabled_chance   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.trivial_min_level = row[6] ? static_cast<uint16_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.trivial_max_level = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.multiplier        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 1;
+			e.npc_min_level     = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_max_level     = row[10] ? static_cast<uint16_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +350,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries e{};
 
-			e.lootdrop_id       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.lootdrop_id       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id           = static_cast<int32_t>(atoi(row[1]));
-			e.item_charges      = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.equip_item        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.chance            = strtof(row[4], nullptr);
-			e.disabled_chance   = strtof(row[5], nullptr);
-			e.trivial_min_level = static_cast<uint16_t>(strtoul(row[6], nullptr, 10));
-			e.trivial_max_level = static_cast<uint16_t>(strtoul(row[7], nullptr, 10));
-			e.multiplier        = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.npc_min_level     = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.npc_max_level     = static_cast<uint16_t>(strtoul(row[10], nullptr, 10));
+			e.item_charges      = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.equip_item        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.chance            = row[4] ? strtof(row[4], nullptr) : 1;
+			e.disabled_chance   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.trivial_min_level = row[6] ? static_cast<uint16_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.trivial_max_level = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.multiplier        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 1;
+			e.npc_min_level     = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.npc_max_level     = row[10] ? static_cast<uint16_t>(strtoul(row[10], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -418,6 +419,82 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LootdropEntries &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.lootdrop_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.equip_item));
+		v.push_back(std::to_string(e.chance));
+		v.push_back(std::to_string(e.disabled_chance));
+		v.push_back(std::to_string(e.trivial_min_level));
+		v.push_back(std::to_string(e.trivial_max_level));
+		v.push_back(std::to_string(e.multiplier));
+		v.push_back(std::to_string(e.npc_min_level));
+		v.push_back(std::to_string(e.npc_max_level));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LootdropEntries> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.lootdrop_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.equip_item));
+			v.push_back(std::to_string(e.chance));
+			v.push_back(std::to_string(e.disabled_chance));
+			v.push_back(std::to_string(e.trivial_min_level));
+			v.push_back(std::to_string(e.trivial_max_level));
+			v.push_back(std::to_string(e.multiplier));
+			v.push_back(std::to_string(e.npc_min_level));
+			v.push_back(std::to_string(e.npc_max_level));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOOTDROP_ENTRIES_REPOSITORY_H

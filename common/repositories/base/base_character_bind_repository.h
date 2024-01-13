@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterBindRepository {
 public:
 	struct CharacterBind {
@@ -144,14 +143,14 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterBind e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot        = static_cast<int32_t>(atoi(row[1]));
-			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.x           = strtof(row[4], nullptr);
-			e.y           = strtof(row[5], nullptr);
-			e.z           = strtof(row[6], nullptr);
-			e.heading     = strtof(row[7], nullptr);
+			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.x           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading     = row[7] ? strtof(row[7], nullptr) : 0;
 
 			return e;
 		}
@@ -291,14 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBind e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot        = static_cast<int32_t>(atoi(row[1]));
-			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.x           = strtof(row[4], nullptr);
-			e.y           = strtof(row[5], nullptr);
-			e.z           = strtof(row[6], nullptr);
-			e.heading     = strtof(row[7], nullptr);
+			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.x           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading     = row[7] ? strtof(row[7], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -323,14 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterBind e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot        = static_cast<int32_t>(atoi(row[1]));
-			e.zone_id     = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.instance_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.x           = strtof(row[4], nullptr);
-			e.y           = strtof(row[5], nullptr);
-			e.z           = strtof(row[6], nullptr);
-			e.heading     = strtof(row[7], nullptr);
+			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.x           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading     = row[7] ? strtof(row[7], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}

@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GUILDS_REPOSITORY_H
@@ -28,6 +28,7 @@ public:
 		std::string motd_setter;
 		std::string channel;
 		std::string url;
+		uint32_t    favor;
 	};
 
 	static std::string PrimaryKey()
@@ -47,6 +48,7 @@ public:
 			"motd_setter",
 			"channel",
 			"url",
+			"favor",
 		};
 	}
 
@@ -62,6 +64,7 @@ public:
 			"motd_setter",
 			"channel",
 			"url",
+			"favor",
 		};
 	}
 
@@ -111,6 +114,7 @@ public:
 		e.motd_setter = "";
 		e.channel     = "";
 		e.url         = "";
+		e.favor       = 0;
 
 		return e;
 	}
@@ -136,8 +140,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				guilds_id
 			)
 		);
@@ -151,10 +156,11 @@ public:
 			e.leader      = static_cast<int32_t>(atoi(row[2]));
 			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.tribute     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";
+			e.favor       = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -196,6 +202,7 @@ public:
 		v.push_back(columns[6] + " = '" + Strings::Escape(e.motd_setter) + "'");
 		v.push_back(columns[7] + " = '" + Strings::Escape(e.channel) + "'");
 		v.push_back(columns[8] + " = '" + Strings::Escape(e.url) + "'");
+		v.push_back(columns[9] + " = " + std::to_string(e.favor));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -226,6 +233,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.motd_setter) + "'");
 		v.push_back("'" + Strings::Escape(e.channel) + "'");
 		v.push_back("'" + Strings::Escape(e.url) + "'");
+		v.push_back(std::to_string(e.favor));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -264,6 +272,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.motd_setter) + "'");
 			v.push_back("'" + Strings::Escape(e.channel) + "'");
 			v.push_back("'" + Strings::Escape(e.url) + "'");
+			v.push_back(std::to_string(e.favor));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -302,10 +311,11 @@ public:
 			e.leader      = static_cast<int32_t>(atoi(row[2]));
 			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.tribute     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";
+			e.favor       = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -335,10 +345,11 @@ public:
 			e.leader      = static_cast<int32_t>(atoi(row[2]));
 			e.minstatus   = static_cast<int16_t>(atoi(row[3]));
 			e.motd        = row[4] ? row[4] : "";
-			e.tribute     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.tribute     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.motd_setter = row[6] ? row[6] : "";
 			e.channel     = row[7] ? row[7] : "";
 			e.url         = row[8] ? row[8] : "";
+			e.favor       = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -397,6 +408,80 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Guilds &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.leader));
+		v.push_back(std::to_string(e.minstatus));
+		v.push_back("'" + Strings::Escape(e.motd) + "'");
+		v.push_back(std::to_string(e.tribute));
+		v.push_back("'" + Strings::Escape(e.motd_setter) + "'");
+		v.push_back("'" + Strings::Escape(e.channel) + "'");
+		v.push_back("'" + Strings::Escape(e.url) + "'");
+		v.push_back(std::to_string(e.favor));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Guilds> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.leader));
+			v.push_back(std::to_string(e.minstatus));
+			v.push_back("'" + Strings::Escape(e.motd) + "'");
+			v.push_back(std::to_string(e.tribute));
+			v.push_back("'" + Strings::Escape(e.motd_setter) + "'");
+			v.push_back("'" + Strings::Escape(e.channel) + "'");
+			v.push_back("'" + Strings::Escape(e.url) + "'");
+			v.push_back(std::to_string(e.favor));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GUILDS_REPOSITORY_H

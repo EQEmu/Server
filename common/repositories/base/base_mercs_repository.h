@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_MERCS_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseMercsRepository {
 public:
@@ -208,30 +207,30 @@ public:
 		if (results.RowCount() == 1) {
 			Mercs e{};
 
-			e.MercID           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.OwnerCharacterID = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.Slot             = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.MercID           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.OwnerCharacterID = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.Slot             = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.Name             = row[3] ? row[3] : "";
-			e.TemplateID       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.SuspendedTime    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.IsSuspended      = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.TimerRemaining   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.Gender           = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.MercSize         = strtof(row[9], nullptr);
-			e.StanceID         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.HP               = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.Mana             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.Endurance        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.Face             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.LuclinHairStyle  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.LuclinHairColor  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.LuclinEyeColor   = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.LuclinEyeColor2  = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.LuclinBeardColor = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.LuclinBeard      = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.DrakkinHeritage  = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.DrakkinTattoo    = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.DrakkinDetails   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
+			e.TemplateID       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.SuspendedTime    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.IsSuspended      = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.TimerRemaining   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.Gender           = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.MercSize         = row[9] ? strtof(row[9], nullptr) : 5;
+			e.StanceID         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.HP               = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.Mana             = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.Endurance        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.Face             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.LuclinHairStyle  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 1;
+			e.LuclinHairColor  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1;
+			e.LuclinEyeColor   = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 1;
+			e.LuclinEyeColor2  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.LuclinBeardColor = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.LuclinBeard      = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.DrakkinHeritage  = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.DrakkinTattoo    = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.DrakkinDetails   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -419,30 +418,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mercs e{};
 
-			e.MercID           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.OwnerCharacterID = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.Slot             = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.MercID           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.OwnerCharacterID = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.Slot             = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.Name             = row[3] ? row[3] : "";
-			e.TemplateID       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.SuspendedTime    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.IsSuspended      = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.TimerRemaining   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.Gender           = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.MercSize         = strtof(row[9], nullptr);
-			e.StanceID         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.HP               = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.Mana             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.Endurance        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.Face             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.LuclinHairStyle  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.LuclinHairColor  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.LuclinEyeColor   = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.LuclinEyeColor2  = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.LuclinBeardColor = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.LuclinBeard      = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.DrakkinHeritage  = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.DrakkinTattoo    = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.DrakkinDetails   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
+			e.TemplateID       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.SuspendedTime    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.IsSuspended      = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.TimerRemaining   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.Gender           = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.MercSize         = row[9] ? strtof(row[9], nullptr) : 5;
+			e.StanceID         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.HP               = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.Mana             = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.Endurance        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.Face             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.LuclinHairStyle  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 1;
+			e.LuclinHairColor  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1;
+			e.LuclinEyeColor   = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 1;
+			e.LuclinEyeColor2  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.LuclinBeardColor = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.LuclinBeard      = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.DrakkinHeritage  = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.DrakkinTattoo    = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.DrakkinDetails   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -467,30 +466,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mercs e{};
 
-			e.MercID           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.OwnerCharacterID = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.Slot             = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.MercID           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.OwnerCharacterID = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.Slot             = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.Name             = row[3] ? row[3] : "";
-			e.TemplateID       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.SuspendedTime    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.IsSuspended      = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.TimerRemaining   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.Gender           = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.MercSize         = strtof(row[9], nullptr);
-			e.StanceID         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.HP               = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.Mana             = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.Endurance        = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.Face             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.LuclinHairStyle  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.LuclinHairColor  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.LuclinEyeColor   = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.LuclinEyeColor2  = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.LuclinBeardColor = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.LuclinBeard      = static_cast<uint32_t>(strtoul(row[20], nullptr, 10));
-			e.DrakkinHeritage  = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.DrakkinTattoo    = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.DrakkinDetails   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
+			e.TemplateID       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.SuspendedTime    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.IsSuspended      = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.TimerRemaining   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.Gender           = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.MercSize         = row[9] ? strtof(row[9], nullptr) : 5;
+			e.StanceID         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.HP               = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.Mana             = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.Endurance        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.Face             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.LuclinHairStyle  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 1;
+			e.LuclinHairColor  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1;
+			e.LuclinEyeColor   = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 1;
+			e.LuclinEyeColor2  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.LuclinBeardColor = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.LuclinBeard      = row[20] ? static_cast<uint32_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.DrakkinHeritage  = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.DrakkinTattoo    = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.DrakkinDetails   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -549,6 +548,108 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Mercs &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.MercID));
+		v.push_back(std::to_string(e.OwnerCharacterID));
+		v.push_back(std::to_string(e.Slot));
+		v.push_back("'" + Strings::Escape(e.Name) + "'");
+		v.push_back(std::to_string(e.TemplateID));
+		v.push_back(std::to_string(e.SuspendedTime));
+		v.push_back(std::to_string(e.IsSuspended));
+		v.push_back(std::to_string(e.TimerRemaining));
+		v.push_back(std::to_string(e.Gender));
+		v.push_back(std::to_string(e.MercSize));
+		v.push_back(std::to_string(e.StanceID));
+		v.push_back(std::to_string(e.HP));
+		v.push_back(std::to_string(e.Mana));
+		v.push_back(std::to_string(e.Endurance));
+		v.push_back(std::to_string(e.Face));
+		v.push_back(std::to_string(e.LuclinHairStyle));
+		v.push_back(std::to_string(e.LuclinHairColor));
+		v.push_back(std::to_string(e.LuclinEyeColor));
+		v.push_back(std::to_string(e.LuclinEyeColor2));
+		v.push_back(std::to_string(e.LuclinBeardColor));
+		v.push_back(std::to_string(e.LuclinBeard));
+		v.push_back(std::to_string(e.DrakkinHeritage));
+		v.push_back(std::to_string(e.DrakkinTattoo));
+		v.push_back(std::to_string(e.DrakkinDetails));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Mercs> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.MercID));
+			v.push_back(std::to_string(e.OwnerCharacterID));
+			v.push_back(std::to_string(e.Slot));
+			v.push_back("'" + Strings::Escape(e.Name) + "'");
+			v.push_back(std::to_string(e.TemplateID));
+			v.push_back(std::to_string(e.SuspendedTime));
+			v.push_back(std::to_string(e.IsSuspended));
+			v.push_back(std::to_string(e.TimerRemaining));
+			v.push_back(std::to_string(e.Gender));
+			v.push_back(std::to_string(e.MercSize));
+			v.push_back(std::to_string(e.StanceID));
+			v.push_back(std::to_string(e.HP));
+			v.push_back(std::to_string(e.Mana));
+			v.push_back(std::to_string(e.Endurance));
+			v.push_back(std::to_string(e.Face));
+			v.push_back(std::to_string(e.LuclinHairStyle));
+			v.push_back(std::to_string(e.LuclinHairColor));
+			v.push_back(std::to_string(e.LuclinEyeColor));
+			v.push_back(std::to_string(e.LuclinEyeColor2));
+			v.push_back(std::to_string(e.LuclinBeardColor));
+			v.push_back(std::to_string(e.LuclinBeard));
+			v.push_back(std::to_string(e.DrakkinHeritage));
+			v.push_back(std::to_string(e.DrakkinTattoo));
+			v.push_back(std::to_string(e.DrakkinDetails));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_MERCS_REPOSITORY_H

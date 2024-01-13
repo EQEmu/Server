@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterAltCurrencyRepository {
 public:
 	struct CharacterAltCurrency {
@@ -124,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.char_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.currency_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.amount      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -252,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.char_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.currency_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.amount      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -279,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAltCurrency e{};
 
-			e.char_id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.currency_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.amount      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.char_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.currency_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.amount      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}

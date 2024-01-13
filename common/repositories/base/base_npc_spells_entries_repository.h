@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_NPC_SPELLS_ENTRIES_REPOSITORY_H
@@ -148,8 +148,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				npc_spells_entries_id
 			)
 		);
@@ -158,12 +159,12 @@ public:
 		if (results.RowCount() == 1) {
 			NpcSpellsEntries e{};
 
-			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id            = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
-			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.spellid       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.minlevel      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.maxlevel      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
 			e.manacost      = static_cast<int16_t>(atoi(row[6]));
 			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
 			e.priority      = static_cast<int16_t>(atoi(row[8]));
@@ -321,12 +322,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEntries e{};
 
-			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id            = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
-			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.spellid       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.minlevel      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.maxlevel      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
 			e.manacost      = static_cast<int16_t>(atoi(row[6]));
 			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
 			e.priority      = static_cast<int16_t>(atoi(row[8]));
@@ -357,12 +358,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpellsEntries e{};
 
-			e.id            = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id            = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.npc_spells_id = static_cast<int32_t>(atoi(row[1]));
-			e.spellid       = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.type          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.minlevel      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.maxlevel      = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
+			e.spellid       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.minlevel      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.maxlevel      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 255;
 			e.manacost      = static_cast<int16_t>(atoi(row[6]));
 			e.recast_delay  = static_cast<int32_t>(atoi(row[7]));
 			e.priority      = static_cast<int16_t>(atoi(row[8]));
@@ -427,6 +428,84 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const NpcSpellsEntries &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.npc_spells_id));
+		v.push_back(std::to_string(e.spellid));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.minlevel));
+		v.push_back(std::to_string(e.maxlevel));
+		v.push_back(std::to_string(e.manacost));
+		v.push_back(std::to_string(e.recast_delay));
+		v.push_back(std::to_string(e.priority));
+		v.push_back(std::to_string(e.resist_adjust));
+		v.push_back(std::to_string(e.min_hp));
+		v.push_back(std::to_string(e.max_hp));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<NpcSpellsEntries> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.npc_spells_id));
+			v.push_back(std::to_string(e.spellid));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.minlevel));
+			v.push_back(std::to_string(e.maxlevel));
+			v.push_back(std::to_string(e.manacost));
+			v.push_back(std::to_string(e.recast_delay));
+			v.push_back(std::to_string(e.priority));
+			v.push_back(std::to_string(e.resist_adjust));
+			v.push_back(std::to_string(e.min_hp));
+			v.push_back(std::to_string(e.max_hp));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_NPC_SPELLS_ENTRIES_REPOSITORY_H

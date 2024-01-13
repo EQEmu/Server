@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_PETITIONS_REPOSITORY_H
@@ -164,8 +164,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				petitions_id
 			)
 		);
@@ -174,8 +175,8 @@ public:
 		if (results.RowCount() == 1) {
 			Petitions e{};
 
-			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.dib          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.petid        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
@@ -189,7 +190,7 @@ public:
 			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
 			e.unavailables = static_cast<int32_t>(atoi(row[13]));
 			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
-			e.senttime     = strtoll(row[15], nullptr, 10);
+			e.senttime     = row[15] ? strtoll(row[15], nullptr, 10) : 0;
 
 			return e;
 		}
@@ -353,8 +354,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Petitions e{};
 
-			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.dib          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.petid        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
@@ -368,7 +369,7 @@ public:
 			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
 			e.unavailables = static_cast<int32_t>(atoi(row[13]));
 			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
-			e.senttime     = strtoll(row[15], nullptr, 10);
+			e.senttime     = row[15] ? strtoll(row[15], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -393,8 +394,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Petitions e{};
 
-			e.dib          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.petid        = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			e.dib          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.petid        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname     = row[2] ? row[2] : "";
 			e.accountname  = row[3] ? row[3] : "";
 			e.lastgm       = row[4] ? row[4] : "";
@@ -408,7 +409,7 @@ public:
 			e.checkouts    = static_cast<int32_t>(atoi(row[12]));
 			e.unavailables = static_cast<int32_t>(atoi(row[13]));
 			e.ischeckedout = static_cast<int8_t>(atoi(row[14]));
-			e.senttime     = strtoll(row[15], nullptr, 10);
+			e.senttime     = row[15] ? strtoll(row[15], nullptr, 10) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -467,6 +468,92 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Petitions &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.dib));
+		v.push_back(std::to_string(e.petid));
+		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back("'" + Strings::Escape(e.accountname) + "'");
+		v.push_back("'" + Strings::Escape(e.lastgm) + "'");
+		v.push_back("'" + Strings::Escape(e.petitiontext) + "'");
+		v.push_back("'" + Strings::Escape(e.gmtext) + "'");
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.urgency));
+		v.push_back(std::to_string(e.charclass));
+		v.push_back(std::to_string(e.charrace));
+		v.push_back(std::to_string(e.charlevel));
+		v.push_back(std::to_string(e.checkouts));
+		v.push_back(std::to_string(e.unavailables));
+		v.push_back(std::to_string(e.ischeckedout));
+		v.push_back(std::to_string(e.senttime));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Petitions> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.dib));
+			v.push_back(std::to_string(e.petid));
+			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back("'" + Strings::Escape(e.accountname) + "'");
+			v.push_back("'" + Strings::Escape(e.lastgm) + "'");
+			v.push_back("'" + Strings::Escape(e.petitiontext) + "'");
+			v.push_back("'" + Strings::Escape(e.gmtext) + "'");
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.urgency));
+			v.push_back(std::to_string(e.charclass));
+			v.push_back(std::to_string(e.charrace));
+			v.push_back(std::to_string(e.charlevel));
+			v.push_back(std::to_string(e.checkouts));
+			v.push_back(std::to_string(e.unavailables));
+			v.push_back(std::to_string(e.ischeckedout));
+			v.push_back(std::to_string(e.senttime));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_PETITIONS_REPOSITORY_H

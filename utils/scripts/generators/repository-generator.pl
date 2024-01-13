@@ -319,17 +319,17 @@ foreach my $table_to_generate (@tables) {
 
         if ($column_type =~ /unsigned/) {
             if ($data_type =~ /bigint/) {
-                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
-                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoull(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoull(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoull(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
             }
             elsif ($data_type =~ /int/) {
-                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
-                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(strtoul(row[%s], nullptr, 10));\n", $column_name_formatted, $struct_data_type, $index);
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(strtoul(row[%s], nullptr, 10)) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(strtoul(row[%s], nullptr, 10)) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
             }
         }
         elsif ($data_type =~ /bigint/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoll(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoll(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
         elsif ($data_type =~ /datetime/) {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
@@ -340,12 +340,12 @@ foreach my $table_to_generate (@tables) {
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
         }
         elsif ($data_type =~ /float|decimal/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtof(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtof(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtof(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
         elsif ($data_type =~ /double/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtod(row[%s], nullptr);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
         else {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
@@ -466,7 +466,7 @@ foreach my $table_to_generate (@tables) {
     $new_base_repository =~ s/\{\{INSERT_MANY_ENTRIES}}/$insert_many_entries/g;
     $new_base_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
     $new_base_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
-    $new_base_repository =~ s/\{\{ADDITIONAL_INCLUDES}}/$additional_includes/g;
+    $new_base_repository =~ s/\{\{ADDITIONAL_INCLUDES}}\n/$additional_includes/g;
 
     # Extended repository
     my $new_repository = $repository_template;

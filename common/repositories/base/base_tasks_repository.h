@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseTasksRepository {
 public:
 	struct Tasks {
@@ -228,32 +227,32 @@ public:
 		if (results.RowCount() == 1) {
 			Tasks e{};
 
-			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.type                  = static_cast<int8_t>(atoi(row[1]));
-			e.duration              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
 			e.reward_text           = row[6] ? row[6] : "";
 			e.reward_id_list        = row[7] ? row[7] : "";
-			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
-			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.repeatable            = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
 			e.faction_reward        = static_cast<int32_t>(atoi(row[19]));
 			e.completion_emote      = row[20] ? row[20] : "";
-			e.replay_timer_group    = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.replay_timer_seconds  = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.request_timer_group   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
 			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 			e.enabled               = static_cast<int16_t>(atoi(row[28]));
@@ -460,32 +459,32 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tasks e{};
 
-			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.type                  = static_cast<int8_t>(atoi(row[1]));
-			e.duration              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
 			e.reward_text           = row[6] ? row[6] : "";
 			e.reward_id_list        = row[7] ? row[7] : "";
-			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
-			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.repeatable            = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
 			e.faction_reward        = static_cast<int32_t>(atoi(row[19]));
 			e.completion_emote      = row[20] ? row[20] : "";
-			e.replay_timer_group    = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.replay_timer_seconds  = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.request_timer_group   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
 			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 			e.enabled               = static_cast<int16_t>(atoi(row[28]));
@@ -513,32 +512,32 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tasks e{};
 
-			e.id                    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.type                  = static_cast<int8_t>(atoi(row[1]));
-			e.duration              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.duration_code         = static_cast<int8_t>(atoi(row[3]));
 			e.title                 = row[4] ? row[4] : "";
 			e.description           = row[5] ? row[5] : "";
 			e.reward_text           = row[6] ? row[6] : "";
 			e.reward_id_list        = row[7] ? row[7] : "";
-			e.cash_reward           = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.exp_reward            = static_cast<int32_t>(atoi(row[9]));
-			e.reward_method         = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.reward_points         = static_cast<int32_t>(atoi(row[11]));
 			e.reward_point_type     = static_cast<int32_t>(atoi(row[12]));
-			e.min_level             = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.max_level             = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.level_spread          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.min_players           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.max_players           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.repeatable            = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
 			e.faction_reward        = static_cast<int32_t>(atoi(row[19]));
 			e.completion_emote      = row[20] ? row[20] : "";
-			e.replay_timer_group    = static_cast<uint32_t>(strtoul(row[21], nullptr, 10));
-			e.replay_timer_seconds  = static_cast<uint32_t>(strtoul(row[22], nullptr, 10));
-			e.request_timer_group   = static_cast<uint32_t>(strtoul(row[23], nullptr, 10));
-			e.request_timer_seconds = static_cast<uint32_t>(strtoul(row[24], nullptr, 10));
-			e.dz_template_id        = static_cast<uint32_t>(strtoul(row[25], nullptr, 10));
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
 			e.lock_activity_id      = static_cast<int32_t>(atoi(row[26]));
 			e.faction_amount        = static_cast<int32_t>(atoi(row[27]));
 			e.enabled               = static_cast<int16_t>(atoi(row[28]));
