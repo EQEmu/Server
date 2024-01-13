@@ -491,12 +491,38 @@ void EntityList::MobProcess()
 				old_client_count > 0 &&
 				zone->GetSecondsBeforeIdle() > 0
 			) {
-				// Start Timer to allow any mobs that chased chars from zone
-				// to return home.
+				if (!zone->IsIdle()) {
+					LogInfo(
+						"Zone will go into an idle state after [{}] second{}.",
+						zone->GetSecondsBeforeIdle(),
+						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+					);
+				}
+
 				mob_settle_timer->Start(zone->GetSecondsBeforeIdle() * 1000);
 			}
 
 			old_client_count = numclients;
+
+			if (numclients == 0 && mob_settle_timer->Check()) {
+				if (!zone->IsIdle()) {
+					LogInfo(
+						"Zone has gone idle after [{}] second{}.",
+						zone->GetSecondsBeforeIdle(),
+						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+					);
+
+					zone->SetIsIdle(true);
+				}
+			}
+
+			if (numclients > 0 && mob_settle_timer->Check()) {
+				if (zone->IsIdle()) {
+					LogInfo("Zone is no longer idle.");
+
+					zone->SetIsIdle(false);
+				}
+			}
 
 			// Disable settle timer if someone zones into empty zone
 			if (numclients > 0 || mob_settle_timer->Check()) {

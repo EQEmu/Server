@@ -3259,3 +3259,13 @@ void Zone::SetSecondsBeforeIdle(uint32 seconds_before_idle)
 {
 	Zone::m_seconds_before_idle = seconds_before_idle;
 }
+
+bool Zone::IsIdle() const
+{
+	return m_is_idle;
+}
+
+void Zone::SetIsIdle(bool m_is_idle)
+{
+	Zone::m_is_idle = m_is_idle;
+}
