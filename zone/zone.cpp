@@ -2646,18 +2646,22 @@ void Zone::ClearSpawnTimers()
 
 	iterator.Reset();
 
+	std::vector<std::string> respawn_ids;
+
 	while (iterator.MoreElements()) {
-		RespawnTimesRepository::DeleteWhere(
-			database,
-			fmt::format(
-				"`id` = {} AND `instance_id` = {}",
-				iterator.GetData()->GetID(),
-				GetInstanceID()
-			)
-		);
+		respawn_ids.emplace_back(std::to_string(iterator.GetData()->GetID()));
 
 		iterator.Advance();
 	}
+
+	RespawnTimesRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`instance_id` = {} AND `id` IN ({})",
+			GetInstanceID(),
+			Strings::Implode(", ", respawn_ids)
+		)
+	);
 }
 
 void Zone::LoadTickItems()

@@ -69,11 +69,13 @@ public:
 			return 0;
 		}
 
-		if ((l[0].start + l[0].duration) <= time_seconds) {
+		auto r = l.front();
+
+		if ((r.start + r.duration) <= time_seconds) {
 			return 0;
 		}
 
-		return ((l[0].start + l[0].duration) - time_seconds);
+		return ((r.start + r.duration) - time_seconds);
 	}
 };
 
