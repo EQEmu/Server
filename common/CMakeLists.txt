@@ -230,7 +230,6 @@ SET(repositories
     repositories/base/base_inventory_snapshots_repository.h
     repositories/base/base_ip_exemptions_repository.h
     repositories/base/base_items_repository.h
-    repositories/base/base_item_tick_repository.h
     repositories/base/base_ldon_trap_entries_repository.h
     repositories/base/base_ldon_trap_templates_repository.h
     repositories/base/base_level_exp_mods_repository.h
@@ -408,7 +407,6 @@ SET(repositories
     repositories/inventory_snapshots_repository.h
     repositories/ip_exemptions_repository.h
     repositories/items_repository.h
-    repositories/item_tick_repository.h
     repositories/ldon_trap_entries_repository.h
     repositories/ldon_trap_templates_repository.h
     repositories/level_exp_mods_repository.h

@@ -1219,7 +1219,6 @@ bool Zone::Init(bool is_static) {
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
 
 	LoadGrids();
-	LoadTickItems();
 
 	npc_scale_manager->LoadScaleData();
 
@@ -2662,34 +2661,6 @@ void Zone::ClearSpawnTimers()
 			Strings::Implode(", ", respawn_ids)
 		)
 	);
-}
-
-void Zone::LoadTickItems()
-{
-	tick_items.clear();
-
-    const std::string query = "SELECT it_itemid, it_chance, it_level, it_qglobal, it_bagslot FROM item_tick";
-    auto results = database.QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
-
-
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        if(Strings::ToInt(row[0]) == 0)
-            continue;
-
-        item_tick_struct ti_tmp;
-		ti_tmp.itemid = Strings::ToInt(row[0]);
-		ti_tmp.chance = Strings::ToInt(row[1]);
-		ti_tmp.level = Strings::ToInt(row[2]);
-		ti_tmp.bagslot = (int16)Strings::ToInt(row[4]);
-		ti_tmp.qglobal = std::string(row[3]);
-		tick_items[Strings::ToInt(row[0])] = ti_tmp;
-
-    }
-
-	LogInfo("Loaded [{}] item_tick entries", Strings::Commify(results.RowCount()));
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {

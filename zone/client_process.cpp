@@ -525,11 +525,6 @@ bool Client::Process() {
 				CalcBonuses();
 			}
 
-			if (ItemTickTimer.Check())
-			{
-				TickItemCheck();
-			}
-
 			if (ItemQuestTimer.Check())
 			{
 				ItemTimerCheck();
