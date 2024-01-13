@@ -104,7 +104,7 @@ void ShowZoneData(Client *c, const Seperator *sep)
 				zone->newzone_data.safe_x,
 				zone->newzone_data.safe_y,
 				zone->newzone_data.safe_z,
-				zone->newzone_data.safe_heading,
+				zone->newzone_data.safe_heading
 			)
 		)
 	);
