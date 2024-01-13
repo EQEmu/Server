@@ -516,16 +516,14 @@ void EntityList::MobProcess()
 				}
 			}
 
-			if (numclients > 0 && mob_settle_timer->Check()) {
+			// Disable settle timer if someone zones into empty zone
+			if (numclients > 0 || mob_settle_timer->Check()) {
 				if (zone->IsIdle()) {
 					LogInfo("Zone is no longer idle.");
 
 					zone->SetIsIdle(false);
 				}
-			}
 
-			// Disable settle timer if someone zones into empty zone
-			if (numclients > 0 || mob_settle_timer->Check()) {
 				mob_settle_timer->Disable();
 			}
 
