@@ -6203,10 +6203,7 @@ void Client::CheckLDoNHail(NPC* n)
 
 void Client::CheckEmoteHail(NPC* n, const char* message)
 {
-	if (
-		!Strings::BeginsWith(message, "hail") &&
-		!Strings::BeginsWith(message, "Hail")
-	) {
+	if (!Strings::BeginsWith(Strings::ToLower(message), "hail")) {
 		return;
 	}
 
@@ -6214,7 +6211,7 @@ void Client::CheckEmoteHail(NPC* n, const char* message)
 		return;
 	}
 
-	const auto emote_id = n->GetEmoteID();
+	const uint32 emote_id = n->GetEmoteID();
 	if (emote_id) {
 		n->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emote_id, this);
 	}

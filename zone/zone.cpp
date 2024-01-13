@@ -62,6 +62,7 @@
 #include "../common/repositories/ldon_trap_entries_repository.h"
 #include "../common/repositories/ldon_trap_templates_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
+#include "../common/repositories/npc_emotes_repository.h"
 #include "../common/serverinfo.h"
 
 #include <time.h>
@@ -2570,27 +2571,29 @@ void Zone::DoAdventureActions()
 
 }
 
-void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* NPCEmoteList)
+void Zone::LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v)
 {
+	v->clear();
 
-	NPCEmoteList->clear();
-    const std::string query = "SELECT emoteid, event_, type, text FROM npc_emotes";
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-        return;
-    }
+	const auto& l = NpcEmotesRepository::All(content_db);
 
-    for (auto row = results.begin(); row != results.end(); ++row)
-    {
-	    auto nes = new NPC_Emote_Struct;
-	    nes->emoteid = Strings::ToInt(row[0]);
-	    nes->event_ = Strings::ToInt(row[1]);
-	    nes->type = Strings::ToInt(row[2]);
-	    strn0cpy(nes->text, row[3], sizeof(nes->text));
-	    NPCEmoteList->push_back(nes);
-    }
+	for (const auto& e : l) {
+		auto n = new NPC_Emote_Struct;
 
-	LogInfo("Loaded [{}] npc emotes", Strings::Commify(results.RowCount()));
+		n->emoteid = e.emoteid;
+		n->event_  = e.event_;
+		n->type    = e.type;
+
+		strn0cpy(n->text, e.text.c_str(), sizeof(n->text));
+
+		v->push_back(n);
+	}
+
+	LogInfo(
+		"Loaded [{}] NPC Emote{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
 }
 

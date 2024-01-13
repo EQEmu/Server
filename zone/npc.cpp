@@ -1113,9 +1113,9 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool start_spawn_timer) {
-	const auto emote_id = GetEmoteID();
+	const uint32 emote_id = GetEmoteID();
 	if (emote_id) {
-		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
+		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emote_id);
 	}
 
 	if (IsNPC()) {
@@ -3070,72 +3070,75 @@ void NPC::SendPayload(int payload_id, std::string payload_value)
 	}
 }
 
-NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
-	std::vector<NPC_Emote_Struct *> emotes;
-	for (auto &e: zone->npc_emote_list) {
-		NPC_Emote_Struct *nes = e;
-		if (emoteid == nes->emoteid && event_ == nes->event_) {
-			emotes.push_back(e);
+NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emote_id, uint8 event_) {
+	std::vector<NPC_Emote_Struct*> emotes;
+
+	for (const auto &e : zone->npc_emote_list) {
+		auto nes = e;
+
+		if (nes->emoteid == emote_id && nes->event_ == event_) {
+			emotes.emplace_back(e);
 		}
 	}
 
 	if (emotes.empty()) {
 		return nullptr;
-	}
-	else if (emotes.size() == 1) {
-		return emotes[0];
+	} else if (emotes.size() == 1) {
+		return emotes.front();
 	}
 
-	int index = zone->random.Roll0(emotes.size());
+	const int index = zone->random.Roll0(emotes.size());
 
 	return emotes[index];
 }
 
-void NPC::DoNPCEmote(uint8 event_, uint32 emoteid, Mob* target)
+void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 {
-	if (emoteid == 0) {
+	if (!emote_id) {
 		return;
 	}
 
-	NPC_Emote_Struct *nes = GetNPCEmote(emoteid, event_);
-	if (nes == nullptr) {
+	auto e = GetNPCEmote(emote_id, event_);
+	if (!e) {
 		return;
 	}
 
-	std::string processed = nes->text;
+	std::string processed = e->text;
+
+	// Mob Variables
 	Strings::FindReplace(processed, "$mname", GetCleanName());
-	Strings::FindReplace(processed, "$mracep", GetRacePlural() = GetClass());
+	Strings::FindReplace(processed, "$mracep", GetRacePlural());
 	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
-	if (target) {
-		Strings::FindReplace(processed, "$name", target->GetCleanName());
-		Strings::FindReplace(processed, "$racep", GetRacePlural() = target->GetClass());
-		Strings::FindReplace(processed, "$race", GetPlayerRaceName(target->GetRace()));
-		Strings::FindReplace(processed, "$class", GetClassIDName(target->GetClass()));
-	}
-	else {
-		Strings::FindReplace(processed, "$name", "foe");
-		Strings::FindReplace(processed, "$race", "race");
-		Strings::FindReplace(processed, "$racep", "races");
-		Strings::FindReplace(processed, "$class", "class");
-	}
+	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
-	if (emoteid == nes->emoteid) {
-		if (event_ == EQ::constants::EmoteEventTypes::Hailed && target) {
-			DoQuestPause(target);
+	// Target Variables
+	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
+	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
+	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
+	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
+
+	if (emoteid == e->emoteid) {
+		if (event_ == EQ::constants::EmoteEventTypes::Hailed && t) {
+			DoQuestPause(t);
 		}
 
-		if (nes->type == 1) {
-			Emote("%s", processed.c_str());
-		}
-		else if (nes->type == 2) {
-			Shout("%s", processed.c_str());
-		}
-		else if (nes->type == 3) {
-			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, processed.c_str());
-		}
-		else {
-			Say("%s", processed.c_str());
+		if (e->type == EQ::constants::EmoteTypes::Say) {
+			Say(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Emote) {
+			Emote(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Shout) {
+			Shout(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Proximity) {
+			entity_list.MessageCloseString(
+				this,
+				true,
+				200,
+				Chat::NPCQuestSay,
+				GENERIC_STRING,
+				processed.c_str()
+			);
 		}
 	}
 }

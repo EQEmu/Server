@@ -1092,6 +1092,22 @@ void command_npcedit(Client *c, const Seperator *sep)
 			);
 			return;
 		}
+	} else if (!strcasecmp(sep->arg[1], "emoteid")) {
+		if (sep->IsNumber(2)) {
+			const uint32 emote_id = Strings::ToUnsignedInt(sep->arg[2]);
+			n.emoteid = emote_id;
+			d = fmt::format(
+				"{} now has an Emote ID of {}.",
+				npc_id_string,
+				Strings::Commify(emote_id)
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				"Usage: #npcedit emoteid [Emote ID] - Sets an NPC's Emote ID"
+			);
+			return;
+		}
 	} else if (!strcasecmp(sep->arg[1], "spellscale")) {
 		if (sep->IsNumber(2)) {
 			auto spell_scale = Strings::ToUnsignedInt(sep->arg[2]);
@@ -1720,6 +1736,7 @@ void SendNPCEditSubCommands(Client *c)
 	c->Message(Chat::White, "Usage: #npcedit version [Version] - Sets an NPC's Version");
 	c->Message(Chat::White, "Usage: #npcedit maxlevel [Max Level] - Sets an NPC's Maximum Level");
 	c->Message(Chat::White, "Usage: #npcedit scalerate [Scale Rate] - Sets an NPC's Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
+	c->Message(Chat::White, "Usage: #npcedit emoteid [Emote ID] - Sets an NPC's Emote ID");
 	c->Message(Chat::White, "Usage: #npcedit spellscale [Scale Rate] - Sets an NPC's Spell Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
 	c->Message(Chat::White, "Usage: #npcedit healscale [Scale Rate] - Sets an NPC's Heal Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
 	c->Message(Chat::White, "Usage: #npcedit no_target [Flag] - Sets an NPC's No Target Hotkey Flag [0 = Not Targetable with Target Hotkey, 1 = Targetable with Target Hotkey]");

@@ -350,6 +350,7 @@ namespace EQ
 		};
 
 		enum EmoteTypes : uint8 {
+			Say,
 			Emote,
 			Shout,
 			Proximity

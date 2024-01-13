@@ -274,7 +274,7 @@ public:
 	void LoadMercSpells();
 	void LoadMercTemplates();
 	void LoadNewMerchantData(uint32 merchantid);
-	void LoadNPCEmotes(std::vector<NPC_Emote_Struct *> *NPCEmoteList);
+	void LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v);
 	void LoadTempMerchantData();
 	void LoadVeteranRewards();
 	void LoadZoneDoors();
