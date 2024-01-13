@@ -54,6 +54,7 @@
 
 #include "repositories/zone_repository.h"
 #include "zone_store.h"
+#include "repositories/merchantlist_temp_repository.h"
 
 extern Client client;
 
@@ -1221,8 +1222,9 @@ void Database::GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus) {
 		*oStatus = Strings::ToInt(row[1]);
 }
 
-void Database::ClearMerchantTemp(){
-	QueryDatabase("DELETE FROM merchantlist_temp");
+void Database::ClearMerchantTemp()
+{
+	MerchantlistTempRepository::ClearTemporaryMerchantLists(*this);
 }
 
 bool Database::UpdateName(const char* oldname, const char* newname) {
