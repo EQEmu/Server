@@ -202,44 +202,45 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
+		if (!o) {
+			c->Message(Chat::White, "You do not have a valid selected object.");
+			return;
+		}
+
 		const uint32 object_id = o->GetDBID();
 
-		if (o) {
-			auto app = new EQApplicationPacket();
-			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(nullptr, app);
-			entity_list.RemoveObject(o->GetID());
-			safe_delete(app);
+		auto app = new EQApplicationPacket();
+		o->CreateDeSpawnPacket(app);
+		entity_list.QueueClients(nullptr, app);
+		entity_list.RemoveObject(o->GetID());
+		safe_delete(app);
 
-			const int deleted_object = ObjectRepository::DeleteWhere(
-				content_db,
+		const int deleted_object = ObjectRepository::DeleteWhere(
+			content_db,
+			fmt::format(
+				"id = {} AND zoneid = {} AND version = {}",
+				object_id,
+				zone->GetZoneID(),
+				zone->GetInstanceVersion()
+			)
+		);
+
+		if (deleted_object) {
+			c->Message(
+				Chat::White,
 				fmt::format(
-					"id = {} AND zoneid = {} AND version = {}",
-					object_id,
-					zone->GetZoneID(),
-					zone->GetInstanceVersion()
-				)
+					"Successfully deleted Object ID {}.",
+					object_id
+				).c_str()
 			);
-
-			if (deleted_object) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Successfully deleted Object ID {}.",
-						object_id
-					).c_str()
-				);
-			} else {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Failed to delete Object ID {}.",
-						object_id
-					).c_str()
-				);
-			}
-
-			return;
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to delete Object ID {}.",
+					object_id
+				).c_str()
+			);
 		}
 
 		const auto &e = ObjectRepository::GetWhere(
