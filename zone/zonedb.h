@@ -627,8 +627,8 @@ public:
 	bool	SetTrapData(Trap* trap, bool repopnow = false);
 
 	/* Time   */
-	uint32	GetZoneTZ(uint32 zoneid, uint32 version);
-	bool	SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz);
+	uint32	GetZoneTimezone(uint32 zoneid, uint32 version);
+	bool	SetZoneTimezone(uint32 zoneid, uint32 version, uint32 tz);
 
 	/* Group   */
 	void RefreshGroupFromDB(Client *c);

@@ -49,6 +49,7 @@
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
+#include "../common/repositories/zone_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -2574,35 +2575,27 @@ void ZoneDatabase::DeleteMerchantTemp(uint32 npc_id, uint32 slot_id, uint32 zone
 	);
 }
 
-//New functions for timezone
-uint32 ZoneDatabase::GetZoneTZ(uint32 zoneid, uint32 version) {
+uint32 ZoneDatabase::GetZoneTimezone(uint32 zone_id, uint32 instance_version)
+{
+	const auto& l = ZoneRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`zoneidnumber` = {} AND (`version` = {} OR `version` = 0) ORDER BY `version` DESC",
+			zone_id,
+			instance_version
+		)
+	);
 
-	std::string query = StringFormat("SELECT timezone FROM zone WHERE zoneidnumber = %i "
-                                    "AND (version = %i OR version = 0) ORDER BY version DESC",
-                                    zoneid, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return 0;
-    }
+	if (l.empty()) {
+		return 0;
+	}
 
-    if (results.RowCount() == 0)
-        return 0;
-
-    auto& row = results.begin();
-    return Strings::ToInt(row[0]);
+	return l[0].id ? l[0].timezone : 0;
 }
 
-bool ZoneDatabase::SetZoneTZ(uint32 zoneid, uint32 version, uint32 tz) {
-
-	std::string query = StringFormat("UPDATE zone SET timezone = %i "
-                                    "WHERE zoneidnumber = %i AND version = %i",
-                                    tz, zoneid, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-    }
-
-    return results.RowsAffected() == 1;
+bool ZoneDatabase::SetZoneTimezone(uint32 zone_id, uint32 instance_version, uint32 timezone)
+{
+	return ZoneRepository::SetTimeZone(*this, zone_id, instance_version, timezone);
 }
 
 void ZoneDatabase::RefreshGroupFromDB(Client *client){

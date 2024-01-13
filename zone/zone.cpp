@@ -1217,7 +1217,7 @@ bool Zone::Init(bool is_static) {
 	Expedition::CacheAllFromDatabase();
 
 	LogInfo("Loading timezone data");
-	zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
+	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
 
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
 
