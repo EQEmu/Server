@@ -411,10 +411,12 @@ void EntityList::RaidProcess()
 
 void EntityList::DoorProcess()
 {
-#ifdef IDLE_WHEN_EMPTY
-	if (numclients < 1)
-		return;
-#endif
+	if (zone && zone->IsIdleWhenEmpty()) {
+		if (numclients < 1) {
+			return;
+		}
+	}
+
 	if (door_list.empty()) {
 		door_timer.Disable();
 		return;
@@ -480,46 +482,76 @@ void EntityList::MobProcess()
 
 		size_t sz = mob_list.size();
 
-#ifdef IDLE_WHEN_EMPTY
-		static int old_client_count=0;
+		static int   old_client_count  = 0;
 		static Timer *mob_settle_timer = new Timer();
 
-		if (numclients == 0 && old_client_count > 0 &&
-			RuleI(Zone, SecondsBeforeIdle) > 0) {
-			// Start Timer to allow any mobs that chased chars from zone
-			// to return home.
-			mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
-		}
+		if (zone->IsIdleWhenEmpty()) {
+			if (
+				numclients == 0 &&
+				old_client_count > 0 &&
+				zone->GetSecondsBeforeIdle() > 0
+			) {
+				if (!zone->IsIdle()) {
+					LogInfo(
+						"Zone will go into an idle state after [{}] second{}.",
+						zone->GetSecondsBeforeIdle(),
+						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+					);
+				}
 
-		old_client_count = numclients;
+				mob_settle_timer->Start(zone->GetSecondsBeforeIdle() * 1000);
+			}
 
-		// Disable settle timer if someone zones into empty zone
-		if (numclients > 0 || mob_settle_timer->Check()) {
-			mob_settle_timer->Disable();
-		}
+			old_client_count = numclients;
 
-		Spawn2* s2 = mob->CastToNPC()->respawn2;
+			if (numclients == 0 && mob_settle_timer->Check()) {
+				if (!zone->IsIdle()) {
+					LogInfo(
+						"Zone has gone idle after [{}] second{}.",
+						zone->GetSecondsBeforeIdle(),
+						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+					);
 
-		// Perform normal mob processing if any of these are true:
-		//	-- zone is not empty
-		//	-- a quest has turned it on for this zone while zone is idle
-		//	-- the entity's spawn2 point is marked as path_while_zone_idle
-		//	-- the zone is newly empty and we're allowing mobs to settle
-		if (zone->process_mobs_while_empty || numclients > 0 ||
-			(s2 && s2->PathWhenZoneIdle()) || mob_settle_timer->Enabled()) {
+					zone->SetIsIdle(true);
+				}
+			}
+
+			// Disable settle timer if someone zones into empty zone
+			if (numclients > 0 || mob_settle_timer->Check()) {
+				if (zone->IsIdle()) {
+					LogInfo("Zone is no longer idle.");
+
+					zone->SetIsIdle(false);
+				}
+
+				mob_settle_timer->Disable();
+			}
+
+			Spawn2* s2 = mob->CastToNPC()->respawn2;
+
+			// Perform normal mob processing if any of these are true:
+			//	-- zone is not empty
+			//	-- a quest has turned it on for this zone while zone is idle
+			//	-- the entity's spawn2 point is marked as path_while_zone_idle
+			//	-- the zone is newly empty and we're allowing mobs to settle
+			if (
+				numclients > 0 ||
+				(s2 && s2->PathWhenZoneIdle()) ||
+				mob_settle_timer->Enabled()
+			) {
+				mob_dead = !mob->Process();
+			} else {
+				// spawn_events can cause spawns and deaths while zone empty.
+				// At the very least, process that.
+				mob_dead = mob->CastToNPC()->GetDepop();
+			}
+		} else {
 			mob_dead = !mob->Process();
 		}
-		else {
-			// spawn_events can cause spawns and deaths while zone empty.
-			// At the very least, process that.
-			mob_dead = mob->CastToNPC()->GetDepop();
-		}
-#else
-		mob_dead = !mob->Process();
-#endif
+
 		size_t a_sz = mob_list.size();
 
-		if(a_sz > sz) {
+		if (a_sz > sz) {
 			//increased size can potentially screw with iterators so reset it to current value
 			//if buckets are re-orderered we may skip a process here and there but since
 			//process happens so often it shouldn't matter much
@@ -529,30 +561,30 @@ void EntityList::MobProcess()
 			++it;
 		}
 
-		if(mob_dead) {
-			if(mob->IsMerc()) {
+		if (mob_dead) {
+			if (mob->IsMerc()) {
 				entity_list.RemoveMerc(id);
-			}
-			else if(mob->IsBot()) {
+			} else if (mob->IsBot()) {
 				entity_list.RemoveBot(id);
-			}
-			else if(mob->IsNPC()) {
+			} else if (mob->IsNPC()) {
 				entity_list.RemoveNPC(id);
-			}
-			else {
+			} else {
 #ifdef _WINDOWS
 				struct in_addr in;
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
-				Group *g = GetGroupByMob(mob);
-				if(g) {
+
+				Group* g = GetGroupByMob(mob);
+				if (g) {
 					g->DelMember(mob);
 				}
-				Raid *r = entity_list.GetRaidByClient(mob->CastToClient());
-				if(r) {
+
+				Raid* r = entity_list.GetRaidByClient(mob->CastToClient());
+				if (r) {
 					r->MemberZoned(mob->CastToClient());
 				}
+
 				entity_list.RemoveClient(id);
 			}
 

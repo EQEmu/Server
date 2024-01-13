@@ -933,12 +933,13 @@ void QuestManager::repopzone() {
 	}
 }
 
-void QuestManager::processmobswhilezoneempty(bool on) {
-	if(zone) {
-		zone->process_mobs_while_empty = on;
-	}
-	else {
-		LogQuests("QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file");
+void QuestManager::processmobswhilezoneempty(bool idle_when_empty) {
+	if (zone) {
+		zone->SetIdleWhenEmpty(idle_when_empty);
+	} else {
+		LogQuests(
+			"QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file"
+		);
 	}
 }
 
