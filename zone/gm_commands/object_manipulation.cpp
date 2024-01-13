@@ -242,55 +242,6 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 				).c_str()
 			);
 		}
-
-		const auto &e = ObjectRepository::GetWhere(
-			content_db,
-			fmt::format(
-				"id = {} AND zoneid = {} AND version = {} LIMIT 1",
-				object_id,
-				zone->GetZoneID(),
-				zone->GetInstanceVersion()
-			)
-		);
-
-		if (e[0].type == ObjectTypes::Temporary) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} is a temporarily spawned ground spawn or dropped item, which is not supported with #object. See the 'ground_spawns' table in the database.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
-
-		const int deleted_object = ObjectRepository::DeleteWhere(
-			content_db,
-			fmt::format(
-				"id = {} AND zoneid = {} AND version = {}",
-				object_id,
-				zone->GetZoneID(),
-				zone->GetInstanceVersion()
-			)
-		);
-
-		if (deleted_object) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Successfully deleted Object ID {}.",
-					object_id
-				).c_str()
-			);
-		} else {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Failed to delete Object ID {}.",
-					object_id
-				).c_str()
-			);
-		}
 	} else if (is_edit) {
 		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
