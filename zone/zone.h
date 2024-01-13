@@ -77,14 +77,6 @@ struct ZoneEXPModInfo {
 	float AAExpMod;
 };
 
-struct ItemTickStruct {
-	uint32      itemid;
-	uint32      chance;
-	uint32      level;
-	int16       bagslot;
-	std::string qglobal;
-};
-
 class Client;
 class Expedition;
 class Map;
