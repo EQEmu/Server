@@ -392,7 +392,7 @@ struct NewZone_Struct {
 /*0724*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
 /*0728*/	uint32 lava_damage; // Seen 50
 /*0732*/	uint32 min_lava_damage; // Seen 10
-/*0736*/
+/*0736*/	float safe_heading;
 };
 
 /*

@@ -3817,71 +3817,73 @@ std::string QuestManager::GetEncounter() const {
 }
 
 void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
-	if (strcasecmp(type.c_str(), "ztype") == 0)
+	if (!strcasecmp(type.c_str(), "ztype"))
 		zone->newzone_data.ztype = Strings::ToInt(value);
-	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
+	else if (!strcasecmp(type.c_str(), "fog_red")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_red[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_green")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_green[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_blue")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_blue[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_minclip")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_minclip[i] = Strings::ToFloat(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_maxclip")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_maxclip[i] = Strings::ToFloat(value);
 		}
-	} else if (strcasecmp(type.c_str(), "gravity") == 0) {
+	} else if (!strcasecmp(type.c_str(), "gravity")) {
 		zone->newzone_data.gravity = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "time_type") == 0) {
+	} else if (!strcasecmp(type.c_str(), "time_type")) {
 		zone->newzone_data.time_type = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
+	} else if (!strcasecmp(type.c_str(), "rain_chance")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.rain_chance[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
+	} else if (!strcasecmp(type.c_str(), "rain_duration")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.rain_duration[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
+	} else if (!strcasecmp(type.c_str(), "snow_chance")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.snow_chance[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
+	} else if (!strcasecmp(type.c_str(), "snow_duration")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.snow_duration[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "sky") == 0) {
+	} else if (!strcasecmp(type.c_str(), "sky")) {
 		zone->newzone_data.sky = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "safe_x") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_x")) {
 		zone->newzone_data.safe_x = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "safe_y") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_y")) {
 		zone->newzone_data.safe_y = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "safe_z") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_z")) {
 		zone->newzone_data.safe_z = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "max_z") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_heading")) {
+		zone->newzone_data.safe_heading = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "max_z")) {
 		zone->newzone_data.max_z = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "underworld") == 0) {
+	} else if (!strcasecmp(type.c_str(), "underworld")) {
 		zone->newzone_data.underworld = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "minclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "minclip")) {
 		zone->newzone_data.minclip = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "maxclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "maxclip")) {
 		zone->newzone_data.maxclip = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "fog_density") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_density")) {
 		zone->newzone_data.fog_density = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "suspendbuffs") == 0) {
+	} else if (!strcasecmp(type.c_str(), "suspendbuffs")) {
 		zone->newzone_data.suspend_buffs = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "lavadamage") == 0) {
+	} else if (!strcasecmp(type.c_str(), "lavadamage")) {
 		zone->newzone_data.lava_damage = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "minlavadamage") == 0) {
+	} else if (!strcasecmp(type.c_str(), "minlavadamage")) {
 		zone->newzone_data.min_lava_damage = Strings::ToInt(value);
 	}
 

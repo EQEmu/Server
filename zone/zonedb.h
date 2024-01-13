@@ -519,7 +519,7 @@ public:
 	bool	LoadAlternateAdvancement(Client *c);
 
 	/* Zone related   */
-	bool		SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd);
+	bool		SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_Struct* zd);
 	bool		LoadStaticZonePoints(LinkedList<ZonePoint*>* zone_point_list,const char* zonename, uint32 version);
 	int			getZoneShutDownDelay(uint32 zoneID, uint32 version);
 

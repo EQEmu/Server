@@ -357,9 +357,10 @@ void SetZoneData(Client *c, const Seperator *sep)
 			database.QueryDatabase(query);
 		}
 
-		zone->newzone_data.safe_x = x;
-		zone->newzone_data.safe_y = y;
-		zone->newzone_data.safe_z = z;
+		zone->newzone_data.safe_x       = x;
+		zone->newzone_data.safe_y       = y;
+		zone->newzone_data.safe_z       = z;
+		zone->newzone_data.safe_heading = heading;
 
 		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
