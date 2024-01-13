@@ -100,10 +100,11 @@ void ShowZoneData(Client *c, const Seperator *sep)
 		DialogueWindow::TableCell("Safe Coordinates") +
 		DialogueWindow::TableCell(
 			fmt::format(
-				"{:.2f}, {:.2f}, {:.2f}",
+				"{:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
 				zone->newzone_data.safe_x,
 				zone->newzone_data.safe_y,
-				zone->newzone_data.safe_z
+				zone->newzone_data.safe_z,
+				zone->newzone_data.safe_heading,
 			)
 		)
 	);

@@ -115,6 +115,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_
 	e.safe_x              = zd->safe_x;
 	e.safe_y              = zd->safe_y;
 	e.safe_z              = zd->safe_z;
+	e.safe_heading        = zd->safe_heading;
 
 	return ZoneRepository::UpdateOne(*this, e);
 }

@@ -1365,6 +1365,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	newzone_data.safe_x                    = z->safe_x;
 	newzone_data.safe_y                    = z->safe_y;
 	newzone_data.safe_z                    = z->safe_z;
+	newzone_data.safe_heading              = z->safe_heading;
 	newzone_data.underworld                = z->underworld;
 	newzone_data.minclip                   = z->minclip;
 	newzone_data.maxclip                   = z->maxclip;
