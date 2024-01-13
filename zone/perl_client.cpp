@@ -1413,7 +1413,7 @@ void Perl_Client_EndSharedTask(Client* self, bool send_fail)
 	return self->EndSharedTask(send_fail);
 }
 
-uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
+int64_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
 }

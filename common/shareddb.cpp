@@ -45,6 +45,7 @@
 #include "path_manager.h"
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
+#include "repositories/character_corpses_repository.h"
 
 namespace ItemField
 {
@@ -1667,27 +1668,18 @@ EQ::ItemInstance* SharedDatabase::CreateBaseItem(const EQ::ItemData* item, int16
 	return inst;
 }
 
-int32 SharedDatabase::DeleteStalePlayerCorpses() {
-	if(RuleB(Zone, EnableShadowrest)) {
-		const std::string query = StringFormat(
-			"UPDATE `character_corpses` SET `is_buried` = 1 WHERE `is_buried` = 0 AND "
-            "(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d AND NOT time_of_death = 0",
-             (RuleI(Character, CorpseDecayTimeMS) / 1000));
-		const auto results = QueryDatabase(query);
-		if (!results.Success())
-			return -1;
-
-		return results.RowsAffected();
-	}
-
-	const std::string query = StringFormat(
-		"DELETE FROM `character_corpses` WHERE (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > %d "
-		"AND NOT time_of_death = 0", (RuleI(Character, CorpseDecayTimeMS) / 1000));
-	const auto results = QueryDatabase(query);
-    if (!results.Success())
-        return -1;
-
-    return results.RowsAffected();
+int SharedDatabase::DeleteStalePlayerCorpses() {
+	return (
+		RuleB(Zone, EnableShadowrest) ?
+		CharacterCorpsesRepository::BuryDecayedCorpses(*this) :
+		CharacterCorpsesRepository::DeleteWhere(
+			*this,
+			fmt::format(
+				"(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
+				RuleI(Character, CorpseDecayTimeMS) / 1000
+			)
+		)
+	);
 }
 
 bool SharedDatabase::GetCommandSettings(std::map<std::string, std::pair<uint8, std::vector<std::string>>> &command_settings)

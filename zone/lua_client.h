@@ -361,7 +361,7 @@ public:
 	void LockSharedTask(bool lock);
 	void EndSharedTask();
 	void EndSharedTask(bool send_fail);
-	int GetCorpseCount();
+	int64 GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
 	void AssignToInstance(int instance_id);
