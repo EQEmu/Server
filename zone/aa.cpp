@@ -1898,7 +1898,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(
 			continue;
 		}
 
-		if (ranks.count(e.rank_id)) {
+		if (ranks.count(e.rank_id) > 0) {
 			AA::Rank* r = ranks[e.rank_id].get();
 			r->effects.push_back(f);
 		}
