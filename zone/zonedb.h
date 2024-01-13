@@ -458,10 +458,14 @@ public:
 
 	void ZeroPlayerProfileCurrency(PlayerProfile_Struct* pp);
 
-	double GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
-	double GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version = -1) const;
-	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version = -1);
-	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version = -1);
+	/* EXP Modifiers */
+	void LoadCharacterEXPModifier(Client* c);
+	void SaveCharacterEXPModifier(Client *c);
+
+	float GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1);
+	float GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version = -1);
+	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, float aa_modifier, int16 instance_version = -1);
+	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, float exp_modifier, int16 instance_version = -1);
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const std::string& name);

@@ -248,6 +248,9 @@ public:
 	bool IsEXPEnabled() const;
 	void SetEXPEnabled(bool is_exp_enabled);
 
+	std::vector<EXPModifier> GetEXPModifiers();
+	void SetEXPModifiers(std::vector<EXPModifier> exp_modifiers);
+
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
@@ -602,10 +605,10 @@ public:
 
 	inline uint32 GetEXP() const { return m_pp.exp; }
 
-	inline double GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1) const { return database.GetAAEXPModifier(CharacterID(), zone_id, instance_version); };
-	inline double GetEXPModifier(uint32 zone_id, int16 instance_version = -1) const { return database.GetEXPModifier(CharacterID(), zone_id, instance_version); };
-	inline void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version = -1) { database.SetAAEXPModifier(CharacterID(), zone_id, aa_modifier, instance_version); };
-	inline void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version = -1) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier, instance_version); };
+	float GetAAEXPModifier(uint32 zone_id, int16 instance_version = -1);
+	float GetEXPModifier(uint32 zone_id, int16 instance_version = -1);
+	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version = -1);
+	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version = -1);
 
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetLDoNPoints(uint32 theme_id, uint32 points);
@@ -1952,6 +1955,8 @@ public:
 private:
 
 	bool m_exp_enabled;
+
+	std::vector<EXPModifier> m_exp_modifiers;
 
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;

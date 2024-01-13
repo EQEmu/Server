@@ -45,6 +45,7 @@
 #include "../common/repositories/merc_subtypes_repository.h"
 #include "../common/repositories/npc_types_tint_repository.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
+#include "../common/repositories/character_exp_modifiers_repository.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_corpses_repository.h"
 #include "../common/repositories/character_corpse_items_repository.h"
@@ -4233,98 +4234,6 @@ bool ZoneDatabase::DeleteCharacterCorpse(uint32 corpse_id)
 	return CharacterCorpsesRepository::DeleteOne(*this, corpse_id);
 }
 
-double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	const std::string query = fmt::format(
-		SQL(
-			SELECT
-			`aa_modifier`
-			FROM
-			`character_exp_modifiers`
-			WHERE
-			`character_id` = {}
-			AND
-			(`zone_id` = {} OR `zone_id` = 0) AND
-			(`instance_version` = {} OR `instance_version` = -1)
-			ORDER BY `zone_id`, `instance_version` DESC
-			LIMIT 1
-		),
-		character_id,
-		zone_id,
-		instance_version
-	);
-
-	auto results = database.QueryDatabase(query);
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToFloat(row[0]);
-	}
-
-	return 1.0f;
-}
-
-double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	const std::string query = fmt::format(
-		SQL(
-			SELECT
-			`exp_modifier`
-			FROM
-			`character_exp_modifiers`
-			WHERE
-			`character_id` = {}
-			AND
-			(`zone_id` = {} OR `zone_id` = 0) AND
-			(`instance_version` = {} OR `instance_version` = -1)
-			ORDER BY `zone_id`, `instance_version` DESC
-			LIMIT 1
-		),
-		character_id,
-		zone_id,
-		instance_version
-	);
-
-	auto results = database.QueryDatabase(query);
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		return Strings::ToFloat(row[0]);
-	}
-
-	return 1.0f;
-}
-
-void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
-	float exp_modifier = GetEXPModifier(character_id, zone_id, instance_version);
-	std::string query = fmt::format(
-		SQL(
-			REPLACE INTO
-			`character_exp_modifiers`
-			VALUES
-			({}, {}, {}, {}, {})
-		),
-		character_id,
-		zone_id,
-		instance_version,
-		aa_modifier,
-		exp_modifier
-	);
-	database.QueryDatabase(query);
-}
-
-void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
-	float aa_modifier = GetAAEXPModifier(character_id, zone_id, instance_version);
-	std::string query = fmt::format(
-		SQL(
-			REPLACE INTO
-			`character_exp_modifiers`
-			VALUES
-			({}, {}, {}, {}, {})
-		),
-		character_id,
-		zone_id,
-		instance_version,
-		aa_modifier,
-		exp_modifier
-	);
-	database.QueryDatabase(query);
-}
-
 void ZoneDatabase::UpdateGMStatus(uint32 account_id, int new_status)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
@@ -4425,4 +4334,110 @@ void ZoneDatabase::ZeroPlayerProfileCurrency(PlayerProfile_Struct* pp)
 	if (pp->copper_cursor < 0) {
 		pp->copper_cursor = 0;
 	}
+}
+
+float ZoneDatabase::GetAAEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	int16 instance_version
+)
+{
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version
+	);
+
+	return m.aa_modifier;
+}
+
+float ZoneDatabase::GetEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	int16 instance_version
+)
+{
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version
+	);
+
+	return m.exp_modifier;
+}
+
+void ZoneDatabase::SetAAEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	float aa_modifier,
+	int16 instance_version
+)
+{
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version,
+		EXPModifier{
+			.aa_modifier = aa_modifier,
+			.exp_modifier = -1.0f
+		}
+	);
+}
+
+void ZoneDatabase::SetEXPModifierByCharID(
+	uint32 character_id,
+	uint32 zone_id,
+	float exp_modifier,
+	int16 instance_version
+)
+{
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
+		zone_id,
+		instance_version,
+		EXPModifier{
+			.aa_modifier = -1.0f,
+			.exp_modifier = exp_modifier
+		}
+	);
+}
+
+void ZoneDatabase::LoadCharacterEXPModifier(Client* c)
+{
+	if (!zone) {
+		return;
+	}
+
+	EXPModifier m = CharacterExpModifiersRepository::GetEXPModifier(
+		*this,
+		c->CharacterID(),
+		zone->GetZoneID(),
+		zone->GetInstanceVersion()
+	);
+
+	zone->exp_modifiers[c->CharacterID()] = m;
+}
+
+void ZoneDatabase::SaveCharacterEXPModifier(Client* c)
+{
+	if (!zone) {
+		return;
+	}
+
+	EXPModifier m = zone->exp_modifiers[c->CharacterID()];
+
+	CharacterExpModifiersRepository::ReplaceOne(
+		*this,
+		CharacterExpModifiersRepository::CharacterExpModifiers{
+			.character_id = static_cast<int32_t>(c->CharacterID()),
+			.zone_id = static_cast<int32_t>(zone->GetZoneID()),
+			.instance_version = zone->GetInstanceVersion(),
+			.aa_modifier = m.aa_modifier,
+			.exp_modifier = m.exp_modifier
+		}
+	);
 }

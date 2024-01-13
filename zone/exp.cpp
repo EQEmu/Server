@@ -183,7 +183,7 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 		}
 
 		if (RuleB(Character, EnableCharacterEXPMods)) {
-			in_add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+			in_add_exp *= zone->GetEXPModifier(this);
 		}
 	}
 
@@ -317,7 +317,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_aaxp *= GetAAEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+		add_aaxp *= zone->GetAAEXPModifier(this);
 	}
 
 	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
@@ -480,7 +480,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+		add_exp *= zone->GetEXPModifier(this);
 	}
 
 	//Enforce Percent XP Cap per kill, if rule is enabled

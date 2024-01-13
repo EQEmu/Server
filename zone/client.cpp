@@ -388,6 +388,10 @@ Client::~Client() {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
+	if (zone) {
+		zone->ClearEXPModifier(this);
+	}
+
 	if(IsInAGuild())
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
 
@@ -741,6 +745,8 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
+
+	database.SaveCharacterEXPModifier(this);
 
 	return true;
 }
@@ -11950,4 +11956,46 @@ void Client::ClearXTargets()
 			SendXTargetPacket(i, nullptr);
 		}
 	}
+}
+
+float Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version)
+{
+	return database.GetAAEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
+}
+
+float Client::GetEXPModifier(uint32 zone_id, int16 instance_version)
+{
+	return database.GetEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
+}
+
+void Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version)
+{
+	database.SetAAEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		aa_modifier,
+		instance_version
+	);
+
+	database.LoadCharacterEXPModifier(this);
+}
+
+void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version)
+{
+	database.SetEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		exp_modifier,
+		instance_version
+	);
+
+	database.LoadCharacterEXPModifier(this);
 }

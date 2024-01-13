@@ -1946,36 +1946,36 @@ std::string lua_get_hex_color_code(std::string color_name) {
 	return quest_manager.gethexcolorcode(color_name);
 }
 
-double lua_get_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
-	return database.GetAAEXPModifier(character_id, zone_id);
+float lua_get_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id);
 }
 
-double lua_get_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, int16 instance_version) {
-	return database.GetAAEXPModifier(character_id, zone_id, instance_version);
+float lua_get_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, int16 instance_version) {
+	return quest_manager.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
-double lua_get_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
-	return database.GetEXPModifier(character_id, zone_id);
+float lua_get_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id);
 }
 
-double lua_get_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, int16 instance_version) {
-	return database.GetEXPModifier(character_id, zone_id, instance_version);
+float lua_get_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, int16 instance_version) {
+	return quest_manager.GetEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
-void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double aa_modifier) {
-	database.SetAAEXPModifier(character_id, zone_id, aa_modifier);
+void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, float aa_modifier) {
+	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier);
 }
 
-void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
-	database.SetAAEXPModifier(character_id, zone_id, aa_modifier, instance_version);
+void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, float aa_modifier, int16 instance_version) {
+	quest_manager.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
 }
 
-void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double exp_modifier) {
-	database.SetEXPModifier(character_id, zone_id, exp_modifier);
+void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, float exp_modifier) {
+	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier);
 }
 
-void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
-	database.SetEXPModifier(character_id, zone_id, exp_modifier, instance_version);
+void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, float exp_modifier, int16 instance_version) {
+	quest_manager.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
 }
 
 void lua_add_ldon_loss(uint32 theme_id) {
@@ -5834,14 +5834,14 @@ luabind::scope lua_register_general() {
 		luabind::def("seconds_to_time", &lua_seconds_to_time),
 		luabind::def("time_to_seconds", &lua_time_to_seconds),
 		luabind::def("get_hex_color_code", &lua_get_hex_color_code),
-		luabind::def("get_aa_exp_modifier_by_char_id", (double(*)(uint32,uint32))&lua_get_aa_exp_modifier_by_char_id),
-		luabind::def("get_aa_exp_modifier_by_char_id", (double(*)(uint32,uint32,int16))&lua_get_aa_exp_modifier_by_char_id),
-		luabind::def("get_exp_modifier_by_char_id", (double(*)(uint32,uint32))&lua_get_exp_modifier_by_char_id),
-		luabind::def("get_exp_modifier_by_char_id", (double(*)(uint32,uint32,int16))&lua_get_exp_modifier_by_char_id),
-		luabind::def("set_aa_exp_modifier_by_char_id", (void(*)(uint32,uint32,double))&lua_set_aa_exp_modifier_by_char_id),
-		luabind::def("set_aa_exp_modifier_by_char_id", (void(*)(uint32,uint32,double,int16))&lua_set_aa_exp_modifier_by_char_id),
-		luabind::def("set_exp_modifier_by_char_id", (void(*)(uint32,uint32,double))&lua_set_exp_modifier_by_char_id),
-		luabind::def("set_exp_modifier_by_char_id", (void(*)(uint32,uint32,double,int16))&lua_set_exp_modifier_by_char_id),
+		luabind::def("get_aa_exp_modifier_by_char_id", (float(*)(uint32,uint32))&lua_get_aa_exp_modifier_by_char_id),
+		luabind::def("get_aa_exp_modifier_by_char_id", (float(*)(uint32,uint32,int16))&lua_get_aa_exp_modifier_by_char_id),
+		luabind::def("get_exp_modifier_by_char_id", (float(*)(uint32,uint32))&lua_get_exp_modifier_by_char_id),
+		luabind::def("get_exp_modifier_by_char_id", (float(*)(uint32,uint32,int16))&lua_get_exp_modifier_by_char_id),
+		luabind::def("set_aa_exp_modifier_by_char_id", (void(*)(uint32,uint32,float))&lua_set_aa_exp_modifier_by_char_id),
+		luabind::def("set_aa_exp_modifier_by_char_id", (void(*)(uint32,uint32,float,int16))&lua_set_aa_exp_modifier_by_char_id),
+		luabind::def("set_exp_modifier_by_char_id", (void(*)(uint32,uint32,float))&lua_set_exp_modifier_by_char_id),
+		luabind::def("set_exp_modifier_by_char_id", (void(*)(uint32,uint32,float,int16))&lua_set_exp_modifier_by_char_id),
 		luabind::def("add_ldon_loss", &lua_add_ldon_loss),
 		luabind::def("add_ldon_points", &lua_add_ldon_points),
 		luabind::def("add_ldon_win", &lua_add_ldon_win),
