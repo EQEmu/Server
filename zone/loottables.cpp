@@ -637,7 +637,7 @@ void ZoneDatabase::LoadGlobalLoot()
 	const auto& l = GlobalLootRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`enabled` = 1 {}",
+			"`enabled` = 1{}",
 			ContentFilterCriteria::apply()
 		)
 	);
@@ -647,7 +647,7 @@ void ZoneDatabase::LoadGlobalLoot()
 	}
 
 	LogInfo(
-		"Loaded [{}] global loot entr{}.",
+		"Loaded [{}] Global Loot Entr{}.",
 		Strings::Commify(l.size()),
 		l.size() != 1 ? "ies" : "y"
 	);
@@ -658,16 +658,12 @@ void ZoneDatabase::LoadGlobalLoot()
 		if (!e.zone.empty()) {
 			const auto& zones = Strings::Split(e.zone, "|");
 
-			if (std::find(zones.begin(), zones.end(), zone_id) == zones.end()) {
+			if (!Strings::Contains(zones, zone_id)) {
 				continue;
 			}
 		}
 
-		GlobalLootEntry gle(
-			e.id,
-			e.loottable_id,
-			!e.description.empty() ? e.description : std::string()
-		);
+		GlobalLootEntry gle(e.id, e.loottable_id, e.description);
 
 		if (e.min_level) {
 			gle.AddRule(GlobalLoot::RuleTypes::LevelMin, e.min_level);
