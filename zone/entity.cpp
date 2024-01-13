@@ -531,7 +531,6 @@ void EntityList::MobProcess()
 
 			// Perform normal mob processing if any of these are true:
 			//	-- zone is not empty
-			//	-- a quest has turned it on for this zone while zone is idle
 			//	-- the entity's spawn2 point is marked as path_while_zone_idle
 			//	-- the zone is newly empty and we're allowing mobs to settle
 			if (
