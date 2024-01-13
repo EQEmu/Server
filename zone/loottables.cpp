@@ -27,6 +27,7 @@
 #include "zonedb.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/global_loot_repository.h"
 #include "quest_parser_collection.h"
 
 #ifdef _WINDOWS
@@ -624,107 +625,90 @@ void NPC::AddLootTable(uint32 loottable_id)
 
 void NPC::CheckGlobalLootTables()
 {
-	auto tables = zone->GetGlobalLootTables(this);
+	const auto& l = zone->GetGlobalLootTables(this);
 
-	for (auto &id : tables)
-		database.AddLootTableToNPC(this, id, &itemlist, nullptr, nullptr, nullptr, nullptr);
+	for (const auto& e : l) {
+		database.AddLootTableToNPC(this, e, &itemlist, nullptr, nullptr, nullptr, nullptr);
+	}
 }
 
 void ZoneDatabase::LoadGlobalLoot()
 {
-	auto query = fmt::format(
-		SQL
-		(
-			SELECT
-			  id,
-			  loottable_id,
-			  description,
-			  min_level,
-			  max_level,
-			  rare,
-			  raid,
-			  race,
-			  class,
-			  bodytype,
-			  zone,
-			  hot_zone
-			FROM
-			  global_loot
-			WHERE
-			  enabled = 1
-			  {}
-		),
-		ContentFilterCriteria::apply()
+	const auto& l = GlobalLootRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`enabled` = 1 {}",
+			ContentFilterCriteria::apply()
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowCount() == 0) {
+	if (l.empty()) {
 		return;
 	}
 
-	LogInfo("Loaded [{}] global loot entries", Strings::Commify(results.RowCount()));
+	LogInfo(
+		"Loaded [{}] Global Loot Entr{}.",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "ies" : "y"
+	);
 
-	// we might need this, lets not keep doing it in a loop
-	auto      zoneid = std::to_string(zone->GetZoneID());
-	for (auto row    = results.begin(); row != results.end(); ++row) {
-		// checking zone limits
-		if (row[10]) {
-			auto zones = Strings::Split(row[10], '|');
+	const std::string& zone_id = std::to_string(zone->GetZoneID());
 
-			auto it = std::find(zones.begin(), zones.end(), zoneid);
-			if (it == zones.end()) {  // not in here, skip
+	for (const auto& e : l) {
+		if (!e.zone.empty()) {
+			const auto& zones = Strings::Split(e.zone, "|");
+
+			if (!Strings::Contains(zones, zone_id)) {
 				continue;
 			}
 		}
 
-		GlobalLootEntry e(Strings::ToInt(row[0]), Strings::ToInt(row[1]), row[2] ? row[2] : "");
+		GlobalLootEntry gle(e.id, e.loottable_id, e.description);
 
-		auto min_level = Strings::ToInt(row[3]);
-		if (min_level) {
-			e.AddRule(GlobalLoot::RuleTypes::LevelMin, min_level);
+		if (e.min_level) {
+			gle.AddRule(GlobalLoot::RuleTypes::LevelMin, e.min_level);
 		}
 
-		auto max_level = Strings::ToInt(row[4]);
-		if (max_level) {
-			e.AddRule(GlobalLoot::RuleTypes::LevelMax, max_level);
+		if (e.max_level) {
+			gle.AddRule(GlobalLoot::RuleTypes::LevelMax, e.max_level);
 		}
 
-		// null is not used
-		if (row[5]) {
-			e.AddRule(GlobalLoot::RuleTypes::Rare, Strings::ToInt(row[5]));
+		if (e.rare) {
+			gle.AddRule(GlobalLoot::RuleTypes::Rare, e.rare);
 		}
 
-		// null is not used
-		if (row[6]) {
-			e.AddRule(GlobalLoot::RuleTypes::Raid, Strings::ToInt(row[6]));
+		if (e.raid) {
+			gle.AddRule(GlobalLoot::RuleTypes::Raid, e.raid);
 		}
 
-		if (row[7]) {
-			auto races = Strings::Split(row[7], '|');
+		if (!e.race.empty()) {
+			const auto& races = Strings::Split(e.race, "|");
 
-			for (auto &r : races)
-				e.AddRule(GlobalLoot::RuleTypes::Race, Strings::ToInt(r));
+			for (const auto& r : races) {
+				gle.AddRule(GlobalLoot::RuleTypes::Race, Strings::ToInt(r));
+			}
 		}
 
-		if (row[8]) {
-			auto classes = Strings::Split(row[8], '|');
+		if (!e.class_.empty()) {
+			const auto& classes = Strings::Split(e.class_, "|");
 
-			for (auto &c : classes)
-				e.AddRule(GlobalLoot::RuleTypes::Class, Strings::ToInt(c));
+			for (const auto& c : classes) {
+				gle.AddRule(GlobalLoot::RuleTypes::Class, Strings::ToInt(c));
+			}
 		}
 
-		if (row[9]) {
-			auto bodytypes = Strings::Split(row[9], '|');
+		if (!e.bodytype.empty()) {
+			const auto& bodytypes = Strings::Split(e.bodytype, "|");
 
-			for (auto &b : bodytypes)
-				e.AddRule(GlobalLoot::RuleTypes::BodyType, Strings::ToInt(b));
+			for (const auto& b : bodytypes) {
+				gle.AddRule(GlobalLoot::RuleTypes::BodyType, Strings::ToInt(b));
+			}
 		}
 
-		// null is not used
-		if (row[11]) {
-			e.AddRule(GlobalLoot::RuleTypes::HotZone, Strings::ToInt(row[11]));
+		if (e.hot_zone) {
+			gle.AddRule(GlobalLoot::RuleTypes::HotZone, e.hot_zone);
 		}
 
-		zone->AddGlobalLootEntry(e);
+		zone->AddGlobalLootEntry(gle);
 	}
 }

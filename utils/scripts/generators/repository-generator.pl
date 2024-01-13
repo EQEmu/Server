@@ -68,7 +68,8 @@ my $database_schema = $json->decode($output);
 # database
 #############################################
 my $content;
-open(my $fh, '<', $config_path) or die "cannot open file $config_path"; {
+open(my $fh, '<', $config_path) or die "cannot open file $config_path";
+{
     local $/;
     $content = <$fh>;
 }
@@ -336,8 +337,8 @@ foreach my $table_to_generate (@tables) {
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
         }
         elsif ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = static_cast<%s>(atoi(row[%s]));\n", $column_name_formatted, $struct_data_type, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(atoi(row[%s])) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(atoi(row[%s])) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
         }
         elsif ($data_type =~ /float|decimal/) {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtof(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
@@ -348,8 +349,8 @@ foreach my $table_to_generate (@tables) {
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
         else {
-            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
-            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
 
         # print $column_name . "\n";
@@ -512,7 +513,7 @@ foreach my $table_to_generate (@tables) {
     # write extended repository
     #############################################
     if ($repository_generation_option eq "all" || $repository_generation_option eq "extended") {
-        my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
+        my $generated_repository = './common/repositories/' . $table_to_generate . '_repository.h';
 
         # check if file exists firsts
         if (-e $generated_repository) {
@@ -538,15 +539,17 @@ print $generated_base_repository_files . "\n";
 print "\n#Extended Repositories\n";
 print $generated_repository_files . "\n";
 
-sub trim {
+sub trim
+{
     my $string = $_[0];
     $string =~ s/^\s+//;
     $string =~ s/\s+$//;
     return $string;
 }
 
-sub translate_mysql_data_type_to_c {
-    my $mysql_data_type = $_[0];
+sub translate_mysql_data_type_to_c
+{
+    my $mysql_data_type   = $_[0];
     my $mysql_column_type = $_[1];
 
     my $struct_data_type = "std::string";
@@ -590,7 +593,8 @@ sub translate_mysql_data_type_to_c {
 }
 
 # This is so we can change reserved words on the cpp side to something that will continue be functional in the compilers
-sub get_reserved_cpp_variable_names {
+sub get_reserved_cpp_variable_names
+{
     return (
         "class",
         "int",
@@ -599,7 +603,8 @@ sub get_reserved_cpp_variable_names {
     );
 }
 
-sub format_column_name_for_cpp_var {
+sub format_column_name_for_cpp_var
+{
     my $column_name = $_[0];
 
     for my $word (get_reserved_cpp_variable_names()) {
@@ -611,7 +616,8 @@ sub format_column_name_for_cpp_var {
     return $column_name;
 }
 
-sub format_column_name_for_mysql {
+sub format_column_name_for_mysql
+{
     my $column_name = $_[0];
     for my $word (get_reserved_cpp_variable_names()) {
         if ($word eq $column_name) {

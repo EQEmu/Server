@@ -16,6 +16,7 @@
 #include "../../strings.h"
 #include <ctime>
 
+
 class BaseGlobalLootRepository {
 public:
 	struct GlobalLoot {
@@ -179,21 +180,21 @@ public:
 		if (results.RowCount() == 1) {
 			GlobalLoot e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description            = row[1] ? row[1] : "";
-			e.loottable_id           = static_cast<int32_t>(atoi(row[2]));
-			e.enabled                = static_cast<int8_t>(atoi(row[3]));
-			e.min_level              = static_cast<int32_t>(atoi(row[4]));
-			e.max_level              = static_cast<int32_t>(atoi(row[5]));
-			e.rare                   = static_cast<int8_t>(atoi(row[6]));
-			e.raid                   = static_cast<int8_t>(atoi(row[7]));
+			e.loottable_id           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.enabled                = row[3] ? static_cast<int8_t>(atoi(row[3])) : 1;
+			e.min_level              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_level              = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.rare                   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.raid                   = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 			e.race                   = row[8] ? row[8] : "";
 			e.class_                 = row[9] ? row[9] : "";
 			e.bodytype               = row[10] ? row[10] : "";
 			e.zone                   = row[11] ? row[11] : "";
-			e.hot_zone               = static_cast<int8_t>(atoi(row[12]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.hot_zone               = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
@@ -362,21 +363,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GlobalLoot e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description            = row[1] ? row[1] : "";
-			e.loottable_id           = static_cast<int32_t>(atoi(row[2]));
-			e.enabled                = static_cast<int8_t>(atoi(row[3]));
-			e.min_level              = static_cast<int32_t>(atoi(row[4]));
-			e.max_level              = static_cast<int32_t>(atoi(row[5]));
-			e.rare                   = static_cast<int8_t>(atoi(row[6]));
-			e.raid                   = static_cast<int8_t>(atoi(row[7]));
+			e.loottable_id           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.enabled                = row[3] ? static_cast<int8_t>(atoi(row[3])) : 1;
+			e.min_level              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_level              = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.rare                   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.raid                   = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 			e.race                   = row[8] ? row[8] : "";
 			e.class_                 = row[9] ? row[9] : "";
 			e.bodytype               = row[10] ? row[10] : "";
 			e.zone                   = row[11] ? row[11] : "";
-			e.hot_zone               = static_cast<int8_t>(atoi(row[12]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.hot_zone               = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
@@ -403,21 +404,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GlobalLoot e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description            = row[1] ? row[1] : "";
-			e.loottable_id           = static_cast<int32_t>(atoi(row[2]));
-			e.enabled                = static_cast<int8_t>(atoi(row[3]));
-			e.min_level              = static_cast<int32_t>(atoi(row[4]));
-			e.max_level              = static_cast<int32_t>(atoi(row[5]));
-			e.rare                   = static_cast<int8_t>(atoi(row[6]));
-			e.raid                   = static_cast<int8_t>(atoi(row[7]));
+			e.loottable_id           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.enabled                = row[3] ? static_cast<int8_t>(atoi(row[3])) : 1;
+			e.min_level              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_level              = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.rare                   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.raid                   = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 			e.race                   = row[8] ? row[8] : "";
 			e.class_                 = row[9] ? row[9] : "";
 			e.bodytype               = row[10] ? row[10] : "";
 			e.zone                   = row[11] ? row[11] : "";
-			e.hot_zone               = static_cast<int8_t>(atoi(row[12]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.hot_zone               = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
