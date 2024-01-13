@@ -5195,7 +5195,7 @@ ALTER TABLE `instance_list`
 		.sql = R"(
 ALTER TABLE `zone`
 ADD COLUMN `idle_when_empty` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `min_lava_damage`
-ADD COLUMN `seconds_before_idle` int(11) UNSIGNED NOT NULL DEFAULT 1 AFTER `idle_when_empty`
+ADD COLUMN `seconds_before_idle` int(11) UNSIGNED NOT NULL DEFAULT 60 AFTER `idle_when_empty`
 )",
 		.content_schema_update = true
 	}
