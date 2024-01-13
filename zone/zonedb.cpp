@@ -38,6 +38,7 @@
 #include "../common/repositories/character_item_recast_repository.h"
 #include "../common/repositories/account_repository.h"
 #include "../common/repositories/respawn_times_repository.h"
+#include "../common/repositories/object_contents_repository.h"
 
 #include <ctime>
 #include <iostream>
@@ -195,110 +196,99 @@ bool ZoneDatabase::SetSpecialAttkFlag(uint8 id, const char* flag) {
 	return results.RowsAffected() != 0;
 }
 
-// Load child objects for a world container (i.e., forge, bag dropped to ground, etc)
-void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* container)
+void ZoneDatabase::LoadWorldContainer(uint32 parent_id, EQ::ItemInstance* container)
 {
 	if (!container) {
-		LogError("Programming error: LoadWorldContainer passed nullptr pointer");
 		return;
 	}
 
-	std::string query   = StringFormat(
-		"SELECT bagidx, itemid, charges, augslot1, augslot2, augslot3, augslot4, augslot5, augslot6 "
-		"FROM object_contents WHERE parentid = %i", parentid
+	const auto& l = ObjectContentsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`parentid` = {}",
+			parent_id
+		)
 	);
 
-	auto        results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error in DB::LoadWorldContainer: [{}]", results.ErrorMessage().c_str());
+	for (const auto& e : l) {
+		const uint32 augments[EQ::invaug::SOCKET_COUNT] = {
+			e.augslot1,
+			e.augslot2,
+			e.augslot3,
+			e.augslot4,
+			e.augslot5,
+			static_cast<uint32>(e.augslot6)
+		};
+
+		auto inst = database.CreateItem(e.itemid, e.charges);
+
+		if (inst && inst->GetItem()->IsClassCommon()) {
+			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+				if (augments[i]) {
+					inst->PutAugment(&database, i, augments[i]);
+				}
+			}
+
+			container->PutItem(e.bagidx, *inst);
+		}
+
+		safe_delete(inst);
+	}
+}
+
+void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ::ItemInstance* container)
+{
+	if (!container) {
 		return;
 	}
 
-    for (auto& row = results.begin(); row != results.end(); ++row) {
-        uint8 index = (uint8)Strings::ToInt(row[0]);
-        uint32 item_id = (uint32)Strings::ToInt(row[1]);
-        int8 charges = (int8)Strings::ToInt(row[2]);
-		uint32 aug[EQ::invaug::SOCKET_COUNT];
-        aug[0] = (uint32)Strings::ToInt(row[3]);
-        aug[1] = (uint32)Strings::ToInt(row[4]);
-        aug[2] = (uint32)Strings::ToInt(row[5]);
-        aug[3] = (uint32)Strings::ToInt(row[6]);
-        aug[4] = (uint32)Strings::ToInt(row[7]);
-		aug[5] = (uint32)Strings::ToInt(row[8]);
+	DeleteWorldContainer(parent_id, zone_id);
 
-        EQ::ItemInstance* inst = database.CreateItem(item_id, charges);
-		if (inst && inst->GetItem()->IsClassCommon()) {
-			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++)
-                if (aug[i])
-                    inst->PutAugment(&database, i, aug[i]);
-            // Put item inside world container
-            container->PutItem(index, *inst);
-        }
-		safe_delete(inst);
-    }
-
-}
-
-// Save child objects for a world container (i.e., forge, bag dropped to ground, etc)
-void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ::ItemInstance* container)
-{
-	// Since state is not saved for each world container action, we'll just delete
-	// all and save from scratch .. we may come back later to optimize
-	if (!container)
-		return;
-
-	//Delete all items from container
-	DeleteWorldContainer(parent_id,zone_id);
-
-	// Save all 10 items, if they exist
 	for (uint8 index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; index++) {
+		auto inst = container->GetItem(index);
+		if (!inst) {
+			continue;
+		}
 
-		EQ::ItemInstance* inst = container->GetItem(index);
-		if (!inst)
-            continue;
-
-        uint32 item_id = inst->GetItem()->ID;
-		uint32 augslot[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
+		uint32 augments[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
 
 		if (inst->IsType(EQ::item::ItemClassCommon)) {
 			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
-                EQ::ItemInstance *auginst=inst->GetAugment(i);
-                augslot[i]=(auginst && auginst->GetItem()) ? auginst->GetItem()->ID : 0;
-            }
-        }
-
-		std::string query   = StringFormat(
-			"REPLACE INTO object_contents "
-			"(zoneid, parentid, bagidx, itemid, charges, "
-			"augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
-			"VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
-			zone_id, parent_id, index, item_id, inst->GetCharges(),
-			augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]
-		);
-
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
+				auto augment = inst->GetAugment(i);
+				augments[i] = (augment && augment->GetItem()) ? augment->GetItem()->ID : 0;
+			}
 		}
 
+		ObjectContentsRepository::ReplaceOne(
+			*this,
+			ObjectContentsRepository::ObjectContents{
+				.zoneid = zone_id,
+				.parentid = parent_id,
+				.bagidx = index,
+				.itemid = inst->GetItem()->ID,
+				.charges = inst->GetCharges(),
+				.droptime = std::time(nullptr),
+				.augslot1 = augments[0],
+				.augslot2 = augments[1],
+				.augslot3 = augments[2],
+				.augslot4 = augments[3],
+				.augslot5 = augments[4],
+				.augslot6 = static_cast<int32_t>(augments[5])
+			}
+		);
 	}
-
 }
 
-// Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 {
-	std::string query = StringFormat(
-		"DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i",
-		parent_id,
-		zone_id
+	ObjectContentsRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`parentid` = {} AND `zoneid` = {}",
+			parent_id,
+			zone_id
+		)
 	);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error in ZoneDatabase::DeleteWorldContainer: [{}]", results.ErrorMessage().c_str());
-	}
-
 }
 
 Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
