@@ -989,7 +989,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pgraveyard_zoneid = 0;
 	m_max_clients     = 0;
 	pvpzone           = false;
-	m_idle_when_empty = true;
+	idle_when_empty = true;
 
 	if (database.GetServerType() == 1) {
 		pvpzone = true;
@@ -1005,7 +1005,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 		m_safe_points.w = z->safe_heading;
 		m_graveyard_id    = z->graveyard_id;
 		m_max_clients     = z->maxclients;
-		m_idle_when_empty = z->idle_when_empty;
+		idle_when_empty = z->idle_when_empty;
 
 		if (z->file_name.empty()) {
 			strcpy(file_name, short_name);
@@ -1391,7 +1391,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	allow_mercs               = true;
 	m_graveyard_id            = z->graveyard_id;
 	m_max_clients             = z->maxclients;
-	m_idle_when_empty         = z->idle_when_empty;
+	idle_when_empty         = z->idle_when_empty;
 
 	// safe coordinates
 	m_safe_points.x = z->safe_x;

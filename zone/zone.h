@@ -105,7 +105,7 @@ public:
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
-	bool m_idle_when_empty;
+	bool idle_when_empty;
 	bool AggroLimitReached() { return (aggroedmobs > 10) ? true : false; }
 	bool AllowMercs() const { return (allow_mercs); }
 	bool CanBind() const { return (can_bind); }

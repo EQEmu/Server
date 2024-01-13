@@ -411,7 +411,7 @@ void EntityList::RaidProcess()
 
 void EntityList::DoorProcess()
 {
-	if (zone && zone->m_idle_when_empty) {
+	if (zone && zone->idle_when_empty) {
 		if (numclients < 1) {
 			return;
 		}
@@ -485,7 +485,7 @@ void EntityList::MobProcess()
 		static int   old_client_count  = 0;
 		static Timer *mob_settle_timer = new Timer();
 
-		if (zone->m_idle_when_empty) {
+		if (zone->idle_when_empty) {
 			if (
 				numclients == 0 &&
 				old_client_count > 0 &&
