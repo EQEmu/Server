@@ -219,7 +219,6 @@ public:
 
 	std::pair<AA::Ability *, AA::Rank *> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
 
-	std::unordered_map<int, ItemTickStruct>             tick_items;
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
@@ -285,7 +284,6 @@ public:
 	void LoadNewMerchantData(uint32 merchantid);
 	void LoadNPCEmotes(std::vector<NPC_Emote_Struct *> *NPCEmoteList);
 	void LoadTempMerchantData();
-	void LoadItemTicks();
 	void LoadVeteranRewards();
 	void LoadZoneDoors();
 	void ReloadStaticData();

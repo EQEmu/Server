@@ -6547,7 +6547,6 @@ luabind::scope lua_register_events() {
 			luabind::value("discover_item", static_cast<int>(EVENT_DISCOVER_ITEM)),
 			luabind::value("disconnect", static_cast<int>(EVENT_DISCONNECT)),
 			luabind::value("connect", static_cast<int>(EVENT_CONNECT)),
-			luabind::value("item_tick", static_cast<int>(EVENT_ITEM_TICK)),
 			luabind::value("duel_win", static_cast<int>(EVENT_DUEL_WIN)),
 			luabind::value("duel_lose", static_cast<int>(EVENT_DUEL_LOSE)),
 			luabind::value("encounter_load", static_cast<int>(EVENT_ENCOUNTER_LOAD)),

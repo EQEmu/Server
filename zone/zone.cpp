@@ -1219,7 +1219,6 @@ bool Zone::Init(bool is_static) {
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
 
 	LoadGrids();
-	LoadItemTicks();
 
 	npc_scale_manager->LoadScaleData();
 
@@ -2661,34 +2660,6 @@ void Zone::ClearSpawnTimers()
 			GetInstanceID(),
 			Strings::Implode(", ", respawn_ids)
 		)
-	);
-}
-
-void Zone::LoadItemTicks()
-{
-	tick_items.clear();
-
-	const auto& l = ItemTickRepository::All(database);
-
-	for (const auto& e : l) {
-		if (!e.it_itemid) {
-			continue;
-		}
-
-		ItemTickStruct i{
-			.itemid = static_cast<uint32>(e.it_itemid),
-			.chance = static_cast<uint32>(e.it_chance),
-			.level =static_cast<uint32>(e.it_level),
-			.bagslot = e.it_bagslot,
-			.qglobal = e.it_qglobal,
-		};
-
-	}
-
-	LogInfo(
-		"Loaded [{}] item_tick entr{}",
-		Strings::Commify(l.size()),
-		l.size() != 1 ? "ies" : "y"
 	);
 }
 

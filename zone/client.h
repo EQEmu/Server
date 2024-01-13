@@ -1590,8 +1590,6 @@ public:
 	void DuplicateLoreMessage(uint32 ItemID);
 	void GarbleMessage(char *, uint8);
 
-	void TickItemCheck();
-	void TryItemTick(int slot);
 	void ItemTimerCheck();
 	void TryItemTimer(int slot);
 	void SendItemScale(EQ::ItemInstance *inst);
@@ -2008,7 +2006,6 @@ private:
 
 	AggroMeter m_aggrometer;
 
-	Timer ItemTickTimer;
 	Timer ItemQuestTimer;
 	std::map<std::string,std::string> accountflags;
 

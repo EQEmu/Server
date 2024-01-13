@@ -165,7 +165,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   TrackingTimer(2000),
   RespawnFromHoverTimer(0),
   merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-  ItemTickTimer(10000),
   ItemQuestTimer(500),
   anon_toggle_timer(250),
   afk_toggle_timer(250),
@@ -6568,7 +6567,7 @@ void Client::SendAltCurrencies() {
 		if (!currency_count) {
 			return;
 		}
-			
+
 		auto outapp = new EQApplicationPacket(
 			OP_AltCurrency,
 			sizeof(AltCurrencyPopulate_Struct) +
@@ -7742,68 +7741,6 @@ std::vector<std::string> Client::GetAccountFlags()
 	}
 
 	return l;
-}
-
-void Client::TickItemCheck()
-{
-	int i;
-
-	if(zone->tick_items.empty()) { return; }
-
-	//Scan equip, general, cursor slots for items
-	for (i = EQ::invslot::POSSESSIONS_BEGIN; i <= EQ::invslot::POSSESSIONS_END; i++)
-	{
-		TryItemTick(i);
-	}
-	//Scan bags
-	for (i = EQ::invbag::GENERAL_BAGS_BEGIN; i <= EQ::invbag::CURSOR_BAG_END; i++)
-	{
-		TryItemTick(i);
-	}
-}
-
-void Client::TryItemTick(int slot)
-{
-	int iid = 0;
-	const EQ::ItemInstance* inst = m_inv[slot];
-	if(inst == 0) { return; }
-
-	iid = inst->GetID();
-
-	if(zone->tick_items.count(iid) > 0)
-	{
-		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQ::invslot::EQUIPMENT_END))
-		{
-			EQ::ItemInstance* e_inst = (EQ::ItemInstance*)inst;
-
-			if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
-				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-			}
-		}
-	}
-
-	//Only look at augs in main inventory
-	if (slot > EQ::invslot::EQUIPMENT_END) { return; }
-
-	for (int x = EQ::invaug::SOCKET_BEGIN; x <= EQ::invaug::SOCKET_END; ++x)
-	{
-		EQ::ItemInstance * a_inst = inst->GetAugment(x);
-		if(!a_inst) { continue; }
-
-		iid = a_inst->GetID();
-
-		if(zone->tick_items.count(iid) > 0)
-		{
-			if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) )
-			{
-				EQ::ItemInstance* e_inst = (EQ::ItemInstance*) a_inst;
-
-				if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
-					parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-				}
-			}
-		}
-	}
 }
 
 void Client::ItemTimerCheck()
