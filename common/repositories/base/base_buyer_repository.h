@@ -135,12 +135,12 @@ public:
 		if (results.RowCount() == 1) {
 			Buyer e{};
 
-			e.charid   = static_cast<int32_t>(atoi(row[0]));
-			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
-			e.itemid   = static_cast<int32_t>(atoi(row[2]));
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = static_cast<int32_t>(atoi(row[4]));
-			e.price    = static_cast<int32_t>(atoi(row[5]));
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			return e;
 		}
@@ -275,12 +275,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Buyer e{};
 
-			e.charid   = static_cast<int32_t>(atoi(row[0]));
-			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
-			e.itemid   = static_cast<int32_t>(atoi(row[2]));
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = static_cast<int32_t>(atoi(row[4]));
-			e.price    = static_cast<int32_t>(atoi(row[5]));
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -305,12 +305,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Buyer e{};
 
-			e.charid   = static_cast<int32_t>(atoi(row[0]));
-			e.buyslot  = static_cast<int32_t>(atoi(row[1]));
-			e.itemid   = static_cast<int32_t>(atoi(row[2]));
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.itemname = row[3] ? row[3] : "";
-			e.quantity = static_cast<int32_t>(atoi(row[4]));
-			e.price    = static_cast<int32_t>(atoi(row[5]));
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}

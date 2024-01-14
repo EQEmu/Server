@@ -524,7 +524,7 @@ public:
 			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.account_id              = static_cast<int32_t>(atoi(row[1]));
+			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name                    = row[2] ? row[2] : "";
 			e.last_name               = row[3] ? row[3] : "";
 			e.title                   = row[4] ? row[4] : "";
@@ -618,7 +618,7 @@ public:
 			e.lfg                     = row[92] ? static_cast<uint8_t>(strtoul(row[92], nullptr, 10)) : 0;
 			e.mailkey                 = row[93] ? row[93] : "";
 			e.xtargets                = row[94] ? static_cast<uint8_t>(strtoul(row[94], nullptr, 10)) : 5;
-			e.firstlogon              = static_cast<int8_t>(atoi(row[95]));
+			e.firstlogon              = row[95] ? static_cast<int8_t>(atoi(row[95])) : 0;
 			e.e_aa_effects            = row[96] ? static_cast<uint32_t>(strtoul(row[96], nullptr, 10)) : 0;
 			e.e_percent_to_aa         = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 0;
 			e.e_expended_aa_spent     = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 0;
@@ -760,7 +760,7 @@ public:
 		v.push_back(columns[99] + " = " + std::to_string(e.aa_points_spent_old));
 		v.push_back(columns[100] + " = " + std::to_string(e.aa_points_old));
 		v.push_back(columns[101] + " = " + std::to_string(e.e_last_invsnapshot));
-		v.push_back(columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -884,7 +884,7 @@ public:
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1016,7 +1016,7 @@ public:
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1051,7 +1051,7 @@ public:
 			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.account_id              = static_cast<int32_t>(atoi(row[1]));
+			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name                    = row[2] ? row[2] : "";
 			e.last_name               = row[3] ? row[3] : "";
 			e.title                   = row[4] ? row[4] : "";
@@ -1145,7 +1145,7 @@ public:
 			e.lfg                     = row[92] ? static_cast<uint8_t>(strtoul(row[92], nullptr, 10)) : 0;
 			e.mailkey                 = row[93] ? row[93] : "";
 			e.xtargets                = row[94] ? static_cast<uint8_t>(strtoul(row[94], nullptr, 10)) : 5;
-			e.firstlogon              = static_cast<int8_t>(atoi(row[95]));
+			e.firstlogon              = row[95] ? static_cast<int8_t>(atoi(row[95])) : 0;
 			e.e_aa_effects            = row[96] ? static_cast<uint32_t>(strtoul(row[96], nullptr, 10)) : 0;
 			e.e_percent_to_aa         = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 0;
 			e.e_expended_aa_spent     = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 0;
@@ -1178,7 +1178,7 @@ public:
 			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.account_id              = static_cast<int32_t>(atoi(row[1]));
+			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name                    = row[2] ? row[2] : "";
 			e.last_name               = row[3] ? row[3] : "";
 			e.title                   = row[4] ? row[4] : "";
@@ -1272,7 +1272,7 @@ public:
 			e.lfg                     = row[92] ? static_cast<uint8_t>(strtoul(row[92], nullptr, 10)) : 0;
 			e.mailkey                 = row[93] ? row[93] : "";
 			e.xtargets                = row[94] ? static_cast<uint8_t>(strtoul(row[94], nullptr, 10)) : 5;
-			e.firstlogon              = static_cast<int8_t>(atoi(row[95]));
+			e.firstlogon              = row[95] ? static_cast<int8_t>(atoi(row[95])) : 0;
 			e.e_aa_effects            = row[96] ? static_cast<uint32_t>(strtoul(row[96], nullptr, 10)) : 0;
 			e.e_percent_to_aa         = row[97] ? static_cast<uint32_t>(strtoul(row[97], nullptr, 10)) : 0;
 			e.e_expended_aa_spent     = row[98] ? static_cast<uint32_t>(strtoul(row[98], nullptr, 10)) : 0;
@@ -1456,7 +1456,7 @@ public:
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1581,7 +1581,7 @@ public:
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

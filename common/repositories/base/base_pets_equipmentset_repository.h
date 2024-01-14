@@ -123,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			PetsEquipmentset e{};
 
-			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.set_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = static_cast<int32_t>(atoi(row[2]));
+			e.nested_set = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
 
 			return e;
 		}
@@ -251,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentset e{};
 
-			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.set_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = static_cast<int32_t>(atoi(row[2]));
+			e.nested_set = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
 
 			all_entries.push_back(e);
 		}
@@ -278,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PetsEquipmentset e{};
 
-			e.set_id     = static_cast<int32_t>(atoi(row[0]));
+			e.set_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.setname    = row[1] ? row[1] : "";
-			e.nested_set = static_cast<int32_t>(atoi(row[2]));
+			e.nested_set = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
 
 			all_entries.push_back(e);
 		}

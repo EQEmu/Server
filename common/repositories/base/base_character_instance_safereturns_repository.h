@@ -149,9 +149,9 @@ public:
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
 			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;
@@ -300,9 +300,9 @@ public:
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
 			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;
@@ -333,9 +333,9 @@ public:
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
 			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;

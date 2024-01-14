@@ -170,10 +170,10 @@ public:
 			e.zone_id_list           = row[4] ? row[4] : "";
 			e.item_id                = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.item_charges           = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 1;
-			e.status                 = static_cast<int32_t>(atoi(row[7]));
-			e.inventory_slot         = static_cast<int32_t>(atoi(row[8]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
+			e.status                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.inventory_slot         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.min_expansion          = row[9] ? static_cast<int8_t>(atoi(row[9])) : -1;
+			e.max_expansion          = row[10] ? static_cast<int8_t>(atoi(row[10])) : -1;
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 
@@ -337,10 +337,10 @@ public:
 			e.zone_id_list           = row[4] ? row[4] : "";
 			e.item_id                = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.item_charges           = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 1;
-			e.status                 = static_cast<int32_t>(atoi(row[7]));
-			e.inventory_slot         = static_cast<int32_t>(atoi(row[8]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
+			e.status                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.inventory_slot         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.min_expansion          = row[9] ? static_cast<int8_t>(atoi(row[9])) : -1;
+			e.max_expansion          = row[10] ? static_cast<int8_t>(atoi(row[10])) : -1;
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 
@@ -374,10 +374,10 @@ public:
 			e.zone_id_list           = row[4] ? row[4] : "";
 			e.item_id                = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.item_charges           = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 1;
-			e.status                 = static_cast<int32_t>(atoi(row[7]));
-			e.inventory_slot         = static_cast<int32_t>(atoi(row[8]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[9]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[10]));
+			e.status                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.inventory_slot         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.min_expansion          = row[9] ? static_cast<int8_t>(atoi(row[9])) : -1;
+			e.max_expansion          = row[10] ? static_cast<int8_t>(atoi(row[10])) : -1;
 			e.content_flags          = row[11] ? row[11] : "";
 			e.content_flags_disabled = row[12] ? row[12] : "";
 

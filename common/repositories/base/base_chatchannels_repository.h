@@ -131,11 +131,11 @@ public:
 		if (results.RowCount() == 1) {
 			Chatchannels e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name      = row[1] ? row[1] : "";
 			e.owner     = row[2] ? row[2] : "";
 			e.password  = row[3] ? row[3] : "";
-			e.minstatus = static_cast<int32_t>(atoi(row[4]));
+			e.minstatus = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Chatchannels e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name      = row[1] ? row[1] : "";
 			e.owner     = row[2] ? row[2] : "";
 			e.password  = row[3] ? row[3] : "";
-			e.minstatus = static_cast<int32_t>(atoi(row[4]));
+			e.minstatus = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Chatchannels e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name      = row[1] ? row[1] : "";
 			e.owner     = row[2] ? row[2] : "";
 			e.password  = row[3] ? row[3] : "";
-			e.minstatus = static_cast<int32_t>(atoi(row[4]));
+			e.minstatus = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

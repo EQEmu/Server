@@ -266,7 +266,7 @@ public:
 			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
 			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
 			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
 			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
 			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
 			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;
@@ -513,7 +513,7 @@ public:
 			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
 			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
 			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
 			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
 			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
 			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;
@@ -569,7 +569,7 @@ public:
 			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
 			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
 			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
 			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
 			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
 			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;

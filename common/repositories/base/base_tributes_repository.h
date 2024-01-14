@@ -135,7 +135,7 @@ public:
 			e.unknown = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = static_cast<int8_t>(atoi(row[4]));
+			e.isguild = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -271,7 +271,7 @@ public:
 			e.unknown = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = static_cast<int8_t>(atoi(row[4]));
+			e.isguild = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -300,7 +300,7 @@ public:
 			e.unknown = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.name    = row[2] ? row[2] : "";
 			e.descr   = row[3] ? row[3] : "";
-			e.isguild = static_cast<int8_t>(atoi(row[4]));
+			e.isguild = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

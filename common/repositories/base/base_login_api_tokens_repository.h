@@ -135,10 +135,10 @@ public:
 		if (results.RowCount() == 1) {
 			LoginApiTokens e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = static_cast<int32_t>(atoi(row[2]));
-			e.can_read   = static_cast<int32_t>(atoi(row[3]));
+			e.can_write  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.can_read   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
@@ -177,8 +177,8 @@ public:
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.token) + "'");
 		v.push_back(columns[2] + " = " + std::to_string(e.can_write));
 		v.push_back(columns[3] + " = " + std::to_string(e.can_read));
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -204,8 +204,8 @@ public:
 		v.push_back("'" + Strings::Escape(e.token) + "'");
 		v.push_back(std::to_string(e.can_write));
 		v.push_back(std::to_string(e.can_read));
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -239,8 +239,8 @@ public:
 			v.push_back("'" + Strings::Escape(e.token) + "'");
 			v.push_back(std::to_string(e.can_write));
 			v.push_back(std::to_string(e.can_read));
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -274,10 +274,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginApiTokens e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = static_cast<int32_t>(atoi(row[2]));
-			e.can_read   = static_cast<int32_t>(atoi(row[3]));
+			e.can_write  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.can_read   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
@@ -304,10 +304,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginApiTokens e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.token      = row[1] ? row[1] : "";
-			e.can_write  = static_cast<int32_t>(atoi(row[2]));
-			e.can_read   = static_cast<int32_t>(atoi(row[3]));
+			e.can_write  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.can_read   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.created_at = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 			e.updated_at = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
@@ -388,8 +388,8 @@ public:
 		v.push_back("'" + Strings::Escape(e.token) + "'");
 		v.push_back(std::to_string(e.can_write));
 		v.push_back(std::to_string(e.can_read));
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -416,8 +416,8 @@ public:
 			v.push_back("'" + Strings::Escape(e.token) + "'");
 			v.push_back(std::to_string(e.can_write));
 			v.push_back(std::to_string(e.can_read));
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

@@ -140,7 +140,7 @@ public:
 			e.bandolier_slot = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.icon           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.bandolier_name = row[5] ? row[5] : "";
+			e.bandolier_name = row[5] ? row[5] : "0";
 
 			return e;
 		}
@@ -280,7 +280,7 @@ public:
 			e.bandolier_slot = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.icon           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.bandolier_name = row[5] ? row[5] : "";
+			e.bandolier_name = row[5] ? row[5] : "0";
 
 			all_entries.push_back(e);
 		}
@@ -310,7 +310,7 @@ public:
 			e.bandolier_slot = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.icon           = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.bandolier_name = row[5] ? row[5] : "";
+			e.bandolier_name = row[5] ? row[5] : "0";
 
 			all_entries.push_back(e);
 		}

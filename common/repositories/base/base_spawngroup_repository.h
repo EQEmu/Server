@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseSpawngroupRepository {
 public:
 	struct Spawngroup {
@@ -164,18 +163,18 @@ public:
 		if (results.RowCount() == 1) {
 			Spawngroup e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name          = row[1] ? row[1] : "";
-			e.spawn_limit   = static_cast<int8_t>(atoi(row[2]));
+			e.spawn_limit   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.dist          = row[3] ? strtof(row[3], nullptr) : 0;
 			e.max_x         = row[4] ? strtof(row[4], nullptr) : 0;
 			e.min_x         = row[5] ? strtof(row[5], nullptr) : 0;
 			e.max_y         = row[6] ? strtof(row[6], nullptr) : 0;
 			e.min_y         = row[7] ? strtof(row[7], nullptr) : 0;
-			e.delay         = static_cast<int32_t>(atoi(row[8]));
-			e.mindelay      = static_cast<int32_t>(atoi(row[9]));
-			e.despawn       = static_cast<int8_t>(atoi(row[10]));
-			e.despawn_timer = static_cast<int32_t>(atoi(row[11]));
+			e.delay         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 45000;
+			e.mindelay      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 15000;
+			e.despawn       = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.despawn_timer = row[11] ? static_cast<int32_t>(atoi(row[11])) : 100;
 			e.wp_spawns     = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			return e;
@@ -331,18 +330,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawngroup e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name          = row[1] ? row[1] : "";
-			e.spawn_limit   = static_cast<int8_t>(atoi(row[2]));
+			e.spawn_limit   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.dist          = row[3] ? strtof(row[3], nullptr) : 0;
 			e.max_x         = row[4] ? strtof(row[4], nullptr) : 0;
 			e.min_x         = row[5] ? strtof(row[5], nullptr) : 0;
 			e.max_y         = row[6] ? strtof(row[6], nullptr) : 0;
 			e.min_y         = row[7] ? strtof(row[7], nullptr) : 0;
-			e.delay         = static_cast<int32_t>(atoi(row[8]));
-			e.mindelay      = static_cast<int32_t>(atoi(row[9]));
-			e.despawn       = static_cast<int8_t>(atoi(row[10]));
-			e.despawn_timer = static_cast<int32_t>(atoi(row[11]));
+			e.delay         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 45000;
+			e.mindelay      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 15000;
+			e.despawn       = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.despawn_timer = row[11] ? static_cast<int32_t>(atoi(row[11])) : 100;
 			e.wp_spawns     = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
@@ -368,18 +367,18 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawngroup e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name          = row[1] ? row[1] : "";
-			e.spawn_limit   = static_cast<int8_t>(atoi(row[2]));
+			e.spawn_limit   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.dist          = row[3] ? strtof(row[3], nullptr) : 0;
 			e.max_x         = row[4] ? strtof(row[4], nullptr) : 0;
 			e.min_x         = row[5] ? strtof(row[5], nullptr) : 0;
 			e.max_y         = row[6] ? strtof(row[6], nullptr) : 0;
 			e.min_y         = row[7] ? strtof(row[7], nullptr) : 0;
-			e.delay         = static_cast<int32_t>(atoi(row[8]));
-			e.mindelay      = static_cast<int32_t>(atoi(row[9]));
-			e.despawn       = static_cast<int8_t>(atoi(row[10]));
-			e.despawn_timer = static_cast<int32_t>(atoi(row[11]));
+			e.delay         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 45000;
+			e.mindelay      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 15000;
+			e.despawn       = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.despawn_timer = row[11] ? static_cast<int32_t>(atoi(row[11])) : 100;
 			e.wp_spawns     = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);

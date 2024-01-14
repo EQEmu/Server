@@ -207,9 +207,9 @@ public:
 		if (results.RowCount() == 1) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
 			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
 			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
@@ -224,13 +224,13 @@ public:
 			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
 			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			return e;
 		}
@@ -418,9 +418,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
 			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
 			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
@@ -435,13 +435,13 @@ public:
 			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
 			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -466,9 +466,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
 			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
 			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
@@ -483,13 +483,13 @@ public:
 			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
 			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			all_entries.push_back(e);
 		}

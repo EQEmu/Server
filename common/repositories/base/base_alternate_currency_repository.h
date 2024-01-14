@@ -119,8 +119,8 @@ public:
 		if (results.RowCount() == 1) {
 			AlternateCurrency e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.item_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.item_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 
 			return e;
 		}
@@ -243,8 +243,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AlternateCurrency e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.item_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.item_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -269,8 +269,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AlternateCurrency e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.item_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.item_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 
 			all_entries.push_back(e);
 		}

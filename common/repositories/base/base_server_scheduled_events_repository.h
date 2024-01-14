@@ -179,20 +179,20 @@ public:
 		if (results.RowCount() == 1) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -243,8 +243,8 @@ public:
 		v.push_back(columns[12] + " = " + std::to_string(e.month_end));
 		v.push_back(columns[13] + " = " + std::to_string(e.year_end));
 		v.push_back(columns[14] + " = '" + Strings::Escape(e.cron_expression) + "'");
-		v.push_back(columns[15] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back(columns[16] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[15] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[16] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -281,8 +281,8 @@ public:
 		v.push_back(std::to_string(e.month_end));
 		v.push_back(std::to_string(e.year_end));
 		v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -327,8 +327,8 @@ public:
 			v.push_back(std::to_string(e.month_end));
 			v.push_back(std::to_string(e.year_end));
 			v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -362,20 +362,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -403,20 +403,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -509,8 +509,8 @@ public:
 		v.push_back(std::to_string(e.month_end));
 		v.push_back(std::to_string(e.year_end));
 		v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -548,8 +548,8 @@ public:
 			v.push_back(std::to_string(e.month_end));
 			v.push_back(std::to_string(e.year_end));
 			v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

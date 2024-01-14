@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseAaRanksRepository {
 public:
 	struct AaRanks {
@@ -165,18 +164,18 @@ public:
 			AaRanks e{};
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.upper_hotkey_sid = static_cast<int32_t>(atoi(row[1]));
-			e.lower_hotkey_sid = static_cast<int32_t>(atoi(row[2]));
-			e.title_sid        = static_cast<int32_t>(atoi(row[3]));
-			e.desc_sid         = static_cast<int32_t>(atoi(row[4]));
-			e.cost             = static_cast<int32_t>(atoi(row[5]));
-			e.level_req        = static_cast<int32_t>(atoi(row[6]));
-			e.spell            = static_cast<int32_t>(atoi(row[7]));
-			e.spell_type       = static_cast<int32_t>(atoi(row[8]));
-			e.recast_time      = static_cast<int32_t>(atoi(row[9]));
-			e.expansion        = static_cast<int32_t>(atoi(row[10]));
-			e.prev_id          = static_cast<int32_t>(atoi(row[11]));
-			e.next_id          = static_cast<int32_t>(atoi(row[12]));
+			e.upper_hotkey_sid = row[1] ? static_cast<int32_t>(atoi(row[1])) : -1;
+			e.lower_hotkey_sid = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.title_sid        = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.desc_sid         = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.cost             = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.level_req        = row[6] ? static_cast<int32_t>(atoi(row[6])) : 51;
+			e.spell            = row[7] ? static_cast<int32_t>(atoi(row[7])) : -1;
+			e.spell_type       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.recast_time      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.expansion        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.prev_id          = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.next_id          = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
 
 			return e;
 		}
@@ -333,18 +332,18 @@ public:
 			AaRanks e{};
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.upper_hotkey_sid = static_cast<int32_t>(atoi(row[1]));
-			e.lower_hotkey_sid = static_cast<int32_t>(atoi(row[2]));
-			e.title_sid        = static_cast<int32_t>(atoi(row[3]));
-			e.desc_sid         = static_cast<int32_t>(atoi(row[4]));
-			e.cost             = static_cast<int32_t>(atoi(row[5]));
-			e.level_req        = static_cast<int32_t>(atoi(row[6]));
-			e.spell            = static_cast<int32_t>(atoi(row[7]));
-			e.spell_type       = static_cast<int32_t>(atoi(row[8]));
-			e.recast_time      = static_cast<int32_t>(atoi(row[9]));
-			e.expansion        = static_cast<int32_t>(atoi(row[10]));
-			e.prev_id          = static_cast<int32_t>(atoi(row[11]));
-			e.next_id          = static_cast<int32_t>(atoi(row[12]));
+			e.upper_hotkey_sid = row[1] ? static_cast<int32_t>(atoi(row[1])) : -1;
+			e.lower_hotkey_sid = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.title_sid        = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.desc_sid         = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.cost             = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.level_req        = row[6] ? static_cast<int32_t>(atoi(row[6])) : 51;
+			e.spell            = row[7] ? static_cast<int32_t>(atoi(row[7])) : -1;
+			e.spell_type       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.recast_time      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.expansion        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.prev_id          = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.next_id          = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
 
 			all_entries.push_back(e);
 		}
@@ -370,18 +369,18 @@ public:
 			AaRanks e{};
 
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.upper_hotkey_sid = static_cast<int32_t>(atoi(row[1]));
-			e.lower_hotkey_sid = static_cast<int32_t>(atoi(row[2]));
-			e.title_sid        = static_cast<int32_t>(atoi(row[3]));
-			e.desc_sid         = static_cast<int32_t>(atoi(row[4]));
-			e.cost             = static_cast<int32_t>(atoi(row[5]));
-			e.level_req        = static_cast<int32_t>(atoi(row[6]));
-			e.spell            = static_cast<int32_t>(atoi(row[7]));
-			e.spell_type       = static_cast<int32_t>(atoi(row[8]));
-			e.recast_time      = static_cast<int32_t>(atoi(row[9]));
-			e.expansion        = static_cast<int32_t>(atoi(row[10]));
-			e.prev_id          = static_cast<int32_t>(atoi(row[11]));
-			e.next_id          = static_cast<int32_t>(atoi(row[12]));
+			e.upper_hotkey_sid = row[1] ? static_cast<int32_t>(atoi(row[1])) : -1;
+			e.lower_hotkey_sid = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.title_sid        = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.desc_sid         = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.cost             = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.level_req        = row[6] ? static_cast<int32_t>(atoi(row[6])) : 51;
+			e.spell            = row[7] ? static_cast<int32_t>(atoi(row[7])) : -1;
+			e.spell_type       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.recast_time      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.expansion        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.prev_id          = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.next_id          = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
 
 			all_entries.push_back(e);
 		}

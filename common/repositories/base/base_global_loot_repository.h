@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseGlobalLootRepository {
 public:
 	struct GlobalLoot {

@@ -155,16 +155,16 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			return e;
@@ -315,16 +315,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);
@@ -350,16 +350,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);

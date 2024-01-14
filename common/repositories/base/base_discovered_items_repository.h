@@ -130,7 +130,7 @@ public:
 			e.item_id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_name       = row[1] ? row[1] : "";
 			e.discovered_date = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.account_status  = static_cast<int32_t>(atoi(row[3]));
+			e.account_status  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			return e;
 		}
@@ -262,7 +262,7 @@ public:
 			e.item_id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_name       = row[1] ? row[1] : "";
 			e.discovered_date = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.account_status  = static_cast<int32_t>(atoi(row[3]));
+			e.account_status  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -290,7 +290,7 @@ public:
 			e.item_id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_name       = row[1] ? row[1] : "";
 			e.discovered_date = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.account_status  = static_cast<int32_t>(atoi(row[3]));
+			e.account_status  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}

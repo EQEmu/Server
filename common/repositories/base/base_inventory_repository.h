@@ -185,12 +185,12 @@ public:
 			e.augslot3            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.augslot4            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augslot5            = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.augslot6            = static_cast<int32_t>(atoi(row[10]));
+			e.augslot6            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
 			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[15]));
+			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 
 			return e;
 		}
@@ -365,12 +365,12 @@ public:
 			e.augslot3            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.augslot4            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augslot5            = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.augslot6            = static_cast<int32_t>(atoi(row[10]));
+			e.augslot6            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
 			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[15]));
+			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -405,12 +405,12 @@ public:
 			e.augslot3            = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.augslot4            = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.augslot5            = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.augslot6            = static_cast<int32_t>(atoi(row[10]));
+			e.augslot6            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 			e.instnodrop          = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.custom_data         = row[12] ? row[12] : "";
 			e.ornamenticon        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[15]));
+			e.ornament_hero_model = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 
 			all_entries.push_back(e);
 		}

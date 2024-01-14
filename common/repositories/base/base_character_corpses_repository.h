@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterCorpsesRepository {
 public:
 	struct CharacterCorpses {
@@ -303,7 +302,7 @@ public:
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
-			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
+			e.zone_id          = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
@@ -312,9 +311,9 @@ public:
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
-			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
-			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
+			e.is_buried        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.was_at_graveyard = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.is_locked        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
@@ -388,7 +387,7 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.y));
 		v.push_back(columns[7] + " = " + std::to_string(e.z));
 		v.push_back(columns[8] + " = " + std::to_string(e.heading));
-		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
 		v.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
 		v.push_back(columns[12] + " = " + std::to_string(e.is_buried));
@@ -456,7 +455,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -532,7 +531,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));
@@ -606,7 +605,7 @@ public:
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
-			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
+			e.zone_id          = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
@@ -615,9 +614,9 @@ public:
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
-			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
-			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
+			e.is_buried        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.was_at_graveyard = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.is_locked        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
@@ -677,7 +676,7 @@ public:
 			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid           = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.charname         = row[2] ? row[2] : "";
-			e.zone_id          = static_cast<int16_t>(atoi(row[3]));
+			e.zone_id          = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 			e.instance_id      = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.x                = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y                = row[6] ? strtof(row[6], nullptr) : 0;
@@ -686,9 +685,9 @@ public:
 			e.time_of_death    = strtoll(row[9] ? row[9] : "-1", nullptr, 10);
 			e.guild_consent_id = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.is_rezzed        = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.is_buried        = static_cast<int8_t>(atoi(row[12]));
-			e.was_at_graveyard = static_cast<int8_t>(atoi(row[13]));
-			e.is_locked        = static_cast<int8_t>(atoi(row[14]));
+			e.is_buried        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.was_at_graveyard = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.is_locked        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 			e.exp              = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
 			e.size             = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.level            = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
@@ -804,7 +803,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -873,7 +872,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));

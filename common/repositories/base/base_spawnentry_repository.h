@@ -151,14 +151,14 @@ public:
 		if (results.RowCount() == 1) {
 			Spawnentry e{};
 
-			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
-			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
-			e.chance                 = static_cast<int16_t>(atoi(row[2]));
-			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int16_t>(atoi(row[4]));
-			e.max_time               = static_cast<int16_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.spawngroupID           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcID                  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.chance                 = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.condition_value_filter = row[3] ? static_cast<int32_t>(atoi(row[3])) : 1;
+			e.min_time               = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.max_time               = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -307,14 +307,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawnentry e{};
 
-			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
-			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
-			e.chance                 = static_cast<int16_t>(atoi(row[2]));
-			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int16_t>(atoi(row[4]));
-			e.max_time               = static_cast<int16_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.spawngroupID           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcID                  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.chance                 = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.condition_value_filter = row[3] ? static_cast<int32_t>(atoi(row[3])) : 1;
+			e.min_time               = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.max_time               = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -341,14 +341,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawnentry e{};
 
-			e.spawngroupID           = static_cast<int32_t>(atoi(row[0]));
-			e.npcID                  = static_cast<int32_t>(atoi(row[1]));
-			e.chance                 = static_cast<int16_t>(atoi(row[2]));
-			e.condition_value_filter = static_cast<int32_t>(atoi(row[3]));
-			e.min_time               = static_cast<int16_t>(atoi(row[4]));
-			e.max_time               = static_cast<int16_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.spawngroupID           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcID                  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.chance                 = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.condition_value_filter = row[3] ? static_cast<int32_t>(atoi(row[3])) : 1;
+			e.min_time               = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.max_time               = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 

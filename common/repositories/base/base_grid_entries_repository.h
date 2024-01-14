@@ -147,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
 			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
 			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			return e;
 		}
@@ -299,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
 			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
 			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -332,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
 			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
 			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
 			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}

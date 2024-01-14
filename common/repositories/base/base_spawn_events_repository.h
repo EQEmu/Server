@@ -177,10 +177,10 @@ public:
 			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
 			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			return e;
 		}
@@ -348,10 +348,10 @@ public:
 			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
 			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -386,10 +386,10 @@ public:
 			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
 			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			all_entries.push_back(e);
 		}

@@ -127,7 +127,7 @@ public:
 		if (results.RowCount() == 1) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -259,7 +259,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -287,7 +287,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";

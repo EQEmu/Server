@@ -182,7 +182,7 @@ public:
 		v.push_back(columns[1] + " = " + std::to_string(e.character_id));
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.expedition_name) + "'");
 		v.push_back(columns[3] + " = '" + Strings::Escape(e.event_name) + "'");
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(columns[5] + " = " + std::to_string(e.duration));
 		v.push_back(columns[6] + " = '" + Strings::Escape(e.from_expedition_uuid) + "'");
 
@@ -210,7 +210,7 @@ public:
 		v.push_back(std::to_string(e.character_id));
 		v.push_back("'" + Strings::Escape(e.expedition_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_name) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(std::to_string(e.duration));
 		v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
@@ -246,7 +246,7 @@ public:
 			v.push_back(std::to_string(e.character_id));
 			v.push_back("'" + Strings::Escape(e.expedition_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_name) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 			v.push_back(std::to_string(e.duration));
 			v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
@@ -398,7 +398,7 @@ public:
 		v.push_back(std::to_string(e.character_id));
 		v.push_back("'" + Strings::Escape(e.expedition_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_name) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 		v.push_back(std::to_string(e.duration));
 		v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 
@@ -427,7 +427,7 @@ public:
 			v.push_back(std::to_string(e.character_id));
 			v.push_back("'" + Strings::Escape(e.expedition_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_name) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 			v.push_back(std::to_string(e.duration));
 			v.push_back("'" + Strings::Escape(e.from_expedition_uuid) + "'");
 

@@ -138,9 +138,9 @@ public:
 			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
 			return e;
 		}
@@ -278,9 +278,9 @@ public:
 			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -308,9 +308,9 @@ public:
 			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.type         = static_cast<int8_t>(atoi(row[3]));
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.was_rewarded = static_cast<int8_t>(atoi(row[5]));
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}

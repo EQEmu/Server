@@ -155,17 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			return e;
 		}
@@ -315,17 +315,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -350,17 +350,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			all_entries.push_back(e);
 		}

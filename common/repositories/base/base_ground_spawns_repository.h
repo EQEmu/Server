@@ -185,7 +185,7 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.max_x                  = row[3] ? strtof(row[3], nullptr) : 2000;
 			e.max_y                  = row[4] ? strtof(row[4], nullptr) : 2000;
 			e.max_z                  = row[5] ? strtof(row[5], nullptr) : 10000;
@@ -197,8 +197,8 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.min_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.max_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 
@@ -372,7 +372,7 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.max_x                  = row[3] ? strtof(row[3], nullptr) : 2000;
 			e.max_y                  = row[4] ? strtof(row[4], nullptr) : 2000;
 			e.max_z                  = row[5] ? strtof(row[5], nullptr) : 10000;
@@ -384,8 +384,8 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.min_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.max_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 
@@ -414,7 +414,7 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.version                = static_cast<int16_t>(atoi(row[2]));
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.max_x                  = row[3] ? strtof(row[3], nullptr) : 2000;
 			e.max_y                  = row[4] ? strtof(row[4], nullptr) : 2000;
 			e.max_z                  = row[5] ? strtof(row[5], nullptr) : 10000;
@@ -426,8 +426,8 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[14]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[15]));
+			e.min_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.max_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.content_flags          = row[16] ? row[16] : "";
 			e.content_flags_disabled = row[17] ? row[17] : "";
 

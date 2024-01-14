@@ -156,9 +156,9 @@ public:
 			e.mincash                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.maxcash                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.avgcoin                = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.done                   = static_cast<int8_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.done                   = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -311,9 +311,9 @@ public:
 			e.mincash                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.maxcash                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.avgcoin                = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.done                   = static_cast<int8_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.done                   = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 
@@ -345,9 +345,9 @@ public:
 			e.mincash                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.maxcash                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.avgcoin                = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.done                   = static_cast<int8_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
+			e.done                   = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.min_expansion          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.max_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
 			e.content_flags          = row[8] ? row[8] : "";
 			e.content_flags_disabled = row[9] ? row[9] : "";
 

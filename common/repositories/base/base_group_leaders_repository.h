@@ -147,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			GroupLeaders e{};
 
-			e.gid            = static_cast<int32_t>(atoi(row[0]));
+			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : "";
+			e.leadershipaa   = row[3] ? row[3] : 0;
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
+			e.mentor_percent = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 
 			return e;
 		}
@@ -299,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupLeaders e{};
 
-			e.gid            = static_cast<int32_t>(atoi(row[0]));
+			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : "";
+			e.leadershipaa   = row[3] ? row[3] : 0;
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
+			e.mentor_percent = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -332,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroupLeaders e{};
 
-			e.gid            = static_cast<int32_t>(atoi(row[0]));
+			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : "";
+			e.leadershipaa   = row[3] ? row[3] : 0;
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
 			e.mentoree       = row[7] ? row[7] : "";
-			e.mentor_percent = static_cast<int32_t>(atoi(row[8]));
+			e.mentor_percent = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}

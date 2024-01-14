@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseAaAbilityRepository {
 public:
 	struct AaAbility {
@@ -174,19 +173,19 @@ public:
 
 			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name               = row[1] ? row[1] : "";
-			e.category           = static_cast<int32_t>(atoi(row[2]));
-			e.classes            = static_cast<int32_t>(atoi(row[3]));
-			e.races              = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage   = static_cast<int32_t>(atoi(row[5]));
-			e.deities            = static_cast<int32_t>(atoi(row[6]));
-			e.status             = static_cast<int32_t>(atoi(row[7]));
-			e.type               = static_cast<int32_t>(atoi(row[8]));
-			e.charges            = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only         = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id      = static_cast<int32_t>(atoi(row[11]));
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
 			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
-			e.reset_on_death     = static_cast<int8_t>(atoi(row[13]));
-			e.auto_grant_enabled = static_cast<int8_t>(atoi(row[14]));
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			return e;
 		}
@@ -350,19 +349,19 @@ public:
 
 			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name               = row[1] ? row[1] : "";
-			e.category           = static_cast<int32_t>(atoi(row[2]));
-			e.classes            = static_cast<int32_t>(atoi(row[3]));
-			e.races              = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage   = static_cast<int32_t>(atoi(row[5]));
-			e.deities            = static_cast<int32_t>(atoi(row[6]));
-			e.status             = static_cast<int32_t>(atoi(row[7]));
-			e.type               = static_cast<int32_t>(atoi(row[8]));
-			e.charges            = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only         = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id      = static_cast<int32_t>(atoi(row[11]));
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
 			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
-			e.reset_on_death     = static_cast<int8_t>(atoi(row[13]));
-			e.auto_grant_enabled = static_cast<int8_t>(atoi(row[14]));
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -389,19 +388,19 @@ public:
 
 			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name               = row[1] ? row[1] : "";
-			e.category           = static_cast<int32_t>(atoi(row[2]));
-			e.classes            = static_cast<int32_t>(atoi(row[3]));
-			e.races              = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage   = static_cast<int32_t>(atoi(row[5]));
-			e.deities            = static_cast<int32_t>(atoi(row[6]));
-			e.status             = static_cast<int32_t>(atoi(row[7]));
-			e.type               = static_cast<int32_t>(atoi(row[8]));
-			e.charges            = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only         = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id      = static_cast<int32_t>(atoi(row[11]));
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
 			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
-			e.reset_on_death     = static_cast<int8_t>(atoi(row[13]));
-			e.auto_grant_enabled = static_cast<int8_t>(atoi(row[14]));
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			all_entries.push_back(e);
 		}

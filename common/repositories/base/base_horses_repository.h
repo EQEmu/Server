@@ -139,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "";
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			return e;
 		}
@@ -282,13 +282,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "";
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +313,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
-			e.notes      = row[6] ? row[6] : "";
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			all_entries.push_back(e);
 		}

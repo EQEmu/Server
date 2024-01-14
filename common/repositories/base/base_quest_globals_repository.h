@@ -135,12 +135,12 @@ public:
 		if (results.RowCount() == 1) {
 			QuestGlobals e{};
 
-			e.charid  = static_cast<int32_t>(atoi(row[0]));
-			e.npcid   = static_cast<int32_t>(atoi(row[1]));
-			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
+			e.charid  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcid   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zoneid  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name    = row[3] ? row[3] : "";
-			e.value   = row[4] ? row[4] : "";
-			e.expdate = static_cast<int32_t>(atoi(row[5]));
+			e.value   = row[4] ? row[4] : "?";
+			e.expdate = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			return e;
 		}
@@ -275,12 +275,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			QuestGlobals e{};
 
-			e.charid  = static_cast<int32_t>(atoi(row[0]));
-			e.npcid   = static_cast<int32_t>(atoi(row[1]));
-			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
+			e.charid  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcid   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zoneid  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name    = row[3] ? row[3] : "";
-			e.value   = row[4] ? row[4] : "";
-			e.expdate = static_cast<int32_t>(atoi(row[5]));
+			e.value   = row[4] ? row[4] : "?";
+			e.expdate = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -305,12 +305,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			QuestGlobals e{};
 
-			e.charid  = static_cast<int32_t>(atoi(row[0]));
-			e.npcid   = static_cast<int32_t>(atoi(row[1]));
-			e.zoneid  = static_cast<int32_t>(atoi(row[2]));
+			e.charid  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npcid   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zoneid  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name    = row[3] ? row[3] : "";
-			e.value   = row[4] ? row[4] : "";
-			e.expdate = static_cast<int32_t>(atoi(row[5]));
+			e.value   = row[4] ? row[4] : "?";
+			e.expdate = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}

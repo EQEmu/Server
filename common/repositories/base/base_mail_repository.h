@@ -145,12 +145,12 @@ public:
 
 			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			return e;
 		}
@@ -292,12 +292,12 @@ public:
 
 			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -324,12 +324,12 @@ public:
 
 			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}

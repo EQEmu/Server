@@ -123,8 +123,8 @@ public:
 		if (results.RowCount() == 1) {
 			DbStr e{};
 
-			e.id    = static_cast<int32_t>(atoi(row[0]));
-			e.type  = static_cast<int32_t>(atoi(row[1]));
+			e.id    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.type  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.value = row[2] ? row[2] : "";
 
 			return e;
@@ -251,8 +251,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DbStr e{};
 
-			e.id    = static_cast<int32_t>(atoi(row[0]));
-			e.type  = static_cast<int32_t>(atoi(row[1]));
+			e.id    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.type  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.value = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -278,8 +278,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DbStr e{};
 
-			e.id    = static_cast<int32_t>(atoi(row[0]));
-			e.type  = static_cast<int32_t>(atoi(row[1]));
+			e.id    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.type  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.value = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
