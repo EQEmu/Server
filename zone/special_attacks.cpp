@@ -2143,7 +2143,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
-	if (who == nullptr || DivineAura() || (!from_spell && !CombatRange(who)) || (IsNPC() && IsCharmed()) || !CombatRange(who)) {
+	if (!who || DivineAura() || (!from_spell && !CombatRange(who)) || (IsNPC() && IsCharmed()) || !CombatRange(who)) {
 		return;
 	}
 
