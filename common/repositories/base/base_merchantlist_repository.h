@@ -20,7 +20,7 @@ class BaseMerchantlistRepository {
 public:
 	struct Merchantlist {
 		int32_t     merchantid;
-		int32_t     slot;
+		uint32_t    slot;
 		int32_t     item;
 		int16_t     faction_required;
 		uint8_t     level_required;
@@ -179,21 +179,21 @@ public:
 		if (results.RowCount() == 1) {
 			Merchantlist e{};
 
-			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
-			e.slot                   = static_cast<int32_t>(atoi(row[1]));
-			e.item                   = static_cast<int32_t>(atoi(row[2]));
-			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.merchantid             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot                   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.faction_required       = row[3] ? static_cast<int16_t>(atoi(row[3])) : -100;
 			e.level_required         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.max_status             = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 255;
 			e.alt_currency_cost      = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
-			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.classes_required       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 65535;
+			e.probability            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 100;
 			e.bucket_name            = row[10] ? row[10] : "";
 			e.bucket_value           = row[11] ? row[11] : "";
 			e.bucket_comparison      = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
@@ -363,21 +363,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Merchantlist e{};
 
-			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
-			e.slot                   = static_cast<int32_t>(atoi(row[1]));
-			e.item                   = static_cast<int32_t>(atoi(row[2]));
-			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.merchantid             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot                   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.faction_required       = row[3] ? static_cast<int16_t>(atoi(row[3])) : -100;
 			e.level_required         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.max_status             = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 255;
 			e.alt_currency_cost      = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
-			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.classes_required       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 65535;
+			e.probability            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 100;
 			e.bucket_name            = row[10] ? row[10] : "";
 			e.bucket_value           = row[11] ? row[11] : "";
 			e.bucket_comparison      = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
@@ -404,21 +404,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Merchantlist e{};
 
-			e.merchantid             = static_cast<int32_t>(atoi(row[0]));
-			e.slot                   = static_cast<int32_t>(atoi(row[1]));
-			e.item                   = static_cast<int32_t>(atoi(row[2]));
-			e.faction_required       = static_cast<int16_t>(atoi(row[3]));
+			e.merchantid             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot                   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.faction_required       = row[3] ? static_cast<int16_t>(atoi(row[3])) : -100;
 			e.level_required         = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 			e.max_status             = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 255;
 			e.alt_currency_cost      = row[7] ? static_cast<uint16_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.classes_required       = static_cast<int32_t>(atoi(row[8]));
-			e.probability            = static_cast<int32_t>(atoi(row[9]));
+			e.classes_required       = row[8] ? static_cast<int32_t>(atoi(row[8])) : 65535;
+			e.probability            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 100;
 			e.bucket_name            = row[10] ? row[10] : "";
 			e.bucket_value           = row[11] ? row[11] : "";
 			e.bucket_comparison      = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.min_expansion          = static_cast<int8_t>(atoi(row[13]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[14]));
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
 			e.content_flags          = row[15] ? row[15] : "";
 			e.content_flags_disabled = row[16] ? row[16] : "";
 
