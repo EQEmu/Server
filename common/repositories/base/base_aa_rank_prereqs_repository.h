@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseAaRankPrereqsRepository {
 public:
 	struct AaRankPrereqs {
@@ -125,8 +124,8 @@ public:
 			AaRankPrereqs e{};
 
 			e.rank_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
-			e.points  = static_cast<int32_t>(atoi(row[2]));
+			e.aa_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.points  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -253,8 +252,8 @@ public:
 			AaRankPrereqs e{};
 
 			e.rank_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
-			e.points  = static_cast<int32_t>(atoi(row[2]));
+			e.aa_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.points  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -280,8 +279,8 @@ public:
 			AaRankPrereqs e{};
 
 			e.rank_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.aa_id   = static_cast<int32_t>(atoi(row[1]));
-			e.points  = static_cast<int32_t>(atoi(row[2]));
+			e.aa_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.points  = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

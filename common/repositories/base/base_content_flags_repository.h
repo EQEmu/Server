@@ -127,9 +127,9 @@ public:
 		if (results.RowCount() == 1) {
 			ContentFlags e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = static_cast<int8_t>(atoi(row[2]));
+			e.enabled   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.notes     = row[3] ? row[3] : "";
 
 			return e;
@@ -258,9 +258,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ContentFlags e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = static_cast<int8_t>(atoi(row[2]));
+			e.enabled   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.notes     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -286,9 +286,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ContentFlags e{};
 
-			e.id        = static_cast<int32_t>(atoi(row[0]));
+			e.id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.flag_name = row[1] ? row[1] : "";
-			e.enabled   = static_cast<int8_t>(atoi(row[2]));
+			e.enabled   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.notes     = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseAaRankEffectsRepository {
 public:
 	struct AaRankEffects {
@@ -134,9 +133,9 @@ public:
 
 			e.rank_id   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
-			e.effect_id = static_cast<int32_t>(atoi(row[2]));
-			e.base1     = static_cast<int32_t>(atoi(row[3]));
-			e.base2     = static_cast<int32_t>(atoi(row[4]));
+			e.effect_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.base1     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.base2     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -270,9 +269,9 @@ public:
 
 			e.rank_id   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
-			e.effect_id = static_cast<int32_t>(atoi(row[2]));
-			e.base1     = static_cast<int32_t>(atoi(row[3]));
-			e.base2     = static_cast<int32_t>(atoi(row[4]));
+			e.effect_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.base1     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.base2     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -299,9 +298,9 @@ public:
 
 			e.rank_id   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.slot      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
-			e.effect_id = static_cast<int32_t>(atoi(row[2]));
-			e.base1     = static_cast<int32_t>(atoi(row[3]));
-			e.base2     = static_cast<int32_t>(atoi(row[4]));
+			e.effect_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.base1     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.base2     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

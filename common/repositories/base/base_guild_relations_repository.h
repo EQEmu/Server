@@ -125,7 +125,7 @@ public:
 
 			e.guild1   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.guild2   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.relation = static_cast<int8_t>(atoi(row[2]));
+			e.relation = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -253,7 +253,7 @@ public:
 
 			e.guild1   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.guild2   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.relation = static_cast<int8_t>(atoi(row[2]));
+			e.relation = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -280,7 +280,7 @@ public:
 
 			e.guild1   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.guild2   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.relation = static_cast<int8_t>(atoi(row[2]));
+			e.relation = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

@@ -125,7 +125,7 @@ public:
 
 			e.shared_task_id = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.character_id   = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
+			e.is_leader      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -253,7 +253,7 @@ public:
 
 			e.shared_task_id = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.character_id   = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
+			e.is_leader      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -280,7 +280,7 @@ public:
 
 			e.shared_task_id = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.character_id   = row[1] ? strtoll(row[1], nullptr, 10) : 0;
-			e.is_leader      = static_cast<int8_t>(atoi(row[2]));
+			e.is_leader      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

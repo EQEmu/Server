@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseCharacterCorpseItemsRepository {
 public:
 	struct CharacterCorpseItems {
@@ -181,8 +180,8 @@ public:
 			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_6               = static_cast<int32_t>(atoi(row[9]));
-			e.attuned             = static_cast<int16_t>(atoi(row[10]));
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
 			e.custom_data         = row[11] ? row[11] : "";
 			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
@@ -357,8 +356,8 @@ public:
 			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_6               = static_cast<int32_t>(atoi(row[9]));
-			e.attuned             = static_cast<int16_t>(atoi(row[10]));
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
 			e.custom_data         = row[11] ? row[11] : "";
 			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
@@ -396,8 +395,8 @@ public:
 			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_6               = static_cast<int32_t>(atoi(row[9]));
-			e.attuned             = static_cast<int16_t>(atoi(row[10]));
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
 			e.custom_data         = row[11] ? row[11] : "";
 			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;

@@ -138,8 +138,8 @@ public:
 			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			return e;
@@ -178,7 +178,7 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.task_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.timer_type));
 		v.push_back(columns[4] + " = " + std::to_string(e.timer_group));
-		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -205,7 +205,7 @@ public:
 		v.push_back(std::to_string(e.task_id));
 		v.push_back(std::to_string(e.timer_type));
 		v.push_back(std::to_string(e.timer_group));
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 			v.push_back(std::to_string(e.task_id));
 			v.push_back(std::to_string(e.timer_type));
 			v.push_back(std::to_string(e.timer_group));
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -277,8 +277,8 @@ public:
 			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
@@ -307,8 +307,8 @@ public:
 			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
@@ -389,7 +389,7 @@ public:
 		v.push_back(std::to_string(e.task_id));
 		v.push_back(std::to_string(e.timer_type));
 		v.push_back(std::to_string(e.timer_group));
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -417,7 +417,7 @@ public:
 			v.push_back(std::to_string(e.task_id));
 			v.push_back(std::to_string(e.timer_type));
 			v.push_back(std::to_string(e.timer_group));
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

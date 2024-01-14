@@ -128,9 +128,9 @@ public:
 			Spawn2Disabled e{};
 
 			e.id          = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
-			e.instance_id = static_cast<int32_t>(atoi(row[2]));
-			e.disabled    = static_cast<int16_t>(atoi(row[3]));
+			e.spawn2_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.instance_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.disabled    = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			return e;
 		}
@@ -259,9 +259,9 @@ public:
 			Spawn2Disabled e{};
 
 			e.id          = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
-			e.instance_id = static_cast<int32_t>(atoi(row[2]));
-			e.disabled    = static_cast<int16_t>(atoi(row[3]));
+			e.spawn2_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.instance_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.disabled    = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -287,9 +287,9 @@ public:
 			Spawn2Disabled e{};
 
 			e.id          = row[0] ? strtoll(row[0], nullptr, 10) : 0;
-			e.spawn2_id   = static_cast<int32_t>(atoi(row[1]));
-			e.instance_id = static_cast<int32_t>(atoi(row[2]));
-			e.disabled    = static_cast<int16_t>(atoi(row[3]));
+			e.spawn2_id   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.instance_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.disabled    = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}

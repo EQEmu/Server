@@ -144,7 +144,7 @@ public:
 			CharacterBind e{};
 
 			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.slot        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.x           = row[4] ? strtof(row[4], nullptr) : 0;
@@ -291,7 +291,7 @@ public:
 			CharacterBind e{};
 
 			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.slot        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.x           = row[4] ? strtof(row[4], nullptr) : 0;
@@ -323,7 +323,7 @@ public:
 			CharacterBind e{};
 
 			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = static_cast<int32_t>(atoi(row[1]));
+			e.slot        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.zone_id     = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.instance_id = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.x           = row[4] ? strtof(row[4], nullptr) : 0;

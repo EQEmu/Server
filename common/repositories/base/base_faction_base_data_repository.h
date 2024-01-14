@@ -135,12 +135,12 @@ public:
 		if (results.RowCount() == 1) {
 			FactionBaseData e{};
 
-			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
-			e.min               = static_cast<int16_t>(atoi(row[1]));
-			e.max               = static_cast<int16_t>(atoi(row[2]));
-			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
-			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
-			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
+			e.client_faction_id = row[0] ? static_cast<int16_t>(atoi(row[0])) : 0;
+			e.min               = row[1] ? static_cast<int16_t>(atoi(row[1])) : -2000;
+			e.max               = row[2] ? static_cast<int16_t>(atoi(row[2])) : 2000;
+			e.unk_hero1         = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.unk_hero2         = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.unk_hero3         = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
 
 			return e;
 		}
@@ -275,12 +275,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionBaseData e{};
 
-			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
-			e.min               = static_cast<int16_t>(atoi(row[1]));
-			e.max               = static_cast<int16_t>(atoi(row[2]));
-			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
-			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
-			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
+			e.client_faction_id = row[0] ? static_cast<int16_t>(atoi(row[0])) : 0;
+			e.min               = row[1] ? static_cast<int16_t>(atoi(row[1])) : -2000;
+			e.max               = row[2] ? static_cast<int16_t>(atoi(row[2])) : 2000;
+			e.unk_hero1         = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.unk_hero2         = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.unk_hero3         = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -305,12 +305,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionBaseData e{};
 
-			e.client_faction_id = static_cast<int16_t>(atoi(row[0]));
-			e.min               = static_cast<int16_t>(atoi(row[1]));
-			e.max               = static_cast<int16_t>(atoi(row[2]));
-			e.unk_hero1         = static_cast<int16_t>(atoi(row[3]));
-			e.unk_hero2         = static_cast<int16_t>(atoi(row[4]));
-			e.unk_hero3         = static_cast<int16_t>(atoi(row[5]));
+			e.client_faction_id = row[0] ? static_cast<int16_t>(atoi(row[0])) : 0;
+			e.min               = row[1] ? static_cast<int16_t>(atoi(row[1])) : -2000;
+			e.max               = row[2] ? static_cast<int16_t>(atoi(row[2])) : 2000;
+			e.unk_hero1         = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.unk_hero2         = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.unk_hero3         = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}

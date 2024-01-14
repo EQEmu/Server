@@ -187,13 +187,13 @@ public:
 			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
 			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
 			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
 			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
@@ -241,7 +241,7 @@ public:
 		v.push_back(columns[9] + " = " + std::to_string(e.event_type_id));
 		v.push_back(columns[10] + " = '" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back(columns[11] + " = '" + Strings::Escape(e.event_data) + "'");
-		v.push_back(columns[12] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[12] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -275,7 +275,7 @@ public:
 		v.push_back(std::to_string(e.event_type_id));
 		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_data) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -317,7 +317,7 @@ public:
 			v.push_back(std::to_string(e.event_type_id));
 			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_data) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -354,13 +354,13 @@ public:
 			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
 			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
 			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
 			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
@@ -391,13 +391,13 @@ public:
 			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
 			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
 			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
 			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
 			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
@@ -487,7 +487,7 @@ public:
 		v.push_back(std::to_string(e.event_type_id));
 		v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 		v.push_back("'" + Strings::Escape(e.event_data) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -522,7 +522,7 @@ public:
 			v.push_back(std::to_string(e.event_type_id));
 			v.push_back("'" + Strings::Escape(e.event_type_name) + "'");
 			v.push_back("'" + Strings::Escape(e.event_data) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

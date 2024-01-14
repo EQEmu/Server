@@ -119,7 +119,7 @@ public:
 		if (results.RowCount() == 1) {
 			ChatchannelReservedNames e{};
 
-			e.id   = static_cast<int32_t>(atoi(row[0]));
+			e.id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name = row[1] ? row[1] : "";
 
 			return e;
@@ -242,7 +242,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ChatchannelReservedNames e{};
 
-			e.id   = static_cast<int32_t>(atoi(row[0]));
+			e.id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);
@@ -268,7 +268,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ChatchannelReservedNames e{};
 
-			e.id   = static_cast<int32_t>(atoi(row[0]));
+			e.id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name = row[1] ? row[1] : "";
 
 			all_entries.push_back(e);

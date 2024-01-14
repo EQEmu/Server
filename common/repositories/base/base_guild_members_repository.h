@@ -151,7 +151,7 @@ public:
 		if (results.RowCount() == 1) {
 			GuildMembers e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.rank           = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -307,7 +307,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildMembers e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.rank           = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -341,7 +341,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GuildMembers e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.rank           = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;

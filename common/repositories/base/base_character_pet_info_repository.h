@@ -147,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			return e;
 		}
@@ -299,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			all_entries.push_back(e);
 		}
@@ -332,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			all_entries.push_back(e);
 		}

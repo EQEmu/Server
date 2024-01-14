@@ -155,15 +155,15 @@ public:
 		if (results.RowCount() == 1) {
 			Fishing e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
-			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
-			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
-			e.chance                 = static_cast<int16_t>(atoi(row[4]));
-			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
-			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.Itemid                 = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.skill_level            = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.chance                 = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.npc_id                 = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.npc_chance             = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 
@@ -314,15 +314,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
-			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
-			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
-			e.chance                 = static_cast<int16_t>(atoi(row[4]));
-			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
-			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.Itemid                 = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.skill_level            = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.chance                 = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.npc_id                 = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.npc_chance             = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 
@@ -349,15 +349,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid                 = static_cast<int32_t>(atoi(row[1]));
-			e.Itemid                 = static_cast<int32_t>(atoi(row[2]));
-			e.skill_level            = static_cast<int16_t>(atoi(row[3]));
-			e.chance                 = static_cast<int16_t>(atoi(row[4]));
-			e.npc_id                 = static_cast<int32_t>(atoi(row[5]));
-			e.npc_chance             = static_cast<int32_t>(atoi(row[6]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[8]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.Itemid                 = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.skill_level            = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.chance                 = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.npc_id                 = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.npc_chance             = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
 			e.content_flags          = row[9] ? row[9] : "";
 			e.content_flags_disabled = row[10] ? row[10] : "";
 

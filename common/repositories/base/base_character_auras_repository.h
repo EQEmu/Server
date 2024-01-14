@@ -123,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterAuras e{};
 
-			e.id       = static_cast<int32_t>(atoi(row[0]));
-			e.slot     = static_cast<int8_t>(atoi(row[1]));
-			e.spell_id = static_cast<int32_t>(atoi(row[2]));
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -251,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAuras e{};
 
-			e.id       = static_cast<int32_t>(atoi(row[0]));
-			e.slot     = static_cast<int8_t>(atoi(row[1]));
-			e.spell_id = static_cast<int32_t>(atoi(row[2]));
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -278,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterAuras e{};
 
-			e.id       = static_cast<int32_t>(atoi(row[0]));
-			e.slot     = static_cast<int8_t>(atoi(row[1]));
-			e.spell_id = static_cast<int32_t>(atoi(row[2]));
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

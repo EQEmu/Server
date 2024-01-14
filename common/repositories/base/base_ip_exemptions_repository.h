@@ -123,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			IpExemptions e{};
 
-			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
+			e.exemption_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
+			e.exemption_amount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -250,9 +250,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			IpExemptions e{};
 
-			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
+			e.exemption_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
+			e.exemption_amount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +277,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			IpExemptions e{};
 
-			e.exemption_id     = static_cast<int32_t>(atoi(row[0]));
+			e.exemption_id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.exemption_ip     = row[1] ? row[1] : "";
-			e.exemption_amount = static_cast<int32_t>(atoi(row[2]));
+			e.exemption_amount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

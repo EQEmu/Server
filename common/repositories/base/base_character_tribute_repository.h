@@ -127,7 +127,7 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterTribute e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.tier         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -258,7 +258,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTribute e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.tier         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
@@ -286,7 +286,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTribute e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.tier         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.tribute      = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;

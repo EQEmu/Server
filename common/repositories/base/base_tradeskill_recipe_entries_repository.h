@@ -143,14 +143,14 @@ public:
 		if (results.RowCount() == 1) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
-			e.item_id        = static_cast<int32_t>(atoi(row[2]));
-			e.successcount   = static_cast<int8_t>(atoi(row[3]));
-			e.failcount      = static_cast<int8_t>(atoi(row[4]));
-			e.componentcount = static_cast<int8_t>(atoi(row[5]));
-			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
-			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
+			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.item_id        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.successcount   = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.failcount      = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.componentcount = row[5] ? static_cast<int8_t>(atoi(row[5])) : 1;
+			e.salvagecount   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.iscontainer    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			return e;
 		}
@@ -290,14 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
-			e.item_id        = static_cast<int32_t>(atoi(row[2]));
-			e.successcount   = static_cast<int8_t>(atoi(row[3]));
-			e.failcount      = static_cast<int8_t>(atoi(row[4]));
-			e.componentcount = static_cast<int8_t>(atoi(row[5]));
-			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
-			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
+			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.item_id        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.successcount   = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.failcount      = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.componentcount = row[5] ? static_cast<int8_t>(atoi(row[5])) : 1;
+			e.salvagecount   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.iscontainer    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -322,14 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipeEntries e{};
 
-			e.id             = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id      = static_cast<int32_t>(atoi(row[1]));
-			e.item_id        = static_cast<int32_t>(atoi(row[2]));
-			e.successcount   = static_cast<int8_t>(atoi(row[3]));
-			e.failcount      = static_cast<int8_t>(atoi(row[4]));
-			e.componentcount = static_cast<int8_t>(atoi(row[5]));
-			e.salvagecount   = static_cast<int8_t>(atoi(row[6]));
-			e.iscontainer    = static_cast<int8_t>(atoi(row[7]));
+			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.item_id        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.successcount   = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.failcount      = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.componentcount = row[5] ? static_cast<int8_t>(atoi(row[5])) : 1;
+			e.salvagecount   = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.iscontainer    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}

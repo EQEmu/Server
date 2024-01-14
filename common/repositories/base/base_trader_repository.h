@@ -138,7 +138,7 @@ public:
 			e.char_id      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.serialnumber = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.item_cost    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.slot_id      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 
@@ -278,7 +278,7 @@ public:
 			e.char_id      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.serialnumber = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.item_cost    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.slot_id      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 
@@ -308,7 +308,7 @@ public:
 			e.char_id      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.item_id      = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.serialnumber = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.charges      = static_cast<int32_t>(atoi(row[3]));
+			e.charges      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.item_cost    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.slot_id      = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
 

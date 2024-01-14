@@ -131,7 +131,7 @@ public:
 		if (results.RowCount() == 1) {
 			DiscordWebhooks e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
@@ -171,8 +171,8 @@ public:
 
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,8 +197,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -231,8 +231,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 			v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -266,7 +266,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscordWebhooks e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
@@ -295,7 +295,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DiscordWebhooks e{};
 
-			e.id           = static_cast<int32_t>(atoi(row[0]));
+			e.id           = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.webhook_name = row[1] ? row[1] : "";
 			e.webhook_url  = row[2] ? row[2] : "";
 			e.created_at   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
@@ -377,8 +377,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -404,8 +404,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 			v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

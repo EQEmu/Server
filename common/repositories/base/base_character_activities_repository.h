@@ -135,7 +135,7 @@ public:
 			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -271,7 +271,7 @@ public:
 			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -300,7 +300,7 @@ public:
 			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

@@ -133,9 +133,9 @@ public:
 
 			e.npc_faction_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.value          = static_cast<int32_t>(atoi(row[2]));
-			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
-			e.temp           = static_cast<int8_t>(atoi(row[4]));
+			e.value          = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.npc_value      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.temp           = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -269,9 +269,9 @@ public:
 
 			e.npc_faction_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.value          = static_cast<int32_t>(atoi(row[2]));
-			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
-			e.temp           = static_cast<int8_t>(atoi(row[4]));
+			e.value          = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.npc_value      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.temp           = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -298,9 +298,9 @@ public:
 
 			e.npc_faction_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.value          = static_cast<int32_t>(atoi(row[2]));
-			e.npc_value      = static_cast<int8_t>(atoi(row[3]));
-			e.temp           = static_cast<int8_t>(atoi(row[4]));
+			e.value          = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.npc_value      = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.temp           = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

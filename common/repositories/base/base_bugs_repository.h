@@ -174,7 +174,7 @@ public:
 			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
+			e.date   = row[11] ? row[11] : 0;
 			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			return e;
@@ -341,7 +341,7 @@ public:
 			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
+			e.date   = row[11] ? row[11] : 0;
 			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
@@ -378,7 +378,7 @@ public:
 			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
+			e.date   = row[11] ? row[11] : 0;
 			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);

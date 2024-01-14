@@ -135,8 +135,8 @@ public:
 		if (results.RowCount() == 1) {
 			Graveyard e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.x       = row[2] ? strtof(row[2], nullptr) : 0;
 			e.y       = row[3] ? strtof(row[3], nullptr) : 0;
 			e.z       = row[4] ? strtof(row[4], nullptr) : 0;
@@ -274,8 +274,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Graveyard e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.x       = row[2] ? strtof(row[2], nullptr) : 0;
 			e.y       = row[3] ? strtof(row[3], nullptr) : 0;
 			e.z       = row[4] ? strtof(row[4], nullptr) : 0;
@@ -304,8 +304,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Graveyard e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
-			e.zone_id = static_cast<int32_t>(atoi(row[1]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.x       = row[2] ? strtof(row[2], nullptr) : 0;
 			e.y       = row[3] ? strtof(row[3], nullptr) : 0;
 			e.z       = row[4] ? strtof(row[4], nullptr) : 0;

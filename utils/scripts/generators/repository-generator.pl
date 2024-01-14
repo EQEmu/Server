@@ -294,7 +294,7 @@ foreach my $table_to_generate (@tables) {
                 $query_value = sprintf('" + std::to_string(e.%s));', $column_name_formatted);
             }
             elsif ($data_type =~ /datetime/) {
-                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
+                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "UNIX_TIMESTAMP()") + ")");', $column_name_formatted, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
@@ -310,7 +310,7 @@ foreach my $table_to_generate (@tables) {
             $value = sprintf('std::to_string(e.%s)', $column_name_formatted);
         }
         elsif ($data_type =~ /datetime/) {
-            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
+            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "UNIX_TIMESTAMP()") + ")"', $column_name_formatted, $column_name_formatted);
         }
 
         $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);

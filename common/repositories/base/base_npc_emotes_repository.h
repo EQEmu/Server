@@ -131,10 +131,10 @@ public:
 		if (results.RowCount() == 1) {
 			NpcEmotes e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.emoteid = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.event_  = static_cast<int8_t>(atoi(row[2]));
-			e.type    = static_cast<int8_t>(atoi(row[3]));
+			e.event_  = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.type    = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.text    = row[4] ? row[4] : "";
 
 			return e;
@@ -266,10 +266,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcEmotes e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.emoteid = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.event_  = static_cast<int8_t>(atoi(row[2]));
-			e.type    = static_cast<int8_t>(atoi(row[3]));
+			e.event_  = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.type    = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);
@@ -295,10 +295,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcEmotes e{};
 
-			e.id      = static_cast<int32_t>(atoi(row[0]));
+			e.id      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.emoteid = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.event_  = static_cast<int8_t>(atoi(row[2]));
-			e.type    = static_cast<int8_t>(atoi(row[3]));
+			e.event_  = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.type    = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
 			e.text    = row[4] ? row[4] : "";
 
 			all_entries.push_back(e);

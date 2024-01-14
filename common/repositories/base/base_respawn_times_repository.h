@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseRespawnTimesRepository {
 public:
 	struct RespawnTimes {
@@ -128,10 +127,10 @@ public:
 		if (results.RowCount() == 1) {
 			RespawnTimes e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
-			e.start       = static_cast<int32_t>(atoi(row[1]));
-			e.duration    = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int16_t>(atoi(row[3]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			return e;
 		}
@@ -260,10 +259,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RespawnTimes e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
-			e.start       = static_cast<int32_t>(atoi(row[1]));
-			e.duration    = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int16_t>(atoi(row[3]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -288,10 +287,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RespawnTimes e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
-			e.start       = static_cast<int32_t>(atoi(row[1]));
-			e.duration    = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int16_t>(atoi(row[3]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.start       = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.duration    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}

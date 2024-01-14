@@ -137,8 +137,8 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
+			e.min_expansion          = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
+			e.max_expansion          = row[3] ? static_cast<int8_t>(atoi(row[3])) : -1;
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 
@@ -276,8 +276,8 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
+			e.min_expansion          = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
+			e.max_expansion          = row[3] ? static_cast<int8_t>(atoi(row[3])) : -1;
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 
@@ -306,8 +306,8 @@ public:
 
 			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                   = row[1] ? row[1] : "";
-			e.min_expansion          = static_cast<int8_t>(atoi(row[2]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[3]));
+			e.min_expansion          = row[2] ? static_cast<int8_t>(atoi(row[2])) : -1;
+			e.max_expansion          = row[3] ? static_cast<int8_t>(atoi(row[3])) : -1;
 			e.content_flags          = row[4] ? row[4] : "";
 			e.content_flags_disabled = row[5] ? row[5] : "";
 

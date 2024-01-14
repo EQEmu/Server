@@ -184,18 +184,18 @@ public:
 			e.spell_id       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.caster_level   = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.ticsremaining  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.counters       = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.numhits        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.melee_rune     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.magic_rune     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.persistent     = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
-			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
-			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
-			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
-			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
-			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
+			e.dot_rune       = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.caston_x       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.caston_y       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_z       = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.ExtraDIChance  = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.instrument_mod = row[16] ? static_cast<int32_t>(atoi(row[16])) : 10;
 
 			return e;
 		}
@@ -368,18 +368,18 @@ public:
 			e.spell_id       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.caster_level   = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.ticsremaining  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.counters       = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.numhits        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.melee_rune     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.magic_rune     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.persistent     = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
-			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
-			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
-			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
-			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
-			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
+			e.dot_rune       = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.caston_x       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.caston_y       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_z       = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.ExtraDIChance  = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.instrument_mod = row[16] ? static_cast<int32_t>(atoi(row[16])) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -409,18 +409,18 @@ public:
 			e.spell_id       = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.caster_level   = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.caster_name    = row[4] ? row[4] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[5]));
+			e.ticsremaining  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.counters       = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.numhits        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.melee_rune     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.magic_rune     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
 			e.persistent     = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.dot_rune       = static_cast<int32_t>(atoi(row[11]));
-			e.caston_x       = static_cast<int32_t>(atoi(row[12]));
-			e.caston_y       = static_cast<int32_t>(atoi(row[13]));
-			e.caston_z       = static_cast<int32_t>(atoi(row[14]));
-			e.ExtraDIChance  = static_cast<int32_t>(atoi(row[15]));
-			e.instrument_mod = static_cast<int32_t>(atoi(row[16]));
+			e.dot_rune       = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.caston_x       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.caston_y       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_z       = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.ExtraDIChance  = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.instrument_mod = row[16] ? static_cast<int32_t>(atoi(row[16])) : 10;
 
 			all_entries.push_back(e);
 		}

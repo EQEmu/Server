@@ -192,7 +192,7 @@ public:
 			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
@@ -200,12 +200,12 @@ public:
 			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			return e;
 		}
@@ -383,7 +383,7 @@ public:
 			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
@@ -391,12 +391,12 @@ public:
 			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -426,7 +426,7 @@ public:
 			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
 			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
@@ -434,12 +434,12 @@ public:
 			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
 			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
 			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			all_entries.push_back(e);
 		}

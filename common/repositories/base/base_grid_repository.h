@@ -127,10 +127,10 @@ public:
 		if (results.RowCount() == 1) {
 			Grid e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid = static_cast<int32_t>(atoi(row[1]));
-			e.type   = static_cast<int32_t>(atoi(row[2]));
-			e.type2  = static_cast<int32_t>(atoi(row[3]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.type2  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			return e;
 		}
@@ -259,10 +259,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Grid e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid = static_cast<int32_t>(atoi(row[1]));
-			e.type   = static_cast<int32_t>(atoi(row[2]));
-			e.type2  = static_cast<int32_t>(atoi(row[3]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.type2  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -287,10 +287,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Grid e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid = static_cast<int32_t>(atoi(row[1]));
-			e.type   = static_cast<int32_t>(atoi(row[2]));
-			e.type2  = static_cast<int32_t>(atoi(row[3]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.type2  = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 
 			all_entries.push_back(e);
 		}

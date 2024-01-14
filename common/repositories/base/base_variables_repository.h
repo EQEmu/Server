@@ -131,11 +131,11 @@ public:
 		if (results.RowCount() == 1) {
 			Variables e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : "";
+			e.ts          = row[4] ? row[4] : std::time(nullptr);
 
 			return e;
 		}
@@ -266,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Variables e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : "";
+			e.ts          = row[4] ? row[4] : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Variables e{};
 
-			e.id          = static_cast<int32_t>(atoi(row[0]));
+			e.id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : "";
+			e.ts          = row[4] ? row[4] : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}

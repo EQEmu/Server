@@ -163,9 +163,9 @@ public:
 		if (results.RowCount() == 1) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
 			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
@@ -331,9 +331,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
 			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
@@ -368,9 +368,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
 			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;

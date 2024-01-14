@@ -123,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharRecipeList e{};
 
-			e.char_id   = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
-			e.madecount = static_cast<int32_t>(atoi(row[2]));
+			e.char_id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.madecount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			return e;
 		}
@@ -251,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharRecipeList e{};
 
-			e.char_id   = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
-			e.madecount = static_cast<int32_t>(atoi(row[2]));
+			e.char_id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.madecount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -278,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharRecipeList e{};
 
-			e.char_id   = static_cast<int32_t>(atoi(row[0]));
-			e.recipe_id = static_cast<int32_t>(atoi(row[1]));
-			e.madecount = static_cast<int32_t>(atoi(row[2]));
+			e.char_id   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.recipe_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.madecount = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
 			all_entries.push_back(e);
 		}

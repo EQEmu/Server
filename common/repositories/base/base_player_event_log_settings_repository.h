@@ -133,9 +133,9 @@ public:
 
 			e.id                 = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.event_name         = row[1] ? row[1] : "";
-			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
-			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
-			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
+			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -269,9 +269,9 @@ public:
 
 			e.id                 = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.event_name         = row[1] ? row[1] : "";
-			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
-			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
-			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
+			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -298,9 +298,9 @@ public:
 
 			e.id                 = row[0] ? strtoll(row[0], nullptr, 10) : 0;
 			e.event_name         = row[1] ? row[1] : "";
-			e.event_enabled      = static_cast<int8_t>(atoi(row[2]));
-			e.retention_days     = static_cast<int32_t>(atoi(row[3]));
-			e.discord_webhook_id = static_cast<int32_t>(atoi(row[4]));
+			e.event_enabled      = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
+			e.retention_days     = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.discord_webhook_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}

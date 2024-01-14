@@ -139,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			return e;
 		}
@@ -283,13 +283,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -314,13 +314,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}

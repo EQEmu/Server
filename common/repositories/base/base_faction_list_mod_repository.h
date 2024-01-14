@@ -129,7 +129,7 @@ public:
 
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.mod        = static_cast<int16_t>(atoi(row[2]));
+			e.mod        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.mod_name   = row[3] ? row[3] : "";
 
 			return e;
@@ -260,7 +260,7 @@ public:
 
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.mod        = static_cast<int16_t>(atoi(row[2]));
+			e.mod        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);
@@ -288,7 +288,7 @@ public:
 
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.faction_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.mod        = static_cast<int16_t>(atoi(row[2]));
+			e.mod        = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
 			e.mod_name   = row[3] ? row[3] : "";
 
 			all_entries.push_back(e);

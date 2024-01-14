@@ -195,26 +195,26 @@ public:
 		if (results.RowCount() == 1) {
 			FactionAssociation e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.id_1   = static_cast<int32_t>(atoi(row[1]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.id_1   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.mod_1  = row[2] ? strtof(row[2], nullptr) : 0;
-			e.id_2   = static_cast<int32_t>(atoi(row[3]));
+			e.id_2   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.mod_2  = row[4] ? strtof(row[4], nullptr) : 0;
-			e.id_3   = static_cast<int32_t>(atoi(row[5]));
+			e.id_3   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.mod_3  = row[6] ? strtof(row[6], nullptr) : 0;
-			e.id_4   = static_cast<int32_t>(atoi(row[7]));
+			e.id_4   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
 			e.mod_4  = row[8] ? strtof(row[8], nullptr) : 0;
-			e.id_5   = static_cast<int32_t>(atoi(row[9]));
+			e.id_5   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.mod_5  = row[10] ? strtof(row[10], nullptr) : 0;
-			e.id_6   = static_cast<int32_t>(atoi(row[11]));
+			e.id_6   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.mod_6  = row[12] ? strtof(row[12], nullptr) : 0;
-			e.id_7   = static_cast<int32_t>(atoi(row[13]));
+			e.id_7   = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.mod_7  = row[14] ? strtof(row[14], nullptr) : 0;
-			e.id_8   = static_cast<int32_t>(atoi(row[15]));
+			e.id_8   = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 			e.mod_8  = row[16] ? strtof(row[16], nullptr) : 0;
-			e.id_9   = static_cast<int32_t>(atoi(row[17]));
+			e.id_9   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
 			e.mod_9  = row[18] ? strtof(row[18], nullptr) : 0;
-			e.id_10  = static_cast<int32_t>(atoi(row[19]));
+			e.id_10  = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
 			e.mod_10 = row[20] ? strtof(row[20], nullptr) : 0;
 
 			return e;
@@ -395,26 +395,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionAssociation e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.id_1   = static_cast<int32_t>(atoi(row[1]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.id_1   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.mod_1  = row[2] ? strtof(row[2], nullptr) : 0;
-			e.id_2   = static_cast<int32_t>(atoi(row[3]));
+			e.id_2   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.mod_2  = row[4] ? strtof(row[4], nullptr) : 0;
-			e.id_3   = static_cast<int32_t>(atoi(row[5]));
+			e.id_3   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.mod_3  = row[6] ? strtof(row[6], nullptr) : 0;
-			e.id_4   = static_cast<int32_t>(atoi(row[7]));
+			e.id_4   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
 			e.mod_4  = row[8] ? strtof(row[8], nullptr) : 0;
-			e.id_5   = static_cast<int32_t>(atoi(row[9]));
+			e.id_5   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.mod_5  = row[10] ? strtof(row[10], nullptr) : 0;
-			e.id_6   = static_cast<int32_t>(atoi(row[11]));
+			e.id_6   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.mod_6  = row[12] ? strtof(row[12], nullptr) : 0;
-			e.id_7   = static_cast<int32_t>(atoi(row[13]));
+			e.id_7   = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.mod_7  = row[14] ? strtof(row[14], nullptr) : 0;
-			e.id_8   = static_cast<int32_t>(atoi(row[15]));
+			e.id_8   = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 			e.mod_8  = row[16] ? strtof(row[16], nullptr) : 0;
-			e.id_9   = static_cast<int32_t>(atoi(row[17]));
+			e.id_9   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
 			e.mod_9  = row[18] ? strtof(row[18], nullptr) : 0;
-			e.id_10  = static_cast<int32_t>(atoi(row[19]));
+			e.id_10  = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
 			e.mod_10 = row[20] ? strtof(row[20], nullptr) : 0;
 
 			all_entries.push_back(e);
@@ -440,26 +440,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			FactionAssociation e{};
 
-			e.id     = static_cast<int32_t>(atoi(row[0]));
-			e.id_1   = static_cast<int32_t>(atoi(row[1]));
+			e.id     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.id_1   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.mod_1  = row[2] ? strtof(row[2], nullptr) : 0;
-			e.id_2   = static_cast<int32_t>(atoi(row[3]));
+			e.id_2   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.mod_2  = row[4] ? strtof(row[4], nullptr) : 0;
-			e.id_3   = static_cast<int32_t>(atoi(row[5]));
+			e.id_3   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 			e.mod_3  = row[6] ? strtof(row[6], nullptr) : 0;
-			e.id_4   = static_cast<int32_t>(atoi(row[7]));
+			e.id_4   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
 			e.mod_4  = row[8] ? strtof(row[8], nullptr) : 0;
-			e.id_5   = static_cast<int32_t>(atoi(row[9]));
+			e.id_5   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.mod_5  = row[10] ? strtof(row[10], nullptr) : 0;
-			e.id_6   = static_cast<int32_t>(atoi(row[11]));
+			e.id_6   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.mod_6  = row[12] ? strtof(row[12], nullptr) : 0;
-			e.id_7   = static_cast<int32_t>(atoi(row[13]));
+			e.id_7   = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.mod_7  = row[14] ? strtof(row[14], nullptr) : 0;
-			e.id_8   = static_cast<int32_t>(atoi(row[15]));
+			e.id_8   = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
 			e.mod_8  = row[16] ? strtof(row[16], nullptr) : 0;
-			e.id_9   = static_cast<int32_t>(atoi(row[17]));
+			e.id_9   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
 			e.mod_9  = row[18] ? strtof(row[18], nullptr) : 0;
-			e.id_10  = static_cast<int32_t>(atoi(row[19]));
+			e.id_10  = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
 			e.mod_10 = row[20] ? strtof(row[20], nullptr) : 0;
 
 			all_entries.push_back(e);
