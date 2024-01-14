@@ -5270,7 +5270,22 @@ MODIFY COLUMN `level` tinyint(3) UNSIGNED NOT NULL FIRST,
 MODIFY COLUMN `class` tinyint(2) UNSIGNED NOT NULL AFTER `level`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9259,
+		.description = "2024_01_13_corpse_rez_overhaul.sql",
+		.check = "SHOW COLUMNS FROM `character_corpses` LIKE 'rez_time'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_corpses`
+ADD COLUMN `rez_time` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `wc_9`,
+ADD COLUMN `gm_exp` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `rez_time`,
+ADD COLUMN `killed_by` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `gm_exp`,
+ADD COLUMN `rezzable` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `killed_by`;
+)"
 	}
+// -- te
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
