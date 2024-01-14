@@ -1,3 +1,21 @@
+## [22.43.0] - 1/14/2024
+
+### Database
+
+* Drop deprecated item_tick table ([#3977](https://github.com/EQEmu/Server/pull/3977)) @Akkadius 2024-01-14
+
+### Merchants
+
+* Change database structure for merchant slots ([#3974](https://github.com/EQEmu/Server/pull/3974)) @joligario 2024-01-14
+
+### Repositories
+
+* Fix datetime zero-value save behavior ([#3976](https://github.com/EQEmu/Server/pull/3976)) @Akkadius 2024-01-14
+
+### Zones
+
+* Convert IDLE_WHEN_EMPTY to a Zone Column ([#3891](https://github.com/EQEmu/Server/pull/3891)) @Kinglykrab 2024-01-13
+
 ## [22.42.1] - 1/13/2024
 
 ### Fixes
