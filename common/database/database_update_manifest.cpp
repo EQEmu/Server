@@ -5221,6 +5221,16 @@ ALTER TABLE `merchantlist`
 ALTER TABLE `merchantlist_temp`
 	MODIFY COLUMN `slot` int(11) UNSIGNED NOT NULL DEFAULT 0
 )"
+	},
+	ManifestEntry{
+		.version = 9255,
+		.description = "2024_01_13_drop_item_tick_deprecated.sql",
+		.check = "show tables like 'item_tick'",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+DROP TABLE item_tick
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
