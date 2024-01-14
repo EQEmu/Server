@@ -16,12 +16,11 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseMerchantlistTempRepository {
 public:
 	struct MerchantlistTemp {
 		uint32_t npcid;
-		uint8_t  slot;
+		uint32_t slot;
 		int32_t  zone_id;
 		int32_t  instance_id;
 		uint32_t itemid;
@@ -137,9 +136,9 @@ public:
 			MerchantlistTemp e{};
 
 			e.npcid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.slot        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.zone_id     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.itemid      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.charges     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 1;
 
@@ -277,9 +276,9 @@ public:
 			MerchantlistTemp e{};
 
 			e.npcid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.slot        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.zone_id     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.itemid      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.charges     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 1;
 
@@ -307,9 +306,9 @@ public:
 			MerchantlistTemp e{};
 
 			e.npcid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.slot        = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.zone_id     = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id = static_cast<int32_t>(atoi(row[3]));
+			e.slot        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.zone_id     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
 			e.itemid      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 			e.charges     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 1;
 

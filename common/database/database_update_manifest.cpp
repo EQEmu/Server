@@ -5198,6 +5198,29 @@ ADD COLUMN `idle_when_empty` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `min_l
 ADD COLUMN `seconds_before_idle` int(11) UNSIGNED NOT NULL DEFAULT 60 AFTER `idle_when_empty`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9253,
+		.description = "2024_01_13_merchantlist_slot.sql",
+		.check = "SHOW COLUMNS FROM `merchantlist` LIKE 'slot'",
+		.condition = "missing",
+		.match = "unsigned",
+		.sql = R"(
+ALTER TABLE `merchantlist`
+	MODIFY COLUMN `slot` int(11) UNSIGNED NOT NULL DEFAULT 0
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9254,
+		.description = "2024_01_13_merchantlist_temp_slot.sql",
+		.check = "SHOW COLUMNS FROM `merchantlist_temp` LIKE 'slot'",
+		.condition = "contains",
+		.match = "tinyint",
+		.sql = R"(
+ALTER TABLE `merchantlist_temp`
+	MODIFY COLUMN `slot` int(11) UNSIGNED NOT NULL DEFAULT 0
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
