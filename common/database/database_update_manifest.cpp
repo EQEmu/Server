@@ -5285,7 +5285,6 @@ ADD COLUMN `killed_by` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `gm_exp`,
 ADD COLUMN `rezzable` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `killed_by`;
 )"
 	}
-// -- te
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
