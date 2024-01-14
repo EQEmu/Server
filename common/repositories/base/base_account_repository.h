@@ -280,7 +280,7 @@ public:
 		v.push_back(columns[14] + " = '" + Strings::Escape(e.minilogin_ip) + "'");
 		v.push_back(columns[15] + " = " + std::to_string(e.hideme));
 		v.push_back(columns[16] + " = " + std::to_string(e.rulesflag));
-		v.push_back(columns[17] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[17] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
 		v.push_back(columns[18] + " = " + std::to_string(e.time_creation));
 		v.push_back(columns[19] + " = '" + Strings::Escape(e.ban_reason) + "'");
 		v.push_back(columns[20] + " = '" + Strings::Escape(e.suspend_reason) + "'");
@@ -325,7 +325,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
 		v.push_back(std::to_string(e.hideme));
 		v.push_back(std::to_string(e.rulesflag));
-		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
 		v.push_back(std::to_string(e.time_creation));
 		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -378,7 +378,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
 			v.push_back(std::to_string(e.hideme));
 			v.push_back(std::to_string(e.rulesflag));
-			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
 			v.push_back(std::to_string(e.time_creation));
 			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -581,7 +581,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
 		v.push_back(std::to_string(e.hideme));
 		v.push_back(std::to_string(e.rulesflag));
-		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
 		v.push_back(std::to_string(e.time_creation));
 		v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 		v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");
@@ -627,7 +627,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.minilogin_ip) + "'");
 			v.push_back(std::to_string(e.hideme));
 			v.push_back(std::to_string(e.rulesflag));
-			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
 			v.push_back(std::to_string(e.time_creation));
 			v.push_back("'" + Strings::Escape(e.ban_reason) + "'");
 			v.push_back("'" + Strings::Escape(e.suspend_reason) + "'");

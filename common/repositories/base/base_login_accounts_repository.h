@@ -195,9 +195,9 @@ public:
 		v.push_back(columns[3] + " = '" + Strings::Escape(e.account_email) + "'");
 		v.push_back(columns[4] + " = '" + Strings::Escape(e.source_loginserver) + "'");
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.last_ip_address) + "'");
-		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[8] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[8] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -225,9 +225,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.account_email) + "'");
 		v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
 		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -263,9 +263,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.account_email) + "'");
 			v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
 			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -421,9 +421,9 @@ public:
 		v.push_back("'" + Strings::Escape(e.account_email) + "'");
 		v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
 		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -452,9 +452,9 @@ public:
 			v.push_back("'" + Strings::Escape(e.account_email) + "'");
 			v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
 			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

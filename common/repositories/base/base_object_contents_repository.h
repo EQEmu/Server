@@ -209,7 +209,7 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.bagidx));
 		v.push_back(columns[3] + " = " + std::to_string(e.itemid));
 		v.push_back(columns[4] + " = " + std::to_string(e.charges));
-		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
 		v.push_back(columns[6] + " = " + std::to_string(e.augslot1));
 		v.push_back(columns[7] + " = " + std::to_string(e.augslot2));
 		v.push_back(columns[8] + " = " + std::to_string(e.augslot3));
@@ -242,7 +242,7 @@ public:
 		v.push_back(std::to_string(e.bagidx));
 		v.push_back(std::to_string(e.itemid));
 		v.push_back(std::to_string(e.charges));
-		v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
 		v.push_back(std::to_string(e.augslot1));
 		v.push_back(std::to_string(e.augslot2));
 		v.push_back(std::to_string(e.augslot3));
@@ -283,7 +283,7 @@ public:
 			v.push_back(std::to_string(e.bagidx));
 			v.push_back(std::to_string(e.itemid));
 			v.push_back(std::to_string(e.charges));
-			v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
 			v.push_back(std::to_string(e.augslot1));
 			v.push_back(std::to_string(e.augslot2));
 			v.push_back(std::to_string(e.augslot3));
@@ -450,7 +450,7 @@ public:
 		v.push_back(std::to_string(e.bagidx));
 		v.push_back(std::to_string(e.itemid));
 		v.push_back(std::to_string(e.charges));
-		v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
 		v.push_back(std::to_string(e.augslot1));
 		v.push_back(std::to_string(e.augslot2));
 		v.push_back(std::to_string(e.augslot3));
@@ -484,7 +484,7 @@ public:
 			v.push_back(std::to_string(e.bagidx));
 			v.push_back(std::to_string(e.itemid));
 			v.push_back(std::to_string(e.charges));
-			v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.droptime > 0 ? std::to_string(e.droptime) : "null") + ")");
 			v.push_back(std::to_string(e.augslot1));
 			v.push_back(std::to_string(e.augslot2));
 			v.push_back(std::to_string(e.augslot3));

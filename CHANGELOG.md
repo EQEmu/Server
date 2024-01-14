@@ -1,3 +1,9 @@
+## [22.43.1] - 1/14/2024
+
+### Repositories
+
+*  Revert #3976 - fix character corpses @Akkadius 2024-01-14
+
 ## [22.43.0] - 1/14/2024
 
 ### Database

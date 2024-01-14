@@ -1703,7 +1703,7 @@ public:
 		v.push_back(columns[131] + " = " + std::to_string(e.UNK124));
 		v.push_back(columns[132] + " = " + std::to_string(e.attuneable));
 		v.push_back(columns[133] + " = " + std::to_string(e.nopet));
-		v.push_back(columns[134] + " = FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[134] + " = FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
 		v.push_back(columns[135] + " = '" + Strings::Escape(e.comment) + "'");
 		v.push_back(columns[136] + " = " + std::to_string(e.UNK127));
 		v.push_back(columns[137] + " = " + std::to_string(e.pointtype));
@@ -1733,8 +1733,8 @@ public:
 		v.push_back(columns[161] + " = " + std::to_string(e.scrolllevel2));
 		v.push_back(columns[162] + " = " + std::to_string(e.scrolllevel));
 		v.push_back(columns[163] + " = " + std::to_string(e.UNK157));
-		v.push_back(columns[164] + " = FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[165] + " = FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[164] + " = FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back(columns[165] + " = FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
 		v.push_back(columns[166] + " = '" + Strings::Escape(e.serialization) + "'");
 		v.push_back(columns[167] + " = '" + Strings::Escape(e.source) + "'");
 		v.push_back(columns[168] + " = " + std::to_string(e.UNK033));
@@ -2009,7 +2009,7 @@ public:
 		v.push_back(std::to_string(e.UNK124));
 		v.push_back(std::to_string(e.attuneable));
 		v.push_back(std::to_string(e.nopet));
-		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.comment) + "'");
 		v.push_back(std::to_string(e.UNK127));
 		v.push_back(std::to_string(e.pointtype));
@@ -2039,8 +2039,8 @@ public:
 		v.push_back(std::to_string(e.scrolllevel2));
 		v.push_back(std::to_string(e.scrolllevel));
 		v.push_back(std::to_string(e.UNK157));
-		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.serialization) + "'");
 		v.push_back("'" + Strings::Escape(e.source) + "'");
 		v.push_back(std::to_string(e.UNK033));
@@ -2323,7 +2323,7 @@ public:
 			v.push_back(std::to_string(e.UNK124));
 			v.push_back(std::to_string(e.attuneable));
 			v.push_back(std::to_string(e.nopet));
-			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.comment) + "'");
 			v.push_back(std::to_string(e.UNK127));
 			v.push_back(std::to_string(e.pointtype));
@@ -2353,8 +2353,8 @@ public:
 			v.push_back(std::to_string(e.scrolllevel2));
 			v.push_back(std::to_string(e.scrolllevel));
 			v.push_back(std::to_string(e.UNK157));
-			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.serialization) + "'");
 			v.push_back("'" + Strings::Escape(e.source) + "'");
 			v.push_back(std::to_string(e.UNK033));
@@ -3309,7 +3309,7 @@ public:
 		v.push_back(std::to_string(e.UNK124));
 		v.push_back(std::to_string(e.attuneable));
 		v.push_back(std::to_string(e.nopet));
-		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.comment) + "'");
 		v.push_back(std::to_string(e.UNK127));
 		v.push_back(std::to_string(e.pointtype));
@@ -3339,8 +3339,8 @@ public:
 		v.push_back(std::to_string(e.scrolllevel2));
 		v.push_back(std::to_string(e.scrolllevel));
 		v.push_back(std::to_string(e.UNK157));
-		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.serialization) + "'");
 		v.push_back("'" + Strings::Escape(e.source) + "'");
 		v.push_back(std::to_string(e.UNK033));
@@ -3616,7 +3616,7 @@ public:
 			v.push_back(std::to_string(e.UNK124));
 			v.push_back(std::to_string(e.attuneable));
 			v.push_back(std::to_string(e.nopet));
-			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.comment) + "'");
 			v.push_back(std::to_string(e.UNK127));
 			v.push_back(std::to_string(e.pointtype));
@@ -3646,8 +3646,8 @@ public:
 			v.push_back(std::to_string(e.scrolllevel2));
 			v.push_back(std::to_string(e.scrolllevel));
 			v.push_back(std::to_string(e.UNK157));
-			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.serialization) + "'");
 			v.push_back("'" + Strings::Escape(e.source) + "'");
 			v.push_back(std::to_string(e.UNK033));

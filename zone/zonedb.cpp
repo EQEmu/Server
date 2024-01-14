@@ -3791,6 +3791,7 @@ uint32 ZoneDatabase::SaveCharacterCorpse(
 	e.z                = position.z;
 	e.heading          = position.w;
 	e.guild_consent_id = guild_consent_id;
+	e.time_of_death    = std::time(nullptr);
 	e.is_locked        = corpse.locked;
 	e.exp              = corpse.exp;
 	e.size             = corpse.size;

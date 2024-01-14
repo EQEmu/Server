@@ -171,8 +171,8 @@ public:
 
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,8 +197,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -231,8 +231,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 			v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -377,8 +377,8 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 		v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -404,8 +404,8 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.webhook_name) + "'");
 			v.push_back("'" + Strings::Escape(e.webhook_url) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

@@ -387,7 +387,7 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.y));
 		v.push_back(columns[7] + " = " + std::to_string(e.z));
 		v.push_back(columns[8] + " = " + std::to_string(e.heading));
-		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
 		v.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
 		v.push_back(columns[12] + " = " + std::to_string(e.is_buried));
@@ -455,7 +455,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -531,7 +531,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));
@@ -803,7 +803,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -872,7 +872,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));

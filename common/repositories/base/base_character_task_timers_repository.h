@@ -178,7 +178,7 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.task_id));
 		v.push_back(columns[3] + " = " + std::to_string(e.timer_type));
 		v.push_back(columns[4] + " = " + std::to_string(e.timer_group));
-		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[5] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -205,7 +205,7 @@ public:
 		v.push_back(std::to_string(e.task_id));
 		v.push_back(std::to_string(e.timer_type));
 		v.push_back(std::to_string(e.timer_group));
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -240,7 +240,7 @@ public:
 			v.push_back(std::to_string(e.task_id));
 			v.push_back(std::to_string(e.timer_type));
 			v.push_back(std::to_string(e.timer_group));
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -389,7 +389,7 @@ public:
 		v.push_back(std::to_string(e.task_id));
 		v.push_back(std::to_string(e.timer_type));
 		v.push_back(std::to_string(e.timer_group));
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -417,7 +417,7 @@ public:
 			v.push_back(std::to_string(e.task_id));
 			v.push_back(std::to_string(e.timer_type));
 			v.push_back(std::to_string(e.timer_group));
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

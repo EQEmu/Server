@@ -586,8 +586,8 @@ public:
 		v.push_back(columns[69] + " = " + std::to_string(e.alcohol));
 		v.push_back(columns[70] + " = " + std::to_string(e.fishing));
 		v.push_back(columns[71] + " = " + std::to_string(e.tinkering));
-		v.push_back(columns[72] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[73] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[72] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[73] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -681,8 +681,8 @@ public:
 		v.push_back(std::to_string(e.alcohol));
 		v.push_back(std::to_string(e.fishing));
 		v.push_back(std::to_string(e.tinkering));
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -784,8 +784,8 @@ public:
 			v.push_back(std::to_string(e.alcohol));
 			v.push_back(std::to_string(e.fishing));
 			v.push_back(std::to_string(e.tinkering));
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1137,8 +1137,8 @@ public:
 		v.push_back(std::to_string(e.alcohol));
 		v.push_back(std::to_string(e.fishing));
 		v.push_back(std::to_string(e.tinkering));
-		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1233,8 +1233,8 @@ public:
 			v.push_back(std::to_string(e.alcohol));
 			v.push_back(std::to_string(e.fishing));
 			v.push_back(std::to_string(e.tinkering));
-			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

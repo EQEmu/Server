@@ -176,9 +176,9 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.task_id));
-		v.push_back(columns[2] + " = FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[2] + " = FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "null") + ")");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "null") + ")");
 		v.push_back(columns[5] + " = " + std::to_string(e.is_locked));
 
 		auto results = db.QueryDatabase(
@@ -203,9 +203,9 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.task_id));
-		v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "null") + ")");
 		v.push_back(std::to_string(e.is_locked));
 
 		auto results = db.QueryDatabase(
@@ -238,9 +238,9 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.task_id));
-			v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "null") + ")");
 			v.push_back(std::to_string(e.is_locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -387,9 +387,9 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.task_id));
-		v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "null") + ")");
 		v.push_back(std::to_string(e.is_locked));
 
 		auto results = db.QueryDatabase(
@@ -415,9 +415,9 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.task_id));
-			v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.accepted_time > 0 ? std::to_string(e.accepted_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.completion_time > 0 ? std::to_string(e.completion_time) : "null") + ")");
 			v.push_back(std::to_string(e.is_locked));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

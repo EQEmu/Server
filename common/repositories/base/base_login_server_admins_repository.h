@@ -189,7 +189,7 @@ public:
 		v.push_back(columns[3] + " = '" + Strings::Escape(e.first_name) + "'");
 		v.push_back(columns[4] + " = '" + Strings::Escape(e.last_name) + "'");
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.email) + "'");
-		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
 		v.push_back(columns[7] + " = '" + Strings::Escape(e.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
@@ -218,7 +218,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.first_name) + "'");
 		v.push_back("'" + Strings::Escape(e.last_name) + "'");
 		v.push_back("'" + Strings::Escape(e.email) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
@@ -255,7 +255,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.first_name) + "'");
 			v.push_back("'" + Strings::Escape(e.last_name) + "'");
 			v.push_back("'" + Strings::Escape(e.email) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -410,7 +410,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.first_name) + "'");
 		v.push_back("'" + Strings::Escape(e.last_name) + "'");
 		v.push_back("'" + Strings::Escape(e.email) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 		auto results = db.QueryDatabase(
@@ -440,7 +440,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.first_name) + "'");
 			v.push_back("'" + Strings::Escape(e.last_name) + "'");
 			v.push_back("'" + Strings::Escape(e.email) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.registration_date > 0 ? std::to_string(e.registration_date) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.registration_ip_address) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");

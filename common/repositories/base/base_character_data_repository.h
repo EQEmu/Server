@@ -760,7 +760,7 @@ public:
 		v.push_back(columns[99] + " = " + std::to_string(e.aa_points_spent_old));
 		v.push_back(columns[100] + " = " + std::to_string(e.aa_points_old));
 		v.push_back(columns[101] + " = " + std::to_string(e.e_last_invsnapshot));
-		v.push_back(columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -884,7 +884,7 @@ public:
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1016,7 +1016,7 @@ public:
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1456,7 +1456,7 @@ public:
 		v.push_back(std::to_string(e.aa_points_spent_old));
 		v.push_back(std::to_string(e.aa_points_old));
 		v.push_back(std::to_string(e.e_last_invsnapshot));
-		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1581,7 +1581,7 @@ public:
 			v.push_back(std::to_string(e.aa_points_spent_old));
 			v.push_back(std::to_string(e.aa_points_old));
 			v.push_back(std::to_string(e.e_last_invsnapshot));
-			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

@@ -172,8 +172,8 @@ public:
 		v.push_back(columns[0] + " = " + std::to_string(e.shared_task_id));
 		v.push_back(columns[1] + " = " + std::to_string(e.activity_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.done_count));
-		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -198,8 +198,8 @@ public:
 		v.push_back(std::to_string(e.shared_task_id));
 		v.push_back(std::to_string(e.activity_id));
 		v.push_back(std::to_string(e.done_count));
-		v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -232,8 +232,8 @@ public:
 			v.push_back(std::to_string(e.shared_task_id));
 			v.push_back(std::to_string(e.activity_id));
 			v.push_back(std::to_string(e.done_count));
-			v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -378,8 +378,8 @@ public:
 		v.push_back(std::to_string(e.shared_task_id));
 		v.push_back(std::to_string(e.activity_id));
 		v.push_back(std::to_string(e.done_count));
-		v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "UNIX_TIMESTAMP()") + ")");
-		v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -405,8 +405,8 @@ public:
 			v.push_back(std::to_string(e.shared_task_id));
 			v.push_back(std::to_string(e.activity_id));
 			v.push_back(std::to_string(e.done_count));
-			v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "UNIX_TIMESTAMP()") + ")");
-			v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_time > 0 ? std::to_string(e.updated_time) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.completed_time > 0 ? std::to_string(e.completed_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

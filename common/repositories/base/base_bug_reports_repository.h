@@ -330,9 +330,9 @@ public:
 		v.push_back(columns[24] + " = " + std::to_string(e._unknown_value));
 		v.push_back(columns[25] + " = '" + Strings::Escape(e.bug_report) + "'");
 		v.push_back(columns[26] + " = '" + Strings::Escape(e.system_info) + "'");
-		v.push_back(columns[27] + " = FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[27] + " = FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
 		v.push_back(columns[28] + " = " + std::to_string(e.bug_status));
-		v.push_back(columns[29] + " = FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[29] + " = FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
 		v.push_back(columns[30] + " = '" + Strings::Escape(e.last_reviewer) + "'");
 		v.push_back(columns[31] + " = '" + Strings::Escape(e.reviewer_notes) + "'");
 
@@ -383,9 +383,9 @@ public:
 		v.push_back(std::to_string(e._unknown_value));
 		v.push_back("'" + Strings::Escape(e.bug_report) + "'");
 		v.push_back("'" + Strings::Escape(e.system_info) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
 		v.push_back(std::to_string(e.bug_status));
-		v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
 		v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
@@ -444,9 +444,9 @@ public:
 			v.push_back(std::to_string(e._unknown_value));
 			v.push_back("'" + Strings::Escape(e.bug_report) + "'");
 			v.push_back("'" + Strings::Escape(e.system_info) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
 			v.push_back(std::to_string(e.bug_status));
-			v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
 			v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
@@ -671,9 +671,9 @@ public:
 		v.push_back(std::to_string(e._unknown_value));
 		v.push_back("'" + Strings::Escape(e.bug_report) + "'");
 		v.push_back("'" + Strings::Escape(e.system_info) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
 		v.push_back(std::to_string(e.bug_status));
-		v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
 		v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
 		v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
@@ -725,9 +725,9 @@ public:
 			v.push_back(std::to_string(e._unknown_value));
 			v.push_back("'" + Strings::Escape(e.bug_report) + "'");
 			v.push_back("'" + Strings::Escape(e.system_info) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
 			v.push_back(std::to_string(e.bug_status));
-			v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
 			v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
 			v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
 
