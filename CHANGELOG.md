@@ -1,3 +1,10 @@
+## [22.42.1] - 1/13/2024
+
+### Fixes
+
+* Fix zone database update manifest ([#3972](https://github.com/EQEmu/Server/pull/3972)) @Kinglykrab 2024-01-13
+* quest::processmobswhilezoneempty() fix. ([#3971](https://github.com/EQEmu/Server/pull/3971)) @noudess 2024-01-13
+
 ## [22.42.0] - 1/13/2024
 
 ### AAs
