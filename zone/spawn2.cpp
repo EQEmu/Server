@@ -845,7 +845,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
     std::string timeAsString;
     EQTime::ToString(&event.next, timeAsString);
 
-  LogSpawns("(LoadDBEvent) Loaded [{}] spawn event [{}] on condition [{}] with period [{}], action [{}], argument [{}], strict [{}]. Will trigger at [{}]", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
+  LogSpawns("(LoadDBEvent) Loaded [{}] spawn event [{}] on condition [{}] with period [{}] action [{}] argument [{}] strict [{}]. Will trigger at [{}]", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
 
 	return true;
 }
@@ -931,7 +931,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		spawn_events.push_back(event);
 
 		LogSpawns(
-			"(LoadSpawnConditions) Loaded [{}] spawn event [{}] on condition [{}] with period [{}], action [{}], argument [{}], strict [{}]",
+			"(LoadSpawnConditions) Loaded [{}] spawn event [{}] on condition [{}] with period [{}] action [{}] argument [{}] strict [{}]",
 			event.enabled ? "enabled" : "disabled",
 			event.id,
 			event.condition_id,
@@ -965,9 +965,15 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 			cevent.next.year == tod.year)
 			StrictCheck = true;
 
-		//If event is disabled, or we failed the strict check, set initial spawn_condition to 0.
-		if(!cevent.enabled || !StrictCheck)
-			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,0);
+		//If event is disabled, or we failed the strict check, set initial spawn_condition to default startup value from spawn_conditions.
+		if(!cevent.enabled || !StrictCheck) {
+			SetCondition(
+					zone->GetShortName(),
+					zone->GetInstanceID(),
+					cevent.condition_id,
+					spawn_conditions[cevent.condition_id].value
+			);
+		}
 
 		if(!cevent.enabled)
             continue;
@@ -1053,7 +1059,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		SpawnCondition &cond = condi->second;
 
 		if(cond.value == new_value) {
-			LogSpawns("Condition update received from world for [{}] with value [{}], which is what we already have", condition_id, new_value);
+			LogSpawns("Condition update received from world for [{}] with value [{}] which is what we already have", condition_id, new_value);
 			return;
 		}
 
@@ -1080,7 +1086,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		SpawnCondition &cond = condi->second;
 
 		if(cond.value == new_value) {
-			LogSpawns("Local Condition update requested for [{}] with value [{}], which is what we already have", condition_id, new_value);
+			LogSpawns("Local Condition update requested for [{}] with value [{}] which is what we already have", condition_id, new_value);
 			return;
 		}
 
