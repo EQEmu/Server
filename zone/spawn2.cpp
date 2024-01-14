@@ -966,8 +966,14 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 			StrictCheck = true;
 
 		//If event is disabled, or we failed the strict check, set initial spawn_condition to default startup value from spawn_conditions.
-		if(!cevent.enabled || !StrictCheck)
-			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,spawn_conditions[cevent.condition_id].value);
+		if(!cevent.enabled || !StrictCheck) {
+			SetCondition(
+					zone->GetShortName(),
+					zone->GetInstanceID(),
+					cevent.condition_id,
+					spawn_conditions[cevent.condition_id].value
+			);
+		}
 
 		if(!cevent.enabled)
             continue;
