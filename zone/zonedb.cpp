@@ -739,7 +739,7 @@ bool ZoneDatabase::LoadCharacterLeadershipAbilities(uint32 character_id, PlayerP
 	);
 
 	for (const auto& e : l) {
-		pp->leader_abilities.ranks[e.slot] = e.rank;
+		pp->leader_abilities.ranks[e.slot] = e.rank_;
 	}
 
 	return true;
@@ -1098,9 +1098,9 @@ bool ZoneDatabase::SaveCharacterLeadershipAbilities(uint32 character_id, PlayerP
 
 	for (int slot_id = 0; slot_id < MAX_LEADERSHIP_AA_ARRAY; slot_id++) {
 		if (pp->leader_abilities.ranks[slot_id] > 0) {
-			e.id   = character_id;
-			e.slot = slot_id;
-			e.rank = pp->leader_abilities.ranks[slot_id];
+			e.id    = character_id;
+			e.slot  = slot_id;
+			e.rank_ = pp->leader_abilities.ranks[slot_id];
 
 			v.emplace_back(e);
 		}
