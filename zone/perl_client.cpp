@@ -2263,14 +2263,14 @@ void Perl_Client_UntrainDiscBySpellID(Client* self, uint16 spell_id, bool update
 
 void Perl_Client_SummonBaggedItems(Client* self, uint32 bag_item_id, perl::reference bag_items_ref) // @categories Inventory and Items, Script Utility
 {
-	std::vector<ServerLootItem_Struct> bagged_items;
+	std::vector<LootItem> bagged_items;
 
 	perl::array bag_items = bag_items_ref;
 	for (perl::hash bag_item : bag_items) // only works if all elements are hashrefs
 	{
 		if (bag_item.exists("item_id") && bag_item.exists("charges"))
 		{
-			ServerLootItem_Struct item{};
+			LootItem item{};
 			item.item_id = bag_item["item_id"];
 			item.charges = bag_item["charges"];
 			item.attuned = bag_item.exists("attuned") ? bag_item["attuned"] : 0;

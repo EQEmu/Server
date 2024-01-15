@@ -10667,7 +10667,7 @@ std::vector<Client *> Client::GetPartyMembers()
 	return clients_to_update;
 }
 
-void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootItem_Struct>& bag_items)
+void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<LootItem>& bag_items)
 {
 	if (bag_items.empty())
 	{

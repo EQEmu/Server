@@ -19,6 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/data_verification.h"
 
+#include "../common/loot.h"
 #include "client.h"
 #include "entity.h"
 #include "mob.h"
@@ -54,8 +55,8 @@ void ZoneDatabase::AddLootTableToNPC(
 	if (!is_global) {
 		*copper = 0;
 		*silver = 0;
-		*gold = 0;
-		*plat = 0;
+		*gold   = 0;
+		*plat   = 0;
 	}
 
 	zone->LoadLootTable(loottable_id);
@@ -90,16 +91,19 @@ void ZoneDatabase::AddLootTableToNPC(
 			max_cash > 0 &&
 			l->avgcoin > 0 &&
 			EQ::ValueWithin(l->avgcoin, min_cash, max_cash)
-		) {
-			const float upper_chance  = static_cast<float>(l->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
+			) {
+			const float upper_chance  =
+							static_cast<float>(l->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
 			const float avg_cash_roll = static_cast<float>(zone->random.Real(0.0, 1.0));
 
 			if (avg_cash_roll < upper_chance) {
 				cash = zone->random.Int(l->avgcoin, max_cash);
-			} else {
+			}
+			else {
 				cash = zone->random.Int(min_cash, l->avgcoin);
 			}
-		} else {
+		}
+		else {
 			cash = zone->random.Int(min_cash, max_cash);
 		}
 	}
@@ -118,7 +122,7 @@ void ZoneDatabase::AddLootTableToNPC(
 	}
 
 	const uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
-	for (auto &lte: zone->GetLootTableEntries(loottable_id)) {
+	for (auto    &lte: zone->GetLootTableEntries(loottable_id)) {
 		for (uint32 k = 1; k <= (lte.multiplier * global_loot_multiplier); k++) {
 			const uint8 drop_limit   = lte.droplimit;
 			const uint8 minimum_drop = lte.mindrop;
@@ -142,7 +146,7 @@ void ZoneDatabase::AddLootTableToNPC(
 // maxdrops = size of the array npcd
 void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item_list, uint8 droplimit, uint8 mindrop)
 {
-	const auto l = zone->GetLootdrop(lootdrop_id);
+	const auto l  = zone->GetLootdrop(lootdrop_id);
 	const auto le = zone->GetLootdropEntries(lootdrop_id);
 
 	auto content_flags = ContentFlags{
@@ -156,18 +160,18 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		l.id == 0 ||
 		le.empty() ||
 		!content_service.DoesPassContentFiltering(content_flags)
-	) {
+		) {
 		return;
 	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {
-		for (const auto& e : le) {
+		for (const auto &e: le) {
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (
 					zone->random.Real(0.0, 100.0) <= e.chance &&
 					npc->MeetsLootDropLevelRequirements(e, true)
-				) {
+					) {
 					const EQ::ItemData *database_item = GetItem(e.item_id);
 					npc->AddLootDrop(
 						database_item,
@@ -193,14 +197,15 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool  roll_table_chance_bypass = false;
 	bool  active_item_list         = false;
 
-	for (const auto& e : le) {
+	for (const auto &e: le) {
 		const EQ::ItemData *db_item = GetItem(e.item_id);
 		if (db_item && npc->MeetsLootDropLevelRequirements(e)) {
 			roll_t += e.chance;
 
 			if (e.chance >= 100) {
 				roll_table_chance_bypass = true;
-			} else {
+			}
+			else {
 				no_loot_prob *= (100 - e.chance) / 100.0f;
 			}
 
@@ -222,8 +227,8 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// translate above for loop using l and le
 	for (int i = 0; i < droplimit; ++i) {
 		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
-			float       roll = (float) zone->random.Real(0.0, roll_t);
-			for (const auto& e : le) {
+			float roll = (float) zone->random.Real(0.0, roll_t);
+			for (const auto &e: le) {
 				const auto *db_item = GetItem(e.item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
@@ -252,7 +257,8 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 						}
 
 						break;
-					} else {
+					}
+					else {
 						roll -= e.chance;
 					}
 				}
@@ -314,7 +320,7 @@ void NPC::AddLootDrop(
 		return;
 	}
 
-	auto item = new ServerLootItem_Struct;
+	auto item = new LootItem;
 
 	if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1) {
 		EQ::SayLinkEngine linker;
@@ -386,8 +392,8 @@ void NPC::AddLootDrop(
 	}
 
 	if (loot_drop.equip_item > 0) {
-		uint8 equipment_slot = UINT8_MAX;
-		const EQ::ItemData *compitem = nullptr;
+		uint8              equipment_slot = UINT8_MAX;
+		const EQ::ItemData *compitem      = nullptr;
 
 		// Equip rules are as follows:
 		// If the item has the NoPet flag set it will not be equipped.
@@ -403,7 +409,7 @@ void NPC::AddLootDrop(
 				int i = EQ::invslot::EQUIPMENT_BEGIN;
 				!found && i <= EQ::invslot::EQUIPMENT_END;
 				i++
-			) {
+				) {
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
@@ -411,13 +417,14 @@ void NPC::AddLootDrop(
 						if (
 							item2->AC > compitem->AC ||
 							(item2->AC == compitem->AC && item2->HP > compitem->HP)
-						) {
+							) {
 							// item would be an upgrade
 							// check if we're multi-slot, if yes then we have to keep
 							// looking in case any of the other slots we can fit into are empty.
 							if (item2->Slots != slots) {
 								found_slot = i;
-							} else {
+							}
+							else {
 								// Unequip old item
 								auto *old_item = GetItem(i);
 
@@ -429,7 +436,8 @@ void NPC::AddLootDrop(
 								found      = true;
 							}
 						}
-					} else {
+					}
+					else {
 						equipment[i] = item2->ID;
 
 						found_slot = i;
@@ -455,9 +463,10 @@ void NPC::AddLootDrop(
 					(1 << EQ::invslot::slotSecondary)
 				)
 			)
-		) {
+			) {
 			equipment_material = Strings::ToUnsignedInt(&item2->IDFile[2]);
-		} else {
+		}
+		else {
 			equipment_material = item2->Material;
 		}
 
@@ -475,7 +484,8 @@ void NPC::AddLootDrop(
 			if (item2->IsType2HWeapon()) {
 				SetTwoHanderEquipped(true);
 			}
-		} else if (
+		}
+		else if (
 			found_slot == EQ::invslot::slotSecondary &&
 			(
 				GetOwner() ||
@@ -487,25 +497,32 @@ void NPC::AddLootDrop(
 				item2->ItemType == EQ::item::ItemTypeShield ||
 				item2->ItemType == EQ::item::ItemTypeLight
 			)
-		) {
+			) {
 			equipment_slot = EQ::textures::weaponSecondary;
 
 			if (item2->Damage > 0) {
 				SendAddPlayerState(PlayerState::SecondaryWeaponEquipped);
 			}
-		} else if (found_slot == EQ::invslot::slotHead) {
+		}
+		else if (found_slot == EQ::invslot::slotHead) {
 			equipment_slot = EQ::textures::armorHead;
-		} else if (found_slot == EQ::invslot::slotChest) {
+		}
+		else if (found_slot == EQ::invslot::slotChest) {
 			equipment_slot = EQ::textures::armorChest;
-		} else if (found_slot == EQ::invslot::slotArms) {
+		}
+		else if (found_slot == EQ::invslot::slotArms) {
 			equipment_slot = EQ::textures::armorArms;
-		} else if (EQ::ValueWithin(found_slot, EQ::invslot::slotWrist1, EQ::invslot::slotWrist2)) {
+		}
+		else if (EQ::ValueWithin(found_slot, EQ::invslot::slotWrist1, EQ::invslot::slotWrist2)) {
 			equipment_slot = EQ::textures::armorWrist;
-		} else if (found_slot == EQ::invslot::slotHands) {
+		}
+		else if (found_slot == EQ::invslot::slotHands) {
 			equipment_slot = EQ::textures::armorHands;
-		} else if (found_slot == EQ::invslot::slotLegs) {
+		}
+		else if (found_slot == EQ::invslot::slotLegs) {
 			equipment_slot = EQ::textures::armorLegs;
-		} else if (found_slot == EQ::invslot::slotFeet) {
+		}
+		else if (found_slot == EQ::invslot::slotFeet) {
 			equipment_slot = EQ::textures::armorFeet;
 		}
 
@@ -600,29 +617,45 @@ void NPC::AddItem(
 void NPC::AddLootTable()
 {
 	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(this, loottable_id, &m_loot_items, &m_loot_copper, &m_loot_silver, &m_loot_gold, &m_loot_platinum);
+		database.AddLootTableToNPC(
+			this,
+			loottable_id,
+			&m_loot_items,
+			&m_loot_copper,
+			&m_loot_silver,
+			&m_loot_gold,
+			&m_loot_platinum
+		);
 	}
 }
 
 void NPC::AddLootTable(uint32 loottable_id)
 {
 	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(this, loottable_id, &m_loot_items, &m_loot_copper, &m_loot_silver, &m_loot_gold, &m_loot_platinum);
+		database.AddLootTableToNPC(
+			this,
+			loottable_id,
+			&m_loot_items,
+			&m_loot_copper,
+			&m_loot_silver,
+			&m_loot_gold,
+			&m_loot_platinum
+		);
 	}
 }
 
 void NPC::CheckGlobalLootTables()
 {
-	const auto& l = zone->GetGlobalLootTables(this);
+	const auto &l = zone->GetGlobalLootTables(this);
 
-	for (const auto& e : l) {
+	for (const auto &e: l) {
 		database.AddLootTableToNPC(this, e, &m_loot_items, nullptr, nullptr, nullptr, nullptr);
 	}
 }
 
 void ZoneDatabase::LoadGlobalLoot()
 {
-	const auto& l = GlobalLootRepository::GetWhere(
+	const auto &l = GlobalLootRepository::GetWhere(
 		*this,
 		fmt::format(
 			"`enabled` = 1 {}",
@@ -640,11 +673,11 @@ void ZoneDatabase::LoadGlobalLoot()
 		l.size() != 1 ? "ies" : "y"
 	);
 
-	const std::string& zone_id = std::to_string(zone->GetZoneID());
+	const std::string &zone_id = std::to_string(zone->GetZoneID());
 
-	for (const auto& e : l) {
+	for (const auto &e: l) {
 		if (!e.zone.empty()) {
-			const auto& zones = Strings::Split(e.zone, "|");
+			const auto &zones = Strings::Split(e.zone, "|");
 
 			if (!Strings::Contains(zones, zone_id)) {
 				continue;
@@ -670,25 +703,25 @@ void ZoneDatabase::LoadGlobalLoot()
 		}
 
 		if (!e.race.empty()) {
-			const auto& races = Strings::Split(e.race, "|");
+			const auto &races = Strings::Split(e.race, "|");
 
-			for (const auto& r : races) {
+			for (const auto &r: races) {
 				gle.AddRule(GlobalLoot::RuleTypes::Race, Strings::ToInt(r));
 			}
 		}
 
 		if (!e.class_.empty()) {
-			const auto& classes = Strings::Split(e.class_, "|");
+			const auto &classes = Strings::Split(e.class_, "|");
 
-			for (const auto& c : classes) {
+			for (const auto &c: classes) {
 				gle.AddRule(GlobalLoot::RuleTypes::Class, Strings::ToInt(c));
 			}
 		}
 
 		if (!e.bodytype.empty()) {
-			const auto& bodytypes = Strings::Split(e.bodytype, "|");
+			const auto &bodytypes = Strings::Split(e.bodytype, "|");
 
-			for (const auto& b : bodytypes) {
+			for (const auto &b: bodytypes) {
 				gle.AddRule(GlobalLoot::RuleTypes::BodyType, Strings::ToInt(b));
 			}
 		}
@@ -699,4 +732,270 @@ void ZoneDatabase::LoadGlobalLoot()
 
 		zone->AddGlobalLootEntry(gle);
 	}
+}
+
+
+LootItem *NPC::GetItem(int slot_id)
+{
+	ItemList::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		if (item->equip_slot == slot_id) {
+			return item;
+		}
+	}
+	return (nullptr);
+}
+
+void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
+{
+	ItemList::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
+			m_loot_items.erase(cur);
+			UpdateEquipmentLight();
+			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
+			return;
+		}
+		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
+			if (item->charges <= quantity) {
+				m_loot_items.erase(cur);
+				UpdateEquipmentLight();
+				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
+			}
+			else {
+				item->charges -= quantity;
+			}
+			return;
+		}
+	}
+}
+
+void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
+{
+	if (killer == nullptr || !killer->IsClient()) {
+		return;
+	}
+
+	uint16 killer_level = killer->GetLevel();
+	uint8  material;
+
+	auto cur = m_loot_items.begin();
+	while (cur != m_loot_items.end()) {
+		if (!(*cur)) {
+			return;
+		}
+
+		uint16 trivial_min_level     = (*cur)->trivial_min_level;
+		uint16 trivial_max_level     = (*cur)->trivial_max_level;
+		bool   fits_trivial_criteria = (
+			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
+			(trivial_max_level > 0 && killer_level > trivial_max_level)
+		);
+
+		if (fits_trivial_criteria) {
+			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
+			if (material != EQ::textures::materialInvalid) {
+				SendWearChange(material);
+			}
+
+			cur = m_loot_items.erase(cur);
+			continue;
+		}
+		++cur;
+	}
+
+	UpdateEquipmentLight();
+	if (UpdateActiveLight()) {
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
+	}
+}
+
+void NPC::ClearItemList()
+{
+	ItemList::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		safe_delete(item);
+	}
+	m_loot_items.clear();
+
+	UpdateEquipmentLight();
+	if (UpdateActiveLight()) {
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
+	}
+}
+
+void NPC::QueryLoot(Client *to, bool is_pet_query)
+{
+	if (!m_loot_items.empty()) {
+		if (!is_pet_query) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Loot | {} ({}) ID: {} Loottable ID: {}",
+					GetName(),
+					GetID(),
+					GetNPCTypeID(),
+					GetLoottableID()
+				).c_str()
+			);
+		}
+
+		int       item_count = 0;
+		for (auto current_item: m_loot_items) {
+			int item_number = (item_count + 1);
+			if (!current_item) {
+				LogError("NPC::QueryLoot() - ItemList error, null item.");
+				continue;
+			}
+
+			if (!current_item->item_id || !database.GetItem(current_item->item_id)) {
+				LogError("NPC::QueryLoot() - Database error, invalid item.");
+				continue;
+			}
+
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkLootItem);
+			linker.SetLootData(current_item);
+
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Item {} | {} ({}){}",
+					item_number,
+					linker.GenerateLink().c_str(),
+					current_item->item_id,
+					(
+						current_item->charges > 1 ?
+							fmt::format(
+								" Amount: {}",
+								current_item->charges
+							) :
+							""
+					)
+				).c_str()
+			);
+			item_count++;
+		}
+	}
+
+	if (!is_pet_query) {
+		if (
+			m_loot_platinum ||
+			m_loot_gold ||
+			m_loot_silver ||
+			m_loot_copper
+			) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Money | {}",
+					Strings::Money(
+						m_loot_platinum,
+						m_loot_gold,
+						m_loot_silver,
+						m_loot_copper
+					)
+				).c_str()
+			);
+		}
+	}
+}
+
+bool NPC::HasItem(uint32 item_id)
+{
+	if (!database.GetItem(item_id)) {
+		return false;
+	}
+
+	for (auto loot_item: m_loot_items) {
+		if (!loot_item) {
+			LogError("NPC::HasItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::HasItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+uint16 NPC::CountItem(uint32 item_id)
+{
+	uint16 item_count = 0;
+	if (!database.GetItem(item_id)) {
+		return item_count;
+	}
+
+	for (auto loot_item: m_loot_items) {
+		if (!loot_item) {
+			LogError("NPC::CountItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::CountItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			item_count += loot_item->charges > 0 ? loot_item->charges : 1;
+		}
+	}
+	return item_count;
+}
+
+uint32 NPC::GetItemIDBySlot(uint16 loot_slot)
+{
+	for (auto loot_item: m_loot_items) {
+		if (loot_item->lootslot == loot_slot) {
+			return loot_item->item_id;
+		}
+	}
+	return 0;
+}
+
+uint16 NPC::GetFirstSlotByItemID(uint32 item_id)
+{
+	for (auto loot_item: m_loot_items) {
+		if (loot_item->item_id == item_id) {
+			return loot_item->lootslot;
+		}
+	}
+	return 0;
+}
+
+void NPC::AddLootCash(
+	uint32 in_copper,
+	uint32 in_silver,
+	uint32 in_gold,
+	uint32 in_platinum
+)
+{
+	m_loot_copper   = in_copper >= 0 ? in_copper : 0;
+	m_loot_silver   = in_silver >= 0 ? in_silver : 0;
+	m_loot_gold     = in_gold >= 0 ? in_gold : 0;
+	m_loot_platinum = in_platinum >= 0 ? in_platinum : 0;
+}
+
+void NPC::RemoveLootCash()
+{
+	m_loot_copper   = 0;
+	m_loot_silver   = 0;
+	m_loot_gold     = 0;
+	m_loot_platinum = 0;
 }

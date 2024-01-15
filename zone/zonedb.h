@@ -367,7 +367,7 @@ namespace RaidLootTypes {
 }
 
 class ZoneDatabase : public SharedDatabase {
-	typedef std::list<ServerLootItem_Struct*> ItemList;
+	typedef std::list<LootItem*> ItemList;
 public:
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);

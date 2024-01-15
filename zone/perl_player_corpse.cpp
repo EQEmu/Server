@@ -86,7 +86,7 @@ void Perl_Corpse_SetCash(Corpse* self, uint16 copper, uint16 silver, uint16 gold
 	self->SetCash(copper, silver, gold, platinum);
 }
 
-void Perl_Corpse_RemoveCash(Corpse* self) // @categories Currency and Points, Corpse
+void Perl_Corpse_RemoveLootCash(Corpse* self) // @categories Currency and Points, Corpse
 {
 	self->RemoveCash();
 }
@@ -232,7 +232,7 @@ void perl_register_corpse()
 	package.add("IsLocked", &Perl_Corpse_IsLocked);
 	package.add("IsRezzed", &Perl_Corpse_IsRezzed);
 	package.add("Lock", &Perl_Corpse_Lock);
-	package.add("RemoveCash", &Perl_Corpse_RemoveCash);
+	package.add("RemoveCash", &Perl_Corpse_RemoveLootCash);
 	package.add("RemoveItem", &Perl_Corpse_RemoveItem);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t))&Perl_Corpse_RemoveItemByID);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t, int))&Perl_Corpse_RemoveItemByID);

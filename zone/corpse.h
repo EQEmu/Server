@@ -21,6 +21,7 @@
 
 #include "mob.h"
 #include "client.h"
+#include "../common/loot.h"
 
 class EQApplicationPacket;
 class Group;
@@ -93,35 +94,37 @@ class Corpse : public Mob {
 	void			LoadPlayerCorpseDecayTime(uint32 dbid);
 
 	/* Corpse: Items */
-	uint32					GetWornItem(int16 equipSlot) const;
-	ServerLootItem_Struct*	GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data = 0);
-	void	SetPlayerKillItemID(int32 pk_item_id) { player_kill_item = pk_item_id; }
-	int32	GetPlayerKillItem() { return player_kill_item; }
-	void	RemoveItem(uint16 lootslot);
-	void	RemoveItem(ServerLootItem_Struct* item_data);
-	void	RemoveItemByID(uint32 item_id, int quantity = 1);
-	void	AddItem(uint32 itemnum, 
-		uint16 charges, 
-		int16 slot = 0, 
-		uint32 aug1 = 0, 
-		uint32 aug2 = 0, 
-		uint32 aug3 = 0, 
-		uint32 aug4 = 0, 
-		uint32 aug5 = 0, 
-		uint32 aug6 = 0, 
-		bool attuned = false, 
-		const std::string &custom_data = std::string(), 
+	uint32 GetWornItem(int16 equipSlot) const;
+	LootItem *GetItem(uint16 lootslot, LootItem **bag_item_data = 0);
+	void SetPlayerKillItemID(int32 pk_item_id) { player_kill_item = pk_item_id; }
+	int32 GetPlayerKillItem() { return player_kill_item; }
+	void RemoveItem(uint16 lootslot);
+	void RemoveItem(LootItem *item_data);
+	void RemoveItemByID(uint32 item_id, int quantity = 1);
+	void AddItem(
+		uint32 itemnum,
+		uint16 charges,
+		int16 slot = 0,
+		uint32 aug1 = 0,
+		uint32 aug2 = 0,
+		uint32 aug3 = 0,
+		uint32 aug4 = 0,
+		uint32 aug5 = 0,
+		uint32 aug6 = 0,
+		bool attuned = false,
+		const std::string &custom_data = std::string(),
 		uint32 ornamenticon = 0,
 		uint32 ornamentidfile = 0,
-		uint32 ornament_hero_model = 0);
+		uint32 ornament_hero_model = 0
+	);
 
 	/* Corpse: Coin */
-	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void	RemoveCash();
-	uint32	GetCopper()		{ return copper; }
-	uint32	GetSilver()		{ return silver; }
-	uint32	GetGold()		{ return gold; }
-	uint32	GetPlatinum()	{ return platinum; }
+	void SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
+	void RemoveCash();
+	uint32 GetCopper() { return copper; }
+	uint32 GetSilver() { return silver; }
+	uint32 GetGold() { return gold; }
+	uint32 GetPlatinum() { return platinum; }
 
 	/* Corpse: Resurrection */
 	bool	IsRezzed() { return rez; }
@@ -136,7 +139,7 @@ class Corpse : public Mob {
 	uint32	GetItemIDBySlot(uint16 loot_slot);
 	uint16	GetFirstSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
-	void	LootItem(Client* client, const EQApplicationPacket* app);
+	void	LootCorpseItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);
 	void	AllowPlayerLoot(Mob *them, uint8 slot);

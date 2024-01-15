@@ -45,8 +45,8 @@ public:
 	void RemoveItem(int item_id, int quantity);
 	void RemoveItem(int item_id, int quantity, int slot);
 	void ClearItemList();
-	void AddCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
-	void RemoveCash();
+	void AddLootCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
+	void RemoveLootCash();
 	int CountLoot();
 	int GetLoottableID();
 	uint32 GetCopper();

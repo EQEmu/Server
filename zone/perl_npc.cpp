@@ -91,14 +91,14 @@ void Perl_NPC_ClearItemList(NPC* self) // @categories Inventory and Items
 	self->ClearItemList();
 }
 
-void Perl_NPC_AddCash(NPC* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points
+void Perl_NPC_AddLootCash(NPC* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points
 {
-	self->AddCash(copper, silver, gold, platinum);
+	self->AddLootCash(copper, silver, gold, platinum);
 }
 
-void Perl_NPC_RemoveCash(NPC* self) // @categories Currency and Points
+void Perl_NPC_RemoveLootCash(NPC* self) // @categories Currency and Points
 {
-	self->RemoveCash();
+	self->RemoveLootCash();
 }
 
 uint32_t Perl_NPC_CountLoot(NPC* self) // @categories Inventory and Items
@@ -799,7 +799,7 @@ void perl_register_npc()
 	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int, int, int16))&Perl_NPC_AddSpellToNPCList);
 	package.add("AddAISpell", (void(*)(NPC*, int16, uint16, uint32, int, int, int16, int8, int8))&Perl_NPC_AddSpellToNPCList);
 	package.add("AddAISpellEffect", &Perl_NPC_AddAISpellEffect);
-	package.add("AddCash", &Perl_NPC_AddCash);
+	package.add("AddCash", &Perl_NPC_AddLootCash);
 	package.add("AddDefensiveProc", &Perl_NPC_AddDefensiveProc);
 	package.add("AddItem", (void(*)(NPC*, uint32))&Perl_NPC_AddItem);
 	package.add("AddItem", (void(*)(NPC*, uint32, uint16))&Perl_NPC_AddItem);
@@ -900,7 +900,7 @@ void perl_register_npc()
 	package.add("ReloadSpells", &Perl_NPC_ReloadSpells);
 	package.add("RemoveAISpell", &Perl_NPC_RemoveSpellFromNPCList);
 	package.add("RemoveAISpellEffect", &Perl_NPC_RemoveAISpellEffect);
-	package.add("RemoveCash", &Perl_NPC_RemoveCash);
+	package.add("RemoveCash", &Perl_NPC_RemoveLootCash);
 	package.add("RemoveDefensiveProc", &Perl_NPC_RemoveDefensiveProc);
 	package.add("RemoveFromHateList", &Perl_NPC_RemoveFromHateList);
 	package.add("RemoveItem", (void(*)(NPC*, uint32))&Perl_NPC_RemoveItem);

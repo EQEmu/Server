@@ -92,14 +92,14 @@ void Lua_NPC::ClearItemList() {
 	self->ClearItemList();
 }
 
-void Lua_NPC::AddCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+void Lua_NPC::AddLootCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	Lua_Safe_Call_Void();
-	self->AddCash(copper, silver, gold, platinum);
+	self->AddLootCash(copper, silver, gold, platinum);
 }
 
-void Lua_NPC::RemoveCash() {
+void Lua_NPC::RemoveLootCash() {
 	Lua_Safe_Call_Void();
-	self->RemoveCash();
+	self->RemoveLootCash();
 }
 
 int Lua_NPC::CountLoot() {
@@ -833,7 +833,7 @@ luabind::scope lua_register_npc() {
 	.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 	.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 	.def("AddAISpellEffect", (void(Lua_NPC::*)(int,int,int,int))&Lua_NPC::AddAISpellEffect)
-	.def("AddCash", (void(Lua_NPC::*)(uint32,uint32,uint32,uint32))&Lua_NPC::AddCash)
+	.def("AddCash", (void(Lua_NPC::*)(uint32,uint32,uint32,uint32))&Lua_NPC::AddLootCash)
 	.def("AddItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::AddItem)
 	.def("AddItem", (void(Lua_NPC::*)(int,int,bool))&Lua_NPC::AddItem)
 	.def("AddItem", (void(Lua_NPC::*)(int,int,bool,int))&Lua_NPC::AddItem)
@@ -935,7 +935,7 @@ luabind::scope lua_register_npc() {
 	.def("ReloadSpells", (void(Lua_NPC::*)(void))&Lua_NPC::ReloadSpells)
 	.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 	.def("RemoveAISpellEffect", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpellEffect)
-	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveCash)
+	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveLootCash)
 	.def("RemoveItem", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int,int))&Lua_NPC::RemoveItem)

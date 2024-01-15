@@ -10061,7 +10061,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	entity->CastToCorpse()->LootItem(this, app);
+	entity->CastToCorpse()->LootCorpseItem(this, app);
 }
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)

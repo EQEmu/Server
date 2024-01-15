@@ -218,9 +218,9 @@ public:
 	void CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void ClearItemList();
 	inline const ItemList &GetLootItems() { return m_loot_items; }
-	ServerLootItem_Struct *GetItem(int slot_id);
-	void AddCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void RemoveCash();
+	LootItem *GetItem(int slot_id);
+	void AddLootCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
+	void RemoveLootCash();
 	void QueryLoot(Client *to, bool is_pet_query = false);
 	bool HasItem(uint32 item_id);
 	uint16 CountItem(uint32 item_id);

@@ -49,7 +49,7 @@ public:
 	void RemoveItemByID(uint32 item_id);
 	void RemoveItemByID(uint32 item_id, int quantity);
 	void SetCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum);
-	void RemoveCash();
+	void RemoveLootCash();
 	bool IsEmpty();
 	void ResetDecayTimer();
 	void SetDecayTimer(uint32 decaytime);
