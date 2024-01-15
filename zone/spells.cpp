@@ -3819,6 +3819,8 @@ bool Mob::SpellOnTarget(
 
 		entity_list.QueueCloseClients(this, outapp, false,
 			RuleI(Range, SpellMessages), 0, true, FilterNone);
+
+		safe_delete(outapp);
 	}
 
 	// Actual cast action - this causes the caster animation and the particles
