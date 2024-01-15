@@ -650,7 +650,7 @@ void ZoneDatabase::LoadGlobalLoot()
 
 LootItem *NPC::GetItem(int slot_id)
 {
-	ItemList::iterator cur, end;
+	LootItems::iterator cur, end;
 	cur = m_loot_items.begin();
 	end = m_loot_items.end();
 	for (; cur != end; ++cur) {
@@ -664,7 +664,7 @@ LootItem *NPC::GetItem(int slot_id)
 
 void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
 {
-	ItemList::iterator cur, end;
+	LootItems::iterator cur, end;
 	cur = m_loot_items.begin();
 	end = m_loot_items.end();
 	for (; cur != end; ++cur) {
@@ -729,9 +729,9 @@ void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 	}
 }
 
-void NPC::ClearItemList()
+void NPC::ClearLootItems()
 {
-	ItemList::iterator cur, end;
+	LootItems::iterator cur, end;
 	cur = m_loot_items.begin();
 	end = m_loot_items.end();
 	for (; cur != end; ++cur) {

@@ -216,8 +216,8 @@ public:
 	void CheckGlobalLootTables();
 	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void CheckTrivialMinMaxLevelDrop(Mob *killer);
-	void ClearItemList();
-	inline const ItemList &GetLootItems() { return m_loot_items; }
+	void ClearLootItems();
+	inline const LootItems &GetLootItems() { return m_loot_items; }
 	LootItem *GetItem(int slot_id);
 	void AddLootCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
 	void RemoveLootCash();
@@ -576,8 +576,8 @@ protected:
 	uint32   m_loot_copper;
 	uint32   m_loot_silver;
 	uint32   m_loot_gold;
-	uint32   m_loot_platinum;
-	ItemList m_loot_items;
+	uint32    m_loot_platinum;
+	LootItems m_loot_items;
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 

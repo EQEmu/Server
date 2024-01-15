@@ -2015,6 +2015,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		player_event_logs.ReloadSettings();
 		break;
 	}
+	case ServerOP_ReloadLoot:
+	{
+		zone->ReloadLootTables();
+		break;
+	}
 	case ServerOP_ReloadMerchants: {
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Merchants");

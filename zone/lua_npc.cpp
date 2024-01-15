@@ -87,9 +87,9 @@ void Lua_NPC::RemoveItem(int item_id, int quantity, int slot) {
 	self->RemoveItem(item_id, quantity, slot);
 }
 
-void Lua_NPC::ClearItemList() {
+void Lua_NPC::ClearLootItems() {
 	Lua_Safe_Call_Void();
-	self->ClearItemList();
+	self->ClearLootItems();
 }
 
 void Lua_NPC::AddLootCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
@@ -848,7 +848,7 @@ luabind::scope lua_register_npc() {
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
 	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
-	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearItemList)
+	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLootItems)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
 	.def("CountItem", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::CountItem)
 	.def("CountLoot", (int(Lua_NPC::*)(void))&Lua_NPC::CountLoot)

@@ -433,6 +433,7 @@ public:
 	void LoadLootTable(const uint32 loottable_id);
 	void LoadLootTables(const std::vector<uint32>& loottable_ids);
 	void ClearLootTables();
+	void ReloadLootTables();
 	LoottableRepository::Loottable *GetLootTable(const uint32 loottable_id);
 	std::vector<LoottableEntriesRepository::LoottableEntries> GetLootTableEntries(const uint32 loottable_id) const;
 	LootdropRepository::Lootdrop GetLootdrop(const uint32 lootdrop_id) const;

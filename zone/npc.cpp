@@ -518,7 +518,15 @@ NPC::~NPC()
 	}
 
 	safe_delete(NPCTypedata_ours);
-	
+
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		safe_delete(item);
+	}
+
 	m_loot_items.clear();
 	faction_list.clear();
 
@@ -1745,8 +1753,8 @@ void NPC::Disarm(Client* client, int chance) {
 			weapon = database.GetItem(equipment[eslot]);
 			if (weapon) {
 				if (!weapon->Magic && weapon->NoDrop != 0) {
-					int16 charges = -1;
-					ItemList::iterator cur, end;
+					int16               charges = -1;
+					LootItems::iterator cur, end;
 					cur = m_loot_items.begin();
 					end = m_loot_items.end();
 					// Get charges for the item in the loot table

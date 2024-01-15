@@ -27,7 +27,7 @@ struct LootItem {
 	uint16      npc_max_level;
 };
 
-typedef std::list<LootItem*> ItemList;
+typedef std::list<LootItem*> LootItems;
 
 
 #endif //CODE_LOOT_H

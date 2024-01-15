@@ -86,9 +86,9 @@ void Perl_NPC_RemoveItem(NPC* self, uint32 item_id, uint16 quantity, uint16 slot
 	self->RemoveItem(item_id, quantity, slot_id);
 }
 
-void Perl_NPC_ClearItemList(NPC* self) // @categories Inventory and Items
+void Perl_NPC_ClearLootItems(NPC* self) // @categories Inventory and Items
 {
-	self->ClearItemList();
+	self->ClearLootItems();
 }
 
 void Perl_NPC_AddLootCash(NPC* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points
@@ -818,7 +818,7 @@ void perl_register_npc()
 	package.add("CalculateNewWaypoint", &Perl_NPC_CalculateNewWaypoint);
 	package.add("ChangeLastName", &Perl_NPC_ChangeLastName);
 	package.add("CheckNPCFactionAlly", &Perl_NPC_CheckNPCFactionAlly);
-	package.add("ClearItemList", &Perl_NPC_ClearItemList);
+	package.add("ClearItemList", &Perl_NPC_ClearLootItems);
 	package.add("ClearLastName", &Perl_NPC_ClearLastName);
 	package.add("CountItem", &Perl_NPC_CountItem);
 	package.add("CountLoot", &Perl_NPC_CountLoot);

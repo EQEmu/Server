@@ -125,6 +125,26 @@ void Zone::ClearLootTables()
 	m_lootdrop_entries.clear();
 }
 
+void Zone::ReloadLootTables()
+{
+	ClearLootTables();
+
+	std::vector<uint32> loottable_ids = {};
+	for (const auto& n : entity_list.GetNPCList()) {
+		if (n.second->GetLoottableID() != 0) {
+			if (std::find(
+				loottable_ids.begin(),
+				loottable_ids.end(),
+				n.second->GetLoottableID()
+			) == loottable_ids.end()) {
+				loottable_ids.push_back(n.second->GetLoottableID());
+			}
+		}
+	}
+
+	LoadLootTables(loottable_ids);
+}
+
 LoottableRepository::Loottable *Zone::GetLootTable(const uint32 loottable_id)
 {
 	for (auto &e: m_loottables) {

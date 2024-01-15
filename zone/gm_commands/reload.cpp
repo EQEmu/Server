@@ -25,6 +25,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_ground_spawns        = !strcasecmp(sep->arg[1], "ground_spawns");
 	bool is_level_mods           = !strcasecmp(sep->arg[1], "level_mods");
 	bool is_logs                 = !strcasecmp(sep->arg[1], "logs") || is_logs_reload_alias;
+	bool is_loot                 = !strcasecmp(sep->arg[1], "loot");
 	bool is_merchants            = !strcasecmp(sep->arg[1], "merchants");
 	bool is_npc_emotes           = !strcasecmp(sep->arg[1], "npc_emotes");
 	bool is_objects              = !strcasecmp(sep->arg[1], "objects");
@@ -55,6 +56,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_ground_spawns &&
 		!is_level_mods &&
 		!is_logs &&
+		!is_loot &&
 		!is_merchants &&
 		!is_npc_emotes &&
 		!is_objects &&
@@ -119,6 +121,9 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_logs) {
 		c->Message(Chat::White, "Attempting to reload Log Settings globally.");
 		pack = new ServerPacket(ServerOP_ReloadLogs, 0);
+	} else if (is_loot) {
+		c->Message(Chat::White, "Attempting to reload Loot globally.");
+		pack = new ServerPacket(ServerOP_ReloadLoot, 0);
 	} else if (is_merchants) {
 		c->Message(Chat::White, "Attempting to reload Merchants globally.");
 		pack = new ServerPacket(ServerOP_ReloadMerchants, 0);

@@ -81,7 +81,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 		return nullptr;
 	}
 
-	ItemList itemlist;
+	LootItems itemlist;
 	for (auto &item: ce.items) {
 		auto tmp = new LootItem;
 
@@ -159,7 +159,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 
 Corpse::Corpse(
 	NPC *in_npc,
-	ItemList *in_itemlist,
+	LootItems *in_itemlist,
 	uint32 in_npctypeid,
 	const NPCType **in_npctypedata,
 	uint32 in_decaytime
@@ -561,7 +561,7 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 }
 
 // To be called from LoadFromDBData
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rezexp, bool wasAtGraveyard) : Mob(
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard) : Mob(
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -619,11 +619,11 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, ItemLi
 	0, // in_heroic_strikethrough
 	false // in_keeps_sold_items
 ),
-	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
-	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
-	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
-	corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
-	loot_cooldown_timer(10)
+																																																																																												  corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
+																																																																																												  corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
+																																																																																												  corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
+																																																																																												  corpse_graveyard_timer(RuleI(Zone, GraveyardTimeMS)),
+																																																																																												  loot_cooldown_timer(10)
 {
 	LoadPlayerCorpseDecayTime(in_dbid);
 
@@ -667,7 +667,7 @@ Corpse::~Corpse() {
 	if (is_player_corpse && !(player_corpse_depop && corpse_db_id == 0)) {
 		Save();
 	}
-	ItemList::iterator cur,end;
+	LootItems::iterator cur, end;
 	cur = itemlist.begin();
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
@@ -856,7 +856,7 @@ void Corpse::AddItem(uint32 itemnum,
 LootItem* Corpse::GetItem(uint16 lootslot, LootItem** bag_item_data) {
 	LootItem *sitem = nullptr, *sitem2 = nullptr;
 
-	ItemList::iterator cur,end;
+	LootItems::iterator cur, end;
 	cur = itemlist.begin();
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
@@ -883,7 +883,7 @@ LootItem* Corpse::GetItem(uint16 lootslot, LootItem** bag_item_data) {
 }
 
 uint32 Corpse::GetWornItem(int16 equipSlot) const {
-	ItemList::const_iterator cur,end;
+	LootItems::const_iterator cur, end;
 	cur = itemlist.begin();
 	end = itemlist.end();
 	for(; cur != end; ++cur) {
@@ -900,7 +900,7 @@ void Corpse::RemoveItem(uint16 lootslot) {
 	if (lootslot == 0xFFFF)
 		return;
 
-	ItemList::iterator cur,end;
+	LootItems::iterator cur, end;
 	cur = itemlist.begin();
 	end = itemlist.end();
 	for (; cur != end; ++cur) {
