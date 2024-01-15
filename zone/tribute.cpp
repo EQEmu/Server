@@ -19,6 +19,8 @@
 #include "../common/global_define.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/features.h"
+#include "../common/repositories/tributes_repository.h"
+#include "../common/repositories/tribute_levels_repository.h"
 
 #include "client.h"
 
@@ -375,62 +377,68 @@ void Client::SendGuildTributes() {
 	}
 }
 
-bool ZoneDatabase::LoadTributes() {
-
-	TributeData tributeData;
-	memset(&tributeData.tiers, 0, sizeof(tributeData.tiers));
-	tributeData.tier_count = 0;
+bool ZoneDatabase::LoadTributes()
+{
+	TributeData tribute_data;
+	memset(&tribute_data.tiers, 0, sizeof(tribute_data.tiers));
+	tribute_data.tier_count = 0;
 
 	tribute_list.clear();
 
-	const std::string query = "SELECT id, name, descr, unknown, isguild FROM tributes";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	const auto& tributes = TributesRepository::All(*this);
+
+	if (tributes.empty()) {
 		return false;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = Strings::ToUnsignedInt(row[0]);
-		tributeData.name = row[1];
-		tributeData.description = row[2];
-		tributeData.unknown = strtoul(row[3], nullptr, 10);
-		tributeData.is_guild = atol(row[4]) == 0? false: true;
+	for (const auto &e: tributes) {
+		tribute_data.name        = e.name;
+		tribute_data.description = e.descr;
+		tribute_data.unknown     = e.unknown;
+		tribute_data.is_guild    = e.isguild;
 
-		tribute_list[id] = tributeData;
-    }
+		tribute_list[e.id] = tribute_data;
+	}
 
-	LogInfo("Loaded [{}] tributes", Strings::Commify(results.RowCount()));
+	LogInfo(
+		"Loaded [{}] Tribute{}",
+		Strings::Commify(tributes.size()),
+		tributes.size() != 1 ? "s" : ""
+	);
 
-	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
-	results = QueryDatabase(query2);
-	if (!results.Success()) {
+	const auto& tribute_levels = TributeLevelsRepository::GetWhere(*this, "ORDER BY `tribute_id`, `level`");
+
+	if (tribute_levels.empty()) {
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = Strings::ToUnsignedInt(row[0]);
-
-		if (tribute_list.count(id) != 1) {
-			LogError("Error in LoadTributes: unknown tribute [{}] in tribute_levels", (unsigned long) id);
+	for (const auto& e : tribute_levels) {
+		if (tribute_list.count(e.tribute_id) != 1) {
+			LogError("Unknown tribute [{}] in tribute_levels.", e.tribute_id);
 			continue;
 		}
 
-		TributeData &cur = tribute_list[id];
+		TributeData& c = tribute_list[e.tribute_id];
 
-		if (cur.tier_count >= MAX_TRIBUTE_TIERS) {
-			LogError("Error in LoadTributes: on tribute [{}]: more tiers defined than permitted", (unsigned long) id);
+		if (c.tier_count >= MAX_TRIBUTE_TIERS) {
+			LogError("Tribute [{}]: more tiers defined than permitted.", e.tribute_id);
 			continue;
 		}
 
-		TributeLevel_Struct &s = cur.tiers[cur.tier_count];
+		TributeLevel_Struct& s = c.tiers[c.tier_count];
 
-		s.level           = Strings::ToUnsignedInt(row[1]);
-		s.cost            = Strings::ToUnsignedInt(row[2]);
-		s.tribute_item_id = Strings::ToUnsignedInt(row[3]);
-		cur.tier_count++;
+		s.level           = e.level;
+		s.cost            = e.cost;
+		s.tribute_item_id = e.item_id;
+
+		c.tier_count++;
 	}
 
-	LogInfo("Loaded [{}] tribute levels", Strings::Commify(results.RowCount()));
+	LogInfo(
+		"Loaded [{}] Tribute Level{}",
+		Strings::Commify(tribute_levels.size()),
+		tribute_levels.size() != 1 ? "s" : ""
+	);
 
 	return true;
 }
