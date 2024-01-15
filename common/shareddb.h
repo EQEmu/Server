@@ -165,17 +165,6 @@ public:
 	uint32 GetItemsCount();
 
 	/**
-	 * loot
-	 */
-	void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
-	void GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
-	void LoadLootTables(void *data, uint32 size);
-	void LoadLootDrops(void *data, uint32 size);
-	bool LoadLoot(const std::string &prefix);
-	const LootTable_Struct *GetLootTable(uint32 loottable_id) const;
-	const LootDrop_Struct *GetLootDrop(uint32 lootdrop_id) const;
-
-	/**
 	 * skills
 	 */
 	void LoadSkillCaps(void *data);

@@ -2,7 +2,6 @@
 #include "../../common/http/httplib.h"
 #include "../../common/eqemu_logsys.h"
 #include "../zonedb.h"
-#include "../../shared_memory/loot.h"
 #include "../../common/process.h"
 #include "../common.h"
 #include "../zone.h"
@@ -56,11 +55,6 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 			)
 		);
 		std::cout << output << "\n";
-	}
-
-	LogInfo("Loading loot tables");
-	if (!database.LoadLoot(hotfix_name)) {
-		LogError("Loading loot failed!");
 	}
 
 	// bootup a fake zone

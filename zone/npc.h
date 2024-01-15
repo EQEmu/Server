@@ -27,6 +27,10 @@
 #include "zonedump.h"
 #include "../common/loottable.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/loottable_repository.h"
+#include "../common/repositories/loottable_entries_repository.h"
+#include "../common/repositories/lootdrop_repository.h"
+#include "../common/repositories/lootdrop_entries_repository.h"
 
 #include <deque>
 #include <list>
@@ -323,7 +327,7 @@ public:
 	void AddLootDrop(
 		const EQ::ItemData *item2,
 		ItemList *itemlist,
-		LootDropEntries_Struct loot_drop,
+		LootdropEntriesRepository::LootdropEntries loot_drop,
 		bool wear_change = false,
 		uint32 augment_one = 0,
 		uint32 augment_two = 0,
@@ -333,7 +337,7 @@ public:
 		uint32 augment_six = 0
 	);
 
-	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose=false);
+	bool MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntries loot_drop, bool verbose=false);
 
 	void CheckSignal();
 
@@ -553,8 +557,6 @@ public:
 	void ReloadSpells();
 
 	void SendPositionToClients();
-
-	static LootDropEntries_Struct NewLootDropEntry();
 
 	bool CanPathTo(float x, float y, float z);
 

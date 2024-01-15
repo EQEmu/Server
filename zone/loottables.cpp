@@ -51,6 +51,7 @@ void ZoneDatabase::AddLootTableToNPC(
 		gold == nullptr &&
 		plat == nullptr
 	);
+
 	if (!is_global) {
 		*copper = 0;
 		*silver = 0;
@@ -58,17 +59,26 @@ void ZoneDatabase::AddLootTableToNPC(
 		*plat = 0;
 	}
 
-	const auto *lts = database.GetLootTable(loottable_id);
-	if (!lts) {
+	zone->LoadLootTable(loottable_id);
+
+	const auto *l = zone->GetLootTable(loottable_id);
+	if (!l) {
 		return;
 	}
 
-	if (!content_service.DoesPassContentFiltering(lts->content_flags)) {
+	auto content_flags = ContentFlags{
+		.min_expansion = l->min_expansion,
+		.max_expansion = l->max_expansion,
+		.content_flags = l->content_flags,
+		.content_flags_disabled = l->content_flags_disabled
+	};
+
+	if (!content_service.DoesPassContentFiltering(content_flags)) {
 		return;
 	}
 
-	uint32 min_cash = lts->mincash;
-	uint32 max_cash = lts->maxcash;
+	uint32 min_cash = l->mincash;
+	uint32 max_cash = l->maxcash;
 	if (min_cash > max_cash) {
 		const uint32 t = min_cash;
 		min_cash = max_cash;
@@ -79,16 +89,16 @@ void ZoneDatabase::AddLootTableToNPC(
 	if (!is_global) {
 		if (
 			max_cash > 0 &&
-			lts->avgcoin > 0 &&
-			EQ::ValueWithin(lts->avgcoin, min_cash, max_cash)
+			l->avgcoin > 0 &&
+			EQ::ValueWithin(l->avgcoin, min_cash, max_cash)
 		) {
-			const float upper_chance  = static_cast<float>(lts->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
+			const float upper_chance  = static_cast<float>(l->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
 			const float avg_cash_roll = static_cast<float>(zone->random.Real(0.0, 1.0));
 
 			if (avg_cash_roll < upper_chance) {
-				cash = zone->random.Int(lts->avgcoin, max_cash);
+				cash = zone->random.Int(l->avgcoin, max_cash);
 			} else {
-				cash = zone->random.Int(min_cash, lts->avgcoin);
+				cash = zone->random.Int(min_cash, l->avgcoin);
 			}
 		} else {
 			cash = zone->random.Int(min_cash, max_cash);
@@ -109,14 +119,11 @@ void ZoneDatabase::AddLootTableToNPC(
 	}
 
 	const uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
-
-	for (uint32 i = 0; i < lts->NumEntries; i++) {
-		for (uint32 k = 1; k <= (lts->Entries[i].multiplier * global_loot_multiplier); k++) {
-			const uint8 drop_limit   = lts->Entries[i].droplimit;
-			const uint8 minimum_drop = lts->Entries[i].mindrop;
-
-			//LootTable Entry probability
-			const float probability = lts->Entries[i].probability;
+	for (auto &lte: zone->GetLootTableEntries(loottable_id)) {
+		for (uint32 k = 1; k <= (lte.multiplier * global_loot_multiplier); k++) {
+			const uint8 drop_limit   = lte.droplimit;
+			const uint8 minimum_drop = lte.mindrop;
+			const float probability  = lte.probability;
 
 			float drop_chance = 0.0f;
 			if (EQ::ValueWithin(probability, 0.0f, 100.0f)) {
@@ -124,47 +131,58 @@ void ZoneDatabase::AddLootTableToNPC(
 			}
 
 			if (probability != 0.0 && (probability == 100.0 || drop_chance <= probability)) {
-				AddLootDropToNPC(npc, lts->Entries[i].lootdrop_id, itemlist, drop_limit, minimum_drop);
+				AddLootDropToNPC(npc, lte.lootdrop_id, itemlist, drop_limit, minimum_drop);
 			}
 		}
 	}
+
+	LogInfo("Loaded [{}] Loot Table [{}]", npc->GetCleanName(), loottable_id);
 }
 
 // Called by AddLootTableToNPC
 // maxdrops = size of the array npcd
 void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item_list, uint8 droplimit, uint8 mindrop)
 {
-	const auto *lds = GetLootDrop(lootdrop_id);
+	const auto l = zone->GetLootdrop(lootdrop_id);
+	const auto le = zone->GetLootdropEntries(lootdrop_id);
+
+	auto content_flags = ContentFlags{
+		.min_expansion = l.min_expansion,
+		.max_expansion = l.max_expansion,
+		.content_flags = l.content_flags,
+		.content_flags_disabled = l.content_flags_disabled
+	};
+
 	if (
-		!lds ||
-		lds->NumEntries == 0 ||
-		!content_service.DoesPassContentFiltering(lds->content_flags)
+		l.id == 0 ||
+		le.size() == 0 ||
+		!content_service.DoesPassContentFiltering(content_flags)
 	) {
 		return;
 	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (droplimit == 0 && mindrop == 0) {
-		for (uint32 i = 0; i < lds->NumEntries; ++i) {
-			const uint8 charges = lds->Entries[i].multiplier;
-			for (int j = 0; j < charges; ++j) {
+		for (const auto& e : le) {
+			for (int j = 0; j < e.multiplier; ++j) {
 				if (
-					zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance &&
-					npc->MeetsLootDropLevelRequirements(lds->Entries[i], true)
+					zone->random.Real(0.0, 100.0) <= e.chance &&
+					npc->MeetsLootDropLevelRequirements(e, true)
 				) {
-					const EQ::ItemData *database_item = GetItem(lds->Entries[i].item_id);
+					const EQ::ItemData *database_item = GetItem(e.item_id);
 					npc->AddLootDrop(
 						database_item,
 						item_list,
-						lds->Entries[i]
+						e
 					);
 				}
 			}
 		}
+
 		return;
 	}
 
-	if (lds->NumEntries > 100 && droplimit == 0) {
+	if (le.size() > 100 && droplimit == 0) {
 		droplimit = 10;
 	}
 
@@ -177,15 +195,15 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool  roll_table_chance_bypass = false;
 	bool  active_item_list         = false;
 
-	for (uint32 i = 0; i < lds->NumEntries; ++i) {
-		const EQ::ItemData *db_item = GetItem(lds->Entries[i].item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(lds->Entries[i])) {
-			roll_t += lds->Entries[i].chance;
+	for (const auto& e : le) {
+		const EQ::ItemData *db_item = GetItem(e.item_id);
+		if (db_item && npc->MeetsLootDropLevelRequirements(e)) {
+			roll_t += e.chance;
 
-			if (lds->Entries[i].chance >= 100) {
+			if (e.chance >= 100) {
 				roll_table_chance_bypass = true;
 			} else {
-				no_loot_prob *= (100 - lds->Entries[i].chance) / 100.0f;
+				no_loot_prob *= (100 - e.chance) / 100.0f;
 			}
 
 			active_item_list = true;
@@ -203,43 +221,43 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// items with chance 60 are 6 times more likely than items chance 10.
 	int drops = 0;
 
+	// translate above for loop using l and le
 	for (int i = 0; i < droplimit; ++i) {
 		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float       roll = (float) zone->random.Real(0.0, roll_t);
-			for (uint32 j    = 0; j < lds->NumEntries; ++j) {
-				const auto *db_item = GetItem(lds->Entries[j].item_id);
+			for (const auto& e : le) {
+				const auto *db_item = GetItem(e.item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
-					if (!npc->MeetsLootDropLevelRequirements(lds->Entries[j])) {
+					if (!npc->MeetsLootDropLevelRequirements(e)) {
 						continue;
 					}
 
-					if (roll < lds->Entries[j].chance) {
+					if (roll < e.chance) {
 						npc->AddLootDrop(
 							db_item,
 							item_list,
-							lds->Entries[j]
+							e
 						);
 						drops++;
 
-						uint8 charges = lds->Entries[i].multiplier;
+						uint8 charges = e.multiplier;
 						charges = EQ::ClampLower(charges, static_cast<uint8>(1));
 
 						for (int k = 1; k < charges; ++k) {
 							float c_roll = static_cast<float>(zone->random.Real(0.0, 100.0));
-							if (c_roll <= lds->Entries[i].chance) {
+							if (c_roll <= e.chance) {
 								npc->AddLootDrop(
 									db_item,
 									item_list,
-									lds->Entries[i]
+									e
 								);
 							}
 						}
 
-						j = lds->NumEntries;
 						break;
 					} else {
-						roll -= lds->Entries[j].chance;
+						roll -= e.chance;
 					}
 				}
 			}
@@ -252,7 +270,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	//	npc->SendAppearancePacket(AppearanceType::Light, npc->GetActiveLightValue());
 }
 
-bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose)
+bool NPC::MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntries loot_drop, bool verbose)
 {
 	if (loot_drop.npc_min_level > 0 && GetLevel() < loot_drop.npc_min_level) {
 		if (verbose) {
@@ -283,27 +301,11 @@ bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool 
 	return true;
 }
 
-LootDropEntries_Struct NPC::NewLootDropEntry()
-{
-	LootDropEntries_Struct loot_drop{};
-	loot_drop.item_id           = 0;
-	loot_drop.item_charges      = 1;
-	loot_drop.equip_item        = 1;
-	loot_drop.chance            = 0;
-	loot_drop.trivial_min_level = 0;
-	loot_drop.trivial_max_level = 0;
-	loot_drop.npc_min_level     = 0;
-	loot_drop.npc_max_level     = 0;
-	loot_drop.multiplier        = 0;
-
-	return loot_drop;
-}
-
 //if itemlist is null, just send wear changes
 void NPC::AddLootDrop(
 	const EQ::ItemData *item2,
 	ItemList *itemlist,
-	LootDropEntries_Struct loot_drop,
+	LootdropEntriesRepository::LootdropEntries loot_drop,
 	bool wear_change,
 	uint32 augment_one,
 	uint32 augment_two,
@@ -565,7 +567,7 @@ void NPC::AddLootDrop(
 
 void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
 {
-	auto loot_drop_entry = NPC::NewLootDropEntry();
+	auto loot_drop_entry = LootdropEntriesRepository::NewEntity();
 
 	loot_drop_entry.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	loot_drop_entry.item_charges = charges;
@@ -590,7 +592,7 @@ void NPC::AddItem(
 		return;
 	}
 
-	auto loot_drop_entry = NPC::NewLootDropEntry();
+	auto loot_drop_entry = LootdropEntriesRepository::NewEntity();
 
 	loot_drop_entry.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	loot_drop_entry.item_charges = charges;

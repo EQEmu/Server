@@ -1747,6 +1747,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	std::vector<uint32> npc_ids;
 	std::vector<uint32> npc_faction_ids;
+	std::vector<uint32> loottable_ids;
 
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
@@ -1797,6 +1798,13 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		}
 		else {
 			t->special_abilities[0] = '\0';
+		}
+
+		if (n.loottable_id > 0) {
+			// check if we already have this loottable_id before inserting it
+			if (std::find(loottable_ids.begin(), loottable_ids.end(), n.loottable_id) == loottable_ids.end()) {
+				loottable_ids.emplace_back(n.loottable_id);
+			}
 		}
 
 		t->npc_spells_id         = n.npc_spells_id;
@@ -1983,6 +1991,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		zone->LoadNPCFactions(npc_faction_ids);
 		zone->LoadNPCFactionAssociations(npc_faction_ids);
 	}
+
+	zone->BulkLoadLootTables(loottable_ids);
 
 	return npc;
 }

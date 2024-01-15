@@ -3508,11 +3508,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			LogError("Loading items failed!");
 		}
 
-		LogInfo("Loading loot tables");
-		if (!content_db.LoadLoot(hotfix_name)) {
-			LogError("Loading loot failed!");
-		}
-
 		LogInfo("Loading skill caps");
 		if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 			LogError("Loading skill caps failed!");

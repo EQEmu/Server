@@ -814,7 +814,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									((is_pet && (!bagitem->IsQuestItem() || pets_can_take_quest_items) ||
 									!is_pet)))) {
 
-									auto loot_drop_entry = NPC::NewLootDropEntry();
+									auto loot_drop_entry = LootdropEntriesRepository::NewEntity();
 									loot_drop_entry.equip_item = 1;
 									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
 
@@ -842,7 +842,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						}
 					}
 
-					auto new_loot_drop_entry = NPC::NewLootDropEntry();
+					auto new_loot_drop_entry = LootdropEntriesRepository::NewEntity();
 					new_loot_drop_entry.equip_item = 1;
 					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 

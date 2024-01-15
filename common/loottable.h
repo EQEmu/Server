@@ -20,6 +20,7 @@
 #define _EQEMU_LOOTTABLE_H
 
 #include "types.h"
+#include <string>
 
 #pragma pack(1)
 struct LootTableEntries_Struct {
@@ -31,10 +32,10 @@ struct LootTableEntries_Struct {
 };
 
 struct ContentFlags {
-	int16 min_expansion;
-	int16 max_expansion;
-	char  content_flags[100];
-	char  content_flags_disabled[100];
+	int16       min_expansion;
+	int16       max_expansion;
+	std::string content_flags;
+	std::string content_flags_disabled;
 };
 
 struct LootTable_Struct {

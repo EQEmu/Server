@@ -371,11 +371,7 @@ int main(int argc, char **argv)
 		LogError("Loading items failed!");
 		LogError("Failed. But ignoring error and going on..");
 	}
-
-	if (!database.LoadLoot(hotfix_name)) {
-		LogError("Loading loot failed!");
-		return 1;
-	}
+	
 	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 		LogError("Loading skill caps failed!");
 		return 1;
