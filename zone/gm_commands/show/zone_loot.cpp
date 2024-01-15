@@ -10,7 +10,7 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 	uint32 loot_number = 1;
 
 	for (auto npc_entity: entity_list.GetNPCList()) {
-		auto il = npc_entity.second->GetItemList();
+		auto il = npc_entity.second->GetLootItems();
 		v.emplace_back(std::make_pair(npc_entity.second, il));
 	}
 

@@ -22,7 +22,6 @@
 #include "../database.h"
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
-#include "../loottable.h"
 #include "../repositories/content_flags_repository.h"
 
 

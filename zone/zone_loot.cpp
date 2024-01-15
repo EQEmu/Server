@@ -5,10 +5,8 @@
 #include "../common/repositories/lootdrop_repository.h"
 #include "../common/repositories/lootdrop_entries_repository.h"
 
-void Zone::BulkLoadLootTables(const std::vector<uint32> &loottable_ids)
+void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 {
-	LogLoot("Loading [{}] loottables", loottable_ids.size());
-
 	// check if table is already loaded
 	for (const auto &e: loottable_ids) {
 		for (const auto &f: m_loottables) {
@@ -74,7 +72,8 @@ void Zone::BulkLoadLootTables(const std::vector<uint32> &loottable_ids)
 
 	// emplace back tables to m_loottables if not exists
 	for (const auto &e: loottables) {
-		bool            has_table = false;
+		bool has_table = false;
+
 		for (const auto &l: m_loottables) {
 			if (e.id == l.id) {
 				has_table = true;
@@ -107,11 +106,15 @@ void Zone::BulkLoadLootTables(const std::vector<uint32> &loottable_ids)
 			}
 		}
 	}
+
+	if (loottable_ids.size() > 1) {
+		LogLoot("Loaded [{}] loottables", m_loottables.size());
+	}
 }
 
 void Zone::LoadLootTable(const uint32 loottable_id)
 {
-	BulkLoadLootTables({loottable_id});
+	LoadLootTables({loottable_id});
 }
 
 void Zone::ClearLootTables()

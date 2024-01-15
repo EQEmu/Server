@@ -17,7 +17,6 @@
 */
 
 #include "../common/global_define.h"
-#include "../common/loottable.h"
 #include "../common/data_verification.h"
 
 #include "client.h"
@@ -136,7 +135,7 @@ void ZoneDatabase::AddLootTableToNPC(
 		}
 	}
 
-	LogInfo("Loaded [{}] Loot Table [{}]", npc->GetCleanName(), loottable_id);
+	LogLootDetail("Loaded [{}] Loot Table [{}]", npc->GetCleanName(), loottable_id);
 }
 
 // Called by AddLootTableToNPC
@@ -155,7 +154,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 
 	if (
 		l.id == 0 ||
-		le.size() == 0 ||
+		le.empty() ||
 		!content_service.DoesPassContentFiltering(content_flags)
 	) {
 		return;
@@ -172,7 +171,6 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 					const EQ::ItemData *database_item = GetItem(e.item_id);
 					npc->AddLootDrop(
 						database_item,
-						item_list,
 						e
 					);
 				}
@@ -236,7 +234,6 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 					if (roll < e.chance) {
 						npc->AddLootDrop(
 							db_item,
-							item_list,
 							e
 						);
 						drops++;
@@ -249,7 +246,6 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 							if (c_roll <= e.chance) {
 								npc->AddLootDrop(
 									db_item,
-									item_list,
 									e
 								);
 							}
@@ -304,7 +300,6 @@ bool NPC::MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntr
 //if itemlist is null, just send wear changes
 void NPC::AddLootDrop(
 	const EQ::ItemData *item2,
-	ItemList *itemlist,
 	LootdropEntriesRepository::LootdropEntries loot_drop,
 	bool wear_change,
 	uint32 augment_one,
@@ -316,10 +311,6 @@ void NPC::AddLootDrop(
 )
 {
 	if (!item2) {
-		return;
-	}
-
-	if (!itemlist && !wear_change) {
 		return;
 	}
 
@@ -530,20 +521,16 @@ void NPC::AddLootDrop(
 		}
 	}
 
-	if (itemlist) {
-		if (found_slot != INVALID_INDEX) {
-			GetInv().PutItem(found_slot, *inst);
-		}
-
-		if (parse->HasQuestSub(GetNPCTypeID(), EVENT_LOOT_ADDED)) {
-			std::vector<std::any> args = { inst };
-			parse->EventNPC(EVENT_LOOT_ADDED, this, nullptr, "", 0, &args);
-		}
-
-		itemlist->push_back(item);
-	} else {
-		safe_delete(item);
+	if (found_slot != INVALID_INDEX) {
+		GetInv().PutItem(found_slot, *inst);
 	}
+
+	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_LOOT_ADDED)) {
+		std::vector<std::any> args = {inst};
+		parse->EventNPC(EVENT_LOOT_ADDED, this, nullptr, "", 0, &args);
+	}
+
+	m_loot_items.push_back(item);
 
 	if (found) {
 		CalcBonuses();
@@ -572,7 +559,7 @@ void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
 	loot_drop_entry.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	loot_drop_entry.item_charges = charges;
 
-	AddLootDrop(item, &itemlist, loot_drop_entry, true);
+	AddLootDrop(item, loot_drop_entry, true);
 }
 
 void NPC::AddItem(
@@ -599,7 +586,6 @@ void NPC::AddItem(
 
 	AddLootDrop(
 		item,
-		&itemlist,
 		loot_drop_entry,
 		true,
 		augment_one,
@@ -614,14 +600,14 @@ void NPC::AddItem(
 void NPC::AddLootTable()
 {
 	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(this, loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this, loottable_id, &m_loot_items, &m_loot_copper, &m_loot_silver, &m_loot_gold, &m_loot_platinum);
 	}
 }
 
 void NPC::AddLootTable(uint32 loottable_id)
 {
 	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(this, loottable_id, &itemlist, &copper, &silver, &gold, &platinum);
+		database.AddLootTableToNPC(this, loottable_id, &m_loot_items, &m_loot_copper, &m_loot_silver, &m_loot_gold, &m_loot_platinum);
 	}
 }
 
@@ -630,7 +616,7 @@ void NPC::CheckGlobalLootTables()
 	const auto& l = zone->GetGlobalLootTables(this);
 
 	for (const auto& e : l) {
-		database.AddLootTableToNPC(this, e, &itemlist, nullptr, nullptr, nullptr, nullptr);
+		database.AddLootTableToNPC(this, e, &m_loot_items, nullptr, nullptr, nullptr, nullptr);
 	}
 }
 

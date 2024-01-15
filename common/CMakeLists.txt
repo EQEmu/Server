@@ -561,7 +561,6 @@ SET(common_headers
     json_config.h
     light_source.h
     linked_list.h
-    loottable.h
     mail_oplist.h
     md5.h
     memory_buffer.h

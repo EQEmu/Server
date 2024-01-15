@@ -41,8 +41,6 @@ struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
 struct NPCFactionList;
 struct FactionAssociations;
-struct LootTable_Struct;
-struct LootDrop_Struct;
 
 
 namespace EQ
@@ -201,19 +199,15 @@ public:
 
 protected:
 
-	std::unique_ptr<EQ::MemoryMappedFile>                             skill_caps_mmf;
-	std::unique_ptr<EQ::MemoryMappedFile>                             items_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>          items_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             faction_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>           faction_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             faction_associations_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>>      faction_associations_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             loot_table_mmf;
-	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             loot_drop_mmf;
-	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>  loot_drop_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             base_data_mmf;
-	std::unique_ptr<EQ::MemoryMappedFile>                             spells_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        skill_caps_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        items_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>        items_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        faction_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>      faction_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        faction_associations_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>> faction_associations_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        base_data_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        spells_mmf;
 
 public:
 	void SetSharedItemsCount(uint32 shared_items_count);

@@ -197,6 +197,7 @@ public:
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
+	// loot
 	void AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item = true);
 	void AddItem(
 		uint32 item_id,
@@ -209,39 +210,36 @@ public:
 		uint32 augment_five = 0,
 		uint32 augment_six = 0
 	);
-	void	AddLootTable();
-	void	AddLootTable(uint32 loottable_id);
-	void	CheckGlobalLootTables();
-	void	DescribeAggro(Client *to_who, Mob *mob, bool verbose);
-	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
-	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
-	void	ClearItemList();
-	inline const ItemList &GetItemList() { return itemlist; }
-	ServerLootItem_Struct*	GetItem(int slot_id);
-	void	AddCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void	RemoveCash();
-	void	QueryLoot(Client* to, bool is_pet_query = false);
-	bool	HasItem(uint32 item_id);
-	uint16	CountItem(uint32 item_id);
-	uint32	GetItemIDBySlot(uint16 loot_slot);
-	uint16	GetFirstSlotByItemID(uint32 item_id);
+	void AddLootTable();
+	void AddLootTable(uint32 loottable_id);
+	void CheckGlobalLootTables();
+	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
+	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
+	void CheckTrivialMinMaxLevelDrop(Mob *killer);
+	void ClearItemList();
+	inline const ItemList &GetLootItems() { return m_loot_items; }
+	ServerLootItem_Struct *GetItem(int slot_id);
+	void AddCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
+	void RemoveCash();
+	void QueryLoot(Client *to, bool is_pet_query = false);
+	bool HasItem(uint32 item_id);
+	uint16 CountItem(uint32 item_id);
+	uint32 GetItemIDBySlot(uint16 loot_slot);
+	uint16 GetFirstSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
-	uint32	CountLoot();
-	inline uint32	GetLoottableID()	const { return loottable_id; }
-	virtual void UpdateEquipmentLight();
+	uint32 CountLoot();
+	inline uint32 GetLoottableID() const { return loottable_id; }
 	inline bool DropsGlobalLoot() const { return !skip_global_loot; }
+	inline uint32 GetCopper() const { return m_loot_copper; }
+	inline uint32 GetSilver() const { return m_loot_silver; }
+	inline uint32 GetGold() const { return m_loot_gold; }
+	inline uint32 GetPlatinum() const { return m_loot_platinum; }
+	inline void SetCopper(uint32 amt) { m_loot_copper = amt; }
+	inline void SetSilver(uint32 amt) { m_loot_silver = amt; }
+	inline void SetGold(uint32 amt) { m_loot_gold = amt; }
+	inline void SetPlatinum(uint32 amt) { m_loot_platinum = amt; }
 
-	inline uint32	GetCopper()		const { return copper; }
-	inline uint32	GetSilver()		const { return silver; }
-	inline uint32	GetGold()		const { return gold; }
-	inline uint32	GetPlatinum()	const { return platinum; }
-
-	inline void	SetCopper(uint32 amt)		{ copper = amt; }
-	inline void	SetSilver(uint32 amt)		{ silver = amt; }
-	inline void	SetGold(uint32 amt)			{ gold = amt; }
-	inline void	SetPlatinum(uint32 amt)		{ platinum = amt; }
-
-
+	virtual void UpdateEquipmentLight();
 	virtual int64 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
 	void SetSpawnGroupId(uint32 sg2){ spawn_group_id =sg2; }
@@ -326,7 +324,6 @@ public:
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,
-		ItemList *itemlist,
 		LootdropEntriesRepository::LootdropEntries loot_drop,
 		bool wear_change = false,
 		uint32 augment_one = 0,
@@ -415,8 +412,6 @@ public:
 	float GetProximityMinZ();
 	float GetProximityMaxZ();
 	bool  IsProximitySet();
-
-	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
 	NPCProximity* proximity;
 	Spawn2*	respawn2;
@@ -569,13 +564,19 @@ protected:
 
 	friend class EntityList;
 	friend class Aura;
-	uint32                        copper;
-	uint32                        silver;
-	uint32                        gold;
-	uint32                        platinum;
-	int32                         grid;
-	uint32                        spawn_group_id;
-	uint16                        wp_m;
+
+	std::list<struct NPCFaction *> faction_list;
+
+	int32  grid;
+	uint32 spawn_group_id;
+	uint16 wp_m;
+
+	// loot
+	uint32   m_loot_copper;
+	uint32   m_loot_silver;
+	uint32   m_loot_gold;
+	uint32   m_loot_platinum;
+	ItemList m_loot_items;
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 

@@ -1992,7 +1992,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		zone->LoadNPCFactionAssociations(npc_faction_ids);
 	}
 
-	zone->BulkLoadLootTables(loottable_ids);
+	zone->LoadLootTables(loottable_ids);
 
 	return npc;
 }

@@ -30,7 +30,6 @@
 #include "features.h"
 #include "ipc_mutex.h"
 #include "inventory_profile.h"
-#include "loottable.h"
 #include "memory_mapped_file.h"
 #include "mysql.h"
 #include "rulesys.h"

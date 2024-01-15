@@ -431,7 +431,7 @@ public:
 
 	// loot
 	void LoadLootTable(const uint32 loottable_id);
-	void BulkLoadLootTables(const std::vector<uint32>& loottable_ids);
+	void LoadLootTables(const std::vector<uint32>& loottable_ids);
 	void ClearLootTables();
 	LoottableRepository::Loottable *GetLootTable(const uint32 loottable_id);
 	std::vector<LoottableEntriesRepository::LoottableEntries> GetLootTableEntries(const uint32 loottable_id) const;
