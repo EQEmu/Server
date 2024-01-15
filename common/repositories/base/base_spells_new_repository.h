@@ -227,7 +227,7 @@ public:
 		int32_t     no_block;
 		int32_t     field206;
 		int32_t     spellgroup;
-		int32_t     rank;
+		int32_t     rank_;
 		int32_t     field209;
 		int32_t     field210;
 		int32_t     CastRestriction;
@@ -474,7 +474,7 @@ public:
 			"no_block",
 			"field206",
 			"spellgroup",
-			"rank",
+			"`rank`",
 			"field209",
 			"field210",
 			"CastRestriction",
@@ -717,7 +717,7 @@ public:
 			"no_block",
 			"field206",
 			"spellgroup",
-			"rank",
+			"`rank`",
 			"field209",
 			"field210",
 			"CastRestriction",
@@ -994,7 +994,7 @@ public:
 		e.no_block             = 0;
 		e.field206             = -1;
 		e.spellgroup           = 0;
-		e.rank                 = 0;
+		e.rank_                = 0;
 		e.field209             = 0;
 		e.field210             = 1;
 		e.CastRestriction      = 0;
@@ -1267,7 +1267,7 @@ public:
 			e.no_block             = row[205] ? static_cast<int32_t>(atoi(row[205])) : 0;
 			e.field206             = row[206] ? static_cast<int32_t>(atoi(row[206])) : -1;
 			e.spellgroup           = row[207] ? static_cast<int32_t>(atoi(row[207])) : 0;
-			e.rank                 = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.rank_                = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
 			e.field209             = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
 			e.field210             = row[210] ? static_cast<int32_t>(atoi(row[210])) : 1;
 			e.CastRestriction      = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
@@ -1537,7 +1537,7 @@ public:
 		v.push_back(columns[205] + " = " + std::to_string(e.no_block));
 		v.push_back(columns[206] + " = " + std::to_string(e.field206));
 		v.push_back(columns[207] + " = " + std::to_string(e.spellgroup));
-		v.push_back(columns[208] + " = " + std::to_string(e.rank));
+		v.push_back(columns[208] + " = " + std::to_string(e.rank_));
 		v.push_back(columns[209] + " = " + std::to_string(e.field209));
 		v.push_back(columns[210] + " = " + std::to_string(e.field210));
 		v.push_back(columns[211] + " = " + std::to_string(e.CastRestriction));
@@ -1795,7 +1795,7 @@ public:
 		v.push_back(std::to_string(e.no_block));
 		v.push_back(std::to_string(e.field206));
 		v.push_back(std::to_string(e.spellgroup));
-		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.rank_));
 		v.push_back(std::to_string(e.field209));
 		v.push_back(std::to_string(e.field210));
 		v.push_back(std::to_string(e.CastRestriction));
@@ -2061,7 +2061,7 @@ public:
 			v.push_back(std::to_string(e.no_block));
 			v.push_back(std::to_string(e.field206));
 			v.push_back(std::to_string(e.spellgroup));
-			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.rank_));
 			v.push_back(std::to_string(e.field209));
 			v.push_back(std::to_string(e.field210));
 			v.push_back(std::to_string(e.CastRestriction));
@@ -2331,7 +2331,7 @@ public:
 			e.no_block             = row[205] ? static_cast<int32_t>(atoi(row[205])) : 0;
 			e.field206             = row[206] ? static_cast<int32_t>(atoi(row[206])) : -1;
 			e.spellgroup           = row[207] ? static_cast<int32_t>(atoi(row[207])) : 0;
-			e.rank                 = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.rank_                = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
 			e.field209             = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
 			e.field210             = row[210] ? static_cast<int32_t>(atoi(row[210])) : 1;
 			e.CastRestriction      = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
@@ -2592,7 +2592,7 @@ public:
 			e.no_block             = row[205] ? static_cast<int32_t>(atoi(row[205])) : 0;
 			e.field206             = row[206] ? static_cast<int32_t>(atoi(row[206])) : -1;
 			e.spellgroup           = row[207] ? static_cast<int32_t>(atoi(row[207])) : 0;
-			e.rank                 = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.rank_                = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
 			e.field209             = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
 			e.field210             = row[210] ? static_cast<int32_t>(atoi(row[210])) : 1;
 			e.CastRestriction      = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
@@ -2903,7 +2903,7 @@ public:
 		v.push_back(std::to_string(e.no_block));
 		v.push_back(std::to_string(e.field206));
 		v.push_back(std::to_string(e.spellgroup));
-		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.rank_));
 		v.push_back(std::to_string(e.field209));
 		v.push_back(std::to_string(e.field210));
 		v.push_back(std::to_string(e.CastRestriction));
@@ -3162,7 +3162,7 @@ public:
 			v.push_back(std::to_string(e.no_block));
 			v.push_back(std::to_string(e.field206));
 			v.push_back(std::to_string(e.spellgroup));
-			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.rank_));
 			v.push_back(std::to_string(e.field209));
 			v.push_back(std::to_string(e.field210));
 			v.push_back(std::to_string(e.CastRestriction));

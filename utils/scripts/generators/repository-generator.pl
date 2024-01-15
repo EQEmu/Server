@@ -599,6 +599,7 @@ sub get_reserved_cpp_variable_names
         "class",
         "int",
         "key",
+        "rank",
         "range"
     );
 }
