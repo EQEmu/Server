@@ -34,29 +34,18 @@
 #define snprintf	_snprintf
 #endif
 
-// Queries the loottable: adds item & coin to the npc
-void ZoneDatabase::AddLootTableToNPC(
-	NPC *npc,
-	uint32 loottable_id,
-	ItemList *itemlist,
-	uint32 *copper,
-	uint32 *silver,
-	uint32 *gold,
-	uint32 *plat
-)
+void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 {
-	const bool is_global = (
-		copper == nullptr &&
-		silver == nullptr &&
-		gold == nullptr &&
-		plat == nullptr
-	);
+	// check if it's a GM spawn
+	if (!npctype_id) {
+		return;
+	}
 
 	if (!is_global) {
-		*copper = 0;
-		*silver = 0;
-		*gold   = 0;
-		*plat   = 0;
+		m_loot_copper   = 0;
+		m_loot_silver   = 0;
+		m_loot_gold     = 0;
+		m_loot_platinum = 0;
 	}
 
 	zone->LoadLootTable(loottable_id);
@@ -87,13 +76,9 @@ void ZoneDatabase::AddLootTableToNPC(
 
 	uint32 cash = 0;
 	if (!is_global) {
-		if (
-			max_cash > 0 &&
-			l->avgcoin > 0 &&
-			EQ::ValueWithin(l->avgcoin, min_cash, max_cash)
-			) {
-			const float upper_chance  =
-							static_cast<float>(l->avgcoin - min_cash) / static_cast<float>(max_cash - min_cash);
+		if (max_cash > 0 && l->avgcoin > 0 && EQ::ValueWithin(l->avgcoin, min_cash, max_cash)) {
+			const float upper_chance  = static_cast<float>(l->avgcoin - min_cash) /
+										static_cast<float>(max_cash - min_cash);
 			const float avg_cash_roll = static_cast<float>(zone->random.Real(0.0, 1.0));
 
 			if (avg_cash_roll < upper_chance) {
@@ -109,16 +94,16 @@ void ZoneDatabase::AddLootTableToNPC(
 	}
 
 	if (cash != 0) {
-		*plat = cash / 1000;
-		cash -= *plat * 1000;
+		m_loot_platinum = cash / 1000;
+		cash -= m_loot_platinum * 1000;
 
-		*gold = cash / 100;
-		cash -= *gold * 100;
+		m_loot_gold = cash / 100;
+		cash -= m_loot_gold * 100;
 
-		*silver = cash / 10;
-		cash -= *silver * 10;
+		m_loot_silver = cash / 10;
+		cash -= m_loot_silver * 10;
 
-		*copper = cash;
+		m_loot_copper = cash;
 	}
 
 	const uint32 global_loot_multiplier = RuleI(Zone, GlobalLootMultiplier);
@@ -134,17 +119,15 @@ void ZoneDatabase::AddLootTableToNPC(
 			}
 
 			if (probability != 0.0 && (probability == 100.0 || drop_chance <= probability)) {
-				AddLootDropToNPC(npc, lte.lootdrop_id, itemlist, drop_limit, minimum_drop);
+				AddLootDropTable(lte.lootdrop_id, drop_limit, minimum_drop);
 			}
 		}
 	}
 
-	LogLootDetail("Loaded [{}] Loot Table [{}]", npc->GetCleanName(), loottable_id);
+	LogLootDetail("Loaded [{}] Loot Table [{}]", GetCleanName(), loottable_id);
 }
 
-// Called by AddLootTableToNPC
-// maxdrops = size of the array npcd
-void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item_list, uint8 droplimit, uint8 mindrop)
+void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop)
 {
 	const auto l  = zone->GetLootdrop(lootdrop_id);
 	const auto le = zone->GetLootdropEntries(lootdrop_id);
@@ -156,11 +139,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		.content_flags_disabled = l.content_flags_disabled
 	};
 
-	if (
-		l.id == 0 ||
-		le.empty() ||
-		!content_service.DoesPassContentFiltering(content_flags)
-		) {
+	if (l.id == 0 || le.empty() || !content_service.DoesPassContentFiltering(content_flags)) {
 		return;
 	}
 
@@ -168,15 +147,9 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	if (droplimit == 0 && mindrop == 0) {
 		for (const auto &e: le) {
 			for (int j = 0; j < e.multiplier; ++j) {
-				if (
-					zone->random.Real(0.0, 100.0) <= e.chance &&
-					npc->MeetsLootDropLevelRequirements(e, true)
-					) {
-					const EQ::ItemData *database_item = GetItem(e.item_id);
-					npc->AddLootDrop(
-						database_item,
-						e
-					);
+				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
+					const EQ::ItemData *database_item = database.GetItem(e.item_id);
+					AddLootDrop(database_item, e);
 				}
 			}
 		}
@@ -198,8 +171,8 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool  active_item_list         = false;
 
 	for (const auto &e: le) {
-		const EQ::ItemData *db_item = GetItem(e.item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(e)) {
+		const EQ::ItemData *db_item = database.GetItem(e.item_id);
+		if (db_item && MeetsLootDropLevelRequirements(e)) {
 			roll_t += e.chance;
 
 			if (e.chance >= 100) {
@@ -227,20 +200,17 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	// translate above for loop using l and le
 	for (int i = 0; i < droplimit; ++i) {
 		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
-			float roll = (float) zone->random.Real(0.0, roll_t);
+			float           roll = (float) zone->random.Real(0.0, roll_t);
 			for (const auto &e: le) {
-				const auto *db_item = GetItem(e.item_id);
+				const auto *db_item = database.GetItem(e.item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
-					if (!npc->MeetsLootDropLevelRequirements(e)) {
+					if (!MeetsLootDropLevelRequirements(e)) {
 						continue;
 					}
 
 					if (roll < e.chance) {
-						npc->AddLootDrop(
-							db_item,
-							e
-						);
+						AddLootDrop(db_item, e);
 						drops++;
 
 						uint8 charges = e.multiplier;
@@ -249,10 +219,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 						for (int k = 1; k < charges; ++k) {
 							float c_roll = static_cast<float>(zone->random.Real(0.0, 100.0));
 							if (c_roll <= e.chance) {
-								npc->AddLootDrop(
-									db_item,
-									e
-								);
+								AddLootDrop(db_item, e);
 							}
 						}
 
@@ -266,10 +233,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		}
 	}
 
-	npc->UpdateEquipmentLight();
-	// no wearchange associated with this function..so, this should not be needed
-	//if (npc->UpdateActiveLightValue())
-	//	npc->SendAppearancePacket(AppearanceType::Light, npc->GetActiveLightValue());
+	UpdateEquipmentLight();
 }
 
 bool NPC::MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntries loot_drop, bool verbose)
@@ -571,12 +535,12 @@ void NPC::AddLootDrop(
 
 void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
 {
-	auto loot_drop_entry = LootdropEntriesRepository::NewEntity();
+	auto l = LootdropEntriesRepository::NewEntity();
 
-	loot_drop_entry.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
-	loot_drop_entry.item_charges = charges;
+	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
+	l.item_charges = charges;
 
-	AddLootDrop(item, loot_drop_entry, true);
+	AddLootDrop(item, l, true);
 }
 
 void NPC::AddItem(
@@ -596,14 +560,14 @@ void NPC::AddItem(
 		return;
 	}
 
-	auto loot_drop_entry = LootdropEntriesRepository::NewEntity();
+	auto l = LootdropEntriesRepository::NewEntity();
 
-	loot_drop_entry.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
-	loot_drop_entry.item_charges = charges;
+	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
+	l.item_charges = charges;
 
 	AddLootDrop(
 		item,
-		loot_drop_entry,
+		l,
 		true,
 		augment_one,
 		augment_two,
@@ -616,32 +580,7 @@ void NPC::AddItem(
 
 void NPC::AddLootTable()
 {
-	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(
-			this,
-			loottable_id,
-			&m_loot_items,
-			&m_loot_copper,
-			&m_loot_silver,
-			&m_loot_gold,
-			&m_loot_platinum
-		);
-	}
-}
-
-void NPC::AddLootTable(uint32 loottable_id)
-{
-	if (npctype_id != 0) { // check if it's a GM spawn
-		database.AddLootTableToNPC(
-			this,
-			loottable_id,
-			&m_loot_items,
-			&m_loot_copper,
-			&m_loot_silver,
-			&m_loot_gold,
-			&m_loot_platinum
-		);
-	}
+	AddLootTable(m_loottable_id);
 }
 
 void NPC::CheckGlobalLootTables()
@@ -649,7 +588,7 @@ void NPC::CheckGlobalLootTables()
 	const auto &l = zone->GetGlobalLootTables(this);
 
 	for (const auto &e: l) {
-		database.AddLootTableToNPC(this, e, &m_loot_items, nullptr, nullptr, nullptr, nullptr);
+		AddLootTable(e, true);
 	}
 }
 

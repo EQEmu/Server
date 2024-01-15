@@ -211,7 +211,8 @@ public:
 		uint32 augment_six = 0
 	);
 	void AddLootTable();
-	void AddLootTable(uint32 loottable_id);
+	void AddLootTable(uint32 loottable_id, bool is_global = false);
+	void AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop);
 	void CheckGlobalLootTables();
 	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
@@ -228,8 +229,8 @@ public:
 	uint16 GetFirstSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
 	uint32 CountLoot();
-	inline uint32 GetLoottableID() const { return loottable_id; }
-	inline bool DropsGlobalLoot() const { return !skip_global_loot; }
+	inline uint32 GetLoottableID() const { return m_loottable_id; }
+	inline bool DropsGlobalLoot() const { return !m_skip_global_loot; }
 	inline uint32 GetCopper() const { return m_loot_copper; }
 	inline uint32 GetSilver() const { return m_loot_silver; }
 	inline uint32 GetGold() const { return m_loot_gold; }
@@ -538,13 +539,13 @@ public:
 	inline bool GetAlwaysAggro() { return always_aggro; }
 	inline bool GetNPCAggro() { return npc_aggro; }
 	inline bool GetIgnoreDespawn() { return ignore_despawn; }
-	inline bool GetSkipGlobalLoot() { return skip_global_loot; }
+	inline bool GetSkipGlobalLoot() { return m_skip_global_loot; }
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
 	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
 
-	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
+	inline bool IsSkipAutoScale() const { return m_skip_auto_scale; }
 
 	void ScaleNPC(uint8 npc_level, bool always_scale = false, bool override_special_abilities = false);
 
@@ -700,9 +701,9 @@ protected:
 
 
 private:
-	uint32              loottable_id;
-	bool                skip_global_loot;
-	bool                skip_auto_scale;
+	uint32              m_loottable_id;
+	bool                m_skip_global_loot;
+	bool                m_skip_auto_scale;
 	bool                p_depop;
 	bool                m_record_loot_stats;
 	std::vector<uint32> m_rolled_items = {};

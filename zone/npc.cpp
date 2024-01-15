@@ -282,11 +282,11 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	m_roambox.delay     = 1000;
 	m_roambox.min_delay = 1000;
 
-	p_depop               = false;
-	loottable_id          = npc_type_data->loottable_id;
-	skip_global_loot      = npc_type_data->skip_global_loot;
-	skip_auto_scale       = npc_type_data->skip_auto_scale;
-	rare_spawn            = npc_type_data->rare_spawn;
+	p_depop          = false;
+	m_loottable_id     = npc_type_data->loottable_id;
+	m_skip_global_loot = npc_type_data->skip_global_loot;
+	m_skip_auto_scale  = npc_type_data->skip_auto_scale;
+	rare_spawn         = npc_type_data->rare_spawn;
 	no_target_hotkey      = npc_type_data->no_target_hotkey;
 	primary_faction       = 0;
 	faction_amount        = npc_type_data->faction_amount;
@@ -2394,7 +2394,7 @@ void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 		return;
 	}
 	else if (stat_lower == "loottable_id") {
-		loottable_id = Strings::ToFloat(value);
+		m_loottable_id = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "healscale") {
@@ -2542,7 +2542,7 @@ float NPC::GetNPCStat(const std::string& stat)
 		return slow_mitigation;
 	}
 	else if (stat_lower == "loottable_id") {
-		return loottable_id;
+		return m_loottable_id;
 	}
 	else if (stat_lower == "healscale") {
 		return healscale;
@@ -2597,7 +2597,7 @@ void NPC::LevelScale() {
 	if (RuleB(NPC, NewLevelScaling)) {
 		if (scalerate == 0 || maxlevel <= 25) {
 			// Don't add HP to dynamically scaled NPCs since this will be calculated later
-			if (max_hp > 0 || skip_auto_scale)
+			if (max_hp > 0 || m_skip_auto_scale)
 			{
 				// pre-pop seems to scale by 20 HP increments while newer by 100
 				// We also don't want 100 increments on newer noobie zones, check level
@@ -2613,7 +2613,7 @@ void NPC::LevelScale() {
 			}
 
 			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
-			if (max_dmg > 0  || skip_auto_scale)
+			if (max_dmg > 0 || m_skip_auto_scale)
 			{
 				max_dmg += (random_level - level) * 2;
 			}
