@@ -5229,7 +5229,7 @@ ALTER TABLE `merchantlist_temp`
 		.condition = "not_empty",
 		.match = "",
 		.sql = R"(
-DROP TABLE item_tick
+DROP TABLE IF EXISTS item_tick
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
