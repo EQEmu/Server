@@ -20,7 +20,7 @@ class BaseGuildRanksRepository {
 public:
 	struct GuildRanks {
 		uint32_t    guild_id;
-		uint8_t     rank;
+		uint8_t     rank_;
 		std::string title;
 	};
 
@@ -33,7 +33,7 @@ public:
 	{
 		return {
 			"guild_id",
-			"rank",
+			"`rank`",
 			"title",
 		};
 	}
@@ -42,7 +42,7 @@ public:
 	{
 		return {
 			"guild_id",
-			"rank",
+			"`rank`",
 			"title",
 		};
 	}
@@ -85,7 +85,7 @@ public:
 		GuildRanks e{};
 
 		e.guild_id = 0;
-		e.rank     = 0;
+		e.rank_    = 0;
 		e.title    = "";
 
 		return e;
@@ -124,7 +124,7 @@ public:
 			GuildRanks e{};
 
 			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.rank     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.title    = row[2] ? row[2] : "";
 
 			return e;
@@ -160,7 +160,7 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[0] + " = " + std::to_string(e.guild_id));
-		v.push_back(columns[1] + " = " + std::to_string(e.rank));
+		v.push_back(columns[1] + " = " + std::to_string(e.rank_));
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
 
 		auto results = db.QueryDatabase(
@@ -184,7 +184,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.rank_));
 		v.push_back("'" + Strings::Escape(e.title) + "'");
 
 		auto results = db.QueryDatabase(
@@ -216,7 +216,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.guild_id));
-			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.rank_));
 			v.push_back("'" + Strings::Escape(e.title) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -252,7 +252,7 @@ public:
 			GuildRanks e{};
 
 			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.rank     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.title    = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -279,7 +279,7 @@ public:
 			GuildRanks e{};
 
 			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.rank     = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.title    = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -356,7 +356,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.guild_id));
-		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.rank_));
 		v.push_back("'" + Strings::Escape(e.title) + "'");
 
 		auto results = db.QueryDatabase(
@@ -381,7 +381,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.guild_id));
-			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.rank_));
 			v.push_back("'" + Strings::Escape(e.title) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
