@@ -3806,7 +3806,7 @@ bool Mob::SpellOnTarget(
 	LogSpells("Casting spell [{}] on [{}] with effective caster level [{}]", spell_id, spelltar->GetName(), caster_level);
 
 	if (IsOfClientBotMerc() && (IsDiscipline(spell_id) || spells[spell_id].is_discipline)) {
-		entity_list.MessageClose(this, false, 200, 0, fmt::format("{}{}", GetCleanName(), spells[spell_id].cast_on_other).c_str());
+		entity_list.MessageClose(this, false, 200, 0, fmt::format("{}{}", spelltar->GetCleanName(), spells[spell_id].cast_on_other).c_str());
 	}
 
 	// Actual cast action - this causes the caster animation and the particles
