@@ -1858,7 +1858,7 @@ uint32 Corpse::GetItemIDBySlot(uint16 loot_slot) {
 	return 0;
 }
 
-uint16 Corpse::GetFirstSlotByItemID(uint32 item_id) {
+uint16 Corpse::GetFirstLootSlotByItemID(uint32 item_id) {
 	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
 		LootItem * loot_item = *current_item;
 		if (loot_item->item_id == item_id) {

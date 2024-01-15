@@ -603,16 +603,16 @@ uint16 Lua_NPC::CountItem(uint32 item_id)
 	return self->CountItem(item_id);
 }
 
-uint32 Lua_NPC::GetItemIDBySlot(uint16 loot_slot)
+uint32 Lua_NPC::GetLootItemIDBySlot(uint16 loot_slot)
 {
 	Lua_Safe_Call_Int();
-	return self->GetItemIDBySlot(loot_slot);
+	return self->GetLootItemIDBySlot(loot_slot);
 }
 
-uint16 Lua_NPC::GetFirstSlotByItemID(uint32 item_id)
+uint16 Lua_NPC::GetFirstLootSlotByItemID(uint32 item_id)
 {
 	Lua_Safe_Call_Int();
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 float Lua_NPC::GetHealScale()
@@ -863,7 +863,7 @@ luabind::scope lua_register_npc() {
 	.def("GetBucketExpires", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketExpires)
 	.def("GetBucketRemaining", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketRemaining)
 	.def("GetCopper", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetCopper)
-	.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstSlotByItemID)
+	.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstLootSlotByItemID)
 	.def("GetFollowCanRun", (bool(Lua_NPC::*)(void))&Lua_NPC::GetFollowCanRun)
 	.def("GetFollowDistance", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowDistance)
 	.def("GetFollowID", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowID)
@@ -873,7 +873,7 @@ luabind::scope lua_register_npc() {
 	.def("GetGuardPointY", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointY)
 	.def("GetGuardPointZ", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointZ)
 	.def("GetHealScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetHealScale)
-	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16))&Lua_NPC::GetItemIDBySlot)
+	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16)) &Lua_NPC::GetLootItemIDBySlot)
 	.def("GetKeepsSoldItems", (bool(Lua_NPC::*)(void))&Lua_NPC::GetKeepsSoldItems)
 	.def("GetLootList", (Lua_NPC_Loot_List(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList)
 	.def("GetLoottableID", (int(Lua_NPC::*)(void))&Lua_NPC::GetLoottableID)

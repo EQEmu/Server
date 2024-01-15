@@ -147,8 +147,8 @@ public:
 	void ClearLastName();
 	bool HasItem(uint32 item_id);
 	uint16 CountItem(uint32 item_id);
-	uint32 GetItemIDBySlot(uint16 slot_id);
-	uint16 GetFirstSlotByItemID(uint32 item_id);
+	uint32 GetLootItemIDBySlot(uint16 loot_slot);
+	uint16 GetFirstLootSlotByItemID(uint32 item_id);
 	float GetHealScale();
 	float GetSpellScale();
 	Lua_NPC_Loot_List GetLootList(lua_State* L);

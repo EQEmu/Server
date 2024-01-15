@@ -212,9 +212,8 @@ public:
 	);
 	void AddLootTable();
 	void AddLootTable(uint32 loottable_id, bool is_global = false);
-	void AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop);
+	void AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop);
 	void CheckGlobalLootTables();
-	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void ClearItemList();
@@ -225,8 +224,8 @@ public:
 	void QueryLoot(Client *to, bool is_pet_query = false);
 	bool HasItem(uint32 item_id);
 	uint16 CountItem(uint32 item_id);
-	uint32 GetItemIDBySlot(uint16 loot_slot);
-	uint16 GetFirstSlotByItemID(uint32 item_id);
+	uint32 GetLootItemIDBySlot(uint16 loot_slot);
+	uint16 GetFirstLootSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
 	uint32 CountLoot();
 	inline uint32 GetLoottableID() const { return m_loottable_id; }
@@ -240,6 +239,7 @@ public:
 	inline void SetGold(uint32 amt) { m_loot_gold = amt; }
 	inline void SetPlatinum(uint32 amt) { m_loot_platinum = amt; }
 
+	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	virtual void UpdateEquipmentLight();
 	virtual int64 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }

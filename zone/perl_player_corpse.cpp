@@ -166,14 +166,14 @@ int Perl_Corpse_CountItem(Corpse* self, uint32_t item_id) // @categories Script 
 	return self->CountItem(item_id);
 }
 
-uint32_t Perl_Corpse_GetItemIDBySlot(Corpse* self, uint16_t loot_slot) // @categories Script Utility
+uint32_t Perl_Corpse_GetLootItemIDBySlot(Corpse* self, uint16_t loot_slot) // @categories Script Utility
 {
 	return self->GetItemIDBySlot(loot_slot);
 }
 
-int Perl_Corpse_GetFirstSlotByItemID(Corpse* self, uint32_t item_id) // @categories Script Utility
+int Perl_Corpse_GetFirstLootSlotByItemID(Corpse* self, uint32_t item_id) // @categories Script Utility
 {
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 void Perl_Corpse_RemoveItemByID(Corpse* self, uint32_t item_id) // @categories Script Utility
@@ -219,9 +219,9 @@ void perl_register_corpse()
 	package.add("GetCopper", &Perl_Corpse_GetCopper);
 	package.add("GetDBID", &Perl_Corpse_GetDBID);
 	package.add("GetDecayTime", &Perl_Corpse_GetDecayTime);
-	package.add("GetFirstSlotByItemID", &Perl_Corpse_GetFirstSlotByItemID);
+	package.add("GetFirstSlotByItemID", &Perl_Corpse_GetFirstLootSlotByItemID);
 	package.add("GetGold", &Perl_Corpse_GetGold);
-	package.add("GetItemIDBySlot", &Perl_Corpse_GetItemIDBySlot);
+	package.add("GetItemIDBySlot", &Perl_Corpse_GetLootItemIDBySlot);
 	package.add("GetLootList", &Perl_Corpse_GetLootList);
 	package.add("GetOwnerName", &Perl_Corpse_GetOwnerName);
 	package.add("GetPlatinum", &Perl_Corpse_GetPlatinum);

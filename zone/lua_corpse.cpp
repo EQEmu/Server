@@ -187,9 +187,9 @@ uint32 Lua_Corpse::GetItemIDBySlot(uint16 loot_slot) {
 	return self->GetItemIDBySlot(loot_slot);
 }
 
-uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
+uint16 Lua_Corpse::GetFirstLootSlotByItemID(uint32 item_id) {
 	Lua_Safe_Call_Int();
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 void Lua_Corpse::RemoveItemByID(uint32 item_id) {
@@ -234,7 +234,7 @@ luabind::scope lua_register_corpse() {
 	.def("GetCopper", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetCopper)
 	.def("GetDBID", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetDBID)
 	.def("GetDecayTime", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetDecayTime)
-	.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID)
+	.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstLootSlotByItemID)
 	.def("GetGold", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetGold)
 	.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
 	.def("GetLootList", (Lua_Corpse_Loot_List(Lua_Corpse::*)(lua_State* L))&Lua_Corpse::GetLootList)

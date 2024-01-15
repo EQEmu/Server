@@ -1,21 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
 #include "../common/global_define.h"
 #include "../common/data_verification.h"
 
@@ -127,7 +109,7 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 	LogLootDetail("Loaded [{}] Loot Table [{}]", GetCleanName(), loottable_id);
 }
 
-void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop)
+void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 {
 	const auto l  = zone->GetLootdrop(lootdrop_id);
 	const auto le = zone->GetLootdropEntries(lootdrop_id);
@@ -144,7 +126,7 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop)
 	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
-	if (droplimit == 0 && mindrop == 0) {
+	if (drop_limit == 0 && min_drop == 0) {
 		for (const auto &e: le) {
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
@@ -157,12 +139,12 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop)
 		return;
 	}
 
-	if (le.size() > 100 && droplimit == 0) {
-		droplimit = 10;
+	if (le.size() > 100 && drop_limit == 0) {
+		drop_limit = 10;
 	}
 
-	if (droplimit < mindrop) {
-		droplimit = mindrop;
+	if (drop_limit < min_drop) {
+		drop_limit = min_drop;
 	}
 
 	float roll_t                   = 0.0f;
@@ -198,8 +180,8 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 droplimit, uint8 mindrop)
 	int drops = 0;
 
 	// translate above for loop using l and le
-	for (int i = 0; i < droplimit; ++i) {
-		if (drops < mindrop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
+	for (int i = 0; i < drop_limit; ++i) {
+		if (drops < min_drop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float           roll = (float) zone->random.Real(0.0, roll_t);
 			for (const auto &e: le) {
 				const auto *db_item = database.GetItem(e.item_id);
@@ -369,19 +351,12 @@ void NPC::AddLootDrop(
 		// it is an improvement.
 
 		if (!item2->NoPet) {
-			for (
-				int i = EQ::invslot::EQUIPMENT_BEGIN;
-				!found && i <= EQ::invslot::EQUIPMENT_END;
-				i++
-				) {
+			for (int i = EQ::invslot::EQUIPMENT_BEGIN; !found && i <= EQ::invslot::EQUIPMENT_END; i++) {
 				const uint32 slots = (1 << i);
 				if (item2->Slots & slots) {
 					if (equipment[i]) {
 						compitem = database.GetItem(equipment[i]);
-						if (
-							item2->AC > compitem->AC ||
-							(item2->AC == compitem->AC && item2->HP > compitem->HP)
-							) {
+						if (item2->AC > compitem->AC || (item2->AC == compitem->AC && item2->HP > compitem->HP)) {
 							// item would be an upgrade
 							// check if we're multi-slot, if yes then we have to keep
 							// looking in case any of the other slots we can fit into are empty.
@@ -586,7 +561,6 @@ void NPC::AddLootTable()
 void NPC::CheckGlobalLootTables()
 {
 	const auto &l = zone->GetGlobalLootTables(this);
-
 	for (const auto &e: l) {
 		AddLootTable(e, true);
 	}
@@ -788,16 +762,17 @@ void NPC::QueryLoot(Client *to, bool is_pet_query)
 			);
 		}
 
-		int       item_count = 0;
+		int item_count = 0;
+
 		for (auto current_item: m_loot_items) {
 			int item_number = (item_count + 1);
 			if (!current_item) {
-				LogError("NPC::QueryLoot() - ItemList error, null item.");
+				LogError("ItemList error, null item.");
 				continue;
 			}
 
 			if (!current_item->item_id || !database.GetItem(current_item->item_id)) {
-				LogError("NPC::QueryLoot() - Database error, invalid item.");
+				LogError("Database error, invalid item.");
 				continue;
 			}
 
@@ -827,12 +802,7 @@ void NPC::QueryLoot(Client *to, bool is_pet_query)
 	}
 
 	if (!is_pet_query) {
-		if (
-			m_loot_platinum ||
-			m_loot_gold ||
-			m_loot_silver ||
-			m_loot_copper
-			) {
+		if (m_loot_platinum || m_loot_gold || m_loot_silver || m_loot_copper) {
 			to->Message(
 				Chat::White,
 				fmt::format(
@@ -898,7 +868,7 @@ uint16 NPC::CountItem(uint32 item_id)
 	return item_count;
 }
 
-uint32 NPC::GetItemIDBySlot(uint16 loot_slot)
+uint32 NPC::GetLootItemIDBySlot(uint16 loot_slot)
 {
 	for (auto loot_item: m_loot_items) {
 		if (loot_item->lootslot == loot_slot) {
@@ -908,7 +878,7 @@ uint32 NPC::GetItemIDBySlot(uint16 loot_slot)
 	return 0;
 }
 
-uint16 NPC::GetFirstSlotByItemID(uint32 item_id)
+uint16 NPC::GetFirstLootSlotByItemID(uint32 item_id)
 {
 	for (auto loot_item: m_loot_items) {
 		if (loot_item->item_id == item_id) {

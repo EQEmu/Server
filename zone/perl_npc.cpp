@@ -620,14 +620,14 @@ int Perl_NPC_CountItem(NPC* self, uint32 item_id)
 	return self->CountItem(item_id);
 }
 
-uint32_t Perl_NPC_GetItemIDBySlot(NPC* self, uint16 loot_slot)
+uint32_t Perl_NPC_GetLootItemIDBySlot(NPC* self, uint16 loot_slot)
 {
-	return self->GetItemIDBySlot(loot_slot);
+	return self->GetLootItemIDBySlot(loot_slot);
 }
 
-int Perl_NPC_GetFirstSlotByItemID(NPC* self, uint32 item_id)
+int Perl_NPC_GetFirstLootSlotByItemID(NPC* self, uint32 item_id)
 {
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 float Perl_NPC_GetHealScale(NPC* self) // @categories Stats and Attributes
@@ -830,14 +830,14 @@ void perl_register_npc()
 	package.add("GetAvoidanceRating", &Perl_NPC_GetAvoidanceRating);
 	package.add("GetCombatState", &Perl_NPC_GetCombatState);
 	package.add("GetCopper", &Perl_NPC_GetCopper);
-	package.add("GetFirstSlotByItemID", &Perl_NPC_GetFirstSlotByItemID);
+	package.add("GetFirstSlotByItemID", &Perl_NPC_GetFirstLootSlotByItemID);
 	package.add("GetGold", &Perl_NPC_GetGold);
 	package.add("GetGrid", &Perl_NPC_GetGrid);
 	package.add("GetGuardPointX", &Perl_NPC_GetGuardPointX);
 	package.add("GetGuardPointY", &Perl_NPC_GetGuardPointY);
 	package.add("GetGuardPointZ", &Perl_NPC_GetGuardPointZ);
 	package.add("GetHealScale", &Perl_NPC_GetHealScale);
-	package.add("GetItemIDBySlot", &Perl_NPC_GetItemIDBySlot);
+	package.add("GetItemIDBySlot", &Perl_NPC_GetLootItemIDBySlot);
 	package.add("GetKeepsSoldItems", &Perl_NPC_GetKeepsSoldItems);
 	package.add("GetLDoNLockedSkill", &Perl_NPC_GetLDoNLockedSkill);
 	package.add("GetLDoNTrapType", &Perl_NPC_GetLDoNTrapType);
