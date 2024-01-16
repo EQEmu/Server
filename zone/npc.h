@@ -573,9 +573,9 @@ protected:
 	uint16 wp_m;
 
 	// loot
-	uint32   m_loot_copper;
-	uint32   m_loot_silver;
-	uint32   m_loot_gold;
+	uint32    m_loot_copper;
+	uint32    m_loot_silver;
+	uint32    m_loot_gold;
 	uint32    m_loot_platinum;
 	LootItems m_loot_items;
 
