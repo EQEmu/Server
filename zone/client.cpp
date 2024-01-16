@@ -11118,6 +11118,16 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
+	auto loot_link = Saylink::Silent("#reload loot");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Loot globally",
+			loot_link
+		).c_str()
+	);
+
 	auto merchants_link = Saylink::Silent("#reload merchants");
 
 	Message(

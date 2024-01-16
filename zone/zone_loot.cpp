@@ -11,14 +11,14 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	for (const auto &e: loottable_ids) {
 		for (const auto &f: m_loottables) {
 			if (e == f.id) {
-				LogLoot("Loottable [{}] already loaded", e);
+				LogLootDetail("Loottable [{}] already loaded", e);
 				return;
 			}
 		}
 	}
 
 	if (loottable_ids.empty()) {
-		LogLoot("No loottables to load");
+		LogLootDetail("No loottables to load");
 		return;
 	}
 
@@ -131,6 +131,7 @@ void Zone::ReloadLootTables()
 
 	std::vector<uint32> loottable_ids = {};
 	for (const auto& n : entity_list.GetNPCList()) {
+		// only add loottable if it's not already in the list
 		if (n.second->GetLoottableID() != 0) {
 			if (std::find(
 				loottable_ids.begin(),
