@@ -2017,7 +2017,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_ReloadLoot:
 	{
-		zone->ReloadLootTables();
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Loot");
+			zone->ReloadLootTables();
+		}
 		break;
 	}
 	case ServerOP_ReloadMerchants: {
