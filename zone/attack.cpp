@@ -4435,9 +4435,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 			// If an "innate" spell, change to spell type to
 			// produce a spell message.  Send to everyone.
-			// This fixes issues with npc-procs like 1002 and 918 which
-			// need to spit out extra spell color.
-			if (IsValidSpell(spell_id) && skill_used == EQ::skills::SkillTigerClaw) {
+			// This fixes issues with npc-procs like 1002 and 918 and
+			// damage based disciplines which need to spit out extra spell color.
+			if (IsValidSpell(spell_id) && 
+				(skill_used == EQ::skills::SkillTigerClaw ||
+				(IsDamageSpell(spell_id) && IsDiscipline(spell_id)))
+				) {
 				a->type = DamageTypeSpell;
 				entity_list.QueueCloseClients(
 					this, /* Sender */
