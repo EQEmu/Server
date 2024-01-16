@@ -23,7 +23,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	}
 
 	auto loottables = LoottableRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"id IN ({})",
 			Strings::Join(loottable_ids, ",")
@@ -31,7 +31,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	);
 
 	auto loottable_entries = LoottableEntriesRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"loottable_id IN ({})",
 			Strings::Join(loottable_ids, ",")
@@ -55,7 +55,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	}
 
 	auto lootdrops = LootdropRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"id IN ({})",
 			Strings::Join(lootdrop_ids, ",")
@@ -63,7 +63,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	);
 
 	auto lootdrop_entries = LootdropEntriesRepository::GetWhere(
-		database,
+		content_db,
 		fmt::format(
 			"lootdrop_id IN ({})",
 			Strings::Join(lootdrop_ids, ",")
