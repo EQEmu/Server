@@ -9099,6 +9099,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
 	menu_reload_four += " | " + Saylink::Silent("#reload logs", "Log Settings");
+	menu_reload_four += " | " + Saylink::Silent("#reload Loot", "Loot");
 
 	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
 	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
