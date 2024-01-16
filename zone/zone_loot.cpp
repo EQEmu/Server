@@ -50,7 +50,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	}
 
 	if (lootdrop_ids.empty()) {
-		LogLoot("No lootdrops to load");
+		LogLoot("No lootdrops to load for loottable(s) [{}]", Strings::Join(loottable_ids, ","));
 		return;
 	}
 
@@ -114,6 +114,10 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 
 void Zone::LoadLootTable(const uint32 loottable_id)
 {
+	if (loottable_id == 0) {
+		return;
+	}
+
 	LoadLootTables({loottable_id});
 }
 
