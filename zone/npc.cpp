@@ -168,12 +168,12 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	}
 
 	SetTaunting(false);
-	proximity     = nullptr;
-	m_loot_copper = 0;
-	m_loot_silver = 0;
-	m_loot_gold     = 0;
-	m_loot_platinum = 0;
-	max_dmg         = npc_type_data->max_dmg;
+	proximity            = nullptr;
+	m_loot_copper        = 0;
+	m_loot_silver        = 0;
+	m_loot_gold          = 0;
+	m_loot_platinum      = 0;
+	max_dmg              = npc_type_data->max_dmg;
 	min_dmg              = npc_type_data->min_dmg;
 	attack_count         = npc_type_data->attack_count;
 	grid                 = 0;
@@ -282,14 +282,14 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	m_roambox.delay     = 1000;
 	m_roambox.min_delay = 1000;
 
-	p_depop          = false;
+	p_depop            = false;
 	m_loottable_id     = npc_type_data->loottable_id;
 	m_skip_global_loot = npc_type_data->skip_global_loot;
 	m_skip_auto_scale  = npc_type_data->skip_auto_scale;
 	rare_spawn         = npc_type_data->rare_spawn;
-	no_target_hotkey      = npc_type_data->no_target_hotkey;
-	primary_faction       = 0;
-	faction_amount        = npc_type_data->faction_amount;
+	no_target_hotkey   = npc_type_data->no_target_hotkey;
+	primary_faction    = 0;
+	faction_amount     = npc_type_data->faction_amount;
 
 	SetNPCFactionID(npc_type_data->npc_faction_id);
 

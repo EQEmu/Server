@@ -71,15 +71,14 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 				continue;
 			}
 
-//				LogInfo(
-//					"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
-//					e.lootdrop_id,
-//					e.droplimit,
-//					e.mindrop,
-//					e.multiplier,
-//					e.probability
-//				);
-
+			LogLootDetail(
+				"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
+				e.lootdrop_id,
+				e.droplimit,
+				e.mindrop,
+				e.multiplier,
+				e.probability
+			);
 
 			nlohmann::json jle;
 			jle["lootdrop_id"] = e.lootdrop_id;
@@ -128,14 +127,14 @@ void SidecarApi::LootSimulatorController(const httplib::Request &req, httplib::R
 					continue;
 				}
 
-//				LogInfo(
-//					"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
-//					e.lootdrop_id,
-//					e.droplimit,
-//					e.mindrop,
-//					e.multiplier,
-//					e.probability
-//				);
+				LogLootDetail(
+					"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
+					e.lootdrop_id,
+					e.droplimit,
+					e.mindrop,
+					e.multiplier,
+					e.probability
+				);
 
 				nlohmann::json jle;
 				jle["lootdrop_id"] = e.lootdrop_id;
