@@ -300,8 +300,6 @@ bool Zone::LoadZoneObjects()
 
 		object->SetDisplayName(e.display_name.c_str());
 
-		object->SetIsFloating(e.is_floating);
-
 		entity_list.AddObject(object, false);
 
 		if (type == ObjectTypes::Temporary && itemid) {

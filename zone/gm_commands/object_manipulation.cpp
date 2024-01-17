@@ -1233,8 +1233,6 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		o = new Object(object_id, od.object_type, icon, od);
 
-		o->SetIsFloating(e.is_floating);
-
 		entity_list.AddObject(o, true);
 
 		c->Message(
