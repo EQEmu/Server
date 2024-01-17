@@ -81,7 +81,7 @@ decay_timer(300000)
 	m_data.tilt_x  = object.tilt_x;
 	m_data.tilt_y  = object.tilt_y;
 
-	if (!m_is_floating) {
+	if (!IsFloating()) {
 		FixZ();
 	}
 }
@@ -130,7 +130,7 @@ decay_timer(300000)
 
 	RandomSpawn(false);
 
-	if (!m_is_floating) {
+	if (!IsFloating()) {
 		FixZ();
 	}
 
@@ -273,7 +273,9 @@ decay_timer(decay_time)
 		}
 	}
 
-	FixZ();
+	if (!IsFloating()) {
+		FixZ();
+	}
 }
 
 Object::Object(
@@ -299,7 +301,6 @@ decay_timer(decay_time)
 	m_type         = type;
 	m_icon         = 0;
 	m_ground_spawn = false;
-	m_is_floating  = false;
 
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -309,7 +310,9 @@ decay_timer(decay_time)
 	m_data.z       = z;
 	m_data.zone_id = zone->GetZoneID();
 
-	FixZ();
+	if (!IsFloating()) {
+		FixZ();
+	}
 
 	if (decay_time) {
 		decay_timer.Start();
