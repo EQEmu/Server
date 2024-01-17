@@ -66,6 +66,7 @@
 #include "../common/repositories/npc_emotes_repository.h"
 #include "../common/serverinfo.h"
 #include "../common/repositories/merc_stance_entries_repository.h"
+#include "../common/repositories/alternate_currency_repository.h"
 
 #include <time.h>
 
@@ -2456,21 +2457,25 @@ void Zone::LoadAlternateCurrencies()
 {
 	AlternateCurrencies.clear();
 
-	AltCurrencyDefinition_Struct current_currency;
+	const auto& l = AlternateCurrencyRepository::All(content_db);
 
-    const std::string query = "SELECT id, item_id FROM alternate_currency";
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
+	if (l.empty()) {
 		return;
-    }
+	}
 
-    for (auto row : results) {
-        current_currency.id = Strings::ToUnsignedInt(row[0]);
-        current_currency.item_id = Strings::ToUnsignedInt(row[1]);
-        AlternateCurrencies.push_back(current_currency);
-    }
+	AltCurrencyDefinition_Struct c;
 
-	LogInfo("Loaded [{}] alternate currencies", Strings::Commify(results.RowCount()));
+	for (const auto &e : l) {
+		c.id      = e.id;
+		c.item_id = e.item_id;
+		AlternateCurrencies.push_back(c);
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Currenc{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "ies" : "y"
+	);
 }
 
 void Zone::UpdateQGlobal(uint32 qid, QGlobal newGlobal)
