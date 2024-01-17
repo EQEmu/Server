@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_NPC_SPELLS_REPOSITORY_H
@@ -184,8 +184,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				npc_spells_id
 			)
 		);
@@ -194,27 +195,27 @@ public:
 		if (results.RowCount() == 1) {
 			NpcSpells e{};
 
-			e.id                       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.parent_list              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.attack_proc              = static_cast<int16_t>(atoi(row[3]));
-			e.proc_chance              = static_cast<int8_t>(atoi(row[4]));
-			e.range_proc               = static_cast<int16_t>(atoi(row[5]));
-			e.rproc_chance             = static_cast<int16_t>(atoi(row[6]));
-			e.defensive_proc           = static_cast<int16_t>(atoi(row[7]));
-			e.dproc_chance             = static_cast<int16_t>(atoi(row[8]));
-			e.fail_recast              = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.engaged_no_sp_recast_min = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.engaged_no_sp_recast_max = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.engaged_b_self_chance    = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.engaged_b_other_chance   = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.engaged_d_chance         = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pursue_no_sp_recast_min  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.pursue_no_sp_recast_max  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.pursue_d_chance          = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.idle_no_sp_recast_min    = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.idle_no_sp_recast_max    = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.idle_b_chance            = static_cast<uint8_t>(strtoul(row[20], nullptr, 10));
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -393,27 +394,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpells e{};
 
-			e.id                       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.parent_list              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.attack_proc              = static_cast<int16_t>(atoi(row[3]));
-			e.proc_chance              = static_cast<int8_t>(atoi(row[4]));
-			e.range_proc               = static_cast<int16_t>(atoi(row[5]));
-			e.rproc_chance             = static_cast<int16_t>(atoi(row[6]));
-			e.defensive_proc           = static_cast<int16_t>(atoi(row[7]));
-			e.dproc_chance             = static_cast<int16_t>(atoi(row[8]));
-			e.fail_recast              = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.engaged_no_sp_recast_min = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.engaged_no_sp_recast_max = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.engaged_b_self_chance    = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.engaged_b_other_chance   = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.engaged_d_chance         = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pursue_no_sp_recast_min  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.pursue_no_sp_recast_max  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.pursue_d_chance          = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.idle_no_sp_recast_min    = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.idle_no_sp_recast_max    = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.idle_b_chance            = static_cast<uint8_t>(strtoul(row[20], nullptr, 10));
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -438,27 +439,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			NpcSpells e{};
 
-			e.id                       = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.parent_list              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.attack_proc              = static_cast<int16_t>(atoi(row[3]));
-			e.proc_chance              = static_cast<int8_t>(atoi(row[4]));
-			e.range_proc               = static_cast<int16_t>(atoi(row[5]));
-			e.rproc_chance             = static_cast<int16_t>(atoi(row[6]));
-			e.defensive_proc           = static_cast<int16_t>(atoi(row[7]));
-			e.dproc_chance             = static_cast<int16_t>(atoi(row[8]));
-			e.fail_recast              = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.engaged_no_sp_recast_min = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.engaged_no_sp_recast_max = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.engaged_b_self_chance    = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.engaged_b_other_chance   = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.engaged_d_chance         = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pursue_no_sp_recast_min  = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.pursue_no_sp_recast_max  = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.pursue_d_chance          = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.idle_no_sp_recast_min    = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.idle_no_sp_recast_max    = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e.idle_b_chance            = static_cast<uint8_t>(strtoul(row[20], nullptr, 10));
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -517,6 +518,102 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const NpcSpells &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.parent_list));
+		v.push_back(std::to_string(e.attack_proc));
+		v.push_back(std::to_string(e.proc_chance));
+		v.push_back(std::to_string(e.range_proc));
+		v.push_back(std::to_string(e.rproc_chance));
+		v.push_back(std::to_string(e.defensive_proc));
+		v.push_back(std::to_string(e.dproc_chance));
+		v.push_back(std::to_string(e.fail_recast));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+		v.push_back(std::to_string(e.engaged_b_self_chance));
+		v.push_back(std::to_string(e.engaged_b_other_chance));
+		v.push_back(std::to_string(e.engaged_d_chance));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+		v.push_back(std::to_string(e.pursue_d_chance));
+		v.push_back(std::to_string(e.idle_no_sp_recast_min));
+		v.push_back(std::to_string(e.idle_no_sp_recast_max));
+		v.push_back(std::to_string(e.idle_b_chance));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<NpcSpells> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.parent_list));
+			v.push_back(std::to_string(e.attack_proc));
+			v.push_back(std::to_string(e.proc_chance));
+			v.push_back(std::to_string(e.range_proc));
+			v.push_back(std::to_string(e.rproc_chance));
+			v.push_back(std::to_string(e.defensive_proc));
+			v.push_back(std::to_string(e.dproc_chance));
+			v.push_back(std::to_string(e.fail_recast));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+			v.push_back(std::to_string(e.engaged_b_self_chance));
+			v.push_back(std::to_string(e.engaged_b_other_chance));
+			v.push_back(std::to_string(e.engaged_d_chance));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+			v.push_back(std::to_string(e.pursue_d_chance));
+			v.push_back(std::to_string(e.idle_no_sp_recast_min));
+			v.push_back(std::to_string(e.idle_no_sp_recast_max));
+			v.push_back(std::to_string(e.idle_b_chance));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_NPC_SPELLS_REPOSITORY_H

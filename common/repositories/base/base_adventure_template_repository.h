@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_ADVENTURE_TEMPLATE_REPOSITORY_H
@@ -232,8 +232,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				adventure_template_id
 			)
 		);
@@ -242,38 +243,38 @@ public:
 		if (results.RowCount() == 1) {
 			AdventureTemplate e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone              = row[1] ? row[1] : "";
-			e.zone_version      = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_hard           = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.is_raid           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.min_level         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.max_level         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.type              = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.type_data         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.type_count        = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.assa_x            = strtof(row[10], nullptr);
-			e.assa_y            = strtof(row[11], nullptr);
-			e.assa_z            = strtof(row[12], nullptr);
-			e.assa_h            = strtof(row[13], nullptr);
+			e.zone_version      = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_hard           = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.is_raid           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.min_level         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 1;
+			e.max_level         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 65;
+			e.type              = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.type_data         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.type_count        = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.assa_x            = row[10] ? strtof(row[10], nullptr) : 0;
+			e.assa_y            = row[11] ? strtof(row[11], nullptr) : 0;
+			e.assa_z            = row[12] ? strtof(row[12], nullptr) : 0;
+			e.assa_h            = row[13] ? strtof(row[13], nullptr) : 0;
 			e.text              = row[14] ? row[14] : "";
-			e.duration          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.zone_in_time      = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.win_points        = static_cast<uint16_t>(strtoul(row[17], nullptr, 10));
-			e.lose_points       = static_cast<uint16_t>(strtoul(row[18], nullptr, 10));
-			e.theme             = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
-			e.zone_in_zone_id   = static_cast<uint16_t>(strtoul(row[20], nullptr, 10));
-			e.zone_in_x         = strtof(row[21], nullptr);
-			e.zone_in_y         = strtof(row[22], nullptr);
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
-			e.dest_x            = strtof(row[24], nullptr);
-			e.dest_y            = strtof(row[25], nullptr);
-			e.dest_z            = strtof(row[26], nullptr);
-			e.dest_h            = strtof(row[27], nullptr);
-			e.graveyard_zone_id = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.graveyard_x       = strtof(row[29], nullptr);
-			e.graveyard_y       = strtof(row[30], nullptr);
-			e.graveyard_z       = strtof(row[31], nullptr);
+			e.duration          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 7200;
+			e.zone_in_time      = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1800;
+			e.win_points        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.lose_points       = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.theme             = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
+			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
+			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
+			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
+			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;
+			e.dest_h            = row[27] ? strtof(row[27], nullptr) : 0;
+			e.graveyard_zone_id = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.graveyard_x       = row[29] ? strtof(row[29], nullptr) : 0;
+			e.graveyard_y       = row[30] ? strtof(row[30], nullptr) : 0;
+			e.graveyard_z       = row[31] ? strtof(row[31], nullptr) : 0;
 
 			return e;
 		}
@@ -489,38 +490,38 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureTemplate e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone              = row[1] ? row[1] : "";
-			e.zone_version      = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_hard           = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.is_raid           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.min_level         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.max_level         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.type              = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.type_data         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.type_count        = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.assa_x            = strtof(row[10], nullptr);
-			e.assa_y            = strtof(row[11], nullptr);
-			e.assa_z            = strtof(row[12], nullptr);
-			e.assa_h            = strtof(row[13], nullptr);
+			e.zone_version      = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_hard           = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.is_raid           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.min_level         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 1;
+			e.max_level         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 65;
+			e.type              = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.type_data         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.type_count        = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.assa_x            = row[10] ? strtof(row[10], nullptr) : 0;
+			e.assa_y            = row[11] ? strtof(row[11], nullptr) : 0;
+			e.assa_z            = row[12] ? strtof(row[12], nullptr) : 0;
+			e.assa_h            = row[13] ? strtof(row[13], nullptr) : 0;
 			e.text              = row[14] ? row[14] : "";
-			e.duration          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.zone_in_time      = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.win_points        = static_cast<uint16_t>(strtoul(row[17], nullptr, 10));
-			e.lose_points       = static_cast<uint16_t>(strtoul(row[18], nullptr, 10));
-			e.theme             = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
-			e.zone_in_zone_id   = static_cast<uint16_t>(strtoul(row[20], nullptr, 10));
-			e.zone_in_x         = strtof(row[21], nullptr);
-			e.zone_in_y         = strtof(row[22], nullptr);
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
-			e.dest_x            = strtof(row[24], nullptr);
-			e.dest_y            = strtof(row[25], nullptr);
-			e.dest_z            = strtof(row[26], nullptr);
-			e.dest_h            = strtof(row[27], nullptr);
-			e.graveyard_zone_id = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.graveyard_x       = strtof(row[29], nullptr);
-			e.graveyard_y       = strtof(row[30], nullptr);
-			e.graveyard_z       = strtof(row[31], nullptr);
+			e.duration          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 7200;
+			e.zone_in_time      = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1800;
+			e.win_points        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.lose_points       = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.theme             = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
+			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
+			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
+			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
+			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;
+			e.dest_h            = row[27] ? strtof(row[27], nullptr) : 0;
+			e.graveyard_zone_id = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.graveyard_x       = row[29] ? strtof(row[29], nullptr) : 0;
+			e.graveyard_y       = row[30] ? strtof(row[30], nullptr) : 0;
+			e.graveyard_z       = row[31] ? strtof(row[31], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -545,38 +546,38 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureTemplate e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone              = row[1] ? row[1] : "";
-			e.zone_version      = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_hard           = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.is_raid           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.min_level         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.max_level         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.type              = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.type_data         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.type_count        = static_cast<uint16_t>(strtoul(row[9], nullptr, 10));
-			e.assa_x            = strtof(row[10], nullptr);
-			e.assa_y            = strtof(row[11], nullptr);
-			e.assa_z            = strtof(row[12], nullptr);
-			e.assa_h            = strtof(row[13], nullptr);
+			e.zone_version      = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_hard           = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.is_raid           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.min_level         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 1;
+			e.max_level         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 65;
+			e.type              = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.type_data         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.type_count        = row[9] ? static_cast<uint16_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.assa_x            = row[10] ? strtof(row[10], nullptr) : 0;
+			e.assa_y            = row[11] ? strtof(row[11], nullptr) : 0;
+			e.assa_z            = row[12] ? strtof(row[12], nullptr) : 0;
+			e.assa_h            = row[13] ? strtof(row[13], nullptr) : 0;
 			e.text              = row[14] ? row[14] : "";
-			e.duration          = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.zone_in_time      = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.win_points        = static_cast<uint16_t>(strtoul(row[17], nullptr, 10));
-			e.lose_points       = static_cast<uint16_t>(strtoul(row[18], nullptr, 10));
-			e.theme             = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
-			e.zone_in_zone_id   = static_cast<uint16_t>(strtoul(row[20], nullptr, 10));
-			e.zone_in_x         = strtof(row[21], nullptr);
-			e.zone_in_y         = strtof(row[22], nullptr);
-			e.zone_in_object_id = static_cast<int16_t>(atoi(row[23]));
-			e.dest_x            = strtof(row[24], nullptr);
-			e.dest_y            = strtof(row[25], nullptr);
-			e.dest_z            = strtof(row[26], nullptr);
-			e.dest_h            = strtof(row[27], nullptr);
-			e.graveyard_zone_id = static_cast<uint32_t>(strtoul(row[28], nullptr, 10));
-			e.graveyard_x       = strtof(row[29], nullptr);
-			e.graveyard_y       = strtof(row[30], nullptr);
-			e.graveyard_z       = strtof(row[31], nullptr);
+			e.duration          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 7200;
+			e.zone_in_time      = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 1800;
+			e.win_points        = row[17] ? static_cast<uint16_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.lose_points       = row[18] ? static_cast<uint16_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.theme             = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 1;
+			e.zone_in_zone_id   = row[20] ? static_cast<uint16_t>(strtoul(row[20], nullptr, 10)) : 0;
+			e.zone_in_x         = row[21] ? strtof(row[21], nullptr) : 0;
+			e.zone_in_y         = row[22] ? strtof(row[22], nullptr) : 0;
+			e.zone_in_object_id = row[23] ? static_cast<int16_t>(atoi(row[23])) : 0;
+			e.dest_x            = row[24] ? strtof(row[24], nullptr) : 0;
+			e.dest_y            = row[25] ? strtof(row[25], nullptr) : 0;
+			e.dest_z            = row[26] ? strtof(row[26], nullptr) : 0;
+			e.dest_h            = row[27] ? strtof(row[27], nullptr) : 0;
+			e.graveyard_zone_id = row[28] ? static_cast<uint32_t>(strtoul(row[28], nullptr, 10)) : 0;
+			e.graveyard_x       = row[29] ? strtof(row[29], nullptr) : 0;
+			e.graveyard_y       = row[30] ? strtof(row[30], nullptr) : 0;
+			e.graveyard_z       = row[31] ? strtof(row[31], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -635,6 +636,126 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const AdventureTemplate &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.zone_version));
+		v.push_back(std::to_string(e.is_hard));
+		v.push_back(std::to_string(e.is_raid));
+		v.push_back(std::to_string(e.min_level));
+		v.push_back(std::to_string(e.max_level));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.type_data));
+		v.push_back(std::to_string(e.type_count));
+		v.push_back(std::to_string(e.assa_x));
+		v.push_back(std::to_string(e.assa_y));
+		v.push_back(std::to_string(e.assa_z));
+		v.push_back(std::to_string(e.assa_h));
+		v.push_back("'" + Strings::Escape(e.text) + "'");
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.zone_in_time));
+		v.push_back(std::to_string(e.win_points));
+		v.push_back(std::to_string(e.lose_points));
+		v.push_back(std::to_string(e.theme));
+		v.push_back(std::to_string(e.zone_in_zone_id));
+		v.push_back(std::to_string(e.zone_in_x));
+		v.push_back(std::to_string(e.zone_in_y));
+		v.push_back(std::to_string(e.zone_in_object_id));
+		v.push_back(std::to_string(e.dest_x));
+		v.push_back(std::to_string(e.dest_y));
+		v.push_back(std::to_string(e.dest_z));
+		v.push_back(std::to_string(e.dest_h));
+		v.push_back(std::to_string(e.graveyard_zone_id));
+		v.push_back(std::to_string(e.graveyard_x));
+		v.push_back(std::to_string(e.graveyard_y));
+		v.push_back(std::to_string(e.graveyard_z));
+		v.push_back(std::to_string(e.graveyard_radius));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<AdventureTemplate> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.zone_version));
+			v.push_back(std::to_string(e.is_hard));
+			v.push_back(std::to_string(e.is_raid));
+			v.push_back(std::to_string(e.min_level));
+			v.push_back(std::to_string(e.max_level));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.type_data));
+			v.push_back(std::to_string(e.type_count));
+			v.push_back(std::to_string(e.assa_x));
+			v.push_back(std::to_string(e.assa_y));
+			v.push_back(std::to_string(e.assa_z));
+			v.push_back(std::to_string(e.assa_h));
+			v.push_back("'" + Strings::Escape(e.text) + "'");
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.zone_in_time));
+			v.push_back(std::to_string(e.win_points));
+			v.push_back(std::to_string(e.lose_points));
+			v.push_back(std::to_string(e.theme));
+			v.push_back(std::to_string(e.zone_in_zone_id));
+			v.push_back(std::to_string(e.zone_in_x));
+			v.push_back(std::to_string(e.zone_in_y));
+			v.push_back(std::to_string(e.zone_in_object_id));
+			v.push_back(std::to_string(e.dest_x));
+			v.push_back(std::to_string(e.dest_y));
+			v.push_back(std::to_string(e.dest_z));
+			v.push_back(std::to_string(e.dest_h));
+			v.push_back(std::to_string(e.graveyard_zone_id));
+			v.push_back(std::to_string(e.graveyard_x));
+			v.push_back(std::to_string(e.graveyard_y));
+			v.push_back(std::to_string(e.graveyard_z));
+			v.push_back(std::to_string(e.graveyard_radius));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_ADVENTURE_TEMPLATE_REPOSITORY_H

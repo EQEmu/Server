@@ -13,7 +13,6 @@ SET(common_sources
     crc32.cpp
     database/database_dump_service.cpp
     database.cpp
-    database_conversions.cpp
     database_instances.cpp
     database/database_update_manifest.cpp
     database/database_update_manifest_bots.cpp
@@ -231,7 +230,6 @@ SET(repositories
     repositories/base/base_inventory_snapshots_repository.h
     repositories/base/base_ip_exemptions_repository.h
     repositories/base/base_items_repository.h
-    repositories/base/base_item_tick_repository.h
     repositories/base/base_ldon_trap_entries_repository.h
     repositories/base/base_ldon_trap_templates_repository.h
     repositories/base/base_level_exp_mods_repository.h
@@ -409,7 +407,6 @@ SET(repositories
     repositories/inventory_snapshots_repository.h
     repositories/ip_exemptions_repository.h
     repositories/items_repository.h
-    repositories/item_tick_repository.h
     repositories/ldon_trap_entries_repository.h
     repositories/ldon_trap_templates_repository.h
     repositories/level_exp_mods_repository.h
@@ -541,7 +538,6 @@ SET(common_headers
     events/player_event_logs.h
     events/player_event_discord_formatter.h
     events/player_events.h
-    errmsg.h
     event_sub.h
     expedition_lockout_timer.h
     extprofile.h
@@ -563,7 +559,6 @@ SET(common_headers
     item_fieldlist.h
     item_instance.h
     json_config.h
-    languages.h
     light_source.h
     linked_list.h
     loottable.h

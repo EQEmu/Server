@@ -1,4 +1,5 @@
 #include "../common/strings.h"
+#include "../common/repositories/auras_repository.h"
 
 #include "aura.h"
 #include "client.h"
@@ -927,36 +928,33 @@ void Mob::MakeAura(uint16 spell_id)
 	}
 }
 
-bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
+bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord& r)
 {
-	auto query = StringFormat(
-		"SELECT npc_type, name, spell_id, distance, aura_type, spawn_type, movement, "
-		"duration, icon, cast_time FROM auras WHERE type='%d'",
-		spell_id
+	const auto& l = AurasRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`type` = {}",
+			spell_id
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	if (results.RowCount() != 1) {
-		return false;
-	}
+	auto e = l.front();
 
-	auto row = results.begin();
+	strn0cpy(r.name, e.name.c_str(), sizeof(r.name));
 
-	record.npc_type = Strings::ToInt(row[0]);
-	strn0cpy(record.name, row[1], 64);
-	record.spell_id   = Strings::ToInt(row[2]);
-	record.distance   = Strings::ToInt(row[3]);
-	record.distance *= record.distance; // so we can avoid sqrt
-	record.aura_type  = Strings::ToInt(row[4]);
-	record.spawn_type = Strings::ToInt(row[5]);
-	record.movement   = Strings::ToInt(row[6]);
-	record.duration   = Strings::ToInt(row[7]) * 1000; // DB is in seconds
-	record.icon       = Strings::ToInt(row[8]);
-	record.cast_time  = Strings::ToInt(row[9]) * 1000; // DB is in seconds
+	r.npc_type   = e.npc_type;
+	r.spell_id   = spell_id;
+	r.distance   = e.distance * e.distance;
+	r.aura_type  = e.aura_type;
+	r.spawn_type = e.spawn_type;
+	r.movement   = e.movement;
+	r.duration   = e.duration * 1000; // Database is in seconds
+	r.icon       = e.icon;
+	r.cast_time  = e.cast_time * 1000; // Database is in seconds
 
 	return true;
 }

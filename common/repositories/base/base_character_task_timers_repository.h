@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_TASK_TIMERS_REPOSITORY_H
@@ -124,8 +124,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_task_timers_id
 			)
 		);
@@ -134,11 +135,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterTaskTimers e{};
 
-			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			return e;
@@ -273,11 +274,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTaskTimers e{};
 
-			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
@@ -303,11 +304,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterTaskTimers e{};
 
-			e.id           = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.task_id      = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.timer_type   = static_cast<int32_t>(atoi(row[3]));
-			e.timer_group  = static_cast<int32_t>(atoi(row[4]));
+			e.id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.task_id      = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.timer_type   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.timer_group  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.expire_time  = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
@@ -367,6 +368,72 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterTaskTimers &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.task_id));
+		v.push_back(std::to_string(e.timer_type));
+		v.push_back(std::to_string(e.timer_group));
+		v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterTaskTimers> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.task_id));
+			v.push_back(std::to_string(e.timer_type));
+			v.push_back(std::to_string(e.timer_group));
+			v.push_back("FROM_UNIXTIME(" + (e.expire_time > 0 ? std::to_string(e.expire_time) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_TASK_TIMERS_REPOSITORY_H

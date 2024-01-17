@@ -91,7 +91,7 @@ void Perl_NPC_ClearItemList(NPC* self) // @categories Inventory and Items
 	self->ClearItemList();
 }
 
-void Perl_NPC_AddCash(NPC* self, uint16 copper, uint16 silver, uint16 gold, uint16 platinum) // @categories Currency and Points
+void Perl_NPC_AddCash(NPC* self, uint32 copper, uint32 silver, uint32 gold, uint32 platinum) // @categories Currency and Points
 {
 	self->AddCash(copper, silver, gold, platinum);
 }
@@ -204,6 +204,7 @@ bool Perl_NPC_IsOnHatelist(NPC* self, Mob* mob) // @categories Hate and Aggro
 void Perl_NPC_RemoveFromHateList(NPC* self, Mob* mob) // @categories Hate and Aggro
 {
 	self->RemoveFromHateList(mob);
+	self->RemoveFromRampageList(mob);
 }
 
 void Perl_NPC_SetNPCFactionID(NPC* self, int faction_id) // @categories Faction

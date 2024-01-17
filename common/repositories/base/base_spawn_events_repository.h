@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H
@@ -156,8 +156,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spawn_events_id
 			)
 		);
@@ -166,20 +167,20 @@ public:
 		if (results.RowCount() == 1) {
 			SpawnEvents e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name        = row[3] ? row[3] : "";
-			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
-			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			return e;
 		}
@@ -337,20 +338,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnEvents e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name        = row[3] ? row[3] : "";
-			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
-			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -375,20 +376,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpawnEvents e{};
 
-			e.id          = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone        = row[1] ? row[1] : "";
-			e.cond_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name        = row[3] ? row[3] : "";
-			e.period      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.next_minute = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.next_hour   = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.next_day    = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.next_month  = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.next_year   = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.enabled     = static_cast<int8_t>(atoi(row[10]));
-			e.action      = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.argument    = static_cast<int32_t>(atoi(row[12]));
-			e.strict      = static_cast<int8_t>(atoi(row[13]));
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -447,6 +448,88 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpawnEvents &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.cond_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.period));
+		v.push_back(std::to_string(e.next_minute));
+		v.push_back(std::to_string(e.next_hour));
+		v.push_back(std::to_string(e.next_day));
+		v.push_back(std::to_string(e.next_month));
+		v.push_back(std::to_string(e.next_year));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.action));
+		v.push_back(std::to_string(e.argument));
+		v.push_back(std::to_string(e.strict));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpawnEvents> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.cond_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.period));
+			v.push_back(std::to_string(e.next_minute));
+			v.push_back(std::to_string(e.next_hour));
+			v.push_back(std::to_string(e.next_day));
+			v.push_back(std::to_string(e.next_month));
+			v.push_back(std::to_string(e.next_year));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.action));
+			v.push_back(std::to_string(e.argument));
+			v.push_back(std::to_string(e.strict));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H

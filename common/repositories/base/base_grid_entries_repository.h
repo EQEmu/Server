@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GRID_ENTRIES_REPOSITORY_H
@@ -136,8 +136,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				grid_entries_id
 			)
 		);
@@ -146,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
-			e.x           = strtof(row[3], nullptr);
-			e.y           = strtof(row[4], nullptr);
-			e.z           = strtof(row[5], nullptr);
-			e.heading     = strtof(row[6], nullptr);
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
+			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			return e;
 		}
@@ -298,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
-			e.x           = strtof(row[3], nullptr);
-			e.y           = strtof(row[4], nullptr);
-			e.z           = strtof(row[5], nullptr);
-			e.heading     = strtof(row[6], nullptr);
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
+			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GridEntries e{};
 
-			e.gridid      = static_cast<int32_t>(atoi(row[0]));
-			e.zoneid      = static_cast<int32_t>(atoi(row[1]));
-			e.number      = static_cast<int32_t>(atoi(row[2]));
-			e.x           = strtof(row[3], nullptr);
-			e.y           = strtof(row[4], nullptr);
-			e.z           = strtof(row[5], nullptr);
-			e.heading     = strtof(row[6], nullptr);
-			e.pause       = static_cast<int32_t>(atoi(row[7]));
-			e.centerpoint = static_cast<int8_t>(atoi(row[8]));
+			e.gridid      = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.number      = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.x           = row[3] ? strtof(row[3], nullptr) : 0;
+			e.y           = row[4] ? strtof(row[4], nullptr) : 0;
+			e.z           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading     = row[6] ? strtof(row[6], nullptr) : 0;
+			e.pause       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.centerpoint = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -398,6 +399,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GridEntries &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.gridid));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.number));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.pause));
+		v.push_back(std::to_string(e.centerpoint));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GridEntries> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.gridid));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.number));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.pause));
+			v.push_back(std::to_string(e.centerpoint));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GRID_ENTRIES_REPOSITORY_H

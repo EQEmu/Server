@@ -1171,7 +1171,7 @@ bool Expedition::HasLockoutByCharacterID(
 {
 	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
 	return std::any_of(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
-		return lockout.IsSameLockout(expedition_name, event_name);
+		return !lockout.IsExpired() && lockout.IsSameLockout(expedition_name, event_name);
 	});
 }
 

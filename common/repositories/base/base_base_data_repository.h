@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BASE_DATA_REPOSITORY_H
@@ -140,8 +140,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				base_data_id
 			)
 		);
@@ -150,16 +151,16 @@ public:
 		if (results.RowCount() == 1) {
 			BaseData e{};
 
-			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.hp       = strtod(row[2], nullptr);
-			e.mana     = strtod(row[3], nullptr);
-			e.end      = strtod(row[4], nullptr);
-			e.unk1     = strtod(row[5], nullptr);
-			e.unk2     = strtod(row[6], nullptr);
-			e.hp_fac   = strtod(row[7], nullptr);
-			e.mana_fac = strtod(row[8], nullptr);
-			e.end_fac  = strtod(row[9], nullptr);
+			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
+			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
+			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
 
 			return e;
 		}
@@ -306,16 +307,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.hp       = strtod(row[2], nullptr);
-			e.mana     = strtod(row[3], nullptr);
-			e.end      = strtod(row[4], nullptr);
-			e.unk1     = strtod(row[5], nullptr);
-			e.unk2     = strtod(row[6], nullptr);
-			e.hp_fac   = strtod(row[7], nullptr);
-			e.mana_fac = strtod(row[8], nullptr);
-			e.end_fac  = strtod(row[9], nullptr);
+			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
+			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
+			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -340,16 +341,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.class_   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.hp       = strtod(row[2], nullptr);
-			e.mana     = strtod(row[3], nullptr);
-			e.end      = strtod(row[4], nullptr);
-			e.unk1     = strtod(row[5], nullptr);
-			e.unk2     = strtod(row[6], nullptr);
-			e.hp_fac   = strtod(row[7], nullptr);
-			e.mana_fac = strtod(row[8], nullptr);
-			e.end_fac  = strtod(row[9], nullptr);
+			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
+			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
+			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -408,6 +409,80 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BaseData &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.end));
+		v.push_back(std::to_string(e.unk1));
+		v.push_back(std::to_string(e.unk2));
+		v.push_back(std::to_string(e.hp_fac));
+		v.push_back(std::to_string(e.mana_fac));
+		v.push_back(std::to_string(e.end_fac));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BaseData> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.end));
+			v.push_back(std::to_string(e.unk1));
+			v.push_back(std::to_string(e.unk2));
+			v.push_back(std::to_string(e.hp_fac));
+			v.push_back(std::to_string(e.mana_fac));
+			v.push_back(std::to_string(e.end_fac));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BASE_DATA_REPOSITORY_H

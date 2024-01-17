@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SERVER_SCHEDULED_EVENTS_REPOSITORY_H
@@ -168,8 +168,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				server_scheduled_events_id
 			)
 		);
@@ -178,20 +179,20 @@ public:
 		if (results.RowCount() == 1) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -361,20 +362,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -402,20 +403,20 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ServerScheduledEvents e{};
 
-			e.id              = static_cast<int32_t>(atoi(row[0]));
+			e.id              = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.description     = row[1] ? row[1] : "";
 			e.event_type      = row[2] ? row[2] : "";
 			e.event_data      = row[3] ? row[3] : "";
-			e.minute_start    = static_cast<int32_t>(atoi(row[4]));
-			e.hour_start      = static_cast<int32_t>(atoi(row[5]));
-			e.day_start       = static_cast<int32_t>(atoi(row[6]));
-			e.month_start     = static_cast<int32_t>(atoi(row[7]));
-			e.year_start      = static_cast<int32_t>(atoi(row[8]));
-			e.minute_end      = static_cast<int32_t>(atoi(row[9]));
-			e.hour_end        = static_cast<int32_t>(atoi(row[10]));
-			e.day_end         = static_cast<int32_t>(atoi(row[11]));
-			e.month_end       = static_cast<int32_t>(atoi(row[12]));
-			e.year_end        = static_cast<int32_t>(atoi(row[13]));
+			e.minute_start    = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hour_start      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.day_start       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.month_start     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.year_start      = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.minute_end      = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.hour_end        = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.day_end         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.month_end       = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.year_end        = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 			e.cron_expression = row[14] ? row[14] : "";
 			e.created_at      = strtoll(row[15] ? row[15] : "-1", nullptr, 10);
 			e.deleted_at      = strtoll(row[16] ? row[16] : "-1", nullptr, 10);
@@ -477,6 +478,94 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const ServerScheduledEvents &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back("'" + Strings::Escape(e.event_type) + "'");
+		v.push_back("'" + Strings::Escape(e.event_data) + "'");
+		v.push_back(std::to_string(e.minute_start));
+		v.push_back(std::to_string(e.hour_start));
+		v.push_back(std::to_string(e.day_start));
+		v.push_back(std::to_string(e.month_start));
+		v.push_back(std::to_string(e.year_start));
+		v.push_back(std::to_string(e.minute_end));
+		v.push_back(std::to_string(e.hour_end));
+		v.push_back(std::to_string(e.day_end));
+		v.push_back(std::to_string(e.month_end));
+		v.push_back(std::to_string(e.year_end));
+		v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<ServerScheduledEvents> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back("'" + Strings::Escape(e.event_type) + "'");
+			v.push_back("'" + Strings::Escape(e.event_data) + "'");
+			v.push_back(std::to_string(e.minute_start));
+			v.push_back(std::to_string(e.hour_start));
+			v.push_back(std::to_string(e.day_start));
+			v.push_back(std::to_string(e.month_start));
+			v.push_back(std::to_string(e.year_start));
+			v.push_back(std::to_string(e.minute_end));
+			v.push_back(std::to_string(e.hour_end));
+			v.push_back(std::to_string(e.day_end));
+			v.push_back(std::to_string(e.month_end));
+			v.push_back(std::to_string(e.year_end));
+			v.push_back("'" + Strings::Escape(e.cron_expression) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SERVER_SCHEDULED_EVENTS_REPOSITORY_H

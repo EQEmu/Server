@@ -2,262 +2,285 @@
 
 void command_fixmob(Client *c, const Seperator *sep)
 {
-	Mob        *target = c->GetTarget();
-	const char *Usage  = "Usage: #fixmob [race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev]";
-
-	if (!sep->arg[1]) {
-		c->Message(Chat::White, Usage);
+	const int arguments = sep->argnum;
+	if (arguments < 2) {
+		SendFixMobSubCommands(c);
+		return;
 	}
-	else if (!target) {
-		c->Message(Chat::White, "Error: this command requires a target");
+
+	Mob* t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
 	}
-	else {
 
-		uint32 Adjustment = 1;    // Previous or Next
-		char   codeMove   = 0;
+	const std::string& type      = sep->arg[1];
+	const std::string& move_type = Strings::ToLower(sep->arg[2]);
 
-		if (sep->arg[2]) {
-			char *command2 = sep->arg[2];
-			codeMove = (command2[0] | 0x20); // First character, lower-cased
-			if (codeMove == 'n') {
-				Adjustment = 1;
-			}
-			else if (codeMove == 'p') {
-				Adjustment = -1;
-			}
-		}
+	std::string change_type;
+	std::string change_value;
 
-		uint16 Race            = target->GetRace();
-		uint8  Gender          = target->GetGender();
-		uint8  Texture         = 0xFF;
-		uint8  HelmTexture     = 0xFF;
-		uint8  HairColor       = target->GetHairColor();
-		uint8  BeardColor      = target->GetBeardColor();
-		uint8  EyeColor1       = target->GetEyeColor1();
-		uint8  EyeColor2       = target->GetEyeColor2();
-		uint8  HairStyle       = target->GetHairStyle();
-		uint8  LuclinFace      = target->GetLuclinFace();
-		uint8  Beard           = target->GetBeard();
-		uint32 DrakkinHeritage = target->GetDrakkinHeritage();
-		uint32 DrakkinTattoo   = target->GetDrakkinTattoo();
-		uint32 DrakkinDetails  = target->GetDrakkinDetails();
+	const bool is_next     = move_type[0] == 'n';
+	const bool is_previous = move_type[0] == 'p';
 
-		const char *ChangeType = nullptr; // If it's still nullptr after processing, they didn't send a valid command
-		uint32     ChangeSetting;
-		char       *command    = sep->arg[1];
+	const uint32 adjustment = is_next ? 1 : -1;
 
-		if (strcasecmp(command, "race") == 0) {
-			if (Race == 1 && codeMove == 'p') {
-				Race = RuleI(NPC, MaxRaceID);
-			}
-			else if (Race >= RuleI(NPC, MaxRaceID) && codeMove != 'p') {
-				Race = 1;
-			}
-			else {
-				Race += Adjustment;
-			}
-			ChangeType    = "Race";
-			ChangeSetting = Race;
-		}
-		else if (strcasecmp(command, "gender") == 0) {
-			if (Gender == MALE && codeMove == 'p') {
-				Gender = NEUTER;
-			}
-			else if (Gender >= NEUTER && codeMove != 'p') {
-				Gender = MALE;
-			}
-			else {
-				Gender += Adjustment;
-			}
-			ChangeType    = "Gender";
-			ChangeSetting = Gender;
-		}
-		else if (strcasecmp(command, "texture") == 0) {
-			Texture       = target->GetTexture();
+	uint16 race_id          = t->GetRace();
+	uint8  gender_id        = t->GetGender();
+	uint8  texture          = UINT8_MAX;
+	uint8  helm_texture     = UINT8_MAX;
+	uint8  hair_color       = t->GetHairColor();
+	uint8  beard_color      = t->GetBeardColor();
+	uint8  eye_color_1      = t->GetEyeColor1();
+	uint8  eye_color_2      = t->GetEyeColor2();
+	uint8  hair_style       = t->GetHairStyle();
+	uint8  face             = t->GetLuclinFace();
+	uint8  beard_style      = t->GetBeard();
+	uint8  drakkin_heritage = t->GetDrakkinHeritage();
+	uint8  drakkin_tattoo   = t->GetDrakkinTattoo();
+	uint8  drakkin_details  = t->GetDrakkinDetails();
 
-			if (Texture == 0 && codeMove == 'p') {
-				Texture = 25;
-			}
-			else if (Texture >= 25 && codeMove != 'p') {
-				Texture = 0;
-			}
-			else {
-				Texture += Adjustment;
-			}
-			ChangeType    = "Texture";
-			ChangeSetting = Texture;
-		}
-		else if (strcasecmp(command, "helm") == 0) {
-			HelmTexture   = target->GetHelmTexture();
-			if (HelmTexture == 0 && codeMove == 'p') {
-				HelmTexture = 25;
-			}
-			else if (HelmTexture >= 25 && codeMove != 'p') {
-				HelmTexture = 0;
-			}
-			else {
-				HelmTexture += Adjustment;
-			}
-			ChangeType    = "HelmTexture";
-			ChangeSetting = HelmTexture;
-		}
-		else if (strcasecmp(command, "face") == 0) {
-			if (LuclinFace == 0 && codeMove == 'p') {
-				LuclinFace = 87;
-			}
-			else if (LuclinFace >= 87 && codeMove != 'p') {
-				LuclinFace = 0;
-			}
-			else {
-				LuclinFace += Adjustment;
-			}
-			ChangeType    = "LuclinFace";
-			ChangeSetting = LuclinFace;
-		}
-		else if (strcasecmp(command, "hair") == 0) {
-			if (HairStyle == 0 && codeMove == 'p') {
-				HairStyle = 8;
-			}
-			else if (HairStyle >= 8 && codeMove != 'p') {
-				HairStyle = 0;
-			}
-			else {
-				HairStyle += Adjustment;
-			}
-			ChangeType    = "HairStyle";
-			ChangeSetting = HairStyle;
-		}
-		else if (strcasecmp(command, "haircolor") == 0) {
-			if (HairColor == 0 && codeMove == 'p') {
-				HairColor = 24;
-			}
-			else if (HairColor >= 24 && codeMove != 'p') {
-				HairColor = 0;
-			}
-			else {
-				HairColor += Adjustment;
-			}
-			ChangeType    = "HairColor";
-			ChangeSetting = HairColor;
-		}
-		else if (strcasecmp(command, "beard") == 0) {
-			if (Beard == 0 && codeMove == 'p') {
-				Beard = 11;
-			}
-			else if (Beard >= 11 && codeMove != 'p') {
-				Beard = 0;
-			}
-			else {
-				Beard += Adjustment;
-			}
-			ChangeType    = "Beard";
-			ChangeSetting = Beard;
-		}
-		else if (strcasecmp(command, "beardcolor") == 0) {
-			if (BeardColor == 0 && codeMove == 'p') {
-				BeardColor = 24;
-			}
-			else if (BeardColor >= 24 && codeMove != 'p') {
-				BeardColor = 0;
-			}
-			else {
-				BeardColor += Adjustment;
-			}
-			ChangeType    = "BeardColor";
-			ChangeSetting = BeardColor;
-		}
-		else if (strcasecmp(command, "heritage") == 0) {
-			if (DrakkinHeritage == 0 && codeMove == 'p') {
-				DrakkinHeritage = 6;
-			}
-			else if (DrakkinHeritage >= 6 && codeMove != 'p') {
-				DrakkinHeritage = 0;
-			}
-			else {
-				DrakkinHeritage += Adjustment;
-			}
-			ChangeType    = "DrakkinHeritage";
-			ChangeSetting = DrakkinHeritage;
-		}
-		else if (strcasecmp(command, "tattoo") == 0) {
-			if (DrakkinTattoo == 0 && codeMove == 'p') {
-				DrakkinTattoo = 8;
-			}
-			else if (DrakkinTattoo >= 8 && codeMove != 'p') {
-				DrakkinTattoo = 0;
-			}
-			else {
-				DrakkinTattoo += Adjustment;
-			}
-			ChangeType    = "DrakkinTattoo";
-			ChangeSetting = DrakkinTattoo;
-		}
-		else if (strcasecmp(command, "detail") == 0) {
-			if (DrakkinDetails == 0 && codeMove == 'p') {
-				DrakkinDetails = 7;
-			}
-			else if (DrakkinDetails >= 7 && codeMove != 'p') {
-				DrakkinDetails = 0;
-			}
-			else {
-				DrakkinDetails += Adjustment;
-			}
-			ChangeType    = "DrakkinDetails";
-			ChangeSetting = DrakkinDetails;
+	const bool is_beard            = Strings::EqualFold(type, "beard");
+	const bool is_beard_color      = Strings::EqualFold(type, "beard_color");
+	const bool is_drakkin_details  = Strings::EqualFold(type, "drakkin_details");
+	const bool is_drakkin_heritage = Strings::EqualFold(type, "drakkin_heritage");
+	const bool is_drakkin_tattoo   = Strings::EqualFold(type, "drakkin_tattoo");
+	const bool is_face             = Strings::EqualFold(type, "face");
+	const bool is_gender           = Strings::EqualFold(type, "gender");
+	const bool is_hair             = Strings::EqualFold(type, "hair");
+	const bool is_hair_color       = Strings::EqualFold(type, "hair_color");
+	const bool is_helm             = Strings::EqualFold(type, "helm");
+	const bool is_race             = Strings::EqualFold(type, "race");
+	const bool is_texture          = Strings::EqualFold(type, "texture");
+
+	if (
+		!is_beard &&
+		!is_beard_color &&
+		!is_drakkin_details &&
+		!is_drakkin_heritage &&
+		!is_drakkin_tattoo &&
+		!is_face &&
+		!is_gender &&
+		!is_hair &&
+		!is_hair_color &&
+		!is_helm &&
+		!is_race &&
+		!is_texture
+	) {
+		SendFixMobSubCommands(c);
+		return;
+	}
+
+	if (is_race) {
+		if (race_id == Race::Human && is_previous) {
+			race_id = RuleI(NPC, MaxRaceID);
+		} else if (race_id >= RuleI(NPC, MaxRaceID) && is_next) {
+			race_id = Race::Human;
+		} else {
+			race_id += adjustment;
 		}
 
-		// Hack to fix some races that base features from face
-		switch (Race) {
-			case 2:    // Barbarian
-				if (LuclinFace > 10) {
-					LuclinFace -= ((DrakkinTattoo - 1) * 10);
-				}
-				LuclinFace += (DrakkinTattoo * 10);
-				break;
-			case 3: // Erudite
-				if (LuclinFace > 10) {
-					LuclinFace -= ((HairStyle - 1) * 10);
-				}
-				LuclinFace += (HairStyle * 10);
-				break;
-			case 5: // HighElf
-			case 6: // DarkElf
-			case 7: // HalfElf
-				if (LuclinFace > 10) {
-					LuclinFace -= ((Beard - 1) * 10);
-				}
-				LuclinFace += (Beard * 10);
-				break;
-			default:
-				break;
+		change_type  = "Race";
+		change_value = std::to_string(race_id);
+	} else if (is_gender) {
+		if (gender_id == Gender::Male && is_previous) {
+			gender_id = Gender::Neuter;
+		} else if (gender_id >= Gender::Neuter && is_next) {
+			gender_id = Gender::Male;
+		} else {
+			gender_id += adjustment;
 		}
 
+		change_type  = "Gender";
+		change_value = std::to_string(gender_id);
+	} else if (is_texture) {
+		texture = t->GetTexture();
 
-		if (ChangeType == nullptr) {
-			c->Message(Chat::White, Usage);
+		if (texture == 0 && is_previous) {
+			texture = 25;
+		} else if (texture >= 25 && is_next) {
+			texture = 0;
+		} else {
+			texture += adjustment;
 		}
-		else {
-			target->SendIllusionPacket(
-				AppearanceStruct{
-					.beard = Beard,
-					.beard_color = BeardColor,
-					.drakkin_details = DrakkinDetails,
-					.drakkin_heritage = DrakkinHeritage,
-					.drakkin_tattoo = DrakkinTattoo,
-					.eye_color_one = EyeColor1,
-					.eye_color_two = EyeColor2,
-					.face = LuclinFace,
-					.gender_id = Gender,
-					.hair = HairStyle,
-					.hair_color = HairColor,
-					.helmet_texture = HelmTexture,
-					.race_id = Race,
-					.texture = Texture,
-				}
-			);
 
-			c->Message(Chat::White, "%s=%i", ChangeType, ChangeSetting);
+		change_type  = "Texture";
+		change_value = std::to_string(texture);
+	} else if (is_helm) {
+		helm_texture   = t->GetHelmTexture();
+		if (helm_texture == 0 && is_previous) {
+			helm_texture = 25;
+		} else if (helm_texture >= 25 && is_next) {
+			helm_texture = 0;
+		} else {
+			helm_texture += adjustment;
+		}
+
+		change_type  = "Helm Texture";
+		change_value = std::to_string(helm_texture);
+	} else if (is_face) {
+		if (face == 0 && is_previous) {
+			face = 87;
+		} else if (face >= 87 && is_next) {
+			face = 0;
+		} else {
+			face += adjustment;
+		}
+
+		change_type  = "Face";
+		change_value = std::to_string(face);
+	} else if (is_hair) {
+		if (hair_style == 0 && is_previous) {
+			hair_style = 8;
+		} else if (hair_style >= 8 && is_next) {
+			hair_style = 0;
+		} else {
+			hair_style += adjustment;
+		}
+
+		change_type  = "Hair Style";
+		change_value = std::to_string(hair_style);
+	} else if (is_hair_color) {
+		if (hair_color == 0 && is_previous) {
+			hair_color = 24;
+		} else if (hair_color >= 24 && is_next) {
+			hair_color = 0;
+		} else {
+			hair_color += adjustment;
+		}
+
+		change_type  = "Hair Color";
+		change_value = std::to_string(hair_color);
+	} else if (is_beard) {
+		if (beard_style == 0 && is_previous) {
+			beard_style = 11;
+		} else if (beard_style >= 11 && is_next) {
+			beard_style = 0;
+		} else {
+			beard_style += adjustment;
+		}
+
+		change_type  = "Beard Style";
+		change_value = std::to_string(beard_style);
+	} else if (is_beard_color) {
+		if (beard_color == 0 && is_previous) {
+			beard_color = 24;
+		} else if (beard_color >= 24 && is_next) {
+			beard_color = 0;
+		} else {
+			beard_color += adjustment;
+		}
+
+		change_type  = "Beard Color";
+		change_value = std::to_string(beard_color);
+	} else if (is_drakkin_heritage) {
+		if (drakkin_heritage == 0 && is_previous) {
+			drakkin_heritage = 6;
+		} else if (drakkin_heritage >= 6 && is_next) {
+			drakkin_heritage = 0;
+		} else {
+			drakkin_heritage += adjustment;
+		}
+
+		change_type  = "Drakkin Heritage";
+		change_value = std::to_string(drakkin_heritage);
+	} else if (is_drakkin_tattoo) {
+		if (drakkin_tattoo == 0 && is_previous) {
+			drakkin_tattoo = 8;
+		} else if (drakkin_tattoo >= 8 && is_next) {
+			drakkin_tattoo = 0;
+		} else {
+			drakkin_tattoo += adjustment;
+		}
+
+		change_type  = "Drakkin Tattoo";
+		change_value = std::to_string(drakkin_tattoo);
+	} else if (is_drakkin_details) {
+		if (drakkin_details == 0 && is_previous) {
+			drakkin_details = 7;
+		} else if (drakkin_details >= 7 && is_next) {
+			drakkin_details = 0;
+		} else {
+			drakkin_details += adjustment;
+		}
+
+		change_type  = "Drakkin Details";
+		change_value = std::to_string(drakkin_details);
+	}
+
+	switch (race_id) {
+		case Race::Barbarian: {
+			if (face > 10) {
+				face -= ((drakkin_tattoo - 1) * 10);
+			}
+
+			face += (drakkin_tattoo * 10);
+			break;
+		}
+		case Race::Erudite: {
+			if (face > 10) {
+				face -= ((hair_style - 1) * 10);
+			}
+
+			face += (hair_style * 10);
+			break;
+		}
+		case Race::HighElf:
+		case Race::DarkElf:
+		case Race::HalfElf: {
+			if (face > 10) {
+				face -= ((beard_style - 1) * 10);
+			}
+
+			face += (beard_style * 10);
+			break;
+		}
+		default: {
+			break;
 		}
 	}
+
+	t->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = beard_style,
+			.beard_color = beard_color,
+			.drakkin_details = drakkin_details,
+			.drakkin_heritage = drakkin_heritage,
+			.drakkin_tattoo = drakkin_tattoo,
+			.eye_color_one = eye_color_1,
+			.eye_color_two = eye_color_2,
+			.face = face,
+			.gender_id = gender_id,
+			.hair = hair_style,
+			.hair_color = hair_color,
+			.helmet_texture = helm_texture,
+			.race_id = race_id,
+			.texture = texture,
+		}
+	);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Appearance for {} | Type: {} Value: {}",
+			c->GetTargetDescription(t, TargetDescriptionType::UCSelf),
+			change_type,
+			change_value
+		).c_str()
+	);
 }
 
+void SendFixMobSubCommands(Client *c)
+{
+	c->Message(Chat::White, "Usage: #fixmob beard [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob beard_color [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob drakkin_details [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob drakkin_heritage [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob drakkin_tattoo [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob face [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob gender [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob hair [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob hair_color [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob helm [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob race [Next|Previous]");
+	c->Message(Chat::White, "Usage: #fixmob texture [Next|Previous]");
+}

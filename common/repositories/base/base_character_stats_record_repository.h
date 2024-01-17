@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_STATS_RECORD_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseCharacterStatsRecordRepository {
 public:
@@ -408,78 +407,78 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterStatsRecord e{};
 
-			e.character_id             = static_cast<int32_t>(atoi(row[0]));
+			e.character_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.status                   = static_cast<int32_t>(atoi(row[2]));
-			e.level                    = static_cast<int32_t>(atoi(row[3]));
-			e.class_                   = static_cast<int32_t>(atoi(row[4]));
-			e.race                     = static_cast<int32_t>(atoi(row[5]));
-			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
-			e.ac                       = static_cast<int32_t>(atoi(row[10]));
-			e.strength                 = static_cast<int32_t>(atoi(row[11]));
-			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
-			e.dexterity                = static_cast<int32_t>(atoi(row[13]));
-			e.agility                  = static_cast<int32_t>(atoi(row[14]));
-			e.intelligence             = static_cast<int32_t>(atoi(row[15]));
-			e.wisdom                   = static_cast<int32_t>(atoi(row[16]));
-			e.charisma                 = static_cast<int32_t>(atoi(row[17]));
-			e.magic_resist             = static_cast<int32_t>(atoi(row[18]));
-			e.fire_resist              = static_cast<int32_t>(atoi(row[19]));
-			e.cold_resist              = static_cast<int32_t>(atoi(row[20]));
-			e.poison_resist            = static_cast<int32_t>(atoi(row[21]));
-			e.disease_resist           = static_cast<int32_t>(atoi(row[22]));
-			e.corruption_resist        = static_cast<int32_t>(atoi(row[23]));
-			e.heroic_strength          = static_cast<int32_t>(atoi(row[24]));
-			e.heroic_stamina           = static_cast<int32_t>(atoi(row[25]));
-			e.heroic_dexterity         = static_cast<int32_t>(atoi(row[26]));
-			e.heroic_agility           = static_cast<int32_t>(atoi(row[27]));
-			e.heroic_intelligence      = static_cast<int32_t>(atoi(row[28]));
-			e.heroic_wisdom            = static_cast<int32_t>(atoi(row[29]));
-			e.heroic_charisma          = static_cast<int32_t>(atoi(row[30]));
-			e.heroic_magic_resist      = static_cast<int32_t>(atoi(row[31]));
-			e.heroic_fire_resist       = static_cast<int32_t>(atoi(row[32]));
-			e.heroic_cold_resist       = static_cast<int32_t>(atoi(row[33]));
-			e.heroic_poison_resist     = static_cast<int32_t>(atoi(row[34]));
-			e.heroic_disease_resist    = static_cast<int32_t>(atoi(row[35]));
-			e.heroic_corruption_resist = static_cast<int32_t>(atoi(row[36]));
-			e.haste                    = static_cast<int32_t>(atoi(row[37]));
-			e.accuracy                 = static_cast<int32_t>(atoi(row[38]));
-			e.attack                   = static_cast<int32_t>(atoi(row[39]));
-			e.avoidance                = static_cast<int32_t>(atoi(row[40]));
-			e.clairvoyance             = static_cast<int32_t>(atoi(row[41]));
-			e.combat_effects           = static_cast<int32_t>(atoi(row[42]));
-			e.damage_shield_mitigation = static_cast<int32_t>(atoi(row[43]));
-			e.damage_shield            = static_cast<int32_t>(atoi(row[44]));
-			e.dot_shielding            = static_cast<int32_t>(atoi(row[45]));
-			e.hp_regen                 = static_cast<int32_t>(atoi(row[46]));
-			e.mana_regen               = static_cast<int32_t>(atoi(row[47]));
-			e.endurance_regen          = static_cast<int32_t>(atoi(row[48]));
-			e.shielding                = static_cast<int32_t>(atoi(row[49]));
-			e.spell_damage             = static_cast<int32_t>(atoi(row[50]));
-			e.spell_shielding          = static_cast<int32_t>(atoi(row[51]));
-			e.strikethrough            = static_cast<int32_t>(atoi(row[52]));
-			e.stun_resist              = static_cast<int32_t>(atoi(row[53]));
-			e.backstab                 = static_cast<int32_t>(atoi(row[54]));
-			e.wind                     = static_cast<int32_t>(atoi(row[55]));
-			e.brass                    = static_cast<int32_t>(atoi(row[56]));
-			e.string                   = static_cast<int32_t>(atoi(row[57]));
-			e.percussion               = static_cast<int32_t>(atoi(row[58]));
-			e.singing                  = static_cast<int32_t>(atoi(row[59]));
-			e.baking                   = static_cast<int32_t>(atoi(row[60]));
-			e.alchemy                  = static_cast<int32_t>(atoi(row[61]));
-			e.tailoring                = static_cast<int32_t>(atoi(row[62]));
-			e.blacksmithing            = static_cast<int32_t>(atoi(row[63]));
-			e.fletching                = static_cast<int32_t>(atoi(row[64]));
-			e.brewing                  = static_cast<int32_t>(atoi(row[65]));
-			e.jewelry                  = static_cast<int32_t>(atoi(row[66]));
-			e.pottery                  = static_cast<int32_t>(atoi(row[67]));
-			e.research                 = static_cast<int32_t>(atoi(row[68]));
-			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
-			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
-			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.status                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.level                    = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.class_                   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.race                     = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.aa_points                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
+			e.ac                       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.strength                 = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.stamina                  = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.dexterity                = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.agility                  = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.intelligence             = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.wisdom                   = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.charisma                 = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.magic_resist             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.fire_resist              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.cold_resist              = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.poison_resist            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.disease_resist           = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.corruption_resist        = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
+			e.heroic_strength          = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.heroic_stamina           = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.heroic_dexterity         = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.heroic_agility           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.heroic_intelligence      = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.heroic_wisdom            = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.heroic_charisma          = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.heroic_magic_resist      = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.heroic_fire_resist       = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.heroic_cold_resist       = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.heroic_poison_resist     = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.heroic_disease_resist    = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.heroic_corruption_resist = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.haste                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.accuracy                 = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.attack                   = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.avoidance                = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.clairvoyance             = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.combat_effects           = row[42] ? static_cast<int32_t>(atoi(row[42])) : 0;
+			e.damage_shield_mitigation = row[43] ? static_cast<int32_t>(atoi(row[43])) : 0;
+			e.damage_shield            = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.dot_shielding            = row[45] ? static_cast<int32_t>(atoi(row[45])) : 0;
+			e.hp_regen                 = row[46] ? static_cast<int32_t>(atoi(row[46])) : 0;
+			e.mana_regen               = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
 			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
 			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
@@ -820,78 +819,78 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterStatsRecord e{};
 
-			e.character_id             = static_cast<int32_t>(atoi(row[0]));
+			e.character_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.status                   = static_cast<int32_t>(atoi(row[2]));
-			e.level                    = static_cast<int32_t>(atoi(row[3]));
-			e.class_                   = static_cast<int32_t>(atoi(row[4]));
-			e.race                     = static_cast<int32_t>(atoi(row[5]));
-			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
-			e.ac                       = static_cast<int32_t>(atoi(row[10]));
-			e.strength                 = static_cast<int32_t>(atoi(row[11]));
-			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
-			e.dexterity                = static_cast<int32_t>(atoi(row[13]));
-			e.agility                  = static_cast<int32_t>(atoi(row[14]));
-			e.intelligence             = static_cast<int32_t>(atoi(row[15]));
-			e.wisdom                   = static_cast<int32_t>(atoi(row[16]));
-			e.charisma                 = static_cast<int32_t>(atoi(row[17]));
-			e.magic_resist             = static_cast<int32_t>(atoi(row[18]));
-			e.fire_resist              = static_cast<int32_t>(atoi(row[19]));
-			e.cold_resist              = static_cast<int32_t>(atoi(row[20]));
-			e.poison_resist            = static_cast<int32_t>(atoi(row[21]));
-			e.disease_resist           = static_cast<int32_t>(atoi(row[22]));
-			e.corruption_resist        = static_cast<int32_t>(atoi(row[23]));
-			e.heroic_strength          = static_cast<int32_t>(atoi(row[24]));
-			e.heroic_stamina           = static_cast<int32_t>(atoi(row[25]));
-			e.heroic_dexterity         = static_cast<int32_t>(atoi(row[26]));
-			e.heroic_agility           = static_cast<int32_t>(atoi(row[27]));
-			e.heroic_intelligence      = static_cast<int32_t>(atoi(row[28]));
-			e.heroic_wisdom            = static_cast<int32_t>(atoi(row[29]));
-			e.heroic_charisma          = static_cast<int32_t>(atoi(row[30]));
-			e.heroic_magic_resist      = static_cast<int32_t>(atoi(row[31]));
-			e.heroic_fire_resist       = static_cast<int32_t>(atoi(row[32]));
-			e.heroic_cold_resist       = static_cast<int32_t>(atoi(row[33]));
-			e.heroic_poison_resist     = static_cast<int32_t>(atoi(row[34]));
-			e.heroic_disease_resist    = static_cast<int32_t>(atoi(row[35]));
-			e.heroic_corruption_resist = static_cast<int32_t>(atoi(row[36]));
-			e.haste                    = static_cast<int32_t>(atoi(row[37]));
-			e.accuracy                 = static_cast<int32_t>(atoi(row[38]));
-			e.attack                   = static_cast<int32_t>(atoi(row[39]));
-			e.avoidance                = static_cast<int32_t>(atoi(row[40]));
-			e.clairvoyance             = static_cast<int32_t>(atoi(row[41]));
-			e.combat_effects           = static_cast<int32_t>(atoi(row[42]));
-			e.damage_shield_mitigation = static_cast<int32_t>(atoi(row[43]));
-			e.damage_shield            = static_cast<int32_t>(atoi(row[44]));
-			e.dot_shielding            = static_cast<int32_t>(atoi(row[45]));
-			e.hp_regen                 = static_cast<int32_t>(atoi(row[46]));
-			e.mana_regen               = static_cast<int32_t>(atoi(row[47]));
-			e.endurance_regen          = static_cast<int32_t>(atoi(row[48]));
-			e.shielding                = static_cast<int32_t>(atoi(row[49]));
-			e.spell_damage             = static_cast<int32_t>(atoi(row[50]));
-			e.spell_shielding          = static_cast<int32_t>(atoi(row[51]));
-			e.strikethrough            = static_cast<int32_t>(atoi(row[52]));
-			e.stun_resist              = static_cast<int32_t>(atoi(row[53]));
-			e.backstab                 = static_cast<int32_t>(atoi(row[54]));
-			e.wind                     = static_cast<int32_t>(atoi(row[55]));
-			e.brass                    = static_cast<int32_t>(atoi(row[56]));
-			e.string                   = static_cast<int32_t>(atoi(row[57]));
-			e.percussion               = static_cast<int32_t>(atoi(row[58]));
-			e.singing                  = static_cast<int32_t>(atoi(row[59]));
-			e.baking                   = static_cast<int32_t>(atoi(row[60]));
-			e.alchemy                  = static_cast<int32_t>(atoi(row[61]));
-			e.tailoring                = static_cast<int32_t>(atoi(row[62]));
-			e.blacksmithing            = static_cast<int32_t>(atoi(row[63]));
-			e.fletching                = static_cast<int32_t>(atoi(row[64]));
-			e.brewing                  = static_cast<int32_t>(atoi(row[65]));
-			e.jewelry                  = static_cast<int32_t>(atoi(row[66]));
-			e.pottery                  = static_cast<int32_t>(atoi(row[67]));
-			e.research                 = static_cast<int32_t>(atoi(row[68]));
-			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
-			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
-			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.status                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.level                    = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.class_                   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.race                     = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.aa_points                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
+			e.ac                       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.strength                 = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.stamina                  = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.dexterity                = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.agility                  = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.intelligence             = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.wisdom                   = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.charisma                 = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.magic_resist             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.fire_resist              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.cold_resist              = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.poison_resist            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.disease_resist           = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.corruption_resist        = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
+			e.heroic_strength          = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.heroic_stamina           = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.heroic_dexterity         = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.heroic_agility           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.heroic_intelligence      = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.heroic_wisdom            = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.heroic_charisma          = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.heroic_magic_resist      = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.heroic_fire_resist       = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.heroic_cold_resist       = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.heroic_poison_resist     = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.heroic_disease_resist    = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.heroic_corruption_resist = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.haste                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.accuracy                 = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.attack                   = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.avoidance                = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.clairvoyance             = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.combat_effects           = row[42] ? static_cast<int32_t>(atoi(row[42])) : 0;
+			e.damage_shield_mitigation = row[43] ? static_cast<int32_t>(atoi(row[43])) : 0;
+			e.damage_shield            = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.dot_shielding            = row[45] ? static_cast<int32_t>(atoi(row[45])) : 0;
+			e.hp_regen                 = row[46] ? static_cast<int32_t>(atoi(row[46])) : 0;
+			e.mana_regen               = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
 			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
 			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
@@ -918,78 +917,78 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterStatsRecord e{};
 
-			e.character_id             = static_cast<int32_t>(atoi(row[0]));
+			e.character_id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.name                     = row[1] ? row[1] : "";
-			e.status                   = static_cast<int32_t>(atoi(row[2]));
-			e.level                    = static_cast<int32_t>(atoi(row[3]));
-			e.class_                   = static_cast<int32_t>(atoi(row[4]));
-			e.race                     = static_cast<int32_t>(atoi(row[5]));
-			e.aa_points                = static_cast<int32_t>(atoi(row[6]));
-			e.hp                       = strtoll(row[7], nullptr, 10);
-			e.mana                     = strtoll(row[8], nullptr, 10);
-			e.endurance                = strtoll(row[9], nullptr, 10);
-			e.ac                       = static_cast<int32_t>(atoi(row[10]));
-			e.strength                 = static_cast<int32_t>(atoi(row[11]));
-			e.stamina                  = static_cast<int32_t>(atoi(row[12]));
-			e.dexterity                = static_cast<int32_t>(atoi(row[13]));
-			e.agility                  = static_cast<int32_t>(atoi(row[14]));
-			e.intelligence             = static_cast<int32_t>(atoi(row[15]));
-			e.wisdom                   = static_cast<int32_t>(atoi(row[16]));
-			e.charisma                 = static_cast<int32_t>(atoi(row[17]));
-			e.magic_resist             = static_cast<int32_t>(atoi(row[18]));
-			e.fire_resist              = static_cast<int32_t>(atoi(row[19]));
-			e.cold_resist              = static_cast<int32_t>(atoi(row[20]));
-			e.poison_resist            = static_cast<int32_t>(atoi(row[21]));
-			e.disease_resist           = static_cast<int32_t>(atoi(row[22]));
-			e.corruption_resist        = static_cast<int32_t>(atoi(row[23]));
-			e.heroic_strength          = static_cast<int32_t>(atoi(row[24]));
-			e.heroic_stamina           = static_cast<int32_t>(atoi(row[25]));
-			e.heroic_dexterity         = static_cast<int32_t>(atoi(row[26]));
-			e.heroic_agility           = static_cast<int32_t>(atoi(row[27]));
-			e.heroic_intelligence      = static_cast<int32_t>(atoi(row[28]));
-			e.heroic_wisdom            = static_cast<int32_t>(atoi(row[29]));
-			e.heroic_charisma          = static_cast<int32_t>(atoi(row[30]));
-			e.heroic_magic_resist      = static_cast<int32_t>(atoi(row[31]));
-			e.heroic_fire_resist       = static_cast<int32_t>(atoi(row[32]));
-			e.heroic_cold_resist       = static_cast<int32_t>(atoi(row[33]));
-			e.heroic_poison_resist     = static_cast<int32_t>(atoi(row[34]));
-			e.heroic_disease_resist    = static_cast<int32_t>(atoi(row[35]));
-			e.heroic_corruption_resist = static_cast<int32_t>(atoi(row[36]));
-			e.haste                    = static_cast<int32_t>(atoi(row[37]));
-			e.accuracy                 = static_cast<int32_t>(atoi(row[38]));
-			e.attack                   = static_cast<int32_t>(atoi(row[39]));
-			e.avoidance                = static_cast<int32_t>(atoi(row[40]));
-			e.clairvoyance             = static_cast<int32_t>(atoi(row[41]));
-			e.combat_effects           = static_cast<int32_t>(atoi(row[42]));
-			e.damage_shield_mitigation = static_cast<int32_t>(atoi(row[43]));
-			e.damage_shield            = static_cast<int32_t>(atoi(row[44]));
-			e.dot_shielding            = static_cast<int32_t>(atoi(row[45]));
-			e.hp_regen                 = static_cast<int32_t>(atoi(row[46]));
-			e.mana_regen               = static_cast<int32_t>(atoi(row[47]));
-			e.endurance_regen          = static_cast<int32_t>(atoi(row[48]));
-			e.shielding                = static_cast<int32_t>(atoi(row[49]));
-			e.spell_damage             = static_cast<int32_t>(atoi(row[50]));
-			e.spell_shielding          = static_cast<int32_t>(atoi(row[51]));
-			e.strikethrough            = static_cast<int32_t>(atoi(row[52]));
-			e.stun_resist              = static_cast<int32_t>(atoi(row[53]));
-			e.backstab                 = static_cast<int32_t>(atoi(row[54]));
-			e.wind                     = static_cast<int32_t>(atoi(row[55]));
-			e.brass                    = static_cast<int32_t>(atoi(row[56]));
-			e.string                   = static_cast<int32_t>(atoi(row[57]));
-			e.percussion               = static_cast<int32_t>(atoi(row[58]));
-			e.singing                  = static_cast<int32_t>(atoi(row[59]));
-			e.baking                   = static_cast<int32_t>(atoi(row[60]));
-			e.alchemy                  = static_cast<int32_t>(atoi(row[61]));
-			e.tailoring                = static_cast<int32_t>(atoi(row[62]));
-			e.blacksmithing            = static_cast<int32_t>(atoi(row[63]));
-			e.fletching                = static_cast<int32_t>(atoi(row[64]));
-			e.brewing                  = static_cast<int32_t>(atoi(row[65]));
-			e.jewelry                  = static_cast<int32_t>(atoi(row[66]));
-			e.pottery                  = static_cast<int32_t>(atoi(row[67]));
-			e.research                 = static_cast<int32_t>(atoi(row[68]));
-			e.alcohol                  = static_cast<int32_t>(atoi(row[69]));
-			e.fishing                  = static_cast<int32_t>(atoi(row[70]));
-			e.tinkering                = static_cast<int32_t>(atoi(row[71]));
+			e.status                   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.level                    = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.class_                   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.race                     = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.aa_points                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.hp                       = row[7] ? strtoll(row[7], nullptr, 10) : 0;
+			e.mana                     = row[8] ? strtoll(row[8], nullptr, 10) : 0;
+			e.endurance                = row[9] ? strtoll(row[9], nullptr, 10) : 0;
+			e.ac                       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.strength                 = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.stamina                  = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.dexterity                = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.agility                  = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.intelligence             = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.wisdom                   = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.charisma                 = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.magic_resist             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.fire_resist              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.cold_resist              = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.poison_resist            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.disease_resist           = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.corruption_resist        = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
+			e.heroic_strength          = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.heroic_stamina           = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.heroic_dexterity         = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.heroic_agility           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.heroic_intelligence      = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.heroic_wisdom            = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.heroic_charisma          = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.heroic_magic_resist      = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.heroic_fire_resist       = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.heroic_cold_resist       = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.heroic_poison_resist     = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.heroic_disease_resist    = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.heroic_corruption_resist = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.haste                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.accuracy                 = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.attack                   = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.avoidance                = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.clairvoyance             = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.combat_effects           = row[42] ? static_cast<int32_t>(atoi(row[42])) : 0;
+			e.damage_shield_mitigation = row[43] ? static_cast<int32_t>(atoi(row[43])) : 0;
+			e.damage_shield            = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.dot_shielding            = row[45] ? static_cast<int32_t>(atoi(row[45])) : 0;
+			e.hp_regen                 = row[46] ? static_cast<int32_t>(atoi(row[46])) : 0;
+			e.mana_regen               = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.endurance_regen          = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.shielding                = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.spell_damage             = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.spell_shielding          = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.strikethrough            = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.stun_resist              = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.backstab                 = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.wind                     = row[55] ? static_cast<int32_t>(atoi(row[55])) : 0;
+			e.brass                    = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.string                   = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.percussion               = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.singing                  = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.baking                   = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.alchemy                  = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.tailoring                = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.blacksmithing            = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.fletching                = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.brewing                  = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.jewelry                  = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.pottery                  = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.research                 = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.alcohol                  = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.fishing                  = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.tinkering                = row[71] ? static_cast<int32_t>(atoi(row[71])) : 0;
 			e.created_at               = strtoll(row[72] ? row[72] : "-1", nullptr, 10);
 			e.updated_at               = strtoll(row[73] ? row[73] : "-1", nullptr, 10);
 
@@ -1050,6 +1049,208 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterStatsRecord &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.character_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.aa_points));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.endurance));
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.strength));
+		v.push_back(std::to_string(e.stamina));
+		v.push_back(std::to_string(e.dexterity));
+		v.push_back(std::to_string(e.agility));
+		v.push_back(std::to_string(e.intelligence));
+		v.push_back(std::to_string(e.wisdom));
+		v.push_back(std::to_string(e.charisma));
+		v.push_back(std::to_string(e.magic_resist));
+		v.push_back(std::to_string(e.fire_resist));
+		v.push_back(std::to_string(e.cold_resist));
+		v.push_back(std::to_string(e.poison_resist));
+		v.push_back(std::to_string(e.disease_resist));
+		v.push_back(std::to_string(e.corruption_resist));
+		v.push_back(std::to_string(e.heroic_strength));
+		v.push_back(std::to_string(e.heroic_stamina));
+		v.push_back(std::to_string(e.heroic_dexterity));
+		v.push_back(std::to_string(e.heroic_agility));
+		v.push_back(std::to_string(e.heroic_intelligence));
+		v.push_back(std::to_string(e.heroic_wisdom));
+		v.push_back(std::to_string(e.heroic_charisma));
+		v.push_back(std::to_string(e.heroic_magic_resist));
+		v.push_back(std::to_string(e.heroic_fire_resist));
+		v.push_back(std::to_string(e.heroic_cold_resist));
+		v.push_back(std::to_string(e.heroic_poison_resist));
+		v.push_back(std::to_string(e.heroic_disease_resist));
+		v.push_back(std::to_string(e.heroic_corruption_resist));
+		v.push_back(std::to_string(e.haste));
+		v.push_back(std::to_string(e.accuracy));
+		v.push_back(std::to_string(e.attack));
+		v.push_back(std::to_string(e.avoidance));
+		v.push_back(std::to_string(e.clairvoyance));
+		v.push_back(std::to_string(e.combat_effects));
+		v.push_back(std::to_string(e.damage_shield_mitigation));
+		v.push_back(std::to_string(e.damage_shield));
+		v.push_back(std::to_string(e.dot_shielding));
+		v.push_back(std::to_string(e.hp_regen));
+		v.push_back(std::to_string(e.mana_regen));
+		v.push_back(std::to_string(e.endurance_regen));
+		v.push_back(std::to_string(e.shielding));
+		v.push_back(std::to_string(e.spell_damage));
+		v.push_back(std::to_string(e.spell_shielding));
+		v.push_back(std::to_string(e.strikethrough));
+		v.push_back(std::to_string(e.stun_resist));
+		v.push_back(std::to_string(e.backstab));
+		v.push_back(std::to_string(e.wind));
+		v.push_back(std::to_string(e.brass));
+		v.push_back(std::to_string(e.string));
+		v.push_back(std::to_string(e.percussion));
+		v.push_back(std::to_string(e.singing));
+		v.push_back(std::to_string(e.baking));
+		v.push_back(std::to_string(e.alchemy));
+		v.push_back(std::to_string(e.tailoring));
+		v.push_back(std::to_string(e.blacksmithing));
+		v.push_back(std::to_string(e.fletching));
+		v.push_back(std::to_string(e.brewing));
+		v.push_back(std::to_string(e.jewelry));
+		v.push_back(std::to_string(e.pottery));
+		v.push_back(std::to_string(e.research));
+		v.push_back(std::to_string(e.alcohol));
+		v.push_back(std::to_string(e.fishing));
+		v.push_back(std::to_string(e.tinkering));
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterStatsRecord> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.character_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.aa_points));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.endurance));
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.strength));
+			v.push_back(std::to_string(e.stamina));
+			v.push_back(std::to_string(e.dexterity));
+			v.push_back(std::to_string(e.agility));
+			v.push_back(std::to_string(e.intelligence));
+			v.push_back(std::to_string(e.wisdom));
+			v.push_back(std::to_string(e.charisma));
+			v.push_back(std::to_string(e.magic_resist));
+			v.push_back(std::to_string(e.fire_resist));
+			v.push_back(std::to_string(e.cold_resist));
+			v.push_back(std::to_string(e.poison_resist));
+			v.push_back(std::to_string(e.disease_resist));
+			v.push_back(std::to_string(e.corruption_resist));
+			v.push_back(std::to_string(e.heroic_strength));
+			v.push_back(std::to_string(e.heroic_stamina));
+			v.push_back(std::to_string(e.heroic_dexterity));
+			v.push_back(std::to_string(e.heroic_agility));
+			v.push_back(std::to_string(e.heroic_intelligence));
+			v.push_back(std::to_string(e.heroic_wisdom));
+			v.push_back(std::to_string(e.heroic_charisma));
+			v.push_back(std::to_string(e.heroic_magic_resist));
+			v.push_back(std::to_string(e.heroic_fire_resist));
+			v.push_back(std::to_string(e.heroic_cold_resist));
+			v.push_back(std::to_string(e.heroic_poison_resist));
+			v.push_back(std::to_string(e.heroic_disease_resist));
+			v.push_back(std::to_string(e.heroic_corruption_resist));
+			v.push_back(std::to_string(e.haste));
+			v.push_back(std::to_string(e.accuracy));
+			v.push_back(std::to_string(e.attack));
+			v.push_back(std::to_string(e.avoidance));
+			v.push_back(std::to_string(e.clairvoyance));
+			v.push_back(std::to_string(e.combat_effects));
+			v.push_back(std::to_string(e.damage_shield_mitigation));
+			v.push_back(std::to_string(e.damage_shield));
+			v.push_back(std::to_string(e.dot_shielding));
+			v.push_back(std::to_string(e.hp_regen));
+			v.push_back(std::to_string(e.mana_regen));
+			v.push_back(std::to_string(e.endurance_regen));
+			v.push_back(std::to_string(e.shielding));
+			v.push_back(std::to_string(e.spell_damage));
+			v.push_back(std::to_string(e.spell_shielding));
+			v.push_back(std::to_string(e.strikethrough));
+			v.push_back(std::to_string(e.stun_resist));
+			v.push_back(std::to_string(e.backstab));
+			v.push_back(std::to_string(e.wind));
+			v.push_back(std::to_string(e.brass));
+			v.push_back(std::to_string(e.string));
+			v.push_back(std::to_string(e.percussion));
+			v.push_back(std::to_string(e.singing));
+			v.push_back(std::to_string(e.baking));
+			v.push_back(std::to_string(e.alchemy));
+			v.push_back(std::to_string(e.tailoring));
+			v.push_back(std::to_string(e.blacksmithing));
+			v.push_back(std::to_string(e.fletching));
+			v.push_back(std::to_string(e.brewing));
+			v.push_back(std::to_string(e.jewelry));
+			v.push_back(std::to_string(e.pottery));
+			v.push_back(std::to_string(e.research));
+			v.push_back(std::to_string(e.alcohol));
+			v.push_back(std::to_string(e.fishing));
+			v.push_back(std::to_string(e.tinkering));
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_STATS_RECORD_REPOSITORY_H

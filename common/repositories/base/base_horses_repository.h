@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_HORSES_REPOSITORY_H
@@ -128,8 +128,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				horses_id
 			)
 		);
@@ -138,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
-			e.mountspeed = strtof(row[5], nullptr);
-			e.notes      = row[6] ? row[6] : "";
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			return e;
 		}
@@ -281,13 +282,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
-			e.mountspeed = strtof(row[5], nullptr);
-			e.notes      = row[6] ? row[6] : "";
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			all_entries.push_back(e);
 		}
@@ -312,13 +313,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Horses e{};
 
-			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.id         = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.filename   = row[1] ? row[1] : "";
-			e.race       = static_cast<int16_t>(atoi(row[2]));
-			e.gender     = static_cast<int8_t>(atoi(row[3]));
-			e.texture    = static_cast<int8_t>(atoi(row[4]));
-			e.mountspeed = strtof(row[5], nullptr);
-			e.notes      = row[6] ? row[6] : "";
+			e.race       = row[2] ? static_cast<int16_t>(atoi(row[2])) : 216;
+			e.gender     = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.texture    = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
+			e.mountspeed = row[5] ? strtof(row[5], nullptr) : 0.75;
+			e.notes      = row[6] ? row[6] : "Notes";
 
 			all_entries.push_back(e);
 		}
@@ -377,6 +378,74 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Horses &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.filename) + "'");
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.texture));
+		v.push_back(std::to_string(e.mountspeed));
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Horses> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.filename) + "'");
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.texture));
+			v.push_back(std::to_string(e.mountspeed));
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_HORSES_REPOSITORY_H

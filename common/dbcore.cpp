@@ -8,7 +8,6 @@
 
 #include "dbcore.h"
 
-#include <errmsg.h>
 #include <fstream>
 #include <iostream>
 #include <mysqld_error.h>
@@ -138,7 +137,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		 * Error logging
 		 */
 		if (mysql_errno(mysql) > 0 && query[0] != '\0') {
-			LogMySQLError("[{}] [{}]\n[{}]", mysql_errno(mysql), mysql_error(mysql), query);
+			LogMySQLError("MySQL Error ({}) [{}] Query [{}]", mysql_errno(mysql), mysql_error(mysql), query);
 		}
 
 		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(mysql), errorBuffer);

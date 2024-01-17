@@ -132,9 +132,22 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			)
 		);
 
-		const bool object_found = l.empty();
+		for (const auto& e : l) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"ID: {} Name: {} XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
+					e.id,
+					e.objectname,
+					e.xpos,
+					e.ypos,
+					e.zpos,
+					e.heading
+				).c_str()
+			);
+		}
 
-		if (object_found) {
+		if (!l.empty()) {
 			c->Message(Chat::White, "An object already exists at this location.");
 			return;
 		}
@@ -189,66 +202,18 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		Object *o = entity_list.GetObjectByID(c->GetObjectToolEntityId());
 
+		if (!o) {
+			c->Message(Chat::White, "You do not have a valid selected object.");
+			return;
+		}
+
 		const uint32 object_id = o->GetDBID();
 
-		if (o) {
-			auto app = new EQApplicationPacket();
-			o->CreateDeSpawnPacket(app);
-			entity_list.QueueClients(nullptr, app);
-			entity_list.RemoveObject(o->GetID());
-			safe_delete(app);
-
-			const int deleted_object = ObjectRepository::DeleteWhere(
-				content_db,
-				fmt::format(
-					"id = {} AND zoneid = {} AND version = {}",
-					object_id,
-					zone->GetZoneID(),
-					zone->GetInstanceVersion()
-				)
-			);
-
-			if (deleted_object) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Successfully deleted Object ID {}.",
-						object_id
-					).c_str()
-				);
-			} else {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Failed to delete Object ID {}.",
-						object_id
-					).c_str()
-				);
-			}
-
-			return;
-		}
-
-		const auto &e = ObjectRepository::GetWhere(
-			content_db,
-			fmt::format(
-				"id = {} AND zoneid = {} AND version = {} LIMIT 1",
-				object_id,
-				zone->GetZoneID(),
-				zone->GetInstanceVersion()
-			)
-		);
-
-		if (e[0].type == ObjectTypes::Temporary) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Object ID {} is a temporarily spawned ground spawn or dropped item, which is not supported with #object. See the 'ground_spawns' table in the database.",
-					object_id
-				).c_str()
-			);
-			return;
-		}
+		auto app = new EQApplicationPacket();
+		o->CreateDeSpawnPacket(app);
+		entity_list.QueueClients(nullptr, app);
+		entity_list.RemoveObject(o->GetID());
+		safe_delete(app);
 
 		const int deleted_object = ObjectRepository::DeleteWhere(
 			content_db,

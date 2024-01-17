@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_INSTANCE_LIST_REPOSITORY_H
@@ -19,13 +19,14 @@
 class BaseInstanceListRepository {
 public:
 	struct InstanceList {
-		int32_t  id;
-		uint32_t zone;
-		uint8_t  version;
-		uint8_t  is_global;
-		uint32_t start_time;
-		uint32_t duration;
-		uint8_t  never_expires;
+		int32_t     id;
+		uint32_t    zone;
+		uint8_t     version;
+		uint8_t     is_global;
+		uint32_t    start_time;
+		uint32_t    duration;
+		uint8_t     never_expires;
+		std::string notes;
 	};
 
 	static std::string PrimaryKey()
@@ -43,6 +44,7 @@ public:
 			"start_time",
 			"duration",
 			"never_expires",
+			"notes",
 		};
 	}
 
@@ -56,6 +58,7 @@ public:
 			"start_time",
 			"duration",
 			"never_expires",
+			"notes",
 		};
 	}
 
@@ -103,6 +106,7 @@ public:
 		e.start_time    = 0;
 		e.duration      = 0;
 		e.never_expires = 0;
+		e.notes         = "";
 
 		return e;
 	}
@@ -128,8 +132,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				instance_list_id
 			)
 		);
@@ -138,13 +143,14 @@ public:
 		if (results.RowCount() == 1) {
 			InstanceList e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
-			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.notes         = row[7] ? row[7] : "";
 
 			return e;
 		}
@@ -184,6 +190,7 @@ public:
 		v.push_back(columns[4] + " = " + std::to_string(e.start_time));
 		v.push_back(columns[5] + " = " + std::to_string(e.duration));
 		v.push_back(columns[6] + " = " + std::to_string(e.never_expires));
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -212,6 +219,7 @@ public:
 		v.push_back(std::to_string(e.start_time));
 		v.push_back(std::to_string(e.duration));
 		v.push_back(std::to_string(e.never_expires));
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,6 +256,7 @@ public:
 			v.push_back(std::to_string(e.start_time));
 			v.push_back(std::to_string(e.duration));
 			v.push_back(std::to_string(e.never_expires));
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -281,13 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InstanceList e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
-			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.notes         = row[7] ? row[7] : "";
 
 			all_entries.push_back(e);
 		}
@@ -312,13 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			InstanceList e{};
 
-			e.id            = static_cast<int32_t>(atoi(row[0]));
-			e.zone          = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.version       = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.is_global     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.start_time    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.duration      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.never_expires = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.id            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zone          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version       = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.is_global     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.start_time    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.duration      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.never_expires = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.notes         = row[7] ? row[7] : "";
 
 			all_entries.push_back(e);
 		}
@@ -377,6 +388,76 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const InstanceList &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zone));
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.is_global));
+		v.push_back(std::to_string(e.start_time));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.never_expires));
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<InstanceList> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zone));
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.is_global));
+			v.push_back(std::to_string(e.start_time));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.never_expires));
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_INSTANCE_LIST_REPOSITORY_H

@@ -2,21 +2,44 @@
 
 void command_petname(Client *c, const Seperator *sep)
 {
-	Mob *target;
-	target = c->GetTarget();
+	Mob *t = nullptr;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
+	}
 
-	if (!target || !target->IsPet()) {
-		c->Message(Chat::White, "Usage: #petname newname (requires a pet target)");
+	if (!t) {
+		c->Message(Chat::White, "You must target your pet to use this command.");
+		return;
 	}
-	else if (target->GetOwnerID() == c->GetID() && strlen(sep->arg[1]) > 0) {
-		char *oldname = strdup(target->GetName());
-		target->TempName(sep->arg[1]);
-		c->Message(Chat::White, "Renamed %s to %s", oldname, sep->arg[1]);
-		free(oldname);
+
+	if (!t->IsPet()) {
+		c->Message(Chat::White, "You must target your pet to use this command.");
+		return;
 	}
-	else {
-		target->TempName();
-		c->Message(Chat::White, "Restored the original name");
+
+	if (t->GetOwnerID() != c->GetID()) {
+		c->Message(Chat::White, "You must target your pet to use this command.");
+		return;
 	}
+
+	if (sep->arg[1]) {
+		const std::string& old_name = t->GetCleanName();
+		const std::string& new_name = sep->arg[1];
+
+		t->TempName(new_name.c_str());
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Renamed your pet from {} to {}.",
+				old_name,
+				new_name
+			).c_str()
+		);
+
+		return;
+	}
+
+	t->TempName();
+	c->Message(Chat::White, "Restored the original name.");
 }
-

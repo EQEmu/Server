@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_ADVENTURE_DETAILS_REPOSITORY_H
@@ -136,8 +136,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				adventure_details_id
 			)
 		);
@@ -146,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			AdventureDetails e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
-			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.adventure_id      = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_id       = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.count             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.assassinate_count = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.status            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.time_created      = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.time_zoned        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.time_completed    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -297,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureDetails e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
-			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.adventure_id      = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_id       = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.count             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.assassinate_count = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.status            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.time_created      = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.time_zoned        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.time_completed    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -330,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AdventureDetails e{};
 
-			e.id                = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.adventure_id      = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.instance_id       = static_cast<int32_t>(atoi(row[2]));
-			e.count             = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.assassinate_count = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.status            = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.time_created      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.time_zoned        = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.time_completed    = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.id                = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.adventure_id      = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_id       = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.count             = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.assassinate_count = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.status            = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.time_created      = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.time_zoned        = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.time_completed    = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -397,6 +398,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const AdventureDetails &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.adventure_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.count));
+		v.push_back(std::to_string(e.assassinate_count));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.time_created));
+		v.push_back(std::to_string(e.time_zoned));
+		v.push_back(std::to_string(e.time_completed));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<AdventureDetails> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.adventure_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.count));
+			v.push_back(std::to_string(e.assassinate_count));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.time_created));
+			v.push_back(std::to_string(e.time_zoned));
+			v.push_back(std::to_string(e.time_completed));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_ADVENTURE_DETAILS_REPOSITORY_H

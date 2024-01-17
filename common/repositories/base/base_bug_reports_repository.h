@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BUG_REPORTS_REPOSITORY_H
@@ -228,8 +228,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bug_reports_id
 			)
 		);
@@ -238,37 +239,37 @@ public:
 		if (results.RowCount() == 1) {
 			BugReports e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone                = row[1] ? row[1] : "";
-			e.client_version_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.client_version_name = row[3] ? row[3] : "";
-			e.account_id          = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.character_id        = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.character_name      = row[6] ? row[6] : "";
-			e.reporter_spoof      = static_cast<int8_t>(atoi(row[7]));
-			e.category_id         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.category_name       = row[9] ? row[9] : "";
-			e.reporter_name       = row[10] ? row[10] : "";
-			e.ui_path             = row[11] ? row[11] : "";
-			e.pos_x               = strtof(row[12], nullptr);
-			e.pos_y               = strtof(row[13], nullptr);
-			e.pos_z               = strtof(row[14], nullptr);
-			e.heading             = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.time_played         = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.target_id           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.target_name         = row[18] ? row[18] : "";
-			e.optional_info_mask  = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e._can_duplicate      = static_cast<int8_t>(atoi(row[20]));
-			e._crash_bug          = static_cast<int8_t>(atoi(row[21]));
-			e._target_info        = static_cast<int8_t>(atoi(row[22]));
-			e._character_flags    = static_cast<int8_t>(atoi(row[23]));
-			e._unknown_value      = static_cast<int8_t>(atoi(row[24]));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone                = row[1] ? row[1] : "Unknown";
+			e.client_version_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.client_version_name = row[3] ? row[3] : "Unknown";
+			e.account_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.character_id        = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.character_name      = row[6] ? row[6] : "Unknown";
+			e.reporter_spoof      = row[7] ? static_cast<int8_t>(atoi(row[7])) : 1;
+			e.category_id         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.category_name       = row[9] ? row[9] : "Other";
+			e.reporter_name       = row[10] ? row[10] : "Unknown";
+			e.ui_path             = row[11] ? row[11] : "Unknown";
+			e.pos_x               = row[12] ? strtof(row[12], nullptr) : 0;
+			e.pos_y               = row[13] ? strtof(row[13], nullptr) : 0;
+			e.pos_z               = row[14] ? strtof(row[14], nullptr) : 0;
+			e.heading             = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.time_played         = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.target_id           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.target_name         = row[18] ? row[18] : "Unknown";
+			e.optional_info_mask  = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e._can_duplicate      = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e._crash_bug          = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e._target_info        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e._character_flags    = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e._unknown_value      = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
 			e.bug_report          = row[25] ? row[25] : "";
 			e.system_info         = row[26] ? row[26] : "";
 			e.report_datetime     = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
-			e.bug_status          = static_cast<uint8_t>(strtoul(row[28], nullptr, 10));
+			e.bug_status          = row[28] ? static_cast<uint8_t>(strtoul(row[28], nullptr, 10)) : 0;
 			e.last_review         = strtoll(row[29] ? row[29] : "-1", nullptr, 10);
-			e.last_reviewer       = row[30] ? row[30] : "";
+			e.last_reviewer       = row[30] ? row[30] : "None";
 			e.reviewer_notes      = row[31] ? row[31] : "";
 
 			return e;
@@ -481,37 +482,37 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BugReports e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone                = row[1] ? row[1] : "";
-			e.client_version_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.client_version_name = row[3] ? row[3] : "";
-			e.account_id          = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.character_id        = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.character_name      = row[6] ? row[6] : "";
-			e.reporter_spoof      = static_cast<int8_t>(atoi(row[7]));
-			e.category_id         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.category_name       = row[9] ? row[9] : "";
-			e.reporter_name       = row[10] ? row[10] : "";
-			e.ui_path             = row[11] ? row[11] : "";
-			e.pos_x               = strtof(row[12], nullptr);
-			e.pos_y               = strtof(row[13], nullptr);
-			e.pos_z               = strtof(row[14], nullptr);
-			e.heading             = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.time_played         = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.target_id           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.target_name         = row[18] ? row[18] : "";
-			e.optional_info_mask  = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e._can_duplicate      = static_cast<int8_t>(atoi(row[20]));
-			e._crash_bug          = static_cast<int8_t>(atoi(row[21]));
-			e._target_info        = static_cast<int8_t>(atoi(row[22]));
-			e._character_flags    = static_cast<int8_t>(atoi(row[23]));
-			e._unknown_value      = static_cast<int8_t>(atoi(row[24]));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone                = row[1] ? row[1] : "Unknown";
+			e.client_version_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.client_version_name = row[3] ? row[3] : "Unknown";
+			e.account_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.character_id        = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.character_name      = row[6] ? row[6] : "Unknown";
+			e.reporter_spoof      = row[7] ? static_cast<int8_t>(atoi(row[7])) : 1;
+			e.category_id         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.category_name       = row[9] ? row[9] : "Other";
+			e.reporter_name       = row[10] ? row[10] : "Unknown";
+			e.ui_path             = row[11] ? row[11] : "Unknown";
+			e.pos_x               = row[12] ? strtof(row[12], nullptr) : 0;
+			e.pos_y               = row[13] ? strtof(row[13], nullptr) : 0;
+			e.pos_z               = row[14] ? strtof(row[14], nullptr) : 0;
+			e.heading             = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.time_played         = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.target_id           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.target_name         = row[18] ? row[18] : "Unknown";
+			e.optional_info_mask  = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e._can_duplicate      = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e._crash_bug          = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e._target_info        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e._character_flags    = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e._unknown_value      = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
 			e.bug_report          = row[25] ? row[25] : "";
 			e.system_info         = row[26] ? row[26] : "";
 			e.report_datetime     = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
-			e.bug_status          = static_cast<uint8_t>(strtoul(row[28], nullptr, 10));
+			e.bug_status          = row[28] ? static_cast<uint8_t>(strtoul(row[28], nullptr, 10)) : 0;
 			e.last_review         = strtoll(row[29] ? row[29] : "-1", nullptr, 10);
-			e.last_reviewer       = row[30] ? row[30] : "";
+			e.last_reviewer       = row[30] ? row[30] : "None";
 			e.reviewer_notes      = row[31] ? row[31] : "";
 
 			all_entries.push_back(e);
@@ -537,37 +538,37 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BugReports e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone                = row[1] ? row[1] : "";
-			e.client_version_id   = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.client_version_name = row[3] ? row[3] : "";
-			e.account_id          = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.character_id        = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.character_name      = row[6] ? row[6] : "";
-			e.reporter_spoof      = static_cast<int8_t>(atoi(row[7]));
-			e.category_id         = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.category_name       = row[9] ? row[9] : "";
-			e.reporter_name       = row[10] ? row[10] : "";
-			e.ui_path             = row[11] ? row[11] : "";
-			e.pos_x               = strtof(row[12], nullptr);
-			e.pos_y               = strtof(row[13], nullptr);
-			e.pos_z               = strtof(row[14], nullptr);
-			e.heading             = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.time_played         = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.target_id           = static_cast<uint32_t>(strtoul(row[17], nullptr, 10));
-			e.target_name         = row[18] ? row[18] : "";
-			e.optional_info_mask  = static_cast<uint32_t>(strtoul(row[19], nullptr, 10));
-			e._can_duplicate      = static_cast<int8_t>(atoi(row[20]));
-			e._crash_bug          = static_cast<int8_t>(atoi(row[21]));
-			e._target_info        = static_cast<int8_t>(atoi(row[22]));
-			e._character_flags    = static_cast<int8_t>(atoi(row[23]));
-			e._unknown_value      = static_cast<int8_t>(atoi(row[24]));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone                = row[1] ? row[1] : "Unknown";
+			e.client_version_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.client_version_name = row[3] ? row[3] : "Unknown";
+			e.account_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.character_id        = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.character_name      = row[6] ? row[6] : "Unknown";
+			e.reporter_spoof      = row[7] ? static_cast<int8_t>(atoi(row[7])) : 1;
+			e.category_id         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.category_name       = row[9] ? row[9] : "Other";
+			e.reporter_name       = row[10] ? row[10] : "Unknown";
+			e.ui_path             = row[11] ? row[11] : "Unknown";
+			e.pos_x               = row[12] ? strtof(row[12], nullptr) : 0;
+			e.pos_y               = row[13] ? strtof(row[13], nullptr) : 0;
+			e.pos_z               = row[14] ? strtof(row[14], nullptr) : 0;
+			e.heading             = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.time_played         = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.target_id           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.target_name         = row[18] ? row[18] : "Unknown";
+			e.optional_info_mask  = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e._can_duplicate      = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e._crash_bug          = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e._target_info        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e._character_flags    = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e._unknown_value      = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
 			e.bug_report          = row[25] ? row[25] : "";
 			e.system_info         = row[26] ? row[26] : "";
 			e.report_datetime     = strtoll(row[27] ? row[27] : "-1", nullptr, 10);
-			e.bug_status          = static_cast<uint8_t>(strtoul(row[28], nullptr, 10));
+			e.bug_status          = row[28] ? static_cast<uint8_t>(strtoul(row[28], nullptr, 10)) : 0;
 			e.last_review         = strtoll(row[29] ? row[29] : "-1", nullptr, 10);
-			e.last_reviewer       = row[30] ? row[30] : "";
+			e.last_reviewer       = row[30] ? row[30] : "None";
 			e.reviewer_notes      = row[31] ? row[31] : "";
 
 			all_entries.push_back(e);
@@ -627,6 +628,124 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BugReports &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.client_version_id));
+		v.push_back("'" + Strings::Escape(e.client_version_name) + "'");
+		v.push_back(std::to_string(e.account_id));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back("'" + Strings::Escape(e.character_name) + "'");
+		v.push_back(std::to_string(e.reporter_spoof));
+		v.push_back(std::to_string(e.category_id));
+		v.push_back("'" + Strings::Escape(e.category_name) + "'");
+		v.push_back("'" + Strings::Escape(e.reporter_name) + "'");
+		v.push_back("'" + Strings::Escape(e.ui_path) + "'");
+		v.push_back(std::to_string(e.pos_x));
+		v.push_back(std::to_string(e.pos_y));
+		v.push_back(std::to_string(e.pos_z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.time_played));
+		v.push_back(std::to_string(e.target_id));
+		v.push_back("'" + Strings::Escape(e.target_name) + "'");
+		v.push_back(std::to_string(e.optional_info_mask));
+		v.push_back(std::to_string(e._can_duplicate));
+		v.push_back(std::to_string(e._crash_bug));
+		v.push_back(std::to_string(e._target_info));
+		v.push_back(std::to_string(e._character_flags));
+		v.push_back(std::to_string(e._unknown_value));
+		v.push_back("'" + Strings::Escape(e.bug_report) + "'");
+		v.push_back("'" + Strings::Escape(e.system_info) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
+		v.push_back(std::to_string(e.bug_status));
+		v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
+		v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BugReports> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.client_version_id));
+			v.push_back("'" + Strings::Escape(e.client_version_name) + "'");
+			v.push_back(std::to_string(e.account_id));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back("'" + Strings::Escape(e.character_name) + "'");
+			v.push_back(std::to_string(e.reporter_spoof));
+			v.push_back(std::to_string(e.category_id));
+			v.push_back("'" + Strings::Escape(e.category_name) + "'");
+			v.push_back("'" + Strings::Escape(e.reporter_name) + "'");
+			v.push_back("'" + Strings::Escape(e.ui_path) + "'");
+			v.push_back(std::to_string(e.pos_x));
+			v.push_back(std::to_string(e.pos_y));
+			v.push_back(std::to_string(e.pos_z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.time_played));
+			v.push_back(std::to_string(e.target_id));
+			v.push_back("'" + Strings::Escape(e.target_name) + "'");
+			v.push_back(std::to_string(e.optional_info_mask));
+			v.push_back(std::to_string(e._can_duplicate));
+			v.push_back(std::to_string(e._crash_bug));
+			v.push_back(std::to_string(e._target_info));
+			v.push_back(std::to_string(e._character_flags));
+			v.push_back(std::to_string(e._unknown_value));
+			v.push_back("'" + Strings::Escape(e.bug_report) + "'");
+			v.push_back("'" + Strings::Escape(e.system_info) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.report_datetime > 0 ? std::to_string(e.report_datetime) : "null") + ")");
+			v.push_back(std::to_string(e.bug_status));
+			v.push_back("FROM_UNIXTIME(" + (e.last_review > 0 ? std::to_string(e.last_review) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.last_reviewer) + "'");
+			v.push_back("'" + Strings::Escape(e.reviewer_notes) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BUG_REPORTS_REPOSITORY_H

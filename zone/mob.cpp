@@ -567,29 +567,29 @@ Mob::~Mob()
 	LeaveHealRotationTargetPool();
 }
 
-uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
-	switch (iAppearance) {
-		// 0 standing, 1 sitting, 2 ducking, 3 lieing down, 4 looting
+uint32 Mob::GetAppearanceValue(EmuAppearance in_appearance) {
+	switch (in_appearance) {
 		case eaStanding: {
-			return ANIM_STAND;
+			return Animation::Standing;
 		}
 		case eaSitting: {
-			return ANIM_SIT;
+			return Animation::Sitting;
 		}
 		case eaCrouching: {
-			return ANIM_CROUCH;
+			return Animation::Crouching;
 		}
 		case eaDead: {
-			return ANIM_DEATH;
+			return Animation::Lying;
 		}
 		case eaLooting: {
-			return ANIM_LOOT;
+			return Animation::Looting;
 		}
-		//to shup up compiler:
-		case _eaMaxAppearance:
+		case _eaMaxAppearance: {
 			break;
+		}
 	}
-	return(ANIM_STAND);
+
+	return Animation::Standing;
 }
 
 
@@ -638,14 +638,14 @@ void Mob::CalcInvisibleLevel()
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
 	if (state == Invisibility::Visible) {
-		SendAppearancePacket(AT_Invis, Invisibility::Visible);
+		SendAppearancePacket(AppearanceType::Invisibility, Invisibility::Visible);
 		ZeroInvisibleVars(InvisType::T_INVISIBLE);
 	} else {
 		if (!set_on_bonus_calc) {
 			nobuff_invisible = state;
 			CalcInvisibleLevel();
 		}
-		SendAppearancePacket(AT_Invis, invisible);
+		SendAppearancePacket(AppearanceType::Invisibility, invisible);
 	}
 
 	BreakCharmPetIfConditionsMet();
@@ -1531,30 +1531,30 @@ void Mob::SendHPUpdate(bool force_update_all)
 	if (IsNPC() && IsDestructibleObject()) {
 		if (GetHPRatio() > 74) {
 			if (GetAppearance() != eaStanding) {
-				SendAppearancePacket(AT_DamageState, eaStanding);
+				SendAppearancePacket(AppearanceType::DamageState, eaStanding);
 				_appearance = eaStanding;
 			}
 		}
 		else if (GetHPRatio() > 49) {
 			if (GetAppearance() != eaSitting) {
-				SendAppearancePacket(AT_DamageState, eaSitting);
+				SendAppearancePacket(AppearanceType::DamageState, eaSitting);
 				_appearance = eaSitting;
 			}
 		}
 		else if (GetHPRatio() > 24) {
 			if (GetAppearance() != eaCrouching) {
-				SendAppearancePacket(AT_DamageState, eaCrouching);
+				SendAppearancePacket(AppearanceType::DamageState, eaCrouching);
 				_appearance = eaCrouching;
 			}
 		}
 		else if (GetHPRatio() > 0) {
 			if (GetAppearance() != eaDead) {
-				SendAppearancePacket(AT_DamageState, eaDead);
+				SendAppearancePacket(AppearanceType::DamageState, eaDead);
 				_appearance = eaDead;
 			}
 		}
 		else if (GetAppearance() != eaLooting) {
-			SendAppearancePacket(AT_DamageState, eaLooting);
+			SendAppearancePacket(AppearanceType::DamageState, eaLooting);
 			_appearance = eaLooting;
 		}
 	}
@@ -1597,21 +1597,6 @@ void Mob::SentPositionPacket(float dx, float dy, float dz, float dh, int anim, b
 	spu->animation = anim;
 
 	entity_list.QueueClients(this, &outapp, send_to_self == false, false);
-}
-
-// this is for SendPosition()
-void Mob::MakeSpawnUpdateNoDelta(PlayerPositionUpdateServer_Struct *spu) {
-	memset(spu, 0xff, sizeof(PlayerPositionUpdateServer_Struct));
-	spu->spawn_id = GetID();
-	spu->x_pos = FloatToEQ19(m_Position.x);
-	spu->y_pos = FloatToEQ19(m_Position.y);
-	spu->z_pos = FloatToEQ19(m_Position.z);
-	spu->delta_x = FloatToEQ13(0);
-	spu->delta_y = FloatToEQ13(0);
-	spu->delta_z = FloatToEQ13(0);
-	spu->heading = FloatToEQ12(m_Position.w);
-	spu->animation = 0;
-	spu->delta_heading = FloatToEQ10(0);
 }
 
 // this is for SendPosUpdate()
@@ -2867,7 +2852,7 @@ void Mob::ShowStats(Client* c)
 		);
 
 		// Drakkin Features
-		if (t->GetRace() == RACE_DRAKKIN_522) {
+		if (t->GetRace() == Race::Drakkin) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -3526,7 +3511,7 @@ void Mob::GMMove(const glm::vec4 &position, bool save_guard_spot) {
 void Mob::SendIllusionPacket(const AppearanceStruct& a)
 {
 	uint16 new_race = (
-		a.race_id != RACE_DOUG_0 ?
+		a.race_id != Race::Doug ?
 		a.race_id :
 		(use_model ? use_model : GetBaseRace())
 	);
@@ -3558,7 +3543,7 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	uint32 new_drakkin_tattoo   = a.drakkin_tattoo == UINT32_MAX ? GetDrakkinTattoo() : a.drakkin_tattoo;
 
 	// Reset features to Base from the Player Profile
-	if (IsClient() && a.race_id == RACE_DOUG_0) {
+	if (IsClient() && a.race_id == Race::Doug) {
 		new_beard            = CastToClient()->GetBaseBeard();
 		new_beard_color      = CastToClient()->GetBaseBeardColor();
 		new_drakkin_details  = CastToClient()->GetBaseDetails();
@@ -3632,7 +3617,7 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 	SendArmorAppearance();
 
 	if (a.send_effects) {
-		SendSavedAppearenceEffects(nullptr);
+		SendSavedAppearanceEffects(nullptr);
 	}
 
 	LogSpells(
@@ -3678,230 +3663,226 @@ void Mob::SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender)
 
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
-	if (IsPlayerRace(GetRace())) {
-		uint8 current_gender = GetGender();
-		uint8 new_texture = 0xFF;
-		uint8 new_helm_texture = 0xFF;
-		uint8 new_hair_color = 0xFF;
-		uint8 new_beard_color = 0xFF;
-		uint8 new_eye_color_one = 0xFF;
-		uint8 new_eye_color_two = 0xFF;
-		uint8 new_hair_style = 0xFF;
-		uint8 new_luclin_face = 0xFF;
-		uint8 new_beard = 0xFF;
-		uint32 new_drakkin_heritage = 0xFFFFFFFF;
-		uint32 new_drakkin_tattoo = 0xFFFFFFFF;
-		uint32 new_drakkin_details = 0xFFFFFFFF;
-
-		// Set some common feature settings
-		new_eye_color_one = zone->random.Int(0, 9);
-		new_eye_color_two = zone->random.Int(0, 9);
-		new_luclin_face = zone->random.Int(0, 7);
-
-		// Adjust all settings based on the min and max for each feature of each race and gender
-		switch (GetRace()) {
-			case HUMAN:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == MALE) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case BARBARIAN:
-				new_hair_color = zone->random.Int(0, 19);
-				new_luclin_face = zone->random.Int(0, 87);
-
-				if (current_gender == MALE) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case ERUDITE:
-				if (current_gender == MALE) {
-					new_beard_color = zone->random.Int(0, 19);
-					new_beard = zone->random.Int(0, 5);
-					new_luclin_face = zone->random.Int(0, 57);
-				} else if (current_gender == FEMALE) {
-					new_luclin_face = zone->random.Int(0, 87);
-				}
-
-				break;
-			case WOOD_ELF:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == MALE) {
-					new_hair_style = zone->random.Int(0, 3);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case HIGH_ELF:
-				new_hair_color = zone->random.Int(0, 14);
-
-				if (current_gender == MALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case DARK_ELF:
-				new_hair_color = zone->random.Int(13, 18);
-
-				if (current_gender == MALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case HALF_ELF:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == MALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_luclin_face = zone->random.Int(0, 37);
-					new_beard_color = new_hair_color;
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case DWARF:
-				new_hair_color = zone->random.Int(0, 19);
-				new_beard_color = new_hair_color;
-
-				if (current_gender == MALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-					new_luclin_face = zone->random.Int(0, 17);
-				}
-
-				break;
-			case TROLL:
-				new_eye_color_one = zone->random.Int(0, 10);
-				new_eye_color_two = zone->random.Int(0, 10);
-
-				if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_hair_color = zone->random.Int(0, 23);
-				}
-
-				break;
-			case OGRE:
-				if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 3);
-					new_hair_color = zone->random.Int(0, 23);
-				}
-
-				break;
-			case HALFLING:
-				new_hair_color = zone->random.Int(0, 19);
-
-				if (current_gender == MALE) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case GNOME:
-				new_hair_color = zone->random.Int(0, 24);
-
-				if (current_gender == MALE) {
-					new_beard_color = new_hair_color;
-					new_hair_style = zone->random.Int(0, 3);
-					new_beard = zone->random.Int(0, 5);
-				} else if (current_gender == FEMALE) {
-					new_hair_style = zone->random.Int(0, 2);
-				}
-
-				break;
-			case IKSAR:
-			case VAHSHIR:
-				new_luclin_face = zone->random.Int(0, 7);
-				break;
-			case FROGLOK:
-				new_luclin_face = zone->random.Int(0, 9);
-				break;
-			case DRAKKIN:
-				new_hair_color = zone->random.Int(0, 3);
-				new_beard_color = new_hair_color;
-				new_eye_color_one = zone->random.Int(0, 11);
-				new_eye_color_two = zone->random.Int(0, 11);
-				new_luclin_face = zone->random.Int(0, 6);
-				new_drakkin_heritage = zone->random.Int(0, 6);
-				new_drakkin_tattoo = zone->random.Int(0, 7);
-				new_drakkin_details = zone->random.Int(0, 7);
-
-				if (current_gender == MALE) {
-					new_beard = zone->random.Int(0, 12);
-					new_hair_style = zone->random.Int(0, 8);
-				} else if (current_gender == FEMALE) {
-					new_beard = zone->random.Int(0, 3);
-					new_hair_style = zone->random.Int(0, 7);
-				}
-
-				break;
-			default:
-				break;
-		}
-
-		if (set_variables) {
-			haircolor = new_hair_color;
-			beardcolor = new_beard_color;
-			eyecolor1 = new_eye_color_one;
-			eyecolor2 = new_eye_color_two;
-			hairstyle = new_hair_style;
-			luclinface = new_luclin_face;
-			beard = new_beard;
-			drakkin_heritage = new_drakkin_heritage;
-			drakkin_tattoo = new_drakkin_tattoo;
-			drakkin_details = new_drakkin_details;
-		}
-
-		if (send_illusion) {
-			SendIllusionPacket(
-				AppearanceStruct{
-					.beard = new_beard,
-					.beard_color = new_beard_color,
-					.drakkin_details = new_drakkin_details,
-					.drakkin_heritage = new_drakkin_heritage,
-					.drakkin_tattoo = new_drakkin_tattoo,
-					.eye_color_one = new_eye_color_one,
-					.eye_color_two = new_eye_color_two,
-					.face = new_luclin_face,
-					.gender_id = current_gender,
-					.hair = new_hair_style,
-					.hair_color = new_hair_color,
-					.helmet_texture = new_helm_texture,
-					.race_id = GetRace(),
-					.texture = new_texture,
-				}
-			);
-		}
-
-		return true;
+	if (!IsPlayerRace(GetRace())) {
+		return false;
 	}
-	return false;
+
+	uint8  current_gender       = GetGender();
+	uint8  new_texture          = UINT8_MAX;
+	uint8  new_helm_texture     = UINT8_MAX;
+	uint8  new_hair_color       = UINT8_MAX;
+	uint8  new_beard_color      = UINT8_MAX;
+	uint8  new_eye_color_one    = zone->random.Int(0, 9);
+	uint8  new_eye_color_two    = zone->random.Int(0, 9);
+	uint8  new_hair_style       = UINT8_MAX;
+	uint8  new_luclin_face      = zone->random.Int(0, 7);
+	uint8  new_beard            = UINT8_MAX;
+	uint32 new_drakkin_heritage = UINT32_MAX;
+	uint32 new_drakkin_tattoo   = UINT32_MAX;
+	uint32 new_drakkin_details  = UINT32_MAX;
+
+	// Adjust all settings based on the min and max for each feature of each race and gender
+	switch (GetRace()) {
+		case HUMAN:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case BARBARIAN:
+			new_hair_color  = zone->random.Int(0, 19);
+			new_luclin_face = zone->random.Int(0, 87);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case ERUDITE:
+			if (current_gender == Gender::Male) {
+				new_beard_color = zone->random.Int(0, 19);
+				new_beard       = zone->random.Int(0, 5);
+				new_luclin_face = zone->random.Int(0, 57);
+			} else if (current_gender == Gender::Female) {
+				new_luclin_face = zone->random.Int(0, 87);
+			}
+
+			break;
+		case WOOD_ELF:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style = zone->random.Int(0, 3);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case HIGH_ELF:
+			new_hair_color = zone->random.Int(0, 14);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case DARK_ELF:
+			new_hair_color = zone->random.Int(13, 18);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case HALF_ELF:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_hair_style  = zone->random.Int(0, 3);
+				new_luclin_face = zone->random.Int(0, 37);
+				new_beard_color = new_hair_color;
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case DWARF:
+			new_hair_color  = zone->random.Int(0, 19);
+			new_beard_color = new_hair_color;
+
+			if (current_gender == Gender::Male) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_beard      = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style  = zone->random.Int(0, 2);
+				new_luclin_face = zone->random.Int(0, 17);
+			}
+
+			break;
+		case TROLL:
+			new_eye_color_one = zone->random.Int(0, 10);
+			new_eye_color_two = zone->random.Int(0, 10);
+
+			if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_hair_color = zone->random.Int(0, 23);
+			}
+
+			break;
+		case OGRE:
+			if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 3);
+				new_hair_color = zone->random.Int(0, 23);
+			}
+
+			break;
+		case HALFLING:
+			new_hair_color = zone->random.Int(0, 19);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case GNOME:
+			new_hair_color = zone->random.Int(0, 24);
+
+			if (current_gender == Gender::Male) {
+				new_beard_color = new_hair_color;
+				new_hair_style  = zone->random.Int(0, 3);
+				new_beard       = zone->random.Int(0, 5);
+			} else if (current_gender == Gender::Female) {
+				new_hair_style = zone->random.Int(0, 2);
+			}
+
+			break;
+		case IKSAR:
+		case VAHSHIR:
+			new_luclin_face = zone->random.Int(0, 7);
+			break;
+		case FROGLOK:
+			new_luclin_face = zone->random.Int(0, 9);
+			break;
+		case DRAKKIN:
+			new_hair_color       = zone->random.Int(0, 3);
+			new_beard_color      = new_hair_color;
+			new_eye_color_one    = zone->random.Int(0, 11);
+			new_eye_color_two    = zone->random.Int(0, 11);
+			new_luclin_face      = zone->random.Int(0, 6);
+			new_drakkin_heritage = zone->random.Int(0, 6);
+			new_drakkin_tattoo   = zone->random.Int(0, 7);
+			new_drakkin_details  = zone->random.Int(0, 7);
+
+			if (current_gender == Gender::Male) {
+				new_beard      = zone->random.Int(0, 12);
+				new_hair_style = zone->random.Int(0, 8);
+			} else if (current_gender == Gender::Female) {
+				new_beard      = zone->random.Int(0, 3);
+				new_hair_style = zone->random.Int(0, 7);
+			}
+
+			break;
+		default:
+			break;
+	}
+
+	if (set_variables) {
+		haircolor        = new_hair_color;
+		beardcolor       = new_beard_color;
+		eyecolor1        = new_eye_color_one;
+		eyecolor2        = new_eye_color_two;
+		hairstyle        = new_hair_style;
+		luclinface       = new_luclin_face;
+		beard            = new_beard;
+		drakkin_heritage = new_drakkin_heritage;
+		drakkin_tattoo   = new_drakkin_tattoo;
+		drakkin_details  = new_drakkin_details;
+	}
+
+	if (send_illusion) {
+		SendIllusionPacket(
+			AppearanceStruct{
+				.beard = new_beard,
+				.beard_color = new_beard_color,
+				.drakkin_details = new_drakkin_details,
+				.drakkin_heritage = new_drakkin_heritage,
+				.drakkin_tattoo = new_drakkin_tattoo,
+				.eye_color_one = new_eye_color_one,
+				.eye_color_two = new_eye_color_two,
+				.face = new_luclin_face,
+				.gender_id = current_gender,
+				.hair = new_hair_style,
+				.hair_color = new_hair_color,
+				.helmet_texture = new_helm_texture,
+				.race_id = GetRace(),
+				.texture = new_texture,
+			}
+		);
+	}
+
+	return true;
 }
 
 uint16 Mob::GetFactionRace() {
@@ -3918,103 +3899,116 @@ uint16 Mob::GetFactionRace() {
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (
 		IsPlayerRace(in_race) ||
-		in_race == RACE_BROWNIE_15 ||
-		in_race == RACE_KERRAN_23 ||
-		in_race == RACE_LION_50 ||
-		in_race == RACE_DRACNID_57 ||
-		in_race == RACE_ZOMBIE_70 ||
-		in_race == RACE_QEYNOS_CITIZEN_71 ||
-		in_race == RACE_RIVERVALE_CITIZEN_81 ||
-		in_race == RACE_HALAS_CITIZEN_90 ||
-		in_race == RACE_GROBB_CITIZEN_92 ||
-		in_race == RACE_OGGOK_CITIZEN_93 ||
-		in_race == RACE_KALADIM_CITIZEN_94 ||
-		in_race == RACE_ELF_VAMPIRE_98 ||
-		in_race == RACE_FELGUARD_106 ||
-		in_race == RACE_FAYGUARD_112 ||
-		in_race == RACE_ERUDITE_GHOST_118 ||
-		in_race == RACE_IKSAR_CITIZEN_139 ||
-		in_race == RACE_SHADE_224 ||
-		in_race == RACE_TROLL_CREW_MEMBER_331 ||
-		in_race == RACE_PIRATE_DECKHAND_332 ||
-		in_race == RACE_GNOME_PIRATE_338 ||
-		in_race == RACE_DARK_ELF_PIRATE_339 ||
-		in_race == RACE_OGRE_PIRATE_340 ||
-		in_race == RACE_HUMAN_PIRATE_341 ||
-		in_race == RACE_ERUDITE_PIRATE_342 ||
-		in_race == RACE_UNDEAD_PIRATE_344 ||
-		in_race == RACE_KNIGHT_OF_HATE_351 ||
-		in_race == RACE_WARLOCK_OF_HATE_352 ||
-		in_race == RACE_UNDEAD_VAMPIRE_359 ||
-		in_race == RACE_VAMPIRE_360 ||
-		in_race == RACE_SAND_ELF_364 ||
-		in_race == RACE_TAELOSIAN_NATIVE_385 ||
-		in_race == RACE_TAELOSIAN_EVOKER_386 ||
-		in_race == RACE_DRACHNID_461 ||
-		in_race == RACE_ZOMBIE_471 ||
-		in_race == RACE_ELDDAR_489 ||
-		in_race == RACE_VAMPIRE_497 ||
-		in_race == RACE_KERRAN_562 ||
-		in_race == RACE_BROWNIE_568 ||
-		in_race == RACE_HUMAN_566 ||
-		in_race == RACE_ELVEN_GHOST_587 ||
-		in_race == RACE_HUMAN_GHOST_588 ||
-		in_race == RACE_COLDAIN_645
+		in_race == Race::Brownie ||
+		in_race == Race::Kerran ||
+		in_race == Race::Lion ||
+		in_race == Race::Drachnid ||
+		in_race == Race::Zombie ||
+		in_race == Race::QeynosCitizen ||
+		in_race == Race::RivervaleCitizen ||
+		in_race == Race::HalasCitizen ||
+		in_race == Race::GrobbCitizen ||
+		in_race == Race::OggokCitizen ||
+		in_race == Race::KaladimCitizen ||
+		in_race == Race::ElfVampire ||
+		in_race == Race::Felguard ||
+		in_race == Race::Fayguard ||
+		in_race == Race::EruditeGhost ||
+		in_race == Race::IksarCitizen ||
+		in_race == Race::Shade ||
+		in_race == Race::TrollCrewMember ||
+		in_race == Race::PirateDeckhand ||
+		in_race == Race::GnomePirate ||
+		in_race == Race::DarkElfPirate ||
+		in_race == Race::OgrePirate ||
+		in_race == Race::HumanPirate ||
+		in_race == Race::EruditePirate ||
+		in_race == Race::TrollZombie ||
+		in_race == Race::KnightOfHate ||
+		in_race == Race::ArcanistOfHate ||
+		in_race == Race::UndeadVampire ||
+		in_race == Race::Vampire3 ||
+		in_race == Race::SandElf ||
+		in_race == Race::Nihil ||
+		in_race == Race::Trusik ||
+		in_race == Race::Drachnid2 ||
+		in_race == Race::Zombie2 ||
+		in_race == Race::Elddar ||
+		in_race == Race::Vampire4 ||
+		in_race == Race::Kerran2 ||
+		in_race == Race::Brownie2 ||
+		in_race == Race::Human2 ||
+		in_race == Race::ElvenGhost ||
+		in_race == Race::HumanGhost ||
+		in_race == Race::Coldain2
 	) {
-		if (in_gender >= 2) { // Male default for PC Races
-			return 0;
+		if (in_gender >= Gender::Neuter) { // Male default for PC Races
+			return Gender::Male;
 		} else {
 			return in_gender;
 		}
 	} else if (
-		in_race == RACE_FREEPORT_GUARD_44 ||
-		in_race == RACE_MIMIC_52 ||
-		in_race == RACE_HUMAN_BEGGAR_55 ||
-		in_race == RACE_VAMPIRE_65 ||
-		in_race == RACE_HIGHPASS_CITIZEN_67 ||
-		in_race == RACE_NERIAK_CITIZEN_77 ||
-		in_race == RACE_ERUDITE_CITIZEN_78 ||
-		in_race == RACE_CLOCKWORK_GNOME_88 ||
-		in_race == RACE_DWARF_GHOST_117 ||
-		in_race == RACE_SPECTRAL_IKSAR_147 ||
-		in_race == RACE_INVISIBLE_MAN_127 ||
-		in_race == RACE_VAMPYRE_208 ||
-		in_race == RACE_RECUSO_237 ||
-		in_race == RACE_BROKEN_SKULL_PIRATE_333 ||
-		in_race == RACE_INVISIBLE_MAN_OF_ZOMM_600 ||
-		in_race == RACE_OGRE_NPC_MALE_624 ||
-		in_race == RACE_BEEFEATER_667 ||
-		in_race == RACE_ERUDITE_678
+		in_race == Race::FreeportGuard ||
+		in_race == Race::Mimic ||
+		in_race == Race::HumanBeggar ||
+		in_race == Race::Vampire ||
+		in_race == Race::HighpassCitizen ||
+		in_race == Race::NeriakCitizen ||
+		in_race == Race::EruditeCitizen ||
+		in_race == Race::ClockworkGnome ||
+		in_race == Race::DwarfGhost ||
+		in_race == Race::IksarSpirit ||
+		in_race == Race::InvisibleMan ||
+		in_race == Race::Vampire2 ||
+		in_race == Race::Recuso ||
+		in_race == Race::BrokenSkullPirate ||
+		in_race == Race::InvisibleManOfZomm ||
+		in_race == Race::Ogre2 ||
+		in_race == Race::RoyalGuard ||
+		in_race == Race::Erudite2
 	) { // Male only races
-		return 0;
+		return Gender::Male;
 	} else if (
-		in_race == RACE_FAIRY_25 ||
-		in_race == RACE_PIXIE_56 ||
-		in_race == RACE_BANSHEE_487 ||
-		in_race == RACE_BANSHEE_488 ||
-		in_race == RACE_AYONAE_RO_498 ||
-		in_race == RACE_SULLON_ZEK_499
+		in_race == Race::Fairy ||
+		in_race == Race::Pixie ||
+		in_race == Race::Banshee2 ||
+		in_race == Race::Banshee3 ||
+		in_race == Race::AyonaeRo ||
+		in_race == Race::SullonZek
 	) { // Female only races
-		return 1;
+		return Gender::Female;
 	} else { // Neutral default for NPC Races
-		return 2;
+		return Gender::Neuter;
 	}
 }
 
-void Mob::SendAppearancePacket(uint32 type, uint32 value, bool WholeZone, bool iIgnoreSelf, Client *specific_target) {
-	if (!GetID())
+void Mob::SendAppearancePacket(
+	uint32 type,
+	uint32 value,
+	bool whole_zone,
+	bool ignore_self,
+	Client* target
+)
+{
+	if (!GetID()) {
 		return;
+	}
+
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
-	SpawnAppearance_Struct* appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
-	appearance->spawn_id = GetID();
-	appearance->type = type;
-	appearance->parameter = value;
-	if (WholeZone)
-		entity_list.QueueClients(this, outapp, iIgnoreSelf);
-	else if(specific_target != nullptr)
-		specific_target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
-	else if (IsClient())
+	auto* a = (SpawnAppearance_Struct*)outapp->pBuffer;
+
+	a->spawn_id  = GetID();
+	a->type      = type;
+	a->parameter = value;
+
+	if (whole_zone) {
+		entity_list.QueueClients(this, outapp, ignore_self);
+	} else if (target) {
+		target->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	} else if (IsClient()) {
 		CastToClient()->QueuePacket(outapp, false, Client::CLIENT_CONNECTED);
+	}
+
 	safe_delete(outapp);
 }
 
@@ -4034,21 +4028,6 @@ void Mob::SendLevelAppearance(){
 	la->value4a = 1;
 	la->value4b = 1;
 	la->value5a = 2;
-	entity_list.QueueCloseClients(this,outapp);
-	safe_delete(outapp);
-}
-
-void Mob::SendStunAppearance()
-{
-	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
-	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
-	la->parm1 = 58;
-	la->parm2 = 60;
-	la->spawn_id = GetID();
-	la->value1a = 2;
-	la->value1b = 0;
-	la->value2a = 2;
-	la->value2b = 0;
 	entity_list.QueueCloseClients(this,outapp);
 	safe_delete(outapp);
 }
@@ -4092,19 +4071,19 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	}
 
 	if (!value1ground && parm1) {
-		SetAppearenceEffects(value1slot, parm1);
+		SetAppearanceEffects(value1slot, parm1);
 	}
 	if (!value2ground && parm2) {
-		SetAppearenceEffects(value2slot, parm2);
+		SetAppearanceEffects(value2slot, parm2);
 	}
 	if (!value3ground && parm3) {
-		SetAppearenceEffects(value3slot, parm3);
+		SetAppearanceEffects(value3slot, parm3);
 	}
 	if (!value4ground && parm4) {
-		SetAppearenceEffects(value4slot, parm4);
+		SetAppearanceEffects(value4slot, parm4);
 	}
 	if (!value5ground && parm5) {
-		SetAppearenceEffects(value5slot, parm5);
+		SetAppearanceEffects(value5slot, parm5);
 	}
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
@@ -4135,7 +4114,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	safe_delete(outapp);
 }
 
-void Mob::SetAppearenceEffects(int32 slot, int32 value)
+void Mob::SetAppearanceEffects(int32 slot, int32 value)
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		if (!appearance_effects_id[i]) {
@@ -4173,7 +4152,7 @@ void Mob::ListAppearanceEffects(Client* c)
 	}
 }
 
-void Mob::ClearAppearenceEffects()
+void Mob::ClearAppearanceEffects()
 {
 	for (int i = 0; i < MAX_APPEARANCE_EFFECTS; i++) {
 		appearance_effects_id[i] = 0;
@@ -4181,7 +4160,7 @@ void Mob::ClearAppearenceEffects()
 	}
 }
 
-void Mob::SendSavedAppearenceEffects(Client *receiver = nullptr)
+void Mob::SendSavedAppearanceEffects(Client *receiver = nullptr)
 {
 	if (!appearance_effects_id[0]) {
 		return;
@@ -4339,15 +4318,17 @@ const int64& Mob::SetMana(int64 amount)
 }
 
 
-void Mob::SetAppearance(EmuAppearance app, bool iIgnoreSelf) {
+void Mob::SetAppearance(EmuAppearance app, bool ignore_self) {
 	if (_appearance == app) {
 		return;
 	}
 
 	_appearance = app;
-	SendAppearancePacket(AT_Anim, GetAppearanceValue(app), true, iIgnoreSelf);
+
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(app), true, ignore_self);
+
 	if (IsClient() && IsAIControlled()) {
-		SendAppearancePacket(AT_Anim, ANIM_FREEZE, false, false);
+		SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false);
 	}
 }
 
@@ -4373,87 +4354,97 @@ void Mob::SendWearChangeAndLighting(int8 last_texture) {
 		SendWearChange(i);
 	}
 	UpdateActiveLight();
-	SendAppearancePacket(AT_Light, GetActiveLightType());
+	SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 
 }
 
-void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
-	// Size Code
-	if (!bNoRestriction)
-	{
-		if (IsClient() || petid != 0)
-			if (in_size < 3.0)
-				in_size = 3.0;
-
-
-			if (IsClient() || petid != 0)
-				if (in_size > 15.0)
-					in_size = 15.0;
+void Mob::ChangeSize(float in_size = 0, bool unrestricted)
+{
+	if (!unrestricted) {
+		if (IsClient() || petid != 0) {
+			EQ::Clamp(in_size, 3.0f, 15.0f);
+		}
 	}
 
+	EQ::Clamp(in_size, 1.0f, 255.0f);
 
-	if (in_size < 1.0)
-		in_size = 1.0;
-
-	if (in_size > 255.0)
-		in_size = 255.0;
-	//End of Size Code
 	size = in_size;
-	SendAppearancePacket(AT_Size, (uint32) in_size);
+
+	SendAppearancePacket(AppearanceType::Size, static_cast<uint32>(in_size));
 }
 
-Mob* Mob::GetOwnerOrSelf() {
-	if (!GetOwnerID())
+Mob* Mob::GetOwnerOrSelf()
+{
+	if (!GetOwnerID()) {
 		return this;
-	Mob* owner = entity_list.GetMob(GetOwnerID());
-	if (!owner) {
+	}
+
+	Mob* m = entity_list.GetMob(GetOwnerID());
+
+	if (!m) {
 		SetOwnerID(0);
-		return(this);
+		return this;
 	}
-	if (owner->GetPetID() == GetID()) {
-		return owner;
+
+	if (m->GetPetID() == GetID()) {
+		return m;
 	}
-	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
-		return (CastToNPC()->GetSwarmInfo()->GetOwner());
+
+	if (IsNPC() && CastToNPC()->GetSwarmInfo()){
+		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
+
 	SetOwnerID(0);
 	return this;
 }
 
 Mob* Mob::GetOwner() {
-	Mob* owner = entity_list.GetMob(GetOwnerID());
-	if (owner && owner->GetPetID() == GetID()) {
+	Mob* m = entity_list.GetMob(GetOwnerID());
 
-		return owner;
+	if (m && m->GetPetID() == GetID()) {
+		return m;
 	}
+
 	if(IsNPC() && CastToNPC()->GetSwarmInfo()){
-		return (CastToNPC()->GetSwarmInfo()->GetOwner());
+		return CastToNPC()->GetSwarmInfo()->GetOwner();
 	}
+
 	SetOwnerID(0);
 	return 0;
 }
 
 Mob* Mob::GetUltimateOwner()
 {
-	Mob* Owner = GetOwner();
+	Mob* m = GetOwner();
 
-	if(!Owner)
+	if (!m) {
 		return this;
+	}
 
-	while(Owner && Owner->HasOwner())
-		Owner = Owner->GetOwner();
+	while (m && m->HasOwner()) {
+		m = m->GetOwner();
+	}
 
-	return Owner ? Owner : this;
+	return m ? m : this;
 }
 
-void Mob::SetOwnerID(uint16 NewOwnerID) {
-	if (NewOwnerID == GetID() && NewOwnerID != 0) // ok, no charming yourself now =p
+void Mob::SetOwnerID(uint16 new_owner_id) {
+	if (new_owner_id && new_owner_id == GetID()) {
 		return;
-	ownerid = NewOwnerID;
+	}
+
+	ownerid = new_owner_id;
+
 	// if we're setting the owner ID to 0 and they're not either charmed or not-a-pet then
 	// they're a normal pet and should be despawned
-	if (ownerid == 0 && IsNPC() && GetPetType() != petCharmed && GetPetType() != petNone)
+	if (
+		!ownerid &&
+		IsNPC() &&
+		GetPetType() != petCharmed &&
+		GetPetType() != petNone
+	) {
 		Depop();
+	}
 }
 
 // used in checking for behind (backstab) and checking in front (melee LoS)
@@ -4554,10 +4545,23 @@ bool Mob::CanThisClassDoubleAttack(void) const
 
 bool Mob::CanThisClassTripleAttack() const
 {
-	if (!IsClient())
+	if (!IsClient()) {
 		return false; // When they added the real triple attack skill, mobs lost the ability to triple
-	else
-		return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
+	} else {
+		if (RuleB(Combat, ClassicTripleAttack)) {
+			return (
+				GetLevel() >= 60 &&
+				(
+					GetClass() == Class::Warrior ||
+					GetClass() == Class::Ranger ||
+					GetClass() == Class::Monk ||
+					GetClass() == Class::Berserker
+				)
+			);
+		} else {
+			return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
+		}
+	}
 }
 
 bool Mob::IsWarriorClass(void) const
@@ -4720,27 +4724,6 @@ bool Mob::PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, fl
 	}
 
 	return Result;
-}
-
-bool Mob::PlotPositionOnArcInFrontOfTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance, float min_deg, float max_deg)
-{
-
-
-	return false;
-}
-
-bool Mob::PlotPositionOnArcBehindTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float distance)
-{
-
-
-	return false;
-}
-
-bool Mob::PlotPositionBehindMeFacingTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_dist, float max_dist)
-{
-
-
-	return false;
 }
 
 bool Mob::HateSummon() {
@@ -5635,9 +5618,9 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 	m_EntityVariables[variable_name] = variable_value;
 }
 
-void Mob::SetFlyMode(GravityBehavior flymode)
+void Mob::SetFlyMode(GravityBehavior in_flymode)
 {
-	flymode = flymode;
+	flymode = in_flymode;
 }
 
 void Mob::Teleport(const glm::vec3 &pos)
@@ -6867,22 +6850,22 @@ void Mob::RemoveAllNimbusEffects()
 bool Mob::IsBoat() const {
 
 	return (
-		race == RACE_SHIP_72 ||
-		race == RACE_LAUNCH_73 ||
-		race == RACE_GHOST_SHIP_114 ||
-		race == RACE_SHIP_404 ||
-		race == RACE_MERCHANT_SHIP_550 ||
-		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552 ||
-		race == RACE_BOAT_533
+		race == Race::Ship ||
+		race == Race::Launch ||
+		race == Race::GhostShip ||
+		race == Race::DiscordShip ||
+		race == Race::MerchantShip ||
+		race == Race::PirateShip ||
+		race == Race::GhostShip2 ||
+		race == Race::Boat2
 	);
 }
 
 bool Mob::IsControllableBoat() const {
 
 	return (
-		race == RACE_BOAT_141 ||
-		race == RACE_ROWBOAT_502
+		race == Race::Boat ||
+		race == Race::Rowboat
 	);
 }
 
@@ -8218,37 +8201,37 @@ int Mob::DispatchZoneControllerEvent(
 std::string Mob::GetRacePlural()
 {
 	switch (GetBaseRace()) {
-		case RACE_HUMAN_1:
+		case Race::Human:
 			return "Humans";
-		case RACE_BARBARIAN_2:
+		case Race::Barbarian:
 			return "Barbarians";
-		case RACE_ERUDITE_3:
+		case Race::Erudite:
 			return "Erudites";
-		case RACE_WOOD_ELF_4:
+		case Race::WoodElf:
 			return "Wood Elves";
-		case RACE_HIGH_ELF_5:
+		case Race::HighElf:
 			return "High Elves";
-		case RACE_DARK_ELF_6:
+		case Race::DarkElf:
 			return "Dark Elves";
-		case RACE_HALF_ELF_7:
+		case Race::HalfElf:
 			return "Half Elves";
-		case RACE_DWARF_8:
+		case Race::Dwarf:
 			return "Dwarves";
-		case RACE_TROLL_9:
+		case Race::Troll:
 			return "Trolls";
-		case RACE_OGRE_10:
+		case Race::Ogre:
 			return "Ogres";
-		case RACE_HALFLING_11:
+		case Race::Halfling:
 			return "Halflings";
-		case RACE_GNOME_12:
+		case Race::Gnome:
 			return "Gnomes";
-		case RACE_IKSAR_128:
+		case Race::Iksar:
 			return "Iksar";
-		case RACE_VAH_SHIR_130:
+		case Race::VahShir:
 			return "Vah Shir";
-		case RACE_FROGLOK_330:
+		case Race::Froglok2:
 			return "Frogloks";
-		case RACE_DRAKKIN_522:
+		case Race::Drakkin:
 			return "Drakkin";
 		default:
 			return "Races";

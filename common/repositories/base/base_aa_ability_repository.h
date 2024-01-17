@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_AA_ABILITY_REPOSITORY_H
@@ -33,6 +33,7 @@ public:
 		int32_t     first_rank_id;
 		uint8_t     enabled;
 		int8_t      reset_on_death;
+		int8_t      auto_grant_enabled;
 	};
 
 	static std::string PrimaryKey()
@@ -57,6 +58,7 @@ public:
 			"first_rank_id",
 			"enabled",
 			"reset_on_death",
+			"auto_grant_enabled",
 		};
 	}
 
@@ -77,6 +79,7 @@ public:
 			"first_rank_id",
 			"enabled",
 			"reset_on_death",
+			"auto_grant_enabled",
 		};
 	}
 
@@ -117,20 +120,21 @@ public:
 	{
 		AaAbility e{};
 
-		e.id               = 0;
-		e.name             = "";
-		e.category         = -1;
-		e.classes          = 131070;
-		e.races            = 65535;
-		e.drakkin_heritage = 127;
-		e.deities          = 131071;
-		e.status           = 0;
-		e.type             = 0;
-		e.charges          = 0;
-		e.grant_only       = 0;
-		e.first_rank_id    = -1;
-		e.enabled          = 1;
-		e.reset_on_death   = 0;
+		e.id                 = 0;
+		e.name               = "";
+		e.category           = -1;
+		e.classes            = 131070;
+		e.races              = 65535;
+		e.drakkin_heritage   = 127;
+		e.deities            = 131071;
+		e.status             = 0;
+		e.type               = 0;
+		e.charges            = 0;
+		e.grant_only         = 0;
+		e.first_rank_id      = -1;
+		e.enabled            = 1;
+		e.reset_on_death     = 0;
+		e.auto_grant_enabled = 0;
 
 		return e;
 	}
@@ -156,8 +160,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				aa_ability_id
 			)
 		);
@@ -166,20 +171,21 @@ public:
 		if (results.RowCount() == 1) {
 			AaAbility e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.name             = row[1] ? row[1] : "";
-			e.category         = static_cast<int32_t>(atoi(row[2]));
-			e.classes          = static_cast<int32_t>(atoi(row[3]));
-			e.races            = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage = static_cast<int32_t>(atoi(row[5]));
-			e.deities          = static_cast<int32_t>(atoi(row[6]));
-			e.status           = static_cast<int32_t>(atoi(row[7]));
-			e.type             = static_cast<int32_t>(atoi(row[8]));
-			e.charges          = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only       = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id    = static_cast<int32_t>(atoi(row[11]));
-			e.enabled          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.reset_on_death   = static_cast<int8_t>(atoi(row[13]));
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			return e;
 		}
@@ -227,6 +233,7 @@ public:
 		v.push_back(columns[11] + " = " + std::to_string(e.first_rank_id));
 		v.push_back(columns[12] + " = " + std::to_string(e.enabled));
 		v.push_back(columns[13] + " = " + std::to_string(e.reset_on_death));
+		v.push_back(columns[14] + " = " + std::to_string(e.auto_grant_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -262,6 +269,7 @@ public:
 		v.push_back(std::to_string(e.first_rank_id));
 		v.push_back(std::to_string(e.enabled));
 		v.push_back(std::to_string(e.reset_on_death));
+		v.push_back(std::to_string(e.auto_grant_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -305,6 +313,7 @@ public:
 			v.push_back(std::to_string(e.first_rank_id));
 			v.push_back(std::to_string(e.enabled));
 			v.push_back(std::to_string(e.reset_on_death));
+			v.push_back(std::to_string(e.auto_grant_enabled));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -338,20 +347,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaAbility e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.name             = row[1] ? row[1] : "";
-			e.category         = static_cast<int32_t>(atoi(row[2]));
-			e.classes          = static_cast<int32_t>(atoi(row[3]));
-			e.races            = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage = static_cast<int32_t>(atoi(row[5]));
-			e.deities          = static_cast<int32_t>(atoi(row[6]));
-			e.status           = static_cast<int32_t>(atoi(row[7]));
-			e.type             = static_cast<int32_t>(atoi(row[8]));
-			e.charges          = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only       = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id    = static_cast<int32_t>(atoi(row[11]));
-			e.enabled          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.reset_on_death   = static_cast<int8_t>(atoi(row[13]));
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -376,20 +386,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			AaAbility e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.name             = row[1] ? row[1] : "";
-			e.category         = static_cast<int32_t>(atoi(row[2]));
-			e.classes          = static_cast<int32_t>(atoi(row[3]));
-			e.races            = static_cast<int32_t>(atoi(row[4]));
-			e.drakkin_heritage = static_cast<int32_t>(atoi(row[5]));
-			e.deities          = static_cast<int32_t>(atoi(row[6]));
-			e.status           = static_cast<int32_t>(atoi(row[7]));
-			e.type             = static_cast<int32_t>(atoi(row[8]));
-			e.charges          = static_cast<int32_t>(atoi(row[9]));
-			e.grant_only       = static_cast<int8_t>(atoi(row[10]));
-			e.first_rank_id    = static_cast<int32_t>(atoi(row[11]));
-			e.enabled          = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.reset_on_death   = static_cast<int8_t>(atoi(row[13]));
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -448,6 +459,90 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const AaAbility &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.category));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.deities));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.grant_only));
+		v.push_back(std::to_string(e.first_rank_id));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.reset_on_death));
+		v.push_back(std::to_string(e.auto_grant_enabled));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<AaAbility> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.category));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.deities));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.grant_only));
+			v.push_back(std::to_string(e.first_rank_id));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.reset_on_death));
+			v.push_back(std::to_string(e.auto_grant_enabled));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_AA_ABILITY_REPOSITORY_H

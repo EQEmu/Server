@@ -8,7 +8,7 @@ void ShowBuriedCorpseCount(Client *c, const Seperator *sep)
 		t = c->GetTarget()->CastToClient();
 	}
 
-	const uint32 corpse_count = database.GetCharacterBuriedCorpseCount(t->CharacterID());
+	const int64 corpse_count = database.GetCharacterBuriedCorpseCount(t->CharacterID());
 
 	c->Message(
 		Chat::White,

@@ -524,7 +524,8 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	} else {
 		if (
 			(
-				GetINT() <= RuleI(Aggro, IntAggroThreshold) ||
+				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BT_Undead) ||
+				(GetINT() <= RuleI(Aggro, IntAggroThreshold)) ||
 				AlwaysAggro() ||
 				(
 					mob->IsClient() &&
@@ -983,14 +984,14 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 	float size_mod = GetSize();
 	float other_size_mod = other->GetSize();
 
-	if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
+	if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) { //For races with a fixed size
 		size_mod = 60.0f;
 	}
 	else if (size_mod < 6.0) {
 		size_mod = 8.0f;
 	}
 
-	if (other->GetRace() == RACE_LAVA_DRAGON_49 || other->GetRace() == RACE_WURM_158 || other->GetRace() == RACE_GHOST_DRAGON_196) { //For races with a fixed size
+	if (other->GetRace() == Race::LavaDragon || other->GetRace() == Race::Wurm || other->GetRace() == Race::GhostDragon) { //For races with a fixed size
 		other_size_mod = 60.0f;
 	}
 	else if (other_size_mod < 6.0) {
@@ -1011,11 +1012,11 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 		size_mod *= size_mod * 4;
 	}
 
-	if (other->GetRace() == RACE_VELIOUS_DRAGON_184)		// Lord Vyemm and other velious dragons
+	if (other->GetRace() == Race::VeliousDragon)		// Lord Vyemm and other velious dragons
 	{
 		size_mod *= 1.75;
 	}
-	if (other->GetRace() == RACE_DRAGON_SKELETON_122)		// Dracoliche in Fear.  Skeletal Dragon
+	if (other->GetRace() == Race::DragonSkeleton)		// Dracoliche in Fear.  Skeletal Dragon
 	{
 		size_mod *= 2.25;
 	}
@@ -1180,47 +1181,52 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 }
 
 //offensive spell aggro
-int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
+int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 {
-	if (IsNoDetrimentalSpellAggroSpell(spell_id))
+	if (IsNoDetrimentalSpellAggroSpell(spell_id)) {
 		return 0;
+	}
 
-	int32 AggroAmount = 0;
-	int32 nonModifiedAggro = 0;
-	uint16 slevel = GetLevel();
+	int32 aggro_amount = 0;
+	int32 non_modified_aggro = 0;
+	uint16 mob_level = GetLevel();
 	bool dispel = false;
 	bool on_hatelist = target ? target->CheckAggro(this) : false;
 	int proc_cap = RuleI(Aggro, MaxScalingProcAggro);
-	int64 hate_cap = isproc && proc_cap != -1 ? proc_cap : 1200;
+	int64 hate_cap = is_proc && proc_cap != -1 ? proc_cap : 1200;
 
 	int64 target_hp = target ? target->GetMaxHP() : 18000; // default to max
 	int64 default_aggro = 25;
-	if (target_hp >= 18000) // max
+	if (target_hp >= 18000) { // max
 		default_aggro = hate_cap;
-	else if (target_hp >= 390) // min, 390 is the first number with int division that is 26
+	} else if (target_hp >= 390) { // min, 390 is the first number with int division that is 26
 		default_aggro = target_hp / 15;
+	}
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		switch (spells[spell_id].effect_id[o]) {
 			case SE_CurrentHPOnce:
 			case SE_CurrentHP: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if(val < 0)
-					AggroAmount -= val;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if(val < 0) {
+					aggro_amount -= val;
+				}
 				break;
 			}
 			case SE_MovementSpeed: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount += default_aggro;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount += default_aggro;
+				}
 				break;
 			}
 			case SE_AttackSpeed:
 			case SE_AttackSpeed2:
 			case SE_AttackSpeed3: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 100)
-					AggroAmount += default_aggro;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 100) {
+					aggro_amount += default_aggro;
+				}
 				break;
 			}
 			case SE_Stun:
@@ -1229,16 +1235,17 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_Charm:
 			case SE_Fear:
 			case SE_Fearstun:
-				AggroAmount += default_aggro;
+				aggro_amount += default_aggro;
 				break;
 			case SE_Root:
-				AggroAmount += 10;
+				aggro_amount += 10;
 				break;
 			case SE_ACv2:
 			case SE_ArmorClass: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount += default_aggro;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount += default_aggro;
+				}
 				break;
 			}
 			case SE_ATK:
@@ -1254,31 +1261,34 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_INT:
 			case SE_WIS:
 			case SE_CHA: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount += 10;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount += 10;
+				}
 				break;
 			}
 			case SE_ResistAll: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount += 50;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount += 50;
+				}
 				break;
 			}
 			case SE_AllStats: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount += 70;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount += 70;
+				}
 				break;
 			}
 			case SE_BardAEDot:
-				AggroAmount += 10;
+				aggro_amount += 10;
 				break;
 			case SE_SpinTarget:
 			case SE_Amnesia:
 			case SE_Silence:
 			case SE_Destroy:
-				AggroAmount += default_aggro;
+				aggro_amount += default_aggro;
 				break;
 			// unsure -- leave them this for now
 			case SE_Harmony:
@@ -1300,7 +1310,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_DamageShield:
 			case SE_SpellDamageShield:
 			case SE_ReverseDS: {
-				AggroAmount += slevel * 2;
+				aggro_amount += mob_level * 2;
 				break;
 			}
 			// unsure -- leave them this for now
@@ -1308,9 +1318,10 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			case SE_ManaRegen_v2:
 			case SE_ManaPool:
 			case SE_CurrentEndurance: {
-				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
-				if (val < 0)
-					AggroAmount -= val * 2;
+				int64 val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
+				if (val < 0) {
+					aggro_amount -= val * 2;
+				}
 				break;
 			}
 			case SE_CancelMagic:
@@ -1320,37 +1331,41 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 				break;
 			case SE_ReduceHate:
 			case SE_InstantHate:
-				nonModifiedAggro = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], slevel, spell_id);
+				non_modified_aggro = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base_value[o], spells[spell_id].max_value[o], mob_level, spell_id);
 				break;
 		}
 	}
 
-	if (IsBardSong(spell_id) && AggroAmount > 40)
-		AggroAmount = 40; // bard songs seem to cap to 40 for most of their spells?
+	if (IsBardSong(spell_id) && aggro_amount > RuleI(Aggro, BardAggroCap)) {
+		aggro_amount = RuleI(Aggro, BardAggroCap);
+	}
 
-	if (dispel && target && target->GetHateAmount(this) < 100)
-		AggroAmount += 50;
+	if (dispel && target && target->GetHateAmount(this) < 100) {
+		aggro_amount += 50;
+	}
 
-	if (spells[spell_id].hate_added != 0) // overrides the hate (ex. tash), can be negative.
-		AggroAmount = spells[spell_id].hate_added;
+	if (spells[spell_id].hate_added != 0) { // overrides the hate (ex. tash), can be negative.
+		aggro_amount = spells[spell_id].hate_added;
+	}
 
-	if (GetOwner() && IsPet() && AggroAmount > 0)
-		AggroAmount = AggroAmount * RuleI(Aggro, PetSpellAggroMod) / 100;
+	if (GetOwner() && IsPet() && aggro_amount > 0) {
+		aggro_amount = aggro_amount * RuleI(Aggro, PetSpellAggroMod) / 100;
+	}
 
 	// hate focus ignored on first action for some reason
-	if (!on_hatelist && AggroAmount > 0) {
+	if (!on_hatelist && aggro_amount > 0) {
 		int HateMod = RuleI(Aggro, SpellAggroMod);
 		HateMod += GetFocusEffect(focusSpellHateMod, spell_id);
-
-		AggroAmount = (AggroAmount * HateMod) / 100;
+		aggro_amount = (aggro_amount * HateMod) / 100;
 	}
 
 	// initial aggro gets a bonus 100 besides for dispel or hate override
 	// We add this 100 in AddToHateList so we need to account for the oddities here
-	if (dispel && spells[spell_id].hate_added > 0 && !on_hatelist)
-		AggroAmount -= 100;
+	if (dispel && spells[spell_id].hate_added > 0 && !on_hatelist) {
+		aggro_amount -= 100;
+	}
 
-	return AggroAmount + spells[spell_id].bonus_hate + nonModifiedAggro;
+	return aggro_amount + spells[spell_id].bonus_hate + non_modified_aggro;
 }
 
 //healing and buffing aggro

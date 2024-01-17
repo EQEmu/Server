@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOOTTABLE_ENTRIES_REPOSITORY_H
@@ -124,8 +124,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				loottable_entries_id
 			)
 		);
@@ -134,12 +135,12 @@ public:
 		if (results.RowCount() == 1) {
 			LoottableEntries e{};
 
-			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.probability  = strtof(row[5], nullptr);
+			e.loottable_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.lootdrop_id  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.multiplier   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.droplimit    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.mindrop      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.probability  = row[5] ? strtof(row[5], nullptr) : 100;
 
 			return e;
 		}
@@ -274,12 +275,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoottableEntries e{};
 
-			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.probability  = strtof(row[5], nullptr);
+			e.loottable_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.lootdrop_id  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.multiplier   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.droplimit    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.mindrop      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.probability  = row[5] ? strtof(row[5], nullptr) : 100;
 
 			all_entries.push_back(e);
 		}
@@ -304,12 +305,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoottableEntries e{};
 
-			e.loottable_id = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.lootdrop_id  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.multiplier   = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.droplimit    = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.mindrop      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.probability  = strtof(row[5], nullptr);
+			e.loottable_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.lootdrop_id  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.multiplier   = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 1;
+			e.droplimit    = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.mindrop      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.probability  = row[5] ? strtof(row[5], nullptr) : 100;
 
 			all_entries.push_back(e);
 		}
@@ -368,6 +369,72 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LoottableEntries &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.loottable_id));
+		v.push_back(std::to_string(e.lootdrop_id));
+		v.push_back(std::to_string(e.multiplier));
+		v.push_back(std::to_string(e.droplimit));
+		v.push_back(std::to_string(e.mindrop));
+		v.push_back(std::to_string(e.probability));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LoottableEntries> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.loottable_id));
+			v.push_back(std::to_string(e.lootdrop_id));
+			v.push_back(std::to_string(e.multiplier));
+			v.push_back(std::to_string(e.droplimit));
+			v.push_back(std::to_string(e.mindrop));
+			v.push_back(std::to_string(e.probability));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOOTTABLE_ENTRIES_REPOSITORY_H

@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include <ctype.h>
@@ -160,7 +159,7 @@ bool UCSDatabase::VerifyMailKey(const std::string& characterName, int IPAddress,
 		LogInfo("No mailkeys found for [{}].", characterName.c_str());
 		return false;
 	}
-	
+
 	auto row = results.begin();
 
 	// The key is the client's IP address (expressed as 8 hex digits) and an 8 hex digit random string generated

@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_MERC_BUFFS_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseMercBuffsRepository {
 public:
@@ -188,25 +187,25 @@ public:
 		if (results.RowCount() == 1) {
 			MercBuffs e{};
 
-			e.MercBuffId         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.MercId             = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.SpellId            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.CasterLevel        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.DurationFormula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
-			e.PoisonCounters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.DiseaseCounters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.CurseCounters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.CorruptionCounters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.HitCount           = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.MeleeRune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.MagicRune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.MercBuffId         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.MercId             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.CorruptionCounters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			return e;
 		}
@@ -379,25 +378,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercBuffs e{};
 
-			e.MercBuffId         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.MercId             = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.SpellId            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.CasterLevel        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.DurationFormula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
-			e.PoisonCounters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.DiseaseCounters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.CurseCounters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.CorruptionCounters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.HitCount           = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.MeleeRune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.MagicRune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.MercBuffId         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.MercId             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.CorruptionCounters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -422,25 +421,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			MercBuffs e{};
 
-			e.MercBuffId         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.MercId             = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.SpellId            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.CasterLevel        = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.DurationFormula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.TicsRemaining      = static_cast<int32_t>(atoi(row[5]));
-			e.PoisonCounters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.DiseaseCounters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.CurseCounters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.CorruptionCounters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.HitCount           = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.MeleeRune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.MagicRune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune           = static_cast<int32_t>(atoi(row[13]));
-			e.caston_x           = static_cast<int32_t>(atoi(row[14]));
-			e.Persistent         = static_cast<int8_t>(atoi(row[15]));
-			e.caston_y           = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z           = static_cast<int32_t>(atoi(row[17]));
-			e.ExtraDIChance      = static_cast<int32_t>(atoi(row[18]));
+			e.MercBuffId         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.MercId             = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.SpellId            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.CasterLevel        = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.DurationFormula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.TicsRemaining      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.PoisonCounters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.DiseaseCounters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.CurseCounters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.CorruptionCounters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.HitCount           = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.MeleeRune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.MagicRune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune           = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.caston_x           = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.Persistent         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.caston_y           = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z           = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.ExtraDIChance      = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -499,6 +498,98 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const MercBuffs &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.MercBuffId));
+		v.push_back(std::to_string(e.MercId));
+		v.push_back(std::to_string(e.SpellId));
+		v.push_back(std::to_string(e.CasterLevel));
+		v.push_back(std::to_string(e.DurationFormula));
+		v.push_back(std::to_string(e.TicsRemaining));
+		v.push_back(std::to_string(e.PoisonCounters));
+		v.push_back(std::to_string(e.DiseaseCounters));
+		v.push_back(std::to_string(e.CurseCounters));
+		v.push_back(std::to_string(e.CorruptionCounters));
+		v.push_back(std::to_string(e.HitCount));
+		v.push_back(std::to_string(e.MeleeRune));
+		v.push_back(std::to_string(e.MagicRune));
+		v.push_back(std::to_string(e.dot_rune));
+		v.push_back(std::to_string(e.caston_x));
+		v.push_back(std::to_string(e.Persistent));
+		v.push_back(std::to_string(e.caston_y));
+		v.push_back(std::to_string(e.caston_z));
+		v.push_back(std::to_string(e.ExtraDIChance));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<MercBuffs> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.MercBuffId));
+			v.push_back(std::to_string(e.MercId));
+			v.push_back(std::to_string(e.SpellId));
+			v.push_back(std::to_string(e.CasterLevel));
+			v.push_back(std::to_string(e.DurationFormula));
+			v.push_back(std::to_string(e.TicsRemaining));
+			v.push_back(std::to_string(e.PoisonCounters));
+			v.push_back(std::to_string(e.DiseaseCounters));
+			v.push_back(std::to_string(e.CurseCounters));
+			v.push_back(std::to_string(e.CorruptionCounters));
+			v.push_back(std::to_string(e.HitCount));
+			v.push_back(std::to_string(e.MeleeRune));
+			v.push_back(std::to_string(e.MagicRune));
+			v.push_back(std::to_string(e.dot_rune));
+			v.push_back(std::to_string(e.caston_x));
+			v.push_back(std::to_string(e.Persistent));
+			v.push_back(std::to_string(e.caston_y));
+			v.push_back(std::to_string(e.caston_z));
+			v.push_back(std::to_string(e.ExtraDIChance));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_MERC_BUFFS_REPOSITORY_H

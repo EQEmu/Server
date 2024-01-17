@@ -39,6 +39,12 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 #include "bot.h"
 
+#include "../common/repositories/character_alternate_abilities_repository.h"
+#include "../common/repositories/aa_ability_repository.h"
+#include "../common/repositories/aa_ranks_repository.h"
+#include "../common/repositories/aa_rank_effects_repository.h"
+#include "../common/repositories/aa_rank_prereqs_repository.h"
+
 extern WorldServer worldserver;
 extern QueryServ* QServ;
 
@@ -510,38 +516,41 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 	delete made_npc;
 }
 
-void Client::ResetAA() {
+void Client::ResetAA()
+{
 	SendClearAA();
 	RefundAA();
 
 	memset(&m_pp.aa_array[0], 0, sizeof(AA_Array) * MAX_PP_AA_ARRAY);
 
-	int i = 0;
-	for(auto &rank_value : aa_ranks) {
-		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value.first, rank_value.second.first);
-		auto ability = ability_rank.first;
-		auto rank = ability_rank.second;
+	int slot_id = 0;
 
-		if(!rank) {
+	for (auto& rank_value: aa_ranks) {
+		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value.first, rank_value.second.first);
+		auto ability      = ability_rank.first;
+		auto rank         = ability_rank.second;
+
+		if (!rank) {
 			continue;
 		}
 
-		m_pp.aa_array[i].AA = rank_value.first;
-		m_pp.aa_array[i].value = rank_value.second.first;
-		m_pp.aa_array[i].charges = rank_value.second.second;
-		++i;
+		m_pp.aa_array[slot_id].AA      = rank_value.first;
+		m_pp.aa_array[slot_id].value   = rank_value.second.first;
+		m_pp.aa_array[slot_id].charges = rank_value.second.second;
+		++slot_id;
 	}
 
-	for(int i = 0; i < _maxLeaderAA; ++i)
-		m_pp.leader_abilities.ranks[i] = 0;
+	for (int slot_id = 0; slot_id < _maxLeaderAA; ++slot_id) {
+		m_pp.leader_abilities.ranks[slot_id] = 0;
+	}
 
 	m_pp.group_leadership_points = 0;
-	m_pp.raid_leadership_points = 0;
-	m_pp.group_leadership_exp = 0;
-	m_pp.raid_leadership_exp = 0;
+	m_pp.raid_leadership_points  = 0;
+	m_pp.group_leadership_exp    = 0;
+	m_pp.raid_leadership_exp     = 0;
 
 	database.DeleteCharacterAAs(CharacterID());
-	database.DeleteCharacterLeadershipAAs(CharacterID());
+	database.DeleteCharacterLeadershipAbilities(CharacterID());
 }
 
 void Client::SendClearAA()
@@ -833,31 +842,31 @@ void Client::RefundAA() {
 	int refunded = 0;
 
 	auto rank_value = aa_ranks.begin();
-	while(rank_value != aa_ranks.end()) {
+	while (rank_value != aa_ranks.end()) {
 		auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(rank_value->first, rank_value->second.first);
-		auto ability = ability_rank.first;
-		auto rank = ability_rank.second;
+		auto ability      = ability_rank.first;
+		auto rank         = ability_rank.second;
 
-		if(!ability) {
+		if (!ability) {
 			++rank_value;
 			continue;
 		}
 
-		if(ability->charges > 0 && rank_value->second.second < 1) {
+		if (ability->charges > 0 && rank_value->second.second < 1) {
 			++rank_value;
 			continue;
 		}
 
-		if(ability->grant_only) {
+		if (ability->grant_only) {
 			++rank_value;
 			continue;
 		}
 
 		refunded += rank->total_cost;
-		rank_value = aa_ranks.erase(rank_value);
+		rank_value        = aa_ranks.erase(rank_value);
 	}
 
-	if(refunded > 0) {
+	if (refunded > 0) {
 		m_pp.aapoints += refunded;
 		SaveAA();
 		Save();
@@ -1438,40 +1447,42 @@ void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 
 bool ZoneDatabase::LoadAlternateAdvancement(Client *c) {
 	c->ClearAAs();
-	std::string query = StringFormat(
-		"SELECT "
-		"aa_id, "
-		"aa_value, "
-		"charges "
-		"FROM "
-		"`character_alternate_abilities` "
-		"WHERE `id` = %u", c->CharacterID());
-	MySQLRequestResult results = database.QueryDatabase(query);
 
-	int i = 0;
-	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 aa = Strings::ToUnsignedInt(row[0]);
-		uint32 value = Strings::ToUnsignedInt(row[1]);
-		uint32 charges = Strings::ToUnsignedInt(row[2]);
+	const auto& l = CharacterAlternateAbilitiesRepository::GetWhere(
+		database,
+		fmt::format(
+			"`id` = {}",
+			c->CharacterID()
+		)
+	);
 
-		auto rank = zone->GetAlternateAdvancementRank(aa);
-		if(!rank) {
+	uint32 slot_id = 0;
+
+	for (const auto& e : l) {
+		const uint16 aa_id    = e.aa_id;
+		const uint16 aa_value = e.aa_value;
+		const uint16 charges  = e.charges;
+
+		auto rank = zone->GetAlternateAdvancementRank(aa_id);
+		if (!rank) {
 			continue;
 		}
 
 		auto ability = rank->base_ability;
-		if(!ability) {
+		if (!ability) {
 			continue;
 		}
 
-		rank = ability->GetRankByPointsSpent(value);
+		rank = ability->GetRankByPointsSpent(aa_value);
 
-		if(c->CanUseAlternateAdvancementRank(rank)) {
-			c->GetPP().aa_array[i].AA = aa;
-			c->GetPP().aa_array[i].value = value;
-			c->GetPP().aa_array[i].charges = charges;
-			c->SetAA(aa, value, charges);
-			i++;
+		if (c->CanUseAlternateAdvancementRank(rank)) {
+			c->GetPP().aa_array[slot_id].AA      = aa_id;
+			c->GetPP().aa_array[slot_id].value   = aa_value;
+			c->GetPP().aa_array[slot_id].charges = charges;
+
+			c->SetAA(aa_id, aa_value, charges);
+
+			slot_id++;
 		}
 	}
 
@@ -1556,56 +1567,61 @@ uint32 Mob::GetAAByAAID(uint32 aa_id, uint32 *charges) const {
 	return 0;
 }
 
-bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges) {
-	if(zone) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbilityByRank(rank_id);
+bool Mob::SetAA(uint32 rank_id, uint32 new_value, uint32 charges)
+{
+	if (zone) {
+		auto a = zone->GetAlternateAdvancementAbilityByRank(rank_id);
 
-		if(!ability) {
+		if (!a) {
 			return false;
 		}
 
-		if(new_value > ability->GetMaxLevel(this)) {
+		if(new_value > a->GetMaxLevel(this)) {
 			return false;
 		}
 
-		aa_ranks[ability->id] = std::make_pair(new_value, charges);
+		aa_ranks[a->id] = std::make_pair(new_value, charges);
 	}
 
 	return true;
 }
 
 
-bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
+bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
+{
 	if (!rank) {
 		return false;
 	}
 
-	AA::Ability *ability = rank->base_ability;
+	const auto a = rank->base_ability;
 
-	if(!ability)
-		return false;
-
-	if(!(ability->classes & (1 << GetClass()))) {
+	if (!a) {
 		return false;
 	}
 
-	// Passive and Active Shroud AAs
-	// For now we skip them
-	if(ability->category == 3 || ability->category == 4) {
+	if (!(a->classes & (1 << GetClass()))) {
+		return false;
+	}
+
+	// Passive and Active Shroud AAs, skip for now
+	if (
+		a->category == AACategory::ShroudPassive ||
+		a->category == AACategory::ShroudActive
+	) {
 		return false;
 	}
 
 	//the one titanium hack i will allow
 	//just to make sure we dont crash the client with newer aas
 	//we'll exclude any expendable ones
-	if(IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskTitaniumAndEarlier) {
-		if(ability->charges > 0) {
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskTitaniumAndEarlier) {
+		if (a->charges > 0) {
 			return false;
 		}
 	}
 
-	int expansion = RuleI(Expansion, CurrentExpansion);
-	bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
+	const int  expansion        = RuleI(Expansion, CurrentExpansion);
+	const bool use_expansion_aa = RuleB(Expansion, UseCurrentExpansionAAOnly);
 	if (use_expansion_aa && expansion >= 0) {
 		if (rank->expansion > expansion) {
 			return false;
@@ -1617,36 +1633,35 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 		if (rank->expansion && !(CastToClient()->GetPP().expansions & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
-	}
-	else if (IsBot()) {
+	} else if (IsBot()) {
 		if (rank->expansion && !(CastToBot()->GetExpansionBitmask() & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
-	}
-	else {
+	} else {
 		if (rank->expansion && !(RuleI(World, ExpansionSettings) & (1 << (rank->expansion - 1)))) {
 			return false;
 		}
 	}
 
 	auto race = GetPlayerRaceValue(GetBaseRace());
-	race = race > 16 ? 1 : race;
-	if(!(ability->races & (1 << (race - 1)))) {
+
+	race = race > PLAYER_RACE_COUNT ? Race::Human : race;
+
+	if (!(a->races & (1 << (race - 1)))) {
 		return false;
 	}
 
-	auto deity = GetDeityBit();
-	if(!(ability->deities & deity)) {
+	const auto deity = GetDeityBit();
+	if (!(a->deities & deity)) {
 		return false;
 	}
 
-	if(IsClient() && CastToClient()->Admin() < ability->status) {
+	if (IsClient() && CastToClient()->Admin() < a->status) {
 		return false;
 	}
 
-	if(GetBaseRace() == 522) {
-		//drakkin_heritage
-		if(!(ability->drakkin_heritage & (1 << GetDrakkinHeritage()))) {
+	if (GetBaseRace() == Race::Drakkin) {
+		if (!(a->drakkin_heritage & (1 << GetDrakkinHeritage()))) {
 			return false;
 		}
 	}
@@ -1654,13 +1669,15 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	return true;
 }
 
-bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant) {
-	AA::Ability *ability = rank->base_ability;
+bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant)
+{
+	auto a = rank->base_ability;
 
-	if(!ability)
+	if (!a) {
 		return false;
+	}
 
-	if(!CanUseAlternateAdvancementRank(rank)) {
+	if (!CanUseAlternateAdvancementRank(rank)) {
 		return false;
 	}
 
@@ -1668,54 +1685,53 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 		return false;
 	}
 
-	//You can't purchase grant only AAs they can only be assigned
-	if(check_grant && ability->grant_only) {
+	// You cannot purchase grant only AAs they can only be assigned
+	if (check_grant && a->grant_only) {
 		return false;
 	}
 
-	//check level req
-	if(rank->level_req > GetLevel()) {
+	if (rank->level_req > GetLevel()) {
 		return false;
 	}
 
-	uint32 current_charges = 0;
-	auto points = GetAA(rank->id, &current_charges);
+	uint32       current_charges = 0;
+	const uint32 points          = GetAA(rank->id, &current_charges);
 
 	//check that we are on previous rank already (if exists)
 	//grant ignores the req to own the previous rank.
-	if(check_grant && rank->prev) {
-		if(points != rank->prev->current_value) {
+	if (check_grant && rank->prev) {
+		if (points != rank->prev->current_value) {
 			return false;
 		}
 	}
 
 	//check that we aren't already on this rank or one ahead of us
-	if(points >= rank->current_value) {
+	if (points >= rank->current_value) {
 		return false;
 	}
 
 	//if expendable only let us purchase if we have no charges already
 	//not quite sure on how this functions client side atm
 	//I intend to look into it later to make sure the behavior is right
-	if(ability->charges > 0 && current_charges > 0) {
+	if (a->charges > 0 && current_charges > 0) {
 		return false;
 	}
 
 	//check prereqs
-	for(auto &prereq : rank->prereqs) {
+	for (auto &prereq: rank->prereqs) {
 		AA::Ability *prereq_ability = zone->GetAlternateAdvancementAbility(prereq.first);
 
-		if(prereq_ability) {
+		if (prereq_ability) {
 			auto ranks = GetAA(prereq_ability->first_rank_id);
-			if(ranks < prereq.second) {
+			if (ranks < prereq.second) {
 				return false;
 			}
 		}
 	}
 
 	//check price, if client
-	if(check_price && IsClient()) {
-		if(rank->cost > CastToClient()->GetAAPoints()) {
+	if (check_price && IsClient()) {
+		if (rank->cost > CastToClient()->GetAAPoints()) {
 			return false;
 		}
 	}
@@ -1782,126 +1798,141 @@ void Zone::LoadAlternateAdvancement() {
 	}
 }
 
-bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
-													std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks)
+bool ZoneDatabase::LoadAlternateAdvancementAbilities(
+	std::unordered_map<int, std::unique_ptr<AA::Ability>> &abilities,
+	std::unordered_map<int, std::unique_ptr<AA::Rank>> &ranks
+)
 {
 	abilities.clear();
-	std::string query = "SELECT id, name, category, classes, races, deities, drakkin_heritage, status, type, charges, "
-		"grant_only, reset_on_death, auto_grant_enabled, first_rank_id FROM aa_ability WHERE enabled = 1";
-	auto results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			auto ability = new AA::Ability;
-			ability->id = Strings::ToUnsignedInt(row[0]);
-			ability->name = row[1];
-			ability->category = Strings::ToInt(row[2]);
-			//EQ client has classes left shifted by one bit for some odd reason
-			ability->classes = Strings::ToInt(row[3]) << 1;
-			ability->races = Strings::ToInt(row[4]);
-			ability->deities = Strings::ToInt(row[5]);
-			ability->drakkin_heritage = Strings::ToInt(row[6]);
-			ability->status = Strings::ToInt(row[7]);
-			ability->type = Strings::ToInt(row[8]);
-			ability->charges = Strings::ToInt(row[9]);
-			ability->grant_only = Strings::ToBool(row[10]);
-			ability->reset_on_death = Strings::ToBool(row[11]);
-			ability->auto_grant_enabled = Strings::ToBool(row[12]);
-			ability->first_rank_id = Strings::ToInt(row[13]);
-			ability->first = nullptr;
 
-			abilities[ability->id] = std::unique_ptr<AA::Ability>(ability);
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Abilities");
+	const auto& aa_abilities = AaAbilityRepository::GetWhere(*this, "`enabled` = 1");
+
+	if (aa_abilities.empty()) {
+		LogError("Failed to load Alternate Advancement Abilities.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Abilities", Strings::Commify((int)abilities.size()));
+	for (const auto& e : aa_abilities) {
+		auto a = new AA::Ability;
+
+		a->id                 = e.id;
+		a->name               = e.name;
+		a->category           = e.category;
+		a->classes            = e.classes << 1; // EQ client has classes left shifted by one bit
+		a->races              = e.races;
+		a->deities            = e.deities;
+		a->drakkin_heritage   = e.drakkin_heritage;
+		a->status             = e.status;
+		a->type               = e.type;
+		a->charges            = e.charges;
+		a->grant_only         = e.grant_only;
+		a->reset_on_death     = e.reset_on_death;
+		a->auto_grant_enabled = e.auto_grant_enabled;
+		a->first_rank_id      = e.first_rank_id;
+		a->first              = nullptr;
+
+		abilities[a->id] = std::unique_ptr<AA::Ability>(a);
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Abilit{}.",
+		Strings::Commify(abilities.size()),
+		abilities.size() != 1 ? "ies" : "y"
+	);
+
 	ranks.clear();
 
-	query = "SELECT id, upper_hotkey_sid, lower_hotkey_sid, title_sid, desc_sid, cost, level_req, spell, spell_type, recast_time, "
-		"next_id, expansion FROM aa_ranks";
+	const auto& aa_ranks = AaRanksRepository::All(*this);
 
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			auto rank = new AA::Rank;
-			rank->id = Strings::ToUnsignedInt(row[0]);
-			rank->upper_hotkey_sid = Strings::ToInt(row[1]);
-			rank->lower_hotkey_sid = Strings::ToInt(row[2]);
-			rank->title_sid = Strings::ToInt(row[3]);
-			rank->desc_sid = Strings::ToInt(row[4]);
-			rank->cost = Strings::ToInt(row[5]);
-			rank->level_req = Strings::ToInt(row[6]);
-			rank->spell = Strings::ToInt(row[7]);
-			rank->spell_type = Strings::ToInt(row[8]);
-			rank->recast_time = Strings::ToInt(row[9]);
-			rank->next_id = Strings::ToInt(row[10]);
-			rank->expansion = Strings::ToInt(row[11]);
-			rank->base_ability = nullptr;
-			rank->total_cost = 0;
-			rank->prev_id = -1;
-			rank->next = nullptr;
-			rank->prev = nullptr;
-
-			ranks[rank->id] = std::unique_ptr<AA::Rank>(rank);
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Ranks");
+	if (aa_ranks.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Ranks.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Ranks", Strings::Commify((int)ranks.size()));
+	for (const auto &e : aa_ranks) {
+		auto r = new AA::Rank;
 
-	query = "SELECT rank_id, slot, effect_id, base1, base2 FROM aa_rank_effects";
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			AA::RankEffect effect;
-			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
-			effect.slot = Strings::ToUnsignedInt(row[1]);
-			effect.effect_id = Strings::ToInt(row[2]);
-			effect.base_value = Strings::ToInt(row[3]);
-			effect.limit_value = Strings::ToInt(row[4]);
+		r->id               = e.id;
+		r->upper_hotkey_sid = e.upper_hotkey_sid;
+		r->lower_hotkey_sid = e.lower_hotkey_sid;
+		r->title_sid        = e.title_sid;
+		r->desc_sid         = e.desc_sid;
+		r->cost             = e.cost;
+		r->level_req        = e.level_req;
+		r->spell            = e.spell;
+		r->spell_type       = e.spell_type;
+		r->recast_time      = e.recast_time;
+		r->next_id          = e.next_id;
+		r->expansion        = e.expansion;
+		r->base_ability     = nullptr;
+		r->total_cost       = 0;
+		r->prev_id          = -1;
+		r->next             = nullptr;
+		r->prev             = nullptr;
 
-			if(effect.slot < 1)
-				continue;
+		ranks[r->id] = std::unique_ptr<AA::Rank>(r);
+	}
 
-			if(ranks.count(rank_id) > 0) {
-				AA::Rank *rank = ranks[rank_id].get();
-				rank->effects.push_back(effect);
-			}
-		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Rank Effects");
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank{}.",
+		Strings::Commify(ranks.size()),
+		ranks.size() != 1 ? "s" : ""
+	);
+
+	const auto& aa_rank_effects = AaRankEffectsRepository::All(*this);
+
+	if (aa_rank_effects.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Rank Effects.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Effects", Strings::Commify(results.RowCount()));
+	for (const auto &e : aa_rank_effects) {
+		AA::RankEffect f;
 
-	query = "SELECT rank_id, aa_id, points FROM aa_rank_prereqs";
-	results = QueryDatabase(query);
-	if(results.Success()) {
-		for(auto row = results.begin(); row != results.end(); ++row) {
-			uint32 rank_id = Strings::ToUnsignedInt(row[0]);
-			int aa_id = Strings::ToInt(row[1]);
-			int points = Strings::ToInt(row[2]);
+		f.slot        = e.slot;
+		f.effect_id   = e.effect_id;
+		f.base_value  = e.base1;
+		f.limit_value = e.base2;
 
-			if(aa_id <= 0 || points <= 0) {
-				continue;
-			}
-
-			if(ranks.count(rank_id) > 0) {
-				AA::Rank *rank = ranks[rank_id].get();
-				rank->prereqs[aa_id] = points;
-			}
+		if (f.slot < 1) {
+			continue;
 		}
-	} else {
-		LogError("Failed to load Alternate Advancement Ability Rank Prereqs");
+
+		if (ranks.count(e.rank_id) > 0) {
+			AA::Rank* r = ranks[e.rank_id].get();
+			r->effects.push_back(f);
+		}
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank Effect{}.",
+		Strings::Commify(aa_rank_effects.size()),
+		aa_rank_effects.size() != 1 ? "s" : ""
+	);
+
+	const auto& aa_rank_prereqs = AaRankPrereqsRepository::All(*this);
+
+	if (aa_rank_prereqs.empty()) {
+		LogError("Failed to load Alternate Advancement Ability Rank Prerequisites.");
 		return false;
 	}
 
-	LogInfo("Loaded [{}] Alternate Advancement Ability Rank Prereqs", Strings::Commify(results.RowCount()));
+	for (const auto& e : aa_rank_prereqs) {
+		if (e.aa_id <= 0 || e.points <= 0) {
+			continue;
+		}
+
+		if (ranks.count(e.rank_id) > 0) {
+			AA::Rank* rank = ranks[e.rank_id].get();
+			rank->prereqs[e.aa_id] = e.points;
+		}
+	}
+
+	LogInfo(
+		"Loaded [{}] Alternate Advancement Ability Rank Prerequisite{}.",
+		Strings::Commify(aa_rank_prereqs.size()),
+		aa_rank_prereqs.size() != 1 ? "s" : ""
+	);
 
 	return true;
 }

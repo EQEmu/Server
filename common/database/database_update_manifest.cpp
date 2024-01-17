@@ -5016,7 +5016,7 @@ CREATE TABLE `spawn2_disabled` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4;
 INSERT INTO spawn2_disabled (spawn2_id, disabled) SELECT id, 1 FROM spawn2 WHERE enabled = 0;
 ALTER TABLE `spawn2` DROP COLUMN `enabled`;
-)"
+)",
 	},
 	ManifestEntry{
 		.version = 9242,
@@ -5028,7 +5028,8 @@ ALTER TABLE `spawn2` DROP COLUMN `enabled`;
 ALTER TABLE `spawnentry`
 ADD COLUMN `min_time` smallint(4) NOT NULL DEFAULT 0 AFTER `condition_value_filter`,
 ADD COLUMN `max_time` smallint(4) NOT NULL DEFAULT 0 AFTER `min_time`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9243,
@@ -5082,7 +5083,8 @@ INSERT INTO
 
 DROP TABLE `starting_items`;
 RENAME TABLE `starting_items_new` TO `starting_items`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9244,
@@ -5092,7 +5094,8 @@ RENAME TABLE `starting_items_new` TO `starting_items`;
 		.match = "0000-00-00 00:00:00",
 		.sql = R"(
 ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
-		)"
+		)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9245,
@@ -5104,7 +5107,8 @@ ALTER TABLE `items` MODIFY COLUMN `updated` datetime NULL DEFAULT NULL;
 ALTER TABLE `object` CHANGE COLUMN `unknown08` `size_percentage` float NOT NULL DEFAULT 0 AFTER `icon`;
 ALTER TABLE `object` CHANGE COLUMN `unknown10` `solid_type` mediumint(5) NOT NULL DEFAULT 0 AFTER `size`;
 ALTER TABLE `object` CHANGE COLUMN `unknown20` `incline` int(11) NOT NULL DEFAULT 0 AFTER `solid_type`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9246,
@@ -5133,9 +5137,101 @@ CHANGE COLUMN `slot` `inventory_slot` mediumint(9) NOT NULL DEFAULT -1 AFTER `st
 
 ALTER TABLE `starting_items`
 CHANGE COLUMN `temporary` `class_list` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `id`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9248,
+		.description = "2023_12_22_drop_npc_emotes_index.sql",
+		.check = "show index from npc_emotes where key_name = 'emoteid'",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_emotes` DROP INDEX `emoteid`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9249,
+		.description = "2023_12_26_add_tasks_enabled_column.sql",
+		.check = "SHOW COLUMNS FROM `tasks` LIKE 'enabled'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `tasks`
+ADD COLUMN `enabled` smallint NULL DEFAULT 1 AFTER `faction_amount`
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9250,
+		.description = "2023_01_06_task_activities_list_group.sql",
+		.check = "SHOW COLUMNS FROM `task_activities` LIKE 'list_group'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `task_activities`
+	ADD COLUMN `list_group` TINYINT UNSIGNED NOT NULL DEFAULT '0' AFTER `optional`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9251,
+		.description = "2023_01_12_instance_list_notes.sql",
+		.check = "SHOW COLUMNS FROM `instance_list` LIKE 'notes'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `instance_list`
+	ADD COLUMN `notes` varchar(50) NOT NULL DEFAULT '' AFTER `never_expires`;
+)",
+	},
+	ManifestEntry{
+		.version = 9252,
+		.description = "2024_01_07_zone_idle_when_empty.sql",
+		.check = "SHOW COLUMNS FROM `zone` LIKE 'idle_when_empty'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `zone`
+ADD COLUMN `idle_when_empty` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `min_lava_damage`,
+ADD COLUMN `seconds_before_idle` int(11) UNSIGNED NOT NULL DEFAULT 60 AFTER `idle_when_empty`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9253,
+		.description = "2024_01_13_merchantlist_slot.sql",
+		.check = "SHOW COLUMNS FROM `merchantlist` LIKE 'slot'",
+		.condition = "missing",
+		.match = "unsigned",
+		.sql = R"(
+ALTER TABLE `merchantlist`
+	MODIFY COLUMN `slot` int(11) UNSIGNED NOT NULL DEFAULT 0
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9254,
+		.description = "2024_01_13_merchantlist_temp_slot.sql",
+		.check = "SHOW COLUMNS FROM `merchantlist_temp` LIKE 'slot'",
+		.condition = "contains",
+		.match = "tinyint",
+		.sql = R"(
+ALTER TABLE `merchantlist_temp`
+	MODIFY COLUMN `slot` int(11) UNSIGNED NOT NULL DEFAULT 0
+)"
+	},
+	ManifestEntry{
+		.version = 9255,
+		.description = "2024_01_13_drop_item_tick_deprecated.sql",
+		.check = "show tables like 'item_tick'",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+DROP TABLE IF EXISTS item_tick
 )"
 	}
-
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

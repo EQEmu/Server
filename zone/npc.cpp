@@ -32,6 +32,11 @@
 #include "../common/say_link.h"
 #include "../common/data_verification.h"
 
+#include "../common/repositories/npc_types_repository.h"
+#include "../common/repositories/spawngroup_repository.h"
+#include "../common/repositories/spawn2_repository.h"
+#include "../common/repositories/spawnentry_repository.h"
+
 #include "client.h"
 #include "entity.h"
 #include "npc.h"
@@ -155,10 +160,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	// lava dragon is a fixed size model and should always use its default
 	// otherwise pathing issues
-	if (race == RACE_LAVA_DRAGON_49) {
+	if (race == Race::LavaDragon) {
 		size = 5;
 	}
-	if (race == RACE_WURM_158) {
+	if (race == Race::Wurm) {
 		size = 15;
 	}
 
@@ -295,8 +300,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	m_record_loot_stats  = false;
 
 	if (GetClass() == Class::MercenaryLiaison && RuleB(Mercs, AllowMercs)) {
-		LoadMercTypes();
-		LoadMercs();
+		LoadMercenaryTypes();
+		LoadMercenaries();
 	}
 
 	SpellFocusDMG  = 0;
@@ -602,14 +607,14 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
 			itemlist.erase(cur);
 			UpdateEquipmentLight();
-			if (UpdateActiveLight()) { SendAppearancePacket(AT_Light, GetActiveLightType()); }
+			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
 			if (item->charges <= quantity) {
 				itemlist.erase(cur);
 				UpdateEquipmentLight();
-				if (UpdateActiveLight()) { SendAppearancePacket(AT_Light, GetActiveLightType()); }
+				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
 			}
 			else {
 				item->charges -= quantity;
@@ -655,7 +660,7 @@ void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight()) {
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 }
 
@@ -671,7 +676,7 @@ void NPC::ClearItemList() {
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight())
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 }
 
 void NPC::QueryLoot(Client* to, bool is_pet_query)
@@ -820,32 +825,22 @@ uint16 NPC::GetFirstSlotByItemID(uint32 item_id) {
 	return 0;
 }
 
-void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
-	if(in_copper >= 0)
-		copper = in_copper;
-	else
-		copper = 0;
-
-	if(in_silver >= 0)
-		silver = in_silver;
-	else
-		silver = 0;
-
-	if(in_gold >= 0)
-		gold = in_gold;
-	else
-		gold = 0;
-
-	if(in_platinum >= 0)
-		platinum = in_platinum;
-	else
-		platinum = 0;
+void NPC::AddCash(
+	uint32 in_copper,
+	uint32 in_silver,
+	uint32 in_gold,
+	uint32 in_platinum
+) {
+	copper   = in_copper >= 0 ? in_copper : 0;
+	silver   = in_silver >= 0 ? in_silver : 0;
+	gold     = in_gold >= 0 ? in_gold : 0;
+	platinum = in_platinum >= 0 ? in_platinum : 0;
 }
 
 void NPC::RemoveCash() {
-	copper = 0;
-	silver = 0;
-	gold = 0;
+	copper   = 0;
+	silver   = 0;
+	gold     = 0;
 	platinum = 0;
 }
 
@@ -1118,9 +1113,9 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool start_spawn_timer) {
-	const auto emote_id = GetEmoteID();
+	const uint32 emote_id = GetEmoteID();
 	if (emote_id) {
-		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
+		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emote_id);
 	}
 
 	if (IsNPC()) {
@@ -1220,7 +1215,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = NEUTER;
+	npc_type->gender = Gender::Neuter;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 200;
@@ -1469,96 +1464,80 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 }
 
 uint32 ZoneDatabase::CreateNewNPCCommand(
-	const char *zone,
-	uint32 zone_version,
-	Client *client,
-	NPC *spawn,
+	const std::string& zone,
+	uint32 instance_version,
+	Client* c,
+	NPC* n,
 	uint32 extra
 )
 {
-	uint32 npc_type_id = 0;
+	auto e = NpcTypesRepository::NewEntity();
 
-	if (extra && client && client->GetZoneID()) {
-		// Set an npc_type ID within the standard range for the current zone if possible (zone_id * 1000)
-		int starting_npc_id = client->GetZoneID() * 1000;
+	e.id              = NpcTypesRepository::GetOpenIDInZoneRange(*this, c->GetZoneID());
+	e.name            = Strings::RemoveNumbers(n->GetName());
+	e.level           = n->GetLevel();
+	e.race            = n->GetRace();
+	e.class_          = n->GetClass();
+	e.hp              = n->GetMaxHP();
+	e.gender          = n->GetGender();
+	e.texture         = n->GetTexture();
+	e.helmtexture     = n->GetHelmTexture();
+	e.size            = n->GetSize();
+	e.loottable_id    = n->GetLoottableID();
+	e.merchant_id     = n->MerchantType;
+	e.runspeed        = n->GetRunspeed();
+	e.prim_melee_type = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	e.sec_melee_type  = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
 
-		std::string query = StringFormat(
-			"SELECT MAX(id) FROM npc_types WHERE id >= %i AND id < %i",
-			starting_npc_id,
-			starting_npc_id + 1000
-		);
+	e = NpcTypesRepository::InsertOne(*this, e);
 
-		auto results = QueryDatabase(query);
-		if (results.Success()) {
-			if (results.RowCount() != 0) {
-				auto row = results.begin();
-				npc_type_id = Strings::ToInt(row[0]) + 1;
-				// Prevent the npc_type id from exceeding the range for this zone
-				if (npc_type_id >= (starting_npc_id + 1000)) {
-					npc_type_id = 0;
-				}
-			}
-			else { // No npc_type IDs set in this range yet
-				npc_type_id = starting_npc_id;
-			}
-		}
-	}
-
-	char tmpstr[64];
-	EntityList::RemoveNumbers(strn0cpy(tmpstr, spawn->GetName(), sizeof(tmpstr)));
-	std::string query;
-	if (npc_type_id) {
-		query = StringFormat("INSERT INTO npc_types (id, name, level, race, class, hp, gender, "
-				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
-				     "runspeed, prim_melee_type, sec_melee_type) "
-					 "VALUES(%i, \"%s\" , %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %i, %i, %i)",
-				     npc_type_id, tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(),
-				     spawn->GetMaxHP(), spawn->GetGender(), spawn->GetTexture(),
-				     spawn->GetHelmTexture(), spawn->GetSize(), spawn->GetLoottableID(),
-				     spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
-			return false;
-		}
-		npc_type_id = results.LastInsertedID();
-	} else {
-		query = StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
-				     "texture, helmtexture, size, loottable_id, merchant_id, face, "
-				     "runspeed, prim_melee_type, sec_melee_type) "
-					 "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %i, %i, %i)",
-				     tmpstr, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
-				     spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
-				     spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
-			return false;
-		}
-		npc_type_id = results.LastInsertedID();
-	}
-
-	query = StringFormat("INSERT INTO spawngroup (id, name) VALUES(%i, '%s-%s')", 0, zone, spawn->GetName());
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-	uint32 spawngroupid = results.LastInsertedID();
-
-	spawn->SetSpawnGroupId(spawngroupid);
-	spawn->SetNPCTypeID(npc_type_id);
-
-	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), 1200, spawn->GetHeading(),
-			     spawngroupid);
-	results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!e.id) {
 		return false;
 	}
 
-	query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)", spawngroupid,
-			     npc_type_id, 100);
-	results = QueryDatabase(query);
-	if (!results.Success()) {
+	auto sg = SpawngroupRepository::NewEntity();
+
+	sg.name = fmt::format(
+		"{}-{}",
+		zone,
+		n->GetName()
+	);
+
+	sg = SpawngroupRepository::InsertOne(*this, sg);
+
+	if (!sg.id) {
+		return false;
+	}
+
+	n->SetSpawnGroupId(sg.id);
+	n->SetNPCTypeID(e.id);
+
+	auto s2 = Spawn2Repository::NewEntity();
+
+	s2.zone         = zone;
+	s2.version      = instance_version;
+	s2.x            = n->GetX();
+	s2.y            = n->GetY();
+	s2.z            = n->GetZ();
+	s2.respawntime  = 1200;
+	s2.heading      = n->GetHeading();
+	s2.spawngroupID = sg.id;
+
+	s2 = Spawn2Repository::InsertOne(*this, s2);
+
+	if (!s2.id) {
+		return false;
+	}
+
+	auto se = SpawnentryRepository::NewEntity();
+
+	se.spawngroupID = sg.id;
+	se.npcID        = e.id;
+	se.chance       = 100;
+
+	se = SpawnentryRepository::InsertOne(*this, se);
+
+	if (!se.spawngroupID) {
 		return false;
 	}
 
@@ -1566,227 +1545,273 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 }
 
 uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
-	const char *zone,
-	uint32 zone_version,
-	Client *client,
-	NPC *spawn,
-	uint32 respawnTime
+	const std::string& zone,
+	uint32 instance_version,
+	Client* c,
+	NPC* n,
+	uint32 in_respawn_time
 )
 {
-	uint32 last_insert_id = 0;
-
-	std::string query = fmt::format(
-		"INSERT INTO spawngroup (name) VALUES('{}{}{}')",
-		zone,
-		Strings::Escape(spawn->GetName()),
-		Timer::GetCurrentTime()
+	auto sg = SpawngroupRepository::InsertOne(
+		*this,
+		SpawngroupRepository::Spawngroup{
+			.name = fmt::format(
+				"{}_{}_{}",
+				zone,
+				Strings::Escape(n->GetName()),
+				Timer::GetCurrentTime()
+			)
+		}
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-	last_insert_id = results.LastInsertedID();
-
-	uint32 respawntime = 0;
-	uint32 spawnid     = 0;
-	if (respawnTime) {
-		respawntime = respawnTime;
-	}
-	else if (spawn->respawn2 && spawn->respawn2->RespawnTimer() != 0) {
-		respawntime = spawn->respawn2->RespawnTimer();
-	}
-	else {
-		respawntime = 1200;
-	}
-
-	query = StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			     "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-			     zone, zone_version, spawn->GetX(), spawn->GetY(), spawn->GetZ(), respawntime,
-			     spawn->GetHeading(), last_insert_id);
-	results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-	spawnid = results.LastInsertedID();
-
-	query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) VALUES(%i, %i, %i)", last_insert_id,
-			     spawn->GetNPCTypeID(), 100);
-	results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (!sg.id) {
 		return 0;
 	}
 
-	return spawnid;
+	uint32 respawn_time = 1200;
+	uint32 spawn_id     = 0;
+
+	if (in_respawn_time) {
+		respawn_time = in_respawn_time;
+	} else if (n->respawn2 && n->respawn2->RespawnTimer()) {
+		respawn_time = n->respawn2->RespawnTimer();
+	}
+
+	auto s2 = Spawn2Repository::NewEntity();
+
+	s2.zone         = zone;
+	s2.version      = instance_version;
+	s2.x            = n->GetX();
+	s2.y            = n->GetY();
+	s2.z            = n->GetZ();
+	s2.heading      = n->GetHeading();
+	s2.respawntime  = respawn_time;
+	s2.spawngroupID = sg.id;
+
+	s2 = Spawn2Repository::InsertOne(*this, s2);
+
+	if (!s2.id) {
+		return 0;
+	}
+
+	auto se = SpawnentryRepository::NewEntity();
+
+	se.spawngroupID = sg.id;
+	se.npcID        = n->GetNPCTypeID();
+	se.chance       = 100;
+
+	se = SpawnentryRepository::InsertOne(*this, se);
+
+	if (!se.spawngroupID) {
+		return 0;
+	}
+
+	return s2.id;
 }
 
-uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client *client, NPC *spawn)
+uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client* c, NPC* n)
 {
-	std::string query =
-	    StringFormat("UPDATE npc_types SET name = '%s', level = '%i', race = '%i', class = '%i', "
-			 "hp = '%i', gender = '%i', texture = '%i', helmtexture = '%i', size = '%i', "
-			 "loottable_id = '%i', merchant_id = '%i', face = '%i' "
-			 "WHERE id = '%i'",
-			 spawn->GetName(), spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
-			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
-			 spawn->GetLoottableID(), spawn->MerchantType, spawn->GetLuclinFace(), spawn->GetNPCTypeID());
-	auto results = QueryDatabase(query);
-	return results.Success() == true ? 1 : 0;
+	auto e = NpcTypesRepository::FindOne(*this, n->GetNPCTypeID());
+
+	e.name         = Strings::RemoveNumbers(n->GetName());
+	e.level        = n->GetLevel();
+	e.race         = n->GetRace();
+	e.class_       = n->GetClass();
+	e.hp           = n->GetMaxHP();
+	e.gender       = n->GetGender();
+	e.texture      = n->GetTexture();
+	e.helmtexture  = n->GetHelmTexture();
+	e.size         = n->GetSize();
+	e.loottable_id = n->GetLoottableID();
+	e.merchant_id  = n->MerchantType;
+	e.face         = n->GetLuclinFace();
+
+	const int updated = NpcTypesRepository::UpdateOne(*this, e);
+
+	return updated;
 }
 
-uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const char *zone, Client *client, NPC *spawn)
+uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n)
 {
-	uint32 id = 0;
-	uint32 spawngroupID = 0;
+	const auto& l = Spawn2Repository::GetWhere(
+		*this,
+		fmt::format(
+			"`zone` = '{}' AND `spawngroupID` = {}",
+			zone,
+			n->GetSpawnGroupId()
+		)
+	);
 
-	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE "
-					 "zone='%s' AND spawngroupID=%i",
-					 zone, spawn->GetSpawnGroupId());
-	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (l.empty()) {
 		return 0;
+	}
 
-	if (results.RowCount() == 0)
+	auto e = l.front();
+
+	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
+	}
 
-	auto row = results.begin();
-	if (row[0])
-		id = Strings::ToInt(row[0]);
-
-	if (row[1])
-		spawngroupID = Strings::ToInt(row[1]);
-
-	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
-	results = QueryDatabase(query);
-	if (!results.Success())
+	if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
+	}
 
-	query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
-	results = QueryDatabase(query);
-	if (!results.Success())
+	if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
-
-	query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
-	results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
+	}
 
 	return 1;
 }
 
-uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(const char *zone, uint32 zone_version, Client *client,
-						       NPC *spawn)
+uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(
+	const std::string& zone,
+	uint32 instance_version,
+	Client* c,
+	NPC* n
+)
 {
-	uint32 id = 0;
-	uint32 spawngroupID = 0;
+	const auto& l = Spawn2Repository::GetWhere(
+		*this,
+		fmt::format(
+			"`zone` = '{}' AND (`version` = {} OR `version` = -1) AND `spawngroupID` = {}",
+			zone,
+			instance_version,
+			n->GetSpawnGroupId()
+		)
+	);
 
-	std::string query = StringFormat("SELECT id, spawngroupID FROM spawn2 WHERE zone = '%s' "
-					 "AND (version = %u OR version = -1) AND spawngroupID = %i",
-					 zone, zone_version, spawn->GetSpawnGroupId());
-	auto results = QueryDatabase(query);
-	if (!results.Success())
+	if (l.empty()) {
 		return 0;
+	}
 
-	if (results.RowCount() == 0)
+	auto e = l.front();
+
+	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
+	}
 
-	auto row = results.begin();
-
-	if (row[0])
-		id = Strings::ToInt(row[0]);
-
-	if (row[1])
-		spawngroupID = Strings::ToInt(row[1]);
-
-	query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'", id);
-	results = QueryDatabase(query);
-	if (!results.Success())
+	if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
+	}
 
-	query = StringFormat("DELETE FROM spawngroup WHERE id = '%i'", spawngroupID);
-	results = QueryDatabase(query);
-	if (!results.Success())
+	if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
 		return 0;
+	}
 
-	query = StringFormat("DELETE FROM spawnentry WHERE spawngroupID = '%i'", spawngroupID);
-	results = QueryDatabase(query);
-	if (!results.Success())
+	if (!NpcTypesRepository::DeleteOne(*this, n->GetNPCTypeID())) {
 		return 0;
-
-	query = StringFormat("DELETE FROM npc_types WHERE id = '%i'", spawn->GetNPCTypeID());
-	results = QueryDatabase(query);
-	if (!results.Success())
-		return 0;
+	}
 
 	return 1;
 }
 
-uint32 ZoneDatabase::AddSpawnFromSpawnGroup(const char *zone, uint32 zone_version, Client *client, NPC *spawn,
-					    uint32 spawnGroupID)
+uint32 ZoneDatabase::AddSpawnFromSpawnGroup(
+	const std::string& zone,
+	uint32 instance_version,
+	Client* c,
+	NPC* n,
+	uint32 spawngroup_id
+)
 {
-	uint32 last_insert_id = 0;
-	std::string query =
-	    StringFormat("INSERT INTO spawn2 (zone, version, x, y, z, respawntime, heading, spawngroupID) "
-			 "VALUES('%s', %u, %f, %f, %f, %i, %f, %i)",
-			 zone, zone_version, client->GetX(), client->GetY(), client->GetZ(), 120, client->GetHeading(),
-			 spawnGroupID);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
+	auto e = Spawn2Repository::NewEntity();
+
+	e.zone         = zone;
+	e.version      = instance_version;
+	e.x            = c->GetX();
+	e.y            = c->GetY();
+	e.z            = c->GetZ();
+	e.heading      = c->GetHeading();
+	e.respawntime  = 120;
+	e.spawngroupID = spawngroup_id;
+
+	e = Spawn2Repository::InsertOne(*this, e);
+
+	if (!e.id) {
 		return 0;
+	}
 
 	return 1;
 }
 
-uint32 ZoneDatabase::AddNPCTypes(const char *zone, uint32 zone_version, Client *client, NPC *spawn, uint32 spawnGroupID)
+uint32 ZoneDatabase::AddNPCTypes(
+	const std::string& zone,
+	uint32 instance_version,
+	Client* c,
+	NPC* n,
+	uint32 spawngroup_id
+)
 {
-	uint32 npc_type_id;
-	char numberlessName[64];
+	auto e = NpcTypesRepository::NewEntity();
 
-	EntityList::RemoveNumbers(strn0cpy(numberlessName, spawn->GetName(), sizeof(numberlessName)));
-	std::string query =
-	    StringFormat("INSERT INTO npc_types (name, level, race, class, hp, gender, "
-			 "texture, helmtexture, size, loottable_id, merchant_id, face, "
-			 "runspeed, prim_melee_type, sec_melee_type) "
-			 "VALUES(\"%s\", %i, %i, %i, %i, %i, %i, %i, %f, %i, %i, %i, %f, %i, %i)",
-			 numberlessName, spawn->GetLevel(), spawn->GetRace(), spawn->GetClass(), spawn->GetMaxHP(),
-			 spawn->GetGender(), spawn->GetTexture(), spawn->GetHelmTexture(), spawn->GetSize(),
-			 spawn->GetLoottableID(), spawn->MerchantType, 0, spawn->GetRunspeed(), 28, 28);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
+	e.name            = Strings::RemoveNumbers(n->GetName());
+	e.level           = n->GetLevel();
+	e.race            = n->GetRace();
+	e.class_          = n->GetClass();
+	e.hp              = n->GetMaxHP();
+	e.gender          = n->GetGender();
+	e.texture         = n->GetTexture();
+	e.helmtexture     = n->GetHelmTexture();
+	e.size            = n->GetSize();
+	e.loottable_id    = n->GetLoottableID();
+	e.merchant_id     = n->MerchantType;
+	e.face            = n->GetLuclinFace();
+	e.runspeed        = n->GetRunspeed();
+	e.prim_melee_type = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	e.sec_melee_type  = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+
+	e = NpcTypesRepository::InsertOne(*this, e);
+
+	if (!e.id) {
 		return 0;
-	npc_type_id = results.LastInsertedID();
+	}
 
-	if (client)
-		client->Message(Chat::White, "%s npc_type ID %i created successfully!", numberlessName, npc_type_id);
+	if (c) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"NPC Created | ID: {} Name: {}",
+				e.id,
+				e.name
+			).c_str()
+		);
+	}
 
 	return 1;
 }
 
-uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
-
+uint32 ZoneDatabase::NPCSpawnDB(
+	uint8 command,
+	const std::string& zone,
+	uint32 instance_version,
+	Client *c,
+	NPC* n,
+	uint32 extra
+)
+{
 	switch (command) {
-		case NPCSpawnTypes::CreateNewSpawn: { // Create a new NPC and add all spawn related data
-			return CreateNewNPCCommand(zone, zone_version, c, spawn, extra);
+		case NPCSpawnTypes::CreateNewSpawn: {
+			return CreateNewNPCCommand(zone, instance_version, c, n, extra);
 		}
-		case NPCSpawnTypes::AddNewSpawngroup: { // Add new spawn group and spawn point for an existing NPC Type ID
-			return AddNewNPCSpawnGroupCommand(zone, zone_version, c, spawn, extra);
+		case NPCSpawnTypes::AddNewSpawngroup: {
+			return AddNewNPCSpawnGroupCommand(zone, instance_version, c, n, extra);
 		}
-		case NPCSpawnTypes::UpdateAppearance: { // Update npc_type appearance and other data on targeted spawn
-			return UpdateNPCTypeAppearance(c, spawn);
+		case NPCSpawnTypes::UpdateAppearance: {
+			return UpdateNPCTypeAppearance(c, n);
 		}
-		case NPCSpawnTypes::RemoveSpawn: { // delete spawn from spawning, but leave in npc_types table
-			return DeleteSpawnLeaveInNPCTypeTable(zone, c, spawn);
+		case NPCSpawnTypes::RemoveSpawn: {
+			return DeleteSpawnLeaveInNPCTypeTable(zone, c, n);
 		}
-		case NPCSpawnTypes::DeleteSpawn: { //delete spawn from DB (including npc_type)
-			return DeleteSpawnRemoveFromNPCTypeTable(zone, zone_version, c, spawn);
+		case NPCSpawnTypes::DeleteSpawn: {
+			return DeleteSpawnRemoveFromNPCTypeTable(zone, instance_version, c, n);
 		}
-		case NPCSpawnTypes::AddSpawnFromSpawngroup: { // add a spawn from spawngroup
-			return AddSpawnFromSpawnGroup(zone, zone_version, c, spawn, extra);
-        }
-		case NPCSpawnTypes::CreateNewNPC: { // add npc_type
-			return AddNPCTypes(zone, zone_version, c, spawn, extra);
+		case NPCSpawnTypes::AddSpawnFromSpawngroup: {
+			return AddSpawnFromSpawnGroup(zone, instance_version, c, n, extra);
+		}
+		case NPCSpawnTypes::CreateNewNPC: {
+			return AddNPCTypes(zone, instance_version, c, n, extra);
 		}
 	}
+
 	return false;
 }
 
@@ -1997,7 +2022,7 @@ void NPC::Disarm(Client* client, int chance) {
 		if (zone->random.Int(0, 1000) <= chance) {
 			weapon = database.GetItem(equipment[eslot]);
 			if (weapon) {
-				if (!weapon->Magic && weapon->NoDrop == 255) {
+				if (!weapon->Magic && weapon->NoDrop != 0) {
 					int16 charges = -1;
 					ItemList::iterator cur, end;
 					cur = itemlist.begin();
@@ -2439,7 +2464,7 @@ void NPC::SetLevel(uint8 in_level, bool command)
 	if(in_level > level)
 		SendLevelAppearance();
 	level = in_level;
-	SendAppearancePacket(AT_WhoLevel, in_level);
+	SendAppearancePacket(AppearanceType::WhoLevel, in_level);
 }
 
 void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
@@ -3045,43 +3070,76 @@ void NPC::SendPayload(int payload_id, std::string payload_value)
 	}
 }
 
-NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emoteid, uint8 event_) {
-	LinkedListIterator<NPC_Emote_Struct*> iterator(zone->NPCEmoteList);
-	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		NPC_Emote_Struct* nes = iterator.GetData();
-		if (emoteid == nes->emoteid && event_ == nes->event_) {
-			return nes;
+NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emote_id, uint8 event_) {
+	std::vector<NPC_Emote_Struct*> emotes;
+
+	for (const auto &e : zone->npc_emote_list) {
+		auto nes = e;
+
+		if (nes->emoteid == emote_id && nes->event_ == event_) {
+			emotes.emplace_back(e);
 		}
-		iterator.Advance();
 	}
-	return nullptr;
+
+	if (emotes.empty()) {
+		return nullptr;
+	} else if (emotes.size() == 1) {
+		return emotes.front();
+	}
+
+	const int index = zone->random.Roll0(emotes.size());
+
+	return emotes[index];
 }
 
-void NPC::DoNPCEmote(uint8 event_, uint32 emoteid)
+void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 {
-	if (emoteid == 0)
-	{
+	if (!emote_id) {
 		return;
 	}
 
-	NPC_Emote_Struct* nes = GetNPCEmote(emoteid,event_);
-	if(nes == nullptr)
-	{
+	auto e = GetNPCEmote(emote_id, event_);
+	if (!e) {
 		return;
 	}
 
-	if(emoteid == nes->emoteid)
-	{
-		if(nes->type == 1)
-			Emote("%s",nes->text);
-		else if(nes->type == 2)
-			Shout("%s",nes->text);
-		else if(nes->type == 3)
-			entity_list.MessageCloseString(this, true, 200, 10, GENERIC_STRING, nes->text);
-		else
-			Say("%s",nes->text);
+	std::string processed = e->text;
+
+	// Mob Variables
+	Strings::FindReplace(processed, "$mname", GetCleanName());
+	Strings::FindReplace(processed, "$mracep", GetRacePlural());
+	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
+	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
+
+	// Target Variables
+	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
+	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
+	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
+	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
+
+	if (emoteid == e->emoteid) {
+		if (event_ == EQ::constants::EmoteEventTypes::Hailed && t) {
+			DoQuestPause(t);
+		}
+
+		if (e->type == EQ::constants::EmoteTypes::Say) {
+			Say(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Emote) {
+			Emote(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Shout) {
+			Shout(processed.c_str());
+		} else if (e->type == EQ::constants::EmoteTypes::Proximity) {
+			entity_list.MessageCloseString(
+				this,
+				true,
+				200,
+				Chat::NPCQuestSay,
+				GENERIC_STRING,
+				processed.c_str()
+			);
+		}
 	}
 }
 
@@ -3691,25 +3749,25 @@ void NPC::ScaleNPC(uint8 npc_level, bool always_scale, bool override_special_abi
 bool NPC::IsGuard()
 {
 	switch (GetRace()) {
-	case RT_GUARD:
+	case Race::FreeportGuard:
 		if (GetTexture() == 1 || GetTexture() == 2)
 			return true;
 		break;
-	case RT_IKSAR_2:
+	case Race::IksarCitizen:
 		if (GetTexture() == 1)
 			return true;
 		break;
-	case RT_GUARD_2:
-	case RT_GUARD_3:
-	case RT_GUARD_4:
-	case RT_HUMAN_3:
-	case RT_HALFLING_2:
-	case RT_ERUDITE_2:
-	case RT_BARBARIAN_2:
-	case RT_DARK_ELF_2:
-	case RT_TROLL_2:
+	case Race::Felguard:
+	case Race::Fayguard:
+	case Race::VahShirGuard:
+	case Race::QeynosCitizen:
+	case Race::RivervaleCitizen:
+	case Race::EruditeCitizen:
+	case Race::HalasCitizen:
+	case Race::NeriakCitizen:
+	case Race::GrobbCitizen:
 	case OGGOK_CITIZEN:
-	case RT_DWARF_2:
+	case Race::KaladimCitizen:
 		return true;
 	default:
 		break;

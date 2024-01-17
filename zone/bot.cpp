@@ -281,10 +281,10 @@ Bot::Bot(
 				case SE_IllusionCopy:
 				case SE_Illusion: {
 					if (spell.base_value[x1] == -1) {
-						if (gender == FEMALE) {
-							gender = MALE;
-						} else if (gender == MALE) {
-							gender = FEMALE;
+						if (gender == Gender::Female) {
+							gender = Gender::Male;
+						} else if (gender == Gender::Male) {
+							gender = Gender::Female;
 						}
 
 						SendIllusionPacket(
@@ -325,30 +325,30 @@ Bot::Bot(
 
 					switch (spell.base_value[x1]) {
 					case OGRE:
-						SendAppearancePacket(AT_Size, 9);
+						SendAppearancePacket(AppearanceType::Size, 9);
 						break;
 					case TROLL:
-						SendAppearancePacket(AT_Size, 8);
+						SendAppearancePacket(AppearanceType::Size, 8);
 						break;
 					case VAHSHIR:
 					case BARBARIAN:
-						SendAppearancePacket(AT_Size, 7);
+						SendAppearancePacket(AppearanceType::Size, 7);
 						break;
 					case HALF_ELF:
 					case WOOD_ELF:
 					case DARK_ELF:
 					case FROGLOK:
-						SendAppearancePacket(AT_Size, 5);
+						SendAppearancePacket(AppearanceType::Size, 5);
 						break;
 					case DWARF:
-						SendAppearancePacket(AT_Size, 4);
+						SendAppearancePacket(AppearanceType::Size, 4);
 						break;
 					case HALFLING:
 					case GNOME:
-						SendAppearancePacket(AT_Size, 3);
+						SendAppearancePacket(AppearanceType::Size, 3);
 						break;
 					default:
-						SendAppearancePacket(AT_Size, 6);
+						SendAppearancePacket(AppearanceType::Size, 6);
 						break;
 					}
 					break;
@@ -372,18 +372,18 @@ Bot::Bot(
 				case SE_Invisibility:
 				{
 					invisible = true;
-					SendAppearancePacket(AT_Invis, 1);
+					SendAppearancePacket(AppearanceType::Invisibility, 1);
 					break;
 				}
 				case SE_Levitate:
 				{
 					if (!zone->CanLevitate())
 					{
-							SendAppearancePacket(AT_Levitate, 0);
+							SendAppearancePacket(AppearanceType::FlyMode, 0);
 							BuffFadeByEffect(SE_Levitate);
 					}
 					else {
-						SendAppearancePacket(AT_Levitate, 2);
+						SendAppearancePacket(AppearanceType::FlyMode, 2);
 					}
 					break;
 				}
@@ -2681,7 +2681,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 	float other_size_mod = tar->GetSize();
 
 	// For races with a fixed size
-	if (GetRace() == RT_DRAGON || GetRace() == RT_WURM || GetRace() == RT_DRAGON_7) {
+	if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) {
 		// size_mod = 60.0f;
 	}
 
@@ -2690,7 +2690,7 @@ void Bot::CalcMeleeDistances(const Mob* tar, const EQ::ItemInstance* const& p_it
 	}
 
 	// For races with a fixed size
-	if (tar->GetRace() == RT_DRAGON || tar->GetRace() == RT_WURM || tar->GetRace() == RT_DRAGON_7) {
+	if (tar->GetRace() == Race::LavaDragon || tar->GetRace() == Race::Wurm || tar->GetRace() == Race::GhostDragon) {
 		other_size_mod = 60.0f;
 	}
 
@@ -2783,10 +2783,12 @@ bool Bot::IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distanc
 		// Normally, we wouldn't want to do this without class checks..but, too many issues can arise if we let enchanter animation pets run rampant
 		if (HasPet()) {
 			GetPet()->RemoveFromHateList(tar);
+			GetPet()->RemoveFromRampageList(tar);
 			GetPet()->SetTarget(nullptr);
 		}
 
 		RemoveFromHateList(tar);
+		RemoveFromRampageList(tar);
 		SetTarget(nullptr);
 
 		SetAttackFlag(false);
@@ -3674,7 +3676,7 @@ void Bot::LevelBotWithClient(Client* c, uint8 new_level, bool send_appearance) {
 				}
 
 				e->SendHPUpdate();
-				e->SendAppearancePacket(AT_WhoLevel, new_level, true, true); // who level change
+				e->SendAppearancePacket(AppearanceType::WhoLevel, new_level, true, true); // who level change
 				e->AI_AddBotSpells(e->GetBotSpellID());
 			}
 		}
@@ -3706,7 +3708,7 @@ void Bot::BotAddEquipItem(uint16 slot_id, uint32 item_id) {
 
 		UpdateEquipmentLight();
 		if (UpdateActiveLight() && GetID()) { // temp hack fix
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+			SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 		}
 	}
 }
@@ -3726,7 +3728,7 @@ void Bot::BotRemoveEquipItem(uint16 slot_id)
 
 	UpdateEquipmentLight();
 	if (UpdateActiveLight()) {
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
 }
 
@@ -7894,7 +7896,7 @@ void Bot::BotGroupSay(Mob *speaker, const char *msg, ...) {
 	if (speaker->HasGroup()) {
 		Group *g = speaker->GetGroup();
 		if (g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
 	} else
 		speaker->Say("%s", buf);
 }
@@ -8136,28 +8138,6 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 	}
 
 	return true;
-}
-
-std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
-{
-	// TODO: review
-
-	int saylink_size = strlen(message);
-	char* escaped_string = new char[saylink_size * 2];
-
-	database.DoEscapeString(escaped_string, message, saylink_size);
-
-	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
-	safe_delete_array(escaped_string);
-
-	EQ::SayLinkEngine linker;
-	linker.SetLinkType(EQ::saylink::SayLinkItemData);
-	linker.SetProxyItemID(SAYLINK_ITEM_ID);
-	linker.SetProxyAugment1ID(saylink_id);
-	linker.SetProxyText(name);
-
-	auto saylink = linker.GenerateLink();
-	return saylink;
 }
 
 void Bot::Signal(int signal_id)

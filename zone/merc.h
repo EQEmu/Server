@@ -126,7 +126,7 @@ public:
 	bool IsOfClientBotMerc() const override { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
+	static Merc* LoadMercenary(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c, bool setmax = false);
 	void UpdateMercAppearance();
@@ -151,13 +151,13 @@ public:
 
 	// "GET" Class Methods
 	virtual Mob* GetOwner();
-	Client* GetMercOwner();
+	Client* GetMercenaryOwner();
 	virtual Mob* GetOwnerOrSelf();
-	uint32 GetMercID() { return _MercID; }
-	uint32 GetMercCharacterID( ) { return owner_char_id; }
-	uint32 GetMercTemplateID() { return _MercTemplateID; }
-	uint32 GetMercType() { return _MercType; }
-	uint32 GetMercSubType() { return _MercSubType; }
+	uint32 GetMercenaryID() { return _MercID; }
+	uint32 GetMercenaryCharacterID( ) { return owner_char_id; }
+	uint32 GetMercenaryTemplateID() { return _MercTemplateID; }
+	uint32 GetMercenaryType() { return _MercType; }
+	uint32 GetMercenarySubType() { return _MercSubType; }
 	uint8 GetProficiencyID() { return _ProficiencyID; }
 	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
@@ -327,7 +327,7 @@ private:
 
 	float GetDefaultSize();
 
-	bool LoadMercSpells();
+	bool LoadMercenarySpells();
 	bool CheckStance(int16 stance);
 	std::vector<MercSpell> GetMercSpells() { return merc_spells; }
 

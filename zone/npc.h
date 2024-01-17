@@ -213,7 +213,7 @@ public:
 	void	ClearItemList();
 	inline const ItemList &GetItemList() { return itemlist; }
 	ServerLootItem_Struct*	GetItem(int slot_id);
-	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
+	void	AddCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
 	void	RemoveCash();
 	void	QueryLoot(Client* to, bool is_pet_query = false);
 	bool	HasItem(uint32 item_id);
@@ -383,16 +383,16 @@ public:
 	void				AI_SetRoambox(float distance, float max_x, float min_x, float max_y, float min_y, uint32 delay = 2500, uint32 min_delay = 2500);
 
 	//mercenary stuff
-	void	LoadMercTypes();
-	void	LoadMercs();
-	std::list<MercType> GetMercTypesList() {return mercTypeList; };
-	std::list<MercType> GetMercTypesList( uint32 expansion );
-	std::list<MercData> GetMercsList() {return mercDataList; };
-	std::list<MercData> GetMercsList( uint32 expansion );
-	int		GetNumMercTypes() { return static_cast<int>(mercTypeList.size()); };
-	int		GetNumMercTypes( uint32 expansion );
-	int		GetNumMercs() { return static_cast<int>(mercDataList.size()); };
-	int		GetNumMercs( uint32 expansion );
+	void	LoadMercenaryTypes();
+	void	LoadMercenaries();
+	std::list<MercType> GetMercenaryTypesList() {return mercTypeList; };
+	std::list<MercType> GetMercenaryTypesList( uint32 expansion );
+	std::list<MercData> GetMercenariesList() {return mercDataList; };
+	std::list<MercData> GetMercenariesList( uint32 expansion );
+	int		GetNumMercenaryTypes() { return static_cast<int>(mercTypeList.size()); };
+	int		GetNumMercenaryTypes( uint32 expansion );
+	int		GetNumberOfMercenaries() { return static_cast<int>(mercDataList.size()); };
+	int		GetNumberOfMercenaries( uint32 expansion );
 
 	inline bool GetNPCAggro() const { return npc_aggro; }
 	inline void SetNPCAggro(bool in_npc_aggro) { npc_aggro = in_npc_aggro; }
@@ -475,8 +475,8 @@ public:
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }
 
-	NPC_Emote_Struct* GetNPCEmote(uint32 emoteid, uint8 event_);
-	void DoNPCEmote(uint8 event_, uint32 emoteid);
+	NPC_Emote_Struct* GetNPCEmote(uint32 emote_id, uint8 event_);
+	void DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t = nullptr);
 	bool CanTalk();
 	void DoQuestPause(Mob *other);
 

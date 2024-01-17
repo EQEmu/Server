@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPELL_GLOBALS_REPOSITORY_H
@@ -116,8 +116,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spell_globals_id
 			)
 		);
@@ -126,7 +127,7 @@ public:
 		if (results.RowCount() == 1) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -258,7 +259,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -286,7 +287,7 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellGlobals e{};
 
-			e.spellid    = static_cast<int32_t>(atoi(row[0]));
+			e.spellid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.spell_name = row[1] ? row[1] : "";
 			e.qglobal    = row[2] ? row[2] : "";
 			e.value      = row[3] ? row[3] : "";
@@ -348,6 +349,68 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpellGlobals &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.spellid));
+		v.push_back("'" + Strings::Escape(e.spell_name) + "'");
+		v.push_back("'" + Strings::Escape(e.qglobal) + "'");
+		v.push_back("'" + Strings::Escape(e.value) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpellGlobals> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.spellid));
+			v.push_back("'" + Strings::Escape(e.spell_name) + "'");
+			v.push_back("'" + Strings::Escape(e.qglobal) + "'");
+			v.push_back("'" + Strings::Escape(e.value) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPELL_GLOBALS_REPOSITORY_H

@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include <ctype.h>
@@ -399,5 +398,6 @@ void QSDatabase::GeneralQueryReceive(ServerPacket *pack)
 		LogInfo("[{}]", query.c_str());
 	}
 
+	safe_delete(pack);
 	safe_delete_array(queryBuffer);
 }

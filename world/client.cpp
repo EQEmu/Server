@@ -28,7 +28,6 @@
 #include "../common/inventory_profile.h"
 #include "../common/races.h"
 #include "../common/classes.h"
-#include "../common/languages.h"
 #include "../common/skills.h"
 #include "../common/extprofile.h"
 #include "../common/strings.h"
@@ -36,6 +35,7 @@
 #include "../common/random.h"
 #include "../common/shareddb.h"
 #include "../common/opcodemgr.h"
+#include "../common/data_verification.h"
 
 #include "client.h"
 #include "worlddb.h"
@@ -536,10 +536,21 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	}
 
 	auto length = snprintf(char_name, 64, "%s", (char*)app->pBuffer);
-	uchar race = app->pBuffer[64];
-	uchar clas = app->pBuffer[68];
 
-	LogInfo("Name approval request. Name=[{}], race=[{}], class=[{}]", char_name, GetRaceIDName(race), GetClassIDName(clas));
+	uchar race_selection  = app->pBuffer[64];
+	uchar class_selection = app->pBuffer[68];
+
+	if (!IsPlayerRace(race_selection)) {
+		LogInfo("Invalid Race ID.");
+		return false;
+	}
+
+	if (!EQ::ValueWithin(class_selection, Class::Warrior, Class::Berserker)) {
+		LogInfo("Invalid Class ID.");
+		return false;
+	}
+	
+	LogInfo("Name approval request. Name=[{}], race_selection=[{}], class=[{}]", char_name, GetRaceIDName(race_selection), GetClassIDName(class_selection));
 
 	EQApplicationPacket *outapp;
 	outapp = new EQApplicationPacket;
@@ -945,8 +956,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->ChatHost,
-			config->ChatPort,
+			config->GetUCSHost(),
+			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
 			static_cast<char>(connection_type),
@@ -971,8 +982,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 
 		buffer = fmt::format("{},{},{}.{},{}{:08X}",
-			config->MailHost,
-			config->MailPort,
+			config->GetUCSHost(),
+			config->GetUCSPort(),
 			config->ShortName,
 			GetCharName(),
 			static_cast<char>(connection_type),
@@ -1692,14 +1703,15 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.hunger_level = 6000;
 	pp.thirst_level = 6000;
 
+	/* Set default skills for everybody */
+	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+
 	/* Set Racial and Class specific language and skills */
 	SetRacialLanguages(&pp);
 	SetRaceStartingSkills(&pp);
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
-
-	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
-	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
@@ -2144,7 +2156,9 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case FROGLOK:
 		{
-			pp->skills[EQ::skills::SkillSwimming] = 125;
+			if (RuleI(Skills, SwimmingStartValue) < 125) {
+				pp->skills[EQ::skills::SkillSwimming] = 125;
+			}
 			break;
 		}
 	case GNOME:
@@ -2161,7 +2175,9 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	case IKSAR:
 		{
 			pp->skills[EQ::skills::SkillForage] = 50;
-			pp->skills[EQ::skills::SkillSwimming] = 100;
+			if (RuleI(Skills, SwimmingStartValue) < 100) {
+				pp->skills[EQ::skills::SkillSwimming] = 100;
+			}
 			break;
 		}
 	case WOOD_ELF:
@@ -2181,115 +2197,101 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 
 void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 {
-	switch( pp->race )
-	{
-	case BARBARIAN:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_BARBARIAN] = 100;
+	switch (pp->race) {
+		case Race::Human: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
 			break;
 		}
-	case DARK_ELF:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_DARK_ELVISH] = 100;
-			pp->languages[LANG_DARK_SPEECH] = 100;
-			pp->languages[LANG_ELDER_ELVISH] = 100;
-			pp->languages[LANG_ELVISH] = 25;
+		case Race::Barbarian: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Barbarian]    = Language::MaxValue;
 			break;
 		}
-	case DWARF:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_DWARVISH] = 100;
-			pp->languages[LANG_GNOMISH] = 25;
+		case Race::Erudite: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Erudian]      = Language::MaxValue;
 			break;
 		}
-	case ERUDITE:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_ERUDIAN] = 100;
+		case Race::WoodElf: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Elvish]       = Language::MaxValue;
 			break;
 		}
-	case FROGLOK:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_FROGLOK] = 100;
-			pp->languages[LANG_TROLL] = 25;
+		case Race::HighElf: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::DarkElvish]   = 25;
+			pp->languages[Language::ElderElvish]  = 25;
+			pp->languages[Language::Elvish]       = Language::MaxValue;
 			break;
 		}
-	case GNOME:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_DWARVISH] = 25;
-			pp->languages[LANG_GNOMISH] = 100;
+		case Race::DarkElf: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::DarkElvish]   = Language::MaxValue;
+			pp->languages[Language::DarkSpeech]   = Language::MaxValue;
+			pp->languages[Language::ElderElvish]  = Language::MaxValue;
+			pp->languages[Language::Elvish]       = 25;
 			break;
 		}
-	case HALF_ELF:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_ELVISH] = 100;
+		case Race::HalfElf: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Elvish]       = Language::MaxValue;
 			break;
 		}
-	case HALFLING:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_HALFLING] = 100;
+		case Race::Dwarf: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Dwarvish]     = Language::MaxValue;
+			pp->languages[Language::Gnomish]      = 25;
 			break;
 		}
-	case HIGH_ELF:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_DARK_ELVISH] = 25;
-			pp->languages[LANG_ELDER_ELVISH] = 25;
-			pp->languages[LANG_ELVISH] = 100;
+		case Race::Troll: {
+			pp->languages[Language::CommonTongue] = RuleI(Character, TrollCommonTongue);
+			pp->languages[Language::DarkSpeech]   = Language::MaxValue;
+			pp->languages[Language::Troll]        = Language::MaxValue;
 			break;
 		}
-	case HUMAN:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
+		case Race::Ogre: {
+			pp->languages[Language::CommonTongue] = RuleI(Character, OgreCommonTongue);
+			pp->languages[Language::DarkSpeech]   = Language::MaxValue;
+			pp->languages[Language::Ogre]         = Language::MaxValue;
 			break;
 		}
-	case IKSAR:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, IksarCommonTongue);
-			pp->languages[LANG_DARK_SPEECH] = 100;
-			pp->languages[LANG_LIZARDMAN] = 100;
+		case Race::Halfling: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Halfling]     = Language::MaxValue;
 			break;
 		}
-	case OGRE:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, OgreCommonTongue);
-			pp->languages[LANG_DARK_SPEECH] = 100;
-			pp->languages[LANG_OGRE] = 100;
+		case Race::Gnome: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Dwarvish]     = 25;
+			pp->languages[Language::Gnomish]      = Language::MaxValue;
 			break;
 		}
-	case TROLL:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = RuleI(Character, TrollCommonTongue);
-			pp->languages[LANG_DARK_SPEECH] = 100;
-			pp->languages[LANG_TROLL] = 100;
+		case Race::Iksar: {
+			pp->languages[Language::CommonTongue] = RuleI(Character, IksarCommonTongue);
+			pp->languages[Language::DarkSpeech]   = Language::MaxValue;
+			pp->languages[Language::Lizardman]    = Language::MaxValue;
 			break;
 		}
-	case WOOD_ELF:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_ELVISH] = 100;
+		case Race::VahShir: {
+			pp->languages[Language::CommonTongue]  = Language::MaxValue;
+			pp->languages[Language::CombineTongue] = Language::MaxValue;
+			pp->languages[Language::Erudian]       = 25;
+			pp->languages[Language::VahShir]       = Language::MaxValue;
 			break;
 		}
-	case VAHSHIR:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_COMBINE_TONGUE] = 100;
-			pp->languages[LANG_ERUDIAN] = 25;
-			pp->languages[LANG_VAH_SHIR] = 100;
+		case Race::Froglok: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::Froglok]      = Language::MaxValue;
+			pp->languages[Language::Troll]        = 25;
 			break;
 		}
-	case DRAKKIN:
-		{
-			pp->languages[LANG_COMMON_TONGUE] = 100;
-			pp->languages[LANG_ELDER_DRAGON] = 100;
-			pp->languages[LANG_DRAGON] = 100;
+		case Race::Drakkin: {
+			pp->languages[Language::CommonTongue] = Language::MaxValue;
+			pp->languages[Language::ElderDragon]  = Language::MaxValue;
+			pp->languages[Language::Dragon]       = Language::MaxValue;
+			break;
+		}
+		default: {
 			break;
 		}
 	}
@@ -2298,12 +2300,12 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 void Client::SetClassLanguages(PlayerProfile_Struct *pp)
 {
 	// we only need to handle one class, but custom server might want to do more
-	switch(pp->class_) {
-	case Class::Rogue:
-		pp->languages[LANG_THIEVES_CANT] = 100;
-		break;
-	default:
-		break;
+	switch (pp->class_) {
+		case Class::Rogue:
+			pp->languages[Language::ThievesCant] = Language::MaxValue;
+			break;
+		default:
+			break;
 	}
 }
 

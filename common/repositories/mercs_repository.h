@@ -44,7 +44,23 @@ public:
      */
 
 	// Custom extended repository methods here
+	static MercsRepository::Mercs GetMercenaryBySlot(Database& db, Client* c)
+	{
+		const auto& l = MercsRepository::GetWhere(
+			db,
+			fmt::format(
+				"`OwnerCharacterID` = {} AND `Slot` = {}",
+				c->CharacterID(),
+				c->GetMercSlot()
+			)
+		);
 
+		if (l.empty()) {
+			return MercsRepository::NewEntity();
+		}
+
+		return l[0];
+	}
 };
 
 #endif //EQEMU_MERCS_REPOSITORY_H

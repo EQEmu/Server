@@ -494,14 +494,14 @@ void Lua_Client::IncreaseSkill(int skill_id, int value) {
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id);
+	self->IncreaseLanguageSkill(language_id);
 }
 
-void Lua_Client::IncreaseLanguageSkill(int skill_id, int value) {
+void Lua_Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase) {
 	Lua_Safe_Call_Void();
-	self->IncreaseLanguageSkill(skill_id, value);
+	self->IncreaseLanguageSkill(language_id, increase);
 }
 
 int Lua_Client::GetRawSkill(int skill_id) {
@@ -544,9 +544,9 @@ void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod
 	self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), target, chance_mod);
 }
 
-void Lua_Client::SetLanguageSkill(int language, int value) {
+void Lua_Client::SetLanguageSkill(uint8 language_id, uint8 language_skill) {
 	Lua_Safe_Call_Void();
-	self->SetLanguageSkill(language, value);
+	self->SetLanguageSkill(language_id, language_skill);
 }
 
 int Lua_Client::MaxSkill(int skill_id) {
@@ -1436,7 +1436,7 @@ void Lua_Client::EndSharedTask(bool send_fail) {
 	self->EndSharedTask(send_fail);
 }
 
-int Lua_Client::GetCorpseCount() {
+int64 Lua_Client::GetCorpseCount() {
 	Lua_Safe_Call_Int();
 	return self->GetCorpseCount();
 }
@@ -1458,12 +1458,12 @@ void Lua_Client::AssignToInstance(int instance_id) {
 
 void Lua_Client::Freeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 }
 
 void Lua_Client::UnFreeze() {
 	Lua_Safe_Call_Void();
-	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
 
 uint32 Lua_Client::GetAggroCount() {
@@ -2164,42 +2164,62 @@ void Lua_Client::Fling(float value, float target_x, float target_y, float target
 	self->Fling(value, target_x, target_y, target_z, ignore_los, clip_through_walls);
 }
 
-double Lua_Client::GetAAEXPModifier(uint32 zone_id) {
+float Lua_Client::GetAAEXPModifier() {
+	Lua_Safe_Call_Real();
+	return zone->GetAAEXPModifier(self);
+}
+
+float Lua_Client::GetAAEXPModifier(uint32 zone_id) {
 	Lua_Safe_Call_Real();
 	return self->GetAAEXPModifier(zone_id);
 }
 
-double Lua_Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version) {
+float Lua_Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version) {
 	Lua_Safe_Call_Real();
 	return self->GetAAEXPModifier(zone_id, instance_version);
 }
 
-double Lua_Client::GetEXPModifier(uint32 zone_id) {
+float Lua_Client::GetEXPModifier() {
+	Lua_Safe_Call_Real();
+	return zone->GetEXPModifier(self);
+}
+
+float Lua_Client::GetEXPModifier(uint32 zone_id) {
 	Lua_Safe_Call_Real();
 	return self->GetEXPModifier(zone_id);
 }
 
-double Lua_Client::GetEXPModifier(uint32 zone_id, int16 instance_version) {
+float Lua_Client::GetEXPModifier(uint32 zone_id, int16 instance_version) {
 	Lua_Safe_Call_Real();
 	return self->GetEXPModifier(zone_id, instance_version);
 }
 
-void Lua_Client::SetAAEXPModifier(uint32 zone_id, double aa_modifier) {
+void Lua_Client::SetAAEXPModifier(float aa_modifier) {
+	Lua_Safe_Call_Void();
+	zone->SetAAEXPModifier(self, aa_modifier);
+}
+
+void Lua_Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier) {
 	Lua_Safe_Call_Void();
 	self->SetAAEXPModifier(zone_id, aa_modifier);
 }
 
-void Lua_Client::SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version) {
+void Lua_Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version) {
 	Lua_Safe_Call_Void();
 	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
 }
 
-void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier) {
+void Lua_Client::SetEXPModifier(float exp_modifier) {
+	Lua_Safe_Call_Void();
+	zone->SetEXPModifier(self, exp_modifier);
+}
+
+void Lua_Client::SetEXPModifier(uint32 zone_id, float exp_modifier) {
 	Lua_Safe_Call_Void();
 	self->SetEXPModifier(zone_id, exp_modifier);
 }
 
-void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version) {
+void Lua_Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version) {
 	Lua_Safe_Call_Void();
 	self->SetEXPModifier(zone_id, exp_modifier, instance_version);
 }
@@ -2279,7 +2299,7 @@ void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	self->RemoveItem(item_id, quantity);
 }
 
-void Lua_Client::SetGMStatus(int16 new_status) {
+void Lua_Client::SetGMStatus(int new_status) {
 	Lua_Safe_Call_Void();
 	self->SetGMStatus(new_status);
 }
@@ -3246,6 +3266,18 @@ void Lua_Client::SummonItemIntoInventory(luabind::object item_table) {
 	);
 }
 
+bool Lua_Client::HasItemOnCorpse(uint32 item_id)
+{
+	Lua_Safe_Call_Bool();
+	return self->HasItemOnCorpse(item_id);
+}
+
+void Lua_Client::ClearXTargets()
+{
+	Lua_Safe_Call_Void();
+	self->ClearXTargets();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3317,6 +3349,7 @@ luabind::scope lua_register_client() {
 	.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 	.def("ClearAccountFlag", (void(Lua_Client::*)(const std::string&))&Lua_Client::ClearAccountFlag)
 	.def("ClearPEQZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearPEQZoneFlag)
+	.def("ClearXTargets", (void(Lua_Client::*)(void))&Lua_Client::ClearXTargets)
 	.def("ClearZoneFlag", (void(Lua_Client::*)(uint32))&Lua_Client::ClearZoneFlag)
 	.def("Connected", (bool(Lua_Client::*)(void))&Lua_Client::Connected)
 	.def("CountAugmentEquippedByID", (int(Lua_Client::*)(uint32))&Lua_Client::CountAugmentEquippedByID)
@@ -3364,8 +3397,9 @@ luabind::scope lua_register_client() {
 	.def("ForageItem", (void(Lua_Client::*)(bool))&Lua_Client::ForageItem)
 	.def("ForageItem", (void(Lua_Client::*)(void))&Lua_Client::ForageItem)
 	.def("Freeze", (void(Lua_Client::*)(void))&Lua_Client::Freeze)
-	.def("GetAAEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
-	.def("GetAAEXPModifier", (double(Lua_Client::*)(uint32,int16))&Lua_Client::GetAAEXPModifier)
+	.def("GetAAEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetAAEXPModifier)
+	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
+	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 	.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 	.def("GetAAPoints", (int(Lua_Client::*)(void))&Lua_Client::GetAAPoints)
@@ -3414,7 +3448,7 @@ luabind::scope lua_register_client() {
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
 	.def("GetClientVersion", (int(Lua_Client::*)(void))&Lua_Client::GetClientVersion)
 	.def("GetClientVersionBit", (uint32(Lua_Client::*)(void))&Lua_Client::GetClientVersionBit)
-	.def("GetCorpseCount", (int(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
+	.def("GetCorpseCount", (int64(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
 	.def("GetCorpseID", (int(Lua_Client::*)(int))&Lua_Client::GetCorpseID)
 	.def("GetCorpseItemAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetCorpseItemAt)
 	.def("GetDiscSlotBySpellID", (int(Lua_Client::*)(int32))&Lua_Client::GetDiscSlotBySpellID)
@@ -3422,8 +3456,9 @@ luabind::scope lua_register_client() {
 	.def("GetDuelTarget", (int(Lua_Client::*)(void))&Lua_Client::GetDuelTarget)
 	.def("GetEXP", (uint32(Lua_Client::*)(void))&Lua_Client::GetEXP)
 	.def("GetEXPForLevel", (uint32(Lua_Client::*)(uint16))&Lua_Client::GetEXPForLevel)
-	.def("GetEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
-	.def("GetEXPModifier", (double(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
+	.def("GetEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetEXPModifier)
+	.def("GetEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
+	.def("GetEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
 	.def("GetEndurance", (int(Lua_Client::*)(void))&Lua_Client::GetEndurance)
 	.def("GetEndurancePercent", (int(Lua_Client::*)(void))&Lua_Client::GetEndurancePercent)
@@ -3508,6 +3543,7 @@ luabind::scope lua_register_client() {
 	.def("HasDisciplineLearned", (bool(Lua_Client::*)(uint16))&Lua_Client::HasDisciplineLearned)
 	.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 	.def("HasItemEquippedByID", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemEquippedByID)
+	.def("HasItemOnCorpse", (bool(Lua_Client::*)(uint32))&Lua_Client::HasItemOnCorpse)
 	.def("HasPEQZoneFlag", (bool(Lua_Client::*)(uint32))&Lua_Client::HasPEQZoneFlag)
 	.def("HasRecipeLearned", (bool(Lua_Client::*)(uint32))&Lua_Client::HasRecipeLearned)
 	.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
@@ -3516,8 +3552,8 @@ luabind::scope lua_register_client() {
 	.def("Hungry", (bool(Lua_Client::*)(void))&Lua_Client::Hungry)
 	.def("InZone", (bool(Lua_Client::*)(void))&Lua_Client::InZone)
 	.def("IncStats", (void(Lua_Client::*)(int,int))&Lua_Client::IncStats)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseLanguageSkill)
-	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8))&Lua_Client::IncreaseLanguageSkill)
+	.def("IncreaseLanguageSkill", (void(Lua_Client::*)(uint8,uint8))&Lua_Client::IncreaseLanguageSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseSkill)
 	.def("IncreaseSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseSkill)
 	.def("IncrementAA", (void(Lua_Client::*)(int))&Lua_Client::IncrementAA)
@@ -3653,8 +3689,9 @@ luabind::scope lua_register_client() {
 	.def("SendPayload", (void(Lua_Client::*)(int,std::string))&Lua_Client::SendPayload)
 	.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 	.def("SendZoneFlagInfo", (void(Lua_Client::*)(Lua_Client))&Lua_Client::SendZoneFlagInfo)
-	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
-	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double,int16))&Lua_Client::SetAAEXPModifier)
+	.def("SetAAEXPModifier", (void(Lua_Client::*)(float))&Lua_Client::SetAAEXPModifier)
+	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float))&Lua_Client::SetAAEXPModifier)
+	.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,float,int16))&Lua_Client::SetAAEXPModifier)
 	.def("SetAAPoints", (void(Lua_Client::*)(int))&Lua_Client::SetAAPoints)
 	.def("SetAATitle", (void(Lua_Client::*)(std::string))&Lua_Client::SetAATitle)
 	.def("SetAATitle", (void(Lua_Client::*)(std::string,bool))&Lua_Client::SetAATitle)
@@ -3679,7 +3716,7 @@ luabind::scope lua_register_client() {
 	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int))&Lua_Client::SetBotSpawnLimit)
 	.def("SetBotSpawnLimit", (void(Lua_Client::*)(int,uint8))&Lua_Client::SetBotSpawnLimit)
 	.def("SetBucket", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetBucket)
-	.def("SetBucketExpires", (void(Lua_Client::*)(std::string,std::string,std::string))&Lua_Client::SetBucket)
+	.def("SetBucket", (void(Lua_Client::*)(std::string,std::string,std::string))&Lua_Client::SetBucket)
 	.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
 	.def("SetConsumption", (void(Lua_Client::*)(int, int))&Lua_Client::SetConsumption)
 	.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
@@ -3688,8 +3725,9 @@ luabind::scope lua_register_client() {
 	.def("SetEXP", (void(Lua_Client::*)(uint64,uint64))&Lua_Client::SetEXP)
 	.def("SetEXP", (void(Lua_Client::*)(uint64,uint64,bool))&Lua_Client::SetEXP)
 	.def("SetEXPEnabled", (void(Lua_Client::*)(bool))&Lua_Client::SetEXPEnabled)
-	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
-	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double,int16))&Lua_Client::SetEXPModifier)
+	.def("SetEXPModifier", (void(Lua_Client::*)(float))&Lua_Client::SetEXPModifier)
+	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,float))&Lua_Client::SetEXPModifier)
+	.def("SetEXPModifier", (void(Lua_Client::*)(uint32,float,int16))&Lua_Client::SetEXPModifier)
 	.def("SetEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::SetEbonCrystals)
 	.def("SetEndurance", (void(Lua_Client::*)(int))&Lua_Client::SetEndurance)
 	.def("SetEnvironmentDamageModifier", (void(Lua_Client::*)(int))&Lua_Client::SetEnvironmentDamageModifier)
@@ -3697,7 +3735,7 @@ luabind::scope lua_register_client() {
 	.def("SetFactionLevel2", (void(Lua_Client::*)(uint32,int,int,int,int,int,int))&Lua_Client::SetFactionLevel2)
 	.def("SetFeigned", (void(Lua_Client::*)(bool))&Lua_Client::SetFeigned)
 	.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
-	.def("SetGMStatus", (void(Lua_Client::*)(int16))&Lua_Client::SetGMStatus)
+	.def("SetGMStatus", (void(Lua_Client::*)(int))&Lua_Client::SetGMStatus)
 	.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
 	.def("SetHorseId", (void(Lua_Client::*)(int))&Lua_Client::SetHorseId)
 	.def("SetHunger", (void(Lua_Client::*)(int))&Lua_Client::SetHunger)

@@ -5,7 +5,7 @@ void FindRace(Client *c, const Seperator *sep)
 	if (sep->IsNumber(2)) {
 		const auto race_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
 		const std::string& race_name = GetRaceIDName(race_id);
-		if (EQ::ValueWithin(race_id, RACE_HUMAN_1, RACE_PEGASUS_732)) {
+		if (EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3)) {
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -41,7 +41,7 @@ void FindRace(Client *c, const Seperator *sep)
 
 	auto found_count = 0;
 
-	for (uint16 race_id = RACE_HUMAN_1; race_id <= RACE_PEGASUS_732; race_id++) {
+	for (uint16 race_id = Race::Human; race_id <= Race::Pegasus3; race_id++) {
 		std::string race_name = GetRaceIDName(race_id);
 		auto race_name_lower = Strings::ToLower(race_name);
 		if (!Strings::Contains(race_name_lower, search_criteria)) {

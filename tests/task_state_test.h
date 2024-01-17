@@ -463,15 +463,17 @@ void TaskStateTest::TestOptionalSteps()
 		// activity_id | step | state
 		// 0 | 0 | complete
 		// 1 | 1 | hidden | optional (active)
-		// 2 | 2 | hidden | optional
-		// 3 | 2 | hidden
+		// 2 | 2 | hidden | optional (active)
+		// 3 | 2 | hidden (active)
 
 		auto res = Tasks::GetActiveElements(data, state, activity_count);
 
-		// since optional is on its own step it's effectively non-optional to open next step
+		// steps that only contain optionals should not need to be completed to open next step
 		TEST_ASSERT(res.is_task_complete == false);
-		TEST_ASSERT(res.active.size() == 1);
+		TEST_ASSERT(res.active.size() == 3);
 		TEST_ASSERT(std::find(res.active.begin(), res.active.end(), 1) != res.active.end());
+		TEST_ASSERT(std::find(res.active.begin(), res.active.end(), 2) != res.active.end());
+		TEST_ASSERT(std::find(res.active.begin(), res.active.end(), 3) != res.active.end());
 	}
 
 	{
@@ -530,9 +532,9 @@ void TaskStateTest::TestOptionalLastSteps()
 	auto state = GetMockWorldState(activity_count);
 	data[0].step = 0;
 	data[1].optional = true;
-	data[1].step = 2;
+	data[1].step = 1;
 	data[2].optional = true;
-	data[2].step = 3;
+	data[2].step = 2;
 
 	{
 		// activity_id | step | state
@@ -553,13 +555,15 @@ void TaskStateTest::TestOptionalLastSteps()
 		// activity_id | step | state
 		// 0 | 0 | complete
 		// 1 | 1 | hidden | optional (active)
-		// 2 | 2 | hidden | optional
+		// 2 | 2 | hidden | optional (active)
 
+		// step with only an optional should not prevent next step being active
 		auto res = Tasks::GetActiveElements(data, state, activity_count);
 
 		TEST_ASSERT(res.is_task_complete == true);
-		TEST_ASSERT(res.active.size() == 1);
+		TEST_ASSERT(res.active.size() == 2);
 		TEST_ASSERT(std::find(res.active.begin(), res.active.end(), 1) != res.active.end());
+		TEST_ASSERT(std::find(res.active.begin(), res.active.end(), 2) != res.active.end());
 	}
 
 	{

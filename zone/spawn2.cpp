@@ -29,6 +29,7 @@
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/spawn2_repository.h"
 #include "../common/repositories/spawn2_disabled_repository.h"
+#include "../common/repositories/respawn_times_repository.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -442,32 +443,26 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	/* Bulk Load NPC Types Data into the cache */
 	content_db.LoadNPCTypesData(0, true);
 
-	std::string spawn_query = StringFormat(
-		"SELECT "
-		"respawn_times.id, "
-		"respawn_times.`start`, "
-		"respawn_times.duration "
-		"FROM "
-		"respawn_times "
-		"WHERE instance_id = %u",
-		zone->GetInstanceID()
+	const auto& l = RespawnTimesRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`instance_id` = {}",
+			zone->GetInstanceID()
+		)
 	);
-	auto results = database.QueryDatabase(spawn_query);
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 start_duration = Strings::ToInt(row[1]) > 0 ? Strings::ToInt(row[1]) : 0;
-		uint32 end_duration = Strings::ToInt(row[2]) > 0 ? Strings::ToInt(row[2]) : 0;
 
-		/* Our current time was expired */
-		if ((start_duration + end_duration) <= tv.tv_sec) {
-			spawn_times[Strings::ToInt(row[0])] = 0;
-		}
-		/* We still have time left on this timer */
-		else {
-			spawn_times[Strings::ToInt(row[0])] = ((start_duration + end_duration) - tv.tv_sec) * 1000;
+	for (const auto& e : l) {
+		int start    = e.start > 0 ? e.start : 0;
+		int duration = e.duration > 0 ? e.duration : 0;
+
+		if ((start + duration) <= tv.tv_sec) { // Our current time was expired
+			spawn_times[e.id] = 0;
+		} else { // We still have time left on this timer
+			spawn_times[e.id] = ((start + duration) - tv.tv_sec) * 1000;
 		}
 	}
 
-	LogInfo("Loaded [{}] respawn timer(s)", Strings::Commify(results.RowCount()));
+	LogInfo("Loaded [{}] respawn timer(s)", Strings::Commify(l.size()));
 
 	const char *zone_name = ZoneName(zoneid);
 
@@ -537,7 +532,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		spawn2_list.Insert(new_spawn);
 	}
 
-	LogInfo("Loaded [{}] spawn2 entries", Strings::Commify(results.RowCount()));
+	LogInfo("Loaded [{}] spawn2 entries", Strings::Commify(l.size()));
 
 	NPC::SpawnZoneController();
 
@@ -850,7 +845,7 @@ bool SpawnConditionManager::LoadDBEvent(uint32 event_id, SpawnEvent &event, std:
     std::string timeAsString;
     EQTime::ToString(&event.next, timeAsString);
 
-  LogSpawns("(LoadDBEvent) Loaded [{}] spawn event [{}] on condition [{}] with period [{}], action [{}], argument [{}], strict [{}]. Will trigger at [{}]", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
+  LogSpawns("(LoadDBEvent) Loaded [{}] spawn event [{}] on condition [{}] with period [{}] action [{}] argument [{}] strict [{}]. Will trigger at [{}]", event.enabled? "enabled": "disabled", event.id, event.condition_id, event.period, event.action, event.argument, event.strict, timeAsString.c_str());
 
 	return true;
 }
@@ -936,7 +931,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 		spawn_events.push_back(event);
 
 		LogSpawns(
-			"(LoadSpawnConditions) Loaded [{}] spawn event [{}] on condition [{}] with period [{}], action [{}], argument [{}], strict [{}]",
+			"(LoadSpawnConditions) Loaded [{}] spawn event [{}] on condition [{}] with period [{}] action [{}] argument [{}] strict [{}]",
 			event.enabled ? "enabled" : "disabled",
 			event.id,
 			event.condition_id,
@@ -970,9 +965,15 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 			cevent.next.year == tod.year)
 			StrictCheck = true;
 
-		//If event is disabled, or we failed the strict check, set initial spawn_condition to 0.
-		if(!cevent.enabled || !StrictCheck)
-			SetCondition(zone->GetShortName(), zone->GetInstanceID(),cevent.condition_id,0);
+		//If event is disabled, or we failed the strict check, set initial spawn_condition to default startup value from spawn_conditions.
+		if(!cevent.enabled || !StrictCheck) {
+			SetCondition(
+					zone->GetShortName(),
+					zone->GetInstanceID(),
+					cevent.condition_id,
+					spawn_conditions[cevent.condition_id].value
+			);
+		}
 
 		if(!cevent.enabled)
             continue;
@@ -1058,7 +1059,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		SpawnCondition &cond = condi->second;
 
 		if(cond.value == new_value) {
-			LogSpawns("Condition update received from world for [{}] with value [{}], which is what we already have", condition_id, new_value);
+			LogSpawns("Condition update received from world for [{}] with value [{}] which is what we already have", condition_id, new_value);
 			return;
 		}
 
@@ -1085,7 +1086,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		SpawnCondition &cond = condi->second;
 
 		if(cond.value == new_value) {
-			LogSpawns("Local Condition update requested for [{}] with value [{}], which is what we already have", condition_id, new_value);
+			LogSpawns("Local Condition update requested for [{}] with value [{}] which is what we already have", condition_id, new_value);
 			return;
 		}
 

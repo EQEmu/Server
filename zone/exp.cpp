@@ -183,7 +183,7 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 		}
 
 		if (RuleB(Character, EnableCharacterEXPMods)) {
-			in_add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+			in_add_exp *= zone->GetEXPModifier(this);
 		}
 	}
 
@@ -317,7 +317,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_aaxp *= GetAAEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+		add_aaxp *= zone->GetAAEXPModifier(this);
 	}
 
 	add_aaxp = (uint64)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
@@ -480,7 +480,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 	}
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
-		add_exp *= GetEXPModifier(zone->GetZoneID(), zone->GetInstanceVersion());
+		add_exp *= zone->GetEXPModifier(this);
 	}
 
 	//Enforce Percent XP Cap per kill, if rule is enabled
@@ -665,7 +665,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 		}
 		level_count++;
 
-		if(GetMercID())
+		if(GetMercenaryID())
 			UpdateMercLevel();
 	}
 	//see if we lost any levels
@@ -676,7 +676,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			break;
 		}
 		level_increase = false;
-		if(GetMercID())
+		if(GetMercenaryID())
 			UpdateMercLevel();
 	}
 	check_level--;
@@ -950,7 +950,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	SendAppearancePacket(AT_WhoLevel, set_level); // who level change
+	SendAppearancePacket(AppearanceType::WhoLevel, set_level); // who level change
 
 	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 

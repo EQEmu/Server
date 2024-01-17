@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_RAID_DETAILS_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseRaidDetailsRepository {
 public:
@@ -164,19 +163,19 @@ public:
 		if (results.RowCount() == 1) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
-			e.marked_npc_1_entity_id   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_1_zone_id     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_1_instance_id = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.marked_npc_2_entity_id   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.marked_npc_2_zone_id     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.marked_npc_2_instance_id = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.marked_npc_3_entity_id   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.marked_npc_3_zone_id     = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.marked_npc_3_instance_id = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.marked_npc_1_instance_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.marked_npc_2_entity_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.marked_npc_2_zone_id     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.marked_npc_2_instance_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.marked_npc_3_entity_id   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.marked_npc_3_zone_id     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.marked_npc_3_instance_id = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -332,19 +331,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
-			e.marked_npc_1_entity_id   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_1_zone_id     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_1_instance_id = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.marked_npc_2_entity_id   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.marked_npc_2_zone_id     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.marked_npc_2_instance_id = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.marked_npc_3_entity_id   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.marked_npc_3_zone_id     = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.marked_npc_3_instance_id = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.marked_npc_1_instance_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.marked_npc_2_entity_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.marked_npc_2_zone_id     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.marked_npc_2_instance_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.marked_npc_3_entity_id   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.marked_npc_3_zone_id     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.marked_npc_3_instance_id = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -369,19 +368,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidDetails e{};
 
-			e.raidid                   = static_cast<int32_t>(atoi(row[0]));
-			e.loottype                 = static_cast<int32_t>(atoi(row[1]));
-			e.locked                   = static_cast<int8_t>(atoi(row[2]));
+			e.raidid                   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.loottype                 = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.locked                   = row[2] ? static_cast<int8_t>(atoi(row[2])) : 0;
 			e.motd                     = row[3] ? row[3] : "";
-			e.marked_npc_1_entity_id   = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.marked_npc_1_zone_id     = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.marked_npc_1_instance_id = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.marked_npc_2_entity_id   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.marked_npc_2_zone_id     = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.marked_npc_2_instance_id = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.marked_npc_3_entity_id   = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.marked_npc_3_zone_id     = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.marked_npc_3_instance_id = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
+			e.marked_npc_1_entity_id   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.marked_npc_1_zone_id     = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.marked_npc_1_instance_id = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.marked_npc_2_entity_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.marked_npc_2_zone_id     = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.marked_npc_2_instance_id = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.marked_npc_3_entity_id   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.marked_npc_3_zone_id     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.marked_npc_3_instance_id = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -440,6 +439,86 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const RaidDetails &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.raidid));
+		v.push_back(std::to_string(e.loottype));
+		v.push_back(std::to_string(e.locked));
+		v.push_back("'" + Strings::Escape(e.motd) + "'");
+		v.push_back(std::to_string(e.marked_npc_1_entity_id));
+		v.push_back(std::to_string(e.marked_npc_1_zone_id));
+		v.push_back(std::to_string(e.marked_npc_1_instance_id));
+		v.push_back(std::to_string(e.marked_npc_2_entity_id));
+		v.push_back(std::to_string(e.marked_npc_2_zone_id));
+		v.push_back(std::to_string(e.marked_npc_2_instance_id));
+		v.push_back(std::to_string(e.marked_npc_3_entity_id));
+		v.push_back(std::to_string(e.marked_npc_3_zone_id));
+		v.push_back(std::to_string(e.marked_npc_3_instance_id));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<RaidDetails> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.raidid));
+			v.push_back(std::to_string(e.loottype));
+			v.push_back(std::to_string(e.locked));
+			v.push_back("'" + Strings::Escape(e.motd) + "'");
+			v.push_back(std::to_string(e.marked_npc_1_entity_id));
+			v.push_back(std::to_string(e.marked_npc_1_zone_id));
+			v.push_back(std::to_string(e.marked_npc_1_instance_id));
+			v.push_back(std::to_string(e.marked_npc_2_entity_id));
+			v.push_back(std::to_string(e.marked_npc_2_zone_id));
+			v.push_back(std::to_string(e.marked_npc_2_instance_id));
+			v.push_back(std::to_string(e.marked_npc_3_entity_id));
+			v.push_back(std::to_string(e.marked_npc_3_zone_id));
+			v.push_back(std::to_string(e.marked_npc_3_instance_id));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_RAID_DETAILS_REPOSITORY_H

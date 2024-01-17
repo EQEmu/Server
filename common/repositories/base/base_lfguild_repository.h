@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LFGUILD_REPOSITORY_H
@@ -136,8 +136,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				lfguild_id
 			)
 		);
@@ -146,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			Lfguild e{};
 
-			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -298,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lfguild e{};
 
-			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lfguild e{};
 
-			e.type       = static_cast<uint8_t>(strtoul(row[0], nullptr, 10));
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.name       = row[1] ? row[1] : "";
 			e.comment    = row[2] ? row[2] : "";
-			e.fromlevel  = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.tolevel    = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.classes    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aacount    = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.timezone   = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.timeposted = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -398,6 +399,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Lfguild &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.comment) + "'");
+		v.push_back(std::to_string(e.fromlevel));
+		v.push_back(std::to_string(e.tolevel));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.aacount));
+		v.push_back(std::to_string(e.timezone));
+		v.push_back(std::to_string(e.timeposted));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Lfguild> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.comment) + "'");
+			v.push_back(std::to_string(e.fromlevel));
+			v.push_back(std::to_string(e.tolevel));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.aacount));
+			v.push_back(std::to_string(e.timezone));
+			v.push_back(std::to_string(e.timeposted));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LFGUILD_REPOSITORY_H

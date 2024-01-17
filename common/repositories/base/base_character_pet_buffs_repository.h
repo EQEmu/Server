@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_PET_BUFFS_REPOSITORY_H
@@ -144,8 +144,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_pet_buffs_id
 			)
 		);
@@ -154,17 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			return e;
 		}
@@ -314,17 +315,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +350,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetBuffs e{};
 
-			e.char_id        = static_cast<int32_t>(atoi(row[0]));
-			e.pet            = static_cast<int32_t>(atoi(row[1]));
-			e.slot           = static_cast<int32_t>(atoi(row[2]));
-			e.spell_id       = static_cast<int32_t>(atoi(row[3]));
-			e.caster_level   = static_cast<int8_t>(atoi(row[4]));
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet            = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.slot           = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.spell_id       = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.caster_level   = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 			e.castername     = row[5] ? row[5] : "";
-			e.ticsremaining  = static_cast<int32_t>(atoi(row[6]));
-			e.counters       = static_cast<int32_t>(atoi(row[7]));
-			e.numhits        = static_cast<int32_t>(atoi(row[8]));
-			e.rune           = static_cast<int32_t>(atoi(row[9]));
-			e.instrument_mod = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
+			e.ticsremaining  = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.counters       = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.numhits        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.rune           = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.instrument_mod = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -418,6 +419,82 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterPetBuffs &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.pet));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.caster_level));
+		v.push_back("'" + Strings::Escape(e.castername) + "'");
+		v.push_back(std::to_string(e.ticsremaining));
+		v.push_back(std::to_string(e.counters));
+		v.push_back(std::to_string(e.numhits));
+		v.push_back(std::to_string(e.rune));
+		v.push_back(std::to_string(e.instrument_mod));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterPetBuffs> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.pet));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.caster_level));
+			v.push_back("'" + Strings::Escape(e.castername) + "'");
+			v.push_back(std::to_string(e.ticsremaining));
+			v.push_back(std::to_string(e.counters));
+			v.push_back(std::to_string(e.numhits));
+			v.push_back(std::to_string(e.rune));
+			v.push_back(std::to_string(e.instrument_mod));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_PET_BUFFS_REPOSITORY_H

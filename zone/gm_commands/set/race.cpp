@@ -23,7 +23,7 @@ void SetRace(Client *c, const Seperator *sep)
 	const uint16 race_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 	if (
-		!EQ::ValueWithin(race_id, RACE_DOUG_0, RuleI(NPC, MaxRaceID)) &&
+		!EQ::ValueWithin(race_id, Race::Doug, RuleI(NPC, MaxRaceID)) &&
 		!EQ::ValueWithin(race_id, 2253, 2259)
 	) {
 		c->Message(

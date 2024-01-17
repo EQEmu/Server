@@ -122,7 +122,7 @@ public:
 	Lua_Doors_List GetDoorsList();
 	Lua_Spawn_List GetSpawnList();
 	void SignalAllClients(int signal_id);
-	void ChannelMessage(Lua_Mob from, int channel_num, int language, const char *message);
+	void ChannelMessage(Lua_Mob from, int channel_num, uint8 language, const char *message);
 	Lua_Bot GetBotByID(uint32 bot_id);
 	Lua_Bot GetBotByName(std::string bot_name);
 	Lua_Client GetBotOwnerByBotEntityID(uint32 entity_id);

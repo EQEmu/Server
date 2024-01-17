@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOGIN_WORLD_SERVERS_REPOSITORY_H
@@ -140,8 +140,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				login_world_servers_id
 			)
 		);
@@ -150,15 +151,15 @@ public:
 		if (results.RowCount() == 1) {
 			LoginWorldServers e{};
 
-			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
+			e.login_server_list_type_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
-			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
+			e.login_server_admin_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.is_server_trusted         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 			e.note                      = row[9] ? row[9] : "";
 
 			return e;
@@ -305,15 +306,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginWorldServers e{};
 
-			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
+			e.login_server_list_type_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
-			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
+			e.login_server_admin_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.is_server_trusted         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 			e.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(e);
@@ -339,15 +340,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LoginWorldServers e{};
 
-			e.id                        = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id                        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.long_name                 = row[1] ? row[1] : "";
 			e.short_name                = row[2] ? row[2] : "";
 			e.tag_description           = row[3] ? row[3] : "";
-			e.login_server_list_type_id = static_cast<int32_t>(atoi(row[4]));
+			e.login_server_list_type_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
 			e.last_login_date           = strtoll(row[5] ? row[5] : "-1", nullptr, 10);
 			e.last_ip_address           = row[6] ? row[6] : "";
-			e.login_server_admin_id     = static_cast<int32_t>(atoi(row[7]));
-			e.is_server_trusted         = static_cast<int32_t>(atoi(row[8]));
+			e.login_server_admin_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.is_server_trusted         = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
 			e.note                      = row[9] ? row[9] : "";
 
 			all_entries.push_back(e);
@@ -407,6 +408,80 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LoginWorldServers &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.long_name) + "'");
+		v.push_back("'" + Strings::Escape(e.short_name) + "'");
+		v.push_back("'" + Strings::Escape(e.tag_description) + "'");
+		v.push_back(std::to_string(e.login_server_list_type_id));
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back(std::to_string(e.login_server_admin_id));
+		v.push_back(std::to_string(e.is_server_trusted));
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LoginWorldServers> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.long_name) + "'");
+			v.push_back("'" + Strings::Escape(e.short_name) + "'");
+			v.push_back("'" + Strings::Escape(e.tag_description) + "'");
+			v.push_back(std::to_string(e.login_server_list_type_id));
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+			v.push_back(std::to_string(e.login_server_admin_id));
+			v.push_back(std::to_string(e.is_server_trusted));
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOGIN_WORLD_SERVERS_REPOSITORY_H

@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_RAID_MEMBERS_REPOSITORY_H
@@ -15,7 +15,6 @@
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
-
 
 class BaseRaidMembersRepository {
 public:
@@ -168,19 +167,19 @@ public:
 		if (results.RowCount() == 1) {
 			RaidMembers e{};
 
-			e.id            = strtoull(row[0], nullptr, 10);
-			e.raidid        = static_cast<int32_t>(atoi(row[1]));
-			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
-			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e._class        = static_cast<int8_t>(atoi(row[5]));
-			e.level         = static_cast<int8_t>(atoi(row[6]));
+			e.id            = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.raidid        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.charid        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.bot_id        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.groupid       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e._class        = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.level         = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
 			e.name          = row[7] ? row[7] : "";
-			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
-			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
-			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.isgroupleader = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.israidleader  = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
+			e.islooter      = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.is_marker     = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.is_assister   = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.note          = row[13] ? row[13] : "";
 
 			return e;
@@ -339,19 +338,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidMembers e{};
 
-			e.id            = strtoull(row[0], nullptr, 10);
-			e.raidid        = static_cast<int32_t>(atoi(row[1]));
-			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
-			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e._class        = static_cast<int8_t>(atoi(row[5]));
-			e.level         = static_cast<int8_t>(atoi(row[6]));
+			e.id            = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.raidid        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.charid        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.bot_id        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.groupid       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e._class        = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.level         = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
 			e.name          = row[7] ? row[7] : "";
-			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
-			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
-			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.isgroupleader = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.israidleader  = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
+			e.islooter      = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.is_marker     = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.is_assister   = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.note          = row[13] ? row[13] : "";
 
 			all_entries.push_back(e);
@@ -377,19 +376,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			RaidMembers e{};
 
-			e.id            = strtoull(row[0], nullptr, 10);
-			e.raidid        = static_cast<int32_t>(atoi(row[1]));
-			e.charid        = static_cast<int32_t>(atoi(row[2]));
-			e.bot_id        = static_cast<int32_t>(atoi(row[3]));
-			e.groupid       = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e._class        = static_cast<int8_t>(atoi(row[5]));
-			e.level         = static_cast<int8_t>(atoi(row[6]));
+			e.id            = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.raidid        = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.charid        = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.bot_id        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.groupid       = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e._class        = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
+			e.level         = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
 			e.name          = row[7] ? row[7] : "";
-			e.isgroupleader = static_cast<int8_t>(atoi(row[8]));
-			e.israidleader  = static_cast<int8_t>(atoi(row[9]));
-			e.islooter      = static_cast<int8_t>(atoi(row[10]));
-			e.is_marker     = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.is_assister   = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.isgroupleader = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.israidleader  = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
+			e.islooter      = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.is_marker     = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.is_assister   = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 			e.note          = row[13] ? row[13] : "";
 
 			all_entries.push_back(e);
@@ -449,6 +448,88 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const RaidMembers &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.raidid));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.groupid));
+		v.push_back(std::to_string(e._class));
+		v.push_back(std::to_string(e.level));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.isgroupleader));
+		v.push_back(std::to_string(e.israidleader));
+		v.push_back(std::to_string(e.islooter));
+		v.push_back(std::to_string(e.is_marker));
+		v.push_back(std::to_string(e.is_assister));
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<RaidMembers> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.raidid));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.groupid));
+			v.push_back(std::to_string(e._class));
+			v.push_back(std::to_string(e.level));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.isgroupleader));
+			v.push_back(std::to_string(e.israidleader));
+			v.push_back(std::to_string(e.islooter));
+			v.push_back(std::to_string(e.is_marker));
+			v.push_back(std::to_string(e.is_assister));
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_RAID_MEMBERS_REPOSITORY_H

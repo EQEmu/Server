@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_DYNAMIC_ZONES_REPOSITORY_H
@@ -192,8 +192,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				dynamic_zones_id
 			)
 		);
@@ -202,29 +203,29 @@ public:
 		if (results.RowCount() == 1) {
 			DynamicZones e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.instance_id         = static_cast<int32_t>(atoi(row[1]));
-			e.type                = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.instance_id         = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type                = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.uuid                = row[3] ? row[3] : "";
 			e.name                = row[4] ? row[4] : "";
-			e.leader_id           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.min_players         = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.max_players         = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.dz_switch_id        = static_cast<int32_t>(atoi(row[8]));
-			e.compass_zone_id     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.compass_x           = strtof(row[10], nullptr);
-			e.compass_y           = strtof(row[11], nullptr);
-			e.compass_z           = strtof(row[12], nullptr);
-			e.safe_return_zone_id = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.safe_return_x       = strtof(row[14], nullptr);
-			e.safe_return_y       = strtof(row[15], nullptr);
-			e.safe_return_z       = strtof(row[16], nullptr);
-			e.safe_return_heading = strtof(row[17], nullptr);
-			e.zone_in_x           = strtof(row[18], nullptr);
-			e.zone_in_y           = strtof(row[19], nullptr);
-			e.zone_in_z           = strtof(row[20], nullptr);
-			e.zone_in_heading     = strtof(row[21], nullptr);
-			e.has_zone_in         = static_cast<uint8_t>(strtoul(row[22], nullptr, 10));
+			e.leader_id           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.min_players         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.max_players         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.dz_switch_id        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_zone_id     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.compass_x           = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_y           = row[11] ? strtof(row[11], nullptr) : 0;
+			e.compass_z           = row[12] ? strtof(row[12], nullptr) : 0;
+			e.safe_return_zone_id = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.safe_return_x       = row[14] ? strtof(row[14], nullptr) : 0;
+			e.safe_return_y       = row[15] ? strtof(row[15], nullptr) : 0;
+			e.safe_return_z       = row[16] ? strtof(row[16], nullptr) : 0;
+			e.safe_return_heading = row[17] ? strtof(row[17], nullptr) : 0;
+			e.zone_in_x           = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y           = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z           = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_heading     = row[21] ? strtof(row[21], nullptr) : 0;
+			e.has_zone_in         = row[22] ? static_cast<uint8_t>(strtoul(row[22], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -409,29 +410,29 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZones e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.instance_id         = static_cast<int32_t>(atoi(row[1]));
-			e.type                = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.instance_id         = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type                = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.uuid                = row[3] ? row[3] : "";
 			e.name                = row[4] ? row[4] : "";
-			e.leader_id           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.min_players         = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.max_players         = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.dz_switch_id        = static_cast<int32_t>(atoi(row[8]));
-			e.compass_zone_id     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.compass_x           = strtof(row[10], nullptr);
-			e.compass_y           = strtof(row[11], nullptr);
-			e.compass_z           = strtof(row[12], nullptr);
-			e.safe_return_zone_id = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.safe_return_x       = strtof(row[14], nullptr);
-			e.safe_return_y       = strtof(row[15], nullptr);
-			e.safe_return_z       = strtof(row[16], nullptr);
-			e.safe_return_heading = strtof(row[17], nullptr);
-			e.zone_in_x           = strtof(row[18], nullptr);
-			e.zone_in_y           = strtof(row[19], nullptr);
-			e.zone_in_z           = strtof(row[20], nullptr);
-			e.zone_in_heading     = strtof(row[21], nullptr);
-			e.has_zone_in         = static_cast<uint8_t>(strtoul(row[22], nullptr, 10));
+			e.leader_id           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.min_players         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.max_players         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.dz_switch_id        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_zone_id     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.compass_x           = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_y           = row[11] ? strtof(row[11], nullptr) : 0;
+			e.compass_z           = row[12] ? strtof(row[12], nullptr) : 0;
+			e.safe_return_zone_id = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.safe_return_x       = row[14] ? strtof(row[14], nullptr) : 0;
+			e.safe_return_y       = row[15] ? strtof(row[15], nullptr) : 0;
+			e.safe_return_z       = row[16] ? strtof(row[16], nullptr) : 0;
+			e.safe_return_heading = row[17] ? strtof(row[17], nullptr) : 0;
+			e.zone_in_x           = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y           = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z           = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_heading     = row[21] ? strtof(row[21], nullptr) : 0;
+			e.has_zone_in         = row[22] ? static_cast<uint8_t>(strtoul(row[22], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -456,29 +457,29 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZones e{};
 
-			e.id                  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.instance_id         = static_cast<int32_t>(atoi(row[1]));
-			e.type                = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
+			e.id                  = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.instance_id         = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.type                = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.uuid                = row[3] ? row[3] : "";
 			e.name                = row[4] ? row[4] : "";
-			e.leader_id           = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.min_players         = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.max_players         = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.dz_switch_id        = static_cast<int32_t>(atoi(row[8]));
-			e.compass_zone_id     = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.compass_x           = strtof(row[10], nullptr);
-			e.compass_y           = strtof(row[11], nullptr);
-			e.compass_z           = strtof(row[12], nullptr);
-			e.safe_return_zone_id = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.safe_return_x       = strtof(row[14], nullptr);
-			e.safe_return_y       = strtof(row[15], nullptr);
-			e.safe_return_z       = strtof(row[16], nullptr);
-			e.safe_return_heading = strtof(row[17], nullptr);
-			e.zone_in_x           = strtof(row[18], nullptr);
-			e.zone_in_y           = strtof(row[19], nullptr);
-			e.zone_in_z           = strtof(row[20], nullptr);
-			e.zone_in_heading     = strtof(row[21], nullptr);
-			e.has_zone_in         = static_cast<uint8_t>(strtoul(row[22], nullptr, 10));
+			e.leader_id           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.min_players         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.max_players         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.dz_switch_id        = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_zone_id     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.compass_x           = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_y           = row[11] ? strtof(row[11], nullptr) : 0;
+			e.compass_z           = row[12] ? strtof(row[12], nullptr) : 0;
+			e.safe_return_zone_id = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.safe_return_x       = row[14] ? strtof(row[14], nullptr) : 0;
+			e.safe_return_y       = row[15] ? strtof(row[15], nullptr) : 0;
+			e.safe_return_z       = row[16] ? strtof(row[16], nullptr) : 0;
+			e.safe_return_heading = row[17] ? strtof(row[17], nullptr) : 0;
+			e.zone_in_x           = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y           = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z           = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_heading     = row[21] ? strtof(row[21], nullptr) : 0;
+			e.has_zone_in         = row[22] ? static_cast<uint8_t>(strtoul(row[22], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -537,6 +538,106 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const DynamicZones &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.type));
+		v.push_back("'" + Strings::Escape(e.uuid) + "'");
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.leader_id));
+		v.push_back(std::to_string(e.min_players));
+		v.push_back(std::to_string(e.max_players));
+		v.push_back(std::to_string(e.dz_switch_id));
+		v.push_back(std::to_string(e.compass_zone_id));
+		v.push_back(std::to_string(e.compass_x));
+		v.push_back(std::to_string(e.compass_y));
+		v.push_back(std::to_string(e.compass_z));
+		v.push_back(std::to_string(e.safe_return_zone_id));
+		v.push_back(std::to_string(e.safe_return_x));
+		v.push_back(std::to_string(e.safe_return_y));
+		v.push_back(std::to_string(e.safe_return_z));
+		v.push_back(std::to_string(e.safe_return_heading));
+		v.push_back(std::to_string(e.zone_in_x));
+		v.push_back(std::to_string(e.zone_in_y));
+		v.push_back(std::to_string(e.zone_in_z));
+		v.push_back(std::to_string(e.zone_in_heading));
+		v.push_back(std::to_string(e.has_zone_in));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<DynamicZones> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.type));
+			v.push_back("'" + Strings::Escape(e.uuid) + "'");
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.leader_id));
+			v.push_back(std::to_string(e.min_players));
+			v.push_back(std::to_string(e.max_players));
+			v.push_back(std::to_string(e.dz_switch_id));
+			v.push_back(std::to_string(e.compass_zone_id));
+			v.push_back(std::to_string(e.compass_x));
+			v.push_back(std::to_string(e.compass_y));
+			v.push_back(std::to_string(e.compass_z));
+			v.push_back(std::to_string(e.safe_return_zone_id));
+			v.push_back(std::to_string(e.safe_return_x));
+			v.push_back(std::to_string(e.safe_return_y));
+			v.push_back(std::to_string(e.safe_return_z));
+			v.push_back(std::to_string(e.safe_return_heading));
+			v.push_back(std::to_string(e.zone_in_x));
+			v.push_back(std::to_string(e.zone_in_y));
+			v.push_back(std::to_string(e.zone_in_z));
+			v.push_back(std::to_string(e.zone_in_heading));
+			v.push_back(std::to_string(e.has_zone_in));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_DYNAMIC_ZONES_REPOSITORY_H

@@ -857,7 +857,7 @@ bool Merc::Process()
 		return false;
 	}
 
-	if(!GetMercOwner()) {
+	if(!GetMercenaryOwner()) {
 		//p_depop = true;               //this was causing a crash - removed merc from entity list, but not group
 		//return false;                 //merc can live after client dies, not sure how long
 	}
@@ -867,8 +867,8 @@ bool Merc::Process()
 		return false;
 	}
 
-	if (HasGroup() && GetMercOwner() && GetFollowID() == 0) {
-		SetFollowID(GetMercOwner()->GetID());
+	if (HasGroup() && GetMercenaryOwner() && GetFollowID() == 0) {
+		SetFollowID(GetMercenaryOwner()->GetID());
 	}
 
 	SpellProcess();
@@ -1691,7 +1691,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 												continue;
 										}
 
-										if(hpr < checkHPR && g->members[i] == GetMercOwner()) {
+										if(hpr < checkHPR && g->members[i] == GetMercenaryOwner()) {
 											if(!tar || (hpr < tar->GetHPRatio() || (tar->IsPet() && hpr < checkPetHPR)))
 												tar = g->members[i];            //check owner first
 										}
@@ -3546,7 +3546,7 @@ void Merc::MercGroupSay(Mob *speaker, const char *msg, ...)
 		Group *g = speaker->GetGroup();
 
 		if(g)
-			g->GroupMessage(speaker->CastToMob(), 0, 100, buf);
+			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
 	}
 }
 
@@ -3933,14 +3933,14 @@ float Merc::GetMaxMeleeRangeToTarget(Mob* target) {
 		float size_mod = GetSize();
 		float other_size_mod = target->GetSize();
 
-		if (GetRace() == RACE_LAVA_DRAGON_49 || GetRace() == RACE_WURM_158 || GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (GetRace() == Race::LavaDragon || GetRace() == Race::Wurm || GetRace() == Race::GhostDragon) //For races with a fixed size
 		{
 			size_mod = 60.0f;
 		} else if (size_mod < 6.0) {
 			size_mod = 8.0f;
 		}
 
-		if (target->GetRace() == RACE_LAVA_DRAGON_49 || target->GetRace() == RACE_WURM_158 || target->GetRace() == RACE_GHOST_DRAGON_196) //For races with a fixed size
+		if (target->GetRace() == Race::LavaDragon || target->GetRace() == Race::Wurm || target->GetRace() == Race::GhostDragon) //For races with a fixed size
 		{
 			other_size_mod = 60.0f;
 		} else if (other_size_mod < 6.0) {
@@ -4076,8 +4076,8 @@ void Merc::SetTarget(Mob* mob) {
 Mob* Merc::GetOwnerOrSelf() {
 	Mob* Result = nullptr;
 
-	if(GetMercOwner())
-		Result = GetMercOwner();
+	if(GetMercenaryOwner())
+		Result = GetMercenaryOwner();
 	else
 		Result = this;
 
@@ -4108,7 +4108,7 @@ bool Merc::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	return true;
 }
 
-Client* Merc::GetMercOwner() {
+Client* Merc::GetMercenaryOwner() {
 	Client* mercOwner = nullptr;
 
 	if(GetOwner())
@@ -4230,7 +4230,7 @@ const char* Merc::GetRandomName(){
 	return name;
 }
 
-bool Merc::LoadMercSpells() {
+bool Merc::LoadMercenarySpells() {
 	// loads mercs spells into list
 	merc_spells.clear();
 
@@ -4278,18 +4278,18 @@ bool Merc::LoadMercSpells() {
 
 bool Merc::Save() {
 
-	if(database.SaveMerc(this)){
+	if(database.SaveMercenary(this)){
 		return true;
 	}
 
 	return false;
 }
 
-Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB) {
+Merc* Merc::LoadMercenary(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB) {
 
 	if(c)
 	{
-		if(c->GetMercID())
+		if(c->GetMercenaryID())
 		{
 			merc_template = zone->GetMercTemplate(c->GetMercInfo().MercTemplateID);
 		}
@@ -4302,7 +4302,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 
 		const NPCType* npc_type_to_copy = nullptr;
 		if (c) {
-			npc_type_to_copy = content_db.GetMercType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
+			npc_type_to_copy = content_db.GetMercenaryType(merc_template->MercNPCID, merc_template->RaceID, c->GetLevel());
 		}
 
 		if(npc_type_to_copy != nullptr)
@@ -4323,7 +4323,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			npc_type->race = merc_template->RaceID;
 
 			// Use the Gender and Size of the Merchant if possible
-			uint8 tmpgender = MALE;
+			uint8 tmpgender = Gender::Male;
 			float tmpsize = 6.0f;
 			if(merchant_id > 0)
 			{
@@ -4365,12 +4365,12 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 			if(merc)
 			{
 				merc->SetMercData( merc_template->MercTemplateID );
-				database.LoadMercEquipment(merc);
+				database.LoadMercenaryEquipment(merc);
 				merc->UpdateMercStats(c, true);
 
 				if(updateFromDB)
 				{
-					database.LoadCurrentMerc(c);
+					database.LoadCurrentMercenary(c);
 
 					merc->SetMercID(c->GetMercInfo().mercid);
 					snprintf(merc->name, 64, "%s", c->GetMercInfo().merc_name);
@@ -4397,11 +4397,11 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 					merc->RandomizeFeatures(false, true);
 				}
 
-				if(merc->GetMercID()) {
-					database.LoadMercBuffs(merc);
+				if(merc->GetMercenaryID()) {
+					database.LoadMercenaryBuffs(merc);
 				}
 
-				merc->LoadMercSpells();
+				merc->LoadMercenarySpells();
 			}
 
 			Log(Logs::General, Logs::Mercenaries, "LoadMerc Successful for %s (%s).", merc->GetName(), c->GetName());
@@ -4414,7 +4414,7 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 
 void Merc::UpdateMercInfo(Client *c) {
 	snprintf(c->GetMercInfo().merc_name, 64, "%s", name);
-	c->GetMercInfo().mercid = GetMercID();
+	c->GetMercInfo().mercid = GetMercenaryID();
 	c->GetMercInfo().IsSuspended = IsSuspended();
 	c->GetMercInfo().Gender = GetGender();
 	c->GetMercInfo().MercSize = GetSize();
@@ -4438,7 +4438,7 @@ void Merc::UpdateMercStats(Client *c, bool setmax)
 	if (c->GetMercInfo().MercTemplateID > 0) {
 		Log(Logs::General, Logs::Mercenaries, "Updating Mercenary Stats for %s (%s).", GetName(),
 			c->GetName());
-		const NPCType *npc_type = content_db.GetMercType(
+		const NPCType *npc_type = content_db.GetMercenaryType(
 		    zone->GetMercTemplate(c->GetMercInfo().MercTemplateID)->MercNPCID, GetRace(), c->GetLevel());
 		if (npc_type) {
 			max_hp = npc_type->max_hp;
@@ -4626,7 +4626,7 @@ void Merc::UpdateMercAppearance() {
 	}
 
 	if (UpdateActiveLight())
-		SendAppearancePacket(AT_Light, GetActiveLightType());
+		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 }
 
 void Merc::UpdateEquipmentLight()
@@ -4674,7 +4674,7 @@ bool Merc::Spawn(Client *owner) {
 	if(!owner)
 		return false;
 
-	MercTemplate* merc_template = zone->GetMercTemplate(GetMercTemplateID());
+	MercTemplate* merc_template = zone->GetMercTemplate(GetMercenaryTemplateID());
 
 	if(!merc_template)
 		return false;
@@ -4841,7 +4841,7 @@ void Client::UpdateMercTimer()
 	{
 		if(GetMercTimer()->Check())
 		{
-			uint32 upkeep = merc->CalcUpkeepCost(merc->GetMercTemplateID(), GetLevel());
+			uint32 upkeep = merc->CalcUpkeepCost(merc->GetMercenaryTemplateID(), GetLevel());
 
 			if(CheckCanRetainMerc(upkeep))
 			{
@@ -4898,7 +4898,7 @@ bool Client::CheckCanHireMerc(Mob* merchant, uint32 template_id) {
 	}
 
 	// Check if max number of mercs is already reached
-	if(GetNumMercs() >= MAXMERCS) {
+	if(GetNumberOfMercenaries() >= MAXMERCS) {
 		SendMercResponsePackets(6);
 		return false;
 	}
@@ -5053,7 +5053,7 @@ void Client::SuspendMercCommand() {
 			}
 
 			// Get merc, assign it to client & spawn
-			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
+			Merc* merc = Merc::LoadMercenary(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 			if(merc)
 			{
 				SpawnMerc(merc, false);
@@ -5079,7 +5079,7 @@ void Client::SuspendMercCommand() {
 				}
 			}
 
-			if(CurrentMerc && GetMercID())
+			if(CurrentMerc && GetMercenaryID())
 			{
 				CurrentMerc->Suspend();
 				Log(Logs::General, Logs::Mercenaries, "SuspendMercCommand Successful Suspend for %s.", GetName());
@@ -5123,13 +5123,13 @@ void Client::SpawnMercOnZone() {
 	if (GetMerc())
 		return;
 
-	if(database.LoadMercInfo(this))
+	if(database.LoadMercenaryInfo(this))
 	{
 		if(!GetMercInfo().IsSuspended)
 		{
 			GetMercInfo().SuspendedTime = 0;
 			// Get merc, assign it to client & spawn
-			Merc* merc = Merc::LoadMerc(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
+			Merc* merc = Merc::LoadMercenary(this, &zone->merc_templates[GetMercInfo().MercTemplateID], 0, true);
 			if(merc)
 			{
 				SpawnMerc(merc, false);
@@ -5189,7 +5189,7 @@ void Client::SendMercTimer(Merc* merc) {
 
 void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 
-	if (!merc || !CheckCanSpawnMerc(merc->GetMercTemplateID()))
+	if (!merc || !CheckCanSpawnMerc(merc->GetMercenaryTemplateID()))
 	{
 		if (merc)
 		{
@@ -5212,7 +5212,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 
 bool Merc::Suspend() {
 
-	Client* mercOwner = GetMercOwner();
+	Client* mercOwner = GetMercenaryOwner();
 
 	if(!mercOwner)
 		return false;
@@ -5261,8 +5261,8 @@ bool Merc::Unsuspend(bool setMaxStats) {
 
 	Client* mercOwner = nullptr;
 
-	if(GetMercOwner()) {
-		mercOwner = GetMercOwner();
+	if(GetMercenaryOwner()) {
+		mercOwner = GetMercenaryOwner();
 	}
 
 	if(!mercOwner)
@@ -5273,7 +5273,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		// Set time remaining to max on unsuspend - there is a charge for unsuspending as well
 		SetSuspended(false);
 
-		mercOwner->GetMercInfo().mercid = GetMercID();
+		mercOwner->GetMercInfo().mercid = GetMercenaryID();
 		mercOwner->GetMercInfo().IsSuspended = false;
 
 		mercOwner->SendMercenaryUnsuspendPacket(0);
@@ -5299,7 +5299,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 			//check for sufficient funds and remove them last
 			if(RuleB(Mercs, ChargeMercUpkeepCost))
 			{
-				uint32 cost = CalcUpkeepCost(GetMercTemplateID(), GetLevel()) * 100;    // Cost is in gold
+				uint32 cost = CalcUpkeepCost(GetMercenaryTemplateID(), GetLevel()) * 100;    // Cost is in gold
 				if(cost > 0 && !mercOwner->HasMoney(cost))
 				{
 					mercOwner->SendMercResponsePackets(1);
@@ -5317,7 +5317,7 @@ bool Merc::Unsuspend(bool setMaxStats) {
 bool Client::DismissMerc(uint32 MercID) {
 
 	bool Dismissed = true;
-	if (!database.DeleteMerc(MercID))
+	if (!database.DeleteMercenary(MercID))
 	{
 		Log(Logs::General, Logs::Mercenaries, "Dismiss Failed Database Query for MercID: %i, Client: %s.", MercID, GetName());
 		Dismissed = false;
@@ -5390,9 +5390,9 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 				}
 				else if(group->DelMember(merc, true))
 				{
-					if(merc->GetMercCharacterID() != 0)
+					if(merc->GetMercenaryCharacterID() != 0)
 					{
-						database.SetGroupID(merc->GetName(), 0, merc->GetMercCharacterID(), true);
+						database.SetGroupID(merc->GetName(), 0, merc->GetMercenaryCharacterID(), true);
 					}
 				}
 			}
@@ -5433,9 +5433,9 @@ bool Merc::MercJoinClientGroup() {
 
 	Client* mercOwner = nullptr;
 
-	if(GetMercOwner())
+	if(GetMercenaryOwner())
 	{
-		mercOwner = GetMercOwner();
+		mercOwner = GetMercenaryOwner();
 	}
 
 	if(!mercOwner)
@@ -5516,18 +5516,18 @@ bool Merc::AddMercToGroup(Merc* merc, Group* group) {
 		// Remove merc from current group if it's not the destination group
 		if(merc->HasGroup())
 		{
-			if(merc->GetGroup() == group && merc->GetMercOwner())
+			if(merc->GetGroup() == group && merc->GetMercenaryOwner())
 			{
 				// Merc is already in the destination group
-				merc->SetFollowID(merc->GetMercOwner()->GetID());
+				merc->SetFollowID(merc->GetMercenaryOwner()->GetID());
 				return true;
 			}
 			merc->RemoveMercFromGroup(merc, merc->GetGroup());
 		}
 		//Try and add the member, followed by checking if the merc owner exists.
-		if(group->AddMember(merc) && merc->GetMercOwner())
+		if(group->AddMember(merc) && merc->GetMercenaryOwner())
 		{
-			merc->SetFollowID(merc->GetMercOwner()->GetID());
+			merc->SetFollowID(merc->GetMercenaryOwner()->GetID());
 			Result = true;
 		}
 		else
@@ -5551,13 +5551,13 @@ void Client::InitializeMercInfo() {
 
 Merc* Client::GetMerc() {
 
-	if(GetMercID() == 0)
+	if(GetMercenaryID() == 0)
 	{
-		Log(Logs::Detail, Logs::Mercenaries, "GetMerc - GetMercID: 0 for %s.", GetName());
+		Log(Logs::Detail, Logs::Mercenaries, "GetMerc - GetMercenaryID: 0 for %s.", GetName());
 		return (nullptr);
 	}
 
-	Merc* tmp = entity_list.GetMercByID(GetMercID());
+	Merc* tmp = entity_list.GetMercByID(GetMercenaryID());
 	if(tmp == nullptr)
 	{
 		SetMercID(0);
@@ -5575,7 +5575,7 @@ Merc* Client::GetMerc() {
 	return (tmp);
 }
 
-uint8 Client::GetNumMercs() {
+uint8 Client::GetNumberOfMercenaries() {
 
 	uint8 numMercs = 0;
 
@@ -5586,7 +5586,7 @@ uint8 Client::GetNumMercs() {
 			numMercs++;
 		}
 	}
-	Log(Logs::General, Logs::Mercenaries, "GetNumMercs Number: %i for %s.", numMercs, GetName());
+	Log(Logs::General, Logs::Mercenaries, "GetNumberOfMercenaries Number: %i for %s.", numMercs, GetName());
 
 	return numMercs;
 }
@@ -5624,7 +5624,7 @@ void Client::SetMerc(Merc* newmerc) {
 		GetMercInfo().myTemplate = nullptr;
 		GetMercInfo().IsSuspended = false;
 		GetMercInfo().SuspendedTime = 0;
-		GetMercInfo().Gender = MALE;
+		GetMercInfo().Gender = Gender::Male;
 		GetMercInfo().State = 0;
 		memset(GetMercInfo().merc_name, 0, 64);
 		Log(Logs::General, Logs::Mercenaries, "SetMerc No Merc for %s.", GetName());
@@ -5636,8 +5636,8 @@ void Client::SetMerc(Merc* newmerc) {
 		newmerc->SetOwnerID(GetID());
 		newmerc->SetMercCharacterID(CharacterID());
 		newmerc->SetClientVersion((uint8)ClientVersion());
-		GetMercInfo().mercid = newmerc->GetMercID();
-		GetMercInfo().MercTemplateID = newmerc->GetMercTemplateID();
+		GetMercInfo().mercid = newmerc->GetMercenaryID();
+		GetMercInfo().MercTemplateID = newmerc->GetMercenaryTemplateID();
 		GetMercInfo().myTemplate = zone->GetMercTemplate(GetMercInfo().MercTemplateID);
 		GetMercInfo().IsSuspended = newmerc->IsSuspended();
 		GetMercInfo().SuspendedTime = 0;
@@ -5653,7 +5653,7 @@ void Client::UpdateMercLevel() {
 	if (merc)
 	{
 		merc->UpdateMercStats(this, false);
-		merc->SendAppearancePacket(AT_WhoLevel, GetLevel(), true, true);
+		merc->SendAppearancePacket(AppearanceType::WhoLevel, GetLevel(), true, true);
 	}
 }
 
@@ -5722,75 +5722,78 @@ void Client::SendMercAssignPacket(uint32 entityID, uint32 unk01, uint32 unk02) {
 	Log(Logs::Detail, Logs::Mercenaries, "Sent SendMercAssignPacket EndID: %i, Unk1: %i, Unk2: %i, Client: %s.", entityID, unk01, unk02, GetName());
 }
 
-void NPC::LoadMercTypes() {
+void NPC::LoadMercenaryTypes()
+{
+	const std::string& query = fmt::format(
+		SQL(
+			SELECT DISTINCT MTyp.dbstring, MTyp.clientversion
+			FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE,
+			merc_types MTyp, merc_templates MTem
+			WHERE MME.merchant_id = {}
+			AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id
+			AND MMTE.merc_template_id = MTem.merc_template_id
+			AND MTem.merc_type_id = MTyp.merc_type_id
+		),
+		GetNPCTypeID()
+	);
 
-	std::string query = StringFormat("SELECT DISTINCT MTyp.dbstring, MTyp.clientversion "
-		"FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
-		"merc_types MTyp, merc_templates MTem "
-		"WHERE MME.merchant_id = %i "
-		"AND MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
-		"AND MMTE.merc_template_id = MTem.merc_template_id "
-		"AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID());
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogError("Error in NPC::LoadMercTypes()");
+	if (!results.Success()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		MercType tempMercType;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		MercType t;
 
-		tempMercType.Type = Strings::ToInt(row[0]);
-		tempMercType.ClientVersion = Strings::ToInt(row[1]);
+		t.Type          = Strings::ToInt(row[0]);
+		t.ClientVersion = Strings::ToInt(row[1]);
 
-		mercTypeList.push_back(tempMercType);
+		mercTypeList.push_back(t);
 	}
-
 }
 
-void NPC::LoadMercs() {
+void NPC::LoadMercenaries()
+{
+	const std::string& query = fmt::format(
+		SQL(
+			SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id,
+			MTem.dbstring AS merc_subtype_id, 0 AS CostFormula,
+			CASE WHEN MTem.clientversion > MTyp.clientversion
+			THEN MTem.clientversion
+			ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id
+			FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE,
+			merc_types MTyp, merc_templates MTem
+			WHERE MME.merchant_id = {} AND
+			MME.merc_merchant_template_id = MMTE.merc_merchant_template_id
+			AND MMTE.merc_template_id = MTem.merc_template_id
+			AND MTem.merc_type_id = MTyp.merc_type_id
+		),
+		GetNPCTypeID()
+	);
 
-	std::string query = StringFormat("SELECT DISTINCT MTem.merc_template_id, MTyp.dbstring AS merc_type_id, "
-		"MTem.dbstring AS merc_subtype_id, 0 AS CostFormula, "
-		"CASE WHEN MTem.clientversion > MTyp.clientversion "
-		"THEN MTem.clientversion "
-		"ELSE MTyp.clientversion END AS clientversion, MTem.merc_npc_type_id "
-		"FROM merc_merchant_entries MME, merc_merchant_template_entries MMTE, "
-		"merc_types MTyp, merc_templates MTem "
-		"WHERE MME.merchant_id = %i AND "
-		"MME.merc_merchant_template_id = MMTE.merc_merchant_template_id "
-		"AND MMTE.merc_template_id = MTem.merc_template_id "
-		"AND MTem.merc_type_id = MTyp.merc_type_id;", GetNPCTypeID());
 	auto results = database.QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		LogError("Error in NPC::LoadMercTypes()");
+	if (!results.Success()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row)
-	{
-		MercData tempMerc;
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		MercData t;
 
-		tempMerc.MercTemplateID = Strings::ToInt(row[0]);
-		tempMerc.MercType = Strings::ToInt(row[1]);
-		tempMerc.MercSubType = Strings::ToInt(row[2]);
-		tempMerc.CostFormula = Strings::ToInt(row[3]);
-		tempMerc.ClientVersion = Strings::ToInt(row[4]);
-		tempMerc.NPCID = Strings::ToInt(row[5]);
+		t.MercTemplateID = Strings::ToInt(row[0]);
+		t.MercType       = Strings::ToInt(row[1]);
+		t.MercSubType    = Strings::ToInt(row[2]);
+		t.CostFormula    = Strings::ToInt(row[3]);
+		t.ClientVersion  = Strings::ToInt(row[4]);
+		t.NPCID          = Strings::ToInt(row[5]);
 
-		mercDataList.push_back(tempMerc);
+		mercDataList.push_back(t);
 	}
-
 }
 
-int NPC::GetNumMercTypes(uint32 clientVersion) {
+int NPC::GetNumMercenaryTypes(uint32 clientVersion) {
 
 	int count = 0;
-	std::list<MercType> mercTypeList = GetMercTypesList();
+	std::list<MercType> mercTypeList = GetMercenaryTypesList();
 
 	for (auto mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end(); ++mercTypeListItr) {
 		if(mercTypeListItr->ClientVersion <= clientVersion)
@@ -5800,10 +5803,10 @@ int NPC::GetNumMercTypes(uint32 clientVersion) {
 	return count;
 }
 
-int NPC::GetNumMercs(uint32 clientVersion) {
+int NPC::GetNumberOfMercenaries(uint32 clientVersion) {
 
 	int count = 0;
-	std::list<MercData> mercDataList = GetMercsList();
+	std::list<MercData> mercDataList = GetMercenariesList();
 
 	for (auto mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr) {
 		if(mercListItr->ClientVersion <= clientVersion)
@@ -5813,11 +5816,11 @@ int NPC::GetNumMercs(uint32 clientVersion) {
 	return count;
 }
 
-std::list<MercType> NPC::GetMercTypesList(uint32 clientVersion) {
+std::list<MercType> NPC::GetMercenaryTypesList(uint32 clientVersion) {
 
 	std::list<MercType> result;
 
-	if(GetNumMercTypes() > 0)
+	if(GetNumMercenaryTypes() > 0)
 	{
 		for (auto mercTypeListItr = mercTypeList.begin(); mercTypeListItr != mercTypeList.end();
 		     ++mercTypeListItr) {
@@ -5834,11 +5837,11 @@ std::list<MercType> NPC::GetMercTypesList(uint32 clientVersion) {
 	return result;
 }
 
-std::list<MercData> NPC::GetMercsList(uint32 clientVersion) {
+std::list<MercData> NPC::GetMercenariesList(uint32 clientVersion) {
 
 	std::list<MercData> result;
 
-	if(GetNumMercs() > 0)
+	if(GetNumberOfMercenaries() > 0)
 	{
 		for (auto mercListItr = mercDataList.begin(); mercListItr != mercDataList.end(); ++mercListItr) {
 			if(mercListItr->ClientVersion <= clientVersion)

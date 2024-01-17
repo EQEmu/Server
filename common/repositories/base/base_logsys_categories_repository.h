@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOGSYS_CATEGORIES_REPOSITORY_H
@@ -128,8 +128,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				logsys_categories_id
 			)
 		);
@@ -138,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			return e;
 		}
@@ -282,13 +283,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +314,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -378,6 +379,74 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LogsysCategories &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.log_category_id));
+		v.push_back("'" + Strings::Escape(e.log_category_description) + "'");
+		v.push_back(std::to_string(e.log_to_console));
+		v.push_back(std::to_string(e.log_to_file));
+		v.push_back(std::to_string(e.log_to_gmsay));
+		v.push_back(std::to_string(e.log_to_discord));
+		v.push_back(std::to_string(e.discord_webhook_id));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LogsysCategories> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.log_category_id));
+			v.push_back("'" + Strings::Escape(e.log_category_description) + "'");
+			v.push_back(std::to_string(e.log_to_console));
+			v.push_back(std::to_string(e.log_to_file));
+			v.push_back(std::to_string(e.log_to_gmsay));
+			v.push_back(std::to_string(e.log_to_discord));
+			v.push_back(std::to_string(e.discord_webhook_id));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOGSYS_CATEGORIES_REPOSITORY_H

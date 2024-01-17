@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_MAIL_REPOSITORY_H
@@ -132,8 +132,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				mail_id
 			)
 		);
@@ -142,14 +143,14 @@ public:
 		if (results.RowCount() == 1) {
 			Mail e{};
 
-			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			return e;
 		}
@@ -289,14 +290,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mail e{};
 
-			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -321,14 +322,14 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Mail e{};
 
-			e.msgid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.charid    = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.timestamp = static_cast<int32_t>(atoi(row[2]));
+			e.msgid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.charid    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.timestamp = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.from      = row[3] ? row[3] : "";
 			e.subject   = row[4] ? row[4] : "";
 			e.body      = row[5] ? row[5] : "";
 			e.to        = row[6] ? row[6] : "";
-			e.status    = static_cast<int8_t>(atoi(row[7]));
+			e.status    = row[7] ? static_cast<int8_t>(atoi(row[7])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -387,6 +388,76 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Mail &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.msgid));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.timestamp));
+		v.push_back("'" + Strings::Escape(e.from) + "'");
+		v.push_back("'" + Strings::Escape(e.subject) + "'");
+		v.push_back("'" + Strings::Escape(e.body) + "'");
+		v.push_back("'" + Strings::Escape(e.to) + "'");
+		v.push_back(std::to_string(e.status));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Mail> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.msgid));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.timestamp));
+			v.push_back("'" + Strings::Escape(e.from) + "'");
+			v.push_back("'" + Strings::Escape(e.subject) + "'");
+			v.push_back("'" + Strings::Escape(e.body) + "'");
+			v.push_back("'" + Strings::Escape(e.to) + "'");
+			v.push_back(std::to_string(e.status));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_MAIL_REPOSITORY_H
