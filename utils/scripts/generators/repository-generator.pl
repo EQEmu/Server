@@ -570,7 +570,7 @@ sub translate_mysql_data_type_to_c
             $struct_data_type = 'float';
         }
         elsif ($mysql_data_type =~ /double/i) {
-            $struct_data_type = 'float';
+            $struct_data_type = 'double';
         }
     }
     elsif ($mysql_data_type =~ /bigint/) {
