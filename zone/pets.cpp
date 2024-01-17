@@ -21,6 +21,7 @@
 #include "../common/strings.h"
 
 #include "../common/repositories/pets_repository.h"
+#include "../common/repositories/pets_beastlord_data_repository.h"
 
 #include "entity.h"
 #include "client.h"
@@ -196,15 +197,18 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	}
 
 	// Beastlord Pets
-	if(record.petnaming == 2) {
+	if (record.petnaming == 2) {
 		uint16 race_id = GetBaseRace();
-		auto beastlord_pet_data = content_db.GetBeastlordPetData(race_id);
-		npc_type->race = beastlord_pet_data.race_id;
-		npc_type->texture = beastlord_pet_data.texture;
-		npc_type->helmtexture = beastlord_pet_data.helm_texture;
-		npc_type->gender = beastlord_pet_data.gender;
-		npc_type->size *= beastlord_pet_data.size_modifier;
-		npc_type->luclinface = beastlord_pet_data.face;
+
+		auto d = content_db.GetBeastlordPetData(race_id);
+
+		npc_type->race        = d.race_id;
+		npc_type->texture     = d.texture;
+		npc_type->helmtexture = d.helm_texture;
+		npc_type->gender      = d.gender;
+		npc_type->luclinface  = d.face;
+
+		npc_type->size *= d.size_modifier;
 	}
 
 	// handle monster summoning pet appearance
@@ -655,27 +659,20 @@ bool Pet::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 }
 
 BeastlordPetData::PetStruct ZoneDatabase::GetBeastlordPetData(uint16 race_id) {
-	BeastlordPetData::PetStruct beastlord_pet_data;
-	std::string query = fmt::format(
-		SQL(
-			SELECT
-			`pet_race`, `texture`, `helm_texture`, `gender`, `size_modifier`, `face`
-			FROM `pets_beastlord_data`
-			WHERE `player_race` = {}
-		),
-		race_id
-	);
-	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowCount() != 1) {
-		return beastlord_pet_data;
+	BeastlordPetData::PetStruct d;
+
+	const auto& e = PetsBeastlordDataRepository::FindOne(*this, race_id);
+
+	if (!e.player_race) {
+		return d;
 	}
 
-	auto row = results.begin();
-	beastlord_pet_data.race_id = Strings::ToInt(row[0]);
-	beastlord_pet_data.texture = Strings::ToInt(row[1]);
-	beastlord_pet_data.helm_texture = Strings::ToInt(row[2]);
-	beastlord_pet_data.gender = Strings::ToInt(row[3]);
-	beastlord_pet_data.size_modifier = Strings::ToFloat(row[4]);
-	beastlord_pet_data.face = Strings::ToInt(row[5]);
-	return beastlord_pet_data;
+	d.race_id       = e.pet_race;
+	d.texture       = e.texture;
+	d.helm_texture  = e.helm_texture;
+	d.gender        = e.gender;
+	d.size_modifier = e.size_modifier;
+	d.face          = e.face;
+
+	return d;
 }
