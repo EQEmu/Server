@@ -24,6 +24,7 @@
 #include "mob.h"
 #include "trap.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/traps_repository.h"
 
 /*
 
@@ -439,59 +440,63 @@ void EntityList::ClearTrapPointers()
 }
 
 
-bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
-	std::string query = StringFormat(
-		"SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
-		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u %s",
-		zonename,
-		version,
-		ContentFilterCriteria::apply().c_str()
+
+bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_version)
+{
+	const auto& l = TrapsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`zone` = '{}' AND `version` = {} {}",
+			Strings::Escape(zone_short_name),
+			instance_version,
+			ContentFilterCriteria::apply()
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 tid = Strings::ToInt(row[0]);
-		uint8 grp = Strings::ToInt(row[15]);
-
-		if (grp > 0)
-		{
-			// If a member of our group is already spawned skip loading this trap.
-			if (entity_list.IsTrapGroupSpawned(tid, grp))
-			{
+	for (const auto& e : l) {
+		if (e.group) {
+			if (entity_list.IsTrapGroupSpawned(e.id, e.group)) {
+				// If a member of our group is already spawned skip loading this trap.
 				continue;
 			}
 		}
-		auto trap = new Trap();
-		trap->trap_id = tid;
-		trap->db_id = tid;
-		trap->m_Position = glm::vec3(Strings::ToFloat(row[1]), Strings::ToFloat(row[2]), Strings::ToFloat(row[3]));
-		trap->effect = Strings::ToInt(row[4]);
-		trap->effectvalue = Strings::ToInt(row[5]);
-		trap->effectvalue2 = Strings::ToInt(row[6]);
-		trap->skill = Strings::ToInt(row[7]);
-		trap->maxzdiff = Strings::ToFloat(row[8]);
-		trap->radius = Strings::ToFloat(row[9]);
-		trap->chance = Strings::ToInt(row[10]);
-		trap->message = row[11];
-		trap->respawn_time = Strings::ToInt(row[12]);
-		trap->respawn_var = Strings::ToInt(row[13]);
-		trap->level = Strings::ToInt(row[14]);
-		trap->group = grp;
-		trap->triggered_number = Strings::ToInt(row[16]);
-		trap->despawn_when_triggered = atobool(row[17]);
-		trap->undetectable = atobool(row[18]);
-		entity_list.AddTrap(trap);
-		trap->CreateHiddenTrigger();
-		Log(Logs::General, Logs::Traps, "Trap %d successfully loaded.", trap->trap_id);
+
+		auto t = new Trap();
+
+		t->trap_id                = e.id;
+		t->db_id                  = e.id;
+		t->m_Position             = glm::vec3(e.x, e.y, e.z);
+		t->effect                 = e.effect;
+		t->effectvalue            = e.effectvalue;
+		t->effectvalue2           = e.effectvalue2;
+		t->skill                  = e.skill;
+		t->maxzdiff               = e.maxzdiff;
+		t->radius                 = e.radius;
+		t->chance                 = e.chance;
+		t->message                = e.message;
+		t->respawn_time           = e.respawn_time;
+		t->respawn_var            = e.respawn_var;
+		t->level                  = e.level;
+		t->group                  = e.group;
+		t->triggered_number       = e.triggered_number;
+		t->despawn_when_triggered = e.despawn_when_triggered;
+		t->undetectable           = e.undetectable;
+
+		entity_list.AddTrap(t);
+
+		t->CreateHiddenTrigger();
 	}
 
-	LogInfo("Loaded [{}] trap(s)", Strings::Commify(results.RowCount()));
+	LogInfo(
+		"Loaded [{}] Trap{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
 	return true;
 }
@@ -525,61 +530,61 @@ void Trap::CreateHiddenTrigger()
 	SetHiddenTrigger(npca);
 }
 
-bool ZoneDatabase::SetTrapData(Trap* trap, bool repopnow) {
+bool ZoneDatabase::SetTrapData(Trap* t, bool repop)
+{
+	const auto& l = TrapsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`zone` = '{}' AND `id` = {}{}",
+			zone->GetShortName(),
+			t->db_id,
+			(
+				t->group ?
+				fmt::format(
+					" AND `group` = {} ORDER BY RAND() LIMIT 1",
+					t->group
+				) :
+				""
+			)
+		)
+	);
 
-	uint32 dbid = trap->db_id;
-	std::string query;
-
-	if (trap->group > 0)
-	{
-		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
-			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND `group`=%d AND id != %d ORDER BY RAND() LIMIT 1", zone->GetShortName(), trap->group, dbid);
-	}
-	else
-	{
-		// We could just use the existing data here, but querying the DB is not expensive, and allows content developers to change traps without rebooting.
-		query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
-			"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-			"triggered_number, despawn_when_triggered, undetectable FROM traps WHERE zone='%s' AND id = %d", zone->GetShortName(), dbid);
-	}
-
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	const uint32 before_id = t->db_id;
 
-		trap->db_id = Strings::ToInt(row[0]);
-		trap->m_Position = glm::vec3(Strings::ToFloat(row[1]), Strings::ToFloat(row[2]), Strings::ToFloat(row[3]));
-		trap->effect = Strings::ToInt(row[4]);
-		trap->effectvalue = Strings::ToInt(row[5]);
-		trap->effectvalue2 = Strings::ToInt(row[6]);
-		trap->skill = Strings::ToInt(row[7]);
-		trap->maxzdiff = Strings::ToFloat(row[8]);
-		trap->radius = Strings::ToFloat(row[9]);
-		trap->chance = Strings::ToInt(row[10]);
-		trap->message = row[11];
-		trap->respawn_time = Strings::ToInt(row[12]);
-		trap->respawn_var = Strings::ToInt(row[13]);
-		trap->level = Strings::ToInt(row[14]);
-		trap->triggered_number = Strings::ToInt(row[15]);
-		trap->despawn_when_triggered = atobool(row[16]);
-		trap->undetectable = atobool(row[17]);
-		trap->CreateHiddenTrigger();
+	for (const auto& e : l) {
+		t->db_id                  = e.id;
+		t->m_Position             = glm::vec3(e.x, e.y, e.z);
+		t->effect                 = e.effect;
+		t->effectvalue            = e.effectvalue;
+		t->effectvalue2           = e.effectvalue2;
+		t->skill                  = e.skill;
+		t->maxzdiff               = e.maxzdiff;
+		t->radius                 = e.radius;
+		t->chance                 = e.chance;
+		t->message                = e.message;
+		t->respawn_var            = e.respawn_var;
+		t->level                  = e.level;
+		t->triggered_number       = e.triggered_number;
+		t->despawn_when_triggered = e.despawn_when_triggered;
+		t->undetectable           = e.undetectable;
+		t->respawn_time           = e.respawn_time;
 
-		if (repopnow)
-		{
-			trap->chkarea_timer.Enable();
+		t->CreateHiddenTrigger();
+
+
+		if (repop) {
+			t->chkarea_timer.Enable();
+		} else {
+			t->respawn_timer.Start((t->respawn_time + zone->random.Int(0, t->respawn_var)) * 1000);
 		}
-		else
-		{
-			trap->respawn_timer.Start((trap->respawn_time + zone->random.Int(0, trap->respawn_var)) * 1000);
-		}
 
-		if (trap->trap_id != trap->db_id)
-			Log(Logs::General, Logs::Traps, "Trap (%d) DBID has changed from %d to %d", trap->trap_id, dbid, trap->db_id);
+		if (t->trap_id != t->db_id) {
+			LogTraps("Trap ({}) DBID has changed from {} to {}.", t->trap_id, before_id, t->db_id);
+		}
 
 		return true;
 	}

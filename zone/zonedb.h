@@ -623,8 +623,8 @@ public:
 	bool LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id);
 
 	/* Traps   */
-	bool	LoadTraps(const char* zonename, int16 version);
-	bool	SetTrapData(Trap* trap, bool repopnow = false);
+	bool	LoadTraps(const std::string& zone_short_name, int16 instance_version);
+	bool	SetTrapData(Trap* t, bool repop = false);
 
 	/* Time   */
 	uint32	GetZoneTimezone(uint32 zoneid, uint32 version);
