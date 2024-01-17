@@ -45,6 +45,7 @@ public:
 		float       tilt_x;
 		float       tilt_y;
 		std::string display_name;
+		uint8_t     is_floating;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
 		std::string content_flags;
@@ -85,6 +86,7 @@ public:
 			"tilt_x",
 			"tilt_y",
 			"display_name",
+			"is_floating",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -121,6 +123,7 @@ public:
 			"tilt_x",
 			"tilt_y",
 			"display_name",
+			"is_floating",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -191,6 +194,7 @@ public:
 		e.tilt_x                 = 0;
 		e.tilt_y                 = 0;
 		e.display_name           = "";
+		e.is_floating            = 0;
 		e.min_expansion          = -1;
 		e.max_expansion          = -1;
 		e.content_flags          = "";
@@ -257,10 +261,11 @@ public:
 			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
 			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
 			e.display_name           = row[25] ? row[25] : "";
-			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
-			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
-			e.content_flags          = row[28] ? row[28] : "";
-			e.content_flags_disabled = row[29] ? row[29] : "";
+			e.is_floating            = row[26] ? static_cast<uint8_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.min_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.max_expansion          = row[28] ? static_cast<int8_t>(atoi(row[28])) : -1;
+			e.content_flags          = row[29] ? row[29] : "";
+			e.content_flags_disabled = row[30] ? row[30] : "";
 
 			return e;
 		}
@@ -319,10 +324,11 @@ public:
 		v.push_back(columns[23] + " = " + std::to_string(e.tilt_x));
 		v.push_back(columns[24] + " = " + std::to_string(e.tilt_y));
 		v.push_back(columns[25] + " = '" + Strings::Escape(e.display_name) + "'");
-		v.push_back(columns[26] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[27] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[28] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[29] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[26] + " = " + std::to_string(e.is_floating));
+		v.push_back(columns[27] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[28] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[29] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[30] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -370,6 +376,7 @@ public:
 		v.push_back(std::to_string(e.tilt_x));
 		v.push_back(std::to_string(e.tilt_y));
 		v.push_back("'" + Strings::Escape(e.display_name) + "'");
+		v.push_back(std::to_string(e.is_floating));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
 		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -429,6 +436,7 @@ public:
 			v.push_back(std::to_string(e.tilt_x));
 			v.push_back(std::to_string(e.tilt_y));
 			v.push_back("'" + Strings::Escape(e.display_name) + "'");
+			v.push_back(std::to_string(e.is_floating));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
 			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -492,10 +500,11 @@ public:
 			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
 			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
 			e.display_name           = row[25] ? row[25] : "";
-			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
-			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
-			e.content_flags          = row[28] ? row[28] : "";
-			e.content_flags_disabled = row[29] ? row[29] : "";
+			e.is_floating            = row[26] ? static_cast<uint8_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.min_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.max_expansion          = row[28] ? static_cast<int8_t>(atoi(row[28])) : -1;
+			e.content_flags          = row[29] ? row[29] : "";
+			e.content_flags_disabled = row[30] ? row[30] : "";
 
 			all_entries.push_back(e);
 		}
@@ -546,10 +555,11 @@ public:
 			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
 			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
 			e.display_name           = row[25] ? row[25] : "";
-			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
-			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
-			e.content_flags          = row[28] ? row[28] : "";
-			e.content_flags_disabled = row[29] ? row[29] : "";
+			e.is_floating            = row[26] ? static_cast<uint8_t>(strtoul(row[26], nullptr, 10)) : 0;
+			e.min_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.max_expansion          = row[28] ? static_cast<int8_t>(atoi(row[28])) : -1;
+			e.content_flags          = row[29] ? row[29] : "";
+			e.content_flags_disabled = row[30] ? row[30] : "";
 
 			all_entries.push_back(e);
 		}
@@ -650,6 +660,7 @@ public:
 		v.push_back(std::to_string(e.tilt_x));
 		v.push_back(std::to_string(e.tilt_y));
 		v.push_back("'" + Strings::Escape(e.display_name) + "'");
+		v.push_back(std::to_string(e.is_floating));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
 		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -702,6 +713,7 @@ public:
 			v.push_back(std::to_string(e.tilt_x));
 			v.push_back(std::to_string(e.tilt_y));
 			v.push_back("'" + Strings::Escape(e.display_name) + "'");
+			v.push_back(std::to_string(e.is_floating));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
 			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
