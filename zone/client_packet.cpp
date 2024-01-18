@@ -866,8 +866,8 @@ void Client::CompleteConnect()
 			SendGuildRankNames();
 		}
 
-		SendAppearancePacket(AT_GuildID, GuildID(), true);
-		SendAppearancePacket(AT_GuildRank, GuildRank(), false);
+		SendAppearancePacket(AppearanceType::GuildID, GuildID(), true);
+		SendAppearancePacket(AppearanceType::GuildRank, GuildRank(), false);
 
 		SendGuildActiveTributes(GuildID());
 		SendGuildFavorAndTimer(GuildID());
@@ -8058,7 +8058,7 @@ void Client::Handle_OP_GuildDemote(const EQApplicationPacket *app)
 		auto c = entity_list.GetClientByName(demote->target);
 		if (c) {
 			c->SetGuildRank(rank);
-			c->SendAppearancePacket(AT_GuildRank, rank, false);
+			c->SendAppearancePacket(AppearanceType::GuildRank, rank, false);
 		}
 
 		bool banker_status = guild_mgr.GetGuildBankerStatus(gci.guild_id, rank);
@@ -8543,7 +8543,7 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 		auto c = entity_list.GetClientByName(promote->target);
 		if (c) {
 			c->SetGuildRank(rank);
-			c->SendAppearancePacket(AT_GuildRank, rank, false);
+			c->SendAppearancePacket(AppearanceType::GuildRank, rank, false);
 		}
 
 		bool banker_status = guild_mgr.GetGuildBankerStatus(gci.guild_id, rank);

@@ -73,7 +73,7 @@ public:
 		}
 
 		auto m = guild_members[0];
-		m.rank = rank_id;
+		m.rank_ = rank_id;
 
 		return UpdateOne(db, m);
 	}

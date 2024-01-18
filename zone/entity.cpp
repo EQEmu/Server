@@ -5917,10 +5917,10 @@ void EntityList::SendToGuildTitleDisplay(Client* c)
 		for (auto& client : client_list) {
 			if (client.second->IsInAGuild()) {
 				if (client.second->GuildID() == c->GuildID()) {
-					c->SendAppearancePacket(AT_GuildID, client.second->GuildID(), false);
+					c->SendAppearancePacket(AppearanceType::GuildID, client.second->GuildID(), false);
 				}
 				else if (!guild_mgr.CheckPermission(client.second->GuildID(), client.second->GuildRank(), GUILD_ACTION_DISPLAY_GUILD_NAME)) {
-					c->SendAppearancePacket(AT_GuildID, 0, false);
+					c->SendAppearancePacket(AppearanceType::GuildID, 0, false);
 				}
 			}
 		}
@@ -5933,10 +5933,10 @@ void EntityList::SendAllGuildTitleDisplay(uint32 guild_id)
 		if (c.second->IsInAGuild()) {
 			if (!guild_mgr.CheckPermission(c.second->GuildID(), c.second->GuildRank(), GUILD_ACTION_DISPLAY_GUILD_NAME))
 			{
-				c.second->SendAppearancePacket(AT_GuildShow, 0, false, true, nullptr, true);
+				c.second->SendAppearancePacket(AppearanceType::GuildShow, 0, false, true, nullptr, true);
 			}
 			else {
-				c.second->SendAppearancePacket(AT_GuildShow, 1, false, true, nullptr, true);
+				c.second->SendAppearancePacket(AppearanceType::GuildShow, 1, false, true, nullptr, true);
 			}
 		}
 	}

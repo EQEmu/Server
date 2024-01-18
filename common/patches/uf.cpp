@@ -2483,7 +2483,7 @@ namespace UF
 		OUT(type);
 		OUT(parameter);
 		switch (emu->type) {
-			case AT_GuildRank: {
+			case AppearanceType::GuildRank: {
 				//Translate new ranks to old values* /
 				switch (emu->parameter) {
 					case GUILD_SENIOR_MEMBER:

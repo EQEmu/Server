@@ -172,8 +172,8 @@ void Client::SendGuildSpawnAppearance() {
 	} else {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		LogGuilds("Sending spawn appearance for guild [{}] at rank [{}]", GuildID(), rank);
-		SendAppearancePacket(AT_GuildID, GuildID());
-		SendAppearancePacket(AT_GuildRank, rank);
+		SendAppearancePacket(AppearanceType::GuildID, GuildID());
+		SendAppearancePacket(AppearanceType::GuildRank, rank);
 	}
 	UpdateWho();
 }
@@ -789,8 +789,8 @@ void EntityList::SendGuildMemberAdd(
 			}
 
 			c.second->SendGuildActiveTributes(guild_id);
-			c.second->SendAppearancePacket(AT_GuildID, guild_id, true, false, c.second, false);
-			c.second->SendAppearancePacket(AT_GuildRank, rank, true, false, c.second, false);
+			c.second->SendAppearancePacket(AppearanceType::GuildID, guild_id, true, false, c.second, false);
+			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank, true, false, c.second, false);
 			c.second->DoGuildTributeUpdate();
 		}
 	}
@@ -846,8 +846,8 @@ void EntityList::SendGuildMemberRemove(uint32 guild_id, std::string player_name)
 				c.second->SendGuildActiveTributes(0);
 				c.second->SetGuildListDirty(false);
 				c.second->SendGuildList();
-				c.second->SendAppearancePacket(AT_GuildID, GUILD_NONE, true);
-				c.second->SendAppearancePacket(AT_GuildRank, GUILD_RANK_NONE, true);
+				c.second->SendAppearancePacket(AppearanceType::GuildID, GUILD_NONE, true);
+				c.second->SendAppearancePacket(AppearanceType::GuildRank, GUILD_RANK_NONE, true);
 			}
 		}
 	}
@@ -888,7 +888,7 @@ void EntityList::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std:
 
 		if (player_name.compare(c.second->GetName()) == 0) {
 			c.second->SetGuildRank(rank);
-			c.second->SendAppearancePacket(AT_GuildRank, rank, false);
+			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank, false);
 		}
 	}
 }

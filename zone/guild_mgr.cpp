@@ -1760,7 +1760,7 @@ void ZoneGuildManager::MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, 
 	m.last_tribute   = 0;
     m.total_tribute  = 0;
     m.tribute_enable = 0;
-    m.rank           = rank;
+    m.rank_          = rank;
     m.char_id        = char_id;
     m.guild_id       = guild_id;
     m.public_note.clear();

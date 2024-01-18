@@ -416,7 +416,7 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 	auto where_filter = fmt::format("guild_id = '{}'", guild_id);
 	auto guild_ranks = GuildRanksRepository::GetWhere(*m_db, where_filter);
 	for (auto const& r : guild_ranks) {
-		guild->rank_names[r.rank] = r.title;
+		guild->rank_names[r.rank_] = r.title;
 	}
 
 	where_filter = fmt::format("guild_id = '{}'", guild_id);

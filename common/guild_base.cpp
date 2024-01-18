@@ -110,7 +110,7 @@ bool BaseGuildManager::LoadGuilds()
 
 		for (auto const &r: guilds_ranks) {
 			if (r.guild_id == g.id) {
-				m_guilds[g.id]->rank_names[r.rank] = r.title;
+				m_guilds[g.id]->rank_names[r.rank_] = r.title;
 			}
 		}
 
@@ -192,7 +192,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id)
 	auto guild_ranks  = GuildRanksRepository::GetWhere(*m_db, where_filter);
 
 	for (auto const &r: guild_ranks) {
-		guild->rank_names[r.rank] = r.title;
+		guild->rank_names[r.rank_] = r.title;
 	}
 
 	where_filter = fmt::format("guild_id = '{}'", guild_id);
@@ -299,7 +299,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 		GuildRanksRepository::GuildRanks              gr;
 		for (int i = GUILD_LEADER; i <= GUILD_MAX_RANK; i++) {
 			gr.guild_id = guild_id;
-			gr.rank     = i;
+			gr.rank_    = i;
 			gr.title    = in->rank_names[i];
 			out.push_back(gr);
 		}
@@ -752,7 +752,7 @@ bool BaseGuildManager::UpdateDbGuild(uint32 char_id, uint32 guild_id, uint8 rank
 	}
 	e.char_id  = (int32_t) char_id;
 	e.guild_id = guild_id;
-	e.rank     = rank;
+	e.rank_     = rank;
 
 	auto r = GuildMembersRepository::ReplaceOne(*m_db, e);
 	if (!r) {
@@ -790,7 +790,7 @@ bool BaseGuildManager::GetBankerFlag(uint32 CharID, bool compat_mode)
 		return db_banker;
 	}
 
-	return member.banker || GetGuildBankerStatus(member.guild_id, member.rank);
+	return member.banker || GetGuildBankerStatus(member.guild_id, member.rank_);
 }
 
 bool BaseGuildManager::UpdateDbAltFlag(uint32 charid, bool is_alt)
