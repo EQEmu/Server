@@ -233,7 +233,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 		}
 		if(newmember->IsMerc())
 		{
-			Client* owner = newmember->CastToMerc()->GetMercOwner();
+			Client* owner = newmember->CastToMerc()->GetMercenaryOwner();
 			if(owner)
 			{
 				CharacterID = owner->CastToClient()->CharacterID();
@@ -331,7 +331,7 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 
 		if(newmember->IsMerc())
 		{
-			Client* owner = newmember->CastToMerc()->GetMercOwner();
+			Client* owner = newmember->CastToMerc()->GetMercenaryOwner();
 			if(owner)
 			{
 				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
@@ -757,7 +757,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 
 	if(oldmember->IsMerc())
 	{
-		Client* owner = oldmember->CastToMerc()->GetMercOwner();
+		Client* owner = oldmember->CastToMerc()->GetMercenaryOwner();
 		if(owner)
 		{
 			database.SetGroupID(oldmember->GetCleanName(), 0, owner->CharacterID(), true);
@@ -952,7 +952,7 @@ void Group::DisbandGroup(bool joinraid) {
 
 		if (members[i]->IsMerc())
 		{
-			Client* owner = members[i]->CastToMerc()->GetMercOwner();
+			Client* owner = members[i]->CastToMerc()->GetMercenaryOwner();
 			if(owner)
 			{
 				database.SetGroupID(members[i]->GetCleanName(), 0, owner->CharacterID(), true);

@@ -274,7 +274,7 @@ namespace RoF2
 		unsigned char *emu_buffer = in->pBuffer;
 		uint32 opcode = *((uint32*)emu_buffer);
 
-		if (opcode == 8) {
+		if (opcode == AlternateCurrencyMode::Populate) {
 			AltCurrencyPopulate_Struct *populate = (AltCurrencyPopulate_Struct*)emu_buffer;
 
 			auto outapp = new EQApplicationPacket(
@@ -3232,7 +3232,7 @@ namespace RoF2
 
 		SpawnAppearance_Struct *sas = (SpawnAppearance_Struct *)emu_buffer;
 
-		if (sas->type != AT_Size)
+		if (sas->type != AppearanceType::Size)
 		{
 			dest->FastQueuePacket(&in, ack_req);
 			return;

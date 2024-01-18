@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_LEADERSHIP_ABILITIES_REPOSITORY_H
@@ -21,7 +21,7 @@ public:
 	struct CharacterLeadershipAbilities {
 		uint32_t id;
 		uint16_t slot;
-		uint16_t rank;
+		uint16_t rank_;
 	};
 
 	static std::string PrimaryKey()
@@ -34,7 +34,7 @@ public:
 		return {
 			"id",
 			"slot",
-			"rank",
+			"`rank`",
 		};
 	}
 
@@ -43,7 +43,7 @@ public:
 		return {
 			"id",
 			"slot",
-			"rank",
+			"`rank`",
 		};
 	}
 
@@ -84,9 +84,9 @@ public:
 	{
 		CharacterLeadershipAbilities e{};
 
-		e.id   = 0;
-		e.slot = 0;
-		e.rank = 0;
+		e.id    = 0;
+		e.slot  = 0;
+		e.rank_ = 0;
 
 		return e;
 	}
@@ -112,8 +112,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_leadership_abilities_id
 			)
 		);
@@ -122,9 +123,9 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_ = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -160,7 +161,7 @@ public:
 
 		v.push_back(columns[0] + " = " + std::to_string(e.id));
 		v.push_back(columns[1] + " = " + std::to_string(e.slot));
-		v.push_back(columns[2] + " = " + std::to_string(e.rank));
+		v.push_back(columns[2] + " = " + std::to_string(e.rank_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -184,7 +185,7 @@ public:
 
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.slot));
-		v.push_back(std::to_string(e.rank));
+		v.push_back(std::to_string(e.rank_));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -216,7 +217,7 @@ public:
 
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.slot));
-			v.push_back(std::to_string(e.rank));
+			v.push_back(std::to_string(e.rank_));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -250,9 +251,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_ = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -277,9 +278,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterLeadershipAbilities e{};
 
-			e.id   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.slot = static_cast<uint16_t>(strtoul(row[1], nullptr, 10));
-			e.rank = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
+			e.id    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.slot  = row[1] ? static_cast<uint16_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_ = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -338,6 +339,66 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterLeadershipAbilities &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.rank_));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterLeadershipAbilities> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.rank_));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_LEADERSHIP_ABILITIES_REPOSITORY_H

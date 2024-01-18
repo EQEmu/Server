@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseLogsysCategoriesRepository {
 public:
 	struct LogsysCategories {
@@ -140,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			return e;
 		}
@@ -284,13 +283,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -315,13 +314,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LogsysCategories e{};
 
-			e.log_category_id          = static_cast<int32_t>(atoi(row[0]));
+			e.log_category_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.log_category_description = row[1] ? row[1] : "";
-			e.log_to_console           = static_cast<int16_t>(atoi(row[2]));
-			e.log_to_file              = static_cast<int16_t>(atoi(row[3]));
-			e.log_to_gmsay             = static_cast<int16_t>(atoi(row[4]));
-			e.log_to_discord           = static_cast<int16_t>(atoi(row[5]));
-			e.discord_webhook_id       = static_cast<int32_t>(atoi(row[6]));
+			e.log_to_console           = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.log_to_file              = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.log_to_gmsay             = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.log_to_discord           = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.discord_webhook_id       = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}

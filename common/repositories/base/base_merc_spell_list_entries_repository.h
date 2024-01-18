@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_MERC_SPELL_LIST_ENTRIES_REPOSITORY_H
@@ -399,6 +399,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const MercSpellListEntries &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.merc_spell_list_entry_id));
+		v.push_back(std::to_string(e.merc_spell_list_id));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.spell_type));
+		v.push_back(std::to_string(e.stance_id));
+		v.push_back(std::to_string(e.minlevel));
+		v.push_back(std::to_string(e.maxlevel));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.procChance));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<MercSpellListEntries> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.merc_spell_list_entry_id));
+			v.push_back(std::to_string(e.merc_spell_list_id));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.spell_type));
+			v.push_back(std::to_string(e.stance_id));
+			v.push_back(std::to_string(e.minlevel));
+			v.push_back(std::to_string(e.maxlevel));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.procChance));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_MERC_SPELL_LIST_ENTRIES_REPOSITORY_H

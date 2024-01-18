@@ -2,25 +2,43 @@
 
 void command_appearance(Client *c, const Seperator *sep)
 {
-	Mob *t = c->CastToMob();
+	const int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1) || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #appearance [Type] [Value]");
+		c->Message(Chat::White, "Note: Types are as follows:");
 
-	// sends any appearance packet
-	// Dev debug command, for appearance types
-	if (sep->arg[2][0] == 0) {
-		c->Message(Chat::White, "Usage: #appearance type value");
-	}
-	else {
-		if ((c->GetTarget())) {
-			t = c->GetTarget();
+		for (const auto& a : EQ::constants::GetAppearanceTypeMap()) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Appearance Type {} | {}",
+					a.first,
+					a.second
+				).c_str()
+			);
 		}
-		t->SendAppearancePacket(Strings::ToInt(sep->arg[1]), Strings::ToInt(sep->arg[2]));
-		c->Message(
-			Chat::White,
-			"Sending appearance packet: target=%s, type=%s, value=%s",
-			t->GetName(),
-			sep->arg[1],
-			sep->arg[2]
-		);
-	}
-}
 
+		return;
+	}
+
+	Mob *t = c;
+	if (c->GetTarget()) {
+		t = c->GetTarget();
+	}
+
+	const uint32 type  = Strings::ToUnsignedInt(sep->arg[1]);
+	const uint32 value = Strings::ToUnsignedInt(sep->arg[2]);
+
+	t->SendAppearancePacket(type, value);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Appearance Sent to {} | Type: {} ({}) Value: {}",
+			c->GetTargetDescription(t, TargetDescriptionType::UCSelf),
+			EQ::constants::GetAppearanceTypeName(type),
+			type,
+			value
+		).c_str()
+	);
+}

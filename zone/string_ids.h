@@ -55,6 +55,7 @@
 #define MISS_NOTE					180		//You miss a note, bringing your song to a close!
 #define CANNOT_USE_ITEM				181		//Your race, class, or deity cannot use this item.
 #define ITEM_OUT_OF_CHARGES			182		//Item is out of charges.
+#define ALREADY_ON_A_MOUNT			189		//You are already on a mount.
 #define TARGET_NO_MANA				191		//Your target has no mana to affect
 #define TARGET_GROUP_MEMBER			196		//You must first target a group member.
 #define SPELL_TOO_POWERFUL			197		//Your spell is too powerful for your intended target.
@@ -177,6 +178,7 @@
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
 #define SUMMONING_CORPSE_ZONE		596		//Summoning %1's corpse(s).
 #define TASK_NOT_RIGHT_LEVEL        615     //You are not at the right level for this task.
+#define INVITE_GROUP_LEADER			679		//To invite another group into yours, please invite the leader of the other group.
 #define PET_HOLD_SET_ON				698		//The pet hold mode has been set to on.
 #define PET_HOLD_SET_OFF			699		//The pet hold mode has been set to off.
 #define PET_FOCUS_SET_ON			700		//The pet focus mode has been set to on.
@@ -373,6 +375,7 @@
 #define ALREADY_IN_YOUR_RAID		5077	//%1 is already in your raid.
 #define NOT_IN_YOUR_RAID            5082	//%1 is not in your raid.
 #define GAIN_RAIDEXP				5085	//You gained raid experience!
+#define ALREADY_IN_GRP_RAID			5088	//% 1 rejects your invite because they are in a raid and you are not in theirs, or they are a raid group leader
 #define DUNGEON_SEALED				5141	//The gateway to the dungeon is sealed off to you.  Perhaps you would be able to enter if you needed to adventure there.
 #define ADVENTURE_COMPLETE			5147	//You received %1 points for successfully completing the adventure.
 #define SUCCOR_FAIL					5169	//The portal collapes before you can escape!

@@ -233,7 +233,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						client->MessageString(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
 					else // normal tell echo "You told Soanso, 'something'"
 							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
-						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
+						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, Language::CommonTongue, Language::MaxValue, scm->message);
 				}
 				else if (scm->chan_num == ChatChannel_Tell) {
 					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);

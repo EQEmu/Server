@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_ZONE_POINTS_REPOSITORY_H
@@ -196,8 +196,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				zone_points_id
 			)
 		);
@@ -206,30 +207,30 @@ public:
 		if (results.RowCount() == 1) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
-			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.y                      = strtof(row[4], nullptr);
-			e.x                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.heading                = strtof(row[7], nullptr);
-			e.target_y               = strtof(row[8], nullptr);
-			e.target_x               = strtof(row[9], nullptr);
-			e.target_z               = strtof(row[10], nullptr);
-			e.target_heading         = strtof(row[11], nullptr);
-			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
-			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.buffer                 = strtof(row[15], nullptr);
-			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
+			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.target_y               = row[8] ? strtof(row[8], nullptr) : 0;
+			e.target_x               = row[9] ? strtof(row[9], nullptr) : 0;
+			e.target_z               = row[10] ? strtof(row[10], nullptr) : 0;
+			e.target_heading         = row[11] ? strtof(row[11], nullptr) : 0;
+			e.zoneinst               = row[12] ? static_cast<uint16_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.target_zone_id         = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
+			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			return e;
 		}
@@ -417,30 +418,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
-			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.y                      = strtof(row[4], nullptr);
-			e.x                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.heading                = strtof(row[7], nullptr);
-			e.target_y               = strtof(row[8], nullptr);
-			e.target_x               = strtof(row[9], nullptr);
-			e.target_z               = strtof(row[10], nullptr);
-			e.target_heading         = strtof(row[11], nullptr);
-			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
-			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.buffer                 = strtof(row[15], nullptr);
-			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
+			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.target_y               = row[8] ? strtof(row[8], nullptr) : 0;
+			e.target_x               = row[9] ? strtof(row[9], nullptr) : 0;
+			e.target_z               = row[10] ? strtof(row[10], nullptr) : 0;
+			e.target_heading         = row[11] ? strtof(row[11], nullptr) : 0;
+			e.zoneinst               = row[12] ? static_cast<uint16_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.target_zone_id         = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
+			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -465,30 +466,30 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<int32_t>(atoi(row[2]));
-			e.number                 = static_cast<uint16_t>(strtoul(row[3], nullptr, 10));
-			e.y                      = strtof(row[4], nullptr);
-			e.x                      = strtof(row[5], nullptr);
-			e.z                      = strtof(row[6], nullptr);
-			e.heading                = strtof(row[7], nullptr);
-			e.target_y               = strtof(row[8], nullptr);
-			e.target_x               = strtof(row[9], nullptr);
-			e.target_z               = strtof(row[10], nullptr);
-			e.target_heading         = strtof(row[11], nullptr);
-			e.zoneinst               = static_cast<uint16_t>(strtoul(row[12], nullptr, 10));
-			e.target_zone_id         = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.target_instance        = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.buffer                 = strtof(row[15], nullptr);
-			e.client_version_mask    = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[17]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[18]));
+			e.version                = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.number                 = row[3] ? static_cast<uint16_t>(strtoul(row[3], nullptr, 10)) : 1;
+			e.y                      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.x                      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z                      = row[6] ? strtof(row[6], nullptr) : 0;
+			e.heading                = row[7] ? strtof(row[7], nullptr) : 0;
+			e.target_y               = row[8] ? strtof(row[8], nullptr) : 0;
+			e.target_x               = row[9] ? strtof(row[9], nullptr) : 0;
+			e.target_z               = row[10] ? strtof(row[10], nullptr) : 0;
+			e.target_heading         = row[11] ? strtof(row[11], nullptr) : 0;
+			e.zoneinst               = row[12] ? static_cast<uint16_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.target_zone_id         = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.target_instance        = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.buffer                 = row[15] ? strtof(row[15], nullptr) : 0;
+			e.client_version_mask    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 4294967295;
+			e.min_expansion          = row[17] ? static_cast<int8_t>(atoi(row[17])) : -1;
+			e.max_expansion          = row[18] ? static_cast<int8_t>(atoi(row[18])) : -1;
 			e.content_flags          = row[19] ? row[19] : "";
 			e.content_flags_disabled = row[20] ? row[20] : "";
-			e.is_virtual             = static_cast<int8_t>(atoi(row[21]));
-			e.height                 = static_cast<int32_t>(atoi(row[22]));
-			e.width                  = static_cast<int32_t>(atoi(row[23]));
+			e.is_virtual             = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.height                 = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.width                  = row[23] ? static_cast<int32_t>(atoi(row[23])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -547,6 +548,108 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const ZonePoints &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.number));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.target_y));
+		v.push_back(std::to_string(e.target_x));
+		v.push_back(std::to_string(e.target_z));
+		v.push_back(std::to_string(e.target_heading));
+		v.push_back(std::to_string(e.zoneinst));
+		v.push_back(std::to_string(e.target_zone_id));
+		v.push_back(std::to_string(e.target_instance));
+		v.push_back(std::to_string(e.buffer));
+		v.push_back(std::to_string(e.client_version_mask));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.is_virtual));
+		v.push_back(std::to_string(e.height));
+		v.push_back(std::to_string(e.width));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<ZonePoints> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.number));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.target_y));
+			v.push_back(std::to_string(e.target_x));
+			v.push_back(std::to_string(e.target_z));
+			v.push_back(std::to_string(e.target_heading));
+			v.push_back(std::to_string(e.zoneinst));
+			v.push_back(std::to_string(e.target_zone_id));
+			v.push_back(std::to_string(e.target_instance));
+			v.push_back(std::to_string(e.buffer));
+			v.push_back(std::to_string(e.client_version_mask));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.is_virtual));
+			v.push_back(std::to_string(e.height));
+			v.push_back(std::to_string(e.width));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_ZONE_POINTS_REPOSITORY_H

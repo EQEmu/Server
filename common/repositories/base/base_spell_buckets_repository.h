@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPELL_BUCKETS_REPOSITORY_H
@@ -20,7 +20,7 @@ class BaseSpellBucketsRepository {
 public:
 	struct SpellBuckets {
 		uint64_t    spellid;
-		std::string key;
+		std::string key_;
 		std::string value;
 	};
 
@@ -33,7 +33,7 @@ public:
 	{
 		return {
 			"spellid",
-			"key",
+			"`key`",
 			"value",
 		};
 	}
@@ -42,7 +42,7 @@ public:
 	{
 		return {
 			"spellid",
-			"key",
+			"`key`",
 			"value",
 		};
 	}
@@ -85,7 +85,7 @@ public:
 		SpellBuckets e{};
 
 		e.spellid = 0;
-		e.key     = "";
+		e.key_    = "";
 		e.value   = "";
 
 		return e;
@@ -112,8 +112,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spell_buckets_id
 			)
 		);
@@ -122,8 +123,8 @@ public:
 		if (results.RowCount() == 1) {
 			SpellBuckets e{};
 
-			e.spellid = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.spellid = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 
 			return e;
@@ -159,7 +160,7 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[0] + " = " + std::to_string(e.spellid));
-		v.push_back(columns[1] + " = '" + Strings::Escape(e.key) + "'");
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.key_) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
@@ -183,7 +184,7 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.spellid));
-		v.push_back("'" + Strings::Escape(e.key) + "'");
+		v.push_back("'" + Strings::Escape(e.key_) + "'");
 		v.push_back("'" + Strings::Escape(e.value) + "'");
 
 		auto results = db.QueryDatabase(
@@ -215,7 +216,7 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.spellid));
-			v.push_back("'" + Strings::Escape(e.key) + "'");
+			v.push_back("'" + Strings::Escape(e.key_) + "'");
 			v.push_back("'" + Strings::Escape(e.value) + "'");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
@@ -250,8 +251,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets e{};
 
-			e.spellid = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.spellid = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -277,8 +278,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SpellBuckets e{};
 
-			e.spellid = strtoull(row[0], nullptr, 10);
-			e.key     = row[1] ? row[1] : "";
+			e.spellid = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.key_    = row[1] ? row[1] : "";
 			e.value   = row[2] ? row[2] : "";
 
 			all_entries.push_back(e);
@@ -338,6 +339,66 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpellBuckets &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.spellid));
+		v.push_back("'" + Strings::Escape(e.key_) + "'");
+		v.push_back("'" + Strings::Escape(e.value) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpellBuckets> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.spellid));
+			v.push_back("'" + Strings::Escape(e.key_) + "'");
+			v.push_back("'" + Strings::Escape(e.value) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPELL_BUCKETS_REPOSITORY_H

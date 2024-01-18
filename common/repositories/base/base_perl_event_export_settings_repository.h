@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H
@@ -128,8 +128,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				perl_event_export_settings_id
 			)
 		);
@@ -138,13 +139,13 @@ public:
 		if (results.RowCount() == 1) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			return e;
 		}
@@ -282,13 +283,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -313,13 +314,13 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PerlEventExportSettings e{};
 
-			e.event_id          = static_cast<int32_t>(atoi(row[0]));
+			e.event_id          = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.event_description = row[1] ? row[1] : "";
-			e.export_qglobals   = static_cast<int16_t>(atoi(row[2]));
-			e.export_mob        = static_cast<int16_t>(atoi(row[3]));
-			e.export_zone       = static_cast<int16_t>(atoi(row[4]));
-			e.export_item       = static_cast<int16_t>(atoi(row[5]));
-			e.export_event      = static_cast<int16_t>(atoi(row[6]));
+			e.export_qglobals   = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.export_mob        = row[3] ? static_cast<int16_t>(atoi(row[3])) : 0;
+			e.export_zone       = row[4] ? static_cast<int16_t>(atoi(row[4])) : 0;
+			e.export_item       = row[5] ? static_cast<int16_t>(atoi(row[5])) : 0;
+			e.export_event      = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -378,6 +379,74 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const PerlEventExportSettings &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.event_id));
+		v.push_back("'" + Strings::Escape(e.event_description) + "'");
+		v.push_back(std::to_string(e.export_qglobals));
+		v.push_back(std::to_string(e.export_mob));
+		v.push_back(std::to_string(e.export_zone));
+		v.push_back(std::to_string(e.export_item));
+		v.push_back(std::to_string(e.export_event));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<PerlEventExportSettings> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.event_id));
+			v.push_back("'" + Strings::Escape(e.event_description) + "'");
+			v.push_back(std::to_string(e.export_qglobals));
+			v.push_back(std::to_string(e.export_mob));
+			v.push_back(std::to_string(e.export_zone));
+			v.push_back(std::to_string(e.export_item));
+			v.push_back(std::to_string(e.export_event));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_PERL_EVENT_EXPORT_SETTINGS_REPOSITORY_H

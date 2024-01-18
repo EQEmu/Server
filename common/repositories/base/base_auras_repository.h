@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_AURAS_REPOSITORY_H
@@ -144,8 +144,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				auras_id
 			)
 		);
@@ -154,17 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			return e;
 		}
@@ -314,17 +315,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +350,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Auras e{};
 
-			e.type       = static_cast<int32_t>(atoi(row[0]));
-			e.npc_type   = static_cast<int32_t>(atoi(row[1]));
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.name       = row[2] ? row[2] : "";
-			e.spell_id   = static_cast<int32_t>(atoi(row[3]));
-			e.distance   = static_cast<int32_t>(atoi(row[4]));
-			e.aura_type  = static_cast<int32_t>(atoi(row[5]));
-			e.spawn_type = static_cast<int32_t>(atoi(row[6]));
-			e.movement   = static_cast<int32_t>(atoi(row[7]));
-			e.duration   = static_cast<int32_t>(atoi(row[8]));
-			e.icon       = static_cast<int32_t>(atoi(row[9]));
-			e.cast_time  = static_cast<int32_t>(atoi(row[10]));
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -418,6 +419,82 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Auras &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.npc_type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.distance));
+		v.push_back(std::to_string(e.aura_type));
+		v.push_back(std::to_string(e.spawn_type));
+		v.push_back(std::to_string(e.movement));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.cast_time));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Auras> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.npc_type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.distance));
+			v.push_back(std::to_string(e.aura_type));
+			v.push_back(std::to_string(e.spawn_type));
+			v.push_back(std::to_string(e.movement));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.cast_time));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_AURAS_REPOSITORY_H

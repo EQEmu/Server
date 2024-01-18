@@ -933,12 +933,13 @@ void QuestManager::repopzone() {
 	}
 }
 
-void QuestManager::processmobswhilezoneempty(bool on) {
-	if(zone) {
-		zone->process_mobs_while_empty = on;
-	}
-	else {
-		LogQuests("QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file");
+void QuestManager::processmobswhilezoneempty(bool turn_on) {
+	if (zone) {
+		zone->SetIdleWhenEmpty(!turn_on);
+	} else {
+		LogQuests(
+			"QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file"
+		);
 	}
 }
 
@@ -1081,7 +1082,7 @@ std::string QuestManager::getfactionname(int faction_id) {
 	return content_db.GetFactionName(faction_id);
 }
 
-std::string QuestManager::getlanguagename(int language_id) {
+std::string QuestManager::getlanguagename(uint8 language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }
 
@@ -1331,14 +1332,14 @@ void QuestManager::addskill(int skill_id, int value) {
 	initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
-void QuestManager::setlanguage(int skill_id, int value) {
+void QuestManager::setlanguage(uint8 language_id, uint8 language_skill) {
 	QuestManagerCurrentQuestVars();
 
 	if (!initiator) {
 		return;
 	}
 
-	initiator->SetLanguageSkill(skill_id, value);
+	initiator->SetLanguageSkill(language_id, language_skill);
 }
 
 void QuestManager::setskill(int skill_id, int value) {
@@ -2101,28 +2102,17 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const glm::vec4& posit
 	return true;
 }
 
-int QuestManager::getplayercorpsecount(uint32 char_id) {
-	if (char_id > 0) {
-		return database.CountCharacterCorpses(char_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecount(uint32 character_id) {
+	return character_id ? database.CountCharacterCorpses(character_id) : 0;
 
 }
 
-int QuestManager::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id) {
-	if (char_id > 0 && zone_id > 0) {
-		return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecountbyzoneid(uint32 character_id, uint32 zone_id) {
+	return (character_id && zone_id) ? database.CountCharacterCorpsesByZoneID(character_id, zone_id) : 0;
 }
 
-uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
-	uint32 Result = 0;
-
-	if(char_id > 0) {
-		Result = database.GetCharacterBuriedCorpseCount(char_id);
-	}
-	return Result;
+int64 QuestManager::getplayerburiedcorpsecount(uint32 character_id) {
+	return character_id ? database.GetCharacterBuriedCorpseCount(character_id) : 0;
 }
 
 bool QuestManager::buryplayercorpse(uint32 char_id)
@@ -3090,35 +3080,39 @@ void QuestManager::removeitem(uint32 item_id, uint32 quantity) {
 	initiator->RemoveItem(item_id, quantity);
 }
 
-void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
+void QuestManager::UpdateSpawnTimer(uint32 spawn2_id, uint32 new_time)
 {
 	bool found = false;
 
-	database.UpdateRespawnTime(id, 0, (newTime/1000));
+	database.UpdateRespawnTime(spawn2_id, 0, (new_time / 1000));
+
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+
 	iterator.Reset();
-	while (iterator.MoreElements())
-	{
-		if(iterator.GetData()->GetID() == id)
-		{
-			if(!iterator.GetData()->NPCPointerValid())
-			{
-				iterator.GetData()->SetTimer(newTime);
+
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->GetID() == spawn2_id) {
+			if (!iterator.GetData()->NPCPointerValid()) {
+				iterator.GetData()->SetTimer(new_time);
 			}
+
 			found = true;
 			break;
 		}
+
 		iterator.Advance();
 	}
 
-	if(!found)
-	{
+	if (!found) {
 		//Spawn wasn't in this zone...
 		//Tell the other zones to update their spawn time for this spawn point
 		auto pack = new ServerPacket(ServerOP_UpdateSpawn, sizeof(UpdateSpawnTimer_Struct));
-		UpdateSpawnTimer_Struct *ust = (UpdateSpawnTimer_Struct*) pack->pBuffer;
-		ust->id = id;
-		ust->duration = newTime;
+
+		auto ust  = (UpdateSpawnTimer_Struct*) pack->pBuffer;
+
+		ust->id       = spawn2_id;
+		ust->duration = new_time;
+
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
@@ -3538,12 +3532,12 @@ void QuestManager::FlyMode(GravityBehavior flymode)
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		initiator->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		initiator->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		initiator->SetFlyMode(flymode);
 	}
 	else if(owner)
 	{
-		owner->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		owner->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		owner->SetFlyMode(flymode);
 	}
 }
@@ -3813,71 +3807,73 @@ std::string QuestManager::GetEncounter() const {
 }
 
 void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
-	if (strcasecmp(type.c_str(), "ztype") == 0)
+	if (!strcasecmp(type.c_str(), "ztype"))
 		zone->newzone_data.ztype = Strings::ToInt(value);
-	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
+	else if (!strcasecmp(type.c_str(), "fog_red")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_red[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_green")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_green[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_blue")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_blue[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_minclip")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_minclip[i] = Strings::ToFloat(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_maxclip")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.fog_maxclip[i] = Strings::ToFloat(value);
 		}
-	} else if (strcasecmp(type.c_str(), "gravity") == 0) {
+	} else if (!strcasecmp(type.c_str(), "gravity")) {
 		zone->newzone_data.gravity = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "time_type") == 0) {
+	} else if (!strcasecmp(type.c_str(), "time_type")) {
 		zone->newzone_data.time_type = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
+	} else if (!strcasecmp(type.c_str(), "rain_chance")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.rain_chance[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
+	} else if (!strcasecmp(type.c_str(), "rain_duration")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.rain_duration[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
+	} else if (!strcasecmp(type.c_str(), "snow_chance")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.snow_chance[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
+	} else if (!strcasecmp(type.c_str(), "snow_duration")) {
 		for (int i = 0; i < 4; i++) {
 			zone->newzone_data.snow_duration[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "sky") == 0) {
+	} else if (!strcasecmp(type.c_str(), "sky")) {
 		zone->newzone_data.sky = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "safe_x") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_x")) {
 		zone->newzone_data.safe_x = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "safe_y") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_y")) {
 		zone->newzone_data.safe_y = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "safe_z") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_z")) {
 		zone->newzone_data.safe_z = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "max_z") == 0) {
+	} else if (!strcasecmp(type.c_str(), "safe_heading")) {
+		zone->newzone_data.safe_heading = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "max_z")) {
 		zone->newzone_data.max_z = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "underworld") == 0) {
+	} else if (!strcasecmp(type.c_str(), "underworld")) {
 		zone->newzone_data.underworld = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "minclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "minclip")) {
 		zone->newzone_data.minclip = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "maxclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "maxclip")) {
 		zone->newzone_data.maxclip = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "fog_density") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_density")) {
 		zone->newzone_data.fog_density = Strings::ToFloat(value);
-	} else if (strcasecmp(type.c_str(), "suspendbuffs") == 0) {
+	} else if (!strcasecmp(type.c_str(), "suspendbuffs")) {
 		zone->newzone_data.suspend_buffs = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "lavadamage") == 0) {
+	} else if (!strcasecmp(type.c_str(), "lavadamage")) {
 		zone->newzone_data.lava_damage = Strings::ToInt(value);
-	} else if (strcasecmp(type.c_str(), "minlavadamage") == 0) {
+	} else if (!strcasecmp(type.c_str(), "minlavadamage")) {
 		zone->newzone_data.min_lava_damage = Strings::ToInt(value);
 	}
 
@@ -3915,20 +3911,20 @@ std::string QuestManager::gethexcolorcode(std::string color_name) {
 	return std::string();
 }
 
-double QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	return database.GetAAEXPModifier(character_id, zone_id, instance_version);
+float QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
-double QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
-	return database.GetEXPModifier(character_id, zone_id, instance_version);
+float QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetEXPModifierByCharID(character_id, zone_id, instance_version);
 }
 
-void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier, int16 instance_version) {
-	database.SetAAEXPModifier(character_id, zone_id, aa_modifier, instance_version);
+void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, float aa_modifier, int16 instance_version) {
+	database.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
 }
 
-void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier, int16 instance_version) {
-	database.SetEXPModifier(character_id, zone_id, exp_modifier, instance_version);
+void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, float exp_modifier, int16 instance_version) {
+	database.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
 }
 
 std::string QuestManager::getgendername(uint32 gender_id) {

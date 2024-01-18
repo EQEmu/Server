@@ -58,6 +58,7 @@ extern volatile bool RunLoops;
 #include "mob_movement_manager.h"
 #include "cheat_manager.h"
 
+#include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/account_flags_repository.h"
 #include "../common/repositories/bug_reports_repository.h"
 #include "../common/repositories/char_recipe_list_repository.h"
@@ -164,7 +165,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   TrackingTimer(2000),
   RespawnFromHoverTimer(0),
   merc_timer(RuleI(Mercs, UpkeepIntervalMS)),
-  ItemTickTimer(10000),
   ItemQuestTimer(500),
   anon_toggle_timer(250),
   afk_toggle_timer(250),
@@ -390,11 +390,18 @@ Client::~Client() {
 		Bot::ProcessBotOwnerRefDelete(this);
 	}
 
+	if (zone) {
+		zone->ClearEXPModifier(this);
+	}
+
+	if(IsInAGuild())
+		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+
 	Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 	if (horse)
 		horse->Depop();
 
-	Mob* merc = entity_list.GetMob(GetMercID());
+	Mob* merc = entity_list.GetMob(GetMercenaryID());
 	if (merc)
 		merc->Depop();
 
@@ -482,7 +489,7 @@ void Client::SendZoneInPackets()
 	// Spawn Appearance Packet
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)outapp->pBuffer;
-	sa->type = AT_SpawnID;			// Is 0x10 used to set the player id?
+	sa->type = AppearanceType::SpawnID;			// Is 0x10 used to set the player id?
 	sa->parameter = GetID();	// Four bytes for this parameter...
 	outapp->priority = 6;
 	QueuePacket(outapp);
@@ -497,7 +504,7 @@ void Client::SendZoneInPackets()
 	safe_delete(outapp);
 	SetSpawned();
 	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
+		SendAppearancePacket(AppearanceType::PVP, GetPVP(false), true, false);
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -586,45 +593,52 @@ void Client::ReportConnectingState() {
 	};
 }
 
-bool Client::SaveAA() {
-	std::string iquery;
-	int spentpoints = 0;
-	int i = 0;
-	for(auto &rank : aa_ranks) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(rank.first);
-		if(!ability)
+bool Client::SaveAA()
+{
+	std::vector<CharacterAlternateAbilitiesRepository::CharacterAlternateAbilities> v;
+
+	uint32 aa_points_spent = 0;
+
+	auto e = CharacterAlternateAbilitiesRepository::NewEntity();
+
+	for (auto &rank : aa_ranks) {
+		auto a = zone->GetAlternateAdvancementAbility(rank.first);
+		if (!a) {
 			continue;
+		}
 
-		if(rank.second.first > 0) {
-			AA::Rank *r = ability->GetRankByPointsSpent(rank.second.first);
-
-			if(!r)
+		if (rank.second.first > 0) {
+			auto r = a->GetRankByPointsSpent(rank.second.first);
+			if (!r) {
 				continue;
-
-			spentpoints += r->total_cost;
-
-			if(i == 0) {
-				iquery = StringFormat("REPLACE INTO `character_alternate_abilities` (id, aa_id, aa_value, charges)"
-									  " VALUES (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
-			} else {
-				iquery += StringFormat(", (%u, %u, %u, %u)", character_id, ability->first_rank_id, rank.second.first, rank.second.second);
 			}
-			i++;
+
+			aa_points_spent += r->total_cost;
+
+			e.id       = character_id;
+			e.aa_id    = a->first_rank_id;
+			e.aa_value = rank.second.first;
+			e.charges  = rank.second.second;
+
+			v.emplace_back(e);
 		}
 	}
 
-	m_pp.aapoints_spent = spentpoints + m_epp.expended_aa;
+	m_pp.aapoints_spent = aa_points_spent + m_epp.expended_aa;
 
-	if(iquery.length() > 0) {
-		database.QueryDatabase(iquery);
-	}
-
-	return true;
+	return CharacterAlternateAbilitiesRepository::ReplaceMany(database, v);
 }
 
 void Client::RemoveExpendedAA(int aa_id)
 {
-	database.QueryDatabase(StringFormat("DELETE from `character_alternate_abilities` WHERE `id` = %d and `aa_id` = %d", character_id, aa_id));
+	CharacterAlternateAbilitiesRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`id` = {} AND `aa_id` = {}",
+			CharacterID(),
+			aa_id
+		)
+	);
 }
 
 bool Client::Save(uint8 iCommitNow) {
@@ -734,6 +748,8 @@ bool Client::Save(uint8 iCommitNow) {
 	}
 	
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
+
+	database.SaveCharacterEXPModifier(this);
 
 	return true;
 }
@@ -915,15 +931,19 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	// Garble the message based on drunkness
 	if (GetIntoxication() > 0 && !(RuleB(Chat, ServerWideOOC) && chan_num == ChatChannel_OOC) && !GetGM()) {
 		GarbleMessage(message, (int)(GetIntoxication() / 3));
-		language = 0; // No need for language when drunk
-		lang_skill = 100;
+		language   = Language::CommonTongue; // No need for language when drunk
+		lang_skill = Language::MaxValue;
 	}
 
 	// some channels don't use languages
-	if (chan_num == ChatChannel_OOC || chan_num == ChatChannel_GMSAY || chan_num == ChatChannel_Broadcast || chan_num == ChatChannel_Petition)
-	{
-		language = 0;
-		lang_skill = 100;
+	if (
+		chan_num == ChatChannel_OOC ||
+		chan_num == ChatChannel_GMSAY ||
+		chan_num == ChatChannel_Broadcast ||
+		chan_num == ChatChannel_Petition
+	) {
+		language   = Language::CommonTongue;
+		lang_skill = Language::MaxValue;
 	}
 
 	// Censor the message
@@ -1275,69 +1295,88 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 }
 
-void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...) {
-	if ((chan_num==11 && !(GetGM())) || (chan_num==10 && Admin() < AccountStatus::QuestTroupe)) // dont need to send /pr & /petition to everybody
+void Client::ChannelMessageSend(
+	const char *from,
+	const char *to,
+	uint8 channel_id,
+	uint8 language_id,
+	uint8 language_skill,
+	const char *message,
+	...
+)
+{
+	if (
+		(channel_id == ChatChannel_Petition && Admin() < AccountStatus::QuestTroupe) ||
+		(channel_id == ChatChannel_GMSAY && !GetGM())
+	) {
 		return;
+	}
+
 	va_list argptr;
-	char buffer[4096];
-	char message_sender[64];
+	char    buffer[4096];
+	char    message_sender[64];
 
 	va_start(argptr, message);
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
 
-	EQApplicationPacket app(OP_ChannelMessage, sizeof(ChannelMessage_Struct)+strlen(buffer)+1);
-	ChannelMessage_Struct* cm = (ChannelMessage_Struct*)app.pBuffer;
+	EQApplicationPacket app(OP_ChannelMessage, sizeof(ChannelMessage_Struct) + strlen(buffer) + 1);
 
-	if (from == 0)
+	auto* cm = (ChannelMessage_Struct *) app.pBuffer;
+
+	if (from == 0) {
 		strcpy(cm->sender, "ZServer");
-	else if (from[0] == 0)
+	} else if (from[0] == 0) {
 		strcpy(cm->sender, "ZServer");
-	else {
+	} else {
 		CleanMobName(from, message_sender);
 		strcpy(cm->sender, message_sender);
 	}
-	if (to != 0)
+
+	if (to != 0) {
 		strcpy((char *) cm->targetname, to);
-	else if (chan_num == ChatChannel_Tell)
+	} else if (channel_id == ChatChannel_Tell) {
 		strcpy(cm->targetname, m_pp.name);
-	else
+	} else {
 		cm->targetname[0] = 0;
-
-	uint8 ListenerSkill;
-
-	if (language < MAX_PP_LANGUAGE) {
-		ListenerSkill = m_pp.languages[language];
-		if (ListenerSkill < 24) {
-			cm->language = (MAX_PP_LANGUAGE - 1); // in an unknown tongue
-		}
-		else {
-			cm->language = language;
-		}
 	}
-	else {
-		ListenerSkill = m_pp.languages[0];
-		cm->language = 0;
+
+	uint8 listener_skill;
+
+	const bool is_valid_language = EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27);
+
+	if (is_valid_language) {
+		listener_skill = m_pp.languages[language_id];
+		cm->language   = listener_skill < 24 ? Language::Unknown27 : language_id;
+	} else {
+		listener_skill = m_pp.languages[Language::CommonTongue];
+		cm->language   = Language::CommonTongue;
 	}
 
 	// set effective language skill = lower of sender and receiver skills
-	int32 EffSkill = (lang_skill < ListenerSkill ? lang_skill : ListenerSkill);
-	if (EffSkill > 100)	// maximum language skill is 100
-		EffSkill = 100;
-	cm->skill_in_language = EffSkill;
+	uint8 effective_skill = (language_skill < listener_skill ? language_skill : listener_skill);
+	if (effective_skill > Language::MaxValue) {
+		effective_skill = Language::MaxValue;
+	}
 
-	cm->chan_num = chan_num;
+	cm->skill_in_language = effective_skill;
+
+	cm->chan_num = channel_id;
 	strcpy(&cm->message[0], buffer);
 
 	QueuePacket(&app);
 
-	bool senderCanTrainSelf = RuleB(Client, SelfLanguageLearning);
-	bool weAreNotSender = strcmp(GetCleanName(), cm->sender);
+	const bool can_train_self = RuleB(Client, SelfLanguageLearning);
+	const bool is_not_sender  = strcmp(GetCleanName(), cm->sender);
 
-	if (senderCanTrainSelf || weAreNotSender) {
-		if ((chan_num == ChatChannel_Group) && (ListenerSkill < 100)) {	// group message in unmastered language, check for skill up
-			if (language < MAX_PP_LANGUAGE && m_pp.languages[language] <= lang_skill)
-				CheckLanguageSkillIncrease(language, lang_skill);
+	if (can_train_self || is_not_sender) {
+		if (
+			channel_id == ChatChannel_Group &&
+			listener_skill < Language::MaxValue
+		) { // group message in non-mastered language, check for skill up
+			if (is_valid_language && m_pp.languages[language_id] <= language_skill) {
+				CheckLanguageSkillIncrease(language_id, language_skill);
+			}
 		}
 	}
 }
@@ -1638,26 +1677,30 @@ void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
 	safe_delete(outapp);
 }
 
-void Client::IncreaseLanguageSkill(int skill_id, int value) {
+void Client::IncreaseLanguageSkill(uint8 language_id, uint8 increase)
+{
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (skill_id >= MAX_PP_LANGUAGE)
-		return; //Invalid lang id
+	m_pp.languages[language_id] += increase;
 
-	m_pp.languages[skill_id] += value;
+	if (m_pp.languages[language_id] > Language::MaxValue) {
+		m_pp.languages[language_id] = Language::MaxValue;
+	}
 
-	if (m_pp.languages[skill_id] > 100) //Lang skill above max
-		m_pp.languages[skill_id] = 100;
-
-	database.SaveCharacterLanguage(CharacterID(), skill_id, m_pp.languages[skill_id]);
+	database.SaveCharacterLanguage(CharacterID(), language_id, m_pp.languages[language_id]);
 
 	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
-	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId = 100 + skill_id;
-	skill->value = m_pp.languages[skill_id];
+	auto* s = (SkillUpdate_Struct*) outapp->pBuffer;
+
+	s->skillId = 100 + language_id;
+	s->value   = m_pp.languages[language_id];
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify client
+	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
 }
 
 void Client::AddSkill(EQ::skills::SkillType skillid, uint16 value) {
@@ -2224,7 +2267,7 @@ void Client::SetGM(bool toggle) {
 			m_pp.gm ? "now" : "no longer"
 		).c_str()
 	);
-	SendAppearancePacket(AT_GM, m_pp.gm);
+	SendAppearancePacket(AppearanceType::GM, m_pp.gm);
 	Save();
 	UpdateWho();
 }
@@ -2275,9 +2318,9 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		memcpy(out->booktext, booktxt2.c_str(), length);
 
-		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
-			if (m_pp.languages[book_language] < 100) {
-				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[book_language] < Language::MaxValue) {
+				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
 			}
 		}
 
@@ -2676,38 +2719,43 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	return false;
 }
 
-void Client::CheckLanguageSkillIncrease(uint8 langid, uint8 TeacherSkill) {
-	if (IsDead() || IsUnconscious())
+void Client::CheckLanguageSkillIncrease(uint8 language_id, uint8 teacher_skill) {
+	if (IsDead() || IsUnconscious()) {
 		return;
-	if (IsAIControlled())
+	}
+
+	if (IsAIControlled()) {
 		return;
-	if (langid >= MAX_PP_LANGUAGE)
-		return;		// do nothing if langid is an invalid language
+	}
 
-	int LangSkill = m_pp.languages[langid];		// get current language skill
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (LangSkill < 100) {	// if the language isn't already maxed
-		int32 Chance = 5 + ((TeacherSkill - LangSkill)/10);	// greater chance to learn if teacher's skill is much higher than yours
-		Chance = (Chance * RuleI(Character, SkillUpModifier)/100);
+	const uint8 language_skill = m_pp.languages[language_id]; // get current language skill
 
-		if(zone->random.Real(0,100) < Chance) {	// if they make the roll
-			IncreaseLanguageSkill(langid);	// increase the language skill by 1
+	if (language_skill < Language::MaxValue) { // if the language isn't already maxed
+		int chance = 5 + ((teacher_skill - language_skill) / 10); // greater chance to learn if teacher's skill is much higher than yours
+		chance = (chance * RuleI(Character, SkillUpModifier) / 100);
+
+		if (zone->random.Real(0, 100) < chance) { // if they make the roll
+			IncreaseLanguageSkill(language_id);
 
 			if (parse->PlayerHasQuestSub(EVENT_LANGUAGE_SKILL_UP)) {
-				const auto& export_string = fmt::format(
+				const auto &export_string = fmt::format(
 					"{} {} {}",
-					langid,
-					LangSkill + 1,
-					100
+					language_id,
+					language_skill + 1,
+					Language::MaxValue
 				);
 
 				parse->EventPlayer(EVENT_LANGUAGE_SKILL_UP, this, export_string, 0);
 			}
 
-			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", langid, LangSkill, Chance);
+			LogSkills("Language [{}] at value [{}] successfully gain with [{}] % chance", language_id, language_skill, chance);
+		} else {
+			LogSkills("Language [{}] at value [{}] failed to gain with [{}] % chance", language_id, language_skill, chance);
 		}
-		else
-			LogSkills("Language [{}] at value [{}] failed to gain with [{}] % chance", langid, LangSkill, Chance);
 	}
 }
 
@@ -2842,7 +2890,7 @@ void Client::SetPVP(bool toggle, bool message) {
 		}
 	}
 
-	SendAppearancePacket(AT_PVP, GetPVP());
+	SendAppearancePacket(AppearanceType::PVP, GetPVP());
 	Save();
 }
 
@@ -3569,25 +3617,30 @@ void Client::SetHideMe(bool flag)
 	UpdateWho();
 }
 
-void Client::SetLanguageSkill(int langid, int value)
+void Client::SetLanguageSkill(uint8 language_id, uint8 language_skill)
 {
-	if (langid >= MAX_PP_LANGUAGE)
-		return; //Invalid Language
+	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		return;
+	}
 
-	if (value > 100)
-		value = 100; //Max lang value
+	if (language_skill > Language::MaxValue) {
+		language_skill = Language::MaxValue;
+	}
 
-	m_pp.languages[langid] = value;
-	database.SaveCharacterLanguage(CharacterID(), langid, value);
+	m_pp.languages[language_id] = language_skill;
+
+	database.SaveCharacterLanguage(CharacterID(), language_id, language_skill);
 
 	auto outapp = new EQApplicationPacket(OP_SkillUpdate, sizeof(SkillUpdate_Struct));
-	SkillUpdate_Struct* skill = (SkillUpdate_Struct*)outapp->pBuffer;
-	skill->skillId = 100 + langid;
-	skill->value = m_pp.languages[langid];
+	auto* s = (SkillUpdate_Struct*) outapp->pBuffer;
+
+	s->skillId = 100 + language_id;
+	s->value   = m_pp.languages[language_id];
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	MessageString( Chat::Skills, LANG_SKILL_IMPROVED ); //Notify the client
+	MessageString(Chat::Skills, LANG_SKILL_IMPROVED);
 }
 
 void Client::LinkDead()
@@ -3610,7 +3663,7 @@ void Client::LinkDead()
 
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
-	SendAppearancePacket(AT_Linkdead, 1);
+	SendAppearancePacket(AppearanceType::Linkdead, 1);
 	client_state = CLIENT_LINKDEAD;
 	AI_Start(CLIENT_LD_TIMEOUT);
 }
@@ -3753,7 +3806,7 @@ void Client::EnteringMessages(Client* client)
 				).c_str()
 			);
 
-			client->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+			client->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 		}
 	}
 }
@@ -4602,7 +4655,7 @@ void Client::ClearGroupAAs() {
 	m_pp.raid_leadership_exp = 0;
 
 	Save();
-	database.SaveCharacterLeadershipAA(CharacterID(), &m_pp);
+	database.SaveCharacterLeadershipAbilities(CharacterID(), &m_pp);
 }
 
 void Client::UpdateGroupAAs(int32 points, uint32 type) {
@@ -6162,10 +6215,7 @@ void Client::CheckLDoNHail(NPC* n)
 
 void Client::CheckEmoteHail(NPC* n, const char* message)
 {
-	if (
-		!Strings::BeginsWith(message, "hail") &&
-		!Strings::BeginsWith(message, "Hail")
-	) {
+	if (!Strings::BeginsWith(Strings::ToLower(message), "hail")) {
 		return;
 	}
 
@@ -6173,7 +6223,7 @@ void Client::CheckEmoteHail(NPC* n, const char* message)
 		return;
 	}
 
-	const auto emote_id = n->GetEmoteID();
+	const uint32 emote_id = n->GetEmoteID();
 	if (emote_id) {
 		n->DoNPCEmote(EQ::constants::EmoteEventTypes::Hailed, emote_id, this);
 	}
@@ -6522,27 +6572,33 @@ void Client::RemoveFromInstance(uint16 instance_id)
 
 void Client::SendAltCurrencies() {
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
-		uint32 count = zone->AlternateCurrencies.size();
-		if(count == 0) {
+		const uint32 currency_count = zone->AlternateCurrencies.size();
+		if (!currency_count) {
 			return;
 		}
 
-		auto outapp =
-		    new EQApplicationPacket(OP_AltCurrency, sizeof(AltCurrencyPopulate_Struct) +
-								sizeof(AltCurrencyPopulateEntry_Struct) * count);
-		AltCurrencyPopulate_Struct *altc = (AltCurrencyPopulate_Struct*)outapp->pBuffer;
-		altc->opcode = ALT_CURRENCY_OP_POPULATE;
-		altc->count = count;
+		auto outapp = new EQApplicationPacket(
+			OP_AltCurrency,
+			sizeof(AltCurrencyPopulate_Struct) +
+			sizeof(AltCurrencyPopulateEntry_Struct) * currency_count
+		);
+
+		auto a = (AltCurrencyPopulate_Struct*) outapp->pBuffer;
+
+		a->opcode = AlternateCurrencyMode::Populate;
+		a->count  = currency_count;
 
 		uint32 currency_id = 0;
-		for (const auto& alternate_currency : zone->AlternateCurrencies) {
-			const EQ::ItemData* item = database.GetItem(alternate_currency.item_id);
-			altc->entries[currency_id].currency_number = alternate_currency.id;
-			altc->entries[currency_id].unknown00 = 1;
-			altc->entries[currency_id].currency_number2 = alternate_currency.id;
-			altc->entries[currency_id].item_id = alternate_currency.item_id;
-			altc->entries[currency_id].item_icon = item ? item->Icon : 1000;
-			altc->entries[currency_id].stack_size = item ? item->StackSize : 1000;
+		for (const auto& c : zone->AlternateCurrencies) {
+			const auto* item = database.GetItem(c.item_id);
+
+			a->entries[currency_id].currency_number  = c.id;
+			a->entries[currency_id].unknown00        = 1;
+			a->entries[currency_id].currency_number2 = c.id;
+			a->entries[currency_id].item_id          = c.item_id;
+			a->entries[currency_id].item_icon        = item ? item->Icon : 1000;
+			a->entries[currency_id].stack_size       = item ? item->StackSize : 1000;
+
 			currency_id++;
 		}
 
@@ -6639,11 +6695,8 @@ void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 uint32 Client::GetAlternateCurrencyValue(uint32 currency_id) const
 {
 	auto iter = alternate_currency.find(currency_id);
-	if(iter == alternate_currency.end()) {
-		return 0;
-	} else {
-		return (*iter).second;
-	}
+
+	return iter == alternate_currency.end() ? 0 : (*iter).second;
 }
 
 void Client::ProcessAlternateCurrencyQueue() {
@@ -7699,68 +7752,6 @@ std::vector<std::string> Client::GetAccountFlags()
 	return l;
 }
 
-void Client::TickItemCheck()
-{
-	int i;
-
-	if(zone->tick_items.empty()) { return; }
-
-	//Scan equip, general, cursor slots for items
-	for (i = EQ::invslot::POSSESSIONS_BEGIN; i <= EQ::invslot::POSSESSIONS_END; i++)
-	{
-		TryItemTick(i);
-	}
-	//Scan bags
-	for (i = EQ::invbag::GENERAL_BAGS_BEGIN; i <= EQ::invbag::CURSOR_BAG_END; i++)
-	{
-		TryItemTick(i);
-	}
-}
-
-void Client::TryItemTick(int slot)
-{
-	int iid = 0;
-	const EQ::ItemInstance* inst = m_inv[slot];
-	if(inst == 0) { return; }
-
-	iid = inst->GetID();
-
-	if(zone->tick_items.count(iid) > 0)
-	{
-		if (GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) && (zone->tick_items[iid].bagslot || slot <= EQ::invslot::EQUIPMENT_END))
-		{
-			EQ::ItemInstance* e_inst = (EQ::ItemInstance*)inst;
-
-			if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
-				parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-			}
-		}
-	}
-
-	//Only look at augs in main inventory
-	if (slot > EQ::invslot::EQUIPMENT_END) { return; }
-
-	for (int x = EQ::invaug::SOCKET_BEGIN; x <= EQ::invaug::SOCKET_END; ++x)
-	{
-		EQ::ItemInstance * a_inst = inst->GetAugment(x);
-		if(!a_inst) { continue; }
-
-		iid = a_inst->GetID();
-
-		if(zone->tick_items.count(iid) > 0)
-		{
-			if( GetLevel() >= zone->tick_items[iid].level && zone->random.Int(0, 100) >= (100 - zone->tick_items[iid].chance) )
-			{
-				EQ::ItemInstance* e_inst = (EQ::ItemInstance*) a_inst;
-
-				if (parse->ItemHasQuestSub(e_inst, EVENT_ITEM_TICK)) {
-					parse->EventItem(EVENT_ITEM_TICK, this, e_inst, nullptr, "", slot);
-				}
-			}
-		}
-	}
-}
-
 void Client::ItemTimerCheck()
 {
 	int i;
@@ -8568,37 +8559,37 @@ bool Client::CanMedOnHorse()
 void Client::EnableAreaHPRegen(int value)
 {
 	AreaHPRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaHPRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaHealthRegen, value, false);
 }
 
 void Client::DisableAreaHPRegen()
 {
 	AreaHPRegen = 1.0f;
-	SendAppearancePacket(AT_AreaHPRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaHealthRegen, 1000, false);
 }
 
 void Client::EnableAreaManaRegen(int value)
 {
 	AreaManaRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaManaRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaManaRegen, value, false);
 }
 
 void Client::DisableAreaManaRegen()
 {
 	AreaManaRegen = 1.0f;
-	SendAppearancePacket(AT_AreaManaRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaManaRegen, 1000, false);
 }
 
 void Client::EnableAreaEndRegen(int value)
 {
 	AreaEndRegen = value * 0.001f;
-	SendAppearancePacket(AT_AreaEndRegen, value, false);
+	SendAppearancePacket(AppearanceType::AreaEnduranceRegen, value, false);
 }
 
 void Client::DisableAreaEndRegen()
 {
 	AreaEndRegen = 1.0f;
-	SendAppearancePacket(AT_AreaEndRegen, 1000, false);
+	SendAppearancePacket(AppearanceType::AreaEnduranceRegen, 1000, false);
 }
 
 void Client::EnableAreaRegens(int value)
@@ -10014,7 +10005,7 @@ void Client::SetAnon(uint8 anon_flag) {
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
 	spawn_appearance->spawn_id = GetID();
-	spawn_appearance->type = AT_Anon;
+	spawn_appearance->type = AppearanceType::Anonymous;
 	spawn_appearance->parameter = anon_flag;
 	entity_list.QueueClients(this, outapp);
 	Save();
@@ -10027,7 +10018,7 @@ void Client::SetAFK(uint8 afk_flag) {
 	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
 	spawn_appearance->spawn_id = GetID();
-	spawn_appearance->type = AT_AFK;
+	spawn_appearance->type = AppearanceType::AFK;
 	spawn_appearance->parameter = afk_flag;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
@@ -10274,7 +10265,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 	}
 }
 
-void Client::SetGMStatus(int16 new_status) {
+void Client::SetGMStatus(int new_status) {
 	if (Admin() != new_status) {
 		database.UpdateGMStatus(AccountID(), new_status);
 		UpdateAdmin();
@@ -10551,9 +10542,9 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 
 		memcpy(out->booktext, book_text.c_str(), length);
 
-		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
-			if (m_pp.languages[book_language] < 100) {
-				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+		if (EQ::ValueWithin(book_language, Language::CommonTongue, Language::Unknown27)) {
+			if (m_pp.languages[book_language] < Language::MaxValue) {
+				GarbleMessage(out->booktext, (Language::MaxValue - m_pp.languages[book_language]));
 			}
 		}
 
@@ -10702,22 +10693,22 @@ void Client::SaveSpells()
 
 void Client::SaveDisciplines()
 {
-	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> character_discs = {};
+	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> v;
 
-	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
-		if (IsValidSpell(m_pp.disciplines.values[index])) {
-			auto discipline = CharacterDisciplinesRepository::NewEntity();
-			discipline.id      = CharacterID();
-			discipline.slot_id = index;
-			discipline.disc_id = m_pp.disciplines.values[index];
-			character_discs.emplace_back(discipline);
+	for (int slot_id = 0; slot_id < MAX_PP_DISCIPLINES; slot_id++) {
+		if (IsValidSpell(m_pp.disciplines.values[slot_id])) {
+			auto e = CharacterDisciplinesRepository::NewEntity();
+
+			e.id      = CharacterID();
+			e.slot_id = slot_id;
+			e.disc_id = m_pp.disciplines.values[slot_id];
+
+			v.emplace_back(e);
 		}
 	}
 
-	CharacterDisciplinesRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
-
-	if (!character_discs.empty()) {
-		CharacterDisciplinesRepository::InsertMany(database, character_discs);
+	if (!v.empty()) {
+		CharacterDisciplinesRepository::ReplaceMany(database, v);
 	}
 }
 
@@ -10888,8 +10879,8 @@ void Client::ReconnectUCS()
 
 	buffer = StringFormat(
 		"%s,%i,%s.%s,%c%s",
-		Config->ChatHost.c_str(),
-		Config->ChatPort,
+		Config->GetUCSHost().c_str(),
+		Config->GetUCSPort(),
 		Config->ShortName.c_str(),
 		GetName(),
 		connection_type,
@@ -10915,8 +10906,8 @@ void Client::ReconnectUCS()
 
 	buffer = StringFormat(
 		"%s,%i,%s.%s,%c%s",
-		Config->MailHost.c_str(),
-		Config->MailPort,
+		Config->GetUCSHost().c_str(),
+		Config->GetUCSPort(),
 		Config->ShortName.c_str(),
 		GetName(),
 		connection_type,
@@ -11229,7 +11220,7 @@ void Client::Undye()
 		SendWearChange(slot);
 	}
 
-	database.DeleteCharacterDye(CharacterID());
+	database.DeleteCharacterMaterialColor(CharacterID());
 }
 
 void Client::SetTrackingID(uint32 entity_id)
@@ -11931,6 +11922,8 @@ std::string GetZoneModeString(ZoneMode mode)
 			return "ZoneToSafeCoords";
 		case GMSummon:
 			return "GMSummon";
+		case GMHiddenSummon:
+			return "GMHiddenSummon";
 		case ZoneToBindPoint:
 			return "ZoneToBindPoint";
 		case ZoneSolicited:
@@ -11948,4 +11941,69 @@ std::string GetZoneModeString(ZoneMode mode)
 		default:
 			return "Unknown";
 	}
+}
+
+void Client::ClearXTargets()
+{
+	if (!XTargettingAvailable()) {
+		return;
+	}
+
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].ID) {
+			Mob* m = entity_list.GetMob(XTargets[i].ID);
+
+			if (m) {
+				RemoveXTarget(m, false);
+			}
+
+			XTargets[i].ID      = 0;
+			XTargets[i].Name[0] = 0;
+			XTargets[i].dirty   = false;
+
+			SendXTargetPacket(i, nullptr);
+		}
+	}
+}
+
+float Client::GetAAEXPModifier(uint32 zone_id, int16 instance_version)
+{
+	return database.GetAAEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
+}
+
+float Client::GetEXPModifier(uint32 zone_id, int16 instance_version)
+{
+	return database.GetEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		instance_version
+	);
+}
+
+void Client::SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version)
+{
+	database.SetAAEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		aa_modifier,
+		instance_version
+	);
+
+	database.LoadCharacterEXPModifier(this);
+}
+
+void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version)
+{
+	database.SetEXPModifierByCharID(
+		CharacterID(),
+		zone_id,
+		exp_modifier,
+		instance_version
+	);
+
+	database.LoadCharacterEXPModifier(this);
 }

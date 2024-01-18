@@ -74,7 +74,7 @@ public:
 	void DoAnim(int animation_id, int animation_speed, bool ackreq);
 	void DoAnim(int animation_id, int animation_speed, bool ackreq, int filter);
 	void ChangeSize(double in_size);
-	void ChangeSize(double in_size, bool no_restriction);
+	void ChangeSize(double in_size, bool unrestricted);
 	bool RandomizeFeatures();
 	bool RandomizeFeatures(bool send_illusion);
 	bool RandomizeFeatures(bool send_illusion, bool save_variables);
@@ -186,11 +186,11 @@ public:
 	void Message(uint32 type, const char *message);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance);
 	void Say(const char *message);
-	void Say(const char* message, int language);
+	void Say(const char* message, uint8 language_id);
 	void QuestSay(Lua_Client client, const char *message);
 	void QuestSay(Lua_Client client, const char *message, luabind::adl::object opts);
 	void Shout(const char *message);
-	void Shout(const char* message, int language);
+	void Shout(const char* message, uint8 language_id);
 	void Emote(const char *message);
 	void InterruptSpell();
 	void InterruptSpell(int spell_id);

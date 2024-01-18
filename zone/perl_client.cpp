@@ -464,14 +464,14 @@ void Perl_Client_IncreaseSkill(Client* self, int skill_id, int value) // @catego
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(skill_id);
+	self->IncreaseLanguageSkill(language_id);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id, uint8 increase) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(skill_id, value);
+	self->IncreaseLanguageSkill(language_id, increase);
 }
 
 uint32_t Perl_Client_GetRawSkill(Client* self, int skill_id) // @categories Skills and Recipes
@@ -514,9 +514,9 @@ bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id, int chance_modif
 	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr, chance_modifier);
 }
 
-void Perl_Client_SetLanguageSkill(Client* self, int language_id, int value) // @categories Account and Character, Skills and Recipes, Stats and Attributes
+void Perl_Client_SetLanguageSkill(Client* self, uint8 language_id, uint8 language_skill) // @categories Account and Character, Skills and Recipes, Stats and Attributes
 {
-	self->SetLanguageSkill(language_id, value);
+	self->SetLanguageSkill(language_id, language_skill);
 }
 
 int Perl_Client_MaxSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
@@ -1208,7 +1208,7 @@ void Perl_Client_ReadBook(Client* self, const char* book_text, uint8 type) // @c
 	self->QuestReadBook(book_text, type);
 }
 
-void Perl_Client_SetGMStatus(Client* self, int16 new_status) // @categories Script Utility
+void Perl_Client_SetGMStatus(Client* self, int new_status) // @categories Script Utility
 {
 	self->SetGMStatus(new_status);
 }
@@ -1413,7 +1413,7 @@ void Perl_Client_EndSharedTask(Client* self, bool send_fail)
 	return self->EndSharedTask(send_fail);
 }
 
-uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
+int64_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
 }
@@ -1440,12 +1440,12 @@ void Perl_Client_RemoveFromInstance(Client* self, uint16 instance_id) // @catego
 
 void Perl_Client_Freeze(Client* self)
 {
-	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
 }
 
 void Perl_Client_UnFreeze(Client* self)
 {
-	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
+	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
 
 uint32 Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
@@ -1591,7 +1591,7 @@ void Perl_Client_SilentMessage(Client* self, const char* message) // @categories
 				if (self->GetTarget()->CastToNPC()->IsMoving() &&
 					  !self->GetTarget()->CastToNPC()->IsOnHatelist(self->GetTarget()))
 					self->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-				self->ChannelMessageReceived(ChatChannel_Say, 0, 100, message, nullptr, true);
+				self->ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, message, nullptr, true);
 			}
 		}
 	}
@@ -2121,42 +2121,62 @@ EQ::InventoryProfile* Perl_Client_GetInventory(Client* self)
 	return &self->GetInv();
 }
 
-double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
+float Perl_Client_GetAAEXPModifier(Client* self)
+{
+	return zone->GetAAEXPModifier(self);
+}
+
+float Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
 {
 	return self->GetAAEXPModifier(zone_id);
 }
 
-double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+float Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
 {
 	return self->GetAAEXPModifier(zone_id, instance_version);
 }
 
-double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
+float Perl_Client_GetEXPModifier(Client* self)
+{
+	return zone->GetEXPModifier(self);
+}
+
+float Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
 {
 	return self->GetEXPModifier(zone_id);
 }
 
-double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+float Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
 {
 	return self->GetEXPModifier(zone_id, instance_version);
 }
 
-void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier)
+void Perl_Client_SetAAEXPModifier(Client* self, float aa_modifier)
+{
+	zone->SetAAEXPModifier(self, aa_modifier);
+}
+
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, float aa_modifier)
 {
 	self->SetAAEXPModifier(zone_id, aa_modifier);
 }
 
-void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier, int16 instance_version)
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, float aa_modifier, int16 instance_version)
 {
 	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
 }
 
-void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier)
+void Perl_Client_SetEXPModifier(Client* self, float exp_modifier)
+{
+	zone->SetEXPModifier(self, exp_modifier);
+}
+
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, float exp_modifier)
 {
 	self->SetEXPModifier(zone_id, exp_modifier);
 }
 
-void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier, int16 instance_version)
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, float exp_modifier, int16 instance_version)
 {
 	self->SetEXPModifier(zone_id, exp_modifier, instance_version);
 }
@@ -3063,6 +3083,11 @@ bool Perl_Client_HasItemOnCorpse(Client* self, uint32 item_id)
 	return self->HasItemOnCorpse(item_id);
 }
 
+void Perl_Client_ClearXTargets(Client* self)
+{
+	self->ClearXTargets();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3137,6 +3162,7 @@ void perl_register_client()
 	package.add("ClearCompassMark", &Perl_Client_ClearCompassMark);
 	package.add("ClearAccountFlag", &Perl_Client_ClearAccountFlag);
 	package.add("ClearPEQZoneFlag", &Perl_Client_ClearPEQZoneFlag);
+	package.add("ClearXTargets", &Perl_Client_ClearXTargets);
 	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
 	package.add("Connected", &Perl_Client_Connected);
 	package.add("CountAugmentEquippedByID", &Perl_Client_CountAugmentEquippedByID);
@@ -3175,8 +3201,9 @@ void perl_register_client()
 	package.add("ForageItem", &Perl_Client_ForageItem);
 	package.add("Freeze", &Perl_Client_Freeze);
 	package.add("GMKill", &Perl_Client_GMKill);
-	package.add("GetAAEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
-	package.add("GetAAEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (float(*)(Client*))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAExp", &Perl_Client_GetAAExp);
 	package.add("GetAALevel", &Perl_Client_GetAALevel);
 	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
@@ -3235,8 +3262,9 @@ void perl_register_client()
 	package.add("GetEnvironmentDamageModifier", &Perl_Client_GetEnvironmentDamageModifier);
 	package.add("GetEXP", &Perl_Client_GetEXP);
 	package.add("GetEXPForLevel", &Perl_Client_GetEXPForLevel);
-	package.add("GetEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
-	package.add("GetEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (float(*)(Client*))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
 	package.add("GetEndurance", &Perl_Client_GetEndurance);
 	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);
@@ -3334,8 +3362,8 @@ void perl_register_client()
 	package.add("Hungry", &Perl_Client_Hungry);
 	package.add("InZone", &Perl_Client_InZone);
 	package.add("IncStats", &Perl_Client_IncStats);
-	package.add("IncreaseLanguageSkill", (void(*)(Client*, int))&Perl_Client_IncreaseLanguageSkill);
-	package.add("IncreaseLanguageSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8))&Perl_Client_IncreaseLanguageSkill);
+	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8, uint8))&Perl_Client_IncreaseLanguageSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
 	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
 	package.add("IncrementAA", &Perl_Client_IncrementAA);
@@ -3466,8 +3494,9 @@ void perl_register_client()
 	package.add("SendToInstance", &Perl_Client_SendToInstance);
 	package.add("SendWebLink", &Perl_Client_SendWebLink);
 	package.add("SendZoneFlagInfo", &Perl_Client_SendZoneFlagInfo);
-	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetAAEXPModifier);
-	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, float))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float, int16))&Perl_Client_SetAAEXPModifier);
 	package.add("SetAAPoints", &Perl_Client_SetAAPoints);
 	package.add("SetAATitle", (void(*)(Client*, std::string))&Perl_Client_SetAATitle);
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
@@ -3501,8 +3530,9 @@ void perl_register_client()
 	package.add("SetDueling", &Perl_Client_SetDueling);
 	package.add("SetEXP", (void(*)(Client*, uint64, uint64))&Perl_Client_SetEXP);
 	package.add("SetEXP", (void(*)(Client*, uint64, uint64, bool))&Perl_Client_SetEXP);
-	package.add("SetEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetEXPModifier);
-	package.add("SetEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, float))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, float))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, float, int16))&Perl_Client_SetEXPModifier);
 	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);
 	package.add("SetEndurance", &Perl_Client_SetEndurance);
 	package.add("SetEnvironmentDamageModifier", &Perl_Client_SetEnvironmentDamageModifier);

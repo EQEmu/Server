@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_INSTANCE_SAFERETURNS_REPOSITORY_H
@@ -136,8 +136,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_instance_safereturns_id
 			)
 		);
@@ -146,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
-			e.safe_x           = strtof(row[5], nullptr);
-			e.safe_y           = strtof(row[6], nullptr);
-			e.safe_z           = strtof(row[7], nullptr);
-			e.safe_heading     = strtof(row[8], nullptr);
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;
+			e.safe_heading     = row[8] ? strtof(row[8], nullptr) : 0;
 
 			return e;
 		}
@@ -297,15 +298,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
-			e.safe_x           = strtof(row[5], nullptr);
-			e.safe_y           = strtof(row[6], nullptr);
-			e.safe_z           = strtof(row[7], nullptr);
-			e.safe_heading     = strtof(row[8], nullptr);
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;
+			e.safe_heading     = row[8] ? strtof(row[8], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -330,15 +331,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterInstanceSafereturns e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.character_id     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.instance_zone_id = static_cast<int32_t>(atoi(row[2]));
-			e.instance_id      = static_cast<int32_t>(atoi(row[3]));
-			e.safe_zone_id     = static_cast<int32_t>(atoi(row[4]));
-			e.safe_x           = strtof(row[5], nullptr);
-			e.safe_y           = strtof(row[6], nullptr);
-			e.safe_z           = strtof(row[7], nullptr);
-			e.safe_heading     = strtof(row[8], nullptr);
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.character_id     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.instance_zone_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.instance_id      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.safe_zone_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.safe_x           = row[5] ? strtof(row[5], nullptr) : 0;
+			e.safe_y           = row[6] ? strtof(row[6], nullptr) : 0;
+			e.safe_z           = row[7] ? strtof(row[7], nullptr) : 0;
+			e.safe_heading     = row[8] ? strtof(row[8], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -397,6 +398,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterInstanceSafereturns &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.character_id));
+		v.push_back(std::to_string(e.instance_zone_id));
+		v.push_back(std::to_string(e.instance_id));
+		v.push_back(std::to_string(e.safe_zone_id));
+		v.push_back(std::to_string(e.safe_x));
+		v.push_back(std::to_string(e.safe_y));
+		v.push_back(std::to_string(e.safe_z));
+		v.push_back(std::to_string(e.safe_heading));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterInstanceSafereturns> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.character_id));
+			v.push_back(std::to_string(e.instance_zone_id));
+			v.push_back(std::to_string(e.instance_id));
+			v.push_back(std::to_string(e.safe_zone_id));
+			v.push_back(std::to_string(e.safe_x));
+			v.push_back(std::to_string(e.safe_y));
+			v.push_back(std::to_string(e.safe_z));
+			v.push_back(std::to_string(e.safe_heading));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_INSTANCE_SAFERETURNS_REPOSITORY_H

@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_TRAPS_REPOSITORY_H
@@ -200,8 +200,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				traps_id
 			)
 		);
@@ -210,29 +211,29 @@ public:
 		if (results.RowCount() == 1) {
 			Traps e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.x                      = static_cast<int32_t>(atoi(row[3]));
-			e.y                      = static_cast<int32_t>(atoi(row[4]));
-			e.z                      = static_cast<int32_t>(atoi(row[5]));
-			e.chance                 = static_cast<int8_t>(atoi(row[6]));
-			e.maxzdiff               = strtof(row[7], nullptr);
-			e.radius                 = strtof(row[8], nullptr);
-			e.effect                 = static_cast<int32_t>(atoi(row[9]));
-			e.effectvalue            = static_cast<int32_t>(atoi(row[10]));
-			e.effectvalue2           = static_cast<int32_t>(atoi(row[11]));
+			e.version                = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.x                      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.y                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.z                      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.chance                 = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.maxzdiff               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.radius                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.effect                 = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.effectvalue            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.effectvalue2           = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.message                = row[12] ? row[12] : "";
-			e.skill                  = static_cast<int32_t>(atoi(row[13]));
-			e.level                  = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.respawn_time           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.respawn_var            = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.triggered_number       = static_cast<int8_t>(atoi(row[17]));
-			e.group                  = static_cast<int8_t>(atoi(row[18]));
-			e.despawn_when_triggered = static_cast<int8_t>(atoi(row[19]));
-			e.undetectable           = static_cast<int8_t>(atoi(row[20]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[21]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[22]));
+			e.skill                  = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.level                  = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
+			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
+			e.max_expansion          = row[22] ? static_cast<int8_t>(atoi(row[22])) : -1;
 			e.content_flags          = row[23] ? row[23] : "";
 			e.content_flags_disabled = row[24] ? row[24] : "";
 
@@ -425,29 +426,29 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Traps e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.x                      = static_cast<int32_t>(atoi(row[3]));
-			e.y                      = static_cast<int32_t>(atoi(row[4]));
-			e.z                      = static_cast<int32_t>(atoi(row[5]));
-			e.chance                 = static_cast<int8_t>(atoi(row[6]));
-			e.maxzdiff               = strtof(row[7], nullptr);
-			e.radius                 = strtof(row[8], nullptr);
-			e.effect                 = static_cast<int32_t>(atoi(row[9]));
-			e.effectvalue            = static_cast<int32_t>(atoi(row[10]));
-			e.effectvalue2           = static_cast<int32_t>(atoi(row[11]));
+			e.version                = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.x                      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.y                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.z                      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.chance                 = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.maxzdiff               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.radius                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.effect                 = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.effectvalue            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.effectvalue2           = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.message                = row[12] ? row[12] : "";
-			e.skill                  = static_cast<int32_t>(atoi(row[13]));
-			e.level                  = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.respawn_time           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.respawn_var            = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.triggered_number       = static_cast<int8_t>(atoi(row[17]));
-			e.group                  = static_cast<int8_t>(atoi(row[18]));
-			e.despawn_when_triggered = static_cast<int8_t>(atoi(row[19]));
-			e.undetectable           = static_cast<int8_t>(atoi(row[20]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[21]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[22]));
+			e.skill                  = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.level                  = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
+			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
+			e.max_expansion          = row[22] ? static_cast<int8_t>(atoi(row[22])) : -1;
 			e.content_flags          = row[23] ? row[23] : "";
 			e.content_flags_disabled = row[24] ? row[24] : "";
 
@@ -474,29 +475,29 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Traps e{};
 
-			e.id                     = static_cast<int32_t>(atoi(row[0]));
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.zone                   = row[1] ? row[1] : "";
-			e.version                = static_cast<uint16_t>(strtoul(row[2], nullptr, 10));
-			e.x                      = static_cast<int32_t>(atoi(row[3]));
-			e.y                      = static_cast<int32_t>(atoi(row[4]));
-			e.z                      = static_cast<int32_t>(atoi(row[5]));
-			e.chance                 = static_cast<int8_t>(atoi(row[6]));
-			e.maxzdiff               = strtof(row[7], nullptr);
-			e.radius                 = strtof(row[8], nullptr);
-			e.effect                 = static_cast<int32_t>(atoi(row[9]));
-			e.effectvalue            = static_cast<int32_t>(atoi(row[10]));
-			e.effectvalue2           = static_cast<int32_t>(atoi(row[11]));
+			e.version                = row[2] ? static_cast<uint16_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.x                      = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.y                      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.z                      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.chance                 = row[6] ? static_cast<int8_t>(atoi(row[6])) : 0;
+			e.maxzdiff               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.radius                 = row[8] ? strtof(row[8], nullptr) : 0;
+			e.effect                 = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.effectvalue            = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.effectvalue2           = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
 			e.message                = row[12] ? row[12] : "";
-			e.skill                  = static_cast<int32_t>(atoi(row[13]));
-			e.level                  = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.respawn_time           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.respawn_var            = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
-			e.triggered_number       = static_cast<int8_t>(atoi(row[17]));
-			e.group                  = static_cast<int8_t>(atoi(row[18]));
-			e.despawn_when_triggered = static_cast<int8_t>(atoi(row[19]));
-			e.undetectable           = static_cast<int8_t>(atoi(row[20]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[21]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[22]));
+			e.skill                  = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.level                  = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 1;
+			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
+			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
+			e.max_expansion          = row[22] ? static_cast<int8_t>(atoi(row[22])) : -1;
 			e.content_flags          = row[23] ? row[23] : "";
 			e.content_flags_disabled = row[24] ? row[24] : "";
 
@@ -557,6 +558,110 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Traps &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back(std::to_string(e.chance));
+		v.push_back(std::to_string(e.maxzdiff));
+		v.push_back(std::to_string(e.radius));
+		v.push_back(std::to_string(e.effect));
+		v.push_back(std::to_string(e.effectvalue));
+		v.push_back(std::to_string(e.effectvalue2));
+		v.push_back("'" + Strings::Escape(e.message) + "'");
+		v.push_back(std::to_string(e.skill));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.respawn_time));
+		v.push_back(std::to_string(e.respawn_var));
+		v.push_back(std::to_string(e.triggered_number));
+		v.push_back(std::to_string(e.group));
+		v.push_back(std::to_string(e.despawn_when_triggered));
+		v.push_back(std::to_string(e.undetectable));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Traps> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back(std::to_string(e.chance));
+			v.push_back(std::to_string(e.maxzdiff));
+			v.push_back(std::to_string(e.radius));
+			v.push_back(std::to_string(e.effect));
+			v.push_back(std::to_string(e.effectvalue));
+			v.push_back(std::to_string(e.effectvalue2));
+			v.push_back("'" + Strings::Escape(e.message) + "'");
+			v.push_back(std::to_string(e.skill));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.respawn_time));
+			v.push_back(std::to_string(e.respawn_var));
+			v.push_back(std::to_string(e.triggered_number));
+			v.push_back(std::to_string(e.group));
+			v.push_back(std::to_string(e.despawn_when_triggered));
+			v.push_back(std::to_string(e.undetectable));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_TRAPS_REPOSITORY_H

@@ -39,6 +39,12 @@
 #include "../common/discord/discord.h"
 #include "../common/repositories/dynamic_zone_templates_repository.h"
 
+struct EXPModifier
+{
+	float aa_modifier;
+	float exp_modifier;
+};
+
 class DynamicZone;
 
 struct ZonePoint {
@@ -77,14 +83,6 @@ struct ZoneEXPModInfo {
 	float AAExpMod;
 };
 
-struct item_tick_struct {
-	uint32      itemid;
-	uint32      chance;
-	uint32      level;
-	int16       bagslot;
-	std::string qglobal;
-};
-
 class Client;
 class Expedition;
 class Map;
@@ -107,7 +105,12 @@ public:
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
-	bool process_mobs_while_empty;
+	bool IsIdle() const;
+	void SetIsIdle(bool m_is_idle);
+	bool IsIdleWhenEmpty() const;
+	void SetIdleWhenEmpty(bool idle_when_empty);
+	uint32 GetSecondsBeforeIdle() const;
+	void SetSecondsBeforeIdle(uint32 seconds_before_idle);
 	bool AggroLimitReached() { return (aggroedmobs > 10) ? true : false; }
 	bool AllowMercs() const { return (allow_mercs); }
 	bool CanBind() const { return (can_bind); }
@@ -139,6 +142,7 @@ public:
 	bool LoadGroundSpawns();
 	bool LoadZoneCFG(const char *filename, uint16 instance_version);
 	bool LoadZoneObjects();
+	bool IsSpecialBindLocation(const glm::vec4& location);
 	bool Process();
 	bool SaveZoneCFG();
 
@@ -218,7 +222,6 @@ public:
 
 	std::pair<AA::Ability *, AA::Rank *> GetAlternateAdvancementAbilityAndRank(int id, int points_spent);
 
-	std::unordered_map<int, item_tick_struct>             tick_items;
 	std::unordered_map<int, std::unique_ptr<AA::Ability>> aa_abilities;
 	std::unordered_map<int, std::unique_ptr<AA::Rank>>    aa_ranks;
 
@@ -228,6 +231,8 @@ public:
 	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>>  expedition_cache;
 	std::unordered_map<uint32, DynamicZoneTemplatesRepository::DynamicZoneTemplates> dz_template_cache;
+
+	std::unordered_map<uint32, EXPModifier> exp_modifiers;
 
 	time_t weather_timer;
 	Timer  spawn2_timer;
@@ -256,6 +261,12 @@ public:
 	std::string GetZoneDescription();
 	void SendReloadMessage(std::string reload_type);
 
+	void ClearEXPModifier(Client* c);
+	float GetAAEXPModifier(Client* c);
+	float GetEXPModifier(Client* c);
+	void SetAAEXPModifier(Client* c, float aa_modifier);
+	void SetEXPModifier(Client* c, float exp_modifier);
+
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);
 	void ChangeWeather();
@@ -279,12 +290,11 @@ public:
 	void LoadLDoNTraps();
 	void LoadLevelEXPMods();
 	void LoadGrids();
-	void LoadMercSpells();
-	void LoadMercTemplates();
+	void LoadMercenarySpells();
+	void LoadMercenaryTemplates();
 	void LoadNewMerchantData(uint32 merchantid);
-	void LoadNPCEmotes(std::vector<NPC_Emote_Struct *> *NPCEmoteList);
+	void LoadNPCEmotes(std::vector<NPC_Emote_Struct*>* v);
 	void LoadTempMerchantData();
-	void LoadTickItems();
 	void LoadVeteranRewards();
 	void LoadZoneDoors();
 	void ReloadStaticData();
@@ -431,6 +441,9 @@ private:
 	uint32    m_max_clients;
 	uint32    zoneid;
 	uint32    m_last_ucss_update;
+	bool      m_idle_when_empty;
+	uint32    m_seconds_before_idle;
+	bool      m_is_idle;
 
 	GlobalLootManager                   m_global_loot;
 	LinkedList<ZoneClientAuth_Struct *> client_auth_list;

@@ -1,92 +1,262 @@
 #include "../client.h"
 #include "../data_bucket.h"
+#include "../dialogue_window.h"
+#include "../../common/repositories/data_buckets_repository.h"
 
 void command_databuckets(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::Yellow, "Usage: #databuckets view (partial key)|(limit) OR #databuckets delete (key)");
+	const int arguments = sep->argnum;
+	if (!arguments) {
+		SendDataBucketsSubCommands(c);
 		return;
 	}
-	if (strcasecmp(sep->arg[1], "view") == 0) {
 
-		std::string key_filter;
-		uint8       limit = 50;
-		for (int    i     = 2; i < 4; i++) {
-			if (sep->arg[i][0] == '\0') {
-				break;
-			}
-			if (strcasecmp(sep->arg[i], "limit") == 0) {
-				limit = (uint8) Strings::ToInt(sep->arg[i + 1]);
-				continue;
-			}
-		}
-		if (sep->arg[2]) {
-			key_filter = Strings::ToLower(sep->arg[2]);
-		}
-		std::string query = "SELECT `id`, `key`, `value`, `expires` FROM data_buckets";
-		if (!key_filter.empty()) { query += StringFormat(" WHERE `key` LIKE '%%%s%%'", key_filter.c_str()); }
-		query += StringFormat(" LIMIT %u", limit);
-		auto results = database.QueryDatabase(query);
-		if (!results.Success()) {
+	const bool is_delete = !strcasecmp(sep->arg[1], "delete");
+	const bool is_edit   = !strcasecmp(sep->arg[1], "edit");
+	const bool is_view   = !strcasecmp(sep->arg[1], "view");
+
+	if (
+		!is_delete &&
+		!is_edit &&
+		!is_view
+	) {
+		SendDataBucketsSubCommands(c);
+		return;
+	}
+
+	if (is_delete) {
+		if (arguments < 2) {
+			SendDataBucketsSubCommands(c);
 			return;
 		}
-		if (results.RowCount() == 0) {
-			c->Message(Chat::Yellow, "No data_buckets found");
-			return;
-		}
-		int         _ctr         = 0;
-		// put in window for easier readability in case want command line for something else
-		std::string window_title = "Data Buckets";
-		std::string window_text  =
-						"<table>"
-						"<tr>"
-						"<td>ID</td>"
-						"<td>Expires</td>"
-						"<td>Key</td>"
-						"<td>Value</td>"
-						"</tr>";
-		for (auto   row          = results.begin(); row != results.end(); ++row) {
-			auto        id      = static_cast<uint32>(Strings::ToInt(row[0]));
-			std::string key     = row[1];
-			std::string value   = row[2];
-			std::string expires = row[3];
-			window_text.append(
-				StringFormat(
-					"<tr>"
-					"<td>%u</td>"
-					"<td>%s</td>"
-					"<td>%s</td>"
-					"<td>%s</td>"
-					"</tr>",
-					id,
-					expires.c_str(),
-					key.c_str(),
-					value.c_str()
-				));
-			_ctr++;
-			std::string del_saylink = StringFormat("#databuckets delete %s", key.c_str());
+
+		const std::string& key_filter = sep->arg[2];
+
+		const uint32 character_id = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
+		const uint32 npc_id       = sep->IsNumber(4) ? Strings::ToUnsignedInt(sep->arg[4]) : 0;
+		const uint32 bot_id       = sep->IsNumber(5) ? Strings::ToUnsignedInt(sep->arg[5]) : 0;
+
+		if (
+			!character_id &&
+			!npc_id &&
+			!bot_id
+		) {
+			if (!DataBucket::DeleteData(key_filter)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"An error occurred deleting data bucket '{}'.",
+						key_filter
+					).c_str()
+				);
+				return;
+			}
+
 			c->Message(
 				Chat::White,
-				"%s : %s",
-				Saylink::Silent(del_saylink, "Delete").c_str(),
-				key.c_str(),
-				"  Value:  ",
-				value.c_str());
+				fmt::format(
+					"Data bucket '{}' deleted.",
+					key_filter
+				).c_str()
+			);
+		} else {
+			DataBucketKey k = {};
+
+			k.key          = key_filter;
+			k.character_id = character_id;
+			k.npc_id       = npc_id;
+			k.bot_id       = bot_id;
+
+			if (!DataBucket::DeleteData(k)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"An error occurred deleting data bucket '{}'.",
+						key_filter
+					).c_str()
+				);
+				return;
+			}
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Data bucket '{}' deleted.",
+					key_filter
+				).c_str()
+			);
 		}
-		window_text.append("</table>");
-		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
-		std::string response = _ctr > 0 ? StringFormat("Found %i matching data buckets", _ctr).c_str()
-			: "No Databuckets found.";
-		c->Message(Chat::Yellow, response.c_str());
-	}
-	else if (strcasecmp(sep->arg[1], "delete") == 0) {
-		if (DataBucket::DeleteData(sep->argplus[2])) {
-			c->Message(Chat::Yellow, "data bucket %s deleted.", sep->argplus[2]);
+	} else if (is_edit) {
+		if (arguments < 6) {
+			SendDataBucketsSubCommands(c);
+			return;
 		}
-		else {
-			c->Message(Chat::Red, "An error occurred deleting data bucket %s", sep->argplus[2]);
+
+		const std::string& key_filter = sep->arg[2];
+		const std::string& value      = sep->arg[6];
+
+		const uint32 character_id = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
+		const uint32 npc_id       = sep->IsNumber(4) ? Strings::ToUnsignedInt(sep->arg[4]) : 0;
+		const uint32 bot_id       = sep->IsNumber(5) ? Strings::ToUnsignedInt(sep->arg[5]) : 0;
+		const uint32 expires      = arguments > 6 && sep->IsNumber(7) ? Strings::ToUnsignedInt(sep->arg[7]) : 0;
+
+		DataBucketKey k = {};
+
+		k.key          = key_filter;
+		k.character_id = character_id;
+		k.npc_id       = npc_id;
+		k.bot_id       = bot_id;
+		k.value        = value;
+
+		if (arguments > 6) {
+			k.expires = expires;
 		}
-		return;
+
+		const std::string& expires_string = expires == 0 ? "Never" : std::to_string(expires);
+
+		DataBucket::SetData(k);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Bucket Edited | Key: {} Value: {} Expires: {} Character ID: {} NPC ID: {} Bot ID: {}",
+				key_filter,
+				value,
+				expires_string,
+				character_id,
+				npc_id,
+				bot_id
+			).c_str()
+		);
+	} else if (is_view) {
+		if (arguments < 2) {
+			SendDataBucketsSubCommands(c);
+			return;
+		}
+
+		const std::string& key_filter = sep->arg[2];
+
+		const uint32 character_id = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
+		const uint32 npc_id       = sep->IsNumber(4) ? Strings::ToUnsignedInt(sep->arg[4]) : 0;
+		const uint32 bot_id       = sep->IsNumber(5) ? Strings::ToUnsignedInt(sep->arg[5]) : 0;
+
+		std::string where_filter = fmt::format(
+			"`key` LIKE '%{}%'",
+			Strings::Escape(key_filter)
+		);
+
+		if (character_id) {
+			where_filter += fmt::format(
+				" AND `character_id` = {}",
+				character_id
+			);
+		}
+
+		if (npc_id) {
+			where_filter += fmt::format(
+				" AND `npc_id` = {}",
+				npc_id
+			);
+		}
+
+		if (bot_id) {
+			where_filter += fmt::format(
+				" AND `bot_id` = {}",
+				bot_id
+			);
+		}
+
+		where_filter += " LIMIT 50";
+
+		const auto& l = DataBucketsRepository::GetWhere(database, where_filter);
+
+		if (l.empty()) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"No data buckets found matching '{}'.",
+					key_filter
+				).c_str()
+			);
+			return;
+		}
+
+		std::string window_text = DialogueWindow::TableRow(
+			DialogueWindow::TableCell("ID") +
+			DialogueWindow::TableCell("Key") +
+			DialogueWindow::TableCell("Value") +
+			DialogueWindow::TableCell("Expires") +
+			DialogueWindow::TableCell("Character ID") +
+			DialogueWindow::TableCell("NPC ID") +
+			DialogueWindow::TableCell("Bot ID")
+		);
+
+		uint16 bucket_count  = 0;
+		uint16 bucket_number = 1;
+
+		for (const auto& e : l) {
+			const std::string& expires_string = e.expires == 0 ? "Never" : std::to_string(e.expires);
+
+			window_text += DialogueWindow::TableRow(
+				DialogueWindow::TableCell(std::to_string(e.id)) +
+				DialogueWindow::TableCell(e.key_) +
+				DialogueWindow::TableCell(e.value) +
+				DialogueWindow::TableCell(expires_string) +
+				DialogueWindow::TableCell(std::to_string(e.character_id)) +
+				DialogueWindow::TableCell(std::to_string(e.npc_id)) +
+				DialogueWindow::TableCell(std::to_string(e.bot_id))
+			);
+
+			const std::string& delete_link = Saylink::Silent(
+				fmt::format(
+					"#databuckets delete {} {} {} {}",
+					e.key_,
+					e.character_id,
+					e.npc_id,
+					e.bot_id
+				),
+				"Delete"
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Bucket {} | Key: {} | Value: {} | Character ID: {} NPC ID: {} Bot ID: {} | {}",
+					bucket_number,
+					e.key_,
+					e.value,
+					e.character_id,
+					e.npc_id,
+					e.bot_id,
+					delete_link
+				).c_str()
+			);
+
+			bucket_count++;
+			bucket_number++;
+		}
+
+		window_text = DialogueWindow::Table(window_text);
+
+		c->SendPopupToClient("Data Buckets", window_text.c_str());
+
+		const std::string& response = fmt::format(
+			"Found {} data bucket{} matching '{}'{}.",
+			bucket_count,
+			bucket_count != 1 ? "s" : "",
+			key_filter,
+			bucket_count == 50 ? ", max reached" : ""
+		);
+
+		c->Message(Chat::White, response.c_str());
 	}
 }
 
+void SendDataBucketsSubCommands(Client *c)
+{
+	c->Message(Chat::White, "Usage: #databuckets delete [Key] [Character ID] [NPC ID] [Bot ID]");
+	c->Message(Chat::White, "Usage: #databuckets edit [Key] [Character ID] [NPC ID] [Bot ID] [Value] [Expires]");
+	c->Message(Chat::White, "Usage: #databuckets view [Partial Key] [Character ID] [NPC ID] [Bot ID]");
+	c->Message(Chat::White, "Note: Character ID, NPC ID, and Bot ID are optional if not needed, if needed they are required for specificity");
+	c->Message(Chat::White, "Note: Edit requires Character ID, NPC ID, Bot ID, and Value, Expires is optional and does not modify the existing expiration time if not provided");
+}

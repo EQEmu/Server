@@ -71,14 +71,18 @@ public:
 	int GetBaseWIS();
 	int GetWeight();
 	uint32 GetEXP();
-	double GetEXPModifier(uint32 zone_id);
-	double GetEXPModifier(uint32 zone_id, int16 instance_version);
-	double GetAAEXPModifier(uint32 zone_id);
-	double GetAAEXPModifier(uint32 zone_id, int16 instance_version);
-	void SetAAEXPModifier(uint32 zone_id, double aa_modifier);
-	void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version);
-	void SetEXPModifier(uint32 zone_id, double exp_modifier);
-	void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version);
+	float GetEXPModifier();
+	float GetEXPModifier(uint32 zone_id);
+	float GetEXPModifier(uint32 zone_id, int16 instance_version);
+	float GetAAEXPModifier();
+	float GetAAEXPModifier(uint32 zone_id);
+	float GetAAEXPModifier(uint32 zone_id, int16 instance_version);
+	void SetAAEXPModifier(float aa_modifier);
+	void SetAAEXPModifier(uint32 zone_id, float aa_modifier);
+	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version);
+	void SetEXPModifier(float exp_modifier);
+	void SetEXPModifier(uint32 zone_id, float exp_modifier);
+	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version);
 	uint32 GetAAExp();
 	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();
@@ -165,8 +169,8 @@ public:
 	void SetSkillPoints(int skill);
 	void IncreaseSkill(int skill_id);
 	void IncreaseSkill(int skill_id, int value);
-	void IncreaseLanguageSkill(int skill_id);
-	void IncreaseLanguageSkill(int skill_id, int value);
+	void IncreaseLanguageSkill(uint8 language_id);
+	void IncreaseLanguageSkill(uint8 language_id, uint8 increase);
 	int GetRawSkill(int skill_id);
 	bool HasSkill(int skill_id);
 	bool CanHaveSkill(int skill_id);
@@ -175,7 +179,7 @@ public:
 	void CheckSpecializeIncrease(int spell_id);
 	void CheckIncreaseSkill(int skill_id, Lua_Mob target);
 	void CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod);
-	void SetLanguageSkill(int language, int value);
+	void SetLanguageSkill(uint8 language_id, uint8 language_skill);
 	int MaxSkill(int skill_id);
 	bool IsMedding();
 	int GetDuelTarget();
@@ -361,7 +365,7 @@ public:
 	void LockSharedTask(bool lock);
 	void EndSharedTask();
 	void EndSharedTask(bool send_fail);
-	int GetCorpseCount();
+	int64 GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
 	void AssignToInstance(int instance_id);
@@ -439,7 +443,7 @@ public:
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
-	void SetGMStatus(int16 new_status);
+	void SetGMStatus(int new_status);
 	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
@@ -488,6 +492,7 @@ public:
 	void RemoveRadiantCrystals(uint32 amount);
 	void SummonItemIntoInventory(luabind::object item_table);
 	bool HasItemOnCorpse(uint32 item_id);
+	void ClearXTargets();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

@@ -311,9 +311,9 @@ void Perl_Mob_ChangeSize(Mob* self, float in_size) // @categories Script Utility
 	self->ChangeSize(in_size);
 }
 
-void Perl_Mob_ChangeSize(Mob* self, float in_size, bool no_restriction) // @categories Script Utility
+void Perl_Mob_ChangeSize(Mob* self, float in_size, bool unrestricted) // @categories Script Utility
 {
-	self->ChangeSize(in_size, no_restriction);
+	self->ChangeSize(in_size, unrestricted);
 }
 
 void Perl_Mob_GMMove(Mob* self, float x, float y, float z) // @categories Script Utility
@@ -2322,7 +2322,7 @@ void Perl_Mob_SetDeltas(Mob* self, float delta_x, float delta_y, float delta_z, 
 
 void Perl_Mob_SetLD(Mob* self, bool value) // @categories Script Utility
 {
-	self->SendAppearancePacket(AT_Linkdead, value);
+	self->SendAppearancePacket(AppearanceType::Linkdead, value);
 }
 
 void Perl_Mob_SetTargetable(Mob* self, bool on) // @categories Stats and Attributes

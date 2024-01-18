@@ -75,6 +75,7 @@ struct ActivityInformation {
 	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
 	int              zone_version;
 	bool             optional;
+	uint8_t          list_group; // element group in window list (groups separated by dividers), valid values are 0-19
 	bool             has_area; // non-database field
 
 	inline bool CheckZone(int zone_id, int version) const
@@ -359,9 +360,11 @@ namespace Tasks {
 			if (activity_states[i].activity_state != ActivityCompleted)
 			{
 				completed_ids[i] = false;
-				current_step = std::min(current_step, el.step);
+
+				// step system advances to next step if only optionals active
 				if (!el.optional)
 				{
+					current_step = std::min(current_step, el.step);
 					result.is_task_complete = false;
 				}
 			}

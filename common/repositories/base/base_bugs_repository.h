@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BUGS_REPOSITORY_H
@@ -152,8 +152,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bugs_id
 			)
 		);
@@ -162,19 +163,19 @@ public:
 		if (results.RowCount() == 1) {
 			Bugs e{};
 
-			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = strtof(row[4], nullptr);
-			e.y      = strtof(row[5], nullptr);
-			e.z      = strtof(row[6], nullptr);
+			e.x      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z      = row[6] ? strtof(row[6], nullptr) : 0;
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
-			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.date   = row[11] ? row[11] : 0;
+			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -329,19 +330,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Bugs e{};
 
-			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = strtof(row[4], nullptr);
-			e.y      = strtof(row[5], nullptr);
-			e.z      = strtof(row[6], nullptr);
+			e.x      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z      = row[6] ? strtof(row[6], nullptr) : 0;
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
-			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.date   = row[11] ? row[11] : 0;
+			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -366,19 +367,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Bugs e{};
 
-			e.id     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+			e.id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.zone   = row[1] ? row[1] : "";
 			e.name   = row[2] ? row[2] : "";
 			e.ui     = row[3] ? row[3] : "";
-			e.x      = strtof(row[4], nullptr);
-			e.y      = strtof(row[5], nullptr);
-			e.z      = strtof(row[6], nullptr);
+			e.x      = row[4] ? strtof(row[4], nullptr) : 0;
+			e.y      = row[5] ? strtof(row[5], nullptr) : 0;
+			e.z      = row[6] ? strtof(row[6], nullptr) : 0;
 			e.type   = row[7] ? row[7] : "";
-			e.flag   = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
+			e.flag   = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
 			e.target = row[9] ? row[9] : "";
 			e.bug    = row[10] ? row[10] : "";
-			e.date   = row[11] ? row[11] : "";
-			e.status = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
+			e.date   = row[11] ? row[11] : 0;
+			e.status = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -437,6 +438,86 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Bugs &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.ui) + "'");
+		v.push_back(std::to_string(e.x));
+		v.push_back(std::to_string(e.y));
+		v.push_back(std::to_string(e.z));
+		v.push_back("'" + Strings::Escape(e.type) + "'");
+		v.push_back(std::to_string(e.flag));
+		v.push_back("'" + Strings::Escape(e.target) + "'");
+		v.push_back("'" + Strings::Escape(e.bug) + "'");
+		v.push_back("'" + Strings::Escape(e.date) + "'");
+		v.push_back(std::to_string(e.status));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Bugs> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.ui) + "'");
+			v.push_back(std::to_string(e.x));
+			v.push_back(std::to_string(e.y));
+			v.push_back(std::to_string(e.z));
+			v.push_back("'" + Strings::Escape(e.type) + "'");
+			v.push_back(std::to_string(e.flag));
+			v.push_back("'" + Strings::Escape(e.target) + "'");
+			v.push_back("'" + Strings::Escape(e.bug) + "'");
+			v.push_back("'" + Strings::Escape(e.date) + "'");
+			v.push_back(std::to_string(e.status));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BUGS_REPOSITORY_H

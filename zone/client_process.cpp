@@ -534,11 +534,6 @@ bool Client::Process() {
 				CalcBonuses();
 			}
 
-			if (ItemTickTimer.Check())
-			{
-				TickItemCheck();
-			}
-
 			if (ItemQuestTimer.Check())
 			{
 				ItemTimerCheck();
@@ -585,7 +580,7 @@ bool Client::Process() {
 			linkdead_timer.Start(RuleI(Zone, ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
-			SendAppearancePacket(AT_Linkdead, 1);
+			SendAppearancePacket(AppearanceType::Linkdead, 1);
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
@@ -776,10 +771,12 @@ void Client::BulkSendInventoryItems()
 		}
 	}
 
-	bool deletenorent = database.NoRentExpired(GetName());
-	if (deletenorent) { //client was offline for more than 30 minutes, delete no rent items
-		if (RuleB(Inventory, TransformSummonedBags))
+	const bool delete_no_rent = database.NoRentExpired(GetName());
+	if (delete_no_rent) { //client was offline for more than 30 minutes, delete no rent items
+		if (RuleB(Inventory, TransformSummonedBags)) {
 			DisenchantSummonedBags(false);
+		}
+
 		RemoveNoRent(false);
 	}
 
@@ -1040,7 +1037,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 	{
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
-		database.MarkCorpseAsRezzed(PendingRezzDBID);
+		database.MarkCorpseAsResurrected(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz spellid [{}] in zone[{}] instance id [{}]",
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
@@ -1197,10 +1194,10 @@ void Client::CancelSneakHide()
 	if (hidden || improved_hidden) {
 		auto app = new EQApplicationPacket(OP_CancelSneakHide, 0);
 		FastQueuePacket(&app);
-		// SoF and Tit send back a OP_SpawnAppearance turning off AT_Invis
+		// SoF and Tit send back a OP_SpawnAppearance turning off AppearanceType::Invisibility
 		// so we need to handle our sneaking flag only
 		// The later clients send back a OP_Hide (this has a size but data is 0)
-		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
+		// as well as OP_SpawnAppearance with AppearanceType::Invisibility and one with AppearanceType::Sneak
 		// So we don't have to handle any of those flags
 		if (ClientVersionBit() & EQ::versions::maskSoFAndEarlier)
 			sneaking = false;
@@ -1565,19 +1562,24 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 	Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
 
-	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM)
+	if (!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM) {
 		return;
+	}
 
 	//you can only use your own trainer, client enforces this, but why trust it
 	if (!RuleB(Character, AllowCrossClassTrainers)) {
 		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-		if (GetClass() != trains_class)
+		if (GetClass() != trains_class) {
+			safe_delete(outapp);
 			return;
+		}
 	}
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2) {
+		safe_delete(outapp);
 		return;
+	}
 
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
 //#pragma GCC push_options
@@ -1670,7 +1672,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// languages go here
 		if (gmskill->skill_id > 25)
 		{
-			std::cout << "Wrong Training Skill (languages)" << std::endl;
+			LogSkills("Wrong Training Skill (languages)");
 			DumpPacket(app);
 			return;
 		}
@@ -1685,7 +1687,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		// normal skills go here
 		if (gmskill->skill_id > EQ::skills::HIGHEST_SKILL)
 		{
-			std::cout << "Wrong Training Skill (abilities)" << std::endl;
+			LogSkills("Wrong Training Skill (abilities)");
 			DumpPacket(app);
 			return;
 		}
@@ -1704,11 +1706,12 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 
 		uint16 skilllevel = GetRawSkill(skill);
 
-		if(skilllevel == 0) {
+		if (skilllevel == 0) {
 			//this is a new skill..
 			uint16 t_level = SkillTrainLevel(skill, GetClass());
-			if (t_level == 0)
-			{
+
+			if (t_level == 0) {
+				LogSkills("Tried to train a new skill [{}] which is invalid for this race/class.", skill);
 				return;
 			}
 
@@ -1718,7 +1721,6 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillBrewing:
 			case EQ::skills::SkillMakePoison:
 			case EQ::skills::SkillTinkering:
-			case EQ::skills::SkillResearch:
 			case EQ::skills::SkillAlchemy:
 			case EQ::skills::SkillBaking:
 			case EQ::skills::SkillTailoring:
@@ -1728,6 +1730,14 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillPottery:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
 					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
+					return;
+				}
+				break;
+			case EQ::skills::SkillResearch:
+				if(skilllevel >= RuleI(Skills, MaxTrainResearch)) {
+					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 				break;
@@ -1738,6 +1748,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
 					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 			default:
@@ -1749,6 +1760,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			{
 				// Don't allow training over max skill level
 				MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+				SetSkill(skill, skilllevel);
 				return;
 			}
 
@@ -1759,6 +1771,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				{
 					// Restrict specialization training to follow the rules
 					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
+					SetSkill(skill, skilllevel);
 					return;
 				}
 			}

@@ -40,7 +40,6 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 }
 
 int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
-
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -60,15 +59,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 	bool Critical = false;
 	int64 base_value = value;
 	int chance = 0;
-
-	// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
-	if ((spell_id == SPELL_HARM_TOUCH || spell_id == SPELL_HARM_TOUCH2 || spell_id == SPELL_IMP_HARM_TOUCH ) && GetLevel() > 40)
-		value -= (GetLevel() - 40) * 20;
-
-	//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-	if (spell_id == SPELL_IMP_HARM_TOUCH && IsOfClientBot()) { //Improved Harm Touch
-		value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
-	}
+	int legacy_manaburn_cap = RuleI(Spells, LegacyManaburnCap);
 
 	chance = RuleI(Spells, BaseCritChance); //Wizard base critical chance is 2% (Does not scale with level)
 	chance += itembonuses.CriticalSpellChance + spellbonuses.CriticalSpellChance + aabonuses.CriticalSpellChance;
@@ -102,6 +93,10 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 
 		if (IsOfClientBot() && GetClass() == Class::Wizard) {
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
+		}
+
+		if (IsClient() && IsHarmTouchSpell(spell_id)) {
+			ratio += RuleI(Spells, HarmTouchCritRatio); //Default is zero
 		}
 
 		if (Critical) {
@@ -138,12 +133,30 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value) * ratio / 100;
 			}
 
+			// legacy manaburn can crit, but is still held to the same cap
+			if (RuleB(Spells, LegacyManaburn) && spell_id == SPELL_MANA_BURN) {
+				if (value < -legacy_manaburn_cap) {
+					value = -legacy_manaburn_cap;
+				}
+			}
+
 			entity_list.FilteredMessageCloseString(
 				this, true, 100, Chat::SpellCrit, FilterSpellCrits,
 				OTHER_CRIT_BLAST, nullptr, GetName(), itoa(-value));
 
-			if (IsClient())
+			if (IsClient()) {
 				MessageString(Chat::SpellCrit, YOU_CRIT_BLAST, itoa(-value));
+			}
+
+			// Need to scale HT damage differently after level 40! It no longer scales by the constant value in the spell file. It scales differently, instead of 10 more damage per level, it does 30 more damage per level. So we multiply the level minus 40 times 20 if they are over level 40.
+			if (IsHarmTouchSpell(spell_id) && GetLevel() > 40) {
+				value -= (GetLevel() - 40) * 20;
+			}
+
+			//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm Touch.
+			if (spell_id == SPELL_IMP_HARM_TOUCH && IsOfClientBot()) { //Improved Harm Touch
+				value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
+			}
 
 			return value;
 		}
@@ -181,6 +194,13 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
 	) {
 		value -= GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
+	}
+
+	// Apply Manaburn Damage Cap
+	if (RuleB(Spells, LegacyManaburn) && spell_id == SPELL_MANA_BURN) {
+		if (value < -legacy_manaburn_cap) {
+			value = -legacy_manaburn_cap;
+		}
 	}
 
 	return value;
@@ -592,6 +612,22 @@ int32 Mob::GetActSpellCost(uint16 spell_id, int32 cost)
 
 int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 {
+	// focuses don't affect discipline duration (Except War Cries)
+	if (
+		IsDiscipline(spell_id) && 
+		(
+			spell_id != SPELL_BATTLE_CRY &&
+			spell_id != SPELL_WAR_CRY &&
+			spell_id != SPELL_BATTLE_CRY_OF_DRAVEL &&
+			spell_id != SPELL_WAR_CRY_OF_DRAVEL &&
+			spell_id != SPELL_BATTLE_CRY_OF_THE_MASTRUQ &&
+			spell_id != SPELL_ANCIENT_CRY_OF_CHAOS &&
+			spell_id != SPELL_BLOODTHIRST
+		)
+	) {
+		return duration;
+	}
+
 	int increase = 100;
 	increase += GetFocusEffect(focusSpellDuration, spell_id);
 	int tic_inc = 0;
@@ -690,7 +726,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			return false;
 		} else if (m_pp.disciplines.values[r] == 0) {
 			m_pp.disciplines.values[r] = spell_id;
-			database.SaveCharacterDisc(CharacterID(), r, spell_id);
+			database.SaveCharacterDiscipline(CharacterID(), r, spell_id);
 			SendDisciplineUpdate();
 			Message(Chat::White, "You have learned a new discipline!");
 			return true;
@@ -789,7 +825,7 @@ void Client::TrainDiscBySpellID(int32 spell_id)
 	for(i = 0; i < MAX_PP_DISCIPLINES; i++) {
 		if(m_pp.disciplines.values[i] == 0) {
 			m_pp.disciplines.values[i] = spell_id;
-			database.SaveCharacterDisc(CharacterID(), i, spell_id);
+			database.SaveCharacterDiscipline(CharacterID(), i, spell_id);
 			SendDisciplineUpdate();
 			Message(Chat::Yellow, "You have learned a new combat ability!");
 			return;

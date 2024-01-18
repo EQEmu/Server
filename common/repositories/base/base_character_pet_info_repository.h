@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_PET_INFO_REPOSITORY_H
@@ -136,8 +136,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_pet_info_id
 			)
 		);
@@ -146,15 +147,15 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			return e;
 		}
@@ -298,15 +299,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			all_entries.push_back(e);
 		}
@@ -331,15 +332,15 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterPetInfo e{};
 
-			e.char_id  = static_cast<int32_t>(atoi(row[0]));
-			e.pet      = static_cast<int32_t>(atoi(row[1]));
+			e.char_id  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.pet      = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
 			e.petname  = row[2] ? row[2] : "";
-			e.petpower = static_cast<int32_t>(atoi(row[3]));
-			e.spell_id = static_cast<int32_t>(atoi(row[4]));
-			e.hp       = static_cast<int32_t>(atoi(row[5]));
-			e.mana     = static_cast<int32_t>(atoi(row[6]));
-			e.size     = strtof(row[7], nullptr);
-			e.taunting = static_cast<int8_t>(atoi(row[8]));
+			e.petpower = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.spell_id = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp       = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.mana     = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.size     = row[7] ? strtof(row[7], nullptr) : 0;
+			e.taunting = row[8] ? static_cast<int8_t>(atoi(row[8])) : 1;
 
 			all_entries.push_back(e);
 		}
@@ -398,6 +399,78 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterPetInfo &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.pet));
+		v.push_back("'" + Strings::Escape(e.petname) + "'");
+		v.push_back(std::to_string(e.petpower));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.taunting));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterPetInfo> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.pet));
+			v.push_back("'" + Strings::Escape(e.petname) + "'");
+			v.push_back(std::to_string(e.petpower));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.taunting));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_PET_INFO_REPOSITORY_H

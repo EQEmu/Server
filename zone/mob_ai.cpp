@@ -472,8 +472,8 @@ void Client::AI_Start(uint32 iMoveDelay) {
 		return;
 
 	pClientSideTarget = GetTarget() ? GetTarget()->GetID() : 0;
-	SendAppearancePacket(AT_Anim, ANIM_FREEZE);	// this freezes the client
-	SendAppearancePacket(AT_Linkdead, 1); // Sending LD packet so *LD* appears by the player name when charmed/feared -Kasai
+	SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);	// this freezes the client
+	SendAppearancePacket(AppearanceType::Linkdead, 1); // Sending LD packet so *LD* appears by the player name when charmed/feared -Kasai
 	SetAttackTimer();
 	SetFeigned(false);
 }
@@ -537,8 +537,8 @@ void Client::AI_Stop() {
 	safe_delete(app);
 
 	SetTarget(entity_list.GetMob(pClientSideTarget));
-	SendAppearancePacket(AT_Anim, GetAppearanceValue(GetAppearance()));
-	SendAppearancePacket(AT_Linkdead, 0); // Removing LD packet so *LD* no longer appears by the player name when charmed/feared -Kasai
+	SendAppearancePacket(AppearanceType::Animation, GetAppearanceValue(GetAppearance()));
+	SendAppearancePacket(AppearanceType::Linkdead, 0); // Removing LD packet so *LD* no longer appears by the player name when charmed/feared -Kasai
 	if (!auto_attack) {
 		attack_timer.Disable();
 		attack_dw_timer.Disable();
@@ -778,6 +778,7 @@ void Client::AI_Process()
 
 		if (GetTarget()->IsCorpse()) {
 			RemoveFromHateList(this);
+			RemoveFromRampageList(this);
 			return;
 		}
 
@@ -1089,6 +1090,7 @@ void Mob::AI_Process() {
 
 		if (target->IsCorpse()) {
 			RemoveFromHateList(this);
+			RemoveFromRampageList(this);
 			return;
 		}
 
@@ -1798,9 +1800,9 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 						parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					}
 
-					auto emote_id = GetEmoteID();
+					const uint32 emote_id = GetEmoteID();
 					if (emote_id) {
-						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid, attacker);
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emote_id, attacker);
 					}
 
 					std::string mob_name = GetCleanName();
@@ -1841,14 +1843,13 @@ void Mob::AI_Event_NoLongerEngaged() {
 		SetAssistAggro(false);
 		if (CastToNPC()->GetCombatEvent() && GetHP() > 0) {
 			if (entity_list.GetNPCByID(GetID())) {
-				auto emote_id = CastToNPC()->GetEmoteID();
-
 				if (parse->HasQuestSub(GetNPCTypeID(), EVENT_COMBAT)) {
 					parse->EventNPC(EVENT_COMBAT, CastToNPC(), nullptr, "0", 0);
 				}
 
+				const uint32 emote_id = CastToNPC()->GetEmoteID();
 				if (emote_id) {
-					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emoteid);
+					CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::LeaveCombat, emote_id);
 				}
 
 				m_combat_record.Stop();
@@ -2062,6 +2063,32 @@ void Mob::ClearRampage()
 	RampageArray.clear();
 }
 
+void Mob::RemoveFromRampageList(Mob* mob, bool remove_feigned)
+{
+	if (!mob) {
+		return;
+	}
+
+	if (
+		IsNPC() &&
+		GetSpecialAbility(SPECATK_RAMPAGE) &&
+		(
+			remove_feigned  ||
+			mob->IsNPC() ||
+			(
+				mob->IsClient() &&
+				!mob->CastToClient()->GetFeigned()
+			)
+		)
+	) {
+		for (int i = 0; i < RampageArray.size(); i++) {
+			if (mob->GetID() == RampageArray[i]) {
+				RampageArray[i] = 0;
+			}
+		}
+	}
+}
+
 bool Mob::Rampage(ExtraAttackOptions *opts)
 {
 	int index_hit = 0;
@@ -2070,23 +2097,37 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 	} else {
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
 	}
+
 	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
-	if (rampage_targets == 0) // if set to 0 or not set in the DB
+
+	if (rampage_targets == 0) { // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
-	if (rampage_targets > RuleI(Combat, MaxRampageTargets))
+	}
+
+	if (rampage_targets > RuleI(Combat, MaxRampageTargets)) {
 		rampage_targets = RuleI(Combat, MaxRampageTargets);
+	}
 
 	m_specialattacks = eSpecialAttacks::Rampage;
 	for (int i = 0; i < RampageArray.size(); i++) {
-		if (index_hit >= rampage_targets)
+		if (index_hit >= rampage_targets) {
 			break;
+		}
 		// range is important
 		Mob *m_target = entity_list.GetMob(RampageArray[i]);
 		if (m_target) {
-			if (m_target == GetTarget())
+			if (m_target == GetTarget()) {
 				continue;
+			}
+
+			if (m_target->IsCorpse()) {
+				LogAggroDetail("[{}] is on [{}]'s rampage list", m_target->GetCleanName(), GetCleanName());
+				RemoveFromRampageList(m_target, true);
+				continue;
+			}
+
 			if (DistanceSquaredNoZ(GetPosition(), m_target->GetPosition()) <= NPC_RAMPAGE_RANGE2) {
-				ProcessAttackRounds(m_target, opts);
+				ProcessAttackRounds(m_target, opts, true);
 				index_hit++;
 			}
 		}
@@ -2094,20 +2135,22 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 
 	if (RuleB(Combat, RampageHitsTarget)) {
 		if (index_hit < rampage_targets)
-			ProcessAttackRounds(GetTarget(), opts);
+			ProcessAttackRounds(GetTarget(), opts, true);
 	} else { // let's do correct behavior here, if they set above rule we can assume they want non-live like behavior
 		if (index_hit < rampage_targets) {
 			// so we go over in reverse order and skip range check
 			// lets do it this way to still support non-live-like >1 rampage targets
 			// likely live is just a fall through of the last valid mob
 			for (auto i = RampageArray.crbegin(); i != RampageArray.crend(); ++i) {
-				if (index_hit >= rampage_targets)
+				if (index_hit >= rampage_targets) {
 					break;
+				}
 				auto m_target = entity_list.GetMob(*i);
 				if (m_target) {
-					if (m_target == GetTarget())
+					if (m_target == GetTarget()) {
 						continue;
-					ProcessAttackRounds(m_target, opts);
+					}
+					ProcessAttackRounds(m_target, opts, true);
 					index_hit++;
 				}
 			}

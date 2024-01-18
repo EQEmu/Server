@@ -93,13 +93,13 @@ void Perl__say(const char* message)
 	// we currently default to these
 	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
-	opts.language     = 0;
+	opts.language     = Language::CommonTongue;
 	opts.message_type = Chat::NPCQuestSay;
 
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id)
+void Perl__say(const char* message, uint8 language_id)
 {
 	Journal::Options opts;
 	opts.speak_mode   = Journal::SpeakMode::Say;
@@ -110,7 +110,7 @@ void Perl__say(const char* message, int language_id)
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type)
+void Perl__say(const char* message, uint8 language_id, int message_type)
 {
 	Journal::Options opts;
 	opts.speak_mode   = Journal::SpeakMode::Say;
@@ -121,7 +121,7 @@ void Perl__say(const char* message, int language_id, int message_type)
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type, int speak_mode)
+void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode)
 {
 	Journal::Options opts;
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
@@ -132,7 +132,7 @@ void Perl__say(const char* message, int language_id, int message_type, int speak
 	quest_manager.say(message, opts);
 }
 
-void Perl__say(const char* message, int language_id, int message_type, int speak_mode, int journal_mode)
+void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode, int journal_mode)
 {
 	Journal::Options opts;
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
@@ -674,9 +674,9 @@ void Perl__addskill(int skill_id, int value)
 	quest_manager.addskill(skill_id, value);
 }
 
-void Perl__setlanguage(int skill_id, int value)
+void Perl__setlanguage(uint8 language_id, uint8 language_skill)
 {
-	quest_manager.setlanguage(skill_id, value);
+	quest_manager.setlanguage(language_id, language_skill);
 }
 
 void Perl__setskill(int skill_id, int value)
@@ -982,17 +982,17 @@ bool Perl__summonallplayercorpses(uint32 char_id, float dest_x, float dest_y, fl
 	return quest_manager.summonallplayercorpses(char_id, position);
 }
 
-int Perl__getplayercorpsecount(uint32 char_id)
+int64 Perl__getplayercorpsecount(uint32 character_id)
 {
-	return quest_manager.getplayercorpsecount(char_id);
+	return quest_manager.getplayercorpsecount(character_id);
 }
 
-int Perl__getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id)
+int64 Perl__getplayercorpsecountbyzoneid(uint32 character_id, uint32 zone_id)
 {
-	return quest_manager.getplayercorpsecountbyzoneid(char_id, zone_id);
+	return quest_manager.getplayercorpsecountbyzoneid(character_id, zone_id);
 }
 
-int Perl__getplayerburiedcorpsecount(uint32 char_id)
+int64 Perl__getplayerburiedcorpsecount(uint32 char_id)
 {
 	return quest_manager.getplayerburiedcorpsecount(char_id);
 }
@@ -4713,7 +4713,7 @@ std::string Perl__getfactionname(int faction_id)
 	return quest_manager.getfactionname(faction_id);
 }
 
-std::string Perl__getlanguagename(int language_id)
+std::string Perl__getlanguagename(uint8 language_id)
 {
 	return quest_manager.getlanguagename(language_id);
 }
@@ -5703,6 +5703,26 @@ int Perl__GetZoneMinimumLavaDamage(uint32 zone_id, int version)
 	return zone_store.GetZoneMinimumLavaDamage(zone_id, version);
 }
 
+uint8 Perl__GetZoneIdleWhenEmpty(uint32 zone_id)
+{
+	return zone_store.GetZoneIdleWhenEmpty(zone_id);
+}
+
+uint8 Perl__GetZoneIdleWhenEmpty(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneIdleWhenEmpty(zone_id, version);
+}
+
+uint32 Perl__GetZoneSecondsBeforeIdle(uint32 zone_id)
+{
+	return zone_store.GetZoneSecondsBeforeIdle(zone_id);
+}
+
+uint32 Perl__GetZoneSecondsBeforeIdle(uint32 zone_id, int version)
+{
+	return zone_store.GetZoneSecondsBeforeIdle(zone_id, version);
+}
+
 void Perl__send_channel_message(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
 {
 	quest_manager.SendChannelMessage(channel_number, guild_id, language_id, language_skill, message);
@@ -5810,6 +5830,8 @@ void perl_register_quest()
 	package.add("GetZoneGraveyardID", (float(*)(uint32, int))&Perl__GetZoneGraveyardID);
 	package.add("GetZoneHotzone", (uint8(*)(uint32))&Perl__GetZoneHotzone);
 	package.add("GetZoneHotzone", (uint8(*)(uint32, int))&Perl__GetZoneHotzone);
+	package.add("GetZoneIdleWhenEmpty", (uint8(*)(uint32))&Perl__GetZoneIdleWhenEmpty);
+	package.add("GetZoneIdleWhenEmpty", (uint8(*)(uint32, int))&Perl__GetZoneIdleWhenEmpty);
 	package.add("GetZoneInstanceType", (uint8(*)(uint32))&Perl__GetZoneInstanceType);
 	package.add("GetZoneInstanceType", (uint8(*)(uint32, int))&Perl__GetZoneInstanceType);
 	package.add("GetZoneID", &Perl__GetZoneID);
@@ -5890,6 +5912,8 @@ void perl_register_quest()
 	package.add("GetZoneSafeY", (float(*)(uint32, int))&Perl__GetZoneSafeY);
 	package.add("GetZoneSafeZ", (float(*)(uint32))&Perl__GetZoneSafeZ);
 	package.add("GetZoneSafeZ", (float(*)(uint32, int))&Perl__GetZoneSafeZ);
+	package.add("GetZoneSecondsBeforeIdle", (uint32(*)(uint32))&Perl__GetZoneSecondsBeforeIdle);
+	package.add("GetZoneSecondsBeforeIdle", (uint32(*)(uint32, int))&Perl__GetZoneSecondsBeforeIdle);
 	package.add("GetZoneShutdownDelay", (uint64(*)(uint32))&Perl__GetZoneShutdownDelay);
 	package.add("GetZoneShutdownDelay", (uint64(*)(uint32, int))&Perl__GetZoneShutdownDelay);
 	package.add("GetZoneSky", (uint8(*)(uint32))&Perl__GetZoneSky);
@@ -6532,10 +6556,10 @@ void perl_register_quest()
 	package.add("safemove", &Perl__safemove);
 	package.add("save", &Perl__save);
 	package.add("say", (void(*)(const char*))&Perl__say);
-	package.add("say", (void(*)(const char*, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int, int))&Perl__say);
-	package.add("say", (void(*)(const char*, int, int, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int, int))&Perl__say);
+	package.add("say", (void(*)(const char*, uint8, int, int, int))&Perl__say);
 	package.add("saylink", (std::string(*)(const char*))&Perl__saylink);
 	package.add("saylink", (std::string(*)(const char*, bool))&Perl__saylink);
 	package.add("saylink", (std::string(*)(const char*, bool, const char*))&Perl__saylink);

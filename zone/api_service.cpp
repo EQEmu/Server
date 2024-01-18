@@ -220,8 +220,8 @@ Json::Value ApiGetNpcListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["npc_spells_effects_id"]         = npc->GetNPCSpellsEffectsID();
 		row["npc_spells_id"]                 = npc->GetNPCSpellsID();
 		row["npchp_regen"]                   = npc->GetNPCHPRegen();
-		row["num_merc_types"]                = npc->GetNumMercTypes();
-		row["num_mercs"]                     = npc->GetNumMercs();
+		row["num_merc_types"]                = npc->GetNumMercenaryTypes();
+		row["num_mercs"]                     = npc->GetNumberOfMercenaries();
 		row["number_of_attacks"]             = npc->GetNumberOfAttacks();
 		row["pet_spell_id"]                  = npc->GetPetSpellID();
 		row["platinum"]                      = npc->GetPlatinum();
@@ -734,11 +734,11 @@ Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connectio
 		row["ls_account_id"]                           = client->LSAccountID();
 		row["max_endurance"]                           = client->GetMaxEndurance();
 		row["max_x_tars"]                              = client->GetMaxXTargets();
-		row["merc_id"]                                 = client->GetMercID();
+		row["merc_id"]                                 = client->GetMercenaryID();
 		row["merc_only_or_no_group"]                   = client->MercOnlyOrNoGroup();
 		row["merc_slot"]                               = client->GetMercSlot();
 		row["next_inv_snapshot_time"]                  = client->GetNextInvSnapshotTime();
-		row["num_mercs"]                               = client->GetNumMercs();
+		row["num_mercs"]                               = client->GetNumberOfMercenaries();
 		row["pending_adventure_create"]                = client->GetPendingAdventureCreate();
 		row["pending_adventure_door_click"]            = client->GetPendingAdventureDoorClick();
 		row["pending_adventure_leave"]                 = client->GetPendingAdventureLeave();

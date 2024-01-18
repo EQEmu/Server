@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 #include <cereal/cereal.hpp>
-
 class BasePlayerEventLogsRepository {
 public:
 	struct PlayerEventLogs {
@@ -185,16 +184,16 @@ public:
 		if (results.RowCount() == 1) {
 			PlayerEventLogs e{};
 
-			e.id              = strtoll(row[0], nullptr, 10);
-			e.account_id      = strtoll(row[1], nullptr, 10);
-			e.character_id    = strtoll(row[2], nullptr, 10);
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
-			e.x               = strtof(row[5], nullptr);
-			e.y               = strtof(row[6], nullptr);
-			e.z               = strtof(row[7], nullptr);
-			e.heading         = strtof(row[8], nullptr);
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
@@ -352,16 +351,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id              = strtoll(row[0], nullptr, 10);
-			e.account_id      = strtoll(row[1], nullptr, 10);
-			e.character_id    = strtoll(row[2], nullptr, 10);
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
-			e.x               = strtof(row[5], nullptr);
-			e.y               = strtof(row[6], nullptr);
-			e.z               = strtof(row[7], nullptr);
-			e.heading         = strtof(row[8], nullptr);
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);
@@ -389,16 +388,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			PlayerEventLogs e{};
 
-			e.id              = strtoll(row[0], nullptr, 10);
-			e.account_id      = strtoll(row[1], nullptr, 10);
-			e.character_id    = strtoll(row[2], nullptr, 10);
-			e.zone_id         = static_cast<int32_t>(atoi(row[3]));
-			e.instance_id     = static_cast<int32_t>(atoi(row[4]));
-			e.x               = strtof(row[5], nullptr);
-			e.y               = strtof(row[6], nullptr);
-			e.z               = strtof(row[7], nullptr);
-			e.heading         = strtof(row[8], nullptr);
-			e.event_type_id   = static_cast<int32_t>(atoi(row[9]));
+			e.id              = row[0] ? strtoll(row[0], nullptr, 10) : 0;
+			e.account_id      = row[1] ? strtoll(row[1], nullptr, 10) : 0;
+			e.character_id    = row[2] ? strtoll(row[2], nullptr, 10) : 0;
+			e.zone_id         = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.instance_id     = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.x               = row[5] ? strtof(row[5], nullptr) : 0;
+			e.y               = row[6] ? strtof(row[6], nullptr) : 0;
+			e.z               = row[7] ? strtof(row[7], nullptr) : 0;
+			e.heading         = row[8] ? strtof(row[8], nullptr) : 0;
+			e.event_type_id   = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
 			e.event_type_name = row[10] ? row[10] : "";
 			e.event_data      = row[11] ? row[11] : "";
 			e.created_at      = strtoll(row[12] ? row[12] : "-1", nullptr, 10);

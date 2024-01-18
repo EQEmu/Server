@@ -61,7 +61,7 @@ typedef enum {
 	EVENT_DISCOVER_ITEM,
 	EVENT_DISCONNECT,
 	EVENT_CONNECT,
-	EVENT_ITEM_TICK,
+	EVENT_ITEM_TICK, // Unused, keeping so event IDs don't get out of wack
 	EVENT_DUEL_WIN,
 	EVENT_DUEL_LOSE,
 	EVENT_ENCOUNTER_LOAD,

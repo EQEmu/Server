@@ -1419,7 +1419,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 		if (other->CheckHitChance(this, hit)) {
 			if (IsNPC() && other->IsClient() && other->animation > 0 && GetLevel() >= 5 && BehindMob(other, GetX(), GetY())) {
 				// ~ 12% chance
-				if (zone->random.Roll(12)) {
+				if (zone->random.Roll(RuleI(Combat, StunChance))) {
 					int stun_resist2 = other->spellbonuses.FrontalStunResist + other->itembonuses.FrontalStunResist + other->aabonuses.FrontalStunResist;
 					int stun_resist = other->spellbonuses.StunResist + other->itembonuses.StunResist + other->aabonuses.StunResist;
 					if (zone->random.Roll(stun_resist2)) {
@@ -1463,9 +1463,9 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 //SYNC WITH: tune.cpp, mob.h TuneClientAttack
 bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
-	if (!other) {
+	if (!other || (other && other->IsCorpse())) {
 		SetTarget(nullptr);
-		LogError("A null Mob object was passed for evaluation!");
+		LogError("A null or invalid Mob object was passed for evaluation!");
 		return false;
 	}
 
@@ -1818,9 +1818,9 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 				parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
 			}
 
-			auto emote_id = killerMob->GetEmoteID();
+			const uint32 emote_id = killerMob->GetEmoteID();
 			if (emote_id) {
-				killerMob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid, this);
+				killerMob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emote_id, this);
 			}
 
 			killerMob->TrySpellOnKill(killed_level, spell);
@@ -2119,6 +2119,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		}
 
 		RemoveFromHateList(other);
+		RemoveFromRampageList(other);
 		LogCombat("I am not allowed to attack [{}]", other->GetName());
 		return false;
 	}
@@ -2280,49 +2281,51 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
 			//pets do half damage to clients in pvp
 			my_hit.damage_done /= 2;
-			if (my_hit.damage_done < 1)
+			if (my_hit.damage_done < 1) {
 				my_hit.damage_done = 1;
+			}
 		}
-	}
-	else {
+	} else {
 		my_hit.damage_done = DMG_INVULNERABLE;
 	}
 
 	if (GetHP() > 0 && !other->HasDied()) {
 		other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks); // Not avoidable client already had thier chance to Avoid
+	} else {
+		return false;
 	}
-	else
-		return false;
 
-	if (HasDied()) //killed by damage shield ect
+	if (HasDied()) { //killed by damage shield ect
 		return false;
+	}
 
 	MeleeLifeTap(my_hit.damage_done);
 
 	CommonBreakInvisibleFromCombat();
 
 	//I doubt this works...
-	if (!GetTarget())
+	if (!GetTarget()) {
 		return true; //We killed them
-
-	if (!bRiposte && !other->HasDied()) {
-		TryWeaponProc(nullptr, weapon, other, Hand);	//no weapon
-
-		if (!other->HasDied())
-			TrySpellProc(nullptr, weapon, other, Hand);
-
-		if (my_hit.damage_done > 0 && HasSkillProcSuccess() && !other->HasDied())
-			TrySkillProc(other, my_hit.skill, 0, true, Hand);
 	}
 
-	if (GetHP() > 0 && !other->HasDied())
+	bool has_hit = my_hit.damage_done > 0;
+	if (has_hit && !bRiposte && !other->HasDied()) {
+		TryWeaponProc(nullptr, weapon, other, Hand);
+
+		if (!other->HasDied()) {
+			TrySpellProc(nullptr, weapon, other, Hand);
+		}
+
+		if (HasSkillProcSuccess() && !other->HasDied()) {
+			TrySkillProc(other, my_hit.skill, 0, true, Hand);
+		}
+	}
+
+	if (GetHP() > 0 && !other->HasDied()) {
 		TriggerDefensiveProcs(other, Hand, true, my_hit.damage_done);
+	}
 
-	if (my_hit.damage_done > 0)
-		return true;
-
-	else
-		return false;
+	return has_hit;
 }
 
 void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
@@ -2722,7 +2725,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
-		uint32 emoteid = GetEmoteID();
+		const uint32 emote_id = GetEmoteID();
 		corpse = new Corpse(this, &itemlist, GetNPCTypeID(), &NPCTypedata,
 			level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS)
 			: RuleI(NPC, MinorNPCCorpseDecayTimeMS));
@@ -2737,8 +2740,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		SetID(0);
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 
-		if (killer != 0 && emoteid != 0)
-			corpse->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::AfterDeath, emoteid, killer);
+		if (killer != 0 && emote_id)
+			corpse->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::AfterDeath, emote_id, killer);
 		if (killer != 0 && killer->IsClient()) {
 			corpse->AllowPlayerLoot(killer, 0);
 			if (killer->IsGrouped()) {
@@ -2820,9 +2823,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	// Parse quests even if we're killed by an NPC
 	if (oos) {
 		if (IsNPC()) {
-			auto emote_id = GetEmoteID();
+			const uint32 emote_id = GetEmoteID();
 			if (emote_id) {
-				DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emoteid, killer_mob);
+				DoNPCEmote(EQ::constants::EmoteEventTypes::OnDeath, emote_id, killer_mob);
 			}
 		}
 
@@ -2831,10 +2834,11 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				parse->EventNPC(EVENT_NPC_SLAY, oos->CastToNPC(), this, "", 0);
 			}
 
-			auto emote_id = oos->GetEmoteID();
+			const uint32 emote_id = oos->GetEmoteID();
 			if (emote_id) {
 				oos->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledNPC, emote_id, this);
 			}
+
 			if (killer_mob) {
 				killer_mob->TrySpellOnKill(killed_level, spell);
 			}
@@ -3032,12 +3036,12 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 
 	// if other is a merc, add the merc client to the hate list
 	if (other->IsMerc()) {
-		if (other->CastToMerc()->GetMercOwner() && other->CastToMerc()->GetMercOwner()->CastToClient()->GetFeigned()) {
-			AddFeignMemory(other->CastToMerc()->GetMercOwner()->CastToClient());
+		if (other->CastToMerc()->GetMercenaryOwner() && other->CastToMerc()->GetMercenaryOwner()->CastToClient()->GetFeigned()) {
+			AddFeignMemory(other->CastToMerc()->GetMercenaryOwner()->CastToClient());
 		}
 		else {
-			if (!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercOwner()))
-				hate_list.AddEntToHateList(other->CastToMerc()->GetMercOwner(), 0, 0, false, true);
+			if (!hate_list.IsEntOnHateList(other->CastToMerc()->GetMercenaryOwner()))
+				hate_list.AddEntToHateList(other->CastToMerc()->GetMercenaryOwner(), 0, 0, false, true);
 			// if mercs are reworked to include adding 'this' to owner's xtarget list, this should reflect bots code above
 		}
 	} //MERC
@@ -3214,57 +3218,73 @@ uint8 Mob::GetWeaponDamageBonus(const EQ::ItemData *weapon, bool offhand)
 	// We assume that the level check is done before calling this function and sinister strikes is checked before
 	// calling for offhand DB
 	auto level = GetLevel();
-	if (!weapon)
+
+	if (!weapon) {
 		return 1 + ((level - 28) / 3); // how does weaponless scale?
+	}
 
 	auto delay = weapon->Delay;
 	if (weapon->IsType1HWeapon() || weapon->ItemType == EQ::item::ItemTypeMartial) {
 		// we assume sinister strikes is checked before calling here
 		if (!offhand) {
-			if (delay <= 39)
+			if (delay <= 39) {
 				return 1 + ((level - 28) / 3);
-			else if (delay < 43)
+			} else if (delay < 43) {
 				return 2 + ((level - 28) / 3) + ((delay - 40) / 3);
-			else if (delay < 45)
+			} else if (delay < 45) {
 				return 3 + ((level - 28) / 3) + ((delay - 40) / 3);
-			else if (delay >= 45)
+			} else if (delay >= 45) {
 				return 4 + ((level - 28) / 3) + ((delay - 40) / 3);
+			}
+		} else {
+			if (RuleB(Skills, UseAltSinisterStrikeFormula)) {
+				if (delay <= 19) {
+					return 5 + ((level - 40) / 3) * (delay / 30);
+				} else if (delay <= 23) {
+					return 6 + ((level - 40) / 3) * (delay / 30);
+				} else if (delay >= 24) {
+					return 7 + ((level - 40) / 3) * (delay / 30);
+				}
+			} else {
+				return 1 + ((level - 40) / 3) * (delay / 30); // YOOO shit's useless waste of AAs
+			}
 		}
-		else {
-			return 1 + ((level - 40) / 3) * (delay / 30); // YOOO shit's useless waste of AAs
-		}
-	}
-	else {
+	} else {
 		// 2h damage bonus
 		int64 damage_bonus = 1 + (level - 28) / 3;
-		if (delay <= 27)
+
+		if (delay <= 27) {
 			return damage_bonus + 1;
+		}
+
 		// Client isn't reflecting what the dev quoted, this matches better
 		if (level > 29) {
 			int level_bonus = (level - 30) / 5 + 1;
 			if (level > 50) {
 				level_bonus++;
 				int level_bonus2 = level - 50;
-				if (level > 67)
+				if (level > 67) {
 					level_bonus2 += 5;
-				else if (level > 59)
+				} else if (level > 59) {
 					level_bonus2 += 4;
-				else if (level > 58)
+				} else if (level > 58) {
 					level_bonus2 += 3;
-				else if (level > 56)
+				} else if (level > 56) {
 					level_bonus2 += 2;
-				else if (level > 54)
+				} else if (level > 54) {
 					level_bonus2++;
+				}
 				level_bonus += level_bonus2 * delay / 40;
 			}
 			damage_bonus += level_bonus;
 		}
 		if (delay >= 40) {
 			int delay_bonus = (delay - 40) / 3 + 1;
-			if (delay >= 45)
+			if (delay >= 45) {
 				delay_bonus += 2;
-			else if (delay >= 43)
+			} else if (delay >= 43) {
 				delay_bonus++;
+			}
 			damage_bonus += delay_bonus;
 		}
 		return damage_bonus;
@@ -3701,31 +3721,82 @@ bool Mob::HasRangedProcs() const
 
 bool Client::CheckDoubleAttack()
 {
-	int chance = 0;
-	int skill = GetSkill(EQ::skills::SkillDoubleAttack);
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
-	int bonusGiveDA = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
-	if (skill > 0)
-		chance = skill + GetLevel();
-	else if (!bonusGiveDA)
+	uint32 bonus_give_double_attack = aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack;
+
+	if (!HasSkill(EQ::skills::SkillDoubleAttack) && !bonus_give_double_attack) {
 		return false;
+	}
 
-	if (bonusGiveDA)
-		chance += bonusGiveDA / 100.0f * 500; // convert to skill value
-	int per_inc = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
-	if (per_inc)
-		chance += chance * per_inc / 100;
+	float chance = 0.0f;
+	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
 
-	return zone->random.Int(1, 500) <= chance;
+	int32 bonus_double_attack = 0;
+	if ((GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (!HasTwoHanderEquipped())) {
+		LogCombatDetail("Knight class without a 2 hand weapon equipped = No DA Bonus!");
+	} else {
+		bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+	}
+
+	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
+	if (skill) {
+		chance = (float(skill + GetLevel()) * (float(100.0f + bonus_double_attack + bonus_give_double_attack) / 100.0f)) / 500.0f;
+	} else {
+		chance = (float(bonus_give_double_attack + bonus_double_attack) / 100.0f);
+	}
+
+	LogCombatDetail(
+		"skill [{}] bonus_give_double_attack [{}] bonus_double_attack [{}] chance [{}]",
+		skill,
+		bonus_give_double_attack,
+		bonus_double_attack,
+		chance
+	);
+
+	return zone->random.Roll(chance);
 }
 
 // Admittedly these parses were short, but this check worked for 3 toons across multiple levels
 // with varying triple attack skill (1-3% error at least)
 bool Client::CheckTripleAttack()
 {
-	int chance = GetSkill(EQ::skills::SkillTripleAttack);
-	if (chance < 1)
+	int chance;
+
+	if (RuleB(Combat, ClassicTripleAttack)) {
+		if (
+			IsClient() &&
+			GetLevel() >= 60 &&
+			(
+				GetClass() == Class::Warrior ||
+				GetClass() == Class::Ranger ||
+				GetClass() == Class::Monk ||
+				GetClass() == Class::Berserker
+			)
+		) {
+			switch (GetClass()) {
+				case Class::Warrior:
+					chance = RuleI(Combat, ClassicTripleAttackChanceWarrior);
+					break;
+				case Class::Ranger:
+					chance = RuleI(Combat, ClassicTripleAttackChanceRanger);
+					break;
+				case Class::Monk:
+					chance = RuleI(Combat, ClassicTripleAttackChanceMonk);
+					break;
+				case Class::Berserker:
+					chance = RuleI(Combat, ClassicTripleAttackChanceBerserker);
+					break;
+				default:
+					break;
+			}
+		}
+	} else {
+		chance = GetSkill(EQ::skills::SkillTripleAttack);
+	}
+
+	if (chance < 1) {
 		return false;
+	}
 
 	int inc = aabonuses.TripleAttackChance + spellbonuses.TripleAttackChance + itembonuses.TripleAttackChance;
 	chance = static_cast<int>(chance * (1 + inc / 100.0f));
@@ -3810,6 +3881,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 	if (damage > 0) {
 		//if there is some damage being done and theres an attacker involved
+		int previous_hp_ratio = GetHPRatio();
+
 		if (attacker) {
 			// if spell is lifetap add hp to the caster
 			if (IsValidSpell(spell_id) && IsLifetapSpell(spell_id)) {
@@ -3914,13 +3987,13 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
 
-		if (IsClient() && CastToClient()->sneaking) {
-			CastToClient()->sneaking = false;
-			SendAppearancePacket(AT_Sneak, 0);
+		if (IsClient()) {
+			CommonBreakInvisible();
 		}
+
 		if (attacker && attacker->IsClient() && attacker->CastToClient()->sneaking) {
 			attacker->CastToClient()->sneaking = false;
-			attacker->SendAppearancePacket(AT_Sneak, 0);
+			attacker->SendAppearancePacket(AppearanceType::Sneak, 0);
 		}
 
 		//final damage has been determined.
@@ -4035,8 +4108,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			}
 		}
 		else {
-			if (GetHPRatio() < 16)
+			if (GetHPRatio() < 16 && previous_hp_ratio >= 16) {
 				TryDeathSave();
+			}
 		}
 
 		TryTriggerOnCastRequirement();
@@ -4184,8 +4258,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		//send an HP update if we are hurt
-		if (GetHP() < GetMaxHP())
+		if (GetHP() < GetMaxHP()) {
 			SendHPUpdate(); // the OP_Damage actually updates the client in these cases, so we skip the HP update for them
+		}
 	}	//end `if damage was done`
 
 		//send damage packet...
@@ -4193,32 +4268,48 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));
 		CombatDamage_Struct* a = (CombatDamage_Struct*)outapp->pBuffer;
 		a->target = GetID();
-		if (attacker == nullptr)
+
+		if (!attacker) {
 			a->source = 0;
-		else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe())
+		} else if (attacker->IsClient() && attacker->CastToClient()->GMHideMe()) {
 			a->source = 0;
-		else
+		} else {
 			a->source = attacker->GetID();
+		}
+
 		a->type = (EQ::ValueWithin(skill_used, EQ::skills::Skill1HBlunt, EQ::skills::Skill2HPiercing)) ?
 				SkillDamageTypes[skill_used] : SkillDamageTypes[EQ::skills::SkillHandtoHand]; // was 0x1c
 		a->damage = damage;
 		a->spellid = spell_id;
-		if (special == eSpecialAttacks::AERampage)
+
+		if (special == eSpecialAttacks::AERampage) {
 			a->special = 1;
-		else if (special == eSpecialAttacks::Rampage)
+		} else if (special == eSpecialAttacks::Rampage) {
 			a->special = 2;
-		else
+		} else {
 			a->special = 0;
+		}
+
 		a->hit_heading = attacker ? attacker->GetHeading() : 0.0f;
 		if (RuleB(Combat, MeleePush) && damage > 0 && !IsRooted() &&
 			(IsClient() || zone->random.Roll(RuleI(Combat, MeleePushChance)))) {
 			a->force = EQ::skills::GetSkillMeleePushForce(skill_used);
+
+			if (RuleR(Combat, MeleePushForceClientPercent) && IsClient()) {
+				a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
+			}
+
+			if (RuleR(Combat, MeleePushForcePetPercent) && IsPet()) {
+				a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
+			}
+
 			if (IsNPC()) {
-				if (attacker && attacker->IsNPC()) {
+				if (!RuleB(Combat, NPCtoNPCPush) && attacker && attacker->IsNPC()) {
 					a->force = 0.0f; // 2013 change that disabled NPC vs NPC push
 				} else {
 					a->force *= 0.10f; // force against NPCs is divided by 10 I guess? ex bash is 0.3, parsed 0.03 against an NPC
 				}
+
 				if (ForcedMovement == 0 && a->force != 0.0f && position_update_melee_push_timer.Check()) {
 					m_Delta.x += a->force * g_Math.FastSin(a->hit_heading);
 					m_Delta.y += a->force * g_Math.FastCos(a->hit_heading);
@@ -5188,7 +5279,6 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 {
 	float hp_limit = 10.0f;
-
 	auto fb_hp_limit = std::max(
 		{
 			aabonuses.FinishingBlowLvl[SBIndex::FINISHING_BLOW_LEVEL_HP_RATIO],
@@ -5200,28 +5290,36 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 	if (fb_hp_limit) {
 		hp_limit = fb_hp_limit/10.0f;
 	}
-	if (defender && !defender->IsClient() && defender->GetHPRatio() < hp_limit) {
 
-		uint32 FB_Dmg =
+	if (defender && !defender->IsClient() && defender->GetHPRatio() < hp_limit) {
+		uint32 finishing_blow_damage =
 				   aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_DMG];
 
-		uint32 FB_Level = 0;
-		FB_Level = aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
-		if (FB_Level < spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX])
-			FB_Level = spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
-		else if (FB_Level < itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX])
-			FB_Level = itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		uint32 finishing_blow_level = 0;
+		finishing_blow_level = aabonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		if (finishing_blow_level < spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]) {
+			finishing_blow_level = spellbonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		} else if (finishing_blow_level < itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX]) {
+			finishing_blow_level = itembonuses.FinishingBlowLvl[SBIndex::FINISHING_EFFECT_LEVEL_MAX];
+		}
 
 		// modern AA description says rank 1 (500) is 50% chance
-		int ProcChance = (
+		int proc_chance = (
 			aabonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
 			itembonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE] +
 			spellbonuses.FinishingBlow[SBIndex::FINISHING_EFFECT_PROC_CHANCE]
 		);
 
-		if (FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) &&
-			(ProcChance >= zone->random.Int(1, 1000))) {
-
+		if (
+			(
+				(RuleB(Combat, FinishingBlowOnlyWhenFleeing) && !defender->currently_fleeing) ||
+				!RuleB(Combat, FinishingBlowOnlyWhenFleeing)
+			) &&
+			finishing_blow_level &&
+			finishing_blow_damage &&
+			defender->GetLevel() <= finishing_blow_level &&
+			proc_chance >= zone->random.Int(1, 1000)
+		) {
 			/* Finishing Blow Critical Message */
 			entity_list.FilteredMessageCloseString(
 				this, /* Sender */
@@ -5234,7 +5332,7 @@ bool Mob::TryFinishingBlow(Mob *defender, int64 &damage)
 				GetCleanName() /* Message1 */
 			);
 
-			damage = FB_Dmg;
+			damage = finishing_blow_damage;
 			return true;
 		}
 	}
@@ -5298,24 +5396,29 @@ void Mob::DoRiposte(Mob *defender)
 
 void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, ExtraAttackOptions *opts)
 {
-	int64 dmgbonusmod = 0;
+	int64 damage_bonus_mod = 0;
+	damage_bonus_mod += GetMeleeDamageMod_SE(skill);
+	damage_bonus_mod += GetMeleeDmgPositionMod(defender);
 
-	dmgbonusmod += GetMeleeDamageMod_SE(skill);
-	dmgbonusmod += GetMeleeDmgPositionMod(defender);
-	if (opts)
-		dmgbonusmod += opts->melee_damage_bonus_flat;
+	if (opts) {
+		damage_bonus_mod += opts->melee_damage_bonus_flat;
+	}
 
 	if (defender) {
 		if (defender->IsOfClientBotMerc() && defender->GetClass() == Class::Warrior) {
-			dmgbonusmod -= 5;
+			damage_bonus_mod -= 5;
 		}
-		// 168 defensive
-		dmgbonusmod += (defender->spellbonuses.MeleeMitigationEffect +
-		                defender->itembonuses.MeleeMitigationEffect +
-		                defender->aabonuses.MeleeMitigationEffect);
+
+		if (defender->IsOfClientBotMerc()) {
+			damage_bonus_mod += (
+				defender->spellbonuses.MeleeMitigationEffect +
+				defender->itembonuses.MeleeMitigationEffect +
+				defender->aabonuses.MeleeMitigationEffect
+			);
+		}
 	}
 
-	damage += damage * dmgbonusmod / 100;
+	damage += damage * damage_bonus_mod / 100;
 }
 
 bool Mob::HasDied() {
@@ -6237,8 +6340,9 @@ void NPC::SetAttackTimer()
 
 void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 {
-	if (!target)
+	if (!target || (target && target->IsCorpse())) {
 		return;
+	}
 
 	Attack(target, hand, false, false, IsFromSpell);
 
@@ -6292,15 +6396,21 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 
 			// you can only triple from the main hand
 			if (hand == EQ::invslot::slotPrimary && CanThisClassTripleAttack()) {
-				CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+				if (!RuleB(Combat, ClassicTripleAttack)) {
+					CheckIncreaseSkill(EQ::skills::SkillTripleAttack, target, -10);
+				}
+
 				if (CheckTripleAttack()) {
 					Attack(target, hand, false, false, IsFromSpell);
-					auto flurrychance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
+					int flurry_chance = aabonuses.FlurryChance + spellbonuses.FlurryChance +
 							    itembonuses.FlurryChance;
-					if (flurrychance && zone->random.Roll(flurrychance)) {
+
+					if (flurry_chance && zone->random.Roll(flurry_chance)) {
 						Attack(target, hand, false, false, IsFromSpell);
-						if (zone->random.Roll(flurrychance))
+
+						if (zone->random.Roll(flurry_chance)) {
 							Attack(target, hand, false, false, IsFromSpell);
+						}
 						MessageString(Chat::NPCFlurry, YOU_FLURRY);
 					}
 				}
@@ -6337,10 +6447,11 @@ bool Client::CheckDualWield()
 	return zone->random.Int(1, 375) <= chance;
 }
 
-void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool rampage)
 {
-	if (!target)
+	if (!target) {
 		return;
+	}
 
 	if (RuleB(Combat, UseLiveCombatRounds)) {
 		// A "quad" on live really is just a successful dual wield where both double attack
@@ -6350,8 +6461,9 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 			if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 				int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
-				if (chance && zone->random.Roll(chance))
+				if (chance && zone->random.Roll(chance)) {
 					Flurry(nullptr);
+				}
 			}
 		}
 		return;
@@ -6359,16 +6471,14 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 
 	if (IsNPC()) {
 		int16 n_atk = CastToNPC()->GetNumberOfAttacks();
-		if (n_atk <= 1) {
+		if (n_atk <= 1 || rampage) {
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
-		}
-		else {
+		} else {
 			for (int i = 0; i < n_atk; ++i) {
 				Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 			}
 		}
-	}
-	else {
+	} else {
 		Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 	}
 
@@ -6394,10 +6504,12 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 	}
 }
 
-void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
+void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool rampage)
 {
-	if (!target)
+	if (!target) {
 		return;
+	}
+
 	// Mobs will only dual wield w/ the flag or have a secondary weapon
 	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
 	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
@@ -6405,13 +6517,14 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		GetEquippedItemFromTextureSlot(EQ::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);
-			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack()) {
+			if (CanThisClassDoubleAttack() && GetLevel() > 35 && CheckDoubleAttack() && !rampage) {
 				Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);
 
 				if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 					int chance = spellbonuses.PC_Pet_Flurry + itembonuses.PC_Pet_Flurry + aabonuses.PC_Pet_Flurry;
-					if (chance && zone->random.Roll(chance))
+					if (chance && zone->random.Roll(chance)) {
 						Flurry(nullptr);
+					}
 				}
 			}
 		}

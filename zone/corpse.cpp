@@ -927,7 +927,7 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 
 		UpdateEquipmentLight();
 		if (UpdateActiveLight())
-			SendAppearancePacket(AT_Light, GetActiveLightType());
+			SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 
 		safe_delete(sitem);
 		return;
@@ -2058,8 +2058,10 @@ bool Corpse::MovePlayerCorpseToGraveyard()
 	{
 		Save();
 
+		glm::vec4 graveyard_point = zone->GetGraveyardPoint();
+
 		uint16_t instance_id = (zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0;
-		database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(), instance_id, zone->GetGraveyardPoint());
+		database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(), instance_id, graveyard_point);
 		SendWorldSpawnPlayerCorpseInZone(zone->graveyard_zoneid());
 
 		corpse_db_id = 0;

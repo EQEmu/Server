@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_DYNAMIC_ZONE_TEMPLATES_REPOSITORY_H
@@ -188,8 +188,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				dynamic_zone_templates_id
 			)
 		);
@@ -198,28 +199,28 @@ public:
 		if (results.RowCount() == 1) {
 			DynamicZoneTemplates e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
-			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone_id          = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zone_version     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = static_cast<int32_t>(atoi(row[4]));
-			e.max_players      = static_cast<int32_t>(atoi(row[5]));
-			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
-			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
-			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
-			e.compass_x        = strtof(row[9], nullptr);
-			e.compass_y        = strtof(row[10], nullptr);
-			e.compass_z        = strtof(row[11], nullptr);
-			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
-			e.return_x         = strtof(row[13], nullptr);
-			e.return_y         = strtof(row[14], nullptr);
-			e.return_z         = strtof(row[15], nullptr);
-			e.return_h         = strtof(row[16], nullptr);
-			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
-			e.zone_in_x        = strtof(row[18], nullptr);
-			e.zone_in_y        = strtof(row[19], nullptr);
-			e.zone_in_z        = strtof(row[20], nullptr);
-			e.zone_in_h        = strtof(row[21], nullptr);
+			e.min_players      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_players      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.duration_seconds = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.dz_switch_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.compass_zone_id  = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_x        = row[9] ? strtof(row[9], nullptr) : 0;
+			e.compass_y        = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_z        = row[11] ? strtof(row[11], nullptr) : 0;
+			e.return_zone_id   = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.return_x         = row[13] ? strtof(row[13], nullptr) : 0;
+			e.return_y         = row[14] ? strtof(row[14], nullptr) : 0;
+			e.return_z         = row[15] ? strtof(row[15], nullptr) : 0;
+			e.return_h         = row[16] ? strtof(row[16], nullptr) : 0;
+			e.override_zone_in = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.zone_in_x        = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y        = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z        = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_h        = row[21] ? strtof(row[21], nullptr) : 0;
 
 			return e;
 		}
@@ -401,28 +402,28 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneTemplates e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
-			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone_id          = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zone_version     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = static_cast<int32_t>(atoi(row[4]));
-			e.max_players      = static_cast<int32_t>(atoi(row[5]));
-			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
-			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
-			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
-			e.compass_x        = strtof(row[9], nullptr);
-			e.compass_y        = strtof(row[10], nullptr);
-			e.compass_z        = strtof(row[11], nullptr);
-			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
-			e.return_x         = strtof(row[13], nullptr);
-			e.return_y         = strtof(row[14], nullptr);
-			e.return_z         = strtof(row[15], nullptr);
-			e.return_h         = strtof(row[16], nullptr);
-			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
-			e.zone_in_x        = strtof(row[18], nullptr);
-			e.zone_in_y        = strtof(row[19], nullptr);
-			e.zone_in_z        = strtof(row[20], nullptr);
-			e.zone_in_h        = strtof(row[21], nullptr);
+			e.min_players      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_players      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.duration_seconds = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.dz_switch_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.compass_zone_id  = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_x        = row[9] ? strtof(row[9], nullptr) : 0;
+			e.compass_y        = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_z        = row[11] ? strtof(row[11], nullptr) : 0;
+			e.return_zone_id   = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.return_x         = row[13] ? strtof(row[13], nullptr) : 0;
+			e.return_y         = row[14] ? strtof(row[14], nullptr) : 0;
+			e.return_z         = row[15] ? strtof(row[15], nullptr) : 0;
+			e.return_h         = row[16] ? strtof(row[16], nullptr) : 0;
+			e.override_zone_in = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.zone_in_x        = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y        = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z        = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_h        = row[21] ? strtof(row[21], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -447,28 +448,28 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneTemplates e{};
 
-			e.id               = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.zone_id          = static_cast<int32_t>(atoi(row[1]));
-			e.zone_version     = static_cast<int32_t>(atoi(row[2]));
+			e.id               = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone_id          = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.zone_version     = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 			e.name             = row[3] ? row[3] : "";
-			e.min_players      = static_cast<int32_t>(atoi(row[4]));
-			e.max_players      = static_cast<int32_t>(atoi(row[5]));
-			e.duration_seconds = static_cast<int32_t>(atoi(row[6]));
-			e.dz_switch_id     = static_cast<int32_t>(atoi(row[7]));
-			e.compass_zone_id  = static_cast<int32_t>(atoi(row[8]));
-			e.compass_x        = strtof(row[9], nullptr);
-			e.compass_y        = strtof(row[10], nullptr);
-			e.compass_z        = strtof(row[11], nullptr);
-			e.return_zone_id   = static_cast<int32_t>(atoi(row[12]));
-			e.return_x         = strtof(row[13], nullptr);
-			e.return_y         = strtof(row[14], nullptr);
-			e.return_z         = strtof(row[15], nullptr);
-			e.return_h         = strtof(row[16], nullptr);
-			e.override_zone_in = static_cast<int8_t>(atoi(row[17]));
-			e.zone_in_x        = strtof(row[18], nullptr);
-			e.zone_in_y        = strtof(row[19], nullptr);
-			e.zone_in_z        = strtof(row[20], nullptr);
-			e.zone_in_h        = strtof(row[21], nullptr);
+			e.min_players      = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.max_players      = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.duration_seconds = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.dz_switch_id     = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.compass_zone_id  = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.compass_x        = row[9] ? strtof(row[9], nullptr) : 0;
+			e.compass_y        = row[10] ? strtof(row[10], nullptr) : 0;
+			e.compass_z        = row[11] ? strtof(row[11], nullptr) : 0;
+			e.return_zone_id   = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.return_x         = row[13] ? strtof(row[13], nullptr) : 0;
+			e.return_y         = row[14] ? strtof(row[14], nullptr) : 0;
+			e.return_z         = row[15] ? strtof(row[15], nullptr) : 0;
+			e.return_h         = row[16] ? strtof(row[16], nullptr) : 0;
+			e.override_zone_in = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.zone_in_x        = row[18] ? strtof(row[18], nullptr) : 0;
+			e.zone_in_y        = row[19] ? strtof(row[19], nullptr) : 0;
+			e.zone_in_z        = row[20] ? strtof(row[20], nullptr) : 0;
+			e.zone_in_h        = row[21] ? strtof(row[21], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -527,6 +528,104 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const DynamicZoneTemplates &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.zone_version));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.min_players));
+		v.push_back(std::to_string(e.max_players));
+		v.push_back(std::to_string(e.duration_seconds));
+		v.push_back(std::to_string(e.dz_switch_id));
+		v.push_back(std::to_string(e.compass_zone_id));
+		v.push_back(std::to_string(e.compass_x));
+		v.push_back(std::to_string(e.compass_y));
+		v.push_back(std::to_string(e.compass_z));
+		v.push_back(std::to_string(e.return_zone_id));
+		v.push_back(std::to_string(e.return_x));
+		v.push_back(std::to_string(e.return_y));
+		v.push_back(std::to_string(e.return_z));
+		v.push_back(std::to_string(e.return_h));
+		v.push_back(std::to_string(e.override_zone_in));
+		v.push_back(std::to_string(e.zone_in_x));
+		v.push_back(std::to_string(e.zone_in_y));
+		v.push_back(std::to_string(e.zone_in_z));
+		v.push_back(std::to_string(e.zone_in_h));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<DynamicZoneTemplates> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.zone_version));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.min_players));
+			v.push_back(std::to_string(e.max_players));
+			v.push_back(std::to_string(e.duration_seconds));
+			v.push_back(std::to_string(e.dz_switch_id));
+			v.push_back(std::to_string(e.compass_zone_id));
+			v.push_back(std::to_string(e.compass_x));
+			v.push_back(std::to_string(e.compass_y));
+			v.push_back(std::to_string(e.compass_z));
+			v.push_back(std::to_string(e.return_zone_id));
+			v.push_back(std::to_string(e.return_x));
+			v.push_back(std::to_string(e.return_y));
+			v.push_back(std::to_string(e.return_z));
+			v.push_back(std::to_string(e.return_h));
+			v.push_back(std::to_string(e.override_zone_in));
+			v.push_back(std::to_string(e.zone_in_x));
+			v.push_back(std::to_string(e.zone_in_y));
+			v.push_back(std::to_string(e.zone_in_z));
+			v.push_back(std::to_string(e.zone_in_h));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_DYNAMIC_ZONE_TEMPLATES_REPOSITORY_H

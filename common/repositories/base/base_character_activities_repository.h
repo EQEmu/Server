@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_ACTIVITIES_REPOSITORY_H
@@ -120,8 +120,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_activities_id
 			)
 		);
@@ -130,11 +131,11 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterActivities e{};
 
-			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.charid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			return e;
 		}
@@ -266,11 +267,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterActivities e{};
 
-			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.charid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -295,11 +296,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterActivities e{};
 
-			e.charid     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.taskid     = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.activityid = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.donecount  = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.completed  = static_cast<int8_t>(atoi(row[4]));
+			e.charid     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid     = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.activityid = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.donecount  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.completed  = row[4] ? static_cast<int8_t>(atoi(row[4])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -358,6 +359,70 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterActivities &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.taskid));
+		v.push_back(std::to_string(e.activityid));
+		v.push_back(std::to_string(e.donecount));
+		v.push_back(std::to_string(e.completed));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterActivities> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.taskid));
+			v.push_back(std::to_string(e.activityid));
+			v.push_back(std::to_string(e.donecount));
+			v.push_back(std::to_string(e.completed));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_ACTIVITIES_REPOSITORY_H

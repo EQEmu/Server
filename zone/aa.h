@@ -1525,6 +1525,19 @@ enum {	//values of AA_Action.action
 	aaActionBuy = 3
 };
 
+namespace AACategory {
+	constexpr int None          = -1;
+	constexpr int Passive       = 1;
+	constexpr int Progression   = 2;
+	constexpr int ShroudPassive = 3;
+	constexpr int ShroudActive  = 4;
+	constexpr int VeteranReward = 5;
+	constexpr int Tradeskill    = 6;
+	constexpr int Expendable    = 7;
+	constexpr int RacialInnate  = 8;
+	constexpr int EverQuest     = 9;
+}
+
 class Timer;
 class Mob;
 class SwarmPet {

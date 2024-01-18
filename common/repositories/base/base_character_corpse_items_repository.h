@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_CORPSE_ITEMS_REPOSITORY_H
@@ -19,17 +19,21 @@
 class BaseCharacterCorpseItemsRepository {
 public:
 	struct CharacterCorpseItems {
-		uint32_t corpse_id;
-		uint32_t equip_slot;
-		uint32_t item_id;
-		uint32_t charges;
-		uint32_t aug_1;
-		uint32_t aug_2;
-		uint32_t aug_3;
-		uint32_t aug_4;
-		uint32_t aug_5;
-		int32_t  aug_6;
-		int16_t  attuned;
+		uint32_t    corpse_id;
+		uint32_t    equip_slot;
+		uint32_t    item_id;
+		uint32_t    charges;
+		uint32_t    aug_1;
+		uint32_t    aug_2;
+		uint32_t    aug_3;
+		uint32_t    aug_4;
+		uint32_t    aug_5;
+		int32_t     aug_6;
+		int16_t     attuned;
+		std::string custom_data;
+		uint32_t    ornamenticon;
+		uint32_t    ornamentidfile;
+		uint32_t    ornament_hero_model;
 	};
 
 	static std::string PrimaryKey()
@@ -51,6 +55,10 @@ public:
 			"aug_5",
 			"aug_6",
 			"attuned",
+			"custom_data",
+			"ornamenticon",
+			"ornamentidfile",
+			"ornament_hero_model",
 		};
 	}
 
@@ -68,6 +76,10 @@ public:
 			"aug_5",
 			"aug_6",
 			"attuned",
+			"custom_data",
+			"ornamenticon",
+			"ornamentidfile",
+			"ornament_hero_model",
 		};
 	}
 
@@ -108,17 +120,21 @@ public:
 	{
 		CharacterCorpseItems e{};
 
-		e.corpse_id  = 0;
-		e.equip_slot = 0;
-		e.item_id    = 0;
-		e.charges    = 0;
-		e.aug_1      = 0;
-		e.aug_2      = 0;
-		e.aug_3      = 0;
-		e.aug_4      = 0;
-		e.aug_5      = 0;
-		e.aug_6      = 0;
-		e.attuned    = 0;
+		e.corpse_id           = 0;
+		e.equip_slot          = 0;
+		e.item_id             = 0;
+		e.charges             = 0;
+		e.aug_1               = 0;
+		e.aug_2               = 0;
+		e.aug_3               = 0;
+		e.aug_4               = 0;
+		e.aug_5               = 0;
+		e.aug_6               = 0;
+		e.attuned             = 0;
+		e.custom_data         = "";
+		e.ornamenticon        = 0;
+		e.ornamentidfile      = 0;
+		e.ornament_hero_model = 0;
 
 		return e;
 	}
@@ -144,8 +160,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_corpse_items_id
 			)
 		);
@@ -154,17 +171,21 @@ public:
 		if (results.RowCount() == 1) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
-			e.attuned    = static_cast<int16_t>(atoi(row[10]));
+			e.corpse_id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.equip_slot          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_1               = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_2               = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -209,6 +230,10 @@ public:
 		v.push_back(columns[8] + " = " + std::to_string(e.aug_5));
 		v.push_back(columns[9] + " = " + std::to_string(e.aug_6));
 		v.push_back(columns[10] + " = " + std::to_string(e.attuned));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(columns[12] + " = " + std::to_string(e.ornamenticon));
+		v.push_back(columns[13] + " = " + std::to_string(e.ornamentidfile));
+		v.push_back(columns[14] + " = " + std::to_string(e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -241,6 +266,10 @@ public:
 		v.push_back(std::to_string(e.aug_5));
 		v.push_back(std::to_string(e.aug_6));
 		v.push_back(std::to_string(e.attuned));
+		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(std::to_string(e.ornamenticon));
+		v.push_back(std::to_string(e.ornamentidfile));
+		v.push_back(std::to_string(e.ornament_hero_model));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -281,6 +310,10 @@ public:
 			v.push_back(std::to_string(e.aug_5));
 			v.push_back(std::to_string(e.aug_6));
 			v.push_back(std::to_string(e.attuned));
+			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+			v.push_back(std::to_string(e.ornamenticon));
+			v.push_back(std::to_string(e.ornamentidfile));
+			v.push_back(std::to_string(e.ornament_hero_model));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -314,17 +347,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
-			e.attuned    = static_cast<int16_t>(atoi(row[10]));
+			e.corpse_id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.equip_slot          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_1               = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_2               = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -349,17 +386,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			CharacterCorpseItems e{};
 
-			e.corpse_id  = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.equip_slot = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.item_id    = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.charges    = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.aug_1      = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.aug_2      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.aug_3      = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.aug_4      = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.aug_5      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.aug_6      = static_cast<int32_t>(atoi(row[9]));
-			e.attuned    = static_cast<int16_t>(atoi(row[10]));
+			e.corpse_id           = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.equip_slot          = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.charges             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_1               = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_2               = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_3               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_4               = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_5               = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.aug_6               = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.attuned             = row[10] ? static_cast<int16_t>(atoi(row[10])) : 0;
+			e.custom_data         = row[11] ? row[11] : "";
+			e.ornamenticon        = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.ornamentidfile      = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -418,6 +459,90 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterCorpseItems &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.corpse_id));
+		v.push_back(std::to_string(e.equip_slot));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.aug_1));
+		v.push_back(std::to_string(e.aug_2));
+		v.push_back(std::to_string(e.aug_3));
+		v.push_back(std::to_string(e.aug_4));
+		v.push_back(std::to_string(e.aug_5));
+		v.push_back(std::to_string(e.aug_6));
+		v.push_back(std::to_string(e.attuned));
+		v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+		v.push_back(std::to_string(e.ornamenticon));
+		v.push_back(std::to_string(e.ornamentidfile));
+		v.push_back(std::to_string(e.ornament_hero_model));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterCorpseItems> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.corpse_id));
+			v.push_back(std::to_string(e.equip_slot));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.aug_1));
+			v.push_back(std::to_string(e.aug_2));
+			v.push_back(std::to_string(e.aug_3));
+			v.push_back(std::to_string(e.aug_4));
+			v.push_back(std::to_string(e.aug_5));
+			v.push_back(std::to_string(e.aug_6));
+			v.push_back(std::to_string(e.attuned));
+			v.push_back("'" + Strings::Escape(e.custom_data) + "'");
+			v.push_back(std::to_string(e.ornamenticon));
+			v.push_back(std::to_string(e.ornamentidfile));
+			v.push_back(std::to_string(e.ornament_hero_model));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_CORPSE_ITEMS_REPOSITORY_H

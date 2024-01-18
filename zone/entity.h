@@ -171,7 +171,7 @@ public:
 			return it->second;
 		return nullptr;
 	}
-	Client *GetClientByName(const char *name);
+	Client *GetClientByName(const char* name);
 	Client *GetClientByAccID(uint32 accid);
 	inline Client *GetClientByID(uint16 id)
 	{
@@ -480,7 +480,7 @@ public:
 	void	UpdateHoTT(Mob* target);
 
 	void	Process();
-	void	ClearAggro(Mob* targ);
+	void	ClearAggro(Mob* targ, bool clear_caster_id = false);
 	void    ClearWaterAggro(Mob* targ);
 	void	ClearFeignAggro(Mob* targ);
 	void	ClearZoneFeignAggro(Mob* targ);
