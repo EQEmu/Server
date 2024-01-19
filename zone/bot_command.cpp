@@ -281,7 +281,7 @@ public:
 						entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
 						break;
 					case SE_Mez:
-						if (spells[spell_id].spell_affect_index != 12)
+						if (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)] != 31)
 							break;
 						entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
 						break;
