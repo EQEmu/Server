@@ -1799,19 +1799,6 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			t->special_abilities[0] = '\0';
 		}
 
-		if (t->npc_faction_id > 0) {
-			if (
-				std::find(
-					faction_ids.begin(),
-					faction_ids.end(),
-					t->npc_faction_id
-				) == faction_ids.end()
-			) {
-				faction_ids.emplace_back(t->npc_faction_id);
-			}
-		}
-
-
 		t->npc_spells_id         = n.npc_spells_id;
 		t->npc_spells_effects_id = n.npc_spells_effects_id;
 		t->d_melee_texture1      = n.d_melee_texture1;
@@ -1857,6 +1844,18 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->drakkin_heritage = n.drakkin_heritage;
 		t->drakkin_tattoo   = n.drakkin_tattoo;
 		t->drakkin_details  = n.drakkin_details;
+
+		if (t->npc_faction_id > 0) {
+			if (
+				std::find(
+					faction_ids.begin(),
+					faction_ids.end(),
+					t->npc_faction_id
+				) == faction_ids.end()
+			) {
+				faction_ids.emplace_back(t->npc_faction_id);
+			}
+		}
 
 		// armor tint
 		uint32 armor_tint_id = n.armortint_id;
@@ -3468,18 +3467,13 @@ bool ZoneDatabase::GetFactionName(int32 faction_id, char* name, uint32 buflen) {
 
 std::string ZoneDatabase::GetFactionName(int32 faction_id)
 {
-	std::string faction_name;
-	if (
-		faction_id <= 0 ||
-		 faction_id > static_cast<int>(max_faction) ||
-		 !faction_array[faction_id]
-	) {
-		return faction_name;
+	const auto& e = NpcFactionRepository::FindOne(*this, faction_id);
+
+	if (!e.id) {
+		return std::string();
 	}
 
-	faction_name = faction_array[faction_id]->name;
-
-	return faction_name;
+	return e.name;
 }
 
 //o--------------------------------------------------------------
@@ -3643,7 +3637,7 @@ bool ZoneDatabase::GetFactionIDsForNPC(
 	}
 
 	const auto& f = zone->GetNPCFaction(faction_id);
-	if (!f->id) {
+	if (!f) {
 		return false;
 	}
 

@@ -34,16 +34,16 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &faction_ids)
 			std::find(
 				npc_faction_ids.begin(),
 				npc_faction_ids.end(),
-				e.primaryfaction
+				e.id
 			) == npc_faction_ids.end()
 		) {
-			npc_faction_ids.emplace_back(e.primaryfaction);
+			npc_faction_ids.emplace_back(e.id);
 		}
 	}
 
 	if (npc_faction_ids.empty()) {
 		LogFaction(
-			"No NPC Primary Faction IDs to load for NPC Faction IDs [{}]",
+			"No NPC Faction IDs to load for Faction IDs [{}]",
 			Strings::Join(faction_ids, ", ")
 		);
 		return;
@@ -77,7 +77,7 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &faction_ids)
 	}
 
 	if (faction_ids.size() > 1) {
-		LogFaction("Loaded [{}] Factions.", faction_ids.size());
+		LogFaction("Loaded [{}] Factions", faction_ids.size());
 	}
 }
 
