@@ -8312,7 +8312,7 @@ void Client::RewardFaction(int faction_id, int amount)
 				GetBaseRace(),
 				GetDeity(),
 				new_values[slot_id],
-				false;
+				false
 			);
 		}
 	}
