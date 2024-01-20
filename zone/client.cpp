@@ -8251,7 +8251,7 @@ void Client::RewardFaction(int faction_id, int amount)
 		f->id_10
 	};
 
-	std::vector<int> faction_modifiers = {
+	std::vector<float> faction_modifiers = {
 		f->mod_1,
 		f->mod_2,
 		f->mod_3,
@@ -8265,16 +8265,16 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	std::vector<int> temporary_values = {
-		faction_modifiers[0] * amount,
-		faction_modifiers[1] * amount,
-		faction_modifiers[2] * amount,
-		faction_modifiers[3] * amount,
-		faction_modifiers[4] * amount,
-		faction_modifiers[5] * amount,
-		faction_modifiers[6] * amount,
-		faction_modifiers[7] * amount,
-		faction_modifiers[8] * amount,
-		faction_modifiers[9] * amount
+		static_cast<int>(faction_modifiers[0] * amount),
+		static_cast<int>(faction_modifiers[1] * amount),
+		static_cast<int>(faction_modifiers[2] * amount),
+		static_cast<int>(faction_modifiers[3] * amount),
+		static_cast<int>(faction_modifiers[4] * amount),
+		static_cast<int>(faction_modifiers[5] * amount),
+		static_cast<int>(faction_modifiers[6] * amount),
+		static_cast<int>(faction_modifiers[7] * amount),
+		static_cast<int>(faction_modifiers[8] * amount),
+		static_cast<int>(faction_modifiers[9] * amount)
 	};
 
 	std::vector<int> signs = {
