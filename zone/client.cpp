@@ -8231,11 +8231,9 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 
 void Client::RewardFaction(int faction_id, int amount)
 {
-	// first we hit the primary faction, even without any associations
 	SetFactionLevel2(CharacterID(), faction_id, GetClass(), GetBaseRace(), GetDeity(), amount, false);
 
 	auto f = zone->GetFactionAssociation(faction_id);
-	// We could log here, but since it's actually expected for some not to have entries, it would be noisy.
 	if (!f) {
 		return;
 	}

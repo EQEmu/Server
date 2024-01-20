@@ -52,13 +52,13 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_data_buckets &&
 		!is_doors &&
 		!is_dztemplates &&
-		!is_npc_factions &&
 		!is_faction_associations &&
 		!is_ground_spawns &&
 		!is_level_mods &&
 		!is_logs &&
 		!is_merchants &&
 		!is_npc_emotes &&
+		!is_npc_factions &&
 		!is_objects &&
 		!is_opcodes &&
 		!is_perl_export &&
