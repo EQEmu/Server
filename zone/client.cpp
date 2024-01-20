@@ -8240,184 +8240,83 @@ void Client::RewardFaction(int faction_id, int amount)
 		return;
 	}
 
-	// Faction IDs
-	int f1  = f->id_1;
-	int f2  = f->id_2;
-	int f3  = f->id_3;
-	int f4  = f->id_4;
-	int f5  = f->id_5;
-	int f6  = f->id_6;
-	int f7  = f->id_7;
-	int f8  = f->id_8;
-	int f9  = f->id_9;
-	int f10 = f->id_10;
+	std::vector<int> faction_ids = {
+		f->id_1,
+		f->id_2,
+		f->id_3,
+		f->id_4,
+		f->id_5,
+		f->id_6,
+		f->id_7,
+		f->id_8,
+		f->id_9,
+		f->id_10
+	};
 
-	// Modifiers
-	float m1  = f->mod_1;
-	float m2  = f->mod_2;
-	float m3  = f->mod_3;
-	float m4  = f->mod_4;
-	float m5  = f->mod_5;
-	float m6  = f->mod_6;
-	float m7  = f->mod_7;
-	float m8  = f->mod_8;
-	float m9  = f->mod_9;
-	float m10 = f->mod_10;
+	std::vector<int> faction_modifiers = {
+		f->mod_1,
+		f->mod_2,
+		f->mod_3,
+		f->mod_4,
+		f->mod_5,
+		f->mod_6,
+		f->mod_7,
+		f->mod_8,
+		f->mod_9,
+		f->mod_10
+	};
 
-	// Temporary Values
-	float t1  = m1 * amount;
-	float t2  = m2 * amount;
-	float t3  = m3 * amount;
-	float t4  = m4 * amount;
-	float t5  = m5 * amount;
-	float t6  = m6 * amount;
-	float t7  = m7 * amount;
-	float t8  = m8 * amount;
-	float t9  = m9 * amount;
-	float t10 = m10 * amount;
+	std::vector<int> temporary_values = {
+		f->mod_1 * amount,
+		f->mod_2 * amount,
+		f->mod_3 * amount,
+		f->mod_4 * amount,
+		f->mod_5 * amount,
+		f->mod_6 * amount,
+		f->mod_7 * amount,
+		f->mod_8 * amount,
+		f->mod_9 * amount,
+		f->mod_10 * amount
+	};
 
-	// Sign (-/+)
-	int s1  = t1 < 0.0f ? -1 : 1;
-	int s2  = t2 < 0.0f ? -1 : 1;
-	int s3  = t3 < 0.0f ? -1 : 1;
-	int s4  = t4 < 0.0f ? -1 : 1;
-	int s5  = t5 < 0.0f ? -1 : 1;
-	int s6  = t6 < 0.0f ? -1 : 1;
-	int s7  = t7 < 0.0f ? -1 : 1;
-	int s8  = t8 < 0.0f ? -1 : 1;
-	int s9  = t9 < 0.0f ? -1 : 1;
-	int s10 = t10 < 0.0f ? -1 : 1;
+	std::vector<int> signs = {
+		t1 < 0.0f ? -1 : 1,
+		t2 < 0.0f ? -1 : 1,
+		t3 < 0.0f ? -1 : 1,
+		t4 < 0.0f ? -1 : 1,
+		t5 < 0.0f ? -1 : 1,
+		t6 < 0.0f ? -1 : 1,
+		t7 < 0.0f ? -1 : 1,
+		t8 < 0.0f ? -1 : 1,
+		t9 < 0.0f ? -1 : 1,
+		t10 < 0.0f ? -1 : 1
+	};
 
-	// New Values
-	int n1  = std::max(1, static_cast<int>(std::abs(t1)) * s1);
-	int n2  = std::max(1, static_cast<int>(std::abs(t2)) * s2);
-	int n3  = std::max(1, static_cast<int>(std::abs(t3)) * s3);
-	int n4  = std::max(1, static_cast<int>(std::abs(t4)) * s4);
-	int n5  = std::max(1, static_cast<int>(std::abs(t5)) * s5);
-	int n6  = std::max(1, static_cast<int>(std::abs(t6)) * s6);
-	int n7  = std::max(1, static_cast<int>(std::abs(t7)) * s7);
-	int n8  = std::max(1, static_cast<int>(std::abs(t8)) * s8);
-	int n9  = std::max(1, static_cast<int>(std::abs(t9)) * s9);
-	int n10 = std::max(1, static_cast<int>(std::abs(t10)) * s10);
+	std::vector<int> new_values = {
+		std::max(1, static_cast<int>(std::abs(t1)) * s1),
+		std::max(1, static_cast<int>(std::abs(t2)) * s2),
+		std::max(1, static_cast<int>(std::abs(t3)) * s3),
+		std::max(1, static_cast<int>(std::abs(t4)) * s4),
+		std::max(1, static_cast<int>(std::abs(t5)) * s5),
+		std::max(1, static_cast<int>(std::abs(t6)) * s6),
+		std::max(1, static_cast<int>(std::abs(t7)) * s7),
+		std::max(1, static_cast<int>(std::abs(t8)) * s8),
+		std::max(1, static_cast<int>(std::abs(t9)) * s9),
+		std::max(1, static_cast<int>(std::abs(t10)) * s10)
+	};
 
-	if (f1 > 0 && m1 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f1,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n1,
-			false
-		);
-	}
-
-	if (f2 > 0 && m2 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f2,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n2,
-			false
-		);
-	}
-
-	if (f3 > 0 && m3 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f3,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n3,
-			false
-		);
-	}
-
-	if (f4 > 0 && m4 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f4,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n4,
-			false
-		);
-	}
-
-	if (f5 > 0 && m5 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f5,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n5,
-			false
-		);
-	}
-
-	if (f6 > 0 && m6 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f6,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n6,
-			false
-		);
-	}
-
-	if (f7 > 0 && m7 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f7,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n7,
-			false
-		);
-	}
-
-	if (f8 > 0 && m8 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f8,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n8,
-			false
-		);
-	}
-
-	if (f9 > 0 && m9 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f9,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n9,
-			false
-		);
-	}
-
-	if (f10 > 0 && m10 > 0.0f) {
-		SetFactionLevel2(
-			CharacterID(),
-			f10,
-			GetClass(),
-			GetBaseRace(),
-			GetDeity(),
-			n10,
-			false
-		);
+	for (uint16 slot_id = 0; slot_id < faction_ids.size(); slot_id++) {
+		if (faction_ids[slot_id] > 0 && faction_modifiers[slot_id] > 0.0f) {
+			SetFactionLevel2(
+				CharacterID(),
+				faction_ids[slot_id],
+				GetClass(),
+				GetBaseRace(),
+				GetDeity(),
+				new_values[slot_id],
+				false;
+			);
+		}
 	}
 }
 
