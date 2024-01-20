@@ -315,6 +315,9 @@ RULE_INT(World, MaximumQuestErrors, 30, "Changes the maximum number of quest err
 RULE_INT(World, BootHour, 0, "Sets the in-game hour world will set when it first boots. 0-24 are valid options, where 0 disables this rule")
 RULE_BOOL(World, UseItemLinksForKeyRing, false, "Uses item links for Key Ring Listing instead of item name")
 RULE_BOOL(World, UseOldShadowKnightClassExport, true, "Disable to have Shadowknight show as Shadow Knight (live-like)")
+RULE_BOOL(World, AllowWorldWideSpellsOnBots, false, "Set to true to allow world wide spells (cast/remove) to affect bots")
+RULE_BOOL(World, AllowWorldWideSpellsOnMercs, false, "Set to true to allow world wide spells (cast/remove) to affect mercenaries")
+RULE_BOOL(World, AllowWorldWideSpellsOnPets, false, "Set to true to allow world wide spells (cast/remove) to affect pets")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -340,6 +343,9 @@ RULE_INT(Zone, GlobalLootMultiplier, 1, "Sets Global Loot drop multiplier for da
 RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a zone and has hit its zone shut down timer, it will hard kill the process to free memory back to the OS")
 RULE_INT(Zone, SpawnEventMin, 3, "When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.")
 RULE_INT(Zone, ForageChance, 25, "Chance of foraging from zone table vs global table")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross zone spells (cast/remove) to affect bots")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

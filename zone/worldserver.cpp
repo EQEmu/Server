@@ -2734,97 +2734,281 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_CZSpell:
 	{
-		CZSpell_Struct* CZS = (CZSpell_Struct*) pack->pBuffer;
-		uint8 update_type = CZS->update_type;
-		uint8 update_subtype = CZS->update_subtype;
-		int update_identifier = CZS->update_identifier;
-		uint32 spell_id = CZS->spell_id;
-		const char* client_name = CZS->client_name;
-		if (update_type == CZUpdateType_Character) {
-			auto client = entity_list.GetClientByCharID(update_identifier);
-			if (client) {
-				switch (update_subtype) {
-					case CZSpellUpdateSubtype_Cast:
-						client->ApplySpellBuff(spell_id);
-						break;
-					case CZSpellUpdateSubtype_Remove:
-						client->BuffFadeBySpellID(spell_id);
-						break;
-				}
-			}
-		} else if (update_type == CZUpdateType_Group) {
-			auto client_group = entity_list.GetGroupByID(update_identifier);
-			if (client_group) {
-				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-						auto group_member = client_group->members[member_index]->CastToClient();
-						switch (update_subtype) {
-							case CZSpellUpdateSubtype_Cast:
-								group_member->ApplySpellBuff(spell_id);
-								break;
-							case CZSpellUpdateSubtype_Remove:
-								group_member->BuffFadeBySpellID(spell_id);
-								break;
-						}
-					}
-				}
-			}
-		} else if (update_type == CZUpdateType_Raid) {
-			auto client_raid = entity_list.GetRaidByID(update_identifier);
-			if (client_raid) {
-				for (const auto& m : client_raid->members) {
-					if (m.is_bot) {
-						continue;
-					}
+		auto s = (CZSpell_Struct*) pack->pBuffer;
 
-					if (m.member && m.member->IsClient()) {
-						auto raid_member = m.member->CastToClient();
-						switch (update_subtype) {
+		if (s->update_type == CZUpdateType_Character) {
+			Client* c = entity_list.GetClientByCharID(s->update_identifier);
+			if (c) {
+				switch (s->update_subtype) {
+					case CZSpellUpdateSubtype_Cast:
+						c->ApplySpellBuff(s->spell_id);
+
+						if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+							for (const auto& b : entity_list.GetBotListByCharacterID(c->CharacterID())) {
+								b->ApplySpellBuff(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+							if (c->GetMerc()) {
+								c->GetMerc()->ApplySpellBuff(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+							if (c->HasPet()) {
+								c->GetPet()->ApplySpellBuff(s->spell_id);
+							}
+						}
+
+						break;
+					case CZSpellUpdateSubtype_Remove:
+						c->BuffFadeBySpellID(s->spell_id);
+
+						if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+							for (const auto& b : entity_list.GetBotListByCharacterID(c->CharacterID())) {
+								b->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+							if (c->GetMerc()) {
+								c->GetMerc()->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+							if (c->HasPet()) {
+								c->GetPet()->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
+						break;
+				}
+			}
+		} else if (s->update_type == CZUpdateType_Group) {
+			Group* g = entity_list.GetGroupByID(s->update_identifier);
+			if (g) {
+				for (const auto& m : g->members) {
+					if (
+						m &&
+						(
+							m->IsClient() ||
+							(m->IsBot() && RuleB(Zone, AllowCrossZoneSpellsOnBots)) ||
+							(m->IsMerc() && RuleB(Zone, AllowCrossZoneSpellsOnMercs))
+						)
+					) {
+						switch (s->update_subtype) {
 							case CZSpellUpdateSubtype_Cast:
-								raid_member->ApplySpellBuff(spell_id);
+								m->ApplySpellBuff(s->spell_id);
+
+								if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+									if (m->HasPet()) {
+										m->GetPet()->ApplySpellBuff(s->spell_id);
+									}
+								}
+
 								break;
 							case CZSpellUpdateSubtype_Remove:
-								raid_member->BuffFadeBySpellID(spell_id);
+								m->BuffFadeBySpellID(s->spell_id);
+
+								if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+									if (m->HasPet()) {
+										m->GetPet()->BuffFadeBySpellID(s->spell_id);
+									}
+								}
+
 								break;
 						}
 					}
 				}
 			}
-		} else if (update_type == CZUpdateType_Guild) {
-			for (auto &client: entity_list.GetClientList()) {
-				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
-					switch (update_subtype) {
+		} else if (s->update_type == CZUpdateType_Raid) {
+			Raid* r = entity_list.GetRaidByID(s->update_identifier);
+			if (r) {
+				for (const auto& m : r->members) {
+					if (
+						m.member &&
+						(
+							m.member->IsClient() ||
+							(m.member->IsBot() && RuleB(Zone, AllowCrossZoneSpellsOnBots)) ||
+							(m.member->IsMerc() && RuleB(Zone, AllowCrossZoneSpellsOnMercs))
+						)
+					){
+						switch (s->update_subtype) {
+							case CZSpellUpdateSubtype_Cast:
+								m.member->ApplySpellBuff(s->spell_id);
+
+								if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+									if (m.member->HasPet()) {
+										m.member->GetPet()->ApplySpellBuff(s->spell_id);
+									}
+								}
+
+								break;
+							case CZSpellUpdateSubtype_Remove:
+								m.member->BuffFadeBySpellID(s->spell_id);
+
+								if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+									if (m.member->HasPet()) {
+										m.member->GetPet()->BuffFadeBySpellID(s->spell_id);
+									}
+								}
+
+								break;
+						}
+					}
+				}
+			}
+		} else if (s->update_type == CZUpdateType_Guild) {
+			for (const auto& c : entity_list.GetClientList()) {
+				if (c.second->IsInGuild(s->update_identifier)) {
+					switch (s->update_subtype) {
 						case CZSpellUpdateSubtype_Cast:
-							client.second->ApplySpellBuff(spell_id);
+							c.second->ApplySpellBuff(s->spell_id);
+
+							if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+								for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+									b->ApplySpellBuff(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+								if (c.second->GetMerc()) {
+									c.second->GetMerc()->ApplySpellBuff(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+								if (c.second->HasPet()) {
+									c.second->GetPet()->ApplySpellBuff(s->spell_id);
+								}
+							}
+
 							break;
 						case CZSpellUpdateSubtype_Remove:
-							client.second->BuffFadeBySpellID(spell_id);
+							c.second->BuffFadeBySpellID(s->spell_id);
+
+							if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+								for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+									b->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+								if (c.second->GetMerc()) {
+									c.second->GetMerc()->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+								if (c.second->HasPet()) {
+									c.second->GetPet()->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
 							break;
 					}
 				}
 			}
-		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {
-				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
-					switch (update_subtype) {
+		} else if (s->update_type == CZUpdateType_Expedition) {
+			for (const auto& c : entity_list.GetClientList()) {
+				if (c.second->GetExpedition() && c.second->GetExpedition()->GetID() == s->update_identifier) {
+					switch (s->update_subtype) {
 						case CZSpellUpdateSubtype_Cast:
-							client.second->ApplySpellBuff(spell_id);
+							c.second->ApplySpellBuff(s->spell_id);
+
+							if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+								for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+									b->ApplySpellBuff(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+								if (c.second->GetMerc()) {
+									c.second->GetMerc()->ApplySpellBuff(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+								if (c.second->HasPet()) {
+									c.second->GetPet()->ApplySpellBuff(s->spell_id);
+								}
+							}
+
 							break;
 						case CZSpellUpdateSubtype_Remove:
-							client.second->BuffFadeBySpellID(spell_id);
+							c.second->BuffFadeBySpellID(s->spell_id);
+
+							if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+								for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+									b->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+								if (c.second->GetMerc()) {
+									c.second->GetMerc()->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
+							if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+								if (c.second->HasPet()) {
+									c.second->GetPet()->BuffFadeBySpellID(s->spell_id);
+								}
+							}
+
 							break;
 					}
 				}
 			}
-		} else if (update_type == CZUpdateType_ClientName) {
-			auto client = entity_list.GetClientByName(client_name);
-			if (client) {
-				switch (update_subtype) {
+		} else if (s->update_type == CZUpdateType_ClientName) {
+			Client* c = entity_list.GetClientByName(s->client_name);
+			if (c) {
+				switch (s->update_subtype) {
 					case CZSpellUpdateSubtype_Cast:
-						client->ApplySpellBuff(spell_id);
+						c->ApplySpellBuff(s->spell_id);
+
+						if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+							for (const auto& b : entity_list.GetBotListByCharacterID(c->CharacterID())) {
+								b->ApplySpellBuff(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+							if (c->GetMerc()) {
+								c->GetMerc()->ApplySpellBuff(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+							if (c->HasPet()) {
+								c->GetPet()->ApplySpellBuff(s->spell_id);
+							}
+						}
+
 						break;
 					case CZSpellUpdateSubtype_Remove:
-						client->BuffFadeBySpellID(spell_id);
+						c->BuffFadeBySpellID(s->spell_id);
+
+						if (RuleB(Zone, AllowCrossZoneSpellsOnBots)) {
+							for (const auto& b : entity_list.GetBotListByCharacterID(c->CharacterID())) {
+								b->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+							if (c->GetMerc()) {
+								c->GetMerc()->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
+						if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+							if (c->HasPet()) {
+								c->GetPet()->BuffFadeBySpellID(s->spell_id);
+							}
+						}
+
 						break;
 				}
 			}
@@ -3180,27 +3364,58 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_WWSpell:
-	{
-		WWSpell_Struct* WWS = (WWSpell_Struct*) pack->pBuffer;
-		uint8 update_type = WWS->update_type;
-		uint32 spell_id = WWS->spell_id;
-		uint8 min_status = WWS->min_status;
-		uint8 max_status = WWS->max_status;
-		if (update_type == WWSpellUpdateType_Cast) {
-			for (auto &client : entity_list.GetClientList()) {
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
-					client.second->ApplySpellBuff(spell_id);
+	case ServerOP_WWSpell: {
+		auto s = (WWSpell_Struct *) pack->pBuffer;
+
+		for (const auto& c : entity_list.GetClientList()) {
+			if (
+				c.second->Admin() >= s->min_status &&
+				(c.second->Admin() <= s->max_status || s->max_status == AccountStatus::Player)
+			) {
+				if (s->update_type == WWSpellUpdateType_Cast) {
+					c.second->ApplySpellBuff(s->spell_id);
+
+					if (RuleB(World, AllowWorldWideSpellsOnBots)) {
+						for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+							b->ApplySpellBuff(s->spell_id);
+						}
+					}
+
+					if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+						if (c.second->GetMerc()) {
+							c.second->GetMerc()->ApplySpellBuff(s->spell_id);
+						}
+					}
+
+					if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+						if (c.second->HasPet()) {
+							c.second->GetPet()->ApplySpellBuff(s->spell_id);
+						}
+					}
+				} else if (s->update_type == WWSpellUpdateType_Remove) {
+					c.second->BuffFadeBySpellID(s->spell_id);
+
+					if (RuleB(World, AllowWorldWideSpellsOnBots)) {
+						for (const auto& b : entity_list.GetBotListByCharacterID(c.second->CharacterID())) {
+							b->BuffFadeBySpellID(s->spell_id);
+						}
+					}
+
+					if (RuleB(World, AllowWorldWideSpellsOnMercs)) {
+						if (c.second->GetMerc()) {
+							c.second->GetMerc()->BuffFadeBySpellID(s->spell_id);
+						}
+					}
+
+					if (RuleB(World, AllowWorldWideSpellsOnPets)) {
+						if (c.second->HasPet()) {
+							c.second->GetPet()->BuffFadeBySpellID(s->spell_id);
+						}
+					}
 				}
 			}
-		} else if (update_type == WWSpellUpdateType_Remove) {
-			for (auto &client : entity_list.GetClientList()) {
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
-					client.second->BuffFadeBySpellID(spell_id);
-				}
-			}
+			break;
 		}
-		break;
 	}
 	case ServerOP_WWTaskUpdate:
 	{
