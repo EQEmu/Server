@@ -8265,16 +8265,16 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	std::vector<int> temporary_values = {
-		f->mod_1 * amount,
-		f->mod_2 * amount,
-		f->mod_3 * amount,
-		f->mod_4 * amount,
-		f->mod_5 * amount,
-		f->mod_6 * amount,
-		f->mod_7 * amount,
-		f->mod_8 * amount,
-		f->mod_9 * amount,
-		f->mod_10 * amount
+		faction_modifiers[0] * amount,
+		faction_modifiers[1] * amount,
+		faction_modifiers[2] * amount,
+		faction_modifiers[3] * amount,
+		faction_modifiers[4] * amount,
+		faction_modifiers[5] * amount,
+		faction_modifiers[6] * amount,
+		faction_modifiers[7] * amount,
+		faction_modifiers[8] * amount,
+		faction_modifiers[9] * amount
 	};
 
 	std::vector<int> signs = {
