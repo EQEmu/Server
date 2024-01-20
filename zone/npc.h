@@ -26,6 +26,7 @@
 #include "../common/zone_store.h"
 #include "zonedump.h"
 #include "../common/loottable.h"
+#include "../common/repositories/npc_faction_entries_repository.h"
 
 #include <deque>
 #include <list>
@@ -296,7 +297,7 @@ public:
 	void SetNPCFactionID(int32 in)
 	{
 		npc_faction_id = in;
-		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+		content_db.GetFactionIDsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
     glm::vec4 m_SpawnPoint;
@@ -564,7 +565,6 @@ protected:
 
 	friend class EntityList;
 	friend class Aura;
-	std::list<struct NPCFaction*> faction_list;
 	uint32                        copper;
 	uint32                        silver;
 	uint32                        gold;
@@ -572,6 +572,8 @@ protected:
 	int32                         grid;
 	uint32                        spawn_group_id;
 	uint16                        wp_m;
+
+	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 
 	int32	npc_faction_id;
 	int32	primary_faction;

@@ -12,6 +12,7 @@
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
 #include "../common/races.h"
+#include "../common/repositories/npc_faction_entries_repository.h"
 
 #include "bot_database.h"
 
@@ -507,11 +508,10 @@ public:
 	uint32 UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_consent_id);
 
 	/* Faction   */
-	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool		GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //needed for factions Dec, 16 2001
 	bool		GetFactionName(int faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
 	std::string GetFactionName(int faction_id);
-	bool		GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // improve faction handling
+	bool		GetFactionIDsForNPC(uint32 faction_id, std::list<NpcFactionEntriesRepository::NpcFactionEntries>* faction_list, int32* primary_faction = 0); // improve faction handling
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
 	inline uint32 GetMaxFaction() { return max_faction; }

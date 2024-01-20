@@ -372,14 +372,6 @@ int main(int argc, char **argv)
 		LogError("Failed. But ignoring error and going on..");
 	}
 
-	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
-		LogError("Loading npcs faction lists failed!");
-		return 1;
-	}
-	if (!content_db.LoadFactionAssociation(hotfix_name)) {
-		LogError("Loading faction association hits failed!");
-		return 1;
-	}
 	if (!database.LoadLoot(hotfix_name)) {
 		LogError("Loading loot failed!");
 		return 1;

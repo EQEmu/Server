@@ -165,22 +165,6 @@ public:
 	uint32 GetItemsCount();
 
 	/**
-	 * faction
-	 */
-	void GetFactionListInfo(uint32 &list_count, uint32 &max_lists);
-	const NPCFactionList *GetNPCFactionEntry(uint32 id) const;
-	void LoadNPCFactionLists(void *data, uint32 size, uint32 list_count, uint32 max_lists);
-	bool LoadNPCFactionLists(const std::string &prefix);
-
-	/**
-	 * faction associations
-	 */
-	void GetFactionAssociationInfo(uint32 &list_count, uint32 &max_lists);
-	const FactionAssociations *GetFactionAssociationHit(int id);
-	void LoadFactionAssociation(void *data, uint32 size, uint32 list_count, uint32 max_lists);
-	bool LoadFactionAssociation(const std::string &prefix);
-
-	/**
 	 * loot
 	 */
 	void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);

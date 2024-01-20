@@ -285,24 +285,24 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 			auto faction_name = content_db.GetFactionName(mob_faction_id);
 			bool has_entry = false;
 			for (auto faction : faction_list) {
-				if (static_cast<int>(faction->factionID) == mob_faction_id) {
+				if (static_cast<int>(faction.faction_id) == mob_faction_id) {
 					to_who->Message(
 						Chat::White,
 						fmt::format(
 							"{} has {} standing with Faction {} ({}) with their Faction Level of {}",
 							to_who->GetTargetDescription(mob),
 							(
-								faction->npc_value != 0 ?
+								faction.npc_value != 0 ?
 								(
-									faction->npc_value > 0 ?
+									faction.npc_value > 0 ?
 									"positive" :
 									"negative"
 								 ) :
 								"neutral"
 							),
 							faction_name,
-							faction->factionID,
-							faction->npc_value
+							faction.faction_id,
+							faction.npc_value
 						).c_str()
 					);
 					has_entry = true;

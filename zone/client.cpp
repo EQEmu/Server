@@ -7385,39 +7385,42 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 }
 
 //Sets the characters faction standing with the specified NPC.
-void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity, bool quest)
+void Client::SetFactionLevel(
+	uint32 character_id,
+	uint32 faction_id,
+	uint8 class_id,
+	uint8 race_id,
+	uint8 deity_id,
+	bool is_quest
+)
 {
-	int32 faction_id[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	int32 npc_value[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	uint8 temp[MAX_NPC_FACTIONS] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	int32 current_value;
+	auto l = zone->GetNPCFactionEntries(faction_id);
 
-	// Get the npc faction list
-	if (!content_db.GetNPCFactionList(npc_id, faction_id, npc_value, temp)) {
+	if (l.empty()) {
 		return;
 	}
 
-	for (int i = 0; i < MAX_NPC_FACTIONS; i++) {
-		int32 faction_before_hit;
-		FactionMods fm;
-		int32 this_faction_max;
-		int32 this_faction_min;
+	int current_value;
 
-		if (faction_id[i] <= 0)
+	for (auto& e : l) {
+		if (e.faction_id <= 0) {
 			continue;
+		}
 
-		// Find out starting faction for this faction
-		// It needs to be used to adj max and min personal
-		// The range is still the same, 1200-3000(4200), but adjusted for base
-		content_db.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(), faction_id[i]);
+		int faction_before;
+		int faction_minimum;
+		int faction_maximum;
 
-		if (quest)
-		{
-			//The ole switcheroo
-			if (npc_value[i] > 0)
-				npc_value[i] = -std::abs(npc_value[i]);
-			else if (npc_value[i] < 0)
-				npc_value[i] = std::abs(npc_value[i]);
+		FactionMods faction_modifiers;
+
+		content_db.GetFactionData(&faction_modifiers, class_id, race_id, deity_id, e.faction_id);
+
+		if (is_quest) {
+			if (e.npc_value > 0) {
+				e.npc_value = -std::abs(e.npc_value);
+			} else if (e.npc_value < 0) {
+				e.npc_value = std::abs(e.npc_value);
+			}
 		}
 
 		// Adjust the amount you can go up or down so the resulting range
@@ -7425,23 +7428,36 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		//
 		// Adjust these values for cases where starting faction is below
 		// min or above max by not allowing any earn in those directions.
-		this_faction_min = fm.min - fm.base;
-		this_faction_min = std::min(0, this_faction_min);
-		this_faction_max = fm.max - fm.base;
-		this_faction_max = std::max(0, this_faction_max);
+		faction_minimum = faction_modifiers.min - faction_modifiers.base;
+		faction_minimum = std::min(0, faction_minimum);
+
+		faction_maximum = faction_modifiers.max - faction_modifiers.base;
+		faction_maximum = std::max(0, faction_maximum);
 
 		// Get the characters current value with that faction
-		current_value = GetCharacterFactionLevel(faction_id[i]);
-		faction_before_hit = current_value;
+		current_value = GetCharacterFactionLevel(e.faction_id);
+		faction_before = current_value;
 
-		UpdatePersonalFaction(char_id, npc_value[i], faction_id[i], &current_value, temp[i], this_faction_min, this_faction_max);
+		UpdatePersonalFaction(
+			character_id,
+			e.npc_value,
+			e.faction_id,
+			&current_value,
+			e.temp,
+			faction_minimum,
+			faction_maximum
+		);
 
-		//Message(Chat::Lime, "Min(%d) Max(%d) Before(%d), After(%d)\n", this_faction_min, this_faction_max, faction_before_hit, current_value);
-
-		SendFactionMessage(npc_value[i], faction_id[i], faction_before_hit, current_value, temp[i], this_faction_min, this_faction_max);
+		SendFactionMessage(
+			e.npc_value,
+			e.faction_id,
+			faction_before,
+			current_value,
+			e.temp,
+			faction_minimum,
+			faction_maximum
+		);
 	}
-
-	return;
 }
 
 void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value, uint8 temp)
@@ -8213,33 +8229,195 @@ void Client::CashReward(uint32 copper, uint32 silver, uint32 gold, uint32 platin
 	QueuePacket(outapp.get());
 }
 
-void Client::RewardFaction(int id, int amount)
+void Client::RewardFaction(int faction_id, int amount)
 {
 	// first we hit the primary faction, even without any associations
-	SetFactionLevel2(CharacterID(), id, GetClass(), GetBaseRace(), GetDeity(), amount, false);
+	SetFactionLevel2(CharacterID(), faction_id, GetClass(), GetBaseRace(), GetDeity(), amount, false);
 
-	auto faction_assoc = content_db.GetFactionAssociationHit(id);
+	auto f = zone->GetFactionAssociation(faction_id);
 	// We could log here, but since it's actually expected for some not to have entries, it would be noisy.
-	if (!faction_assoc) {
+	if (!f) {
 		return;
 	}
 
-	// now hit them in order
-	for (int i = 0; i < MAX_FACTION_ASSOC; ++i) {
-		if (faction_assoc->hits[i].id <= 0) // we don't allow later entries
-			break;
-		if (faction_assoc->hits[i].multiplier == 0.0f) {
-			LogFaction("Bad association multiplier for ID {} entry {}", id, i + 1);
-			continue;
-		}
+	// Faction IDs
+	int f1  = f->id_1;
+	int f2  = f->id_2;
+	int f3  = f->id_3;
+	int f4  = f->id_4;
+	int f5  = f->id_5;
+	int f6  = f->id_6;
+	int f7  = f->id_7;
+	int f8  = f->id_8;
+	int f9  = f->id_9;
+	int f10 = f->id_10;
 
-		// value is truncated and min clamped to 1 (or -1)
-		float temp = faction_assoc->hits[i].multiplier * amount;
-		int sign = temp < 0.0f ? -1 : 1;
-		int32 new_amount = std::max(1, static_cast<int32>(std::abs(temp))) * sign;
+	// Modifiers
+	float m1  = f->mod_1;
+	float m2  = f->mod_2;
+	float m3  = f->mod_3;
+	float m4  = f->mod_4;
+	float m5  = f->mod_5;
+	float m6  = f->mod_6;
+	float m7  = f->mod_7;
+	float m8  = f->mod_8;
+	float m9  = f->mod_9;
+	float m10 = f->mod_10;
 
-		SetFactionLevel2(CharacterID(), faction_assoc->hits[i].id, GetClass(), GetBaseRace(), GetDeity(),
-				 new_amount, false);
+	// Temporary Values
+	float t1  = m1 * amount;
+	float t2  = m2 * amount;
+	float t3  = m3 * amount;
+	float t4  = m4 * amount;
+	float t5  = m5 * amount;
+	float t6  = m6 * amount;
+	float t7  = m7 * amount;
+	float t8  = m8 * amount;
+	float t9  = m9 * amount;
+	float t10 = m10 * amount;
+
+	// Sign (-/+)
+	int s1  = t1 < 0.0f ? -1 : 1;
+	int s2  = t2 < 0.0f ? -1 : 1;
+	int s3  = t3 < 0.0f ? -1 : 1;
+	int s4  = t4 < 0.0f ? -1 : 1;
+	int s5  = t5 < 0.0f ? -1 : 1;
+	int s6  = t6 < 0.0f ? -1 : 1;
+	int s7  = t7 < 0.0f ? -1 : 1;
+	int s8  = t8 < 0.0f ? -1 : 1;
+	int s9  = t9 < 0.0f ? -1 : 1;
+	int s10 = t10 < 0.0f ? -1 : 1;
+
+	// New Values
+	int n1  = std::max(1, static_cast<int>(std::abs(t1)) * s1);
+	int n2  = std::max(1, static_cast<int>(std::abs(t2)) * s2);
+	int n3  = std::max(1, static_cast<int>(std::abs(t3)) * s3);
+	int n4  = std::max(1, static_cast<int>(std::abs(t4)) * s4);
+	int n5  = std::max(1, static_cast<int>(std::abs(t5)) * s5);
+	int n6  = std::max(1, static_cast<int>(std::abs(t6)) * s6);
+	int n7  = std::max(1, static_cast<int>(std::abs(t7)) * s7);
+	int n8  = std::max(1, static_cast<int>(std::abs(t8)) * s8);
+	int n9  = std::max(1, static_cast<int>(std::abs(t9)) * s9);
+	int n10 = std::max(1, static_cast<int>(std::abs(t10)) * s10);
+
+	if (f1 > 0 && m1 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f1,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n1,
+			false
+		);
+	}
+
+	if (f2 > 0 && m2 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f2,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n2,
+			false
+		);
+	}
+
+	if (f3 > 0 && m3 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f3,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n3,
+			false
+		);
+	}
+
+	if (f4 > 0 && m4 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f4,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n4,
+			false
+		);
+	}
+
+	if (f5 > 0 && m5 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f5,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n5,
+			false
+		);
+	}
+
+	if (f6 > 0 && m6 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f6,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n6,
+			false
+		);
+	}
+
+	if (f7 > 0 && m7 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f7,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n7,
+			false
+		);
+	}
+
+	if (f8 > 0 && m8 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f8,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n8,
+			false
+		);
+	}
+
+	if (f9 > 0 && m9 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f9,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n9,
+			false
+		);
+	}
+
+	if (f10 > 0 && m10 > 0.0f) {
+		SetFactionLevel2(
+			CharacterID(),
+			f10,
+			GetClass(),
+			GetBaseRace(),
+			GetDeity(),
+			n10,
+			false
+		);
 	}
 }
 
@@ -9019,6 +9197,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_three += Saylink::Silent("#reload data_buckets_cache", "Databuckets");
 	menu_reload_three += " | " + Saylink::Silent("#reload doors", "Doors");
+	menu_reload_three += " | " + Saylink::Silent("#reload faction_associations", "Faction Associations");
 	menu_reload_three += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
@@ -9026,6 +9205,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
 	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
+	menu_reload_five += " | " + Saylink::Silent("#reload npc_factions", "NPC Factions");
 	menu_reload_five += " | " + Saylink::Silent("#reload objects", "Objects");
 	menu_reload_five += " | " + Saylink::Silent("#reload opcodes", "Opcodes");
 
@@ -10993,7 +11173,24 @@ void Client::SendReloadCommandMessages() {
 	);
 
 	auto dztemplates_link = Saylink::Silent("#reload dztemplates");
-	Message(Chat::White, fmt::format("Usage: {} - Reloads Dynamic Zone Templates globally", dztemplates_link).c_str());
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Dynamic Zone Templates globally",
+			dztemplates_link
+		).c_str()
+	);
+
+	auto faction_associations_link = Saylink::Silent("#reload faction_associations");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Faction Associations globally",
+			faction_associations_link
+		).c_str()
+	);
 
 	auto ground_spawns_link = Saylink::Silent("#reload ground_spawns");
 
@@ -11042,6 +11239,16 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads NPC Emotes globally",
 			npc_emotes_link
+		).c_str()
+	);
+
+	auto npc_factions_link = Saylink::Silent("#reload npc_factions");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads NPC Factions globally",
+			npc_factions_link
 		).c_str()
 	);
 

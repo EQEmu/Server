@@ -2114,6 +2114,24 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadNPCFactions:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("NPC Factions");
+			zone->ReloadNPCFactions();
+		}
+
+		break;
+	}
+	case ServerOP_ReloadFactionAssociations:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Faction Associations");
+			zone->ReloadFactionAssociations();
+		}
+
+		break;
+	}
 	case ServerOP_CameraShake:
 	{
 		if (zone)
@@ -3292,16 +3310,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogInfo("Loading items");
 		if (!content_db.LoadItems(hotfix_name)) {
 			LogError("Loading items failed!");
-		}
-
-		LogInfo("Loading npc faction lists");
-		if (!content_db.LoadNPCFactionLists(hotfix_name)) {
-			LogError("Loading npcs faction lists failed!");
-		}
-
-		LogInfo("Loading faction association hits");
-		if (!content_db.LoadFactionAssociation(hotfix_name)) {
-			LogError("Loading faction association hits failed!");
 		}
 
 		LogInfo("Loading loot tables");
