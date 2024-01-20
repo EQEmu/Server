@@ -8280,16 +8280,16 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	std::vector<int> signs = {
-		t1 < 0.0f ? -1 : 1,
-		t2 < 0.0f ? -1 : 1,
-		t3 < 0.0f ? -1 : 1,
-		t4 < 0.0f ? -1 : 1,
-		t5 < 0.0f ? -1 : 1,
-		t6 < 0.0f ? -1 : 1,
-		t7 < 0.0f ? -1 : 1,
-		t8 < 0.0f ? -1 : 1,
-		t9 < 0.0f ? -1 : 1,
-		t10 < 0.0f ? -1 : 1
+		temporary_values[0] < 0.0f ? -1 : 1,
+		temporary_values[1] < 0.0f ? -1 : 1,
+		temporary_values[2] < 0.0f ? -1 : 1,
+		temporary_values[3] < 0.0f ? -1 : 1,
+		temporary_values[4] < 0.0f ? -1 : 1,
+		temporary_values[5] < 0.0f ? -1 : 1,
+		temporary_values[6] < 0.0f ? -1 : 1,
+		temporary_values[7] < 0.0f ? -1 : 1,
+		temporary_values[8] < 0.0f ? -1 : 1,
+		temporary_values[9] < 0.0f ? -1 : 1
 	};
 
 	std::vector<int> new_values = {
