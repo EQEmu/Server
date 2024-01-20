@@ -3059,7 +3059,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			) {
 				switch (s->update_type) {
 					case WWMoveUpdateType_MoveZone:
-						c.second->MoveZone(s->zone_short_name.c_str());
+						c.second->MoveZone(s->zone_short_name);
 						break;
 					case WWMoveUpdateType_MoveZoneInstance:
 						c.second->MoveZoneInstance(s->instance_id);
