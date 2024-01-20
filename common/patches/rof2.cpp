@@ -2433,16 +2433,16 @@ namespace RoF2
 		outapp->WriteFloat(emu->z);
 		outapp->WriteFloat(emu->heading);
 
-		outapp->WriteUInt8(1);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->pvp);
-		outapp->WriteUInt8(2);				// Unknown
+		outapp->WriteUInt8(0);				// Unknown
 		outapp->WriteUInt8(emu->gm);
 		outapp->WriteUInt32(emu->guild_id);
 
 		outapp->WriteUInt8(emu->guildrank);	// guildrank
-		outapp->WriteUInt32(60);				// Unknown
-		outapp->WriteUInt8(1);			// Unknown
-		outapp->WriteUInt32(61);				// Unknown
+		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt8(0);			// Unknown
+		outapp->WriteUInt32(0);				// Unknown
 
 		outapp->WriteUInt64(emu->exp);		// int32 in client
 
@@ -2483,10 +2483,10 @@ namespace RoF2
 
 		for (uint32 r = 0; r < 10; r++)
 		{
-//			outapp->WriteUInt32(0xffffffff);
-//			outapp->WriteUInt32(0);
-			outapp->WriteUInt32(60);
-			outapp->WriteUInt32(1);
+			outapp->WriteUInt32(0xffffffff);
+			outapp->WriteUInt32(0);
+//			outapp->WriteUInt32(60);
+//			outapp->WriteUInt32(1);
 		}
 
 		outapp->WriteUInt32(0);				// Unknown

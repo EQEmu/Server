@@ -886,7 +886,7 @@ void Client::CompleteConnect()
 			data->guild_id       = GuildID();
 			data->no_donations   = gci.total_tribute;
 			data->time_remaining = guild_mgr.GetGuildTributeTimeRemaining(GuildID());
-			strncpy(data->player_name, GetCleanName(), strlen(GetCleanName()));
+			strncpy(data->player_name, GetCleanName(), sizeof(data->player_name));
 
 			worldserver.SendPacket(out);
 			safe_delete(out)
@@ -8196,8 +8196,8 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 							OP_GuildPromote,
 							sizeof(GuildPromoteStruct));
 						GuildPromoteStruct *gps   = (GuildPromoteStruct *) outapp->pBuffer;
-						strcpy(gps->name, gc->myname);
-						strcpy(gps->target, gc->othername);
+						strn0cpy(gps->name, gc->myname, sizeof(gps->name));
+						strn0cpy(gps->target, gc->othername, sizeof(gps->target));
 						gps->myrank               = GuildRank();
 						gps->rank                 = rank;
 						Handle_OP_GuildPromote(outapp);
@@ -17016,7 +17016,7 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 		GuildTributeUpdate *out = (GuildTributeUpdate *) outapp->pBuffer;
 		out->guild_id = GuildID();
 		out->favor    = guild->tribute.favor;
-		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
+		strn0cpy(out->player_name, GetCleanName(), sizeof(out->player_name));
 		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
 		out->member_favor   = member_favor;
@@ -17061,7 +17061,7 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 		GuildTributeUpdate *out = (GuildTributeUpdate *) outapp->pBuffer;
 		out->guild_id = GuildID();
 		out->favor    = guild->tribute.favor;
-		strncpy(out->player_name, GetCleanName(), strlen(GetCleanName()));
+		strncpy(out->player_name, GetCleanName(), sizeof(out->player_name));
 		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
 		out->member_favor   = member_favor;

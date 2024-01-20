@@ -1709,6 +1709,24 @@ struct GuildDelete_Struct {
 	/*000*/ uint32 guild_id;
 };
 
+struct GuildRenameGuild_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ char   new_guild_name[64];
+};
+
+struct GuildRenameMember_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ char   player_name[64];
+	/*068*/ char   new_player_name[64];
+};
+
+struct GuildMemberDetails_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ char   player_name[64];
+	/*068*/ uint32 zone_id;
+	/*072*/ uint32 last_on;
+	/*076*/ uint32 offline_mode; //1 Offline
+};
 /*
 ** Money Loot
 ** Length: 22 Bytes

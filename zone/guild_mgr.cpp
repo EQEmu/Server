@@ -569,7 +569,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildUpdateUCPStruct));
 					GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
 					gucp->payload.rank_name.rank = s->rank;
-					strcpy(gucp->payload.rank_name.rank_name, s->rank_name);
+					strn0cpy(gucp->payload.rank_name.rank_name, s->rank_name, sizeof(gucp->payload.rank_name.rank_name));
 					gucp->action = GuildUpdateRanks;
 
 					entity_list.QueueClientsGuild(outapp, s->guild_id);
@@ -1532,8 +1532,8 @@ void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
 		for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++)
 		{
 			gucp->payload.rank_name.rank = i;
-			strcpy(gucp->payload.rank_name.rank_name, guild->second->rank_names[i].c_str());
-			gucp->action = 4;
+			strn0cpy(gucp->payload.rank_name.rank_name, guild->second->rank_names[i].c_str(), sizeof(gucp->payload.rank_name.rank_name));
+			gucp->action = GuildUpdateRanks;
 			c->QueuePacket(outapp);
 		}
 		safe_delete(outapp);
@@ -1772,17 +1772,10 @@ void ZoneGuildManager::MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, 
 
 bool ZoneGuildManager::IsActionABankAction(GuildAction action)
 {
-	std::vector<GuildAction> Guild_Bank_Actions = {GUILD_ACTION_BANK_DEPOSIT_ITEMS,
-                                                   GUILD_ACTION_BANK_PROMOTE_ITEMS,
-                                                   GUILD_ACTION_BANK_VIEW_ITEMS,
-                                                   GUILD_ACTION_BANK_WITHDRAW_ITEMS};
-
-	for (auto const& a : Guild_Bank_Actions) {
-		if (a == action) {
-			return true;
-		}
-	}
-	return false;
+	return action == GUILD_ACTION_BANK_DEPOSIT_ITEMS ||
+		   action == GUILD_ACTION_BANK_PROMOTE_ITEMS ||
+		   action == GUILD_ACTION_BANK_VIEW_ITEMS ||
+		   action == GUILD_ACTION_BANK_WITHDRAW_ITEMS;
 }
 
 void ZoneGuildManager::SendToWorldMemberRankUpdate(uint32 guild_id, uint32 rank, uint32 banker, uint32 alt, bool no_update, const char *player_name)

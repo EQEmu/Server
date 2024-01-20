@@ -221,13 +221,13 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id)
 
 BaseGuildManager::GuildInfo *BaseGuildManager::_CreateGuild(
 	uint32 guild_id,
-	std::string &guild_name,
+	std::string guild_name,
 	uint32 leader_char_id,
 	uint8 minstatus,
-	std::string &guild_motd,
-	std::string &motd_setter,
-	std::string &Channel,
-	std::string &URL,
+	std::string guild_motd,
+	std::string motd_setter,
+	std::string Channel,
+	std::string URL,
 	uint32 favor
 )
 {
@@ -488,7 +488,6 @@ bool BaseGuildManager::SetGuildRank(uint32 charid, uint8 rank)
 		return false;
 	}
 
-	auto guild_id = GetGuildIDByCharacterID(charid);
 	return true;
 }
 
@@ -649,15 +648,17 @@ bool BaseGuildManager::UpdateDbGuildLeader(uint32 guild_id, uint32 leader)
 	GuildsRepository::Guilds out = CreateGuildRepoFromGuildInfo(guild_id, *in);
 
 	if (!GuildsRepository::UpdateOne(*m_db, out)) {
-		LogGuilds("Could not make character id [{}] the leader for guild id [{}] in database", leader, guild_id);
+		LogGuilds("Could not make character id [{}] the leader for guild id [{}] in guilds table", leader, guild_id);
 		return false;
 	}
 
-	if (!UpdateDbGuildRank(old_leader, GUILD_OFFICER)) {
+	if (!UpdateDbGuildRank(old_leader, GUILD_OFFICER) || !UpdateDbBankerFlag(old_leader, false)) {
+		LogGuilds("Could not make character id [{}] an officer/non-banker for guild id [{}] in guild_members table", old_leader, guild_id);
 		return false;
 	}
 
-	if (!UpdateDbGuildRank(out.leader, GUILD_LEADER)) {
+	if (!UpdateDbGuildRank(out.leader, GUILD_LEADER) || !UpdateDbBankerFlag(out.leader, true)) {
+		LogGuilds("Could not make character id [{}] the leader/banker for guild id [{}] in guild_members table", leader, guild_id);
 		return false;
 	}
 
@@ -1089,7 +1090,7 @@ bool BaseGuildManager::IsGuildLeader(uint32 guild_id, uint32 char_id) const
 		LogGuilds("Check leader for char [{}]: invalid guild", char_id);
 		return (false);    //invalid guild
 	}
-	LogGuilds("Check leader for guild [{}], char [{}]: leader id=[{}]", guild_id, char_id, res->second->leader);
+	LogGuilds("Check leader for guild [{}]\, char [{}]\: leader id=[{}]", guild_id, char_id, res->second->leader);
 	return (char_id == res->second->leader);
 }
 

@@ -197,7 +197,7 @@ class BaseGuildManager
 		Database *m_db;	//we do not own this
 
 		bool _StoreGuildDB(uint32 guild_id);
-		GuildInfo* _CreateGuild(uint32 guild_id, std::string& guild_name, uint32 leader_char_id, uint8 minstatus, std::string& guild_motd, std::string& motd_setter, std::string& Channel, std::string& URL, uint32 favour);
+		GuildInfo* _CreateGuild(uint32 guild_id, std::string guild_name, uint32 leader_char_id, uint8 minstatus, std::string guild_motd, std::string motd_setter, std::string Channel, std::string URL, uint32 favour);
 		uint32 _GetFreeGuildID();
         GuildsRepository::Guilds CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager::GuildInfo& in);
 };

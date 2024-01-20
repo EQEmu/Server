@@ -3466,7 +3466,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
 
 		data->guild_id = in->guild_id;
-		strncpy(data->player_name, in->player_name, strlen(in->player_name));
+		strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 		data->no_donations = in->member_favor;
 		data->tribute_toggle = in->member_enabled ? true : false;
 		data->tribute_trophy_toggle = 0; //not yet implemented
@@ -3503,7 +3503,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
 
 		data->guild_id = in->guild_id;
-		strncpy(data->player_name, in->player_name, strlen(in->player_name));
+		strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 		data->no_donations = in->no_donations;
 		data->tribute_toggle = in->tribute_toggle ? true : false;
 		data->tribute_trophy_toggle = 0; //not yet implemented
