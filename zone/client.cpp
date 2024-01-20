@@ -8293,16 +8293,16 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	std::vector<int> new_values = {
-		std::max(1, static_cast<int>(std::abs(t1)) * s1),
-		std::max(1, static_cast<int>(std::abs(t2)) * s2),
-		std::max(1, static_cast<int>(std::abs(t3)) * s3),
-		std::max(1, static_cast<int>(std::abs(t4)) * s4),
-		std::max(1, static_cast<int>(std::abs(t5)) * s5),
-		std::max(1, static_cast<int>(std::abs(t6)) * s6),
-		std::max(1, static_cast<int>(std::abs(t7)) * s7),
-		std::max(1, static_cast<int>(std::abs(t8)) * s8),
-		std::max(1, static_cast<int>(std::abs(t9)) * s9),
-		std::max(1, static_cast<int>(std::abs(t10)) * s10)
+		std::max(1, static_cast<int>(std::abs(temporary_values[0])) * signs[0]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[1])) * signs[1]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[2])) * signs[2]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[3])) * signs[3]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[4])) * signs[4]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[5])) * signs[5]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[6])) * signs[6]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[7])) * signs[7]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[8])) * signs[8]),
+		std::max(1, static_cast<int>(std::abs(temporary_values[9])) * signs[9])
 	};
 
 	for (uint16 slot_id = 0; slot_id < faction_ids.size(); slot_id++) {
