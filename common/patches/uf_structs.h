@@ -1700,8 +1700,8 @@ struct GuildMemberAdd_Struct {
 	/*008*/ uint32 unknown08;
 	/*012*/ uint32 unknown12;
 	/*016*/ uint32 level;
-	/*020*/ uint32 _class;
-	/*024*/ uint32 rank;
+	/*020*/ uint32 class_;
+	/*024*/ uint32 rank_;
 	/*028*/ uint32 zone_id;
 	/*032*/ uint32 last_on;
 	/*036*/ char   player_name[64];
@@ -1710,7 +1710,7 @@ struct GuildMemberAdd_Struct {
 struct GuildMemberRank_Struct {
 	/*000*/ uint32 guild_id;
 	/*004*/ uint32 unknown_004;
-	/*008*/ uint32 rank;
+	/*008*/ uint32 rank_;
 	/*012*/ char   player_name[64];
 	/*076*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
 };

@@ -930,7 +930,8 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	entity_list.SendAllGuildTitleDisplay(GuildID());
+	entity_list.SendToGuildTitleDisplay(this);
+	SendGuildSpawnAppearance();
 
 	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
@@ -7967,7 +7968,8 @@ void Client::Handle_OP_GuildCreate(const EQApplicationPacket *app)
 	SendGuildList();
 	guild_mgr.MemberAdd(new_guild_id, CharacterID(), GetLevel(), GetClass(), GUILD_LEADER, GetZoneID(), GetName());
 	guild_mgr.SendToWorldSendGuildList();
-	entity_list.SendAllGuildTitleDisplay(new_guild_id);
+	SendGuildSpawnAppearance();
+	//entity_list.SendAllGuildTitleDisplay(new_guild_id);
 
 	Message(Chat::Yellow, "You are now the leader of %s", GuildName);
 
@@ -8332,7 +8334,8 @@ void Client::Handle_OP_GuildInviteAccept(const EQApplicationPacket *app)
 	c_invitee->SetGuildID(guild_id);
 	c_invitee->SetGuildListDirty(false);
 	guild_mgr.MemberAdd(guild_id, c_invitee->CharacterID(), c_invitee->GetLevel(), c_invitee->GetClass(), response, c_invitee->GetZoneID(), std::string(c_invitee->GetCleanName()));
-	entity_list.SendAllGuildTitleDisplay(guild_id);
+	SendGuildSpawnAppearance();
+	//entity_list.SendAllGuildTitleDisplay(guild_id);
 
 	LogGuilds("Adding [{}] ([{}]) to guild [{}] ([{}]) at rank [{}]",
 		GetName(),

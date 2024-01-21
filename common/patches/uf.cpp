@@ -1237,23 +1237,23 @@ namespace UF
 
 		OUT(guild_id)
 		OUT(level)
-		OUT(_class)
-		switch (emu->rank) {
+		OUT(class_)
+		switch (emu->rank_) {
 			case GUILD_SENIOR_MEMBER:
 			case GUILD_MEMBER:
 			case GUILD_JUNIOR_MEMBER:
 			case GUILD_INITIATE:
 			case GUILD_RECRUIT: {
-				eq->rank = GUILD_MEMBER_TI;
+				eq->rank_ = GUILD_MEMBER_TI;
 				break;
 			}
 			case GUILD_OFFICER:
 			case GUILD_SENIOR_OFFICER: {
-				eq->rank = GUILD_OFFICER_TI;
+				eq->rank_ = GUILD_OFFICER_TI;
 				break;
 			}
 			case GUILD_LEADER: {
-				eq->rank = GUILD_LEADER_TI;
+				eq->rank_ = GUILD_LEADER_TI;
 				break;
 			}
 		}
@@ -1273,22 +1273,22 @@ namespace UF
 		OUT(alt_banker)
 		OUT_str(player_name)
 
-		switch (emu->rank) {
+		switch (emu->rank_) {
 			case GUILD_SENIOR_MEMBER:
 			case GUILD_MEMBER:
 			case GUILD_JUNIOR_MEMBER:
 			case GUILD_INITIATE:
 			case GUILD_RECRUIT: {
-				eq->rank = GUILD_MEMBER_TI;
+				eq->rank_ = GUILD_MEMBER_TI;
 				break;
 			}
 			case GUILD_OFFICER:
 			case GUILD_SENIOR_OFFICER: {
-				eq->rank = GUILD_OFFICER_TI;
+				eq->rank_ = GUILD_OFFICER_TI;
 				break;
 			}
 			case GUILD_LEADER: {
-				eq->rank = GUILD_LEADER_TI;
+				eq->rank_ = GUILD_LEADER_TI;
 				break;
 			}
 		}
@@ -2504,6 +2504,10 @@ namespace UF
 						break;
 					}
 				}
+			}
+			case AppearanceType::GuildShow: {
+				FAIL_ENCODE();
+				return;
 			}
 			default: {
 				break;

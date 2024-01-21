@@ -523,7 +523,6 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					res->second->functions[sgpus->function_id].perm_value &= ~(1UL << (8 - sgpus->rank));
 				}
 
-				auto                   client  = entity_list.GetMob(sgpus->member_name);
 				auto                   outapp  = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildPermission_Struct));
 				GuildPermission_Struct *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
 				guuacs->Action      = GuildUpdatePermissions;
@@ -540,7 +539,8 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				safe_delete(outapp);
 
 				if (sgpus->function_id == GuildUpdateRanks) {
-					entity_list.SendAllGuildTitleDisplay(sgpus->guild_id);
+					entity_list.SendGuildSpawnAppearance(sgpus->guild_id);
+					//entity_list.SendAllGuildTitleDisplay(sgpus->guild_id);
 				}
 
 				//for backwards compatibility with guild bank functionality

@@ -5244,7 +5244,8 @@ CREATE TABLE `guild_permissions` (
 	`perm_id` INT(11) NOT NULL DEFAULT '0',
 	`guild_id` INT(11) NOT NULL DEFAULT '0',
 	`permission` INT(11) NOT NULL DEFAULT '0',
-	PRIMARY KEY (`id`, `perm_id`, `guild_id`) USING BTREE
+	PRIMARY KEY (`id`) USING BTREE,
+	UNIQUE INDEX `perm_id_guild_id` (`perm_id`, `guild_id`) USING BTREE
 )
 ENGINE=InnoDB
 AUTO_INCREMENT=1;

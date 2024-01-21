@@ -170,10 +170,12 @@ void Client::SendGuildSpawnAppearance() {
 		SendAppearancePacket(AppearanceType::GuildID, GUILD_NONE);
 		LogGuilds("Sending spawn appearance for no guild tag");
 	} else {
-		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		uint8  rank    = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
+		uint32 display = guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_DISPLAY_GUILD_NAME) ? 1 : 0;
 		LogGuilds("Sending spawn appearance for guild [{}] at rank [{}]", GuildID(), rank);
-		SendAppearancePacket(AppearanceType::GuildID, GuildID());
-		SendAppearancePacket(AppearanceType::GuildRank, rank);
+		SendAppearancePacket(AppearanceType::GuildID, GuildID(), true);
+		SendAppearancePacket(AppearanceType::GuildRank, rank, true);
+		SendAppearancePacket(AppearanceType::GuildShow, display, true);
 	}
 	UpdateWho();
 }
@@ -557,13 +559,13 @@ void Client::SendGuildMemberAdd(
 	out->last_on  = time(nullptr);
 	out->level    = level;
 	out->zone_id  = zone_id;
-	out->rank     = rank_;
-	out->spirt    = 0;
-	out->_class   = class_;
+	out->rank_    = rank_;
+	out->spirit   = spirit;
+	out->class_   = class_;
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void Client::SendGuildMemberRename(uint32 guild_id, std::string player_name, std::string new_player_name)
@@ -605,7 +607,7 @@ void Client::SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string pla
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void Client::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std::string player_name, bool alt, bool banker)
@@ -614,12 +616,12 @@ void Client::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std::str
 	auto out    = (GuildMemberRank_Struct *) outapp->pBuffer;
 
 	out->guild_id = guild_id;
-	out->rank     = rank;
+	out->rank_    = rank;
 	out->alt_banker = (alt << 1) | banker;
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void Client::SendGuildMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note)
@@ -632,7 +634,7 @@ void Client::SendGuildMemberPublicNote(uint32 guild_id, std::string player_name,
 	strn0cpy(out->public_note, public_note.c_str(), sizeof(out->public_note));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void Client::SendGuildMemberDetails(uint32 guild_id, uint32 zone_id, uint32 offline_mode, std::string player_name)
@@ -647,7 +649,7 @@ void Client::SendGuildMemberDetails(uint32 guild_id, uint32 zone_id, uint32 offl
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void Client::SendGuildRenameGuild(uint32 guild_id, std::string new_guild_name)
@@ -659,7 +661,7 @@ void Client::SendGuildRenameGuild(uint32 guild_id, std::string new_guild_name)
 	strn0cpy(out->new_guild_name, new_guild_name.c_str(), sizeof(out->new_guild_name));
 
 	QueuePacket(outapp);
-	safe_delete(outapp)
+	safe_delete(outapp);
 }
 
 void EntityList::SendGuildMembersList(uint32 guild_id)
@@ -703,8 +705,8 @@ void EntityList::SendGuildMemberAdd(
 			}
 
 			c.second->SendGuildActiveTributes(guild_id);
-			c.second->SendAppearancePacket(AppearanceType::GuildID, guild_id, true, false, c.second, false);
-			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank_, true, false, c.second, false);
+			c.second->SendAppearancePacket(AppearanceType::GuildID, guild_id, true, false, c.second);
+			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank_, true, false, c.second);
 			c.second->DoGuildTributeUpdate();
 		}
 	}
@@ -722,7 +724,7 @@ void EntityList::SendGuildMemberRename(uint32 guild_id, std::string player_name,
 			strn0cpy(out->new_player_name, new_player_name.c_str(), sizeof(out->new_player_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 	}
 }
@@ -738,7 +740,7 @@ void EntityList::SendGuildMemberRemove(uint32 guild_id, std::string player_name)
 			strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 
 			c.second->SetGuildListDirty(true);
 
@@ -768,7 +770,7 @@ void EntityList::SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string
 			strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 	}
 }
@@ -781,12 +783,12 @@ void EntityList::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank_, std
 			auto out = (GuildMemberRank_Struct *) outapp->pBuffer;
 
 			out->guild_id   = guild_id;
-			out->rank       = rank_;
+			out->rank_      = rank_;
 			out->alt_banker = (alt << 1) | banker;
 			strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 
 		if (player_name.compare(c.second->GetName()) == 0) {
@@ -808,7 +810,7 @@ void EntityList::SendGuildMemberPublicNote(uint32 guild_id, std::string player_n
 			strn0cpy(out->public_note, public_note.c_str(), sizeof(out->public_note));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 	}
 }
@@ -827,7 +829,7 @@ void EntityList::SendGuildMemberDetails(uint32 guild_id, uint32 zone_id, uint32 
 			strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 	}
 }
@@ -843,7 +845,7 @@ void EntityList::SendGuildRenameGuild(uint32 guild_id, std::string new_guild_nam
 			strn0cpy(out->new_guild_name, new_guild_name.c_str(), sizeof(out->new_guild_name));
 
 			c.second->QueuePacket(outapp);
-			safe_delete(outapp)
+			safe_delete(outapp);
 		}
 	}
 }
