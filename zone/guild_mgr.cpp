@@ -538,9 +538,8 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				);
 				safe_delete(outapp);
 
-				if (sgpus->function_id == GuildUpdateRanks) {
+				if (sgpus->function_id == GUILD_ACTION_DISPLAY_GUILD_NAME) {
 					entity_list.SendGuildSpawnAppearance(sgpus->guild_id);
-					//entity_list.SendAllGuildTitleDisplay(sgpus->guild_id);
 				}
 
 				//for backwards compatibility with guild bank functionality
