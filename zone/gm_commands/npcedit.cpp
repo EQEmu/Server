@@ -1645,6 +1645,31 @@ void command_npcedit(Client *c, const Seperator *sep)
 			);
 			return;
 		}
+	} else if (!strcasecmp(sep->arg[1], "grid_id")) {
+		if (sep->IsNumber(2)) {
+			const uint32 grid_id = Strings::ToUnsignedInt(sep->arg[2]);
+			if (grid_id) {
+				d = fmt::format(
+					"{} now has a Grid ID of {} on Spawn Group ID {}.",
+					npc_id_string,
+					grid_id,
+					Strings::Commify(std::to_string(t->GetSpawnGroupId()))
+				);
+				auto query = fmt::format(
+					"UPDATE spawn2 SET pathgrid = {} WHERE spawngroupID = {} AND version = {}",
+					grid_id,
+					t->GetSpawnGroupId(),
+					zone->GetInstanceVersion()
+				);
+				content_db.QueryDatabase(query);
+			} else {
+				c->Message(Chat::White, "Grid ID must be greater than 0.");
+				return;
+			}
+		} else {
+			c->Message(Chat::White, "Usage: #npcedit grid_id [Grid ID] - Sets an NPC's Grid ID");
+			return;
+		}
 	} else {
 		SendNPCEditSubCommands(c);
 		return;
@@ -1768,4 +1793,5 @@ void SendNPCEditSubCommands(Client *c)
 	c->Message(Chat::White, "Usage: #npcedit keeps_sold_items [Flag] - Sets an NPC's Keeps Sold Items Flag [0 = False, 1 = True]");
 	c->Message(Chat::White, "Usage: #npcedit setanimation [Animation ID] - Sets an NPC's Animation on Spawn (Stored in spawn2 table)");
 	c->Message(Chat::White, "Usage: #npcedit respawntime [Respawn Time] - Sets an NPC's Respawn Timer in Seconds (Stored in spawn2 table)");
+	c->Message(Chat::White, "Usage: #npcedit grid_id [Grid ID] - Sets an NPC's Grid ID");
 }
