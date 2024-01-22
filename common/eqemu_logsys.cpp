@@ -701,6 +701,8 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	log_settings[Logs::Crash].log_to_console = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Crash].log_to_gmsay   = static_cast<uint8>(Logs::General);
 	log_settings[Logs::Crash].log_to_file    = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Info].log_to_file     = static_cast<uint8>(Logs::General);
+	log_settings[Logs::Info].log_to_console  = static_cast<uint8>(Logs::General);
 
 	return this;
 }
