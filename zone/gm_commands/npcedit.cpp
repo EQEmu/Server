@@ -1645,7 +1645,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			);
 			return;
 		}
-	} else if (!strcasecmp(sep->arg[1], "grid_id")) {
+	} else if (!strcasecmp(sep->arg[1], "set_grid")) {
 		if (sep->IsNumber(2)) {
 			const uint32 grid_id = Strings::ToUnsignedInt(sep->arg[2]);
 			if (grid_id) {
@@ -1667,7 +1667,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				return;
 			}
 		} else {
-			c->Message(Chat::White, "Usage: #npcedit grid_id [Grid ID] - Sets an NPC's Grid ID");
+			c->Message(Chat::White, "Usage: #npcedit set_grid [Grid ID] - Sets an NPC's Grid ID");
 			return;
 		}
 	} else {
@@ -1793,5 +1793,5 @@ void SendNPCEditSubCommands(Client *c)
 	c->Message(Chat::White, "Usage: #npcedit keeps_sold_items [Flag] - Sets an NPC's Keeps Sold Items Flag [0 = False, 1 = True]");
 	c->Message(Chat::White, "Usage: #npcedit setanimation [Animation ID] - Sets an NPC's Animation on Spawn (Stored in spawn2 table)");
 	c->Message(Chat::White, "Usage: #npcedit respawntime [Respawn Time] - Sets an NPC's Respawn Timer in Seconds (Stored in spawn2 table)");
-	c->Message(Chat::White, "Usage: #npcedit grid_id [Grid ID] - Sets an NPC's Grid ID");
+	c->Message(Chat::White, "Usage: #npcedit set_grid [Grid ID] - Sets an NPC's Grid ID");
 }

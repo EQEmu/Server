@@ -6,7 +6,7 @@ void command_petitems(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must have a pet to use this command.");
 		return;
 	}
-	
+
 	auto pet = c->GetPet()->CastToNPC();
 	auto loot_list = pet->GetLootList();
 	if (!loot_list.empty()) {
