@@ -660,68 +660,53 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 	merchanttable[merchantid] = merchant_list;
 }
 
-void Zone::GetMerchantDataForZoneLoad() {
-	auto query = fmt::format(
-		SQL (
-			SELECT
-			merchantid,
-			slot,
-			item,
-			faction_required,
-			level_required,
-			min_status,
-			max_status,
-			alt_currency_cost,
-			classes_required,
-			probability,
-			bucket_name,
-			bucket_value,
-			bucket_comparison
-			from merchantlist where merchantid IN (
-					select merchant_id from npc_types where id in (
-						select npcID from spawnentry where spawngroupID IN (
-							select spawngroupID from spawn2 where `zone` = '{}' and (`version` = {} OR `version` = -1)
+void Zone::GetMerchantDataForZoneLoad()
+{
+	const auto& l = MerchantlistRepository::GetWhere(
+		content_db,
+		fmt::format(
+			SQL(
+				`merchantid` IN (
+					SELECT `merchant_id` FROM `npc_types` WHERE `id` IN (
+						SELECT `npcID` FROM `spawnentry` WHERE `spawngroupID` IN (
+							SELECT `spawngroupID` FROM `spawn2` WHERE `zone` = '{}' AND (`version` = {} OR `version` = -1)
+						)
 					)
 				)
-			)
-			{}
-			ORDER BY
-			merchantlist.slot
-		),
-		GetShortName(),
-		GetInstanceVersion(),
-		ContentFilterCriteria::apply()
+				{}
+				ORDER BY `merchantlist`.`slot`
+			),
+			GetShortName(),
+			GetInstanceVersion(),
+			ContentFilterCriteria::apply()
+		)
 	);
 
-	auto results = content_db.QueryDatabase(query);
+	LogInfo("Loaded [{}] merchant lists", Strings::Commify(l.size()));
 
-	LogInfo("Loaded [{}] merchant lists", Strings::Commify(results.RowCount()));
-
-	std::map<uint32, std::list<MerchantList> >::iterator merchant_list;
-
-	uint32 npc_id = 0;
-	if (!results.Success() || !results.RowCount()) {
+	if (l.empty()) {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
 
-	for (auto row : results) {
-		MerchantList mle{};
-		mle.id = Strings::ToUnsignedInt(row[0]);
-		if (npc_id != mle.id) {
-			merchant_list = merchanttable.find(mle.id);
-			if (merchant_list == merchanttable.end()) {
+	std::map<uint32, std::list<MerchantList>>::iterator ml;
+	uint32 npc_id = 0;
+
+	for (const auto& e : l) {
+		if (npc_id != e.merchantid) {
+			ml = merchanttable.find(e.merchantid);
+			if (ml == merchanttable.end()) {
 				std::list<MerchantList> empty;
-				merchanttable[mle.id] = empty;
-				merchant_list = merchanttable.find(mle.id);
+				merchanttable[e.merchantid] = empty;
+				ml = merchanttable.find(e.merchantid);
 			}
 
-			npc_id = mle.id;
+			npc_id = e.merchantid;
 		}
 
 		bool found = false;
-		for (const auto &m : merchant_list->second) {
-			if (m.item == mle.id) {
+		for (const auto &m : ml->second) {
+			if (m.item == e.merchantid) {
 				found = true;
 				break;
 			}
@@ -731,20 +716,23 @@ void Zone::GetMerchantDataForZoneLoad() {
 			continue;
 		}
 
-		mle.slot              = Strings::ToUnsignedInt(row[1]);
-		mle.item              = Strings::ToUnsignedInt(row[2]);
-		mle.faction_required  = static_cast<int16>(Strings::ToInt(row[3]));
-		mle.level_required    = static_cast<uint8>(Strings::ToUnsignedInt(row[4]));
-		mle.min_status        = static_cast<uint8>(Strings::ToUnsignedInt(row[5]));
-		mle.max_status        = static_cast<uint8>(Strings::ToUnsignedInt(row[6]));
-		mle.alt_currency_cost = static_cast<uint16>(Strings::ToUnsignedInt(row[7]));
-		mle.classes_required  = Strings::ToUnsignedInt(row[8]);
-		mle.probability       = static_cast<uint8>(Strings::ToUnsignedInt(row[9]));
-		mle.bucket_name       = row[10];
-		mle.bucket_value      = row[11];
-		mle.bucket_comparison = static_cast<uint8>(Strings::ToUnsignedInt(row[12]));
-
-		merchant_list->second.push_back(mle);
+		ml->second.push_back(
+			MerchantList{
+				.id = static_cast<uint32>(e.merchantid),
+				.slot = e.slot,
+				.item = static_cast<uint32>(e.item),
+				.faction_required = e.faction_required,
+				.level_required = static_cast<int8>(e.level_required),
+				.min_status = e.min_status,
+				.max_status = e.max_status,
+				.alt_currency_cost = e.alt_currency_cost,
+				.classes_required = static_cast<uint32>(e.classes_required),
+				.probability = static_cast<uint8>(e.probability),
+				.bucket_name = e.bucket_name,
+				.bucket_value = e.bucket_value,
+				.bucket_comparison = e.bucket_comparison
+			}
+		);
 	}
 }
 
