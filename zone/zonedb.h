@@ -602,8 +602,8 @@ public:
 	/* Tradeskills  */
 	bool	GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec, bool* is_augmented);
 	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec);
-	uint32	GetZoneForage(uint32 ZoneID, uint8 skill); /* for foraging */
-	uint32	GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance);
+	uint32	GetZoneForage(uint32 zone_id, uint8 skill_level);
+	uint32	GetZoneFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
 	bool	EnableRecipe(uint32 recipe_id);
 	bool	DisableRecipe(uint32 recipe_id);
