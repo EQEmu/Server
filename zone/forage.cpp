@@ -59,7 +59,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 zone_id, uint8 skill_level)
 	const auto& l = ForageRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`zoneid` = {} AND `level` <= {} {} LIMIT {}",
+			"(`zoneid` = {} || `zoneid` = 0) AND `level` <= {} {} LIMIT {}",
 			zone_id,
 			skill_level,
 			ContentFilterCriteria::apply(),
