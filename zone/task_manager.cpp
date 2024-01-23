@@ -238,6 +238,17 @@ bool TaskManager::LoadTasks(int single_task)
 			}
 		}
 
+		// store initial active element ids for select window
+		if (ad->req_activity_id < 0 && ad->step <= task_data->selector_step)
+		{
+			if (ad->step < task_data->selector_step)
+			{
+				task_data->selector_step = ad->step;
+				task_data->selector_ids.clear();
+			}
+			task_data->selector_ids.push_back(activity_id);
+		}
+
 		LogTasksDetail(
 			"(Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_method [{}] goal_count [{}] zones [{}]"
 			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
