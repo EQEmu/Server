@@ -2001,8 +2001,8 @@ void QuestManager::showgrid(int grid_id)
 
 	v.push_back(
 		FindPerson_Point{
-			.x = initiator->GetX(),
 			.y = initiator->GetY(),
+			.x = initiator->GetX(),
 			.z = initiator->GetZ()
 		}
 	);
@@ -2023,8 +2023,8 @@ void QuestManager::showgrid(int grid_id)
 	for (const auto& e : l) {
 		v.push_back(
 			FindPerson_Point{
-				.x = e.x,
 				.y = e.y,
+				.x = e.x,
 				.z = e.z
 			}
 		);
