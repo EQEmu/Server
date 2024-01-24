@@ -536,17 +536,15 @@ public:
 	void        UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id);
 
 	/* Grids/Paths  */
-	uint32		GetFreeGrid(uint16 zoneid);
-	void		DeleteGrid(Client *c, uint32 sg2, uint32 grid_num, bool grid_too, uint16 zoneid);
-	void		DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid);
-	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const glm::vec4& position, uint32 pause, uint16 zoneid);
-	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, const glm::vec4& position, uint32 pause, int type1, int type2, uint16 zoneid);
-	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
-	bool		GridExistsInZone(uint32 zone_id, uint32 grid_id);
-	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const glm::vec3& location, uint32 script = 0, uint16 zoneid = 0);
-	int			GetHighestGrid(uint32 zoneid);
-	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
-	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
+	uint32 GetFreeGrid(uint32 zone_id);
+	void DeleteWaypoint(Client* c, uint32 grid_id, uint32 number, uint32 zone_id);
+	void AddWaypoint(Client* c, uint32 grid_id, uint32 number, const glm::vec4 &position, uint32 pause, uint32 zone_id);
+	uint32 AddWaypointForSpawn(Client* c, uint32 spawn2_id, const glm::vec4 &position, uint32 pause, int type, int type2, uint32 zone_id);
+	void ModifyGrid(Client* c, bool remove, uint32 grid_id, uint8 type = 0, uint8 type2 = 0, uint32 zone_id = 0);
+	bool GridExistsInZone(uint32 zone_id, uint32 grid_id);
+	int GetHighestGrid(uint32 zone_id);
+	int GetHighestWaypoint(uint32 zone_id, uint32 grid_id);
+	int GetRandomWaypointFromGrid(glm::vec4 &loc, uint32 zone_id, uint32 grid_id);
 
 	/* NPCs  */
 

@@ -256,7 +256,7 @@ bool Spawn2::Process() {
 		if (spawn_group->wp_spawns && grid_ > 0)
 		{
 			glm::vec4 wploc;
-			starting_wp = content_db.GetRandomWaypointLocFromGrid(wploc, zone->GetZoneID(), grid_);
+			starting_wp = content_db.GetRandomWaypointFromGrid(wploc, zone->GetZoneID(), grid_);
 			if (wploc.x != 0.0f || wploc.y != 0.0f || wploc.z != 0.0f)
 			{
 				loc = wploc;

@@ -29,7 +29,7 @@ void command_wpadd(Client *c, const Seperator *sep)
 		}
 
 		auto   zone_id  = zone->GetZoneID();
-		uint32 tmp_grid = content_db.AddWPForSpawn(c, s2info->GetID(), position, pause, type1, type2, zone_id);
+		uint32 tmp_grid = content_db.AddWaypointForSpawn(c, s2info->GetID(), position, pause, type1, type2, zone_id);
 		if (tmp_grid) {
 			target->CastToNPC()->SetGrid(tmp_grid);
 		}

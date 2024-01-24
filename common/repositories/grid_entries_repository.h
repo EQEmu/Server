@@ -76,6 +76,48 @@ public:
 		return grid_entries;
 	}
 
+	static int GetHighestWaypoint(Database& db, uint32 zone_id, uint32 grid_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					SELECT COALESCE(MAX(`number`), 0) FROM `{}`
+					WHERE `zoneid` = {} AND `gridid` = {}
+				),
+				TableName(),
+				zone_id,
+				grid_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToInt(row[0]);
+	}
+
+	static int GetNextWaypoint(Database& db, uint32 zone_id, uint32 grid_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT MAX(`number`) FROM `{}` WHERE `zoneid` = {} AND `gridid` = {}",
+				TableName(),
+				zone_id,
+				grid_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 1;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToInt(row[0]) + 1;
+	}
 };
 
 #endif //EQEMU_GRID_ENTRIES_REPOSITORY_H

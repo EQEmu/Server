@@ -183,7 +183,7 @@ public:
 	void enable_proximity_say();
 	void disable_proximity_say();
 	void setanim(int npc_type, int animnum);
-	void showgrid(int gridid);
+	void showgrid(int grid_id);
 	void spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id, short new_value);
 	short get_spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id);
 	void toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base);
