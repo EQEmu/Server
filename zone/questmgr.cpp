@@ -40,6 +40,7 @@
 #include "dialogue_window.h"
 
 #include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/instance_list_repository.h"
 
 #include <iostream>
 #include <limits.h>
@@ -3239,7 +3240,7 @@ std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
 	return res;
 }
 
-uint16 QuestManager::CreateInstance(const char *zone_short_name, int16 instance_version, uint32 duration)
+uint16 QuestManager::CreateInstance(const std::string& zone_short_name, int16 instance_version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();
 
@@ -3275,57 +3276,56 @@ void QuestManager::DestroyInstance(uint16 instance_id)
 
 void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
 {
-	std::string query = StringFormat("UPDATE instance_list SET duration = %lu, start_time = UNIX_TIMESTAMP() WHERE id = %lu",
-		(unsigned long)new_duration, (unsigned long)instance_id);
-	auto results = database.QueryDatabase(query);
+	auto e = InstanceListRepository::FindOne(database, instance_id);
 
-	if (results.Success()) {
+	if (!e.id) {
+		return;
+	}
+
+	e.duration   = new_duration;
+	e.start_time = std::time(nullptr);
+
+	const int updated = InstanceListRepository::UpdateOne(database, e);
+
+	if (updated) {
 		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
-		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*) pack->pBuffer;
-		ut->instance_id = instance_id;
+
+		auto ut = (ServerInstanceUpdateTime_Struct*) pack->pBuffer;
+
+		ut->instance_id  = instance_id;
 		ut->new_duration = new_duration;
+
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
 
-uint32 QuestManager::GetInstanceTimer() {
-	if (zone && zone->GetInstanceID() > 0 && zone->GetInstanceTimer()) {
-		uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
-		return ttime;
+uint32 QuestManager::GetInstanceTimer()
+{
+	if (zone && zone->GetInstanceID() && zone->GetInstanceTimer()) {
+		return zone->GetInstanceTimer()->GetRemainingTime();
 	}
+
 	return 0;
 }
 
-uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
-	if (instance_id == 0)
-		return 0;
-
-	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
-	auto results = database.QueryDatabase(query);
-
-	if (results.Success()) {
-		auto row = results.begin();
-		uint32 timer = Strings::ToInt(row[0]);
-		return timer;
-	}
-	return 0;
+uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id)
+{
+	return instance_id ? InstanceListRepository::GetRemainingTimeByInstanceID(instance_id) : 0;
 }
 
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		return database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version);
-	}
-	return 0;
+
+	return initiator ? database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version) : 0;
 }
 
 std::vector<uint16> QuestManager::GetInstanceIDs(std::string zone_name, uint32 character_id)
 {
 	if (!character_id) {
 		QuestManagerCurrentQuestVars();
+
 		if (initiator) {
 			return database.GetInstanceIDs(ZoneID(zone_name), initiator->CharacterID());
 		}
@@ -3336,33 +3336,37 @@ std::vector<uint16> QuestManager::GetInstanceIDs(std::string zone_name, uint32 c
 	return database.GetInstanceIDs(ZoneID(zone_name), character_id);
 }
 
-uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
-	return database.GetInstanceID(ZoneID(zone), char_id, version);
+uint16 QuestManager::GetInstanceIDByCharID(
+	const std::string &zone_short_name,
+	int16 instance_version,
+	uint32 character_id
+)
+{
+	return database.GetInstanceID(ZoneID(zone_short_name), character_id, instance_version);
 }
 
 void QuestManager::AssignToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
+
+	if (initiator) {
 		database.AddClientToInstance(instance_id, initiator->CharacterID());
 	}
 }
 
-void QuestManager::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id) {
-	database.AddClientToInstance(instance_id, char_id);
+void QuestManager::AssignToInstanceByCharID(uint16 instance_id, uint32 character_id)
+{
+	database.AddClientToInstance(instance_id, character_id);
 }
 
 void QuestManager::AssignGroupToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		Group *g = initiator->GetGroup();
-		if (g)
-		{
-			uint32 gid = g->GetID();
-			database.AssignGroupToInstance(gid, instance_id);
+
+	if (initiator) {
+		Group* g = initiator->GetGroup();
+		if (g) {
+			database.AssignGroupToInstance(g->GetID(), instance_id);
 		}
 	}
 }
@@ -3370,13 +3374,11 @@ void QuestManager::AssignGroupToInstance(uint16 instance_id)
 void QuestManager::AssignRaidToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		Raid *r = initiator->GetRaid();
-		if(r)
-		{
-			uint32 rid = r->GetID();
-			database.AssignRaidToInstance(rid, instance_id);
+
+	if (initiator) {
+		Raid* r = initiator->GetRaid();
+		if (r) {
+			database.AssignRaidToInstance(r->GetID(), instance_id);
 		}
 	}
 }
@@ -3384,12 +3386,13 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 void QuestManager::RemoveFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
+
+	if (initiator) {
+		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
 			initiator->Message(Chat::Say, "Removed client from instance.");
-		else
+		} else {
 			initiator->Message(Chat::Say, "Failed to remove client from instance.");
+		}
 	}
 }
 
@@ -3404,16 +3407,22 @@ bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
+
+	if (initiator) {
 		std::list<uint32> character_ids;
 
-		if (database.RemoveClientsFromInstance(instance_id))
+		if (database.RemoveClientsFromInstance(instance_id)) {
 			initiator->Message(Chat::Say, "Removed all players from instance.");
-		else
-		{
+		} else {
 			database.GetCharactersInInstance(instance_id, character_ids);
-			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", character_ids.size()); // once the expedition system is in, this message it not relevant
+			initiator->Message(
+				Chat::Say,
+				fmt::format(
+					"Failed to remove {} player{} from instance.",
+					character_ids.size(),
+					character_ids.size() != 1 ? "s" : ""
+				).c_str()
+			);
 		}
 	}
 }
@@ -3421,8 +3430,8 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 void QuestManager::MovePCInstance(int zone_id, int instance_id, const glm::vec4& position)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
+
+	if (initiator) {
 		initiator->MovePC(zone_id, instance_id, position.x, position.y, position.z, position.w);
 	}
 }
@@ -3430,10 +3439,10 @@ void QuestManager::MovePCInstance(int zone_id, int instance_id, const glm::vec4&
 void QuestManager::FlagInstanceByGroupLeader(uint32 zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		Group *g = initiator->GetGroup();
-		if(g){
+
+	if (initiator) {
+		Group* g = initiator->GetGroup();
+		if (g) {
 			database.FlagInstanceByGroupLeader(zone, version, initiator->CharacterID(), g->GetID());
 		}
 	}
@@ -3442,11 +3451,10 @@ void QuestManager::FlagInstanceByGroupLeader(uint32 zone, int16 version)
 void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		Raid *r = initiator->GetRaid();
-		if(r)
-		{
+
+	if (initiator) {
+		Raid* r = initiator->GetRaid();
+		if (r) {
 			database.FlagInstanceByRaidLeader(zone, version, initiator->CharacterID(), r->GetID());
 		}
 	}
