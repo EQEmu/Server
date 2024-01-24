@@ -1075,7 +1075,7 @@ void ZoneDatabase::ModifyGrid(
 			*this,
 			GridRepository::Grid{
 				.id = static_cast<int32_t>(grid_id),
-				.zoneid = zone_id,
+				.zoneid = static_cast<int32_t>(zone_id),
 				.type = type,
 				.type2 = type2
 			}
@@ -1183,7 +1183,7 @@ uint32 ZoneDatabase::AddWaypointForSpawn(
 			*this,
 			GridRepository::Grid{
 				.id = static_cast<int32_t>(grid_id),
-				.zoneid = zone_id,
+				.zoneid = static_cast<int32_t>(zone_id),
 				.type = type,
 				.type2 = type2
 			}
@@ -1200,7 +1200,7 @@ uint32 ZoneDatabase::AddWaypointForSpawn(
 		*this,
 		GridEntriesRepository::GridEntries{
 			.gridid = static_cast<int32_t>(grid_id),
-			.zoneid = zone_id,
+			.zoneid = static_cast<int32_t>(zone_id),
 			.number = next_waypoint,
 			.x = position.x,
 			.y = position.y,
