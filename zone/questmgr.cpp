@@ -3311,7 +3311,7 @@ uint32 QuestManager::GetInstanceTimer()
 
 uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id)
 {
-	return instance_id ? InstanceListRepository::GetRemainingTimeByInstanceID(instance_id) : 0;
+	return instance_id ? InstanceListRepository::GetRemainingTimeByInstanceID(database, instance_id) : 0;
 }
 
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
