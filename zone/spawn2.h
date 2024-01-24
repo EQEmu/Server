@@ -147,9 +147,9 @@ public:
 	SpawnConditionManager();
 
 	void Process();
-	bool LoadSpawnConditions(const char* zone_name, uint32 instance_id);
+	bool LoadSpawnConditions(const std::string& zone_short_name, uint32 instance_id);
 
-	int16 GetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id);
+	int16 GetCondition(const std::string& zone_short_name, uint32 instance_id, uint16 condition);
 	void SetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id, int16 new_value, bool world_update = false);
 	void ToggleEvent(uint32 event_id, bool enabled, bool strict, bool reset_base);
 	bool Check(uint16 condition, int16 min_value);
@@ -160,9 +160,9 @@ protected:
 	std::vector<SpawnEvent> spawn_events;
 
 	void ExecEvent(SpawnEvent &e, bool send_update);
-	void UpdateDBEvent(SpawnEvent &e);
-	bool LoadDBEvent(uint32 event_id, SpawnEvent &e, std::string &zone_name);
-	void UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value);
+	void UpdateSpawnEvent(SpawnEvent &e);
+	bool LoadSpawnEvent(uint32 event_id, SpawnEvent& event, std::string& zone_short_name);
+	void UpdateSpawnCondition(const std::string& zone_short_name, uint32 instance_id, uint16 condition, int16 condition_value);
 	void FindNearestEvent();
 
 	Timer minute_timer;
