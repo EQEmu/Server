@@ -34,6 +34,11 @@ void command_grid(Client *c, const Seperator *sep)
 		const uint8  wander_type = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[3]));
 		const uint8  pause_type  = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[4]));
 
+		if (!grid_id) {
+			c->Message(Chat::White, "You must specify a valid grid ID.");
+			return;
+		}
+
 		if (!content_db.GridExistsInZone(zone->GetZoneID(), grid_id)) {
 			content_db.ModifyGrid(c, false, grid_id, wander_type, pause_type, zone->GetZoneID());
 
