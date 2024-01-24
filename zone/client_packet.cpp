@@ -866,8 +866,8 @@ void Client::CompleteConnect()
 			SendGuildRankNames();
 		}
 
-		SendAppearancePacket(AppearanceType::GuildID, GuildID(), true);
-		SendAppearancePacket(AppearanceType::GuildRank, GuildRank(), false);
+		//SendAppearancePacket(AppearanceType::GuildID, GuildID(), true);
+		//SendAppearancePacket(AppearanceType::GuildRank, GuildRank(), false);
 
 		SendGuildActiveTributes(GuildID());
 		SendGuildFavorAndTimer(GuildID());
@@ -930,8 +930,8 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	entity_list.SendToGuildTitleDisplay(this);
-	SendGuildSpawnAppearance();
+	//entity_list.SendToGuildTitleDisplay(this);
+	//SendGuildSpawnAppearance();
 
 	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();

@@ -314,6 +314,7 @@ union
 	uint32 DestructibleUnk9;
 	bool targetable_with_hotkey;
 	bool show_name;
+	bool guild_show;
 };
 
 struct PlayerState_Struct {

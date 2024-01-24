@@ -4214,7 +4214,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC ? 0 : 1); // unknown - Must be 1 for guild name to be shown abover players head.
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show); 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // TempPet
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
