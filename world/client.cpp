@@ -554,7 +554,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	}
 
 	LogInfo(
-		"Name approval request. Name=[{}], race_selection=[{}], class=[{}]",
+		"char_name [{}] race_id [{}] class_id [{}]",
 		char_name,
 		GetRaceIDName(race_id),
 		GetClassIDName(class_id)
