@@ -861,7 +861,7 @@ bool SpawnConditionManager::LoadSpawnEvent(
 	EQTime::ToString(&event.next, time_string);
 
 	LogSpawns(
-		"(LoadSpawnEvent) Loaded [{}] spawn event [{}] on condition [{}] with period [{}] action [{}] argument [{}] strict [{}]. Will trigger at [{}]",
+		"Loaded [{}] event_id [{}] condition [{}] period [{}] action [{}] argument [{}] strict [{}] time [{}]",
 		event.enabled ? "enabled" : "disabled",
 		event.id,
 		event.condition_id,
