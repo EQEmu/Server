@@ -535,67 +535,64 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 		return false;
 	}
 
-	auto length = snprintf(char_name, 64, "%s", (char*)app->pBuffer);
+	auto n = (NameApproval_Struct*) app->pBuffer;
 
-	uchar race_selection  = app->pBuffer[64];
-	uchar class_selection = app->pBuffer[68];
+	strn0cpy(char_name, n->name, sizeof(char_name));
 
-	if (!IsPlayerRace(race_selection)) {
+	const uint32 length   = strlen(n->name);
+	const uint32 race_id  = n->race_id;
+	const uint32 class_id = n->class_id;
+
+	if (!IsPlayerRace(race_id)) {
 		LogInfo("Invalid Race ID.");
 		return false;
 	}
 
-	if (!EQ::ValueWithin(class_selection, Class::Warrior, Class::Berserker)) {
+	if (!EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker)) {
 		LogInfo("Invalid Class ID.");
 		return false;
 	}
-	
-	LogInfo("Name approval request. Name=[{}], race_selection=[{}], class=[{}]", char_name, GetRaceIDName(race_selection), GetClassIDName(class_selection));
 
-	EQApplicationPacket *outapp;
-	outapp = new EQApplicationPacket;
-	outapp->SetOpcode(OP_ApproveName);
-	outapp->pBuffer = new uchar[1];
-	outapp->size = 1;
+	LogInfo(
+		"char_name [{}] race_id [{}] class_id [{}]",
+		char_name,
+		GetRaceIDName(race_id),
+		GetClassIDName(class_id)
+	);
 
-	bool valid = true;
-	/* Name must be between 4 and 15 characters long, packet forged if this is true */
-	if (length < 4 || length > 15) {
-		valid = false;
-	}
-	/* Name must begin with an upper-case letter, can be sent with some tricking of the client */
-	else if (islower(char_name[0])) {
-		valid = false;
-	}
-	/* Name must not have any spaces, packet forged if this is true */
-	else if (strstr(char_name, " ")) {
-		valid = false;
-	}
-	/* I would like to do this later, since it's likely more expensive, but oh well */
-	else if (!database.CheckNameFilter(char_name)) {
-		valid = false;
-	}
-	else {
-		/* Name must not not contain any uppercase letters, can be sent with some tricking of the client */
+	bool is_valid = true;
+
+	if (!EQ::ValueWithin(length, 4, 15)) { /* Name must be between 4 and 15 characters long, packet forged if this is true */
+		is_valid = false;
+	} else if (islower(char_name[0])) { /* Name must begin with an upper-case letter, can be sent with some tricking of the client */
+		is_valid = false;
+	} else if (strstr(char_name, " ")) { /* Name must not have any spaces, packet forged if this is true */
+		is_valid = false;
+	} else if (!database.CheckNameFilter(char_name)) { /* I would like to do this later, since it's likely more expensive, but oh well */
+		is_valid = false;
+	} else { /* Name must not contain any uppercase letters, can be sent with some tricking of the client */
 		for (int i = 1; i < length; ++i) {
 			if (isupper(char_name[i])) {
-				valid = false;
+				is_valid = false;
 				break;
 			}
 		}
 	}
 
-	/* Still not invalid, let's see if it's taken */
-	if (valid) {
-		valid = database.ReserveName(GetAccountID(), char_name);
+	if (is_valid) { /* Still not invalid, let's see if it's taken */
+		is_valid = database.ReserveName(GetAccountID(), char_name);
 	}
 
-	outapp->pBuffer[0] = valid ? 1 : 0;
+	auto outapp = new EQApplicationPacket(OP_ApproveName, 1);
+
+	outapp->pBuffer[0] = is_valid ? 1 : 0;
+
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if (!valid)
+	if (!is_valid) {
 		memset(char_name, 0, sizeof(char_name));
+	}
 
 	return true;
 }
