@@ -1,3 +1,68 @@
+## [22.43.2] - 1/25/2024
+
+### Bots
+
+* ^mez command spell list fix ([#3998](https://github.com/EQEmu/Server/pull/3998)) @dariusuknuis 2024-01-19
+
+### Code
+
+* Cleanup position methods ([#4015](https://github.com/EQEmu/Server/pull/4015)) @Kinglykrab 2024-01-25
+
+### Commands
+
+* Add `#npcedit set_grid [Grid ID]` to `#npcedit` ([#4004](https://github.com/EQEmu/Server/pull/4004)) @Kinglykrab 2024-01-22
+
+### Crash Fix
+
+* Fix crash when creating Frogloks/Drakkin ([#4016](https://github.com/EQEmu/Server/pull/4016)) @Kinglykrab 2024-01-25
+* Reverting PR #3877 ([#3997](https://github.com/EQEmu/Server/pull/3997)) @fryguy503 2024-01-17
+
+### Database
+
+* Drop deprecated item_tick table ([#3977](https://github.com/EQEmu/Server/pull/3977)) @Akkadius 2024-01-14
+* Drop item_tick if exists tweak in manifest ([#3985](https://github.com/EQEmu/Server/pull/3985)) @Akkadius 2024-01-15
+* Increase max spawngroup name from 50 to 200 ([#3991](https://github.com/EQEmu/Server/pull/3991)) @Akkadius 2024-01-22
+
+### Fixes
+
+* Fix Mercenaries Buffs/Zoning Issues ([#4000](https://github.com/EQEmu/Server/pull/4000)) @Kinglykrab 2024-01-22
+* Fix zone database update manifest ([#3972](https://github.com/EQEmu/Server/pull/3972)) @Kinglykrab 2024-01-13
+* Fixes to zone idle while empty changes. ([#4006](https://github.com/EQEmu/Server/pull/4006)) @noudess 2024-01-23
+* Reversed logic on InLiquid ([#3979](https://github.com/EQEmu/Server/pull/3979)) @fryguy503 2024-01-14
+
+### Instances
+
+* Convert Instance Quest Methods to Repositories ([#4012](https://github.com/EQEmu/Server/pull/4012)) @Kinglykrab 2024-01-25
+
+### Logging
+
+* Force Info category to be always on in file/console logs ([#3990](https://github.com/EQEmu/Server/pull/3990)) @Akkadius 2024-01-22
+
+### Merchants
+
+* Change database structure for merchant slots ([#3974](https://github.com/EQEmu/Server/pull/3974)) @joligario 2024-01-14
+
+### Messages
+
+* Fix disciple message added by previous patch. ([#3986](https://github.com/EQEmu/Server/pull/3986)) @noudess 2024-01-15
+
+### Quest API
+
+* QuestReward should now summon item to the inventory instead of the cursor. ([#3996](https://github.com/EQEmu/Server/pull/3996)) @regneq 2024-01-22
+
+### Repositories
+
+* Add `rank` to reserved words ([#3982](https://github.com/EQEmu/Server/pull/3982)) @Akkadius 2024-01-15
+* Fix datetime zero-value save behavior ([#3976](https://github.com/EQEmu/Server/pull/3976)) @Akkadius 2024-01-14
+
+### Spawn2
+
+* Spawn condition value should default spawn_conditions value ([#3980](https://github.com/EQEmu/Server/pull/3980)) @noudess 2024-01-14
+
+### Zoning
+
+* Additional logs for zoning under instance checks ([#3989](https://github.com/EQEmu/Server/pull/3989)) @Akkadius 2024-01-22
+
 ## [22.43.1] - 1/14/2024
 
 ### Repositories
