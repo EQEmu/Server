@@ -259,6 +259,7 @@ RULE_BOOL(Skills, RequireTomeHandin, false, "Disable click-to-learn and force ha
 RULE_INT(Skills, TradeSkillClamp, 0, "Legacy tradeskills would clamp at 252 regardless of item modifiers and skill combination. DEFAULT: 0 will bypass clamp. Legacy value 252")
 RULE_BOOL(Skills, UseAltSinisterStrikeFormula, false, "Enabling will utilize a formula derived from 2004 monkey business post which makes the AA actually worth something.")
 RULE_BOOL(Skills, TrackingAutoRefreshSkillUps, true, "Disable to prevent tracking auto-refresh from giving skill-ups. Classic Style")
+RULE_INT(Skills, MaximumTauntDistance, 150, "Maximum player taunt distance.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
