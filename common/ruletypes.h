@@ -269,6 +269,7 @@ RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop i
 RULE_BOOL(Pets, CanTakeQuestItems, true, "Setting whether anyone can give quest items to pets")
 RULE_BOOL(Pets, LivelikeBreakCharmOnInvis, true, "Default: true will break charm on any type of invis (hide/ivu/iva/etc) false will only break if the pet can not see you (ex. you have an undead pet and cast IVU")
 RULE_BOOL(Pets, ClientPetsUseOwnerNameInLastName, true, "Disable this to keep client pet's last names from being owner_name's pet")
+RULE_INT(Pets, PetTauntRange, 150, "Range at which a pet will taunt targets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
