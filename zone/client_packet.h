@@ -171,7 +171,7 @@
 	void Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket* app);
 	void Handle_OP_GuildTributeSelect(const EQApplicationPacket* app);
 	void Handle_OP_GuildTributeToggle(const EQApplicationPacket* app);
-	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
+	void Handle_OP_GuildUpdate(const EQApplicationPacket *app);
 	void Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app);
 	void Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);

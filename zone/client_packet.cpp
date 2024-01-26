@@ -260,7 +260,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_GuildPublicNote] = &Client::Handle_OP_GuildPublicNote;
 	ConnectedOpcodes[OP_GuildRemove] = &Client::Handle_OP_GuildRemove;
 	ConnectedOpcodes[OP_GuildStatus] = &Client::Handle_OP_GuildStatus;
-	ConnectedOpcodes[OP_GuildUpdateURLAndChannel] = &Client::Handle_OP_GuildUpdateURLAndChannel;
+	ConnectedOpcodes[OP_GuildUpdate] = &Client::Handle_OP_GuildUpdate;
 	ConnectedOpcodes[OP_GuildWar] = &Client::Handle_OP_GuildWar;
 	ConnectedOpcodes[OP_GuildSelectTribute] = &Client::Handle_OP_GuildTributeSelect;
 	ConnectedOpcodes[OP_GuildModifyBenefits] = &Client::Handle_OP_GuildTributeModifyBenefits;
@@ -866,9 +866,6 @@ void Client::CompleteConnect()
 			SendGuildRankNames();
 		}
 
-		//SendAppearancePacket(AppearanceType::GuildID, GuildID(), true);
-		//SendAppearancePacket(AppearanceType::GuildRank, GuildRank(), false);
-
 		SendGuildActiveTributes(GuildID());
 		SendGuildFavorAndTimer(GuildID());
 		DoGuildTributeUpdate();
@@ -928,11 +925,7 @@ void Client::CompleteConnect()
 
 	worldserver.RequestTellQueue(GetName());
 
-	entity_list.ScanCloseMobs(close_mobs, this, true);
-
-	//entity_list.SendToGuildTitleDisplay(this);
-	//SendGuildSpawnAppearance();
-
+	SendGuildSpawnAppearance();
 	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}
@@ -8707,7 +8700,7 @@ void Client::Handle_OP_GuildStatus(const EQApplicationPacket *app)
 	}
 }
 
-void Client::Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app)
+void Client::Handle_OP_GuildUpdate(const EQApplicationPacket *app)
 {
 	if (!IsInAGuild()) {
 		return;

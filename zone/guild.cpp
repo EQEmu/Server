@@ -69,7 +69,7 @@ void Client::SendGuildURL()
 	if(IsInAGuild())
 	{
 		auto outapp =
-		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		    new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -91,7 +91,7 @@ void Client::SendGuildChannel()
 	if(IsInAGuild())
 	{
 		auto outapp =
-		    new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateURLAndChannel_Struct));
+		    new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateURLAndChannel_Struct));
 
 		GuildUpdateURLAndChannel_Struct *guuacs = (GuildUpdateURLAndChannel_Struct*) outapp->pBuffer;
 
@@ -121,16 +121,14 @@ void Client::SendGuildRanks()
 		{
 			while(i < permissions)
 			{
-					auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,
+					auto outapp = new EQApplicationPacket(OP_GuildUpdate,
 						sizeof(GuildUpdateRanks_Struct));
 					GuildUpdateRanks_Struct* guuacs = (GuildUpdateRanks_Struct*)outapp->pBuffer;
-					//guuacs->Unknown0008 = GuildID();
 					strncpy(guuacs->Unknown0012, GetCleanName(), 64);
 					guuacs->Action = GuildUpdatePermissions;
 					guuacs->RankID = j;
 					guuacs->GuildID = GuildID();
 					guuacs->PermissionID = i;
-					//				guuacs->PermissionVal = 1;
 					guuacs->PermissionVal = guild_mgr.CheckPermission(GuildID(), j, (GuildAction)i);
 					guuacs->Unknown0089[0] = 0x2c;
 					guuacs->Unknown0089[1] = 0x01;
@@ -151,7 +149,7 @@ void Client::SendGuildRankNames()
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
 		for (int i = 1; i <= GUILD_MAX_RANK; i++)
 		{
-			auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
+			auto outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
 			GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 
 			gucp->payload.rank_name.rank = i;
@@ -542,7 +540,7 @@ void Client::SendGuildMemberAdd(
 	uint32 level,
 	uint32 class_,
 	uint32 rank_,
-	uint32 spirit,
+	uint32 guild_show,
 	uint32 zone_id,
 	std::string player_name
 )
@@ -555,13 +553,13 @@ void Client::SendGuildMemberAdd(
 	auto outapp = new EQApplicationPacket(OP_GuildMemberAdd, sizeof(GuildMemberAdd_Struct));
 	auto out    = (GuildMemberAdd_Struct *) outapp->pBuffer;
 
-	out->guild_id = guild_id;
-	out->last_on  = time(nullptr);
-	out->level    = level;
-	out->zone_id  = zone_id;
-	out->rank_    = rank_;
-	out->spirit   = spirit;
-	out->class_   = class_;
+	out->guild_id   = guild_id;
+	out->last_on    = time(nullptr);
+	out->level      = level;
+	out->zone_id    = zone_id;
+	out->rank_      = rank_;
+	out->guild_show = guild_show;
+	out->class_     = class_;
 	strn0cpy(out->player_name, player_name.c_str(), sizeof(out->player_name));
 
 	QueuePacket(outapp);
@@ -794,6 +792,9 @@ void EntityList::SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank_, std
 		if (player_name.compare(c.second->GetName()) == 0) {
 			c.second->SetGuildRank(rank_);
 			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank_, false);
+			c.second->SendAppearancePacket(AppearanceType::GuildShow,
+				guild_mgr.CheckPermission(c.second->GuildID(), c.second->GuildRank(), GUILD_ACTION_DISPLAY_GUILD_NAME) ? 1 : 0,
+				true);
 		}
 	}
 }

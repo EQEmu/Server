@@ -5233,7 +5233,7 @@ DROP TABLE IF EXISTS item_tick
 )"
 	},
 	ManifestEntry{
-		.version = 9256,
+		.version = 9257,
 		.description = "2023_11_11_guild_features.sql",
 		.check = "SHOW TABLES LIKE 'guild_permissions'",
 		.condition = "empty",

@@ -843,7 +843,7 @@ luabind::scope lua_register_packet_opcodes() {
 		luabind::value("HideCorpse", static_cast<int>(OP_HideCorpse)),
 		luabind::value("TargetBuffs", static_cast<int>(OP_TargetBuffs)),
 		luabind::value("TradeBusy", static_cast<int>(OP_TradeBusy)),
-		luabind::value("GuildUpdateURLAndChannel", static_cast<int>(OP_GuildUpdateURLAndChannel)),
+		luabind::value("GuildUpdate", static_cast<int>(OP_GuildUpdate)),
 		luabind::value("CameraEffect", static_cast<int>(OP_CameraEffect)),
 		luabind::value("SpellEffect", static_cast<int>(OP_SpellEffect)),
 		luabind::value("DzQuit", static_cast<int>(OP_DzQuit)),

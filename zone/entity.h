@@ -415,8 +415,6 @@ public:
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
-	void    SendToGuildTitleDisplay(Client* c);
-	void    SendAllGuildTitleDisplay(uint32 guild_id);
 	void    UpdateGuildTributes(uint32 guild_id);
 
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
@@ -428,7 +426,6 @@ public:
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = AccountStatus::Player, uint8 maxstatus = AccountStatus::Player);
 	void	QueueClientsGuild(const EQApplicationPacket* app, uint32 guildeqid = 0);
-	void    QueueClientsNotInGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender, uint32 guild_id);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true, bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false, bool clear_target_window  = false);
 

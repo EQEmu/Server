@@ -1680,7 +1680,7 @@ struct GuildMemberAdd_Struct {
 	/*016*/ uint32 level;
 	/*020*/ uint32 class_;
 	/*024*/ uint32 rank_;
-	/*028*/ uint32 spirit; //not confirmed single byte 0x000000FF
+	/*028*/ uint32 guild_show;
 	/*032*/ uint32 zone_id;
 	/*036*/ uint32 last_on;
 	/*040*/ char   player_name[64];

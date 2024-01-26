@@ -746,7 +746,7 @@ public:
 	void RequestGuildActiveTributes(uint32 guild_id);
 	void RequestGuildFavorAndTimer(uint32 guild_id);
 	void SendGuildMembersList();
-	void SendGuildMemberAdd(uint32 guild_id, uint32 level, uint32 _class, uint32 rank, uint32 spirit, uint32 zone_id, std::string player_name);
+	void SendGuildMemberAdd(uint32 guild_id, uint32 level, uint32 _class, uint32 rank, uint32 guild_show, uint32 zone_id, std::string player_name);
 	void SendGuildMemberRename(uint32 guild_id, std::string player_name, std::string new_player_name);
 	void SendGuildMemberDelete(uint32 guild_id, std::string player_name);
 	void SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string player_name);

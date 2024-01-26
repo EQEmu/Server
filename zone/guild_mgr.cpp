@@ -523,7 +523,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					res->second->functions[sgpus->function_id].perm_value &= ~(1UL << (8 - sgpus->rank));
 				}
 
-				auto                   outapp  = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildPermission_Struct));
+				auto                   outapp  = new EQApplicationPacket(OP_GuildUpdate,sizeof(GuildPermission_Struct));
 				GuildPermission_Struct *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
 				guuacs->Action      = GuildUpdatePermissions;
 				guuacs->rank        = sgpus->rank;
@@ -565,7 +565,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 				auto guild = guild_mgr.GetGuildByGuildID(s->guild_id);
 				if (guild) {
 					guild->rank_names[s->rank] = s->rank_name;
-					auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel,sizeof(GuildUpdateUCPStruct));
+					auto outapp = new EQApplicationPacket(OP_GuildUpdate,sizeof(GuildUpdateUCPStruct));
 					GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
 					gucp->payload.rank_name.rank = s->rank;
 					strn0cpy(gucp->payload.rank_name.rank_name, s->rank_name, sizeof(gucp->payload.rank_name.rank_name));
@@ -1526,7 +1526,7 @@ void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
 	auto c = entity_list.GetClientByCharID(char_id);
 	if (c)
 	{
-		auto outapp = new EQApplicationPacket(OP_GuildUpdateURLAndChannel, sizeof(GuildUpdateUCPStruct));
+		auto outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
 		GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 		for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++)
 		{
