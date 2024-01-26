@@ -52,10 +52,7 @@ public:
 	bool QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count);
 	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool ByAccount = false);
 
-	bool LoadOwnerID(const std::string& bot_name, uint32& owner_id);
-	bool LoadOwnerID(const uint32 bot_id, uint32& owner_id);
 	uint32 GetOwnerID(const uint32 bot_id);
-	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id);
 	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id);
 
 	bool LoadBot(const uint32 bot_id, Bot*& loaded_bot);
@@ -63,8 +60,8 @@ public:
 	bool SaveBot(Bot* bot_inst);
 	bool DeleteBot(const uint32 bot_id);
 
-	bool LoadBuffs(Bot* bot_inst);
-	bool SaveBuffs(Bot* bot_inst);
+	bool LoadBuffs(Bot* b);
+	bool SaveBuffs(Bot* b);
 	bool DeleteBuffs(const uint32 bot_id);
 
 	bool LoadStance(const uint32 bot_id, int& bot_stance);
@@ -164,7 +161,6 @@ public:
 
 	/* Bot miscellaneous functions   */
 	uint8 GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index);
-	std::string GetBotNameByID(const uint32 bot_id); 
 
 	uint16 GetRaceClassBitmask(uint16 bot_race);
 
@@ -172,7 +168,6 @@ public:
 	public:
 		/* fail::Bot functions   */
 		static const char* LoadBotsList();
-		static const char* LoadOwnerID();
 		static const char* LoadBotID();
 		static const char* LoadBot();
 		static const char* SaveNewBot();
@@ -237,9 +232,6 @@ public:
 		static const char* SaveHealRotation();
 		static const char* DeleteHealRotation();
 		static const char* DeleteAllHealRotations();
-
-		/* fail::Bot miscellaneous functions   */
-		static const char* GetBotNameByID();
 	};
 
 	private:
