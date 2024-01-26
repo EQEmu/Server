@@ -1819,7 +1819,8 @@ void NPC::DoClassAttacks(Mob *target) {
 		target->GetBodyType() != BT_Undead &&
 		taunt_time &&
 		type_of_pet &&
-		type_of_pet != petTargetLock
+		type_of_pet != petTargetLock &&
+		DistanceSquared(this->GetPosition(), target->GetPosition()) <= (RuleI(Pets, PetTauntRange)*RuleI(Pets, PetTauntRange))
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
