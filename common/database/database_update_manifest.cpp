@@ -5233,6 +5233,17 @@ DROP TABLE IF EXISTS item_tick
 )"
 	},
 	ManifestEntry{
+		.version = 9256,
+		.description = "2024_01_16_increase_spawngroup_size.sql",
+		.check = "SHOW COLUMNS FROM `spawngroup` LIKE 'name'",
+		.condition = "contains",
+		.match = "varchar(50)",
+		.sql = R"(
+ALTER TABLE `spawngroup`
+MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `id`;
+)"
+	},
+	ManifestEntry{
 		.version = 9257,
 		.description = "2023_11_11_guild_features.sql",
 		.check = "SHOW TABLES LIKE 'guild_permissions'",
@@ -5291,8 +5302,8 @@ CREATE TABLE guild_tributes (
   enabled int(11) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (guild_id) USING BTREE
 ) ENGINE=InnoDB;
-			)"
-	}
+)"
+    }
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
