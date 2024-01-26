@@ -1820,14 +1820,15 @@ void NPC::DoClassAttacks(Mob *target) {
 		taunt_time &&
 		type_of_pet &&
 		type_of_pet != petTargetLock &&
-		DistanceSquared(this->GetPosition(), target->GetPosition()) <= (RuleI(Pets, PetTauntRange)*RuleI(Pets, PetTauntRange))
+		DistanceSquared(GetPosition(), target->GetPosition()) <= (RuleI(Pets, PetTauntRange) * RuleI(Pets, PetTauntRange))
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
 	}
 
-	if(!ca_time)
+	if(!ca_time) {
 		return;
+	}
 
 	float HasteModifier = GetHaste() * 0.01f;
 
