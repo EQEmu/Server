@@ -229,6 +229,8 @@ Bot::Bot(
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 
+	database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage);
+
 	EquipBot();
 
 	if (GetClass() == Class::Rogue) {

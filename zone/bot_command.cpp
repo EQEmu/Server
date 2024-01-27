@@ -7557,7 +7557,6 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 
 		if (ab_type != ActionableBots::ABT_All) {
 			if (!database.botdb.SaveHelmAppearance(bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
-				c->Message(Chat::White, "%s for '%s'", bot_iter->GetCleanName());
 				return;
 			}
 
@@ -9073,6 +9072,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 			my_bot->SetBotArcherySetting(false, true);
 		}
 
+		my_bot->RemoveBotItemBySlot(slot_id);
 		my_bot->BotRemoveEquipItem(slot_id);
 		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 
