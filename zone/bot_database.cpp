@@ -1782,6 +1782,10 @@ bool BotDatabase::CreateCloneBotInventory(const uint32 bot_id, const uint32 clon
 		)
 	);
 
+	if (l.empty()) {
+		return true;
+	}
+
 	for (auto e : l) {
 		e.bot_id = clone_id;
 	}
