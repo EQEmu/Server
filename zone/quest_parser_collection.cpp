@@ -815,11 +815,7 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 
 	std::string npc_name = npc_id == ZONE_CONTROLLER_NPC_ID ? "zone_controller" : npc_type->name;
 
-	for (int i = 0; i < npc_name.length(); ++i) {
-		if (npc_name[i] == '`') {
-			npc_name[i] = '-';
-		}
-	}
+	Strings::FindReplace(npc_name, "`", "-");
 
 	const std::string& global_path = fmt::format(
 		"{}/{}",
