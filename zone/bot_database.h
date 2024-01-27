@@ -53,7 +53,7 @@ public:
 	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool by_account = false);
 
 	uint32 GetOwnerID(const uint32 bot_id);
-	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id);
+	bool LoadBotID(const std::string& bot_name, uint32& bot_id, uint8& bot_class_id);
 
 	bool LoadBot(const uint32 bot_id, Bot*& loaded_bot);
 	bool SaveNewBot(Bot* b, uint32& bot_id);

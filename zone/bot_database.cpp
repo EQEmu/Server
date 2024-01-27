@@ -332,17 +332,16 @@ uint32 BotDatabase::GetOwnerID(const uint32 bot_id)
 	return l.bot_id ? l.owner_id : 0;
 }
 
-bool BotDatabase::LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id)
+bool BotDatabase::LoadBotID(const std::string& bot_name, uint32& bot_id, uint8& bot_class_id)
 {
-	if (!owner_id || bot_name.empty()) {
+	if (bot_name.empty()) {
 		return false;
 	}
 
 	const auto& l = BotDataRepository::GetWhere(
 		database,
 		fmt::format(
-			"`owner_id` = {} AND `name` = '{}' LIMIT 1",
-			owner_id,
+			"`name` = '{}' LIMIT 1",
 			Strings::Escape(bot_name)
 		)
 	);

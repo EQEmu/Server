@@ -7119,7 +7119,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 
 	uint32 bot_id = 0;
 	uint8 bot_class = Class::None;
-	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id, bot_class)) {
+	if (!database.botdb.LoadBotID(bot_name, bot_id, bot_class)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
