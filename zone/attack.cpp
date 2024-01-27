@@ -2764,59 +2764,31 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						}
 
 						switch (r->GetLootType()) {
-<<<<<<< Updated upstream
-						case 0:
-						case 1:
-							if (m.member && m.is_raid_leader) {
-								corpse->AllowPlayerLoot(m.member, i);
-								i++;
-							}
-							break;
-						case 2:
-							if (m.member && (m.is_raid_leader || m.is_group_leader)) {
-								corpse->AllowPlayerLoot(m.member, i);
-								i++;
-							}
-							break;
-						case 3:
-							if (m.member && m.is_looter) {
-								corpse->AllowPlayerLoot(m.member, i);
-								i++;
-							}
-							break;
-						case 4:
-							if (m.member) {
-								corpse->AllowPlayerLoot(m.member, i);
-								i++;
-							}
-							break;
-=======
 							case RaidLootType::LeaderOnly:
 								if (m.member && m.is_raid_leader) {
-									corpse->AllowPlayerLoot(m.member, slot_id);
-									slot_id++;
+									corpse->AllowPlayerLoot(m.member, i);
+									i++;
 								}
 								break;
 							case RaidLootType::LeaderAndGroupLeadersOnly:
 								if (m.member && (m.is_raid_leader || m.is_group_leader)) {
-									corpse->AllowPlayerLoot(m.member, slot_id);
-									slot_id++;
+									corpse->AllowPlayerLoot(m.member, i);
+									i++;
 								}
 								break;
 							case RaidLootType::LeaderSelected:
 								if (m.member && m.is_looter) {
-									corpse->AllowPlayerLoot(m.member, slot_id);
-									slot_id++;
+									corpse->AllowPlayerLoot(m.member, i);
+									i++;
 								}
 								break;
 							case RaidLootType::EntireRaid:
 							default:
 								if (m.member) {
-									corpse->AllowPlayerLoot(m.member, slot_id);
-									slot_id++;
+									corpse->AllowPlayerLoot(m.member, i);
+									i++;
 								}
 								break;
->>>>>>> Stashed changes
 						}
 					}
 				}
@@ -4465,7 +4437,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			// produce a spell message.  Send to everyone.
 			// This fixes issues with npc-procs like 1002 and 918 and
 			// damage based disciplines which need to spit out extra spell color.
-			if (IsValidSpell(spell_id) && 
+			if (IsValidSpell(spell_id) &&
 				(skill_used == EQ::skills::SkillTigerClaw ||
 				(IsDamageSpell(spell_id) && IsDiscipline(spell_id)))
 				) {
