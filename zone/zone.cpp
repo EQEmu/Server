@@ -974,6 +974,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	default_ruleset = 0;
 
 	is_zone_time_localized = false;
+	quest_idle_override = false;
 
 	loglevelvar = 0;
 	merchantvar = 0;

@@ -525,7 +525,7 @@ void EntityList::MobProcess()
 			//	-- the entity's spawn2 point is marked as path_while_zone_idle
 			//	-- the zone is newly empty and we're allowing mobs to settle
 			if (
-				numclients > 0 ||
+				numclients > 0 || quest_idle_override ||
 				(s2 && s2->PathWhenZoneIdle()) ||
 				mob_settle_timer->Enabled()
 			) {

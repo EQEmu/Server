@@ -105,6 +105,7 @@ public:
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
+	bool quest_idle_override;
 	bool IsIdleWhenEmpty() const;
 	void SetIdleWhenEmpty(bool idle_when_empty);
 	uint32 GetSecondsBeforeIdle() const;
