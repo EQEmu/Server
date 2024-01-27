@@ -1800,9 +1800,8 @@ void Mob::AI_Event_Engaged(Mob *attacker, bool yell_for_help)
 						parse->EventNPC(EVENT_COMBAT, CastToNPC(), attacker, "1", 0);
 					}
 
-					const uint32 emote_id = GetEmoteID();
-					if (emote_id) {
-						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emote_id, attacker);
+					if (emoteid) {
+						CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::EnterCombat, emoteid, attacker);
 					}
 
 					std::string mob_name = GetCleanName();

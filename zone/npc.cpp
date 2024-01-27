@@ -438,7 +438,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	qGlobals = nullptr;
 
-	SetEmoteID(static_cast<uint32>(npc_type_data->emoteid));
+	SetEmoteID(npc_type_data->emoteid);
 	InitializeBuffSlots();
 	CalcBonuses();
 
@@ -1113,9 +1113,8 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool start_spawn_timer) {
-	const uint32 emote_id = GetEmoteID();
-	if (emote_id) {
-		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emote_id);
+	if (emoteid) {
+		DoNPCEmote(EQ::constants::EmoteEventTypes::OnDespawn, emoteid);
 	}
 
 	if (IsNPC()) {
@@ -3073,10 +3072,8 @@ void NPC::SendPayload(int payload_id, std::string payload_value)
 NPC_Emote_Struct* NPC::GetNPCEmote(uint32 emote_id, uint8 event_) {
 	std::vector<NPC_Emote_Struct*> emotes;
 
-	for (const auto &e : zone->npc_emote_list) {
-		auto nes = e;
-
-		if (nes->emoteid == emote_id && nes->event_ == event_) {
+	for (auto& e : zone->npc_emote_list) {
+		if (e->emoteid == emote_id && e->event_ == event_) {
 			emotes.emplace_back(e);
 		}
 	}
@@ -3098,7 +3095,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 		return;
 	}
 
-	auto e = GetNPCEmote(emote_id, event_);
+	const auto& e = GetNPCEmote(emote_id, event_);
 	if (!e) {
 		return;
 	}
@@ -3119,7 +3116,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 
-	if (emoteid == e->emoteid) {
+	if (GetEmoteID() == e->emoteid) {
 		if (event_ == EQ::constants::EmoteEventTypes::Hailed && t) {
 			DoQuestPause(t);
 		}
