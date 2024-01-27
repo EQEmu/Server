@@ -228,17 +228,8 @@ Bot::Bot(
 	strcpy(name, GetCleanName());
 
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
-	if (!database.botdb.LoadInspectMessage(GetBotID(), _botInspectMessage) && bot_owner)
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadInspectMessage(), GetCleanName());
 
-	std::string error_message;
-
-	EquipBot(&error_message);
-	if (!error_message.empty()) {
-		if (bot_owner)
-			bot_owner->Message(Chat::White, error_message.c_str());
-		error_message.clear();
-	}
+	EquipBot();
 
 	if (GetClass() == Class::Rogue) {
 		m_evade_timer.Start();
@@ -252,17 +243,12 @@ Bot::Bot(
 	GenerateBaseStats();
 
 	bot_timers.clear();
-	if (!database.botdb.LoadTimers(this) && bot_owner) {
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::LoadTimers(), GetCleanName());
-	}
+
+	database.botdb.LoadTimers(this);
 
 	LoadAAs();
 
-	if (!database.botdb.LoadBuffs(this)) {
-		if (bot_owner) {
-			bot_owner->Message(Chat::White, "&s for '%s'", BotDatabase::fail::LoadBuffs(), GetCleanName());
-		}
-	} else {
+	if (database.botdb.LoadBuffs(this)) {
 		//reapply some buffs
 		uint32 buff_count = GetMaxBuffSlots();
 		for (uint32 j1 = 0; j1 < buff_count; j1++) {
@@ -1335,38 +1321,23 @@ bool Bot::Save()
 	if (!bot_owner)
 		return false;
 
-	std::string error_message;
-
 	if (!GetBotID()) { // New bot record
 		uint32 bot_id = 0;
 		if (!database.botdb.SaveNewBot(this, bot_id) || !bot_id) {
-			bot_owner->Message(Chat::White, "%s '%s'", BotDatabase::fail::SaveNewBot(), GetCleanName());
 			return false;
 		}
 		SetBotID(bot_id);
 	}
 	else { // Update existing bot record
 		if (!database.botdb.SaveBot(this)) {
-			bot_owner->Message(Chat::White, "%s '%s'", BotDatabase::fail::SaveBot(), GetCleanName());
 			return false;
 		}
 	}
 
 	// All of these continue to process if any fail
-	if (!database.botdb.SaveBuffs(this))
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveBuffs(), GetCleanName());
-	if (!database.botdb.SaveTimers(this))
-		bot_owner->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveTimers(), GetCleanName());
-
-	if (!database.botdb.SaveStance(this)) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to save stance for '{}'.",
-				GetCleanName()
-			).c_str()
-		);
-	}
+	database.botdb.SaveBuffs(this);
+	database.botdb.SaveTimers(this);
+	database.botdb.SaveStance(this);
 
 	if (!SavePet())
 		bot_owner->Message(Chat::White, "Failed to save pet for '%s'", GetCleanName());
@@ -1382,7 +1353,6 @@ bool Bot::DeleteBot()
 	}
 
 	if (!database.botdb.DeleteHealRotation(GetBotID())) {
-		bot_owner->Message(Chat::White, "%s", BotDatabase::fail::DeleteHealRotation());
 		return false;
 	}
 
@@ -1413,65 +1383,23 @@ bool Bot::DeleteBot()
 		RemoveBotFromRaid(this);
 	}
 
-	std::string error_message;
-
 	if (!database.botdb.DeleteItems(GetBotID())) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"{} for '{}'.",
-				BotDatabase::fail::DeleteItems(),
-				GetCleanName()
-			).c_str()
-		);
 		return false;
 	}
 
 	if (!database.botdb.DeleteTimers(GetBotID())) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"{} for '{}'.",
-				BotDatabase::fail::DeleteTimers(),
-				GetCleanName()
-			).c_str()
-		);
 		return false;
 	}
 
 	if (!database.botdb.DeleteBuffs(GetBotID())) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"{} for '{}'.",
-				BotDatabase::fail::DeleteBuffs(),
-				GetCleanName()
-			).c_str()
-		);
 		return false;
 	}
 
 	if (!database.botdb.DeleteStance(GetBotID())) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"{} for '{}'.",
-				BotDatabase::fail::DeleteStance(),
-				GetCleanName()
-			).c_str()
-		);
 		return false;
 	}
 
 	if (!database.botdb.DeleteBot(GetBotID())) {
-		bot_owner->Message(
-			Chat::White,
-			fmt::format(
-				"{} '{}'",
-				BotDatabase::fail::DeleteBot(),
-				GetCleanName()
-			).c_str()
-		);
 		return false;
 	}
 
@@ -1511,20 +1439,16 @@ bool Bot::LoadPet()
 		}
 	}
 
-	std::string error_message;
-
 	uint32 pet_index = 0;
 	if (!database.botdb.LoadPetIndex(GetBotID(), pet_index)) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::LoadPetIndex(), GetCleanName());
 		return false;
 	}
 	if (!pet_index)
 		return true;
 
 	uint32 saved_pet_spell_id = 0;
-	if (!database.botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id)) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::LoadPetSpellID(), GetCleanName());
-	}
+	database.botdb.LoadPetSpellID(GetBotID(), saved_pet_spell_id);
+
 	if (!IsValidSpell(saved_pet_spell_id)) {
 		bot_owner->Message(Chat::White, "Invalid spell id for %s's pet", GetCleanName());
 		DeletePet();
@@ -1537,7 +1461,6 @@ bool Bot::LoadPet()
 	uint32 pet_spell_id = 0;
 
 	if (!database.botdb.LoadPetStats(GetBotID(), pet_name, pet_mana, pet_hp, pet_spell_id)) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::LoadPetStats(), GetCleanName());
 		return false;
 	}
 
@@ -1551,13 +1474,11 @@ bool Bot::LoadPet()
 
 	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
-	if (!database.botdb.LoadPetBuffs(GetBotID(), pet_buffs))
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
+	database.botdb.LoadPetBuffs(GetBotID(), pet_buffs);
 
 	uint32 pet_items[EQ::invslot::EQUIPMENT_COUNT];
 	memset(pet_items, 0, (sizeof(uint32) * EQ::invslot::EQUIPMENT_COUNT));
-	if (!database.botdb.LoadPetItems(GetBotID(), pet_items))
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
+	database.botdb.LoadPetItems(GetBotID(), pet_items);
 
 	pet_inst->SetPetState(pet_buffs, pet_items);
 	pet_inst->CalcBonuses();
@@ -1596,17 +1517,12 @@ bool Bot::SavePet()
 	std::string pet_name_str = pet_name;
 	safe_delete_array(pet_name)
 
-	std::string error_message;
-
 	if (!database.botdb.SavePetStats(GetBotID(), pet_name_str, pet_inst->GetMana(), pet_inst->GetHP(), pet_inst->GetPetSpellID())) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::SavePetStats(), GetCleanName());
 		return false;
 	}
 
-	if (!database.botdb.SavePetBuffs(GetBotID(), pet_buffs))
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::SavePetBuffs(), GetCleanName());
-	if (!database.botdb.SavePetItems(GetBotID(), pet_items))
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::SavePetItems(), GetCleanName());
+	database.botdb.SavePetBuffs(GetBotID(), pet_buffs);
+	database.botdb.SavePetItems(GetBotID(), pet_items);
 
 	return true;
 }
@@ -1617,18 +1533,13 @@ bool Bot::DeletePet()
 	if (!bot_owner)
 		return false;
 
-	std::string error_message;
-
 	if (!database.botdb.DeletePetItems(GetBotID())) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::DeletePetItems(), GetCleanName());
 		return false;
 	}
 	if (!database.botdb.DeletePetBuffs(GetBotID())) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::DeletePetBuffs(), GetCleanName());
 		return false;
 	}
 	if (!database.botdb.DeletePetStats(GetBotID())) {
-		bot_owner->Message(Chat::White, "%s for %s's pet", BotDatabase::fail::DeletePetStats(), GetCleanName());
 		return false;
 	}
 
@@ -3379,29 +3290,26 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 }
 
 // Deletes the inventory record for the specified item from the database for this bot.
-void Bot::RemoveBotItemBySlot(uint16 slot_id, std::string *error_message)
+void Bot::RemoveBotItemBySlot(uint16 slot_id)
 {
 	if (!GetBotID()) {
 		return;
 	}
 
-	if (!database.botdb.DeleteItemBySlot(GetBotID(), slot_id)) {
-		*error_message = BotDatabase::fail::DeleteItemBySlot();
-	}
+	database.botdb.DeleteItemBySlot(GetBotID(), slot_id);
 
 	m_inv.DeleteItem(slot_id);
 	UpdateEquipmentLight();
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* error_message)
+void Bot::GetBotItems(EQ::InventoryProfile &inv)
 {
 	if (!GetBotID()) {
 		return;
 	}
 
 	if (!database.botdb.LoadItems(GetBotID(), inv)) {
-		*error_message = BotDatabase::fail::LoadItems();
 		return;
 	}
 
@@ -3732,7 +3640,7 @@ void Bot::BotRemoveEquipItem(uint16 slot_id)
 	}
 }
 
-void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::string* error_message, bool save_to_database)
+void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, bool save_to_database)
 {
 	if (!inst) {
 		return;
@@ -3740,7 +3648,6 @@ void Bot::BotTradeAddItem(const EQ::ItemInstance* inst, uint16 slot_id, std::str
 
 	if (save_to_database) {
 		if (!database.botdb.SaveItemBySlot(this, slot_id, inst)) {
-			*error_message = BotDatabase::fail::SaveItemBySlot();
 			return;
 		}
 
@@ -3848,21 +3755,7 @@ void Bot::RemoveBotItem(uint32 item_id) {
 
 
 		if (inst->GetID() == item_id) {
-			std::string error_message;
-			RemoveBotItemBySlot(slot_id, &error_message);
-			if (!error_message.empty()) {
-				if (GetOwner()) {
-					GetOwner()->CastToClient()->Message(
-						Chat::White,
-						fmt::format(
-							"Database Error: {}",
-							error_message
-						).c_str()
-					);
-				}
-				return;
-			}
-
+			RemoveBotItemBySlot(slot_id);
 			BotRemoveEquipItem(slot_id);
 			CalcBotStats(GetOwner()->CastToClient()->GetBotOption(Client::booStatsUpdate));
 			return;
@@ -5389,18 +5282,15 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 	return Result;
 }
 
-void Bot::EquipBot(std::string* error_message) {
-	GetBotItems(m_inv, error_message);
+void Bot::EquipBot() {
+	GetBotItems(m_inv);
 	const EQ::ItemInstance* inst = nullptr;
 	const EQ::ItemData* item = nullptr;
 	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
 		inst = GetBotItem(slot_id);
 		if (inst) {
 			item = inst->GetItem();
-			BotTradeAddItem(inst, slot_id, error_message, false);
-			if (!error_message->empty()) {
-				return;
-			}
+			BotTradeAddItem(inst, slot_id, false);
 		}
 	}
 	UpdateEquipmentLight();
@@ -8131,8 +8021,6 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 			save_slot = -2;
 
 		if (!database.botdb.SaveEquipmentColor(GetBotID(), save_slot, rgb)) {
-			if (GetBotOwner() && GetBotOwner()->IsClient())
-				GetBotOwner()->CastToClient()->Message(Chat::White, "%s", BotDatabase::fail::SaveEquipmentColor());
 			return false;
 		}
 	}

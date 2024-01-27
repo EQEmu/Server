@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_PETS_REPOSITORY_H
@@ -124,8 +124,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bot_pets_id
 			)
 		);
@@ -134,12 +135,12 @@ public:
 		if (results.RowCount() == 1) {
 			BotPets e{};
 
-			e.pets_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.spell_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.bot_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.pets_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.spell_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.bot_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name       = row[3] ? row[3] : "";
-			e.mana       = static_cast<int32_t>(atoi(row[4]));
-			e.hp         = static_cast<int32_t>(atoi(row[5]));
+			e.mana       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			return e;
 		}
@@ -273,12 +274,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotPets e{};
 
-			e.pets_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.spell_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.bot_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.pets_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.spell_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.bot_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name       = row[3] ? row[3] : "";
-			e.mana       = static_cast<int32_t>(atoi(row[4]));
-			e.hp         = static_cast<int32_t>(atoi(row[5]));
+			e.mana       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -303,12 +304,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotPets e{};
 
-			e.pets_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.spell_id   = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.bot_id     = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.pets_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.spell_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.bot_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name       = row[3] ? row[3] : "";
-			e.mana       = static_cast<int32_t>(atoi(row[4]));
-			e.hp         = static_cast<int32_t>(atoi(row[5]));
+			e.mana       = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.hp         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -367,6 +368,72 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotPets &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.pets_index));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.hp));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotPets> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.pets_index));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.hp));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_PETS_REPOSITORY_H

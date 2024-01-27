@@ -50,14 +50,14 @@ public:
 	/* Bot functions   */
 	bool QueryNameAvailablity(const std::string& bot_name, bool& available_flag);
 	bool QueryBotCount(const uint32 owner_id, int class_id, uint32& bot_count, uint32& bot_class_count);
-	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool ByAccount = false);
+	bool LoadBotsList(const uint32 owner_id, std::list<BotsAvailableList>& bots_list, bool by_account = false);
 
 	uint32 GetOwnerID(const uint32 bot_id);
 	bool LoadBotID(const uint32 owner_id, const std::string& bot_name, uint32& bot_id, uint8& bot_class_id);
 
 	bool LoadBot(const uint32 bot_id, Bot*& loaded_bot);
-	bool SaveNewBot(Bot* bot_inst, uint32& bot_id);
-	bool SaveBot(Bot* bot_inst);
+	bool SaveNewBot(Bot* b, uint32& bot_id);
+	bool SaveBot(Bot* b);
 	bool DeleteBot(const uint32 bot_id);
 
 	bool LoadBuffs(Bot* b);
@@ -65,13 +65,13 @@ public:
 	bool DeleteBuffs(const uint32 bot_id);
 
 	bool LoadStance(const uint32 bot_id, int& bot_stance);
-	bool LoadStance(Bot* bot_inst, bool& stance_flag);
+	bool LoadStance(Bot* b, bool& stance_flag);
 	bool SaveStance(const uint32 bot_id, const int bot_stance);
-	bool SaveStance(Bot* bot_inst);
+	bool SaveStance(Bot* b);
 	bool DeleteStance(const uint32 bot_id);
 
-	bool LoadTimers(Bot* bot_inst);
-	bool SaveTimers(Bot* bot_inst);
+	bool LoadTimers(Bot* b);
+	bool SaveTimers(Bot* b);
 	bool DeleteTimers(const uint32 bot_id);
 
 
@@ -79,17 +79,14 @@ public:
 	bool QueryInventoryCount(const uint32 bot_id, uint32& item_count);
 
 	bool LoadItems(const uint32 bot_id, EQ::InventoryProfile &inventory_inst);
-	bool SaveItems(Bot* bot_inst);
 	bool DeleteItems(const uint32 bot_id);
 
 	bool LoadItemSlots(const uint32 bot_id, std::map<uint16, uint32>& m);
-	bool LoadItemBySlot(Bot* bot_inst);
 	bool LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id);
-	bool SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQ::ItemInstance* item_inst);
+	bool SaveItemBySlot(Bot* b, const uint32 slot_id, const EQ::ItemInstance* inst);
 	bool DeleteItemBySlot(const uint32 bot_id, const uint32 slot_id);
 
-	bool LoadEquipmentColor(const uint32 bot_id, const uint8 material_slot_id, uint32& rgb);
-	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 rgb);
+	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 color);
 
 	bool SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask);
 	bool SaveEnforceSpellSetting(const uint32 bot_id, const bool enforce_spell_setting);
@@ -123,19 +120,18 @@ public:
 	bool SaveAllArmorColorBySlot(const uint32 owner_id, const int16 slot_id, const uint32 rgb_value);
 	bool SaveAllArmorColors(const uint32 owner_id, const uint32 rgb_value);
 
-	bool SaveHelmAppearance(const uint32 owner_id, const uint32 bot_id, const bool show_flag = true);
+	bool SaveHelmAppearance(const uint32 bot_id, const bool show_flag = true);
 	bool SaveAllHelmAppearances(const uint32 owner_id, const bool show_flag = true);
 
-	bool ToggleHelmAppearance(const uint32 owner_id, const uint32 bot_id);
 	bool ToggleAllHelmAppearances(const uint32 owner_id);
 
-	bool SaveFollowDistance(const uint32 owner_id, const uint32 bot_id, const uint32 follow_distance);
+	bool SaveFollowDistance(const uint32 bot_id, const uint32 follow_distance);
 	bool SaveAllFollowDistances(const uint32 owner_id, const uint32 follow_distance);
 
-	bool CreateCloneBot(const uint32 owner_id, const uint32 bot_id, const std::string& clone_name, uint32& clone_id);
-	bool CreateCloneBotInventory(const uint32 owner_id, const uint32 bot_id, const uint32 clone_id);
+	bool CreateCloneBot(const uint32 bot_id, const std::string& clone_name, uint32& clone_id);
+	bool CreateCloneBotInventory(const uint32 bot_id, const uint32 clone_id);
 
-	bool SaveStopMeleeLevel(const uint32 owner_id, const uint32 bot_id, const uint8 sml_value);
+	bool SaveStopMeleeLevel(const uint32 bot_id, const uint8 sml_value);
 
 	bool SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting);
 
@@ -143,7 +139,7 @@ public:
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
 
-	bool SaveBotCasterRange(const uint32 owner_id, const uint32 bot_id, const uint32 bot_caster_range_value);
+	bool SaveBotCasterRange(const uint32 bot_id, const uint32 bot_caster_range_value);
 
 	/* Bot group functions   */
 	bool LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list);
@@ -162,13 +158,11 @@ public:
 	/* Bot miscellaneous functions   */
 	uint8 GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index);
 
-	uint16 GetRaceClassBitmask(uint16 bot_race);
+	uint32 GetRaceClassBitmask(uint32 bot_race);
 
 	class fail {
 	public:
 		/* fail::Bot functions   */
-		static const char* LoadBotsList();
-		static const char* LoadBotID();
 		static const char* LoadBot();
 		static const char* SaveNewBot();
 		static const char* SaveBot();
@@ -184,11 +178,9 @@ public:
 		/* fail::Bot inventory functions   */
 		static const char* QueryInventoryCount();
 		static const char* LoadItems();
-		static const char* SaveItems();
 		static const char* DeleteItems();
 		static const char* SaveItemBySlot();
 		static const char* DeleteItemBySlot();
-		static const char* LoadEquipmentColor();
 		static const char* SaveEquipmentColor();
 
 		/* fail::Bot pet functions   */
@@ -207,25 +199,17 @@ public:
 		/* fail::Bot command functions   */
 		static const char* LoadInspectMessage();
 		static const char* SaveInspectMessage();
-		static const char* DeleteInspectMessage();
 		static const char* SaveAllInspectMessages();
-		static const char* DeleteAllInspectMessages();
 		static const char* SaveAllArmorColorBySlot();
 		static const char* SaveAllArmorColors();
-		static const char* SaveHelmAppearance();
 		static const char* SaveAllHelmAppearances();
-		static const char* ToggleHelmAppearance();
 		static const char* ToggleAllHelmAppearances();
 		static const char* SaveFollowDistance();
 		static const char* SaveAllFollowDistances();
 		static const char* SaveStopMeleeLevel();
 		static const char* SaveBotCasterRange();
 
-		/* fail::Bot group functions   */
-		static const char* LoadGroupedBotsByGroupID();
-
 		/* fail::Bot heal rotation functions   */
-		static const char* LoadHealRotationIDByBotID();
 		static const char* LoadHealRotation();
 		static const char* LoadHealRotationMembers();
 		static const char* LoadHealRotationTargets();

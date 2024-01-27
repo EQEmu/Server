@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_HEAL_ROTATIONS_REPOSITORY_H
@@ -19,22 +19,22 @@
 class BaseBotHealRotationsRepository {
 public:
 	struct BotHealRotations {
-		uint32_t    heal_rotation_index;
-		uint32_t    bot_id;
-		uint32_t    interval;
-		uint32_t    fast_heals;
-		uint32_t    adaptive_targeting;
-		uint32_t    casting_override;
-		std::string safe_hp_base;
-		std::string safe_hp_cloth;
-		std::string safe_hp_leather;
-		std::string safe_hp_chain;
-		std::string safe_hp_plate;
-		std::string critical_hp_base;
-		std::string critical_hp_cloth;
-		std::string critical_hp_leather;
-		std::string critical_hp_chain;
-		std::string critical_hp_plate;
+		uint32_t heal_rotation_index;
+		uint32_t bot_id;
+		uint32_t interval_;
+		uint32_t fast_heals;
+		uint32_t adaptive_targeting;
+		uint32_t casting_override;
+		float    safe_hp_base;
+		float    safe_hp_cloth;
+		float    safe_hp_leather;
+		float    safe_hp_chain;
+		float    safe_hp_plate;
+		float    critical_hp_base;
+		float    critical_hp_cloth;
+		float    critical_hp_leather;
+		float    critical_hp_chain;
+		float    critical_hp_plate;
 	};
 
 	static std::string PrimaryKey()
@@ -47,7 +47,7 @@ public:
 		return {
 			"heal_rotation_index",
 			"bot_id",
-			"interval",
+			"`interval`",
 			"fast_heals",
 			"adaptive_targeting",
 			"casting_override",
@@ -69,7 +69,7 @@ public:
 		return {
 			"heal_rotation_index",
 			"bot_id",
-			"interval",
+			"`interval`",
 			"fast_heals",
 			"adaptive_targeting",
 			"casting_override",
@@ -125,7 +125,7 @@ public:
 
 		e.heal_rotation_index = 0;
 		e.bot_id              = 0;
-		e.interval            = 0;
+		e.interval_           = 0;
 		e.fast_heals          = 0;
 		e.adaptive_targeting  = 0;
 		e.casting_override    = 0;
@@ -164,8 +164,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bot_heal_rotations_id
 			)
 		);
@@ -174,12 +175,12 @@ public:
 		if (results.RowCount() == 1) {
 			BotHealRotations e{};
 
-			e.heal_rotation_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.interval            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.fast_heals          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.adaptive_targeting  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.casting_override    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.heal_rotation_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.interval_           = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.fast_heals          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.adaptive_targeting  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.casting_override    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -214,7 +215,7 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[1] + " = " + std::to_string(e.bot_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.interval));
+		v.push_back(columns[2] + " = " + std::to_string(e.interval_));
 		v.push_back(columns[3] + " = " + std::to_string(e.fast_heals));
 		v.push_back(columns[4] + " = " + std::to_string(e.adaptive_targeting));
 		v.push_back(columns[5] + " = " + std::to_string(e.casting_override));
@@ -251,7 +252,7 @@ public:
 
 		v.push_back(std::to_string(e.heal_rotation_index));
 		v.push_back(std::to_string(e.bot_id));
-		v.push_back(std::to_string(e.interval));
+		v.push_back(std::to_string(e.interval_));
 		v.push_back(std::to_string(e.fast_heals));
 		v.push_back(std::to_string(e.adaptive_targeting));
 		v.push_back(std::to_string(e.casting_override));
@@ -296,7 +297,7 @@ public:
 
 			v.push_back(std::to_string(e.heal_rotation_index));
 			v.push_back(std::to_string(e.bot_id));
-			v.push_back(std::to_string(e.interval));
+			v.push_back(std::to_string(e.interval_));
 			v.push_back(std::to_string(e.fast_heals));
 			v.push_back(std::to_string(e.adaptive_targeting));
 			v.push_back(std::to_string(e.casting_override));
@@ -343,12 +344,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotHealRotations e{};
 
-			e.heal_rotation_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.interval            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.fast_heals          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.adaptive_targeting  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.casting_override    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.heal_rotation_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.interval_           = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.fast_heals          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.adaptive_targeting  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.casting_override    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -373,12 +374,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotHealRotations e{};
 
-			e.heal_rotation_index = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.interval            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.fast_heals          = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.adaptive_targeting  = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.casting_override    = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			e.heal_rotation_index = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.interval_           = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.fast_heals          = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.adaptive_targeting  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.casting_override    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -437,6 +438,92 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotHealRotations &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.heal_rotation_index));
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.interval_));
+		v.push_back(std::to_string(e.fast_heals));
+		v.push_back(std::to_string(e.adaptive_targeting));
+		v.push_back(std::to_string(e.casting_override));
+		v.push_back(std::to_string(e.safe_hp_base));
+		v.push_back(std::to_string(e.safe_hp_cloth));
+		v.push_back(std::to_string(e.safe_hp_leather));
+		v.push_back(std::to_string(e.safe_hp_chain));
+		v.push_back(std::to_string(e.safe_hp_plate));
+		v.push_back(std::to_string(e.critical_hp_base));
+		v.push_back(std::to_string(e.critical_hp_cloth));
+		v.push_back(std::to_string(e.critical_hp_leather));
+		v.push_back(std::to_string(e.critical_hp_chain));
+		v.push_back(std::to_string(e.critical_hp_plate));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotHealRotations> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.heal_rotation_index));
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.interval_));
+			v.push_back(std::to_string(e.fast_heals));
+			v.push_back(std::to_string(e.adaptive_targeting));
+			v.push_back(std::to_string(e.casting_override));
+			v.push_back(std::to_string(e.safe_hp_base));
+			v.push_back(std::to_string(e.safe_hp_cloth));
+			v.push_back(std::to_string(e.safe_hp_leather));
+			v.push_back(std::to_string(e.safe_hp_chain));
+			v.push_back(std::to_string(e.safe_hp_plate));
+			v.push_back(std::to_string(e.critical_hp_base));
+			v.push_back(std::to_string(e.critical_hp_cloth));
+			v.push_back(std::to_string(e.critical_hp_leather));
+			v.push_back(std::to_string(e.critical_hp_chain));
+			v.push_back(std::to_string(e.critical_hp_plate));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_HEAL_ROTATIONS_REPOSITORY_H

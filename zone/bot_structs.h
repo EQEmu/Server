@@ -24,14 +24,14 @@
 #include <sstream>
 
 struct BotsAvailableList {
-	uint32 ID;
-	char Name[64];
-	uint16 Class;
-	uint8 Level;
-	uint16 Race;
-	uint8 Gender;
-	char Owner[64];
-	uint32 Owner_ID;
+	uint32 bot_id;
+	char   bot_name[64];
+	uint16 class_;
+	uint8  level;
+	uint16 race;
+	uint8  gender;
+	char   owner_name[64];
+	uint32 owner_id;
 };
 
 struct BotSpell {
