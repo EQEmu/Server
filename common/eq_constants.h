@@ -1120,4 +1120,11 @@ enum MoneySubtypes
 	SharedBank // Platinum Only
 };
 
+namespace RaidLootType {
+	constexpr uint32 LeaderOnly                = 1;
+	constexpr uint32 LeaderAndGroupLeadersOnly = 2;
+	constexpr uint32 LeaderSelected            = 3;
+	constexpr uint32 EntireRaid                = 4;
+}
+
 #endif /*COMMON_EQ_CONSTANTS_H*/
