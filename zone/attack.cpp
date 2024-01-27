@@ -2513,7 +2513,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	}
 
 	if (give_exp && give_exp->HasOwner()) {
-		bool ownerInGroup = false;
+		bool owner_in_group = false;
+
 		if (
 			(
 				give_exp->HasGroup() &&
@@ -2530,12 +2531,12 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				)
 			)
 		) {
-			ownerInGroup = true;
+			owner_in_group = true;
 		}
 
 		give_exp = give_exp->GetUltimateOwner();
 
-		if (!RuleB(Bots, BotGroupXP) && !ownerInGroup) {
+		if (!RuleB(Bots, BotGroupXP) && !owner_in_group) {
 			give_exp = nullptr;
 		}
 	}
