@@ -207,16 +207,16 @@ void Embperl::init_eval_file(void)
 		"}", FALSE);
 }
 
-int Embperl::eval_file(const char* packagename, const char* filename)
+int Embperl::eval_file(const char* package_name, const char* filename)
 {
 	std::vector<std::string> args;
-	args.push_back(packagename);
+	args.push_back(package_name);
 	args.push_back(filename);
 
 	return dosub("main::eval_file", &args);
 }
 
-int Embperl::dosub(const char* subname, const std::vector<std::string>* args, int mode)
+int Embperl::dosub(const char* sub_name, const std::vector<std::string>* args, int mode)
 {
 	dSP;
 	int         ret_value = 0;
@@ -235,7 +235,7 @@ int Embperl::dosub(const char* subname, const std::vector<std::string>* args, in
 
 	PUTBACK;
 
-	count = call_pv(subname, mode);
+	count = call_pv(sub_name, mode);
 	SPAGAIN;
 
 	if (SvTRUE(ERRSV)) {
@@ -260,7 +260,7 @@ int Embperl::dosub(const char* subname, const std::vector<std::string>* args, in
 	// check for syntax errors
 	if (args && !args->empty()) {
 		const std::string& filename = args->back();
-		std::string sub = subname;
+		std::string sub = sub_name;
 		if (sub == "main::eval_file" && !filename.empty() && File::Exists(filename)) {
 			BenchTimer benchmark;
 

@@ -142,7 +142,7 @@ public:
 
 	//loads a file and compiles it into our interpreter (assuming it hasn't already been read in)
 	//idea borrowed from perlembed
-	int eval_file(const char* packagename, const char* filename);
+	int eval_file(const char* package_name, const char* filename);
 
 	//check to see if a sub exists in package
 	bool SubExists(const char* package, const char* sub);
