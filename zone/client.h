@@ -1498,6 +1498,7 @@ public:
 	void GuildBankAck();
 	void GuildBankDepositAck(bool Fail, int8 action);
 	inline bool IsGuildBanker() { return GuildBanker; }
+	inline void SetGuildBanker(bool banker) { GuildBanker = banker; }
 	void ClearGuildBank();
 	void SendGroupCreatePacket();
 	void SendGroupLeaderChangePacket(const char *LeaderName);

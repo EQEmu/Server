@@ -730,6 +730,7 @@ namespace Titanium
 						break;
 					}
 				}
+				break; 
 			}
 			case AppearanceType::GuildShow: {
 				FAIL_ENCODE();

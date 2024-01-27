@@ -1762,10 +1762,10 @@ void ZoneGuildManager::MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, 
     m.rank_          = rank;
     m.char_id        = char_id;
     m.guild_id       = guild_id;
+    m.online         = 1;
     m.public_note.clear();
 
 	GuildMembersRepository::ReplaceOne(*m_db, m);
-	UpdateDbMemberOnline(char_id, true);
 	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
 }
 

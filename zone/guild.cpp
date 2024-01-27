@@ -411,6 +411,7 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		);
 
 		guild_mgr.UpdateDbBankerFlag(c->CharacterID(), bank_status);
+		c->SetGuildBanker(bank_status);
 		CharGuildInfo cgi;
 		guild_mgr.GetCharInfo(c->CharacterID(), cgi);
 
@@ -684,7 +685,7 @@ void EntityList::SendGuildMemberAdd(
 {
 	for (auto &c: client_list) {
 		if (c.second->GuildID() == guild_id) {
-			c.second->SendGuildMemberAdd(guild_id, level, class_, rank_, 0, zone_id, c.second->GetCleanName());
+			c.second->SendGuildMemberAdd(guild_id, level, class_, rank_, 0, zone_id, player_name);
 		}
 
 		if (player_name.compare(c.second->GetCleanName()) == 0) {
@@ -705,6 +706,7 @@ void EntityList::SendGuildMemberAdd(
 			c.second->SendGuildActiveTributes(guild_id);
 			c.second->SendAppearancePacket(AppearanceType::GuildID, guild_id, true, false, c.second);
 			c.second->SendAppearancePacket(AppearanceType::GuildRank, rank_, true, false, c.second);
+			c.second->SendAppearancePacket(AppearanceType::GuildShow, guild_mgr.CheckPermission(guild_id, rank_, GUILD_ACTION_DISPLAY_GUILD_NAME) ? 1 : 0);
 			c.second->DoGuildTributeUpdate();
 		}
 	}

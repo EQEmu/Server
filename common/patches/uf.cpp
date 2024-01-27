@@ -2504,6 +2504,7 @@ namespace UF
 						break;
 					}
 				}
+				break;
 			}
 			case AppearanceType::GuildShow: {
 				FAIL_ENCODE();

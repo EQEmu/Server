@@ -7983,7 +7983,7 @@ void Client::Handle_OP_GuildDelete(const EQApplicationPacket *app)
 	else {
 		LogGuilds("Deleting guild [{}] ([{}])", guild_mgr.GetGuildName(GuildID()), GuildID());
 		if (!guild_mgr.DeleteGuild(GuildID()))
-			Message(Chat::Red, "Guild delete failed.");
+			Message(Chat::Red, "Guild delete failed. Do you have items in the Guild Bank?");
 		else {
 			Message(Chat::White, "Guild successfully deleted.");
 		}
