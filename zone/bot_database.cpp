@@ -1452,7 +1452,9 @@ bool BotDatabase::SavePetBuffs(const uint32 bot_id, const SpellBuff_Struct* pet_
 		v.emplace_back(e);
 	}
 
-	BotPetBuffsRepository::InsertMany(database, v);
+	if (!v.empty()) {
+		BotPetBuffsRepository::InsertMany(database, v);
+	}
 
 	return true;
 }
