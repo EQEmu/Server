@@ -28,6 +28,7 @@ public:
 	bool SendPacket(ServerPacket *pack);
 	bool SendPacket(uint32 zoneid, ServerPacket *pack);
 	bool SendPacket(uint32 zoneid, uint16 instanceid, ServerPacket *pack);
+	bool SendPacketToBootedZones(ServerPacket* pack);
 	bool SetLockedZone(uint16 iZoneID, bool iLock);
 
 	EQTime worldclock;

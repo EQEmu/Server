@@ -857,3 +857,15 @@ const std::list<std::unique_ptr<ZoneServer>> &ZSList::getZoneServerList() const
 {
 	return zone_server_list;
 }
+
+bool ZSList::SendPacketToBootedZones(ServerPacket* pack)
+{
+	for (auto const& z : zone_server_list) {
+		auto r = z.get();
+		if (r && r->GetZoneID() > 0) {
+			r->SendPacket(pack);
+		}
+	}
+
+	return true;
+}

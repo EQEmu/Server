@@ -1538,7 +1538,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		}
 		case ServerOP_GuildTributeUpdate: {
-			GuildTributeUpdate* data = (GuildTributeUpdate*)pack->pBuffer;
+			auto data  = (GuildTributeUpdate *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
 
 			if (guild) {
@@ -1551,17 +1551,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 				guild->tribute.timer.Disable();
 
-				for (auto const &z: zoneserver_list.getZoneServerList()) {
-					auto r = z.get();
-					if (r->GetZoneID() > 0) {
-						r->SendPacket(pack);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(pack);
 			}
 			break;
 		}
 		case ServerOP_GuildTributeActivate: {
-			GuildTributeUpdate* data = (GuildTributeUpdate*)pack->pBuffer;
+			auto data  = (GuildTributeUpdate *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(data->guild_id);
 
 			if (guild) {
@@ -1599,21 +1594,15 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				guild_mgr.UpdateDbGuildFavor(data->guild_id, data->favor);
 				guild_mgr.UpdateDbTributeTimeRemaining(data->guild_id, data->time_remaining);
 
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
-					auto r = z.get();
-					if (r->GetZoneID() > 0) {
-						r->SendPacket(pack);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(pack);
 			}
 			break;
 		}
 		case ServerOP_GuildTributeOptInToggle:
 		{
-			GuildTributeMemberToggle* in = (GuildTributeMemberToggle*)pack->pBuffer;
+			auto in    = (GuildTributeMemberToggle *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
-
-			auto c = client_list.FindCharacter(in->player_name);
+			auto c     = client_list.FindCharacter(in->player_name);
 			if (c) {
 				c->SetGuildTributeOptIn(in->tribute_toggle ? true : false);
 			}
@@ -1624,39 +1613,34 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			if (guild) {
-
 				CharGuildInfo gci;
 				guild_mgr.GetCharInfo(in->char_id, gci);
 
-				ServerPacket* out = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
-				GuildTributeMemberToggle* data = (GuildTributeMemberToggle*)out->pBuffer;
+				auto out  = new ServerPacket(ServerOP_GuildTributeOptInToggle, sizeof(GuildTributeMemberToggle));
+				auto data = (GuildTributeMemberToggle *)out->pBuffer;
 
-				data->char_id = in->char_id;
-				data->command = in->command;
-				data->tribute_toggle = in->tribute_toggle;
-				data->no_donations = gci.total_tribute;
+				data->char_id             = in->char_id;
+				data->command             = in->command;
+				data->tribute_toggle      = in->tribute_toggle;
+				data->no_donations        = gci.total_tribute;
 				data->member_last_donated = gci.last_tribute;
-				data->guild_id = in->guild_id;
-				strncpy(data->player_name, in->player_name, strlen(in->player_name));
-				data->time_remaining = in->time_remaining;
+				data->guild_id            = in->guild_id;
+				data->time_remaining      = in->time_remaining;
+				strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
-					if (z.get()->GetZoneID() > 0) {
-						z.get()->SendPacket(out);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(out);
 				safe_delete(out);
 			}
 			break;
 		}
 		case ServerOP_RequestGuildActiveTributes:
 		{
-			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+			auto in    = (GuildTributeUpdate *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
 
 			if (guild) {
-				ServerPacket* sp = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
-				GuildTributeUpdate* out = (GuildTributeUpdate*)sp->pBuffer;
+				auto sp  = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
+				auto out = (GuildTributeUpdate *)sp->pBuffer;
 
 				out->guild_id          = in->guild_id;
 				out->enabled           = guild->tribute.enabled;
@@ -1667,13 +1651,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->tribute_id_2_tier = guild->tribute.id_2_tier;
 				out->time_remaining    = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
 
-
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
-					auto r = z.get();
-					if (r->GetZoneID() > 0) {
-						r->SendPacket(sp);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(sp);
 				safe_delete(sp);
 			}
 
@@ -1681,7 +1659,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_RequestGuildFavorAndTimer:
 		{
-			GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+			auto in    = (GuildTributeUpdate *)pack->pBuffer;
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
 
 			if (guild) {
@@ -1693,12 +1671,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->tribute_timer = guild_mgr.GetGuildTributeTimeRemaining(in->guild_id);
 				out->trophy_timer  = 0;
 
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
-					auto r = z.get();
-					if (r->GetZoneID() > 0) {
-						r->SendPacket(sp);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(sp);
 				safe_delete(sp);
 			}
 
@@ -1707,11 +1680,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_GuildTributeUpdateDonations:
 		{
 			auto in = (GuildTributeUpdate*)pack->pBuffer;
-
 			auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+
 			if (guild) {
 				guild->tribute.favor = in->favor;
-
 				guild_mgr.SendGuildTributeFavorAndTimer(in->guild_id, guild->tribute.favor, guild_mgr.GetGuildTributeTimeRemaining(in->guild_id)/*guild->tribute.timer.GetRemainingTime()*/);
 
 				auto sp  = new ServerPacket(ServerOP_GuildTributeUpdateDonations, sizeof(GuildTributeUpdate));
@@ -1721,14 +1693,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				out->member_favor   = in->member_favor;
 				out->member_enabled = in->member_enabled ? true : false;
 				out->member_time    = in->member_time;
-				strncpy(out->player_name, in->player_name, strlen(in->player_name));
+				strn0cpy(out->player_name, in->player_name, sizeof(out->player_name));
 
-				for (auto const& z : zoneserver_list.getZoneServerList()) {
-					auto r = z.get();
-					if (r->GetZoneID() > 0) {
-						r->SendPacket(sp);
-					}
-				}
+				zoneserver_list.SendPacketToBootedZones(sp);
 				safe_delete(sp)
 			}
 			break;

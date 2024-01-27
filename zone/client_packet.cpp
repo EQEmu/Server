@@ -925,7 +925,8 @@ void Client::CompleteConnect()
 
 	worldserver.RequestTellQueue(GetName());
 
-	SendGuildSpawnAppearance();
+	entity_list.ScanCloseMobs(close_mobs, this, true);
+
 	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}

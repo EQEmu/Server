@@ -1581,7 +1581,7 @@ void ClientList::GetClientList(Json::Value &response)
 		row["client_version"]   = cle->GetClientVersion();
 		row["gm"]               = cle->GetGM();
 		row["guild_id"]         = cle->GuildID();
-		row["guild_rank"]		= cle->GuildRank();
+		row["guild_rank"]       = cle->GuildRank();
 		row["guild_tribute_opt_in"] = cle->GuildTributeOptIn();
 		row["instance"]         = cle->instance();
 		row["is_local_client"]  = cle->IsLocalClient();
