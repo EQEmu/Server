@@ -2390,7 +2390,8 @@ void Client::RecordPossibleHack(const std::string& message)
 
 void Client::SendGuildTributeFavorAndTimer(uint32 favor, uint32 time_remaining) 
 {
-	if (!GetCLE) {
+	auto cle = GetCLE();
+	if (!cle) {
 		return;
 	}
 
@@ -2423,7 +2424,7 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle *in)
 	data->tribute_trophy_toggle = 0; //not yet implemented
 	data->time                  = time(nullptr);
 	data->command               = in->command;
-	strn0cpy(data->player_name, in->player_name, sizeof(data->player_name);
+	strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
