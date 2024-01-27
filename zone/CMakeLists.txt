@@ -161,6 +161,7 @@ SET(zone_sources
     zone_config.cpp
     zonedb.cpp
     zone_event_scheduler.cpp
+    zone_npc_factions.cpp
     zone_reload.cpp
     zoning.cpp
 )
