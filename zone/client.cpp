@@ -7403,7 +7403,7 @@ void Client::SetFactionLevel(
 	int current_value;
 
 	for (auto& e : l) {
-		if (e.faction_id <= 0) {
+		if (e.faction_id <= 0 || e.value == 0) {
 			continue;
 		}
 
@@ -7440,7 +7440,7 @@ void Client::SetFactionLevel(
 
 		UpdatePersonalFaction(
 			character_id,
-			e.npc_value,
+			e.value,
 			e.faction_id,
 			&current_value,
 			e.temp,
@@ -7449,7 +7449,7 @@ void Client::SetFactionLevel(
 		);
 
 		SendFactionMessage(
-			e.npc_value,
+			e.value,
 			e.faction_id,
 			faction_before,
 			current_value,

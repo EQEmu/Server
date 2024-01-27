@@ -134,8 +134,18 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 {
 	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> npc_faction_entries = { };
 
-	for (const auto& e : m_npc_faction_entries) {
-		if (e.npc_faction_id == faction_id) {
+	std::vector<uint32> faction_ids;
+
+	for (auto e : m_npc_faction_entries) {
+		if (
+			e.npc_faction_id == faction_id &&
+			std::find(
+				faction_ids.begin(),
+				faction_ids.end(),
+				e.faction_id
+			) == faction_ids.end()
+		) {
+			faction_ids.emplace_back(e.faction_id);
 			npc_faction_entries.emplace_back(e);
 		}
 	}
@@ -167,21 +177,7 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& faction_ids)
 		)
 	);
 
-	std::vector<uint32> faction_association_ids;
-
-	for (const auto& e : faction_associations) {
-		if (
-			std::find(
-				faction_association_ids.begin(),
-				faction_association_ids.end(),
-				e.id_1
-			) == faction_association_ids.end()
-		) {
-			faction_association_ids.emplace_back(e.id_1);
-		}
-	}
-
-	if (faction_association_ids.empty()) {
+	if (faction_associations.empty()) {
 		LogFaction(
 			"No Faction Association Entries to load for Faction IDs [{}]",
 			Strings::Join(faction_ids, ", ")
