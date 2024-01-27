@@ -203,13 +203,6 @@ void Embperl::init_eval_file(void)
 		// we 'my' $filename,$mtime,$package,$sub to prevent them from changing our state up here.
 		"	eval(\"package $package; my(\\$filename,\\$mtime,\\$package,\\$sub); \\$isloaded = 1; require './$filename'; \");"
 		" print $@ if $@;"
-		/*				"local *FH;open FH, $filename or die \"open '$filename' $!\";"
-						"local($/) = undef;my $sub = <FH>;close FH;"
-						"my $eval = qq{package $package; sub handler { $sub; }};"
-						"{ my($filename,$mtime,$package,$sub); eval $eval; }"
-						"die $@ if $@;"
-						"$Cache{$package}{mtime} = $mtime; ${$package.'::isloaded'} = 1;}"
-		*/
 		"}"
 		"}", FALSE);
 }
