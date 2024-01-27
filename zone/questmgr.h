@@ -106,7 +106,7 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
-	void processmobswhilezoneempty(bool idle_when_empty);
+	void processmobswhilezoneempty(bool quest_override_on);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
