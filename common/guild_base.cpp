@@ -1469,9 +1469,12 @@ BaseGuildManager::CreateGuildRepoFromGuildInfo(uint32 guild_id, BaseGuildManager
 uint32 BaseGuildManager::GetGuildTributeTimeRemaining(uint32 guild_id)
 {
 	auto guild = GetGuildByGuildID(guild_id);
-	if (guild && guild->tribute.timer.Enabled()) {
-		guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
-	}
+	if (guild) {
+		if (guild->tribute.timer.Enabled()) {
+			guild->tribute.time_remaining = guild->tribute.timer.GetRemainingTime();
+		}
 
-	return guild->tribute.time_remaining;
+		return guild->tribute.time_remaining;
+	}
+	return 0;
 }

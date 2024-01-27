@@ -133,22 +133,21 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		//broadcast this packet to all zones.
 		zoneserver_list.SendPacket(pack);
 
-		//LoadGuilds();
-
 		break;
 	}
 
-	case ServerOP_GuildMemberUpdate: {
+	case ServerOP_GuildMemberUpdate: 
+	{
 		if(pack->size != sizeof(ServerGuildMemberUpdate_Struct))
 		{
 			LogGuilds("Received ServerOP_GuildMemberUpdate of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildMemberUpdate_Struct));
 			return;
 		}
-		ServerGuildID_Struct* s = (ServerGuildID_Struct*)pack->pBuffer;
+	
+		auto s = (ServerGuildID_Struct *)pack->pBuffer;
 		RefreshGuild(s->guild_id);
 
 		zoneserver_list.SendPacket(pack);
-
 		break;
 	}
 	case ServerOP_GuildPermissionUpdate:
@@ -159,13 +158,13 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 			return;
 		}
 
-		ServerGuildPermissionUpdate_Struct* sg = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
-
+		auto sg    = (ServerGuildPermissionUpdate_Struct *)pack->pBuffer;
 		auto guild = GetGuildByGuildID(sg->guild_id);
 		if (!guild) {
 			guild_mgr.LoadGuilds();
 			guild = GetGuildByGuildID(sg->guild_id);
 		}
+
 		if (guild) {
 			if (sg->function_value) {
 				guild->functions[sg->function_id].perm_value |= (1UL << (8 - sg->rank));
@@ -180,12 +179,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 				sg->function_value
 			);
 
-			for (auto const& z : zoneserver_list.getZoneServerList()) {
-				auto r = z.get();
-				if (r->GetZoneID() > 0) {
-					r->SendPacket(pack);
-				}
-			}
+			zoneserver_list.SendPacketToBootedZones(pack);
 		}
 		else {
 			LogError("World Received ServerOP_GuildPermissionUpdate for guild [{}] function id {} with value of {} but guild could not be found.",
@@ -205,13 +199,13 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 			return;
 		}
 
-		ServerGuildRankNameChange* rnc = (ServerGuildRankNameChange*)pack->pBuffer;
-
+		auto rnc   = (ServerGuildRankNameChange*)pack->pBuffer;
 		auto guild = GetGuildByGuildID(rnc->guild_id);
 		if (!guild) {
 			guild_mgr.LoadGuilds();
 			guild = GetGuildByGuildID(rnc->guild_id);
 		}
+
 		if (guild) {
 			guild->rank_names[rnc->rank] = rnc->rank_name;
 			LogGuilds("World Received ServerOP_GuildRankNameChange from zone for guild [{}] rank id {} with new name of {}",
@@ -219,12 +213,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 				rnc->rank,
 				rnc->rank_name
 			);
-			for (auto const& z : zoneserver_list.getZoneServerList()) {
-				auto r = z.get();
-				if (r->GetZoneID() > 0) {
-					r->SendPacket(pack);
-				}
-			}
+			zoneserver_list.SendPacketToBootedZones(pack);
 		}
 		else {
 			LogError("World Received ServerOP_GuildRankNameChange from zone for guild [{}] rank id {} with new name of {} but could not find guild.",
@@ -245,12 +234,7 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildSendGuildList:
 	case ServerOP_GuildMembersList:
 	{
-		for (auto const& z : zoneserver_list.getZoneServerList()) {
-			auto r = z.get();
-			if (r->GetZoneID() > 0) {
-				r->SendPacket(pack);
-			}
-		}
+		zoneserver_list.SendPacketToBootedZones(pack);
 		break;
 	}
 	default:
@@ -277,15 +261,13 @@ void WorldGuildManager::Process()
 				 g.second->tribute.timer.Enabled() &&
 				 g.second->tribute.timer.Check()
 			) {
-			g.second->tribute.favor -= GetGuildTributeCost(g.first);
+			g.second->tribute.favor         -= GetGuildTributeCost(g.first);
 			g.second->tribute.time_remaining = RuleI(Guild, TributeTime);
 			g.second->tribute.timer.Start(RuleI(Guild, TributeTime));
 
 			guild_mgr.UpdateDbGuildFavor(g.first, g.second->tribute.favor);
 			guild_mgr.UpdateDbTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
-
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
-
 		}
 		else if (g.second->tribute.send_timer &&
 				 ((g.second->tribute.timer.GetRemainingTime() / 1000) %
@@ -318,11 +300,10 @@ uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 	auto total_cost    = 0;
 
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
-	if (guild) {
-
-		TributeData &d1 = tribute_list[guild->tribute.id_1];
-		TributeData &d2 = tribute_list[guild->tribute.id_2];
-
+	if (guild) 
+	{
+		TributeData &d1  = tribute_list[guild->tribute.id_1];
+		TributeData &d2  = tribute_list[guild->tribute.id_2];
 		uint32 cost_id1  = d1.tiers[guild->tribute.id_1_tier].cost;
 		uint32 cost_id2  = d2.tiers[guild->tribute.id_2_tier].cost;
 		uint32 level_id1 = d2.tiers[guild->tribute.id_1_tier].level;
@@ -340,21 +321,19 @@ uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 	return total_cost;
 }
 
-bool WorldGuildManager::LoadTributes() {
-
+bool WorldGuildManager::LoadTributes() 
+{
 	TributeData td{};
 	td.tier_count = 0;
 
 	tribute_list.clear();
 
 	auto tributes = TributesRepository::All(*m_db);
-
 	for (auto const& t : tributes) {
-		td.name = t.name;
-		td.description = t.descr;
-		td.unknown = t.unknown;
-		td.is_guild = t.isguild == 0 ? false : true;
-
+		td.name            = t.name;
+		td.description     = t.descr;
+		td.unknown         = t.unknown;
+		td.is_guild        = t.isguild == 0 ? false : true;
 		tribute_list[t.id] = td;
 	}
 
@@ -378,8 +357,8 @@ bool WorldGuildManager::LoadTributes() {
 
 		TributeLevel_Struct& s = cur.tiers[cur.tier_count];
 
-		s.level = t.level;
-		s.cost = t.cost;
+		s.level           = t.level;
+		s.cost            = t.cost;
 		s.tribute_item_id = t.item_id;
 
 		cur.tier_count++;
@@ -449,18 +428,13 @@ bool WorldGuildManager::RefreshGuild(uint32 guild_id)
 
 void WorldGuildManager::SendGuildTributeFavorAndTimer(uint32 guild_id, uint32 favor, uint32 time)
 {
-	ServerPacket* sp = new ServerPacket(ServerOP_GuildTributeFavAndTimer, sizeof(GuildTributeFavorTimer_Struct));
-	GuildTributeFavorTimer_Struct* data = (GuildTributeFavorTimer_Struct*)sp->pBuffer;
-	data->guild_id = guild_id;
-	data->guild_favor = favor;
+	auto sp   = new ServerPacket(ServerOP_GuildTributeFavAndTimer, sizeof(GuildTributeFavorTimer_Struct));
+	auto data = (GuildTributeFavorTimer_Struct *)sp->pBuffer;
+	data->guild_id      = guild_id;
+	data->guild_favor   = favor;
 	data->tribute_timer = time;
-	data->trophy_timer = 0;
+	data->trophy_timer  = 0;
 
-	for (auto const& z : zoneserver_list.getZoneServerList()) {
-		auto r = z.get();
-		if (r->GetZoneID() > 0) {
-			r->SendPacket(sp);
-		}
-	}
+	zoneserver_list.SendPacketToBootedZones(sp);
 	safe_delete(sp)
 }
