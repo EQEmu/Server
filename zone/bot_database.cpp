@@ -1560,7 +1560,9 @@ bool BotDatabase::SavePetItems(const uint32 bot_id, const uint32* pet_items, boo
 		v.emplace_back(e);
 	}
 
-	BotPetInventoriesRepository::InsertMany(database, v);
+	if (!v.empty()) {
+		BotPetInventoriesRepository::InsertMany(database, v);
+	}
 
 	return true;
 }
