@@ -364,41 +364,41 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 		return false;
 	}
 
-	const auto& l = BotDataRepository::FindOne(database, bot_id);
-	if (!l.bot_id) {
+	const auto& e = BotDataRepository::FindOne(database, bot_id);
+	if (!e.bot_id) {
 		return false;
 	}
 
 	auto d = Bot::CreateDefaultNPCTypeStructForBot(
-		l.name,
-		l.last_name,
-		l.level,
-		l.race,
-		l.class_,
-		l.gender
+		e.name,
+		e.last_name,
+		e.level,
+		e.race,
+		e.class_,
+		e.gender
 	);
 
 	auto t = Bot::FillNPCTypeStruct(
-		l.spells_id,
-		l.name,
-		l.last_name,
-		l.level,
-		l.race,
-		l.class_,
-		l.gender,
-		l.size,
-		l.face,
-		l.hair_style,
-		l.hair_color,
-		l.eye_color_1,
-		l.eye_color_2,
-		l.beard,
-		l.beard_color,
-		l.drakkin_heritage,
-		l.drakkin_tattoo,
-		l.drakkin_details,
-		l.hp,
-		l.mana,
+		e.spells_id,
+		e.name,
+		e.last_name,
+		e.level,
+		e.race,
+		e.class_,
+		e.gender,
+		e.size,
+		e.face,
+		e.hair_style,
+		e.hair_color,
+		e.eye_color_1,
+		e.eye_color_2,
+		e.beard,
+		e.beard_color,
+		e.drakkin_heritage,
+		e.drakkin_tattoo,
+		e.drakkin_details,
+		e.hp,
+		e.mana,
 		d->MR,
 		d->CR,
 		d->DR,
@@ -420,31 +420,32 @@ bool BotDatabase::LoadBot(const uint32 bot_id, Bot*& loaded_bot)
 
 	loaded_bot = new Bot(
 		bot_id,
-		l.owner_id,
-		l.spells_id,
-		l.time_spawned,
-		l.zone_id,
+		e.owner_id,
+		e.spells_id,
+		e.time_spawned,
+		e.zone_id,
 		t,
-		l.expansion_bitmask
+		e.expansion_bitmask
 	);
 
 	if (loaded_bot) {
-		loaded_bot->SetSurname(l.last_name);
-		loaded_bot->SetTitle(l.title);
-		loaded_bot->SetSuffix(l.suffix);
+		loaded_bot->SetSurname(e.last_name);
+		loaded_bot->SetTitle(e.title);
+		loaded_bot->SetSuffix(e.suffix);
 
-		loaded_bot->SetShowHelm((l.show_helm ? true : false));
+		loaded_bot->SetShowHelm(e.show_helm);
 
-		auto bfd = EQ::Clamp(l.follow_distance, static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
+		auto bfd = EQ::Clamp(e.follow_distance, static_cast<uint32>(1), BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
+
 		loaded_bot->SetFollowDistance(bfd);
 
-		loaded_bot->SetStopMeleeLevel(l.stop_melee_level);
+		loaded_bot->SetStopMeleeLevel(e.stop_melee_level);
 
-		loaded_bot->SetBotEnforceSpellSetting((l.enforce_spell_settings ? true : false));
+		loaded_bot->SetBotEnforceSpellSetting(e.enforce_spell_settings);
 
-		loaded_bot->SetBotArcherySetting((l.archery_setting ? true : false));
+		loaded_bot->SetBotArcherySetting(e.archery_setting);
 
-		loaded_bot->SetBotCasterRange(l.caster_range);
+		loaded_bot->SetBotCasterRange(e.caster_range);
 	}
 
 	return true;
