@@ -89,7 +89,7 @@ public:
 
 
 protected:
-	struct_HateList *Find(Mob *ent);
+	struct_HateList* Find(Mob* m);
 private:
 	std::list<struct_HateList *> list;
 	Mob                          *hate_owner;
