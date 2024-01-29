@@ -1123,49 +1123,25 @@ bool Zone::Init(bool is_static) {
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
 
-	if(!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
-		LogError("Loading spawn conditions failed, continuing without them");
-	}
+	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
-	if (!content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion())) {
-		LogError("Loading static zone points failed");
-		return false;
-	}
+	content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion());
 
 	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
 		LogError("Loading spawn groups failed");
 		return false;
 	}
 
-	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion()))
-	{
-		LogError("Loading spawn2 points failed");
-		return false;
-	}
+	content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion());
+	database.LoadCharacterCorpses(zoneid, instanceid);
 
-	if (!database.LoadCharacterCorpses(zoneid, instanceid)) {
-		LogError("Loading player corpses failed");
-		return false;
-	}
-
-	if (!content_db.LoadTraps(short_name, GetInstanceVersion()))
-	{
-		LogError("Loading traps failed");
-		return false;
-	}
+	content_db.LoadTraps(short_name, GetInstanceVersion());
 
 	LogInfo("Loading adventure flavor text");
 	LoadAdventureFlavor();
 
-	if (!LoadGroundSpawns())
-	{
-		LogError("Loading ground spawns failed. continuing");
-	}
-
-	if (!LoadZoneObjects())
-	{
-		LogError("Loading World Objects failed. continuing");
-	}
+	LoadGroundSpawns();
+	LoadZoneObjects();
 
 	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
@@ -1923,9 +1899,7 @@ void Zone::Repop()
 		LogError("Loading spawn groups failed");
 	}
 
-	if (!spawn_conditions.LoadSpawnConditions(short_name, instanceid)) {
-		LogError("Loading spawn conditions failed, continuing without them");
-	}
+	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
 	if (!content_db.PopulateZoneSpawnList(zoneid, spawn2_list, GetInstanceVersion())) {
 		LogDebug("Error in Zone::Repop: database.PopulateZoneSpawnList failed");

@@ -37,7 +37,7 @@ public:
 		uint32_t    respawn_time;
 		uint32_t    respawn_var;
 		int8_t      triggered_number;
-		int8_t      group;
+		int8_t      group_;
 		int8_t      despawn_when_triggered;
 		int8_t      undetectable;
 		int8_t      min_expansion;
@@ -72,7 +72,7 @@ public:
 			"respawn_time",
 			"respawn_var",
 			"triggered_number",
-			"group",
+			"`group`",
 			"despawn_when_triggered",
 			"undetectable",
 			"min_expansion",
@@ -103,7 +103,7 @@ public:
 			"respawn_time",
 			"respawn_var",
 			"triggered_number",
-			"group",
+			"`group`",
 			"despawn_when_triggered",
 			"undetectable",
 			"min_expansion",
@@ -168,7 +168,7 @@ public:
 		e.respawn_time           = 60;
 		e.respawn_var            = 0;
 		e.triggered_number       = 0;
-		e.group                  = 0;
+		e.group_                 = 0;
 		e.despawn_when_triggered = 0;
 		e.undetectable           = 0;
 		e.min_expansion          = -1;
@@ -229,7 +229,7 @@ public:
 			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
 			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
-			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.group_                 = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
 			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
 			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
 			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
@@ -286,7 +286,7 @@ public:
 		v.push_back(columns[15] + " = " + std::to_string(e.respawn_time));
 		v.push_back(columns[16] + " = " + std::to_string(e.respawn_var));
 		v.push_back(columns[17] + " = " + std::to_string(e.triggered_number));
-		v.push_back(columns[18] + " = " + std::to_string(e.group));
+		v.push_back(columns[18] + " = " + std::to_string(e.group_));
 		v.push_back(columns[19] + " = " + std::to_string(e.despawn_when_triggered));
 		v.push_back(columns[20] + " = " + std::to_string(e.undetectable));
 		v.push_back(columns[21] + " = " + std::to_string(e.min_expansion));
@@ -332,7 +332,7 @@ public:
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.respawn_var));
 		v.push_back(std::to_string(e.triggered_number));
-		v.push_back(std::to_string(e.group));
+		v.push_back(std::to_string(e.group_));
 		v.push_back(std::to_string(e.despawn_when_triggered));
 		v.push_back(std::to_string(e.undetectable));
 		v.push_back(std::to_string(e.min_expansion));
@@ -386,7 +386,7 @@ public:
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.respawn_var));
 			v.push_back(std::to_string(e.triggered_number));
-			v.push_back(std::to_string(e.group));
+			v.push_back(std::to_string(e.group_));
 			v.push_back(std::to_string(e.despawn_when_triggered));
 			v.push_back(std::to_string(e.undetectable));
 			v.push_back(std::to_string(e.min_expansion));
@@ -444,7 +444,7 @@ public:
 			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
 			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
-			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.group_                 = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
 			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
 			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
 			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
@@ -493,7 +493,7 @@ public:
 			e.respawn_time           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 60;
 			e.respawn_var            = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 			e.triggered_number       = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
-			e.group                  = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.group_                 = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
 			e.despawn_when_triggered = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
 			e.undetectable           = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
 			e.min_expansion          = row[21] ? static_cast<int8_t>(atoi(row[21])) : -1;
@@ -592,7 +592,7 @@ public:
 		v.push_back(std::to_string(e.respawn_time));
 		v.push_back(std::to_string(e.respawn_var));
 		v.push_back(std::to_string(e.triggered_number));
-		v.push_back(std::to_string(e.group));
+		v.push_back(std::to_string(e.group_));
 		v.push_back(std::to_string(e.despawn_when_triggered));
 		v.push_back(std::to_string(e.undetectable));
 		v.push_back(std::to_string(e.min_expansion));
@@ -639,7 +639,7 @@ public:
 			v.push_back(std::to_string(e.respawn_time));
 			v.push_back(std::to_string(e.respawn_var));
 			v.push_back(std::to_string(e.triggered_number));
-			v.push_back(std::to_string(e.group));
+			v.push_back(std::to_string(e.group_));
 			v.push_back(std::to_string(e.despawn_when_triggered));
 			v.push_back(std::to_string(e.undetectable));
 			v.push_back(std::to_string(e.min_expansion));

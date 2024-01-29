@@ -459,8 +459,8 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 	}
 
 	for (const auto& e : l) {
-		if (e.group) {
-			if (entity_list.IsTrapGroupSpawned(e.id, e.group)) {
+		if (e.group_) {
+			if (entity_list.IsTrapGroupSpawned(e.id, e.group_)) {
 				// If a member of our group is already spawned skip loading this trap.
 				continue;
 			}
@@ -482,7 +482,7 @@ bool ZoneDatabase::LoadTraps(const std::string& zone_short_name, int16 instance_
 		t->respawn_time           = e.respawn_time;
 		t->respawn_var            = e.respawn_var;
 		t->level                  = e.level;
-		t->group                  = e.group;
+		t->group                  = e.group_;
 		t->triggered_number       = e.triggered_number;
 		t->despawn_when_triggered = e.despawn_when_triggered;
 		t->undetectable           = e.undetectable;
