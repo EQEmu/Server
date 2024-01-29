@@ -3116,7 +3116,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 
-	if (GetEmoteID() == e->emoteid) {
+	if (emoteid == e->emoteid) {
 		if (event_ == EQ::constants::EmoteEventTypes::Hailed && t) {
 			DoQuestPause(t);
 		}
