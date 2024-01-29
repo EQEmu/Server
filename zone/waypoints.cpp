@@ -1215,9 +1215,7 @@ uint32 ZoneDatabase::AddWaypointForSpawn(
 
 uint32 ZoneDatabase::GetFreeGrid(uint32 zone_id)
 {
-	const int64 grid_id = GridRepository::GetMaxId(*this);
-
-	return static_cast<uint32>(grid_id) + 1;
+	return GridRepository::GetHighestGrid(*this, zone_id) + 1;
 }
 
 int ZoneDatabase::GetHighestWaypoint(uint32 zone_id, uint32 grid_id)
@@ -1242,7 +1240,7 @@ int ZoneDatabase::GetRandomWaypointFromGrid(glm::vec4 &loc, uint32 zone_id, uint
 		return 0;
 	}
 
-	auto e = l[0];
+	auto e = l.front();
 
 	loc.x = e.x;
 	loc.y = e.y;
