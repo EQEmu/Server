@@ -960,6 +960,9 @@ public:
 	void SetTitleSuffix(std::string suffix);
 	void MemorizeSpell(uint32 slot, uint32 spell_id, uint32 scribing, uint32 reduction = 0);
 
+	float GetAAEXPPercentage();
+	float GetEXPPercentage();
+
 	// Item methods
 	void UseAugmentContainer(int container_slot);
 	void EVENT_ITEM_ScriptStopReturn();

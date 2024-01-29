@@ -12004,3 +12004,23 @@ void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_v
 
 	database.LoadCharacterEXPModifier(this);
 }
+
+float Client::GetAAEXPPercentage()
+{
+	const float current = GetAAXP();
+	const float max     = GetRequiredAAExperience();
+
+	const float percentage = ((current / max) * 100);
+
+	return std::round(percentage * 100) / 100;
+}
+
+float Client::GetEXPPercentage()
+{
+	const float current = GetEXP() - GetEXPForLevel(GetLevel());
+	const float max     = GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel());
+
+	const float percentage = ((current / max) * 100);
+
+	return std::round(percentage * 100) / 100;
+}

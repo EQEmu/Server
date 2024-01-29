@@ -3088,6 +3088,16 @@ void Perl_Client_ClearXTargets(Client* self)
 	self->ClearXTargets();
 }
 
+float Perl_Client_GetAAEXPPercentage(Client* self)
+{
+	return self->GetAAEXPPercentage();
+}
+
+float Perl_Client_GetEXPPercentage(Client* self)
+{
+	return self->GetEXPPercentage();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3204,6 +3214,7 @@ void perl_register_client()
 	package.add("GetAAEXPModifier", (float(*)(Client*))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPPercentage", &Perl_Client_GetAAEXPPercentage);
 	package.add("GetAAExp", &Perl_Client_GetAAExp);
 	package.add("GetAALevel", &Perl_Client_GetAALevel);
 	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
@@ -3265,6 +3276,7 @@ void perl_register_client()
 	package.add("GetEXPModifier", (float(*)(Client*))&Perl_Client_GetEXPModifier);
 	package.add("GetEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
 	package.add("GetEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPPercentage", &Perl_Client_GetEXPPercentage);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
 	package.add("GetEndurance", &Perl_Client_GetEndurance);
 	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);
