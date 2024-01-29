@@ -660,7 +660,7 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 	merchanttable[merchantid] = merchant_list;
 }
 
-void Zone::GetMerchantDataForZoneLoad()
+void Zone::LoadMerchants()
 {
 	const auto& l = MerchantlistRepository::GetWhere(
 		content_db,
@@ -1187,7 +1187,7 @@ bool Zone::Init(bool is_static) {
 	content_db.LoadGlobalLoot();
 
 	//Load merchant data
-	GetMerchantDataForZoneLoad();
+	LoadMerchants();
 
 	//Load temporary merchant data
 	LoadTempMerchantData();
