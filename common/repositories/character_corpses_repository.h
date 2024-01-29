@@ -163,7 +163,7 @@ public:
 	{
 		db.QueryDatabase(
 			fmt::format(
-				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}`, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
+				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
 				TableName(),
 				zone_id,
 				instance_id,
