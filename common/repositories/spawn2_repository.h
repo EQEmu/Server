@@ -44,7 +44,35 @@ public:
      */
 
 	// Custom extended repository methods here
+	static uint32 GetPathGridBySpawn2ID(Database& db, uint32 spawn2_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT `pathgrid` FROM `{}` WHERE `id` = {}",
+				TableName(),
+				spawn2_id
+			)
+		);
 
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToUnsignedInt(row[0]);
+	}
+
+	static void SetPathGridBySpawn2ID(Database& db, uint32 spawn2_id, uint32 grid_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `spawn2` SET `pathgrid` = {} WHERE `id` = {}",
+				grid_id,
+				spawn2_id
+			)
+		);
+	}
 };
 
 #endif //EQEMU_SPAWN2_REPOSITORY_H

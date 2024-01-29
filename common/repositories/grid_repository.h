@@ -71,6 +71,27 @@ public:
 		return grids;
 	}
 
+	static int GetHighestGrid(Database& db, uint32 zone_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					SELECT COALESCE(MAX(`id`), 0) FROM `{}`
+					WHERE `zoneid` = {}
+				),
+				TableName(),
+				zone_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToInt(row[0]);
+	}
 };
 
 #endif //EQEMU_GRID_REPOSITORY_H
