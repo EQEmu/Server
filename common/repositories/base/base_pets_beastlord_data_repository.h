@@ -19,13 +19,13 @@
 class BasePetsBeastlordDataRepository {
 public:
 	struct PetsBeastlordData {
-		uint32_t    player_race;
-		uint32_t    pet_race;
-		uint8_t     texture;
-		uint8_t     helm_texture;
-		uint8_t     gender;
-		std::string size_modifier;
-		uint8_t     face;
+		uint32_t player_race;
+		uint32_t pet_race;
+		uint8_t  texture;
+		uint8_t  helm_texture;
+		uint8_t  gender;
+		float    size_modifier;
+		uint8_t  face;
 	};
 
 	static std::string PrimaryKey()

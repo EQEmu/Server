@@ -566,8 +566,11 @@ sub translate_mysql_data_type_to_c
         elsif ($mysql_data_type =~ /int/) {
             $struct_data_type = 'uint32_t';
         }
-        elsif ($mysql_data_type =~ /float|decimal/) {
+        elsif ($mysql_data_type =~ /float|decimal/i) {
             $struct_data_type = 'float';
+        }
+        elsif ($mysql_data_type =~ /double/i) {
+            $struct_data_type = 'double';
         }
     }
     elsif ($mysql_data_type =~ /bigint/) {
