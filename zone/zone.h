@@ -278,7 +278,7 @@ public:
 	void DoAdventureActions();
 	void DoAdventureAssassinationCountIncrease();
 	void DoAdventureCountIncrease();
-	void GetMerchantDataForZoneLoad();
+	void LoadMerchants();
 	void GetTimeSync();
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
