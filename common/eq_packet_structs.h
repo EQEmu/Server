@@ -631,6 +631,12 @@ struct ConsentResponse_Struct {
 	char zonename[32];
 };
 
+struct NameApproval_Struct {
+	char name[64];
+	uint32 race_id;
+	uint32 class_id;
+};
+
 /*
 ** Name Generator Struct
 ** Length: 72 bytes

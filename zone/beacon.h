@@ -46,7 +46,7 @@ public:
 	bool	IsBeacon()			const { return true; }
 	bool	Process();
 	virtual void	Depop(bool not_used = true)	{ remove_me = true; }
-	void AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust);
+	void AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 in_resist_adjust);
 
 protected:
 	Timer remove_timer;

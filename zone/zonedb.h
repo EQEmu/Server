@@ -528,7 +528,7 @@ public:
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
-	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
+	bool		CreateSpawn2(Client* c, uint32 spawngroup_id, const std::string& zone_short_name, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 condition_value);
 	void		UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id,uint32 timeleft);
 	uint32		GetSpawnTimeLeft(uint32 spawn2_id, uint16 instance_id);
 	void        UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id);
@@ -621,8 +621,8 @@ public:
 	bool LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id);
 
 	/* Traps   */
-	bool	LoadTraps(const char* zonename, int16 version);
-	bool	SetTrapData(Trap* trap, bool repopnow = false);
+	bool	LoadTraps(const std::string& zone_short_name, int16 instance_version);
+	bool	SetTrapData(Trap* t, bool repop = false);
 
 	/* Time   */
 	uint32	GetZoneTimezone(uint32 zoneid, uint32 version);

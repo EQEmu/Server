@@ -2295,7 +2295,7 @@ bool ZoneDatabase::SaveMercenary(Merc* m)
 		auto e = MercsRepository::NewEntity();
 
 		e.OwnerCharacterID = m->GetMercenaryCharacterID();
-		e.Slot             = c->GetNumberOfMercenaries();
+		e.Slot             = (c->GetNumberOfMercenaries() - 1);
 		e.Name             = m->GetCleanName();
 		e.TemplateID       = m->GetMercenaryTemplateID();
 		e.SuspendedTime    = c->GetMercInfo().SuspendedTime;
@@ -2336,7 +2336,7 @@ bool ZoneDatabase::SaveMercenary(Merc* m)
 	auto e = MercsRepository::FindOne(*this, m->GetMercenaryID());
 
 	e.OwnerCharacterID = m->GetMercenaryCharacterID();
-	e.Slot             = c->GetNumberOfMercenaries();
+	e.Slot             = (c->GetNumberOfMercenaries() - 1);
 	e.Name             = m->GetCleanName();
 	e.TemplateID       = m->GetMercenaryTemplateID();
 	e.SuspendedTime    = c->GetMercInfo().SuspendedTime;
@@ -2416,7 +2416,9 @@ void ZoneDatabase::SaveMercenaryBuffs(Merc* m)
 		v.emplace_back(e);
 	}
 
-	MercBuffsRepository::InsertMany(*this, v);
+	if (!v.empty()) {
+		MercBuffsRepository::InsertMany(*this, v);
+	}
 }
 
 void ZoneDatabase::LoadMercenaryBuffs(Merc* m)

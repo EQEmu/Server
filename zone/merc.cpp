@@ -5575,20 +5575,17 @@ Merc* Client::GetMerc() {
 	return (tmp);
 }
 
-uint8 Client::GetNumberOfMercenaries() {
+uint8 Client::GetNumberOfMercenaries()
+{
+	uint8 count = 0;
 
-	uint8 numMercs = 0;
-
-	for(int i=0; i<MAXMERCS; i++)
-	{
-		if(m_mercinfo[i].mercid != 0)
-		{
-			numMercs++;
+	for (int slot_id = 0; slot_id < MAXMERCS; slot_id++) {
+		if (m_mercinfo[slot_id].mercid != 0) {
+			count++;
 		}
 	}
-	Log(Logs::General, Logs::Mercenaries, "GetNumberOfMercenaries Number: %i for %s.", numMercs, GetName());
 
-	return numMercs;
+	return count;
 }
 
 void Merc::SetMercData( uint32 template_id ) {
@@ -5738,17 +5735,17 @@ void NPC::LoadMercenaryTypes()
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		MercType t;
-
-		t.Type          = Strings::ToInt(row[0]);
-		t.ClientVersion = Strings::ToInt(row[1]);
-
-		mercTypeList.push_back(t);
+	for (auto row : results) {
+		mercTypeList.push_back(
+			MercType{
+				.Type = Strings::ToUnsignedInt(row[0]),
+				.ClientVersion = Strings::ToUnsignedInt(row[1])
+			}
+		);
 	}
 }
 
@@ -5772,21 +5769,21 @@ void NPC::LoadMercenaries()
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
+	if (!results.Success() || !results.RowCount()) {
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		MercData t;
-
-		t.MercTemplateID = Strings::ToInt(row[0]);
-		t.MercType       = Strings::ToInt(row[1]);
-		t.MercSubType    = Strings::ToInt(row[2]);
-		t.CostFormula    = Strings::ToInt(row[3]);
-		t.ClientVersion  = Strings::ToInt(row[4]);
-		t.NPCID          = Strings::ToInt(row[5]);
-
-		mercDataList.push_back(t);
+	for (auto row : results) {
+		mercDataList.push_back(
+			MercData{
+				.MercTemplateID = Strings::ToUnsignedInt(row[0]),
+				.MercType = Strings::ToUnsignedInt(row[1]),
+				.MercSubType = Strings::ToUnsignedInt(row[2]),
+				.CostFormula = Strings::ToUnsignedInt(row[3]),
+				.ClientVersion = Strings::ToUnsignedInt(row[4]),
+				.NPCID = Strings::ToUnsignedInt(row[5])
+			}
+		);
 	}
 }
 

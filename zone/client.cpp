@@ -8113,7 +8113,8 @@ void Client::SendColoredText(uint32 color, std::string message)
 }
 
 
-void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction) {
+void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, uint32 itemid, uint32 exp, bool faction)
+{
 
 	auto outapp = new EQApplicationPacket(OP_Sound, sizeof(QuestReward_Struct));
 	memset(outapp->pBuffer, 0, sizeof(QuestReward_Struct));
@@ -8128,16 +8129,16 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	qr->item_id[0] = itemid;
 	qr->exp_reward = exp;
 
-	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0)
+	if (copper > 0 || silver > 0 || gold > 0 || platinum > 0) {
 		AddMoneyToPP(copper, silver, gold, platinum);
+	}
 
-	if (itemid > 0)
-		SummonItem(itemid, -1, 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
+	if (itemid > 0) {
+		SummonItemIntoInventory(itemid, -1, 0, 0, 0, 0, 0, 0, false);
+	}
 
-	if (faction)
-	{
-		if (target && target->IsNPC() && !target->IsCharmed())
-		{
+	if (faction) {
+		if (target && target->IsNPC() && !target->IsCharmed()) {
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
@@ -8145,8 +8146,9 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		}
 	}
 
-	if (exp > 0)
+	if (exp > 0) {
 		AddEXP(exp);
+	}
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);
@@ -8163,23 +8165,25 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	// not set in caller because reasons
 	qr->mob_id = target ? target->GetID() : 0; // Entity ID for the from mob name, tasks won't set this
 
-	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0)
+	if (reward.copper > 0 || reward.silver > 0 || reward.gold > 0 || reward.platinum > 0) {
 		AddMoneyToPP(reward.copper, reward.silver, reward.gold, reward.platinum);
+	}
 
-	for (int i = 0; i < QUESTREWARD_COUNT; ++i)
-		if (reward.item_id[i] > 0)
-			SummonItem(reward.item_id[i], -1, 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
+	for (int i = 0; i < QUESTREWARD_COUNT; ++i) {
+		if (reward.item_id[i] > 0) {
+			SummonItemIntoInventory(reward.item_id[i], -1, 0, 0, 0, 0, 0, 0, false);
+		}
+	}
 
 	// only process if both are valid
 	// if we don't have a target here, we want to just reward, but if there is a target, need to check charm
-	if (reward.faction && reward.faction_mod && (target == nullptr || !target->IsCharmed()))
+	if (reward.faction && reward.faction_mod && (target == nullptr || !target->IsCharmed())) {
 		RewardFaction(reward.faction, reward.faction_mod);
+	}
 
 	// legacy support
-	if (faction)
-	{
-		if (target && target->IsNPC() && !target->IsCharmed())
-		{
+	if (faction) {
+		if (target && target->IsNPC() && !target->IsCharmed()) {
 			int32 nfl_id = target->CastToNPC()->GetNPCFactionID();
 			SetFactionLevel(CharacterID(), nfl_id, GetBaseClass(), GetBaseRace(), GetDeity(), true);
 			qr->faction = target->CastToNPC()->GetPrimaryFaction();
@@ -8187,8 +8191,9 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 		}
 	}
 
-	if (reward.exp_reward > 0)
+	if (reward.exp_reward > 0) {
 		AddEXP(reward.exp_reward);
+	}
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 	safe_delete(outapp);

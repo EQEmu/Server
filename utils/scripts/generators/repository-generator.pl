@@ -606,7 +606,8 @@ sub get_reserved_cpp_variable_names
         "int",
         "key",
         "rank",
-        "range"
+        "range",
+        "interval"
     );
 }
 

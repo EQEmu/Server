@@ -259,6 +259,7 @@ RULE_BOOL(Skills, RequireTomeHandin, false, "Disable click-to-learn and force ha
 RULE_INT(Skills, TradeSkillClamp, 0, "Legacy tradeskills would clamp at 252 regardless of item modifiers and skill combination. DEFAULT: 0 will bypass clamp. Legacy value 252")
 RULE_BOOL(Skills, UseAltSinisterStrikeFormula, false, "Enabling will utilize a formula derived from 2004 monkey business post which makes the AA actually worth something.")
 RULE_BOOL(Skills, TrackingAutoRefreshSkillUps, true, "Disable to prevent tracking auto-refresh from giving skill-ups. Classic Style")
+RULE_INT(Skills, MaximumTauntDistance, 150, "Maximum player taunt distance.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
@@ -269,6 +270,7 @@ RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop i
 RULE_BOOL(Pets, CanTakeQuestItems, true, "Setting whether anyone can give quest items to pets")
 RULE_BOOL(Pets, LivelikeBreakCharmOnInvis, true, "Default: true will break charm on any type of invis (hide/ivu/iva/etc) false will only break if the pet can not see you (ex. you have an undead pet and cast IVU")
 RULE_BOOL(Pets, ClientPetsUseOwnerNameInLastName, true, "Disable this to keep client pet's last names from being owner_name's pet")
+RULE_INT(Pets, PetTauntRange, 150, "Range at which a pet will taunt targets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)

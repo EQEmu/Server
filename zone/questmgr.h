@@ -106,7 +106,7 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
-	void processmobswhilezoneempty(bool idle_when_empty);
+	void processmobswhilezoneempty(bool quest_override_on);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
@@ -262,7 +262,7 @@ public:
 	void UpdateSpawnTimer(uint32 id, uint32 newTime);
 	void MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity = 0);
 	uint32 MerchantCountItem(uint32 NPCid, uint32 itemid);
-	uint16 CreateInstance(const char *zone_short_name, int16 instance_version, uint32 duration);
+	uint16 CreateInstance(const std::string& zone_short_name, int16 instance_version, uint32 duration);
 	void UpdateInstanceTimer(uint16 instance_id, uint32 new_duration);
 	void UpdateZoneHeader(std::string type, std::string value);
 	uint32 GetInstanceTimer();
@@ -270,7 +270,7 @@ public:
 	void DestroyInstance(uint16 instance_id);
 	uint16 GetInstanceID(const char *zone, int16 version);
 	std::vector<uint16> GetInstanceIDs(std::string zone_name, uint32 character_id = 0);
-	uint16 GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id);
+	uint16 GetInstanceIDByCharID(const std::string& zone_short_name, int16 instance_version, uint32 character_id);
 	void AssignToInstance(uint16 instance_id);
 	void AssignToInstanceByCharID(uint16 instance_id, uint32 char_id);
 	void AssignGroupToInstance(uint16 instance_id);

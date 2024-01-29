@@ -491,41 +491,32 @@ void EntityList::MobProcess()
 				old_client_count > 0 &&
 				zone->GetSecondsBeforeIdle() > 0
 			) {
-				if (!zone->IsIdle()) {
-					LogInfo(
-						"Zone will go into an idle state after [{}] second{}.",
-						zone->GetSecondsBeforeIdle(),
-						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
-					);
-				}
-
+				LogInfo(
+					"Zone will go into an idle state after [{}] second{}.",
+					zone->GetSecondsBeforeIdle(),
+					zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+				);
 				mob_settle_timer->Start(zone->GetSecondsBeforeIdle() * 1000);
 			}
 
-			old_client_count = numclients;
-
 			if (numclients == 0 && mob_settle_timer->Check()) {
-				if (!zone->IsIdle()) {
-					LogInfo(
-						"Zone has gone idle after [{}] second{}.",
-						zone->GetSecondsBeforeIdle(),
-						zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
-					);
-
-					zone->SetIsIdle(true);
-				}
+				LogInfo(
+					"Zone has gone idle after [{}] second{}.",
+					zone->GetSecondsBeforeIdle(),
+					zone->GetSecondsBeforeIdle() != 1 ? "s" : ""
+				);
+				mob_settle_timer->Disable();
 			}
 
 			// Disable settle timer if someone zones into empty zone
 			if (numclients > 0 || mob_settle_timer->Check()) {
-				if (zone->IsIdle()) {
-					LogInfo("Zone is no longer idle.");
-
-					zone->SetIsIdle(false);
+				if (mob_settle_timer->Enabled()) {
+					LogInfo("Zone is no longer scheduled to go idle.");
+					mob_settle_timer->Disable();
 				}
-
-				mob_settle_timer->Disable();
 			}
+
+			old_client_count = numclients;
 
 			Spawn2* s2 = mob->CastToNPC()->respawn2;
 
@@ -534,7 +525,7 @@ void EntityList::MobProcess()
 			//	-- the entity's spawn2 point is marked as path_while_zone_idle
 			//	-- the zone is newly empty and we're allowing mobs to settle
 			if (
-				numclients > 0 ||
+				numclients > 0 || zone->quest_idle_override ||
 				(s2 && s2->PathWhenZoneIdle()) ||
 				mob_settle_timer->Enabled()
 			) {

@@ -107,15 +107,17 @@ Beacon::Beacon(const glm::vec4 &in_pos, int lifetime) : Mob(
 {
 	remove_timer.Disable();
 	spell_timer.Disable();
-	remove_me = false;
-	spell_id = 0xFFFF;
-	resist_adjust = 0;
-	spell_iterations = 0;
-	caster_id = 0;
-	max_targets = 4; // default
 
-	if(lifetime)
+	remove_me        = false;
+	spell_id         = UINT16_MAX;
+	resist_adjust    = 0;
+	spell_iterations = 0;
+	caster_id        = 0;
+	max_targets      = 4;
+
+	if (lifetime) {
 		remove_timer.Start();
+	}
 }
 
 Beacon::~Beacon()
@@ -125,55 +127,53 @@ Beacon::~Beacon()
 
 bool Beacon::Process()
 {
-	if(remove_me)
-	{
+	if (remove_me) {
 		return false;
 	}
 
-	if
-	(
+	if (
 		spell_timer.Enabled() &&
 		spell_timer.Check() &&
 		IsValidSpell(spell_id)
-	)
-	{
-		Mob *caster = entity_list.GetMob(caster_id);
-		if(caster && spell_iterations-- && max_targets)
-		{
+	) {
+		Mob* caster = entity_list.GetMob(caster_id);
+		if (caster && spell_iterations-- && max_targets) {
 			// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
 			// I don't think any other cases that get here matter
-			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) && spells[spell_id].target_type != ST_AECaster;
+			const bool affect_caster = (
+				!caster->IsNPC() &&
+				!caster->IsAIControlled() &&
+				spells[spell_id].target_type != ST_AECaster
+			);
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
-		}
-		else
-		{
+		} else {
 			// spell is done casting, or caster disappeared
-			spell_id = 0xFFFF;
+			caster_id        = 0;
+			spell_id         = UINT16_MAX;
 			spell_iterations = 0;
+
 			spell_timer.Disable();
-			caster_id = 0;
 		}
 	}
 
-	if(remove_timer.Enabled() && remove_timer.Check())
-	{
+	if (remove_timer.Enabled() && remove_timer.Check()) {
 		return false;
 	}
 
 	return true;
 }
 
-void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust)
+void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 in_resist_adjust)
 {
 	if (!IsValidSpell(cast_spell_id) || !caster) {
 		return;
 	}
 
-	caster_id = caster->GetID();
-	spell_id = cast_spell_id;
-	resist_adjust = resist_adjust;
-	spell_iterations = spells[spell_id].aoe_duration / 2500;
-	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
+	caster_id        = caster->GetID();
+	spell_id         = cast_spell_id;
+	resist_adjust    = in_resist_adjust;
+	spell_iterations = ((spells[spell_id].aoe_duration / 2500) < 1) ? 1 : spell_iterations;
+
 	if (spells[spell_id].aoe_max_targets) {
 		max_targets = spells[spell_id].aoe_max_targets;
 	}

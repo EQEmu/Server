@@ -20,8 +20,34 @@ void WorldserverCLI::MercsEnable(int argc, char **argv, argh::parser &cmd, std::
 		LogInfo("Merc tables already exist, skipping bootstrap");
 	}
 
-	LogInfo("Enabling mercs");
+	uint32 expansions_setting        = RuleManager::Instance()->GetIntRule(RuleManager::Int__ExpansionSettings);
+	uint32 expansions_setting_before = expansions_setting;
+	bool   update_expansions         = false;
+
+	if (expansions_setting != -1 && !(expansions_setting & EQ::expansions::ExpansionBitmask::bitSoD)) {
+		expansions_setting += EQ::expansions::ExpansionBitmask::bitSoD;
+		update_expansions = true;
+	}
+
+	LogInfo("Enabling Mercenaries");
 	LogInfo("Setting rule Mercs:AllowMercs to true");
 	RuleManager::Instance()->SetRule("Mercs:AllowMercs", "true", &database, true, true);
-	LogInfo("Mercs enabled");
+
+	if (update_expansions) {
+		LogInfo(
+			"Updating World:ExpansionSettings from [{}] to [{}] to enable Mercenary Liaison spawns",
+			expansions_setting_before,
+			expansions_setting
+		);
+
+		RuleManager::Instance()->SetRule(
+			"World:ExpansionSettings",
+			std::to_string(expansions_setting),
+			&database,
+			true,
+			true
+		);
+	}
+
+	LogInfo("Mercenaries enabled");
 }

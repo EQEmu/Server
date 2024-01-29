@@ -44,7 +44,57 @@ public:
      */
 
 	// Custom extended repository methods here
+	static bool UpdateItemColors(Database& db, const uint32 bot_id, const uint32 color, const std::string& where_clause)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `inst_color` = {} WHERE `bot_id` = {} AND `slot_id` {}",
+				TableName(),
+				color,
+				bot_id,
+				where_clause
+			)
+		);
 
+		return results.Success();
+	}
+
+	static bool SaveAllArmorColors(Database& db, const uint32 owner_id, const uint32 color)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `inst_color` = {} WHERE `slot_id` IN ({}, {}, {}, {}, {}, {}, {}) AND `bot_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {})",
+				TableName(),
+				color,
+				EQ::invslot::slotHead,
+				EQ::invslot::slotChest,
+				EQ::invslot::slotArms,
+				EQ::invslot::slotWrist1,
+				EQ::invslot::slotWrist2,
+				EQ::invslot::slotHands,
+				EQ::invslot::slotLegs,
+				EQ::invslot::slotFeet,
+				owner_id
+			)
+		);
+
+		return results.Success();
+	}
+
+	static bool SaveAllArmorColorsBySlot(Database& db, const uint32 owner_id, const int16 slot_id, const uint32 color)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `inst_color` = {} WHERE `slot_id` = {} AND `bot_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {})",
+				TableName(),
+				color,
+				slot_id,
+				owner_id
+			)
+		);
+
+		return results.Success();
+	}
 };
 
 #endif //EQEMU_BOT_INVENTORIES_REPOSITORY_H
