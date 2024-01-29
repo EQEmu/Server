@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_SPELL_CASTING_CHANCES_REPOSITORY_H
@@ -180,8 +180,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bot_spell_casting_chances_id
 			)
 		);
@@ -190,26 +191,26 @@ public:
 		if (results.RowCount() == 1) {
 			BotSpellCastingChances e{};
 
-			e.id               = static_cast<int32_t>(atoi(row[0]));
-			e.spell_type_index = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.class_id         = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.stance_index     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.nHSND_value      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.pH_value         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.pS_value         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.pHS_value        = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.pN_value         = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.pHN_value        = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
-			e.pSN_value        = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.pHSN_value       = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.pD_value         = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.pHD_value        = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.pSD_value        = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pHSD_value       = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.pND_value        = static_cast<uint8_t>(strtoul(row[16], nullptr, 10));
-			e.pHND_value       = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.pSND_value       = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
-			e.pHSND_value      = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
+			e.id               = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.spell_type_index = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.class_id         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.stance_index     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.nHSND_value      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.pH_value         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.pS_value         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.pHS_value        = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.pN_value         = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.pHN_value        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.pSN_value        = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.pHSN_value       = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.pD_value         = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.pHD_value        = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.pSD_value        = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pHSD_value       = row[15] ? static_cast<uint8_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pND_value        = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pHND_value       = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.pSND_value       = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.pHSND_value      = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -385,26 +386,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotSpellCastingChances e{};
 
-			e.id               = static_cast<int32_t>(atoi(row[0]));
-			e.spell_type_index = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.class_id         = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.stance_index     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.nHSND_value      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.pH_value         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.pS_value         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.pHS_value        = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.pN_value         = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.pHN_value        = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
-			e.pSN_value        = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.pHSN_value       = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.pD_value         = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.pHD_value        = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.pSD_value        = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pHSD_value       = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.pND_value        = static_cast<uint8_t>(strtoul(row[16], nullptr, 10));
-			e.pHND_value       = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.pSND_value       = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
-			e.pHSND_value      = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
+			e.id               = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.spell_type_index = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.class_id         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.stance_index     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.nHSND_value      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.pH_value         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.pS_value         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.pHS_value        = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.pN_value         = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.pHN_value        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.pSN_value        = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.pHSN_value       = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.pD_value         = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.pHD_value        = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.pSD_value        = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pHSD_value       = row[15] ? static_cast<uint8_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pND_value        = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pHND_value       = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.pSND_value       = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.pHSND_value      = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -429,26 +430,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotSpellCastingChances e{};
 
-			e.id               = static_cast<int32_t>(atoi(row[0]));
-			e.spell_type_index = static_cast<uint8_t>(strtoul(row[1], nullptr, 10));
-			e.class_id         = static_cast<uint8_t>(strtoul(row[2], nullptr, 10));
-			e.stance_index     = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.nHSND_value      = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.pH_value         = static_cast<uint8_t>(strtoul(row[5], nullptr, 10));
-			e.pS_value         = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
-			e.pHS_value        = static_cast<uint8_t>(strtoul(row[7], nullptr, 10));
-			e.pN_value         = static_cast<uint8_t>(strtoul(row[8], nullptr, 10));
-			e.pHN_value        = static_cast<uint8_t>(strtoul(row[9], nullptr, 10));
-			e.pSN_value        = static_cast<uint8_t>(strtoul(row[10], nullptr, 10));
-			e.pHSN_value       = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.pD_value         = static_cast<uint8_t>(strtoul(row[12], nullptr, 10));
-			e.pHD_value        = static_cast<uint8_t>(strtoul(row[13], nullptr, 10));
-			e.pSD_value        = static_cast<uint8_t>(strtoul(row[14], nullptr, 10));
-			e.pHSD_value       = static_cast<uint8_t>(strtoul(row[15], nullptr, 10));
-			e.pND_value        = static_cast<uint8_t>(strtoul(row[16], nullptr, 10));
-			e.pHND_value       = static_cast<uint8_t>(strtoul(row[17], nullptr, 10));
-			e.pSND_value       = static_cast<uint8_t>(strtoul(row[18], nullptr, 10));
-			e.pHSND_value      = static_cast<uint8_t>(strtoul(row[19], nullptr, 10));
+			e.id               = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.spell_type_index = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.class_id         = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.stance_index     = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.nHSND_value      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.pH_value         = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.pS_value         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.pHS_value        = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.pN_value         = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.pHN_value        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.pSN_value        = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.pHSN_value       = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.pD_value         = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.pHD_value        = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.pSD_value        = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pHSD_value       = row[15] ? static_cast<uint8_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pND_value        = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pHND_value       = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.pSND_value       = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.pHSND_value      = row[19] ? static_cast<uint8_t>(strtoul(row[19], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -507,6 +508,100 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotSpellCastingChances &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.spell_type_index));
+		v.push_back(std::to_string(e.class_id));
+		v.push_back(std::to_string(e.stance_index));
+		v.push_back(std::to_string(e.nHSND_value));
+		v.push_back(std::to_string(e.pH_value));
+		v.push_back(std::to_string(e.pS_value));
+		v.push_back(std::to_string(e.pHS_value));
+		v.push_back(std::to_string(e.pN_value));
+		v.push_back(std::to_string(e.pHN_value));
+		v.push_back(std::to_string(e.pSN_value));
+		v.push_back(std::to_string(e.pHSN_value));
+		v.push_back(std::to_string(e.pD_value));
+		v.push_back(std::to_string(e.pHD_value));
+		v.push_back(std::to_string(e.pSD_value));
+		v.push_back(std::to_string(e.pHSD_value));
+		v.push_back(std::to_string(e.pND_value));
+		v.push_back(std::to_string(e.pHND_value));
+		v.push_back(std::to_string(e.pSND_value));
+		v.push_back(std::to_string(e.pHSND_value));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotSpellCastingChances> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.spell_type_index));
+			v.push_back(std::to_string(e.class_id));
+			v.push_back(std::to_string(e.stance_index));
+			v.push_back(std::to_string(e.nHSND_value));
+			v.push_back(std::to_string(e.pH_value));
+			v.push_back(std::to_string(e.pS_value));
+			v.push_back(std::to_string(e.pHS_value));
+			v.push_back(std::to_string(e.pN_value));
+			v.push_back(std::to_string(e.pHN_value));
+			v.push_back(std::to_string(e.pSN_value));
+			v.push_back(std::to_string(e.pHSN_value));
+			v.push_back(std::to_string(e.pD_value));
+			v.push_back(std::to_string(e.pHD_value));
+			v.push_back(std::to_string(e.pSD_value));
+			v.push_back(std::to_string(e.pHSD_value));
+			v.push_back(std::to_string(e.pND_value));
+			v.push_back(std::to_string(e.pHND_value));
+			v.push_back(std::to_string(e.pSND_value));
+			v.push_back(std::to_string(e.pHSND_value));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_SPELL_CASTING_CHANCES_REPOSITORY_H

@@ -44,7 +44,36 @@ public:
      */
 
 	// Custom extended repository methods here
+	static bool SaveAllInspectMessages(Database& db, const uint32 owner_id, const std::string& inspect_message)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					INSERT INTO `bot_inspect_messages` (`bot_id`, `inspect_message`) VALUES
+					(SELECT `bot_id`, '{}' inspect_message FROM `bot_data` WHERE `owner_id` = {})
+				),
+				inspect_message,
+				owner_id
+			)
+		);
 
+		return results.Success();
+	}
+
+	static bool DeleteAllInspectMessages(Database& db, const uint32 owner_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				SQL(
+					DELETE FROM `bot_inspect_messages`
+					WHERE `bot_id` IN (SELECT `bot_id` FROM `bot_data` WHERE `owner_id` = {})
+				),
+				owner_id
+			)
+		);
+
+		return results.Success();
+	}
 };
 
 #endif //EQEMU_BOT_INSPECT_MESSAGES_REPOSITORY_H

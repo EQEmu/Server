@@ -566,6 +566,9 @@ sub translate_mysql_data_type_to_c
         elsif ($mysql_data_type =~ /int/) {
             $struct_data_type = 'uint32_t';
         }
+        elsif ($mysql_data_type =~ /float|decimal/) {
+            $struct_data_type = 'float';
+        }
     }
     elsif ($mysql_data_type =~ /bigint/) {
         $struct_data_type = 'int64_t';
@@ -600,7 +603,8 @@ sub get_reserved_cpp_variable_names
         "int",
         "key",
         "rank",
-        "range"
+        "range",
+        "interval"
     );
 }
 

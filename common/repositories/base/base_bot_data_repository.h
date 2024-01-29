@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_DATA_REPOSITORY_H
@@ -278,7 +278,7 @@ public:
 		e.expansion_bitmask      = -1;
 		e.enforce_spell_settings = 0;
 		e.archery_setting        = 0;
-		e.caster_range           = 0;
+		e.caster_range           = 300;
 
 		return e;
 	}
@@ -315,57 +315,57 @@ public:
 		if (results.RowCount() == 1) {
 			BotData e{};
 
-			e.bot_id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.owner_id               = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spells_id              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.bot_id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.owner_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spells_id              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name                   = row[3] ? row[3] : "";
 			e.last_name              = row[4] ? row[4] : "";
 			e.title                  = row[5] ? row[5] : "";
 			e.suffix                 = row[6] ? row[6] : "";
-			e.zone_id                = static_cast<int16_t>(atoi(row[7]));
-			e.gender                 = static_cast<int8_t>(atoi(row[8]));
-			e.race                   = static_cast<int16_t>(atoi(row[9]));
-			e.class_                 = static_cast<int8_t>(atoi(row[10]));
-			e.level                  = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.deity                  = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.creation_day           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.last_spawn             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.time_spawned           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size                   = strtof(row[16], nullptr);
-			e.face                   = static_cast<int32_t>(atoi(row[17]));
-			e.hair_color             = static_cast<int32_t>(atoi(row[18]));
-			e.hair_style             = static_cast<int32_t>(atoi(row[19]));
-			e.beard                  = static_cast<int32_t>(atoi(row[20]));
-			e.beard_color            = static_cast<int32_t>(atoi(row[21]));
-			e.eye_color_1            = static_cast<int32_t>(atoi(row[22]));
-			e.eye_color_2            = static_cast<int32_t>(atoi(row[23]));
-			e.drakkin_heritage       = static_cast<int32_t>(atoi(row[24]));
-			e.drakkin_tattoo         = static_cast<int32_t>(atoi(row[25]));
-			e.drakkin_details        = static_cast<int32_t>(atoi(row[26]));
-			e.ac                     = static_cast<int16_t>(atoi(row[27]));
-			e.atk                    = static_cast<int32_t>(atoi(row[28]));
-			e.hp                     = static_cast<int32_t>(atoi(row[29]));
-			e.mana                   = static_cast<int32_t>(atoi(row[30]));
-			e.str                    = static_cast<int32_t>(atoi(row[31]));
-			e.sta                    = static_cast<int32_t>(atoi(row[32]));
-			e.cha                    = static_cast<int32_t>(atoi(row[33]));
-			e.dex                    = static_cast<int32_t>(atoi(row[34]));
-			e.int_                   = static_cast<int32_t>(atoi(row[35]));
-			e.agi                    = static_cast<int32_t>(atoi(row[36]));
-			e.wis                    = static_cast<int32_t>(atoi(row[37]));
-			e.fire                   = static_cast<int16_t>(atoi(row[38]));
-			e.cold                   = static_cast<int16_t>(atoi(row[39]));
-			e.magic                  = static_cast<int16_t>(atoi(row[40]));
-			e.poison                 = static_cast<int16_t>(atoi(row[41]));
-			e.disease                = static_cast<int16_t>(atoi(row[42]));
-			e.corruption             = static_cast<int16_t>(atoi(row[43]));
-			e.show_helm              = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.follow_distance        = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
-			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
-			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
-			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
-			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
+			e.zone_id                = row[7] ? static_cast<int16_t>(atoi(row[7])) : 0;
+			e.gender                 = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.race                   = row[9] ? static_cast<int16_t>(atoi(row[9])) : 0;
+			e.class_                 = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.level                  = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.deity                  = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.creation_day           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.last_spawn             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.time_spawned           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size                   = row[16] ? strtof(row[16], nullptr) : 0;
+			e.face                   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 1;
+			e.hair_color             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 1;
+			e.hair_style             = row[19] ? static_cast<int32_t>(atoi(row[19])) : 1;
+			e.beard                  = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.beard_color            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 1;
+			e.eye_color_1            = row[22] ? static_cast<int32_t>(atoi(row[22])) : 1;
+			e.eye_color_2            = row[23] ? static_cast<int32_t>(atoi(row[23])) : 1;
+			e.drakkin_heritage       = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.drakkin_tattoo         = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.drakkin_details        = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.ac                     = row[27] ? static_cast<int16_t>(atoi(row[27])) : 0;
+			e.atk                    = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.hp                     = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.mana                   = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.str                    = row[31] ? static_cast<int32_t>(atoi(row[31])) : 75;
+			e.sta                    = row[32] ? static_cast<int32_t>(atoi(row[32])) : 75;
+			e.cha                    = row[33] ? static_cast<int32_t>(atoi(row[33])) : 75;
+			e.dex                    = row[34] ? static_cast<int32_t>(atoi(row[34])) : 75;
+			e.int_                   = row[35] ? static_cast<int32_t>(atoi(row[35])) : 75;
+			e.agi                    = row[36] ? static_cast<int32_t>(atoi(row[36])) : 75;
+			e.wis                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 75;
+			e.fire                   = row[38] ? static_cast<int16_t>(atoi(row[38])) : 0;
+			e.cold                   = row[39] ? static_cast<int16_t>(atoi(row[39])) : 0;
+			e.magic                  = row[40] ? static_cast<int16_t>(atoi(row[40])) : 0;
+			e.poison                 = row[41] ? static_cast<int16_t>(atoi(row[41])) : 0;
+			e.disease                = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
+			e.corruption             = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
+			e.show_helm              = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.follow_distance        = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 200;
+			e.stop_melee_level       = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 255;
+			e.expansion_bitmask      = row[47] ? static_cast<int32_t>(atoi(row[47])) : -1;
+			e.enforce_spell_settings = row[48] ? static_cast<uint8_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.archery_setting        = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.caster_range           = row[50] ? static_cast<uint32_t>(strtoul(row[50], nullptr, 10)) : 300;
 
 			return e;
 		}
@@ -634,57 +634,57 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotData e{};
 
-			e.bot_id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.owner_id               = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spells_id              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.bot_id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.owner_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spells_id              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name                   = row[3] ? row[3] : "";
 			e.last_name              = row[4] ? row[4] : "";
 			e.title                  = row[5] ? row[5] : "";
 			e.suffix                 = row[6] ? row[6] : "";
-			e.zone_id                = static_cast<int16_t>(atoi(row[7]));
-			e.gender                 = static_cast<int8_t>(atoi(row[8]));
-			e.race                   = static_cast<int16_t>(atoi(row[9]));
-			e.class_                 = static_cast<int8_t>(atoi(row[10]));
-			e.level                  = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.deity                  = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.creation_day           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.last_spawn             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.time_spawned           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size                   = strtof(row[16], nullptr);
-			e.face                   = static_cast<int32_t>(atoi(row[17]));
-			e.hair_color             = static_cast<int32_t>(atoi(row[18]));
-			e.hair_style             = static_cast<int32_t>(atoi(row[19]));
-			e.beard                  = static_cast<int32_t>(atoi(row[20]));
-			e.beard_color            = static_cast<int32_t>(atoi(row[21]));
-			e.eye_color_1            = static_cast<int32_t>(atoi(row[22]));
-			e.eye_color_2            = static_cast<int32_t>(atoi(row[23]));
-			e.drakkin_heritage       = static_cast<int32_t>(atoi(row[24]));
-			e.drakkin_tattoo         = static_cast<int32_t>(atoi(row[25]));
-			e.drakkin_details        = static_cast<int32_t>(atoi(row[26]));
-			e.ac                     = static_cast<int16_t>(atoi(row[27]));
-			e.atk                    = static_cast<int32_t>(atoi(row[28]));
-			e.hp                     = static_cast<int32_t>(atoi(row[29]));
-			e.mana                   = static_cast<int32_t>(atoi(row[30]));
-			e.str                    = static_cast<int32_t>(atoi(row[31]));
-			e.sta                    = static_cast<int32_t>(atoi(row[32]));
-			e.cha                    = static_cast<int32_t>(atoi(row[33]));
-			e.dex                    = static_cast<int32_t>(atoi(row[34]));
-			e.int_                   = static_cast<int32_t>(atoi(row[35]));
-			e.agi                    = static_cast<int32_t>(atoi(row[36]));
-			e.wis                    = static_cast<int32_t>(atoi(row[37]));
-			e.fire                   = static_cast<int16_t>(atoi(row[38]));
-			e.cold                   = static_cast<int16_t>(atoi(row[39]));
-			e.magic                  = static_cast<int16_t>(atoi(row[40]));
-			e.poison                 = static_cast<int16_t>(atoi(row[41]));
-			e.disease                = static_cast<int16_t>(atoi(row[42]));
-			e.corruption             = static_cast<int16_t>(atoi(row[43]));
-			e.show_helm              = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.follow_distance        = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
-			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
-			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
-			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
-			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
+			e.zone_id                = row[7] ? static_cast<int16_t>(atoi(row[7])) : 0;
+			e.gender                 = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.race                   = row[9] ? static_cast<int16_t>(atoi(row[9])) : 0;
+			e.class_                 = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.level                  = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.deity                  = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.creation_day           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.last_spawn             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.time_spawned           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size                   = row[16] ? strtof(row[16], nullptr) : 0;
+			e.face                   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 1;
+			e.hair_color             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 1;
+			e.hair_style             = row[19] ? static_cast<int32_t>(atoi(row[19])) : 1;
+			e.beard                  = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.beard_color            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 1;
+			e.eye_color_1            = row[22] ? static_cast<int32_t>(atoi(row[22])) : 1;
+			e.eye_color_2            = row[23] ? static_cast<int32_t>(atoi(row[23])) : 1;
+			e.drakkin_heritage       = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.drakkin_tattoo         = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.drakkin_details        = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.ac                     = row[27] ? static_cast<int16_t>(atoi(row[27])) : 0;
+			e.atk                    = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.hp                     = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.mana                   = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.str                    = row[31] ? static_cast<int32_t>(atoi(row[31])) : 75;
+			e.sta                    = row[32] ? static_cast<int32_t>(atoi(row[32])) : 75;
+			e.cha                    = row[33] ? static_cast<int32_t>(atoi(row[33])) : 75;
+			e.dex                    = row[34] ? static_cast<int32_t>(atoi(row[34])) : 75;
+			e.int_                   = row[35] ? static_cast<int32_t>(atoi(row[35])) : 75;
+			e.agi                    = row[36] ? static_cast<int32_t>(atoi(row[36])) : 75;
+			e.wis                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 75;
+			e.fire                   = row[38] ? static_cast<int16_t>(atoi(row[38])) : 0;
+			e.cold                   = row[39] ? static_cast<int16_t>(atoi(row[39])) : 0;
+			e.magic                  = row[40] ? static_cast<int16_t>(atoi(row[40])) : 0;
+			e.poison                 = row[41] ? static_cast<int16_t>(atoi(row[41])) : 0;
+			e.disease                = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
+			e.corruption             = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
+			e.show_helm              = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.follow_distance        = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 200;
+			e.stop_melee_level       = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 255;
+			e.expansion_bitmask      = row[47] ? static_cast<int32_t>(atoi(row[47])) : -1;
+			e.enforce_spell_settings = row[48] ? static_cast<uint8_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.archery_setting        = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.caster_range           = row[50] ? static_cast<uint32_t>(strtoul(row[50], nullptr, 10)) : 300;
 
 			all_entries.push_back(e);
 		}
@@ -709,57 +709,57 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotData e{};
 
-			e.bot_id                 = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.owner_id               = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spells_id              = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
+			e.bot_id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.owner_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spells_id              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.name                   = row[3] ? row[3] : "";
 			e.last_name              = row[4] ? row[4] : "";
 			e.title                  = row[5] ? row[5] : "";
 			e.suffix                 = row[6] ? row[6] : "";
-			e.zone_id                = static_cast<int16_t>(atoi(row[7]));
-			e.gender                 = static_cast<int8_t>(atoi(row[8]));
-			e.race                   = static_cast<int16_t>(atoi(row[9]));
-			e.class_                 = static_cast<int8_t>(atoi(row[10]));
-			e.level                  = static_cast<uint8_t>(strtoul(row[11], nullptr, 10));
-			e.deity                  = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.creation_day           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.last_spawn             = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.time_spawned           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.size                   = strtof(row[16], nullptr);
-			e.face                   = static_cast<int32_t>(atoi(row[17]));
-			e.hair_color             = static_cast<int32_t>(atoi(row[18]));
-			e.hair_style             = static_cast<int32_t>(atoi(row[19]));
-			e.beard                  = static_cast<int32_t>(atoi(row[20]));
-			e.beard_color            = static_cast<int32_t>(atoi(row[21]));
-			e.eye_color_1            = static_cast<int32_t>(atoi(row[22]));
-			e.eye_color_2            = static_cast<int32_t>(atoi(row[23]));
-			e.drakkin_heritage       = static_cast<int32_t>(atoi(row[24]));
-			e.drakkin_tattoo         = static_cast<int32_t>(atoi(row[25]));
-			e.drakkin_details        = static_cast<int32_t>(atoi(row[26]));
-			e.ac                     = static_cast<int16_t>(atoi(row[27]));
-			e.atk                    = static_cast<int32_t>(atoi(row[28]));
-			e.hp                     = static_cast<int32_t>(atoi(row[29]));
-			e.mana                   = static_cast<int32_t>(atoi(row[30]));
-			e.str                    = static_cast<int32_t>(atoi(row[31]));
-			e.sta                    = static_cast<int32_t>(atoi(row[32]));
-			e.cha                    = static_cast<int32_t>(atoi(row[33]));
-			e.dex                    = static_cast<int32_t>(atoi(row[34]));
-			e.int_                   = static_cast<int32_t>(atoi(row[35]));
-			e.agi                    = static_cast<int32_t>(atoi(row[36]));
-			e.wis                    = static_cast<int32_t>(atoi(row[37]));
-			e.fire                   = static_cast<int16_t>(atoi(row[38]));
-			e.cold                   = static_cast<int16_t>(atoi(row[39]));
-			e.magic                  = static_cast<int16_t>(atoi(row[40]));
-			e.poison                 = static_cast<int16_t>(atoi(row[41]));
-			e.disease                = static_cast<int16_t>(atoi(row[42]));
-			e.corruption             = static_cast<int16_t>(atoi(row[43]));
-			e.show_helm              = static_cast<uint32_t>(strtoul(row[44], nullptr, 10));
-			e.follow_distance        = static_cast<uint32_t>(strtoul(row[45], nullptr, 10));
-			e.stop_melee_level       = static_cast<uint8_t>(strtoul(row[46], nullptr, 10));
-			e.expansion_bitmask      = static_cast<int32_t>(atoi(row[47]));
-			e.enforce_spell_settings = static_cast<uint8_t>(strtoul(row[48], nullptr, 10));
-			e.archery_setting        = static_cast<uint8_t>(strtoul(row[49], nullptr, 10));
-			e.caster_range           = static_cast<uint32_t>(strtoul(row[50], nullptr, 10));
+			e.zone_id                = row[7] ? static_cast<int16_t>(atoi(row[7])) : 0;
+			e.gender                 = row[8] ? static_cast<int8_t>(atoi(row[8])) : 0;
+			e.race                   = row[9] ? static_cast<int16_t>(atoi(row[9])) : 0;
+			e.class_                 = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.level                  = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.deity                  = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.creation_day           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.last_spawn             = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.time_spawned           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.size                   = row[16] ? strtof(row[16], nullptr) : 0;
+			e.face                   = row[17] ? static_cast<int32_t>(atoi(row[17])) : 1;
+			e.hair_color             = row[18] ? static_cast<int32_t>(atoi(row[18])) : 1;
+			e.hair_style             = row[19] ? static_cast<int32_t>(atoi(row[19])) : 1;
+			e.beard                  = row[20] ? static_cast<int32_t>(atoi(row[20])) : 0;
+			e.beard_color            = row[21] ? static_cast<int32_t>(atoi(row[21])) : 1;
+			e.eye_color_1            = row[22] ? static_cast<int32_t>(atoi(row[22])) : 1;
+			e.eye_color_2            = row[23] ? static_cast<int32_t>(atoi(row[23])) : 1;
+			e.drakkin_heritage       = row[24] ? static_cast<int32_t>(atoi(row[24])) : 0;
+			e.drakkin_tattoo         = row[25] ? static_cast<int32_t>(atoi(row[25])) : 0;
+			e.drakkin_details        = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.ac                     = row[27] ? static_cast<int16_t>(atoi(row[27])) : 0;
+			e.atk                    = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.hp                     = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.mana                   = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.str                    = row[31] ? static_cast<int32_t>(atoi(row[31])) : 75;
+			e.sta                    = row[32] ? static_cast<int32_t>(atoi(row[32])) : 75;
+			e.cha                    = row[33] ? static_cast<int32_t>(atoi(row[33])) : 75;
+			e.dex                    = row[34] ? static_cast<int32_t>(atoi(row[34])) : 75;
+			e.int_                   = row[35] ? static_cast<int32_t>(atoi(row[35])) : 75;
+			e.agi                    = row[36] ? static_cast<int32_t>(atoi(row[36])) : 75;
+			e.wis                    = row[37] ? static_cast<int32_t>(atoi(row[37])) : 75;
+			e.fire                   = row[38] ? static_cast<int16_t>(atoi(row[38])) : 0;
+			e.cold                   = row[39] ? static_cast<int16_t>(atoi(row[39])) : 0;
+			e.magic                  = row[40] ? static_cast<int16_t>(atoi(row[40])) : 0;
+			e.poison                 = row[41] ? static_cast<int16_t>(atoi(row[41])) : 0;
+			e.disease                = row[42] ? static_cast<int16_t>(atoi(row[42])) : 0;
+			e.corruption             = row[43] ? static_cast<int16_t>(atoi(row[43])) : 0;
+			e.show_helm              = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
+			e.follow_distance        = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 200;
+			e.stop_melee_level       = row[46] ? static_cast<uint8_t>(strtoul(row[46], nullptr, 10)) : 255;
+			e.expansion_bitmask      = row[47] ? static_cast<int32_t>(atoi(row[47])) : -1;
+			e.enforce_spell_settings = row[48] ? static_cast<uint8_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.archery_setting        = row[49] ? static_cast<uint8_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.caster_range           = row[50] ? static_cast<uint32_t>(strtoul(row[50], nullptr, 10)) : 300;
 
 			all_entries.push_back(e);
 		}
@@ -818,6 +818,162 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotData &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.owner_id));
+		v.push_back(std::to_string(e.spells_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.last_name) + "'");
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back("'" + Strings::Escape(e.suffix) + "'");
+		v.push_back(std::to_string(e.zone_id));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.race));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.level));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.creation_day));
+		v.push_back(std::to_string(e.last_spawn));
+		v.push_back(std::to_string(e.time_spawned));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.face));
+		v.push_back(std::to_string(e.hair_color));
+		v.push_back(std::to_string(e.hair_style));
+		v.push_back(std::to_string(e.beard));
+		v.push_back(std::to_string(e.beard_color));
+		v.push_back(std::to_string(e.eye_color_1));
+		v.push_back(std::to_string(e.eye_color_2));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.drakkin_tattoo));
+		v.push_back(std::to_string(e.drakkin_details));
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.atk));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.str));
+		v.push_back(std::to_string(e.sta));
+		v.push_back(std::to_string(e.cha));
+		v.push_back(std::to_string(e.dex));
+		v.push_back(std::to_string(e.int_));
+		v.push_back(std::to_string(e.agi));
+		v.push_back(std::to_string(e.wis));
+		v.push_back(std::to_string(e.fire));
+		v.push_back(std::to_string(e.cold));
+		v.push_back(std::to_string(e.magic));
+		v.push_back(std::to_string(e.poison));
+		v.push_back(std::to_string(e.disease));
+		v.push_back(std::to_string(e.corruption));
+		v.push_back(std::to_string(e.show_helm));
+		v.push_back(std::to_string(e.follow_distance));
+		v.push_back(std::to_string(e.stop_melee_level));
+		v.push_back(std::to_string(e.expansion_bitmask));
+		v.push_back(std::to_string(e.enforce_spell_settings));
+		v.push_back(std::to_string(e.archery_setting));
+		v.push_back(std::to_string(e.caster_range));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotData> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.owner_id));
+			v.push_back(std::to_string(e.spells_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.last_name) + "'");
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back("'" + Strings::Escape(e.suffix) + "'");
+			v.push_back(std::to_string(e.zone_id));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.race));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.level));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.creation_day));
+			v.push_back(std::to_string(e.last_spawn));
+			v.push_back(std::to_string(e.time_spawned));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.face));
+			v.push_back(std::to_string(e.hair_color));
+			v.push_back(std::to_string(e.hair_style));
+			v.push_back(std::to_string(e.beard));
+			v.push_back(std::to_string(e.beard_color));
+			v.push_back(std::to_string(e.eye_color_1));
+			v.push_back(std::to_string(e.eye_color_2));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.drakkin_tattoo));
+			v.push_back(std::to_string(e.drakkin_details));
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.atk));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.str));
+			v.push_back(std::to_string(e.sta));
+			v.push_back(std::to_string(e.cha));
+			v.push_back(std::to_string(e.dex));
+			v.push_back(std::to_string(e.int_));
+			v.push_back(std::to_string(e.agi));
+			v.push_back(std::to_string(e.wis));
+			v.push_back(std::to_string(e.fire));
+			v.push_back(std::to_string(e.cold));
+			v.push_back(std::to_string(e.magic));
+			v.push_back(std::to_string(e.poison));
+			v.push_back(std::to_string(e.disease));
+			v.push_back(std::to_string(e.corruption));
+			v.push_back(std::to_string(e.show_helm));
+			v.push_back(std::to_string(e.follow_distance));
+			v.push_back(std::to_string(e.stop_melee_level));
+			v.push_back(std::to_string(e.expansion_bitmask));
+			v.push_back(std::to_string(e.enforce_spell_settings));
+			v.push_back(std::to_string(e.archery_setting));
+			v.push_back(std::to_string(e.caster_range));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_DATA_REPOSITORY_H

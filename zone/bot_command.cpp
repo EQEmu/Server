@@ -5843,7 +5843,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	}
 
 	uint32 clone_id = 0;
-	if (!database.botdb.CreateCloneBot(c->CharacterID(), my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
+	if (!database.botdb.CreateCloneBot(my_bot->GetBotID(), bot_name, clone_id) || !clone_id) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -5875,7 +5875,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		);
 	}
 
-	if (!database.botdb.CreateCloneBotInventory(c->CharacterID(), my_bot->GetBotID(), clone_id)) {
+	if (!database.botdb.CreateCloneBotInventory(my_bot->GetBotID(), clone_id)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -6361,25 +6361,9 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (dye_all) {
-			if (!database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value)) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"{}",
-						BotDatabase::fail::SaveAllArmorColors()
-					).c_str()
-				);
-			}
+			database.botdb.SaveAllArmorColors(c->CharacterID(), rgb_value);
 		} else {
-			if (!database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value)) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"{}",
-						BotDatabase::fail::SaveAllArmorColorBySlot()
-					).c_str()
-				);
-			}
+			database.botdb.SaveAllArmorColorBySlot(c->CharacterID(), slot_id, rgb_value);
 		}
 	}
 }
@@ -6527,8 +6511,7 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetFollowDistance(bfd);
-		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveFollowDistance(c->CharacterID(), bot_iter->GetBotID(), bfd)) {
-			c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveFollowDistance(), bot_iter->GetCleanName());
+		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveFollowDistance(bot_iter->GetBotID(), bfd)) {
 			return;
 		}
 
@@ -6537,7 +6520,6 @@ void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep)
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (!database.botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
-			c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllFollowDistances());
 			return;
 		}
 
@@ -6706,7 +6688,6 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 			memcpy(bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
 		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveInspectMessage(bot_iter->GetBotID(), *bot_message_struct)) {
-			c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveInspectMessage(), bot_iter->GetCleanName());
 			return;
 		}
 
@@ -6720,7 +6701,6 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 			memcpy(&bot_message_struct, client_message_struct, sizeof(InspectMessage_Struct));
 
 		if (!database.botdb.SaveAllInspectMessages(c->CharacterID(), bot_message_struct)) {
-			c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllInspectMessages());
 			return;
 		}
 
@@ -6800,7 +6780,6 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 
 	std::list<BotsAvailableList> bots_list;
 	if (!database.botdb.LoadBotsList(c->CharacterID(), bots_list, Account)) {
-		c->Message(Chat::White, "%s", BotDatabase::fail::LoadBotsList());
 		return;
 	}
 
@@ -6814,18 +6793,18 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 	auto bot_number = 1;
 	for (auto bots_iter : bots_list) {
 		if (filter_mask) {
-			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.Class) {
+			if ((filter_mask & MaskClass) && filter_value[FilterClass] != bots_iter.class_) {
 				continue;
 			}
 
-			if ((filter_mask & MaskRace) && filter_value[FilterRace] != bots_iter.Race) {
+			if ((filter_mask & MaskRace) && filter_value[FilterRace] != bots_iter.race) {
 				continue;
 			}
 
 			if (filter_mask & MaskName) {
 				std::string name_criteria = sep->arg[name_criteria_arg];
 				std::transform(name_criteria.begin(), name_criteria.end(), name_criteria.begin(), ::tolower);
-				std::string name_check = bots_iter.Name;
+				std::string name_check = bots_iter.bot_name;
 				std::transform(name_check.begin(), name_check.end(), name_check.begin(), ::tolower);
 				if (name_check.find(name_criteria) == std::string::npos) {
 					continue;
@@ -6833,7 +6812,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 			}
 		}
 
-		auto* bot = entity_list.GetBotByBotName(bots_iter.Name);
+		auto* bot = entity_list.GetBotByBotName(bots_iter.bot_name);
 
 		c->Message(
 			Chat::White,
@@ -6841,22 +6820,22 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 				"Bot {} | {} is a Level {} {} {} {} owned by {}.",
 				bot_number,
 				(
-					(c->CharacterID() == bots_iter.Owner_ID && !bot) ?
+					(c->CharacterID() == bots_iter.owner_id && !bot) ?
 					Saylink::Silent(
-						fmt::format("^spawn {}", bots_iter.Name),
-						bots_iter.Name
+						fmt::format("^spawn {}", bots_iter.bot_name),
+						bots_iter.bot_name
 					) :
-					bots_iter.Name
+					bots_iter.bot_name
 				),
-				bots_iter.Level,
-				GetGenderName(bots_iter.Gender),
-				GetRaceIDName(bots_iter.Race),
-				GetClassIDName(bots_iter.Class),
-				bots_iter.Owner
+				bots_iter.level,
+				GetGenderName(bots_iter.gender),
+				GetRaceIDName(bots_iter.race),
+				GetClassIDName(bots_iter.class_),
+				bots_iter.owner_name
 			).c_str()
 		);
 
-		if (c->CharacterID() == bots_iter.Owner_ID) {
+		if (c->CharacterID() == bots_iter.owner_id) {
 			bots_owned++;
 		}
 
@@ -6975,10 +6954,7 @@ void bot_subcommand_bot_surname(Client *c, const Seperator *sep)
 	std::replace(bot_surname.begin(), bot_surname.end(), '_', ' ');
 
 	my_bot->SetSurname(bot_surname);
-	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::White, BotDatabase::fail::SaveBot());
-	}
-	else {
+	if (database.botdb.SaveBot(my_bot)) {
 		c->Message(Chat::White, "Bot Surname Saved.");
 	}
 }
@@ -7003,10 +6979,7 @@ void bot_subcommand_bot_title(Client *c, const Seperator *sep)
 	std::replace(bot_title.begin(), bot_title.end(), '_', ' ');
 
 	my_bot->SetTitle(bot_title);
-	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::White, BotDatabase::fail::SaveBot());
-	}
-	else {
+	if (database.botdb.SaveBot(my_bot)) {
 		c->Message(Chat::White, "Bot Title Saved.");
 	}
 }
@@ -7031,10 +7004,7 @@ void bot_subcommand_bot_suffix(Client *c, const Seperator *sep)
 	std::replace(bot_suffix.begin(), bot_suffix.end(), '_', ' ');
 
 	my_bot->SetSuffix(bot_suffix);
-	if (!database.botdb.SaveBot(my_bot)) {
-		c->Message(Chat::White, BotDatabase::fail::SaveBot());
-	}
-	else {
+	if (database.botdb.SaveBot(my_bot)) {
 		c->Message(Chat::White, "Bot Suffix Saved.");
 	}
 }
@@ -7149,7 +7119,7 @@ void bot_subcommand_bot_spawn(Client *c, const Seperator *sep)
 
 	uint32 bot_id = 0;
 	uint8 bot_class = Class::None;
-	if (!database.botdb.LoadBotID(c->CharacterID(), bot_name, bot_id, bot_class)) {
+	if (!database.botdb.LoadBotID(bot_name, bot_id, bot_class)) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -7387,8 +7357,7 @@ void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep)
 	// [reset] falls through with initialization value
 
 	my_bot->SetStopMeleeLevel(sml);
-	if (!database.botdb.SaveStopMeleeLevel(c->CharacterID(), my_bot->GetBotID(), sml))
-		c->Message(Chat::White, "%s for '%s'", BotDatabase::fail::SaveStopMeleeLevel(), my_bot->GetCleanName());
+	database.botdb.SaveStopMeleeLevel(my_bot->GetBotID(), sml);
 
 	c->Message(Chat::White, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
 }
@@ -7587,8 +7556,7 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 			bot_iter->SetShowHelm(helm_state);
 
 		if (ab_type != ActionableBots::ABT_All) {
-			if (!database.botdb.SaveHelmAppearance(c->CharacterID(), bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
-				c->Message(Chat::White, "%s for '%s'", bot_iter->GetCleanName());
+			if (!database.botdb.SaveHelmAppearance(bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
 				return;
 			}
 
@@ -7608,12 +7576,10 @@ void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep)
 
 	if (ab_type == ActionableBots::ABT_All) {
 		if (toggle_helm) {
-			if (!database.botdb.ToggleAllHelmAppearances(c->CharacterID()))
-				c->Message(Chat::White, "%s", BotDatabase::fail::ToggleAllHelmAppearances());
+			database.botdb.ToggleAllHelmAppearances(c->CharacterID());
 		}
 		else {
-			if (!database.botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state))
-				c->Message(Chat::White, "%s", BotDatabase::fail::SaveAllHelmAppearances());
+			database.botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state);
 		}
 
 		c->Message(Chat::White, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
@@ -8357,8 +8323,7 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 	bool member_fail = false;
 	bool target_fail = false;
 
-	if (!database.botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail))
-		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotation());
+	database.botdb.LoadHealRotation(creator_member, member_list, target_list, load_flag, member_fail, target_fail);
 
 	if (!load_flag) {
 		c->Message(Chat::White, "Successfully added %s as a current member to a new Heal Rotation", creator_member->GetCleanName());
@@ -8387,9 +8352,6 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 				c->Message(Chat::White, "Could not locate member with bot id '%u'", member_iter);
 		}
 	}
-	else {
-		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotationMembers());
-	}
 
 	if (!target_fail) {
 		for (auto target_iter : target_list) {
@@ -8405,9 +8367,6 @@ void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep)
 			if (!target_mob->JoinHealRotationTargetPool(creator_member->MemberOfHealRotation()))
 				c->Message(Chat::White, "Failed to add target '%s'", target_mob->GetCleanName());
 		}
-	}
-	else {
-		c->Message(Chat::White, "%s", BotDatabase::fail::LoadHealRotationTargets());
 	}
 
 	c->Message(Chat::White, "Successfully loaded %s's Heal Rotation", creator_member->GetCleanName());
@@ -8430,11 +8389,7 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 	}
 
 	if (all_flag) {
-		if (database.botdb.DeleteAllHealRotations(c->CharacterID()))
-			c->Message(Chat::White, "Succeeded in deleting all heal rotations");
-		else
-			c->Message(Chat::White, "%s", BotDatabase::fail::DeleteAllHealRotations());
-
+		database.botdb.DeleteAllHealRotations(c->CharacterID());
 		return;
 	}
 
@@ -8454,7 +8409,6 @@ void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep)
 	}
 
 	if (!database.botdb.DeleteHealRotation(current_member->GetBotID())) {
-		c->Message(Chat::White, "%s", BotDatabase::fail::DeleteHealRotation());
 		return;
 	}
 
@@ -8741,7 +8695,6 @@ void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep)
 	bool member_fail = false;
 	bool target_fail = false;
 	if (!database.botdb.SaveHealRotation(current_member, member_fail, target_fail)) {
-		c->Message(Chat::White, "%s", BotDatabase::fail::SaveHealRotation());
 		return;
 	}
 	if (member_fail)
@@ -8997,15 +8950,7 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 	}
 
 	uint32 database_count = 0;
-	if (!database.botdb.QueryInventoryCount(my_bot->GetBotID(), database_count)) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{}",
-				BotDatabase::fail::QueryInventoryCount()
-			).c_str()
-		);
-	}
+	database.botdb.QueryInventoryCount(my_bot->GetBotID(), database_count);
 
 	if (inventory_count != database_count) {
 		c->Message(
@@ -9114,7 +9059,6 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	std::string error_message;
 	if (itm) {
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
@@ -9128,18 +9072,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 			my_bot->SetBotArcherySetting(false, true);
 		}
 
-		my_bot->RemoveBotItemBySlot(slot_id, &error_message);
-		if (!error_message.empty()) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Database Error: {}",
-					error_message
-				).c_str()
-			);
-			return;
-		}
-
+		my_bot->RemoveBotItemBySlot(slot_id);
 		my_bot->BotRemoveEquipItem(slot_id);
 		my_bot->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 
@@ -10671,16 +10604,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 			my_bot->SetBotCasterRange(crange);
 			++success_count;
 
-			if (!database.botdb.SaveBotCasterRange(c->CharacterID(), my_bot->GetBotID(), crange)) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"{} for '{}'",
-						BotDatabase::fail::SaveBotCasterRange(),
-						my_bot->GetCleanName()
-					).c_str()
-				);
-			}
+			database.botdb.SaveBotCasterRange(my_bot->GetBotID(), crange);
 		}
 	}
 	if (!current_check) {

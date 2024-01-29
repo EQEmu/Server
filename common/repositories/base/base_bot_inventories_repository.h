@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_INVENTORIES_REPOSITORY_H
@@ -168,8 +168,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bot_inventories_id
 			)
 		);
@@ -178,23 +179,23 @@ public:
 		if (results.RowCount() == 1) {
 			BotInventories e{};
 
-			e.inventories_index   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.slot_id             = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id             = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.inst_charges        = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.inst_color          = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.inst_no_drop        = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.inventories_index   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.inst_charges        = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.inst_color          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.inst_no_drop        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.inst_custom_data    = row[7] ? row[7] : "";
-			e.ornament_icon       = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.ornament_id_file    = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[10]));
-			e.augment_1           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.augment_2           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.augment_3           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.augment_4           = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.augment_5           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.augment_6           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.ornament_icon       = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.ornament_id_file    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.augment_1           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.augment_2           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.augment_3           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.augment_4           = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.augment_5           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.augment_6           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -361,23 +362,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotInventories e{};
 
-			e.inventories_index   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.slot_id             = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id             = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.inst_charges        = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.inst_color          = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.inst_no_drop        = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.inventories_index   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.inst_charges        = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.inst_color          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.inst_no_drop        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.inst_custom_data    = row[7] ? row[7] : "";
-			e.ornament_icon       = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.ornament_id_file    = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[10]));
-			e.augment_1           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.augment_2           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.augment_3           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.augment_4           = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.augment_5           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.augment_6           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.ornament_icon       = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.ornament_id_file    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.augment_1           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.augment_2           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.augment_3           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.augment_4           = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.augment_5           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.augment_6           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -402,23 +403,23 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotInventories e{};
 
-			e.inventories_index   = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.slot_id             = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id             = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.inst_charges        = static_cast<uint16_t>(strtoul(row[4], nullptr, 10));
-			e.inst_color          = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.inst_no_drop        = static_cast<uint8_t>(strtoul(row[6], nullptr, 10));
+			e.inventories_index   = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot_id             = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id             = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.inst_charges        = row[4] ? static_cast<uint16_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.inst_color          = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.inst_no_drop        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
 			e.inst_custom_data    = row[7] ? row[7] : "";
-			e.ornament_icon       = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.ornament_id_file    = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.ornament_hero_model = static_cast<int32_t>(atoi(row[10]));
-			e.augment_1           = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.augment_2           = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.augment_3           = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.augment_4           = static_cast<uint32_t>(strtoul(row[14], nullptr, 10));
-			e.augment_5           = static_cast<uint32_t>(strtoul(row[15], nullptr, 10));
-			e.augment_6           = static_cast<uint32_t>(strtoul(row[16], nullptr, 10));
+			e.ornament_icon       = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.ornament_id_file    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.ornament_hero_model = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.augment_1           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.augment_2           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.augment_3           = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.augment_4           = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.augment_5           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.augment_6           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -477,6 +478,94 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotInventories &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.inventories_index));
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.inst_charges));
+		v.push_back(std::to_string(e.inst_color));
+		v.push_back(std::to_string(e.inst_no_drop));
+		v.push_back("'" + Strings::Escape(e.inst_custom_data) + "'");
+		v.push_back(std::to_string(e.ornament_icon));
+		v.push_back(std::to_string(e.ornament_id_file));
+		v.push_back(std::to_string(e.ornament_hero_model));
+		v.push_back(std::to_string(e.augment_1));
+		v.push_back(std::to_string(e.augment_2));
+		v.push_back(std::to_string(e.augment_3));
+		v.push_back(std::to_string(e.augment_4));
+		v.push_back(std::to_string(e.augment_5));
+		v.push_back(std::to_string(e.augment_6));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotInventories> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.inventories_index));
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.inst_charges));
+			v.push_back(std::to_string(e.inst_color));
+			v.push_back(std::to_string(e.inst_no_drop));
+			v.push_back("'" + Strings::Escape(e.inst_custom_data) + "'");
+			v.push_back(std::to_string(e.ornament_icon));
+			v.push_back(std::to_string(e.ornament_id_file));
+			v.push_back(std::to_string(e.ornament_hero_model));
+			v.push_back(std::to_string(e.augment_1));
+			v.push_back(std::to_string(e.augment_2));
+			v.push_back(std::to_string(e.augment_3));
+			v.push_back(std::to_string(e.augment_4));
+			v.push_back(std::to_string(e.augment_5));
+			v.push_back(std::to_string(e.augment_6));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_INVENTORIES_REPOSITORY_H
