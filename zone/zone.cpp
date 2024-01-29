@@ -381,7 +381,7 @@ bool Zone::LoadGroundSpawns() {
 						g.spawn[slot_id].max_z,
 						g.spawn[slot_id].heading,
 						g.spawn[slot_id].respawn_timer,
-						g.spawn[slot_id].is_floating
+						g.spawn[slot_id].fix_z
 					);
 
 					entity_list.AddObject(object, false);

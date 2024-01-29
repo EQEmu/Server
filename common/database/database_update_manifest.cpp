@@ -5250,7 +5250,8 @@ MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-ADD COLUMN `fix_z` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `respawn_timer`;
+ALTER TABLE `ground_spawns`
+ADD COLUMN `fix_z` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `respawn_timer`;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry

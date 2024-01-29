@@ -48,7 +48,7 @@ Object::Object(
 	uint32 icon,
 	const Object_Struct& object,
 	const EQ::ItemInstance* inst,
-	bool is_floating
+	bool fix_z
 ) :
 respawn_timer(0),
 decay_timer(300000)
@@ -60,7 +60,7 @@ decay_timer(300000)
 	m_id           = id;
 	m_type         = type;
 	m_icon         = icon;
-	m_is_floating  = is_floating;
+	m_fix_z        = fix_z;
 	m_inst         = nullptr;
 	m_ground_spawn = false;
 
@@ -81,7 +81,7 @@ decay_timer(300000)
 	m_data.tilt_x  = object.tilt_x;
 	m_data.tilt_y  = object.tilt_y;
 
-	if (!IsFloating()) {
+	if (!IsFixZEnabled()) {
 		FixZ();
 	}
 }
@@ -97,7 +97,7 @@ Object::Object(
 	float z,
 	float heading,
 	uint32 respawn_timer_,
-	bool is_floating
+	bool fix_z
 ) :
 respawn_timer(respawn_timer_ * 1000),
 decay_timer(300000)
@@ -113,7 +113,7 @@ decay_timer(300000)
 	m_inst         = (inst) ? inst->Clone() : nullptr;
 	m_type         = ObjectTypes::Temporary;
 	m_icon         = 0;
-	m_is_floating  = is_floating;
+	m_fix_z        = fix_z;
 	m_ground_spawn = true;
 
 	decay_timer.Disable();
@@ -130,7 +130,7 @@ decay_timer(300000)
 
 	RandomSpawn(false);
 
-	if (!IsFloating()) {
+	if (!IsFixZEnabled()) {
 		FixZ();
 	}
 
@@ -157,7 +157,7 @@ decay_timer(300000)
 	m_type         = ObjectTypes::Temporary;
 	m_icon         = 0;
 	m_ground_spawn = false;
-	m_is_floating  = false;
+	m_fix_z        = false;
 
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -215,7 +215,7 @@ Object::Object(
 	float z,
 	float heading,
 	uint32 decay_time,
-	bool is_floating
+	bool fix_z
 ) :
 respawn_timer(0),
 decay_timer(decay_time)
@@ -229,7 +229,7 @@ decay_timer(decay_time)
 	m_type         = ObjectTypes::Temporary;
 	m_icon         = 0;
 	m_ground_spawn = false;
-	m_is_floating  = is_floating;
+	m_fix_z        = fix_z;
 
 	// Set as much struct data as we can
 	memset(&m_data, 0, sizeof(Object_Struct));
@@ -273,7 +273,7 @@ decay_timer(decay_time)
 		}
 	}
 
-	if (!IsFloating()) {
+	if (!IsFixZEnabled()) {
 		FixZ();
 	}
 }
@@ -310,7 +310,7 @@ decay_timer(decay_time)
 	m_data.z       = z;
 	m_data.zone_id = zone->GetZoneID();
 
-	if (!IsFloating()) {
+	if (!IsFixZEnabled()) {
 		FixZ();
 	}
 
@@ -877,7 +877,7 @@ GroundSpawns* ZoneDatabase::LoadGroundSpawns(
 		gs->spawn[slot_id].item_id       = e.item;
 		gs->spawn[slot_id].max_allowed   = e.max_allowed;
 		gs->spawn[slot_id].respawn_timer = e.respawn_timer;
-		gs->spawn[slot_id].is_floating   = e.is_floating;
+		gs->spawn[slot_id].fix_z         = e.fix_z;
 
 		slot_id++;
 	}

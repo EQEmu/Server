@@ -33,7 +33,7 @@ public:
 		uint32_t    max_allowed;
 		std::string comment;
 		uint32_t    respawn_timer;
-		uint8_t     is_floating;
+		uint8_t     fix_z;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
 		std::string content_flags;
@@ -62,7 +62,7 @@ public:
 			"max_allowed",
 			"comment",
 			"respawn_timer",
-			"is_floating",
+			"fix_z",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -87,7 +87,7 @@ public:
 			"max_allowed",
 			"comment",
 			"respawn_timer",
-			"is_floating",
+			"fix_z",
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
@@ -146,7 +146,7 @@ public:
 		e.max_allowed            = 1;
 		e.comment                = "";
 		e.respawn_timer          = 300;
-		e.is_floating            = 0;
+		e.fix_z                  = 1;
 		e.min_expansion          = -1;
 		e.max_expansion          = -1;
 		e.content_flags          = "";
@@ -201,7 +201,7 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.is_floating            = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.fix_z                  = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 1;
 			e.min_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.max_expansion          = row[16] ? static_cast<int8_t>(atoi(row[16])) : -1;
 			e.content_flags          = row[17] ? row[17] : "";
@@ -252,7 +252,7 @@ public:
 		v.push_back(columns[11] + " = " + std::to_string(e.max_allowed));
 		v.push_back(columns[12] + " = '" + Strings::Escape(e.comment) + "'");
 		v.push_back(columns[13] + " = " + std::to_string(e.respawn_timer));
-		v.push_back(columns[14] + " = " + std::to_string(e.is_floating));
+		v.push_back(columns[14] + " = " + std::to_string(e.fix_z));
 		v.push_back(columns[15] + " = " + std::to_string(e.min_expansion));
 		v.push_back(columns[16] + " = " + std::to_string(e.max_expansion));
 		v.push_back(columns[17] + " = '" + Strings::Escape(e.content_flags) + "'");
@@ -292,7 +292,7 @@ public:
 		v.push_back(std::to_string(e.max_allowed));
 		v.push_back("'" + Strings::Escape(e.comment) + "'");
 		v.push_back(std::to_string(e.respawn_timer));
-		v.push_back(std::to_string(e.is_floating));
+		v.push_back(std::to_string(e.fix_z));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
 		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -340,7 +340,7 @@ public:
 			v.push_back(std::to_string(e.max_allowed));
 			v.push_back("'" + Strings::Escape(e.comment) + "'");
 			v.push_back(std::to_string(e.respawn_timer));
-			v.push_back(std::to_string(e.is_floating));
+			v.push_back(std::to_string(e.fix_z));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
 			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -392,7 +392,7 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.is_floating            = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.fix_z                  = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 1;
 			e.min_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.max_expansion          = row[16] ? static_cast<int8_t>(atoi(row[16])) : -1;
 			e.content_flags          = row[17] ? row[17] : "";
@@ -435,7 +435,7 @@ public:
 			e.max_allowed            = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 1;
 			e.comment                = row[12] ? row[12] : "";
 			e.respawn_timer          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 300;
-			e.is_floating            = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.fix_z                  = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 1;
 			e.min_expansion          = row[15] ? static_cast<int8_t>(atoi(row[15])) : -1;
 			e.max_expansion          = row[16] ? static_cast<int8_t>(atoi(row[16])) : -1;
 			e.content_flags          = row[17] ? row[17] : "";
@@ -528,7 +528,7 @@ public:
 		v.push_back(std::to_string(e.max_allowed));
 		v.push_back("'" + Strings::Escape(e.comment) + "'");
 		v.push_back(std::to_string(e.respawn_timer));
-		v.push_back(std::to_string(e.is_floating));
+		v.push_back(std::to_string(e.fix_z));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
 		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
@@ -569,7 +569,7 @@ public:
 			v.push_back(std::to_string(e.max_allowed));
 			v.push_back("'" + Strings::Escape(e.comment) + "'");
 			v.push_back(std::to_string(e.respawn_timer));
-			v.push_back(std::to_string(e.is_floating));
+			v.push_back(std::to_string(e.fix_z));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
 			v.push_back("'" + Strings::Escape(e.content_flags) + "'");

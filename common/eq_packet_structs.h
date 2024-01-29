@@ -3463,7 +3463,7 @@ struct GroundSpawn {
 	uint32      item_id       = 0;
 	uint32      max_allowed   = 1;
 	uint32      respawn_timer = 1;
-	bool        is_floating   = false;
+	bool        fix_z         = true;
 };
 
 struct GroundSpawns {
