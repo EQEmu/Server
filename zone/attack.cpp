@@ -2839,14 +2839,6 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			)
 		);
 
-		Shout(
-			fmt::format(
-				"In NPC::Death, killer_mob is '{}' and my emote ID is '{}'.",
-				killer_mob ? killer_mob->GetCleanName() : "nullptr",
-				emoteid
-			).c_str()
-		);
-
 		if (killer_mob && emoteid) {
 			DoNPCEmote(EQ::constants::EmoteEventTypes::AfterDeath, emoteid, killer_mob);
 		}
