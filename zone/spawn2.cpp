@@ -887,10 +887,6 @@ bool SpawnConditionManager::LoadSpawnConditions(const std::string& zone_short_na
 		)
 	);
 
-	if (conditions.empty()) {
-		return false;
-	}
-
 	for (const auto& e : conditions) {
 		SpawnCondition c;
 
@@ -919,10 +915,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const std::string& zone_short_na
 		)
 	);
 
-	if (condition_values.empty()) {
-		spawn_conditions.clear();
-		return false;
-	}
+	spawn_conditions.clear();
 
 	for (const auto& e : condition_values) {
 		auto i = spawn_conditions.find(e.id);
@@ -938,10 +931,6 @@ bool SpawnConditionManager::LoadSpawnConditions(const std::string& zone_short_na
 			Strings::Escape(zone_short_name)
 		)
 	);
-
-	if (events.empty()) {
-		return false;
-	}
 
 	LogInfo("Loaded [{}] spawn_events", Strings::Commify(std::to_string(events.size())));
 
