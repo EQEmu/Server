@@ -27,6 +27,7 @@
 #include "../common/database_schema.h"
 #include "../common/zone_store.h"
 #include "worlddb.h"
+#include "world_config.h"
 
 extern ZSList     zoneserver_list;
 extern ClientList client_list;
@@ -273,5 +274,8 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 	}
 	if (m == "reload") {
 		reload(r, args);
+	}
+	if (m == "lock_status") {
+		r["locked"] = WorldConfig::get()->Locked;
 	}
 }
