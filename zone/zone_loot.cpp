@@ -7,6 +7,8 @@
 
 void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 {
+	BenchTimer timer;
+
 	// check if table is already loaded
 	for (const auto &e: loottable_ids) {
 		for (const auto &f: m_loottables) {
@@ -108,7 +110,7 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 	}
 
 	if (loottable_ids.size() > 1) {
-		LogLoot("Loaded [{}] loottables", m_loottables.size());
+		LogInfo("Loaded [{}] loottables ({}s)", m_loottables.size(), std::to_string(timer.elapsed()));
 	}
 }
 

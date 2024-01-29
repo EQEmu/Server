@@ -510,7 +510,7 @@ void NPC::AddLootDrop(
 
 void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
 {
-	auto l = LootdropEntriesRepository::NewEntity();
+	auto l = LootdropEntriesRepository::NewNpcEntity();
 
 	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	l.item_charges = charges;
@@ -535,7 +535,7 @@ void NPC::AddItem(
 		return;
 	}
 
-	auto l = LootdropEntriesRepository::NewEntity();
+	auto l = LootdropEntriesRepository::NewNpcEntity();
 
 	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	l.item_charges = charges;
