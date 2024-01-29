@@ -48,7 +48,7 @@ struct NPCType;
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-uint32 ZoneDatabase::GetZoneForage(uint32 zone_id, uint8 skill_level)
+uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
 {
 	uint32 forage_items[FORAGE_ITEM_LIMIT];
 
@@ -70,6 +70,12 @@ uint32 ZoneDatabase::GetZoneForage(uint32 zone_id, uint8 skill_level)
 	if (l.empty()) {
 		return 0;
 	}
+
+	LogInfo(
+		"Loaded [{}] Forage Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
 	int forage_chances[FORAGE_ITEM_LIMIT];
 
@@ -110,7 +116,7 @@ uint32 ZoneDatabase::GetZoneForage(uint32 zone_id, uint8 skill_level)
 	return item_id;
 }
 
-uint32 ZoneDatabase::GetZoneFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance)
+uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance)
 {
 	uint32 fishing_items[50];
 	int fishing_chances[50];
@@ -134,6 +140,11 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 zone_id, uint8 skill_level, uint32 &n
 		return 0;
 	}
 
+	LogInfo(
+		"Loaded [{}] Fishing Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
 	uint32 npc_ids[50];
 	uint32 npc_chances[50];
@@ -302,7 +313,7 @@ void Client::GoFish()
 		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
-			food_id = content_db.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
+			food_id = content_db.LoadFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
@@ -447,7 +458,7 @@ void Client::ForageItem(bool guarantee) {
 		uint32 stringid = FORAGE_NOEAT;
 
 		if (zone->random.Roll(RuleI(Zone, ForageChance))) {
-			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
+			foragedfood = content_db.LoadForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
