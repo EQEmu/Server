@@ -2454,6 +2454,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 
+	auto* killer = GetHateDamageTop(this);
+
 	entity_list.RemoveFromTargets(this, p_depop);
 
 	if (p_depop) {
@@ -2509,7 +2511,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	Mob* give_exp = hate_list.GetDamageTopOnHateList(this);
 
 	if (give_exp) {
-		give_exp = killer_mob;
+		give_exp = killer;
 	}
 
 	if (give_exp && give_exp->HasOwner()) {
@@ -2795,18 +2797,18 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		(!is_merchant || allow_merchant_corpse) &&
 		(
 			(
-				killer_mob &&
+				killer &&
 				(
-					killer_mob->IsClient() ||
+					killer->IsClient() ||
 					(
-						killer_mob->HasOwner() &&
-						killer_mob->GetUltimateOwner()->IsClient()
+						killer->HasOwner() &&
+						killer->GetUltimateOwner()->IsClient()
 					) ||
 					(
-						killer_mob->IsNPC() &&
-						killer_mob->CastToNPC()->GetSwarmInfo() &&
-						killer_mob->CastToNPC()->GetSwarmInfo()->GetOwner() &&
-						killer_mob->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient()
+						killer->IsNPC() &&
+						killer->CastToNPC()->GetSwarmInfo() &&
+						killer->CastToNPC()->GetSwarmInfo()->GetOwner() &&
+						killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient()
 					)
 				)
 			) ||
@@ -2815,13 +2817,13 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			)
 		)
 	) {
-		if (killer_mob) {
-			if (killer_mob->GetOwner() != 0 && killer_mob->GetOwner()->IsClient()) {
-				killer_mob = killer_mob->GetOwner();
+		if (killer) {
+			if (killer->GetOwner() != 0 && killer->GetOwner()->IsClient()) {
+				killer = killer->GetOwner();
 			}
 
-			if (killer_mob->IsClient() && !killer_mob->CastToClient()->GetGM()) {
-				CheckTrivialMinMaxLevelDrop(killer_mob);
+			if (killer->IsClient() && !killer->CastToClient()->GetGM()) {
+				CheckTrivialMinMaxLevelDrop(killer);
 			}
 		}
 
@@ -2854,10 +2856,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		SetID(0);
 		ApplyIllusionToCorpse(illusion_spell_id, corpse);
 
-		if (killer_mob && killer_mob->IsClient()) {
-			corpse->AllowPlayerLoot(killer_mob, 0);
-			if (killer_mob->IsGrouped()) {
-				Group* g = entity_list.GetGroupByClient(killer_mob->CastToClient());
+		if (killer && killer->IsClient()) {
+			corpse->AllowPlayerLoot(killer, 0);
+			if (killer->IsGrouped()) {
+				Group* g = entity_list.GetGroupByClient(killer->CastToClient());
 				if (g) {
 					uint8 slot_id = 0;
 
@@ -2869,8 +2871,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						slot_id++;
 					}
 				}
-			} else if (killer_mob->IsRaidGrouped()) {
-				Raid* r = entity_list.GetRaidByClient(killer_mob->CastToClient());
+			} else if (killer->IsRaidGrouped()) {
+				Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
 				if (r) {
 					uint8 slot_id = 0;
 
