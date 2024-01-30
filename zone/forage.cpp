@@ -31,6 +31,8 @@
 #include "water_map.h"
 #include "zonedb.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/forage_repository.h"
+#include "../common/repositories/fishing_repository.h"
 #include "../common/events/player_event_logs.h"
 #include "worldserver.h"
 
@@ -46,141 +48,145 @@ struct NPCType;
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
+uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
+{
+	uint32 forage_items[FORAGE_ITEM_LIMIT];
 
-	uint32 item[FORAGE_ITEM_LIMIT];
-	uint32 chance[FORAGE_ITEM_LIMIT];
-	uint32 ret;
-
-	for (int c=0; c < FORAGE_ITEM_LIMIT; c++) {
-		item[c] = 0;
+	for (uint16 slot_id = 0; slot_id < FORAGE_ITEM_LIMIT; slot_id++) {
+		forage_items[slot_id] = 0;
 	}
 
-	uint32 chancepool = 0;
-    std::string query = fmt::format(
-    	SQL(
-    		SELECT
-			  itemid,
-			  chance
-			FROM
-			  forage
-			WHERE
-			  zoneid = '{}'
-			  and level <= '{}'
-			  {}
-			LIMIT
-			 {}
-    		),
-    	ZoneID,
-    	skill,
-    	ContentFilterCriteria::apply(),
-    	FORAGE_ITEM_LIMIT
+	const auto& l = ForageRepository::GetWhere(
+		*this,
+		fmt::format(
+			"(`zoneid` = {} || `zoneid` = 0) AND `level` <= {} {} LIMIT {}",
+			zone_id,
+			skill_level,
+			ContentFilterCriteria::apply(),
+			FORAGE_ITEM_LIMIT
+		)
 	);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
+
+	if (l.empty()) {
 		return 0;
 	}
 
-	uint8     index = 0;
-	for (auto row   = results.begin(); row != results.end(); ++row, ++index) {
-		if (index >= FORAGE_ITEM_LIMIT) {
+	LogInfo(
+		"Loaded [{}] Forage Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
+
+	int forage_chances[FORAGE_ITEM_LIMIT];
+
+	int    current_chance = 0;
+	uint32 item_id        = 0;
+	uint8  count          = 0;
+
+	for (const auto& e : l) {
+		if (count >= FORAGE_ITEM_LIMIT) {
 			break;
 		}
 
-		item[index]   = Strings::ToInt(row[0]);
-		chance[index] = Strings::ToInt(row[1]) + chancepool;
-		chancepool    = chance[index];
+		forage_items[count]   = e.Itemid;
+		forage_chances[count] = e.chance;
+
+		current_chance = forage_chances[count];
+
+		count++;
 	}
 
-	if(chancepool == 0 || index < 1)
+	if (current_chance == 0 || count < 1) {
 		return 0;
-
-	if(index == 1) {
-		return item[0];
 	}
 
-	ret = 0;
+	if (count == 1) {
+		return forage_items[0];
+	}
 
-	uint32 rindex = zone->random.Int(1, chancepool);
+	const int roll = zone->random.Int(1, current_chance);
 
-	for(int i = 0; i < index; i++) {
-		if(rindex <= chance[i]) {
-			ret = item[i];
+	for (uint16 slot_id = 0; slot_id < count; slot_id++) {
+		if (roll <= forage_chances[slot_id]) {
+			item_id = forage_items[slot_id];
 			break;
 		}
 	}
 
-	return ret;
+	return item_id;
 }
 
-uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
+uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance)
 {
-	uint32 item[50];
-	uint32 chance[50];
-	uint32 npc_ids[50];
-	uint32 npc_chances[50];
-	uint32 chancepool = 0;
-	uint32 ret = 0;
+	uint32 fishing_items[50];
+	int fishing_chances[50];
 
-	for (int c=0; c<50; c++) {
-		item[c]=0;
-		chance[c]=0;
+	for (uint16 slot_id = 0; slot_id < 50; slot_id++) {
+		fishing_items[slot_id]   = 0;
+		fishing_chances[slot_id] = 0;
 	}
 
-    std::string query = fmt::format(
-    	SQL(
-    	SELECT
-		  itemid,
-		  chance,
-		  npc_id,
-		  npc_chance
-		FROM
-		  fishing
-		WHERE
-		  (zoneid = '{}' || zoneid = 0)
-		  AND skill_level <= '{}'
-		  {}
-		),
-		ZoneID,
-		skill,
-		ContentFilterCriteria::apply()
+	const auto& l = FishingRepository::GetWhere(
+		*this,
+		fmt::format(
+			"(`zoneid` = {} || `zoneid` = 0) AND `skill_level` <= {} {}",
+			zone_id,
+			skill_level,
+			ContentFilterCriteria::apply()
+		)
 	);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+
+	if (l.empty()) {
 		return 0;
-    }
+	}
 
-    uint8 index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        if (index >= 50)
-            break;
+	LogInfo(
+		"Loaded [{}] Fishing Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
-        item[index] = Strings::ToInt(row[0]);
-        chance[index] = Strings::ToInt(row[1])+chancepool;
-        chancepool = chance[index];
+	uint32 npc_ids[50];
+	uint32 npc_chances[50];
 
-        npc_ids[index] = Strings::ToInt(row[2]);
-        npc_chances[index] = Strings::ToInt(row[3]);
-    }
+	int    current_chance = 0;
+	uint32 item_id        = 0;
+	uint8  count          = 0;
 
-	npc_id = 0;
+	for (const auto &e: l) {
+		if (count >= 50) {
+			break;
+		}
+
+		fishing_items[count]   = e.Itemid;
+		fishing_chances[count] = e.chance + current_chance;
+		npc_ids[count]         = e.npc_id;
+		npc_chances[count]     = e.npc_chance;
+
+		current_chance = fishing_chances[count];
+	}
+
+	npc_id     = 0;
 	npc_chance = 0;
-	if (index <= 0)
-        return 0;
 
-    uint32 random = zone->random.Int(1, chancepool);
-    for (int i = 0; i < index; i++)
-    {
-        if (random > chance[i])
-            continue;
+	if (count <= 0) {
+		return 0;
+	}
 
-        ret = item[i];
-        npc_id = npc_ids[i];
-        npc_chance = npc_chances[i];
-        break;
-    }
+	const int roll = zone->random.Int(1, current_chance);
 
-	return ret;
+	for (uint16 i = 0; i < count; i++) {
+		if (roll > fishing_chances[i]) {
+			continue;
+		}
+
+		item_id    = fishing_items[i];
+		npc_id     = npc_ids[i];
+		npc_chance = npc_chances[i];
+		break;
+	}
+
+	return item_id;
 }
 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
@@ -307,7 +313,7 @@ void Client::GoFish()
 		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
-			food_id = content_db.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
+			food_id = content_db.LoadFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
@@ -452,7 +458,7 @@ void Client::ForageItem(bool guarantee) {
 		uint32 stringid = FORAGE_NOEAT;
 
 		if (zone->random.Roll(RuleI(Zone, ForageChance))) {
-			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
+			foragedfood = content_db.LoadForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
