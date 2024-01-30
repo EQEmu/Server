@@ -1356,7 +1356,7 @@ bool BotDatabase::DeletePetStats(const uint32 bot_id)
 		return true;
 	}
 
-	BotPetsRepository::DeleteOne(database, saved_pet_index);
+	return BotPetsRepository::DeleteOne(database, saved_pet_index) == 1;
 }
 
 bool BotDatabase::LoadPetBuffs(const uint32 bot_id, SpellBuff_Struct* pet_buffs)
@@ -1630,6 +1630,7 @@ bool BotDatabase::SaveInspectMessage(const uint32 bot_id, const InspectMessage_S
 	if (bot_message.size() > UINT8_MAX) {
 		bot_message = bot_message.substr(0, UINT8_MAX);
 	}
+	return true;
 }
 
 bool BotDatabase::DeleteInspectMessage(const uint32 bot_id)
