@@ -915,8 +915,6 @@ bool SpawnConditionManager::LoadSpawnConditions(const std::string& zone_short_na
 		)
 	);
 
-	spawn_conditions.clear();
-
 	for (const auto& e : condition_values) {
 		auto i = spawn_conditions.find(e.id);
 		if (i != spawn_conditions.end()) {
