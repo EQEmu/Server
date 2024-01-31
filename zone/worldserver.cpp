@@ -1989,6 +1989,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadFactions:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Factions");
+			zone->ReloadNPCFactions();
+			zone->ReloadFactionAssociations();
+		}
+
+		break;
+	}
 	case ServerOP_ReloadLevelEXPMods:
 	{
 		if (zone && zone->IsLoaded()) {
@@ -2112,24 +2122,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion());
 			zone->SendReloadMessage("Zone Data");
 		}
-		break;
-	}
-	case ServerOP_ReloadNPCFactions:
-	{
-		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("NPC Factions");
-			zone->ReloadNPCFactions();
-		}
-
-		break;
-	}
-	case ServerOP_ReloadFactionAssociations:
-	{
-		if (zone && zone->IsLoaded()) {
-			zone->SendReloadMessage("Faction Associations");
-			zone->ReloadFactionAssociations();
-		}
-
 		break;
 	}
 	case ServerOP_CameraShake:

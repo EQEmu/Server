@@ -9094,7 +9094,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_three += Saylink::Silent("#reload data_buckets_cache", "Databuckets");
 	menu_reload_three += " | " + Saylink::Silent("#reload doors", "Doors");
-	menu_reload_three += " | " + Saylink::Silent("#reload faction_associations", "Faction Associations");
+	menu_reload_three += " | " + Saylink::Silent("#reload factions", "Factions");
 	menu_reload_three += " | " + Saylink::Silent("#reload ground_spawns", "Ground Spawns");
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
@@ -9102,7 +9102,6 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
 	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
-	menu_reload_five += " | " + Saylink::Silent("#reload npc_factions", "NPC Factions");
 	menu_reload_five += " | " + Saylink::Silent("#reload objects", "Objects");
 	menu_reload_five += " | " + Saylink::Silent("#reload opcodes", "Opcodes");
 
@@ -11079,13 +11078,13 @@ void Client::SendReloadCommandMessages() {
 		).c_str()
 	);
 
-	auto faction_associations_link = Saylink::Silent("#reload faction_associations");
+	auto factions_link = Saylink::Silent("#reload factions");
 
 	Message(
 		Chat::White,
 		fmt::format(
-			"Usage: {} - Reloads Faction Associations globally",
-			faction_associations_link
+			"Usage: {} - Reloads Factions globally",
+			factions_link
 		).c_str()
 	);
 
@@ -11136,16 +11135,6 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads NPC Emotes globally",
 			npc_emotes_link
-		).c_str()
-	);
-
-	auto npc_factions_link = Saylink::Silent("#reload npc_factions");
-
-	Message(
-		Chat::White,
-		fmt::format(
-			"Usage: {} - Reloads NPC Factions globally",
-			npc_factions_link
 		).c_str()
 	);
 

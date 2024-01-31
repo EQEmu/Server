@@ -1389,12 +1389,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadCommands:
 		case ServerOP_ReloadDoors:
 		case ServerOP_ReloadDataBucketsCache:
-		case ServerOP_ReloadFactionAssociations:
+		case ServerOP_ReloadFactions:
 		case ServerOP_ReloadGroundSpawns:
 		case ServerOP_ReloadLevelEXPMods:
 		case ServerOP_ReloadMerchants:
 		case ServerOP_ReloadNPCEmotes:
-		case ServerOP_ReloadNPCFactions:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
 		case ServerOP_ReloadStaticZoneData:
