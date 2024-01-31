@@ -3345,8 +3345,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					}
 				}
 			}
-			break;
 		}
+		break;
 	}
 	case ServerOP_WWTaskUpdate:
 	{
