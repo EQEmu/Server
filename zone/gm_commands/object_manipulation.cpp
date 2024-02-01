@@ -154,13 +154,7 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 		const uint32 object_id = (ObjectRepository::GetMaxId(content_db) + 1);
 
-		Object *o = new Object(
-			object_id,
-			od.object_type,
-			icon,
-			od,
-			nullptr
-		);
+		Object* o = new Object(object_id, od.object_type, icon, od);
 
 		entity_list.AddObject(o, true);
 
@@ -1237,7 +1231,8 @@ void ObjectManipulation::CommandHandler(Client *c, const Seperator *sep)
 			od.object_type = ObjectTypes::StaticLocked;
 		}
 
-		o = new Object(object_id, od.object_type, icon, od, nullptr);
+		o = new Object(object_id, od.object_type, icon, od);
+
 		entity_list.AddObject(o, true);
 
 		c->Message(

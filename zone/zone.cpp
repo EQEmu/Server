@@ -297,7 +297,9 @@ bool Zone::LoadZoneObjects()
 		}
 
 		auto object = new Object(id, type, icon, data, inst);
+
 		object->SetDisplayName(e.display_name.c_str());
+
 		entity_list.AddObject(object, false);
 
 		if (type == ObjectTypes::Temporary && itemid) {
@@ -353,39 +355,50 @@ bool Zone::IsSpecialBindLocation(const glm::vec4& location)
 
 //this also just loads into entity_list, not really into zone
 bool Zone::LoadGroundSpawns() {
-	GroundSpawns groundspawn;
+	GroundSpawns g;
 
-	memset(&groundspawn, 0, sizeof(groundspawn));
-	int gsindex=0;
-	content_db.LoadGroundSpawns(zoneid, GetInstanceVersion(), &groundspawn);
-	uint32 ix=0;
-	char* name = nullptr;
-	uint32 gsnumber=0;
-	int added = 0;
-	for(gsindex=0;gsindex<50;gsindex++){
-		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
-			EQ::ItemInstance* inst = nullptr;
-			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
-			gsnumber=groundspawn.spawn[gsindex].max_allowed;
-			ix=0;
-			if(inst){
-				name = groundspawn.spawn[gsindex].name;
-				for(ix=0;ix<gsnumber;ix++){
+	memset(&g, 0, sizeof(g));
+
+	content_db.LoadGroundSpawns(zoneid, GetInstanceVersion(), &g);
+
+	uint32 added = 0;
+
+	for (uint16 slot_id = 0; slot_id < 50; slot_id++) {
+		if (EQ::ValueWithin(g.spawn[slot_id].item_id, 1, (SAYLINK_ITEM_ID - 1))) {
+			auto inst = database.CreateItem(g.spawn[slot_id].item_id);
+
+			const uint32 max_allowed = g.spawn[slot_id].max_allowed;
+
+			if (inst) {
+				for (uint32 i = 0; i < max_allowed; i++) {
 					auto object = new Object(
-					    inst, name, groundspawn.spawn[gsindex].max_x,
-					    groundspawn.spawn[gsindex].min_x, groundspawn.spawn[gsindex].max_y,
-					    groundspawn.spawn[gsindex].min_y, groundspawn.spawn[gsindex].max_z,
-					    groundspawn.spawn[gsindex].heading,
-					    groundspawn.spawn[gsindex].respawntimer); // new object with id of 10000+
+						inst,
+						g.spawn[slot_id].name,
+						g.spawn[slot_id].max_x,
+						g.spawn[slot_id].min_x,
+						g.spawn[slot_id].max_y,
+						g.spawn[slot_id].min_y,
+						g.spawn[slot_id].max_z,
+						g.spawn[slot_id].heading,
+						g.spawn[slot_id].respawn_timer,
+						g.spawn[slot_id].fix_z
+					);
+
 					entity_list.AddObject(object, false);
+
 					added++;
 				}
+
 				safe_delete(inst);
 			}
 		}
 	}
 
-	LogInfo("Loaded [{}] ground spawns", Strings::Commify(added));
+	LogInfo(
+		"Loaded [{}] Ground Spawn{}",
+		Strings::Commify(added),
+		added != 1 ? "s" : ""
+	);
 
 	return(true);
 }
