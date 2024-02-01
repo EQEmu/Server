@@ -1504,7 +1504,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	if (Hand == EQ::invslot::slotSecondary) {
-		weapon = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotSecondary) : CastToBot()->GetBotItem(EQ::invslot::slotPrimary);
+		weapon = (IsClient()) ? GetInv().GetItem(EQ::invslot::slotSecondary) : CastToBot()->GetBotItem(EQ::invslot::slotSecondary);
 		OffHandAtk(true);
 	}
 	else {
