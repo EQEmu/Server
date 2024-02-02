@@ -7387,14 +7387,14 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 //Sets the characters faction standing with the specified NPC.
 void Client::SetFactionLevel(
 	uint32 character_id,
-	uint32 faction_id,
+	uint32 npc_faction_id,
 	uint8 class_id,
 	uint8 race_id,
 	uint8 deity_id,
 	bool is_quest
 )
 {
-	auto l = zone->GetNPCFactionEntries(faction_id);
+	auto l = zone->GetNPCFactionEntries(npc_faction_id);
 
 	if (l.empty()) {
 		return;

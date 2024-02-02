@@ -511,7 +511,7 @@ public:
 	bool		GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //needed for factions Dec, 16 2001
 	bool		GetFactionName(int faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
 	std::string GetFactionName(int faction_id);
-	bool		GetFactionIDsForNPC(uint32 faction_id, std::list<NpcFactionEntriesRepository::NpcFactionEntries>* faction_list, int32* primary_faction = 0); // improve faction handling
+	bool		GetFactionIDsForNPC(uint32 npc_faction_id, std::list<NpcFactionEntriesRepository::NpcFactionEntries>* faction_list, int32* primary_faction = 0); // improve faction handling
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
 	inline uint32 GetMaxFaction() { return max_faction; }

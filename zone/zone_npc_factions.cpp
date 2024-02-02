@@ -119,10 +119,10 @@ void Zone::ReloadNPCFactions()
 	LoadNPCFactions(faction_ids);
 }
 
-NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 faction_id)
+NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 npc_faction_id)
 {
 	for (auto& e : m_npc_factions) {
-		if (e.primaryfaction == faction_id) {
+		if (e.id == npc_faction_id) {
 			return &e;
 		}
 	}
@@ -130,7 +130,7 @@ NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 faction_id)
 	return nullptr;
 }
 
-std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionEntries(const uint32 faction_id) const
+std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionEntries(const uint32 npc_faction_id) const
 {
 	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> npc_faction_entries = { };
 
@@ -138,7 +138,7 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 
 	for (auto e : m_npc_faction_entries) {
 		if (
-			e.npc_faction_id == faction_id &&
+			e.npc_faction_id == npc_faction_id &&
 			std::find(
 				faction_ids.begin(),
 				faction_ids.end(),
