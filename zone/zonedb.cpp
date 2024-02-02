@@ -3643,13 +3643,11 @@ bool ZoneDatabase::GetFactionIDsForNPC(
 
 	const auto& npcf = zone->GetNPCFaction(npc_faction_id);
 	if (!npcf) {
+		LogError("No NPC faction entry for [{}]", npc_faction_id);
 		return false;
 	}
 
 	const auto& l = zone->GetNPCFactionEntries(npc_faction_id);
-	if (l.empty()) {
-		return false;
-	}
 
 	if (primary_faction) {
 		*primary_faction = npcf->primaryfaction;
