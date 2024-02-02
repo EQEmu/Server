@@ -1746,7 +1746,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	}
 
 	std::vector<uint32> npc_ids;
-	std::vector<uint32> faction_ids;
+	std::vector<uint32> npc_faction_ids;
 
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
@@ -1848,12 +1848,13 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		if (t->npc_faction_id > 0) {
 			if (
 				std::find(
-					faction_ids.begin(),
-					faction_ids.end(),
+					npc_faction_ids.begin(),
+					npc_faction_ids.end(),
 					t->npc_faction_id
-				) == faction_ids.end()
+				) == npc_faction_ids.end()
 			) {
-				faction_ids.emplace_back(t->npc_faction_id);
+				LogFaction("Loading npc_faction ID [{}]", t->npc_faction_id);
+				npc_faction_ids.emplace_back(t->npc_faction_id);
 			}
 		}
 
@@ -1979,8 +1980,10 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
 
-	zone->LoadNPCFactions(faction_ids);
-	zone->LoadFactionAssociations(faction_ids);
+	if (bulk_load) {
+		zone->LoadNPCFactions(npc_faction_ids);
+		zone->LoadFactionAssociations(npc_faction_ids);
+	}
 
 	return npc;
 }

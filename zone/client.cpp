@@ -8304,7 +8304,7 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	for (uint16 slot_id = 0; slot_id < faction_ids.size(); slot_id++) {
-		if (faction_ids[slot_id] > 0 && faction_modifiers[slot_id] > 0.0f) {
+		if (faction_ids[slot_id] > 0) {
 			SetFactionLevel2(
 				CharacterID(),
 				faction_ids[slot_id],

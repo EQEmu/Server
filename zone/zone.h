@@ -418,7 +418,7 @@ public:
 	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> GetNPCFactionEntries(const uint32 npc_faction_id) const;
 
 	void LoadFactionAssociation(const uint32 faction_id);
-	void LoadFactionAssociations(const std::vector<uint32>& faction_ids);
+	void LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids);
 	void ClearFactionAssociations();
 	void ReloadFactionAssociations();
 	FactionAssociationRepository::FactionAssociation* GetFactionAssociation(const uint32 faction_id);

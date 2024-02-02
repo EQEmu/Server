@@ -3,9 +3,19 @@
 #include "../common/repositories/npc_faction_repository.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
 
-void Zone::LoadNPCFactions(const std::vector<uint32> &faction_ids)
+void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 {
-	for (const auto& e : faction_ids) {
+	LogFaction(
+		"Load for Faction IDs [{}]",
+		Strings::Join(npc_faction_ids, ", ")
+	);
+
+	if (npc_faction_ids.empty()) {
+		LogFactionDetail("No NPC factions to load.");
+		return;
+	}
+
+	for (const auto& e : npc_faction_ids) {
 		for (const auto& f : m_npc_factions) {
 			if (e == f.id) {
 				LogFactionDetail("Faction [{}] already loaded.", e);
@@ -14,40 +24,13 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &faction_ids)
 		}
 	}
 
-	if (faction_ids.empty()) {
-		LogFactionDetail("No NPC factions to load.");
-		return;
-	}
-
-	std::vector<uint32> npc_faction_ids;
-
 	auto npc_factions = NpcFactionRepository::GetWhere(
 		content_db,
 		fmt::format(
 			"`id` IN ({})",
-			Strings::Join(faction_ids, ", ")
+			Strings::Join(npc_faction_ids, ", ")
 		)
 	);
-
-	for (const auto& e : npc_factions) {
-		if (
-			std::find(
-				npc_faction_ids.begin(),
-				npc_faction_ids.end(),
-				e.id
-			) == npc_faction_ids.end()
-		) {
-			npc_faction_ids.emplace_back(e.id);
-		}
-	}
-
-	if (npc_faction_ids.empty()) {
-		LogFaction(
-			"No NPC Faction IDs to load for Faction IDs [{}]",
-			Strings::Join(faction_ids, ", ")
-		);
-		return;
-	}
 
 	auto npc_faction_entries = NpcFactionEntriesRepository::GetWhere(
 		content_db,
@@ -76,8 +59,8 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &faction_ids)
 		}
 	}
 
-	if (faction_ids.size() > 1) {
-		LogFaction("Loaded [{}] Factions", faction_ids.size());
+	if (npc_factions.size() > 1) {
+		LogFaction("Loaded [{}] Factions", npc_factions.size());
 	}
 }
 
@@ -87,6 +70,7 @@ void Zone::LoadNPCFaction(const uint32 faction_id)
 		return;
 	}
 
+	LogFaction("LoadNPCFaction for [{}]", faction_id);
 	LoadNPCFactions({ faction_id });
 }
 
@@ -98,6 +82,8 @@ void Zone::ClearNPCFactions()
 
 void Zone::ReloadNPCFactions()
 {
+	LogFaction("Reloading NPC Factions");
+
 	ClearNPCFactions();
 
 	std::vector<uint32> faction_ids = { };
@@ -153,9 +139,14 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 	return npc_faction_entries;
 }
 
-void Zone::LoadFactionAssociations(const std::vector<uint32>& faction_ids)
+void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 {
-	for (const auto& e : faction_ids) {
+	LogFaction(
+		"Load Associations for Faction IDs [{}]",
+		Strings::Join(npc_faction_ids, ", ")
+	);
+
+	for (const auto& e : npc_faction_ids) {
 		for (const auto& f : m_faction_associations) {
 			if (f.id_1 == e) {
 				LogFaction("Faction Association for Faction ID [{}] already loaded.", e);
@@ -164,15 +155,30 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& faction_ids)
 		}
 	}
 
-	if (faction_ids.empty()) {
+	if (npc_faction_ids.empty()) {
 		LogFactionDetail("No Faction Associations to load.");
 		return;
 	}
 
+	std::vector<uint32> faction_ids = { };
+
+	for (const auto& e : npc_faction_ids) {
+		for (const auto& f : m_npc_factions) {
+			if (e == f.id && f.primaryfaction > 0) {
+				faction_ids.emplace_back(f.primaryfaction);
+			}
+		}
+	}
+
+	LogFaction(
+		"These are the primary faction IDs[{}]",
+		Strings::Join(faction_ids, ", ")
+	);
+
 	const auto& faction_associations = FactionAssociationRepository::GetWhere(
 		content_db,
 		fmt::format(
-			"`id_1` IN ({})",
+			"`id` IN ({})",
 			Strings::Join(faction_ids, ", ")
 		)
 	);
@@ -185,70 +191,102 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& faction_ids)
 		return;
 	}
 
+	uint32 num_associations= 0;
+
 	for (const auto& e : faction_associations) {
-		bool has_association = false;
-
-		for (const auto& f : m_faction_associations) {
-			if (e.id_1 == f.id_1) {
-				has_association = true;
-				break;
+			if (e.id_1) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_1, e.mod_1);
 			}
-		}
+			if (e.id_2) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_2, e.mod_2);
+			}
+			if (e.id_3) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_3, e.mod_3);
+			}
+			if (e.id_4) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_4, e.mod_4);
+			}
+			if (e.id_5) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_5, e.mod_5);
+			}
+			if (e.id_6) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_6, e.mod_6);
+			}
+			if (e.id_7) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_7, e.mod_7);
+			}
+			if (e.id_8) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_8, e.mod_8);
+			}
+			if (e.id_9) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_9, e.mod_9);
+			}
+			if (e.id_10) {
+				num_associations++;
+				LogFaction("Association [{}] -> [{}]", e.id_10, e.mod_10);
+			}
 
-		if (!has_association) {
 			m_faction_associations.emplace_back(e);
 		}
+
+	if (num_associations)
+			LogFaction("Loaded [{}] Faction Associations.", num_associations);
 	}
 
-	if (faction_ids.size() > 1) {
-		LogFaction("Loaded [{}] Faction Associations.", faction_ids.size());
-	}
-}
+	void Zone::LoadFactionAssociation(const uint32 npc_faction_id)
+	{
+		if (!npc_faction_id) {
+			return;
+		}
 
-void Zone::LoadFactionAssociation(const uint32 faction_id)
-{
-	if (!faction_id) {
-		return;
+		LoadFactionAssociations({ npc_faction_id });
 	}
 
-	LoadFactionAssociations({ faction_id });
-}
+	void Zone::ClearFactionAssociations()
+	{
+		m_faction_associations.clear();
+	}
 
-void Zone::ClearFactionAssociations()
-{
-	m_faction_associations.clear();
-}
+	void Zone::ReloadFactionAssociations()
+	{
+		ClearFactionAssociations();
 
-void Zone::ReloadFactionAssociations()
-{
-	ClearFactionAssociations();
+		std::vector<uint32> npc_faction_ids = { };
 
-	std::vector<uint32> faction_ids = { };
-
-	for (const auto& n : entity_list.GetNPCList()) {
-		if (n.second->GetNPCFactionID() != 0) {
-			if (
-				std::find(
-					faction_ids.begin(),
-					faction_ids.end(),
-					n.second->GetNPCFactionID()
-				) == faction_ids.end()
-			) {
-				faction_ids.emplace_back(n.second->GetNPCFactionID());
+		for (const auto& n : entity_list.GetNPCList()) {
+			if (n.second->GetNPCFactionID() != 0) {
+				if (
+					std::find(
+						npc_faction_ids.begin(),
+						npc_faction_ids.end(),
+						n.second->GetNPCFactionID()
+					) == npc_faction_ids.end()
+				) {
+					npc_faction_ids.emplace_back(n.second->GetNPCFactionID());
+				}
 			}
 		}
+
+		LogFaction("Reloading Faction Associations");
+		LoadFactionAssociations(npc_faction_ids);
 	}
 
-	LoadFactionAssociations(faction_ids);
-}
-
-FactionAssociationRepository::FactionAssociation* Zone::GetFactionAssociation(const uint32 faction_id)
-{
-	for (auto& e : m_faction_associations) {
-		if (e.id_1 == faction_id) {
-			return &e;
+	FactionAssociationRepository::FactionAssociation* Zone::GetFactionAssociation(const uint32 faction_id)
+	{
+		for (auto& e : m_faction_associations) {
+			if (e.id == faction_id) {
+				return &e;
+			}
 		}
-	}
 
 	return nullptr;
 }
