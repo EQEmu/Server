@@ -2781,7 +2781,7 @@ void Mob::ShowStats(Client* c)
 				fmt::format(
 					"Faction: {} ({})",
 					faction_name,
-					t->GetPrimaryFaction();	
+					t->GetPrimaryFaction()
 				).c_str()
 			);
 		}
