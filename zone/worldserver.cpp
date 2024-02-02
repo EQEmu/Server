@@ -1,4 +1,4 @@
-/*	EQEMu: Everquest Server Emulator
+eloeloau: Everquest Server Emulator
 Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
 
 This program is free software; you can redistribute it and/or modify
@@ -1993,6 +1993,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Factions");
+			content_db.LoadFactionData();
 			zone->ReloadNPCFactions();
 			zone->ReloadFactionAssociations();
 		}
