@@ -64,14 +64,14 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 	}
 }
 
-void Zone::LoadNPCFaction(const uint32 faction_id)
+void Zone::LoadNPCFaction(const uint32 npc_faction_id)
 {
-	if (!faction_id) {
+	if (!npc_faction_id) {
 		return;
 	}
 
-	LogFaction("LoadNPCFaction for [{}]", faction_id);
-	LoadNPCFactions({ faction_id });
+	LogFaction("LoadNPCFaction for [{}]", npc_faction_id);
+	LoadNPCFactions({ npc_faction_id });
 }
 
 void Zone::ClearNPCFactions()
@@ -86,23 +86,23 @@ void Zone::ReloadNPCFactions()
 
 	ClearNPCFactions();
 
-	std::vector<uint32> faction_ids = { };
+	std::vector<uint32> npc_faction_ids = { };
 
 	for (const auto& n : entity_list.GetNPCList()) {
 		if (n.second->GetNPCFactionID() != 0) {
 			if (
 				std::find(
-					faction_ids.begin(),
-					faction_ids.end(),
+					npc_faction_ids.begin(),
+					npc_faction_ids.end(),
 					n.second->GetNPCFactionID()
-				) == faction_ids.end()
+				) == npc_faction_ids.end()
 			) {
-				faction_ids.emplace_back(n.second->GetNPCFactionID());
+				npc_faction_ids.emplace_back(n.second->GetNPCFactionID());
 			}
 		}
 	}
 
-	LoadNPCFactions(faction_ids);
+	LoadNPCFactions(npc_faction_ids);
 }
 
 NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 npc_faction_id)
