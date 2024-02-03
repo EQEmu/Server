@@ -21,7 +21,7 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 	std::vector<uint32> new_npc_faction_ids = { };
 
 	for (const auto& e : npc_faction_ids) {
-		bool found=0;
+		bool found = false;
 
 		for (const auto& nf : m_npc_factions) {
 			found = (nf.id == e);
@@ -162,11 +162,11 @@ void Zone::LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids
 
 	for (const auto& e : npc_faction_ids) {
 		for (const auto& f : m_npc_factions) {
-			bool found=false;
+			bool found = false;
 			if (e == f.id && f.primaryfaction > 0) {
-				for (auto a : m_faction_associations) {
+				for (const auto& a : m_faction_associations) {
 					if (a.id == f.primaryfaction) {
-						found=true;
+						found = true;
 						LogError("Association [{}] already loaded", a.id);
 					break;
 					}
