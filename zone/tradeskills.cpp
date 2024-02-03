@@ -274,7 +274,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	);
 
 	EQ::InventoryProfile &user_inv  = user->GetInv();
-	PlayerProfile_Struct    &user_pp   = user->GetPP();
+	PlayerProfile_Struct &user_pp   = user->GetPP();
 	EQ::ItemInstance     *container = nullptr;
 	EQ::ItemInstance     *inst      = nullptr;
 
@@ -326,8 +326,8 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	container = inst;
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeTransformationmold) {
-		const EQ::ItemInstance *inst    = container->GetItem(0);
-		bool                      AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
+		const EQ::ItemInstance *inst = container->GetItem(0);
+		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && EQ::ItemInstance::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
 			const EQ::ItemData *new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
@@ -372,7 +372,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		LogTradeskillsDetail("Check 1");
 
 		const EQ::ItemInstance* inst = container->GetItem(0);
-		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
+		if (inst && inst->GetOrnamentationIcon()) {
 			const EQ::ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
@@ -389,7 +389,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	DBTradeskillRecipe_Struct spec;
-	bool                      is_augmented = false;
+	bool is_augmented = false;
 
 	if (parse->PlayerHasQuestSub(EVENT_COMBINE)) {
 		if (parse->EventPlayer(EVENT_COMBINE, user, std::to_string(in_combine->container_slot), 0) == 1) {
