@@ -59,21 +59,10 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 	);
 
 	for (const auto& e : npc_factions) {
-		bool has_faction = false;
+		m_npc_factions.emplace_back(e);
 
-		for (const auto& f : m_npc_factions) {
-			if (e.primaryfaction == f.primaryfaction) {
-				has_faction = true;
-				break;
-			}
-		}
-
-		if (!has_faction) {
-			m_npc_factions.emplace_back(e);
-
-			for (const auto& f : npc_faction_entries) {
-				m_npc_faction_entries.emplace_back(f);
-			}
+		for (const auto& f : npc_faction_entries) {
+			m_npc_faction_entries.emplace_back(f);
 		}
 	}
 
@@ -267,7 +256,7 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 			LogFaction("Loaded [{}] Faction Associations.", num_associations);
 	}
 
-	void Zone::LoadFactionAssociation(const uint32 npc_faction_id)
+void Zone::LoadFactionAssociation(const uint32 npc_faction_id)
 	{
 		if (!npc_faction_id) {
 			return;
@@ -276,12 +265,12 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 		LoadFactionAssociations({ npc_faction_id });
 	}
 
-	void Zone::ClearFactionAssociations()
+void Zone::ClearFactionAssociations()
 	{
 		m_faction_associations.clear();
 	}
 
-	void Zone::ReloadFactionAssociations()
+void Zone::ReloadFactionAssociations()
 	{
 		ClearFactionAssociations();
 
@@ -305,7 +294,7 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 		LoadFactionAssociations(npc_faction_ids);
 	}
 
-	FactionAssociationRepository::FactionAssociation* Zone::GetFactionAssociation(const uint32 faction_id)
+FactionAssociationRepository::FactionAssociation* Zone::GetFactionAssociation(const uint32 faction_id)
 	{
 		for (auto& e : m_faction_associations) {
 			if (e.id == faction_id) {
