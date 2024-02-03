@@ -4485,7 +4485,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						if (attacker->IsBot()) {
 							Mob* owner = attacker->GetOwner();
 
-							if (owner->CastToClient()->GetFilter(FilterDamageShields) != FilterHide) {
+							if (owner && owner->CastToClient()->GetFilter(FilterDamageShields) != FilterHide) {
 								owner->MessageString(
 									Chat::DamageShield,
 									OTHER_HIT_NONMELEE,
