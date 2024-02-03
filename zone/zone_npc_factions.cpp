@@ -146,7 +146,7 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 	return npc_faction_entries;
 }
 
-void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
+void Zone::LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 {
 	LogFaction(
 		"Load Associations for NPC Faction IDs [{}]",
@@ -256,13 +256,13 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 			LogFaction("Loaded [{}] Faction Associations.", num_associations);
 	}
 
-void Zone::LoadFactionAssociation(const uint32 npc_faction_id)
+void Zone::LoadNPCFactionAssociation(const uint32 npc_faction_id)
 	{
 		if (!npc_faction_id) {
 			return;
 		}
 
-		LoadFactionAssociations({ npc_faction_id });
+		LoadNPCFactionAssociations({ npc_faction_id });
 	}
 
 void Zone::ClearFactionAssociations()
@@ -291,7 +291,7 @@ void Zone::ReloadFactionAssociations()
 		}
 
 		LogFaction("Reloading Faction Associations");
-		LoadFactionAssociations(npc_faction_ids);
+		LoadNPCFactionAssociations(npc_faction_ids);
 	}
 
 FactionAssociationRepository::FactionAssociation* Zone::GetFactionAssociation(const uint32 faction_id)

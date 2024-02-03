@@ -1982,7 +1982,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	if (!npc_faction_ids.empty()) {
 		zone->LoadNPCFactions(npc_faction_ids);
-		zone->LoadFactionAssociations(npc_faction_ids);
+		zone->LoadNPCFactionAssociations(npc_faction_ids);
 	}
 
 	return npc;
