@@ -15,20 +15,38 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 		return;
 	}
 
+	// Narrow the list sent in, to new npc_faction_ids that are being loaded
+	// as the result of a new spawn.  Ignore those already loaded.
+
+	std::vector<uint32> new_npc_faction_ids = { };
+
 	for (const auto& e : npc_faction_ids) {
-		for (const auto& f : m_npc_factions) {
-			if (e == f.id) {
-				LogFactionDetail("Faction [{}] already loaded.", e);
-				return;
+		bool found=0;
+
+		for (const auto& nf : m_npc_factions) {
+			found = (nf.id == e);
+			if (found) {
+				LogFaction("Already loaded npc_faction [{}]", nf.id);
+				break;
 			}
 		}
+
+		// This one is new
+		if (!found) {
+			new_npc_faction_ids.emplace_back(e);
+		}
+	}
+
+	if (new_npc_faction_ids.empty()) {
+		LogFactionDetail("No New NPC factions to load.");
+		return;
 	}
 
 	auto npc_factions = NpcFactionRepository::GetWhere(
 		content_db,
 		fmt::format(
 			"`id` IN ({})",
-			Strings::Join(npc_faction_ids, ", ")
+			Strings::Join(new_npc_faction_ids, ", ")
 		)
 	);
 
@@ -36,7 +54,7 @@ void Zone::LoadNPCFactions(const std::vector<uint32> &npc_faction_ids)
 		content_db,
 		fmt::format(
 			"`npc_faction_id` IN ({})",
-			Strings::Join(npc_faction_ids, ", ")
+			Strings::Join(new_npc_faction_ids, ", ")
 		)
 	);
 
@@ -142,18 +160,9 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 {
 	LogFaction(
-		"Load Associations for Faction IDs [{}]",
+		"Load Associations for NPC Faction IDs [{}]",
 		Strings::Join(npc_faction_ids, ", ")
 	);
-
-	for (const auto& e : npc_faction_ids) {
-		for (const auto& f : m_faction_associations) {
-			if (f.id_1 == e) {
-				LogFaction("Faction Association for Faction ID [{}] already loaded.", e);
-				return;
-			}
-		}
-	}
 
 	if (npc_faction_ids.empty()) {
 		LogFactionDetail("No Faction Associations to load.");
@@ -164,14 +173,30 @@ void Zone::LoadFactionAssociations(const std::vector<uint32>& npc_faction_ids)
 
 	for (const auto& e : npc_faction_ids) {
 		for (const auto& f : m_npc_factions) {
+			bool found=false;
 			if (e == f.id && f.primaryfaction > 0) {
-				faction_ids.emplace_back(f.primaryfaction);
+				for (auto a : m_faction_associations) {
+					if (a.id == f.primaryfaction) {
+						found=true;
+						LogError("Association [{}] already loaded", a.id);
+					break;
+					}
+				}
+
+				if (!found) {
+					faction_ids.emplace_back(f.primaryfaction);
+				}
 			}
 		}
 	}
 
+	if (faction_ids.empty()) {
+		LogFactionDetail("No New Faction Associations to load.");
+		return;
+	}
+
 	LogFaction(
-		"These are the primary faction IDs[{}]",
+		"These are the primary faction IDs [{}]",
 		Strings::Join(faction_ids, ", ")
 	);
 
