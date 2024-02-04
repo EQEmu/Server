@@ -340,9 +340,9 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "faction")) {
 		if (sep->IsNumber(2)) {
 			auto npc_faction_id   = Strings::ToInt(sep->arg[2]);
-			const NPCFactionList* cf = content_db.GetNPCFactionEntry(npc_faction_id);
-			if (cf) {
-				auto faction_id = cf->primaryfaction;
+			const auto f = zone->GetNPCFaction(npc_faction_id);
+			if (f) {
+				auto faction_id = f->primaryfaction;
 				auto faction_name = content_db.GetFactionName(faction_id);
 
 				n.npc_faction_id = npc_faction_id;

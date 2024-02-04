@@ -38,6 +38,9 @@
 #include "queryserv.h"
 #include "../common/discord/discord.h"
 #include "../common/repositories/dynamic_zone_templates_repository.h"
+#include "../common/repositories/npc_faction_repository.h"
+#include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/faction_association_repository.h"
 
 struct EXPModifier
 {
@@ -407,6 +410,21 @@ public:
 
 	void ReloadContentFlags();
 
+	void LoadNPCFaction(const uint32 npc_faction_id);
+	void LoadNPCFactions(const std::vector<uint32>& npc_faction_ids);
+	void ClearNPCFactions();
+	void ReloadNPCFactions();
+	NpcFactionRepository::NpcFaction* GetNPCFaction(const uint32 npc_faction_id);
+	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> GetNPCFactionEntries(const uint32 npc_faction_id) const;
+
+	void LoadNPCFactionAssociation(const uint32 npc_faction_id);
+	void LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids);
+	void LoadFactionAssociation(const uint32 faction_id);
+	void LoadFactionAssociations(const std::vector<uint32>& faction_ids);
+	void ClearFactionAssociations();
+	void ReloadFactionAssociations();
+	FactionAssociationRepository::FactionAssociation* GetFactionAssociation(const uint32 faction_id);
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
@@ -457,6 +475,10 @@ private:
 	Timer                               qglobal_purge_timer;
 	ZoneSpellsBlocked                   *blocked_spells;
 
+	// Factions
+	std::vector<NpcFactionRepository::NpcFaction>                 m_npc_factions         = { };
+	std::vector<NpcFactionEntriesRepository::NpcFactionEntries>   m_npc_faction_entries  = { };
+	std::vector<FactionAssociationRepository::FactionAssociation> m_faction_associations = { };
 };
 
 #endif

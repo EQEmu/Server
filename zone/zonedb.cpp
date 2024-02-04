@@ -1746,6 +1746,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	}
 
 	std::vector<uint32> npc_ids;
+	std::vector<uint32> npc_faction_ids;
 
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
@@ -1798,7 +1799,6 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			t->special_abilities[0] = '\0';
 		}
 
-
 		t->npc_spells_id         = n.npc_spells_id;
 		t->npc_spells_effects_id = n.npc_spells_effects_id;
 		t->d_melee_texture1      = n.d_melee_texture1;
@@ -1844,6 +1844,18 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->drakkin_heritage = n.drakkin_heritage;
 		t->drakkin_tattoo   = n.drakkin_tattoo;
 		t->drakkin_details  = n.drakkin_details;
+
+		if (t->npc_faction_id > 0) {
+			if (
+				std::find(
+					npc_faction_ids.begin(),
+					npc_faction_ids.end(),
+					t->npc_faction_id
+				) == npc_faction_ids.end()
+			) {
+				npc_faction_ids.emplace_back(t->npc_faction_id);
+			}
+		}
 
 		// armor tint
 		uint32 armor_tint_id = n.armortint_id;
@@ -1966,6 +1978,11 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	}
 
 	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
+
+	if (!npc_faction_ids.empty()) {
+		zone->LoadNPCFactions(npc_faction_ids);
+		zone->LoadNPCFactionAssociations(npc_faction_ids);
+	}
 
 	return npc;
 }
@@ -3467,30 +3484,6 @@ std::string ZoneDatabase::GetFactionName(int32 faction_id)
 }
 
 //o--------------------------------------------------------------
-//| Name: GetNPCFactionList; Dec. 16, 2001
-//o--------------------------------------------------------------
-//| Purpose: Gets a list of faction_id's and values bound to the npc_id. Returns false on failure.
-//o--------------------------------------------------------------
-bool ZoneDatabase::GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction) {
-	if (npcfaction_id <= 0) {
-		if (primary_faction)
-			*primary_faction = npcfaction_id;
-		return true;
-	}
-	const NPCFactionList* nfl = GetNPCFactionEntry(npcfaction_id);
-	if (!nfl)
-		return false;
-	if (primary_faction)
-		*primary_faction = nfl->primaryfaction;
-	for (int i=0; i<MAX_NPC_FACTIONS; i++) {
-		faction_id[i] = nfl->factionid[i];
-		value[i] = nfl->factionvalue[i];
-		temp[i] = nfl->factiontemp[i];
-	}
-	return true;
-}
-
-//o--------------------------------------------------------------
 //| Name: SetCharacterFactionLevel; Dec. 20, 2001
 //o--------------------------------------------------------------
 //| Purpose: Update characters faction level with specified faction_id to specified value. Returns false on failure.
@@ -3634,46 +3627,40 @@ bool ZoneDatabase::LoadFactionData()
 	return true;
 }
 
-bool ZoneDatabase::GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction) {
-	if (nfl_id <= 0) {
-		std::list<struct NPCFaction*>::iterator cur,end;
-		cur = faction_list->begin();
-		end = faction_list->end();
-		for(; cur != end; ++cur) {
-			struct NPCFaction* tmp = *cur;
-			safe_delete(tmp);
+bool ZoneDatabase::GetFactionIDsForNPC(
+	uint32 npc_faction_id,
+	std::list<NpcFactionEntriesRepository::NpcFactionEntries> *faction_list,
+	int32* primary_faction
+)
+{
+	if (npc_faction_id <= 0) {
+		faction_list->clear();
+
+		if (primary_faction) {
+			*primary_faction = npc_faction_id;
 		}
 
-		faction_list->clear();
-		if (primary_faction)
-			*primary_faction = nfl_id;
 		return true;
 	}
-	const NPCFactionList* nfl = GetNPCFactionEntry(nfl_id);
-	if (!nfl)
-		return false;
-	if (primary_faction)
-		*primary_faction = nfl->primaryfaction;
 
-	std::list<struct NPCFaction*>::iterator cur,end;
-	cur = faction_list->begin();
-	end = faction_list->end();
-	for(; cur != end; ++cur) {
-		struct NPCFaction* tmp = *cur;
-		safe_delete(tmp);
+	const auto& npcf = zone->GetNPCFaction(npc_faction_id);
+	if (!npcf) {
+		LogError("No NPC faction entry for [{}]", npc_faction_id);
+		return false;
 	}
+
+	const auto& l = zone->GetNPCFactionEntries(npc_faction_id);
+
+	if (primary_faction) {
+		*primary_faction = npcf->primaryfaction;
+	}
+
 	faction_list->clear();
-	for (int i=0; i<MAX_NPC_FACTIONS; i++) {
-		struct NPCFaction *pFac;
-		if (nfl->factionid[i]) {
-			pFac = new struct NPCFaction;
-			pFac->factionID = nfl->factionid[i];
-			pFac->value_mod = nfl->factionvalue[i];
-			pFac->npc_value = nfl->factionnpcvalue[i];
-			pFac->temp = nfl->factiontemp[i];
-			faction_list->push_back(pFac);
-		}
+
+	for (const auto& e: l) {
+		faction_list->emplace_back(e);
 	}
+
 	return true;
 }
 

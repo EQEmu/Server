@@ -21,6 +21,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_data_buckets         = !strcasecmp(sep->arg[1], "data_buckets_cache");
 	bool is_doors                = !strcasecmp(sep->arg[1], "doors");
 	bool is_dztemplates          = !strcasecmp(sep->arg[1], "dztemplates");
+	bool is_factions             = !strcasecmp(sep->arg[1], "factions");
 	bool is_ground_spawns        = !strcasecmp(sep->arg[1], "ground_spawns");
 	bool is_level_mods           = !strcasecmp(sep->arg[1], "level_mods");
 	bool is_logs                 = !strcasecmp(sep->arg[1], "logs") || is_logs_reload_alias;
@@ -50,6 +51,7 @@ void command_reload(Client *c, const Seperator *sep)
 		!is_data_buckets &&
 		!is_doors &&
 		!is_dztemplates &&
+		!is_factions &&
 		!is_ground_spawns &&
 		!is_level_mods &&
 		!is_logs &&
@@ -100,6 +102,9 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_dztemplates) {
 		c->Message(Chat::White, "Attempting to reload Dynamic Zone Templates globally.");
 		pack = new ServerPacket(ServerOP_ReloadDzTemplates, 0);
+	} else if (is_factions) {
+		c->Message(Chat::White, "Attempting to reload Factions globally.");
+		pack = new ServerPacket(ServerOP_ReloadFactions, 0);
 	} else if (is_ground_spawns) {
 		c->Message(Chat::White, "Attempting to reload Ground Spawns globally.");
 		pack = new ServerPacket(ServerOP_ReloadGroundSpawns, 0);
