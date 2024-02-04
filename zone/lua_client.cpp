@@ -3278,6 +3278,18 @@ void Lua_Client::ClearXTargets()
 	self->ClearXTargets();
 }
 
+uint8 Lua_Client::GetAAEXPPercentage()
+{
+	Lua_Safe_Call_Int();
+	return self->GetAAEXPPercentage();
+}
+
+uint8 Lua_Client::GetEXPPercentage()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEXPPercentage();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3400,6 +3412,7 @@ luabind::scope lua_register_client() {
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetAAEXPModifier)
+	.def("GetAAEXPPercentage", (uint8(Lua_Client::*)(void))&Lua_Client::GetAAEXPPercentage)
 	.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 	.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 	.def("GetAAPoints", (int(Lua_Client::*)(void))&Lua_Client::GetAAPoints)
@@ -3459,6 +3472,7 @@ luabind::scope lua_register_client() {
 	.def("GetEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
+	.def("GetEXPPercentage", (uint8(Lua_Client::*)(void))&Lua_Client::GetEXPPercentage)
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
 	.def("GetEndurance", (int(Lua_Client::*)(void))&Lua_Client::GetEndurance)
 	.def("GetEndurancePercent", (int(Lua_Client::*)(void))&Lua_Client::GetEndurancePercent)

@@ -3088,12 +3088,12 @@ void Perl_Client_ClearXTargets(Client* self)
 	self->ClearXTargets();
 }
 
-float Perl_Client_GetAAEXPPercentage(Client* self)
+uint8 Perl_Client_GetAAEXPPercentage(Client* self)
 {
 	return self->GetAAEXPPercentage();
 }
 
-float Perl_Client_GetEXPPercentage(Client* self)
+uint8 Perl_Client_GetEXPPercentage(Client* self)
 {
 	return self->GetEXPPercentage();
 }
