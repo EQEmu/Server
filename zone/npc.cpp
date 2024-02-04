@@ -4139,15 +4139,19 @@ void NPC::DescribeSpecialAbilities(Client* c)
 		},
 	};
 
-	std::map<uint32, std::string> abilities;
+	std::vector<std::string> messages = { };
 
 	for (const auto& e : toggleable_special_abilities) {
 		if (GetSpecialAbility(e)) {
-			abilities[e] = EQ::constants::GetSpecialAbilityName(e);
+			messages.emplace_back(
+				fmt::format(
+					"{} ({})",
+					EQ::constants::GetSpecialAbilityName(e),
+					e
+				)
+			);
 		}
 	}
-
-	std::vector<std::tuple<uint32, std::string, int>> parameter_abilities;
 
 	int slot_id;
 
@@ -4156,8 +4160,10 @@ void NPC::DescribeSpecialAbilities(Client* c)
 			slot_id = 0;
 
 			for (const auto& a : e.second) {
-				parameter_abilities.push_back(
-					std::make_tuple(
+				messages.emplace_back(
+					fmt::format(
+						"{} ({}) | {}: {}",
+						EQ::constants::GetSpecialAbilityName(e.first),
 						e.first,
 						a,
 						GetSpecialAbilityParam(e.first, slot_id)
@@ -4169,7 +4175,7 @@ void NPC::DescribeSpecialAbilities(Client* c)
 		}
 	}
 
-	if (abilities.empty() && parameter_abilities.empty()) {
+	if (messages.empty()) {
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -4185,33 +4191,9 @@ void NPC::DescribeSpecialAbilities(Client* c)
 		fmt::format(
 			"{} has the following special abilit{}:",
 			c->GetTargetDescription(this),
-			(abilities.size() + parameter_abilities.size()) != 1 ? "ies" : "y"
+			messages.size() != 1 ? "ies" : "y"
 		).c_str()
 	);
-
-	std::vector<std::string> messages = { };
-
-	for (const auto& e : abilities) {
-		messages.emplace_back(
-			fmt::format(
-				"{} ({})",
-				e.second,
-				e.first
-			)
-		);
-	}
-
-	for (const auto& e : parameter_abilities) {
-		messages.emplace_back(
-			fmt::format(
-				"{} ({}) | {}: {}",
-				EQ::constants::GetSpecialAbilityName(std::get<0>(e)),
-				std::get<0>(e),
-				std::get<1>(e),
-				std::get<2>(e)
-			)
-		);
-	}
 
 	std::sort(
 		messages.begin(),
