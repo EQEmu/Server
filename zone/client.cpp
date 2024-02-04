@@ -12097,3 +12097,25 @@ void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_v
 
 	database.LoadCharacterEXPModifier(this);
 }
+
+int Client::GetAAEXPPercentage()
+{
+	int scaled = static_cast<int>(330.0f * static_cast<float>(GetAAXP()) / GetRequiredAAExperience());
+
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0));
+}
+
+int Client::GetEXPPercentage()
+{
+	float    norm = 0.0f;
+	uint32_t min  = GetEXPForLevel(GetLevel());
+	uint32_t max  = GetEXPForLevel(GetLevel() + 1);
+
+	if (min != max) {
+		norm = static_cast<float>(GetEXP() - min) / (max - min);
+	}
+
+	int scaled = static_cast<int>(330.0f * norm); // scale and truncate
+
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
+}

@@ -493,6 +493,8 @@ public:
 	void SummonItemIntoInventory(luabind::object item_table);
 	bool HasItemOnCorpse(uint32 item_id);
 	void ClearXTargets();
+	int GetAAEXPPercentage();
+	int GetEXPPercentage();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
