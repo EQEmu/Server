@@ -12005,26 +12005,24 @@ void Client::SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_v
 	database.LoadCharacterEXPModifier(this);
 }
 
-uint8 Client::GetAAEXPPercentage()
+int Client::GetAAEXPPercentage()
 {
-	const float current = GetAAXP();
-	const float max     = GetRequiredAAExperience();
+	int scaled = static_cast<int>(330.0f * static_cast<float>(GetAAXP()) / GetRequiredAAExperience());
 
-	const float percentage = ((current / max) * 100.0f);
-
-	return std::round(percentage);
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0));
 }
 
-uint8 Client::GetEXPPercentage()
+int Client::GetEXPPercentage()
 {
-	const float current = GetEXP() - GetEXPForLevel(GetLevel());
-	const float max     = GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel());
+	float    norm = 0.0f;
+	uint32_t min  = GetEXPForLevel(GetLevel());
+	uint32_t max  = GetEXPForLevel(GetLevel() + 1);
 
-	if (max == 0.0f) {
-		return 0;
+	if (min != max) {
+		norm = static_cast<float>(GetEXP() - min) / (max - min);
 	}
 
-	const float percentage = ((current / max) * 100.0f);
+	int scaled = static_cast<int>(330.0f * norm); // scale and truncate
 
-	return std::round(percentage);
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
 }
