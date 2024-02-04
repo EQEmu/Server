@@ -2775,13 +2775,13 @@ void Mob::ShowStats(Client* c)
 
 		// Faction
 		if (t->GetNPCFactionID()) {
-			const std::string& faction_name = content_db.GetFactionName(t->GetNPCFactionID());
+			const std::string& faction_name = content_db.GetFactionName(t->GetPrimaryFaction());
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"Faction: {} ({})",
 					faction_name,
-					t->GetNPCFactionID()
+					t->GetPrimaryFaction()
 				).c_str()
 			);
 		}

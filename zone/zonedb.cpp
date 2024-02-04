@@ -1746,7 +1746,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 	}
 
 	std::vector<uint32> npc_ids;
-	std::vector<uint32> faction_ids;
+	std::vector<uint32> npc_faction_ids;
 
 	for (NpcTypesRepository::NpcTypes &n : NpcTypesRepository::GetWhere((Database &) content_db, filter)) {
 		NPCType *t;
@@ -1848,12 +1848,12 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		if (t->npc_faction_id > 0) {
 			if (
 				std::find(
-					faction_ids.begin(),
-					faction_ids.end(),
+					npc_faction_ids.begin(),
+					npc_faction_ids.end(),
 					t->npc_faction_id
-				) == faction_ids.end()
+				) == npc_faction_ids.end()
 			) {
-				faction_ids.emplace_back(t->npc_faction_id);
+				npc_faction_ids.emplace_back(t->npc_faction_id);
 			}
 		}
 
@@ -1979,8 +1979,10 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 
 	DataBucket::BulkLoadEntities(DataBucketLoadType::NPC, npc_ids);
 
-	zone->LoadNPCFactions(faction_ids);
-	zone->LoadFactionAssociations(faction_ids);
+	if (!npc_faction_ids.empty()) {
+		zone->LoadNPCFactions(npc_faction_ids);
+		zone->LoadNPCFactionAssociations(npc_faction_ids);
+	}
 
 	return npc;
 }
@@ -3467,13 +3469,18 @@ bool ZoneDatabase::GetFactionName(int32 faction_id, char* name, uint32 buflen) {
 
 std::string ZoneDatabase::GetFactionName(int32 faction_id)
 {
-	const auto& e = NpcFactionRepository::FindOne(*this, faction_id);
-
-	if (!e.id) {
-		return std::string();
+	std::string faction_name;
+	if (
+		faction_id <= 0 ||
+		 faction_id > static_cast<int>(max_faction) ||
+		 !faction_array[faction_id]
+	) {
+		return faction_name;
 	}
 
-	return e.name;
+	faction_name = faction_array[faction_id]->name;
+
+	return faction_name;
 }
 
 //o--------------------------------------------------------------
@@ -3621,33 +3628,31 @@ bool ZoneDatabase::LoadFactionData()
 }
 
 bool ZoneDatabase::GetFactionIDsForNPC(
-	uint32 faction_id,
+	uint32 npc_faction_id,
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> *faction_list,
 	int32* primary_faction
 )
 {
-	if (faction_id <= 0) {
+	if (npc_faction_id <= 0) {
 		faction_list->clear();
 
 		if (primary_faction) {
-			*primary_faction = faction_id;
+			*primary_faction = npc_faction_id;
 		}
 
 		return true;
 	}
 
-	const auto& f = zone->GetNPCFaction(faction_id);
-	if (!f) {
+	const auto& npcf = zone->GetNPCFaction(npc_faction_id);
+	if (!npcf) {
+		LogError("No NPC faction entry for [{}]", npc_faction_id);
 		return false;
 	}
 
-	const auto& l = zone->GetNPCFactionEntries(faction_id);
-	if (l.empty()) {
-		return false;
-	}
+	const auto& l = zone->GetNPCFactionEntries(npc_faction_id);
 
 	if (primary_faction) {
-		*primary_faction = f->primaryfaction;
+		*primary_faction = npcf->primaryfaction;
 	}
 
 	faction_list->clear();

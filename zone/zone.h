@@ -410,13 +410,15 @@ public:
 
 	void ReloadContentFlags();
 
-	void LoadNPCFaction(const uint32 faction_id);
-	void LoadNPCFactions(const std::vector<uint32>& faction_ids);
+	void LoadNPCFaction(const uint32 npc_faction_id);
+	void LoadNPCFactions(const std::vector<uint32>& npc_faction_ids);
 	void ClearNPCFactions();
 	void ReloadNPCFactions();
-	NpcFactionRepository::NpcFaction* GetNPCFaction(const uint32 faction_id);
-	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> GetNPCFactionEntries(const uint32 faction_id) const;
+	NpcFactionRepository::NpcFaction* GetNPCFaction(const uint32 npc_faction_id);
+	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> GetNPCFactionEntries(const uint32 npc_faction_id) const;
 
+	void LoadNPCFactionAssociation(const uint32 npc_faction_id);
+	void LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids);
 	void LoadFactionAssociation(const uint32 faction_id);
 	void LoadFactionAssociations(const std::vector<uint32>& faction_ids);
 	void ClearFactionAssociations();

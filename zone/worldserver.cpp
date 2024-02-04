@@ -1993,6 +1993,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Factions");
+			content_db.LoadFactionData();
 			zone->ReloadNPCFactions();
 			zone->ReloadFactionAssociations();
 		}
