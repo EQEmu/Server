@@ -1853,7 +1853,6 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 					t->npc_faction_id
 				) == npc_faction_ids.end()
 			) {
-				LogFaction("Loading npc_faction ID [{}]", t->npc_faction_id);
 				npc_faction_ids.emplace_back(t->npc_faction_id);
 			}
 		}

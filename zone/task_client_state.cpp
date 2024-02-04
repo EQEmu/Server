@@ -1067,6 +1067,7 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 		);
 	} else if (ti->faction_reward != 0 && ti->faction_amount != 0) {
 		// faction_reward is a faction ID
+		zone->LoadFactionAssociation(ti->faction_reward);
 		c->RewardFaction(
 			ti->faction_reward,
 			ti->faction_amount

@@ -1439,6 +1439,7 @@ void QuestManager::rewardfaction(int faction_id, int faction_value) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
 		if (faction_id != 0 && faction_value != 0) {
+			zone->LoadFactionAssociation(faction_id);
 			initiator->RewardFaction(faction_id, faction_value);
 		}
 	}
