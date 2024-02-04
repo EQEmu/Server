@@ -167,7 +167,7 @@ void Zone::LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids
 				for (const auto& a : m_faction_associations) {
 					if (a.id == f.primaryfaction) {
 						found = true;
-						LogError("Association [{}] already loaded", a.id);
+						LogFaction("Association [{}] already loaded", a.id);
 						break;
 					}
 				}

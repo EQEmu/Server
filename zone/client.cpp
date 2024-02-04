@@ -8264,17 +8264,17 @@ void Client::RewardFaction(int faction_id, int amount)
 		f->mod_10
 	};
 
-	std::vector<int> temporary_values = {
-		static_cast<int>(faction_modifiers[0] * amount),
-		static_cast<int>(faction_modifiers[1] * amount),
-		static_cast<int>(faction_modifiers[2] * amount),
-		static_cast<int>(faction_modifiers[3] * amount),
-		static_cast<int>(faction_modifiers[4] * amount),
-		static_cast<int>(faction_modifiers[5] * amount),
-		static_cast<int>(faction_modifiers[6] * amount),
-		static_cast<int>(faction_modifiers[7] * amount),
-		static_cast<int>(faction_modifiers[8] * amount),
-		static_cast<int>(faction_modifiers[9] * amount)
+	std::vector<float> temporary_values = {
+		static_cast<float>(faction_modifiers[0] * amount),
+		static_cast<float>(faction_modifiers[1] * amount),
+		static_cast<float>(faction_modifiers[2] * amount),
+		static_cast<float>(faction_modifiers[3] * amount),
+		static_cast<float>(faction_modifiers[4] * amount),
+		static_cast<float>(faction_modifiers[5] * amount),
+		static_cast<float>(faction_modifiers[6] * amount),
+		static_cast<float>(faction_modifiers[7] * amount),
+		static_cast<float>(faction_modifiers[8] * amount),
+		static_cast<float>(faction_modifiers[9] * amount)
 	};
 
 	std::vector<int> signs = {
@@ -8291,16 +8291,16 @@ void Client::RewardFaction(int faction_id, int amount)
 	};
 
 	std::vector<int> new_values = {
-		std::max(1, static_cast<int>(std::abs(temporary_values[0])) * signs[0]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[1])) * signs[1]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[2])) * signs[2]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[3])) * signs[3]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[4])) * signs[4]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[5])) * signs[5]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[6])) * signs[6]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[7])) * signs[7]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[8])) * signs[8]),
-		std::max(1, static_cast<int>(std::abs(temporary_values[9])) * signs[9])
+		std::max(1, static_cast<int>(std::abs(temporary_values[0]))) * signs[0],
+		std::max(1, static_cast<int>(std::abs(temporary_values[1]))) * signs[1],
+		std::max(1, static_cast<int>(std::abs(temporary_values[2]))) * signs[2],
+		std::max(1, static_cast<int>(std::abs(temporary_values[3]))) * signs[3],
+		std::max(1, static_cast<int>(std::abs(temporary_values[4]))) * signs[4],
+		std::max(1, static_cast<int>(std::abs(temporary_values[5]))) * signs[5],
+		std::max(1, static_cast<int>(std::abs(temporary_values[6]))) * signs[6],
+		std::max(1, static_cast<int>(std::abs(temporary_values[7]))) * signs[7],
+		std::max(1, static_cast<int>(std::abs(temporary_values[8]))) * signs[8],
+		std::max(1, static_cast<int>(std::abs(temporary_values[9]))) * signs[9]
 	};
 
 	for (uint16 slot_id = 0; slot_id < faction_ids.size(); slot_id++) {
