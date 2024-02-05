@@ -137,11 +137,13 @@ struct Reload {
 std::vector<Reload> reload_types = {
 	Reload{.command = "aa", .opcode = ServerOP_ReloadAAData, .desc = "Alternate Advancement"},
 	Reload{.command = "alternate_currencies", .opcode = ServerOP_ReloadAlternateCurrencies, .desc = "Alternate Currencies"},
+	Reload{.command = "base_data", .opcode = ServerOP_ReloadBaseData, .desc = "Base Data"},
 	Reload{.command = "blocked_spells", .opcode = ServerOP_ReloadBlockedSpells, .desc = "Blocked Spells"},
 	Reload{.command = "commands", .opcode = ServerOP_ReloadCommands, .desc = "Commands"},
 	Reload{.command = "data_buckets_cache", .opcode = ServerOP_ReloadDataBucketsCache, .desc = "Data Buckets Cache"},
 	Reload{.command = "doors", .opcode = ServerOP_ReloadDoors, .desc = "Doors"},
 	Reload{.command = "dztemplates", .opcode = ServerOP_ReloadDzTemplates, .desc = "Dynamic Zone Templates"},
+	Reload{.command = "factions", .opcode = ServerOP_ReloadFactions, .desc = "Factions"},
 	Reload{.command = "ground_spawns", .opcode = ServerOP_ReloadGroundSpawns, .desc = "Ground Spawns"},
 	Reload{.command = "level_mods", .opcode = ServerOP_ReloadLevelEXPMods, .desc = "Level Mods"},
 	Reload{.command = "logs", .opcode = ServerOP_ReloadLogs, .desc = "Log Settings"},

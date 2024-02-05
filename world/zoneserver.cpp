@@ -1385,6 +1385,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_RefreshCensorship:
 		case ServerOP_ReloadAAData:
 		case ServerOP_ReloadAlternateCurrencies:
+		case ServerOP_ReloadBaseData:
 		case ServerOP_ReloadBlockedSpells:
 		case ServerOP_ReloadCommands:
 		case ServerOP_ReloadDoors:

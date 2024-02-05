@@ -160,6 +160,7 @@ SET(zone_sources
     zone.cpp
     zone_config.cpp
     zonedb.cpp
+    zone_base_data.cpp
     zone_event_scheduler.cpp
     zone_npc_factions.cpp
     zone_reload.cpp

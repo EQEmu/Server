@@ -15,6 +15,7 @@ void command_reload(Client *c, const Seperator *sep)
 	bool is_rq_alias             = sep->arg[0] && Strings::Contains(command, "#rq");
 	bool is_aa                   = !strcasecmp(sep->arg[1], "aa");
 	bool is_alternate_currencies = !strcasecmp(sep->arg[1], "alternate_currencies");
+	bool is_base_data            = !strcasecmp(sep->arg[1], "base_data");
 	bool is_blocked_spells       = !strcasecmp(sep->arg[1], "blocked_spells");
 	bool is_commands             = !strcasecmp(sep->arg[1], "commands");
 	bool is_content_flags        = !strcasecmp(sep->arg[1], "content_flags");
@@ -46,6 +47,7 @@ void command_reload(Client *c, const Seperator *sep)
 	if (
 		!is_aa &&
 		!is_alternate_currencies &&
+		!is_base_data &&
 		!is_blocked_spells &&
 		!is_commands &&
 		!is_content_flags &&
@@ -86,6 +88,9 @@ void command_reload(Client *c, const Seperator *sep)
 	} else if (is_alternate_currencies) {
 		c->Message(Chat::White, "Attempting to reload Alternate Currencies globally.");
 		pack = new ServerPacket(ServerOP_ReloadAlternateCurrencies, 0);
+	} else if (is_base_data) {
+		c->Message(Chat::White, "Attempting to reload Base Data globally.");
+		pack = new ServerPacket(ServerOP_ReloadBaseData, 0);
 	} else if (is_blocked_spells) {
 		c->Message(Chat::White, "Attempting to reload Blocked Spells globally.");
 		pack = new ServerPacket(ServerOP_ReloadBlockedSpells, 0);

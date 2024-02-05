@@ -180,14 +180,6 @@ public:
 	uint32 GetSharedSpellsCount() { return m_shared_spells_count; }
 	uint32 GetSpellsCount();
 
-	/**
-	 * basedata
-	 */
-	int GetMaxBaseDataLevel();
-	bool LoadBaseData(const std::string &prefix);
-	void LoadBaseData(void *data, int max_level);
-	const BaseDataStruct *GetBaseData(int lvl, int cl) const;
-
 	std::string CreateItemLink(uint32 item_id) const
 	{
 		EQ::SayLinkEngine linker;

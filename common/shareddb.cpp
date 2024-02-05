@@ -1974,115 +1974,292 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
     LoadDamageShieldTypes(sp, max_spells);
 }
 
-int SharedDatabase::GetMaxBaseDataLevel() {
-	const std::string query = "SELECT MAX(level) FROM base_data";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return -1;
-	}
+void SharedDatabase::GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries) {
+	loot_table_count = 0;
+	max_loot_table = 0;
+	loot_table_entries = 0;
+	const std::string query =
+		fmt::format(
+			"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM loottable_entries) FROM loottable WHERE TRUE {}",
+			ContentFilterCriteria::apply()
+		);
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        return;
+    }
 
 	if (results.RowCount() == 0)
-        return -1;
+        return;
 
-    auto& row = results.begin();
+	auto& row = results.begin();
 
-	return Strings::ToInt(row[0]);
+    loot_table_count = Strings::ToUnsignedInt(row[0]);
+	max_loot_table = Strings::ToUnsignedInt(row[1] ? row[1] : "0");
+	loot_table_entries = Strings::ToUnsignedInt(row[2]);
 }
 
-bool SharedDatabase::LoadBaseData(const std::string &prefix) {
-	base_data_mmf.reset(nullptr);
+void SharedDatabase::GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries) {
+	loot_drop_count = 0;
+	max_loot_drop = 0;
+	loot_drop_entries = 0;
+
+	const std::string query = fmt::format(
+		"SELECT COUNT(*), MAX(id), (SELECT COUNT(*) FROM lootdrop_entries) FROM lootdrop WHERE TRUE {}",
+		ContentFilterCriteria::apply()
+	);
+
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        return;
+    }
+
+	if (results.RowCount() == 0)
+        return;
+
+    auto& row =results.begin();
+
+	loot_drop_count = Strings::ToUnsignedInt(row[0]);
+	max_loot_drop = Strings::ToUnsignedInt(row[1] ? row[1] : "0");
+	loot_drop_entries = Strings::ToUnsignedInt(row[2]);
+}
+
+void SharedDatabase::LoadLootTables(void *data, uint32 size) {
+	EQ::FixedMemoryVariableHashSet<LootTable_Struct> hash(static_cast<uint8*>(data), size);
+
+	uint8 loot_table[sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128)];
+	LootTable_Struct *lt = reinterpret_cast<LootTable_Struct*>(loot_table);
+
+	const std::string query = fmt::format(
+		SQL(
+			SELECT
+			  loottable.id,
+			  loottable.mincash,
+			  loottable.maxcash,
+			  loottable.avgcoin,
+			  loottable_entries.lootdrop_id,
+			  loottable_entries.multiplier,
+			  loottable_entries.droplimit,
+			  loottable_entries.mindrop,
+			  loottable_entries.probability,
+			  loottable.min_expansion,
+			  loottable.max_expansion,
+			  loottable.content_flags,
+			  loottable.content_flags_disabled
+			FROM
+			  loottable
+			  LEFT JOIN loottable_entries ON loottable.id = loottable_entries.loottable_id
+			WHERE TRUE {}
+			ORDER BY
+			  id
+			),
+			ContentFilterCriteria::apply()
+		);
+
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+        return;
+    }
+
+	uint32 current_id    = 0;
+	uint32 current_entry = 0;
+
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		const uint32 id = Strings::ToUnsignedInt(row[0]);
+		if (id != current_id) {
+			if (current_id != 0) {
+				hash.insert(
+					current_id,
+					loot_table,
+					(sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries)));
+			}
+
+			memset(loot_table, 0, sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * 128));
+			current_entry = 0;
+			current_id    = id;
+			lt->mincash = Strings::ToUnsignedInt(row[1]);
+			lt->maxcash = Strings::ToUnsignedInt(row[2]);
+			lt->avgcoin = Strings::ToUnsignedInt(row[3]);
+
+			lt->content_flags.min_expansion = static_cast<int16>(Strings::ToInt(row[9]));
+			lt->content_flags.max_expansion = static_cast<int16>(Strings::ToInt(row[10]));
+
+			strn0cpy(lt->content_flags.content_flags,          row[11], sizeof(lt->content_flags.content_flags));
+			strn0cpy(lt->content_flags.content_flags_disabled, row[12],  sizeof(lt->content_flags.content_flags_disabled));
+		}
+
+		if (current_entry > 128) {
+			continue;
+		}
+
+		if (!row[4]) {
+			continue;
+		}
+
+		lt->Entries[current_entry].lootdrop_id = Strings::ToUnsignedInt(row[4]);
+		lt->Entries[current_entry].multiplier  = static_cast<uint8>(Strings::ToUnsignedInt(row[5]));
+		lt->Entries[current_entry].droplimit   = static_cast<uint8>(Strings::ToUnsignedInt(row[6]));
+		lt->Entries[current_entry].mindrop     = static_cast<uint8>(Strings::ToUnsignedInt(row[7]));
+		lt->Entries[current_entry].probability = Strings::ToFloat(row[8]);
+
+		++(lt->NumEntries);
+		++current_entry;
+	}
+
+	if (current_id != 0) {
+		hash.insert(
+			current_id,
+			loot_table,
+			(sizeof(LootTable_Struct) + (sizeof(LootTableEntries_Struct) * lt->NumEntries))
+		);
+	}
+
+}
+
+void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
+
+	EQ::FixedMemoryVariableHashSet<LootDrop_Struct> hash(static_cast<uint8*>(data), size);
+	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
+	LootDrop_Struct *p_loot_drop_struct = reinterpret_cast<LootDrop_Struct*>(loot_drop);
+
+	const std::string query = fmt::format(
+		SQL(
+			SELECT
+			  lootdrop.id,
+			  lootdrop_entries.item_id,
+			  lootdrop_entries.item_charges,
+			  lootdrop_entries.equip_item,
+			  lootdrop_entries.chance,
+			  lootdrop_entries.trivial_min_level,
+			  lootdrop_entries.trivial_max_level,
+			  lootdrop_entries.npc_min_level,
+			  lootdrop_entries.npc_max_level,
+			  lootdrop_entries.multiplier,
+			  lootdrop.min_expansion,
+			  lootdrop.max_expansion,
+			  lootdrop.content_flags,
+			  lootdrop.content_flags_disabled
+			FROM
+			  lootdrop
+			  JOIN lootdrop_entries ON lootdrop.id = lootdrop_entries.lootdrop_id
+			WHERE
+			  TRUE {}
+			ORDER BY
+			  lootdrop_id
+		),
+		ContentFilterCriteria::apply()
+	);
+
+    auto results = QueryDatabase(query);
+    if (!results.Success()) {
+		return;
+    }
+
+	uint32 current_id    = 0;
+	uint32 current_entry = 0;
+
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		const auto id = Strings::ToUnsignedInt(row[0]);
+		if (id != current_id) {
+			if (current_id != 0) {
+				hash.insert(
+					current_id,
+					loot_drop,
+					(sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * p_loot_drop_struct->NumEntries)));
+			}
+
+			memset(loot_drop, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260));
+			current_entry = 0;
+			current_id    = id;
+
+			p_loot_drop_struct->content_flags.min_expansion = static_cast<int16>(Strings::ToInt(row[10]));
+			p_loot_drop_struct->content_flags.max_expansion = static_cast<int16>(Strings::ToUnsignedInt(row[11]));
+
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags,          row[12], sizeof(p_loot_drop_struct->content_flags.content_flags));
+			strn0cpy(p_loot_drop_struct->content_flags.content_flags_disabled, row[13], sizeof(p_loot_drop_struct->content_flags.content_flags_disabled));
+		}
+
+		if (current_entry >= 1260) {
+			continue;
+		}
+
+		p_loot_drop_struct->Entries[current_entry].item_id           = Strings::ToUnsignedInt(row[1]);
+		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(Strings::ToUnsignedInt(row[2]));
+		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(Strings::ToUnsignedInt(row[3]));
+		p_loot_drop_struct->Entries[current_entry].chance            = Strings::ToFloat(row[4]);
+		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(Strings::ToUnsignedInt(row[5]));
+		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(Strings::ToUnsignedInt(row[6]));
+		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(Strings::ToUnsignedInt(row[7]));
+		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(Strings::ToUnsignedInt(row[8]));
+		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(Strings::ToUnsignedInt(row[9]));
+
+		++(p_loot_drop_struct->NumEntries);
+		++current_entry;
+	}
+
+	if(current_id != 0)
+        hash.insert(current_id, loot_drop, (sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * p_loot_drop_struct->NumEntries)));
+
+}
+
+bool SharedDatabase::LoadLoot(const std::string &prefix) {
+	loot_table_mmf.reset(nullptr);
+	loot_drop_mmf.reset(nullptr);
 
 	try {
 		const auto Config = EQEmuConfig::get();
-		EQ::IPCMutex mutex("base_data");
+		EQ::IPCMutex mutex("loot");
 		mutex.Lock();
+		std::string file_name_lt = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("loot_table"));
 
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("base_data"));
-		base_data_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
+		loot_table_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_lt);
+		loot_table_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(
+			static_cast<uint8*>(loot_table_mmf->Get()),
+			loot_table_mmf->Size());
+
+		LogInfo("Loaded loot tables via shared memory");
+
+		std::string file_name_ld = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("loot_drop"));
+		loot_drop_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_ld);
+		loot_drop_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(
+			static_cast<uint8*>(loot_drop_mmf->Get()),
+			loot_drop_mmf->Size());
 		mutex.Unlock();
-
-		LogInfo("Loaded base data via shared memory");
-	} catch(std::exception& ex) {
-		LogError("Error Loading Base Data: {}", ex.what());
+	} catch(std::exception &ex) {
+		LogError("Error loading loot: {}", ex.what());
 		return false;
 	}
 
 	return true;
 }
 
-void SharedDatabase::LoadBaseData(void *data, int max_level) {
-	char *base_ptr = static_cast<char*>(data);
+const LootTable_Struct* SharedDatabase::GetLootTable(uint32 loottable_id) const
+{
+	if(!loot_table_hash)
+		return nullptr;
 
-	const std::string query = "SELECT * FROM base_data ORDER BY level, class ASC";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        return;
+	try {
+		if(loot_table_hash->exists(loottable_id)) {
+			return &loot_table_hash->at(loottable_id);
+		}
+	} catch(std::exception &ex) {
+		LogError("Could not get loot table: {}", ex.what());
 	}
-
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		const int lvl = Strings::ToInt(row[0]);
-		const int cl = Strings::ToInt(row[1]);
-
-        if(lvl <= 0) {
-            LogError("Non fatal error: base_data.level <= 0, ignoring.");
-            continue;
-        }
-
-        if(lvl >= max_level) {
-            LogError("Non fatal error: base_data.level >= max_level, ignoring.");
-            continue;
-        }
-
-        if(cl <= 0) {
-            LogError("Non fatal error: base_data.cl <= 0, ignoring.");
-            continue;
-        }
-
-        if(cl > 16) {
-            LogError("Non fatal error: base_data.class > 16, ignoring.");
-            continue;
-        }
-
-        BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + (((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct)));
-		bd->base_hp = Strings::ToFloat(row[2]);
-		bd->base_mana = Strings::ToFloat(row[3]);
-		bd->base_end = Strings::ToFloat(row[4]);
-		bd->hp_regen = Strings::ToFloat(row[5]);
-		bd->end_regen = Strings::ToFloat(row[6]);
-		bd->hp_factor = Strings::ToFloat(row[7]);
-		bd->mana_factor = Strings::ToFloat(row[8]);
-		bd->endurance_factor = Strings::ToFloat(row[9]);
-    }
+	return nullptr;
 }
 
-const BaseDataStruct* SharedDatabase::GetBaseData(int lvl, int cl) const
+const LootDrop_Struct* SharedDatabase::GetLootDrop(uint32 lootdrop_id) const
 {
-	if(!base_data_mmf) {
+	if(!loot_drop_hash)
 		return nullptr;
+
+	try {
+		if(loot_drop_hash->exists(lootdrop_id)) {
+			return &loot_drop_hash->at(lootdrop_id);
+		}
+	} catch(std::exception &ex) {
+		LogError("Could not get loot drop: {}", ex.what());
 	}
-
-	if(lvl <= 0) {
-		return nullptr;
-	}
-
-	if(cl <= 0) {
-		return nullptr;
-	}
-
-	if(cl > 16) {
-		return nullptr;
-	}
-
-	char *base_ptr = static_cast<char*>(base_data_mmf->Get());
-
-	const uint32 offset = ((16 * (lvl - 1)) + (cl - 1)) * sizeof(BaseDataStruct);
-
-	if(offset >= base_data_mmf->Size()) {
-		return nullptr;
-	}
-
-	const BaseDataStruct *bd = reinterpret_cast<BaseDataStruct*>(base_ptr + offset);
-	return bd;
+	return nullptr;
 }
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {

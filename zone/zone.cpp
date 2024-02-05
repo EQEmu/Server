@@ -1177,6 +1177,8 @@ bool Zone::Init(bool is_static) {
 
 	content_db.LoadGlobalLoot();
 
+	LoadBaseData();
+
 	//Load merchant data
 	LoadMerchants();
 

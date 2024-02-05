@@ -45,6 +45,7 @@
 #include "../common/repositories/loottable_entries_repository.h"
 #include "../common/repositories/lootdrop_repository.h"
 #include "../common/repositories/lootdrop_entries_repository.h"
+#include "../common/repositories/base_data_repository.h"
 
 struct EXPModifier
 {
@@ -439,6 +440,12 @@ public:
 	LootdropRepository::Lootdrop GetLootdrop(const uint32 lootdrop_id) const;
 	std::vector<LootdropEntriesRepository::LootdropEntries> GetLootdropEntries(const uint32 lootdrop_id) const;
 
+	// Base Data
+	inline void ClearBaseData() { m_base_data.clear(); };
+	BaseDataRepository::BaseData GetBaseData(uint8 level, uint8 class_id);
+	void LoadBaseData();
+	void ReloadBaseData();
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
@@ -499,6 +506,9 @@ private:
 	std::vector<LoottableEntriesRepository::LoottableEntries> m_loottable_entries = {};
 	std::vector<LootdropRepository::Lootdrop>                 m_lootdrops         = {};
 	std::vector<LootdropEntriesRepository::LootdropEntries>   m_lootdrop_entries  = {};
+
+	// Base Data
+	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 };
 
 #endif

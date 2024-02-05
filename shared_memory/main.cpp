@@ -30,7 +30,6 @@
 #include "items.h"
 #include "skill_caps.h"
 #include "spells.h"
-#include "base_data.h"
 #include "../common/content/world_content_service.h"
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
@@ -180,22 +179,15 @@ int main(int argc, char **argv)
 
 	std::string hotfix_name = "";
 
-	bool load_all           = true;
-	bool load_items         = false;
-	bool load_skill_caps    = false;
-	bool load_spells        = false;
-	bool load_bd            = false;
+	bool load_all        = true;
+	bool load_items      = false;
+	bool load_loot       = false;
+	bool load_skill_caps = false;
+	bool load_spells     = false;
 
 	if (argc > 1) {
 		for (int i = 1; i < argc; ++i) {
 			switch (argv[i][0]) {
-				case 'b':
-					if (strcasecmp("base_data", argv[i]) == 0) {
-						load_bd  = true;
-						load_all = false;
-					}
-					break;
-
 				case 'i':
 					if (strcasecmp("items", argv[i]) == 0) {
 						load_items = true;
@@ -257,16 +249,6 @@ int main(int argc, char **argv)
 		LogInfo("Loading spells");
 		try {
 			LoadSpells(&content_db, hotfix_name);
-		} catch (std::exception &ex) {
-			LogError("{}", ex.what());
-			return 1;
-		}
-	}
-
-	if (load_all || load_bd) {
-		LogInfo("Loading base data");
-		try {
-			LoadBaseData(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;

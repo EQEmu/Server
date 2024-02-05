@@ -9087,6 +9087,7 @@ void Client::ShowDevToolsMenu()
 	 */
 	menu_reload_one += Saylink::Silent("#reload aa", "AAs");
 	menu_reload_one += " | " + Saylink::Silent("#reload alternate_currencies", "Alternate Currencies");
+	menu_reload_one += " | " + Saylink::Silent("#reload base_data", "Base Data");
 	menu_reload_one += " | " + Saylink::Silent("#reload blocked_spells", "Blocked Spells");
 
 	menu_reload_two += Saylink::Silent("#reload commands", "Commands");
@@ -11016,6 +11017,16 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads Alternate Currencies globally",
 			alternate_currencies_link
+		).c_str()
+	);
+
+	auto base_data_link = Saylink::Silent("#reload base_data");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Base Data globally",
+			base_data_link
 		).c_str()
 	);
 
