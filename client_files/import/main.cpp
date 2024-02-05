@@ -281,16 +281,16 @@ void ImportBaseData(SharedDatabase *db)
 			continue;
 		}
 
-		e.level     = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[0].c_str()));
-		e.class_    = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[1].c_str()));
-		e.hp        = Strings::ToFloat(line_data[2].c_str());
-		e.mana      = Strings::ToFloat(line_data[3].c_str());
-		e.end       = Strings::ToFloat(line_data[4].c_str());
-		e.hp_regen  = Strings::ToFloat(line_data[5].c_str());
-		e.end_regen = Strings::ToFloat(line_data[6].c_str());
-		e.hp_fac    = Strings::ToFloat(line_data[7].c_str());
-		e.mana_fac  = Strings::ToFloat(line_data[8].c_str());
-		e.end_fac   = Strings::ToFloat(line_data[9].c_str());
+		e.level     = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[0]));
+		e.class_    = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[1]));
+		e.hp        = Strings::ToFloat(line_data[2]);
+		e.mana      = Strings::ToFloat(line_data[3]);
+		e.end       = Strings::ToFloat(line_data[4]);
+		e.hp_regen  = Strings::ToFloat(line_data[5]);
+		e.end_regen = Strings::ToFloat(line_data[6]);
+		e.hp_fac    = Strings::ToFloat(line_data[7]);
+		e.mana_fac  = Strings::ToFloat(line_data[8]);
+		e.end_fac   = Strings::ToFloat(line_data[9]);
 
 		v.emplace_back(e);
 	}
