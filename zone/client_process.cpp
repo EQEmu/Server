@@ -1050,7 +1050,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				RuleI(Character, ResurrectionSicknessSpellID)
 			);
 			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
-		} else if (SpellEffectDescNum == 2738) { // Divine Rez
+		} else if (SpellEffectDescNum == SPELL_DIVINE_REZ) { // Divine Rez
 			SetHP(GetMaxHP());
 			SetMana(GetMaxMana());
 			SetEndurance(GetMaxEndurance());

@@ -1854,7 +1854,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 					who->CastToClient()->SetDuelTarget(0);
 				}
 			}
-		} else if(killer_mob->IsClient()) {
+		} else if (killer_mob->IsClient()) {
 			killed_by = Killed_PVP;
 		}
 	}
@@ -1908,11 +1908,10 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC()) {
 		exploss = 0;
 	} else if (killer_mob) {
-		if (killer_mob->IsClient()) {
-			exploss = 0;
-		} else if (killer_mob->GetOwner() && killer_mob->GetOwner()->IsClient()) {
-			exploss = 0;
-		} else if (killer_mob->IsBot()) {
+		if (
+			killer_mob->IsOfClientBot() ||
+			(killer_mob->GetOwner() && killer_mob->GetOwner()->IsOfClientBot())
+		) {
 			exploss = 0;
 		}
 	}

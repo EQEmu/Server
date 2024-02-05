@@ -4596,9 +4596,9 @@ void Corpse::CastRezz(uint16 spell_id, Mob* Caster)
 	rezz->x           = m_Position.x;
 	rezz->y           = m_Position.y;
 	rezz->z           = GetFixedZ(m_Position);
-	rezz->unknown000  = 0x00000000;
-	rezz->unknown020  = 0x00000000;
-	rezz->unknown088  = 0x00000000;
+	rezz->unknown000  = 0;
+	rezz->unknown020  = 0;
+	rezz->unknown088  = 0;
 
 	// We send this to world, because it needs to go to the player who may not be in this zone.
 	worldserver.RezzPlayer(outapp, rez_experience, corpse_db_id, OP_RezzRequest);

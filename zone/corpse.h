@@ -171,7 +171,7 @@ class Corpse : public Mob {
 
 	virtual void UpdateEquipmentLight();
 
-	void		IsOwnerOnline();
+	void		CheckIsOwnerOnline();
 	void		SetOwnerOnline(bool value) { is_owner_online = value; }
 	bool		GetOwnerOnline() { return is_owner_online; }
 

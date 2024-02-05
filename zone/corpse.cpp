@@ -1029,7 +1029,7 @@ bool Corpse::Process() {
 	}
 
 	if (owner_online_timer.Check() && rezzable) {
-		IsOwnerOnline();
+		CheckIsOwnerOnline();
 	}
 
 	if (corpse_delay_timer.Check()) {
@@ -1047,18 +1047,20 @@ bool Corpse::Process() {
 	}
 	
 	//Player is offline. If rez timer is enabled, disable it and save corpse.
-	if (!is_owner_online && rezzable) {
-		if (corpse_rez_timer.Enabled()) {
-			rez_time = corpse_rez_timer.GetRemainingTime();
-			corpse_rez_timer.Disable();
-			is_corpse_changed = true;
-			Save();
-		}
-	} else if (is_owner_online && rezzable) { //Player is online. If rez timer is disabled, enable it.
-		if (corpse_rez_timer.Enabled()) {
-			rez_time = corpse_rez_timer.GetRemainingTime();
-		} else {
-			SetRezTimer();
+	if (rezzable) {
+		if (!is_owner_online) {
+			if (corpse_rez_timer.Enabled()) {
+				rez_time = corpse_rez_timer.GetRemainingTime();
+				corpse_rez_timer.Disable();
+				is_corpse_changed = true;
+				Save();
+			}
+		} else { //Player is online. If rez timer is disabled, enable it.
+			if (corpse_rez_timer.Enabled()) {
+				rez_time = corpse_rez_timer.GetRemainingTime();
+			} else {
+				SetRezTimer();
+			}
 		}
 	}
 
@@ -2179,7 +2181,7 @@ void Corpse::SetRezTimer(bool initial_timer)
 		return;
 	}
 
-	IsOwnerOnline();
+	CheckIsOwnerOnline();
 
 	if (!is_owner_online && !initial_timer) {
 		if (corpse_rez_timer.Enabled()) {
@@ -2208,7 +2210,7 @@ void Corpse::SetRezTimer(bool initial_timer)
 	corpse_rez_timer.SetTimer(rez_time);
 }
 
-void Corpse::IsOwnerOnline()
+void Corpse::CheckIsOwnerOnline()
 {
 	Client* client = entity_list.GetClientByCharID(GetCharID());
 
@@ -2220,8 +2222,8 @@ void Corpse::IsOwnerOnline()
 			// Client is not in the corpse's zone, send a packet to world to have it check.
 			auto pack = new ServerPacket(ServerOP_IsOwnerOnline, sizeof(ServerIsOwnerOnline_Struct));
 			ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*)pack->pBuffer;
-			strncpy(online->name, GetOwnerName(), 64);
-			online->corpse_id  = this->GetID();
+			strncpy(online->name, GetOwnerName(), sizeof(online->name));
+			online->corpse_id  = GetID();
 			online->zone_id    = zone->GetZoneID();
 			online->online     = 0;
 			online->account_id = account_id;

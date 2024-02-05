@@ -1432,15 +1432,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				break;
 			}
 
-			ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*) pack->pBuffer;
-			ClientListEntry* cle = client_list.FindCharacter(online->name);
-			if (cle) {
-				online->online = 1;
-			} else {
-				online->online = 0;
-			}
+			auto o = (ServerIsOwnerOnline_Struct*) pack->pBuffer;
+			auto cle = client_list.FindCharacter(o->name);
 			
-			auto zs = zoneserver_list.FindByZoneID(online->zone_id);
+			o->online = cle ? 1 : 0;
+			
+			auto zs = zoneserver_list.FindByZoneID(o->zone_id);
 			if (zs) {
 				zs->SendPacket(pack);
 			}
