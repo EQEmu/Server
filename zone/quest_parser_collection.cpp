@@ -1275,10 +1275,6 @@ void QuestParserCollection::LoadPerlEventExportSettings(PerlEventExportSettings*
 
 	const auto& l = PerlEventExportSettingsRepository::All(database);
 
-	if (l.empty()) {
-		return;
-	}
-
 	for (const auto& e: l) {
 		s[e.event_id].qglobals        = e.export_qglobals;
 		s[e.event_id].mob             = e.export_mob;

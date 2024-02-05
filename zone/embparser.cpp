@@ -306,7 +306,9 @@ int PerlembParser::EventCommon(
 		is_global
 	);
 
-	if (!perl->SubExists(package_name.c_str(), QuestEventSubroutines[event_id])) {
+	const std::string& sub_name = QuestEventSubroutines[event_id];
+
+	if (!perl->SubExists(package_name.c_str(), sub_name.c_str())) {
 		return 0;
 	}
 
@@ -580,7 +582,7 @@ bool PerlembParser::GlobalPlayerHasQuestSub(QuestEventID event_id)
 		!perl ||
 		global_player_quest_status_ != questLoaded ||
 		event_id >= _LargestEventID
-		) {
+	) {
 		return false;
 	}
 
@@ -1601,7 +1603,7 @@ void PerlembParser::ExportEventVariables(
 					const int16  item_charges = inst ? inst->GetCharges() : 0;
 					const auto   is_attuned   = inst ? inst->IsAttuned() : false;
 
-					auto var_name = fmt::format("inst{}", i + 1);
+					auto var_name = fmt::format("item{}", i + 1);
 					ExportVar(package_name.c_str(), var_name.c_str(), item_id);
 
 					auto temp_var_name = fmt::format("{}_charges", var_name);
@@ -1716,9 +1718,10 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() >= 1) {
 				ExportVar(
 					package_name.c_str(),
-					"inst",
+					"item",
 					"QuestItem",
-					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
+				);
 			}
 
 			if (extra_pointers && extra_pointers->size() == 2) {
@@ -1794,9 +1797,10 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(
 					package_name.c_str(),
-					"inst",
+					"item",
 					"QuestItem",
-					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
+				);
 			}
 
 			break;
@@ -1862,7 +1866,7 @@ void PerlembParser::ExportEventVariables(
 					ExportVar(package_name.c_str(), "item_id", inst->GetID());
 					ExportVar(package_name.c_str(), "item_name", inst->GetItem()->Name);
 					ExportVar(package_name.c_str(), "spell_id", inst->GetItem()->Click.Effect);
-					ExportVar(package_name.c_str(), "inst", "QuestItem", inst);
+					ExportVar(package_name.c_str(), "item", "QuestItem", inst);
 
 					if (IsValidSpell(inst->GetItem()->Click.Effect)) {
 						ExportVar(
@@ -1927,9 +1931,10 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(
 					package_name.c_str(),
-					"inst",
+					"item",
 					"QuestItem",
-					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
+				);
 			}
 
 			break;
@@ -1941,9 +1946,10 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(
 					package_name.c_str(),
-					"inst",
+					"item",
 					"QuestItem",
-					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
+				);
 			}
 
 			break;
@@ -1966,9 +1972,10 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				ExportVar(
 					package_name.c_str(),
-					"inst",
+					"item",
 					"QuestItem",
-					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+					std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0))
+				);
 			}
 
 			break;
@@ -2042,7 +2049,7 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "item_id", item_instance->GetItem()->ID);
 				ExportVar(package_name.c_str(), "spell_id", item_instance->GetItem()->Click.Effect);
 				ExportVar(package_name.c_str(), "slot_id", extra_data);
-				ExportVar(package_name.c_str(), "inst", "QuestItem", item_instance);
+				ExportVar(package_name.c_str(), "item", "QuestItem", item_instance);
 			}
 
 			break;
@@ -2132,7 +2139,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
 
 			if (extra_pointers && extra_pointers->size() == 1) {
-				ExportVar(package_name.c_str(), "inst", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
 
 			break;
@@ -2146,7 +2153,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "slot_id", sep.arg[1]);
 
 			if (extra_pointers && extra_pointers->size() == 1) {
-				ExportVar(package_name.c_str(), "inst", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
 
 			break;
@@ -2160,7 +2167,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "augment_slot", sep.arg[3]);
 
 			if (extra_pointers && extra_pointers->size() >= 1) {
-				ExportVar(package_name.c_str(), "inst", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
 
 			if (extra_pointers && extra_pointers->size() >= 2) {
@@ -2179,7 +2186,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "destroyed", sep.arg[4]);
 
 			if (extra_pointers && extra_pointers->size() >= 1) {
-				ExportVar(package_name.c_str(), "inst", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+				ExportVar(package_name.c_str(), "item", "QuestItem", std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
 			}
 
 			if (extra_pointers && extra_pointers->size() >= 3) {
@@ -2337,7 +2344,7 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "item_id", inst->GetID());
 				ExportVar(package_name.c_str(), "item_name", inst->GetItem()->Name);
 				ExportVar(package_name.c_str(), "quantity", inst->IsStackable() ? inst->GetCharges() : 1);
-				ExportVar(package_name.c_str(), "inst", "QuestItem", inst);
+				ExportVar(package_name.c_str(), "item", "QuestItem", inst);
 			}
 
 			break;
@@ -2362,7 +2369,7 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers && extra_pointers->size() == 1) {
 				auto inst = std::any_cast<EQ::ItemInstance*>(extra_pointers->at(0));
 				if (inst) {
-					ExportVar(package_name.c_str(), "inst", "QuestItem", inst);
+					ExportVar(package_name.c_str(), "item", "QuestItem", inst);
 					ExportVar(package_name.c_str(), "item_id", inst->GetID());
 					ExportVar(package_name.c_str(), "item_name", inst->GetItem()->Name);
 					ExportVar(package_name.c_str(), "item_charges", inst->GetCharges());
