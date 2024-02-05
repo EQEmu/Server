@@ -266,7 +266,7 @@ int PerlembParser::EventCommon(
 
 	bool is_player_quest        = false;
 	bool is_global_player_quest = false;
-	bool is_global_npc          = false;
+	bool is_global_npc_quest    = false;
 	bool is_bot_quest           = false;
 	bool is_global_bot_quest    = false;
 	bool is_item_quest          = false;
@@ -279,7 +279,7 @@ int PerlembParser::EventCommon(
 		is_global_player_quest,
 		is_bot_quest,
 		is_global_bot_quest,
-		is_global_npc,
+		is_global_npc_quest,
 		is_item_quest,
 		is_spell_quest,
 		event_id,
@@ -294,7 +294,7 @@ int PerlembParser::EventCommon(
 		is_global_player_quest,
 		is_bot_quest,
 		is_global_bot_quest,
-		is_global_npc,
+		is_global_npc_quest,
 		is_item_quest,
 		is_spell_quest,
 		package_name,
@@ -323,7 +323,7 @@ int PerlembParser::EventCommon(
 			is_global_player_quest,
 			is_bot_quest,
 			is_global_bot_quest,
-			is_global_npc,
+			is_global_npc_quest,
 			is_item_quest,
 			is_spell_quest,
 			package_name,
@@ -340,7 +340,7 @@ int PerlembParser::EventCommon(
 			is_global_player_quest,
 			is_bot_quest,
 			is_global_bot_quest,
-			is_global_npc,
+			is_global_npc_quest,
 			is_item_quest,
 			is_spell_quest,
 			package_name,
@@ -1175,7 +1175,7 @@ void PerlembParser::GetQuestTypes(
 	bool& is_global_player_quest,
 	bool& is_bot_quest,
 	bool& is_global_bot_quest,
-	bool& is_global_npc,
+	bool& is_global_npc_quest,
 	bool& is_item_quest,
 	bool& is_spell_quest,
 	QuestEventID event_id,
@@ -1234,7 +1234,7 @@ void PerlembParser::GetQuestPackageName(
 	bool& is_global_player_quest,
 	bool& is_bot_quest,
 	bool& is_global_bot_quest,
-	bool& is_global_npc,
+	bool& is_global_npc_quest,
 	bool& is_item_quest,
 	bool& is_spell_quest,
 	std::string& package_name,
@@ -1255,8 +1255,8 @@ void PerlembParser::GetQuestPackageName(
 		!is_spell_quest
 	) {
 		if (is_global) {
-			is_global_npc = true;
-			package_name  = "qst_global_npc";
+			is_global_npc_quest = true;
+			package_name        = "qst_global_npc";
 		} else {
 			package_name = fmt::format("qst_npc_{}", npc_mob->GetNPCTypeID());
 		}
@@ -1299,7 +1299,7 @@ void PerlembParser::ExportQGlobals(
 	bool is_global_player_quest,
 	bool is_bot_quest,
 	bool is_global_bot_quest,
-	bool is_global_npc,
+	bool is_global_npc_quest,
 	bool is_item_quest,
 	bool is_spell_quest,
 	std::string& package_name,
@@ -1449,7 +1449,7 @@ void PerlembParser::ExportMobVariables(
 	bool is_global_player_quest,
 	bool is_bot_quest,
 	bool is_global_bot_quest,
-	bool is_global_npc,
+	bool is_global_npc_quest,
 	bool is_item_quest,
 	bool is_spell_quest,
 	std::string& package_name,
