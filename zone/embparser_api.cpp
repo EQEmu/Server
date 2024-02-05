@@ -1042,9 +1042,9 @@ void Perl__repopzone()
 	quest_manager.repopzone();
 }
 
-void Perl__repopzone(bool is_force)
+void Perl__repopzone(bool is_forced)
 {
-	quest_manager.repopzone(is_force);
+	quest_manager.repopzone(is_forced);
 }
 
 void Perl__processmobswhilezoneempty(bool on)

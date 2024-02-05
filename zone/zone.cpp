@@ -1888,7 +1888,7 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::Repop(bool is_force)
+void Zone::Repop(bool is_forced)
 {
 	if (!Depop()) {
 		return;
@@ -1901,7 +1901,7 @@ void Zone::Repop(bool is_force)
 		iterator.RemoveCurrent();
 	}
 
-	if (is_force) {
+	if (is_forced) {
 		ClearSpawnTimers();
 	}
 

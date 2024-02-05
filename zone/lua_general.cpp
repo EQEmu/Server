@@ -403,8 +403,8 @@ void lua_repop_zone() {
 	quest_manager.repopzone();
 }
 
-void lua_repop_zone(bool is_force) {
-	quest_manager.repopzone(is_force);
+void lua_repop_zone(bool is_forced) {
+	quest_manager.repopzone(is_forced);
 }
 
 void lua_process_mobs_while_zone_empty(bool on) {

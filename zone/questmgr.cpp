@@ -926,10 +926,10 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 	}
 }
 
-void QuestManager::repopzone(bool is_force)
+void QuestManager::repopzone(bool is_forced)
 {
 	if (zone) {
-		zone->Repop(is_force);
+		zone->Repop(is_forced);
 	} else {
 		LogQuests("QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file");
 	}
