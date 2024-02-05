@@ -5266,7 +5266,8 @@ CHANGE COLUMN `unk1` `hp_regen` double NOT NULL AFTER `end`,
 CHANGE COLUMN `unk2` `end_regen` double NOT NULL AFTER `hp_regen`,
 MODIFY COLUMN `level` tinyint(3) UNSIGNED NOT NULL FIRST,
 MODIFY COLUMN `class` tinyint(2) UNSIGNED NOT NULL AFTER `level`;
-)"
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

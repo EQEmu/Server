@@ -143,7 +143,6 @@ std::vector<Reload> reload_types = {
 	Reload{.command = "data_buckets_cache", .opcode = ServerOP_ReloadDataBucketsCache, .desc = "Data Buckets Cache"},
 	Reload{.command = "doors", .opcode = ServerOP_ReloadDoors, .desc = "Doors"},
 	Reload{.command = "dztemplates", .opcode = ServerOP_ReloadDzTemplates, .desc = "Dynamic Zone Templates"},
-	Reload{.command = "factions", .opcode = ServerOP_ReloadFactions, .desc = "Factions"},
 	Reload{.command = "ground_spawns", .opcode = ServerOP_ReloadGroundSpawns, .desc = "Ground Spawns"},
 	Reload{.command = "level_mods", .opcode = ServerOP_ReloadLevelEXPMods, .desc = "Level Mods"},
 	Reload{.command = "logs", .opcode = ServerOP_ReloadLogs, .desc = "Log Settings"},

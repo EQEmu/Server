@@ -15,9 +15,7 @@ void Zone::LoadBaseData()
 {
 	const auto& l = BaseDataRepository::All(content_db);
 
-	if (l.empty()) {
-		return;
-	}
+	m_base_data.reserve(l.size());
 
 	for (const auto& e : l) {
 		if (e.level < 1 || !IsPlayerClass(e.class_)) {
@@ -26,6 +24,12 @@ void Zone::LoadBaseData()
 
 		m_base_data.emplace_back(e);
 	}
+
+	LogInfo(
+		"Loaded [{}] Base Data Entr{}",
+		l.size(),
+		l.size() != 1 ? "ies" : "y"
+	);
 }
 
 void Zone::ReloadBaseData()
