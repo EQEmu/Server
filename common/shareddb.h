@@ -24,7 +24,6 @@
 #include "database.h"
 #include "skills.h"
 #include "spdat.h"
-#include "base_data.h"
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
 #include "say_link.h"
@@ -198,7 +197,6 @@ protected:
 	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>      faction_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                        faction_associations_mmf;
 	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>> faction_associations_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                        base_data_mmf;
 	std::unique_ptr<EQ::MemoryMappedFile>                        spells_mmf;
 
 public:
