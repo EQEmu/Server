@@ -84,7 +84,7 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	// Steal item
 	while (steal_item) {
 		std::vector<std::pair<const EQ::ItemData *, uint16>> loot_selection; // <const ItemData*, charges>
-		for (auto                                            item_iter: target_npc->itemlist) {
+		for (auto                                            item_iter: target_npc->GetLootItems()) {
 			if (!item_iter || !item_iter->item_id) {
 				continue;
 			}

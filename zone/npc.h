@@ -25,7 +25,6 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "zonedump.h"
-#include "../common/loottable.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
 #include "../common/repositories/loottable_repository.h"
 #include "../common/repositories/loottable_entries_repository.h"
@@ -565,8 +564,6 @@ protected:
 
 	friend class EntityList;
 	friend class Aura;
-
-	std::list<struct NPCFaction *> faction_list;
 
 	int32  grid;
 	uint32 spawn_group_id;
