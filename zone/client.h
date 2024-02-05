@@ -181,12 +181,6 @@ struct XTarget_Struct
 	char Name[65];
 };
 
-typedef enum {
-	Killed_NPC,
-	Killed_DUEL,
-	Killed_PVP
-} KilledByTypes;
-
 struct RespawnOption
 {
 	std::string name;
@@ -267,7 +261,7 @@ public:
 	bool GotoPlayerRaid(const std::string& player_name);
 
 	//abstract virtual function implementations required by base abstract class
-	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, uint8 killed_by = 0);
+	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC);
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }

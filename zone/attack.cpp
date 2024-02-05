@@ -1718,7 +1718,7 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 	}
 }
 
-bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killed_by)
+bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
 {
 	if (!ClientFinishedLoading() || dead) {
 		return false;
@@ -1814,7 +1814,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 				parse->EventNPC(EVENT_SLAY, killer_mob->CastToNPC(), this, "", 0);
 			}
 
-			killed_by = Killed_NPC;
+			killed_by = KilledByTypes::Killed_NPC;
 
 			auto emote_id = killer_mob->GetEmoteID();
 			if (emote_id) {
@@ -1845,7 +1845,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 				killer_mob->CastToClient()->SetDueling(false);
 				killer_mob->CastToClient()->SetDuelTarget(0);
 				entity_list.DuelMessage(killer_mob, this, false);
-				killed_by = Killed_DUEL;
+				killed_by = KilledByTypes::Killed_DUEL;
 			} else {
 				//otherwise, we just died, end the duel.
 				Mob* who = entity_list.GetMob(GetDuelTarget());
@@ -1855,7 +1855,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 				}
 			}
 		} else if (killer_mob->IsClient()) {
-			killed_by = Killed_PVP;
+			killed_by = KilledByTypes::Killed_PVP;
 		}
 	}
 
@@ -2374,7 +2374,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killed_by)
+bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
 {
 	LogCombat(
 		"Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",

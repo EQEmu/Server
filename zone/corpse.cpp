@@ -102,29 +102,29 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 
 	/* Create Corpse Entity */
 	auto pc = new Corpse(
-		in_dbid,             // uint32 in_dbid
-		in_charid,           // uint32 in_charid
-		in_charname.c_str(), // char* in_charname
-		&itemlist,           // ItemList* in_itemlist
-		ce.copper,           // uint32 in_copper
-		ce.silver,           // uint32 in_silver
-		ce.gold,             // uint32 in_gold
-		ce.plat,             // uint32 in_plat
+		in_dbid,                                  // uint32 in_dbid
+		in_charid,                                // uint32 in_charid
+		in_charname.c_str(),                      // char* in_charname
+		&itemlist,                                // ItemList* in_itemlist
+		ce.copper,                                // uint32 in_copper
+		ce.silver,                                // uint32 in_silver
+		ce.gold,                                  // uint32 in_gold
+		ce.plat,                                  // uint32 in_plat
 		position,
-		ce.size,             // float in_size
-		ce.gender,           // uint8 in_gender
-		ce.race,             // uint16 in_race
-		ce.class_,           // uint8 in_class
-		ce.deity,            // uint8 in_deity
-		ce.level,            // uint8 in_level
-		ce.texture,          // uint8 in_texture
-		ce.helmtexture,      // uint8 in_helmtexture
-		ce.exp,              // uint32 in_rez_exp
-		ce.gm_exp,           // uint32 in_gm_rez_exp
-		ce.killed_by,        // uint8 in_killed_by
-		ce.rezzable,         // bool rezzable
-		ce.rez_time,         // uint32 rez_time
-		was_at_graveyard     // bool wasAtGraveyard
+		ce.size,                                  // float in_size
+		ce.gender,                                // uint8 in_gender
+		ce.race,                                  // uint16 in_race
+		ce.class_,                                // uint8 in_class
+		ce.deity,                                 // uint8 in_deity
+		ce.level,                                 // uint8 in_level
+		ce.texture,                               // uint8 in_texture
+		ce.helmtexture,                           // uint8 in_helmtexture
+		ce.exp,                                   // uint32 in_rez_exp
+		ce.gm_exp,                                // uint32 in_gm_rez_exp
+		static_cast<KilledByTypes>(ce.killed_by), // uint8 in_killed_by
+		ce.rezzable,                             // bool rezzable
+		ce.rez_time,                              // uint32 rez_time
+		was_at_graveyard                          // bool wasAtGraveyard
 	);
 
 	if (ce.locked)
@@ -286,7 +286,7 @@ Corpse::Corpse(
 	loot_request_type = LootRequestType::Forbidden;
 }
 
-Corpse::Corpse(Client* client, int32 in_rez_exp, uint8 in_killed_by) : Mob (
+Corpse::Corpse(Client* client, int32 in_rez_exp, KilledByTypes in_killed_by) : Mob (
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -385,7 +385,7 @@ Corpse::Corpse(Client* client, int32 in_rez_exp, uint8 in_killed_by) : Mob (
 	silver               = 0;
 	gold                 = 0;
 	platinum             = 0;
-	killed_by            = in_killed_by;
+	killed_by            = (uint8)in_killed_by;
 	rezzable             = true;
 	rez_time             = 0;
 	is_owner_online      = false;
@@ -574,7 +574,7 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 }
 
 // To be called from LoadFromDBData
-Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rez_exp, uint32 in_gm_rez_exp, KilledByTypes in_killed_by, bool in_rezzable, uint32 in_rez_time, bool wasAtGraveyard) : Mob(
+Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture,uint32 in_rez_exp, uint32 in_gm_rez_exp, KilledByTypes in_killed_by, bool in_rezzable, uint32 in_rez_time, bool wasAtGraveyard) : Mob(
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -664,7 +664,7 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, LootIt
 
 	rez_experience    = in_rez_exp;
 	gm_rez_experience = in_gm_rez_exp;
-	killed_by         = in_killed_by;
+	killed_by         = (uint8)in_killed_by;
 	rezzable          = in_rezzable;
 	rez_time          = in_rez_time;
 	is_owner_online   = false;
@@ -2196,7 +2196,7 @@ void Corpse::SetRezTimer(bool initial_timer)
 
 	if (initial_timer) {
 		uint32 timer = RuleI(Character, CorpseResTimeMS);
-		if (killed_by == Killed_DUEL) {
+		if (static_cast<KilledByTypes>(killed_by) == KilledByTypes::Killed_DUEL) {
 			timer = RuleI(Character, DuelCorpseResTimeMS);
 		}
 		rez_time = timer;
