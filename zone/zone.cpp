@@ -1888,7 +1888,7 @@ void Zone::ClearNPCTypeCache(int id) {
 	}
 }
 
-void Zone::Repop()
+void Zone::Repop(bool is_force)
 {
 	if (!Depop()) {
 		return;
@@ -1899,6 +1899,10 @@ void Zone::Repop()
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
+	}
+
+	if (is_force) {
+		ClearSpawnTimers();
 	}
 
 	npc_scale_manager->LoadScaleData();
