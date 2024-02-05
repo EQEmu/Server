@@ -2143,7 +2143,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
-	if (!who || DivineAura() || (!from_spell && !CombatRange(who)) || (IsNPC() && IsCharmed()) || !CombatRange(who)) {
+	if (!who || DivineAura() || (!from_spell && !CombatRange(who)) || (IsNPC() && IsCharmed())) {
 		return;
 	}
 
@@ -2237,7 +2237,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 
 	// Log result
 	LogHate(
-		"Taunter mob {} target npc {} taunt_chance [{}] success [{}] hate_top [{}]",
+		"Taunter mob [{}] target npc [{}] taunt_chance [{}] success [{}] hate_top [{}]",
 		GetMobDescription(),
 		who->GetMobDescription(),
 		taunt_chance,
@@ -2283,7 +2283,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 	}
 
 	// Modern Abilities
-	if (RuleB(Combat, ClassicTauntSystem)) {
+	if (!RuleB(Combat, ClassicTauntSystem)) {
 		TryCastOnSkillUse(who, EQ::skills::SkillTaunt);
 
 		if (HasSkillProcs()) {
