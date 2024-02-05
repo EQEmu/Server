@@ -2,13 +2,6 @@
 
 void command_repop(Client *c, const Seperator *sep)
 {
-	const uint16 arguments = sep->argnum;
-	if (!arguments) {
-		c->Message(Chat::White, "Zone depopped, repopping now.");
-		zone->Repop();
-		return;
-	}
-
 	const bool is_forced = !strcasecmp(sep->arg[1], "force");
 
 	c->Message(
@@ -19,6 +12,7 @@ void command_repop(Client *c, const Seperator *sep)
 		).c_str()
 	);
 
+	entity_list.ClearAreas();
 	zone->Repop(is_forced);
 }
 
