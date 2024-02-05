@@ -27,6 +27,7 @@
 #include "questmgr.h"
 #include "../common/path_manager.h"
 #include "../common/repositories/perl_event_export_settings_repository.h"
+#include "../common/file.h"
 
 #include <stdio.h>
 
@@ -838,21 +839,17 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		fmt::format("{}/default", global_path), // Global Default
 	};
 
-	FILE* f;
 	std::string file_name;
 
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -886,21 +883,16 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 		fmt::format("{}/player", global_path) // Global
 	};
 
-	FILE        * f;
 	std::string file_name;
-
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -916,7 +908,6 @@ QuestInterface* QuestParserCollection::GetQIByGlobalNPCQuest(std::string& filena
 		return nullptr;
 	}
 
-	FILE        * f;
 	std::string file_name;
 
 	for (auto* e: _load_precedence) {
@@ -927,10 +918,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalNPCQuest(std::string& filena
 			_extensions.find(e->GetIdentifier())->second
 		);
 
-		f = fopen(file_name.c_str(), "r");
-
-		if (f) {
-			fclose(f);
+		if (File::Exists(file_name)) {
 			filename = file_name;
 			return e;
 		}
@@ -945,9 +933,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalPlayerQuest(std::string& fil
 		return nullptr;
 	}
 
-	FILE        * f;
 	std::string file_name;
-
 	for (auto* e: _load_precedence) {
 		file_name = fmt::format(
 			"{}/{}/global_player.{}",
@@ -956,10 +942,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalPlayerQuest(std::string& fil
 			_extensions.find(e->GetIdentifier())->second
 		);
 
-		f = fopen(file_name.c_str(), "r");
-
-		if (f) {
-			fclose(f);
+		if (File::Exists(file_name)) {
 			filename = file_name;
 			return e;
 		}
@@ -993,21 +976,16 @@ QuestInterface* QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 		fmt::format("{}/default", global_path) // Global Default
 	};
 
-	FILE        * f;
 	std::string file_name;
-
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -1042,21 +1020,16 @@ QuestInterface* QuestParserCollection::GetQIByItemQuest(std::string item_script,
 		fmt::format("{}/default", global_path) // Global Default
 	};
 
-	FILE        * f;
 	std::string file_name;
-
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -1089,9 +1062,7 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 		fmt::format("{}/{}", global_path, encounter_name) // Global
 	};
 
-	FILE        * f;
 	std::string file_name;
-
 	for (uint8 index = 0; index < file_names.size(); index++) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
@@ -1100,10 +1071,7 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -1137,9 +1105,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 		fmt::format("{}/bot", global_path) // Global
 	};
 
-	FILE* f;
 	std::string file_name;
-
 	for (uint8 index = 0; index < file_names.size(); index++) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
@@ -1148,10 +1114,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 				_extensions.find(e->GetIdentifier())->second
 			);
 
-			f = fopen(file_name.c_str(), "r");
-
-			if (f) {
-				fclose(f);
+			if (File::Exists(file_name)) {
 				filename = file_name;
 				return e;
 			}
@@ -1167,9 +1130,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalBotQuest(std::string& filena
 		return nullptr;
 	}
 
-	FILE* f;
 	std::string file_name;
-
 	for (auto* e: _load_precedence) {
 		file_name = fmt::format(
 			"{}/{}/global_bot.{}",
@@ -1178,10 +1139,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalBotQuest(std::string& filena
 			_extensions.find(e->GetIdentifier())->second
 		);
 
-		f = fopen(file_name.c_str(), "r");
-
-		if (f) {
-			fclose(f);
+		if (File::Exists(file_name)) {
 			filename = file_name;
 			return e;
 		}
