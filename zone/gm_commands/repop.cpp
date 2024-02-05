@@ -2,7 +2,7 @@
 
 void command_repop(Client *c, const Seperator *sep)
 {
-	const bool is_forced = !strcasecmp(sep->arg[1], "force");
+	const bool is_forced = sep->argnum > 0 ? !strcasecmp(sep->arg[1], "force") : false;
 
 	c->Message(
 		Chat::White,
