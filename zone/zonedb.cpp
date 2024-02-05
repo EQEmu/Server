@@ -3914,30 +3914,18 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id)
 
 bool ZoneDatabase::LoadCharacterCorpseRezData(uint32 corpse_id, uint32 *exp, uint32 *gm_exp, bool *rezzable, bool *is_rezzed)
 {
-	std::string query = StringFormat(
-		"SELECT           \n"
-		"exp,             \n"
-		"gm_exp,		  \n"
-		"rezzable,		  \n"
-		"is_rezzed		  \n"
-		"FROM             \n"
-		"character_corpses\n"
-		"WHERE `id` = %u  LIMIT 1\n",
-		corpse_id
-	);
+	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);
 
-	auto results = QueryDatabase(query);
-	uint16 i = 0;
-
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		*exp       = Strings::ToUnsignedInt(row[i++]);	// exp,
-		*gm_exp    = Strings::ToUnsignedInt(row[i++]);	// gm_exp,
-		*rezzable  = Strings::ToInt(row[i++]);			// rezzable
-		*is_rezzed = Strings::ToInt(row[i++]);			// is_rezzed
-
-		return true;
+	if (!e.id) {
+		return false;
 	}
-	return false;
+
+	*exp       = e.exp;
+	*gm_exp    = e.gm_exp;
+	*rezzable  = e.rezzable;
+	*is_rezzed = e.is_rezzed;
+
+	return true;
 }
 
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse)
