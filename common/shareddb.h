@@ -34,7 +34,6 @@
 #include <memory>
 
 class EvolveInfo;
-struct BaseDataStruct;
 struct InspectMessage_Struct;
 struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
