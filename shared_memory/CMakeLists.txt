@@ -11,8 +11,6 @@ SET(shared_memory_sources
 SET(shared_memory_headers
 	base_data.h
 	items.h
-	loot.h
-	npc_faction.h
 	spells.h
 	skill_caps.h
 )
