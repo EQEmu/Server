@@ -506,6 +506,8 @@ void NPC::AddLootDrop(
 	if (UpdateActiveLight()) {
 		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
 	}
+
+	safe_delete(inst);
 }
 
 void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
