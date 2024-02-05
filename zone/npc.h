@@ -369,6 +369,8 @@ public:
 	inline bool			IsGuarding() const { return(m_GuardPoint.w != 0); }
 	void				SaveGuardSpotCharm();
 
+	void DescribeSpecialAbilities(Client* c);
+
 	uint16 GetMeleeTexture1() const;
 	uint16 GetMeleeTexture2() const;
 

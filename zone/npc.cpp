@@ -3995,3 +3995,215 @@ bool NPC::CanPathTo(float x, float y, float z)
 
 	return !route.empty();
 }
+
+void NPC::DescribeSpecialAbilities(Client* c)
+{
+	if (!c) {
+		return;
+	}
+
+	// These abilities are simple on/off flags
+	static const std::vector<uint32> toggleable_special_abilities = {
+		SPECATK_TRIPLE,
+		SPECATK_QUAD,
+		SPECATK_INNATE_DW,
+		SPECATK_BANE,
+		SPECATK_MAGICAL,
+		UNSLOWABLE,
+		UNMEZABLE,
+		UNCHARMABLE,
+		UNSTUNABLE,
+		UNSNAREABLE,
+		UNFEARABLE,
+		UNDISPELLABLE,
+		IMMUNE_MELEE,
+		IMMUNE_MAGIC,
+		IMMUNE_FLEEING,
+		IMMUNE_MELEE_EXCEPT_BANE,
+		IMMUNE_MELEE_NONMAGICAL,
+		IMMUNE_AGGRO,
+		IMMUNE_AGGRO_ON,
+		IMMUNE_CASTING_FROM_RANGE,
+		IMMUNE_FEIGN_DEATH,
+		IMMUNE_TAUNT,
+		NPC_NO_BUFFHEAL_FRIENDS,
+		IMMUNE_PACIFY,
+		DESTRUCTIBLE_OBJECT,
+		NO_HARM_FROM_CLIENT,
+		ALWAYS_FLEE,
+		ALLOW_BENEFICIAL,
+		DISABLE_MELEE,
+		ALLOW_TO_TANK,
+		IGNORE_ROOT_AGGRO_RULES,
+		PROX_AGGRO,
+		IMMUNE_RANGED_ATTACKS,
+		IMMUNE_DAMAGE_CLIENT,
+		IMMUNE_DAMAGE_NPC,
+		IMMUNE_AGGRO_CLIENT,
+		IMMUNE_AGGRO_NPC,
+		IMMUNE_FADING_MEMORIES,
+		IMMUNE_OPEN,
+		IMMUNE_ASSASSINATE,
+		IMMUNE_HEADSHOT,
+	};
+
+	// These abilities have parameters that need to be parsed out individually
+	static const std::map<uint32, std::vector<std::string>> parameter_special_abilities = {
+		{ SPECATK_SUMMON, { "Cooldown in Milliseconds", "Health Percentage" } },
+		{
+			SPECATK_ENRAGE,
+			{
+				"Health Percentage",
+				"Duration in Milliseconds",
+				"Cooldown in Milliseconds"
+			}
+		},
+		{
+			SPECATK_RAMPAGE,
+			{
+				"Chance",
+				"Targets",
+				"Flat Damage Bonus",
+				"Ignore Armor Percentage",
+				"Ignore Flat Armor Amount",
+				"Critical Chance",
+				"Flat Critical Chance Bonus"
+			}
+		},
+		{
+			SPECATK_AREA_RAMPAGE,
+			{
+				"Targets",
+				"Normal Attack Damage Percentage",
+				"Flat Damage Bonus",
+				"Ignore Armor Percentage",
+				"Ignore Flat Armor Amount",
+				"Critical Chance",
+				"Flat Critical Chance Bonus"
+			}
+		},
+		{
+			SPECATK_FLURRY,
+			{
+				"Attacks",
+				"Normal Attack Damage Percentage",
+				"Flat Damage Bonus",
+				"Ignore Armor Percentage",
+				"Ignore Flat Armor Amount",
+				"Critical Chance",
+				"Flat Critical Chance Bonus"
+			}
+		},
+		{
+			SPECATK_RANGED_ATK,
+			{
+				"Attacks",
+				"Maximum Range",
+				"Chance",
+				"Damage Percentage",
+				"Minimum Range"
+			}
+		},
+		{ NPC_TUNNELVISION, { "Aggro Modifier on Non-Tanks" } },
+		{ LEASH, { "Range" } },
+		{ TETHER, { "Range" } },
+		{ FLEE_PERCENT, { "Health Percentage", "Chance" } },
+		{
+			NPC_CHASE_DISTANCE,
+			{
+				"Maximum Distance",
+				"Minimum Distance",
+				"Ignore Line of Sight"
+			}
+		},
+		{ CASTING_RESIST_DIFF, { "Resist Difficulty Value" } },
+		{
+			COUNTER_AVOID_DAMAGE,
+			{
+				"Reduction Percentage for Block, Dodge, Parry, and Riposte",
+				"Reduction Percentage for Riposte",
+				"Reduction Percentage for Block",
+				"Reduction Percentage for Parry",
+				"Reduction Percentage for Dodge",
+			}
+		},
+		{
+			MODIFY_AVOID_DAMAGE,
+			{
+				"Addition Percentage for Block, Dodge, Parry, and Riposte",
+				"Addition Percentage for Riposte",
+				"Addition Percentage for Block",
+				"Addition Percentage for Parry",
+				"Addition Percentage for Dodge",
+			}
+		},
+	};
+
+	std::vector<std::string> messages = { };
+
+	for (const auto& e : toggleable_special_abilities) {
+		if (GetSpecialAbility(e)) {
+			messages.emplace_back(
+				fmt::format(
+					"{} ({})",
+					EQ::constants::GetSpecialAbilityName(e),
+					e
+				)
+			);
+		}
+	}
+
+	int slot_id;
+
+	for (const auto& e : parameter_special_abilities) {
+		if (GetSpecialAbility(e.first)) {
+			slot_id = 0;
+
+			for (const auto& a : e.second) {
+				messages.emplace_back(
+					fmt::format(
+						"{} ({}) | {}: {}",
+						EQ::constants::GetSpecialAbilityName(e.first),
+						e.first,
+						a,
+						GetSpecialAbilityParam(e.first, slot_id)
+					)
+				);
+
+				slot_id++;
+			}
+		}
+	}
+
+	if (messages.empty()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has no special abilities.",
+				c->GetTargetDescription(this)
+			).c_str()
+		);
+		return;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} has the following special abilit{}:",
+			c->GetTargetDescription(this),
+			messages.size() != 1 ? "ies" : "y"
+		).c_str()
+	);
+
+	std::sort(
+		messages.begin(),
+		messages.end(),
+		[](const std::string& a, const std::string& b) {
+			return a < b;
+		}
+	);
+
+	for (const auto& e : messages) {
+		c->Message(Chat::White, e.c_str());
+	}
+}

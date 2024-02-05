@@ -30,6 +30,7 @@
 #include "show/server_info.cpp"
 #include "show/skills.cpp"
 #include "show/spawn_status.cpp"
+#include "show/special_abilities.cpp"
 #include "show/spells.cpp"
 #include "show/spells_list.cpp"
 #include "show/stats.cpp"
@@ -88,6 +89,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "server_info", .u = "server_info", .fn = ShowServerInfo, .a = {"#serverinfo"}},
 		Cmd{.cmd = "skills", .u = "skills", .fn = ShowSkills, .a = {"#showskills"}},
 		Cmd{.cmd = "spawn_status", .u = "spawn_status [all|disabled|enabled|Spawn ID]", .fn = ShowSpawnStatus, .a = {"#spawnstatus"}},
+		Cmd{.cmd = "special_abilities", .u = "special_abilities", .fn = ShowSpecialAbilities, .a = {"#showspecialabilities"}},
 		Cmd{.cmd = "spells", .u = "spells [disciplines|spells]", .fn = ShowSpells, .a = {"#showspells"}},
 		Cmd{.cmd = "spells_list", .u = "spells_list", .fn = ShowSpellsList, .a = {"#showspellslist"}},
 		Cmd{.cmd = "stats", .u = "stats", .fn = ShowStats, .a = {"#showstats"}},
