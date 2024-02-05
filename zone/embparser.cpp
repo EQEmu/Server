@@ -1546,27 +1546,23 @@ void PerlembParser::ExportZoneVariables(std::string& package_name)
 void PerlembParser::ExportItemVariables(std::string& package_name, Mob* mob)
 {
 	if (mob && mob->IsClient()) {
-		const std::string& hash_name = fmt::format("{}::hasitem", package_name);
-
-		perl->eval(fmt::format("%{} = ();", hash_name).c_str());
+		perl->eval(fmt::format("%{}::hasitem = ();", package_name).c_str());
 
 		for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
 			int item_id = mob->CastToClient()->GetItemIDAt(slot);
 			if (item_id != -1 && item_id != 0) {
-				auto hi_decl = fmt::format("push (@{{${0}{{{1}}}}},{2});", hash_name, item_id, slot);
+				auto hi_decl = fmt::format("push (@{{${0}::hasitem{{{1}}}}},{2});", package_name, item_id, slot);
 				perl->eval(hi_decl.c_str());
 			}
 		}
 	}
 
 	if (mob && mob->IsClient()) {
-		const std::string& hash_name = fmt::format("{}::oncursor", package_name);
-
-		perl->eval(fmt::format("%{} = ();", hash_name).c_str());
+		perl->eval(fmt::format("%{}::oncursor = ();", package_name).c_str());
 
 		int item_id = mob->CastToClient()->GetItemIDAt(EQ::invslot::slotCursor);
 		if (item_id != -1 && item_id != 0) {
-			auto hi_decl = fmt::format("push (@{{${0}{{{1}}}}},{2});", hash_name, item_id, EQ::invslot::slotCursor);
+			auto hi_decl = fmt::format("push (@{{${0}::oncursor{{{1}}}}},{2});", package_name, item_id, EQ::invslot::slotCursor);
 			perl->eval(hi_decl.c_str());
 		}
 	}
