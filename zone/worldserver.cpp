@@ -2015,6 +2015,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		player_event_logs.ReloadSettings();
 		break;
 	}
+	case ServerOP_ReloadLoot:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Loot");
+			zone->ReloadLootTables();
+		}
+		break;
+	}
 	case ServerOP_ReloadMerchants: {
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("Merchants");
@@ -3506,11 +3514,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogInfo("Loading items");
 		if (!content_db.LoadItems(hotfix_name)) {
 			LogError("Loading items failed!");
-		}
-
-		LogInfo("Loading loot tables");
-		if (!content_db.LoadLoot(hotfix_name)) {
-			LogError("Loading loot failed!");
 		}
 
 		LogInfo("Loading skill caps");

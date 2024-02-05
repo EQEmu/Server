@@ -145,6 +145,7 @@ std::vector<Reload> reload_types = {
 	Reload{.command = "ground_spawns", .opcode = ServerOP_ReloadGroundSpawns, .desc = "Ground Spawns"},
 	Reload{.command = "level_mods", .opcode = ServerOP_ReloadLevelEXPMods, .desc = "Level Mods"},
 	Reload{.command = "logs", .opcode = ServerOP_ReloadLogs, .desc = "Log Settings"},
+	Reload{.command = "loot", .opcode = ServerOP_ReloadLoot, .desc = "Loot"},
 	Reload{.command = "merchants", .opcode = ServerOP_ReloadMerchants, .desc = "Merchants"},
 	Reload{.command = "npc_emotes", .opcode = ServerOP_ReloadNPCEmotes, .desc = "NPC Emotes"},
 	Reload{.command = "objects", .opcode = ServerOP_ReloadObjects, .desc = "Objects"},

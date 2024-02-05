@@ -41,8 +41,6 @@ struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
 struct NPCFactionList;
 struct FactionAssociations;
-struct LootTable_Struct;
-struct LootDrop_Struct;
 
 
 namespace EQ
@@ -165,17 +163,6 @@ public:
 	uint32 GetItemsCount();
 
 	/**
-	 * loot
-	 */
-	void GetLootTableInfo(uint32 &loot_table_count, uint32 &max_loot_table, uint32 &loot_table_entries);
-	void GetLootDropInfo(uint32 &loot_drop_count, uint32 &max_loot_drop, uint32 &loot_drop_entries);
-	void LoadLootTables(void *data, uint32 size);
-	void LoadLootDrops(void *data, uint32 size);
-	bool LoadLoot(const std::string &prefix);
-	const LootTable_Struct *GetLootTable(uint32 loottable_id) const;
-	const LootDrop_Struct *GetLootDrop(uint32 lootdrop_id) const;
-
-	/**
 	 * skills
 	 */
 	void LoadSkillCaps(void *data);
@@ -212,19 +199,15 @@ public:
 
 protected:
 
-	std::unique_ptr<EQ::MemoryMappedFile>                             skill_caps_mmf;
-	std::unique_ptr<EQ::MemoryMappedFile>                             items_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>          items_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             faction_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>           faction_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             faction_associations_mmf;
-	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>>      faction_associations_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             loot_table_mmf;
-	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             loot_drop_mmf;
-	std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>  loot_drop_hash;
-	std::unique_ptr<EQ::MemoryMappedFile>                             base_data_mmf;
-	std::unique_ptr<EQ::MemoryMappedFile>                             spells_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        skill_caps_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        items_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>        items_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        faction_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>      faction_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        faction_associations_mmf;
+	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>> faction_associations_hash;
+	std::unique_ptr<EQ::MemoryMappedFile>                        base_data_mmf;
+	std::unique_ptr<EQ::MemoryMappedFile>                        spells_mmf;
 
 public:
 	void SetSharedItemsCount(uint32 shared_items_count);

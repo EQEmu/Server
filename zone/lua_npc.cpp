@@ -87,19 +87,19 @@ void Lua_NPC::RemoveItem(int item_id, int quantity, int slot) {
 	self->RemoveItem(item_id, quantity, slot);
 }
 
-void Lua_NPC::ClearItemList() {
+void Lua_NPC::ClearLootItems() {
 	Lua_Safe_Call_Void();
-	self->ClearItemList();
+	self->ClearLootItems();
 }
 
-void Lua_NPC::AddCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
+void Lua_NPC::AddLootCash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	Lua_Safe_Call_Void();
-	self->AddCash(copper, silver, gold, platinum);
+	self->AddLootCash(copper, silver, gold, platinum);
 }
 
-void Lua_NPC::RemoveCash() {
+void Lua_NPC::RemoveLootCash() {
 	Lua_Safe_Call_Void();
-	self->RemoveCash();
+	self->RemoveLootCash();
 }
 
 int Lua_NPC::CountLoot() {
@@ -603,16 +603,16 @@ uint16 Lua_NPC::CountItem(uint32 item_id)
 	return self->CountItem(item_id);
 }
 
-uint32 Lua_NPC::GetItemIDBySlot(uint16 loot_slot)
+uint32 Lua_NPC::GetLootItemIDBySlot(uint16 loot_slot)
 {
 	Lua_Safe_Call_Int();
-	return self->GetItemIDBySlot(loot_slot);
+	return self->GetLootItemIDBySlot(loot_slot);
 }
 
-uint16 Lua_NPC::GetFirstSlotByItemID(uint32 item_id)
+uint16 Lua_NPC::GetFirstLootSlotByItemID(uint32 item_id)
 {
 	Lua_Safe_Call_Int();
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 float Lua_NPC::GetHealScale()
@@ -833,7 +833,7 @@ luabind::scope lua_register_npc() {
 	.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 	.def("AddAISpell", (void(Lua_NPC::*)(int,int,int,int,int,int,int,int))&Lua_NPC::AddAISpell)
 	.def("AddAISpellEffect", (void(Lua_NPC::*)(int,int,int,int))&Lua_NPC::AddAISpellEffect)
-	.def("AddCash", (void(Lua_NPC::*)(uint32,uint32,uint32,uint32))&Lua_NPC::AddCash)
+	.def("AddCash", (void(Lua_NPC::*)(uint32,uint32,uint32,uint32))&Lua_NPC::AddLootCash)
 	.def("AddItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::AddItem)
 	.def("AddItem", (void(Lua_NPC::*)(int,int,bool))&Lua_NPC::AddItem)
 	.def("AddItem", (void(Lua_NPC::*)(int,int,bool,int))&Lua_NPC::AddItem)
@@ -848,7 +848,7 @@ luabind::scope lua_register_npc() {
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
 	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
-	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearItemList)
+	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLootItems)
 	.def("ClearLastName", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLastName)
 	.def("CountItem", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::CountItem)
 	.def("CountLoot", (int(Lua_NPC::*)(void))&Lua_NPC::CountLoot)
@@ -863,7 +863,7 @@ luabind::scope lua_register_npc() {
 	.def("GetBucketExpires", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketExpires)
 	.def("GetBucketRemaining", (std::string(Lua_NPC::*)(std::string))&Lua_NPC::GetBucketRemaining)
 	.def("GetCopper", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetCopper)
-	.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstSlotByItemID)
+	.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstLootSlotByItemID)
 	.def("GetFollowCanRun", (bool(Lua_NPC::*)(void))&Lua_NPC::GetFollowCanRun)
 	.def("GetFollowDistance", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowDistance)
 	.def("GetFollowID", (int(Lua_NPC::*)(void))&Lua_NPC::GetFollowID)
@@ -873,7 +873,7 @@ luabind::scope lua_register_npc() {
 	.def("GetGuardPointY", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointY)
 	.def("GetGuardPointZ", (float(Lua_NPC::*)(void))&Lua_NPC::GetGuardPointZ)
 	.def("GetHealScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetHealScale)
-	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16))&Lua_NPC::GetItemIDBySlot)
+	.def("GetItemIDBySlot", (uint32(Lua_NPC::*)(uint16)) &Lua_NPC::GetLootItemIDBySlot)
 	.def("GetKeepsSoldItems", (bool(Lua_NPC::*)(void))&Lua_NPC::GetKeepsSoldItems)
 	.def("GetLootList", (Lua_NPC_Loot_List(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList)
 	.def("GetLoottableID", (int(Lua_NPC::*)(void))&Lua_NPC::GetLoottableID)
@@ -935,7 +935,7 @@ luabind::scope lua_register_npc() {
 	.def("ReloadSpells", (void(Lua_NPC::*)(void))&Lua_NPC::ReloadSpells)
 	.def("RemoveAISpell", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpell)
 	.def("RemoveAISpellEffect", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveAISpellEffect)
-	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveCash)
+	.def("RemoveCash", (void(Lua_NPC::*)(void))&Lua_NPC::RemoveLootCash)
 	.def("RemoveItem", (void(Lua_NPC::*)(int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int))&Lua_NPC::RemoveItem)
 	.def("RemoveItem", (void(Lua_NPC::*)(int,int,int))&Lua_NPC::RemoveItem)

@@ -1184,7 +1184,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 	// a lot of wasted checks and calls coded above...
 }
 
-void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, ServerLootItem_Struct** bag_item_data)
+void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, LootItem** bag_item_data)
 {
 	LogInventory("Putting loot item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
@@ -1296,7 +1296,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 // Locate an available space in inventory to place an item
 // and then put the item there
 // The change will be saved to the database
-bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool try_cursor, ServerLootItem_Struct** bag_item_data)
+bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool try_cursor, LootItem** bag_item_data)
 {
 	// #1: Try to auto equip
 	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {

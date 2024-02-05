@@ -51,36 +51,37 @@ void command_lootsim(Client *c, const Seperator *sep)
 			c->SendChatLineBreak();
 
 			// npc level loot table
-			auto loot_table = database.GetLootTable(loottable_id);
+			auto loot_table = zone->GetLootTable(loottable_id);
 			if (!loot_table) {
 				c->Message(Chat::Red, "Loot table not found");
 				return;
 			}
 
-			for (uint32 i = 0; i < loot_table->NumEntries; i++) {
-				auto le = loot_table->Entries[i];
+			auto le = zone->GetLootTableEntries(loottable_id);
 
+			// translate above for loop using loot_table_entries
+			for (auto &e: le) {
 				c->Message(
 					Chat::White,
 					fmt::format(
 						"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
-						le.lootdrop_id,
-						le.droplimit,
-						le.mindrop,
-						le.multiplier,
-						le.probability
+						e.lootdrop_id,
+						e.droplimit,
+						e.mindrop,
+						e.multiplier,
+						e.probability
 					).c_str()
 				);
 
-				auto loot_drop = database.GetLootDrop(le.lootdrop_id);
-				if (!loot_drop) {
+				auto loot_drop = zone->GetLootdrop(e.lootdrop_id);
+				if (!loot_drop.id) {
 					continue;
 				}
 
-				for (uint32 ei = 0; ei < loot_drop->NumEntries; ei++) {
-					auto               e            = loot_drop->Entries[ei];
-					int                rolled_count = npc->GetRolledItemCount(e.item_id);
-					const EQ::ItemData *item        = database.GetItem(e.item_id);
+				auto loot_drop_entries = zone->GetLootdropEntries(e.lootdrop_id);
+				for (auto &f: loot_drop_entries) {
+					int                rolled_count = npc->GetRolledItemCount(f.item_id);
+					const EQ::ItemData *item        = database.GetItem(f.item_id);
 
 					EQ::SayLinkEngine linker;
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
@@ -91,10 +92,10 @@ void command_lootsim(Client *c, const Seperator *sep)
 					c->Message(
 						Chat::White,
 						fmt::format(
-							"-- [{}] item_id [{}] chance [{}] rolled_count [{}] ({:.2f}%) name [{}]",
-							ei,
-							e.item_id,
-							e.chance,
+							"-- lootdrop_id [{}] item_id [{}] chance [{}] rolled_count [{}] ({:.2f}%) name [{}]",
+							f.lootdrop_id,
+							f.item_id,
+							f.chance,
 							rolled_count,
 							rolled_percentage,
 							linker.GenerateLink()
@@ -102,7 +103,6 @@ void command_lootsim(Client *c, const Seperator *sep)
 					);
 				}
 			}
-
 
 			// global loot
 			auto tables = zone->GetGlobalLootTables(npc);
@@ -116,36 +116,37 @@ void command_lootsim(Client *c, const Seperator *sep)
 				c->Message(Chat::White, fmt::format("# Global Loot Table ID [{}]", id).c_str());
 				c->SendChatLineBreak();
 
-				loot_table = database.GetLootTable(id);
+				loot_table = zone->GetLootTable(loottable_id);
 				if (!loot_table) {
 					c->Message(Chat::Red, fmt::format("Global Loot table not found [{}]", id).c_str());
 					continue;
 				}
 
-				for (uint32 i = 0; i < loot_table->NumEntries; i++) {
-					auto le = loot_table->Entries[i];
+				le = zone->GetLootTableEntries(loottable_id);
 
+				// translate above for loop using loot_table_entries
+				for (auto &e: le) {
 					c->Message(
 						Chat::White,
 						fmt::format(
 							"# Lootdrop ID [{}] drop_limit [{}] min_drop [{}] mult [{}] probability [{}]",
-							le.lootdrop_id,
-							le.droplimit,
-							le.mindrop,
-							le.multiplier,
-							le.probability
+							e.lootdrop_id,
+							e.droplimit,
+							e.mindrop,
+							e.multiplier,
+							e.probability
 						).c_str()
 					);
 
-					auto loot_drop = database.GetLootDrop(le.lootdrop_id);
-					if (!loot_drop) {
+					auto loot_drop = zone->GetLootdrop(e.lootdrop_id);
+					if (!loot_drop.id) {
 						continue;
 					}
 
-					for (uint32 ei = 0; ei < loot_drop->NumEntries; ei++) {
-						auto               e            = loot_drop->Entries[ei];
-						int                rolled_count = npc->GetRolledItemCount(e.item_id);
-						const EQ::ItemData *item        = database.GetItem(e.item_id);
+					auto loot_drop_entries = zone->GetLootdropEntries(e.lootdrop_id);
+					for (auto &f: loot_drop_entries) {
+						int                rolled_count = npc->GetRolledItemCount(f.item_id);
+						const EQ::ItemData *item        = database.GetItem(f.item_id);
 
 						EQ::SayLinkEngine linker;
 						linker.SetLinkType(EQ::saylink::SayLinkItemData);
@@ -156,10 +157,10 @@ void command_lootsim(Client *c, const Seperator *sep)
 						c->Message(
 							Chat::White,
 							fmt::format(
-								"-- [{}] item_id [{}] chance [{}] rolled_count [{}] ({:.2f}%) name [{}]",
-								ei,
-								e.item_id,
-								e.chance,
+								"-- lootdrop_id [{}] item_id [{}] chance [{}] rolled_count [{}] ({:.2f}%) name [{}]",
+								f.lootdrop_id,
+								f.item_id,
+								f.chance,
 								rolled_count,
 								rolled_percentage,
 								linker.GenerateLink()

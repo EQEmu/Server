@@ -112,7 +112,7 @@ void Lua_Corpse::SetCash(uint32 copper, uint32 silver, uint32 gold, uint32 plati
 	self->SetCash(copper, silver, gold, platinum);
 }
 
-void Lua_Corpse::RemoveCash() {
+void Lua_Corpse::RemoveLootCash() {
 	Lua_Safe_Call_Void();
 	self->RemoveCash();
 }
@@ -187,9 +187,9 @@ uint32 Lua_Corpse::GetItemIDBySlot(uint16 loot_slot) {
 	return self->GetItemIDBySlot(loot_slot);
 }
 
-uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
+uint16 Lua_Corpse::GetFirstLootSlotByItemID(uint32 item_id) {
 	Lua_Safe_Call_Int();
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 void Lua_Corpse::RemoveItemByID(uint32 item_id) {
@@ -199,14 +199,14 @@ void Lua_Corpse::RemoveItemByID(uint32 item_id) {
 
 void Lua_Corpse::RemoveItemByID(uint32 item_id, int quantity) {
 	Lua_Safe_Call_Void();
-	self->RemoveItemByID(item_id, quantity);	
+	self->RemoveItemByID(item_id, quantity);
 }
 
 Lua_Corpse_Loot_List Lua_Corpse::GetLootList(lua_State* L) {
 	Lua_Safe_Call_Class(Lua_Corpse_Loot_List);
 	Lua_Corpse_Loot_List ret;
 	auto loot_list = self->GetLootList();
-	
+
 	for (auto item_id : loot_list) {
 		ret.entries.push_back(item_id);
 	}
@@ -234,7 +234,7 @@ luabind::scope lua_register_corpse() {
 	.def("GetCopper", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetCopper)
 	.def("GetDBID", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetDBID)
 	.def("GetDecayTime", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetDecayTime)
-	.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID)
+	.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstLootSlotByItemID)
 	.def("GetGold", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetGold)
 	.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
 	.def("GetLootList", (Lua_Corpse_Loot_List(Lua_Corpse::*)(lua_State* L))&Lua_Corpse::GetLootList)
@@ -247,7 +247,7 @@ luabind::scope lua_register_corpse() {
 	.def("IsLocked", (bool(Lua_Corpse::*)(void))&Lua_Corpse::IsLocked)
 	.def("IsRezzed", (bool(Lua_Corpse::*)(void))&Lua_Corpse::IsRezzed)
 	.def("Lock", (void(Lua_Corpse::*)(void))&Lua_Corpse::Lock)
-	.def("RemoveCash", (void(Lua_Corpse::*)(void))&Lua_Corpse::RemoveCash)
+	.def("RemoveCash", (void(Lua_Corpse::*)(void))&Lua_Corpse::RemoveLootCash)
 	.def("RemoveItem", (void(Lua_Corpse::*)(uint16))&Lua_Corpse::RemoveItem)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32))&Lua_Corpse::RemoveItemByID)
 	.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32,int))&Lua_Corpse::RemoveItemByID)

@@ -169,10 +169,10 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	SetTaunting(false);
 	proximity            = nullptr;
-	copper               = 0;
-	silver               = 0;
-	gold                 = 0;
-	platinum             = 0;
+	m_loot_copper        = 0;
+	m_loot_silver        = 0;
+	m_loot_gold          = 0;
+	m_loot_platinum      = 0;
 	max_dmg              = npc_type_data->max_dmg;
 	min_dmg              = npc_type_data->min_dmg;
 	attack_count         = npc_type_data->attack_count;
@@ -282,14 +282,14 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	m_roambox.delay     = 1000;
 	m_roambox.min_delay = 1000;
 
-	p_depop               = false;
-	loottable_id          = npc_type_data->loottable_id;
-	skip_global_loot      = npc_type_data->skip_global_loot;
-	skip_auto_scale       = npc_type_data->skip_auto_scale;
-	rare_spawn            = npc_type_data->rare_spawn;
-	no_target_hotkey      = npc_type_data->no_target_hotkey;
-	primary_faction       = 0;
-	faction_amount        = npc_type_data->faction_amount;
+	p_depop            = false;
+	m_loottable_id     = npc_type_data->loottable_id;
+	m_skip_global_loot = npc_type_data->skip_global_loot;
+	m_skip_auto_scale  = npc_type_data->skip_auto_scale;
+	rare_spawn         = npc_type_data->rare_spawn;
+	no_target_hotkey   = npc_type_data->no_target_hotkey;
+	primary_faction    = 0;
+	faction_amount     = npc_type_data->faction_amount;
 
 	SetNPCFactionID(npc_type_data->npc_faction_id);
 
@@ -519,11 +519,15 @@ NPC::~NPC()
 
 	safe_delete(NPCTypedata_ours);
 
-	for (auto* e : itemlist) {
-		safe_delete(e);
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		safe_delete(item);
 	}
 
-	itemlist.clear();
+	m_loot_items.clear();
 	faction_list.clear();
 
 	safe_delete(reface_timer);
@@ -568,265 +572,6 @@ void NPC::SetTarget(Mob* mob) {
 		}
 	}
 	Mob::SetTarget(mob);
-}
-
-ServerLootItem_Struct* NPC::GetItem(int slot_id) {
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		if (item->equip_slot == slot_id) {
-			return item;
-		}
-	}
-	return(nullptr);
-}
-
-void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
-			itemlist.erase(cur);
-			UpdateEquipmentLight();
-			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
-			return;
-		}
-		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
-			if (item->charges <= quantity) {
-				itemlist.erase(cur);
-				UpdateEquipmentLight();
-				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
-			}
-			else {
-				item->charges -= quantity;
-			}
-			return;
-		}
-	}
-}
-
-void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
-{
-	if (killer == nullptr || !killer->IsClient()) {
-		return;
-	}
-
-	uint16 killer_level = killer->GetLevel();
-	uint8  material;
-
-	auto cur = itemlist.begin();
-	while (cur != itemlist.end()) {
-		if (!(*cur)) {
-			return;
-		}
-
-		uint16 trivial_min_level     = (*cur)->trivial_min_level;
-		uint16 trivial_max_level     = (*cur)->trivial_max_level;
-		bool   fits_trivial_criteria = (
-			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
-			(trivial_max_level > 0 && killer_level > trivial_max_level)
-		);
-
-		if (fits_trivial_criteria) {
-			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQ::textures::materialInvalid) {
-				SendWearChange(material);
-			}
-
-			cur = itemlist.erase(cur);
-			continue;
-		}
-		++cur;
-	}
-
-	UpdateEquipmentLight();
-	if (UpdateActiveLight()) {
-		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
-	}
-}
-
-void NPC::ClearItemList() {
-	ItemList::iterator cur,end;
-	cur = itemlist.begin();
-	end = itemlist.end();
-	for(; cur != end; ++cur) {
-		ServerLootItem_Struct* item = *cur;
-		safe_delete(item);
-	}
-	itemlist.clear();
-
-	UpdateEquipmentLight();
-	if (UpdateActiveLight())
-		SendAppearancePacket(AppearanceType::Light, GetActiveLightType());
-}
-
-void NPC::QueryLoot(Client* to, bool is_pet_query)
-{
-	if (!itemlist.empty()) {
-		if (!is_pet_query) {
-			to->Message(
-				Chat::White,
-				fmt::format(
-					"Loot | {} ({}) ID: {} Loottable ID: {}",
-					GetName(),
-					GetID(),
-					GetNPCTypeID(),
-					GetLoottableID()
-				).c_str()
-			);
-		}
-
-		int item_count = 0;
-		for (auto current_item : itemlist) {
-			int item_number = (item_count + 1);
-			if (!current_item) {
-				LogError("NPC::QueryLoot() - ItemList error, null item.");
-				continue;
-			}
-
-			if (!current_item->item_id || !database.GetItem(current_item->item_id)) {
-				LogError("NPC::QueryLoot() - Database error, invalid item.");
-				continue;
-			}
-
-			EQ::SayLinkEngine linker;
-			linker.SetLinkType(EQ::saylink::SayLinkLootItem);
-			linker.SetLootData(current_item);
-
-			to->Message(
-				Chat::White,
-				fmt::format(
-					"Item {} | {} ({}){}",
-					item_number,
-					linker.GenerateLink().c_str(),
-					current_item->item_id,
-					(
-						current_item->charges > 1 ?
-						fmt::format(
-							" Amount: {}",
-							current_item->charges
-						) :
-						""
-					)
-				).c_str()
-			);
-			item_count++;
-		}
-	}
-
-	if (!is_pet_query) {
-		if (
-			platinum ||
-			gold ||
-			silver ||
-			copper
-		) {
-			to->Message(
-				Chat::White,
-				fmt::format(
-					"Money | {}",
-					Strings::Money(
-						platinum,
-						gold,
-						silver,
-						copper
-					)
-				).c_str()
-			);
-		}
-	}
-}
-
-bool NPC::HasItem(uint32 item_id) {
-	if (!database.GetItem(item_id)) {
-		return false;
-	}
-
-	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
-		ServerLootItem_Struct* loot_item = *current_item;
-		if (!loot_item) {
-			LogError("NPC::HasItem() - ItemList error, null item");
-			continue;
-		}
-
-		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::HasItem() - Database error, invalid item");
-			continue;
-		}
-
-		if (loot_item->item_id == item_id) {
-			return true;
-		}
-	}
-	return false;
-}
-
-uint16 NPC::CountItem(uint32 item_id) {
-	uint16 item_count = 0;
-	if (!database.GetItem(item_id)) {
-		return item_count;
-	}
-
-	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
-		ServerLootItem_Struct* loot_item = *current_item;
-		if (!loot_item) {
-			LogError("NPC::CountItem() - ItemList error, null item");
-			continue;
-		}
-
-		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::CountItem() - Database error, invalid item");
-			continue;
-		}
-
-		if (loot_item->item_id == item_id) {
-			item_count += loot_item->charges > 0 ? loot_item->charges : 1;
-		}
-	}
-	return item_count;
-}
-
-uint32 NPC::GetItemIDBySlot(uint16 loot_slot) {
-	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
-		ServerLootItem_Struct* loot_item = *current_item;
-		if (loot_item->lootslot == loot_slot) {
-			return loot_item->item_id;
-		}
-	}
-	return 0;
-}
-
-uint16 NPC::GetFirstSlotByItemID(uint32 item_id) {
-	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
-		ServerLootItem_Struct* loot_item = *current_item;
-		if (loot_item->item_id == item_id) {
-			return loot_item->lootslot;
-		}
-	}
-	return 0;
-}
-
-void NPC::AddCash(
-	uint32 in_copper,
-	uint32 in_silver,
-	uint32 in_gold,
-	uint32 in_platinum
-) {
-	copper   = in_copper >= 0 ? in_copper : 0;
-	silver   = in_silver >= 0 ? in_silver : 0;
-	gold     = in_gold >= 0 ? in_gold : 0;
-	platinum = in_platinum >= 0 ? in_platinum : 0;
-}
-
-void NPC::RemoveCash() {
-	copper   = 0;
-	silver   = 0;
-	gold     = 0;
-	platinum = 0;
 }
 
 bool NPC::Process()
@@ -1059,7 +804,7 @@ bool NPC::Process()
 }
 
 uint32 NPC::CountLoot() {
-	return(itemlist.size());
+	return(m_loot_items.size());
 }
 
 void NPC::UpdateEquipmentLight()
@@ -1080,7 +825,7 @@ void NPC::UpdateEquipmentLight()
 	}
 
 	uint8 general_light_type = 0;
-	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
+	for (auto iter = m_loot_items.begin(); iter != m_loot_items.end(); ++iter) {
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 
@@ -1891,14 +1636,15 @@ void NPC::PickPocket(Client* thief)
 	int steal_chance = steal_skill * 100 / (5 * over_level + 5);
 
 	// Determine whether to steal money or an item.
-	uint32 money[6] = { 0, ((steal_skill >= 125) ? (GetPlatinum()) : (0)), ((steal_skill >= 60) ? (GetGold()) : (0)), GetSilver(), GetCopper(), 0 };
+	uint32 money[6] = {0, ((steal_skill >= 125) ? (GetPlatinum()) : (0)), ((steal_skill >= 60) ? (GetGold()) : (0)), GetSilver(),
+					   GetCopper(), 0 };
 	bool has_coin = ((money[PickPocketPlatinum] | money[PickPocketGold] | money[PickPocketSilver] | money[PickPocketCopper]) != 0);
 	bool steal_item = (steal_skill >= steal_chance && (zone->random.Roll(50) || !has_coin));
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
 		std::vector<std::pair<const EQ::ItemData*, uint16>> loot_selection; // <const ItemData*, charges>
-		for (auto item_iter : itemlist) {
+		for (auto item_iter : m_loot_items) {
 			if (!item_iter || !item_iter->item_id)
 				continue;
 
@@ -2007,13 +1753,13 @@ void NPC::Disarm(Client* client, int chance) {
 			weapon = database.GetItem(equipment[eslot]);
 			if (weapon) {
 				if (!weapon->Magic && weapon->NoDrop != 0) {
-					int16 charges = -1;
-					ItemList::iterator cur, end;
-					cur = itemlist.begin();
-					end = itemlist.end();
+					int16               charges = -1;
+					LootItems::iterator cur, end;
+					cur = m_loot_items.begin();
+					end = m_loot_items.end();
 					// Get charges for the item in the loot table
 					for (; cur != end; cur++) {
-						ServerLootItem_Struct* citem = *cur;
+						LootItem * citem = *cur;
 						if (citem->item_id == weapon->ID) {
 							charges = citem->charges;
 							break;
@@ -2656,7 +2402,7 @@ void NPC::ModifyNPCStat(const std::string& stat, const std::string& value)
 		return;
 	}
 	else if (stat_lower == "loottable_id") {
-		loottable_id = Strings::ToFloat(value);
+		m_loottable_id = Strings::ToFloat(value);
 		return;
 	}
 	else if (stat_lower == "healscale") {
@@ -2804,7 +2550,7 @@ float NPC::GetNPCStat(const std::string& stat)
 		return slow_mitigation;
 	}
 	else if (stat_lower == "loottable_id") {
-		return loottable_id;
+		return m_loottable_id;
 	}
 	else if (stat_lower == "healscale") {
 		return healscale;
@@ -2859,7 +2605,7 @@ void NPC::LevelScale() {
 	if (RuleB(NPC, NewLevelScaling)) {
 		if (scalerate == 0 || maxlevel <= 25) {
 			// Don't add HP to dynamically scaled NPCs since this will be calculated later
-			if (max_hp > 0 || skip_auto_scale)
+			if (max_hp > 0 || m_skip_auto_scale)
 			{
 				// pre-pop seems to scale by 20 HP increments while newer by 100
 				// We also don't want 100 increments on newer noobie zones, check level
@@ -2875,7 +2621,7 @@ void NPC::LevelScale() {
 			}
 
 			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
-			if (max_dmg > 0  || skip_auto_scale)
+			if (max_dmg > 0 || m_skip_auto_scale)
 			{
 				max_dmg += (random_level - level) * 2;
 			}
@@ -3762,8 +3508,8 @@ bool NPC::IsGuard()
 
 std::vector<int> NPC::GetLootList() {
 	std::vector<int> npc_items;
-	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
-		ServerLootItem_Struct* loot_item = *current_item;
+	for (auto current_item  = m_loot_items.begin(); current_item != m_loot_items.end(); ++current_item) {
+		LootItem * loot_item = *current_item;
 		if (!loot_item) {
 			LogError("NPC::GetLootList() - ItemList error, null item");
 			continue;

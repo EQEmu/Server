@@ -28,7 +28,6 @@
 #include "../common/eqemu_exception.h"
 #include "../common/strings.h"
 #include "items.h"
-#include "loot.h"
 #include "skill_caps.h"
 #include "spells.h"
 #include "base_data.h"
@@ -183,7 +182,6 @@ int main(int argc, char **argv)
 
 	bool load_all           = true;
 	bool load_items         = false;
-	bool load_loot          = false;
 	bool load_skill_caps    = false;
 	bool load_spells        = false;
 	bool load_bd            = false;
@@ -202,13 +200,6 @@ int main(int argc, char **argv)
 					if (strcasecmp("items", argv[i]) == 0) {
 						load_items = true;
 						load_all   = false;
-					}
-					break;
-
-				case 'l':
-					if (strcasecmp("loot", argv[i]) == 0) {
-						load_loot = true;
-						load_all  = false;
 					}
 					break;
 
@@ -246,16 +237,6 @@ int main(int argc, char **argv)
 		LogInfo("Loading items");
 		try {
 			LoadItems(&content_db, hotfix_name);
-		} catch (std::exception &ex) {
-			LogError("{}", ex.what());
-			return 1;
-		}
-	}
-
-	if (load_all || load_loot) {
-		LogInfo("Loading loot");
-		try {
-			LoadLoot(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;

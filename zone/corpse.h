@@ -21,6 +21,7 @@
 
 #include "mob.h"
 #include "client.h"
+#include "../common/loot.h"
 
 class EQApplicationPacket;
 class Group;
@@ -43,9 +44,9 @@ class Corpse : public Mob {
 	static void SendEndLootErrorPacket(Client* client);
 	static void SendLootReqErrorPacket(Client* client, LootResponse response = LootResponse::NotAtThisTime);
 
-	Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
+	Corpse(NPC* in_npc, LootItems* in_itemlist, uint32 in_npctypeid, const NPCType** in_npctypedata, uint32 in_decaytime = 600000);
 	Corpse(Client* client, int32 in_rezexp);
-	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, ItemList* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
+	Corpse(uint32 in_corpseid, uint32 in_charid, const char* in_charname, LootItems* in_itemlist, uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_plat, const glm::vec4& position, float in_size, uint8 in_gender, uint16 in_race, uint8 in_class, uint8 in_deity, uint8 in_level, uint8 in_texture, uint8 in_helmtexture, uint32 in_rezexp, bool wasAtGraveyard = false);
 
 	~Corpse();
 	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id);
@@ -93,35 +94,37 @@ class Corpse : public Mob {
 	void			LoadPlayerCorpseDecayTime(uint32 dbid);
 
 	/* Corpse: Items */
-	uint32					GetWornItem(int16 equipSlot) const;
-	ServerLootItem_Struct*	GetItem(uint16 lootslot, ServerLootItem_Struct** bag_item_data = 0);
-	void	SetPlayerKillItemID(int32 pk_item_id) { player_kill_item = pk_item_id; }
-	int32	GetPlayerKillItem() { return player_kill_item; }
-	void	RemoveItem(uint16 lootslot);
-	void	RemoveItem(ServerLootItem_Struct* item_data);
-	void	RemoveItemByID(uint32 item_id, int quantity = 1);
-	void	AddItem(uint32 itemnum, 
-		uint16 charges, 
-		int16 slot = 0, 
-		uint32 aug1 = 0, 
-		uint32 aug2 = 0, 
-		uint32 aug3 = 0, 
-		uint32 aug4 = 0, 
-		uint32 aug5 = 0, 
-		uint32 aug6 = 0, 
-		bool attuned = false, 
-		const std::string &custom_data = std::string(), 
+	uint32 GetWornItem(int16 equipSlot) const;
+	LootItem *GetItem(uint16 lootslot, LootItem **bag_item_data = 0);
+	void SetPlayerKillItemID(int32 pk_item_id) { player_kill_item = pk_item_id; }
+	int32 GetPlayerKillItem() { return player_kill_item; }
+	void RemoveItem(uint16 lootslot);
+	void RemoveItem(LootItem *item_data);
+	void RemoveItemByID(uint32 item_id, int quantity = 1);
+	void AddItem(
+		uint32 itemnum,
+		uint16 charges,
+		int16 slot = 0,
+		uint32 aug1 = 0,
+		uint32 aug2 = 0,
+		uint32 aug3 = 0,
+		uint32 aug4 = 0,
+		uint32 aug5 = 0,
+		uint32 aug6 = 0,
+		bool attuned = false,
+		const std::string &custom_data = std::string(),
 		uint32 ornamenticon = 0,
 		uint32 ornamentidfile = 0,
-		uint32 ornament_hero_model = 0);
+		uint32 ornament_hero_model = 0
+	);
 
 	/* Corpse: Coin */
-	void	SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void	RemoveCash();
-	uint32	GetCopper()		{ return copper; }
-	uint32	GetSilver()		{ return silver; }
-	uint32	GetGold()		{ return gold; }
-	uint32	GetPlatinum()	{ return platinum; }
+	void SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
+	void RemoveCash();
+	uint32 GetCopper() { return copper; }
+	uint32 GetSilver() { return silver; }
+	uint32 GetGold() { return gold; }
+	uint32 GetPlatinum() { return platinum; }
 
 	/* Corpse: Resurrection */
 	bool	IsRezzed() { return rez; }
@@ -134,9 +137,9 @@ class Corpse : public Mob {
 	bool	HasItem(uint32 item_id);
 	uint16	CountItem(uint32 item_id);
 	uint32	GetItemIDBySlot(uint16 loot_slot);
-	uint16	GetFirstSlotByItemID(uint32 item_id);
+	uint16	GetFirstLootSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
-	void	LootItem(Client* client, const EQApplicationPacket* app);
+	void	LootCorpseItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);
 	void	AllowPlayerLoot(Mob *them, uint8 slot);
@@ -167,26 +170,26 @@ protected:
 	void MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
-	bool		is_player_corpse; /* Determines if Player Corpse or not */
-	bool		is_corpse_changed; /* Determines if corpse has changed or not */
-	bool		is_locked; /* Determines if corpse is locked */
-	int32		player_kill_item; /* Determines if Player Kill Item */
-	uint32		corpse_db_id; /* Corpse Database ID (Player Corpse) */
-	uint32		char_id; /* Character ID */
-	uint32		consented_group_id = 0;
-	uint32		consented_raid_id  = 0;
-	uint32		consented_guild_id = 0;
-	ItemList	itemlist; /* Internal Item list used for corpses */
-	uint32		copper;
-	uint32		silver;
-	uint32		gold;
-	uint32		platinum;
-	bool		player_corpse_depop; /* Sets up Corpse::Process to depop the player corpse */
-	uint32		being_looted_by; /* Determines what the corpse is being looted by internally for logic */
-	uint32		rez_experience; /* Amount of experience that the corpse would rez for */
-	bool		rez;
-	bool		become_npc;
-	int			allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
+	bool      is_player_corpse; /* Determines if Player Corpse or not */
+	bool      is_corpse_changed; /* Determines if corpse has changed or not */
+	bool      is_locked; /* Determines if corpse is locked */
+	int32     player_kill_item; /* Determines if Player Kill Item */
+	uint32    corpse_db_id; /* Corpse Database ID (Player Corpse) */
+	uint32    char_id; /* Character ID */
+	uint32    consented_group_id = 0;
+	uint32    consented_raid_id  = 0;
+	uint32    consented_guild_id = 0;
+	LootItems itemlist; /* Internal Item list used for corpses */
+	uint32    copper;
+	uint32    silver;
+	uint32    gold;
+	uint32    platinum;
+	bool      player_corpse_depop; /* Sets up Corpse::Process to depop the player corpse */
+	uint32    being_looted_by; /* Determines what the corpse is being looted by internally for logic */
+	uint32    rez_experience; /* Amount of experience that the corpse would rez for */
+	bool      rez;
+	bool      become_npc;
+	int       allowed_looters[MAX_LOOTERS]; /* People allowed to loot the corpse, character id */
 	Timer		corpse_decay_timer; /* The amount of time in millseconds in which a corpse will take to decay (Depop/Poof) */
 	Timer		corpse_rez_timer; /* The amount of time in millseconds in which a corpse can be rezzed */
 	Timer		corpse_delay_timer;

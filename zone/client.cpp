@@ -9099,6 +9099,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_four += Saylink::Silent("#reload logs", "Level Based Experience Modifiers");
 	menu_reload_four += " | " + Saylink::Silent("#reload logs", "Log Settings");
+	menu_reload_four += " | " + Saylink::Silent("#reload Loot", "Loot");
 
 	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
 	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
@@ -10667,7 +10668,7 @@ std::vector<Client *> Client::GetPartyMembers()
 	return clients_to_update;
 }
 
-void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootItem_Struct>& bag_items)
+void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<LootItem>& bag_items)
 {
 	if (bag_items.empty())
 	{
@@ -11115,6 +11116,16 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads Log Settings globally",
 			logs_link
+		).c_str()
+	);
+
+	auto loot_link = Saylink::Silent("#reload loot");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Loot globally",
+			loot_link
 		).c_str()
 	);
 

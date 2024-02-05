@@ -25,8 +25,11 @@
 #include "zonedb.h"
 #include "../common/zone_store.h"
 #include "zonedump.h"
-#include "../common/loottable.h"
 #include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/loottable_repository.h"
+#include "../common/repositories/loottable_entries_repository.h"
+#include "../common/repositories/lootdrop_repository.h"
+#include "../common/repositories/lootdrop_entries_repository.h"
 
 #include <deque>
 #include <list>
@@ -193,6 +196,7 @@ public:
 	virtual void SpellProcess();
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
+	// loot
 	void AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item = true);
 	void AddItem(
 		uint32 item_id,
@@ -205,39 +209,37 @@ public:
 		uint32 augment_five = 0,
 		uint32 augment_six = 0
 	);
-	void	AddLootTable();
-	void	AddLootTable(uint32 loottable_id);
-	void	CheckGlobalLootTables();
-	void	DescribeAggro(Client *to_who, Mob *mob, bool verbose);
-	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
-	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
-	void	ClearItemList();
-	inline const ItemList &GetItemList() { return itemlist; }
-	ServerLootItem_Struct*	GetItem(int slot_id);
-	void	AddCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
-	void	RemoveCash();
-	void	QueryLoot(Client* to, bool is_pet_query = false);
-	bool	HasItem(uint32 item_id);
-	uint16	CountItem(uint32 item_id);
-	uint32	GetItemIDBySlot(uint16 loot_slot);
-	uint16	GetFirstSlotByItemID(uint32 item_id);
+	void AddLootTable();
+	void AddLootTable(uint32 loottable_id, bool is_global = false);
+	void AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop);
+	void CheckGlobalLootTables();
+	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
+	void CheckTrivialMinMaxLevelDrop(Mob *killer);
+	void ClearLootItems();
+	inline const LootItems &GetLootItems() { return m_loot_items; }
+	LootItem *GetItem(int slot_id);
+	void AddLootCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
+	void RemoveLootCash();
+	void QueryLoot(Client *to, bool is_pet_query = false);
+	bool HasItem(uint32 item_id);
+	uint16 CountItem(uint32 item_id);
+	uint32 GetLootItemIDBySlot(uint16 loot_slot);
+	uint16 GetFirstLootSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
-	uint32	CountLoot();
-	inline uint32	GetLoottableID()	const { return loottable_id; }
+	uint32 CountLoot();
+	inline uint32 GetLoottableID() const { return m_loottable_id; }
+	inline bool DropsGlobalLoot() const { return !m_skip_global_loot; }
+	inline uint32 GetCopper() const { return m_loot_copper; }
+	inline uint32 GetSilver() const { return m_loot_silver; }
+	inline uint32 GetGold() const { return m_loot_gold; }
+	inline uint32 GetPlatinum() const { return m_loot_platinum; }
+	inline void SetCopper(uint32 amt) { m_loot_copper = amt; }
+	inline void SetSilver(uint32 amt) { m_loot_silver = amt; }
+	inline void SetGold(uint32 amt) { m_loot_gold = amt; }
+	inline void SetPlatinum(uint32 amt) { m_loot_platinum = amt; }
+
+	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	virtual void UpdateEquipmentLight();
-	inline bool DropsGlobalLoot() const { return !skip_global_loot; }
-
-	inline uint32	GetCopper()		const { return copper; }
-	inline uint32	GetSilver()		const { return silver; }
-	inline uint32	GetGold()		const { return gold; }
-	inline uint32	GetPlatinum()	const { return platinum; }
-
-	inline void	SetCopper(uint32 amt)		{ copper = amt; }
-	inline void	SetSilver(uint32 amt)		{ silver = amt; }
-	inline void	SetGold(uint32 amt)			{ gold = amt; }
-	inline void	SetPlatinum(uint32 amt)		{ platinum = amt; }
-
-
 	virtual int64 CalcMaxMana();
 	void SetGrid(int32 grid_){ grid=grid_; }
 	void SetSpawnGroupId(uint32 sg2){ spawn_group_id =sg2; }
@@ -322,8 +324,7 @@ public:
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,
-		ItemList *itemlist,
-		LootDropEntries_Struct loot_drop,
+		LootdropEntriesRepository::LootdropEntries loot_drop,
 		bool wear_change = false,
 		uint32 augment_one = 0,
 		uint32 augment_two = 0,
@@ -333,7 +334,7 @@ public:
 		uint32 augment_six = 0
 	);
 
-	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose=false);
+	bool MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntries loot_drop, bool verbose=false);
 
 	void CheckSignal();
 
@@ -411,8 +412,6 @@ public:
 	float GetProximityMinZ();
 	float GetProximityMaxZ();
 	bool  IsProximitySet();
-
-	ItemList	itemlist; //kathgar - why is this public? Doing other things or I would check the code
 
 	NPCProximity* proximity;
 	Spawn2*	respawn2;
@@ -539,13 +538,13 @@ public:
 	inline bool GetAlwaysAggro() { return always_aggro; }
 	inline bool GetNPCAggro() { return npc_aggro; }
 	inline bool GetIgnoreDespawn() { return ignore_despawn; }
-	inline bool GetSkipGlobalLoot() { return skip_global_loot; }
+	inline bool GetSkipGlobalLoot() { return m_skip_global_loot; }
 
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
 	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }
 
-	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
+	inline bool IsSkipAutoScale() const { return m_skip_auto_scale; }
 
 	void ScaleNPC(uint8 npc_level, bool always_scale = false, bool override_special_abilities = false);
 
@@ -553,8 +552,6 @@ public:
 	void ReloadSpells();
 
 	void SendPositionToClients();
-
-	static LootDropEntries_Struct NewLootDropEntry();
 
 	bool CanPathTo(float x, float y, float z);
 
@@ -567,13 +564,17 @@ protected:
 
 	friend class EntityList;
 	friend class Aura;
-	uint32                        copper;
-	uint32                        silver;
-	uint32                        gold;
-	uint32                        platinum;
-	int32                         grid;
-	uint32                        spawn_group_id;
-	uint16                        wp_m;
+
+	int32  grid;
+	uint32 spawn_group_id;
+	uint16 wp_m;
+
+	// loot
+	uint32    m_loot_copper;
+	uint32    m_loot_silver;
+	uint32    m_loot_gold;
+	uint32    m_loot_platinum;
+	LootItems m_loot_items;
 
 	std::list<NpcFactionEntriesRepository::NpcFactionEntries> faction_list;
 
@@ -697,9 +698,9 @@ protected:
 
 
 private:
-	uint32              loottable_id;
-	bool                skip_global_loot;
-	bool                skip_auto_scale;
+	uint32              m_loottable_id;
+	bool                m_skip_global_loot;
+	bool                m_skip_auto_scale;
 	bool                p_depop;
 	bool                m_record_loot_stats;
 	std::vector<uint32> m_rolled_items = {};

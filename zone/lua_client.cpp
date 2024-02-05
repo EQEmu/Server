@@ -2345,7 +2345,7 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 		return;
 	}
 
-	std::vector<ServerLootItem_Struct> bagged_items;
+	std::vector<LootItem> bagged_items;
 
 	luabind::raw_iterator end; // raw_iterator uses lua_rawget
 	for (luabind::raw_iterator it(bag_items_table); it != end; ++it)
@@ -2354,7 +2354,7 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 		if (luabind::type(*it) == LUA_TTABLE)
 		{
 			// no need to try/catch, quest lua parser already catches exceptions
-			ServerLootItem_Struct item{};
+			LootItem item{};
 			item.item_id = luabind::object_cast<uint32>((*it)["item_id"]);
 			item.charges = luabind::object_cast<int16>((*it)["charges"]);
 			item.attuned = luabind::type((*it)["attuned"]) != LUA_TNIL ? luabind::object_cast<uint8>((*it)["attuned"]) : 0;

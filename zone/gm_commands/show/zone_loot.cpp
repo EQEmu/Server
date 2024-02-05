@@ -4,13 +4,13 @@ void ShowZoneLoot(Client *c, const Seperator *sep)
 {
 	const uint32 search_item_id = sep->IsNumber(2) ? Strings::ToUnsignedInt(sep->arg[2]) : 0;
 
-	std::vector<std::pair<NPC *, ItemList>> v;
+	std::vector<std::pair<NPC *, LootItems>> v;
 
 	uint32 loot_count  = 0;
 	uint32 loot_number = 1;
 
 	for (auto npc_entity: entity_list.GetNPCList()) {
-		auto il = npc_entity.second->GetItemList();
+		auto il = npc_entity.second->GetLootItems();
 		v.emplace_back(std::make_pair(npc_entity.second, il));
 	}
 

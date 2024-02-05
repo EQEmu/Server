@@ -2831,7 +2831,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		corpse = new Corpse(
 			this,
-			&itemlist,
+			&m_loot_items,
 			GetNPCTypeID(),
 			&NPCTypedata,
 			(
