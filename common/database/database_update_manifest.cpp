@@ -5241,7 +5241,8 @@ DROP TABLE IF EXISTS item_tick
 		.sql = R"(
 ALTER TABLE `spawngroup`
 MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `id`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9257,
@@ -5252,7 +5253,8 @@ MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci
 		.sql = R"(
 ALTER TABLE `ground_spawns`
 ADD COLUMN `fix_z` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `respawn_timer`;
-)"
+)",
+		.content_schema_update = true
 	},
 	ManifestEntry{
 		.version = 9258,
