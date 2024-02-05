@@ -1063,11 +1063,11 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 	};
 
 	std::string file_name;
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
@@ -1106,11 +1106,11 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 	};
 
 	std::string file_name;
-	for (uint8 index = 0; index < file_names.size(); index++) {
+	for (auto & file : file_names) {
 		for (auto* e: _load_precedence) {
 			file_name = fmt::format(
 				"{}.{}",
-				file_names[index],
+				file,
 				_extensions.find(e->GetIdentifier())->second
 			);
 
