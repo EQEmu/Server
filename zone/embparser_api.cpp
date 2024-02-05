@@ -1042,6 +1042,11 @@ void Perl__repopzone()
 	quest_manager.repopzone();
 }
 
+void Perl__repopzone(bool is_forced)
+{
+	quest_manager.repopzone(is_forced);
+}
+
 void Perl__processmobswhilezoneempty(bool on)
 {
 	quest_manager.processmobswhilezoneempty(on);
@@ -6547,7 +6552,8 @@ void perl_register_quest()
 	package.add("removeldonwin", &Perl__removeldonwin);
 	package.add("removetitle", &Perl__removetitle);
 	package.add("rename", &Perl__rename);
-	package.add("repopzone", &Perl__repopzone);
+	package.add("repopzone", (void(*)(void))&Perl__repopzone);
+	package.add("repopzone", (void(*)(bool))&Perl__repopzone);
 	package.add("resettaskactivity", &Perl__resettaskactivity);
 	package.add("respawn", &Perl__respawn);
 	package.add("resume", &Perl__resume);

@@ -2,23 +2,17 @@
 
 void command_repop(Client *c, const Seperator *sep)
 {
-	int arguments = sep->argnum;
-	if (!arguments) {
-		entity_list.ClearAreas();
-		c->Message(Chat::White, "Zone depopped, repopping now.");
-		zone->Repop();
-		return;
-	}
+	const bool is_forced = sep->argnum > 0 ? !strcasecmp(sep->arg[1], "force") : false;
 
-	bool is_force = !strcasecmp(sep->arg[1], "force");
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Zone depopped, {}repopping now.",
+			is_forced ? "forcefully " : ""
+		).c_str()
+	);
 
-	if (is_force) {
-		zone->ClearSpawnTimers();
-		c->Message(Chat::White, "Zone depopped, forcefully repopping now.");
-	} else {
-		c->Message(Chat::White, "Zone depopped, repopping now.");
-	}
-
-	zone->Repop();
+	entity_list.ClearAreas();
+	zone->Repop(is_forced);
 }
 
