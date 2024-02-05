@@ -19,16 +19,16 @@
 class BaseBaseDataRepository {
 public:
 	struct BaseData {
-		uint32_t level;
-		uint32_t class_;
-		double   hp;
-		double   mana;
-		double   end;
-		double   unk1;
-		double   unk2;
-		double   hp_fac;
-		double   mana_fac;
-		double   end_fac;
+		uint8_t level;
+		uint8_t class_;
+		double  hp;
+		double  mana;
+		double  end;
+		double  hp_regen;
+		double  end_regen;
+		double  hp_fac;
+		double  mana_fac;
+		double  end_fac;
 	};
 
 	static std::string PrimaryKey()
@@ -44,8 +44,8 @@ public:
 			"hp",
 			"mana",
 			"end",
-			"unk1",
-			"unk2",
+			"hp_regen",
+			"end_regen",
 			"hp_fac",
 			"mana_fac",
 			"end_fac",
@@ -60,8 +60,8 @@ public:
 			"hp",
 			"mana",
 			"end",
-			"unk1",
-			"unk2",
+			"hp_regen",
+			"end_regen",
 			"hp_fac",
 			"mana_fac",
 			"end_fac",
@@ -105,16 +105,16 @@ public:
 	{
 		BaseData e{};
 
-		e.level    = 0;
-		e.class_   = 0;
-		e.hp       = 0;
-		e.mana     = 0;
-		e.end      = 0;
-		e.unk1     = 0;
-		e.unk2     = 0;
-		e.hp_fac   = 0;
-		e.mana_fac = 0;
-		e.end_fac  = 0;
+		e.level     = 0;
+		e.class_    = 0;
+		e.hp        = 0;
+		e.mana      = 0;
+		e.end       = 0;
+		e.hp_regen  = 0;
+		e.end_regen = 0;
+		e.hp_fac    = 0;
+		e.mana_fac  = 0;
+		e.end_fac   = 0;
 
 		return e;
 	}
@@ -151,16 +151,16 @@ public:
 		if (results.RowCount() == 1) {
 			BaseData e{};
 
-			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
-			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
-			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
-			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
-			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
-			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
-			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
-			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
+			e.level     = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp        = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana      = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end       = row[4] ? strtod(row[4], nullptr) : 0;
+			e.hp_regen  = row[5] ? strtod(row[5], nullptr) : 0;
+			e.end_regen = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac    = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac  = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac   = row[9] ? strtod(row[9], nullptr) : 0;
 
 			return e;
 		}
@@ -199,8 +199,8 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.hp));
 		v.push_back(columns[3] + " = " + std::to_string(e.mana));
 		v.push_back(columns[4] + " = " + std::to_string(e.end));
-		v.push_back(columns[5] + " = " + std::to_string(e.unk1));
-		v.push_back(columns[6] + " = " + std::to_string(e.unk2));
+		v.push_back(columns[5] + " = " + std::to_string(e.hp_regen));
+		v.push_back(columns[6] + " = " + std::to_string(e.end_regen));
 		v.push_back(columns[7] + " = " + std::to_string(e.hp_fac));
 		v.push_back(columns[8] + " = " + std::to_string(e.mana_fac));
 		v.push_back(columns[9] + " = " + std::to_string(e.end_fac));
@@ -230,8 +230,8 @@ public:
 		v.push_back(std::to_string(e.hp));
 		v.push_back(std::to_string(e.mana));
 		v.push_back(std::to_string(e.end));
-		v.push_back(std::to_string(e.unk1));
-		v.push_back(std::to_string(e.unk2));
+		v.push_back(std::to_string(e.hp_regen));
+		v.push_back(std::to_string(e.end_regen));
 		v.push_back(std::to_string(e.hp_fac));
 		v.push_back(std::to_string(e.mana_fac));
 		v.push_back(std::to_string(e.end_fac));
@@ -269,8 +269,8 @@ public:
 			v.push_back(std::to_string(e.hp));
 			v.push_back(std::to_string(e.mana));
 			v.push_back(std::to_string(e.end));
-			v.push_back(std::to_string(e.unk1));
-			v.push_back(std::to_string(e.unk2));
+			v.push_back(std::to_string(e.hp_regen));
+			v.push_back(std::to_string(e.end_regen));
 			v.push_back(std::to_string(e.hp_fac));
 			v.push_back(std::to_string(e.mana_fac));
 			v.push_back(std::to_string(e.end_fac));
@@ -307,16 +307,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
-			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
-			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
-			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
-			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
-			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
-			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
-			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
+			e.level     = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp        = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana      = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end       = row[4] ? strtod(row[4], nullptr) : 0;
+			e.hp_regen  = row[5] ? strtod(row[5], nullptr) : 0;
+			e.end_regen = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac    = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac  = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac   = row[9] ? strtod(row[9], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -341,16 +341,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BaseData e{};
 
-			e.level    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.class_   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.hp       = row[2] ? strtod(row[2], nullptr) : 0;
-			e.mana     = row[3] ? strtod(row[3], nullptr) : 0;
-			e.end      = row[4] ? strtod(row[4], nullptr) : 0;
-			e.unk1     = row[5] ? strtod(row[5], nullptr) : 0;
-			e.unk2     = row[6] ? strtod(row[6], nullptr) : 0;
-			e.hp_fac   = row[7] ? strtod(row[7], nullptr) : 0;
-			e.mana_fac = row[8] ? strtod(row[8], nullptr) : 0;
-			e.end_fac  = row[9] ? strtod(row[9], nullptr) : 0;
+			e.level     = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.class_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.hp        = row[2] ? strtod(row[2], nullptr) : 0;
+			e.mana      = row[3] ? strtod(row[3], nullptr) : 0;
+			e.end       = row[4] ? strtod(row[4], nullptr) : 0;
+			e.hp_regen  = row[5] ? strtod(row[5], nullptr) : 0;
+			e.end_regen = row[6] ? strtod(row[6], nullptr) : 0;
+			e.hp_fac    = row[7] ? strtod(row[7], nullptr) : 0;
+			e.mana_fac  = row[8] ? strtod(row[8], nullptr) : 0;
+			e.end_fac   = row[9] ? strtod(row[9], nullptr) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -430,8 +430,8 @@ public:
 		v.push_back(std::to_string(e.hp));
 		v.push_back(std::to_string(e.mana));
 		v.push_back(std::to_string(e.end));
-		v.push_back(std::to_string(e.unk1));
-		v.push_back(std::to_string(e.unk2));
+		v.push_back(std::to_string(e.hp_regen));
+		v.push_back(std::to_string(e.end_regen));
 		v.push_back(std::to_string(e.hp_fac));
 		v.push_back(std::to_string(e.mana_fac));
 		v.push_back(std::to_string(e.end_fac));
@@ -462,8 +462,8 @@ public:
 			v.push_back(std::to_string(e.hp));
 			v.push_back(std::to_string(e.mana));
 			v.push_back(std::to_string(e.end));
-			v.push_back(std::to_string(e.unk1));
-			v.push_back(std::to_string(e.unk2));
+			v.push_back(std::to_string(e.hp_regen));
+			v.push_back(std::to_string(e.end_regen));
 			v.push_back(std::to_string(e.hp_fac));
 			v.push_back(std::to_string(e.mana_fac));
 			v.push_back(std::to_string(e.end_fac));

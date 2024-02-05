@@ -5253,6 +5253,21 @@ MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci
 ALTER TABLE `ground_spawns`
 ADD COLUMN `fix_z` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `respawn_timer`;
 )"
+	},
+	ManifestEntry{
+		.version = 9258,
+		.description = "2024_02_04_base_data.sql",
+		.check = "SHOW COLUMNS FROM `base_data` LIKE `hp_regen`",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `base_data`
+CHANGE COLUMN `unk1` `hp_regen` double NOT NULL AFTER `end`,
+CHANGE COLUMN `unk2` `end_regen` double NOT NULL AFTER `hp_regen`,
+MODIFY COLUMN `level` tinyint(3) UNSIGNED NOT NULL FIRST,
+MODIFY COLUMN `class` tinyint(2) UNSIGNED NOT NULL AFTER `level`;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

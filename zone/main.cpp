@@ -381,11 +381,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (!database.LoadBaseData(hotfix_name)) {
-		LogError("Loading base data failed!");
-		return 1;
-	}
-
 	guild_mgr.LoadGuilds();
 	content_db.LoadFactionData();
 	title_manager.LoadTitles();

@@ -1957,6 +1957,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadBaseData:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Base Data");
+			zone->ReloadBaseData();
+		}
+
+		break;
+	}
 	case ServerOP_ReloadBlockedSpells:
 	{
 		if (zone && zone->IsLoaded()) {
@@ -3524,11 +3533,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogInfo("Loading spells");
 		if (!content_db.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 			LogError("Loading spells failed!");
-		}
-
-		LogInfo("Loading base data");
-		if (!content_db.LoadBaseData(hotfix_name)) {
-			LogError("Loading base data failed!");
 		}
 		break;
 	}
