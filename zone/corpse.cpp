@@ -991,14 +991,10 @@ bool Corpse::Process()
 		return false;
 	}
 
-	//Player is offline. If rez timer is enabled, disable it and save corpse.
+	// Player is offline. If rez timer is enabled, disable it and save corpse.
 	if (m_is_rezzable) {
 		if (!m_is_owner_online) {
 			if (m_corpse_rezzable_timer.Enabled()) {
-				LogCorpsesDetail(
-					"Rezzable check for [{}] player corpse, owner not online, rez timer enabled",
-					GetName()
-				);
 				m_remaining_rez_time = m_corpse_rezzable_timer.GetRemainingTime();
 				m_corpse_rezzable_timer.Disable();
 				m_is_corpse_changed = true;
@@ -1976,6 +1972,8 @@ bool Corpse::Summon(Client *client, bool spell, bool CheckDistance)
 
 void Corpse::CompleteResurrection(bool timer_expired)
 {
+	LogCorpses("Corpse [{}] has been rezzed.", GetName());
+
 	m_remaining_rez_time = m_corpse_rezzable_timer.GetRemainingTime();
 
 	if (timer_expired) {
@@ -2193,6 +2191,8 @@ std::vector<int> Corpse::GetLootList()
 
 void Corpse::SetRezTimer(bool initial_timer)
 {
+	LogCorpsesDetail("Checking for rezzable corpse [{}]", GetName());
+
 	if (!m_is_rezzable) {
 		if (m_corpse_rezzable_timer.Enabled()) {
 			m_corpse_rezzable_timer.Disable();
@@ -2226,11 +2226,14 @@ void Corpse::SetRezTimer(bool initial_timer)
 		CompleteResurrection(true);
 		return;
 	}
+
 	m_corpse_rezzable_timer.SetTimer(m_remaining_rez_time);
 }
 
 void Corpse::CheckIsOwnerOnline()
 {
+	LogCorpsesDetail("Checking if owner is online for corpse [{}]", GetOwnerName());
+
 	Client *c = entity_list.GetClientByCharID(GetCharID());
 	if (!c) {
 		// Client is not in the corpse's zone, send a packet to world to have it check.
