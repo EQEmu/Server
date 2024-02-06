@@ -1440,8 +1440,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			if (o->online) {
 				LogCorpsesDetail(
 					"ServerOP_IsOwnerOnline account_id [{}] corpse name [{}] found to be online, sending online update to zone_id [{}]",
-					o->name,
 					o->account_id,
+					o->name,
 					o->zone_id
 				);
 			}
