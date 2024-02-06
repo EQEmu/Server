@@ -4799,6 +4799,9 @@ bool Client::HasItemOnCorpse(uint32 item_id)
 
 	for (int i = 0; i < corpse_count; i++) {
 		const uint32 corpse_id = GetCorpseID(i);
+		if (!corpse_id) {
+			continue;
+		}
 
 		for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id < EQ::invslot::POSSESSIONS_END; slot_id++) {
 			const uint32 current_item_id = GetCorpseItemAt(corpse_id, slot_id);

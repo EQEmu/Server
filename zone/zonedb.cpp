@@ -3901,6 +3901,8 @@ uint32 ZoneDatabase::GetCharacterCorpseID(uint32 character_id, uint8 corpse_limi
 
 uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id)
 {
+	LogCorpsesDetail("corpse_id [{}] slot_id [{}]", corpse_id, slot_id);
+
 	Corpse* c = LoadCharacterCorpse(corpse_id);
 	uint32 item_id = 0;
 
@@ -3912,43 +3914,47 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id)
 	return item_id;
 }
 
-bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse)
+bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& c)
 {
-	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);
+	if (corpse_id == 0) {
+		return false;
+	}
 
-	corpse.locked                    = e.is_locked;
-	corpse.exp                       = e.exp;
-	corpse.size                      = e.size;
-	corpse.level                     = e.level;
-	corpse.race                      = e.race;
-	corpse.gender                    = e.gender;
-	corpse.class_                    = e.class_;
-	corpse.deity                     = e.deity;
-	corpse.texture                   = e.texture;
-	corpse.helmtexture               = e.helm_texture;
-	corpse.copper                    = e.copper;
-	corpse.silver                    = e.silver;
-	corpse.gold                      = e.gold;
-	corpse.plat                      = e.platinum;
-	corpse.haircolor                 = e.hair_color;
-	corpse.beardcolor                = e.beard_color;
-	corpse.eyecolor1                 = e.eye_color_1;
-	corpse.eyecolor2                 = e.eye_color_2;
-	corpse.hairstyle                 = e.hair_style;
-	corpse.face                      = e.face;
-	corpse.beard                     = e.beard;
-	corpse.drakkin_heritage          = e.drakkin_heritage;
-	corpse.drakkin_tattoo            = e.drakkin_tattoo;
-	corpse.drakkin_details           = e.drakkin_details;
-	corpse.item_tint.Head.Color      = e.wc_1;
-	corpse.item_tint.Chest.Color     = e.wc_2;
-	corpse.item_tint.Arms.Color      = e.wc_3;
-	corpse.item_tint.Wrist.Color     = e.wc_4;
-	corpse.item_tint.Hands.Color     = e.wc_5;
-	corpse.item_tint.Legs.Color      = e.wc_6;
-	corpse.item_tint.Feet.Color      = e.wc_7;
-	corpse.item_tint.Primary.Color   = e.wc_8;
-	corpse.item_tint.Secondary.Color = e.wc_9;
+	const auto& cc = CharacterCorpsesRepository::FindOne(*this, corpse_id);
+
+	c.locked                    = cc.is_locked;
+	c.exp                       = cc.exp;
+	c.size                      = cc.size;
+	c.level                     = cc.level;
+	c.race                      = cc.race;
+	c.gender                    = cc.gender;
+	c.class_                    = cc.class_;
+	c.deity                     = cc.deity;
+	c.texture                   = cc.texture;
+	c.helmtexture               = cc.helm_texture;
+	c.copper                    = cc.copper;
+	c.silver                    = cc.silver;
+	c.gold                      = cc.gold;
+	c.plat                      = cc.platinum;
+	c.haircolor                 = cc.hair_color;
+	c.beardcolor                = cc.beard_color;
+	c.eyecolor1                 = cc.eye_color_1;
+	c.eyecolor2                 = cc.eye_color_2;
+	c.hairstyle                 = cc.hair_style;
+	c.face                      = cc.face;
+	c.beard                     = cc.beard;
+	c.drakkin_heritage          = cc.drakkin_heritage;
+	c.drakkin_tattoo            = cc.drakkin_tattoo;
+	c.drakkin_details           = cc.drakkin_details;
+	c.item_tint.Head.Color      = cc.wc_1;
+	c.item_tint.Chest.Color     = cc.wc_2;
+	c.item_tint.Arms.Color      = cc.wc_3;
+	c.item_tint.Wrist.Color     = cc.wc_4;
+	c.item_tint.Hands.Color     = cc.wc_5;
+	c.item_tint.Legs.Color      = cc.wc_6;
+	c.item_tint.Feet.Color      = cc.wc_7;
+	c.item_tint.Primary.Color   = cc.wc_8;
+	c.item_tint.Secondary.Color = cc.wc_9;
 
 	const auto& l = CharacterCorpseItemsRepository::GetWhere(
 		*this,
@@ -3958,7 +3964,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 		)
 	);
 
-	for (const auto& e : l) {
+	for (const auto &e: l) {
 		CharacterCorpseItemEntry item{
 			.item_id = e.item_id,
 			.equip_slot = static_cast<int16>(e.equip_slot),
@@ -3976,7 +3982,7 @@ bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntr
 			.ornament_hero_model = e.ornament_hero_model
 		};
 
-		corpse.items.emplace_back(std::move(item));
+		c.items.emplace_back(std::move(item));
 	}
 
 	return true;
@@ -4007,7 +4013,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(
 			position,
 			std::to_string(e.time_of_death),
 			e.is_rezzed == 1,
-			RuleB(Zone, EnableShadowrest) ? 0 : e.was_at_graveyard,
+			RuleB(Zone, EnableShadowrest) ? false : e.was_at_graveyard,
 			e.guild_consent_id
 		);
 
@@ -4062,7 +4068,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(
 			position,
 			std::to_string(e.time_of_death),
 			e.is_rezzed == 1,
-			RuleB(Zone, EnableShadowrest) ? 0 : e.was_at_graveyard,
+			RuleB(Zone, EnableShadowrest) ? false : e.was_at_graveyard,
 			e.guild_consent_id
 		);
 
@@ -4111,24 +4117,23 @@ bool ZoneDatabase::UnburyCharacterCorpse(uint32 corpse_id, uint32 zone_id, uint1
 
 Corpse* ZoneDatabase::LoadCharacterCorpse(uint32 corpse_id)
 {
-	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);
-
-	Corpse* c = 0;
-
-	if (!e.id) {
-		return c;
+	if (!corpse_id) {
+		return nullptr;
 	}
 
-	glm::vec4 position = glm::vec4(e.x, e.y, e.z, e.heading);
+	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);
+	if (!e.id) {
+		return nullptr;
+	}
 
-	c = Corpse::LoadCharacterCorpseEntity(
+	Corpse* c = Corpse::LoadCharacterCorpseEntity(
 		e.id,
 		e.charid,
 		e.charname,
-		position,
+		glm::vec4(e.x, e.y, e.z, e.heading),
 		std::to_string(e.time_of_death),
 		e.is_rezzed == 1,
-		RuleB(Zone, EnableShadowrest) ? 0 : e.was_at_graveyard,
+		RuleB(Zone, EnableShadowrest) ? false : e.was_at_graveyard,
 		e.guild_consent_id
 	);
 
@@ -4160,7 +4165,7 @@ bool ZoneDatabase::LoadCharacterCorpses(uint32 zone_id, uint16 instance_id)
 				position,
 				std::to_string(e.time_of_death),
 				e.is_rezzed == 1,
-				RuleB(Zone, EnableShadowrest) ? 0 : e.was_at_graveyard,
+				RuleB(Zone, EnableShadowrest) ? false : e.was_at_graveyard,
 				e.guild_consent_id
 			)
 		);

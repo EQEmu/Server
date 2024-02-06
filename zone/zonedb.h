@@ -497,7 +497,7 @@ public:
 	bool GetDecayTimes(npcDecayTimes_Struct* npc_decay_times);
 	uint32 GetFirstCorpseID(uint32 character_id);
 	Corpse* LoadCharacterCorpse(uint32 corpse_id);
-	bool LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &corpse);
+	bool LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry &c);
 	bool LoadCharacterCorpses(uint32 zone_id, uint16 instance_id);
 	void MarkCorpseAsResurrected(uint32 corpse_id);
 	uint32 SaveCharacterCorpse(uint32 character_id, const std::string& name, uint32 zone_id, uint16 instance_id, const CharacterCorpseEntry& c, const glm::vec4& position, uint32 guild_consent_id);

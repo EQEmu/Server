@@ -214,7 +214,8 @@ private:
 	bool		is_owner_online;
 	std::vector<std::string> consented_player_names;
 
-	LootRequestType	loot_request_type;
+	LootRequestType loot_request_type;
+	uint32          m_account_id;
 };
 
 #endif

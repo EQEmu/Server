@@ -373,22 +373,23 @@ Corpse::Corpse(Client* client, int32 in_rez_exp, KilledByTypes in_killed_by) : M
 
 	consented_guild_id = client->AutoConsentGuildEnabled() ? client->GuildID() : 0;
 
-	is_corpse_changed    = true;
-	rez_experience       = in_rez_exp;
-	is_player_corpse     = true;
-	is_locked            = false;
-	being_looted_by      = 0xFFFFFFFF;
-	char_id              = client->CharacterID();
-	corpse_db_id         = 0;
-	player_corpse_depop  = false;
-	copper               = 0;
-	silver               = 0;
-	gold                 = 0;
-	platinum             = 0;
-	killed_by            = (uint8)in_killed_by;
-	rezzable             = true;
-	rez_time             = 0;
-	is_owner_online      = false;
+	is_corpse_changed   = true;
+	rez_experience      = in_rez_exp;
+	is_player_corpse    = true;
+	is_locked           = false;
+	being_looted_by     = 0xFFFFFFFF;
+	char_id             = client->CharacterID();
+	corpse_db_id        = 0;
+	player_corpse_depop = false;
+	copper              = 0;
+	silver              = 0;
+	gold                = 0;
+	platinum            = 0;
+	killed_by           = (uint8) in_killed_by;
+	rezzable            = true;
+	rez_time            = 0;
+	is_owner_online     = false;
+	m_account_id        = client->AccountID();
 
 	owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
 
@@ -1050,15 +1051,21 @@ bool Corpse::Process() {
 	if (rezzable) {
 		if (!is_owner_online) {
 			if (corpse_rez_timer.Enabled()) {
+				LogCorpsesDetail(
+					"Rezzable check for [{}] player corpse, owner not online, rez timer enabled",
+					GetName()
+				);
 				rez_time = corpse_rez_timer.GetRemainingTime();
 				corpse_rez_timer.Disable();
 				is_corpse_changed = true;
 				Save();
 			}
-		} else { //Player is online. If rez timer is disabled, enable it.
+		}
+		else { //Player is online. If rez timer is disabled, enable it.
 			if (corpse_rez_timer.Enabled()) {
 				rez_time = corpse_rez_timer.GetRemainingTime();
-			} else {
+			}
+			else {
 				SetRezTimer();
 			}
 		}
@@ -2221,7 +2228,7 @@ void Corpse::CheckIsOwnerOnline()
 		o->corpse_id  = GetID();
 		o->zone_id    = zone->GetZoneID();
 		o->online     = 0;
-		o->account_id = c->AccountID();
+		o->account_id = m_account_id;
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 		LogCorpsesDetail("Sent IsOwnerOnline packet to world for [{}]", GetName());
