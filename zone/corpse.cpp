@@ -57,29 +57,29 @@ void Corpse::SendLootReqErrorPacket(Client *client, LootResponse response)
 }
 
 Corpse::Corpse(
-	NPC *in_npc,
-	LootItems *in_itemlist,
-	uint32 in_npctypeid,
-	const NPCType **in_npctypedata,
-	uint32 in_decaytime
+	NPC *npc,
+	LootItems *item_list,
+	uint32 npc_type_id,
+	const NPCType **npc_type_data,
+	uint32 decay_time
 ) : Mob(
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
 	0, // in_max_hp
-	in_npc->GetGender(), // in_gender
-	in_npc->GetRace(), // in_race
-	in_npc->GetClass(), // in_class
+	npc->GetGender(), // in_gender
+	npc->GetRace(), // in_race
+	npc->GetClass(), // in_class
 	BT_Humanoid, // in_bodytype
-	in_npc->GetDeity(), // in_deity
-	in_npc->GetLevel(), // in_level
-	in_npc->GetNPCTypeID(), // in_npctype_id
-	in_npc->GetSize(), // in_size
+	npc->GetDeity(), // in_deity
+	npc->GetLevel(), // in_level
+	npc->GetNPCTypeID(), // in_npctype_id
+	npc->GetSize(), // in_size
 	0.0f, // in_runspeed
-	in_npc->GetPosition(), // position
-	in_npc->GetInnateLightType(), // in_light
-	in_npc->GetTexture(), // in_texture
-	in_npc->GetHelmTexture(), // in_helmtexture
+	npc->GetPosition(), // position
+	npc->GetInnateLightType(), // in_light
+	npc->GetTexture(), // in_texture
+	npc->GetHelmTexture(), // in_helmtexture
 	0, // in_ac
 	0, // in_atk
 	0, // in_str
@@ -115,12 +115,12 @@ Corpse::Corpse(
 	0, // in_handtexture
 	0, // in_legtexture
 	0, // in_feettexture
-	(*in_npctypedata)->use_model, // in_usemodel
+	(*npc_type_data)->use_model, // in_usemodel
 	false, // in_always_aggros_foes
 	0, // in_heroic_strikethrough
 	false // in_keeps_sold_items
 ),
-	m_corpse_decay_timer(in_decaytime),
+	m_corpse_decay_timer(decay_time),
 	m_corpse_rezzable_timer(0),
 	m_corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
 	m_corpse_graveyard_timer(0),
@@ -132,20 +132,20 @@ Corpse::Corpse(
 	m_is_player_corpse          = false;
 	m_is_locked                 = false;
 	m_being_looted_by_entity_id = 0xFFFFFFFF;
-	if (in_itemlist) {
-		m_item_list = *in_itemlist;
-		in_itemlist->clear();
+	if (item_list) {
+		m_item_list = *item_list;
+		item_list->clear();
 	}
 
-	SetCash(in_npc->GetCopper(), in_npc->GetSilver(), in_npc->GetGold(), in_npc->GetPlatinum());
+	SetCash(npc->GetCopper(), npc->GetSilver(), npc->GetGold(), npc->GetPlatinum());
 
-	npctype_id = in_npctypeid;
+	npctype_id = npc_type_id;
 	SetPlayerKillItemID(0);
 	m_character_id        = 0;
 	m_corpse_db_id        = 0;
 	m_player_corpse_depop = false;
-	strcpy(corpse_name, in_npc->GetName());
-	strcpy(name, in_npc->GetName());
+	strcpy(corpse_name, npc->GetName());
+	strcpy(name, npc->GetName());
 
 	for (auto &npcCorpseDecayTime: npcCorpseDecayTimes) {
 		if (
@@ -165,7 +165,7 @@ Corpse::Corpse(
 	}
 
 
-	if (in_npc->HasPrivateCorpse()) {
+	if (npc->HasPrivateCorpse()) {
 		m_corpse_delay_timer.SetTimer(m_corpse_decay_timer.GetRemainingTime() + 1000);
 	}
 
@@ -181,7 +181,7 @@ Corpse::Corpse(
 	m_loot_request_type = LootRequestType::Forbidden;
 }
 
-Corpse::Corpse(Client *c, int32 in_rez_exp, KilledByTypes in_killed_by) : Mob(
+Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
@@ -264,7 +264,7 @@ Corpse::Corpse(Client *c, int32 in_rez_exp, KilledByTypes in_killed_by) : Mob(
 	m_consented_guild_id = c->AutoConsentGuildEnabled() ? c->GuildID() : 0;
 
 	m_is_corpse_changed         = true;
-	m_rezzed_experience         = in_rez_exp;
+	m_rezzed_experience         = rez_exp;
 	m_is_player_corpse          = true;
 	m_is_locked                 = false;
 	m_being_looted_by_entity_id = 0xFFFFFFFF;
@@ -463,47 +463,47 @@ void Corpse::MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equi
 
 // To be called from LoadFromDBData
 Corpse::Corpse(
-	uint32 in_dbid,
-	uint32 in_charid,
-	const char *in_charname,
-	LootItems *in_itemlist,
-	uint32 in_copper,
-	uint32 in_silver,
-	uint32 in_gold,
-	uint32 in_plat,
+	uint32 corpse_id,
+	uint32 character_id,
+	const char *character_name,
+	LootItems *item_list,
+	uint32 copper,
+	uint32 silver,
+	uint32 gold,
+	uint32 platinum,
 	const glm::vec4 &position,
-	float in_size,
-	uint8 in_gender,
-	uint16 in_race,
-	uint8 in_class,
-	uint8 in_deity,
-	uint8 in_level,
-	uint8 in_texture,
-	uint8 in_helmtexture,
-	uint32 in_rez_exp,
-	uint32 in_gm_rez_exp,
-	KilledByTypes in_killed_by,
-	bool in_rezzable,
-	uint32 in_rez_time,
-	bool wasAtGraveyard
+	float size,
+	uint8 gender,
+	uint16 race,
+	uint8 class_,
+	uint8 deity,
+	uint8 level,
+	uint8 texture,
+	uint8 helm_texture,
+	uint32 rez_exp,
+	uint32 gm_rez_exp,
+	KilledByTypes killed_by,
+	bool is_rezzable,
+	uint32 rez_remaining_time,
+	bool was_at_graveyard
 ) : Mob(
 	"Unnamed_Corpse", // in_name
 	"", // in_lastname
 	0, // in_cur_hp
 	0, // in_max_hp
-	in_gender, // in_gender
-	in_race, // in_race
-	in_class, // in_class
+	gender, // in_gender
+	race, // in_race
+	class_, // in_class
 	BT_Humanoid, // in_bodytype
-	in_deity, // in_deity
-	in_level, // in_level
+	deity, // in_deity
+	level, // in_level
 	0, // in_npctype_id
-	in_size, // in_size
+	size, // in_size
 	0.0f, // in_runspeed
 	position, // position
 	0, // in_light
-	in_texture, // in_texture
-	in_helmtexture, // in_helmtexture
+	texture, // in_texture
+	helm_texture, // in_helmtexture
 	0, // in_ac
 	0, // in_atk
 	0, // in_str
@@ -545,34 +545,34 @@ Corpse::Corpse(
 	false // in_keeps_sold_items
 )
 {
-	LoadPlayerCorpseDecayTime(in_dbid);
+	LoadPlayerCorpseDecayTime(corpse_id);
 
-	if (!zone->HasGraveyard() || wasAtGraveyard) {
+	if (!zone->HasGraveyard() || was_at_graveyard) {
 		m_corpse_graveyard_timer.Disable();
 	}
 
-	strcpy(corpse_name, in_charname);
-	strcpy(name, in_charname);
+	strcpy(corpse_name, character_name);
+	strcpy(name, character_name);
 
-	m_copper                    = in_copper;
-	m_silver                    = in_silver;
-	m_gold                      = in_gold;
-	m_platinum                  = in_plat;
-	m_rezzed_experience         = in_rez_exp;
-	m_gm_rezzed_experience      = in_gm_rez_exp;
-	m_killed_by_type            = (uint8) in_killed_by;
-	m_is_rezzable               = in_rezzable;
-	m_remaining_rez_time        = in_rez_time;
+	m_copper                    = copper;
+	m_silver                    = silver;
+	m_gold                      = gold;
+	m_platinum                  = platinum;
+	m_rezzed_experience         = rez_exp;
+	m_gm_rezzed_experience      = gm_rez_exp;
+	m_killed_by_type            = (uint8) killed_by;
+	m_is_rezzable               = is_rezzable;
+	m_remaining_rez_time        = rez_remaining_time;
 	m_is_owner_online           = false;
 	m_is_corpse_changed         = false;
 	m_is_player_corpse          = true;
 	m_is_locked                 = false;
 	m_being_looted_by_entity_id = 0xFFFFFFFF;
-	m_corpse_db_id              = in_dbid;
+	m_corpse_db_id              = corpse_id;
 	m_player_corpse_depop       = false;
-	m_character_id              = in_charid;
-	m_item_list                 = *in_itemlist;
-	in_itemlist->clear();
+	m_character_id              = character_id;
+	m_item_list                 = *item_list;
+	item_list->clear();
 
 	// timers
 	m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS));

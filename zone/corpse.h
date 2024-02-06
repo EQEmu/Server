@@ -27,37 +27,37 @@ public:
 	static void SendLootReqErrorPacket(Client *client, LootResponse response = LootResponse::NotAtThisTime);
 
 	Corpse(
-		NPC *in_npc,
-		LootItems *in_itemlist,
-		uint32 in_npctypeid,
-		const NPCType **in_npctypedata,
-		uint32 in_decaytime = 600000
+		NPC *npc,
+		LootItems *item_list,
+		uint32 npc_type_id,
+		const NPCType **npc_type_data,
+		uint32 decay_time = 600000
 	);
-	Corpse(Client *c, int32 in_rez_exp, KilledByTypes killed_by = KilledByTypes::Killed_NPC);
+	Corpse(Client *c, int32 rez_exp, KilledByTypes killed_by = KilledByTypes::Killed_NPC);
 	Corpse(
-		uint32 in_corpseid,
-		uint32 in_charid,
-		const char *in_charname,
-		LootItems *in_itemlist,
-		uint32 in_copper,
-		uint32 in_silver,
-		uint32 in_gold,
-		uint32 in_plat,
+		uint32 corpse_id,
+		uint32 character_id,
+		const char *character_name,
+		LootItems *item_list,
+		uint32 copper,
+		uint32 silver,
+		uint32 gold,
+		uint32 platinum,
 		const glm::vec4 &position,
-		float in_size,
-		uint8 in_gender,
-		uint16 in_race,
-		uint8 in_class,
-		uint8 in_deity,
-		uint8 in_level,
-		uint8 in_texture,
-		uint8 in_helmtexture,
-		uint32 in_rez_exp,
-		uint32 in_gm_rez_exp,
-		KilledByTypes in_killed_by,
-		bool in_rezzable,
-		uint32 in_rez_time,
-		bool wasAtGraveyard = false
+		float size,
+		uint8 gender,
+		uint16 race,
+		uint8 class_,
+		uint8 deity,
+		uint8 level,
+		uint8 texture,
+		uint8 helm_texture,
+		uint32 rez_exp,
+		uint32 gm_rez_exp,
+		KilledByTypes killed_by,
+		bool is_rezzable,
+		uint32 rez_remaining_time,
+		bool was_at_graveyard = false
 	);
 
 	~Corpse();
@@ -70,6 +70,7 @@ public:
 		EQ::skills::SkillType attack_skill,
 		KilledByTypes killed_by = KilledByTypes::Killed_NPC
 	) { return true; }
+
 	virtual void Damage(
 		Mob *from,
 		int64 damage,
@@ -80,6 +81,7 @@ public:
 		bool iBuffTic = false,
 		eSpecialAttacks special = eSpecialAttacks::None
 	) { return; }
+
 	bool Attack(
 		Mob *other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true,
 		bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr
@@ -87,6 +89,7 @@ public:
 	{
 		return false;
 	}
+
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
 	virtual Raid *GetRaid() { return 0; }
@@ -102,16 +105,36 @@ public:
 	virtual void DepopPlayerCorpse();
 	bool Process();
 	bool Save();
+
 	uint32 GetCharID() { return m_character_id; }
+
 	uint32 SetCharID(uint32 iCharID)
 	{
-		if (IsPlayerCorpse()) { return (m_character_id = iCharID); }
+		if (IsPlayerCorpse()) {
+			return (m_character_id = iCharID);
+		}
 		return 0xFFFFFFFF;
 	};
-	uint32
-	GetDecayTime() { if (!m_corpse_decay_timer.Enabled()) { return 0xFFFFFFFF; } else { return m_corpse_decay_timer.GetRemainingTime(); }}
-	uint32
-	GetRezTime() { if (!m_corpse_rezzable_timer.Enabled()) { return 0; } else { return m_corpse_rezzable_timer.GetRemainingTime(); }}
+
+	uint32 GetDecayTime()
+	{
+		if (!m_corpse_decay_timer.Enabled()) {
+			return 0xFFFFFFFF;
+		}
+		else {
+			return m_corpse_decay_timer.GetRemainingTime();
+		}
+	}
+	uint32 GetRezTime()
+	{
+		if (!m_corpse_rezzable_timer.Enabled()) {
+			return 0;
+		}
+		else {
+			return m_corpse_rezzable_timer.GetRemainingTime();
+		}
+	}
+
 	void ResetDecayTimer();
 	void SetDecayTimer(uint32 decay_time);
 	void SetConsentGroupID(uint32 group_id) { if (IsPlayerCorpse()) { m_consented_group_id = group_id; }}
