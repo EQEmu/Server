@@ -1036,7 +1036,7 @@ bool Corpse::Process()
 				Save();
 				m_player_corpse_depop = true;
 				m_corpse_db_id        = 0;
-				LogDebug("Tagged [{}] player corpse has buried", GetName());
+				LogCorpses("Tagged [{}] player corpse has buried", GetName());
 			}
 			else {
 				LogError("Unable to bury [{}] player corpse", GetName());
@@ -1085,7 +1085,6 @@ void Corpse::SetDecayTimer(uint32 decay_time)
 bool Corpse::CanPlayerLoot(int character_id)
 {
 	uint8 looters = 0;
-
 	for (int allowed_looter: m_allowed_looters) {
 		if (allowed_looter != 0) {
 			looters++;
@@ -1095,7 +1094,7 @@ bool Corpse::CanPlayerLoot(int character_id)
 			return true;
 		}
 	}
-	/* If we have no looters, obviously client can loot */
+
 	return looters == 0;
 }
 
@@ -1478,8 +1477,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		item = database.GetItem(GetPlayerKillItem());
 	}
 	else if (GetPlayerKillItem() == -1 || GetPlayerKillItem() == 1) {
-		item_data =
-			GetItem(lootitem->slot_id); // dont allow them to loot entire bags of items as pvp reward
+		item_data = GetItem(lootitem->slot_id); // dont allow them to loot entire bags of items as pvp reward
 	}
 	else {
 		item_data = GetItem(lootitem->slot_id, bag_item_data);
@@ -1489,7 +1487,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		item = database.GetItem(item_data->item_id);
 	}
 
-	if (item != 0) {
+	if (item) {
 		if (item_data) {
 			inst = database.CreateItem(
 				item, item_data ? item_data->charges : 0, item_data->aug_1,
@@ -2263,7 +2261,7 @@ void Corpse::CheckIsOwnerOnline()
 	}
 }
 
-void Corpse::CastRezz(uint16 spell_id, Mob *Caster)
+void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 {
 	LogSpells(
 		"spell_id [{}] IsRezzed() [{}], rez_experience [{}], rez_timer enabled [{}]",
@@ -2276,7 +2274,7 @@ void Corpse::CastRezz(uint16 spell_id, Mob *Caster)
 	// refresh rezzed state from database
 	const auto &e = CharacterCorpsesRepository::FindOne(database, m_corpse_db_id);
 	if (!e.id) {
-		Caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
+		caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
 		return;
 	}
 
@@ -2287,16 +2285,16 @@ void Corpse::CastRezz(uint16 spell_id, Mob *Caster)
 
 	// Rez timer has expired, only GMs can rez at this point. (uses rezzable)
 	if (!IsRezzable()) {
-		if (Caster && Caster->IsClient() && !Caster->CastToClient()->GetGM()) {
-			Caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
-			Caster->MessageString(Chat::White, CORPSE_TOO_OLD);
+		if (caster && caster->IsClient() && !caster->CastToClient()->GetGM()) {
+			caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
+			caster->MessageString(Chat::White, CORPSE_TOO_OLD);
 			return;
 		}
 	}
 
 	// Corpse has been rezzed, but timer is still active. Players can corpse gate, GMs can rez for XP. (uses is_rezzed)
 	if (IsRezzed()) {
-		auto c = Caster && Caster->IsClient() ? Caster->CastToClient() : nullptr;
+		auto c = caster && caster->IsClient() ? caster->CastToClient() : nullptr;
 		if (c) {
 			m_rezzed_experience = 0;
 			if (c->GetGM()) {
@@ -2311,7 +2309,7 @@ void Corpse::CastRezz(uint16 spell_id, Mob *Caster)
 
 	strn0cpy(r->your_name, corpse_name, 64);
 	strn0cpy(r->corpse_name, name, 64);
-	strn0cpy(r->rezzer_name, Caster->GetName(), 64);
+	strn0cpy(r->rezzer_name, caster->GetName(), 64);
 
 	r->zone_id     = zone->GetZoneID();
 	r->instance_id = zone->GetInstanceID();

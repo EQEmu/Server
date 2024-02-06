@@ -187,7 +187,7 @@ public:
 	/* Corpse: Resurrection */
 	bool IsRezzed() { return m_rez; }
 	void IsRezzed(bool in_rez) { m_rez = in_rez; }
-	void CastRezz(uint16 spell_id, Mob *Caster);
+	void CastRezz(uint16 spell_id, Mob *caster);
 	void CompleteResurrection(bool timer_expired = false);
 	bool IsRezzable() { return m_is_rezzable; }
 	void SetRezTimer(bool initial_timer = false);
