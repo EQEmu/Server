@@ -3912,22 +3912,6 @@ uint32 ZoneDatabase::GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slot_id)
 	return item_id;
 }
 
-bool ZoneDatabase::LoadCharacterCorpseRezData(uint32 corpse_id, uint32 *exp, uint32 *gm_exp, bool *rezzable, bool *is_rezzed)
-{
-	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);
-
-	if (!e.id) {
-		return false;
-	}
-
-	*exp       = e.exp;
-	*gm_exp    = e.gm_exp;
-	*rezzable  = e.rezzable;
-	*is_rezzed = e.is_rezzed;
-
-	return true;
-}
-
 bool ZoneDatabase::LoadCharacterCorpseData(uint32 corpse_id, CharacterCorpseEntry& corpse)
 {
 	const auto& e = CharacterCorpsesRepository::FindOne(*this, corpse_id);

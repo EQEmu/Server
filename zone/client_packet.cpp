@@ -5280,52 +5280,84 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 
+	uint32 days, hours, minutes, seconds, remaining_time = 0;
 	if (t && t->IsNPCCorpse()) {
-		uint32 min; uint32 sec; uint32 ttime;
-		if ((ttime = t->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds / 60 drop .00
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_TIME_MINUTE, std::to_string(min).c_str(), std::to_string(sec).c_str());
+		remaining_time = t->GetDecayTime();
+		if (remaining_time != 0) {
+			seconds = (remaining_time / 1000) % 60;
+			minutes = (remaining_time / 60000) % 60;
+			MessageString(
+				Chat::NPCQuestSay,
+				CORPSE_DECAY_TIME_MINUTE,
+				std::to_string(minutes).c_str(),
+				std::to_string(seconds).c_str()
+			);
 		} else {
 			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 		}
 	} else if (t && t->IsPlayerCorpse()) {
-		uint32 day, hour, min, sec, ttime;
+		remaining_time = t->GetRemainingRezTime();
 		if (!t->IsRezzed()) {
-			if ((ttime = t->GetRemainingRezTime()) > 0) {
-				sec = (ttime / 1000) % 60;     // Total seconds
-				min = (ttime / 60000) % 60;    // Total seconds
-				hour = (ttime / 3600000) % 24; // Total hours
-				char val1[20] = { 0 };
-				char val2[20] = { 0 };
-				char val3[20] = { 0 };
-				if (hour) {
-					MessageString(Chat::White, CORPSE_REZ_TIME_HOUR, std::to_string(hour).c_str(), std::to_string(min).c_str(), std::to_string(sec).c_str());
+			if (remaining_time > 0) {
+				seconds = (remaining_time / 1000) % 60;
+				minutes = (remaining_time / 60000) % 60;
+				hours   = (remaining_time / 3600000) % 24;
+				if (hours) {
+					MessageString(
+						Chat::White,
+						CORPSE_REZ_TIME_HOUR,
+						std::to_string(hours).c_str(),
+						std::to_string(minutes).c_str(),
+						std::to_string(seconds).c_str()
+					);
 				} else {
-					MessageString(Chat::White, CORPSE_REZ_TIME_MINUTE, std::to_string(min).c_str(), std::to_string(sec).c_str());
+					MessageString(
+						Chat::White,
+						CORPSE_REZ_TIME_MINUTE,
+						std::to_string(minutes).c_str(),
+						std::to_string(seconds).c_str()
+					);
 				}
-				hour = 0;
+				hours = 0;
 			} else {
 				MessageString(Chat::White, CORPSE_TOO_OLD);
 			}
 		} else {
-			Message(Chat::White, "This corpse has already accepted a resurrection.");	
+			Message(Chat::White, "This corpse has already accepted a resurrection.");
 		}
 
-		if ((ttime = t->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds
-			hour = (ttime / 3600000) % 24; // Total hours
-			day = ttime / 86400000; // Total Days
+		remaining_time = t->GetDecayTime();
+		if (remaining_time != 0) {
+			seconds = (remaining_time / 1000) % 60;
+			minutes = (remaining_time / 60000) % 60;
+			hours   = (remaining_time / 3600000) % 24;
+			days    = remaining_time / 86400000;
 
-			if (day) {
-				MessageString(Chat::White, CORPSE_DECAY_TIME_DAY, std::to_string(day).c_str(), std::to_string(hour).c_str(), std::to_string(min).c_str(), std::to_string(sec).c_str());
-			} else if (hour) {
-				MessageString(Chat::White, CORPSE_DECAY_TIME_HOUR, std::to_string(hour).c_str(), std::to_string(min).c_str(), std::to_string(sec).c_str());
+			if (days) {
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_DAY,
+					std::to_string(days).c_str(),
+					std::to_string(hours).c_str(),
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
+			} else if (hours) {
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_HOUR,
+					std::to_string(hours).c_str(),
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
 			} else {
-				MessageString(Chat::White, CORPSE_DECAY_TIME_MINUTE, std::to_string(min).c_str(), std::to_string(sec).c_str());
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_MINUTE,
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
 			}
-			hour = 0;
 		} else {
 			MessageString(Chat::White, CORPSE_DECAY_NOW);
 		}

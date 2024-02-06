@@ -77,6 +77,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/character_corpses_repository.h"
 
 #include "data_bucket.h"
 #include "quest_parser_collection.h"
@@ -4546,21 +4547,19 @@ bool Mob::SpellOnTarget(
 
 void Corpse::CastRezz(uint16 spell_id, Mob* Caster)
 {
-	LogSpells("Corpse::CastRezz spell_id [{}], Rezzed() is [{}], rezzexp is [{}], rez_timer enabled:: [{}]", spell_id,IsRezzed(),rez_experience, corpse_rez_timer.Enabled());
+	LogSpells("spell_id [{}] IsRezzed() [{}], rez_experience [{}], rez_timer enabled [{}]", spell_id, IsRezzed(), rez_experience, corpse_rez_timer.Enabled());
 
 	// refresh rezzed state from database
-	uint32 db_exp, db_gm_exp;
-	bool db_rezzable, db_is_rezzed;
-	if (!database.LoadCharacterCorpseRezData(corpse_db_id, &db_exp, &db_gm_exp, &db_rezzable, &db_is_rezzed)) {
-		// db error, corpse disappeared?
+	const auto& e = CharacterCorpsesRepository::FindOne(database, corpse_db_id);
+	if (!e.id) {
 		Caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
 		return;
 	}
 
-	rezzable = db_rezzable;
-	IsRezzed(db_is_rezzed);
-	rez_experience = db_exp;
-	gm_rez_experience = db_gm_exp;
+	rez_experience    = e.exp;
+	gm_rez_experience = e.gm_exp;
+	rezzable          = e.rezzable;
+	IsRezzed(e.is_rezzed);
 
 	// Rez timer has expired, only GMs can rez at this point. (uses rezzable)
 	if (!IsRezzable()) {
@@ -4573,12 +4572,12 @@ void Corpse::CastRezz(uint16 spell_id, Mob* Caster)
 
 	// Corpse has been rezzed, but timer is still active. Players can corpse gate, GMs can rez for XP. (uses is_rezzed)
 	if (IsRezzed()) {
-		if (Caster && Caster->IsClient()) {
-			if (Caster->CastToClient()->GetGM()) {
+		auto c = Caster && Caster->IsClient() ? Caster->CastToClient() : nullptr;
+		if (c) {
+			rez_experience = 0;
+			if (c->GetGM()) {
 				rez_experience = gm_rez_experience;
 				gm_rez_experience = 0;
-			} else {
-				rez_experience = 0;
 			}
 		}
 	}

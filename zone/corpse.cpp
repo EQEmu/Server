@@ -1988,12 +1988,12 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 
 void Corpse::CompleteResurrection(bool timer_expired)
 {
+	rez_time = corpse_rez_timer.GetRemainingTime();
+	
 	if (timer_expired) {
 		rez_time = 0;
 		rezzable = false; // Players can no longer rez this corpse.
 		corpse_rez_timer.Disable();
-	} else {
-		rez_time = corpse_rez_timer.GetRemainingTime();
 	}
 
 	IsRezzed(true); // Players can rez this corpse for no XP (corpse gate) provided rezzable is true.
