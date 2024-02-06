@@ -287,6 +287,7 @@ Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 	m_corpse_delay_timer.SetTimer(RuleI(NPC, CorpseUnlockTimer));
 	m_corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS));
 	m_loot_cooldown_timer.SetTimer(10);
+	m_check_rezzable_timer.SetTimer(1000);
 	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
 
 	m_corpse_rezzable_timer.Disable();
@@ -581,6 +582,7 @@ Corpse::Corpse(
 	m_corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS));
 	m_loot_cooldown_timer.SetTimer(10);
 	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
+	m_check_rezzable_timer.SetTimer(1000);
 	m_corpse_rezzable_timer.Disable();
 
 	SetRezTimer();
@@ -995,7 +997,7 @@ bool Corpse::Process()
 	}
 
 	// Player is offline. If rez timer is enabled, disable it and save corpse.
-	if (m_is_rezzable) {
+	if (m_is_rezzable && m_check_rezzable_timer.Check()) {
 		if (!m_is_owner_online) {
 			if (m_corpse_rezzable_timer.Enabled()) {
 				m_remaining_rez_time = m_corpse_rezzable_timer.GetRemainingTime();

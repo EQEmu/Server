@@ -274,6 +274,7 @@ private:
 	Timer                    m_corpse_graveyard_timer;
 	Timer                    m_loot_cooldown_timer;
 	Timer                    m_check_owner_online_timer;
+	Timer                    m_check_rezzable_timer;
 	uint8                    m_killed_by_type;
 	bool                     m_is_rezzable;
 	EQ::TintProfile          m_item_tint;
