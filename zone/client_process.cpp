@@ -1049,8 +1049,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				RuleI(Character, OldResurrectionSicknessSpellID) :
 				RuleI(Character, ResurrectionSicknessSpellID)
 			);
-			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
-		} else if (SpellEffectDescNum == SPELL_DIVINE_REZ) { // Divine Rez
+			SpellOnTarget(resurrection_sickness_spell_id, this);
+		} else if (SpellID == SPELL_DIVINE_REZ) {
 			SetHP(GetMaxHP());
 			SetMana(GetMaxMana());
 			SetEndurance(GetMaxEndurance());
