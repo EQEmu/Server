@@ -674,8 +674,8 @@ Corpse::Corpse(uint32 in_dbid, uint32 in_charid, const char* in_charname, LootIt
 	corpse_rez_timer.Disable();
 	SetRezTimer();
 
-	for (int i = 0; i < MAX_LOOTERS; i++){
-		allowed_looters[i] = 0;
+	for (int & allowed_looter : allowed_looters){
+		allowed_looter = 0;
 	}
 
 	SetPlayerKillItemID(0);
@@ -1033,8 +1033,8 @@ bool Corpse::Process() {
 	}
 
 	if (corpse_delay_timer.Check()) {
-		for (int i = 0; i < MAX_LOOTERS; i++) {
-			allowed_looters[i] = 0;
+		for (int & allowed_looter : allowed_looters) {
+			allowed_looter = 0;
 		}
 		corpse_delay_timer.Disable();
 		return true;
@@ -1045,7 +1045,7 @@ bool Corpse::Process() {
 		corpse_graveyard_timer.Disable();
 		return false;
 	}
-	
+
 	//Player is offline. If rez timer is enabled, disable it and save corpse.
 	if (rezzable) {
 		if (!is_owner_online) {
@@ -1989,7 +1989,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 void Corpse::CompleteResurrection(bool timer_expired)
 {
 	rez_time = corpse_rez_timer.GetRemainingTime();
-	
+
 	if (timer_expired) {
 		rez_time = 0;
 		rezzable = false; // Players can no longer rez this corpse.
@@ -2212,26 +2212,19 @@ void Corpse::SetRezTimer(bool initial_timer)
 
 void Corpse::CheckIsOwnerOnline()
 {
-	Client* client = entity_list.GetClientByCharID(GetCharID());
-
-	if (!client) {
-		uint32 account_id = database.GetAccountIDByChar(GetCharID());
-		client = entity_list.GetClientByAccID(account_id);
-		
-		if (!client) {
-			// Client is not in the corpse's zone, send a packet to world to have it check.
-			auto pack = new ServerPacket(ServerOP_IsOwnerOnline, sizeof(ServerIsOwnerOnline_Struct));
-			ServerIsOwnerOnline_Struct* online = (ServerIsOwnerOnline_Struct*)pack->pBuffer;
-			strncpy(online->name, GetOwnerName(), sizeof(online->name));
-			online->corpse_id  = GetID();
-			online->zone_id    = zone->GetZoneID();
-			online->online     = 0;
-			online->account_id = account_id;
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-		} else {
-			SetOwnerOnline(true);
-		}
+	Client* c = entity_list.GetClientByCharID(GetCharID());
+	if (!c) {
+		// Client is not in the corpse's zone, send a packet to world to have it check.
+		auto pack = new ServerPacket(ServerOP_IsOwnerOnline, sizeof(ServerIsOwnerOnline_Struct));
+		auto *o = (ServerIsOwnerOnline_Struct *) pack->pBuffer;
+		strncpy(o->name, GetOwnerName(), sizeof(o->name));
+		o->corpse_id  = GetID();
+		o->zone_id    = zone->GetZoneID();
+		o->online     = 0;
+		o->account_id = c->AccountID();
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+		LogCorpsesDetail("Sent IsOwnerOnline packet to world for [{}]", GetName());
 	} else {
 		SetOwnerOnline(true);
 	}

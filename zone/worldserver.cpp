@@ -1276,11 +1276,11 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				break;
 			}
 
-			Corpse* corpse = entity_list.GetCorpseByID(o->corpse_id);
-			if (corpse && o->online == 1) {
-				corpse->SetOwnerOnline(true);
-			} else if (corpse) {
-				corpse->SetOwnerOnline(false);
+			Corpse* c = entity_list.GetCorpseByID(o->corpse_id);
+			if (c && o->online) {
+				c->SetOwnerOnline(true);
+			} else if (c) {
+				c->SetOwnerOnline(false);
 			}
 		}
 		break;

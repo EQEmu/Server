@@ -1433,10 +1433,14 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			auto o = (ServerIsOwnerOnline_Struct*) pack->pBuffer;
-			auto cle = client_list.FindCharacter(o->name);
-			
+			auto cle = client_list.FindCLEByAccountID(o->account_id);
+
 			o->online = cle ? 1 : 0;
-			
+
+			if (o->online) {
+				LogCorpsesDetail("ServerOP_IsOwnerOnline account_id [{}] found to be online, sending online update to zone_id [{}]", o->account_id, o->zone_id);
+			}
+
 			auto zs = zoneserver_list.FindByZoneID(o->zone_id);
 			if (zs) {
 				zs->SendPacket(pack);

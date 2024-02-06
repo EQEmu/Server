@@ -276,9 +276,9 @@ public:
 		e.wc_8             = 0;
 		e.wc_9             = 0;
 		e.rez_time         = 0;
-		e.gm_exp            = 0;
-		e.killed_by         = 0;
-		e.rezzable         = 1;
+		e.gm_exp           = 0;
+		e.killed_by        = 0;
+		e.rezzable         = 0;
 
 		return e;
 	}
@@ -363,9 +363,9 @@ public:
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
-			e.gm_exp            = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
-			e.killed_by         = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 1;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -407,7 +407,7 @@ public:
 		v.push_back(columns[6] + " = " + std::to_string(e.y));
 		v.push_back(columns[7] + " = " + std::to_string(e.z));
 		v.push_back(columns[8] + " = " + std::to_string(e.heading));
-		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back(columns[9] + " = FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(columns[10] + " = " + std::to_string(e.guild_consent_id));
 		v.push_back(columns[11] + " = " + std::to_string(e.is_rezzed));
 		v.push_back(columns[12] + " = " + std::to_string(e.is_buried));
@@ -479,7 +479,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -559,7 +559,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));
@@ -682,9 +682,9 @@ public:
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
-			e.gm_exp            = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
-			e.killed_by         = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 1;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -757,9 +757,9 @@ public:
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
 			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
-			e.gm_exp            = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
-			e.killed_by         = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
-			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 1;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -843,7 +843,7 @@ public:
 		v.push_back(std::to_string(e.y));
 		v.push_back(std::to_string(e.z));
 		v.push_back(std::to_string(e.heading));
-		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 		v.push_back(std::to_string(e.guild_consent_id));
 		v.push_back(std::to_string(e.is_rezzed));
 		v.push_back(std::to_string(e.is_buried));
@@ -916,7 +916,7 @@ public:
 			v.push_back(std::to_string(e.y));
 			v.push_back(std::to_string(e.z));
 			v.push_back(std::to_string(e.heading));
-			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "UNIX_TIMESTAMP()") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.time_of_death > 0 ? std::to_string(e.time_of_death) : "null") + ")");
 			v.push_back(std::to_string(e.guild_consent_id));
 			v.push_back(std::to_string(e.is_rezzed));
 			v.push_back(std::to_string(e.is_buried));
@@ -974,7 +974,6 @@ public:
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
-
 };
 
 #endif //EQEMU_BASE_CHARACTER_CORPSES_REPOSITORY_H
