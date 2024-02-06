@@ -1438,7 +1438,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			o->online = cle ? 1 : 0;
 
 			if (o->online) {
-				LogCorpsesDetail("ServerOP_IsOwnerOnline account_id [{}] found to be online, sending online update to zone_id [{}]", o->account_id, o->zone_id);
+				LogCorpsesDetail(
+					"ServerOP_IsOwnerOnline account_id [{}] corpse name [{}] found to be online, sending online update to zone_id [{}]",
+					o->name,
+					o->account_id,
+					o->zone_id
+				);
 			}
 
 			auto zs = zoneserver_list.FindByZoneID(o->zone_id);
