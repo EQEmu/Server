@@ -31,13 +31,11 @@ class Mob;
 class Client;
 class NPC;
 
-namespace EQ
-{
+namespace EQ {
 	class ItemInstance;
 }
 
-typedef enum
-{
+typedef enum {
 	questUnloaded,
 	questLoaded,
 	questFailedToLoad
@@ -49,84 +47,91 @@ public:
 	~PerlembParser();
 
 	virtual int EventNPC(
-		QuestEventID evt,
+		QuestEventID event_id,
 		NPC* npc,
-		Mob *init,
+		Mob* init,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
+
 	virtual int EventGlobalNPC(
-		QuestEventID evt,
+		QuestEventID event_id,
 		NPC* npc,
-		Mob *init,
+		Mob* init,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
+
 	virtual int EventPlayer(
-		QuestEventID evt,
-		Client *client,
+		QuestEventID event_id,
+		Client* client,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
+
 	virtual int EventGlobalPlayer(
-		QuestEventID evt,
-		Client *client,
+		QuestEventID event_id,
+		Client* client,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
+
 	virtual int EventItem(
-		QuestEventID evt,
-		Client *client,
-		EQ::ItemInstance *item,
-		Mob *mob,
+		QuestEventID event_id,
+		Client* client,
+		EQ::ItemInstance* item,
+		Mob* mob,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
+
 	virtual int EventSpell(
-		QuestEventID evt,
+		QuestEventID event_id,
 		Mob* mob,
-		Client *client,
+		Client* client,
 		uint32 spell_id,
 		std::string data,
 		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
-	);
-	virtual int EventBot(
-		QuestEventID evt,
-		Bot *bot,
-		Mob *init,
-		std::string data,
-		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
-	);
-	virtual int EventGlobalBot(
-		QuestEventID evt,
-		Bot *bot,
-		Mob *init,
-		std::string data,
-		uint32 extra_data,
-		std::vector<std::any> *extra_pointers
+		std::vector<std::any>* extra_pointers
 	);
 
-	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt);
-	virtual bool HasGlobalQuestSub(QuestEventID evt);
-	virtual bool PlayerHasQuestSub(QuestEventID evt);
-	virtual bool GlobalPlayerHasQuestSub(QuestEventID evt);
-	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID evt);
-	virtual bool ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt);
-	virtual bool BotHasQuestSub(QuestEventID evt);
-	virtual bool GlobalBotHasQuestSub(QuestEventID evt);
+	virtual int EventBot(
+		QuestEventID event_id,
+		Bot* bot,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
+	virtual int EventGlobalBot(
+		QuestEventID event_id,
+		Bot* bot,
+		Mob* init,
+		std::string data,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
+	);
+
+	virtual bool HasQuestSub(uint32 npc_id, QuestEventID event_id);
+	virtual bool HasGlobalQuestSub(QuestEventID event_id);
+	virtual bool PlayerHasQuestSub(QuestEventID event_id);
+	virtual bool GlobalPlayerHasQuestSub(QuestEventID event_id);
+	virtual bool SpellHasQuestSub(uint32 spell_id, QuestEventID event_id);
+	virtual bool ItemHasQuestSub(EQ::ItemInstance* inst, QuestEventID event_id);
+	virtual bool BotHasQuestSub(QuestEventID event_id);
+	virtual bool GlobalBotHasQuestSub(QuestEventID event_id);
 
 	virtual void LoadNPCScript(std::string filename, int npc_id);
 	virtual void LoadGlobalNPCScript(std::string filename);
 	virtual void LoadPlayerScript(std::string filename);
 	virtual void LoadGlobalPlayerScript(std::string filename);
-	virtual void LoadItemScript(std::string filename, EQ::ItemInstance *item);
+	virtual void LoadItemScript(std::string filename, EQ::ItemInstance* inst);
 	virtual void LoadSpellScript(std::string filename, uint32 spell_id);
 	virtual void LoadBotScript(std::string filename);
 	virtual void LoadGlobalBotScript(std::string filename);
@@ -137,120 +142,131 @@ public:
 	virtual uint32 GetIdentifier() { return 0xf8b05c11; }
 
 private:
-	Embperl *perl;
+	Embperl* perl;
 
-	void ExportHash(const char *pkgprefix, const char *hashname, std::map<std::string, std::string> &vals);
-	void ExportVar(const char *pkgprefix, const char *varname, const char *value);
-	void ExportVar(const char *pkgprefix, const char *varname, int32 value);
-	void ExportVar(const char *pkgprefix, const char *varname, uint32 value);
-	void ExportVar(const char *pkgprefix, const char *varname, float value);
-	void ExportVar(const char* pkgprefix, const char* varname, const char* classname, void* value);
+	void ExportHash(const char* prefix, const char* hash_name, std::map<std::string, std::string>& vals);
+	void ExportVar(const char* prefix, const char* variable_name, const char* value);
+	void ExportVar(const char* prefix, const char* variable_name, int32 value);
+	void ExportVar(const char* prefix, const char* variable_name, uint32 value);
+	void ExportVar(const char* prefix, const char* variable_name, float value);
+	void ExportVar(const char* prefix, const char* variable_name, const char* class_name, void* value);
 
 	int EventCommon(
 		QuestEventID event,
-		uint32 objid,
+		uint32 object_id,
 		const char* data,
-		Mob* npcmob,
-		EQ::ItemInstance* item_inst,
+		Mob* npc_mob,
+		EQ::ItemInstance* inst,
 		const SPDat_Spell_Struct* spell,
 		Mob* mob,
-		uint32 extradata,
-		bool global,
-		std::vector<std::any> *extra_pointers
+		uint32 extra_data,
+		bool is_global,
+		std::vector<std::any>* extra_pointers
 	);
+
 	int SendCommands(
-		const char *pkgprefix,
-		const char *event,
+		const char* prefix,
+		const char* event,
 		uint32 spell_id,
 		Mob* other,
 		Mob* mob,
-		EQ::ItemInstance *item_inst,
-		const SPDat_Spell_Struct *spell
+		EQ::ItemInstance* inst,
+		const SPDat_Spell_Struct* spell
 	);
+
 	void MapFunctions();
 
 	void GetQuestTypes(
-		bool &isPlayerQuest,
-		bool &isGlobalPlayerQuest,
-		bool &isBotQuest,
-		bool &isGlobalBotQuest,
-		bool &isGlobalNPC,
-		bool &isItemQuest,
-		bool &isSpellQuest,
+		bool& is_player_quest,
+		bool& is_global_player_quest,
+		bool& is_bot_quest,
+		bool& is_global_bot_quest,
+		bool& is_global_npc_quest,
+		bool& is_item_quest,
+		bool& is_spell_quest,
 		QuestEventID event,
-		Mob* npcmob,
-		EQ::ItemInstance* item_inst,
+		Mob* npc_mob,
+		EQ::ItemInstance* inst,
 		Mob* mob,
-		bool global
+		bool is_global
 	);
+
 	void GetQuestPackageName(
-		bool &isPlayerQuest,
-		bool &isGlobalPlayerQuest,
-		bool &isBotQuest,
-		bool &isGlobalBotQuest,
-		bool &isGlobalNPC,
-		bool &isItemQuest,
-		bool &isSpellQuest,
-		std::string &package_name,
+		bool& is_player_quest,
+		bool& is_global_player_quest,
+		bool& is_bot_quest,
+		bool& is_global_bot_quest,
+		bool& is_global_npc_quest,
+		bool& is_item_quest,
+		bool& is_spell_quest,
+		std::string& package_name,
 		QuestEventID event,
-		uint32 objid,
-		const char * data,
-		Mob* npcmob,
-		EQ::ItemInstance* item_inst,
-		bool global
+		uint32 object_id,
+		const char* data,
+		Mob* npc_mob,
+		EQ::ItemInstance* inst,
+		bool is_global
 	);
-	void ExportCharID(const std::string &package_name, int &char_id, Mob *npcmob, Mob *mob);
+
+	void ExportCharID(const std::string& package_name, int& char_id, Mob* npc_mob, Mob* mob);
+
 	void ExportQGlobals(
-		bool isPlayerQuest,
-		bool isGlobalPlayerQuest,
-		bool isBotQuest,
-		bool isGlobalBotQuest,
-		bool isGlobalNPC,
-		bool isItemQuest,
-		bool isSpellQuest,
-		std::string &package_name,
-		Mob *npcmob,
-		Mob *mob,
+		bool is_player_quest,
+		bool is_global_player_quest,
+		bool is_bot_quest,
+		bool is_global_bot_quest,
+		bool is_global_npc_quest,
+		bool is_item_quest,
+		bool is_spell_quest,
+		std::string& package_name,
+		Mob* npc_mob,
+		Mob* mob,
 		int char_id
 	);
+
 	void ExportMobVariables(
-		bool isPlayerQuest,
-		bool isGlobalPlayerQuest,
-		bool isBotQuest,
-		bool isGlobalBotQuest,
-		bool isGlobalNPC,
-		bool isItemQuest,
-		bool isSpellQuest,
-		std::string &package_name,
-		Mob *mob,
-		Mob *npcmob
-	);
-	void ExportZoneVariables(std::string &package_name);
-	void ExportItemVariables(std::string &package_name, Mob *mob);
-	void ExportEventVariables(
-		std::string &package_name,
-		QuestEventID event,
-		uint32 objid,
-		const char* data,
-		Mob* npcmob,
-		EQ::ItemInstance* item_inst,
+		bool is_player_quest,
+		bool is_global_player_quest,
+		bool is_bot_quest,
+		bool is_global_bot_quest,
+		bool is_global_npc_quest,
+		bool is_item_quest,
+		bool is_spell_quest,
+		std::string& package_name,
 		Mob* mob,
-		uint32 extradata,
-		std::vector<std::any> *extra_pointers
+		Mob* npc_mob
+	);
+
+	void ExportZoneVariables(std::string& package_name);
+
+	void ExportItemVariables(std::string& package_name, Mob* mob);
+
+	void ExportEventVariables(
+		std::string& package_name,
+		QuestEventID event,
+		uint32 object_id,
+		const char* data,
+		Mob* npc_mob,
+		EQ::ItemInstance* inst,
+		Mob* mob,
+		uint32 extra_data,
+		std::vector<std::any>* extra_pointers
 	);
 
 	std::map<uint32, PerlQuestStatus> npc_quest_status_;
+	std::map<uint32, PerlQuestStatus> item_quest_status_;
+	std::map<uint32, PerlQuestStatus> spell_quest_status_;
+
 	PerlQuestStatus global_npc_quest_status_;
 	PerlQuestStatus player_quest_status_;
 	PerlQuestStatus global_player_quest_status_;
-	std::map<uint32, PerlQuestStatus> item_quest_status_;
-	std::map<uint32, PerlQuestStatus> spell_quest_status_;
 	PerlQuestStatus bot_quest_status_;
 	PerlQuestStatus global_bot_quest_status_;
 
+	SV* _empty_sv;
+
 	std::map<std::string, std::string> vars_;
-	SV *_empty_sv;
-	std::map<std::string, int> clear_vars_;
+	std::map<std::string, int>         clear_vars_;
 };
 
 #endif
