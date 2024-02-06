@@ -29,6 +29,7 @@
 #include "worldserver.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_corpses_repository.h"
+#include "../common/repositories/character_corpse_items_repository.h"
 #include <iostream>
 
 
@@ -53,104 +54,6 @@ void Corpse::SendLootReqErrorPacket(Client *client, LootResponse response)
 	d->unknown2 = 0x40;
 	client->QueuePacket(outapp);
 	safe_delete(outapp);
-}
-
-Corpse *Corpse::LoadCharacterCorpseEntity(
-	uint32 in_dbid,
-	uint32 in_charid,
-	std::string in_charname,
-	const glm::vec4 &position,
-	std::string time_of_death,
-	bool rezzed,
-	bool was_at_graveyard,
-	uint32 guild_consent_id
-)
-{
-	CharacterCorpseEntry ce;
-	if (!database.LoadCharacterCorpseData(in_dbid, ce)) {
-		LogDebug("Unable to create a corpse entity for [{}] [{}] [{}]", in_dbid, in_charid, in_charname);
-		return nullptr;
-	}
-
-	LootItems itemlist;
-	for (auto &item: ce.items) {
-		auto tmp = new LootItem;
-
-		tmp->equip_slot = item.equip_slot;
-		tmp->item_id    = item.item_id;
-		tmp->charges    = item.charges;
-		tmp->lootslot   = item.lootslot;
-		tmp->aug_1      = item.aug_1;
-		tmp->aug_2      = item.aug_2;
-		tmp->aug_3      = item.aug_3;
-		tmp->aug_4      = item.aug_4;
-		tmp->aug_5      = item.aug_5;
-		tmp->aug_6      = item.aug_6;
-		tmp->attuned    = item.attuned;
-
-		itemlist.push_back(tmp);
-	}
-
-	/* Create Corpse Entity */
-	auto pc = new Corpse(
-		in_dbid,                                  // uint32 in_dbid
-		in_charid,                                // uint32 in_charid
-		in_charname.c_str(),                      // char* in_charname
-		&itemlist,                                // ItemList* in_itemlist
-		ce.copper,                                // uint32 in_copper
-		ce.silver,                                // uint32 in_silver
-		ce.gold,                                  // uint32 in_gold
-		ce.plat,                                  // uint32 in_plat
-		position,
-		ce.size,                                  // float in_size
-		ce.gender,                                // uint8 in_gender
-		ce.race,                                  // uint16 in_race
-		ce.class_,                                // uint8 in_class
-		ce.deity,                                 // uint8 in_deity
-		ce.level,                                 // uint8 in_level
-		ce.texture,                               // uint8 in_texture
-		ce.helmtexture,                           // uint8 in_helmtexture
-		ce.exp,                                   // uint32 in_rez_exp
-		ce.gm_exp,                                // uint32 in_gm_rez_exp
-		static_cast<KilledByTypes>(ce.killed_by), // uint8 in_killed_by
-		ce.rezzable,                             // bool rezzable
-		ce.rez_time,                              // uint32 rez_time
-		was_at_graveyard                          // bool wasAtGraveyard
-	);
-
-	if (ce.locked) {
-		pc->Lock();
-	}
-
-	/* Load Item Tints */
-	pc->m_item_tint.Head.Color      = ce.item_tint.Head.Color;
-	pc->m_item_tint.Chest.Color     = ce.item_tint.Chest.Color;
-	pc->m_item_tint.Arms.Color      = ce.item_tint.Arms.Color;
-	pc->m_item_tint.Wrist.Color     = ce.item_tint.Wrist.Color;
-	pc->m_item_tint.Hands.Color     = ce.item_tint.Hands.Color;
-	pc->m_item_tint.Legs.Color      = ce.item_tint.Legs.Color;
-	pc->m_item_tint.Feet.Color      = ce.item_tint.Feet.Color;
-	pc->m_item_tint.Primary.Color   = ce.item_tint.Primary.Color;
-	pc->m_item_tint.Secondary.Color = ce.item_tint.Secondary.Color;
-
-	/* Load Physical Appearance */
-	pc->haircolor        = ce.haircolor;
-	pc->beardcolor       = ce.beardcolor;
-	pc->eyecolor1        = ce.eyecolor1;
-	pc->eyecolor2        = ce.eyecolor2;
-	pc->hairstyle        = ce.hairstyle;
-	pc->luclinface       = ce.face;
-	pc->beard            = ce.beard;
-	pc->drakkin_heritage = ce.drakkin_heritage;
-	pc->drakkin_tattoo   = ce.drakkin_tattoo;
-	pc->drakkin_details  = ce.drakkin_details;
-	pc->IsRezzed(rezzed);
-	pc->m_become_npc         = false;
-	pc->m_consented_guild_id = guild_consent_id;
-
-	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
-
-	return pc;
 }
 
 Corpse::Corpse(
@@ -789,7 +692,6 @@ bool Corpse::Save()
 		ce.items.emplace_back(std::move(e));
 	}
 
-	/* Create New Corpse*/
 	if (m_corpse_db_id == 0) {
 		m_corpse_db_id = database.SaveCharacterCorpse(
 			m_character_id,
@@ -801,7 +703,6 @@ bool Corpse::Save()
 			m_consented_guild_id
 		);
 	}
-		/* Update Corpse Data */
 	else {
 		m_corpse_db_id = database.UpdateCharacterCorpse(
 			m_corpse_db_id,
@@ -812,7 +713,8 @@ bool Corpse::Save()
 			ce,
 			m_Position,
 			m_consented_guild_id,
-			IsRezzed());
+			IsRezzed()
+		);
 	}
 
 	return true;
@@ -923,7 +825,7 @@ void Corpse::AddItem(
 
 LootItem *Corpse::GetItem(uint16 lootslot, LootItem **bag_item_data)
 {
-	LootItem *sitem = nullptr;
+	LootItem *sitem  = nullptr;
 	LootItem *sitem2 = nullptr;
 
 	for (const auto &item: m_item_list) {
@@ -2411,4 +2313,101 @@ void Corpse::CastRezz(uint16 spell_id, Mob *Caster)
 	// We send this to world, because it needs to go to the player who may not be in this zone.
 	worldserver.RezzPlayer(outapp, m_rezzed_experience, m_corpse_db_id, OP_RezzRequest);
 	safe_delete(outapp);
+}
+
+Corpse *Corpse::LoadCharacterCorpse(
+	const CharacterCorpsesRepository::CharacterCorpses &cc,
+	const glm::vec4 &position
+)
+{
+	if (!cc.id) {
+		LogCorpses("Unable to create a corpse entity for character corpse_id [{}]", cc.id);
+		return nullptr;
+	}
+
+	const auto& items = CharacterCorpseItemsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`corpse_id` = {}",
+			cc.id
+		)
+	);
+
+	LootItems item_list;
+	for (auto &i: items) {
+		item_list.push_back(
+			new LootItem{
+				.item_id    = i.item_id,
+				.equip_slot = static_cast<int16>(i.equip_slot),
+				.charges    = static_cast<uint16>(i.charges),
+				.lootslot   = 0,
+				.aug_1      = i.aug_1,
+				.aug_2      = i.aug_2,
+				.aug_3      = i.aug_3,
+				.aug_4      = i.aug_4,
+				.aug_5      = i.aug_5,
+				.aug_6      = static_cast<uint32>(i.aug_6),
+				.attuned    = static_cast<bool>(i.attuned)
+			}
+		);
+	}
+
+	auto c = new Corpse(
+		cc.id,
+		cc.charid,
+		cc.charname.c_str(),
+		&item_list,
+		cc.copper,
+		cc.silver,
+		cc.gold,
+		cc.platinum,
+		position,
+		cc.size,
+		cc.gender,
+		cc.race,
+		cc.class_,
+		cc.deity,
+		cc.level,
+		cc.texture,
+		cc.helm_texture,
+		cc.exp,
+		cc.gm_exp,
+		static_cast<KilledByTypes>(cc.killed_by),
+		cc.rezzable,
+		cc.rez_time,
+		RuleB(Zone, EnableShadowrest) ? false : cc.was_at_graveyard
+	);
+
+	if (cc.is_locked) {
+		c->Lock();
+	}
+
+	// item tints and appearance
+	c->m_item_tint.Head.Color      = cc.wc_1;
+	c->m_item_tint.Chest.Color     = cc.wc_2;
+	c->m_item_tint.Arms.Color      = cc.wc_3;
+	c->m_item_tint.Wrist.Color     = cc.wc_4;
+	c->m_item_tint.Hands.Color     = cc.wc_5;
+	c->m_item_tint.Legs.Color      = cc.wc_6;
+	c->m_item_tint.Feet.Color      = cc.wc_7;
+	c->m_item_tint.Primary.Color   = cc.wc_8;
+	c->m_item_tint.Secondary.Color = cc.wc_9;
+	c->haircolor                   = cc.hair_color;
+	c->beardcolor                  = cc.beard_color;
+	c->eyecolor1                   = cc.eye_color_1;
+	c->eyecolor2                   = cc.eye_color_2;
+	c->hairstyle                   = cc.hair_style;
+	c->luclinface                  = cc.face;
+	c->beard                       = cc.beard;
+	c->drakkin_heritage            = cc.drakkin_heritage;
+	c->drakkin_tattoo              = cc.drakkin_tattoo;
+	c->drakkin_details             = cc.drakkin_details;
+	c->m_become_npc                = false;
+	c->m_consented_guild_id        = cc.guild_consent_id;
+
+	c->IsRezzed(cc.is_rezzed);
+
+	c->UpdateEquipmentLight();
+
+	return c;
 }
