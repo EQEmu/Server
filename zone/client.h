@@ -1465,6 +1465,7 @@ public:
 		}
 		return database.GetCharacterCorpseItemAt(corpse_id, slot_id);
 	}
+
 	void SuspendMinion(int value);
 	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();
