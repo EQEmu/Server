@@ -80,7 +80,7 @@ public:
 		int8 buffslot = -1,
 		bool iBuffTic = false,
 		eSpecialAttacks special = eSpecialAttacks::None
-	) { return; }
+	) { }
 
 	bool Attack(
 		Mob *other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true,
@@ -92,8 +92,8 @@ public:
 
 	virtual bool HasRaid() { return false; }
 	virtual bool HasGroup() { return false; }
-	virtual Raid *GetRaid() { return 0; }
-	virtual Group *GetGroup() { return 0; }
+	virtual Raid *GetRaid() { return nullptr; }
+	virtual Group *GetGroup() { return nullptr; }
 	inline uint32 GetCorpseDBID() { return m_corpse_db_id; }
 	inline char *GetOwnerName() { return corpse_name; }
 	bool IsEmpty() const;
@@ -140,8 +140,8 @@ public:
 	void SetConsentGroupID(uint32 group_id) { if (IsPlayerCorpse()) { m_consented_group_id = group_id; }}
 	void SetConsentRaidID(uint32 raid_id) { if (IsPlayerCorpse()) { m_consented_raid_id = raid_id; }}
 	void SetConsentGuildID(uint32 guild_id) { if (IsPlayerCorpse()) { m_consented_guild_id = guild_id; }}
-	void AddConsentName(std::string consent_player_name);
-	void RemoveConsentName(std::string consent_player_name);
+	void AddConsentName(const std::string& consent_player_name);
+	void RemoveConsentName(const std::string& consent_player_name);
 	void SendWorldSpawnPlayerCorpseInZone(uint32_t zone_id);
 	bool MovePlayerCorpseToGraveyard();
 	bool MovePlayerCorpseToNonInstance();
@@ -199,9 +199,9 @@ public:
 	uint32 GetItemIDBySlot(uint16 loot_slot);
 	uint16 GetFirstLootSlotByItemID(uint32 item_id);
 	std::vector<int> GetLootList();
-	void LootCorpseItem(Client *client, const EQApplicationPacket *app);
-	void EndLoot(Client *client, const EQApplicationPacket *app);
-	void MakeLootRequestPackets(Client *client, const EQApplicationPacket *app);
+	void LootCorpseItem(Client *c, const EQApplicationPacket *app);
+	void EndLoot(Client *c, const EQApplicationPacket *app);
+	void MakeLootRequestPackets(Client *c, const EQApplicationPacket *app);
 	void AllowPlayerLoot(Mob *them, uint8 slot);
 	void AddLooter(Mob *who);
 	uint32 CountItems();
@@ -220,7 +220,7 @@ public:
 
 	/* Mob */
 	void FillSpawnStruct(NewSpawn_Struct *ns, Mob *ForWho);
-	bool Summon(Client *client, bool spell, bool CheckDistance);
+	bool Summon(Client *c, bool spell, bool CheckDistance);
 	void Spawn();
 
 	char corpse_name[64];
