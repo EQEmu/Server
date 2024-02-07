@@ -496,7 +496,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 				auto outapp = new EQApplicationPacket(OP_LFGuild, sizeof(LFGuild_GuildToggle_Struct));
 
-				LFGuild_GuildToggle_Struct *gts = (LFGuild_GuildToggle_Struct *) outapp->pBuffer;
+				auto *gts = (LFGuild_GuildToggle_Struct *) outapp->pBuffer;
 				gts->Command = 1;
 				strcpy(gts->Comment, Comments);
 				gts->FromLevel  = FromLevel;
@@ -514,7 +514,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 		}
 		case ServerOP_GuildPermissionUpdate: {
 			if (is_zone_loaded) {
-				ServerGuildPermissionUpdate_Struct *sgpus = (ServerGuildPermissionUpdate_Struct *) pack->pBuffer;
+				auto *sgpus = (ServerGuildPermissionUpdate_Struct *) pack->pBuffer;
 				auto                               res    = m_guilds.find(sgpus->guild_id);
 				if (sgpus->function_value) {
 					res->second->functions[sgpus->function_id].perm_value |= (1UL << (8 - sgpus->rank));
@@ -523,18 +523,19 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 					res->second->functions[sgpus->function_id].perm_value &= ~(1UL << (8 - sgpus->rank));
 				}
 
-				auto                   outapp  = new EQApplicationPacket(OP_GuildUpdate,sizeof(GuildPermission_Struct));
-				GuildPermission_Struct *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
+				auto outapp  = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildPermission_Struct));
+				auto *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
 				guuacs->Action      = GuildUpdatePermissions;
 				guuacs->rank        = sgpus->rank;
 				guuacs->function_id = sgpus->function_id;
 				guuacs->value       = sgpus->function_value;
 
 				entity_list.QueueClientsGuild(outapp, sgpus->guild_id);
-				LogDebug("Zone Received guild permission update from world for rank {} function id [{}] and value [{}]",
-						 guuacs->rank        = sgpus->rank,
-						 guuacs->function_id = sgpus->function_id,
-						 guuacs->value       = sgpus->function_value
+				LogDebug(
+					"Zone Received guild permission update from world for rank {} function id [{}] and value [{}]",
+					guuacs->rank        = sgpus->rank,
+					guuacs->function_id = sgpus->function_id,
+					guuacs->value       = sgpus->function_value
 				);
 				safe_delete(outapp);
 
@@ -557,16 +558,18 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 		}
 		case ServerOP_GuildRankNameChange: {
 			if (is_zone_loaded) {
-				ServerGuildRankNameChange *s = (ServerGuildRankNameChange *) pack->pBuffer;
-				LogGuilds("Received guild rank name change from world for rank [{}] from guild [{}]",
-						  s->rank,
-						  s->guild_id);
+				auto *s = (ServerGuildRankNameChange *) pack->pBuffer;
+				LogGuilds(
+					"Received guild rank name change from world for rank [{}] from guild [{}]",
+					s->rank,
+					s->guild_id
+				);
 
 				auto guild = guild_mgr.GetGuildByGuildID(s->guild_id);
 				if (guild) {
 					guild->rank_names[s->rank] = s->rank_name;
 					auto outapp = new EQApplicationPacket(OP_GuildUpdate,sizeof(GuildUpdateUCPStruct));
-					GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
+					auto *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
 					gucp->payload.rank_name.rank = s->rank;
 					strn0cpy(gucp->payload.rank_name.rank_name, s->rank_name, sizeof(gucp->payload.rank_name.rank_name));
 					gucp->action = GuildUpdateRanks;
@@ -1450,27 +1453,36 @@ bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 Slo
 	// Is a none-Guild Banker allowed to withdraw the item at this slot ?
 	// This is really here for anti-hacking measures, as the client should not request an item it does not have permission to withdraw.
 	//
-	if(SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1))
+	if (SlotID > (GUILD_BANK_MAIN_AREA_SIZE - 1)) {
 		return false;
+	}
 
 	auto Iterator = GetGuildBank(GuildID);
 
-	if(Iterator == Banks.end())
+	if (Iterator == Banks.end()) {
 		return false;
+	}
 
-	if(Area != GuildBankMainArea)
+	if (Area != GuildBankMainArea) {
 		return false;
+	}
 
 	uint8 Permissions = (*Iterator)->Items.MainArea[SlotID].Permissions;
 
-	if(Permissions == GuildBankBankerOnly)
+	if (Permissions == GuildBankBankerOnly) {
 		return false;
+	}
 
-	if(Permissions != GuildBankSingleMember)	// Public or Public-If-Useable (should really check if item is useable)
+	if (Permissions !=
+		GuildBankSingleMember) {    // Public or Public-If-Useable (should really check if item is useable)
 		return true;
+	}
 
-	if(!strncmp((*Iterator)->Items.MainArea[SlotID].WhoFor, Name, sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor)))
+	if (!strncmp((*Iterator)->Items.MainArea[SlotID].WhoFor,
+				 Name,
+				 sizeof((*Iterator)->Items.MainArea[SlotID].WhoFor))) {
 		return true;
+	}
 
 	return false;
 }
@@ -1493,11 +1505,11 @@ void ZoneGuildManager::SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32
 {
 
 	auto pack = new ServerPacket(ServerOP_GuildPermissionUpdate, sizeof(ServerGuildPermissionUpdate_Struct));
-	ServerGuildPermissionUpdate_Struct* sgpus = (ServerGuildPermissionUpdate_Struct*)pack->pBuffer;
+	auto *sgpus = (ServerGuildPermissionUpdate_Struct *) pack->pBuffer;
 
-	sgpus->guild_id = guild_id;
-	sgpus->rank = rank;
-	sgpus->function_id = function_id;
+	sgpus->guild_id       = guild_id;
+	sgpus->rank           = rank;
+	sgpus->function_id    = function_id;
 	sgpus->function_value = value;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -1511,10 +1523,10 @@ void ZoneGuildManager::UpdateRankName(uint32 guild_id, uint32 rank, std::string 
 void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string rank_name)
 {
 	auto pack = new ServerPacket(ServerOP_GuildRankNameChange, sizeof(ServerGuildRankNameChange));
-	ServerGuildRankNameChange* sgpus = (ServerGuildRankNameChange*)pack->pBuffer;
+	auto *sgpus = (ServerGuildRankNameChange *) pack->pBuffer;
 
 	sgpus->guild_id = guild_id;
-	sgpus->rank = rank;
+	sgpus->rank     = rank;
 	strn0cpy(sgpus->rank_name, rank_name.c_str(), sizeof(sgpus->rank_name));
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
@@ -1660,51 +1672,51 @@ uint8* ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char* prefix_na
 void ZoneGuildManager::SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 level, std::string player_name)
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberLevelUpdate, sizeof(ServerOP_GuildMessage_Struct));
-	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	auto *s_out = (ServerOP_GuildMessage_Struct *) s_outapp->pBuffer;
 
-    s_out->guild_id     = guild_id;
+	s_out->guild_id     = guild_id;
 	s_out->player_level = level;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
 
-    worldserver.SendPacket(s_outapp);
+	worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
 
 void ZoneGuildManager::SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note)
 {
 	auto s_outapp = new ServerPacket(ServerOP_GuildMemberPublicNote, sizeof(ServerOP_GuildMessage_Struct));
-	ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	auto *s_out = (ServerOP_GuildMessage_Struct *) s_outapp->pBuffer;
 
-    s_out->guild_id = guild_id;
+	s_out->guild_id = guild_id;
 	strn0cpy(s_out->player_name, player_name.c_str(), sizeof(s_out->player_name));
 	strn0cpy(s_out->note, public_note.c_str(), sizeof(s_out->note));
 
-    worldserver.SendPacket(s_outapp);
+	worldserver.SendPacket(s_outapp);
 	safe_delete(s_outapp);
 }
 
 void ZoneGuildManager::SendToWorldGuildChannel(uint32 guild_id, std::string channel)
 {
-    auto s_outapp = new ServerPacket(ServerOP_GuildChannel, sizeof(ServerOP_GuildMessage_Struct));
-    ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	auto s_outapp = new ServerPacket(ServerOP_GuildChannel, sizeof(ServerOP_GuildMessage_Struct));
+	auto *s_out = (ServerOP_GuildMessage_Struct *) s_outapp->pBuffer;
 
-    s_out->guild_id = guild_id;
-    strn0cpy(s_out->channel, channel.c_str(), sizeof(s_out->channel));
+	s_out->guild_id = guild_id;
+	strn0cpy(s_out->channel, channel.c_str(), sizeof(s_out->channel));
 
-    worldserver.SendPacket(s_outapp);
-    safe_delete(s_outapp);
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
 }
 
 void ZoneGuildManager::SendToWorldGuildURL(uint32 guild_id, std::string url)
 {
-    auto s_outapp = new ServerPacket(ServerOP_GuildURL, sizeof(ServerOP_GuildMessage_Struct));
-    ServerOP_GuildMessage_Struct* s_out = (ServerOP_GuildMessage_Struct*)s_outapp->pBuffer;
+	auto s_outapp = new ServerPacket(ServerOP_GuildURL, sizeof(ServerOP_GuildMessage_Struct));
+	auto *s_out = (ServerOP_GuildMessage_Struct *) s_outapp->pBuffer;
 
-    s_out->guild_id = guild_id;
-    strn0cpy(s_out->url, url.c_str(), sizeof(s_out->url));
+	s_out->guild_id = guild_id;
+	strn0cpy(s_out->url, url.c_str(), sizeof(s_out->url));
 
-    worldserver.SendPacket(s_outapp);
-    safe_delete(s_outapp);
+	worldserver.SendPacket(s_outapp);
+	safe_delete(s_outapp);
 }
 
 void ZoneGuildManager::SendToWorldMemberRemove(uint32 guild_id, std::string player_name)

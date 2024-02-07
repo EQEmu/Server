@@ -136,14 +136,14 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 		break;
 	}
 
-	case ServerOP_GuildMemberUpdate: 
+	case ServerOP_GuildMemberUpdate:
 	{
 		if(pack->size != sizeof(ServerGuildMemberUpdate_Struct))
 		{
 			LogGuilds("Received ServerOP_GuildMemberUpdate of incorrect size [{}], expected [{}]", pack->size, sizeof(ServerGuildMemberUpdate_Struct));
 			return;
 		}
-	
+
 		auto s = (ServerGuildID_Struct *)pack->pBuffer;
 		RefreshGuild(s->guild_id);
 
@@ -252,19 +252,15 @@ void WorldGuildManager::Process()
 		else if (g.second->tribute.enabled && !g.second->tribute.timer.Enabled()) {
 			g.second->tribute.timer.Start(g.second->tribute.time_remaining);
 			LogGuilds(
-				"Found a Guild Tribute Timer for guild [{}]. that was not started.  Started it with {} time remaining before restart.",
+				"Found a Guild Tribute Timer for guild [{}]. that was not started. Started it with [{}] time remaining before restart.",
 				g.first,
 				g.second->tribute.time_remaining
 			);
 		}
-		else if (g.second->tribute.enabled &&
-				 g.second->tribute.timer.Enabled() &&
-				 g.second->tribute.timer.Check()
-			) {
+		else if (g.second->tribute.enabled && g.second->tribute.timer.Check()) {
 			g.second->tribute.favor         -= GetGuildTributeCost(g.first);
 			g.second->tribute.time_remaining = RuleI(Guild, TributeTime);
 			g.second->tribute.timer.Start(RuleI(Guild, TributeTime));
-
 			guild_mgr.UpdateDbGuildFavor(g.first, g.second->tribute.favor);
 			guild_mgr.UpdateDbTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
@@ -278,9 +274,10 @@ void WorldGuildManager::Process()
 			g.second->tribute.time_remaining = g.second->tribute.timer.GetRemainingTime();
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.time_remaining);
 			guild_mgr.UpdateDbTributeTimeRemaining(g.first, g.second->tribute.time_remaining);
-			LogGuilds("Timer Frequency [{}] ms hit\.  Sending time [{}] to guild clients\.",
-					  RuleI(Guild, TributeTimeRefreshInterval),
-					  g.second->tribute.time_remaining
+			LogGuilds(
+				"Timer Frequency [{}] ms hit sending time [{}] to guild clients",
+				RuleI(Guild, TributeTimeRefreshInterval),
+				g.second->tribute.time_remaining
 			);
 		}
 		else if (!g.second->tribute.send_timer &&
@@ -300,7 +297,7 @@ uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 	auto total_cost    = 0;
 
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
-	if (guild) 
+	if (guild)
 	{
 		TributeData &d1  = tribute_list[guild->tribute.id_1];
 		TributeData &d2  = tribute_list[guild->tribute.id_2];
@@ -321,7 +318,7 @@ uint32 WorldGuildManager::GetGuildTributeCost(uint32 guild_id)
 	return total_cost;
 }
 
-bool WorldGuildManager::LoadTributes() 
+bool WorldGuildManager::LoadTributes()
 {
 	TributeData td{};
 	td.tier_count = 0;

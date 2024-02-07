@@ -144,16 +144,20 @@ void Client::SendGuildRanks()
 
 void Client::SendGuildRankNames()
 {
-	if (IsInAGuild() && (ClientVersion() >= EQ::versions::ClientVersion::RoF))
-	{
+	if (IsInAGuild() && (ClientVersion() >= EQ::versions::ClientVersion::RoF)) {
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
-		for (int i = 1; i <= GUILD_MAX_RANK; i++)
-		{
-			auto outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
-			GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
+
+		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
+
+			auto                 outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
+			GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
 
 			gucp->payload.rank_name.rank = i;
-			strn0cpy(gucp->payload.rank_name.rank_name, guild->rank_names[i].c_str(), sizeof(gucp->payload.rank_name.rank_name));
+			strn0cpy(
+				gucp->payload.rank_name.rank_name,
+				guild->rank_names[i].c_str(),
+				sizeof(gucp->payload.rank_name.rank_name)
+			);
 			gucp->action = GuildUpdateRanks;
 
 			QueuePacket(outapp);
@@ -393,10 +397,9 @@ void Client::SendGuildJoin(GuildJoin_Struct *gj)
 
 void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bool bank_status)
 {
-	auto g_members = [&]() -> std::vector<Client *> {
-		std::vector<Client *> members     = {};
-		auto                  client_list = entity_list.GetClientList();
-		for (auto const       &c: client_list) {
+	auto guild_members = [&]() -> std::vector<Client *> {
+		std::vector<Client *> members = {};
+		for (auto const       &c: entity_list.GetClientList()) {
 			if (c.second->GuildID() == guild_id && c.second->GuildRank() == guild_rank) {
 				members.push_back(c.second);
 			}
@@ -404,7 +407,7 @@ void EntityList::GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bo
 		return members;
 	};
 
-	for (auto const &c: g_members()) {
+	for (auto const &c: guild_members()) {
 		auto outapp = new ServerPacket(
 			ServerOP_GuildRankUpdate,
 			sizeof(ServerGuildRankUpdate_Struct)

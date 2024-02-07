@@ -8111,7 +8111,7 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 		Message(Chat::Red, "Error: You are not in a guild!");
 		return;
 	}
-	
+
 	if (!guild_mgr.CheckPermission(GuildID(), GuildRank(), GUILD_ACTION_MEMBERS_INVITE) ||
 			 (ClientVersion() < EQ::versions::ClientVersion::RoF && GuildRank() > GUILD_OFFICER)) {
 		Message(Chat::Red, "Invalid rank.");
@@ -16864,7 +16864,7 @@ void Client::Handle_OP_GuildTributeOptInOut(const EQApplicationPacket *app)
 	out->char_id        = gci.char_id;
 	out->tribute_toggle = in->tribute_toggle;
 	out->command        = in->command;
-	strncpy(out->player_name, in->player, strlen(in->player));
+	strn0cpy(out->player_name, in->player, sizeof(out->player_name));
 
 	worldserver.SendPacket(sout);
 	safe_delete(sout)
