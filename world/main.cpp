@@ -142,8 +142,6 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
-	WorldBoot::CheckForXMLConfigUpgrade();
-
 	Config = WorldConfig::get();
 
 	LogInfo("CURRENT_VERSION [{}]", CURRENT_VERSION);

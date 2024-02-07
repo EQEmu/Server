@@ -13,8 +13,6 @@ public:
 	static bool HandleCommandInput(int argc, char **argv);
 	static bool LoadServerConfig();
 	static bool LoadDatabaseConnections();
-	static void CheckForServerScript(bool force_download = false);
-	static void CheckForXMLConfigUpgrade();
 	static void RegisterLoginservers();
 	static bool DatabaseLoadRoutines(int argc, char **argv);
 	static void CheckForPossibleConfigurationIssues();
