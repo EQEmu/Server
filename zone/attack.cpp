@@ -2837,8 +2837,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			&NPCTypedata,
 			(
 				level > 54 ?
-				RuleI(NPC, MajorNPCCorpseDecayTimeMS) :
-				RuleI(NPC, MinorNPCCorpseDecayTimeMS)
+				RuleI(NPC, MajorNPCCorpseDecayTime) :
+				RuleI(NPC, MinorNPCCorpseDecayTime)
 			)
 		);
 

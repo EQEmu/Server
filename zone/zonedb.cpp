@@ -3938,7 +3938,7 @@ Corpse* ZoneDatabase::SummonBuriedCharacterCorpses(
 		}
 
 		entity_list.AddCorpse(c);
-		c->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
+		c->SetDecayTimer(RuleI(Character, CorpseDecayTime));
 		c->Spawn();
 
 		if (!UnburyCharacterCorpse(c->GetCorpseDBID(), zone_id, instance_id, position)) {
@@ -3980,7 +3980,7 @@ bool ZoneDatabase::SummonAllCharacterCorpses(
 		c = Corpse::LoadCharacterCorpse(e, position);
 		if (c) {
 			entity_list.AddCorpse(c);
-			c->SetDecayTimer(RuleI(Character, CorpseDecayTimeMS));
+			c->SetDecayTimer(RuleI(Character, CorpseDecayTime));
 			c->Spawn();
 			++corpse_count;
 		} else {

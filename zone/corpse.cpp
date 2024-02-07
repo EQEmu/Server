@@ -161,7 +161,7 @@ Corpse::Corpse(
 	}
 
 	if (IsEmpty()) {
-		m_corpse_decay_timer.SetTimer(RuleI(NPC, EmptyNPCCorpseDecayTimeMS) + 1000);
+		m_corpse_decay_timer.SetTimer(RuleI(NPC, EmptyNPCCorpseDecayTime) + 1000);
 	}
 
 
@@ -282,13 +282,13 @@ Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 	m_account_id                = c->AccountID();
 
 	// timers
-	m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS));
-	m_corpse_rezzable_timer.SetTimer(RuleI(Character, CorpseResTimeMS));
+	m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTime));
+	m_corpse_rezzable_timer.SetTimer(RuleI(Character, CorpseResTime));
 	m_corpse_delay_timer.SetTimer(RuleI(NPC, CorpseUnlockTimer));
 	m_corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS));
 	m_loot_cooldown_timer.SetTimer(10);
 	m_check_rezzable_timer.SetTimer(1000);
-	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
+	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTime));
 
 	m_corpse_rezzable_timer.Disable();
 	SetRezTimer(true);
@@ -576,12 +576,12 @@ Corpse::Corpse(
 	item_list->clear();
 
 	// timers
-	m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS));
-	m_corpse_rezzable_timer.SetTimer(RuleI(Character, CorpseResTimeMS));
+	m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTime));
+	m_corpse_rezzable_timer.SetTimer(RuleI(Character, CorpseResTime));
 	m_corpse_delay_timer.SetTimer(RuleI(NPC, CorpseUnlockTimer));
 	m_corpse_graveyard_timer.SetTimer(RuleI(Zone, GraveyardTimeMS));
 	m_loot_cooldown_timer.SetTimer(10);
-	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTimeMS));
+	m_check_owner_online_timer.SetTimer(RuleI(Character, CorpseOwnerOnlineTime));
 	m_check_rezzable_timer.SetTimer(1000);
 	m_corpse_rezzable_timer.Disable();
 
@@ -1052,13 +1052,13 @@ bool Corpse::Process()
 
 void Corpse::ResetDecayTimer()
 {
-	int decay_ms = level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTimeMS) : RuleI(NPC, MinorNPCCorpseDecayTimeMS);
+	int decay_ms = level > 54 ? RuleI(NPC, MajorNPCCorpseDecayTime) : RuleI(NPC, MinorNPCCorpseDecayTime);
 
 	if (IsPlayerCorpse()) {
-		decay_ms = RuleI(Character, CorpseDecayTimeMS);
+		decay_ms = RuleI(Character, CorpseDecayTime);
 	}
 	else if (IsEmpty()) {
-		decay_ms = RuleI(NPC, EmptyNPCCorpseDecayTimeMS) + 1000;
+		decay_ms = RuleI(NPC, EmptyNPCCorpseDecayTime) + 1000;
 	}
 	else {
 		for (const npcDecayTimes_Struct &decay_time: npcCorpseDecayTimes) {
@@ -2101,8 +2101,8 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id)
 	}
 
 	uint32 active_corpse_decay_timer = database.GetCharacterCorpseDecayTimer(corpse_db_id);
-	if (active_corpse_decay_timer > 0 && RuleI(Character, CorpseDecayTimeMS) > (active_corpse_decay_timer * 1000)) {
-		m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTimeMS) - (active_corpse_decay_timer * 1000));
+	if (active_corpse_decay_timer > 0 && RuleI(Character, CorpseDecayTime) > (active_corpse_decay_timer * 1000)) {
+		m_corpse_decay_timer.SetTimer(RuleI(Character, CorpseDecayTime) - (active_corpse_decay_timer * 1000));
 	}
 	else {
 		m_corpse_decay_timer.SetTimer(2000);
@@ -2222,9 +2222,9 @@ void Corpse::SetRezTimer(bool initial_timer)
 	}
 
 	if (initial_timer) {
-		uint32 timer         = RuleI(Character, CorpseResTimeMS);
+		uint32 timer         = RuleI(Character, CorpseResTime);
 		if (static_cast<KilledByTypes>(m_killed_by_type) == KilledByTypes::Killed_DUEL) {
-			timer = RuleI(Character, DuelCorpseResTimeMS);
+			timer = RuleI(Character, DuelCorpseResTime);
 		}
 		m_remaining_rez_time = timer;
 	}
