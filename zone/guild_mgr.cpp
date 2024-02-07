@@ -1757,13 +1757,13 @@ void ZoneGuildManager::MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, 
 	m.alt            = 0;
 	m.banker         = rank == GUILD_LEADER ? 1 : 0;
 	m.last_tribute   = 0;
-    m.total_tribute  = 0;
-    m.tribute_enable = 0;
-    m.rank_          = rank;
-    m.char_id        = char_id;
-    m.guild_id       = guild_id;
-    m.online         = 1;
-    m.public_note.clear();
+	m.total_tribute  = 0;
+	m.tribute_enable = 0;
+	m.rank_          = rank;
+	m.char_id        = char_id;
+	m.guild_id       = guild_id;
+	m.online         = 1;
+	m.public_note.clear();
 
 	GuildMembersRepository::ReplaceOne(*m_db, m);
 	SendToWorldMemberAdd(guild_id, char_id, level, _class, rank, zone_id, player_name);
