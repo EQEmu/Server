@@ -390,9 +390,9 @@ int Lua_Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint
 	return static_cast<int>(self->GetFactionLevel(char_id, npc_id, race, class_, deity, faction, npc));
 }
 
-void Lua_Client::SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity) {
+void Lua_Client::SetFactionLevel(uint32 char_id, uint32 npc_faction_id, int char_class, int char_race, int char_deity) {
 	Lua_Safe_Call_Void();
-	self->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
+	self->SetFactionLevel(char_id, npc_faction_id, char_class, char_race, char_deity);
 }
 
 void Lua_Client::SetFactionLevel2(uint32 char_id, int faction_id, int char_class, int char_race, int char_deity, int value, int temp) {
@@ -2345,7 +2345,7 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 		return;
 	}
 
-	std::vector<ServerLootItem_Struct> bagged_items;
+	std::vector<LootItem> bagged_items;
 
 	luabind::raw_iterator end; // raw_iterator uses lua_rawget
 	for (luabind::raw_iterator it(bag_items_table); it != end; ++it)
@@ -2354,7 +2354,7 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 		if (luabind::type(*it) == LUA_TTABLE)
 		{
 			// no need to try/catch, quest lua parser already catches exceptions
-			ServerLootItem_Struct item{};
+			LootItem item{};
 			item.item_id = luabind::object_cast<uint32>((*it)["item_id"]);
 			item.charges = luabind::object_cast<int16>((*it)["charges"]);
 			item.attuned = luabind::type((*it)["attuned"]) != LUA_TNIL ? luabind::object_cast<uint8>((*it)["attuned"]) : 0;
@@ -3278,6 +3278,18 @@ void Lua_Client::ClearXTargets()
 	self->ClearXTargets();
 }
 
+int Lua_Client::GetAAEXPPercentage()
+{
+	Lua_Safe_Call_Int();
+	return self->GetAAEXPPercentage();
+}
+
+int Lua_Client::GetEXPPercentage()
+{
+	Lua_Safe_Call_Int();
+	return self->GetEXPPercentage();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3400,6 +3412,7 @@ luabind::scope lua_register_client() {
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
 	.def("GetAAEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetAAEXPModifier)
+	.def("GetAAEXPPercentage", (int(Lua_Client::*)(void))&Lua_Client::GetAAEXPPercentage)
 	.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 	.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 	.def("GetAAPoints", (int(Lua_Client::*)(void))&Lua_Client::GetAAPoints)
@@ -3459,6 +3472,7 @@ luabind::scope lua_register_client() {
 	.def("GetEXPModifier", (float(Lua_Client::*)(void))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
 	.def("GetEXPModifier", (float(Lua_Client::*)(uint32,int16))&Lua_Client::GetEXPModifier)
+	.def("GetEXPPercentage", (int(Lua_Client::*)(void))&Lua_Client::GetEXPPercentage)
 	.def("GetEbonCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetEbonCrystals)
 	.def("GetEndurance", (int(Lua_Client::*)(void))&Lua_Client::GetEndurance)
 	.def("GetEndurancePercent", (int(Lua_Client::*)(void))&Lua_Client::GetEndurancePercent)

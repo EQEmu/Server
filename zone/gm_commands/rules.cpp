@@ -420,32 +420,32 @@ void command_rules(Client *c, const Seperator *sep)
 
 void SendRuleSubCommands(Client *c)
 {
-	c->Message(Chat::White, "Usage: #rule listsets - List available rule sets");
-	c->Message(Chat::White, "Usage: #rule current - gives the name of the ruleset currently running in this zone");
-	c->Message(Chat::White, "Usage: #rule reload - Reload the selected ruleset in this zone");
-	c->Message(Chat::White, "Usage: #rule switch [Ruleset Name] - Change the selected ruleset and load it");
+	c->Message(Chat::White, "Usage: #rules listsets - List available rule sets");
+	c->Message(Chat::White, "Usage: #rules current - gives the name of the ruleset currently running in this zone");
+	c->Message(Chat::White, "Usage: #rules reload - Reload the selected ruleset in this zone");
+	c->Message(Chat::White, "Usage: #rules switch [Ruleset Name] - Change the selected ruleset and load it");
 	c->Message(
 		Chat::White,
-		"Usage: #rule load [Ruleset Name] - Load a ruleset in just this zone without changing the selected set"
+		"Usage: #rules load [Ruleset Name] - Load a ruleset in just this zone without changing the selected set"
 	);
-	c->Message(Chat::White, "Usage: #rule store [Ruleset Name] - Store the running ruleset as the specified name");
-	c->Message(Chat::White, "Usage: #rule reset - Reset all rules to their default values");
-	c->Message(Chat::White, "Usage: #rule get [Rule] - Get the specified rule's local value");
+	c->Message(Chat::White, "Usage: #rules store [Ruleset Name] - Store the running ruleset as the specified name");
+	c->Message(Chat::White, "Usage: #rules reset - Reset all rules to their default values");
+	c->Message(Chat::White, "Usage: #rules get [Rule] - Get the specified rule's local value");
 	c->Message(
 		Chat::White,
-		"Usage: #rule set [Rule) [Value] - Set the specified rule to the specified value locally only"
-	);
-	c->Message(
-		Chat::White,
-		"Usage: #rule setdb [Rule] [Value] - Set the specified rule to the specified value locally and in the DB"
+		"Usage: #rules set [Rule) [Value] - Set the specified rule to the specified value locally only"
 	);
 	c->Message(
 		Chat::White,
-		"Usage: #rule list [Category Name] - List all rules in the specified category (or all categiries if omitted)"
+		"Usage: #rules setdb [Rule] [Value] - Set the specified rule to the specified value locally and in the DB"
 	);
 	c->Message(
 		Chat::White,
-		"Usage: #rule values [Category Name] - List the value of all rules in the specified category"
+		"Usage: #rules list [Category Name] - List all rules in the specified category (or all categiries if omitted)"
+	);
+	c->Message(
+		Chat::White,
+		"Usage: #rules values [Category Name] - List the value of all rules in the specified category"
 	);
 	return;
 }

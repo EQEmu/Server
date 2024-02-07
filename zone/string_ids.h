@@ -125,7 +125,8 @@
 #define FAIL_DISARM_DETECTED_TRAP	370		//You fail to disarm the detected trap.
 #define LOOT_LORE_ERROR				371		//You cannot loot this Lore Item. You already have one.
 #define PICK_LORE					379		//You cannot pick up a lore item you already possess.
-#define POISON_TOO_HIGH				382		// This poison is too high level for you to apply.
+#define POISON_TOO_HIGH				382		//This poison is too high level for you to apply.
+#define TAUNT_TOO_FAR				386		//You are too far away from your target to taunt.
 #define CORPSE_TOO_FAR				389		//The corpse is too far away to summon.
 #define CONSENT_DENIED				390		//You do not have consent to summon that corpse.
 #define DISCIPLINE_RDY				393		//You are ready to use a new discipline now.

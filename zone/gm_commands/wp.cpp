@@ -14,12 +14,12 @@ void command_wp(Client *c, const Seperator *sep)
 			}
 
 			if (strcasecmp("-h", sep->arg[5]) == 0) {
-				content_db.AddWP(c, grid_id, waypoint, c->GetPosition(), pause, zone_id);
+				content_db.AddWaypoint(c, grid_id, waypoint, c->GetPosition(), pause, zone_id);
 			}
 			else {
 				auto position = c->GetPosition();
 				position.w = -1;
-				content_db.AddWP(c, grid_id, waypoint, position, pause, zone_id);
+				content_db.AddWaypoint(c, grid_id, waypoint, position, pause, zone_id);
 			}
 			c->Message(
 				Chat::White,

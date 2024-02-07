@@ -3559,18 +3559,21 @@ struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint32 min_dmg;
 	uint32 max_dmg;
 };
-struct GroundSpawn{
-	float max_x;
-	float max_y;
-	float min_x;
-	float min_y;
-	float max_z;
-	float heading;
-	char name[20];
-	uint32 item;
-	uint32 max_allowed;
-	uint32 respawntimer;
+
+struct GroundSpawn {
+	float       max_x         = 0.0f;
+	float       max_y         = 0.0f;
+	float       min_x         = 0.0f;
+	float       min_y         = 0.0f;
+	float       max_z         = 0.0f;
+	float       heading       = 0.0f;
+	std::string name          = std::string();
+	uint32      item_id       = 0;
+	uint32      max_allowed   = 1;
+	uint32      respawn_timer = 1;
+	bool        fix_z         = true;
 };
+
 struct GroundSpawns {
 	struct GroundSpawn spawn[50]; //Assigned max number to allow
 };
@@ -5785,28 +5788,6 @@ struct MercenaryMerchantResponse_Struct {
 /*0004*/
 };
 
-struct ServerLootItem_Struct {
-	uint32	item_id;	  // uint32	item_id;
-	int16  equip_slot;	  // int16	equip_slot;
-	uint16 charges;	  // uint8	charges;
-	uint16 lootslot;	  // uint16	lootslot;
-	uint32 aug_1;		  // uint32	aug_1;
-	uint32 aug_2;		  // uint32	aug_2;
-	uint32 aug_3;		  // uint32	aug_3;
-	uint32 aug_4;		  // uint32	aug_4;
-	uint32 aug_5;		  // uint32	aug_5;
-	uint32 aug_6;		  // uint32	aug_5;
-	bool attuned;
-	std::string custom_data;
-	uint32 ornamenticon {};
-	uint32 ornamentidfile {};
-	uint32 ornament_hero_model {};
-	uint16 trivial_min_level;
-	uint16 trivial_max_level;
-	uint16 npc_min_level;
-	uint16 npc_max_level;
-};
-
 //Found in client near a ref to the string:
 //"Got a broadcast message for ... %s ...\n"
 struct ClientMarqueeMessage_Struct {
@@ -5824,9 +5805,6 @@ struct ClientMarqueeMessage_Struct {
 	char msg[1]; //message plus null terminator
 
 };
-
-typedef std::list<ServerLootItem_Struct*> ItemList;
-
 
 struct fling_struct {
 /* 00 */ uint32 collision; // 0 collision is off, anything else it's on

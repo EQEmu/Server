@@ -8,42 +8,24 @@
 class LootdropEntriesRepository: public BaseLootdropEntriesRepository {
 public:
 
-    /**
-     * This file was auto generated and can be modified and extended upon
-     *
-     * Base repository methods are automatically
-     * generated in the "base" version of this repository. The base repository
-     * is immutable and to be left untouched, while methods in this class
-     * are used as extension methods for more specific persistence-layer
-     * accessors or mutators.
-     *
-     * Base Methods (Subject to be expanded upon in time)
-     *
-     * Note: Not all tables are designed appropriately to fit functionality with all base methods
-     *
-     * InsertOne
-     * UpdateOne
-     * DeleteOne
-     * FindOne
-     * GetWhere(std::string where_filter)
-     * DeleteWhere(std::string where_filter)
-     * InsertMany
-     * All
-     *
-     * Example custom methods in a repository
-     *
-     * LootdropEntriesRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * LootdropEntriesRepository::GetWhereNeverExpires()
-     * LootdropEntriesRepository::GetWhereXAndY()
-     * LootdropEntriesRepository::DeleteWhereXAndY()
-     *
-     * Most of the above could be covered by base methods, but if you as a developer
-     * find yourself re-using logic for other parts of the code, its best to just make a
-     * method that can be re-used easily elsewhere especially if it can use a base repository
-     * method and encapsulate filters there
-     */
+	static LootdropEntries NewNpcEntity()
+	{
+		LootdropEntries e{};
 
-	// Custom extended repository methods here
+		e.lootdrop_id       = 0;
+		e.item_id           = 0;
+		e.item_charges      = 1;
+		e.equip_item        = 1;
+		e.chance            = 0;
+		e.disabled_chance   = 0;
+		e.trivial_min_level = 0;
+		e.trivial_max_level = 0;
+		e.multiplier        = 0;
+		e.npc_min_level     = 0;
+		e.npc_max_level     = 0;
+
+		return e;
+	}
 
 };
 

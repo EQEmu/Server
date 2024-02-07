@@ -86,7 +86,7 @@ void Perl_Corpse_SetCash(Corpse* self, uint16 copper, uint16 silver, uint16 gold
 	self->SetCash(copper, silver, gold, platinum);
 }
 
-void Perl_Corpse_RemoveCash(Corpse* self) // @categories Currency and Points, Corpse
+void Perl_Corpse_RemoveLootCash(Corpse* self) // @categories Currency and Points, Corpse
 {
 	self->RemoveCash();
 }
@@ -166,14 +166,14 @@ int Perl_Corpse_CountItem(Corpse* self, uint32_t item_id) // @categories Script 
 	return self->CountItem(item_id);
 }
 
-uint32_t Perl_Corpse_GetItemIDBySlot(Corpse* self, uint16_t loot_slot) // @categories Script Utility
+uint32_t Perl_Corpse_GetLootItemIDBySlot(Corpse* self, uint16_t loot_slot) // @categories Script Utility
 {
 	return self->GetItemIDBySlot(loot_slot);
 }
 
-int Perl_Corpse_GetFirstSlotByItemID(Corpse* self, uint32_t item_id) // @categories Script Utility
+int Perl_Corpse_GetFirstLootSlotByItemID(Corpse* self, uint32_t item_id) // @categories Script Utility
 {
-	return self->GetFirstSlotByItemID(item_id);
+	return self->GetFirstLootSlotByItemID(item_id);
 }
 
 void Perl_Corpse_RemoveItemByID(Corpse* self, uint32_t item_id) // @categories Script Utility
@@ -219,9 +219,9 @@ void perl_register_corpse()
 	package.add("GetCopper", &Perl_Corpse_GetCopper);
 	package.add("GetDBID", &Perl_Corpse_GetDBID);
 	package.add("GetDecayTime", &Perl_Corpse_GetDecayTime);
-	package.add("GetFirstSlotByItemID", &Perl_Corpse_GetFirstSlotByItemID);
+	package.add("GetFirstSlotByItemID", &Perl_Corpse_GetFirstLootSlotByItemID);
 	package.add("GetGold", &Perl_Corpse_GetGold);
-	package.add("GetItemIDBySlot", &Perl_Corpse_GetItemIDBySlot);
+	package.add("GetItemIDBySlot", &Perl_Corpse_GetLootItemIDBySlot);
 	package.add("GetLootList", &Perl_Corpse_GetLootList);
 	package.add("GetOwnerName", &Perl_Corpse_GetOwnerName);
 	package.add("GetPlatinum", &Perl_Corpse_GetPlatinum);
@@ -232,7 +232,7 @@ void perl_register_corpse()
 	package.add("IsLocked", &Perl_Corpse_IsLocked);
 	package.add("IsRezzed", &Perl_Corpse_IsRezzed);
 	package.add("Lock", &Perl_Corpse_Lock);
-	package.add("RemoveCash", &Perl_Corpse_RemoveCash);
+	package.add("RemoveCash", &Perl_Corpse_RemoveLootCash);
 	package.add("RemoveItem", &Perl_Corpse_RemoveItem);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t))&Perl_Corpse_RemoveItemByID);
 	package.add("RemoveItemByID", (void(*)(Corpse*, uint32_t, int))&Perl_Corpse_RemoveItemByID);

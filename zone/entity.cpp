@@ -525,7 +525,7 @@ void EntityList::MobProcess()
 			//	-- the entity's spawn2 point is marked as path_while_zone_idle
 			//	-- the zone is newly empty and we're allowing mobs to settle
 			if (
-				numclients > 0 ||
+				numclients > 0 || zone->quest_idle_override ||
 				(s2 && s2->PathWhenZoneIdle()) ||
 				mob_settle_timer->Enabled()
 			) {
@@ -4642,36 +4642,44 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 	}
 }
 
-uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
+uint16 EntityList::CreateGroundObject(uint32 item_id, const glm::vec4& position, uint32 decay_time)
 {
-	const EQ::ItemData *is = database.GetItem(itemid);
-	if (!is)
+	const auto is = database.GetItem(item_id);
+	if (!is) {
 		return 0;
+	}
 
-	auto i = new EQ::ItemInstance(is, is->MaxCharges);
-	if (!i)
+	auto inst = new EQ::ItemInstance(is, is->MaxCharges);
+	if (!inst) {
 		return 0;
+	}
 
-	auto object = new Object(i, position.x, position.y, position.z, position.w, decay_time);
+	auto object = new Object(inst, position.x, position.y, position.z, position.w, decay_time);
+
 	entity_list.AddObject(object, true);
 
-	safe_delete(i);
-	if (!object)
+	safe_delete(inst);
+
+	if (!object) {
 		return 0;
+	}
 
 	return object->GetID();
 }
 
 uint16 EntityList::CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type, uint32 decay_time)
 {
-	if (!model)
+	if (!model) {
 		return 0;
+	}
 
 	auto object = new Object(model, position.x, position.y, position.z, position.w, type);
+
 	entity_list.AddObject(object, true);
 
-	if (!object)
+	if (!object) {
 		return 0;
+	}
 
 	return object->GetID();
 }

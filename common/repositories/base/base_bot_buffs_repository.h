@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_BUFFS_REPOSITORY_H
@@ -180,8 +180,9 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				bot_buffs_id
 			)
 		);
@@ -190,26 +191,26 @@ public:
 		if (results.RowCount() == 1) {
 			BotBuffs e{};
 
-			e.buffs_index         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.caster_level        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.duration_formula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.tics_remaining      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.poison_counters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.disease_counters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.curse_counters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.corruption_counters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.numhits             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.melee_rune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.magic_rune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune            = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.persistent          = static_cast<int8_t>(atoi(row[14]));
-			e.caston_x            = static_cast<int32_t>(atoi(row[15]));
-			e.caston_y            = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z            = static_cast<int32_t>(atoi(row[17]));
-			e.extra_di_chance     = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.instrument_mod      = static_cast<int32_t>(atoi(row[19]));
+			e.buffs_index         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.caster_level        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.duration_formula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.tics_remaining      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.poison_counters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.disease_counters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.curse_counters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.corruption_counters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.numhits             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.melee_rune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.magic_rune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.persistent          = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.caston_x            = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.caston_y            = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z            = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.extra_di_chance     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.instrument_mod      = row[19] ? static_cast<int32_t>(atoi(row[19])) : 10;
 
 			return e;
 		}
@@ -385,26 +386,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotBuffs e{};
 
-			e.buffs_index         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.caster_level        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.duration_formula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.tics_remaining      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.poison_counters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.disease_counters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.curse_counters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.corruption_counters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.numhits             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.melee_rune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.magic_rune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune            = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.persistent          = static_cast<int8_t>(atoi(row[14]));
-			e.caston_x            = static_cast<int32_t>(atoi(row[15]));
-			e.caston_y            = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z            = static_cast<int32_t>(atoi(row[17]));
-			e.extra_di_chance     = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.instrument_mod      = static_cast<int32_t>(atoi(row[19]));
+			e.buffs_index         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.caster_level        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.duration_formula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.tics_remaining      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.poison_counters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.disease_counters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.curse_counters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.corruption_counters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.numhits             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.melee_rune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.magic_rune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.persistent          = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.caston_x            = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.caston_y            = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z            = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.extra_di_chance     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.instrument_mod      = row[19] ? static_cast<int32_t>(atoi(row[19])) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -429,26 +430,26 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotBuffs e{};
 
-			e.buffs_index         = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.bot_id              = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.spell_id            = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.caster_level        = static_cast<uint8_t>(strtoul(row[3], nullptr, 10));
-			e.duration_formula    = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
-			e.tics_remaining      = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			e.poison_counters     = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
-			e.disease_counters    = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
-			e.curse_counters      = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
-			e.corruption_counters = static_cast<uint32_t>(strtoul(row[9], nullptr, 10));
-			e.numhits             = static_cast<uint32_t>(strtoul(row[10], nullptr, 10));
-			e.melee_rune          = static_cast<uint32_t>(strtoul(row[11], nullptr, 10));
-			e.magic_rune          = static_cast<uint32_t>(strtoul(row[12], nullptr, 10));
-			e.dot_rune            = static_cast<uint32_t>(strtoul(row[13], nullptr, 10));
-			e.persistent          = static_cast<int8_t>(atoi(row[14]));
-			e.caston_x            = static_cast<int32_t>(atoi(row[15]));
-			e.caston_y            = static_cast<int32_t>(atoi(row[16]));
-			e.caston_z            = static_cast<int32_t>(atoi(row[17]));
-			e.extra_di_chance     = static_cast<uint32_t>(strtoul(row[18], nullptr, 10));
-			e.instrument_mod      = static_cast<int32_t>(atoi(row[19]));
+			e.buffs_index         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.bot_id              = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.spell_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.caster_level        = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.duration_formula    = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.tics_remaining      = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.poison_counters     = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.disease_counters    = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.curse_counters      = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.corruption_counters = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.numhits             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.melee_rune          = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.magic_rune          = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.dot_rune            = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.persistent          = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.caston_x            = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.caston_y            = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.caston_z            = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.extra_di_chance     = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.instrument_mod      = row[19] ? static_cast<int32_t>(atoi(row[19])) : 10;
 
 			all_entries.push_back(e);
 		}
@@ -507,6 +508,100 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotBuffs &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.buffs_index));
+		v.push_back(std::to_string(e.bot_id));
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.caster_level));
+		v.push_back(std::to_string(e.duration_formula));
+		v.push_back(std::to_string(e.tics_remaining));
+		v.push_back(std::to_string(e.poison_counters));
+		v.push_back(std::to_string(e.disease_counters));
+		v.push_back(std::to_string(e.curse_counters));
+		v.push_back(std::to_string(e.corruption_counters));
+		v.push_back(std::to_string(e.numhits));
+		v.push_back(std::to_string(e.melee_rune));
+		v.push_back(std::to_string(e.magic_rune));
+		v.push_back(std::to_string(e.dot_rune));
+		v.push_back(std::to_string(e.persistent));
+		v.push_back(std::to_string(e.caston_x));
+		v.push_back(std::to_string(e.caston_y));
+		v.push_back(std::to_string(e.caston_z));
+		v.push_back(std::to_string(e.extra_di_chance));
+		v.push_back(std::to_string(e.instrument_mod));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotBuffs> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.buffs_index));
+			v.push_back(std::to_string(e.bot_id));
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.caster_level));
+			v.push_back(std::to_string(e.duration_formula));
+			v.push_back(std::to_string(e.tics_remaining));
+			v.push_back(std::to_string(e.poison_counters));
+			v.push_back(std::to_string(e.disease_counters));
+			v.push_back(std::to_string(e.curse_counters));
+			v.push_back(std::to_string(e.corruption_counters));
+			v.push_back(std::to_string(e.numhits));
+			v.push_back(std::to_string(e.melee_rune));
+			v.push_back(std::to_string(e.magic_rune));
+			v.push_back(std::to_string(e.dot_rune));
+			v.push_back(std::to_string(e.persistent));
+			v.push_back(std::to_string(e.caston_x));
+			v.push_back(std::to_string(e.caston_y));
+			v.push_back(std::to_string(e.caston_z));
+			v.push_back(std::to_string(e.extra_di_chance));
+			v.push_back(std::to_string(e.instrument_mod));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_BUFFS_REPOSITORY_H

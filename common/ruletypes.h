@@ -263,6 +263,7 @@ RULE_BOOL(Skills, RequireTomeHandin, false, "Disable click-to-learn and force ha
 RULE_INT(Skills, TradeSkillClamp, 0, "Legacy tradeskills would clamp at 252 regardless of item modifiers and skill combination. DEFAULT: 0 will bypass clamp. Legacy value 252")
 RULE_BOOL(Skills, UseAltSinisterStrikeFormula, false, "Enabling will utilize a formula derived from 2004 monkey business post which makes the AA actually worth something.")
 RULE_BOOL(Skills, TrackingAutoRefreshSkillUps, true, "Disable to prevent tracking auto-refresh from giving skill-ups. Classic Style")
+RULE_INT(Skills, MaximumTauntDistance, 150, "Maximum player taunt distance.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Pets)
@@ -273,6 +274,7 @@ RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop i
 RULE_BOOL(Pets, CanTakeQuestItems, true, "Setting whether anyone can give quest items to pets")
 RULE_BOOL(Pets, LivelikeBreakCharmOnInvis, true, "Default: true will break charm on any type of invis (hide/ivu/iva/etc) false will only break if the pet can not see you (ex. you have an undead pet and cast IVU")
 RULE_BOOL(Pets, ClientPetsUseOwnerNameInLastName, true, "Disable this to keep client pet's last names from being owner_name's pet")
+RULE_INT(Pets, PetTauntRange, 150, "Range at which a pet will taunt targets.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)
@@ -344,6 +346,9 @@ RULE_INT(Zone, GlobalLootMultiplier, 1, "Sets Global Loot drop multiplier for da
 RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a zone and has hit its zone shut down timer, it will hard kill the process to free memory back to the OS")
 RULE_INT(Zone, SpawnEventMin, 3, "When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.")
 RULE_INT(Zone, ForageChance, 25, "Chance of foraging from zone table vs global table")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnBots, false, "Set to true to allow cross zone spells (cast/remove) to affect bots")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnMercs, false, "Set to true to allow cross zone spells (cast/remove) to affect mercenaries")
+RULE_BOOL(Zone, AllowCrossZoneSpellsOnPets, false, "Set to true to allow cross zone spells (cast/remove) to affect pets")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

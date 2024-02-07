@@ -38,6 +38,14 @@
 #include "queryserv.h"
 #include "../common/discord/discord.h"
 #include "../common/repositories/dynamic_zone_templates_repository.h"
+#include "../common/repositories/npc_faction_repository.h"
+#include "../common/repositories/npc_faction_entries_repository.h"
+#include "../common/repositories/faction_association_repository.h"
+#include "../common/repositories/loottable_repository.h"
+#include "../common/repositories/loottable_entries_repository.h"
+#include "../common/repositories/lootdrop_repository.h"
+#include "../common/repositories/lootdrop_entries_repository.h"
+#include "../common/repositories/base_data_repository.h"
 
 struct EXPModifier
 {
@@ -105,6 +113,7 @@ public:
 	AA::Ability *GetAlternateAdvancementAbilityByRank(int rank_id);
 	AA::Rank *GetAlternateAdvancementRank(int rank_id);
 	bool is_zone_time_localized;
+	bool quest_idle_override;
 	bool IsIdleWhenEmpty() const;
 	void SetIdleWhenEmpty(bool idle_when_empty);
 	uint32 GetSecondsBeforeIdle() const;
@@ -277,7 +286,7 @@ public:
 	void DoAdventureActions();
 	void DoAdventureAssassinationCountIncrease();
 	void DoAdventureCountIncrease();
-	void GetMerchantDataForZoneLoad();
+	void LoadMerchants();
 	void GetTimeSync();
 	void LoadAdventureFlavor();
 	void LoadAlternateAdvancement();
@@ -299,7 +308,7 @@ public:
 	void ReloadWorld(uint8 global_repop);
 	void RemoveAuth(const char *iCharName, const char *iLSKey);
 	void RemoveAuth(uint32 lsid);
-	void Repop();
+	void Repop(bool is_forced = false);
 	void RequestUCSServerStatus();
 	void ResetAuth();
 	void SetDate(uint16 year, uint8 month, uint8 day, uint8 hour, uint8 minute);
@@ -406,6 +415,37 @@ public:
 
 	void ReloadContentFlags();
 
+	void LoadNPCFaction(const uint32 npc_faction_id);
+	void LoadNPCFactions(const std::vector<uint32>& npc_faction_ids);
+	void ClearNPCFactions();
+	void ReloadNPCFactions();
+	NpcFactionRepository::NpcFaction* GetNPCFaction(const uint32 npc_faction_id);
+	std::vector<NpcFactionEntriesRepository::NpcFactionEntries> GetNPCFactionEntries(const uint32 npc_faction_id) const;
+
+	void LoadNPCFactionAssociation(const uint32 npc_faction_id);
+	void LoadNPCFactionAssociations(const std::vector<uint32>& npc_faction_ids);
+	void LoadFactionAssociation(const uint32 faction_id);
+	void LoadFactionAssociations(const std::vector<uint32>& faction_ids);
+	void ClearFactionAssociations();
+	void ReloadFactionAssociations();
+	FactionAssociationRepository::FactionAssociation* GetFactionAssociation(const uint32 faction_id);
+
+	// loot
+	void LoadLootTable(const uint32 loottable_id);
+	void LoadLootTables(const std::vector<uint32>& loottable_ids);
+	void ClearLootTables();
+	void ReloadLootTables();
+	LoottableRepository::Loottable *GetLootTable(const uint32 loottable_id);
+	std::vector<LoottableEntriesRepository::LoottableEntries> GetLootTableEntries(const uint32 loottable_id) const;
+	LootdropRepository::Lootdrop GetLootdrop(const uint32 lootdrop_id) const;
+	std::vector<LootdropEntriesRepository::LootdropEntries> GetLootdropEntries(const uint32 lootdrop_id) const;
+
+	// Base Data
+	inline void ClearBaseData() { m_base_data.clear(); };
+	BaseDataRepository::BaseData GetBaseData(uint8 level, uint8 class_id);
+	void LoadBaseData();
+	void ReloadBaseData();
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
@@ -456,6 +496,19 @@ private:
 	Timer                               qglobal_purge_timer;
 	ZoneSpellsBlocked                   *blocked_spells;
 
+	// Factions
+	std::vector<NpcFactionRepository::NpcFaction>                 m_npc_factions         = { };
+	std::vector<NpcFactionEntriesRepository::NpcFactionEntries>   m_npc_faction_entries  = { };
+	std::vector<FactionAssociationRepository::FactionAssociation> m_faction_associations = { };
+
+	// loot
+	std::vector<LoottableRepository::Loottable>               m_loottables        = {};
+	std::vector<LoottableEntriesRepository::LoottableEntries> m_loottable_entries = {};
+	std::vector<LootdropRepository::Lootdrop>                 m_lootdrops         = {};
+	std::vector<LootdropEntriesRepository::LootdropEntries>   m_lootdrop_entries  = {};
+
+	// Base Data
+	std::vector<BaseDataRepository::BaseData> m_base_data = { };
 };
 
 #endif

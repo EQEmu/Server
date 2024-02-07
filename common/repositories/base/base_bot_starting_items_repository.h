@@ -6,7 +6,7 @@
  * Any modifications to base repositories are to be made by the generator only
  *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BOT_STARTING_ITEMS_REPOSITORY_H
@@ -16,7 +16,6 @@
 #include "../../strings.h"
 #include <ctime>
 
-
 class BaseBotStartingItemsRepository {
 public:
 	struct BotStartingItems {
@@ -25,6 +24,7 @@ public:
 		uint32_t    classes;
 		uint32_t    item_id;
 		uint8_t     item_charges;
+		uint8_t     min_status;
 		int32_t     slot_id;
 		int8_t      min_expansion;
 		int8_t      max_expansion;
@@ -45,6 +45,7 @@ public:
 			"classes",
 			"item_id",
 			"item_charges",
+			"min_status",
 			"slot_id",
 			"min_expansion",
 			"max_expansion",
@@ -61,6 +62,7 @@ public:
 			"classes",
 			"item_id",
 			"item_charges",
+			"min_status",
 			"slot_id",
 			"min_expansion",
 			"max_expansion",
@@ -111,6 +113,7 @@ public:
 		e.classes                = 0;
 		e.item_id                = 0;
 		e.item_charges           = 1;
+		e.min_status             = 0;
 		e.slot_id                = -1;
 		e.min_expansion          = -1;
 		e.max_expansion          = -1;
@@ -152,16 +155,17 @@ public:
 		if (results.RowCount() == 1) {
 			BotStartingItems e{};
 
-			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.races                  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.classes                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.item_charges           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.slot_id                = static_cast<int32_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.content_flags          = row[8] ? row[8] : "";
-			e.content_flags_disabled = row[9] ? row[9] : "";
+			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.races                  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
+			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
+			e.content_flags          = row[9] ? row[9] : "";
+			e.content_flags_disabled = row[10] ? row[10] : "";
 
 			return e;
 		}
@@ -199,11 +203,12 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.classes));
 		v.push_back(columns[3] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[4] + " = " + std::to_string(e.item_charges));
-		v.push_back(columns[5] + " = " + std::to_string(e.slot_id));
-		v.push_back(columns[6] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[7] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[8] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[9] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.min_status));
+		v.push_back(columns[6] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[7] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[8] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[10] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -230,6 +235,7 @@ public:
 		v.push_back(std::to_string(e.classes));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.min_status));
 		v.push_back(std::to_string(e.slot_id));
 		v.push_back(std::to_string(e.min_expansion));
 		v.push_back(std::to_string(e.max_expansion));
@@ -269,6 +275,7 @@ public:
 			v.push_back(std::to_string(e.classes));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.min_status));
 			v.push_back(std::to_string(e.slot_id));
 			v.push_back(std::to_string(e.min_expansion));
 			v.push_back(std::to_string(e.max_expansion));
@@ -307,16 +314,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotStartingItems e{};
 
-			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.races                  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.classes                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.item_charges           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.slot_id                = static_cast<int32_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.content_flags          = row[8] ? row[8] : "";
-			e.content_flags_disabled = row[9] ? row[9] : "";
+			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.races                  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
+			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
+			e.content_flags          = row[9] ? row[9] : "";
+			e.content_flags_disabled = row[10] ? row[10] : "";
 
 			all_entries.push_back(e);
 		}
@@ -341,16 +349,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			BotStartingItems e{};
 
-			e.id                     = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
-			e.races                  = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			e.classes                = static_cast<uint32_t>(strtoul(row[2], nullptr, 10));
-			e.item_id                = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			e.item_charges           = static_cast<uint8_t>(strtoul(row[4], nullptr, 10));
-			e.slot_id                = static_cast<int32_t>(atoi(row[5]));
-			e.min_expansion          = static_cast<int8_t>(atoi(row[6]));
-			e.max_expansion          = static_cast<int8_t>(atoi(row[7]));
-			e.content_flags          = row[8] ? row[8] : "";
-			e.content_flags_disabled = row[9] ? row[9] : "";
+			e.id                     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.races                  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
+			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
+			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
+			e.content_flags          = row[9] ? row[9] : "";
+			e.content_flags_disabled = row[10] ? row[10] : "";
 
 			all_entries.push_back(e);
 		}
@@ -409,6 +418,82 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const BotStartingItems &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.min_status));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<BotStartingItems> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.min_status));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BOT_STARTING_ITEMS_REPOSITORY_H

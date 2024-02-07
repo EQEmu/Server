@@ -344,9 +344,9 @@ int Perl_Client_GetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uin
 	return self->GetFactionLevel(char_id, npc_id, race_id, class_id, deity_id, faction_id, tnpc);
 }
 
-void Perl_Client_SetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity) // @categories Faction
+void Perl_Client_SetFactionLevel(Client* self, uint32 char_id, uint32 npc_faction_id, uint8 char_class, uint8 char_race, uint8 char_deity) // @categories Faction
 {
-	self->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
+	self->SetFactionLevel(char_id, npc_faction_id, char_class, char_race, char_deity);
 }
 
 void Perl_Client_SetFactionLevel2(Client* self, uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value) // @categories Faction
@@ -2263,14 +2263,14 @@ void Perl_Client_UntrainDiscBySpellID(Client* self, uint16 spell_id, bool update
 
 void Perl_Client_SummonBaggedItems(Client* self, uint32 bag_item_id, perl::reference bag_items_ref) // @categories Inventory and Items, Script Utility
 {
-	std::vector<ServerLootItem_Struct> bagged_items;
+	std::vector<LootItem> bagged_items;
 
 	perl::array bag_items = bag_items_ref;
 	for (perl::hash bag_item : bag_items) // only works if all elements are hashrefs
 	{
 		if (bag_item.exists("item_id") && bag_item.exists("charges"))
 		{
-			ServerLootItem_Struct item{};
+			LootItem item{};
 			item.item_id = bag_item["item_id"];
 			item.charges = bag_item["charges"];
 			item.attuned = bag_item.exists("attuned") ? bag_item["attuned"] : 0;
@@ -3088,6 +3088,16 @@ void Perl_Client_ClearXTargets(Client* self)
 	self->ClearXTargets();
 }
 
+int Perl_Client_GetAAEXPPercentage(Client* self)
+{
+	return self->GetAAEXPPercentage();
+}
+
+int Perl_Client_GetEXPPercentage(Client* self)
+{
+	return self->GetEXPPercentage();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3204,6 +3214,7 @@ void perl_register_client()
 	package.add("GetAAEXPModifier", (float(*)(Client*))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPPercentage", &Perl_Client_GetAAEXPPercentage);
 	package.add("GetAAExp", &Perl_Client_GetAAExp);
 	package.add("GetAALevel", &Perl_Client_GetAALevel);
 	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
@@ -3265,6 +3276,7 @@ void perl_register_client()
 	package.add("GetEXPModifier", (float(*)(Client*))&Perl_Client_GetEXPModifier);
 	package.add("GetEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
 	package.add("GetEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPPercentage", &Perl_Client_GetEXPPercentage);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
 	package.add("GetEndurance", &Perl_Client_GetEndurance);
 	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);

@@ -136,14 +136,14 @@ class Object: public Entity
 {
 public:
 	// Loading object from database
-	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const EQ::ItemInstance* inst);
-	Object(const EQ::ItemInstance* inst, char* name,float max_x,float min_x,float max_y,float min_y,float z,float heading,uint32 respawntimer);
+	Object(uint32 id, uint32 type, uint32 icon, const Object_Struct& data, const EQ::ItemInstance* inst = nullptr, bool fix_z = true);
+	Object(const EQ::ItemInstance* inst, const std::string& name, float max_x, float min_x, float max_y, float min_y, float z, float heading, uint32 respawn_timer, bool fix_z);
 	// Loading object from client dropping item on ground
 	Object(Client* client, const EQ::ItemInstance* inst);
-	Object(const EQ::ItemInstance *inst, float x, float y, float z, float heading, uint32 decay_time = 300000);
-	Object(const char *model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
+	Object(const EQ::ItemInstance *inst, float x, float y, float z, float heading, uint32 decay_time = 300000, bool fix_z = true);
+	Object(const std::string& model, float x, float y, float z, float heading, uint8 type, uint32 decay_time = 0);
 
-	// Destructor
+// Destructor
 	~Object();
 	bool Process();
 	bool IsGroundSpawn() { return m_ground_spawn; }
@@ -160,6 +160,10 @@ public:
 	void CreateDeSpawnPacket(EQApplicationPacket* app);
 	void Depop();
 	void Repop();
+
+	// Floating
+	inline bool IsFixZEnabled() const { return m_fix_z; };
+	inline void SetFixZ(bool fix_z) { m_fix_z = fix_z; };
 
 	//Decay functions
 	void StartDecay() {decay_timer.Start();}
@@ -233,6 +237,8 @@ protected:
 	float  m_min_y;
 	bool   m_ground_spawn;
 	char   m_display_name[64];
+	bool   m_fix_z;
+protected:
 
 	std::map<std::string, std::string> o_EntityVariables;
 

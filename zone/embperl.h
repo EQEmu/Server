@@ -73,7 +73,6 @@ private:
 	//install a perl func
 	void init_eval_file(void);
 
-	bool in_use;	//true if perl is executing
 protected:
 	//the embedded interpreter
 	PerlInterpreter * my_perl;
@@ -87,59 +86,66 @@ public:
 	void Reinit();
 
 	//evaluate an expression. throws string errors on fail
-	int eval(const char * code);
+	int eval(const char* code);
 	//execute a subroutine. throws lasterr on failure
-	int dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_EVAL);
+	int dosub(const char* sub_name, const std::vector<std::string>* args = nullptr, int mode = G_SCALAR | G_EVAL);
 
 	//put an integer into a perl varable
-	void seti(const char *varname, int val) const {
-		SV *t = get_sv(varname, true);
+	void seti(const char* variable_name, int val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setiv(t, val);
 	}
+
 	//put a real into a perl varable
-	void setd(const char *varname, float val) const {
-		SV *t = get_sv(varname, true);
+	void setd(const char* variable_name, float val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setnv(t, val);
 	}
+
 	//put a string into a perl varable
-	void setstr(const char *varname, const char *val) const {
-		SV *t = get_sv(varname, true);
+	void setstr(const char* variable_name, const char* val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setpv(t, val);
 	}
+
 	// put a pointer into a blessed perl variable
-	void setptr(const char* varname, const char* classname, void* val) const {
-		SV* t = get_sv(varname, GV_ADD);
-		sv_setref_pv(t, classname, val);
+	void setptr(const char* variable_name, const char* class_name, void* val) const
+	{
+		SV* t = get_sv(variable_name, GV_ADD);
+		sv_setref_pv(t, class_name, val);
 	}
 
 	// put key-value pairs in hash
-	void sethash(const char *varname, std::map<std::string,std::string> &vals)
+	void sethash(const char* variable_name, std::map<std::string, std::string>& vals)
 	{
-		std::map<std::string,std::string>::iterator it;
+		std::map<std::string, std::string>::iterator it;
 
 		// Get hash and clear it.
-		HV *hv = get_hv(varname, TRUE);
+		HV* hv = get_hv(variable_name, TRUE);
 		hv_clear(hv);
 
 		// Iterate through key-value pairs, storing them in hash
-		for (it = vals.begin(); it != vals.end(); ++it)
-		{
-			int keylen = static_cast<int>(it->first.length());
+		for (it = vals.begin(); it != vals.end(); ++it) {
+			int key_length = static_cast<int>(it->first.length());
 
-			SV *val = newSVpv(it->second.c_str(), it->second.length());
+			SV* val = newSVpv(it->second.c_str(), it->second.length());
 
 			// If val was not added to hash, reset reference count
-			if (hv_store(hv, it->first.c_str(), keylen, val, 0) == nullptr)
+			if (!hv_store(hv, it->first.c_str(), key_length, val, 0)) {
 				val->sv_refcnt = 0;
+			}
 		}
 	}
 
 	//loads a file and compiles it into our interpreter (assuming it hasn't already been read in)
 	//idea borrowed from perlembed
-	int eval_file(const char * packagename, const char * filename);
+	int eval_file(const char* package_name, const char* filename);
 
 	//check to see if a sub exists in package
-	bool SubExists(const char *package, const char *sub);
+	bool SubExists(const char* package, const char* sub);
 };
 #endif //EMBPERL
 

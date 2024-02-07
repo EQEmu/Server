@@ -401,6 +401,9 @@ namespace EQ
 		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
 		std::string GetAppearanceTypeName(uint32 animation_type);
 
+		extern const std::map<uint32, std::string>& GetSpecialAbilityMap();
+		std::string GetSpecialAbilityName(uint32 ability_id);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
@@ -595,6 +598,65 @@ enum class ApplySpellType {
 	Solo,
 	Group,
 	Raid
+};
+
+enum {
+	SPECATK_SUMMON            = 1,
+	SPECATK_ENRAGE            = 2,
+	SPECATK_RAMPAGE           = 3,
+	SPECATK_AREA_RAMPAGE      = 4,
+	SPECATK_FLURRY            = 5,
+	SPECATK_TRIPLE            = 6,
+	SPECATK_QUAD              = 7,
+	SPECATK_INNATE_DW         = 8,
+	SPECATK_BANE              = 9,
+	SPECATK_MAGICAL           = 10,
+	SPECATK_RANGED_ATK        = 11,
+	UNSLOWABLE                = 12,
+	UNMEZABLE                 = 13,
+	UNCHARMABLE               = 14,
+	UNSTUNABLE                = 15,
+	UNSNAREABLE               = 16,
+	UNFEARABLE                = 17,
+	UNDISPELLABLE             = 18,
+	IMMUNE_MELEE              = 19,
+	IMMUNE_MAGIC              = 20,
+	IMMUNE_FLEEING            = 21,
+	IMMUNE_MELEE_EXCEPT_BANE  = 22,
+	IMMUNE_MELEE_NONMAGICAL   = 23,
+	IMMUNE_AGGRO              = 24,
+	IMMUNE_AGGRO_ON           = 25,
+	IMMUNE_CASTING_FROM_RANGE = 26,
+	IMMUNE_FEIGN_DEATH        = 27,
+	IMMUNE_TAUNT              = 28,
+	NPC_TUNNELVISION          = 29,
+	NPC_NO_BUFFHEAL_FRIENDS   = 30,
+	IMMUNE_PACIFY             = 31,
+	LEASH                     = 32,
+	TETHER                    = 33,
+	DESTRUCTIBLE_OBJECT       = 34,
+	NO_HARM_FROM_CLIENT       = 35,
+	ALWAYS_FLEE               = 36,
+	FLEE_PERCENT              = 37,
+	ALLOW_BENEFICIAL          = 38,
+	DISABLE_MELEE             = 39,
+	NPC_CHASE_DISTANCE        = 40,
+	ALLOW_TO_TANK             = 41,
+	IGNORE_ROOT_AGGRO_RULES   = 42,
+	CASTING_RESIST_DIFF       = 43,
+	COUNTER_AVOID_DAMAGE      = 44, // Modify by percent NPC's opponents chance to riposte, block, parry or dodge individually, or for all skills
+	PROX_AGGRO                = 45,
+	IMMUNE_RANGED_ATTACKS     = 46,
+	IMMUNE_DAMAGE_CLIENT      = 47,
+	IMMUNE_DAMAGE_NPC         = 48,
+	IMMUNE_AGGRO_CLIENT       = 49,
+	IMMUNE_AGGRO_NPC          = 50,
+	MODIFY_AVOID_DAMAGE       = 51, // Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
+	IMMUNE_FADING_MEMORIES    = 52,
+	IMMUNE_OPEN               = 53,
+	IMMUNE_ASSASSINATE        = 54,
+	IMMUNE_HEADSHOT           = 55,
+	MAX_SPECIAL_ATTACK        = 56
 };
 
 

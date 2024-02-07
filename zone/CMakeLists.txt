@@ -48,7 +48,7 @@ SET(zone_sources
     heal_rotation.cpp
     horse.cpp
     inventory.cpp
-    loottables.cpp
+    loot.cpp
     lua_bot.cpp
     lua_bit.cpp
     lua_corpse.cpp
@@ -87,7 +87,7 @@ SET(zone_sources
     hate_list.cpp
     horse.cpp
     inventory.cpp
-    loottables.cpp
+    loot.cpp
     main.cpp
     map.cpp
     merc.cpp
@@ -160,7 +160,9 @@ SET(zone_sources
     zone.cpp
     zone_config.cpp
     zonedb.cpp
+    zone_base_data.cpp
     zone_event_scheduler.cpp
+    zone_npc_factions.cpp
     zone_reload.cpp
     zoning.cpp
 )

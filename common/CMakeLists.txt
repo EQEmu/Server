@@ -497,7 +497,6 @@ SET(repositories
 SET(common_headers
     additive_lagged_fibonacci_engine.h
     base_packet.h
-    base_data.h
     bodytypes.h
     classes.h
     compression.h
@@ -567,7 +566,7 @@ SET(common_headers
     json_config.h
     light_source.h
     linked_list.h
-    loottable.h
+    loot.h
     mail_oplist.h
     md5.h
     memory_buffer.h

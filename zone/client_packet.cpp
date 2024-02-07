@@ -10207,7 +10207,7 @@ void Client::Handle_OP_LootItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	entity->CastToCorpse()->LootItem(this, app);
+	entity->CastToCorpse()->LootCorpseItem(this, app);
 }
 
 void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
@@ -15052,6 +15052,11 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 
 	if (!zone->CanDoCombat()) {
 		Message(Chat::Red, "You cannot taunt in a no combat zone.");
+		return;
+	}
+
+	if (DistanceSquared(GetPosition(), GetTarget()->GetPosition()) > (RuleI(Skills, MaximumTauntDistance) * (RuleI(Skills, MaximumTauntDistance)))) {
+		MessageString(Chat::TooFarAway, TAUNT_TOO_FAR);
 		return;
 	}
 

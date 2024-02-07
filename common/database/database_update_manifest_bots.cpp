@@ -105,6 +105,25 @@ ALTER TABLE `bot_timers`
 ALTER TABLE `bot_timers`
 	ADD PRIMARY KEY (`bot_id`, `timer_id`, `spell_id`, `item_id`);
 )"
+	},
+	ManifestEntry{
+		.version = 9042,
+		.description = "2024_01_27_delete_bot_foreign_keys.sql",
+		.check = "SHOW CREATE TABLE `bot_stances`",
+		.condition = "contains",
+		.match = "FOREIGN",
+		.sql = R"(
+ALTER TABLE `bot_buffs` DROP FOREIGN KEY `FK_bot_buffs_1`;
+ALTER TABLE `bot_heal_rotations` DROP FOREIGN KEY `FK_bot_heal_rotations`;
+ALTER TABLE `bot_heal_rotation_members` DROP FOREIGN KEY `FK_bot_heal_rotation_members_1`;
+ALTER TABLE `bot_heal_rotation_members` DROP FOREIGN KEY `FK_bot_heal_rotation_members_2`;
+ALTER TABLE `bot_heal_rotation_targets` DROP FOREIGN KEY `FK_bot_heal_rotation_targets`;
+ALTER TABLE `bot_inventories` DROP FOREIGN KEY `FK_bot_inventories_1`;
+ALTER TABLE `bot_pets` DROP FOREIGN KEY `FK_bot_pets_1`;
+ALTER TABLE `bot_pet_buffs` DROP FOREIGN KEY `FK_bot_pet_buffs_1`;
+ALTER TABLE `bot_pet_inventories` DROP FOREIGN KEY `FK_bot_pet_inventories_1`;
+ALTER TABLE `bot_stances` DROP FOREIGN KEY `FK_bot_stances_1`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

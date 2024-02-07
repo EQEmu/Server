@@ -41,6 +41,7 @@
 
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/instance_list_repository.h"
+#include "../common/repositories/grid_entries_repository.h"
 
 #include <iostream>
 #include <limits.h>
@@ -925,18 +926,18 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 	}
 }
 
-void QuestManager::repopzone() {
-	if(zone) {
-		zone->Repop();
-	}
-	else {
+void QuestManager::repopzone(bool is_forced)
+{
+	if (zone) {
+		zone->Repop(is_forced);
+	} else {
 		LogQuests("QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file");
 	}
 }
 
-void QuestManager::processmobswhilezoneempty(bool turn_on) {
+void QuestManager::processmobswhilezoneempty(bool on) {
 	if (zone) {
-		zone->SetIdleWhenEmpty(!turn_on);
+		zone->quest_idle_override = on;
 	} else {
 		LogQuests(
 			"QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file"
@@ -1439,6 +1440,7 @@ void QuestManager::rewardfaction(int faction_id, int faction_value) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
 		if (faction_id != 0 && faction_value != 0) {
+			zone->LoadFactionAssociation(faction_id);
 			initiator->RewardFaction(faction_id, faction_value);
 		}
 	}
@@ -1988,38 +1990,48 @@ void QuestManager::setanim(int npc_type, int animnum) {
 }
 
 //displays an in game path based on a waypoint grid
-void QuestManager::showgrid(int grid) {
+void QuestManager::showgrid(int grid_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator == nullptr)
+
+	if (!initiator) {
 		return;
+	}
 
-	FindPerson_Point pt;
-	std::vector<FindPerson_Point> pts;
+	std::vector<FindPerson_Point> v;
 
-	pt.x = initiator->GetX();
-	pt.y = initiator->GetY();
-	pt.z = initiator->GetZ();
-	pts.push_back(pt);
+	v.push_back(
+		FindPerson_Point{
+			.y = initiator->GetY(),
+			.x = initiator->GetX(),
+			.z = initiator->GetZ()
+		}
+	);
 
-	// Retrieve all waypoints for this grid
-	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
-                                    "WHERE `gridid` = %i AND `zoneid` = %i "
-                                    "ORDER BY `number`", grid, zone->GetZoneID());
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-        LogQuests("Error loading grid [{}] for showgrid(): [{}]", grid, results.ErrorMessage().c_str());
+	const auto& l = GridEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"`gridid` = {} AND `zoneid` = {} ORDER BY `number`",
+			grid_id,
+			zone->GetZoneID()
+		)
+	);
+
+	if (l.empty()) {
 		return;
-    }
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        pt.x = Strings::ToFloat(row[0]);
-        pt.y = Strings::ToFloat(row[1]);
-        pt.z = Strings::ToFloat(row[2]);
+	for (const auto& e : l) {
+		v.push_back(
+			FindPerson_Point{
+				.y = e.y,
+				.x = e.x,
+				.z = e.z
+			}
+		);
+	}
 
-        pts.push_back(pt);
-    }
-
-    initiator->SendPathPacket(pts);
+    initiator->SendPathPacket(v);
 
 }
 

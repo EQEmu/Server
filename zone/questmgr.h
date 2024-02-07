@@ -105,8 +105,8 @@ public:
 	void depop_withtimer(int npc_type = 0); // depop NPC and start spawn timer
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
-	void repopzone();
-	void processmobswhilezoneempty(bool idle_when_empty);
+	void repopzone(bool is_forced = false);
+	void processmobswhilezoneempty(bool quest_override_on);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
@@ -183,7 +183,7 @@ public:
 	void enable_proximity_say();
 	void disable_proximity_say();
 	void setanim(int npc_type, int animnum);
-	void showgrid(int gridid);
+	void showgrid(int grid_id);
 	void spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id, short new_value);
 	short get_spawn_condition(const char *zone_short, uint32 instance_id, uint16 condition_id);
 	void toggle_spawn_event(int event_id, bool enable, bool strict, bool reset_base);

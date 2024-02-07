@@ -639,3 +639,76 @@ std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
 
 	return std::string();
 }
+
+const std::map<uint32, std::string>& EQ::constants::GetSpecialAbilityMap()
+{
+	static const std::map<uint32, std::string> special_ability_map = {
+		{ SPECATK_SUMMON,            "Summon" },
+		{ SPECATK_ENRAGE,            "Enrage" },
+		{ SPECATK_RAMPAGE,           "Rampage" },
+		{ SPECATK_AREA_RAMPAGE,      "Area Rampage" },
+		{ SPECATK_FLURRY,            "Flurry" },
+		{ SPECATK_TRIPLE,            "Triple Attack" },
+		{ SPECATK_QUAD,              "Quadruple Attack" },
+		{ SPECATK_INNATE_DW,         "Dual Wield" },
+		{ SPECATK_BANE,              "Bane Attack" },
+		{ SPECATK_MAGICAL,           "Magical Attack" },
+		{ SPECATK_RANGED_ATK,        "Ranged Attack" },
+		{ UNSLOWABLE,                "Immune to Slow" },
+		{ UNMEZABLE,                 "Immune to Mesmerize" },
+		{ UNCHARMABLE,               "Immune to Charm" },
+		{ UNSTUNABLE,                "Immune to Stun" },
+		{ UNSNAREABLE,               "Immune to Snare" },
+		{ UNFEARABLE,                "Immune to Fear" },
+		{ UNDISPELLABLE,             "Immune to Dispell" },
+		{ IMMUNE_MELEE,              "Immune to Melee" },
+		{ IMMUNE_MAGIC,              "Immune to Magic" },
+		{ IMMUNE_FLEEING,            "Immune to Fleeing" },
+		{ IMMUNE_MELEE_EXCEPT_BANE,  "Immune to Melee except Bane" },
+		{ IMMUNE_MELEE_NONMAGICAL,   "Immune to Non-Magical Melee" },
+		{ IMMUNE_AGGRO,              "Immune to Aggro" },
+		{ IMMUNE_AGGRO_ON,           "Immune to Being Aggro" },
+		{ IMMUNE_CASTING_FROM_RANGE, "Immune to Ranged Spells" },
+		{ IMMUNE_FEIGN_DEATH,        "Immune to Feign Death" },
+		{ IMMUNE_TAUNT,              "Immune to Taunt" },
+		{ NPC_TUNNELVISION,          "Tunnel Vision" },
+		{ NPC_NO_BUFFHEAL_FRIENDS,   "Does Not Heal of Buff Allies" },
+		{ IMMUNE_PACIFY,             "Immune to Pacify" },
+		{ LEASH,                     "Leashed" },
+		{ TETHER,                    "Tethered" },
+		{ DESTRUCTIBLE_OBJECT,       "Destructible Object" },
+		{ NO_HARM_FROM_CLIENT,       "Immune to Harm from Client" },
+		{ ALWAYS_FLEE,               "Always Flees" },
+		{ FLEE_PERCENT,              "Flee Percentage" },
+		{ ALLOW_BENEFICIAL,          "Allows Beneficial Spells" },
+		{ DISABLE_MELEE,             "Melee is Disabled" },
+		{ NPC_CHASE_DISTANCE,        "Chase Distance" },
+		{ ALLOW_TO_TANK,             "Allowed to Tank" },
+		{ IGNORE_ROOT_AGGRO_RULES,   "Ignores Root Aggro" },
+		{ CASTING_RESIST_DIFF,       "Casting Resist Difficulty" },
+		{ COUNTER_AVOID_DAMAGE,      "Counter Damage Avoidance" },
+		{ PROX_AGGRO,                "Proximity Aggro" },
+		{ IMMUNE_RANGED_ATTACKS,     "Immune to Ranged Attacks" },
+		{ IMMUNE_DAMAGE_CLIENT,      "Immune to Client Damage" },
+		{ IMMUNE_DAMAGE_NPC,         "Immune to NPC Damage" },
+		{ IMMUNE_AGGRO_CLIENT,       "Immune to Client Aggro" },
+		{ IMMUNE_AGGRO_NPC,          "Immune to NPC Aggro" },
+		{ MODIFY_AVOID_DAMAGE,       "Modify Damage Avoidance" },
+		{ IMMUNE_FADING_MEMORIES,    "Immune to Memory Fades" },
+		{ IMMUNE_OPEN,               "Immune to Open" },
+		{ IMMUNE_ASSASSINATE,        "Immune to Assassinate" },
+		{ IMMUNE_HEADSHOT,           "Immune to Headshot" },
+	};
+
+	return special_ability_map;
+}
+
+std::string EQ::constants::GetSpecialAbilityName(uint32 ability_id)
+{
+	const auto& a = EQ::constants::GetSpecialAbilityMap().find(ability_id);
+	if (a != EQ::constants::GetSpecialAbilityMap().end()) {
+		return a->second;
+	}
+
+	return std::string();
+}

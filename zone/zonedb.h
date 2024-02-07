@@ -12,10 +12,9 @@
 #include "event_codes.h"
 #include "../common/repositories/doors_repository.h"
 #include "../common/races.h"
+#include "../common/repositories/npc_faction_entries_repository.h"
 
 #include "bot_database.h"
-
-#define WOLF 42
 
 class Client;
 class Corpse;
@@ -337,12 +336,12 @@ struct CharacterCorpseEntry
 
 namespace BeastlordPetData {
 	struct PetStruct {
-		uint16 race_id = WOLF;
-		uint8 texture = 0;
-		uint8 helm_texture = 0;
-		uint8 gender = Gender::Neuter;
-		float size_modifier = 1.0f;
-		uint8 face = 0;
+		uint16 race_id       = Race::Wolf;
+		uint8  texture       = 0;
+		uint8  helm_texture  = 0;
+		uint8  gender        = Gender::Neuter;
+		float  size_modifier = 1.0f;
+		uint8  face          = 0;
 	};
 }
 
@@ -368,7 +367,7 @@ namespace RaidLootTypes {
 }
 
 class ZoneDatabase : public SharedDatabase {
-	typedef std::list<ServerLootItem_Struct*> ItemList;
+	typedef std::list<LootItem*> ItemList;
 public:
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
@@ -507,11 +506,10 @@ public:
 	uint32 UpdateCharacterCorpseConsent(uint32 character_id, uint32 guild_consent_id);
 
 	/* Faction   */
-	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
 	bool		GetFactionData(FactionMods* fd, uint32 class_mod, uint32 race_mod, uint32 deity_mod, int32 faction_id); //needed for factions Dec, 16 2001
 	bool		GetFactionName(int faction_id, char* name, uint32 buflen); // needed for factions Dec, 16 2001
 	std::string GetFactionName(int faction_id);
-	bool		GetFactionIdsForNPC(uint32 nfl_id, std::list<struct NPCFaction*> *faction_list, int32* primary_faction = 0); // improve faction handling
+	bool		GetFactionIDsForNPC(uint32 npc_faction_id, std::list<NpcFactionEntriesRepository::NpcFactionEntries>* faction_list, int32* primary_faction = 0); // improve faction handling
 	bool		SetCharacterFactionLevel(uint32 char_id, int32 faction_id, int32 value, uint8 temp, faction_map &val_list); // needed for factions Dec, 16 2001
 	bool		LoadFactionData();
 	inline uint32 GetMaxFaction() { return max_faction; }
@@ -530,23 +528,21 @@ public:
 	bool		LoadSpawnGroups(const char* zone_name, uint16 version, SpawnGroupList* spawn_group_list);
 	bool		LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList* spawn_group_list);
 	bool		PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spawn2_list, int16 version);
-	bool		CreateSpawn2(Client *c, uint32 spawngroup, const char* zone, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 cond_value);
+	bool		CreateSpawn2(Client* c, uint32 spawngroup_id, const std::string& zone_short_name, const glm::vec4& position, uint32 respawn, uint32 variance, uint16 condition, int16 condition_value);
 	void		UpdateRespawnTime(uint32 spawn2_id, uint16 instance_id,uint32 timeleft);
 	uint32		GetSpawnTimeLeft(uint32 spawn2_id, uint16 instance_id);
 	void        UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instance_id);
 
 	/* Grids/Paths  */
-	uint32		GetFreeGrid(uint16 zoneid);
-	void		DeleteGrid(Client *c, uint32 sg2, uint32 grid_num, bool grid_too, uint16 zoneid);
-	void		DeleteWaypoint(Client *c, uint32 grid_num, uint32 wp_num, uint16 zoneid);
-	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const glm::vec4& position, uint32 pause, uint16 zoneid);
-	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, const glm::vec4& position, uint32 pause, int type1, int type2, uint16 zoneid);
-	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
-	bool		GridExistsInZone(uint32 zone_id, uint32 grid_id);
-	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const glm::vec3& location, uint32 script = 0, uint16 zoneid = 0);
-	int			GetHighestGrid(uint32 zoneid);
-	int			GetHighestWaypoint(uint32 zoneid, uint32 gridid);
-	int			GetRandomWaypointLocFromGrid(glm::vec4 &loc, uint16 zoneid, int grid);
+	uint32 GetFreeGrid(uint32 zone_id);
+	void DeleteWaypoint(Client* c, uint32 grid_id, uint32 number, uint32 zone_id);
+	void AddWaypoint(Client* c, uint32 grid_id, uint32 number, const glm::vec4 &position, uint32 pause, uint32 zone_id);
+	uint32 AddWaypointForSpawn(Client* c, uint32 spawn2_id, const glm::vec4 &position, uint32 pause, int type, int type2, uint32 zone_id);
+	void ModifyGrid(Client* c, bool remove, uint32 grid_id, uint8 type = 0, uint8 type2 = 0, uint32 zone_id = 0);
+	bool GridExistsInZone(uint32 zone_id, uint32 grid_id);
+	int GetHighestGrid(uint32 zone_id);
+	int GetHighestWaypoint(uint32 zone_id, uint32 grid_id);
+	int GetRandomWaypointFromGrid(glm::vec4 &loc, uint32 zone_id, uint32 grid_id);
 
 	/* NPCs  */
 
@@ -602,8 +598,8 @@ public:
 	/* Tradeskills  */
 	bool	GetTradeRecipe(const EQ::ItemInstance* container, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec, bool* is_augmented);
 	bool	GetTradeRecipe(uint32 recipe_id, uint8 c_type, uint32 some_id, Client* c, DBTradeskillRecipe_Struct* spec);
-	uint32	GetZoneForage(uint32 ZoneID, uint8 skill); /* for foraging */
-	uint32	GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance);
+	uint32	LoadForage(uint32 zone_id, uint8 skill_level);
+	uint32	LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance);
 	void	UpdateRecipeMadecount(uint32 recipe_id, uint32 char_id, uint32 madecount);
 	bool	EnableRecipe(uint32 recipe_id);
 	bool	DisableRecipe(uint32 recipe_id);
@@ -623,8 +619,8 @@ public:
 	bool LoadBlockedSpells(int64 blocked_spells_count, ZoneSpellsBlocked* into, uint32 zone_id);
 
 	/* Traps   */
-	bool	LoadTraps(const char* zonename, int16 version);
-	bool	SetTrapData(Trap* trap, bool repopnow = false);
+	bool	LoadTraps(const std::string& zone_short_name, int16 instance_version);
+	bool	SetTrapData(Trap* t, bool repop = false);
 
 	/* Time   */
 	uint32	GetZoneTimezone(uint32 zoneid, uint32 version);

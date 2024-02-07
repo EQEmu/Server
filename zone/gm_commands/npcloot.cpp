@@ -118,7 +118,7 @@ void command_npcloot(Client *c, const Seperator *sep)
 			uint16 gold = sep->IsNumber(3) ? EQ::Clamp(Strings::ToInt(sep->arg[3]), 0, 65535) : 0;
 			uint16 silver = sep->IsNumber(4) ? EQ::Clamp(Strings::ToInt(sep->arg[4]), 0, 65535) : 0;
 			uint16 copper = sep->IsNumber(5) ? EQ::Clamp(Strings::ToInt(sep->arg[5]), 0, 65535) : 0;
-			target->AddCash(
+			target->AddLootCash(
 				copper,
 				silver,
 				gold,

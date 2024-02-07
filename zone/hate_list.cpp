@@ -80,15 +80,18 @@ bool HateList::IsEntOnHateList(Mob *mob)
 	return false;
 }
 
-struct_HateList *HateList::Find(Mob *in_entity)
+struct_HateList* HateList::Find(Mob* m)
 {
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		if ((*iterator)->entity_on_hatelist == in_entity)
-			return (*iterator);
-		++iterator;
+	if (!m) {
+		return nullptr;
 	}
+
+	for (auto* e : list) {
+		if (e->entity_on_hatelist && e->entity_on_hatelist == m) {
+			return e;
+		}
+	}
+
 	return nullptr;
 }
 
