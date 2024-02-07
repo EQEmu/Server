@@ -570,3 +570,23 @@ void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
 
 	InstanceListRepository::UpdateOne(*this, i);
 }
+
+void Database::CleanupInstanceCorpses() {
+	auto l = InstanceListRepository::GetWhere(
+		*this,
+		"never_expires = 0"
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	std::vector<std::string> instance_ids;
+	for (const auto& e : l) {
+		instance_ids.emplace_back(std::to_string(e.id));
+	}
+
+	const auto imploded_instance_ids = Strings::Implode(",", instance_ids);
+
+	CharacterCorpsesRepository::BuryInstances(*this, imploded_instance_ids);
+}

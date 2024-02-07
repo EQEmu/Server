@@ -166,6 +166,7 @@ public:
 	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids);
 	void PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
+	void CleanupInstanceCorpses();
 
 	/* Adventure related. */
 
