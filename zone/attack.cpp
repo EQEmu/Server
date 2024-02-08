@@ -1718,14 +1718,10 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 	}
 }
 
-bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
 {
-	if (!ClientFinishedLoading()) {
+	if (!ClientFinishedLoading() || dead) {
 		return false;
-	}
-
-	if (dead) {
-		return false;	//cant die more than once...
 	}
 
 	if (!spell) {
@@ -1735,7 +1731,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	if (parse->PlayerHasQuestSub(EVENT_DEATH)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {}",
-			killerMob ? killerMob->GetID() : 0,
+			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
 			static_cast<int>(attack_skill)
@@ -1749,7 +1745,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		}
 	}
 
-	if (killerMob && killerMob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
+	if (killer_mob && killer_mob->IsOfClientBot() && IsValidSpell(spell) && damage > 0) {
 		char val1[20] = { 0 };
 
 		entity_list.MessageCloseString(
@@ -1758,14 +1754,14 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			RuleI(Range, DamageMessages),
 			Chat::NonMelee, /* 283 */
 			HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
-			killerMob->GetCleanName(), /* Message1 */
+			killer_mob->GetCleanName(), /* Message1 */
 			GetCleanName(), /* Message2 */
 			ConvertArray(damage, val1)/* Message3 */
 		);
 	}
 
 	int exploss = 0;
-	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
+	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]", killer_mob ? killer_mob->GetName() : "Unknown", damage, spell, attack_skill);
 
 	// #1: Send death packet to everyone
 	uint8 killed_level = GetLevel();
@@ -1785,7 +1781,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	EQApplicationPacket app(OP_Death, sizeof(Death_Struct));
 	Death_Struct* d = (Death_Struct*)app.pBuffer;
 	d->spawn_id = GetID();
-	d->killer_id = killerMob ? killerMob->GetID() : 0;
+	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
 	d->corpseid = GetID();
 	d->bindzoneid = m_pp.binds[0].zone_id;
 	d->spell_id = IsValidSpell(spell) ? spell : 0xffffffff;
@@ -1812,42 +1808,45 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 		GetMerc()->Suspend();
 	}
 
-	if (killerMob) {
-		if (killerMob->IsNPC()) {
-			if (parse->HasQuestSub(killerMob->GetNPCTypeID(), EVENT_SLAY)) {
-				parse->EventNPC(EVENT_SLAY, killerMob->CastToNPC(), this, "", 0);
+	if (killer_mob) {
+		if (killer_mob->IsNPC()) {
+			if (parse->HasQuestSub(killer_mob->GetNPCTypeID(), EVENT_SLAY)) {
+				parse->EventNPC(EVENT_SLAY, killer_mob->CastToNPC(), this, "", 0);
 			}
 
-			if (emoteid) {
-				killerMob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid, this);
+			killed_by = KilledByTypes::Killed_NPC;
+
+			auto emote_id = killer_mob->GetEmoteID();
+			if (emote_id) {
+				killer_mob->CastToNPC()->DoNPCEmote(EQ::constants::EmoteEventTypes::KilledPC, emoteid, this);
 			}
 
-			killerMob->TrySpellOnKill(killed_level, spell);
-		} else if (killerMob->IsBot()) {
+			killer_mob->TrySpellOnKill(killed_level, spell);
+		} else if (killer_mob->IsBot()) {
 			if (parse->BotHasQuestSub(EVENT_SLAY)) {
-				parse->EventBot(EVENT_SLAY, killerMob->CastToBot(), this, "", 0);
+				parse->EventBot(EVENT_SLAY, killer_mob->CastToBot(), this, "", 0);
 			}
 
-			killerMob->TrySpellOnKill(killed_level, spell);
+			killer_mob->TrySpellOnKill(killed_level, spell);
 		}
 
 		if (
-			killerMob->IsClient() &&
-			(IsDueling() || killerMob->CastToClient()->IsDueling())
+			killer_mob->IsClient() &&
+			(IsDueling() || killer_mob->CastToClient()->IsDueling())
 		) {
 			SetDueling(false);
 			SetDuelTarget(0);
 			if (
-				killerMob->IsClient() &&
-				killerMob->CastToClient()->IsDueling() &&
-				killerMob->CastToClient()->GetDuelTarget() == GetID()
+				killer_mob->IsClient() &&
+				killer_mob->CastToClient()->IsDueling() &&
+				killer_mob->CastToClient()->GetDuelTarget() == GetID()
 			) {
 				//if duel opponent killed us...
-				killerMob->CastToClient()->SetDueling(false);
-				killerMob->CastToClient()->SetDuelTarget(0);
-				entity_list.DuelMessage(killerMob, this, false);
-			}
-			else {
+				killer_mob->CastToClient()->SetDueling(false);
+				killer_mob->CastToClient()->SetDuelTarget(0);
+				entity_list.DuelMessage(killer_mob, this, false);
+				killed_by = KilledByTypes::Killed_DUEL;
+			} else {
 				//otherwise, we just died, end the duel.
 				Mob* who = entity_list.GetMob(GetDuelTarget());
 				if (who && who->IsClient()) {
@@ -1855,6 +1854,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 					who->CastToClient()->SetDuelTarget(0);
 				}
 			}
+		} else if (killer_mob->IsClient()) {
+			killed_by = KilledByTypes::Killed_PVP;
 		}
 	}
 
@@ -1906,12 +1907,11 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 
 	if ((GetLevel() < RuleI(Character, DeathExpLossLevel)) || (GetLevel() > RuleI(Character, DeathExpLossMaxLevel)) || IsBecomeNPC()) {
 		exploss = 0;
-	} else if (killerMob) {
-		if (killerMob->IsClient()) {
-			exploss = 0;
-		} else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient()) {
-			exploss = 0;
-		} else if (killerMob->IsBot()) {
+	} else if (killer_mob) {
+		if (
+			killer_mob->IsOfClientBot() ||
+			(killer_mob->GetOwner() && killer_mob->GetOwner()->IsOfClientBot())
+		) {
 			exploss = 0;
 		}
 	}
@@ -1964,11 +1964,11 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 			RuleB(Character, LeaveNakedCorpses)
 		) {
 			// creating the corpse takes the cash/items off the player too
-			new_corpse = new Corpse(this, exploss);
+			new_corpse = new Corpse(this, exploss, killed_by);
 
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
-			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob && killerMob->IsClient()) {
+			if (tmp[0] == '1' && tmp[1] == '\0' && killer_mob && killer_mob->IsClient()) {
 				database.GetVariable("PvPreward", tmp);
 				auto reward = Strings::ToInt(tmp);
 				if (reward == 3) {
@@ -1986,8 +1986,8 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 					new_corpse->SetPlayerKillItemID(0);
 				}
 
-				if (killerMob->CastToClient()->isgrouped) {
-					auto* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+				if (killer_mob->CastToClient()->isgrouped) {
+					auto* group = entity_list.GetGroupByClient(killer_mob->CastToClient());
 					if (group) {
 						for (int i = 0; i < 6; i++) {
 							if (group->members[i]) {
@@ -2058,15 +2058,15 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	/* QS: PlayerLogDeaths */
 	if (RuleB(QueryServ, PlayerLogDeaths)) {
 		const char * killer_name = "";
-		if (killerMob && killerMob->GetCleanName()) { killer_name = killerMob->GetCleanName(); }
+		if (killer_mob && killer_mob->GetCleanName()) { killer_name = killer_mob->GetCleanName(); }
 		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", GetZoneID(), GetInstanceID(), killer_name, spell, damage);
 		QServ->PlayerLogEvent(Player_Log_Deaths, CharacterID(), event_desc);
 	}
 
 	if (player_event_logs.IsEventEnabled(PlayerEvent::DEATH)) {
 		auto e = PlayerEvent::DeathEvent{
-			.killer_id = killerMob ? static_cast<uint32>(killerMob->GetID()) : static_cast<uint32>(0),
-			.killer_name = killerMob ? killerMob->GetCleanName() : "No Killer",
+			.killer_id = killer_mob ? static_cast<uint32>(killer_mob->GetID()) : static_cast<uint32>(0),
+			.killer_name = killer_mob ? killer_mob->GetCleanName() : "No Killer",
 			.damage = damage,
 			.spell_id = spell,
 			.spell_name = IsValidSpell(spell) ? spells[spell].name : "No Spell",
@@ -2080,7 +2080,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	if (parse->PlayerHasQuestSub(EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {}",
-			killerMob ? killerMob->GetID() : 0,
+			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
 			static_cast<int>(attack_skill)
@@ -2092,6 +2092,7 @@ bool Client::Death(Mob* killerMob, int64 damage, uint16 spell, EQ::skills::Skill
 	}
 	return true;
 }
+
 //SYNC WITH: tune.cpp, mob.h TuneNPCAttack
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
@@ -2373,7 +2374,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill)
+bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
 {
 	LogCombat(
 		"Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
@@ -2836,8 +2837,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			&NPCTypedata,
 			(
 				level > 54 ?
-				RuleI(NPC, MajorNPCCorpseDecayTimeMS) :
-				RuleI(NPC, MinorNPCCorpseDecayTimeMS)
+				RuleI(NPC, MajorNPCCorpseDecayTime) :
+				RuleI(NPC, MinorNPCCorpseDecayTime)
 			)
 		);
 

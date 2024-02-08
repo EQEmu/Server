@@ -261,7 +261,7 @@ public:
 	bool GotoPlayerRaid(const std::string& player_name);
 
 	//abstract virtual function implementations required by base abstract class
-	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
+	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC);
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool HasRaid() { return (GetRaid() ? true : false); }
 	virtual bool HasGroup() { return (GetGroup() ? true : false); }
@@ -1459,7 +1459,13 @@ public:
 	void BuryPlayerCorpses();
 	int64 GetCorpseCount() { return database.GetCharacterCorpseCount(CharacterID()); }
 	uint32 GetCorpseID(int corpse) { return database.GetCharacterCorpseID(CharacterID(), corpse); }
-	uint32 GetCorpseItemAt(int corpse_id, int slot_id) { return database.GetCharacterCorpseItemAt(corpse_id, slot_id); }
+	uint32 GetCorpseItemAt(int corpse_id, int slot_id) {
+		if (!corpse_id) {
+			return 0;
+		}
+		return database.GetCharacterCorpseItemAt(corpse_id, slot_id);
+	}
+
 	void SuspendMinion(int value);
 	void Doppelganger(uint16 spell_id, Mob *target, const char *name_override, int pet_count, int pet_duration);
 	void NotifyNewTitlesAvailable();

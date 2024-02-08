@@ -77,6 +77,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/data_verification.h"
 #include "../common/misc_functions.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/repositories/character_corpses_repository.h"
 
 #include "data_bucket.h"
 #include "quest_parser_collection.h"
@@ -227,7 +228,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			(
 				!RuleB(Spells, ManaTapsRequireNPCMana) ||
 				(
-					RuleB(Spells, ManaTapsRequireNPCMana) && 
+					RuleB(Spells, ManaTapsRequireNPCMana) &&
 					GetTarget()->GetMana() == 0
 				)
 			)
@@ -3064,7 +3065,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	if (IsResurrectionEffects(spellid1)) {
 		return 0;
 	}
-	
+
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
 		Message(0, "You must wait before you can be affected by this spell again.");
 		return -1;
@@ -4128,7 +4129,7 @@ bool Mob::SpellOnTarget(
 		if (IsClient() && (casting_spell_aa_id == aaDireCharm || casting_spell_aa_id == aaDireCharm2 || casting_spell_aa_id == aaDireCharm3)) {
 			StopCasting();
 		}
-		
+
 		//the above call does the message to the client if needed
 		LogSpells("Spell [{}] can't take hold due to immunity [{}] -> [{}]", spell_id, GetName(), spelltar->GetName());
 		safe_delete(action_packet);
@@ -4542,44 +4543,6 @@ bool Mob::SpellOnTarget(
 	LogSpells("Cast of [{}] by [{}] on [{}] complete successfully", spell_id, GetName(), spelltar->GetName());
 
 	return true;
-}
-
-void Corpse::CastRezz(uint16 spellid, Mob* Caster)
-{
-	LogSpells("Corpse::CastRezz spellid [{}], Rezzed() is [{}], rezzexp is [{}]", spellid,IsRezzed(),rez_experience);
-
-	if(IsRezzed()){
-		if(Caster && Caster->IsClient())
-			Caster->Message(Chat::Red,"This character has already been resurrected.");
-
-		return;
-	}
-	/*
-	if(!can_rez) {
-		if(Caster && Caster->IsClient())
-			Caster->MessageString(Chat::White, CORPSE_TOO_OLD);
-		return;
-	}
-	*/
-
-	auto outapp = new EQApplicationPacket(OP_RezzRequest, sizeof(Resurrect_Struct));
-	Resurrect_Struct* rezz = (Resurrect_Struct*) outapp->pBuffer;
-	// Why are we truncating these names to 30 characters ?
-	memcpy(rezz->your_name,corpse_name,30);
-	memcpy(rezz->corpse_name,name,30);
-	memcpy(rezz->rezzer_name,Caster->GetName(),30);
-	rezz->zone_id = zone->GetZoneID();
-	rezz->instance_id = zone->GetInstanceID();
-	rezz->spellid = spellid;
-	rezz->x = m_Position.x;
-	rezz->y = m_Position.y;
-	rezz->z = GetFixedZ(m_Position);
-	rezz->unknown000 = 0x00000000;
-	rezz->unknown020 = 0x00000000;
-	rezz->unknown088 = 0x00000000;
-	// We send this to world, because it needs to go to the player who may not be in this zone.
-	worldserver.RezzPlayer(outapp, rez_experience, corpse_db_id, OP_RezzRequest);
-	safe_delete(outapp);
 }
 
 std::vector<uint16> Mob::GetBuffSpellIDs()
@@ -5012,7 +4975,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 					caster->MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
 					return true;
 				}
-				
+
 				caster->MessageString(Chat::Red, CANNOT_CHARM_YET);	// need to verify message type, not in MQ2Cast for easy look up<Paste>
 				AddToHateList(caster, 1,0,true,false,false,spell_id);
 				return true;
@@ -5191,7 +5154,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if (IsHarmTouchSpell(spell_id) && caster->IsClient() && caster->CastToClient()->FindBuff(DISC_UNHOLY_AURA)) {
 		resist_type = RESIST_DISEASE;
 	}
-	
+
 	//Get the resist chance for the target
 	if (resist_type == RESIST_NONE || spells[spell_id].no_resist) {
 		LogSpells("Spell was unresistable");

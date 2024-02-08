@@ -541,7 +541,7 @@ public:
 	bool CanClassEquipItem(uint32 item_id);
 	bool CanRaceEquipItem(uint32 item_id);
 	bool AffectedBySpellExcludingSlot(int slot, int effect);
-	virtual bool Death(Mob* killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) = 0;
+	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by = KilledByTypes::Killed_NPC) = 0;
 	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill,
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	void SetHP(int64 hp);

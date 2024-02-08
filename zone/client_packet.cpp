@@ -5280,28 +5280,87 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 
-	uint32 decay_time = t->GetDecayTime();
-	if (decay_time) {
-		const std::string& time_string = Strings::SecondsToTime(decay_time, true);
-		Message(
-			Chat::NPCQuestSay,
-			fmt::format(
-				"This corpse will decay in {}.",
-				Strings::ToLower(time_string)
-			).c_str()
-		);
-
-		if (t->IsPlayerCorpse()) {
-			Message(
+	uint32 days, hours, minutes, seconds, remaining_time = 0;
+	if (t && t->IsNPCCorpse()) {
+		remaining_time = t->GetDecayTime();
+		if (remaining_time != 0) {
+			seconds = (remaining_time / 1000) % 60;
+			minutes = (remaining_time / 60000) % 60;
+			MessageString(
 				Chat::NPCQuestSay,
-				fmt::format(
-					"This corpse {} be resurrected.",
-					t->IsRezzed() ? "cannot" : "can"
-				).c_str()
+				CORPSE_DECAY_TIME_MINUTE,
+				std::to_string(minutes).c_str(),
+				std::to_string(seconds).c_str()
 			);
+		} else {
+			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 		}
-	} else {
-		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
+	} else if (t && t->IsPlayerCorpse()) {
+		remaining_time = t->GetRemainingRezTime();
+		if (!t->IsRezzed()) {
+			if (remaining_time > 0) {
+				seconds = (remaining_time / 1000) % 60;
+				minutes = (remaining_time / 60000) % 60;
+				hours   = (remaining_time / 3600000) % 24;
+				if (hours) {
+					MessageString(
+						Chat::White,
+						CORPSE_REZ_TIME_HOUR,
+						std::to_string(hours).c_str(),
+						std::to_string(minutes).c_str(),
+						std::to_string(seconds).c_str()
+					);
+				} else {
+					MessageString(
+						Chat::White,
+						CORPSE_REZ_TIME_MINUTE,
+						std::to_string(minutes).c_str(),
+						std::to_string(seconds).c_str()
+					);
+				}
+				hours = 0;
+			} else {
+				MessageString(Chat::White, CORPSE_TOO_OLD);
+			}
+		} else {
+			Message(Chat::White, "This corpse has already accepted a resurrection.");
+		}
+
+		remaining_time = t->GetDecayTime();
+		if (remaining_time != 0) {
+			seconds = (remaining_time / 1000) % 60;
+			minutes = (remaining_time / 60000) % 60;
+			hours   = (remaining_time / 3600000) % 24;
+			days    = remaining_time / 86400000;
+
+			if (days) {
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_DAY,
+					std::to_string(days).c_str(),
+					std::to_string(hours).c_str(),
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
+			} else if (hours) {
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_HOUR,
+					std::to_string(hours).c_str(),
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
+			} else {
+				MessageString(
+					Chat::White,
+					CORPSE_DECAY_TIME_MINUTE,
+					std::to_string(minutes).c_str(),
+					std::to_string(seconds).c_str()
+				);
+			}
+		} else {
+			MessageString(Chat::White, CORPSE_DECAY_NOW);
+		}
 	}
 }
 

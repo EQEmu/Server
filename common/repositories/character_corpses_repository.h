@@ -65,7 +65,7 @@ public:
 			fmt::format(
 				"UPDATE `{}` SET `is_buried` = 1 WHERE `is_buried` = 0 AND (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
 				TableName(),
-				RuleI(Character, CorpseDecayTimeMS) / 1000
+				RuleI(Character, CorpseDecayTime) / 1000
 			)
 		);
 

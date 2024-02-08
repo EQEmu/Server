@@ -226,6 +226,12 @@ enum class LootRequestType : uint8 {
 	AllowedPVPDefined,
 };
 
+enum class KilledByTypes : uint8 {
+	Killed_NPC = 0,
+	Killed_DUEL = 1,
+	Killed_PVP = 2
+};
+
 namespace Journal {
 	enum class SpeakMode : uint8 {
 		Raw = 0,	// this just uses the raw message

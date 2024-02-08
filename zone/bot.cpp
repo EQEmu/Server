@@ -435,8 +435,9 @@ Bot::Bot(
 			SetMana(0);
 			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		} else {
-			SetHP(GetMaxHP());
-			SetMana(GetMaxMana());
+			SetHP(GetMaxHP() / 20);
+			SetMana(GetMaxMana() / 20);
+			SetEndurance(GetMaxEndurance() / 20);
 		}
 	}
 
@@ -4480,20 +4481,24 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 }
 
-bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
-	if (!NPC::Death(killerMob, damage, spell_id, attack_skill)) {
+bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
+{
+	if (!NPC::Death(killer_mob, damage, spell_id, attack_skill)) {
 		return false;
 	}
 
 	Mob *my_owner = GetBotOwner();
+
 	if (my_owner && my_owner->IsClient() && my_owner->CastToClient()->GetBotOption(Client::booDeathMarquee)) {
-		if (killerMob)
-			my_owner->CastToClient()->SendMarqueeMessage(Chat::White, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killerMob->GetCleanName()));
-		else
+		if (killer_mob) {
+			my_owner->CastToClient()->SendMarqueeMessage(Chat::White, 510, 0, 1000, 3000, StringFormat("%s has been slain by %s", GetCleanName(), killer_mob->GetCleanName()));
+		} else {
 			my_owner->CastToClient()->SendMarqueeMessage(Chat::White, 510, 0, 1000, 3000, StringFormat("%s has been slain", GetCleanName()));
+		}
 	}
 
 	const auto c = entity_list.GetCorpseByID(GetID());
+
 	if (c) {
 		c->Depop();
 	}
@@ -4507,19 +4512,19 @@ bool Bot::Death(Mob *killerMob, int64 damage, uint16 spell_id, EQ::skills::Skill
 	if (parse->BotHasQuestSub(EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {}",
-			killerMob ? killerMob->GetID() : 0,
+			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell_id,
 			static_cast<int>(attack_skill)
 		);
 
-		parse->EventBot(EVENT_DEATH_COMPLETE, this, killerMob, export_string, 0);
+		parse->EventBot(EVENT_DEATH_COMPLETE, this, killer_mob, export_string, 0);
 	}
 
 	Zone();
 	entity_list.RemoveBot(GetID());
 
-return true;
+	return true;
 }
 
 void Bot::Damage(Mob *from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
