@@ -2276,7 +2276,7 @@ void Client::SetRacialLanguages( PlayerProfile_Struct *pp )
 			pp->languages[Language::VahShir]       = Language::MaxValue;
 			break;
 		}
-		case Race::Froglok: {
+		case Race::Froglok2: {
 			pp->languages[Language::CommonTongue] = Language::MaxValue;
 			pp->languages[Language::Froglok]      = Language::MaxValue;
 			pp->languages[Language::Troll]        = 25;
