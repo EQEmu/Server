@@ -845,7 +845,7 @@ LootItem *Corpse::GetItem(uint16 lootslot, LootItem **bag_item_data)
 
 		// convert above code to for loop
 		for (const auto &item: m_item_list) {
-			if (item->equip_slot >= bagstart && item->equip_slot < bagstart + 10) {
+			if (item->equip_slot >= bagstart && item->equip_slot < bagstart + RoF2::invbag::SLOT_COUNT) {
 				bag_item_data[item->equip_slot - bagstart] = item;
 			}
 		}
@@ -1468,9 +1468,9 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		return;
 	}
 
-	const EQ::ItemData *item      = nullptr;
-	EQ::ItemInstance   *inst      = nullptr;
-	LootItem           *item_data = nullptr, *bag_item_data[10] = {};
+	const EQ::ItemData *item 	  = nullptr;
+	EQ::ItemInstance   *inst 	  = nullptr;
+	LootItem           *item_data = nullptr, *bag_item_data[RoF2::invbag::SLOT_COUNT] = {};
 
 	memset(bag_item_data, 0, sizeof(bag_item_data));
 	if (GetPlayerKillItem() > 1) {

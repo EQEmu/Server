@@ -189,29 +189,27 @@ SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
 {
-	// Delete cursor items
-	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
-	                                       "AND ((slotid >= 8000 AND slotid <= 8999) "
-	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-	                                       char_id, EQ::invslot::slotCursor,
-	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
-	const auto results = QueryDatabase(query);
+    // Delete cursor items
+    std::string query = StringFormat("DELETE FROM inventory WHERE slotid = %i OR (slotid >= %i AND slotid <= %i)",
+                                    EQ::invslot::slotCursor,
+                                    EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
+    auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
         return false;
     }
 
-    int i = 8000;
-    for(auto& it = start; it != end; ++it, i++) {
-		if (i > 8999) { break; } // shouldn't be anything in the queue that indexes this high
-		const EQ::ItemInstance *inst = *it;
-		const int16 use_slot = (i == 8000) ? EQ::invslot::slotCursor : i;
-		if (!SaveInventory(char_id, inst, use_slot)) {
-			return false;
-		}
+    int i = EQ::invslot::slotCursor;
+    for(auto it = start; it != end; ++it, i++) {
+        if (i > EQ::invbag::CURSOR_BAG_END) { break; } // shouldn't be anything in the queue that indexes this high
+        EQ::ItemInstance *inst = *it;
+        int16 use_slot = (i == EQ::invslot::slotCursor) ? EQ::invslot::slotCursor : i;
+        if (!SaveInventory(char_id, inst, use_slot)) {
+            return false;
+        }
     }
 
-	return true;
+    return true;
 }
 
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance* inst)
@@ -255,7 +253,8 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const EQ::ItemInstance* inst,
 	if (slot_id >= EQ::invslot::GUILD_TRIBUTE_BEGIN && slot_id <= EQ::invslot::GUILD_TRIBUTE_END)
 		return true;
 
-	if (slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END) {
+	if ((slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invslot::SHARED_BANK_END) || 
+	    (slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
         // Shared bank inventory
 		if (!inst) {
 			return DeleteSharedBankSlot(char_id, slot_id);
@@ -388,7 +387,7 @@ bool SharedDatabase::DeleteInventorySlot(uint32 char_id, int16 slot_id) {
 
 	const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM inventory WHERE charid = %i AND slotid >= %i AND slotid < %i",
-                        char_id, base_slot_id, (base_slot_id+10));
+                        char_id, base_slot_id, (base_slot_id+EQ::invbag::SLOT_COUNT));
     results = QueryDatabase(query);
     if (!results.Success()) {
         return false;
@@ -415,7 +414,7 @@ bool SharedDatabase::DeleteSharedBankSlot(uint32 char_id, int16 slot_id) {
     const int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(slot_id, EQ::invbag::SLOT_BEGIN);
     query = StringFormat("DELETE FROM sharedbank WHERE acctid = %i "
                         "AND slotid >= %i AND slotid < %i",
-                        account_id, base_slot_id, (base_slot_id+10));
+                        account_id, base_slot_id, (base_slot_id+EQ::invbag::SLOT_COUNT));
     results = QueryDatabase(query);
     if (!results.Success()) {
         return false;
@@ -755,16 +754,21 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 					inst->PutAugment(this, i, aug[i]);
 			}
 		}
-
+		
+	
 		int16 put_slot_id;
-		if (slot_id >= 8000 && slot_id <= 8999) {
+		if (slot_id >= EQ::invbag::CURSOR_BAG_BEGIN && slot_id <= EQ::invbag::CURSOR_BAG_END) {
 			put_slot_id = inv->PushCursor(*inst);
-		} else if (slot_id >= 3111 && slot_id <= 3179) {
+		}
+		/* COMMENTING THIS OUT FOR NOW.. THIS IS CAUSING ISSUES
+		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
 			LogError("Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
 				char_id, item_id, slot_id);
 			put_slot_id = inv->PushCursor(*inst);
-		} else {
+		} 
+		*/
+		else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
 		}
 
@@ -1230,10 +1234,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.PointType = Strings::ToUnsignedInt(row[ItemField::pointtype]);
 
 		// Bag
-		item.BagSize = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagsize]));
-		item.BagSlots = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagslots]), 0, 10)); // Will need to be changed from std::min to just use database value when bag slots are increased
-		item.BagType = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::bagtype]));
-		item.BagWR = static_cast<uint8>(EQ::Clamp(Strings::ToInt(row[ItemField::bagwr]), 0, 100));
+		item.BagSize = static_cast<uint8>(std::stoul(row[ItemField::bagsize]));
+		item.BagSlots = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagslots]), 0, (int)(EQ::invbag::SLOT_COUNT)));
+		item.BagType = static_cast<uint8>(std::stoul(row[ItemField::bagtype]));
+		item.BagWR = static_cast<uint8>(EQ::Clamp(std::stoi(row[ItemField::bagwr]), 0, 100));
 
 		// Bard Effect
 		item.Bard.Effect = disable_bard_focus_effects ? 0 : Strings::ToInt(row[ItemField::bardeffect]);

@@ -15362,7 +15362,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	// I don't know what they are for (yet), but it doesn't seem to matter that we ignore them.
 
 
-	uint32 max_items = 80;
+	uint32 max_items = EQ::invtype::BAZAAR_SIZE;
 
 	/*
 	if (GetClientVersion() >= EQClientRoF)

@@ -3307,21 +3307,21 @@ struct WhoAllReturnStruct {
 struct Trader_Struct {
 /*000*/	uint32	Code;
 /*004*/	uint32	Unknown004;
-/*008*/	uint64	Items[80];
-/*648*/	uint32	ItemCost[80];
+/*008*/	uint64	Items[EQ::invtype::BAZAAR_SIZE];
+/*648*/	uint32	ItemCost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct ClickTrader_Struct {
 /*000*/	uint32	Code;
 /*004*/	uint32	Unknown004;
-/*008*/	int64	SerialNumber[80];
-/*648*/	uint32	ItemCost[80];
+/*008*/	int64	SerialNumber[EQ::invtype::BAZAAR_SIZE];
+/*648*/	uint32	ItemCost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct GetItems_Struct{
-	uint32	Items[80];
-	int32	SerialNumber[80];
-	int32	Charges[80];
+	uint32	Items[EQ::invtype::BAZAAR_SIZE];
+	int32	SerialNumber[EQ::invtype::BAZAAR_SIZE];
+	int32	Charges[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct BecomeTrader_Struct

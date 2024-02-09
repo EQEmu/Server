@@ -77,6 +77,7 @@ namespace RoF2
 		} // namespace enum_
 		using namespace enum_;
 
+		/* one file to rule them all moved from titanium for ease of changing*/
 		const int16 POSSESSIONS_SIZE = 34;
 		const int16 BANK_SIZE = 24;
 		const int16 SHARED_BANK_SIZE = 2;
@@ -161,8 +162,32 @@ namespace RoF2
 		} // namespace enum_
 		using namespace enum_;
 
+		/* one file to rule them all moved from titanium for ease of changing*/
+		const int16 SLOT_TRADESKILL_EXPERIMENT_COMBINE = 1000;
+
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
+
+		/* these values still match titanium */
+		const int16 BANK_BEGIN = 2000;
+		const int16 BANK_END = (BANK_BEGIN + invtype::BANK_SIZE) - 1;
+
+		const int16 SHARED_BANK_BEGIN = 2500;
+		const int16 SHARED_BANK_END = (SHARED_BANK_BEGIN + invtype::SHARED_BANK_SIZE) - 1;
+
+		const int16 TRADE_BEGIN = 3000;
+		const int16 TRADE_END = (TRADE_BEGIN + invtype::TRADE_SIZE) - 1;
+
+		const int16 TRADE_NPC_END = (TRADE_BEGIN + invtype::TRADE_NPC_SIZE) - 1; // defined by implication
+
+		const int16 WORLD_BEGIN = 4000;
+		const int16 WORLD_END = (WORLD_BEGIN + invtype::WORLD_SIZE) - 1;
+
+		const int16 TRIBUTE_BEGIN = 400;
+		const int16 TRIBUTE_END = (TRIBUTE_BEGIN + invtype::TRIBUTE_SIZE) - 1;
+
+		const int16 GUILD_TRIBUTE_BEGIN = 450;
+		const int16 GUILD_TRIBUTE_END = (GUILD_TRIBUTE_BEGIN + invtype::GUILD_TRIBUTE_SIZE) - 1;
 
 		const int16 POSSESSIONS_BEGIN = slotCharm;
 		const int16 POSSESSIONS_END = slotCursor;
@@ -199,9 +224,24 @@ namespace RoF2
 		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::RoF2; }
 
 		const int16 SLOT_INVALID = IINVALID;
-		const int16 SLOT_BEGIN = INULL;
-		const int16 SLOT_END = 9; //254;
-		const int16 SLOT_COUNT = 10; //255; // server Size will be 255..unsure what actual client is (test)
+		const int16 SLOT_BEGIN = INULL;		
+		const int16 SLOT_COUNT = 200; // there is where you change bag size
+		const int16 SLOT_END = SLOT_COUNT - 1; 
+
+		/* if you change slot count you will have to modify the locations below to fit the larger dimensions of bags */
+		/* only used values since calculations are being done in emu_constants */
+
+		// These are NOT actually used; slot boundries are being calculated in emu_constants. 
+		// If you change bag slot maximum you will blow up existing inventories
+		const int16 GENERAL_BAGS_BEGIN = 251;
+
+		const int16 CURSOR_BAG_BEGIN = 351; 
+
+		const int16 BANK_BAGS_BEGIN = 2031;
+
+		const int16 SHARED_BANK_BAGS_BEGIN = 2531;
+
+		const int16 TRADE_BAGS_BEGIN = 3031;
 
 		const char* GetInvBagIndexName(int16 bag_index);
 

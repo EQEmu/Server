@@ -62,7 +62,7 @@ namespace EQ
 		using RoF2::invtype::KRONO_SIZE;
 		using RoF2::invtype::OTHER_SIZE;
 
-		using Titanium::invtype::TRADE_NPC_SIZE;
+		using RoF2::invtype::TRADE_NPC_SIZE;
 
 		using RoF2::invtype::TYPE_INVALID;
 		using RoF2::invtype::TYPE_BEGIN;
@@ -89,7 +89,7 @@ namespace EQ
 		using RoF2::invslot::SLOT_INVALID;
 		using RoF2::invslot::SLOT_BEGIN;
 
-		using Titanium::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+		using RoF2::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 
 		const int16 SLOT_AUGMENT_GENERIC_RETURN = 1001; // clients don't appear to use this method... (internal inventory return value)
 
@@ -109,25 +109,25 @@ namespace EQ
 		using RoF2::invslot::BONUS_STAT_END;
 		using RoF2::invslot::BONUS_SKILL_END;
 
-		using Titanium::invslot::BANK_BEGIN;
-		using SoF::invslot::BANK_END;
+		using RoF2::invslot::BANK_BEGIN;
+		using RoF2::invslot::BANK_END;
 
-		using Titanium::invslot::SHARED_BANK_BEGIN;
-		using Titanium::invslot::SHARED_BANK_END;
+		using RoF2::invslot::SHARED_BANK_BEGIN;
+		using RoF2::invslot::SHARED_BANK_END;
 
-		using Titanium::invslot::TRADE_BEGIN;
-		using Titanium::invslot::TRADE_END;
+		using RoF2::invslot::TRADE_BEGIN;
+		using RoF2::invslot::TRADE_END;
 
-		using Titanium::invslot::TRADE_NPC_END;
+		using RoF2::invslot::TRADE_NPC_END;
 
-		using Titanium::invslot::WORLD_BEGIN;
-		using Titanium::invslot::WORLD_END;
+		using RoF2::invslot::WORLD_BEGIN;
+		using RoF2::invslot::WORLD_END;
 
-		using Titanium::invslot::TRIBUTE_BEGIN;
-		using Titanium::invslot::TRIBUTE_END;
+		using RoF2::invslot::TRIBUTE_BEGIN;
+		using RoF2::invslot::TRIBUTE_END;
 
-		using Titanium::invslot::GUILD_TRIBUTE_BEGIN;
-		using Titanium::invslot::GUILD_TRIBUTE_END;
+		using RoF2::invslot::GUILD_TRIBUTE_BEGIN;
+		using RoF2::invslot::GUILD_TRIBUTE_END;
 
 		const int16 CORPSE_BEGIN = invslot::slotGeneral1;
 		const int16 CORPSE_END = CORPSE_BEGIN + invslot::slotCursor;
@@ -144,34 +144,36 @@ namespace EQ
 	} // namespace invslot
 
 	namespace invbag {
-		using Titanium::invbag::SLOT_INVALID;
-		using Titanium::invbag::SLOT_BEGIN;
-		using Titanium::invbag::SLOT_END;
-		using Titanium::invbag::SLOT_COUNT;
+		using RoF2::invbag::SLOT_INVALID;
+		using RoF2::invbag::SLOT_BEGIN;
+		using RoF2::invbag::SLOT_END;
+		using RoF2::invbag::SLOT_COUNT;
 
-		using Titanium::invbag::GENERAL_BAGS_BEGIN;
+		using RoF2::invslot::WORLD_END;
+
+		const int16 GENERAL_BAGS_BEGIN = WORLD_END + 1;
 		const int16 GENERAL_BAGS_COUNT = invslot::GENERAL_COUNT * SLOT_COUNT;
 		const int16 GENERAL_BAGS_END = (GENERAL_BAGS_BEGIN + GENERAL_BAGS_COUNT) - 1;
 
 		const int16 GENERAL_BAGS_8_COUNT = 8 * SLOT_COUNT;
 		const int16 GENERAL_BAGS_8_END = (GENERAL_BAGS_BEGIN + GENERAL_BAGS_8_COUNT) - 1;
 
-		const int16 CURSOR_BAG_BEGIN = 351;
+		const int16 CURSOR_BAG_BEGIN = GENERAL_BAGS_END + 1;
 		const int16 CURSOR_BAG_COUNT = SLOT_COUNT;
 		const int16 CURSOR_BAG_END = (CURSOR_BAG_BEGIN + CURSOR_BAG_COUNT) - 1;
 
-		using Titanium::invbag::BANK_BAGS_BEGIN;
+		const int16 BANK_BAGS_BEGIN = CURSOR_BAG_END + 1;
 		const int16 BANK_BAGS_COUNT = (invtype::BANK_SIZE * SLOT_COUNT);
 		const int16 BANK_BAGS_END = (BANK_BAGS_BEGIN + BANK_BAGS_COUNT) - 1;
 
 		const int16 BANK_BAGS_16_COUNT = 16 * SLOT_COUNT;
 		const int16 BANK_BAGS_16_END = (BANK_BAGS_BEGIN + BANK_BAGS_16_COUNT) - 1;
 
-		using Titanium::invbag::SHARED_BANK_BAGS_BEGIN;
+		const int16 SHARED_BANK_BAGS_BEGIN = BANK_BAGS_END + 1;
 		const int16 SHARED_BANK_BAGS_COUNT = invtype::SHARED_BANK_SIZE * SLOT_COUNT;
 		const int16 SHARED_BANK_BAGS_END = (SHARED_BANK_BAGS_BEGIN + SHARED_BANK_BAGS_COUNT) - 1;
 
-		using Titanium::invbag::TRADE_BAGS_BEGIN;
+		const int16 TRADE_BAGS_BEGIN = SHARED_BANK_BAGS_END + 1;
 		const int16 TRADE_BAGS_COUNT = invtype::TRADE_SIZE * SLOT_COUNT;
 		const int16 TRADE_BAGS_END = (TRADE_BAGS_BEGIN + TRADE_BAGS_COUNT) - 1;
 

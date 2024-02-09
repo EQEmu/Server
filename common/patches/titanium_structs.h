@@ -2458,17 +2458,17 @@ struct Trader_Struct {
 	uint32	code;
 	uint32	itemid[160];
 	uint32	unknown;
-	uint32	itemcost[80];
+	uint32	itemcost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct ClickTrader_Struct {
 	uint32	code;
 	uint32	unknown[161];//damn soe this is totally pointless :/ but at least your finally using memset! Good job :) -LE
-	uint32	itemcost[80];
+	uint32	itemcost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct GetItems_Struct{
-	uint32	items[80];
+	uint32	items[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct BecomeTrader_Struct{

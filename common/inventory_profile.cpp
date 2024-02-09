@@ -1056,7 +1056,7 @@ int16 EQ::InventoryProfile::CalcSlotId(int16 bagslot_id, uint8 bagidx) {
 
 	int16 slot_id = INVALID_INDEX;
 
-	if (bagslot_id == invslot::slotCursor || bagslot_id == 8000) {
+	if (bagslot_id == invslot::slotCursor) {
 		slot_id = invbag::CURSOR_BAG_BEGIN + bagidx;
 	}
 	else if (bagslot_id >= invslot::GENERAL_BEGIN && bagslot_id <= invslot::GENERAL_END) {
