@@ -898,6 +898,7 @@ Mob *SwarmPet::GetOwner()
 
 //New AA
 void Client::SendAlternateAdvancementTable() {
+	LogDebug("Sending AA Table");
 	for(auto &aa : zone->aa_abilities) {
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
@@ -926,17 +927,30 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 		return;
 	}
 
-	if(!(ability->classes & (1 << GetClass()))) {
-		return;
+	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
+	auto outapp = new EQApplicationPacket(OP_SendAATable, size);
+	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
+
+
+	// Lie to the client about who can use this AA rank if we are multiclassing
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		if ((ability->classes >> 1) & GetClassesBits() || (ability->classes & (1 << GetClass()))) {
+			aai->classes = 0xFFFFFFF;
+		} else {
+			aai->classes = ability->classes;
+			aai->grant_only = 1;
+		}	
+	} else {
+		if(!(ability->classes & (1 << GetClass()))) {
+			return;
+		}
+		aai->classes = ability->classes;
+		aai->grant_only = ability->grant_only;
 	}
 
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
-
-	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * rank->effects.size()) + (sizeof(AARankPrereq_Struct) * rank->prereqs.size());
-	auto outapp = new EQApplicationPacket(OP_SendAATable, size);
-	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
 
 	aai->id = rank->id;
 	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
@@ -949,7 +963,6 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->spell = rank->spell;
 	aai->spell_type = rank->spell_type;
 	aai->spell_refresh = rank->recast_time;
-	aai->classes = ability->classes;
 	aai->level_req = rank->level_req;
 	aai->current_level = level;
 	aai->max_level = ability->GetMaxLevel(this);
@@ -964,7 +977,6 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->expansion = rank->expansion;
 	aai->category = ability->category;
 	aai->charges = ability->charges;
-	aai->grant_only = ability->grant_only;
 	aai->total_effects = rank->effects.size();
 	aai->total_prereqs = rank->prereqs.size();
 
@@ -1599,8 +1611,15 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 		return false;
 	}
 
-	if (!(a->classes & (1 << GetClass()))) {
-		return false;
+	// Lie to the client about who can use this AA rank if we are multiclassing
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		if (!(IsClient() && ((a->classes >> 1) & this->CastToClient()->GetClassesBits()))) {
+			return false;
+		}
+	} else {
+		if (!(a->classes & (1 << GetClass()))) {
+			return false;
+		}
 	}
 
 	// Passive and Active Shroud AAs, skip for now

@@ -96,7 +96,7 @@ namespace EQ
 		bool IsCharged() const;
 
 		// Can item be equipped by/at?
-		bool IsEquipable(uint16 race, uint16 class_) const;
+		bool IsEquipable(uint16 race, uint16 class_bits) const;
 		bool IsClassEquipable(uint16 class_) const;
 		bool IsRaceEquipable(uint16 race) const;
 		bool IsEquipable(int16 slot_id) const;

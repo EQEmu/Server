@@ -277,7 +277,8 @@ bool EQ::InventoryProfile::SwapItem(
 	uint16 race_id,
 	uint8 class_id,
 	uint16 deity_id,
-	uint8 level
+	uint8 level,
+	int classes_bits
 ) {
 	fail_state = swapInvalid;
 
@@ -350,10 +351,12 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapNullData;
 				return false;
 			}
-			if (race_id && class_id && !source_item->IsEquipable(race_id, class_id)) {
+						
+			if (race_id && class_id && !source_item->IsEquipable(race_id, classes_bits)) {
 				fail_state = swapRaceClass;
 				return false;
-			}
+			}   
+			
 			if (deity_id && source_item->Deity && !(deity::GetDeityBitmask((deity::DeityType)deity_id) & source_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
@@ -656,6 +659,32 @@ int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
 	}
 
 	return quantity;
+}
+
+bool EQ::InventoryProfile::IsClickEffectEquipped(uint32 spellid) {
+
+	bool has_equipped = false;
+	ItemInstance* item = nullptr;
+	ItemInstance* augment = nullptr;
+	EQ::item::ItemEffect_Struct eff;
+
+	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
+		item = GetItem(slot_id);
+		if (!item) { continue; }
+		eff = item->GetItem()->Click;
+		if (eff.Effect == spellid) {
+			return true;
+		}			
+		for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+			augment = item->GetAugment(augment_slot);
+			if (!augment) { continue; }
+			eff = augment->GetItem()->Click;
+			if (eff.Effect == spellid) {
+				return true;
+			}
+		}			
+	}
+	return false;
 }
 
 //This function has a flaw in that it only returns the last stack that it looked at

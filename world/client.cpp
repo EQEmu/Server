@@ -504,7 +504,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			join->lsaccount_id = GetLSID();
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
-		}
+		}		
 
 		if (!is_player_zoning)
 			SendGuildList();

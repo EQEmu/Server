@@ -56,15 +56,15 @@ bool EQ::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, c
 bool EQ::saylink::GenerateLinkBody(std::string &say_link_body, const SayLinkBody_Struct &say_link_body_struct)
 {
 	say_link_body = StringFormat(
-		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
+		"%1X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%1X" "%04X" "%02X" "%05X" "%08X",
 		(0x0F & say_link_body_struct.action_id),
-		(0x000FFFFF & say_link_body_struct.item_id),
-		(0x000FFFFF & say_link_body_struct.augment_1),
-		(0x000FFFFF & say_link_body_struct.augment_2),
-		(0x000FFFFF & say_link_body_struct.augment_3),
-		(0x000FFFFF & say_link_body_struct.augment_4),
-		(0x000FFFFF & say_link_body_struct.augment_5),
-		(0x000FFFFF & say_link_body_struct.augment_6),
+		(0xFFFFFFFF & say_link_body_struct.item_id),
+		(0xFFFFFFFF & say_link_body_struct.augment_1),
+		(0xFFFFFFFF & say_link_body_struct.augment_2),
+		(0xFFFFFFFF & say_link_body_struct.augment_3),
+		(0xFFFFFFFF & say_link_body_struct.augment_4),
+		(0xFFFFFFFF & say_link_body_struct.augment_5),
+		(0xFFFFFFFF & say_link_body_struct.augment_6),
 		(0x0F & say_link_body_struct.is_evolving),
 		(0x0000FFFF & say_link_body_struct.evolve_group),
 		(0xFF & say_link_body_struct.evolve_level),
@@ -142,8 +142,8 @@ void EQ::SayLinkEngine::generate_body()
 	/*
 	Current server mask: EQClientRoF2
 
-	RoF2: "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
-	RoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
+	RoF2: "%1X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%1X" "%04X" "%02X" "%05X" "%08X" (56)
+	RoF:  "%1X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%1X" "%04X" "%1X"  "%05X" "%08X" (55)
 	SoF:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"  "%05X" "%08X" (50)
 	6.2:  "%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X"        "%1X" "%04X" "%1X"         "%08X" (45)
 	*/
@@ -243,15 +243,15 @@ void EQ::SayLinkEngine::generate_body()
 	}
 
 	m_LinkBody = StringFormat(
-		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
+		"%1X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%08X" "%1X" "%04X" "%02X" "%05X" "%08X",
 		(0x0F & m_LinkBodyStruct.action_id),
-		(0x000FFFFF & m_LinkBodyStruct.item_id),
-		(0x000FFFFF & m_LinkBodyStruct.augment_1),
-		(0x000FFFFF & m_LinkBodyStruct.augment_2),
-		(0x000FFFFF & m_LinkBodyStruct.augment_3),
-		(0x000FFFFF & m_LinkBodyStruct.augment_4),
-		(0x000FFFFF & m_LinkBodyStruct.augment_5),
-		(0x000FFFFF & m_LinkBodyStruct.augment_6),
+		(0xFFFFFFFF & m_LinkBodyStruct.item_id),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_1),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_2),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_3),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_4),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_5),
+		(0xFFFFFFFF & m_LinkBodyStruct.augment_6),
 		(0x0F & m_LinkBodyStruct.is_evolving),
 		(0x0000FFFF & m_LinkBodyStruct.evolve_group),
 		(0xFF & m_LinkBodyStruct.evolve_level),
@@ -376,7 +376,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 void EQ::SayLinkEngine::LoadCachedSaylinks()
 {
-	auto saylinks = SaylinkRepository::GetWhere(database, "phrase not REGEXP '[A-Z]' and phrase not REGEXP '[0-9]'");
+	auto saylinks = SaylinkRepository::GetWhere(database, "phrase not like '%#%'");
 	LogSaylink("Loaded [{}] saylinks into cache", saylinks.size());
 	g_cached_saylinks = saylinks;
 }
@@ -399,7 +399,6 @@ SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string sayli
 
 	// return if found from the database
 	if (!saylinks.empty()) {
-		g_cached_saylinks.emplace_back(saylinks[0]);
 		return saylinks[0];
 	}
 

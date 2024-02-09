@@ -1300,7 +1300,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool try_cursor, LootItem** bag_item_data)
 {
 	// #1: Try to auto equip
-	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {
+	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClassesBits()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {
 		for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
 			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
@@ -2166,13 +2166,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 
 		EQ::InventoryProfile::SwapItemFailState fail_state = EQ::InventoryProfile::swapInvalid;
-		if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state, GetBaseRace(), GetBaseClass(), GetDeity(), GetLevel())) {
+		if (!m_inv.SwapItem(src_slot_id, dst_slot_id, fail_state, GetBaseRace(), GetBaseClass(), GetDeity(), GetLevel(), GetClassesBits())) {
 			const char* fail_message = "The selected slot was invalid.";
 			if (fail_state == EQ::InventoryProfile::swapRaceClass || fail_state == EQ::InventoryProfile::swapDeity)
 				fail_message = "Your class, deity and/or race may not equip that item.";
 			else if (fail_state == EQ::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
-
 			if (fail_message)
 				Message(Chat::Red, "%s", fail_message);
 
@@ -2289,7 +2288,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 8: Re-calc stats
 	CalcBonuses();
-	ApplyWeaponsStance();
+
+	if (RuleB(Custom, ServerAuthStats)) {
+		SendEdgeStatBulkUpdate();
+	}
+
+	ApplyWeaponsStance();	
 	return true;
 }
 
@@ -3135,6 +3139,127 @@ uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 	}
 
 	return 0;
+}
+
+int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
+{
+	switch (eLabel)
+	{
+		case eStatCurHP:
+		{
+			return GetHP();
+		}
+		case eStatMaxHP:
+		{	
+			CalcMaxHP();
+			return GetMaxHP();
+		}
+		case eStatCurMana:
+		{
+			return GetMana();
+		}
+		case eStatMaxMana:
+		{
+			CalcMaxMana();
+			return GetMaxMana();
+		}
+		case eStatCurEndur:
+		{
+			return GetEndurance();
+		}
+		case eStatMaxEndur:
+		{
+			CalcMaxEndurance();
+			return GetMaxEndurance();
+		}
+		case eStatClassesBitmask:
+		{
+			return GetClassesBits();
+		}
+		default:
+		{
+			return 0;
+		}
+	}
+	return 0;
+}
+
+void Client::SendEdgeStatBulkUpdate()
+{
+	EmuOpcode opcode = OP_Unknown;
+	EQApplicationPacket* outapp = nullptr;
+	EdgeStat_Struct* itempacket = nullptr;
+
+	// Construct packet
+	opcode = OP_EdgeStats;
+	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * ((int)(eStatEntry::eStatMax) - 1)));
+	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+	itempacket->count = (int)(eStatMax) - 1;
+	for(int guava = 0; guava < eStatEntry::eStatMax - 1; guava++)
+	{
+		LogDebug("EdgePacket packing [{}] value [{}]", (eStatEntry)guava, GetStatValueEdgeType((eStatEntry)guava));
+		itempacket->entries[guava].statKey = (eStatEntry)guava;
+		itempacket->entries[guava].statValue = GetStatValueEdgeType((eStatEntry)guava);
+	}
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SendEdgeHPStats()
+{
+	EmuOpcode opcode = OP_Unknown;
+	EQApplicationPacket* outapp = nullptr;
+	EdgeStat_Struct* itempacket = nullptr;
+
+	// Construct packet
+	opcode = OP_EdgeStats;
+	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+	itempacket->count = 2;
+	itempacket->entries[0].statKey = eStatCurHP;
+	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurHP);
+	itempacket->entries[1].statKey = eStatMaxHP;
+	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxHP);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SendEdgeManaStats()
+{
+	EmuOpcode opcode = OP_Unknown;
+	EQApplicationPacket* outapp = nullptr;
+	EdgeStat_Struct* itempacket = nullptr;
+
+	// Construct packet
+	opcode = OP_EdgeStats;
+	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+	itempacket->count = 2;
+	itempacket->entries[0].statKey = eStatCurMana;
+	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurMana);
+	itempacket->entries[1].statKey = eStatMaxMana;
+	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxMana);
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::SendEdgeEnduranceStats()
+{
+	EmuOpcode opcode = OP_Unknown;
+	EQApplicationPacket* outapp = nullptr;
+	EdgeStat_Struct* itempacket = nullptr;
+
+	// Construct packet
+	opcode = OP_EdgeStats;
+	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+	itempacket->count = 2;
+	itempacket->entries[0].statKey = eStatCurEndur;
+	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurEndur);
+	itempacket->entries[1].statKey = eStatMaxEndur;
+	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxEndur);
+	QueuePacket(outapp);
+	safe_delete(outapp);
 }
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const

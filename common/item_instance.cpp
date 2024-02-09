@@ -222,13 +222,13 @@ bool EQ::ItemInstance::IsCharged() const
 }
 
 // Can item be equipped?
-bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
+bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_bits) const
 {
 	if (!m_item || !m_item->Slots) {
 		return false;
 	}
 
-	return m_item->IsEquipable(race, class_);
+	return m_item->IsEquipable(race, class_bits);
 }
 
 // Can item be equipped by Class?

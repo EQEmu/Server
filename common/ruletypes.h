@@ -947,6 +947,13 @@ RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt I
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Custom)
+RULE_BOOL(Custom, ServerAuthStats, true, "Enable this rule in order to send explicit client updates. Requires client dll.")
+RULE_BOOL(Custom, MulticlassingEnabled, true, "Enable this to enable all multiclass-related tweaks. Requires ServerAuthStats enabled.")
+RULE_BOOL(Custom, SuspendGroupBuffs, true, "Enable this to cause self buffs and group's buffs to not tick down")
+RULE_BOOL(Custom, FadeNPCDebuffsOutofCombat, true, "Enable to to cause NPCs to lose all buffs automatically when combat ends")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL

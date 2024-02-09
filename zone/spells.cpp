@@ -179,25 +179,52 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
-	//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
-	if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
+	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
 		Mob* spell_target = entity_list.GetMobID(target_id);
+		uint16 cached_target_id = 0; // Temporary storage for the proposed target ID
+
 		if (spell_target) {
 			Mob* targets_target = spell_target->GetTarget();
-			if (targets_target) {
-				// If either this is beneficial and the target is not a player or player's pet or vis versa
-				if ((IsBeneficialSpell(spell_id) && (!(spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient()))))
-					|| (IsDetrimentalSpell(spell_id) && (spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient())))) {
-					//Check if the target's target is a valid target; we can use DoCastingChecksOnTarget() here because we can let it handle the failure as vanilla would
-					if (DoCastingChecksOnTarget(true, spell_id, targets_target)) {
-						target_id = targets_target->GetID();
-					}
-					else {
-						//Just return false here because we are going to fail the next check block anyway if we reach this point.
-						StopCastSpell(spell_id, send_spellbar_enable);
-						return false;
-					}
+
+			if (IsBeneficialSpell(spell_id)) {
+				// Check the original target if it's a client
+				if (spell_target->IsClient()) {
+					cached_target_id = spell_target->GetID();
 				}
+				// Check the target's target if it's a client
+				else if (targets_target && targets_target->IsClient()) {
+					cached_target_id = targets_target->GetID();
+				}
+
+				// If no suitable target found yet, default to the caster
+				if (cached_target_id == 0) {
+					cached_target_id = this->GetID(); // Default to the caster
+				}
+			} 
+			else if (IsDetrimentalSpell(spell_id)) {
+				// Check the original target if it's not a client
+				if (!spell_target->IsClient()) {
+					cached_target_id = spell_target->GetID();
+				}
+				// Check the target's target if it's not a client
+				else if (targets_target && !targets_target->IsClient()) {
+					cached_target_id = targets_target->GetID();
+				}
+			}
+
+			// Validate the cached_target_id with DoCastingChecksOnTarget
+			if (cached_target_id > 0) {
+				Mob* cached_target_mob = entity_list.GetMobID(cached_target_id);
+				if (cached_target_mob && DoCastingChecksOnTarget(true, spell_id, cached_target_mob)) {
+					target_id = cached_target_id; // Update target_id only if checks pass
+				} else {
+					StopCastSpell(spell_id, send_spellbar_enable);
+					return false; // Stop casting if checks fail or no valid target is found
+				}
+			} else {
+				// If no target was cached (applicable for detrimental spells), stop casting
+				StopCastSpell(spell_id, send_spellbar_enable);
+				return false;
 			}
 		}
 	}
@@ -427,6 +454,56 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		}
 	} else {
 		orgcasttime = cast_time;
+	}
+
+	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
+		Mob* spell_target = entity_list.GetMobID(target_id);
+		uint16 cached_target_id = 0; // Temporary storage for the proposed target ID
+
+		if (spell_target) {
+			Mob* targets_target = spell_target->GetTarget();
+
+			if (IsBeneficialSpell(spell_id)) {
+				// Check the original target if it's a client
+				if (spell_target->IsClient()) {
+					cached_target_id = spell_target->GetID();
+				}
+				// Check the target's target if it's a client
+				else if (targets_target && targets_target->IsClient()) {
+					cached_target_id = targets_target->GetID();
+				}
+
+				// If no suitable target found yet, default to the caster
+				if (cached_target_id == 0) {
+					cached_target_id = this->GetID(); // Default to the caster
+				}
+			} 
+			else if (IsDetrimentalSpell(spell_id)) {
+				// Check the original target if it's not a client
+				if (!spell_target->IsClient()) {
+					cached_target_id = spell_target->GetID();
+				}
+				// Check the target's target if it's not a client
+				else if (targets_target && !targets_target->IsClient()) {
+					cached_target_id = targets_target->GetID();
+				}
+			}
+
+			// Validate the cached_target_id with DoCastingChecksOnTarget
+			if (cached_target_id > 0) {
+				Mob* cached_target_mob = entity_list.GetMobID(cached_target_id);
+				if (cached_target_mob && DoCastingChecksOnTarget(true, spell_id, cached_target_mob)) {
+					target_id = cached_target_id; // Update target_id only if checks pass
+				} else {
+					StopCastSpell(spell_id, true);
+					return false; // Stop casting if checks fail or no valid target is found
+				}
+			} else {
+				// If no target was cached (applicable for detrimental spells), stop casting
+				StopCastSpell(spell_id, true);
+				return false;
+			}
+		}
 	}
 
 	// we checked for spells not requiring targets above
@@ -1147,15 +1224,41 @@ bool Client::CheckFizzle(uint16 spell_id)
 	int par_skill;
 	int act_skill;
 
-	par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10;//IIRC even if you are lagging behind the skill levels you don't fizzle much
+	par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10; // Initial calculation for single class
+
 	if (par_skill > 235) {
 		par_skill = 235;
 	}
 
-	par_skill += spells[spell_id].classes[GetClass()-1]; // maximum of 270 for level 65 spell
+	par_skill += spells[spell_id].classes[GetClass()-1];
+	
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		int classes_bitmask = GetClassesBits(); // Get the bitmask representing the character's classes
+		int min_class_level = 255; // Initialize with a high value
 
-	act_skill = GetSkill(spells[spell_id].skill);
-	act_skill += GetLevel(); // maximum of whatever the client can cheat
+		for (int i = 0; i < 16; ++i) { // Assuming 16 classes, adjust as necessary
+			if (classes_bitmask & (1 << i)) {
+				int class_spell_level = spells[spell_id].classes[i];
+				if (class_spell_level > 0 && class_spell_level < min_class_level) {
+					min_class_level = class_spell_level;
+				}
+			}
+		}
+
+		if (min_class_level != 255) { // If at least one valid class level was found
+			// Recalculate par_skill based on the lowest class level
+			par_skill = min_class_level * 5 - 10;
+			if (par_skill > 235) {
+				par_skill = 235;
+			}
+			par_skill += min_class_level; // Apply the additional adjustment based on the lowest class level
+		}
+		// Consider handling the case where min_class_level is still 255, indicating no valid class was found
+	}
+
+	act_skill = GetSkill(spells[spell_id].skill);	
+	act_skill += GetLevel(); // maximum of whatever the client can cheat	
+	
 	act_skill += itembonuses.adjusted_casting_skill + spellbonuses.adjusted_casting_skill + aabonuses.adjusted_casting_skill;
 	LogSpellsDetail("Adjusted casting skill: [{}]+[{}]+[{}]+[{}]+[{}]=[{}]", GetSkill(spells[spell_id].skill), GetLevel(), itembonuses.adjusted_casting_skill, spellbonuses.adjusted_casting_skill, aabonuses.adjusted_casting_skill, act_skill);
 
@@ -1186,14 +1289,27 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// the max that diff can be is +- 235
 	float diff = par_skill + static_cast<float>(spells[spell_id].base_difficulty) - act_skill;
 
-	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
-	if (GetClass() == Class::Bard) {
-		diff -= (GetCHA() - 110) / 20.0;
-	} else if (GetCasterClass() == 'W') {
-		diff -= (GetWIS() - 125) / 20.0;
-	} else if (GetCasterClass() == 'I') {
-		diff -= (GetINT() - 125) / 20.0;
+	int classes_bitmask = GetClassesBits();
+	double maxAdjustment = 0; // Start with no adjustment
+
+	// Iterate through each class bit to check for class presence
+	for (int classID = 0; classID < Class::PLAYER_CLASS_COUNT; classID++) {
+		if (classes_bitmask & (1 << classID)) {
+			// Determine the caster type of the current class
+			char casterClass = GetCasterClass(classID); // Now using the overloaded version
+			
+			if (classID == static_cast<int>(Class::Bard)) { // Direct comparison if Bard is one of the classes
+				maxAdjustment = std::max(maxAdjustment, (GetCHA() - 110) / 20.0);
+			} else if (casterClass == 'W') { // Wisdom-based caster
+				maxAdjustment = std::max(maxAdjustment, (GetWIS() - 125) / 20.0);
+			} else if (casterClass == 'I') { // Intelligence-based caster
+				maxAdjustment = std::max(maxAdjustment, (GetINT() - 125) / 20.0);
+			}
+		}
 	}
+
+	// Apply the maximum adjustment found
+	diff -= maxAdjustment;
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
 	float base_fizzle = 10;
@@ -1465,9 +1581,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	bool bard_song_mode = false;
 	bool regain_conc = false;
 	Mob *spell_target = entity_list.GetMob(target_id);
+
 	// here we do different things if this is a bard casting a bard song from
 	// a spell bar slot
-	if(GetClass() == Class::Bard) // bard's can move when casting any spell...
+	if((GetClass() == Class::Bard && !RuleB(Custom, MulticlassingEnabled) || (IsBardSong(spell_id) && RuleB(Custom, MulticlassingEnabled)))) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id) && slot < CastingSlot::MaxGems) {
 			if (spells[spell_id].buff_duration == 0xFFFF) {
@@ -1494,7 +1611,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			}
 		}
 	}
-	else // not bard, check movement
+
+	else
 	{
 		// if has been attacked, or moved while casting
 		// check for regain concentration
@@ -1828,7 +1946,14 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 			if (!IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
+			}			
+
+			/*
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				c->SendSpellBarEnable(spell_id);
+				ZeroBardPulseVars();
 			}
+			*/
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
@@ -1862,7 +1987,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	// there should be no casting going on now
+
 	ZeroCastingVars();
+	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && !IsActiveBardSong(spell_id)) {
+		ZeroBardPulseVars(); // Just in case we are barding too
+	}
+		
 
 	// set the rapid recast timer for next time around
 	// Why do we have this? It mostly just causes issues when things are working correctly
@@ -2791,7 +2921,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			}
 		}
 		//handle bard AA and Discipline recast timers when singing
-		if (GetClass() == Class::Bard && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+		if ((RuleB(Custom, MulticlassingEnabled) ? IsBardSong(spell_id) : GetClass() == Class::Bard) && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
 			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
@@ -6364,11 +6494,13 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 
 int Mob::GetCasterLevel(uint16 spell_id) {
 	int level = GetLevel();
-	if (GetClass() == Class::Bard) {
-		// Bards receive effective casting level increases to resists/effect. They don't receive benefit from spells like intellectual superiority, however.
-		level += itembonuses.effective_casting_level + aabonuses.effective_casting_level;
-	} else {
-		level += itembonuses.effective_casting_level + spellbonuses.effective_casting_level + aabonuses.effective_casting_level;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		if (GetClass() == Class::Bard) {
+			// Bards receive effective casting level increases to resists/effect. They don't receive benefit from spells like intellectual superiority, however.
+			level += itembonuses.effective_casting_level + aabonuses.effective_casting_level;
+		} else {
+			level += itembonuses.effective_casting_level + spellbonuses.effective_casting_level + aabonuses.effective_casting_level;
+		}
 	}
 	LogSpells("Determined effective casting level [{}]+[{}]+[{}]=[{}]", GetLevel(), spellbonuses.effective_casting_level, itembonuses.effective_casting_level, level);
 	return std::max(1, level);

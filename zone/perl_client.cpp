@@ -2012,6 +2012,16 @@ uint32_t Perl_Client_GetClassBitmask(Client* self)
 	return GetPlayerClassBit(self->GetClass());
 }
 
+uint32_t Perl_Client_GetClassesBitmask(Client* self)
+{
+	return self->GetClassesBits();
+}
+
+bool Perl_Client_AddExtraClass(Client* self, int class_id) 
+{
+	return self->AddExtraClass(class_id);
+}
+
 uint32_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
 {
 	return GetPlayerRaceBit(self->GetBaseRace());
@@ -3260,6 +3270,8 @@ void perl_register_client()
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
 	package.add("GetClassAbbreviation", &Perl_Client_GetClassAbbreviation);
 	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
+	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
+	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
 	package.add("GetClientVersion", &Perl_Client_GetClientVersion);
 	package.add("GetClientVersionBit", &Perl_Client_GetClientVersionBit);

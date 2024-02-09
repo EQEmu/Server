@@ -2124,6 +2124,9 @@ void Client::SendManaUpdate()
 	mana_update->spawn_id = GetID();
 	QueuePacket(mana_app);
 	safe_delete(mana_app);
+	if (RuleB(Custom, ServerAuthStats)) {
+		CastToClient()->SendEdgeManaStats();
+	}
 }
 
 // sends endurance update to self
@@ -2136,6 +2139,9 @@ void Client::SendEnduranceUpdate()
 	endurance_update->spawn_id = GetID();
 	QueuePacket(end_app);
 	safe_delete(end_app);
+	if (RuleB(Custom, ServerAuthStats)) {
+		CastToClient()->SendEdgeEnduranceStats();
+	}
 }
 
 void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
@@ -2765,27 +2771,103 @@ bool Client::HasSkill(EQ::skills::SkillType skill_id) const {
 	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
-bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skill_id == EQ::skills::Skill1HPiercing)
-		skill_id = EQ::skills::Skill2HPiercing;
+bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {    
+    if (RuleB(Custom, MulticlassingEnabled)) {
+        unsigned int classes_bits = GetClassesBits();
 
-	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
-	//if you don't have it by max level, then odds are you never will?
+        for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
+            if (classes_bits & (1 << i)) {
+                int classID = i + 1;
+
+                EQ::skills::SkillType adjusted_skill_id = skill_id;
+                if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && classID == Class::Berserker && skill_id == EQ::skills::Skill1HPiercing) {
+                    adjusted_skill_id = EQ::skills::Skill2HPiercing;
+                }
+
+                if (content_db.GetSkillCap(classID, adjusted_skill_id, RuleI(Character, MaxLevel)) > 0) {
+                    return true; // Skill is available for this class
+                }
+            }
+        }
+
+        // Skill is not available for any of the classes
+        return false;
+    } else {
+        if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skill_id == EQ::skills::Skill1HPiercing)
+            skill_id = EQ::skills::Skill2HPiercing;
+
+        return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
+    }
 }
 
 uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
+    if (RuleB(Custom, MulticlassingEnabled)) {
+        unsigned int classes_bits = GetClassesBits();
+        uint16 maxSkill = 0;
+
+        for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
+            if (classes_bits & (1 << i)) {
+                uint16 classID = i + 1;
+
+                EQ::skills::SkillType adjusted_skillid = skillid;
+                if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && classID == Class::Berserker && skillid == EQ::skills::Skill1HPiercing) {
+                    adjusted_skillid = EQ::skills::Skill2HPiercing;
+                }
+
+                uint16 skillCap = content_db.GetSkillCap(classID, adjusted_skillid, level);
+                
+                if (skillCap > maxSkill) {
+                    maxSkill = skillCap;
+                }
+            }
+        }
+
+        return maxSkill;
+    } else {
+        if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
+            skillid = EQ::skills::Skill2HPiercing;
+
+        return(content_db.GetSkillCap(class_, skillid, level));
+    }
+}
+
+uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
-	return(content_db.GetSkillCap(class_, skillid, level));
+	return(content_db.GetSkillCap(class_, skillid, level));    
 }
 
 uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
 {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
-		skillid = EQ::skills::Skill2HPiercing;
+    if (RuleB(Custom, MulticlassingEnabled)) {
+        unsigned int classes_bits = GetClassesBits();
+        uint8 earliestTrainLevel = std::numeric_limits<uint8>::max();
 
-	return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+        for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
+            if (classes_bits & (1 << i)) {
+                uint16 classID = i + 1;
+
+                EQ::skills::SkillType adjusted_skillid = skillid;
+                if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && classID == Class::Berserker && skillid == EQ::skills::Skill1HPiercing) {
+                    adjusted_skillid = EQ::skills::Skill2HPiercing;
+                }
+
+                uint8 trainLevel = content_db.GetTrainLevel(classID, adjusted_skillid, RuleI(Character, MaxLevel));
+                
+                if (trainLevel < earliestTrainLevel) {
+                    earliestTrainLevel = trainLevel;
+                }
+            }
+        }
+
+        return earliestTrainLevel == std::numeric_limits<uint8>::max() ? 0 : earliestTrainLevel;
+    } else {
+        if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
+            skillid = EQ::skills::Skill2HPiercing;
+
+        return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+    }
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill)
@@ -10042,12 +10124,38 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		}
 
-		if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
-			continue;
-		}
+        if (RuleB(Custom, MulticlassingEnabled)) {
+            unsigned int classes_bits = GetClassesBits();
+            bool any_class_usable = false;
 
-		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
-			continue;
+            for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
+                if (classes_bits & (1 << i)) {
+                    uint16 classID = i + 1; // Adjust if class index calculation is different
+
+					if (max_level && spells[spell_id].classes[classID - 1] > max_level) {
+						continue;
+					}
+
+					if (min_level > 1 && spells[spell_id].classes[classID - 1] < min_level) {
+						continue;
+					}
+
+                    any_class_usable = true;
+                    break; // Stop checking if any class is usable
+                }
+            }
+
+            if (!any_class_usable) {
+                continue;
+            }
+        } else {
+			if (max_level && spells[spell_id].classes[m_pp.class_ - 1] > max_level) {
+				continue;
+			}
+
+			if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level) {
+				continue;
+			}
 		}
 
 		if (spells[spell_id].skill == EQ::skills::SkillTigerClaw) {
@@ -11621,18 +11729,46 @@ std::string Client::GetGuildPublicNote()
 
 void Client::MaxSkills()
 {
-	for (const auto &s : EQ::skills::GetSkillTypeMap()) {
-		auto current_skill_value = (
-			EQ::skills::IsSpecializedSkill(s.first) ?
-			MAX_SPECIALIZED_SKILL :
-			content_db.GetSkillCap(GetClass(), s.first, GetLevel())
-		);
+    for (const auto &s : EQ::skills::GetSkillTypeMap()) {
+        uint16 highestSkillCap = 0;
 
-		if (GetSkill(s.first) < current_skill_value) {
-			SetSkill(s.first, current_skill_value);
-		}
-	}
+        if (RuleB(Custom, MulticlassingEnabled)) {
+            unsigned int classes_bits = GetClassesBits();
+
+            // Loop through each bit in classes_bits
+            for (int i = 0; i < sizeof(classes_bits) * 8; ++i) {
+                // Check if the ith bit is set
+                if (classes_bits & (1 << i)) {
+                    // Compute the class ID from the bit position
+                    uint16 classID = i + 1;
+
+                    uint16 classSkillCap = (
+                        EQ::skills::IsSpecializedSkill(s.first) ?
+                        MAX_SPECIALIZED_SKILL :
+                        content_db.GetSkillCap(classID, s.first, GetLevel())
+                    );
+
+                    // Update highestSkillCap if this class has a higher skill cap
+                    if (classSkillCap > highestSkillCap) {
+                        highestSkillCap = classSkillCap;
+                    }
+                }
+
+				// Set skill to the highest cap found across all classes
+				if (GetSkill(s.first) < highestSkillCap) {
+					SetSkill(s.first, highestSkillCap);
+				}
+            }
+        } else {
+            highestSkillCap = (
+                EQ::skills::IsSpecializedSkill(s.first) ?
+                MAX_SPECIALIZED_SKILL :
+                content_db.GetSkillCap(GetClass(), s.first, GetLevel())
+            );
+        }
+    }
 }
+
 
 void Client::SendPath(Mob* target)
 {
@@ -12170,4 +12306,64 @@ int Client::GetEXPPercentage()
 	int scaled = static_cast<int>(330.0f * norm); // scale and truncate
 
 	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
+}
+
+int Client::GetAAEXPPercentage()
+{
+	int scaled = static_cast<int>(330.0f * static_cast<float>(GetAAXP()) / GetRequiredAAExperience());
+
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0));
+}
+
+int Client::GetEXPPercentage()
+{
+	float    norm = 0.0f;
+	uint32_t min  = GetEXPForLevel(GetLevel());
+	uint32_t max  = GetEXPForLevel(GetLevel() + 1);
+
+	if (min != max) {
+		norm = static_cast<float>(GetEXP() - min) / (max - min);
+	}
+
+	int scaled = static_cast<int>(330.0f * norm); // scale and truncate
+
+	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
+}
+
+uint32 Client::GetClassesBits() const
+{
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		return m_pp.classes;
+	} else {
+		return GetPlayerClassBit(m_pp.class_);
+	}
+}
+
+bool Client::AddExtraClass(int class_id) {
+    if (RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker) {
+        int classes_bits = GetClassesBits();
+        int class_count = __builtin_popcount(classes_bits);
+        int n_class_bit = GetPlayerClassBit(class_id);
+
+        if (class_count > 2 || (classes_bits & n_class_bit)) {
+            return false;
+        } else {	
+			std::string query = StringFormat("REPLACE INTO character_multiclass_data (id, classes) VALUES (%i, %i)", character_id, (classes_bits | n_class_bit));
+        	auto results = database.QueryDatabase(query);
+
+			if (!results.Success()) {
+				return false;
+			}
+
+			m_pp.classes = classes_bits | n_class_bit;
+
+			CalcBonuses();
+			SendEdgeStatBulkUpdate();
+			SendAlternateAdvancementTable();
+		}
+
+        return true;
+    } else {
+        return false;
+    }
 }

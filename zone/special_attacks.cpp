@@ -425,7 +425,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		DoAnim(anim1HWeapon, 0, false);
 
-		if (GetClass() == Class::Berserker) {
+		if (GetClass() == Class::Berserker || RuleB(Custom, MulticlassingEnabled)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 
 			if (zone->random.Roll0(450) < chance) {
@@ -471,7 +471,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		class_id == Class::Monk ||
 		class_id == Class::Beastlord ||
 		class_id == Class::Berserker ||
-		allowed_kick_classes & GetPlayerClassBit(class_id)
+		allowed_kick_classes & GetPlayerClassBit(class_id ||
+		RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : 0)
 	);
 
 	bool found_skill = false;
@@ -499,7 +500,13 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		}
 	}
 
-	if (class_id == Class::Monk) {
+	if ((class_id == Class::Monk || RuleB(Custom, MulticlassingEnabled)) &&
+		(ca_atk->m_skill == EQ::skills::SkillFlyingKick ||
+		 ca_atk->m_skill == EQ::skills::SkillDragonPunch ||
+		 ca_atk->m_skill == EQ::skills::SkillEagleStrike ||
+		 ca_atk->m_skill == EQ::skills::SkillTigerClaw ||
+		 ca_atk->m_skill == EQ::skills::SkillRoundKick)) {
+
 		reuse_time = MonkSpecialAttack(GetTarget(), ca_atk->m_skill) - 1 - skill_reduction;
 
 		// Live AA - Technique of Master Wu
@@ -564,7 +571,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (
 		ca_atk->m_atk == 100 &&
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
-		class_id == Class::Rogue
+		(class_id == Class::Rogue || RuleB(Custom, MulticlassingEnabled))
 	) {
 		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 		TryBackstab(GetTarget(), reuse_time);

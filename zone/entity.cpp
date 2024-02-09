@@ -2366,7 +2366,7 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 
 		if (client->IsInGuild(GuildID)) {
 			if (Item && (gbius->Permissions == GuildBankPublicIfUsable))
-				outgbius->Useable = Item->IsEquipable(client->GetBaseRace(), client->GetBaseClass());
+				outgbius->Useable = Item->IsEquipable(client->GetBaseRace(), client->GetClassesBits());
 
 			client->QueuePacket(outapp);
 		}
@@ -4984,6 +4984,10 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 				PlayerRace = ClientEntry->GetRace();
 			}
 
+			if (RuleB(Custom, MulticlassingEnabled)) {
+				PlayerClass = ClientEntry->GetClassesBits();
+			}
+
 			WhoAllPlayerPart1* WAPP1 = (WhoAllPlayerPart1*)Buffer;
 			WAPP1->FormatMSGID = FormatMSGID;
 			WAPP1->PIDMSGID = 0xFFFFFFFF;
@@ -5022,7 +5026,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 			Buffer += sizeof(WhoAllPlayerPart4);
 		}
 
-	}
+	}	
 
 	c->QueuePacket(outapp);
 

@@ -58,6 +58,8 @@ public:
 	void SetBaseRace(int v);
 	void SetBaseGender(int v);
 	int GetClassBitmask();
+	int GetClassesBitmask();
+	bool AddExtraClass(int class_id);
 	int GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);

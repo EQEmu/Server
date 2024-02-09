@@ -453,7 +453,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_CurrentMana:
 			{
 				// Bards don't get mana from effects, good or bad.
-				if(GetClass() == Class::Bard)
+				if(GetClass() == Class::Bard && !RuleB(Custom, MulticlassingEnabled))
 					break;
 				if(IsManaTapSpell(spell_id)) {
 					if(GetCasterClass() != 'N') {
@@ -490,7 +490,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_CurrentManaOnce:
 			{
 				// Bards don't get mana from effects, good or bad.
-				if(GetClass() == Class::Bard)
+				if(GetClass() == Class::Bard && !RuleB(Custom, MulticlassingEnabled))
 					break;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Mana Once: %+i", effect_value);
@@ -3827,11 +3827,59 @@ void Mob::BuffProcess()
 				buffs[buffs_i].ticsremaining != PERMANENT_BUFF_DURATION) {
 				if(!zone->BuffTimersSuspended() || !IsSuspendableSpell(buffs[buffs_i].spellid))
 				{
-					--buffs[buffs_i].ticsremaining;
+					bool suspended = false;
+
+					if (RuleB(Custom, SuspendGroupBuffs)) {						
+						uint32 spellid = buffs[buffs_i].spellid;
+						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
+							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
+							Client* client = GetOwnerOrSelf()->CastToClient();
+
+							if (caster && client) {
+								if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
+									if (caster->GetInv().IsClickEffectEquipped(spellid)) {
+										suspended = true;
+									} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
+										suspended = true;
+									}/* else if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
+										suspended = true;
+									} */ // Bard songs suspension
+
+									if (suspended) {
+										LogDebug("[{}] is suspended.", spellid);
+									}
+								}							
+							}
+
+							if (IsPet() && GetOwner()) {
+								SendPetBuffsToClient();
+							}
+						}
+						
+						// This will suspend detrimental bard songs on mobs. Maybe useful later.
+						/* else {
+							// Attempt to make bard detrimental songs work similarly.
+							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
+
+							if (caster) {								
+								if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(buffs[buffs_i].spellid)) {
+									if (caster->CalculateDistance(GetX(), GetY(), GetZ()) < caster->GetRangeDistTargetSizeMod(this)) {
+										suspended = true;
+									}									
+								}
+							}
+						} */
+					}
+
+					if (!suspended || !RuleB(Custom, SuspendGroupBuffs)) {
+						--buffs[buffs_i].ticsremaining;
+					} else {
+						buffs[buffs_i].UpdateClient = true;
+					}
 
 					if (buffs[buffs_i].ticsremaining < 0) {
 						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
-						BuffFadeBySlot(buffs_i);
+						BuffFadeBySlot(buffs_i);						
 					}
 					else
 					{
@@ -3849,14 +3897,17 @@ void Mob::BuffProcess()
 				if(buffs[buffs_i].UpdateClient == true)
 				{
 					CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
-					// Hack to get UF to play nicer, RoF seems fine without it
-					if (CastToClient()->ClientVersion() == EQ::versions::ClientVersion::UF && buffs[buffs_i].hit_number > 0)
-						CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
-					buffs[buffs_i].UpdateClient = false;
+					CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
+					buffs[buffs_i].UpdateClient = false;					
+				}
+			} else if (RuleB(Custom, FadeNPCDebuffsOutofCombat)) {
+				int spellid = buffs[buffs_i].spellid;
+				if (!IsEngaged() && IsDetrimentalSpell(spellid) && (buffs[buffs_i].ticsremaining) > 0 && !IsCharmSpell(spellid) && !IsHarmonySpell(spellid) && !IsAllianceSpell(spellid) && !IsMesmerizeSpell(spellid)) {
+					BuffFadeBySlot(buffs_i);
 				}
 			}
 		}
-	}
+	}	
 }
 
 void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)

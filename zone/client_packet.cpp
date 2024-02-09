@@ -365,6 +365,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
+	ConnectedOpcodes[OP_Checksum] = &Client::Handle_OP_Checksum;
 
 	// Use or Ignore sense heading based on rule.
 	bool train = RuleB(Skills, TrainSenseHeading);
@@ -789,6 +790,10 @@ void Client::CompleteConnect()
 	SendMobPositions();
 
 	SetLastPositionBeforeBulkUpdate(GetPosition());
+	
+	if (RuleB(Custom, ServerAuthStats)) {
+		SendEdgeStatBulkUpdate();
+	}
 
 	/* This sub event is for if a player logs in for the first time since entering world. */
 	if (firstlogon == 1) {
@@ -9705,7 +9710,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				if (ClientVersion() >= EQ::versions::ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), GetClass()))
+				if (ClientVersion() >= EQ::versions::ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), CastToClient()->GetClassesBits()))
 				{
 					if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol)
 					{
@@ -10302,7 +10307,7 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
 		if (IsBardSong(casting_spell_id) || HasActiveSong()) {
-			InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
+			//InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
 		}
 		else {
 			InterruptSpell(INTERRUPT_SPELL, 0x121);
@@ -16006,6 +16011,18 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 		entity_list.ZoneWho(this, whoall);
 	else
 		WhoAll(whoall);
+	return;
+}
+
+void Client::Handle_OP_Checksum(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SimpleChecksum_Struct*)){
+		LogDebug("Recieved invalid checksum packet");
+	}
+
+	SimpleChecksum_Struct* checksum = (SimpleChecksum_Struct*)app->pBuffer;
+
+	LogDebug("Got Checksum Struct: %d", checksum->checksum);
 	return;
 }
 

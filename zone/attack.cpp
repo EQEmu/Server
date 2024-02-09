@@ -673,194 +673,192 @@ int Mob::GetACSoftcap()
 
 	int level = std::min(105, static_cast<int>(GetLevel())) - 1;
 
-	switch (GetClass()) {
-	case Class::Warrior:
-		return war_softcaps[level];
-	case Class::Cleric:
-	case Class::Bard:
-	case Class::Monk:
-		return clrbrdmnk_softcaps[level];
-	case Class::Paladin:
-	case Class::ShadowKnight:
-		return palshd_softcaps[level];
-	case Class::Ranger:
-		return rng_softcaps[level];
-	case Class::Druid:
-		return dru_softcaps[level];
-	case Class::Rogue:
-	case Class::Shaman:
-	case Class::Beastlord:
-	case Class::Berserker:
-		return rogshmbstber_softcaps[level];
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-		return necwizmagenc_softcaps[level];
-	default:
-		return 350;
-	}
+    int classes_bits = IsClient() ? CastToClient()->GetClassesBits() : (1 << (GetClass() - 1));
+    int highestSoftcap = 0;
+
+    for (int i = 0; i < 16; ++i) {
+        if (classes_bits & (1 << i)) {
+            int softcap = 0;
+            switch (i + 1) { // Adjust for 1-indexed class IDs
+                case Class::Warrior:
+                    softcap = war_softcaps[level];
+                    break;
+                case Class::Cleric:
+                case Class::Bard:
+                case Class::Monk:
+                    softcap = clrbrdmnk_softcaps[level];
+                    break;
+                case Class::Paladin:
+                case Class::ShadowKnight:
+                    softcap = palshd_softcaps[level];
+                    break;
+                case Class::Ranger:
+                    softcap = rng_softcaps[level];
+                    break;
+                case Class::Druid:
+                    softcap = dru_softcaps[level];
+                    break;
+                case Class::Rogue:
+                case Class::Shaman:
+                case Class::Beastlord:
+                case Class::Berserker:
+                    softcap = rogshmbstber_softcaps[level];
+                    break;
+                case Class::Necromancer:
+                case Class::Wizard:
+                case Class::Magician:
+                case Class::Enchanter:
+                    softcap = necwizmagenc_softcaps[level];
+                    break;
+                default:
+                    softcap = 350; // Default soft cap
+            }
+            if (softcap > highestSoftcap) {
+                highestSoftcap = softcap;
+            }
+        }
+    }
+
+    return highestSoftcap;
 }
 
-double Mob::GetSoftcapReturns()
-{
-	// These are based on the dev post, they seem to be correct for every level
-	// AKA no more hard caps
-	switch (GetClass()) {
-	case Class::Warrior:
-		return 0.35;
-	case Class::Cleric:
-	case Class::Bard:
-	case Class::Monk:
-		return 0.3;
-	case Class::Paladin:
-	case Class::ShadowKnight:
-		return 0.33;
-	case Class::Ranger:
-		return 0.315;
-	case Class::Druid:
-		return 0.265;
-	case Class::Rogue:
-	case Class::Shaman:
-	case Class::Beastlord:
-	case Class::Berserker:
-		return 0.28;
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-		return 0.25;
-	default:
-		return 0.3;
-	}
+double Mob::GetSoftcapReturns() {
+    int classes_bits = IsClient() ? CastToClient()->GetClassesBits() : (1 << (GetClass() - 1));
+    double highestSoftcapReturn = 0;
+
+    for (int i = 0; i < 16; ++i) {
+        if (classes_bits & (1 << i)) {
+            double softcapReturn = 0;
+            switch (i + 1) {
+                case Class::Warrior:
+                    softcapReturn = 0.35;
+                    break;
+                case Class::Cleric:
+                case Class::Bard:
+                case Class::Monk:
+                    softcapReturn = 0.3;
+                    break;
+                case Class::Paladin:
+                case Class::ShadowKnight:
+                    softcapReturn = 0.33;
+                    break;
+                case Class::Ranger:
+                    softcapReturn = 0.315;
+                    break;
+                case Class::Druid:
+                    softcapReturn = 0.265;
+                    break;
+                case Class::Rogue:
+                case Class::Shaman:
+                case Class::Beastlord:
+                case Class::Berserker:
+                    softcapReturn = 0.28;
+                    break;
+                case Class::Necromancer:
+                case Class::Wizard:
+                case Class::Magician:
+                case Class::Enchanter:
+                    softcapReturn = 0.25;
+                    break;
+                default:
+                    softcapReturn = 0.3;
+            }
+            if (softcapReturn > highestSoftcapReturn) {
+                highestSoftcapReturn = softcapReturn;
+            }
+        }
+    }
+
+    return highestSoftcapReturn > 0 ? highestSoftcapReturn : 0.3;
 }
 
-int Mob::GetClassRaceACBonus()
-{
-	int ac_bonus = 0;
-	auto level = GetLevel();
-	if (GetClass() == Class::Monk) {
-		int hardcap = 30;
-		int softcap = 14;
-		if (level > 99) {
-			hardcap = 58;
-			softcap = 35;
-		}
-		else if (level > 94) {
-			hardcap = 57;
-			softcap = 34;
-		}
-		else if (level > 89) {
-			hardcap = 56;
-			softcap = 33;
-		}
-		else if (level > 84) {
-			hardcap = 55;
-			softcap = 32;
-		}
-		else if (level > 79) {
-			hardcap = 54;
-			softcap = 31;
-		}
-		else if (level > 74) {
-			hardcap = 53;
-			softcap = 30;
-		}
-		else if (level > 69) {
-			hardcap = 53;
-			softcap = 28;
-		}
-		else if (level > 64) {
-			hardcap = 53;
-			softcap = 26;
-		}
-		else if (level > 63) {
-			hardcap = 50;
-			softcap = 24;
-		}
-		else if (level > 61) {
-			hardcap = 47;
-			softcap = 24;
-		}
-		else if (level > 59) {
-			hardcap = 45;
-			softcap = 24;
-		}
-		else if (level > 54) {
-			hardcap = 40;
-			softcap = 20;
-		}
-		else if (level > 50) {
-			hardcap = 38;
-			softcap = 18;
-		}
-		else if (level > 44) {
-			hardcap = 36;
-			softcap = 17;
-		}
-		else if (level > 29) {
-			hardcap = 34;
-			softcap = 16;
-		}
-		else if (level > 14) {
-			hardcap = 32;
-			softcap = 15;
-		}
-		int weight = IsClient() ? CastToClient()->CalcCurrentWeight()/10 : 0;
-		if (weight < hardcap - 1) {
-			double temp = level + 5;
-			if (weight > softcap) {
-				double redux = static_cast<double>(weight - softcap) * 6.66667;
-				redux = (100.0 - std::min(100.0, redux)) * 0.01;
-				temp = std::max(0.0, temp * redux);
-			}
-			ac_bonus = static_cast<int>((4.0 * temp) / 3.0);
-		}
-		else if (weight > hardcap + 1) {
-			double temp = level + 5;
-			double multiplier = std::min(1.0, (weight - (static_cast<double>(hardcap) - 10.0)) / 100.0);
-			temp = (4.0 * temp) / 3.0;
-			ac_bonus -= static_cast<int>(temp * multiplier);
-		}
-	}
+int Mob::GetClassRaceACBonus() {
+    int classes_bits = IsClient() ? CastToClient()->GetClassesBits() : (1 << (GetClass() - 1));
+    auto level = GetLevel();
+    int max_ac_bonus = 0;
 
-	if (GetClass() == Class::Rogue) {
-		int level_scaler = level - 26;
-		if (GetAGI() < 80)
-			ac_bonus = level_scaler / 4;
-		else if (GetAGI() < 85)
-			ac_bonus = (level_scaler * 2) / 4;
-		else if (GetAGI() < 90)
-			ac_bonus = (level_scaler * 3) / 4;
-		else if (GetAGI() < 100)
-			ac_bonus = (level_scaler * 4) / 4;
-		else if (GetAGI() >= 100)
-			ac_bonus = (level_scaler * 5) / 4;
-		if (ac_bonus > 12)
-			ac_bonus = 12;
-	}
+    for (int i = 0; i < 16; ++i) {
+        if (classes_bits & (1 << i)) {
+            int class_ac_bonus = 0;
+            switch (i + 1) { // Adjust for 1-indexed class IDs
+                case Class::Monk: {
+                    int hardcap = 30, softcap = 14;
+                    if (level > 99) { hardcap = 58; softcap = 35; }
+                    else if (level > 94) { hardcap = 57; softcap = 34; }
+                    else if (level > 89) { hardcap = 56; softcap = 33; }
+                    else if (level > 84) { hardcap = 55; softcap = 32; }
+                    else if (level > 79) { hardcap = 54; softcap = 31; }
+                    else if (level > 74) { hardcap = 53; softcap = 30; }
+                    else if (level > 69) { hardcap = 53; softcap = 28; }
+                    else if (level > 64) { hardcap = 53; softcap = 26; }
+                    else if (level > 63) { hardcap = 50; softcap = 24; }
+                    else if (level > 61) { hardcap = 47; softcap = 24; }
+                    else if (level > 59) { hardcap = 45; softcap = 24; }
+                    else if (level > 54) { hardcap = 40; softcap = 20; }
+                    else if (level > 50) { hardcap = 38; softcap = 18; }
+                    else if (level > 44) { hardcap = 36; softcap = 17; }
+                    else if (level > 29) { hardcap = 34; softcap = 16; }
+                    else if (level > 14) { hardcap = 32; softcap = 15; }
+                    
+                    int weight = IsClient() ? CastToClient()->CalcCurrentWeight() / 10 : 0;
+                    if (weight < hardcap - 1) {
+                        double temp = level + 5;
+                        if (weight > softcap) {
+                            double redux = static_cast<double>(weight - softcap) * 6.66667;
+                            redux = (100.0 - std::min(100.0, redux)) * 0.01;
+                            temp = std::max(0.0, temp * redux);
+                        }
+                        class_ac_bonus = static_cast<int>((4.0 * temp) / 3.0);
+                    } else if (weight > hardcap + 1) {
+                        double temp = level + 5;
+                        double multiplier = std::min(1.0, (weight - (static_cast<double>(hardcap) - 10.0)) / 100.0);
+                        temp = (4.0 * temp) / 3.0;
+                        class_ac_bonus -= static_cast<int>(temp * multiplier);
+                    }
+                    break;
+                }
+				case Class::Rogue: {
+                    // Rogue-specific AC bonus calculation
+                    int level_scaler = level - 26;
+                    if (level_scaler > 0) {
+                        if (GetAGI() < 80) class_ac_bonus = level_scaler / 4;
+                        else if (GetAGI() < 85) class_ac_bonus = (level_scaler * 2) / 4;
+                        else if (GetAGI() < 90) class_ac_bonus = (level_scaler * 3) / 4;
+                        else if (GetAGI() < 100) class_ac_bonus = level_scaler; // (level_scaler * 4) / 4
+                        else if (GetAGI() >= 100) class_ac_bonus = (level_scaler * 5) / 4;
+                        class_ac_bonus = std::min(class_ac_bonus, 12);
+                    }
+                    break;
+                }
+                case Class::Beastlord: {
+                    // Beastlord-specific AC bonus calculation
+                    int level_scaler = level - 6;
+                    if (level_scaler > 0) {
+                        if (GetAGI() < 80) class_ac_bonus = level_scaler / 5;
+                        else if (GetAGI() < 85) class_ac_bonus = (level_scaler * 2) / 5;
+                        else if (GetAGI() < 90) class_ac_bonus = (level_scaler * 3) / 5;
+                        else if (GetAGI() < 100) class_ac_bonus = (level_scaler * 4) / 5;
+                        else if (GetAGI() >= 100) class_ac_bonus = level_scaler; // (level_scaler * 5) / 5
+                        class_ac_bonus = std::min(class_ac_bonus, 16);
+                    }
+                    break;
+                }
+            }
 
-	if (GetClass() == Class::Beastlord) {
-		int level_scaler = level - 6;
-		if (GetAGI() < 80)
-			ac_bonus = level_scaler / 5;
-		else if (GetAGI() < 85)
-			ac_bonus = (level_scaler * 2) / 5;
-		else if (GetAGI() < 90)
-			ac_bonus = (level_scaler * 3) / 5;
-		else if (GetAGI() < 100)
-			ac_bonus = (level_scaler * 4) / 5;
-		else if (GetAGI() >= 100)
-			ac_bonus = (level_scaler * 5) / 5;
-		if (ac_bonus > 16)
-			ac_bonus = 16;
-	}
+            if (class_ac_bonus > max_ac_bonus) {
+                max_ac_bonus = class_ac_bonus;
+            }
+        }
+    }
 
-	if (GetRace() == IKSAR)
-		ac_bonus += EQ::Clamp(static_cast<int>(level), 10, 35);
+    // Iksar race bonus, applied universally to any class calculation
+    if (GetRace() == IKSAR) {
+        max_ac_bonus += std::clamp(static_cast<int>(level), 10, 35);
+    }
 
-	return ac_bonus;
+    return max_ac_bonus;
 }
+
 //SYNC WITH: tune.cpp, mob.h TuneACSum
 int Mob::ACSum(bool skip_caps)
 {
@@ -1169,9 +1167,11 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 
 		if (weapon_item->GetItemRequiredLevel(true) > GetLevel())
 			return 0;
-
-		if (!weapon_item->IsEquipable(GetBaseRace(), GetClass()))
-			return 0;
+		
+		if (IsClient()) {
+			if (!weapon_item->IsEquipable(GetBaseRace(), CastToClient()->GetClassesBits()))
+				return 0;
+		}
 	}
 
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {

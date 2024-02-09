@@ -438,8 +438,12 @@ public:
 	inline uint32 GetBindInstanceID(uint32 index = 0) const { return m_pp.binds[index].instance_id; }
 	int64 CalcMaxMana();
 	int64 CalcBaseMana();
+	int64 _CalcBaseMana(int class_id);
 	const int64& SetMana(int64 amount);
 	int64 CalcManaRegenCap() final;
+
+	uint32 GetClassesBits() const;
+	bool   AddExtraClass(int class_id);
 
 	// guild pool regen shit. Sends a SpawnAppearance with a value that regens to value * 0.001
 	void EnableAreaHPRegen(int value);
@@ -584,6 +588,7 @@ public:
 	/*Endurance and such*/
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
 	int64 CalcBaseEndurance(); //Calculates Base End
+	int64 _CalcBaseEndurance(int class_id); //Calculates Base End
 	int64 CalcEnduranceRegen(bool bCombat = false); //Calculates endurance regen used in DoEnduranceRegen()
 	int64 GetEndurance() const {return current_endurance;} //This gets our current endurance
 	int64 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
@@ -813,6 +818,7 @@ public:
 	void ShowSkillsWindow();
 
 	uint16 MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const;
+	uint16 MaxSkillOriginal(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const;
 	inline uint16 MaxSkill(EQ::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	uint8 SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_);
 	void MaxSkills();
@@ -1032,6 +1038,12 @@ public:
 	void SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type);
 	bool IsValidSlot(uint32 slot);
 	bool IsBankSlot(uint32 slot);
+
+	void SendEdgeStatBulkUpdate();
+	void SendEdgeHPStats();
+	void SendEdgeManaStats();
+	void SendEdgeEnduranceStats();
+	int64_t GetStatValueEdgeType(eStatEntry eLabel);
 
 	inline bool IsTrader() const { return(Trader); }
 	inline bool IsBuyer() const { return(Buyer); }
@@ -1782,6 +1794,7 @@ private:
 	int32 CalcCorrup();
 	int64 CalcMaxHP();
 	int64 CalcBaseHP();
+	int64 _CalcBaseHP(int class_id);
 	int64 CalcHPRegen(bool bCombat = false);
 	int64 CalcManaRegen(bool bCombat = false);
 	int64 CalcBaseManaRegen();

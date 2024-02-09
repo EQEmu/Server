@@ -127,7 +127,14 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		memset(&pp, 0, sizeof(PlayerProfile_Struct));
 		memset(p_character_select_entry_struct->Name, 0, sizeof(p_character_select_entry_struct->Name));
 		strcpy(p_character_select_entry_struct->Name, row[1]);
-		p_character_select_entry_struct->Class = (uint8) Strings::ToUnsignedInt(row[4]);
+
+		// Send UNKNOWN CLASS for multiclassing
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			p_character_select_entry_struct->Class = 0xFFFF;
+		} else {
+			p_character_select_entry_struct->Class =  (uint8) Strings::ToUnsignedInt(row[4]);
+		}	
+
 		p_character_select_entry_struct->Race = (uint32) Strings::ToUnsignedInt(row[3]);
 		p_character_select_entry_struct->Level = (uint8) Strings::ToUnsignedInt(row[5]);
 		p_character_select_entry_struct->ShroudClass = p_character_select_entry_struct->Class;
@@ -166,6 +173,8 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		p_character_select_entry_struct->Enabled = 1;
 		p_character_select_entry_struct->LastLogin = (uint32) Strings::ToInt(row[7]);            // RoF2 value: 1212696584
 		p_character_select_entry_struct->Unknown2 = 0;
+
+				
 
 		if (RuleB(World, EnableReturnHomeButton)) {
 			int now = time(nullptr);
@@ -406,6 +415,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		} else {
 			printf("Error loading inventory for %s\n", p_character_select_entry_struct->Name);
 		}
+
 		buff_ptr += sizeof(CharacterSelectEntry_Struct);
 	}
 }

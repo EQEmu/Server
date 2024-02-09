@@ -981,43 +981,47 @@ int64 Mob::GetSpellHPBonuses() {
 }
 
 char Mob::GetCasterClass() const {
-	switch(class_)
-	{
-	case Class::Cleric:
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::Druid:
-	case Class::Shaman:
-	case Class::Beastlord:
-	case Class::ClericGM:
-	case Class::PaladinGM:
-	case Class::RangerGM:
-	case Class::DruidGM:
-	case Class::ShamanGM:
-	case Class::BeastlordGM:
-		return 'W';
-		break;
-
-	case Class::ShadowKnight:
-	case Class::Bard:
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-	case Class::ShadowKnightGM:
-	case Class::BardGM:
-	case Class::NecromancerGM:
-	case Class::WizardGM:
-	case Class::MagicianGM:
-	case Class::EnchanterGM:
-		return 'I';
-		break;
-
-	default:
-		return 'N';
-		break;
-	}
+    return GetCasterClass(class_);
 }
+
+char Mob::GetCasterClass(int class_id) const {
+    switch(class_id) {
+    case Class::Cleric:
+    case Class::Paladin:
+    case Class::Ranger:
+    case Class::Druid:
+    case Class::Shaman:
+    case Class::Beastlord:
+    case Class::ClericGM:
+    case Class::PaladinGM:
+    case Class::RangerGM:
+    case Class::DruidGM:
+    case Class::ShamanGM:
+    case Class::BeastlordGM:
+        return 'W';
+        break;
+
+    case Class::ShadowKnight:
+    case Class::Bard:
+    case Class::Necromancer:
+    case Class::Wizard:
+    case Class::Magician:
+    case Class::Enchanter:
+    case Class::ShadowKnightGM:
+    case Class::BardGM:
+    case Class::NecromancerGM:
+    case Class::WizardGM:
+    case Class::MagicianGM:
+    case Class::EnchanterGM:
+        return 'I';
+        break;
+
+    default:
+        return 'N';
+        break;
+    }
+}
+
 
 uint8 Mob::GetArchetype() const {
 	switch(class_)
@@ -1428,6 +1432,10 @@ void Mob::SendHPUpdate(bool force_update_all)
 			safe_delete(client_packet);
 
 			ResetHPUpdateTimer();
+
+			if (RuleB(Custom, ServerAuthStats)) {
+				CastToClient()->SendEdgeHPStats();
+			}
 
 			// Used to check if HP has changed to update self next round
 			last_hp = current_hp;
@@ -4563,38 +4571,50 @@ bool Mob::CanThisClassTripleAttack() const
 	}
 }
 
-bool Mob::IsWarriorClass(void) const
-{
-	switch(GetClass())
-	{
-	case Class::Warrior:
-	case Class::WarriorGM:
-	case Class::Rogue:
-	case Class::RogueGM:
-	case Class::Monk:
-	case Class::MonkGM:
-	case Class::Paladin:
-	case Class::PaladinGM:
-	case Class::ShadowKnight:
-	case Class::ShadowKnightGM:
-	case Class::Ranger:
-	case Class::RangerGM:
-	case Class::Beastlord:
-	case Class::BeastlordGM:
-	case Class::Berserker:
-	case Class::BerserkerGM:
-	case Class::Bard:
-	case Class::BardGM:
-		{
-			return true;
-		}
-	default:
-		{
-			return false;
-		}
-	}
+bool Mob::IsWarriorClass(void) const {
+    if (IsClient() && RuleB(Custom, MulticlassingEnabled)) {
+        int classes_bits = CastToClient()->GetClassesBits();
 
+        std::vector<uint16> warriorLikeClasses = {
+            Class::Warrior, Class::Rogue, Class::Monk, Class::Paladin,
+            Class::ShadowKnight, Class::Ranger, Class::Beastlord, 
+			Class::Berserker, Class::Bard
+        };
+
+        for (const auto& class_id : warriorLikeClasses) {
+            if (classes_bits & (1 << (class_id - 1))) {
+                return true; // Return true if any of the warrior-like classes are set in classes_bits
+            }
+        }
+
+        return false;
+    } else {
+        switch(GetClass()) {
+            case Class::Warrior:
+            case Class::WarriorGM:
+            case Class::Rogue:
+            case Class::RogueGM:
+            case Class::Monk:
+            case Class::MonkGM:
+            case Class::Paladin:
+            case Class::PaladinGM:
+            case Class::ShadowKnight:
+            case Class::ShadowKnightGM:
+            case Class::Ranger:
+            case Class::RangerGM:
+            case Class::Beastlord:
+            case Class::BeastlordGM:
+            case Class::Berserker:
+            case Class::BerserkerGM:
+            case Class::Bard:
+            case Class::BardGM:
+                return true;
+            default:
+                return false;
+        }
+    }
 }
+
 
 bool Mob::CanThisClassParry(void) const
 {

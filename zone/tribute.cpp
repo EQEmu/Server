@@ -167,6 +167,10 @@ void Client::DoTributeUpdate() {
 		}
 	}
 	CalcBonuses();
+	
+	if (RuleB(Custom, ServerAuthStats)) {
+		SendEdgeStatBulkUpdate();
+	}
 }
 
 void Client::SendTributeTimer() {

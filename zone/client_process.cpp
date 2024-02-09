@@ -384,6 +384,7 @@ bool Client::Process() {
 		}
 
 		Mob *auto_attack_target = GetTarget();
+
 		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) {
 			//check if change
 			//only check on primary attack.. sorry offhand you gotta wait!
@@ -515,6 +516,10 @@ bool Client::Process() {
 			DoManaRegen();
 			DoEnduranceRegen();
 			BuffProcess();
+
+			if (GetTarget()) {
+				GetTarget()->SendBuffsToClient(this);
+			}
 
 			if (tribute_timer.Check()) {
 				ToggleTribute(true);	//re-activate the tribute.
@@ -1131,20 +1136,34 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 		return;
 	}
 
-	if (
-		m->scribing != memSpellForget &&
-		(
-			!IsPlayerClass(GetClass()) ||
-			GetLevel() < spells[m->spell_id].classes[GetClass() - 1]
-		)
-	) {
-		MessageString(
-			Chat::Red,
-			SPELL_LEVEL_TO_LOW,
-			std::to_string(spells[m->spell_id].classes[GetClass() - 1]).c_str(),
-			spells[m->spell_id].name
-		);
-		return;
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		// Bitmask representing all the classes the player has unlocked.
+		int classesBitmask = GetClassesBits();
+		bool isEligibleForSpell = false;
+
+		for (int classID = 1; classID <= 16; ++classID) {
+			if (classesBitmask & (1 << (classID - 1))) { // Check if the class is unlocked.
+				if (GetLevel() >= spells[m->spell_id].classes[classID - 1]) { // Check if the spell is available for this class at the player's level.
+					isEligibleForSpell = true;
+					break; // Break the loop if the spell is eligible for any of the unlocked classes.
+				}
+			}
+		}
+
+		if (!isEligibleForSpell) {
+			Client::Message(Chat::Red, "None of your classes are currently eligible to learn this spell.");
+			return;
+		}
+	} else {
+		if (m->scribing != memSpellForget && (!IsPlayerClass(GetClass()) || GetLevel() < spells[m->spell_id].classes[GetClass() - 1])) {
+			MessageString(
+				Chat::Red,
+				SPELL_LEVEL_TO_LOW,
+				std::to_string(spells[m->spell_id].classes[GetClass() - 1]).c_str(),
+				spells[m->spell_id].name
+			);
+			return;
+		}
 	}
 
 	switch (m->scribing) {
@@ -1157,7 +1176,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if (
 					item &&
 					RuleB(Character, RestrictSpellScribing) &&
-					!item->IsEquipable(GetRace(), GetClass())
+					!item->IsEquipable(GetRace(), CastToClient()->GetClassesBits())
 				) {
 					MessageString(Chat::Red, CANNOT_USE_ITEM);
 					break;
@@ -1569,14 +1588,15 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 		return;
 	}
 
-	//you can only use your own trainer, client enforces this, but why trust it
-	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
+	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
+
+	if (!RuleB(Character, AllowCrossClassTrainers)) {		
 		if (GetClass() != trains_class) {
+			Message(Chat::White, "You are not a member of the %s class guild.  Begone.", class_names[GetClass()]);
 			safe_delete(outapp);
 			return;
 		}
-	}
+	} 
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if (DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2) {
@@ -1585,17 +1605,25 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	}
 
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
-//#pragma GCC push_options
-//#pragma GCC optimize ("O0")
+	//#pragma GCC push_options
+	//#pragma GCC optimize ("O0")
+	int classes_bits = GetClassesBits(); // Get the bitmask representing the character's classes
+	int trains_class_bit = 1 << (trains_class - 1); // Calculate the bit for trains_class (adjusting for 0-indexing)
+
 	for (int sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; ++sk) {
-		if (sk == EQ::skills::SkillTinkering && GetRace() != GNOME) {
-			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
-		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQ::skills::SkillType)sk, MaxSkill((EQ::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
-			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
-			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
+		if (!(classes_bits & trains_class_bit)) {
+			gmtrain->skills[sk] = 0; // If trains_class isn't represented in our classes, set skill to 0
+			continue; // Skip the rest of the loop and continue with the next skill
 		}
-	}
+		
+		if (sk == EQ::skills::SkillTinkering && GetRace() != GNOME) {
+			gmtrain->skills[sk] = 0; // Non-gnomes can't tinker!
+		} else {
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQ::skills::SkillType)sk, MaxSkillOriginal((EQ::skills::SkillType)sk, trains_class, RuleI(Character, MaxLevel)));
+			// This is the highest level that the trainer can train you to, this is enforced clientside so we can't just
+			// set it to 1 with CanHaveSkill or you won't be able to train past 1.
+		}
+	}	
 
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && GetClass() == Class::Berserker) {
 		gmtrain->skills[EQ::skills::Skill1HPiercing] = gmtrain->skills[EQ::skills::Skill2HPiercing];
@@ -1628,11 +1656,11 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM)
 		return;
 
-	//you can only use your own trainer, client enforces this, but why trust it
-	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-		if (GetClass() != trains_class)
+	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
+	if (!RuleB(Character, AllowCrossClassTrainers)) {		
+		if (GetClass() != trains_class) {
 			return;
+		}
 	}
 
 	//you have to be somewhat close to a trainer to be properly using them
@@ -1659,11 +1687,11 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM)
 		return;
 
-	//you can only use your own trainer, client enforces this, but why trust it
-	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-		if (GetClass() != trains_class)
+	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
+	if (!RuleB(Character, AllowCrossClassTrainers)) {		
+		if (GetClass() != trains_class) {
 			return;
+		}
 	}
 
 	//you have to be somewhat close to a trainer to be properly using them

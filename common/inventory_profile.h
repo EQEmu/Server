@@ -132,7 +132,7 @@ namespace EQ
 
 		// Swap items in inventory
 		enum SwapItemFailState : int8 { swapInvalid = -1, swapPass = 0, swapNotAllowed, swapNullData, swapRaceClass, swapDeity, swapLevel };
-		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = Race::Doug, uint8 class_id = Class::None, uint16 deity_id = deity::DeityType::DeityUnknown, uint8 level = 0);
+		bool SwapItem(int16 source_slot, int16 destination_slot, SwapItemFailState& fail_state, uint16 race_id = Race::Doug, uint8 class_id = Class::None, uint16 deity_id = deity::DeityType::DeityUnknown, uint8 level = 0, int classes_bits = 0);
 
 		// Remove item from inventory
 		bool DeleteItem(int16 slot_id, int16 quantity = 0);
@@ -148,6 +148,9 @@ namespace EQ
 
 		// Check how many of a specific item the player has equipped by Item ID
 		int CountItemEquippedByID(uint32 item_id);
+
+		//Check if a player has any item or augment with a specific click effect ID equipped
+		bool IsClickEffectEquipped(uint32 spellid);
 
 		// Check if player has a specific augment equipped by Item ID
 		bool HasAugmentEquippedByID(uint32 item_id);
