@@ -216,6 +216,8 @@ struct TaskInformation {
 	uint32_t            request_timer_group;
 	uint32_t            request_timer_seconds;
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
+	std::vector<int>    selector_ids; // initial active elements for task select window
+	int                 selector_step = std::numeric_limits<int>::max();
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
 	{
@@ -232,12 +234,14 @@ struct TaskInformation {
 			out.WriteUInt8(0); // 0: no rewards 1: enables "Reward Preview" button
 		}
 
-		// selector only needs to send the first objective to fill description starting zone
-		out.WriteUInt32(std::min(activity_count, 1)); // number of task objectives
-		if (activity_count > 0)
+		// live only sends the initial active elements to the select window
+		// element index 0 fills the description starting zone
+		// bracket descriptions are appended if all their elements are sent
+		out.WriteUInt32(static_cast<uint32_t>(selector_ids.size())); // element count
+		for (int id : selector_ids)
 		{
-			out.WriteUInt32(0); // objective index
-			activity_information[0].SerializeSelector(out, client_version);
+			out.WriteInt32(id); // element index
+			activity_information[id].SerializeSelector(out, client_version);
 		}
 	}
 };
