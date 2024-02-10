@@ -43,8 +43,6 @@
 * Fix Froglok Starting Languages ([#4050](https://github.com/EQEmu/Server/pull/4050)) @Kinglykrab 2024-02-09
 * Fix Issue with Bot Dual wield ([#4037](https://github.com/EQEmu/Server/pull/4037)) @Kinglykrab 2024-02-01
 * Fix for potential crash of DS damage on death ([#4040](https://github.com/EQEmu/Server/pull/4040)) @nytmyr 2024-02-03
-* Revert " fs::exists(fs::path{name}) does not work for Chinese characters in windows"  @Akkadius 2024-02-10
-* fs::exists(fs::path{name}) does not work for Chinese characters in windows  @Akkadius 2024-02-10
 
 ### GM Commands
 
