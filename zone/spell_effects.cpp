@@ -3837,16 +3837,16 @@ void Mob::BuffProcess()
 
 							if (caster && client) {
 								if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
-									if (caster->GetInv().IsClickEffectEquipped(spellid)) {
-										suspended = true;
-									} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
-										suspended = true;
-									}/* else if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
-										suspended = true;
-									} */ // Bard songs suspension
-
-									if (suspended) {
-										LogDebug("[{}] is suspended.", spellid);
+									if (GetSpellEffectIndex(spellid, SE_DivineAura) == -1) {
+										if (caster->GetInv().IsClickEffectEquipped(spellid)) {
+											suspended = true;
+										} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
+											suspended = true;
+										} else if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
+											if (buffs[buffs_i].ticsremaining == 1 && caster == this && caster->IsLinkedSpellReuseTimerReady(spells[spellid].timer_id)) {
+												caster->ApplyBardPulse(spellid, this, (EQ::spells::CastingSlot)caster->FindMemmedSpellBySpellID(spellid));
+											}
+										}
 									}
 								}							
 							}
@@ -3855,20 +3855,6 @@ void Mob::BuffProcess()
 								SendPetBuffsToClient();
 							}
 						}
-						
-						// This will suspend detrimental bard songs on mobs. Maybe useful later.
-						/* else {
-							// Attempt to make bard detrimental songs work similarly.
-							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
-
-							if (caster) {								
-								if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(buffs[buffs_i].spellid)) {
-									if (caster->CalculateDistance(GetX(), GetY(), GetZ()) < caster->GetRangeDistTargetSizeMod(this)) {
-										suspended = true;
-									}									
-								}
-							}
-						} */
 					}
 
 					if (!suspended || !RuleB(Custom, SuspendGroupBuffs)) {

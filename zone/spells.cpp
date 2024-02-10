@@ -1352,6 +1352,8 @@ void Mob::ZeroBardPulseVars()
 	bardsong_target_id = 0;
 	bardsong_slot = CastingSlot::Gem1;
 	bardsong_timer.Disable();
+
+	LogDebug("ZeroBardPulseVars");
 }
 
 void Mob::InterruptSpell(uint16 spellid)
@@ -1948,12 +1950,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				c->CheckSongSkillIncrease(spell_id);
 			}			
 
-			/*
-			if (RuleB(Custom, MulticlassingEnabled)) {
-				c->SendSpellBarEnable(spell_id);
-				ZeroBardPulseVars();
-			}
-			*/
+			
+			if (RuleB(Custom, MulticlassingEnabled)) {				
+				if (IsBeneficialSpell(spell_id)) {
+					c->SendSpellBarEnable(spell_id);
+					c->ZeroBardPulseVars();
+
+					LogDebug("Resetting Bard Song State");
+				}
+			}			
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
@@ -7158,7 +7163,7 @@ void Client::SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration)
 
 bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
 {
-	if (timer_id > 19)
+	if (timer_id > 250)
 		return true;
 	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
 }
