@@ -348,6 +348,10 @@ foreach my $table_to_generate (@tables) {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
+        elsif ($data_type =~ /timestamp/i) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? reinterpret_cast<time_t>(row[%s]) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? reinterpret_cast<time_t>(row[%s]) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+        }
         else {
             $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);
             $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);

@@ -50,7 +50,6 @@
 #include "../common/repositories/name_filter_repository.h"
 #include "../common/repositories/npc_types_repository.h"
 #include "../common/repositories/raid_details_repository.h"
-#include "../common/repositories/raid_leaders_repository.h"
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/reports_repository.h"
 #include "../common/repositories/variables_repository.h"

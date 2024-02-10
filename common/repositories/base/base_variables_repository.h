@@ -135,7 +135,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = row[4] ? reinterpret_cast<time_t>(row[4]) : std::time(nullptr);
 
 			return e;
 		}
@@ -270,7 +270,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = row[4] ? reinterpret_cast<time_t>(row[4]) : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -299,7 +299,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = row[4] ? reinterpret_cast<time_t>(row[4]) : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}

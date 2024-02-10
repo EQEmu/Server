@@ -130,7 +130,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = row[3] ? reinterpret_cast<time_t>(row[3]) : std::time(nullptr);
 
 			return e;
 		}
@@ -262,7 +262,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = row[3] ? reinterpret_cast<time_t>(row[3]) : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}
@@ -290,7 +290,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = row[3] ? reinterpret_cast<time_t>(row[3]) : std::time(nullptr);
 
 			all_entries.push_back(e);
 		}
