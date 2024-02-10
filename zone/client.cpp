@@ -2855,7 +2855,7 @@ uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
 
                 uint8 trainLevel = content_db.GetTrainLevel(classID, adjusted_skillid, RuleI(Character, MaxLevel));
                 
-                if (trainLevel < earliestTrainLevel) {
+                if (trainLevel < earliestTrainLevel && trainLevel != 0) {
                     earliestTrainLevel = trainLevel;
                 }
             }
