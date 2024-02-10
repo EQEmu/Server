@@ -56,6 +56,8 @@ namespace PlayerEvent {
 		KILLED_NAMED_NPC,
 		KILLED_RAID_NPC,
 		ITEM_CREATION,
+		GUILD_TRIBUTE_DONATE_ITEM,
+		GUILD_TRIBUTE_DONATE_PLAT,
 		MAX // dont remove
 	};
 
@@ -112,7 +114,9 @@ namespace PlayerEvent {
 		"Killed NPC",
 		"Killed Named NPC",
 		"Killed Raid NPC",
-		"Item Creation"
+		"Item Creation",
+		"Guild Tribute Donate Item",
+		"Guild Tribute Donate Platinum"
 	};
 
 	// Generic struct used by all events
@@ -939,6 +943,36 @@ namespace PlayerEvent {
 				CEREAL_NVP(combat_time_seconds),
 				CEREAL_NVP(total_damage_per_second_taken),
 				CEREAL_NVP(total_heal_per_second_taken)
+			);
+		}
+	};
+
+	struct GuildTributeDonateItem {
+		uint32      item_id;
+		uint32 		guild_favor;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(guild_favor)
+			);
+		}
+	};
+
+	struct GuildTributeDonatePlat {
+		uint32      plat;
+		uint32 		guild_favor;
+
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(plat),
+				CEREAL_NVP(guild_favor)
 			);
 		}
 	};

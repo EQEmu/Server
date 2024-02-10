@@ -1105,7 +1105,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 		if(update_db)
 			database.SaveInventory(character_id, inst, slot_id);
 	}
-
+	
 	if(client_update && IsValidSlot(slot_id)) {
 		EQApplicationPacket* outapp = nullptr;
 		if(inst) {
@@ -1674,6 +1674,7 @@ bool Client::IsValidSlot(uint32 slot) {
 		(slot == (uint32)EQ::invslot::slotCursor) ||
 		(slot <= EQ::invbag::CURSOR_BAG_END && slot >= EQ::invbag::CURSOR_BAG_BEGIN) ||
 		(slot <= EQ::invslot::TRIBUTE_END && slot >= EQ::invslot::TRIBUTE_BEGIN) ||
+		(slot <= EQ::invslot::GUILD_TRIBUTE_END && slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) ||
 		(slot <= EQ::invslot::SHARED_BANK_END && slot >= EQ::invslot::SHARED_BANK_BEGIN) ||
 		(slot <= EQ::invbag::SHARED_BANK_BAGS_END && slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) ||
 		(slot <= EQ::invslot::TRADE_END && slot >= EQ::invslot::TRADE_BEGIN) ||
@@ -3578,6 +3579,11 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
+	for (int16 index = EQ::invslot::GUILD_TRIBUTE_BEGIN; index <= EQ::invslot::GUILD_TRIBUTE_END; ++index) {
+		auto inst = m_inv[index];
+		if (inst == nullptr) { continue; }
+		instmap[index] = inst;
+	}
 	for (int16 index = EQ::invslot::BANK_BEGIN; index <= EQ::invslot::BANK_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
@@ -3714,6 +3720,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	if (
 		(head >= EQ::invslot::EQUIPMENT_BEGIN && head <= EQ::invslot::EQUIPMENT_END) ||
 		(head >= EQ::invslot::TRIBUTE_BEGIN && head <= EQ::invslot::TRIBUTE_END) ||
+		(head >= EQ::invslot::GUILD_TRIBUTE_BEGIN && head <= EQ::invslot::GUILD_TRIBUTE_END) ||
 		(head >= EQ::invslot::WORLD_BEGIN && head <= EQ::invslot::WORLD_END) ||
 		(head >= 8000 && head <= 8101)) {
 		switch (depth)

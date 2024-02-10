@@ -57,16 +57,32 @@ public:
 	void ListGuilds(Client *c, std::string search_criteria = std::string()) const;
 	void ListGuilds(Client *c, uint32 guild_id = 0) const;
 	void DescribeGuild(Client *c, uint32 guild_id) const;
+	bool IsActionABankAction(GuildAction action);
 
-
-//	bool	DonateTribute(uint32 charid, uint32 guild_id, uint32 tribute_amount);
-
-	uint8 *MakeGuildMembers(uint32 guild_id, const char *prefix_name, uint32 &length);	//make a guild member list packet, returns ownership of the buffer.
+	uint8 *MakeGuildMembers(uint32 guild_id, const char* prefix_name, uint32& length);
+	void  SendToWorldMemberLevelUpdate(uint32 guild_id, uint32 level, std::string player_name);
+	void  SendToWorldMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note);
+	void  SendToWorldMemberRemove(uint32 guild_id, std::string player_name);
+	void  SendToWorldMemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
+	void  SendToWorldGuildChannel(uint32 guild_id, std::string channel);
+	void  SendToWorldGuildURL(uint32 guild_id, std::string url);
+	void  SendToWorldSendGuildList();
+	void  SendToWorldMemberRankUpdate(uint32 guild_id, uint32 rank, uint32 banker, uint32 alt, bool no_update, const char *player_name);
+	void  SendToWorldSendGuildMembersList(uint32 guild_id);
+	bool  RemoveMember(uint32 guild_id, uint32 char_id, std::string player_name);
+	void  MemberAdd(uint32 guild_id, uint32 char_id, uint32 level, uint32 _class, uint32 rank, uint32 zone_id, std::string player_name);
+	bool  MemberRankUpdate(uint32 guild_id, uint32 rank, uint32 banker, uint32 alt, bool no_update, const char *player_name);
 
 	void RecordInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	bool VerifyAndClearInvite(uint32 char_id, uint32 guild_id, uint8 rank);
 	void SendGuildMemberUpdateToWorld(const char *MemberName, uint32 GuildID, uint16 ZoneID, uint32 LastSeen);
 	void RequestOnlineGuildMembers(uint32 FromID, uint32 GuildID);
+	void UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value);
+	void SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value);
+	void UpdateRankName(uint32 gid, uint32 rank, std::string rank_name);
+	void SendRankName(uint32 guild_id, uint32 rank, std::string rank_name);
+	void SendAllRankNames(uint32 guild_id, uint32 char_id);
+	BaseGuildManager::GuildInfo* GetGuildByGuildID(uint32 guild_id);
 
 protected:
 	virtual void SendGuildRefresh(uint32 guild_id, bool name, bool motd, bool rank, bool relation);

@@ -245,6 +245,10 @@ RULE_INT(Guild, PlayerCreationLimit, 1, "Only allow use of the UF+ window if the
 RULE_INT(Guild, PlayerCreationRequiredStatus, 0, "Required status to create a guild")
 RULE_INT(Guild, PlayerCreationRequiredLevel, 0, "Required level of the player attempting to create the guild")
 RULE_INT(Guild, PlayerCreationRequiredTime, 0, "Time needed online on the account to create a guild (in minutes)")
+RULE_INT(Guild, TributeTime, 600000, "Time in ms for guild tributes.  Default is 10 mins.")
+RULE_INT(Guild, TributeTimeRefreshInterval, 180000, "Time in ms to send all guild members a Tribute Time refresh. Default is 3 mins.")
+RULE_INT(Guild, TributePlatConversionRate, 10, "The conversion rate of platinum donations.  Default is 10 guild favor to 1 platinum.")
+RULE_BOOL(Guild, UseCharacterMaxLevelForGuildTributes, true, "Guild Tributes will adhere to Character:MaxLevel.  Default is true.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Skills)

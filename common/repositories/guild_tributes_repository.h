@@ -1,11 +1,11 @@
-#ifndef EQEMU_GUILD_RANKS_REPOSITORY_H
-#define EQEMU_GUILD_RANKS_REPOSITORY_H
+#ifndef EQEMU_GUILD_TRIBUTES_REPOSITORY_H
+#define EQEMU_GUILD_TRIBUTES_REPOSITORY_H
 
 #include "../database.h"
 #include "../strings.h"
-#include "base/base_guild_ranks_repository.h"
+#include "base/base_guild_tributes_repository.h"
 
-class GuildRanksRepository: public BaseGuildRanksRepository {
+class GuildTributesRepository: public BaseGuildTributesRepository {
 public:
 
     /**
@@ -32,10 +32,10 @@ public:
      *
      * Example custom methods in a repository
      *
-     * GuildRanksRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-     * GuildRanksRepository::GetWhereNeverExpires()
-     * GuildRanksRepository::GetWhereXAndY()
-     * GuildRanksRepository::DeleteWhereXAndY()
+     * GuildTributesRepository::GetByZoneAndVersion(int zone_id, int zone_version)
+     * GuildTributesRepository::GetWhereNeverExpires()
+     * GuildTributesRepository::GetWhereXAndY()
+     * GuildTributesRepository::DeleteWhereXAndY()
      *
      * Most of the above could be covered by base methods, but if you as a developer
      * find yourself re-using logic for other parts of the code, its best to just make a
@@ -44,22 +44,34 @@ public:
      */
 
 	// Custom extended repository methods here
-
-	static int UpdateTitle(Database &db, uint32 guild_id, uint32 rank, std::string title)
+	static int UpdateEnabled(Database& db, uint32 guild_id, uint32 enabled)
 	{
-		auto guild_rank = GetWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
-		if (guild_rank.empty()) {
-			return 0;
-		}
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `enabled` = '{}' WHERE `guild_id` = {}",
+				TableName(),
+				enabled,
+				guild_id
+			)
+		);
 
-		auto r = guild_rank[0];
-		r.title = title;
-
-		DeleteWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
-		InsertOne(db, r);
-
-		return 1;
+		return (results.Success() ? results.RowsAffected() : 0);
 	}
+
+	static int UpdateTimeRemaining(Database& db, uint32 guild_id, uint32 time_remaining)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE {} SET `time_remaining` = '{}' WHERE `guild_id` = {}",
+				TableName(),
+				time_remaining,
+				guild_id
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
 };
 
-#endif //EQEMU_GUILD_RANKS_REPOSITORY_H
+#endif //EQEMU_GUILD_TRIBUTES_REPOSITORY_H

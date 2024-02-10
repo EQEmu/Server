@@ -5,6 +5,7 @@
 #include "../common/packet_functions.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/net/packet.h"
+#include "../common/guilds.h"
 #include <cereal/cereal.hpp>
 #include <cereal/archives/binary.hpp>
 #include <cereal/types/chrono.hpp>
@@ -94,6 +95,23 @@
 #define ServerOP_WebInterfaceEvent  0x0066
 #define ServerOP_WebInterfaceSubscribe 0x0067
 #define ServerOP_WebInterfaceUnsubscribe 0x0068
+#define ServerOP_GuildPermissionUpdate			  0x0069
+#define ServerOP_GuildTributeUpdate				  0x0070
+#define ServerOP_GuildRankNameChange			  0x0071
+#define ServerOP_GuildTributeActivate			  0x0072
+#define ServerOP_GuildTributeOptInToggle		  0x0073
+#define ServerOP_GuildTributeFavAndTimer		  0x0074
+#define ServerOP_RequestGuildActiveTributes		  0x0075
+#define ServerOP_RequestGuildFavorAndTimer		  0x0076
+#define ServerOP_GuildTributeUpdateDonations      0x0077
+#define ServerOP_GuildMemberLevelUpdate           0x0078
+#define ServerOP_GuildMemberPublicNote            0x0079
+#define ServerOP_GuildMemberRemove                0x007A
+#define ServerOP_GuildMemberAdd                   0x007B
+#define ServerOP_GuildChannel                     0x007C
+#define ServerOP_GuildURL                         0x007D
+#define ServerOP_GuildSendGuildList				  0x007E
+#define ServerOP_GuildMembersList                 0x007F
 
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
@@ -567,6 +585,8 @@ struct ServerClientList_Struct {
 	uint8	anon;
 	bool	tellsoff;
 	uint32	guild_id;
+	uint32	guild_rank;
+	bool    guild_tribute_opt_in;
 	bool	LFG;
 	uint8	gm;
 	uint8	ClientVersion;
@@ -1006,19 +1026,34 @@ struct ServerGuildCharRefresh_Struct {
 	uint32 char_id;
 };
 
-struct ServerGuildRankUpdate_Struct
-{
-	uint32 GuildID;
-	char MemberName[64];
-	uint32 Rank;
-	uint32 Banker;
+struct ServerGuildRankUpdate_Struct {
+	uint32 guild_id;
+	char   member_name[64];
+	uint32 rank;
+	uint32 banker;
+	uint32 alt;
+	bool   no_update;
 };
 
 struct ServerGuildMemberUpdate_Struct {
-	uint32 GuildID;
-	char MemberName[64];
-	uint32 ZoneID;
-	uint32 LastSeen;
+	uint32 guild_id;
+	char   member_name[64];
+	uint32 zone_id;
+	uint32 last_seen;
+};
+
+struct ServerGuildPermissionUpdate_Struct {
+	uint32 guild_id;
+	char   member_name[64];
+	uint32 rank;
+	uint32 function_id;
+	uint32 function_value;
+};
+
+struct ServerGuildRankNameChange {
+	uint32 guild_id;
+	uint32 rank;
+	char   rank_name[51]; //RoF2 has 51 max.
 };
 
 struct SpawnPlayerCorpse_Struct {
@@ -1855,6 +1890,47 @@ struct ServerOOCMute_Struct {
 struct ServerZoneStatus_Struct {
 	char  name[64];
 	int16 admin;
+};
+
+struct GuildTributeUpdate {
+	uint32 guild_id;
+	uint32 tribute_id_1;
+	uint32 tribute_id_2;
+	uint32 tribute_id_1_tier;
+	uint32 tribute_id_2_tier;
+	uint32 enabled;
+	uint32 favor;
+	uint32 time_remaining;
+	uint32 member_favor;
+	uint32 member_time;
+	uint32 member_enabled;
+	char   player_name[64];
+};
+
+struct GuildTributeMemberToggle {
+	uint32 guild_id;
+	uint32 char_id;
+	char   player_name[64];
+	uint32 tribute_toggle;
+	uint32 command;
+	uint32 time_remaining;
+	uint32 no_donations;
+	uint32 member_last_donated;
+};
+
+struct ServerOP_GuildMessage_Struct {
+	uint32 guild_id{GUILD_NONE};
+	char   player_name[64]{0};
+	uint32 player_level{0};
+	uint32 player_class{0};
+	uint32 player_rank{GUILD_RANK_NONE};
+	uint32 player_zone_id{0};
+	bool   player_offline{false};
+	char   player_new_name[64]{0};
+	char   new_guild_name[64]{0};
+	char   note[256]{0};
+    char   channel[2048]{0};
+    char   url[2048]{0};
 };
 
 #pragma pack()

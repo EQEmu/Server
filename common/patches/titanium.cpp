@@ -34,6 +34,7 @@
 #include "titanium_structs.h"
 #include "../path_manager.h"
 #include "../raid.h"
+#include "../guilds.h"
 
 #include <sstream>
 
@@ -664,6 +665,151 @@ namespace Titanium
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
+	ENCODE(OP_SetGuildRank)
+	{
+		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
+		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
+
+		eq->unknown00 = 0;
+		eq->unknown04 = 0;
+
+		//Translate older ranks to new values* /
+		switch (emu->rank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank = GUILD_LEADER_TI;
+				break;
+			}
+		}
+
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_SpawnAppearance)
+	{
+		ENCODE_LENGTH_EXACT(SpawnAppearance_Struct);
+		SETUP_DIRECT_ENCODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
+
+		OUT(spawn_id);
+		OUT(type);
+		OUT(parameter);
+		switch (emu->type) {
+			case AppearanceType::GuildRank: {
+				//Translate new ranks to old values* /
+				switch (emu->parameter) {
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						eq->parameter = GUILD_MEMBER_TI;
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						eq->parameter = GUILD_OFFICER_TI;
+						break;
+					}
+					case GUILD_LEADER: {
+						eq->parameter = GUILD_LEADER_TI;
+						break;
+					}
+				}
+				break; 
+			}
+			case AppearanceType::GuildShow: {
+				FAIL_ENCODE();
+				return;
+			}
+			default: {
+				break;
+			}
+		}
+
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_GuildMemberAdd)
+	{
+		ENCODE_LENGTH_EXACT(GuildMemberAdd_Struct)
+		SETUP_DIRECT_ENCODE(GuildMemberAdd_Struct, structs::GuildMemberAdd_Struct)
+
+		OUT(guild_id)
+		OUT(level)
+		OUT(class_)
+		switch (emu->rank_) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank_ = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank_ = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank_ = GUILD_LEADER_TI;
+				break;
+			}
+		}
+		OUT(zone_id)
+		OUT(last_on)
+		OUT_str(player_name)
+
+		FINISH_ENCODE()
+	}
+
+	ENCODE(OP_GuildMemberRankAltBanker)
+	{
+		ENCODE_LENGTH_EXACT(GuildMemberRank_Struct)
+		SETUP_DIRECT_ENCODE(GuildMemberRank_Struct, structs::GuildMemberRank_Struct)
+
+		OUT(guild_id)
+		OUT(alt_banker)
+		OUT_str(player_name)
+
+		switch (emu->rank_) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->rank_ = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->rank_ = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->rank_ = GUILD_LEADER_TI;
+				break;
+			}
+		}
+
+		FINISH_ENCODE()
+	}
+
 	ENCODE(OP_GuildMemberList)
 	{
 		//consume the packet
@@ -727,12 +873,34 @@ namespace Titanium
 				str += sl + 1; \
 			}
 #define PutFieldN(field) e->field = htonl(emu_e->field)
-
+				/* Translate new ranks to older values */
 				SlideStructString(name, emu_name);
 				PutFieldN(level);
 				PutFieldN(banker);
 				PutFieldN(class_);
-				PutFieldN(rank);
+				switch (emu_e->rank) {
+					case GUILD_SENIOR_MEMBER:
+					case GUILD_MEMBER:
+					case GUILD_JUNIOR_MEMBER:
+					case GUILD_INITIATE:
+					case GUILD_RECRUIT: {
+						e->rank = htonl(GUILD_MEMBER_TI);
+						break;
+					}
+					case GUILD_OFFICER:
+					case GUILD_SENIOR_OFFICER: {
+						e->rank = htonl(GUILD_OFFICER_TI);
+						break;
+					}
+					case GUILD_LEADER: {
+						e->rank = htonl(GUILD_LEADER_TI);
+						break;
+					}
+					default: {
+						e->rank = htonl(GUILD_MEMBER_TI);
+						break;
+					}
+				}
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
 				PutFieldN(total_tribute);
@@ -751,6 +919,38 @@ namespace Titanium
 
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_SendGuildTributes)
+	{
+		ENCODE_LENGTH_ATLEAST(structs::GuildTributeAbility_Struct);
+		SETUP_VAR_ENCODE(GuildTributeAbility_Struct);
+		ALLOC_VAR_ENCODE(structs::GuildTributeAbility_Struct, sizeof(GuildTributeAbility_Struct) + strlen(emu->ability.name));
+
+		eq->guild_id = emu->guild_id;;
+		strncpy(eq->ability.name, emu->ability.name, strlen(emu->ability.name));
+		eq->ability.tribute_id = emu->ability.tribute_id;
+		eq->ability.tier_count = emu->ability.tier_count;
+		for (int i = 0; i < ntohl(emu->ability.tier_count); i++) {
+			eq->ability.tiers[i].cost = emu->ability.tiers[i].cost;
+			eq->ability.tiers[i].level = emu->ability.tiers[i].level;
+			eq->ability.tiers[i].tribute_item_id = emu->ability.tiers[i].tribute_item_id;
+		}
+		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_GuildTributeDonateItem)
+	{
+		SETUP_DIRECT_ENCODE(GuildTributeDonateItemReply_Struct, structs::GuildTributeDonateItemReply_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "UF::ENCODE(OP_GuildTributeDonateItem)");
+
+		OUT(quantity);
+		OUT(favor);
+		eq->unknown8 = 0;
+		eq->slot = ServerToTitaniumSlot(emu->slot);
+
+		FINISH_ENCODE();
 	}
 
 	ENCODE(OP_Illusion)
@@ -867,11 +1067,60 @@ namespace Titanium
 
 	ENCODE(OP_LFGuild)
 	{
+		struct bit_mask_conversion {
+			uint32	titanium_mask;
+			uint32	rof2_mask;
+		};
+
+		std::vector<bit_mask_conversion> bit_mask = {
+			{.titanium_mask = 2, .rof2_mask = 256},
+			{.titanium_mask = 4, .rof2_mask = 32768},
+			{.titanium_mask = 8, .rof2_mask = 65536},
+			{.titanium_mask = 16, .rof2_mask = 4},
+			{.titanium_mask = 32, .rof2_mask = 64},
+			{.titanium_mask = 64, .rof2_mask = 16384},
+			{.titanium_mask = 128, .rof2_mask = 8192},
+			{.titanium_mask = 256, .rof2_mask = 128},
+			{.titanium_mask = 512, .rof2_mask = 2048},
+			{.titanium_mask = 1024, .rof2_mask = 8},
+			{.titanium_mask = 2048, .rof2_mask = 16},
+			{.titanium_mask = 4096, .rof2_mask = 512},
+			{.titanium_mask = 8192, .rof2_mask = 32},
+			{.titanium_mask = 16384, .rof2_mask = 1024},
+			{.titanium_mask = 32768, .rof2_mask = 2},
+			{.titanium_mask = 65536, .rof2_mask = 4096},
+		};
+
 		EQApplicationPacket *in = *p;
-		*p = nullptr;
 
 		uint32 Command = in->ReadUInt32();
 
+		if (Command == 1) {
+			ENCODE_LENGTH_EXACT(LFGuild_GuildToggle_Struct);
+			SETUP_DIRECT_ENCODE(LFGuild_GuildToggle_Struct, structs::LFGuild_GuildToggle_Struct);
+
+			OUT(Command);
+			OUT_str(Comment);
+			OUT(FromLevel);
+			OUT(ToLevel);
+			OUT(AACount);
+			OUT(TimeZone);
+			OUT(Toggle);
+			OUT(TimePosted);
+			OUT_str(Name);
+
+			uint32 emu_bitmask = emu->Classes;
+			uint32 ti_bitmask = 0;
+			for (auto const& b : bit_mask) {
+				(emu_bitmask & b.rof2_mask) != 0 ? ti_bitmask |= b.titanium_mask : ti_bitmask &= ~b.titanium_mask;
+			}
+			eq->Classes = ti_bitmask;
+
+			FINISH_ENCODE();
+			return;
+		}
+
+		*p = nullptr;
 		if (Command != 0)
 		{
 			dest->FastQueuePacket(&in, ack_req);
@@ -1149,7 +1398,28 @@ namespace Titanium
 		OUT(pvp);
 		OUT(anon);
 		OUT(gm);
-		OUT(guildrank);
+		switch (emu->guildrank) {
+			case GUILD_SENIOR_MEMBER:
+			case GUILD_MEMBER:
+			case GUILD_JUNIOR_MEMBER:
+			case GUILD_INITIATE:
+			case GUILD_RECRUIT: {
+				eq->guildrank = GUILD_MEMBER_TI;
+				break;
+			}
+			case GUILD_OFFICER:
+			case GUILD_SENIOR_OFFICER: {
+				eq->guildrank = GUILD_OFFICER_TI;
+				break;
+			}
+			case GUILD_LEADER: {
+				eq->guildrank = GUILD_LEADER_TI;
+				break;
+			}
+			default: {
+				break;
+			}
+		}
 		OUT(guildbanker);
 		//	OUT(unknown13054[8]);
 		OUT(exp);
@@ -1250,7 +1520,7 @@ namespace Titanium
 	{
 		ENCODE_LENGTH_EXACT(MarkNPC_Struct);
 		SETUP_DIRECT_ENCODE(MarkNPC_Struct, MarkNPC_Struct);
-	
+
 		EQApplicationPacket* outapp = new EQApplicationPacket(OP_MarkNPC, sizeof(MarkNPC_Struct));
 		MarkNPC_Struct* mnpcs = (MarkNPC_Struct*)outapp->pBuffer;
 		mnpcs->TargetID = emu->TargetID;
@@ -1267,10 +1537,10 @@ namespace Titanium
 		*p = nullptr;
 		unsigned char* __emu_buffer = inapp->pBuffer;
 		RaidGeneral_Struct* raid_gen = (RaidGeneral_Struct*)__emu_buffer;
-		
+
 		switch (raid_gen->action)
 		{
-		case raidAdd: 
+		case raidAdd:
 		{
 			RaidAddMember_Struct* emu = (RaidAddMember_Struct*)__emu_buffer;
 
@@ -1340,7 +1610,7 @@ namespace Titanium
 			dest->QueuePacket(inapp);
 			break;
 		}
-		default: 
+		default:
 		{
 			RaidGeneral_Struct* emu = (RaidGeneral_Struct*)__emu_buffer;
 
@@ -1864,7 +2134,28 @@ namespace Titanium
 			eq->beard = emu->beard;
 			strcpy(eq->suffix, emu->suffix);
 			eq->petOwnerId = emu->petOwnerId;
-			eq->guildrank = emu->guildrank;
+			switch (emu->guildrank) {
+				case GUILD_SENIOR_MEMBER:
+				case GUILD_MEMBER:
+				case GUILD_JUNIOR_MEMBER:
+				case GUILD_INITIATE:
+				case GUILD_RECRUIT: {
+					eq->guildrank = GUILD_MEMBER_TI;
+					break;
+				}
+				case GUILD_OFFICER:
+				case GUILD_SENIOR_OFFICER: {
+					eq->guildrank = GUILD_OFFICER_TI;
+					break;
+				}
+				case GUILD_LEADER: {
+					eq->guildrank = GUILD_LEADER_TI;
+					break;
+				}
+				default: {
+					break;
+				}
+			}
 			//		eq->unknown0194[3] = emu->unknown0194[3];
 			for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; k++) {
 				eq->equipment.Slot[k].Material = emu->equipment.Slot[k].Material;
@@ -2205,6 +2496,34 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_GuildDemote)
+	{
+		DECODE_LENGTH_EXACT(structs::GuildDemoteStruct);
+		SETUP_DIRECT_DECODE(GuildDemoteStruct, structs::GuildDemoteStruct);
+
+		memcpy(emu->name, eq->name, sizeof(emu->name));
+		memcpy(emu->target, eq->target, sizeof(emu->target));
+		emu->rank = GUILD_MEMBER;
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_GuildTributeDonateItem)
+	{
+		DECODE_LENGTH_EXACT(structs::GuildTributeDonateItemRequest_Struct);
+		SETUP_DIRECT_DECODE(GuildTributeDonateItemRequest_Struct, structs::GuildTributeDonateItemRequest_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "UF::DECODE(OP_GuildTributeDonateItem)");
+
+		IN(quantity);
+		IN(tribute_master_id);
+		IN(guild_id);
+
+		emu->slot = TitaniumToServerSlot(eq->slot);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_InspectAnswer)
 	{
 		DECODE_LENGTH_EXACT(structs::InspectResponse_Struct);
@@ -2260,7 +2579,76 @@ namespace Titanium
 
 	DECODE(OP_LFGuild)
 	{
+		struct bit_mask_conversion {
+			uint32	titanium_mask;
+			uint32	rof2_mask;
+		};
+
+		std::vector<bit_mask_conversion> bit_mask = {
+			{.titanium_mask = 2, .rof2_mask = 256},
+			{.titanium_mask = 4, .rof2_mask = 32768},
+			{.titanium_mask = 8, .rof2_mask = 65536},
+			{.titanium_mask = 16, .rof2_mask = 4},
+			{.titanium_mask = 32, .rof2_mask = 64},
+			{.titanium_mask = 64, .rof2_mask = 16384},
+			{.titanium_mask = 128, .rof2_mask = 8192},
+			{.titanium_mask = 256, .rof2_mask = 128},
+			{.titanium_mask = 512, .rof2_mask = 2048},
+			{.titanium_mask = 1024, .rof2_mask = 8},
+			{.titanium_mask = 2048, .rof2_mask = 16},
+			{.titanium_mask = 4096, .rof2_mask = 512},
+			{.titanium_mask = 8192, .rof2_mask = 32},
+			{.titanium_mask = 16384, .rof2_mask = 1024},
+			{.titanium_mask = 32768, .rof2_mask = 2},
+			{.titanium_mask = 65536, .rof2_mask = 4096},
+		};
+
 		uint32 Command = __packet->ReadUInt32();
+
+		if (Command == 3) {
+			DECODE_LENGTH_EXACT(structs::LFGuild_SearchPlayer_Struct);
+			SETUP_DIRECT_DECODE(LFGuild_SearchPlayer_Struct, structs::LFGuild_SearchPlayer_Struct);
+
+			IN(Command);
+			IN(Unknown04);
+			IN(FromLevel);
+			IN(ToLevel);
+			IN(MinAA);
+			IN(TimeZone);
+
+			uint32 new_bitmask = 0;
+			uint32 ti_bitmask = eq->Classes;
+			for (auto const& b : bit_mask) {
+				(ti_bitmask & b.titanium_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
+			}
+			emu->Classes = new_bitmask;
+			FINISH_DIRECT_DECODE();
+			return;
+		}
+
+		if (Command == 1) {
+			DECODE_LENGTH_EXACT(structs::LFGuild_GuildToggle_Struct);
+			SETUP_DIRECT_DECODE(LFGuild_GuildToggle_Struct, structs::LFGuild_GuildToggle_Struct);
+
+			IN(Command);
+			IN_str(Comment);
+			IN(FromLevel);
+			IN(ToLevel);
+			IN(AACount);
+			IN(TimeZone);
+			IN(Toggle);
+			IN(TimePosted);
+			IN_str(Name);
+
+			uint32 new_bitmask = 0;
+			uint32 ti_bitmask = eq->Classes;
+			for (auto const& b : bit_mask) {
+				(ti_bitmask & b.titanium_mask) != 0 ? new_bitmask |= b.rof2_mask : new_bitmask &= ~b.rof2_mask;
+			}
+			emu->Classes = new_bitmask;
+			FINISH_DIRECT_DECODE();
+			return;
+		}
 
 		if (Command != 0)
 			return;
@@ -2401,7 +2789,7 @@ namespace Titanium
 			IN(general.parameter);
 			IN_str(general.leader_name);
 			IN_str(general.player_name);
-			
+
 			auto len = 0;
 			if (__packet->size < sizeof(structs::RaidMOTD_Struct)) {
 				len = __packet->size - sizeof(structs::RaidGeneral_Struct);
@@ -2409,8 +2797,8 @@ namespace Titanium
 			else {
 				len = sizeof(eq->motd);
 			}
-			
-			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len); 
+
+			strn0cpy(emu->motd, eq->motd, len > 1024 ? 1024 : len);
 			emu->motd[len - 1] = '\0';
 
 			FINISH_VAR_DECODE();
@@ -2428,7 +2816,7 @@ namespace Titanium
 
 			FINISH_VAR_DECODE();
 			break;
-		}		
+		}
 		default:
 		{
 			SETUP_DIRECT_DECODE(RaidGeneral_Struct, structs::RaidGeneral_Struct);

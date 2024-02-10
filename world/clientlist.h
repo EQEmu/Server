@@ -33,7 +33,9 @@ public:
 
 	void	ZoneBootup(ZoneServer* zs);
 	void	RemoveCLEReferances(ClientListEntry* cle);
-
+	std::map<uint32, ClientListEntry*> GetGuildClientsWithTributeOptIn(uint32 guild_id);
+	std::map<uint32, ClientListEntry*> GetGuildClientList(uint32 guild_id);
+	//Client* GetClient(uint32 char_id);
 
 	//from ZSList
 
@@ -65,6 +67,7 @@ public:
 	void GetClients(const char *zone_name, std::vector<ClientListEntry *> &into);
 
 	void GetClientList(Json::Value &response);
+	void GetGuildClientList(Json::Value& response, uint32 guild_id);
 
 	void SendCharacterMessage(uint32_t character_id, int chat_type, const std::string& message);
 	void SendCharacterMessage(const std::string& character_name, int chat_type, const std::string& message);

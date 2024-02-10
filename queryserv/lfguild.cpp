@@ -10,27 +10,27 @@
 extern WorldServer *worldserver;
 extern QSDatabase database;
 
-PlayerLookingForGuild::PlayerLookingForGuild(char *Name, char *Comments, uint32 Level, uint32 Class, uint32 AACount, uint32 Timezone, uint32 TimePosted)
+PlayerLookingForGuild::PlayerLookingForGuild(char *name, char *comments, uint32 level, uint32 classes, uint32 aa_count, uint32 time_zone, uint32 time_posted)
 {
-	Name = Name;
-	Comments = Comments;
-	Level = Level;
-	Class = Class;
-	AACount = AACount;
-	TimeZone = Timezone;
-	TimePosted = TimePosted;
+	Name        = std::string(name);
+	Comments    = std::string(comments);
+	Level       = level;
+	Class       = classes;
+	AACount     = aa_count;
+	TimeZone    = time_zone;
+	TimePosted  = time_posted;
 }
 
-GuildLookingForPlayers::GuildLookingForPlayers(char *Name, char *Comments, uint32 FromLevel, uint32 ToLevel, uint32 Classes, uint32 AACount, uint32 Timezone, uint32 TimePosted)
+GuildLookingForPlayers::GuildLookingForPlayers(char * name, char * comments, uint32 from_level, uint32 to_level, uint32 classes, uint32 aa_count, uint32 time_zone, uint32 time_posted)
 {
-	Name = Name;
-	Comments = Comments;
-	FromLevel = FromLevel;
-	ToLevel = ToLevel;
-	Classes = Classes;
-	AACount = AACount;
-	TimeZone = Timezone;
-	TimePosted = TimePosted;
+	Name        = std::string(name);
+	Comments    = std::string(comments);
+	FromLevel   = from_level;
+	ToLevel     = to_level;
+	Classes     = classes;
+	AACount     = aa_count;
+	TimeZone    = time_zone;
+	TimePosted  = time_posted;
 }
 
 bool LFGuildManager::LoadDatabase()

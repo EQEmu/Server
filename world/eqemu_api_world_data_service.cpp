@@ -27,10 +27,12 @@
 #include "../common/database_schema.h"
 #include "../common/zone_store.h"
 #include "worlddb.h"
+#include "wguild_mgr.h"
 #include "world_config.h"
 
-extern ZSList     zoneserver_list;
-extern ClientList client_list;
+extern ZSList            zoneserver_list;
+extern ClientList        client_list;
+extern WorldGuildManager guild_mgr;
 
 void callGetZoneList(Json::Value &response)
 {
@@ -277,7 +279,63 @@ void EQEmuApiWorldDataService::get(Json::Value &r, const std::vector<std::string
 	if (m == "reload") {
 		reload(r, args);
 	}
+	if (m == "get_guild_details") {
+		callGetGuildDetails(r, args);
+	}
 	if (m == "lock_status") {
 		r["locked"] = WorldConfig::get()->Locked;
 	}
+}
+
+void EQEmuApiWorldDataService::callGetGuildDetails(Json::Value &response, const std::vector<std::string> &args)
+{
+
+	std::string command = !args[1].empty() ? args[1] : "";
+	if (command.empty()) {
+		return;
+	}
+	Json::Value row;
+
+	auto guild_id = Strings::ToUnsignedInt(command);
+	if (!guild_id) {
+		row = "useage is: api get_guild_details ### where ### is a valid guild id.";
+		return;
+	}
+	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
+	if (!guild) {
+		row = fmt::format("Could not find guild id {}", guild_id);
+		return;
+	}
+
+	row["guild_id"]    = command;
+	row["guild_name"]  = guild->name;
+	row["leader_id"]   = guild->leader;
+	row["min_status"]  = guild->minstatus;
+	row["motd"]        = guild->motd;
+	row["motd_setter"] = guild->motd_setter;
+	row["url"]         = guild->url;
+	row["channel"]     = guild->channel;
+
+	for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++) {
+		row["Ranks"][i] = guild->rank_names[i].c_str();
+	}
+
+	for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
+		row["functions"][i]["db_id"]      = guild->functions[i].id;
+		row["functions"][i]["perm_id"]    = guild->functions[i].perm_id;
+		row["functions"][i]["guild_id"]   = guild->functions[i].guild_id;
+		row["functions"][i]["perm_value"] = guild->functions[i].perm_value;
+	}
+
+	row["tribute"]["favor"]          = guild->tribute.favor;
+	row["tribute"]["id1"]            = guild->tribute.id_1;
+	row["tribute"]["id1_tier"]       = guild->tribute.id_1_tier;
+	row["tribute"]["id2"]            = guild->tribute.id_2;
+	row["tribute"]["id2_tier"]       = guild->tribute.id_2_tier;
+	row["tribute"]["time_remaining"] = guild->tribute.time_remaining;
+	row["tribute"]["enabled"]        = guild->tribute.enabled;
+
+	client_list.GetGuildClientList(response, guild_id);
+
+	response.append(row);
 }

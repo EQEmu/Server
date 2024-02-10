@@ -193,6 +193,17 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 		}
 	}
 
+	if (IsOfClientBot()) {
+		for (i = EQ::invslot::GUILD_TRIBUTE_BEGIN; i <= EQ::invslot::GUILD_TRIBUTE_END; i++) {
+			const auto* inst = GetInv().GetItem(i);
+			if (!inst) {
+				continue;
+			}
+
+			AddItemBonuses(inst, b, false, true);
+		}
+	}
+
 	if (
 		RuleI(Spells, AdditiveBonusWornType) &&
 		RuleI(Spells, AdditiveBonusWornType) != EQ::item::ItemEffectWorn

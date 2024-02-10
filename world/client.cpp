@@ -2387,3 +2387,45 @@ void Client::RecordPossibleHack(const std::string& message)
 		PlayerEventLogsRepository::InsertOne(database, e);
 	}
 }
+
+void Client::SendGuildTributeFavorAndTimer(uint32 favor, uint32 time_remaining) 
+{
+	auto cle = GetCLE();
+	if (!cle) {
+		return;
+	}
+
+	auto guild = guild_mgr.GetGuildByGuildID(GetCLE()->GuildID());
+	if (guild) {
+		guild->tribute.favor = favor;
+		guild->tribute.time_remaining = time_remaining;
+
+		auto outapp = new EQApplicationPacket(OP_GuildTributeFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
+		auto gtsa   = (GuildTributeFavorTimer_Struct *)outapp->pBuffer;
+
+		gtsa->guild_id      = GetCLE()->GuildID();
+		gtsa->guild_favor   = guild->tribute.favor;
+		gtsa->tribute_timer = guild->tribute.time_remaining;
+		gtsa->trophy_timer  = 0; //not yet implemented
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle *in)
+{
+	auto outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
+	auto data   = (GuildTributeOptInOutReply_Struct *)outapp->pBuffer;
+
+	data->guild_id              = in->guild_id;
+	data->no_donations          = in->no_donations;
+	data->tribute_toggle        = in->tribute_toggle;
+	data->tribute_trophy_toggle = 0; //not yet implemented
+	data->time                  = time(nullptr);
+	data->command               = in->command;
+	strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}

@@ -1791,6 +1791,16 @@ int EQ::ItemInstance::RemoveTaskDeliveredItems()
 	return count;
 }
 
+uint32 EQ::ItemInstance::GetItemGuildFavor() const
+{
+	uint32 total = 0;
+	const auto item = GetItem();
+	if (item) {
+		return total = item->GuildFavor;
+	}
+	return 0;
+}
+
 //
 // class EvolveInfo
 //

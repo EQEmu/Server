@@ -240,11 +240,24 @@ public:
 	bool IsMobInZone(Mob *who);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Mob *p);
-	void	SendGuildMOTD(uint32 guild_id);
-	void	SendGuildSpawnAppearance(uint32 guild_id);
-	void	SendGuildMembers(uint32 guild_id);
+	void SendGuildMOTD(uint32 guild_id);
+	void SendGuildChannel(uint32 guild_id);
+	void SendGuildURL(uint32 guild_id);
+	void SendGuildSpawnAppearance(uint32 guild_id);
+	void SendGuildMembers(uint32 guild_id);
+	void SendGuildMembersList(uint32 guild_id);
+	void SendGuildMemberAdd(uint32 guild_id, uint32 level, uint32 _class, uint32 rank, uint32 spirit, uint32 zone_id, std::string player_name);
+	void SendGuildMemberRename(uint32 guild_id, std::string player_name, std::string new_player_name);
+	void SendGuildMemberRemove(uint32 guild_id, std::string player_name);
+	void SendGuildMemberLevel(uint32 guild_id, uint32 level, std::string player_name);
+	void SendGuildMemberRankAltBanker(uint32 guild_id, uint32 rank, std::string player_name, bool alt, bool banker);
+	void SendGuildMemberPublicNote(uint32 guild_id, std::string player_name, std::string public_note);
+	void SendGuildMemberDetails(uint32 guild_id, uint32 zone_id, uint32 offline_mode, std::string player_name);
+	void SendGuildRenameGuild(uint32 guild_id, std::string new_guild_name);
+
 	void	RefreshAllGuildInfo(uint32 guild_id);
 	void	SendGuildList();
+	void    GuildSetPreRoFBankerFlag(uint32 guild_id, uint32 guild_rank, bool banker_status);
 	void	CheckGroupList (const char *fname, const int fline);
 	void	GroupProcess();
 	void	RaidProcess();
@@ -402,6 +415,7 @@ public:
 	void	QuestJournalledSayClose(Mob *sender, float dist, const char* mobname, const char* message, Journal::Options &opts);
 	void	GroupMessage(uint32 gid, const char *from, const char *message);
 	void	ExpeditionWarning(uint32 minutes_left);
+	void    UpdateGuildTributes(uint32 guild_id);
 
 	void	RemoveFromTargets(Mob* mob, bool RemoveFromXTargets = false);
 	void	RemoveFromTargetsFadingMemories(Mob* spell_target, bool RemoveFromXTargets = false, uint32 max_level = 0);
@@ -411,7 +425,7 @@ public:
 	void	QueueCloseClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, float distance=200, Mob* skipped_mob = 0, bool is_ack_required = true, eqFilterType filter=FilterNone);
 	void	QueueClients(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 	void	QueueClientsStatus(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint8 minstatus = AccountStatus::Player, uint8 maxstatus = AccountStatus::Player);
-	void	QueueClientsGuild(Mob* sender, const EQApplicationPacket* app, bool ignore_sender = false, uint32 guildeqid = 0);
+	void	QueueClientsGuild(const EQApplicationPacket* app, uint32 guildeqid = 0);
 	void	QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struct *gbius, uint32 GuildID);
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true, bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false, bool clear_target_window  = false);
 

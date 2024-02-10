@@ -1319,6 +1319,7 @@ namespace RoF2
 		buffer++;
 
 		// Guild ID
+		//*((uint32*)buffer) = htonl(2);
 		buffer += sizeof(uint32);
 
 		//add member count.
@@ -1357,15 +1358,7 @@ namespace RoF2
 				PutFieldN(level);
 				PutFieldN(banker);
 				PutFieldN(class_);
-
-				/* Translate older ranks to new values */
-				switch (emu_e->rank) {
-				case 0: { e->rank = htonl(5); break; }  // GUILD_MEMBER	0
-				case 1: { e->rank = htonl(3); break; }  // GUILD_OFFICER 1
-				case 2: { e->rank = htonl(1); break; }  // GUILD_LEADER	2
-				default: { e->rank = htonl(emu_e->rank); break; } // GUILD_NONE
-				}
-
+				PutFieldN(rank);
 				PutFieldN(time_last_on);
 				PutFieldN(tribute_enable);
 				e->unknown01 = 0;
@@ -1395,8 +1388,10 @@ namespace RoF2
 
 		OUT(GuildID);
 		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(ZoneID);
-		OUT(InstanceID);
+		//OUT(ZoneID);
+		//OUT(InstanceID);
+		eq->InstanceID = emu->InstanceID;
+		eq->ZoneID = emu->ZoneID;
 		OUT(LastSeen);
 		eq->Unknown76 = 0;
 
@@ -1422,7 +1417,7 @@ namespace RoF2
 			if (InBuffer[0])
 			{
 				PacketSize += (5 + strlen(InBuffer));
-				HighestGuildID = i - 1;
+				HighestGuildID += 1;
 			}
 			InBuffer += 64;
 		}
@@ -1459,6 +1454,30 @@ namespace RoF2
 		delete[] __emu_buffer;
 		dest->FastQueuePacket(&in, ack_req);
 	}
+
+	ENCODE(OP_GuildTributeDonateItem)
+	{
+		SETUP_DIRECT_ENCODE(GuildTributeDonateItemReply_Struct, structs::GuildTributeDonateItemReply_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "RoF2::ENCODE(OP_GuildTributeDonateItem)");
+
+		OUT(type);
+		OUT(sub_index);
+		OUT(aug_index);
+		OUT(quantity);
+		OUT(unknown10);
+		OUT(unknown20);
+		OUT(favor);
+
+		structs::InventorySlot_Struct iss;
+		iss = ServerToRoF2Slot(emu->slot);
+
+		eq->slot = iss.Slot;
+		eq->sub_index = iss.SubIndex;
+
+		FINISH_ENCODE();
+	}
+
 
 	ENCODE(OP_HPUpdate)
 	{
@@ -2466,6 +2485,8 @@ namespace RoF2
 		{
 			outapp->WriteUInt32(0xffffffff);
 			outapp->WriteUInt32(0);
+//			outapp->WriteUInt32(60);
+//			outapp->WriteUInt32(1);
 		}
 
 		outapp->WriteUInt32(0);				// Unknown
@@ -3104,19 +3125,12 @@ namespace RoF2
 		ENCODE_LENGTH_EXACT(GuildSetRank_Struct);
 		SETUP_DIRECT_ENCODE(GuildSetRank_Struct, structs::GuildSetRank_Struct);
 
-		eq->GuildID = emu->Unknown00;
+		eq->guild_id= emu->Unknown00;
+		eq->rank = emu->rank;
 
-		/* Translate older ranks to new values */
-		switch (emu->Rank) {
-		case 0: { eq->Rank = 5; break; }  // GUILD_MEMBER	0
-		case 1: { eq->Rank = 3; break; }  // GUILD_OFFICER	1
-		case 2: { eq->Rank = 1; break; }  // GUILD_LEADER	2
-		default: { eq->Rank = emu->Rank; break; }
-		}
-
-		memcpy(eq->MemberName, emu->MemberName, sizeof(eq->MemberName));
-		OUT(Banker);
-		eq->Unknown76 = 1;
+		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
+		OUT(banker);
+		eq->unknown76 = 1;
 
 		FINISH_ENCODE();
 	}
@@ -4178,12 +4192,13 @@ namespace RoF2
 				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildID);
 
 				/* Translate older ranks to new values */
-				switch (emu->guildrank) {
-				case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
-				case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
-				case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
-				default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
-				}
+				//switch (emu->guildrank) {
+				//case 0: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 5);  break; }  // GUILD_MEMBER	0
+				//case 1: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 3);  break; }  // GUILD_OFFICER	1
+				//case 2: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 1);  break; }  // GUILD_LEADER	2
+				//default: { VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank); break; }  //
+				//}
+				VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->guildrank);
 			}
 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->class_);
@@ -4199,7 +4214,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->NPC ? 0 : 1); // unknown - Must be 1 for guild name to be shown abover players head.
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show); 
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // TempPet
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
@@ -4955,7 +4970,7 @@ namespace RoF2
 
 		strn0cpy(emu->target, eq->target, sizeof(emu->target));
 		strn0cpy(emu->name, eq->name, sizeof(emu->name));
-		// IN(rank);
+		IN(rank);
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4979,6 +4994,38 @@ namespace RoF2
 		SETUP_DIRECT_DECODE(GuildStatus_Struct, structs::GuildStatus_Struct);
 
 		memcpy(emu->Name, eq->Name, sizeof(emu->Name));
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_GuildTributeDonateItem)
+	{
+		DECODE_LENGTH_EXACT(structs::GuildTributeDonateItemRequest_Struct);
+		SETUP_DIRECT_DECODE(GuildTributeDonateItemRequest_Struct, structs::GuildTributeDonateItemRequest_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "RoF2::DECODE(OP_GuildTributeDonateItem)");
+
+		IN(type);
+		IN(slot);
+		IN(sub_index);
+		IN(aug_index);
+		IN(unknown10);
+		IN(quantity);
+		IN(tribute_master_id);
+		IN(unknown20);
+		IN(guild_id);
+		IN(unknown28);
+		IN(unknown32);
+
+		structs::InventorySlot_Struct iss;
+		iss.Slot = eq->slot;
+		iss.SubIndex = eq->sub_index;
+		iss.AugIndex = eq->aug_index;
+		iss.Type = eq->type;
+		iss.Unknown01 = 0;
+		iss.Unknown02 = 0;
+
+		emu->slot = RoF2ToServerSlot(iss);
 
 		FINISH_DIRECT_DECODE();
 	}
