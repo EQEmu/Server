@@ -450,7 +450,11 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		->LoadTaskData()
 		->LoadSharedTaskState();
 
+	LogInfo("Purging expired shared tasks");
 	shared_task_manager.PurgeExpiredSharedTasks();
+
+	LogInfo("Cleaning up instance corpses");
+	database.CleanupInstanceCorpses();
 
 	return true;
 }

@@ -1495,7 +1495,7 @@ int SharedDatabase::DeleteStalePlayerCorpses() {
 			*this,
 			fmt::format(
 				"(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
-				RuleI(Character, CorpseDecayTimeMS) / 1000
+				RuleI(Character, CorpseDecayTime) / 1000
 			)
 		)
 	);

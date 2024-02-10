@@ -140,6 +140,7 @@ namespace Logs {
 		DataBuckets,
 		Zoning,
 		EqTime,
+		Corpses,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -239,6 +240,7 @@ namespace Logs {
 		"DataBuckets",
 		"Zoning",
 		"EqTime",
+		"Corpses",
 	};
 }
 
