@@ -48,7 +48,7 @@ namespace fs = std::filesystem;
 bool File::Exists(const std::string &name)
 {
 	// fs::exists(fs::path{name}) does not work for Chinese characters in windows
-	FILE *f = fopen(fs::path{name}.c_str(), "r");
+	FILE *f = fopen(fs::path{name}.string().c_str(), "r");
 	if (f) {
 		fclose(f);
 		return true;
