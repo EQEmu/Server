@@ -38,6 +38,7 @@
 #include <fmt/format.h>
 #include <filesystem>
 #include <iostream>
+#include <sys/stat.h>
 
 namespace fs = std::filesystem;
 
@@ -48,11 +49,12 @@ namespace fs = std::filesystem;
 bool File::Exists(const std::string &name)
 {
 	// fs::exists(fs::path{name}) does not work for Chinese characters in windows
-	FILE *f = fopen(fs::path{name}.string().c_str(), "r");
-	if (f) {
-		fclose(f);
+	struct stat sb{};
+	if (stat(fs::path{name}.string().c_str(), &sb) == 0) {
 		return true;
 	}
+
+	return false;
 }
 
 /**
