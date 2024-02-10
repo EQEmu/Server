@@ -47,9 +47,7 @@ namespace fs = std::filesystem;
  */
 bool File::Exists(const std::string &name)
 {
-	// fs::exists(fs::path{name}) does not work for Chinese characters in windows
-	std::ifstream f(name);
-	return f.good();
+	return fs::exists(fs::path{name});
 }
 
 /**
