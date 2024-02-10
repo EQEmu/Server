@@ -126,7 +126,7 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 
 	// Group::GetLeaderName() is broken if group formed across zones, ask database instead
 	m_leader_name = m_leader ? m_leader->GetName() : GetGroupLeaderName(group->GetID()); // group->GetLeaderName();
-	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name.c_str());
+	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name);
 
 	std::vector<std::string> member_names;
 	member_names.emplace_back(m_leader_name); // leader always added first

@@ -80,7 +80,7 @@ void command_instance(Client *c, const Seperator *sep)
 
 		std::string character_name = sep->arg[3];
 		uint16 instance_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
-		uint32 character_id = database.GetCharacterID(character_name.c_str());
+		uint32 character_id = database.GetCharacterID(character_name);
 		if (instance_id <= 0 || character_id <= 0) {
 			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
 			return;
@@ -270,7 +270,7 @@ void command_instance(Client *c, const Seperator *sep)
 
 		std::string character_name = sep->arg[3];
 		uint16 instance_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
-		uint32 character_id = database.GetCharacterID(character_name.c_str());
+		uint32 character_id = database.GetCharacterID(character_name);
 		if (instance_id <= 0 || character_id <= 0) {
 			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
 			return;

@@ -1127,4 +1127,8 @@ namespace RaidLootType {
 	constexpr uint32 EntireRaid                = 4;
 }
 
+namespace LeadershipAbilitySlot {
+	constexpr uint16 HealthOfTargetsTarget = 14;
+}
+
 #endif /*COMMON_EQ_CONSTANTS_H*/
