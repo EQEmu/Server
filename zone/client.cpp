@@ -66,6 +66,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/character_disciplines_repository.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/discovered_items_repository.h"
+#include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
@@ -8853,49 +8854,69 @@ void Client::SetEXPEnabled(bool is_exp_enabled)
 	m_exp_enabled = is_exp_enabled;
 }
 
-/**
- * @param model_id
- */
 void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 {
 	auto primary_item = m_inv.GetItem(EQ::invslot::slotPrimary);
 	if (primary_item) {
-		database.QueryDatabase(
-			StringFormat(
-				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
-				model_id,
+		auto l = InventoryRepository::GetWhere(
+			database,
+			fmt::format(
+				"`charid` = {} AND `slotid` = {}",
 				character_id,
 				EQ::invslot::slotPrimary
-			));
+			)
+		);
 
-		primary_item->SetOrnamentationIDFile(model_id);
-		SendItemPacket(EQ::invslot::slotPrimary, primary_item, ItemPacketTrade);
-		WearChange(EQ::textures::weaponPrimary, static_cast<uint16>(model_id), 0);
+		if (l.empty()) {
+			return;
+		}
 
-		Message(Chat::Yellow, "Your primary weapon appearance has been modified");
+		auto e = l.front();
+
+		e.ornamentidfile = model_id;
+
+		const int updated = InventoryRepository::UpdateOne(database, e);
+
+		if (updated) {
+			primary_item->SetOrnamentationIDFile(model_id);
+			SendItemPacket(EQ::invslot::slotPrimary, primary_item, ItemPacketTrade);
+			WearChange(EQ::textures::weaponPrimary, model_id, 0);
+
+			Message(Chat::Yellow, "Your primary weapon appearance has been modified.");
+		}
 	}
 }
 
-/**
- * @param model_id
- */
 void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 {
 	auto secondary_item = m_inv.GetItem(EQ::invslot::slotSecondary);
 	if (secondary_item) {
-		database.QueryDatabase(
-			StringFormat(
-				"UPDATE `inventory` SET `ornamentidfile` = %i WHERE `charid` = %i AND `slotid` = %i",
-				model_id,
+		auto l = InventoryRepository::GetWhere(
+			database,
+			fmt::format(
+				"`charid` = {} AND `slotid` = {}",
 				character_id,
 				EQ::invslot::slotSecondary
-			));
+			)
+		);
 
-		secondary_item->SetOrnamentationIDFile(model_id);
-		SendItemPacket(EQ::invslot::slotSecondary, secondary_item, ItemPacketTrade);
-		WearChange(EQ::textures::weaponSecondary, static_cast<uint16>(model_id), 0);
+		if (l.empty()) {
+			return;
+		}
 
-		Message(Chat::Yellow, "Your secondary weapon appearance has been modified");
+		auto e = l.front();
+
+		e.ornamentidfile = model_id;
+
+		const int updated = InventoryRepository::UpdateOne(database, e);
+
+		if (updated) {
+			secondary_item->SetOrnamentationIDFile(model_id);
+			SendItemPacket(EQ::invslot::slotSecondary, secondary_item, ItemPacketTrade);
+			WearChange(EQ::textures::weaponSecondary, model_id, 0);
+
+			Message(Chat::Yellow, "Your secondary weapon appearance has been modified.");
+		}
 	}
 }
 
