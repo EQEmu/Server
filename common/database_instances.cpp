@@ -509,7 +509,7 @@ void Database::FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 ch
 		return;
 	}
 
-	auto raid_leader_id = GetCharacterID(GetRaidLeaderName(raid_id));
+	auto raid_leader_id = GetCharacterID(GetRaidLeaderName(raid_id).c_str());
 	auto raid_leader_instance_id = GetInstanceID(zone_id, raid_leader_id, version);
 
 	if (!raid_leader_instance_id) {

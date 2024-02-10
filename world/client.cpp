@@ -191,9 +191,9 @@ bool Client::CanTradeFVNoDropItem()
 
 void Client::SendEnterWorld(std::string name)
 {
-	char char_name[64] = { 0 };
-	if (is_player_zoning && database.GetLiveChar(GetAccountID(), char_name)) {
-		if(database.GetAccountIDByChar(char_name) != GetAccountID()) {
+	const std::string& live_name = database.GetLiveChar(GetAccountID());
+	if (is_player_zoning) {
+		if(database.GetAccountIDByChar(live_name) != GetAccountID()) {
 			eqs->Close();
 			return;
 		} else {
@@ -201,8 +201,8 @@ void Client::SendEnterWorld(std::string name)
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_EnterWorld, strlen(char_name) + 1);
-	memcpy(outapp->pBuffer,char_name,strlen(char_name)+1);
+	auto outapp = new EQApplicationPacket(OP_EnterWorld, live_name.length() + 1);
+	memcpy(outapp->pBuffer, live_name.c_str(), live_name.length() + 1);
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }

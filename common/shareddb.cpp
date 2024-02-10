@@ -794,8 +794,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	}
 
 	if (cv_conflict) {
-		char char_name[64] = "";
-		GetCharName(char_id, char_name);
+		const std::string& char_name = GetCharName(char_id);
 		LogError("ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,

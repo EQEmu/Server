@@ -66,6 +66,16 @@ public:
 
 		return results.Success() ? results.RowsAffected() : 0;
 	}
+
+	static void ClearAllRaidDetails(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}`",
+				TableName()
+			)
+		);
+	}
 };
 
 #endif //EQEMU_RAID_DETAILS_REPOSITORY_H

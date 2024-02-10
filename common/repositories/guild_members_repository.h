@@ -191,4 +191,5 @@ public:
 		return UpdateOne(db, m);
 	}
 };
+
 #endif //EQEMU_GUILD_MEMBERS_REPOSITORY_H
