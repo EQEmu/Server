@@ -5355,6 +5355,16 @@ CREATE TABLE guild_tributes (
 		.sql = R"(
 ALTER TABLE `character_corpses` MODIFY COLUMN `time_of_death` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 		)"
+	},
+	ManifestEntry{
+		.version = 9262,
+		.description = "2024_02_11_object_contents.sql",
+		.check = "SHOW COLUMNS FROM `object_contents` LIKE 'droptime'",
+		.condition = "contains",
+		.match = "0000-00-00 00:00:00",
+		.sql = R"(
+ALTER TABLE `character_corpses` MODIFY COLUMN `droptime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
+		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
