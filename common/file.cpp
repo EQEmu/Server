@@ -38,21 +38,21 @@
 #include <fmt/format.h>
 #include <filesystem>
 #include <iostream>
+#include <sys/stat.h>
 
 namespace fs = std::filesystem;
 
-/**
- * @param name
- * @return
- */
+
 bool File::Exists(const std::string &name)
 {
-	return fs::exists(fs::path{name});
+	struct stat sb{};
+	if (stat(name.c_str(), &sb) == 0) {
+		return true;
+	}
+
+	return false;
 }
 
-/**
- * @param directory_name
- */
 void File::Makedir(const std::string &directory_name)
 {
 	try {
