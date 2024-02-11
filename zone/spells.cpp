@@ -181,49 +181,47 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
 		Mob* spell_target = entity_list.GetMobID(target_id);
-		uint16 cached_target_id = 0; // Temporary storage for the proposed target ID
+		uint16 cached_target_id = 0;
 
 		if (spell_target) {
 			Mob* targets_target = spell_target->GetTarget();
 
 			if (IsBeneficialSpell(spell_id)) {
-				// Check the original target if it's a client
-				if (spell_target->IsClient()) {
+				
+				if (spell_target->IsClient() || spell_target->IsPetOwnerClient()) {
 					cached_target_id = spell_target->GetID();
 				}
-				// Check the target's target if it's a client
-				else if (targets_target && targets_target->IsClient()) {
+
+				else if (targets_target && (targets_target->IsClient() && targets_target->IsPetOwnerClient())) {
 					cached_target_id = targets_target->GetID();
 				}
 
-				// If no suitable target found yet, default to the caster
 				if (cached_target_id == 0) {
-					cached_target_id = this->GetID(); // Default to the caster
+					cached_target_id = this->GetID();
 				}
 			} 
 			else if (IsDetrimentalSpell(spell_id)) {
-				// Check the original target if it's not a client
 				if (!spell_target->IsClient()) {
 					cached_target_id = spell_target->GetID();
 				}
-				// Check the target's target if it's not a client
+
 				else if (targets_target && !targets_target->IsClient()) {
 					cached_target_id = targets_target->GetID();
 				}
 			}
 
-			// Validate the cached_target_id with DoCastingChecksOnTarget
 			if (cached_target_id > 0) {
 				Mob* cached_target_mob = entity_list.GetMobID(cached_target_id);
 				if (cached_target_mob && DoCastingChecksOnTarget(true, spell_id, cached_target_mob)) {
-					target_id = cached_target_id; // Update target_id only if checks pass
+					target_id = cached_target_id; 
 				} else {
 					StopCastSpell(spell_id, send_spellbar_enable);
-					return false; // Stop casting if checks fail or no valid target is found
+					Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
+					return false;
 				}
-			} else {
-				// If no target was cached (applicable for detrimental spells), stop casting
+			} else {				
 				StopCastSpell(spell_id, send_spellbar_enable);
+				Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
 				return false;
 			}
 		}
@@ -456,6 +454,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		orgcasttime = cast_time;
 	}
 
+	/*
 	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
 		Mob* spell_target = entity_list.GetMobID(target_id);
 		uint16 cached_target_id = 0; // Temporary storage for the proposed target ID
@@ -504,7 +503,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 				return false;
 			}
 		}
-	}
+	} */
 
 	// we checked for spells not requiring targets above
 	if(target_id == 0) {
@@ -1144,121 +1143,35 @@ bool Client::CheckFizzle(uint16 spell_id)
 	//Live AA - Spell Casting Expertise, Mastery of the Past
 	no_fizzle_level = aabonuses.MasteryofPast + itembonuses.MasteryofPast + spellbonuses.MasteryofPast;
 
-	if (spells[spell_id].classes[GetClass()-1] < no_fizzle_level) {
-		return true;
-	}
-
-	if (RuleB(Spells, UseLegacyFizzleCode)) {
-		// CALCULATE SPELL DIFFICULTY - THIS IS CAPPED AT 255
-		// calculates minimum level this spell is available - ensures similar casting difficulty for all classes
-
-		int minimum_level = UINT8_MAX;
-		for (int a = 0; a < Class::PLAYER_CLASS_COUNT; a++) {
-			int this_lvl = spells[spell_id].classes[a];
-			if (this_lvl < minimum_level) {
-				minimum_level = this_lvl;
-			}
-		}
-
-		int spell_difficulty = (minimum_level * 5 < UINT8_MAX) ? minimum_level * 5 : UINT8_MAX;
-
-		// CALCULATE EFFECTIVE CASTING SKILL WITH BONUSES
-		int bonus_casting_level = itembonuses.adjusted_casting_skill + spellbonuses.adjusted_casting_skill + aabonuses.adjusted_casting_skill;
-		int caster_skill = GetSkill(spells[spell_id].skill) + bonus_casting_level * 5;
-		caster_skill = (caster_skill < UINT8_MAX) ? caster_skill : UINT8_MAX;
-
-		LogSpellsDetail("Caster Skill - itembonus.ACS(112) [{}] + spellbonus.ACS(112) [{}] + aabonus.ACS(112) [{}] = TotalBonusCastingLevel [{}] | caster_skill [{}] (Max 255)", itembonuses.adjusted_casting_skill, spellbonuses.adjusted_casting_skill, aabonuses.adjusted_casting_skill, bonus_casting_level, caster_skill);
-
-		// CALCULATE EFFECTIVE SPECIALIZATION SKILL VALUE
-		float specialize_skill_value = GetSpecializeSkillValue(spell_id);
-		switch (GetAA(aaSpellCastingMastery)) {
-			case 1:
-				specialize_skill_value = specialize_skill_value * 1.05;
-				break;
-			case 2:
-				specialize_skill_value = specialize_skill_value * 1.15;
-				break;
-			case 3:
-				specialize_skill_value = specialize_skill_value * 1.3;
-				break;
-		}
-
-		float specialize_reduction = (specialize_skill_value > 50) ? (specialize_skill_value - 50) / 10 : 0.0f;
-
-		// CALCULATE EFFECTIVE CASTING STAT VALUE
-		float prime_stat_reduction = 0.0f;
-
-		if (GetCasterClass() == 'W') {
-			prime_stat_reduction = (GetWIS() - 75) / 10.0;
-		} else if (GetCasterClass() == 'I') {
-			prime_stat_reduction = (GetINT() - 75) / 10.0;
-		}
-
-		// BARDS ARE SPECIAL - they add both CHA and DEX mods to get casting rates similar to full casters without spec skill
-		if (GetClass() == Class::Bard) {
-			prime_stat_reduction = (GetCHA() - 75 + GetDEX() - 75) / 10.0;
-		}
-
-		// GET SPELL-SPECIFIC FIZZLE CHANCE (note that specialization is only used to reduce the Fizzle_adjust!)
-		float spell_fizzle_adjust = static_cast<float>(spells[spell_id].base_difficulty);
-		spell_fizzle_adjust = (spell_fizzle_adjust - specialize_reduction > 0) ? spell_fizzle_adjust - specialize_reduction : 0.0f;
-
-		// CALCULATE FINAL FIZZLE CHANCE
-		float fizzle_chance = spell_difficulty + spell_fizzle_adjust - caster_skill - prime_stat_reduction;
-
-		if (fizzle_chance > 95.0f) {
-			fizzle_chance = 95.0f;
-		} else if (fizzle_chance < 2.0f) {
-			fizzle_chance = 2.0f;
-		}
-
-		float fizzle_roll = zone->random.Real(0, 100);
-
-		LogSpells("Check Fizzle [{}]  spell: [{}]  fizzle_chance: [{}]  roll: [{}]", GetName(), spell_id, fizzle_chance, fizzle_roll);
-
-		return fizzle_roll > fizzle_chance;
-	}
-
-	//is there any sort of focus that affects fizzling?
-
 	int par_skill;
 	int act_skill;
 
-	par_skill = spells[spell_id].classes[GetClass()-1] * 5 - 10; // Initial calculation for single class
-
+	uint8 spell_level = 255;
+	uint8 spell_class = 0;
+	unsigned int class_bits = GetClassesBits();
+	for (int n = 0; n < sizeof(class_bits) * 8; ++n) { 
+		if (class_bits & (1U << n)) { 
+			int class_id = n + 1;
+			if (spells[spell_id].classes[class_id-1] < no_fizzle_level) {
+				return true;
+			}
+			if (spells[spell_id].classes[class_id-1] < spell_level) {
+				spell_level = spells[spell_id].classes[class_id-1];
+				spell_class = class_id;
+			}
+		}
+	}
+	
+	//IIRC even if you are lagging behind the skill levels you don't fizzle much
+	par_skill = spell_level * 5 - 10; 
 	if (par_skill > 235) {
 		par_skill = 235;
 	}
 
-	par_skill += spells[spell_id].classes[GetClass()-1];
-	
-	if (RuleB(Custom, MulticlassingEnabled)) {
-		int classes_bitmask = GetClassesBits(); // Get the bitmask representing the character's classes
-		int min_class_level = 255; // Initialize with a high value
+	par_skill += spell_level; // maximum of 270 for level 65 spell
 
-		for (int i = 0; i < 16; ++i) { // Assuming 16 classes, adjust as necessary
-			if (classes_bitmask & (1 << i)) {
-				int class_spell_level = spells[spell_id].classes[i];
-				if (class_spell_level > 0 && class_spell_level < min_class_level) {
-					min_class_level = class_spell_level;
-				}
-			}
-		}
-
-		if (min_class_level != 255) { // If at least one valid class level was found
-			// Recalculate par_skill based on the lowest class level
-			par_skill = min_class_level * 5 - 10;
-			if (par_skill > 235) {
-				par_skill = 235;
-			}
-			par_skill += min_class_level; // Apply the additional adjustment based on the lowest class level
-		}
-		// Consider handling the case where min_class_level is still 255, indicating no valid class was found
-	}
-
-	act_skill = GetSkill(spells[spell_id].skill);	
-	act_skill += GetLevel(); // maximum of whatever the client can cheat	
-	
+	act_skill = GetSkill(spells[spell_id].skill);
+	act_skill += GetLevel(); // maximum of whatever the client can cheat
 	act_skill += itembonuses.adjusted_casting_skill + spellbonuses.adjusted_casting_skill + aabonuses.adjusted_casting_skill;
 	LogSpellsDetail("Adjusted casting skill: [{}]+[{}]+[{}]+[{}]+[{}]=[{}]", GetSkill(spells[spell_id].skill), GetLevel(), itembonuses.adjusted_casting_skill, spellbonuses.adjusted_casting_skill, aabonuses.adjusted_casting_skill, act_skill);
 
@@ -1289,27 +1202,14 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// the max that diff can be is +- 235
 	float diff = par_skill + static_cast<float>(spells[spell_id].base_difficulty) - act_skill;
 
-	int classes_bitmask = GetClassesBits();
-	double maxAdjustment = 0; // Start with no adjustment
-
-	// Iterate through each class bit to check for class presence
-	for (int classID = 0; classID < Class::PLAYER_CLASS_COUNT; classID++) {
-		if (classes_bitmask & (1 << classID)) {
-			// Determine the caster type of the current class
-			char casterClass = GetCasterClass(classID); // Now using the overloaded version
-			
-			if (classID == static_cast<int>(Class::Bard)) { // Direct comparison if Bard is one of the classes
-				maxAdjustment = std::max(maxAdjustment, (GetCHA() - 110) / 20.0);
-			} else if (casterClass == 'W') { // Wisdom-based caster
-				maxAdjustment = std::max(maxAdjustment, (GetWIS() - 125) / 20.0);
-			} else if (casterClass == 'I') { // Intelligence-based caster
-				maxAdjustment = std::max(maxAdjustment, (GetINT() - 125) / 20.0);
-			}
-		}
+	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
+	if (spell_class == Class::Bard) {
+		diff -= (GetCHA() - 110) / 20.0;
+	} else if (GetCasterClass(spell_class) == 'W') {
+		diff -= (GetWIS() - 125) / 20.0;
+	} else if (GetCasterClass(spell_class) == 'I') {
+		diff -= (GetINT() - 125) / 20.0;
 	}
-
-	// Apply the maximum adjustment found
-	diff -= maxAdjustment;
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever
 	float base_fizzle = 10;
@@ -3550,8 +3450,9 @@ bool Mob::CheckSpellLevelRestriction(Mob *caster, uint16 spell_id)
 	if (check_for_restrictions) {
 		int spell_level = GetSpellMinimumLevel(spell_id);
 
+		// Exclude AA abilities (Frequently level 254)
 		// Only check for beneficial buffs
-		if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
+		if (IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id) && spell_level < 100) {
 			if (spell_level > 65) {
 				if (IsGroupSpell(spell_id) && GetLevel() < 62) {
 					can_cast = false;
@@ -7386,8 +7287,8 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
-	int bitmask = 1;
-	bitmask = bitmask << (CastToClient()->GetClass() - 1);
+	int bitmask = (CastToClient()->GetClassesBits());
+	//bitmask = bitmask << (CastToClient()->GetClass() - 1);
 	if (itm && itm->GetItem()->Classes != 65535) {
 		if ((itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && !(itm->GetItem()->Classes & bitmask)) {
 			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {

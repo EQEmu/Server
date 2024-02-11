@@ -1374,8 +1374,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		TogglePassiveAlternativeAdvancement(*rank, ability->id);
 	}
 	else {
-		// Bards can cast instant cast AAs while they are casting or channeling item cast.
-		if (GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
+
+		 //Bards can cast instant cast AAs while they are casting or channeling item cast.
+		if (!RuleB(Custom, MulticlassingEnabled) && GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
 				return;
 			}
@@ -1384,9 +1385,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
-		}
-		else {
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
+		} 
+		else { 
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, spells[rank->spell].cast_time, 0, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
 		}

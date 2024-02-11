@@ -9452,7 +9452,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
 				Can not click while casting other items.
 			*/
-			if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
+			if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && !RuleB(Custom, MulticlassingEnabled))
 			{
 				is_casting_bard_song = true;
 			}
@@ -9618,10 +9618,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						if (!IsCastWhileInvisibleSpell(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
-						if (GetClass() == Class::Bard){
+						
+						
+						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
-						else {
+
+						else {						
 							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 						}
 					} else {
@@ -9689,10 +9692,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (i == 0) {
 						if (!IsCastWhileInvisibleSpell(augitem->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
+						}						
+						
+						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
+							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
-						if (GetClass() == Class::Bard) {
-							DoBardCastingFromItemClick(is_casting_bard_song, augitem->CastTime, augitem->Click.Effect, target_id, CastingSlot::Item, slot_id, augitem->RecastType, augitem->RecastDelay);
-						}
+
 						else {
 							CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
 						}
