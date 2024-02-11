@@ -49,7 +49,7 @@ namespace fs = std::filesystem;
 bool File::Exists(const std::string &name)
 {
 	std::cout << "Checking if file exists [" << name << "]" << std::endl;
-	std::cout << "Checking if file exists 2 [" << fs::path{name}.string() << "]" << std::endl;
+//	std::cout << "Checking if file exists 2 [" << fs::path{name}.string() << "]" << std::endl;
 	// fs::exists(fs::path{name}) does not work for Chinese characters in windows
 	struct stat sb{};
 	if (stat(name.c_str(), &sb) == 0) {
