@@ -1640,6 +1640,7 @@ uint8* ZoneGuildManager::MakeGuildMembers(uint32 guild_id, const char* prefix_na
 					break;
 				}
 				default: {
+					ci->rank = GUILD_RANK_NONE_TI;
 					break;
 				}
 			}
