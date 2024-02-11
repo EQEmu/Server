@@ -1155,6 +1155,7 @@ namespace UF
 						break;
 					}
 					default: {
+						emu_e->rank = GUILD_RANK_NONE_TI;
 						break;
 					}
 				}
@@ -1256,6 +1257,10 @@ namespace UF
 				eq->rank_ = GUILD_LEADER_TI;
 				break;
 			}
+			default: {
+				eq->rank_ = GUILD_RANK_NONE_TI;
+				break;
+			}
 		}
 		OUT(zone_id)
 		OUT(last_on)
@@ -1289,6 +1294,10 @@ namespace UF
 			}
 			case GUILD_LEADER: {
 				eq->rank_ = GUILD_LEADER_TI;
+				break;
+			}
+			default: {
+				eq->rank_ = GUILD_RANK_NONE_TI;
 				break;
 			}
 		}
@@ -1970,6 +1979,7 @@ namespace UF
 				break;
 			}
 			default: {
+				emu->guildrank = GUILD_RANK_NONE_TI;
 				break;
 			}
 		}
@@ -2503,6 +2513,10 @@ namespace UF
 						eq->parameter = GUILD_LEADER_TI;
 						break;
 					}
+					default: {
+						eq->parameter = GUILD_RANK_NONE_TI;
+						break;
+					}
 				}
 				break;
 			}
@@ -2545,6 +2559,7 @@ namespace UF
 				break;
 			}
 			default: {
+				emu->rank = GUILD_RANK_NONE_TI;
 				break;
 			}
 		}
@@ -3163,6 +3178,7 @@ namespace UF
 						break;
 					}
 					default: {
+						emu->guildrank = GUILD_RANK_NONE_TI;
 						break;
 					}
 				}

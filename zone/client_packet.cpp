@@ -8163,6 +8163,10 @@ void Client::Handle_OP_GuildInvite(const EQApplicationPacket *app)
 				rank = GUILD_LEADER;
 				break;
 			}
+			default: {
+				rank = GUILD_RANK_NONE;
+				break;
+			}
 		}
 	}
 
@@ -8562,6 +8566,10 @@ void Client::Handle_OP_GuildPromote(const EQApplicationPacket *app)
 				}
 				case GUILD_LEADER_TI: {
 					rank = GUILD_LEADER;
+					break;
+				}
+				default: {
+					rank = GUILD_RANK_NONE;
 					break;
 				}
 			}
