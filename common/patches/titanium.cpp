@@ -692,6 +692,10 @@ namespace Titanium
 				eq->rank = GUILD_LEADER_TI;
 				break;
 			}
+			default: {
+				eq->rank = GUILD_RANK_NONE_TI;
+				break;
+			}
 		}
 
 		memcpy(eq->member_name, emu->member_name, sizeof(eq->member_name));
@@ -1417,6 +1421,7 @@ namespace Titanium
 				break;
 			}
 			default: {
+				eq->guildrank = GUILD_RANK_NONE_TI;
 				break;
 			}
 		}

@@ -35,7 +35,7 @@
 #define GUILD_MEMBER_TI	    0
 #define GUILD_OFFICER_TI    1
 #define GUILD_LEADER_TI     2
-#define GUILD_RANK_NONE (GUILD_MAX_RANK+1)
+#define GUILD_RANK_NONE_TI (GUILD_MAX_RANK + 1)
 
 //defines for standard ranks base on RoF2 definitions
 #define GUILD_RANK_NONE      0

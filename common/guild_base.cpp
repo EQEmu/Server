@@ -881,7 +881,7 @@ static void ProcessGuildMember(MySQLRequestRow row, CharGuildInfo &into)
 	if (into.guild_id == 0) {
 		into.guild_id = GUILD_NONE;
 	}
-	if (into.rank > GUILD_MAX_RANK) {
+	if (into.rank > GUILD_MAX_RANK + 1) {
 		into.rank = GUILD_RANK_NONE;
 	}
 }
