@@ -22,6 +22,7 @@
 #include "../common/inventory_profile.h"
 #include "../common/rulesys.h"
 #include <iostream>
+#include <algorithm>
 #include <cstdlib>
 #include <vector>
 #include "sof_char_create_data.h"

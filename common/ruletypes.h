@@ -952,6 +952,8 @@ RULE_BOOL(Custom, ServerAuthStats, true, "Enable this rule in order to send expl
 RULE_BOOL(Custom, MulticlassingEnabled, true, "Enable this to enable all multiclass-related tweaks. Requires ServerAuthStats enabled.")
 RULE_BOOL(Custom, SuspendGroupBuffs, true, "Enable this to cause self buffs and group's buffs to not tick down")
 RULE_BOOL(Custom, FadeNPCDebuffsOutofCombat, true, "Enable to to cause NPCs to lose all buffs automatically when combat ends")
+RULE_BOOL(Custom, BlockRaceOnAccountProgression, true, "Enable to block races out of era for Ret-style account Progression: Key is 'AccountID'-Account-Expansion")
+RULE_BOOL(Custom, BlockClassOnAccountProgression, true, "Enable to block classes out of era for Ret-style account Progression: Key is 'AccountID'-Account-Expansion")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
