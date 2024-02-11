@@ -459,117 +459,118 @@ bool Database::DeleteCharacter(char *character_name)
 
 bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp)
 {
-	auto character_data = CharacterDataRepository::NewEntity();
+	auto c = CharacterDataRepository::NewEntity();
 
-	character_data.id                      = character_id;
-	character_data.account_id              = account_id;
-	character_data.name                    = Strings::Escape(pp->name);
-	character_data.last_name               = Strings::Escape(pp->last_name);
-	character_data.gender                  = pp->gender;
-	character_data.race                    = pp->race;
-	character_data.class_                  = pp->class_;
-	character_data.level                   = pp->level;
-	character_data.deity                   = pp->deity;
-	character_data.birthday                = pp->birthday;
-	character_data.last_login              = pp->lastlogin;
-	character_data.time_played             = pp->timePlayedMin;
-	character_data.pvp_status              = pp->pvp;
-	character_data.level2                  = pp->level2;
-	character_data.anon                    = pp->anon;
-	character_data.gm                      = pp->gm;
-	character_data.intoxication            = pp->intoxication;
-	character_data.hair_color              = pp->haircolor;
-	character_data.beard_color             = pp->beardcolor;
-	character_data.eye_color_1             = pp->eyecolor1;
-	character_data.eye_color_2             = pp->eyecolor2;
-	character_data.hair_style              = pp->hairstyle;
-	character_data.beard                   = pp->beard;
-	character_data.ability_time_seconds    = pp->ability_time_seconds;
-	character_data.ability_number          = pp->ability_number;
-	character_data.ability_time_minutes    = pp->ability_time_minutes;
-	character_data.ability_time_hours      = pp->ability_time_hours;
-	character_data.title                   = Strings::Escape(pp->title);
-	character_data.suffix                  = Strings::Escape(pp->suffix);
-	character_data.exp                     = pp->exp;
-	character_data.points                  = pp->points;
-	character_data.name                    = pp->mana;
-	character_data.cur_hp                  = pp->cur_hp;
-	character_data.str                     = pp->STR;
-	character_data.sta                     = pp->STA;
-	character_data.cha                     = pp->CHA;
-	character_data.dex                     = pp->DEX;
-	character_data.int_                    = pp->INT;
-	character_data.agi                     = pp->AGI;
-	character_data.wis                     = pp->WIS;
-	character_data.face                    = pp->face;
-	character_data.y                       = pp->y;
-	character_data.x                       = pp->x;
-	character_data.z                       = pp->z;
-	character_data.heading                 = pp->heading;
-	character_data.pvp2                    = pp->pvp2;
-	character_data.pvp_type                = pp->pvptype;
-	character_data.autosplit_enabled       = pp->autosplit;
-	character_data.zone_change_count       = pp->zone_change_count;
-	character_data.drakkin_heritage        = pp->drakkin_heritage;
-	character_data.drakkin_tattoo          = pp->drakkin_tattoo;
-	character_data.drakkin_details         = pp->drakkin_details;
-	character_data.toxicity                = pp->toxicity;
-	character_data.hunger_level            = pp->hunger_level;
-	character_data.thirst_level            = pp->thirst_level;
-	character_data.ability_up              = pp->ability_up;
-	character_data.zone_id                 = pp->zone_id;
-	character_data.zone_instance           = pp->zoneInstance;
-	character_data.leadership_exp_on       = pp->leadAAActive;
-	character_data.ldon_points_guk         = pp->ldon_points_guk;
-	character_data.ldon_points_mir         = pp->ldon_points_mir;
-	character_data.ldon_points_mmc         = pp->ldon_points_mmc;
-	character_data.ldon_points_ruj         = pp->ldon_points_ruj;
-	character_data.ldon_points_tak         = pp->ldon_points_tak;
-	character_data.ldon_points_available   = pp->ldon_points_available;
-	character_data.tribute_time_remaining  = pp->tribute_time_remaining;
-	character_data.show_helm               = pp->showhelm;
-	character_data.career_tribute_points   = pp->career_tribute_points;
-	character_data.tribute_points          = pp->tribute_points;
-	character_data.tribute_active          = pp->tribute_active;
-	character_data.endurance               = pp->endurance;
-	character_data.group_leadership_exp    = pp->group_leadership_exp;
-	character_data.raid_leadership_exp     = pp->raid_leadership_exp;
-	character_data.group_leadership_points = pp->group_leadership_points;
-	character_data.raid_leadership_points  = pp->raid_leadership_points;
-	character_data.air_remaining           = pp->air_remaining;
-	character_data.pvp_kills               = pp->PVPKills;
-	character_data.pvp_deaths              = pp->PVPDeaths;
-	character_data.pvp_current_points      = pp->PVPCurrentPoints;
-	character_data.pvp_career_points       = pp->PVPCareerPoints;
-	character_data.pvp_best_kill_streak    = pp->PVPBestKillStreak;
-	character_data.pvp_worst_death_streak  = pp->PVPWorstDeathStreak;
-	character_data.pvp_current_kill_streak = pp->PVPCurrentKillStreak;
-	character_data.aa_points_spent         = pp->aapoints_spent;
-	character_data.aa_exp                  = pp->expAA;
-	character_data.aa_points               = pp->aapoints;
-	character_data.group_auto_consent      = pp->groupAutoconsent;
-	character_data.raid_auto_consent       = pp->raidAutoconsent;
-	character_data.guild_auto_consent      = pp->guildAutoconsent;
-	character_data.RestTimer               = pp->RestTimer;
+	c.id                      = character_id;
+	c.account_id              = account_id;
+	c.name                    = pp->name;
+	c.last_name               = pp->last_name;
+	c.gender                  = pp->gender;
+	c.race                    = pp->race;
+	c.class_                  = pp->class_;
+	c.level                   = pp->level;
+	c.deity                   = pp->deity;
+	c.birthday                = pp->birthday;
+	c.last_login              = pp->lastlogin;
+	c.time_played             = pp->timePlayedMin;
+	c.pvp_status              = pp->pvp;
+	c.level2                  = pp->level2;
+	c.anon                    = pp->anon;
+	c.gm                      = pp->gm;
+	c.intoxication            = pp->intoxication;
+	c.hair_color              = pp->haircolor;
+	c.beard_color             = pp->beardcolor;
+	c.eye_color_1             = pp->eyecolor1;
+	c.eye_color_2             = pp->eyecolor2;
+	c.hair_style              = pp->hairstyle;
+	c.beard                   = pp->beard;
+	c.ability_time_seconds    = pp->ability_time_seconds;
+	c.ability_number          = pp->ability_number;
+	c.ability_time_minutes    = pp->ability_time_minutes;
+	c.ability_time_hours      = pp->ability_time_hours;
+	c.title                   = pp->title;
+	c.suffix                  = pp->suffix;
+	c.exp                     = pp->exp;
+	c.points                  = pp->points;
+	c.name                    = pp->mana;
+	c.cur_hp                  = pp->cur_hp;
+	c.str                     = pp->STR;
+	c.sta                     = pp->STA;
+	c.cha                     = pp->CHA;
+	c.dex                     = pp->DEX;
+	c.int_                    = pp->INT;
+	c.agi                     = pp->AGI;
+	c.wis                     = pp->WIS;
+	c.face                    = pp->face;
+	c.y                       = pp->y;
+	c.x                       = pp->x;
+	c.z                       = pp->z;
+	c.heading                 = pp->heading;
+	c.pvp2                    = pp->pvp2;
+	c.pvp_type                = pp->pvptype;
+	c.autosplit_enabled       = pp->autosplit;
+	c.zone_change_count       = pp->zone_change_count;
+	c.drakkin_heritage        = pp->drakkin_heritage;
+	c.drakkin_tattoo          = pp->drakkin_tattoo;
+	c.drakkin_details         = pp->drakkin_details;
+	c.toxicity                = pp->toxicity;
+	c.hunger_level            = pp->hunger_level;
+	c.thirst_level            = pp->thirst_level;
+	c.ability_up              = pp->ability_up;
+	c.zone_id                 = pp->zone_id;
+	c.zone_instance           = pp->zoneInstance;
+	c.leadership_exp_on       = pp->leadAAActive;
+	c.ldon_points_guk         = pp->ldon_points_guk;
+	c.ldon_points_mir         = pp->ldon_points_mir;
+	c.ldon_points_mmc         = pp->ldon_points_mmc;
+	c.ldon_points_ruj         = pp->ldon_points_ruj;
+	c.ldon_points_tak         = pp->ldon_points_tak;
+	c.ldon_points_available   = pp->ldon_points_available;
+	c.tribute_time_remaining  = pp->tribute_time_remaining;
+	c.show_helm               = pp->showhelm;
+	c.career_tribute_points   = pp->career_tribute_points;
+	c.tribute_points          = pp->tribute_points;
+	c.tribute_active          = pp->tribute_active;
+	c.endurance               = pp->endurance;
+	c.group_leadership_exp    = pp->group_leadership_exp;
+	c.raid_leadership_exp     = pp->raid_leadership_exp;
+	c.group_leadership_points = pp->group_leadership_points;
+	c.raid_leadership_points  = pp->raid_leadership_points;
+	c.air_remaining           = pp->air_remaining;
+	c.pvp_kills               = pp->PVPKills;
+	c.pvp_deaths              = pp->PVPDeaths;
+	c.pvp_current_points      = pp->PVPCurrentPoints;
+	c.pvp_career_points       = pp->PVPCareerPoints;
+	c.pvp_best_kill_streak    = pp->PVPBestKillStreak;
+	c.pvp_worst_death_streak  = pp->PVPWorstDeathStreak;
+	c.pvp_current_kill_streak = pp->PVPCurrentKillStreak;
+	c.aa_points_spent         = pp->aapoints_spent;
+	c.aa_exp                  = pp->expAA;
+	c.aa_points               = pp->aapoints;
+	c.group_auto_consent      = pp->groupAutoconsent;
+	c.raid_auto_consent       = pp->raidAutoconsent;
+	c.guild_auto_consent      = pp->guildAutoconsent;
+	c.RestTimer               = pp->RestTimer;
 
-	CharacterDataRepository::ReplaceOne(*this, character_data);
+	CharacterDataRepository::ReplaceOne(*this, c);
 
 	std::vector<CharacterBindRepository::CharacterBind> character_binds;
 
-	auto character_bind = CharacterBindRepository::NewEntity();
+	character_binds.reserve(5);
 
-	character_bind.id = character_id;
+	auto b = CharacterBindRepository::NewEntity();
 
-	for (int slot_id = 0; slot_id < 5; slot_id++) {
-		character_bind.zone_id     = pp->binds[slot_id].zone_id;
-		character_bind.instance_id = 0;
-		character_bind.x           = pp->binds[slot_id].x;
-		character_bind.y           = pp->binds[slot_id].y;
-		character_bind.z           = pp->binds[slot_id].z;
-		character_bind.heading     = pp->binds[slot_id].heading;
-		character_bind.slot        = slot_id;
+	b.id = character_id;
 
-		character_binds.emplace_back(character_bind);
+	for (uint8 slot_id = 0; slot_id < 5; slot_id++) {
+		b.zone_id     = pp->binds[slot_id].zone_id;
+		b.x           = pp->binds[slot_id].x;
+		b.y           = pp->binds[slot_id].y;
+		b.z           = pp->binds[slot_id].z;
+		b.heading     = pp->binds[slot_id].heading;
+		b.slot        = slot_id;
+
+		character_binds.emplace_back(b);
 	}
 
 	CharacterBindRepository::ReplaceMany(*this, character_binds);
@@ -587,9 +588,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 
 	std::vector<CharacterSkillsRepository::CharacterSkills> character_skills;
 
-	auto character_skill = CharacterSkillsRepository::NewEntity();
-
-	character_skill.id = character_id;
+	character_skills.reserve(MAX_PP_SKILL);
 
 	for (uint16 slot_id = 0; slot_id < MAX_PP_SKILL; slot_id++) {
 		character_skills.emplace_back(
@@ -604,8 +603,6 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	CharacterSkillsRepository::ReplaceMany(*this, character_skills);
 
 	std::vector<CharacterLanguagesRepository::CharacterLanguages> character_languages;
-
-	auto character_language = CharacterLanguagesRepository::NewEntity();
 
 	for (uint16 slot_id = 0; slot_id < MAX_PP_LANGUAGE; slot_id++) {
 		character_languages.emplace_back(

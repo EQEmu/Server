@@ -382,7 +382,7 @@ public:
 
 	static CharacterData NewEntity()
 	{
-		CharacterData e{ };
+		CharacterData e{};
 
 		e.id                      = 0;
 		e.account_id              = 0;
@@ -492,11 +492,11 @@ public:
 	}
 
 	static CharacterData GetCharacterData(
-		const std::vector<CharacterData>& character_datas,
+		const std::vector<CharacterData> &character_datas,
 		int character_data_id
 	)
 	{
-		for (auto& character_data: character_datas) {
+		for (auto &character_data : character_datas) {
 			if (character_data.id == character_data_id) {
 				return character_data;
 			}
@@ -521,7 +521,7 @@ public:
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterData e{ };
+			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
@@ -652,7 +652,7 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const CharacterData& e
+		const CharacterData &e
 	)
 	{
 		std::vector<std::string> v;
@@ -760,9 +760,7 @@ public:
 		v.push_back(columns[99] + " = " + std::to_string(e.aa_points_spent_old));
 		v.push_back(columns[100] + " = " + std::to_string(e.aa_points_old));
 		v.push_back(columns[101] + " = " + std::to_string(e.e_last_invsnapshot));
-		v.push_back(
-			columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")"
-		);
+		v.push_back(columns[102] + " = FROM_UNIXTIME(" + (e.deleted_at > 0 ? std::to_string(e.deleted_at) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -908,12 +906,12 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<CharacterData>& entries
+		const std::vector<CharacterData> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto& e: entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
@@ -1050,7 +1048,7 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterData e{ };
+			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
@@ -1162,7 +1160,7 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterData> GetWhere(Database& db, const std::string& where_filter)
+	static std::vector<CharacterData> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterData> all_entries;
 
@@ -1177,7 +1175,7 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterData e{ };
+			CharacterData e{};
 
 			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.account_id              = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
@@ -1289,7 +1287,7 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, const std::string& where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1327,7 +1325,7 @@ public:
 		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
 	}
 
-	static int64 Count(Database& db, const std::string& where_filter = "")
+	static int64 Count(Database& db, const std::string &where_filter = "")
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1351,7 +1349,7 @@ public:
 
 	static int ReplaceOne(
 		Database& db,
-		const CharacterData& e
+		const CharacterData &e
 	)
 	{
 		std::vector<std::string> v;
@@ -1473,12 +1471,12 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<CharacterData>& entries
+		const std::vector<CharacterData> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto& e: entries) {
+		for (auto &e: entries) {
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));

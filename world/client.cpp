@@ -1755,30 +1755,13 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	/* Set Home Binds  -- yep, all of them */
-	pp.binds[1].zone_id = pp.zone_id;
-	pp.binds[1].x       = pp.x;
-	pp.binds[1].y       = pp.y;
-	pp.binds[1].z       = pp.z;
-	pp.binds[1].heading = pp.heading;
-
-	pp.binds[2].zone_id = pp.zone_id;
-	pp.binds[2].x       = pp.x;
-	pp.binds[2].y       = pp.y;
-	pp.binds[2].z       = pp.z;
-	pp.binds[2].heading = pp.heading;
-
-	pp.binds[3].zone_id = pp.zone_id;
-	pp.binds[3].x       = pp.x;
-	pp.binds[3].y       = pp.y;
-	pp.binds[3].z       = pp.z;
-	pp.binds[3].heading = pp.heading;
-
-	pp.binds[4].zone_id = pp.zone_id;
-	pp.binds[4].x       = pp.x;
-	pp.binds[4].y       = pp.y;
-	pp.binds[4].z       = pp.z;
-	pp.binds[4].heading = pp.heading;
+	for (uint8 slot_id = 1; slot_id < 5; slot_id++) {
+		pp.binds[slot_id].zone_id = pp.zone_id;
+		pp.binds[slot_id].x       = pp.x;
+		pp.binds[slot_id].y       = pp.y;
+		pp.binds[slot_id].z       = pp.z;
+		pp.binds[slot_id].heading = pp.heading;
+	}
 
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
