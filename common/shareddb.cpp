@@ -1301,6 +1301,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
 		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
 
+		if (RuleB(Custom, UseDynamicItemDiscoveryTags)) {
+			snprintf(item.CharmFile, sizeof(item.CharmFile), "%d#%s", item.ID, row[ItemField::charmfile]);
+		}
+
 		try {
 			hash.insert(item.ID, item);
 		} catch (std::exception &ex) {
