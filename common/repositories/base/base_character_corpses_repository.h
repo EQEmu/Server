@@ -66,6 +66,10 @@ public:
 		uint32_t    wc_7;
 		uint32_t    wc_8;
 		uint32_t    wc_9;
+		uint32_t    rez_time;
+		uint32_t    gm_exp;
+		uint32_t    killed_by;
+		uint8_t     rezzable;
 	};
 
 	static std::string PrimaryKey()
@@ -123,6 +127,10 @@ public:
 			"wc_7",
 			"wc_8",
 			"wc_9",
+			"rez_time",
+			"gm_exp",
+			"killed_by",
+			"rezzable",
 		};
 	}
 
@@ -176,6 +184,10 @@ public:
 			"wc_7",
 			"wc_8",
 			"wc_9",
+			"rez_time",
+			"gm_exp",
+			"killed_by",
+			"rezzable",
 		};
 	}
 
@@ -263,6 +275,10 @@ public:
 		e.wc_7             = 0;
 		e.wc_8             = 0;
 		e.wc_9             = 0;
+		e.rez_time         = 0;
+		e.gm_exp           = 0;
+		e.killed_by        = 0;
+		e.rezzable         = 0;
 
 		return e;
 	}
@@ -346,6 +362,10 @@ public:
 			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
+			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -425,6 +445,10 @@ public:
 		v.push_back(columns[44] + " = " + std::to_string(e.wc_7));
 		v.push_back(columns[45] + " = " + std::to_string(e.wc_8));
 		v.push_back(columns[46] + " = " + std::to_string(e.wc_9));
+		v.push_back(columns[47] + " = " + std::to_string(e.rez_time));
+		v.push_back(columns[48] + " = " + std::to_string(e.gm_exp));
+		v.push_back(columns[49] + " = " + std::to_string(e.killed_by));
+		v.push_back(columns[50] + " = " + std::to_string(e.rezzable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -493,6 +517,10 @@ public:
 		v.push_back(std::to_string(e.wc_7));
 		v.push_back(std::to_string(e.wc_8));
 		v.push_back(std::to_string(e.wc_9));
+		v.push_back(std::to_string(e.rez_time));
+		v.push_back(std::to_string(e.gm_exp));
+		v.push_back(std::to_string(e.killed_by));
+		v.push_back(std::to_string(e.rezzable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -569,6 +597,10 @@ public:
 			v.push_back(std::to_string(e.wc_7));
 			v.push_back(std::to_string(e.wc_8));
 			v.push_back(std::to_string(e.wc_9));
+			v.push_back(std::to_string(e.rez_time));
+			v.push_back(std::to_string(e.gm_exp));
+			v.push_back(std::to_string(e.killed_by));
+			v.push_back(std::to_string(e.rezzable));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -649,6 +681,10 @@ public:
 			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
+			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -720,6 +756,10 @@ public:
 			e.wc_7             = row[44] ? static_cast<uint32_t>(strtoul(row[44], nullptr, 10)) : 0;
 			e.wc_8             = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
 			e.wc_9             = row[46] ? static_cast<uint32_t>(strtoul(row[46], nullptr, 10)) : 0;
+			e.rez_time         = row[47] ? static_cast<uint32_t>(strtoul(row[47], nullptr, 10)) : 0;
+			e.gm_exp           = row[48] ? static_cast<uint32_t>(strtoul(row[48], nullptr, 10)) : 0;
+			e.killed_by        = row[49] ? static_cast<uint32_t>(strtoul(row[49], nullptr, 10)) : 0;
+			e.rezzable         = row[50] ? static_cast<uint8_t>(strtoul(row[50], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -841,6 +881,10 @@ public:
 		v.push_back(std::to_string(e.wc_7));
 		v.push_back(std::to_string(e.wc_8));
 		v.push_back(std::to_string(e.wc_9));
+		v.push_back(std::to_string(e.rez_time));
+		v.push_back(std::to_string(e.gm_exp));
+		v.push_back(std::to_string(e.killed_by));
+		v.push_back(std::to_string(e.rezzable));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -910,6 +954,10 @@ public:
 			v.push_back(std::to_string(e.wc_7));
 			v.push_back(std::to_string(e.wc_8));
 			v.push_back(std::to_string(e.wc_9));
+			v.push_back(std::to_string(e.rez_time));
+			v.push_back(std::to_string(e.gm_exp));
+			v.push_back(std::to_string(e.killed_by));
+			v.push_back(std::to_string(e.rezzable));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
