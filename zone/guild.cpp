@@ -146,13 +146,20 @@ void Client::SendGuildRankNames()
 {
 	if (IsInAGuild() && (ClientVersion() >= EQ::versions::ClientVersion::RoF)) {
 		auto guild = guild_mgr.GetGuildByGuildID(GuildID());
+		if (!guild) {
+			return;
+		}
 
 		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
 
 			auto                 outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
-			GuildUpdateUCPStruct *gucp  = (GuildUpdateUCPStruct *) outapp->pBuffer;
+			GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
 
 			gucp->payload.rank_name.rank = i;
+			if (guild->rank_names[i].empty()) {
+				continue;
+			}
+
 			strn0cpy(
 				gucp->payload.rank_name.rank_name,
 				guild->rank_names[i].c_str(),
