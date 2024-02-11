@@ -1,3 +1,9 @@
+## [22.44.1] - 2/11/2024
+
+### Fixes
+
+* Fix File::Exists(file_name) to be resilient to Chinese characters ([#4058](https://github.com/EQEmu/Server/pull/4058)) @Akkadius 2024-02-11
+
 ## [22.44.0] - 2/10/2024
 
 ### Base Data
