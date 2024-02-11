@@ -604,6 +604,8 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 
 	std::vector<CharacterLanguagesRepository::CharacterLanguages> character_languages;
 
+	character_languages.reserve(MAX_PP_LANGUAGE);
+
 	for (uint16 slot_id = 0; slot_id < MAX_PP_LANGUAGE; slot_id++) {
 		character_languages.emplace_back(
 			CharacterLanguagesRepository::CharacterLanguages{
