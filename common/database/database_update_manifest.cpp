@@ -5353,7 +5353,7 @@ CREATE TABLE guild_tributes (
 		.condition = "contains",
 		.match = "0000-00-00 00:00:00",
 		.sql = R"(
-ALTER TABLE `character_corpses` MODIFY COLUMN `time_of_death` datetime NOT NULL NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `character_corpses` MODIFY COLUMN `time_of_death` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
