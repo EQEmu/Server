@@ -5363,7 +5363,7 @@ ALTER TABLE `character_corpses` MODIFY COLUMN `time_of_death` datetime NOT NULL 
 		.condition = "contains",
 		.match = "0000-00-00 00:00:00",
 		.sql = R"(
-ALTER TABLE `character_corpses` MODIFY COLUMN `droptime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `object_contents` MODIFY COLUMN `droptime` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
