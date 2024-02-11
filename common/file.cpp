@@ -52,7 +52,7 @@ bool File::Exists(const std::string &name)
 	std::cout << "Checking if file exists 2 [" << fs::path{name}.string() << "]" << std::endl;
 	// fs::exists(fs::path{name}) does not work for Chinese characters in windows
 	struct stat sb{};
-	if (stat(fs::path{name}.string().c_str(), &sb) == 0) {
+	if (stat(name.c_str(), &sb) == 0) {
 		return true;
 	}
 
