@@ -226,7 +226,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
 
 #ifdef LSPX
-				if (db_loginserver == "eqemu") {
+				// if user updated their password on the login server, update it here by validating their credentials with the login server
+				if (!result && db_loginserver == "eqemu") {
 					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(user, cred);
 					if (account_id > 0) {
 						auto encryption_mode = server.options.GetEncryptionMode();
