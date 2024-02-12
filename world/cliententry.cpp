@@ -139,7 +139,7 @@ void ClientListEntry::SetOnline(CLE_Status iOnline)
 		AccountName(),
 		AccountID(),
 		CLEStatusString[CLE_Status::Online],
-		iOnline
+		static_cast<int>(iOnline)
 	);
 
 	if (iOnline >= CLE_Status::Online && pOnline < CLE_Status::Online) {

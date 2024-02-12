@@ -2521,7 +2521,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				CastToClient()->GetPVP() ? "Yes" : "No",
 				CastToClient()->GetGM() ? "On" : "Off",
 				EQ::constants::GetFlyModeName(static_cast<uint8>(flymode)),
-				flymode,
+				static_cast<int>(flymode),
 				CastToClient()->GetGMSpeed() ? "On" : "Off",
 				CastToClient()->GetHideMe() ? "On" : "Off",
 				CastToClient()->GetGMInvul() ? "On" : "Off",

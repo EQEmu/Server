@@ -6955,7 +6955,7 @@ void Client::ShowXTargets(Client *c)
 			fmt::format(
 				"xtarget slot [{}] type [{}] ID [{}] name [{}]",
 				i,
-				XTargets[i].Type,
+				static_cast<int>(XTargets[i].Type),
 				XTargets[i].ID,
 				strlen(XTargets[i].Name) ? XTargets[i].Name : "No Name"
 			).c_str()

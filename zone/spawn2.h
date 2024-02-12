@@ -169,4 +169,7 @@ protected:
 	TimeOfDay_Struct next_event;
 };
 
+constexpr int format_as(SpawnCondition::OnChange val) { return static_cast<int>(val); }
+constexpr int format_as(SpawnEvent::Action val) { return static_cast<int>(val); }
+
 #endif
