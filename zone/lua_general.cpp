@@ -11,6 +11,7 @@
 #include "../common/timer.h"
 #include "../common/classes.h"
 #include "../common/rulesys.h"
+#include "guild_mgr.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_client.h"
@@ -5406,6 +5407,27 @@ std::string lua_convert_money_to_string(luabind::adl::object table)
 	return Strings::Money(platinum, gold, silver, copper);
 }
 
+uint32 lua_get_guild_favor(uint32 guild_id)
+{
+	return guild_mgr.GetGuildFavor(guild_id);
+}
+
+void lua_set_guild_favor(uint32 guild_id, uint32 favor)
+{
+	guild_mgr.SetGuildFavor(guild_id, favor);
+}
+
+uint32 lua_get_guild_member_favor(uint32 guild_id, uint32 character_id)
+{
+	return guild_mgr.GetGuildMemberFavor(guild_id, character_id);
+}
+
+void lua_set_guild_member_favor(uint32 guild_id, uint32 character_id, uint32 favor)
+{
+	guild_mgr.SetGuildMemberFavor(guild_id, character_id, favor);
+}
+
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6187,6 +6209,10 @@ luabind::scope lua_register_general() {
 		luabind::def("get_spell_resurrection_sickness_check", &lua_get_spell_resurrection_sickness_check),
 		luabind::def("get_spell_nimbus_effect", &lua_get_spell_nimbus_effect),
 		luabind::def("convert_money_to_string", &lua_convert_money_to_string),
+		luabind::def("get_guild_favor", &lua_get_guild_favor),
+		luabind::def("get_guild_member_favor", &lua_get_guild_member_favor),
+		luabind::def("set_guild_favor", &lua_set_guild_favor),
+		luabind::def("set_guild_member_favor", &lua_set_guild_member_favor),
 		/*
 			Cross Zone
 		*/

@@ -1619,7 +1619,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					guild->tribute.timer.Disable();
 				}
 				guild_mgr.UpdateDbGuildTributeEnabled(data->guild_id, data->enabled);
-				guild_mgr.UpdateDbGuildFavor(data->guild_id, data->favor);
+				guild_mgr.SetGuildFavor(data->guild_id, data->favor);
 				guild_mgr.UpdateDbTributeTimeRemaining(data->guild_id, data->time_remaining);
 
 				zoneserver_list.SendPacketToBootedZones(pack);

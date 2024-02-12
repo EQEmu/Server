@@ -1316,16 +1316,21 @@ bool BaseGuildManager::StoreGuildDB(uint32 guild_id)
 	return _StoreGuildDB(guild_id);
 }
 
-uint32 BaseGuildManager::UpdateDbGuildFavor(uint32 guild_id, uint32 favor)
+uint32 BaseGuildManager::GetGuildFavor(uint32 guild_id)
+{
+	const auto& e = GuildsRepository::FindOne(*m_db, guild_id);
+
+	return e.id ? e.favor : 0;
+}
+
+void BaseGuildManager::SetGuildFavor(uint32 guild_id, uint32 favor)
 {
 	if (!GuildsRepository::UpdateFavor(*m_db, guild_id, favor)) {
 		LogError("Error updating guild favor [{}] for guild id [{}] in database.", favor, guild_id);
-		return false;
+		return;
 	}
 
 	LogGuilds("Set guild favor of [{}] for guild id [{}] in the database", favor, guild_id);
-
-	return favor;
 }
 
 bool BaseGuildManager::UpdateDbGuildTributeEnabled(uint32 guild_id, uint32 enabled)
@@ -1387,41 +1392,48 @@ bool BaseGuildManager::UpdateDbMemberTributeEnabled(uint32 guild_id, uint32 char
 	return true;
 }
 
-uint32 BaseGuildManager::UpdateDbMemberFavor(uint32 guild_id, uint32 char_id, uint32 favor)
+uint32 BaseGuildManager::GetGuildMemberFavor(uint32 guild_id, uint32 character_id)
 {
 	CharGuildInfo gci;
-	GetCharInfo(char_id, gci);
+	GetCharInfo(character_id, gci);
+
+	return gci.total_tribute;
+}
+
+void BaseGuildManager::SetGuildMemberFavor(uint32 guild_id, uint32 character_id, uint32 favor)
+{
+	CharGuildInfo gci;
+	GetCharInfo(character_id, gci);
 
 	if (gci.char_name.empty()) {
 		LogGuilds(
 			"Requested to set member id {} tribute to favor [{}] in guild [{}] but we could not find the character.",
-			char_id,
+			character_id,
 			favor,
 			guild_id
 		);
-		return false;
+		return;
 	}
 
 	gci.total_tribute += favor;
-	if (!GuildMembersRepository::UpdateFavor(*m_db, guild_id, char_id, gci.total_tribute)) {
+
+	if (!GuildMembersRepository::UpdateFavor(*m_db, guild_id, character_id, gci.total_tribute)) {
 		LogError(
 			"Error updating member id {} tribute favor [{}] for guild id [{}] in database.",
-			char_id,
+			character_id,
 			favor,
 			guild_id
 		);
-		return false;
+		return;
 	}
 
 	LogGuilds(
 		"Set member {} id {} tribute enabled [{}] for guild id [{}] in the database",
-		gci.char_name.c_str(),
-		char_id,
+		gci.char_name,
+		character_id,
 		favor,
 		guild_id
 	);
-
-	return gci.total_tribute;
 }
 
 bool BaseGuildManager::UpdateDbMemberOnline(uint32 char_id, bool status)

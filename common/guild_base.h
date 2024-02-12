@@ -104,12 +104,15 @@ class BaseGuildManager
 		bool    GetGuildBankerStatus(uint32 guild_id, uint32 guild_rank);
 		bool	SetTributeFlag(uint32 charid, bool enabled);
 		bool	SetPublicNote(uint32 charid, std::string public_note);
-		uint32  UpdateDbGuildFavor(uint32 guild_id, uint32 enabled);
 		bool    UpdateDbGuildTributeEnabled(uint32 guild_id, uint32 enabled);
 		bool    UpdateDbMemberTributeEnabled(uint32 guild_id, uint32 char_id, uint32 enabled);
 		bool    UpdateDbTributeTimeRemaining(uint32 guild_id, uint32 enabled);
-		uint32	UpdateDbMemberFavor(uint32 guild_id, uint32 char_id, uint32 favor);
 		bool    UpdateDbMemberOnline(uint32 char_id, bool status);
+
+		uint32 GetGuildMemberFavor(uint32 guild_id, uint32 character_id);
+		void SetGuildMemberFavor(uint32 guild_id, uint32 character_id, uint32 favor);
+		uint32 GetGuildFavor(uint32 guild_id);
+		void SetGuildFavor(uint32 guild_id, uint32 enabled);
 
 		//queries
 		bool	GetCharInfo(const char *char_name, CharGuildInfo &into);

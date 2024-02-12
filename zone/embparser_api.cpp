@@ -34,6 +34,7 @@
 #include "questmgr.h"
 #include "zone.h"
 #include "data_bucket.h"
+#include "guild_mgr.h"
 
 #include <cctype>
 
@@ -5762,6 +5763,26 @@ std::string Perl__convert_money_to_string(perl::hash table)
 	return Strings::Money(platinum, gold, silver, copper);
 }
 
+uint32 Perl__get_guild_favor(uint32 guild_id)
+{
+	return guild_mgr.GetGuildFavor(guild_id);
+}
+
+void Perl__set_guild_favor(uint32 guild_id, uint32 favor)
+{
+	guild_mgr.SetGuildFavor(guild_id, favor);
+}
+
+uint32 Perl__get_guild_member_favor(uint32 guild_id, uint32 character_id)
+{
+	return guild_mgr.GetGuildMemberFavor(guild_id, character_id);
+}
+
+void Perl__set_guild_member_favor(uint32 guild_id, uint32 character_id, uint32 favor)
+{
+	guild_mgr.SetGuildMemberFavor(guild_id, character_id, favor);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6415,6 +6436,8 @@ void perl_register_quest()
 	package.add("get_expedition_lockouts_by_char_id", (perl::reference(*)(uint32))&Perl__get_expedition_lockouts_by_char_id);
 	package.add("get_expedition_lockouts_by_char_id", (perl::reference(*)(uint32, std::string))&Perl__get_expedition_lockouts_by_char_id);
 	package.add("getfactionname", &Perl__getfactionname);
+	package.add("get_guild_favor", &Perl__get_guild_favor);
+	package.add("get_guild_member_favor", &Perl__get_guild_member_favor);
 	package.add("getinventoryslotid", &Perl__getinventoryslotid);
 	package.add("getitemcomment", &Perl__getitemcomment);
 	package.add("getitemlore", &Perl__getitemlore);
@@ -6581,6 +6604,8 @@ void perl_register_quest()
 	package.add("setaaexpmodifierbycharid", (void(*)(uint32, uint32, double, int16))&Perl__setaaexpmodifierbycharid);
 	package.add("set_data", (void(*)(std::string, std::string))&Perl__set_data);
 	package.add("set_data", (void(*)(std::string, std::string, std::string))&Perl__set_data);
+	package.add("set_guild_favor", &Perl__set_guild_favor);
+	package.add("set_guild_member_favor", &Perl__set_guild_member_favor);
 	package.add("set_proximity", (void(*)(float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float))&Perl__set_proximity);
 	package.add("set_proximity", (void(*)(float, float, float, float, float, float, bool))&Perl__set_proximity);

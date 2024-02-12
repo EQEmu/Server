@@ -261,7 +261,7 @@ void WorldGuildManager::Process()
 			g.second->tribute.favor         -= GetGuildTributeCost(g.first);
 			g.second->tribute.time_remaining = RuleI(Guild, TributeTime);
 			g.second->tribute.timer.Start(RuleI(Guild, TributeTime));
-			guild_mgr.UpdateDbGuildFavor(g.first, g.second->tribute.favor);
+			guild_mgr.SetGuildFavor(g.first, g.second->tribute.favor);
 			guild_mgr.UpdateDbTributeTimeRemaining(g.first, RuleI(Guild, TributeTime));
 			SendGuildTributeFavorAndTimer(g.first, g.second->tribute.favor, g.second->tribute.timer.GetRemainingTime());
 		}

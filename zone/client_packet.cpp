@@ -17055,8 +17055,8 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
 		guild->tribute.favor += favor;
-		guild_mgr.UpdateDbGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.UpdateDbMemberFavor(GuildID(), CharacterID(), favor);
+		guild_mgr.SetGuildFavor(GuildID(), guild->tribute.favor);
+		guild_mgr.SetGuildMemberFavor(GuildID(), CharacterID(), favor);
 
 		if (inst->IsStackable()) {
 			if (inst->GetCharges() < (int32) in->quantity) {
@@ -17086,7 +17086,7 @@ void Client::Handle_OP_GuildTributeDonateItem(const EQApplicationPacket *app)
 		strn0cpy(out->player_name, GetCleanName(), sizeof(out->player_name));
 		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
-		out->member_favor   = member_favor;
+		out->member_favor   = favor;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp)
 
@@ -17109,8 +17109,8 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
 	if (guild) {
 		guild->tribute.favor += favor;
-		guild_mgr.UpdateDbGuildFavor(GuildID(), guild->tribute.favor);
-		auto member_favor = guild_mgr.UpdateDbMemberFavor(GuildID(), CharacterID(), favor);
+		guild_mgr.SetGuildFavor(GuildID(), guild->tribute.favor);
+		guild_mgr.SetGuildMemberFavor(GuildID(), CharacterID(), favor);
 
 		TakePlatinum(quantity, false);
 		SendGuildTributeDonatePlatReply(in, favor);
@@ -17131,7 +17131,7 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 		strncpy(out->player_name, GetCleanName(), sizeof(out->player_name));
 		out->member_time    = time(nullptr);
 		out->member_enabled = GuildTributeOptIn();
-		out->member_favor   = member_favor;
+		out->member_favor   = favor;
 		worldserver.SendPacket(outapp);
 		safe_delete(outapp)
 
