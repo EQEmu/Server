@@ -370,7 +370,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	bot_owner_options[booSpawnMessageSay] = false;
 	bot_owner_options[booSpawnMessageTell] = true;
 	bot_owner_options[booSpawnMessageClassSpecific] = true;
-	bot_owner_options[booAltCombat] = RuleB(Bots, AllowOwnerOptionAltCombat);
 	bot_owner_options[booAutoDefend] = RuleB(Bots, AllowOwnerOptionAutoDefend);
 	bot_owner_options[booBuffCounter] = false;
 	bot_owner_options[booMonkWuMessage] = false;
@@ -537,7 +536,7 @@ void Client::SendZoneInPackets()
 	safe_delete(outapp);
 
 	if (IsInAGuild()) {
-		guild_mgr.UpdateDbMemberOnline(CharacterID(), true); 
+		guild_mgr.UpdateDbMemberOnline(CharacterID(), true);
 		//SendGuildMembers();
 		SendGuildURL();
 		SendGuildChannel();
@@ -747,7 +746,7 @@ bool Client::Save(uint8 iCommitNow) {
 			SetNextInvSnapshot(RuleI(Character, InvSnapshotMinRetryM));
 		}
 	}
-	
+
 	database.SaveCharacterData(this, &m_pp, &m_epp); /* Save Character Data */
 
 	database.SaveCharacterEXPModifier(this);

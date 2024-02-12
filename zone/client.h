@@ -2076,7 +2076,7 @@ public:
 		booSpawnMessageSay,
 		booSpawnMessageTell,
 		booSpawnMessageClassSpecific,
-		booAltCombat,
+		booAltCombat, // Unused
 		booAutoDefend,
 		booBuffCounter,
 		booMonkWuMessage,

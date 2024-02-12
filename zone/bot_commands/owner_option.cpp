@@ -45,11 +45,6 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 						"<td><c \"#888888\">spawn with class-based message</td>"
 						"</tr>"
 						"<tr>"
-						"<td><c \"#CCCCCC\">altcombat</td>"
-						"<td><c \"#00CC00\">enable <c \"#CCCCCC\">| <c \"#00CC00\">disable</td>"
-						"<td><c \"#888888\">use alternate ai combat behavior</td>"
-						"</tr>"
-						"<tr>"
 						"<td></td>"
 						"<td><c \"#00CCCC\">null</td>"
 						"<td><c \"#888888\">(toggles)</td>"
@@ -199,28 +194,6 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 
 		c->Message(Chat::White, "Bot 'spawn message' is now %s.", argument.c_str());
 	}
-	else if (!owner_option.compare("altcombat")) {
-
-		if (RuleB(Bots, AllowOwnerOptionAltCombat)) {
-
-			if (!argument.compare("enable")) {
-				c->SetBotOption(Client::booAltCombat, true);
-			}
-			else if (!argument.compare("disable")) {
-				c->SetBotOption(Client::booAltCombat, false);
-			}
-			else {
-				c->SetBotOption(Client::booAltCombat, !c->GetBotOption(Client::booAltCombat));
-			}
-
-			database.botdb.SaveOwnerOption(c->CharacterID(), Client::booAltCombat, c->GetBotOption(Client::booAltCombat));
-
-			c->Message(Chat::White, "Bot 'alt combat' is now %s.", (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled"));
-		}
-		else {
-			c->Message(Chat::White, "Bot owner option 'altcombat' is not allowed on this server.");
-		}
-	}
 	else if (!owner_option.compare("autodefend")) {
 
 		if (RuleB(Bots, AllowOwnerOptionAutoDefend)) {
@@ -292,7 +265,6 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 			"<tr>" "<td><c \"#CCCCCC\">statsupdate</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"<tr>" "<td><c \"#CCCCCC\">spawnmessage</td>"   "<td><c \"#00CC00\">{}</td>" "</tr>"
-			"<tr>" "<td><c \"#CCCCCC\">altcombat</td>"      "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"<tr>" "<td><c \"#CCCCCC\">autodefend</td>"     "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"<tr>" "<td><c \"#CCCCCC\">buffcounter</td>"    "<td><c \"#00CC00\">{}</td>" "</tr>"
 			"<tr>" "<td><c \"#CCCCCC\">monkwumessage</td>"  "<td><c \"#00CC00\">{}</td>" "</tr>"
@@ -301,7 +273,6 @@ void bot_command_owner_option(Client *c, const Seperator *sep)
 			(c->GetBotOption(Client::booStatsUpdate) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booSpawnMessageSay) ? "say" : (c->GetBotOption(Client::booSpawnMessageTell) ? "tell" : "silent")),
 			(c->GetBotOption(Client::booSpawnMessageClassSpecific) ? "class" : "default"),
-			(RuleB(Bots, AllowOwnerOptionAltCombat) ? (c->GetBotOption(Client::booAltCombat) ? "enabled" : "disabled") : "restricted"),
 			(RuleB(Bots, AllowOwnerOptionAutoDefend) ? (c->GetBotOption(Client::booAutoDefend) ? "enabled" : "disabled") : "restricted"),
 			(c->GetBotOption(Client::booBuffCounter) ? "enabled" : "disabled"),
 			(c->GetBotOption(Client::booMonkWuMessage) ? "enabled" : "disabled")
