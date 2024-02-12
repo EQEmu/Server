@@ -410,7 +410,7 @@ void DataBucket::BulkLoadEntities(DataBucketLoadType::Type t, std::vector<uint32
 			column = "npc_id";
 			break;
 		default:
-			LogError("Incorrect LoadType [{}]", t);
+			LogError("Incorrect LoadType [{}]", static_cast<int>(t));
 			break;
 	}
 
@@ -546,7 +546,7 @@ void DataBucket::HandleWorldMessage(ServerPacket *p)
 		n.e.id,
 		n.e.key_,
 		n.e.value,
-		n.update_action
+		static_cast<int>(n.update_action)
 	);
 
 	// delete

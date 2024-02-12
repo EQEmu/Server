@@ -781,12 +781,15 @@ public:
 	Mob* SetFollowMob(Client* leash_owner);
 
 	Mob* GetBotTarget(Client* bot_owner);
-	void AcquireBotTarget(Group* bot_group, Raid* raid, Client* leash_owner, float leash_distance);
-	void SetBotTarget(Client* bot_owner, Raid* raid, Group* bot_group, Client* leash_owner, float lo_distance, float leash_distance, bool bo_alt_combat);
-	void SetLeashOwnerTarget(Client* leash_owner, Client* bot_owner, float lo_distance, float leash_distance);
 	void SetOwnerTarget(Client* bot_owner);
-	void SetBotGroupTarget(const Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, Mob* const& bg_member, Mob* bgm_target);
-	bool IsValidTarget(Client* bot_owner, Client* leash_owner, float lo_distance, float leash_distance, bool bo_alt_combat, Mob* tar, float tar_distance);
+	bool IsValidTarget(
+		Client* bot_owner,
+		Client* leash_owner,
+		float lo_distance,
+		float leash_distance,
+		Mob* tar,
+		float tar_distance
+	);
 
 	bool PullingFlagChecks(Client* bot_owner);
 	bool ReturningFlagChecks(Client* bot_owner, float fm_distance);
@@ -879,7 +882,6 @@ private:
 	int32	end_regen;
 
 	Timer m_evade_timer; // can be moved to pTimers at some point
-	Timer m_alt_combat_hate_timer;
 	Timer m_auto_defend_timer;
 	Timer auto_save_timer;
 	bool m_dirtyautohaters;

@@ -1107,7 +1107,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 			fmt::format(
 				"My current stance is {} ({}).",
 				EQ::constants::GetStanceName(bot_iter->GetBotStance()),
-				bot_iter->GetBotStance()
+				static_cast<int>(bot_iter->GetBotStance())
 			).c_str()
 		);
 	}

@@ -237,7 +237,7 @@ public:
 		e.y                = 0;
 		e.z                = 0;
 		e.heading          = 0;
-		e.time_of_death    = 0;
+		e.time_of_death    = std::time(nullptr);
 		e.guild_consent_id = 0;
 		e.is_rezzed        = 0;
 		e.is_buried        = 0;

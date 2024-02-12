@@ -45,6 +45,7 @@ typedef enum { //EQEmu internal opcodes list
 	_maxEmuOpcode
 } EmuOpcode;
 
+constexpr int format_as(EmuOpcode opcode) { return static_cast<int>(opcode); }
 extern const char *OpcodeNames[_maxEmuOpcode+1];
 
 #endif

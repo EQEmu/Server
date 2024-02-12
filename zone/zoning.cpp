@@ -746,7 +746,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		z,
 		heading,
 		ignorerestrictions,
-		zm
+		static_cast<int>(zm)
 	);
 
 	cheat_manager.SetExemptStatus(Port, true);

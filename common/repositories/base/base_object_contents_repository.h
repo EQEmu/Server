@@ -116,7 +116,7 @@ public:
 		e.bagidx   = 0;
 		e.itemid   = 0;
 		e.charges  = 0;
-		e.droptime = 0;
+		e.droptime = std::time(nullptr);
 		e.augslot1 = 0;
 		e.augslot2 = 0;
 		e.augslot3 = 0;

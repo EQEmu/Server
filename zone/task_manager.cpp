@@ -256,7 +256,7 @@ bool TaskManager::LoadTasks(int single_task)
 			activity_id,
 			task_data->activity_count,
 			static_cast<int32_t>(ad->activity_type),
-			ad->goal_method,
+			static_cast<int32_t>(ad->goal_method),
 			ad->goal_count,
 			ad->zones.c_str(),
 			ad->target_name.c_str(),

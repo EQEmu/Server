@@ -1487,7 +1487,7 @@ void MobMovementManager::PushEvadeCombat(MobMovementEntry &mob_movement_entry)
  */
 void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	LogDebug("Handle stuck behavior for {0} at ({1}, {2}, {3}) with movement_mode {4}", who->GetName(), x, y, z, mob_movement_mode);
+	LogDebug("Handle stuck behavior for {0} at ({1}, {2}, {3}) with movement_mode {4}", who->GetName(), x, y, z, static_cast<int>(mob_movement_mode));
 
 	auto sb = who->GetStuckBehavior();
 	MobStuckBehavior behavior = RunToTarget;

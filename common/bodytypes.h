@@ -64,4 +64,6 @@ typedef enum {
 } bodyType;
 /* bodytypes above 64 make the mob not show up */
 
+constexpr int format_as(bodyType type) { return static_cast<int>(type); }
+
 #endif
