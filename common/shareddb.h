@@ -160,13 +160,7 @@ public:
 	uint32 GetSharedItemsCount() { return m_shared_items_count; }
 	uint32 GetItemsCount();
 
-	/**
-	 * skills
-	 */
-	void LoadSkillCaps(void *data);
-	bool LoadSkillCaps(const std::string &prefix);
-	uint16 GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
-	uint8 GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
+	uint16 GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level);
 
 	/**
 	 * spells

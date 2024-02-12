@@ -2097,6 +2097,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
+	case ServerOP_ReloadSkillCaps:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("Skill Caps");
+			zone->ReloadSkillCaps();
+		}
+
+		break;
+	}
 	case ServerOP_ReloadDataBucketsCache:
 	{
 		zone->SendReloadMessage("Data buckets cache");
@@ -3561,11 +3570,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		LogInfo("Loading items");
 		if (!content_db.LoadItems(hotfix_name)) {
 			LogError("Loading items failed!");
-		}
-
-		LogInfo("Loading skill caps");
-		if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
-			LogError("Loading skill caps failed!");
 		}
 
 		LogInfo("Loading spells");

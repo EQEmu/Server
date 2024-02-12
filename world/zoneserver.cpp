@@ -1411,6 +1411,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadNPCEmotes:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
+		case ServerOP_ReloadSkillCaps:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
 		case ServerOP_ReloadTraps:
@@ -1494,11 +1495,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Loading items");
 			if (!database.LoadItems(hotfix_name)) {
 				LogInfo("Error: Could not load item data. But ignoring");
-			}
-
-			LogInfo("Loading skill caps");
-			if (!content_db.LoadSkillCaps(hotfix_name)) {
-				LogInfo("Error: Could not load skill cap data. But ignoring");
 			}
 
 			zoneserver_list.SendPacket(pack);

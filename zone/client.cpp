@@ -2756,31 +2756,48 @@ void Client::CheckLanguageSkillIncrease(uint8 language_id, uint8 teacher_skill) 
 	}
 }
 
-bool Client::HasSkill(EQ::skills::SkillType skill_id) const {
-	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
-}
-
-bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skill_id == EQ::skills::Skill1HPiercing)
-		skill_id = EQ::skills::Skill2HPiercing;
-
-	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
-	//if you don't have it by max level, then odds are you never will?
-}
-
-uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
-		skillid = EQ::skills::Skill2HPiercing;
-
-	return(content_db.GetSkillCap(class_, skillid, level));
-}
-
-uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
+bool Client::HasSkill(EQ::skills::SkillType skill_id) const
 {
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == Class::Berserker && skillid == EQ::skills::Skill1HPiercing)
-		skillid = EQ::skills::Skill2HPiercing;
+	return GetSkill(skill_id) > 0 && CanHaveSkill(skill_id);
+}
 
-	return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const
+{
+	if (
+		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
+		class_ == Class::Berserker &&
+		skill_id == EQ::skills::Skill1HPiercing
+	) {
+		skill_id = EQ::skills::Skill2HPiercing;
+	}
+
+	return zone->GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)).cap > 0;
+}
+
+uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint8 class_id, uint8 level) const
+{
+	if (
+		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
+		class_id == Class::Berserker &&
+		skill_id == EQ::skills::Skill1HPiercing
+	) {
+		skill_id = EQ::skills::Skill2HPiercing;
+	}
+
+	return(content_db.GetSkillCap(class_id, skill_id, level));
+}
+
+uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint8 class_id)
+{
+	if (
+		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
+		class_id == Class::Berserker &&
+		skill_id == EQ::skills::Skill1HPiercing
+	) {
+		skill_id = EQ::skills::Skill2HPiercing;
+	}
+
+	return zone->GetTrainLevel(class_id, skill_id, RuleI(Character, MaxLevel));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill)
@@ -9226,6 +9243,7 @@ void Client::ShowDevToolsMenu()
 	menu_reload_six += " | " + Saylink::Silent("#reload quest", "Quests");
 
 	menu_reload_seven += Saylink::Silent("#reload rules", "Rules");
+	menu_reload_seven += " | " + Saylink::Silent("#reload skill_caps", "Skill Caps");
 	menu_reload_seven += " | " + Saylink::Silent("#reload static", "Static Zone Data");
 	menu_reload_seven += " | " + Saylink::Silent("#reload tasks", "Tasks");
 
@@ -11350,6 +11368,16 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads Rules globally",
 			rules_link
+		).c_str()
+	);
+
+	auto skill_caps_link = Saylink::Silent("#reload skill_caps");
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads Skill Caps globally",
+			skill_caps_link
 		).c_str()
 	);
 

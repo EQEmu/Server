@@ -29,6 +29,8 @@
 #include "../../common/content/world_content_service.h"
 #include "../../common/zone_store.h"
 #include "../../common/path_manager.h"
+#include "../../common/repositories/skill_caps_repository.h"
+#include "../../common/file.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
@@ -164,81 +166,76 @@ void ExportSpells(SharedDatabase *db)
 	fclose(f);
 }
 
-bool SkillUsable(SharedDatabase *db, int skill_id, int class_id)
+bool SkillUsable(SharedDatabase* db, int skill_id, int class_id)
 {
-
-	bool res = false;
-
-	std::string query   = StringFormat(
-		"SELECT max(cap) FROM skill_caps WHERE class=%d AND skillID=%d",
-		class_id, skill_id
+	const auto& l = SkillCapsRepository::GetWhere(
+		*db,
+		fmt::format(
+			"`class_id` = {} AND `skill_id` = {} ORDER BY `cap` DESC LIMIT 1",
+			class_id,
+			skill_id
+		)
 	);
-	auto        results = db->QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
 
-	if (results.RowCount() == 0) {
-		return false;
-	}
-
-	auto row = results.begin();
-	if (row[0] && Strings::ToInt(row[0]) > 0) {
-		return true;
-	}
-
-	return false;
+	return !l.empty();
 }
 
-int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level)
+uint32 GetSkill(SharedDatabase* db, int skill_id, int class_id, int level)
 {
-
-	std::string query   = StringFormat(
-		"SELECT cap FROM skill_caps WHERE class=%d AND skillID=%d AND level=%d",
-		class_id, skill_id, level
+	const auto& l = SkillCapsRepository::GetWhere(
+		*db,
+		fmt::format(
+			"`class_id` = {} AND `skill_id` = {} AND `level` = {}",
+			class_id,
+			skill_id,
+			level
+		)
 	);
-	auto        results = db->QueryDatabase(query);
-	if (!results.Success()) {
+
+	if (l.empty()) {
 		return 0;
 	}
 
-	if (results.RowCount() == 0) {
-		return 0;
-	}
+	auto e = l.front();
 
-	auto row = results.begin();
-	return Strings::ToInt(row[0]);
+	return e.cap;
 }
 
-void ExportSkillCaps(SharedDatabase *db)
+void ExportSkillCaps(SharedDatabase* db)
 {
 	LogInfo("Exporting Skill Caps");
 
-	std::string file = fmt::format("{}/export/SkillCaps.txt", path.GetServerPath());
-	FILE *f = fopen(file.c_str(), "w");
-	if (!f) {
+	std::ofstream file(fmt::format("{}/export/SkillCaps.txt", path.GetServerPath()));
+	if (!file || !file.is_open()) {
 		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
-	for (int cl = 1; cl <= 16; ++cl) {
-		for (int skill = 0; skill <= 77; ++skill) {
-			if (SkillUsable(db, skill, cl)) {
-				int      previous_cap = 0;
-				for (int level        = 1; level <= 100; ++level) {
-					int cap = GetSkill(db, skill, cl, level);
+	const uint8 skill_cap_max_level = (
+		RuleI(Character, SkillCapMaxLevel) > 0 ?
+		RuleI(Character, SkillCapMaxLevel) :
+		RuleI(Character, MaxLevel)
+	);
+
+	for (uint8 class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
+		for (uint8 skill_id = EQ::skills::Skill1HBlunt; skill_id <= EQ::skills::Skill2HPiercing; skill_id++) {
+			if (SkillUsable(db, skill_id, class_id)) {
+				uint32 previous_cap = 0;
+				for (uint8 level = 1; level <= skill_cap_max_level; level++) {
+					uint32 cap = GetSkill(db, skill_id, class_id, level);
 					if (cap < previous_cap) {
 						cap = previous_cap;
 					}
 
-					fprintf(f, "%d^%d^%d^%d^0\n", cl, skill, level, cap);
+					file << fmt::format("{}^{}^{}^{}^0", class_id, skill_id, level, cap) << std::endl;
+
 					previous_cap = cap;
 				}
 			}
 		}
 	}
 
-	fclose(f);
+	file.close();
 }
 
 void ExportBaseData(SharedDatabase *db)

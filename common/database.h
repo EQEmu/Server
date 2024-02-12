@@ -244,7 +244,6 @@ public:
 	uint8	GetMinStatus(uint32 zone_id, uint32 instance_version);
 	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
 	uint8	GetServerType();
-	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);
 
 	void	AddReport(std::string who, std::string against, std::string lines);
 	struct TimeOfDay_Struct		LoadTime(time_t &realtime);

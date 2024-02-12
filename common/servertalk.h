@@ -273,6 +273,7 @@
 #define ServerOP_ReloadFactions 0x4126
 #define ServerOP_ReloadLoot 0x4127
 #define ServerOP_ReloadBaseData 0x4128
+#define ServerOP_ReloadSkillCaps 0x4129
 
 #define ServerOP_CZDialogueWindow 0x4500
 #define ServerOP_CZLDoNUpdate 0x4501
