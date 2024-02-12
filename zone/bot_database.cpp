@@ -1842,7 +1842,7 @@ bool BotDatabase::SaveOwnerOption(const uint32 owner_id, size_t type, const bool
 		Client::booDeathMarquee,
 		Client::booStatsUpdate,
 		Client::booSpawnMessageClassSpecific,
-		Client::booAltCombat,
+		Client::booUnused,
 		Client::booAutoDefend,
 		Client::booBuffCounter,
 		Client::booMonkWuMessage
