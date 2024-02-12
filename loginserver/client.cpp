@@ -221,8 +221,25 @@ void Client::Handle_Login(const char *data, unsigned int size)
 
 			ParseAccountString(user, user, db_loginserver);
 
+
 			if (server.db->GetLoginDataFromAccountInfo(user, db_loginserver, db_account_password_hash, db_account_id)) {
 				result = VerifyLoginHash(user, db_loginserver, cred, db_account_password_hash);
+
+#ifdef LSPX
+				if (db_loginserver == "eqemu") {
+					uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(user, cred);
+					if (account_id > 0) {
+						auto encryption_mode = server.options.GetEncryptionMode();
+						server.db->UpdateLoginserverAccountPasswordHash(
+							user,
+							db_loginserver,
+							eqcrypt_hash(user, cred, encryption_mode)
+						);
+						LogInfo("Updating eqemu account [{}] password hash", account_id);
+						result = true;
+					}
+				}
+#endif
 
 				LogDebug("Success [{0}]", (result ? "true" : "false"));
 			}
