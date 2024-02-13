@@ -1,3 +1,9 @@
+## [22.44.5] - 2/12/2024
+
+### Fixes
+
+* [Hotfix] Fix issues where we're using the wrong database pointers @Akkadius
+
 ## [22.44.4] - 2/12/2024
 
 ### Fixes
