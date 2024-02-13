@@ -190,6 +190,14 @@ std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_regi
 std::map<std::string, bool> lua_encounters_loaded;
 std::map<std::string, Encounter *> lua_encounters;
 
+// use debug.traceback() for errors (luaL_traceback is only in luajit and lua 5.2+)
+static void PushErrorHandler(lua_State* L)
+{
+	lua_getglobal(L, "debug");
+	lua_getfield(L, -1, "traceback");
+	lua_remove(L, -2);
+}
+
 LuaParser::LuaParser() {
 	for (int i = 0; i < _LargestEventID; ++i) {
 		NPCArgumentDispatch[i]       = handle_npc_null;
@@ -416,13 +424,14 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 1;
+		int npop = 2;
+		PushErrorHandler(L);
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 2;
+			npop = 3;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -437,7 +446,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
 		quest_manager.StartQuest(npc, c);
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -509,13 +518,14 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 1;
+		int npop = 2;
+		PushErrorHandler(L);
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 2;
+			npop = 3;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -529,7 +539,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		arg_function(this, L, client, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(client, client);
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -586,13 +596,14 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 1;
+		int npop = 2;
+		PushErrorHandler(L);
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 2;
+			npop = 3;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -612,7 +623,7 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		arg_function(this, L, client, item, mob, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(client, client, item);
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -666,13 +677,14 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 1;
+		int npop = 2;
+		PushErrorHandler(L);
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 2;
+			npop = 3;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -693,7 +705,7 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 		arg_function(this, L, mob, client, spell_id, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(mob, client, nullptr, const_cast<SPDat_Spell_Struct*>(&spells[spell_id]));
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -745,6 +757,7 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 	int start = lua_gettop(L);
 
 	try {
+		PushErrorHandler(L);
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 		lua_getfield(L, -1, sub_name);
 
@@ -758,22 +771,22 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		arg_function(this, L, enc, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(enc, nullptr, nullptr, nullptr, encounter_name);
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
-			lua_pop(L, 2);
+			lua_pop(L, 3);
 			return 0;
 		}
 		quest_manager.EndQuest();
 
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
-			lua_pop(L, 2);
+			lua_pop(L, 3);
 			return ret;
 		}
 
-		lua_pop(L, 2);
+		lua_pop(L, 3);
 	} catch(std::exception &ex) {
 		AddError(fmt::format("Lua Exception | [{}] for Encounter [{}]: {}", sub_name, encounter_name, ex.what()));
 
@@ -1124,10 +1137,11 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	}
 
 	auto top = lua_gettop(L);
+	PushErrorHandler(L);
 	if(luaL_loadfile(L, filename.c_str())) {
 		std::string error = lua_tostring(L, -1);
 		AddError(error);
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 		return;
 	}
 
@@ -1147,10 +1161,10 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 
 	lua_setfenv(L, -2); //set the env to the table we made
 
-	if(lua_pcall(L, 0, 0, 0)) {
+	if(lua_pcall(L, 0, 0, top + 1)) {
 		std::string error = lua_tostring(L, -1);
 		AddError(error);
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 	}
 	else {
 		loaded_[package_name] = true;
@@ -1599,13 +1613,14 @@ int LuaParser::_EventBot(
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 1;
+		int npop = 2;
+		PushErrorHandler(L);
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 2;
+			npop = 3;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -1620,7 +1635,7 @@ int LuaParser::_EventBot(
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
 		quest_manager.StartQuest(bot, c);
-		if(lua_pcall(L, 1, 1, 0)) {
+		if(lua_pcall(L, 1, 1, start + 1)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
