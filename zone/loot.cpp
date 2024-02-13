@@ -669,27 +669,41 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
 	LootItems::iterator cur, end;
 	cur = m_loot_items.begin();
 	end = m_loot_items.end();
-	for (; cur != end; ++cur) {
+	for(; cur != end; ++cur) {
 		LootItem *item = *cur;
-		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {
+		if (item->item_id == item_id && slot <= 0 && quantity <= 0) {			
 			m_loot_items.erase(cur);
 			UpdateEquipmentLight();
 			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
+			if (item->equip_slot >= EQ::invslot::EQUIPMENT_BEGIN && item->equip_slot <= EQ::invslot::EQUIPMENT_END) {
+				equipment[item->equip_slot] = 0;
+				SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(item->equip_slot));
+				GetInv().DeleteItem(item->equip_slot);
+			}
+			CalcBonuses();
 			return;
 		}
 		else if (item->item_id == item_id && item->equip_slot == slot && quantity >= 1) {
-			if (item->charges <= quantity) {
+			if (item->charges <= quantity) {				
 				m_loot_items.erase(cur);
 				UpdateEquipmentLight();
 				if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
+				if (item->equip_slot >= EQ::invslot::EQUIPMENT_BEGIN && item->equip_slot <= EQ::invslot::EQUIPMENT_END) {
+					equipment[item->equip_slot] = 0;
+					SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(item->equip_slot));
+					GetInv().DeleteItem(item->equip_slot);
+				}
+				CalcBonuses();
 			}
 			else {
 				item->charges -= quantity;
 			}
 			return;
 		}
-	}
+	}	
 }
+
+
 
 void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 {

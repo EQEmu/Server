@@ -1745,6 +1745,8 @@ protected:
 public:
 	const CombatRecord &GetCombatRecord() const;
 
+	virtual EQ::InventoryProfile& GetInvPublic() { return m_inv; }
+
 public:
 	bool GetWasSpawnedInWater() const;
 
