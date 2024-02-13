@@ -954,6 +954,7 @@ RULE_BOOL(Custom, FadeNPCDebuffsOutofCombat, true, "Enable to to cause NPCs to l
 RULE_BOOL(Custom, BlockRaceOnAccountProgression, true, "Enable to block races out of era for Ret-style account Progression: Key is 'AccountID'-Account-Expansion")
 RULE_BOOL(Custom, BlockClassOnAccountProgression, true, "Enable to block classes out of era for Ret-style account Progression: Key is 'AccountID'-Account-Expansion")
 RULE_BOOL(Custom, UseDynamicItemDiscoveryTags, true, "Enable appending Discovered By: items using the charmfile method")
+RULE_BOOL(Custom, UseDynamicAATimers, true, "Enable using dynamic AA timers")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

@@ -980,6 +980,15 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->total_effects = rank->effects.size();
 	aai->total_prereqs = rank->prereqs.size();
 
+	if (RuleB(Custom, UseDynamicAATimers)) {
+		if (aai->classes == 0xFFFFFFF && rank->base_ability->first->recast_time > 0 && !rank->base_ability->grant_only) {
+			aai->spell_type = GetDynamicAATimer(rank->base_ability->id);
+			if (aai->spell_type == 0) {
+				aai->spell_type = SetDynamicAATimer(rank->base_ability->id);
+			}
+		}
+	}
+
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto &effect : rank->effects) {
 		outapp->WriteSInt32(effect.effect_id);
@@ -1065,11 +1074,44 @@ void Client::SendAlternateAdvancementTimers() {
 	safe_delete(outapp);
 }
 
+int Client::GetDynamicAATimer(int aa_id) {
+    for (int i = 1; i < 100; i++) {
+        std::string key = "aaTimer_" + std::to_string(i);
+        std::string bucketValue = GetBucket(key);
+        
+        // Check if the bucket has a value before attempting conversion
+        if (!bucketValue.empty()) {
+            int value = std::stoi(bucketValue); // Convert string value to integer
+			LogDebug("Got TimerID: [{}]", value);
+            if (value == aa_id) {
+				LogDebug("Returning TimerID: [{}] - [{}]", i, value);
+                return i; // Return the timer ID associated with aa_id
+            }
+        }
+    }
+    return 0; // Return 0 if no associated timer ID is found
+}
+
+int Client::SetDynamicAATimer(int aa_id) {
+    // Iterate through possible timer IDs to find an available one
+    for (int timerID = 1; timerID < (pTimerAAEnd - pTimerAAStart); ++timerID) {
+        std::string key = "aaTimer_" + std::to_string(timerID);
+		auto bucket_value = GetBucket(key);
+        if (bucket_value.empty()) { // If the timer is available
+            // Associate this timer with the given aa_id
+            SetBucket(key, std::to_string(aa_id));
+            return timerID; // Return the assigned timer ID
+        }
+    }
+
+    return 0;
+}
+
 void Client::ResetAlternateAdvancementTimer(int ability) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
-	if(rank) {
+	if(rank) {		
 		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
-		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
+		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);		
 	}
 }
 
@@ -1308,6 +1350,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
+	int spell_type = rank->spell_type;
+
+	if (RuleB(Custom, UseDynamicAATimers)) {
+		spell_type = GetDynamicAATimer(rank->base_ability->id);
+	}
+
 	bool use_toggle_passive_hotkey = UseTogglePassiveHotkey(*rank);
 
 	//make sure it is not a passive
@@ -1324,8 +1372,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 
 	//check cooldown
-	if (!p_timers.Expired(&database, rank->spell_type + pTimerAAStart, false)) {
-		uint32 aaremain = p_timers.GetRemainingTime(rank->spell_type + pTimerAAStart);
+	if (!p_timers.Expired(&database, spell_type + pTimerAAStart, false)) {
+		uint32 aaremain = p_timers.GetRemainingTime(spell_type + pTimerAAStart);
 		uint32 aaremain_hr = aaremain / (60 * 60);
 		uint32 aaremain_min = (aaremain / 60) % 60;
 		uint32 aaremain_sec = aaremain % 60;
@@ -1374,7 +1422,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		TogglePassiveAlternativeAdvancement(*rank, ability->id);
 	}
 	else {
-
 		 //Bards can cast instant cast AAs while they are casting or channeling item cast.
 		if (!RuleB(Custom, MulticlassingEnabled) && GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
@@ -1382,12 +1429,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			}
 
 			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false, -1,
-				rank->spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
+				spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
 		} 
 		else { 
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, spells[rank->spell].cast_time, 0, 0, -1, rank->spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, spells[rank->spell].cast_time, 0, 0, -1, spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
 		}
