@@ -58,6 +58,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "bot_command.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/guild_tributes_repository.h"
+#include "../common/patches/patches.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1976,6 +1977,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->LoadAlternateAdvancement();
 			entity_list.SendAlternateAdvancementStats();
 		}
+		break;
+	}
+	case ServerOP_ReloadOpcodes:
+	{
+		zone->SendReloadMessage("Opcodes");
+		ReloadAllPatches();
 		break;
 	}
 	case ServerOP_ReloadAlternateCurrencies:

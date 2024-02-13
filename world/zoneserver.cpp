@@ -1367,6 +1367,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		case ServerOP_ReloadOpcodes: {
 			ReloadAllPatches();
+			zoneserver_list.SendPacket(pack);
 			break;
 		}
 		case ServerOP_CZDialogueWindow:
