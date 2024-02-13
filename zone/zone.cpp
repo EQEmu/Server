@@ -1898,15 +1898,15 @@ void Zone::Repop(bool is_forced)
 		return;
 	}
 
+	if (is_forced) {
+		ClearSpawnTimers();
+	}
+
 	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
-	}
-
-	if (is_forced) {
-		ClearSpawnTimers();
 	}
 
 	npc_scale_manager->LoadScaleData();
