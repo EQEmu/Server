@@ -1,3 +1,21 @@
+## [22.44.5] - 2/12/2024
+
+### Fixes
+
+* [Hotfix] Fix issues where we're using the wrong database pointers @Akkadius
+
+## [22.44.4] - 2/12/2024
+
+### Fixes
+
+* Fix ClearSpawnTimers() ([#4073](https://github.com/EQEmu/Server/pull/4073)) @Kinglykrab 2024-02-13
+
+## [22.44.3] - 2/12/2024
+
+### Fixes
+
+* Fix Issue with ClearSpawnTimers() ([#4070](https://github.com/EQEmu/Server/pull/4070)) @Kinglykrab 2024-02-13
+
 ## [22.44.2] - 2/12/2024
 
 ### Bots

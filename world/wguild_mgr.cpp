@@ -325,7 +325,7 @@ bool WorldGuildManager::LoadTributes()
 
 	tribute_list.clear();
 
-	auto tributes = TributesRepository::All(*m_db);
+	auto tributes = TributesRepository::All(*m_content_db);
 	for (auto const& t : tributes) {
 		td.name            = t.name;
 		td.description     = t.descr;
@@ -336,7 +336,7 @@ bool WorldGuildManager::LoadTributes()
 
 	LogInfo("Loaded [{}] tributes", Strings::Commify(tributes.size()));
 
-	auto tribute_levels = TributeLevelsRepository::GetWhere(*m_db, "TRUE ORDER BY tribute_id, level");
+	auto tribute_levels = TributeLevelsRepository::GetWhere(*m_content_db, "TRUE ORDER BY tribute_id, level");
 
 	for (auto const& t : tribute_levels) {
 		uint32 id = t.tribute_id;

@@ -264,7 +264,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		}
 	}
 
-	guild_mgr.SetDatabase(&database);
+	guild_mgr.SetDatabase(&database)->SetContentDatabase(&content_db);
 
 	LogInfo("Purging expired data buckets");
 	database.PurgeAllDeletedDataBuckets();

@@ -1898,15 +1898,15 @@ void Zone::Repop(bool is_forced)
 		return;
 	}
 
+	if (is_forced) {
+		ClearSpawnTimers();
+	}
+
 	LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		iterator.RemoveCurrent();
-	}
-
-	if (is_forced) {
-		ClearSpawnTimers();
 	}
 
 	npc_scale_manager->LoadScaleData();
@@ -2649,22 +2649,24 @@ void Zone::ClearSpawnTimers()
 
 	iterator.Reset();
 
-	std::vector<std::string> respawn_ids;
+	std::vector<uint32> respawn_ids;
 
 	while (iterator.MoreElements()) {
-		respawn_ids.emplace_back(std::to_string(iterator.GetData()->GetID()));
+		respawn_ids.emplace_back(iterator.GetData()->spawn2_id);
 
 		iterator.Advance();
 	}
 
-	RespawnTimesRepository::DeleteWhere(
-		database,
-		fmt::format(
-			"`instance_id` = {} AND `id` IN ({})",
-			GetInstanceID(),
-			Strings::Implode(", ", respawn_ids)
-		)
-	);
+	if (!respawn_ids.empty()) {
+		RespawnTimesRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`instance_id` = {} AND `id` IN ({})",
+				GetInstanceID(),
+				Strings::Join(respawn_ids, ", ")
+			)
+		);
+	}
 }
 
 uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {

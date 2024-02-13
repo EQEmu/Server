@@ -75,9 +75,18 @@ class BaseGuildManager
 		virtual ~BaseGuildManager();
 
 		//this must be called before doing anything else with this object
-		void SetDatabase(Database *db)
+		BaseGuildManager * SetDatabase(Database *db)
 		{
 			m_db = db;
+
+			return this;
+		}
+
+		BaseGuildManager * SetContentDatabase(Database *db)
+		{
+			m_content_db = db;
+
+			return this;
 		}
 
 		bool LoadGuilds();
@@ -194,7 +203,8 @@ class BaseGuildManager
 		std::map<uint32, GuildInfo *> m_guilds;	//we own the pointers in this map
 		void ClearGuilds();	//clears internal structure
 
-		Database *m_db;	//we do not own this
+		Database *m_db;
+		Database *m_content_db;
 
 		bool _StoreGuildDB(uint32 guild_id);
 		GuildInfo* _CreateGuild(uint32 guild_id, std::string guild_name, uint32 leader_char_id, uint8 minstatus, std::string guild_motd, std::string motd_setter, std::string Channel, std::string URL, uint32 favour);
