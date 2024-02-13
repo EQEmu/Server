@@ -1,3 +1,9 @@
+## [22.44.4] - 2/12/2024
+
+### Fixes
+
+* Fix ClearSpawnTimers() ([#4073](https://github.com/EQEmu/Server/pull/4073)) @Kinglykrab 2024-02-13
+
 ## [22.44.3] - 2/12/2024
 
 ### Fixes
