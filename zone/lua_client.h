@@ -495,6 +495,7 @@ public:
 	void ClearXTargets();
 	int GetAAEXPPercentage();
 	int GetEXPPercentage();
+	bool IsInAGuild();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

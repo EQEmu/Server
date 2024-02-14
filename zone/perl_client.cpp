@@ -3098,6 +3098,11 @@ int Perl_Client_GetEXPPercentage(Client* self)
 	return self->GetEXPPercentage();
 }
 
+bool Perl_Client_IsInAGuild(Client* self)
+{
+	return self->IsInAGuild();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3386,6 +3391,7 @@ void perl_register_client()
 	package.add("IsDueling", &Perl_Client_IsDueling);
 	package.add("IsEXPEnabled", &Perl_Client_IsEXPEnabled);
 	package.add("IsGrouped", &Perl_Client_IsGrouped);
+	package.add("IsInAGuild", &Perl_Client_IsInAGuild);
 	package.add("IsLD", &Perl_Client_IsLD);
 	package.add("IsMedding", &Perl_Client_IsMedding);
 	package.add("IsRaidGrouped", &Perl_Client_IsRaidGrouped);
