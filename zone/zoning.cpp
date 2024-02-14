@@ -35,6 +35,7 @@ extern WorldServer worldserver;
 extern Zone* zone;
 
 #include "../common/repositories/character_peqzone_flags_repository.h"
+#include "../common/repositories/zone_flags_repository.h"
 #include "../common/events/player_event_logs.h"
 
 
@@ -1067,53 +1068,48 @@ void Client::GoToDeath() {
 	MovePC(m_pp.binds[0].zone_id, m_pp.binds[0].instance_id, 0.0f, 0.0f, 0.0f, 0.0f, 1, ZoneToBindPoint);
 }
 
-void Client::ClearZoneFlag(uint32 zone_id) {
+void Client::ClearZoneFlag(uint32 zone_id)
+{
 	if (!HasZoneFlag(zone_id)) {
 		return;
 	}
 
 	zone_flags.erase(zone_id);
 
-	std::string query = fmt::format(
-		"DELETE FROM zone_flags WHERE charID = {} AND zoneID = {}",
-		CharacterID(),
-		zone_id
+	ZoneFlagsRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`charID` = {} AND `zoneID` = {}",
+			CharacterID(),
+			zone_id
+		)
 	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to clear zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
-	}
 }
 
-bool Client::HasZoneFlag(uint32 zone_id) const {
+bool Client::HasZoneFlag(uint32 zone_id) const
+{
 	return zone_flags.find(zone_id) != zone_flags.end();
 }
 
-void Client::LoadZoneFlags() {
-	const auto query = fmt::format(
-		"SELECT zoneID from zone_flags WHERE charID = {}",
-		CharacterID()
+void Client::LoadZoneFlags()
+{
+	const auto& l = ZoneFlagsRepository::GetWhere(
+		database,
+		fmt::format(
+			"`charID` = {}",
+			CharacterID()
+		)
 	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to load zone flags for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
-		return;
-	}
-
-	if (!results.RowCount()) {
-		return;
-	}
 
 	zone_flags.clear();
 
-	for (auto row : results) {
-		zone_flags.insert(Strings::ToUnsignedInt(row[0]));
+	for (const auto& e : l) {
+		zone_flags.insert(e.zoneID);
 	}
 }
 
-void Client::SendZoneFlagInfo(Client *to) const {
+void Client::SendZoneFlagInfo(Client* to) const
+{
 	if (zone_flags.empty()) {
 		to->Message(
 			Chat::White,
@@ -1178,23 +1174,21 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	);
 }
 
-void Client::SetZoneFlag(uint32 zone_id) {
+void Client::SetZoneFlag(uint32 zone_id)
+{
 	if (HasZoneFlag(zone_id)) {
 		return;
 	}
 
 	zone_flags.insert(zone_id);
 
-	const auto query = fmt::format(
-		"INSERT INTO zone_flags (charID, zoneID) VALUES ({}, {})",
-		CharacterID(),
-		zone_id
+	ZoneFlagsRepository::InsertOne(
+		database,
+		ZoneFlagsRepository::ZoneFlags{
+			.charID = static_cast<int32_t>(CharacterID()),
+			.zoneID = static_cast<int32_t>(zone_id)
+		}
 	);
-	auto results = database.QueryDatabase(query);
-
-	if (!results.Success()) {
-		LogError("MySQL Error while trying to set zone flag for [{}]: [{}]", GetName(), results.ErrorMessage().c_str());
-	}
 }
 
 void Client::ClearPEQZoneFlag(uint32 zone_id) {
