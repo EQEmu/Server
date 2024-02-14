@@ -944,6 +944,7 @@ RULE_BOOL(Items, DisableNoRent, false, "Enable this to disable No Rent Items")
 RULE_BOOL(Items, DisableNoTransfer, false, "Enable this to disable No Transfer Items")
 RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt Items")
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
+RULE_INT(Items, RoseColoredQuestWeightDrop, 80, "Percent chance for rose colored (any remaining percent of 100 is apoc chance)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Custom)

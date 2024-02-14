@@ -165,6 +165,35 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	return x;
 }
 
+uint32 Client::GetApocItemUpgrade(uint32 item_id) {
+	uint32 new_item_id = item_id;
+
+	if (item_id < 1000000) { // this is a normal item
+		int roll = zone->random.Int(1, 100);
+
+		if (roll <= RuleI(Item, RoseColoredQuestWeightDrop)) { // we didn't get apoc
+			new_item_id += 1000000;
+		} else { // we got apoc
+			new_item_id += 2000000;
+		}
+
+		if (new_item_id != item_id) {
+			const EQ::ItemData* item = database.GetItem(new_item_id);
+			if (item != nullptr) {
+				item_id = new_item_id;
+			}
+		}
+	}
+
+	return item_id;
+}
+
+bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
+	item_id = GetApocItemUpgrade(item_id);
+
+	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model);
+}
+
 
 bool Client::CheckLoreConflict(const EQ::ItemData* item)
 {

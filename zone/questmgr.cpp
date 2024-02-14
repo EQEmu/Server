@@ -203,6 +203,13 @@ void QuestManager::me(const char *str) {
 }
 
 void QuestManager::summonitem(uint32 itemid, int16 charges) {
+ 	QuestManagerCurrentQuestVars();
+    if(!initiator)
+        return;
+	initiator->SummonApocItem(itemid, charges);
+}
+
+void QuestManager::summonfixeditem(uint32 itemid, int16 charges) {	
 	QuestManagerCurrentQuestVars();
 	if(!initiator)
 		return;
