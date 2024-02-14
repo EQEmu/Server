@@ -214,7 +214,7 @@ void ZoneDatabase::LoadWorldContainer(uint32 parent_id, EQ::ItemInstance* contai
 	}
 
 	const auto& l = ObjectContentsRepository::GetWhere(
-		*this,
+		database,
 		fmt::format(
 			"`parentid` = {}",
 			parent_id
@@ -271,7 +271,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
 		}
 
 		ObjectContentsRepository::ReplaceOne(
-			*this,
+			database,
 			ObjectContentsRepository::ObjectContents{
 				.zoneid = zone_id,
 				.parentid = parent_id,
@@ -293,7 +293,7 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
 void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 {
 	ObjectContentsRepository::DeleteWhere(
-		*this,
+		database,
 		fmt::format(
 			"`parentid` = {} AND `zoneid` = {}",
 			parent_id,
