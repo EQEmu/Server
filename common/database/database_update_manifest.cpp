@@ -5247,7 +5247,7 @@ MODIFY COLUMN `name` varchar(200) CHARACTER SET latin1 COLLATE latin1_swedish_ci
 	ManifestEntry{
 		.version = 9257,
 		.description = "2024_01_16_ground_spawns_fix_z.sql",
-		.check = "SHOW COLUMNS FROM `ground_spawns` LIKE `fix_z`",
+		.check = "SHOW COLUMNS FROM `ground_spawns` LIKE `'fix_z'`",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
