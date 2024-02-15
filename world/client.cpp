@@ -598,66 +598,66 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 }
 
 bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
-    char newName[17] = {0};
-    bool unique = false;
+	char newName[17] = {0};
+	bool unique = false;
 
-    while (!unique) {
-        std::string cons = "bcdfghjklmnpqrstvwxyz";
-        std::string vows = "aeou";
-        std::string allVows = "aeiou";
-        std::vector<std::string> endPhon = {"a", "e", "i", "o", "u", "os", "as", "us", "is", "y", "an", "en", "in", "on", "un"};
+	while (!unique) {
+		std::string cons = "bcdfghjklmnpqrstvwxyz";
+		std::string vows = "aeou";
+		std::string allVows = "aeiou";
+		std::vector<std::string> endPhon = {"a", "e", "i", "o", "u", "os", "as", "us", "is", "y", "an", "en", "in", "on", "un"};
 
-        std::random_device rd;
-        std::mt19937 gen(rd());
+		std::random_device rd;
+		std::mt19937 gen(rd());
 
-        std::uniform_int_distribution<int> lenDist(5, 10);
-        std::uniform_int_distribution<int> firstCharDist(0, 1);
-        std::uniform_int_distribution<int> consDist(0, cons.size() - 1);
-        std::uniform_int_distribution<int> vowDist(0, vows.size() - 1);
-        std::uniform_int_distribution<int> allVowDist(0, allVows.size() - 1);
-        std::uniform_int_distribution<int> endPhonDist(0, endPhon.size() - 1);
+		std::uniform_int_distribution<int> lenDist(5, 10);
+		std::uniform_int_distribution<int> firstCharDist(0, 1);
+		std::uniform_int_distribution<int> consDist(0, cons.size() - 1);
+		std::uniform_int_distribution<int> vowDist(0, vows.size() - 1);
+		std::uniform_int_distribution<int> allVowDist(0, allVows.size() - 1);
+		std::uniform_int_distribution<int> endPhonDist(0, endPhon.size() - 1);
 
-        int len = 0;
-        memset(newName, 0, sizeof(newName));
+		int len = 0;
+		memset(newName, 0, sizeof(newName));
 
-        if (firstCharDist(gen) == 0) {
-            newName[len++] = vows[vowDist(gen)];
-            newName[len++] = cons[consDist(gen)];
-        } else {
-            newName[len++] = cons[consDist(gen)];
-            newName[len++] = allVows[allVowDist(gen)];
-        }
+		if (firstCharDist(gen) == 0) {
+			newName[len++] = vows[vowDist(gen)];
+			newName[len++] = cons[consDist(gen)];
+		} else {
+			newName[len++] = cons[consDist(gen)];
+			newName[len++] = allVows[allVowDist(gen)];
+		}
 
-        newName[0] = toupper(newName[0]);
+		newName[0] = toupper(newName[0]);
 
-        while (len < lenDist(gen) - 1) {
-            if (len % 2 == 0) {
-                newName[len++] = cons[consDist(gen)];
-            } else {
-                newName[len++] = allVows[allVowDist(gen)];
-            }
-        }
+		while (len < lenDist(gen) - 1) {
+			if (len % 2 == 0) {
+				newName[len++] = cons[consDist(gen)];
+			} else {
+				newName[len++] = allVows[allVowDist(gen)];
+			}
+		}
 
-        std::string end = endPhon[endPhonDist(gen)];
-        for (char c : end) {
-            if (len < 10) newName[len++] = c;
-        }
+		std::string end = endPhon[endPhonDist(gen)];
+		for (char c : end) {
+			if (len < 10) newName[len++] = c;
+		}
 
 		if (database.CheckNameFilter(newName)) {
 			std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE `name` = '%s'", newName);
 			auto res = database.QueryDatabase(query);
 			if (res.Success() && res.RowCount() == 0) {				
-				unique = true; //
+				unique = true;
 			}
 		}
-    }
+	}
 
-    NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
-    memset(ngs->name, 0, 64);
-    strcpy(ngs->name, newName);
+	NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
+	memset(ngs->name, 0, 64);
+	strcpy(ngs->name, newName);
 
-    QueuePacket(app);
-    return true;
+	QueuePacket(app);
+	return true;
 }
 
 bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) {
