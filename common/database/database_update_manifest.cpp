@@ -5259,7 +5259,7 @@ ADD COLUMN `fix_z` tinyint(1) UNSIGNED NOT NULL DEFAULT 1 AFTER `respawn_timer`;
 	ManifestEntry{
 		.version = 9258,
 		.description = "2024_02_04_base_data.sql",
-		.check = "SHOW COLUMNS FROM `base_data` LIKE `hp_regen`",
+		.check = "SHOW COLUMNS FROM `base_data` LIKE 'hp_regen'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
