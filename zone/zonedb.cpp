@@ -635,25 +635,8 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	m_epp->expended_aa           = e.e_expended_aa_spent;
 	m_epp->last_invsnapshot_time = e.e_last_invsnapshot;
 	m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
-	
-	if (RuleB(Custom, MulticlassingEnabled)) {
-		std::string query = StringFormat("SELECT `classes` FROM `character_multiclass_data` WHERE `id` = %i", character_id);
-		auto results = database.QueryDatabase(query);
-		bool found = false; // Flag to track if we found a row
 
-		for (auto& row = results.begin(); row != results.end(); ++row) {
-			if (row[0]) {
-				pp->classes = static_cast<uint32>(std::stoul(row[0]));
-				found = true;
-				break;
-			}
-		}
-
-		// If no row is returned, use the class bit from the player profile (default value)
-		if (!found) {
-			pp->classes = GetPlayerClassBit(pp->class_);
-		}
-	}
+	pp->classes = GetPlayerClassBit(pp->class_);
 
 	return true;
 }
