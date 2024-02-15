@@ -643,9 +643,11 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
             if (len < 10) newName[len++] = c;
         }
 
-		if (!database.CheckNameFilter(newName) && !database.ReserveName(GetAccountID(), newName)) {
-			unique = true;
-		}
+        std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE `name` = '%s'", newName);
+        auto res = database.QueryDatabase(query);
+        if (!res.Success() || res.RowCount() == 0) {
+            unique = true;
+        }
     }
 
     NameGeneration_Struct* ngs = (NameGeneration_Struct*)app->pBuffer;
