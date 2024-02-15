@@ -103,7 +103,7 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT MAX(`number`) FROM `{}` WHERE `zoneid` = {} AND `gridid` = {}",
+				"SELECT COALESCE(MAX(`number`), 0) FROM `{}` WHERE `zoneid` = {} AND `gridid` = {}",
 				TableName(),
 				zone_id,
 				grid_id
