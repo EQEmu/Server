@@ -21,10 +21,7 @@ int WorldContentService::GetCurrentExpansion() const
 WorldContentService *WorldContentService::SetExpansionContext()
 {
 	// do a rule manager reload until where we store expansion is changed to somewhere else
-	auto r = RuleManager::Instance();
-	if (RuleManager::CountRules() == 0) {
-		r->LoadRules(GetDatabase(), "default", true);
-	}
+	RuleManager::Instance()->LoadRules(GetDatabase(), "default", true);
 
 	// pull expansion from rules
 	int expansion = RuleI(Expansion, CurrentExpansion);
