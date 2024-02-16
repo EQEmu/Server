@@ -12189,7 +12189,7 @@ void Client::CheckForImproperContentFiles()
 	std::vector<ZoneCheck> checks = {
 		ZoneCheck{
 			.short_name = "nektulos",
-			.loc = glm::vec3(-259, -1201, -12.60), // zone in
+			.loc = glm::vec3(-259, -1201, -12.60), // safe zone in
 			.within_z_range = 5,
 			.min_expansion = Expansion::ExpansionNumber::Classic,
 			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
@@ -12197,13 +12197,6 @@ void Client::CheckForImproperContentFiles()
 		ZoneCheck{
 			.short_name = "nektulos",
 			.loc = glm::vec3(-715, -57, 42.90), // "nek gate" wizard spire
-			.within_z_range = 5,
-			.min_expansion = Expansion::ExpansionNumber::Classic,
-			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
-		},
-		ZoneCheck{
-			.short_name = "nektulos",
-			.loc = glm::vec3(-349, 705, -3.25), // wrong pok book location
 			.within_z_range = 5,
 			.min_expansion = Expansion::ExpansionNumber::Classic,
 			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
