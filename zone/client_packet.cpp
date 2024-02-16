@@ -963,6 +963,8 @@ void Client::CompleteConnect()
 		GoToBind();
 		return;
 	}
+
+	m_check_improper_content_files.Start(1000);
 }
 
 // connecting opcode handlers
@@ -17138,3 +17140,4 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 		RequestGuildFavorAndTimer(GuildID());
 	}
 }
+

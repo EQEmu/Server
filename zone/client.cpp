@@ -12170,3 +12170,77 @@ int Client::GetEXPPercentage()
 
 	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
 }
+
+struct ZoneCheck {
+	std::string                short_name;
+	glm::vec3                  loc;
+	Expansion::ExpansionNumber min_expansion;
+	Expansion::ExpansionNumber max_expansion;
+};
+
+void Client::CheckForImproperContentFiles()
+{
+	std::vector<ZoneCheck> checks = {
+		ZoneCheck{
+			.short_name = "nektulos",
+			.loc = glm::vec3(0, 0, 0),
+			.min_expansion = Expansion::ExpansionNumber::Classic,
+			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
+		},
+		ZoneCheck{
+			.short_name = "lavastorm",
+			.loc = glm::vec3(-205, -2091, -15.20),
+			.min_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
+			.max_expansion = Expansion::ExpansionNumber::MaxId,
+		},
+	};
+
+	auto z = GetZoneVersionWithFallback(GetZoneID(), GetInstanceVersion());
+
+	for (const auto &c: checks) {
+		if (zone->GetShortName() == c.short_name) {
+			auto f = ContentFlags{
+				.min_expansion = z->min_expansion,
+				.max_expansion = z->max_expansion,
+				.content_flags = z->content_flags,
+				.content_flags_disabled = z->content_flags_disabled
+			};
+
+			bool is_position_equal      = IsPositionEqualWithinCertainZ(GetPosition(), c.loc, .1);
+			bool pass_content_filtering = content_service.DoesPassContentFiltering(f);
+			bool within_expansion       = content_service.GetCurrentExpansion() >= c.min_expansion &&
+										  content_service.GetCurrentExpansion() <= c.max_expansion;
+
+			// print locations
+			LogInfo(
+				"GetPosition x [{}] y [{}] z [{}] c.loc x [{}] y [{}] z [{}]",
+				GetX(), GetY(), GetZ(), c.loc.x, c.loc.y, c.loc.z
+			);
+
+			LogInfo(
+				"We're here is_position_equal [{}] pass_content_filtering [{}]",
+				is_position_equal,
+				pass_content_filtering
+			);
+
+			if (pass_content_filtering && is_position_equal && within_expansion) {
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Your client files are not compatible with the current zone. Please update your client or contact a GM for assistance."
+					).c_str()
+				);
+
+				SendPopupToClient(
+					"Missing Files",
+					fmt::format(
+						R"(Your client files are not compatible with the current zone. Please update your client or contact a GM for assistance.<br><br>Please download <a href="https://github.com/Akkadius/eq-expansion-switcher/releases/latest/download/eq-expansion-switcher-windows-amd64.zip">eq-expansion-switcher-windows-amd64.zip</a> and extract it, run it against your EverQuest directory and set your current expansion to [{}])",
+						content_service.GetCurrentExpansionName()
+					).c_str()
+				);
+			}
+		}
+	}
+
+//	SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+}

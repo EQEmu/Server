@@ -125,6 +125,11 @@ bool Client::Process() {
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
+		if (m_check_improper_content_files.Check()) {
+			CheckForImproperContentFiles();
+			m_check_improper_content_files.Disable();
+		}
+
 		if (mana_timer.Check())
 			CheckManaEndUpdate();
 
@@ -1072,7 +1077,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			SetMana(GetMaxMana() / 20);
 			SetEndurance(GetMaxEndurance() / 20);
 		}
-		
+
 		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0) {
 				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
 						GetAAXP(),true);

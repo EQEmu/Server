@@ -72,6 +72,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		int(zone_mode)
 	);
 
+	content_service.HandleZoneRoutingMiddleware(zc);
+
 	uint16 target_zone_id = 0;
 	auto target_instance_id = zc->instanceID;
 	ZonePoint* zone_point = nullptr;
