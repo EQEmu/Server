@@ -12242,6 +12242,4 @@ void Client::CheckForImproperContentFiles()
 			}
 		}
 	}
-
-//	SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
 }
