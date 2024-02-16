@@ -964,7 +964,9 @@ void Client::CompleteConnect()
 		return;
 	}
 
-	m_check_improper_content_files.Start(1000);
+	if (RuleB(Expansions, CheckForImproperContentFiles)) {
+		m_check_improper_content_files.Start(1000);
+	}
 }
 
 // connecting opcode handlers
