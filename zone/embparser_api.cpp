@@ -5750,6 +5750,19 @@ std::string Perl__convert_money_to_string(perl::hash table)
 	uint64 silver   = table.exists("silver") ? static_cast<uint64>(table["silver"]) : 0;
 	uint64 copper   = table.exists("copper") ? static_cast<uint64>(table["copper"]) : 0;
 
+	uint64 total = ((platinum * 1000) + (gold * 100) + (silver * 10) + copper);
+
+	platinum = total / 1000;
+	total -= (platinum * 1000);
+
+	gold = total / 100;
+	total -= (gold * 100);
+
+	silver = total / 10;
+	total -= (silver * 10);
+
+	copper = total;
+
 	if (
 		!copper &&
 		!silver &&

@@ -1951,44 +1951,58 @@ void Client::Handle_OP_AdventureLeaderboardRequest(const EQApplicationPacket *ap
 
 void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Adventure_Purchase_Struct))
-	{
-		LogError("OP size error: OP_AdventureMerchantPurchase expected:[{}] got:[{}]", sizeof(Adventure_Purchase_Struct), app->size);
+	if (app->size != sizeof(Adventure_Purchase_Struct)) {
+		LogError(
+			"OP size error: OP_AdventureMerchantPurchase expected:[{}] got:[{}]",
+			sizeof(Adventure_Purchase_Struct),
+			app->size
+		);
 		return;
 	}
 
-	Adventure_Purchase_Struct* aps = (Adventure_Purchase_Struct*)app->pBuffer;
-	uint32 merchantid = 0;
-	Mob* tmp = entity_list.GetMob(aps->npcid);
-	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != Class::AdventureMerchant) &&
-		(tmp->GetClass() != Class::DiscordMerchant) && (tmp->GetClass() != Class::NorrathsKeepersMerchant) && (tmp->GetClass() != Class::DarkReignMerchant)))
-		return;
+	auto aps = (Adventure_Purchase_Struct*) app->pBuffer;
 
-	//you have to be somewhat close to them to be properly using them
-	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	Mob* m = entity_list.GetMob(aps->npcid);
+	if (
+		!m ||
+		!m->IsNPC() ||
+		(
+			m->GetClass() != Class::AdventureMerchant &&
+			m->GetClass() != Class::DiscordMerchant &&
+			m->GetClass() != Class::NorrathsKeepersMerchant &&
+			m->GetClass() != Class::DarkReignMerchant
+		)
+	) {
 		return;
+	}
 
-	merchantid = tmp->CastToNPC()->MerchantType;
+	if (DistanceSquared(m_Position, m->GetPosition()) > USE_NPC_RANGE2) {
+		return;
+	}
+
+	const uint32 merchant_id = m->CastToNPC()->MerchantType;
 
 	const EQ::ItemData* item = nullptr;
-	bool found = false;
-	std::list<MerchantList> merchantlists = zone->merchanttable[merchantid];
-	for (auto merchantlist : merchantlists) {
-		if (GetLevel() < merchantlist.level_required) {
+
+	bool found         = false;
+	auto l = zone->merchanttable[merchant_id];
+	for (const auto& e : l) {
+		if (GetLevel() < e.level_required) {
 			continue;
 		}
 
-		int faction_id = tmp->GetPrimaryFaction();
-		if (faction_id != 0 && GetModCharacterFactionLevel(faction_id) < merchantlist.faction_required) {
+		const int faction_id = m->GetPrimaryFaction();
+		if (faction_id != 0 && GetModCharacterFactionLevel(faction_id) < e.faction_required) {
 			continue;
 		}
 
-		item = database.GetItem(merchantlist.item);
+		item = database.GetItem(e.item);
 		if (!item) {
 			continue;
 		}
 
-		if (item->ID == aps->itemid) { //This check to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
+		// This check is to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
+		if (item->ID == aps->itemid) {
 			found = true;
 			break;
 		}
@@ -1999,9 +2013,10 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		return;
 	}
 
-	auto item_cost = item->LDoNPrice;
-	bool cannot_afford = false;
-	std::string merchant_type;
+	const uint32 item_cost     = item->LDoNPrice;
+	bool         cannot_afford = false;
+	std::string  merchant_type;
+
 	if (item_cost < 0) {
 		Message(Chat::Red, "This item cannot be bought.");
 		return;
@@ -2015,30 +2030,31 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
 			uint32 ldon_theme;
+
 			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
 				if (m_pp.ldon_points_tak < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::TAK;
+					ldon_theme    = LDoNThemes::TAK;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::RUJ;
+					ldon_theme    = LDoNThemes::RUJ;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::MMC;
+					ldon_theme    = LDoNThemes::MMC;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::MIR;
+					ldon_theme    = LDoNThemes::MIR;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
-					ldon_theme = LDoNThemes::GUK;
+					ldon_theme    = LDoNThemes::GUK;
 				}
 			}
 
@@ -2098,36 +2114,29 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (aps->Type == LDoNMerchant) {
 		int required_points = item_cost * -1;
 
-		if (!UpdateLDoNPoints(6, required_points)) {
+		if (!UpdateLDoNPoints(item->LDoNTheme, required_points)) {
 			return;
 		}
-	}
-	else if (aps->Type == DiscordMerchant)
-	{
+	} else if (aps->Type == DiscordMerchant) {
 		SetPVPPoints(GetPVPPoints() - item_cost);
 		SendPVPStats();
-	}
-	else if (aps->Type == NorrathsKeepersMerchant)
-	{
+	} else if (aps->Type == NorrathsKeepersMerchant) {
 		SetRadiantCrystals(GetRadiantCrystals() - item_cost);
+	} else if (aps->Type == DarkReignMerchant) {
+		SetEbonCrystals(GetEbonCrystals() - (int32) item->LDoNPrice);
 	}
-	else if (aps->Type == DarkReignMerchant)
-	{
-		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
-	}
-	int16 charges = 1;
-	if (item->MaxCharges != 0)
-		charges = item->MaxCharges;
+
+	const int16 charges = item->MaxCharges != 0 ? item->MaxCharges : 1;
 
 	if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
 		DiscoverItem(item->ID);
 	}
 
-	EQ::ItemInstance *inst = database.CreateItem(item, charges);
-	if (!AutoPutLootInInventory(*inst, true, true))
-	{
+	auto inst = database.CreateItem(item, charges);
+	if (!AutoPutLootInInventory(*inst, true, true)) {
 		PutLootInInventory(EQ::invslot::slotCursor, *inst);
 	}
+
 	safe_delete(inst);
 	Save(1);
 }
@@ -2212,39 +2221,46 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 
 void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Adventure_Sell_Struct))
-	{
-		LogDebug("Size mismatch on OP_AdventureMerchantSell: got [{}] expected [{}]", app->size, sizeof(Adventure_Sell_Struct));
+	if (app->size != sizeof(Adventure_Sell_Struct)) {
+		LogDebug(
+			"Size mismatch on OP_AdventureMerchantSell: got [{}] expected [{}]",
+			app->size,
+			sizeof(Adventure_Sell_Struct)
+		);
 		DumpPacket(app);
 		return;
 	}
 
-	Adventure_Sell_Struct *ams_in = (Adventure_Sell_Struct*)app->pBuffer;
+	auto ams_in = (Adventure_Sell_Struct*) app->pBuffer;
 
-	Mob* vendor = entity_list.GetMob(ams_in->npcid);
-	if (vendor == 0 || !vendor->IsNPC() || ((vendor->GetClass() != Class::AdventureMerchant) &&
-		(vendor->GetClass() != Class::NorrathsKeepersMerchant) && (vendor->GetClass() != Class::DarkReignMerchant)))
-	{
+	Mob* v = entity_list.GetMob(ams_in->npcid);
+	if (
+		!v ||
+		!v->IsNPC() ||
+		(
+			v->GetClass() != Class::AdventureMerchant &&
+			v->GetClass() != Class::NorrathsKeepersMerchant &&
+			v->GetClass() != Class::DarkReignMerchant
+		)
+	) {
 		Message(Chat::Red, "Vendor was not found.");
 		return;
 	}
 
-	if (DistanceSquared(m_Position, vendor->GetPosition())  > USE_NPC_RANGE2)
-	{
+	if (DistanceSquared(m_Position, v->GetPosition()) > USE_NPC_RANGE2) {
 		Message(Chat::Red, "Vendor is out of range.");
 		return;
 	}
 
-	uint32 itemid = GetItemIDAt(ams_in->slot);
+	const uint32 item_id = GetItemIDAt(ams_in->slot);
 
-	if (itemid == 0)
-	{
+	if (!item_id) {
 		Message(Chat::Red, "Found no item at that slot.");
 		return;
 	}
 
-	const EQ::ItemData* item = database.GetItem(itemid);
-	EQ::ItemInstance* inst = GetInv().GetItem(ams_in->slot);
+	const auto item = database.GetItem(item_id);
+	auto       inst = GetInv().GetItem(ams_in->slot);
 	if (!item || !inst) {
 		Message(Chat::Red, "You seemed to have misplaced that item...");
 		return;
@@ -2263,14 +2279,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	//
 	// Note that the the Client will not allow you to sell anything back to a Discord merchant, so there is no need to handle
 	// that case here.
-	if (item->LDoNSold == 0)
-	{
-		Message(Chat::Red, "The merchant does not want that item.");
-		return;
-	}
-
-	if (item->LDoNPrice == 0)
-	{
+	if (!item->LDoNSold || !item->LDoNPrice) {
 		Message(Chat::Red, "The merchant does not want that item.");
 		return;
 	}
@@ -2285,25 +2294,19 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 		item->LDoNPrice
 	);
 
-	if (price == 0)
-	{
+	if (!price) {
 		Message(Chat::Red, "The merchant does not want that item.");
 		return;
 	}
 
-	if (!inst->IsStackable())
-	{
+	if (!inst->IsStackable()) {
 		DeleteItemInInventory(ams_in->slot);
-	}
-	else
-	{
-		if (inst->GetCharges() < ams_in->charges)
-		{
+	} else {
+		if (inst->GetCharges() < ams_in->charges) {
 			ams_in->charges = inst->GetCharges();
 		}
 
-		if (ams_in->charges == 0)
-		{
+		if (ams_in->charges == 0) {
 			Message(Chat::Red, "Charge mismatch error.");
 			return;
 		}
@@ -2313,34 +2316,33 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 	}
 
 	auto outapp = new EQApplicationPacket(OP_AdventureMerchantSell, sizeof(Adventure_Sell_Struct));
-	Adventure_Sell_Struct *ams = (Adventure_Sell_Struct*)outapp->pBuffer;
-	ams->slot = ams_in->slot;
+
+	auto ams = (Adventure_Sell_Struct*) outapp->pBuffer;
+
+	ams->slot       = ams_in->slot;
 	ams->unknown000 = 1;
-	ams->npcid = ams->npcid;
-	ams->charges = ams_in->charges;
+	ams->npcid      = ams->npcid;
+	ams->charges    = ams_in->charges;
 	ams->sell_price = price;
+
 	FastQueuePacket(&outapp);
 
-	switch (vendor->GetClass())
-	{
-	case Class::AdventureMerchant:
-	{
-		UpdateLDoNPoints(6, price);
-		break;
-	}
-	case Class::NorrathsKeepersMerchant:
-	{
-		SetRadiantCrystals(GetRadiantCrystals() + price);
-		break;
-	}
-	case Class::DarkReignMerchant:
-	{
-		SetEbonCrystals(GetEbonCrystals() + price);
-		break;
-	}
-
-	default:
-		break;
+	switch (v->GetClass()) {
+		case Class::AdventureMerchant: {
+			UpdateLDoNPoints(item->LDoNTheme, price);
+			break;
+		}
+		case Class::NorrathsKeepersMerchant: {
+			SetRadiantCrystals(GetRadiantCrystals() + price);
+			break;
+		}
+		case Class::DarkReignMerchant: {
+			SetEbonCrystals(GetEbonCrystals() + price);
+			break;
+		}
+		default: {
+			break;
+		}
 	}
 
 	Save(1);
