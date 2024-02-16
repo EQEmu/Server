@@ -2115,6 +2115,7 @@ private:
 	std::string m_mail_key_full;
 	std::string m_mail_key;
 	Timer m_check_improper_content_files;
+	int8 m_improper_zone_in_check_count = 0;
 public:
 	const std::string &GetMailKeyFull() const;
 	const std::string &GetMailKey() const;

@@ -127,7 +127,6 @@ bool Client::Process() {
 
 		if (m_check_improper_content_files.Check()) {
 			CheckForImproperContentFiles();
-			m_check_improper_content_files.Disable();
 		}
 
 		if (mana_timer.Check())

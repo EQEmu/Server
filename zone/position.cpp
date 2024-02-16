@@ -210,6 +210,10 @@ bool IsPositionEqualWithinCertainZ(const glm::vec3 &p1, const glm::vec3 &p2, flo
 	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < z_eps;
 }
 
+bool IsPositionEqualWithinCertainOffset(const glm::vec3 &p1, const glm::vec3 &p2, float offset) {
+	return std::abs(p1.x - p2.x) < offset && std::abs(p1.y - p2.y) < offset && std::abs(p1.z - p2.z) < offset;
+}
+
 bool IsPositionEqualWithinCertainZ(const glm::vec4 &p1, const glm::vec4 &p2, float z_eps) {
 	return std::abs(p1.x - p2.x) < position_eps && std::abs(p1.y - p2.y) < position_eps && std::abs(p1.z - p2.z) < z_eps;
 }

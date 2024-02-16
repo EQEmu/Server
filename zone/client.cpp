@@ -12174,22 +12174,44 @@ int Client::GetEXPPercentage()
 struct ZoneCheck {
 	std::string                short_name;
 	glm::vec3                  loc;
+	float                      within_z_range;
 	Expansion::ExpansionNumber min_expansion;
 	Expansion::ExpansionNumber max_expansion;
 };
 
 void Client::CheckForImproperContentFiles()
 {
+	if (m_improper_zone_in_check_count > 10) {
+		m_check_improper_content_files.Disable();
+		return;
+	}
+
 	std::vector<ZoneCheck> checks = {
 		ZoneCheck{
 			.short_name = "nektulos",
-			.loc = glm::vec3(0, 0, 0),
+			.loc = glm::vec3(-259, -1201, -12.60), // zone in
+			.within_z_range = 5,
+			.min_expansion = Expansion::ExpansionNumber::Classic,
+			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
+		},
+		ZoneCheck{
+			.short_name = "nektulos",
+			.loc = glm::vec3(-715, -57, 42.90), // "nek gate" wizard spire
+			.within_z_range = 5,
+			.min_expansion = Expansion::ExpansionNumber::Classic,
+			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
+		},
+		ZoneCheck{
+			.short_name = "nektulos",
+			.loc = glm::vec3(-349, 705, -3.25), // wrong pok book location
+			.within_z_range = 5,
 			.min_expansion = Expansion::ExpansionNumber::Classic,
 			.max_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
 		},
 		ZoneCheck{
 			.short_name = "lavastorm",
-			.loc = glm::vec3(-205, -2091, -15.20),
+			.loc = glm::vec3(-205, -2091, -15.20), // entrance from nek
+			.within_z_range = 5,
 			.min_expansion = Expansion::ExpansionNumber::DragonsOfNorrath,
 			.max_expansion = Expansion::ExpansionNumber::MaxId,
 		},
@@ -12206,22 +12228,25 @@ void Client::CheckForImproperContentFiles()
 				.content_flags_disabled = z->content_flags_disabled
 			};
 
-			bool is_position_equal      = IsPositionEqualWithinCertainZ(GetPosition(), c.loc, .1);
+			bool is_position_equal      = IsPositionEqualWithinCertainOffset(GetPosition(), c.loc, c.within_z_range);
 			bool pass_content_filtering = content_service.DoesPassContentFiltering(f);
 			bool within_expansion       = content_service.GetCurrentExpansion() >= c.min_expansion &&
 										  content_service.GetCurrentExpansion() <= c.max_expansion;
 
 			// print locations
 			LogInfo(
-				"Client x [{}] y [{}] z [{}] check loc x [{}] y [{}] z [{}] is_position_equal [{}] pass_content_filtering [{}]",
+				"Client [{}] x [{}] y [{}] z [{}] check loc x [{}] y [{}] z [{}] within_z [{}] equal [{}] filtering [{}] expansion [{}]",
+				GetCleanName(),
 				GetX(),
 				GetY(),
 				GetZ(),
 				c.loc.x,
 				c.loc.y,
 				c.loc.z,
+				c.within_z_range,
 				is_position_equal,
-				pass_content_filtering
+				pass_content_filtering,
+				within_expansion
 			);
 
 			if (pass_content_filtering && is_position_equal && within_expansion) {
@@ -12239,7 +12264,11 @@ void Client::CheckForImproperContentFiles()
 						content_service.GetCurrentExpansionName()
 					).c_str()
 				);
+
+				m_check_improper_content_files.Disable();
 			}
 		}
 	}
+
+	m_improper_zone_in_check_count++;
 }

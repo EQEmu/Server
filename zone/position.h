@@ -56,6 +56,7 @@ bool IsPositionEqual(const glm::vec3 &p1, const glm::vec3 &p2);
 bool IsPositionEqual(const glm::vec4 &p1, const glm::vec4 &p2);
 bool IsPositionEqualWithinCertainZ(const glm::vec3 &p1, const glm::vec3 &p2, float z_eps);
 bool IsPositionEqualWithinCertainZ(const glm::vec4 &p1, const glm::vec4 &p2, float z_eps);
+bool IsPositionEqualWithinCertainOffset(const glm::vec3 &p1, const glm::vec3 &p2, float offset);
 
 bool IsPositionWithinSimpleCylinder(const glm::vec3 &p1, const glm::vec3 &cylinder_center, float cylinder_radius, float cylinder_height);
 bool IsPositionWithinSimpleCylinder(const glm::vec4 &p1, const glm::vec4 &cylinder_center, float cylinder_radius, float cylinder_height);
