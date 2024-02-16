@@ -186,6 +186,7 @@ void WorldContentService::ReloadContentFlags()
 	}
 
 	SetContentFlags(set_content_flags);
+	SetContentZones(ZoneRepository::All(*m_content_database));
 }
 
 Database *WorldContentService::GetDatabase() const
