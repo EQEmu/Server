@@ -12213,12 +12213,13 @@ void Client::CheckForImproperContentFiles()
 
 			// print locations
 			LogInfo(
-				"GetPosition x [{}] y [{}] z [{}] c.loc x [{}] y [{}] z [{}]",
-				GetX(), GetY(), GetZ(), c.loc.x, c.loc.y, c.loc.z
-			);
-
-			LogInfo(
-				"We're here is_position_equal [{}] pass_content_filtering [{}]",
+				"Client x [{}] y [{}] z [{}] check loc x [{}] y [{}] z [{}] is_position_equal [{}] pass_content_filtering [{}]",
+				GetX(),
+				GetY(),
+				GetZ(),
+				c.loc.x,
+				c.loc.y,
+				c.loc.z,
 				is_position_equal,
 				pass_content_filtering
 			);
