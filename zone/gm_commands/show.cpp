@@ -5,6 +5,7 @@
 #include "show/buffs.cpp"
 #include "show/buried_corpse_count.cpp"
 #include "show/client_version_summary.cpp"
+#include "show/content_flags.cpp"
 #include "show/currencies.cpp"
 #include "show/distance.cpp"
 #include "show/emotes.cpp"
@@ -64,6 +65,7 @@ void command_show(Client *c, const Seperator *sep)
 		Cmd{.cmd = "buffs", .u = "buffs", .fn = ShowBuffs, .a = {"#showbuffs"}},
 		Cmd{.cmd = "buried_corpse_count", .u = "buried_corpse_count", .fn = ShowBuriedCorpseCount, .a = {"#getplayerburiedcorpsecount"}},
 		Cmd{.cmd = "client_version_summary", .u = "client_version_summary", .fn = ShowClientVersionSummary, .a = {"#cvs"}},
+		Cmd{.cmd = "content_flags", .u = "content_flags", .fn = ShowContentFlags, .a = {"#showcontentflags"}},
 		Cmd{.cmd = "currencies", .u = "currencies", .fn = ShowCurrencies, .a = {"#viewcurrencies"}},
 		Cmd{.cmd = "distance", .u = "distance", .fn = ShowDistance, .a = {"#distance"}},
 		Cmd{.cmd = "emotes", .u = "emotes", .fn = ShowEmotes, .a = {"#emoteview"}},

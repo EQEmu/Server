@@ -954,8 +954,9 @@ void Client::CompleteConnect()
 	heroforge_wearchange_timer.Start(250);
 
 	RecordStats();
-
 	AutoGrantAAPoints();
+
+
 
 	// enforce some rules..
 	if (!CanEnterZone()) {
