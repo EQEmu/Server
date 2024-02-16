@@ -125,10 +125,6 @@ bool Client::Process() {
 			SentPositionPacket(0.0f, 0.0f, 0.0f, 0.0f, 0);
 		}
 
-		if (m_check_improper_content_files.Check()) {
-			CheckForImproperContentFiles();
-		}
-
 		if (mana_timer.Check())
 			CheckManaEndUpdate();
 

@@ -963,10 +963,6 @@ void Client::CompleteConnect()
 		GoToBind();
 		return;
 	}
-
-	if (RuleB(Expansions, CheckForImproperContentFiles)) {
-		m_check_improper_content_files.Start(1000);
-	}
 }
 
 // connecting opcode handlers
