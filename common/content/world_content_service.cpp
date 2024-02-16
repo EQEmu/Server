@@ -243,7 +243,7 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 // we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
 WorldContentService *WorldContentService::SetContentZones(std::vector<BaseZoneRepository::Zone> zones)
 {
-	m_zones = std::move(zones);
+	m_zones = zones;
 
 	LogInfo("Loaded [{}] zones", m_zones.size());
 
