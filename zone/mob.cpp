@@ -6044,40 +6044,54 @@ bool Mob::TryFadeEffect(int slot)
 	return false;
 }
 
-void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
+void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 {
-	if(target == nullptr || !IsValidSpell(spell_id) || !IsClient())
+	if (!target || !IsValidSpell(spell_id) || !IsOfClientBotMerc()) {
 		return;
-
-	uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
-
-	if(!IsValidSpell(focus_spell))
-		return;
-
-	uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
-
-	if(!IsValidSpell(focus_trigger))
-		return;
-
-	// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
-	// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
-	if(IsBeneficialSpell(spell_id))
-	{
-		if(IsBeneficialSpell(focus_trigger))
-			SpellFinished(focus_trigger, target);
-
-		else
-			SpellFinished(focus_trigger, this, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
 	}
-	// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
-	// if the triggered spell is also detrimental, then it will land on the target
-	else
-	{
-		if(IsBeneficialSpell(focus_trigger))
-			SpellFinished(focus_trigger, this);
 
-		else
-			SpellFinished(focus_trigger, target, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
+	const uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc, spell_id);
+
+	if (!IsValidSpell(focus_spell)) {
+		return;
+	}
+
+	const uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
+
+	if (!IsValidSpell(focus_trigger)) {
+		return;
+	}
+
+	if (IsBeneficialSpell(spell_id)) {
+		// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
+		// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
+		if (IsBeneficialSpell(focus_trigger)) {
+			SpellFinished(focus_trigger, target);
+		} else {
+			SpellFinished(
+				focus_trigger,
+				this,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[focus_trigger].resist_difficulty
+			);
+		}
+	} else {
+		// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
+		// if the triggered spell is also detrimental, then it will land on the target
+		if (IsBeneficialSpell(focus_trigger)) {
+			SpellFinished(focus_trigger, this);
+		} else {
+			SpellFinished(
+				focus_trigger,
+				target,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[focus_trigger].resist_difficulty
+			);
+		}
 	}
 
 	CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
