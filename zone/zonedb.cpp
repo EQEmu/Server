@@ -3087,7 +3087,13 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 void ZoneDatabase::SaveAuras(Client *c)
 {
-	CharacterAurasRepository::DeleteOne(database, c->CharacterID());
+	CharacterAurasRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`id` = {}",
+			c->CharacterID()
+		)
+	);
 
 	std::vector<CharacterAurasRepository::CharacterAuras> v;
 
