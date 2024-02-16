@@ -333,7 +333,6 @@ namespace DatabaseSchema {
 			"group_leaders",
 			"instance_list",
 			"ip_exemptions",
-			"item_tick",
 			"lfguild",
 			"merc_buffs",
 			"merchantlist_temp",
