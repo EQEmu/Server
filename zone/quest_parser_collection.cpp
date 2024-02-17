@@ -831,7 +831,7 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}",
+		"{}/{}/v{}",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -888,7 +888,7 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}",
+		"{}/{}/v{}",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -988,7 +988,7 @@ QuestInterface* QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}/spells",
+		"{}/{}/v{}/spells",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -1040,7 +1040,7 @@ QuestInterface* QuestParserCollection::GetQIByItemQuest(std::string item_script,
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}/items",
+		"{}/{}/v{}/items",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -1092,7 +1092,7 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}/encounters",
+		"{}/{}/v{}/encounters",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -1142,7 +1142,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 	);
 
 	const std::string& zone_versioned_path = fmt::format(
-		"{}/{}_v{}",
+		"{}/{}/v{}",
 		path.GetQuestsPath(),
 		zone->GetShortName(),
 		zone->GetInstanceVersion()
@@ -1150,7 +1150,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 
 	std::vector<std::string> file_names = {
 		fmt::format("{}/bot", zone_versioned_path), // Local versioned by Instance Version ./quests/zone_v0/bot.ext
-		fmt::format("{}/bot_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
+		fmt::format("{}/bot/v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/bot", zone_path), // Local
 		fmt::format("{}/bot", global_path) // Global
 	};
