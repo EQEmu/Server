@@ -1150,7 +1150,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 
 	std::vector<std::string> file_names = {
 		fmt::format("{}/bot", zone_versioned_path), // Local versioned by Instance Version ./quests/zone_v0/bot.ext
-		fmt::format("{}/bot/v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
+		fmt::format("{}/bot_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/bot", zone_path), // Local
 		fmt::format("{}/bot", global_path) // Global
 	};
