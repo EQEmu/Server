@@ -27,7 +27,7 @@ namespace ContentFilterCriteria {
 		);
 
 		criteria += fmt::format(
-			" AND ({}max_expansion <= {} OR {}max_expansion = -1)",
+			" AND ({}max_expansion >= {} OR {}max_expansion = -1)",
 			table_prefix,
 			current_expansion_filter_criteria,
 			table_prefix
