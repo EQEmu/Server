@@ -146,6 +146,7 @@ namespace DatabaseSchema {
 			"friends",
 			"guild_bank",
 			"guild_members",
+			"guild_permissions",
 			"guild_ranks",
 			"guild_relations",
 			"guild_tributes",
