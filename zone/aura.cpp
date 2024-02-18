@@ -942,12 +942,12 @@ bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord& r)
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	strn0cpy(r.name, e.name.c_str(), sizeof(r.name));
 
 	r.npc_type   = e.npc_type;
-	r.spell_id   = spell_id;
+	r.spell_id   = e.spell_id;
 	r.distance   = e.distance * e.distance;
 	r.aura_type  = e.aura_type;
 	r.spawn_type = e.spawn_type;
