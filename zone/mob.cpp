@@ -5547,12 +5547,12 @@ bool Mob::ClearEntityVariables()
 		return false;
 	}
 
-	for (const auto& e : m_EntityVariables) {
-		if (
-			(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-			(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
-			(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
-		) {
+	if (
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
+	) {
+		for (const auto& e : m_EntityVariables) {
 			std::vector<std::any> args = { e.first, e.second };
 
 			if (IsBot()) {
