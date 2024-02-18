@@ -93,7 +93,7 @@ public:
 		e.group_id     = 0;
 		e.character_id = 0;
 		e.bot_id       = 0;
-		e.name         = "0";
+		e.name         = "";
 		e.is_merc      = 0;
 
 		return e;
@@ -134,7 +134,7 @@ public:
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "0";
+			e.name         = row[3] ? row[3] : "";
 			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			return e;
@@ -270,7 +270,7 @@ public:
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "0";
+			e.name         = row[3] ? row[3] : "";
 			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
@@ -299,7 +299,7 @@ public:
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "0";
+			e.name         = row[3] ? row[3] : "";
 			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
