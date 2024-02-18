@@ -313,12 +313,12 @@ int Perl__getinventoryslotid(std::string identifier)
 	return result;
 }
 
-void Perl__castspell(int spell_id, int target_id)
+void Perl__castspell(uint16 spell_id, uint16 target_id)
 {
 	quest_manager.castspell(spell_id, target_id);
 }
 
-void Perl__selfcast(int spell_id)
+void Perl__selfcast(uint16 spell_id)
 {
 	quest_manager.selfcast(spell_id);
 }

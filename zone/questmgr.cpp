@@ -396,19 +396,39 @@ void QuestManager::incstat(int stat, int value) {
 		initiator->IncStats(stat, value);
 }
 
-void QuestManager::castspell(int spell_id, int target_id) {
+void QuestManager::castspell(uint16 spell_id, uint16 target_id)
+{
 	QuestManagerCurrentQuestVars();
+
 	if (owner) {
-		Mob *tgt = entity_list.GetMob(target_id);
-		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
+		Mob* t = entity_list.GetMob(target_id);
+		if (t) {
+			owner->SpellFinished(
+				spell_id,
+				t,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[spell_id].resist_difficulty
+			);
+		}
 	}
 }
 
-void QuestManager::selfcast(int spell_id) {
+void QuestManager::selfcast(uint16 spell_id)
+{
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
+
+	if (initiator) {
+		initiator->SpellFinished(
+			spell_id,
+			initiator,
+			EQ::spells::CastingSlot::Item,
+			0,
+			-1,
+			spells[spell_id].resist_difficulty
+		);
+	}
 }
 
 void QuestManager::addloot(
