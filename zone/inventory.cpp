@@ -3276,7 +3276,7 @@ void Client::SendEdgeStatBulkUpdate()
 	itempacket->count = (int)(eStatMax) - 1;
 	for(int guava = 0; guava < eStatEntry::eStatMax - 1; guava++)
 	{
-		LogDebug("EdgePacket packing [{}] value [{}]", (eStatEntry)guava, GetStatValueEdgeType((eStatEntry)guava));
+		//LogDebug("EdgePacket packing [{}] value [{}]", (eStatEntry)guava, GetStatValueEdgeType((eStatEntry)guava));
 		itempacket->entries[guava].statKey = (eStatEntry)guava;
 		itempacket->entries[guava].statValue = GetStatValueEdgeType((eStatEntry)guava);
 	}
