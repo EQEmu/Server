@@ -5547,6 +5547,24 @@ bool Mob::ClearEntityVariables()
 		return false;
 	}
 
+	for (const auto& e : m_EntityVariables) {
+		if (
+			(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+			(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+			(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
+		) {
+			std::vector<std::any> args = { e.first, e.second };
+
+			if (IsBot()) {
+				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
+			} else if (IsClient()) {
+				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+			} else if (IsNPC()) {
+				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
+			}
+		}
+	}
+
 	m_EntityVariables.clear();
 	return true;
 }
@@ -5563,6 +5581,23 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 	}
 
 	m_EntityVariables.erase(v);
+
+	if (
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
+	) {
+		std::vector<std::any> args = { v->first, v->second };
+
+		if (IsBot()) {
+			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
+		} else if (IsClient()) {
+			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+		} else if (IsNPC()) {
+			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
+		}
+	}
+
 	return true;
 }
 
@@ -5612,6 +5647,24 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 {
 	if (variable_name.empty()) {
 		return;
+	}
+
+	QuestEventID event_id = EntityVariableExists(variable_name) ? EVENT_ENTITY_VARIABLE_UPDATE : EVENT_ENTITY_VARIABLE_SET;
+
+	if (
+		(IsBot() && parse->BotHasQuestSub(event_id)) ||
+		(IsClient() && parse->PlayerHasQuestSub(event_id)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), event_id))
+	) {
+		std::vector<std::any> args = { variable_name, variable_value };
+
+		if (IsBot()) {
+			parse->EventBot(event_id, CastToBot(), nullptr, "", 0, &args);
+		} else if (IsClient()) {
+			parse->EventPlayer(event_id, CastToClient(), "", 0, &args);
+		} else if (IsNPC()) {
+			parse->EventNPC(event_id, CastToNPC(), nullptr, "", 0, &args);
+		}
 	}
 
 	m_EntityVariables[variable_name] = variable_value;

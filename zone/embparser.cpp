@@ -197,6 +197,9 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_TIMER_RESUME",
 	"EVENT_TIMER_START",
 	"EVENT_TIMER_STOP",
+	"EVENT_ENTITY_VARIABLE_DELETE",
+	"EVENT_ENTITY_VARIABLE_SET",
+	"EVENT_ENTITY_VARIABLE_UPDATE",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -2420,6 +2423,17 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "ebon_amount", sep.arg[0]);
 			ExportVar(package_name.c_str(), "radiant_amount", sep.arg[1]);
 			ExportVar(package_name.c_str(), "is_reclaim", sep.arg[2]);
+			break;
+		}
+
+		case EVENT_ENTITY_VARIABLE_DELETE:
+		case EVENT_ENTITY_VARIABLE_SET:
+		case EVENT_ENTITY_VARIABLE_UPDATE: {
+			if (extra_pointers && extra_pointers->size() == 2) {
+				ExportVar(package_name.c_str(), "variable_name", std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+				ExportVar(package_name.c_str(), "variable_value", std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			}
+
 			break;
 		}
 

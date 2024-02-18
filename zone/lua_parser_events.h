@@ -240,6 +240,16 @@ void handle_npc_timer_stop(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_npc_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -808,6 +818,15 @@ void handle_player_timer_stop(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
@@ -1183,6 +1202,16 @@ void handle_bot_timer_pause_resume_start(
 );
 
 void handle_bot_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_entity_variable(
 	QuestInterface *parse,
 	lua_State* L,
 	Bot* bot,

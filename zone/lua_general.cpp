@@ -6661,6 +6661,9 @@ luabind::scope lua_register_events() {
 			luabind::value("timer_resume", static_cast<int>(EVENT_TIMER_RESUME)),
 			luabind::value("timer_start", static_cast<int>(EVENT_TIMER_START)),
 			luabind::value("timer_stop", static_cast<int>(EVENT_TIMER_STOP))
+			luabind::value("entity_variable_delete", static_cast<int>(EVENT_ENTITY_VARIABLE_DELETE)),
+			luabind::value("entity_variable_set", static_cast<int>(EVENT_ENTITY_VARIABLE_SET)),
+			luabind::value("entity_variable_update", static_cast<int>(EVENT_ENTITY_VARIABLE_UPDATE))
 		)];
 }
 

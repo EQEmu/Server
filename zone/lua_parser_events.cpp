@@ -584,6 +584,24 @@ void handle_npc_timer_stop(
 	lua_setfield(L, -2, "timer");
 }
 
+void handle_npc_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (extra_pointers && extra_pointers->size() == 2) {
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+		lua_setfield(L, -2, "variable_name");
+
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+		lua_setfield(L, -2, "variable_value");
+	}
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1596,6 +1614,23 @@ void handle_player_alt_currency_gain_loss(
 	lua_setfield(L, -2, "total");
 }
 
+void handle_player_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (extra_pointers && extra_pointers->size() == 2) {
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+		lua_setfield(L, -2, "variable_name");
+
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+		lua_setfield(L, -2, "variable_value");
+	}
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
@@ -2575,6 +2610,24 @@ void handle_bot_timer_stop(
 ) {
 	lua_pushstring(L, data.c_str());
 	lua_setfield(L, -2, "timer");
+}
+
+void handle_bot_entity_variable(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	if (extra_pointers && extra_pointers->size() == 2) {
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+		lua_setfield(L, -2, "variable_name");
+
+		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+		lua_setfield(L, -2, "variable_value");
+	}
 }
 
 #endif
