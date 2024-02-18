@@ -938,20 +938,18 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			aai->classes = 0xFFFFFFF;
 		} else {
 			aai->classes = ability->classes;
-			aai->grant_only = 1;
 		}	
 	} else {
 		if(!(ability->classes & (1 << GetClass()))) {
 			return;
 		}
 		aai->classes = ability->classes;
-		aai->grant_only = ability->grant_only;
 	}
 
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
-
+	
 	aai->id = rank->id;
 	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
 	aai->lower_hotkey_sid = rank->lower_hotkey_sid;
@@ -967,6 +965,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	aai->current_level = level;
 	aai->max_level = ability->GetMaxLevel(this);
 	aai->prev_id = rank->prev_id;
+	aai->grant_only = ability->grant_only;
 
 	if((rank->next && !CanUseAlternateAdvancementRank(rank->next)) || ability->charges > 0) {
 		aai->next_id = -1;
@@ -1082,9 +1081,9 @@ int Client::GetDynamicAATimer(int aa_id) {
         // Check if the bucket has a value before attempting conversion
         if (!bucketValue.empty()) {
             int value = std::stoi(bucketValue); // Convert string value to integer
-			LogDebug("Got TimerID: [{}]", value);
+			// LogDebug("Got TimerID: [{}]", value);
             if (value == aa_id) {
-				LogDebug("Returning TimerID: [{}] - [{}]", i, value);
+				// LogDebug("Returning TimerID: [{}] - [{}]", i, value);
                 return i; // Return the timer ID associated with aa_id
             }
         }

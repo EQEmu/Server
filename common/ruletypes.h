@@ -957,6 +957,7 @@ RULE_BOOL(Custom, BlockClassOnAccountProgression, true, "Enable to block classes
 RULE_BOOL(Custom, UseDynamicItemDiscoveryTags, true, "Enable appending Discovered By: items using the charmfile method")
 RULE_BOOL(Custom, UseDynamicAATimers, true, "Enable using dynamic AA timers")
 RULE_BOOL(Custom, ExpandedPetAffinity, true, "Allows Pet Affinity to force buffs to pet, even if they aren't group buffs, so long as that they aren't self-only")
+RULE_BOOL(Custom, DoItemUpgrades, true, "Retribution item upgrades")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

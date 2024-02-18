@@ -558,7 +558,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	}
 
 	// dodge
-	if (CanThisClassDodge() && (InFront || GetClass() == Class::Monk)) {
+	if (CanThisClassDodge() && (InFront || (GetClassesBits() & GetPlayerClassBit(Class::Monk)))) {
 		if (IsClient())
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillDodge, other, -10);
 		// check auto discs ... I guess aa/items too :P
@@ -926,7 +926,7 @@ int Mob::ACSum(bool skip_caps)
 	else {
 		LogCombatDetail("ACSum ac [{}]", ac);
 	}
-
+	
 	return ac;
 }
 
@@ -1083,7 +1083,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 				return 0;
 			}
 		}
-		else if ((GetClass() == Class::Monk || GetClass() == Class::Beastlord) && GetLevel() >= 30) {
+		else if ((GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Beastlord))) && GetLevel() >= 30) {
 			dmg = GetHandToHandDamage();
 		}
 		else {
@@ -1199,7 +1199,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 					MagicGloves = gloves->GetItemMagical(true);
 			}
 
-			if (GetClass() == Class::Monk || GetClass() == Class::Beastlord) {
+			if (GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Beastlord))) {
 				if (MagicGloves || GetLevel() >= 30) {
 					dmg = GetHandToHandDamage();
 					if (hate)
@@ -2018,7 +2018,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	/*
 	Reset reuse timer for classic skill based Lay on Hands (For tit I guess)
 	*/
-	if (GetClass() == Class::Paladin) { // we could check if it's not expired I guess, but should be fine not to
+	if (GetClassesBits() & GetPlayerClassBit(Class::Paladin)) { // we could check if it's not expired I guess, but should be fine not to
 		p_timers.Clear(&database, pTimerLayHands);
 	}
 
@@ -3435,14 +3435,14 @@ int Mob::GetHandToHandDamage(void)
 		7, 7, 7, 8, 8, 8, 8, 8, 8, 9,        // 21-30
 		9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 		10, 11, 11, 11, 11, 11, 11, 12, 12 }; // 41-49
-	if (GetClass() == Class::Monk) {
+	if (GetClassesBits() & GetPlayerClassBit(Class::Monk)) {
 		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
 		return mnk_dmg[level];
 	}
-	else if (GetClass() == Class::Beastlord) {
+	else if (GetClassesBits() & GetPlayerClassBit(Class::Beastlord)) {
 		if (level > 49)
 			return 13;
 		return bst_dmg[level];
@@ -3494,7 +3494,7 @@ int Mob::GetHandToHandDelay(void)
 		28, 28, 28, 27, 27, 27, 27, 27, 26, 26, // 61-70
 		26, 26, 26 };                            // 71-73
 
-	if (GetClass() == Class::Monk) {
+	if (GetClassesBits() & GetPlayerClassBit(Class::Monk)) {
 		// Have a look to see if we have epic fists on
 		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
 			return 16;
@@ -3503,7 +3503,7 @@ int Mob::GetHandToHandDelay(void)
 			return GetRace() == IKSAR ? 21 : 20;
 		return GetRace() == IKSAR ? mnk_iks_delay[level] : mnk_hum_delay[level];
 	}
-	else if (GetClass() == Class::Beastlord) {
+	else if (GetClassesBits() & GetPlayerClassBit(Class::Beastlord)) {
 		int level = GetLevel();
 		if (level > 73)
 			return 25;
@@ -3847,11 +3847,37 @@ bool Client::CheckDoubleAttack()
 	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
 
 	int32 bonus_double_attack = 0;
-	if ((GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (!HasTwoHanderEquipped())) {
-		LogCombatDetail("Knight class without a 2 hand weapon equipped = No DA Bonus!");
-	} else {
-		bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
-	}
+
+	bonus_double_attack = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
+
+	if ((GetClassesBits() & (GetPlayerClassBit(Class::Paladin) | GetPlayerClassBit(Class::ShadowKnight))) && (!HasTwoHanderEquipped())) {
+		LogCombatDetail("Knight class without a 2 hand weapon equipped. Negating Knight's Advantage");
+		auto da_negate = 0;
+		auto ka_rank = GetAAByAAID(188);  // Knight's Advantage
+		switch (ka_rank) {
+			case 561:
+				da_negate = 3;
+				break;
+			case 562:
+				da_negate = 6;
+				break;
+			case 563:
+				da_negate = 9;
+				break;
+			case 1624:
+				da_negate = 20;
+				break;
+			case 1625:
+				da_negate = 22;
+				break;
+			case 1626:
+				da_negate = 24;
+				break;
+			default:
+				da_negate = 0;
+				break;
+		}		
+	}		
 
 	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
 	if (skill) {
@@ -4261,7 +4287,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
-				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == Class::Warrior) {
+				(attacker->GetLevel() > 55 || attacker->IsNPC()) && (attacker->GetClassesBits() & GetPlayerClassBit(Class::Warrior))) {
 				can_stun = true;
 			}
 
@@ -4270,11 +4296,10 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsOfClientBotMerc()) {
 				if (
 					IsPlayerClass(GetClass()) &&
-					RuleI(Combat, FrontalStunImmunityClasses) & GetPlayerClassBit(GetClass())
+					RuleI(Combat, FrontalStunImmunityClasses) & GetClassesBits()
 				) {
 					is_immune_to_frontal_stun = true;
 				}
-
 
 				if (
 					(
@@ -5303,12 +5328,11 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	// We either require an innate crit chance or some SPA 169 to crit
 	bool innate_crit = false;
 	int crit_chance = GetCriticalChanceBonus(hit.skill);
-	if ((GetClass() == Class::Warrior || GetClass() == Class::Berserker) && GetLevel() >= 12)
+	if (((GetClassesBits() & (GetPlayerClassBit(Class::Warrior) | GetPlayerClassBit(Class::Berserker))) && GetLevel() >= 12) ||
+		(GetClassesBits() & GetPlayerClassBit(Class::Ranger) && GetLevel() >= 12 && hit.skill == EQ::skills::SkillArchery) ||
+		(GetClassesBits() & GetPlayerClassBit(Class::Rogue) && GetLevel() >= 12 && hit.skill == EQ::skills::SkillThrowing)) {
 		innate_crit = true;
-	else if (GetClass() == Class::Ranger && GetLevel() >= 12 && hit.skill == EQ::skills::SkillArchery)
-		innate_crit = true;
-	else if (GetClass() == Class::Rogue && GetLevel() >= 12 && hit.skill == EQ::skills::SkillThrowing)
-		innate_crit = true;
+	}
 
 	// we have a chance to crit!
 	if (innate_crit || crit_chance) {
@@ -5327,7 +5351,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		dex_bonus += 45; // chances did not match live without a small boost
 
 						 // so if we have an innate crit we have a better chance, except for ber throwing
-		if (!innate_crit || (GetClass() == Class::Berserker && hit.skill == EQ::skills::SkillThrowing))
+		if (!innate_crit || (GetClassesBits() & GetPlayerClassBit(Class::Berserker)) && hit.skill == EQ::skills::SkillThrowing)
 			dex_bonus = dex_bonus * 3 / 5;
 
 		if (crit_chance)
@@ -5351,7 +5375,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 			LogCombat("Crit success roll [{}] dex chance [{}] og dmg [{}] crit_mod [{}] new dmg [{}]", roll, dex_bonus, og_damage, crit_mod, hit.damage_done);
 
 			// step 3: check deadly strike
-			if (GetClass() == Class::Rogue && hit.skill == EQ::skills::SkillThrowing) {
+			if ((GetClassesBits() & GetPlayerClassBit(Class::Rogue)) && hit.skill == EQ::skills::SkillThrowing) {
 				if (BehindMob(defender, GetX(), GetY())) {
 					int chance = GetLevel() * 12;
 					if (zone->random.Int(1, 1000) < chance) {
@@ -5541,10 +5565,10 @@ void Mob::DoRiposte(Mob *defender)
 	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 		LogCombat("Preforming a return SPECIAL ATTACK ([{}] percent chance)", DoubleRipChance);
 
-		if (defender->GetClass() == Class::Monk)
-			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL]);
-		else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
-			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL], true);
+	if (defender->GetClassesBits() & GetPlayerClassBit(Class::Monk))
+		defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL]);
+	else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
+		defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[SBIndex::DOUBLE_RIPOSTE_SKILL], true);
 	}
 }
 
@@ -5559,10 +5583,10 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int64 &damage, Mob *defender, Extra
 	}
 
 	if (defender) {
-		if (defender->IsOfClientBotMerc() && defender->GetClass() == Class::Warrior) {
+		if (defender->IsOfClientBotMerc() && (defender->GetClassesBits() & GetPlayerClassBit(Class::Warrior))) {
 			damage_bonus_mod -= 5;
 		}
-
+		
 		if (defender->IsOfClientBotMerc()) {
 			damage_bonus_mod += (
 				defender->spellbonuses.MeleeMitigationEffect +
@@ -5707,7 +5731,7 @@ const DamageTable &Mob::GetDamageTable() const
 		{ 415, 15,  40 }, // 105
 	};
 
-	bool monk = GetClass() == Class::Monk;
+	bool monk = GetClassesBits() & GetPlayerClassBit(Class::Monk);
 	bool melee = IsWarriorClass();
 	// tables caped at 105 for now -- future proofed for a while at least :P
 	int level = std::min(static_cast<int>(GetLevel()), 105);
@@ -6168,7 +6192,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		if (headshot > 0) {
 			hit.damage_done = headshot;
 		}
-		else if (GetClass() == Class::Ranger && GetLevel() > 50) { // no double dmg on headshot
+		else if ((GetClassesBits() & GetPlayerClassBit(Class::Ranger)) && GetLevel() > 50) { // no double dmg on headshot
 			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
 				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
@@ -6193,7 +6217,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 				hit.damage_done = ass;
 		}
 	}
-	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == Class::Berserker && GetLevel() > 50) {
+	else if (hit.skill == EQ::skills::SkillFrenzy && (GetClassesBits() & GetPlayerClassBit(Class::Berserker)) && GetLevel() > 50) {
 		extra_mincap = 4 * GetLevel() / 5;
 	}
 

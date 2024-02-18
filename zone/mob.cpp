@@ -4571,6 +4571,19 @@ bool Mob::CanThisClassTripleAttack() const
 	}
 }
 
+uint32 Mob::GetClassesBits() const
+{
+	if (IsClient()) {
+		return CastToClient()->GetClassesBits();
+	} else {
+		if (IsPlayerClass(GetClass())) {
+			return GetPlayerClassBit(GetClass());
+		} else {
+			return 0;
+		}
+	}
+}
+
 bool Mob::IsWarriorClass(void) const {
     if (IsClient() && RuleB(Custom, MulticlassingEnabled)) {
         int classes_bits = CastToClient()->GetClassesBits();
@@ -5187,11 +5200,11 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
 
 	if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
-	    (GetClass() == Class::Ranger || GetClass() == Class::ShadowKnight || GetClass() == Class::Paladin || GetClass() == Class::Beastlord)) {
+		(GetClassesBits() & (GetPlayerClassBit(Class::Ranger) | GetPlayerClassBit(Class::ShadowKnight) | GetPlayerClassBit(Class::Paladin) | GetPlayerClassBit(Class::Beastlord)))) {
 		int level_mod = std::min(15, GetLevel() - 50);
 		cast_reducer += level_mod * 3;
 	}
-
+	
 	cast_reducer = std::min(cast_reducer, 50);  //Max cast time with focusSpellHaste and level reducer is 50% of cast time.
 	cast_reducer += cast_reducer_no_limit;
 	casttime = casttime * (100 - cast_reducer) / 100;

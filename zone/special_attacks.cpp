@@ -292,7 +292,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
 	if (
-		(spellend_timer.Enabled() && GetClass() != Class::Bard) ||
+		(spellend_timer.Enabled() && (GetClass() != Class::Bard) || RuleB(Custom, MulticlassingEnabled)) || 
 		IsFeared() ||
 		IsStunned() ||
 		IsMezzed() ||
@@ -425,7 +425,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		DoAnim(anim1HWeapon, 0, false);
 
-		if (GetClass() == Class::Berserker || RuleB(Custom, MulticlassingEnabled)) {
+		if (GetClassesBits() & GetPlayerClassBit(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 
 			if (zone->random.Roll0(450) < chance) {
@@ -465,15 +465,12 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	// Warrior, Ranger, Monk, Beastlord, and Berserker can kick always
 	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClassesBitmask);
 
-	const bool can_use_kick = (
-		class_id == Class::Warrior ||
-		class_id == Class::Ranger ||
-		class_id == Class::Monk ||
-		class_id == Class::Beastlord ||
-		class_id == Class::Berserker ||
-		allowed_kick_classes & GetPlayerClassBit(class_id ||
-		RuleB(Custom, MulticlassingEnabled) ? GetClassesBits() : 0)
-	);
+	const bool can_use_kick = (GetClassesBits() & ((GetPlayerClassBit(Class::Warrior) | 
+													GetPlayerClassBit(Class::Ranger) | 
+													GetPlayerClassBit(Class::Monk) | 
+													GetPlayerClassBit(Class::Beastlord) | 
+													GetPlayerClassBit(Class::Berserker) | 
+													allowed_kick_classes)));
 
 	bool found_skill = false;
 
@@ -500,7 +497,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		}
 	}
 
-	if ((class_id == Class::Monk || RuleB(Custom, MulticlassingEnabled)) &&
+	if ((GetClassesBits() & GetPlayerClassBit(Class::Monk)) &&
 		(ca_atk->m_skill == EQ::skills::SkillFlyingKick ||
 		 ca_atk->m_skill == EQ::skills::SkillDragonPunch ||
 		 ca_atk->m_skill == EQ::skills::SkillEagleStrike ||
@@ -571,7 +568,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (
 		ca_atk->m_atk == 100 &&
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
-		(class_id == Class::Rogue || RuleB(Custom, MulticlassingEnabled))
+		((GetClassesBits() & GetPlayerClassBit(Class::Rogue)))
 	) {
 		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 		TryBackstab(GetTarget(), reuse_time);

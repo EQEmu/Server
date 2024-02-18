@@ -1099,9 +1099,10 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		LogTradeskills("Tradeskill success");
 
 		itr = spec->onsuccess.begin();
+		
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 
-			item = database.GetItem(itr->first);
+			item = database.GetItem(GetApocItemUpgrade(itr->first));
 			if (item) {
 				SummonItem(itr->first, itr->second);
 				if (GetGroup()) {

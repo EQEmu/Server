@@ -636,7 +636,23 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	m_epp->last_invsnapshot_time = e.e_last_invsnapshot;
 	m_epp->next_invsnapshot_time = m_epp->last_invsnapshot_time + (RuleI(Character, InvSnapshotMinIntervalM) * 60);
 
-	pp->classes = GetPlayerClassBit(pp->class_);
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		std::string query = StringFormat("SELECT `value` FROM `data_buckets` WHERE `key` = 'GestaltClasses' AND `character_id` = %d", character_id);
+		auto results = database.QueryDatabase(query);
+		bool found = false;
+
+		for (auto& row = results.begin(); row != results.end(); ++row) {
+			if (row[0]) { 
+				pp->classes = static_cast<uint32>(Strings::ToInt(row[0]));
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
+			pp->classes = GetPlayerClassBit(pp->class_);
+		}
+	}
 
 	return true;
 }

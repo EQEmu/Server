@@ -1131,7 +1131,7 @@ int32	Client::CalcMR()
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
+	if (GetClassesBits() & (GetPlayerClassBit(Class::Warrior) | GetPlayerClassBit(Class::Berserker))) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1765,7 +1765,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 	int weight_limit = GetSTR();
 	auto level = GetLevel();
-	if (GetClass() == Class::Monk) {
+	if (GetClass() == Class::Monk && !RuleB(Custom, MulticlassingEnabled)) {
 		if (level > 99)
 			weight_limit = 58;
 		else if (level > 94)
