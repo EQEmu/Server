@@ -592,13 +592,25 @@ void handle_npc_entity_variable(
 	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
-) {
-	if (extra_pointers && extra_pointers->size() == 2) {
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
-		lua_setfield(L, -2, "variable_name");
+)
+{
+	if (extra_pointers) {
+		if (extra_pointers->size() == 2) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
 
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
-		lua_setfield(L, -2, "variable_value");
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "variable_value");
+		} else if (extra_pointers->size() == 3) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "old_value");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(2)).c_str());
+			lua_setfield(L, -2, "new_value");
+		}
 	}
 }
 
@@ -1621,13 +1633,25 @@ void handle_player_entity_variable(
 	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
-) {
-	if (extra_pointers && extra_pointers->size() == 2) {
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
-		lua_setfield(L, -2, "variable_name");
+)
+{
+	if (extra_pointers) {
+		if (extra_pointers->size() == 2) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
 
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
-		lua_setfield(L, -2, "variable_value");
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "variable_value");
+		} else if (extra_pointers->size() == 3) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "old_value");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(2)).c_str());
+			lua_setfield(L, -2, "new_value");
+		}
 	}
 }
 
@@ -2620,13 +2644,25 @@ void handle_bot_entity_variable(
 	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
-) {
-	if (extra_pointers && extra_pointers->size() == 2) {
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
-		lua_setfield(L, -2, "variable_name");
+)
+{
+	if (extra_pointers) {
+		if (extra_pointers->size() == 2) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
 
-		lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
-		lua_setfield(L, -2, "variable_value");
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "variable_value");
+		} else if (extra_pointers->size() == 3) {
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(0)).c_str());
+			lua_setfield(L, -2, "variable_name");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(1)).c_str());
+			lua_setfield(L, -2, "old_value");
+
+			lua_pushstring(L, std::any_cast<std::string>(extra_pointers->at(2)).c_str());
+			lua_setfield(L, -2, "new_value");
+		}
 	}
 }
 
