@@ -2169,7 +2169,6 @@ bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::Sp
 #include "bot_commands/send_home.cpp"
 #include "bot_commands/size.cpp"
 #include "bot_commands/spell.cpp"
-#include "bot_commands/stop_melee_level.cpp"
 #include "bot_commands/summon.cpp"
 #include "bot_commands/summon_corpse.cpp"
 #include "bot_commands/suspend.cpp"
