@@ -60,7 +60,7 @@ SharedTaskRequest SharedTask::GetRequestCharacters(Database &db, uint32_t reques
 	request.group_type = SharedTaskRequestGroupType::Group;
 	auto characters = CharacterDataRepository::GetWhere(
 		db, fmt::format(
-			"id IN (select charid from group_id where groupid = (select groupid from group_id where charid = {}))",
+			"id IN (select charid from group_id where group_id = (select group_id from group_id where charid = {}))",
 			requested_character_id
 		)
 	);

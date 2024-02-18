@@ -5462,7 +5462,7 @@ bool Merc::MercJoinClientGroup() {
 
 			if (AddMercToGroup(this, g))
 			{
-				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID(), false);
+				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID());
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
 				database.RefreshGroupFromDB(mercOwner);
 				g->SaveGroupLeaderAA();

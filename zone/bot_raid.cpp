@@ -98,7 +98,7 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 			auto r_group_members = GetRaidGroupMembers(GetGroup(b->GetName()));
 			auto g = new Group(b);
 			entity_list.AddGroup(g);
-			database.SetGroupID(b->GetCleanName(), g->GetID(), b->GetBotID());
+			database.SetGroupID(b->GetCleanName(), g->GetID(), 0, b->GetBotID());
 			database.SetGroupLeaderName(g->GetID(), b->GetName());
 
 			for (auto m: r_group_members) {

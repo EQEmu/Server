@@ -2649,7 +2649,7 @@ void ZoneDatabase::RefreshGroupFromDB(Client *client){
 	int index = 0;
 
 	auto query = fmt::format(
-		"SELECT name FROM group_id WHERE groupid = {}",
+		"SELECT name FROM group_id WHERE group_id = {}",
 		group->GetID()
 	);
 	auto results = QueryDatabase(query);

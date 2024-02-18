@@ -1531,7 +1531,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		}	//else, somebody from our group is already here...
 
 		if (!group)
-			database.SetGroupID(GetName(), 0, CharacterID(), false);	//cannot re-establish group, kill it
+			database.SetGroupID(GetName(), 0, CharacterID());	//cannot re-establish group, kill it
 
 	}
 	else {	//no group id
@@ -7189,7 +7189,7 @@ void Client::Handle_OP_GroupCancelInvite(const EQApplicationPacket *app)
 
 	if (!GetMerc())
 	{
-		database.SetGroupID(GetName(), 0, CharacterID(), false);
+		database.SetGroupID(GetName(), 0, CharacterID());
 	}
 	return;
 }
