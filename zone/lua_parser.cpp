@@ -175,7 +175,11 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_alt_currency_gain",
 	"event_alt_currency_loss",
 	"event_crystal_gain",
-	"event_crystal_loss"
+	"event_crystal_loss",
+	"event_timer_pause",
+	"event_timer_resume",
+	"event_timer_start",
+	"event_timer_stop",
 };
 
 extern Zone *zone;
@@ -242,6 +246,10 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]    = handle_npc_damage;
 	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]    = handle_npc_damage;
 	NPCArgumentDispatch[EVENT_LOOT_ADDED]      = handle_npc_loot_added;
+	NPCArgumentDispatch[EVENT_TIMER_PAUSE]     = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_RESUME]    = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_START]     = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_STOP]      = handle_npc_timer_stop;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
@@ -322,6 +330,10 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_LOSS]          = handle_player_alt_currency_gain_loss;
 	PlayerArgumentDispatch[EVENT_CRYSTAL_GAIN]               = handle_player_crystal_gain_loss;
 	PlayerArgumentDispatch[EVENT_CRYSTAL_LOSS]               = handle_player_crystal_gain_loss;
+	PlayerArgumentDispatch[EVENT_TIMER_PAUSE]                = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_RESUME]               = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_START]                = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_STOP]                 = handle_player_timer_stop;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -334,6 +346,10 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM]  = handle_item_augment;
 	ItemArgumentDispatch[EVENT_AUGMENT_INSERT]  = handle_item_augment_insert;
 	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE]  = handle_item_augment_remove;
+	ItemArgumentDispatch[EVENT_TIMER_PAUSE]     = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_RESUME]    = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_START]     = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_STOP]      = handle_item_timer_stop;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT]               = handle_spell_event;
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT]      = handle_spell_event;
@@ -365,6 +381,10 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]     = handle_bot_damage;
 	BotArgumentDispatch[EVENT_LEVEL_UP]         = handle_bot_level_up;
 	BotArgumentDispatch[EVENT_LEVEL_DOWN]       = handle_bot_level_down;
+	BotArgumentDispatch[EVENT_TIMER_PAUSE]      = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_RESUME]     = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_START]      = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_STOP]       = handle_bot_timer_stop;
 #endif
 
 	L = nullptr;

@@ -299,35 +299,35 @@ void lua_disable_spawn2(int spawn2_id) {
 	quest_manager.disable_spawn2(spawn2_id);
 }
 
-void lua_set_timer(const char *timer, int time_ms) {
+void lua_set_timer(std::string timer, uint32 time_ms) {
 	quest_manager.settimerMS(timer, time_ms);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_ItemInst inst) {
+void lua_set_timer(std::string timer, uint32 time_ms, Lua_ItemInst inst) {
 	quest_manager.settimerMS(timer, time_ms, inst);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
+void lua_set_timer(std::string timer, uint32 time_ms, Lua_Mob mob) {
 	quest_manager.settimerMS(timer, time_ms, mob);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_Encounter enc) {
+void lua_set_timer(std::string timer, uint32 time_ms, Lua_Encounter enc) {
 	quest_manager.settimerMS(timer, time_ms, enc);
 }
 
-void lua_stop_timer(const char *timer) {
+void lua_stop_timer(std::string timer) {
 	quest_manager.stoptimer(timer);
 }
 
-void lua_stop_timer(const char *timer, Lua_ItemInst inst) {
+void lua_stop_timer(std::string timer, Lua_ItemInst inst) {
 	quest_manager.stoptimer(timer, inst);
 }
 
-void lua_stop_timer(const char *timer, Lua_Mob mob) {
+void lua_stop_timer(std::string timer, Lua_Mob mob) {
 	quest_manager.stoptimer(timer, mob);
 }
 
-void lua_stop_timer(const char *timer, Lua_Encounter enc) {
+void lua_stop_timer(std::string timer, Lua_Encounter enc) {
 	quest_manager.stoptimer(timer, enc);
 }
 
@@ -347,27 +347,27 @@ void lua_stop_all_timers(Lua_Encounter enc) {
 	quest_manager.stopalltimers(enc);
 }
 
-void lua_pause_timer(const char *timer) {
+void lua_pause_timer(std::string timer) {
 	quest_manager.pausetimer(timer);
 }
 
-void lua_resume_timer(const char *timer) {
+void lua_resume_timer(std::string timer) {
 	quest_manager.resumetimer(timer);
 }
 
-bool lua_is_paused_timer(const char *timer) {
+bool lua_is_paused_timer(std::string timer) {
 	return quest_manager.ispausedtimer(timer);
 }
 
-bool lua_has_timer(const char *timer) {
+bool lua_has_timer(std::string timer) {
 	return quest_manager.hastimer(timer);
 }
 
-uint32 lua_get_remaining_time(const char *timer) {
+uint32 lua_get_remaining_time(std::string timer) {
 	return quest_manager.getremainingtimeMS(timer);
 }
 
-uint32 lua_get_timer_duration(const char *timer) {
+uint32 lua_get_timer_duration(std::string timer) {
 	return quest_manager.gettimerdurationMS(timer);
 }
 
@@ -5623,20 +5623,20 @@ luabind::scope lua_register_general() {
 		luabind::def("spawn_from_spawn2", (Lua_Mob(*)(uint32))&lua_spawn_from_spawn2),
 		luabind::def("enable_spawn2", &lua_enable_spawn2),
 		luabind::def("disable_spawn2", &lua_disable_spawn2),
-		luabind::def("has_timer", (bool(*)(const char*))&lua_has_timer),
-		luabind::def("get_remaining_time", (uint32(*)(const char*))&lua_get_remaining_time),
-		luabind::def("get_timer_duration", (uint32(*)(const char*))&lua_get_timer_duration),
-		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter))&lua_set_timer),
-		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_Encounter))&lua_stop_timer),
-		luabind::def("pause_timer", (void(*)(const char*))&lua_pause_timer),
-		luabind::def("resume_timer", (void(*)(const char*))&lua_resume_timer),
-		luabind::def("is_paused_timer", (bool(*)(const char*))&lua_is_paused_timer),
+		luabind::def("has_timer", (bool(*)(std::string))&lua_has_timer),
+		luabind::def("get_remaining_time", (uint32(*)(std::string))&lua_get_remaining_time),
+		luabind::def("get_timer_duration", (uint32(*)(std::string))&lua_get_timer_duration),
+		luabind::def("set_timer", (void(*)(std::string, uint32))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(std::string, uint32, Lua_ItemInst))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(std::string, uint32, Lua_Mob))&lua_set_timer),
+		luabind::def("set_timer", (void(*)(std::string, uint32, Lua_Encounter))&lua_set_timer),
+		luabind::def("stop_timer", (void(*)(std::string))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(std::string, Lua_ItemInst))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(std::string, Lua_Mob))&lua_stop_timer),
+		luabind::def("stop_timer", (void(*)(std::string, Lua_Encounter))&lua_stop_timer),
+		luabind::def("pause_timer", (void(*)(std::string))&lua_pause_timer),
+		luabind::def("resume_timer", (void(*)(std::string))&lua_resume_timer),
+		luabind::def("is_paused_timer", (bool(*)(std::string))&lua_is_paused_timer),
 		luabind::def("stop_all_timers", (void(*)(void))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_ItemInst))&lua_stop_all_timers),
 		luabind::def("stop_all_timers", (void(*)(Lua_Mob))&lua_stop_all_timers),
@@ -6656,7 +6656,11 @@ luabind::scope lua_register_events() {
 			luabind::value("alt_currency_gain", static_cast<int>(EVENT_ALT_CURRENCY_GAIN)),
 			luabind::value("alt_currency_loss", static_cast<int>(EVENT_ALT_CURRENCY_LOSS)),
 			luabind::value("crystal_gain", static_cast<int>(EVENT_CRYSTAL_GAIN)),
-			luabind::value("crystal_loss", static_cast<int>(EVENT_CRYSTAL_LOSS))
+			luabind::value("crystal_loss", static_cast<int>(EVENT_CRYSTAL_LOSS)),
+			luabind::value("timer_pause", static_cast<int>(EVENT_TIMER_PAUSE)),
+			luabind::value("timer_resume", static_cast<int>(EVENT_TIMER_RESUME)),
+			luabind::value("timer_start", static_cast<int>(EVENT_TIMER_START)),
+			luabind::value("timer_stop", static_cast<int>(EVENT_TIMER_STOP))
 		)];
 }
 
