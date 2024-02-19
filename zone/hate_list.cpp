@@ -73,20 +73,18 @@ void HateList::WipeHateList(bool npc_only) {
 	}
 }
 
-bool HateList::IsEntOnHateList(Mob *mob)
+bool HateList::IsEntOnHateList(Mob* m)
 {
-	if (Find(mob))
-		return true;
-	return false;
+	return m ? Find(m) != nullptr : false;
 }
 
 struct_HateList* HateList::Find(Mob* m)
 {
-	if (!m) {
+	if (!m || list.empty()) {
 		return nullptr;
 	}
 
-	for (auto* e : list) {
+	for (auto e : list) {
 		if (e->entity_on_hatelist && e->entity_on_hatelist == m) {
 			return e;
 		}

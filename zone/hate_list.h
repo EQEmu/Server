@@ -48,7 +48,7 @@ public:
 	Mob *GetMobWithMostHateOnList(bool skip_mezzed = false);
 	Mob *GetEscapingMobOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
-	bool IsEntOnHateList(Mob *mob);
+	bool IsEntOnHateList(Mob* m);
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
 
