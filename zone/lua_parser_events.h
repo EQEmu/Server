@@ -220,6 +220,26 @@ void handle_npc_loot_added(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_npc_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_npc_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -770,6 +790,24 @@ void handle_player_crystal_gain_loss(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_player_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
@@ -860,6 +898,28 @@ void handle_item_augment_remove(
 );
 
 void handle_item_null(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	EQ::ItemInstance* item,
+	Mob *mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_item_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	EQ::ItemInstance* item,
+	Mob *mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_item_timer_stop(
 	QuestInterface *parse,
 	lua_State* L,
 	Client* client,
@@ -1103,6 +1163,26 @@ void handle_bot_level_up(
 );
 
 void handle_bot_level_down(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob* init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_bot_timer_stop(
 	QuestInterface *parse,
 	lua_State* L,
 	Bot* bot,

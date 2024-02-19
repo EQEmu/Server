@@ -193,6 +193,10 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ALT_CURRENCY_LOSS",
 	"EVENT_CRYSTAL_GAIN",
 	"EVENT_CRYSTAL_LOSS",
+	"EVENT_TIMER_PAUSE",
+	"EVENT_TIMER_RESUME",
+	"EVENT_TIMER_START",
+	"EVENT_TIMER_STOP",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -1668,8 +1672,18 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_TIMER: {
+		case EVENT_TIMER:
+		case EVENT_TIMER_STOP: {
 			ExportVar(package_name.c_str(), "timer", data);
+			break;
+		}
+
+		case EVENT_TIMER_PAUSE:
+		case EVENT_TIMER_RESUME:
+		case EVENT_TIMER_START: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "timer", sep.arg[0]);
+			ExportVar(package_name.c_str(), "duration", sep.arg[1]);
 			break;
 		}
 

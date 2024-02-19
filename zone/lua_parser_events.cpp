@@ -553,6 +553,37 @@ void handle_npc_loot_added(
 	}
 }
 
+void handle_npc_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "timer");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "duration");
+}
+
+void handle_npc_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1731,6 +1762,39 @@ void handle_item_null(
 ) {
 }
 
+void handle_item_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	EQ::ItemInstance* item,
+	Mob *mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "timer");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "duration");
+}
+
+void handle_item_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	EQ::ItemInstance* item,
+	Mob *mob,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
+}
+
 // Spell
 void handle_spell_event(
 	QuestInterface *parse,
@@ -2059,6 +2123,35 @@ void handle_player_augment_remove(
 
 	lua_pushboolean(L, Strings::ToBool(sep.arg[4]));
 	lua_setfield(L, -2, "destroyed");
+}
+
+void handle_player_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "timer");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "duration");
+}
+
+void handle_player_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
 }
 
 // Bot
@@ -2451,6 +2544,37 @@ void handle_bot_level_down(
 ) {
 	lua_pushinteger(L, Strings::ToInt(data));
 	lua_setfield(L, -2, "levels_lost");
+}
+
+void handle_bot_timer_pause_resume_start(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	Seperator sep(data.c_str());
+
+	lua_pushstring(L, sep.arg[0]);
+	lua_setfield(L, -2, "timer");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "duration");
+}
+
+void handle_bot_timer_stop(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushstring(L, data.c_str());
+	lua_setfield(L, -2, "timer");
 }
 
 #endif
