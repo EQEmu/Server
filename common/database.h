@@ -260,16 +260,6 @@ public:
 	bool SetVariable(const std::string& name, const std::string& value);
 	bool LoadVariables();
 
-	/* General Queries */
-	bool GetZoneGraveyard(
-		const uint32 graveyard_id,
-		uint32* graveyard_zoneid = 0,
-		float* graveyard_x = 0,
-		float* graveyard_y = 0,
-		float* graveyard_z = 0,
-		float* graveyard_heading = 0
-	);
-
 	uint8 GetPEQZone(uint32 zone_id, uint32 version);
 	uint32 GetServerType();
 	void AddReport(const std::string& who, const std::string& against, const std::string& lines);

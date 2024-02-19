@@ -131,7 +131,7 @@ uint32 Database::CheckLogin(
 	const auto& l = AccountRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`name` = '{}' AND `ls_id` = {} AND `password` IS NOT NULL AND LENGTH(`password`) > 0 AND (`password` = '{}' OR `password` = MD5('{}'))",
+			"`name` = '{}' AND `ls_id` = '{}' AND `password` IS NOT NULL AND LENGTH(`password`) > 0 AND (`password` = '{}' OR `password` = MD5('{}'))",
 			Strings::Escape(name),
 			Strings::Escape(loginserver),
 			Strings::Escape(password),
@@ -224,10 +224,11 @@ uint32 Database::CreateAccount(
 
 	e.name          = name;
 	e.status        = status;
+	e.ls_id         = loginserver;
 	e.lsaccount_id  = lsaccount_id;
 	e.time_creation = std::time(nullptr);
 
-	if (!Strings::EqualFold(password, std::to_string(0))) {
+	if (!password.empty()) {
 		e.password = password;
 	}
 
@@ -612,7 +613,7 @@ uint32 Database::GetAccountIDByName(const std::string& account_name, const std::
 	const auto& l = AccountRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`name` = '{}' AND `ls_id` = '{}'",
+			"`name` = '{}' AND `ls_id` = '{}' LIMIT 1",
 			Strings::Escape(account_name),
 			Strings::Escape(loginserver)
 		)
@@ -791,44 +792,6 @@ void Database::SetAccountCRCField(uint32 account_id, const std::string& field_na
 	}
 
 	AccountRepository::UpdateOne(*this, e);
-}
-
-bool Database::GetZoneGraveyard(
-	const uint32 graveyard_id,
-	uint32* graveyard_zoneid,
-	float* graveyard_x,
-	float* graveyard_y,
-	float* graveyard_z,
-	float* graveyard_heading
-)
-{
-	const auto& e = GraveyardRepository::FindOne(*this, graveyard_id);
-
-	if (!e.id) {
-		return false;
-	}
-
-	if (graveyard_zoneid) {
-		*graveyard_zoneid = e.zone_id;
-	}
-
-	if (graveyard_x) {
-		*graveyard_x = e.x;
-	}
-
-	if (graveyard_y) {
-		*graveyard_y = e.y;
-	}
-
-	if (graveyard_z) {
-		*graveyard_z = e.z;
-	}
-
-	if (graveyard_heading) {
-		*graveyard_heading = e.heading;
-	}
-
-	return true;
 }
 
 uint8 Database::GetPEQZone(uint32 zone_id, uint32 version)

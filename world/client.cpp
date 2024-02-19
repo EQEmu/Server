@@ -54,6 +54,7 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/group_id_repository.h"
+#include "../common/repositories/character_data_repository.h"
 
 #include <iostream>
 #include <iomanip>
@@ -765,9 +766,15 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	auto ew = (EnterWorld_Struct *) app->pBuffer;
 	strn0cpy(char_name, ew->name, sizeof(char_name));
 
-	uint32 temporary_account_id = 0;
-	charid = database.GetCharacterInfo(char_name, &temporary_account_id, &zone_id, &instance_id);
-	if (!charid) {
+	const auto& l = CharacterDataRepository::GetWhere(
+		database,
+		fmt::format(
+			"`name` = '{}' LIMIT 1",
+			Strings::Escape(char_name)
+		)
+	);
+
+	if (l.empty()) {
 		LogInfo("Could not get CharInfo for [{}]", char_name);
 		eqs->Close();
 		return true;
@@ -785,12 +792,22 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		instance_id = r.instance.id;
 	}
 
+	const auto& e = l.front();
+
 	// Make sure this account owns this character
-	if (temporary_account_id != account_id) {
-		LogInfo("Account [{}] does not own the character named [{}] from account [{}]", account_id, char_name, temporary_account_id);
+	if (e.account_id != account_id) {
+		LogInfo(
+			"Account [{}] does not own the character named [{}] from account [{}]",
+			account_id,
+			char_name,
+			e.account_id
+		);
 		eqs->Close();
 		return true;
 	}
+
+	zone_id     = e.zone_id;
+	instance_id = e.zone_instance;
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
