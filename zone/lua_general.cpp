@@ -5406,6 +5406,16 @@ std::string lua_convert_money_to_string(luabind::adl::object table)
 	return Strings::Money(platinum, gold, silver, copper);
 }
 
+void lua_cast_spell(uint16 spell_id, uint16 target_id)
+{
+	quest_manager.castspell(spell_id, target_id);
+}
+
+void lua_self_cast(uint16 spell_id)
+{
+	quest_manager.selfcast(spell_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6187,6 +6197,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_spell_resurrection_sickness_check", &lua_get_spell_resurrection_sickness_check),
 		luabind::def("get_spell_nimbus_effect", &lua_get_spell_nimbus_effect),
 		luabind::def("convert_money_to_string", &lua_convert_money_to_string),
+		luabind::def("cast_spell", &lua_cast_spell),
+		luabind::def("self_cast", &lua_self_cast),
 		/*
 			Cross Zone
 		*/
