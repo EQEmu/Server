@@ -2426,8 +2426,8 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_ENTITY_VARIABLE_CREATED:
-		case EVENT_ENTITY_VARIABLE_DELETED: {
+		case EVENT_ENTITY_VARIABLE_DELETE:
+		case EVENT_ENTITY_VARIABLE_SET: {
 			if (extra_pointers && extra_pointers->size() == 2) {
 				ExportVar(package_name.c_str(), "variable_name", std::any_cast<std::string>(extra_pointers->at(0)).c_str());
 				ExportVar(package_name.c_str(), "variable_value", std::any_cast<std::string>(extra_pointers->at(1)).c_str());
@@ -2436,7 +2436,7 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
-		case EVENT_ENTITY_VARIABLE_UPDATED: {
+		case EVENT_ENTITY_VARIABLE_UPDATE: {
 			if (extra_pointers && extra_pointers->size() == 3) {
 				ExportVar(package_name.c_str(), "variable_name", std::any_cast<std::string>(extra_pointers->at(0)).c_str());
 				ExportVar(package_name.c_str(), "old_value", std::any_cast<std::string>(extra_pointers->at(1)).c_str());

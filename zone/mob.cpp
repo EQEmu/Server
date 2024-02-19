@@ -5646,8 +5646,8 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 
 	const QuestEventID event_id = (
 		!EntityVariableExists(variable_name) ?
-		EVENT_ENTITY_VARIABLE_CREATED :
-		EVENT_ENTITY_VARIABLE_UPDATED
+		EVENT_ENTITY_VARIABLE_SET :
+		EVENT_ENTITY_VARIABLE_UPDATE
 	);
 
 	if (
@@ -5657,7 +5657,7 @@ void Mob::SetEntityVariable(std::string variable_name, std::string variable_valu
 	) {
 		std::vector<std::any> args;
 
-		if (event_id != EVENT_ENTITY_VARIABLE_UPDATED) {
+		if (event_id != EVENT_ENTITY_VARIABLE_UPDATE) {
 			args = { variable_name, variable_value };
 		} else {
 			args = { variable_name, GetEntityVariable(variable_name), variable_value };
