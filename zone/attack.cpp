@@ -4102,8 +4102,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			TryTriggerThreshHold(damage, SE_TriggerSpellThreshold, attacker);
 		}
 
-		if (IsClient()) {
-			//CommonBreakInvisible();
+		if (IsClient() && CastToClient()->sneaking) {
+			CastToClient()->sneaking = false;
+			SendAppearancePacket(AppearanceType::Sneak, 0);
 		}
 
 		if (attacker && attacker->IsClient() && attacker->CastToClient()->sneaking) {
