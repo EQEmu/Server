@@ -492,7 +492,7 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	c.suffix                  = pp->suffix;
 	c.exp                     = pp->exp;
 	c.points                  = pp->points;
-	c.name                    = pp->mana;
+	c.mana                    = pp->mana;
 	c.cur_hp                  = pp->cur_hp;
 	c.str                     = pp->STR;
 	c.sta                     = pp->STA;
