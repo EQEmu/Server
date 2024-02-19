@@ -11,8 +11,7 @@ void ShowContentFlags(Client *c, const Seperator *sep)
 	std::string flags = DialogueWindow::TableRow(
 		DialogueWindow::TableCell("id") +
 		DialogueWindow::TableCell("flag_name") +
-		DialogueWindow::TableCell("enabled") +
-		DialogueWindow::TableCell("notes")
+		DialogueWindow::TableCell("enabled")
 	);
 
 	for (auto &f: ContentFlagsRepository::All(database)) {
@@ -23,8 +22,7 @@ void ShowContentFlags(Client *c, const Seperator *sep)
 				f.enabled ?
 					DialogueWindow::ColorMessage("forest_green", "yes") :
 					DialogueWindow::ColorMessage("red", "no")
-			) +
-			DialogueWindow::TableCell(f.notes)
+			)
 		);
 	}
 
