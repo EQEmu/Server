@@ -8527,10 +8527,17 @@ void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 			(CanRaceEquipItem(e.item_id) || RuleB(Bots, AllowBotEquipAnyRaceGear))
 		) {
 			auto i = BotInventoriesRepository::NewEntity();
+
 			i.bot_id       = GetBotID();
 			i.slot_id      = e.slot_id;
 			i.item_id      = e.item_id;
 			i.inst_charges = e.item_charges;
+			i.augment_1    = e.augment_one;
+			i.augment_2    = e.augment_two;
+			i.augment_3    = e.augment_three;
+			i.augment_4    = e.augment_four;
+			i.augment_5    = e.augment_five;
+			i.augment_6    = e.augment_six;
 
 			v.emplace_back(i);
 		}

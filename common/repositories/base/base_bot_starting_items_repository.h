@@ -24,6 +24,12 @@ public:
 		uint32_t    classes;
 		uint32_t    item_id;
 		uint8_t     item_charges;
+		uint32_t    augment_one;
+		uint32_t    augment_two;
+		uint32_t    augment_three;
+		uint32_t    augment_four;
+		uint32_t    augment_five;
+		uint32_t    augment_six;
 		uint8_t     min_status;
 		int32_t     slot_id;
 		int8_t      min_expansion;
@@ -45,6 +51,12 @@ public:
 			"classes",
 			"item_id",
 			"item_charges",
+			"augment_one",
+			"augment_two",
+			"augment_three",
+			"augment_four",
+			"augment_five",
+			"augment_six",
 			"min_status",
 			"slot_id",
 			"min_expansion",
@@ -62,6 +74,12 @@ public:
 			"classes",
 			"item_id",
 			"item_charges",
+			"augment_one",
+			"augment_two",
+			"augment_three",
+			"augment_four",
+			"augment_five",
+			"augment_six",
 			"min_status",
 			"slot_id",
 			"min_expansion",
@@ -113,6 +131,12 @@ public:
 		e.classes                = 0;
 		e.item_id                = 0;
 		e.item_charges           = 1;
+		e.augment_one            = 0;
+		e.augment_two            = 0;
+		e.augment_three          = 0;
+		e.augment_four           = 0;
+		e.augment_five           = 0;
+		e.augment_six            = 0;
 		e.min_status             = 0;
 		e.slot_id                = -1;
 		e.min_expansion          = -1;
@@ -160,12 +184,18 @@ public:
 			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
-			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
-			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
-			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
-			e.content_flags          = row[9] ? row[9] : "";
-			e.content_flags_disabled = row[10] ? row[10] : "";
+			e.augment_one            = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_two            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_three          = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_four           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_five           = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_six            = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.min_status             = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.slot_id                = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			return e;
 		}
@@ -203,12 +233,18 @@ public:
 		v.push_back(columns[2] + " = " + std::to_string(e.classes));
 		v.push_back(columns[3] + " = " + std::to_string(e.item_id));
 		v.push_back(columns[4] + " = " + std::to_string(e.item_charges));
-		v.push_back(columns[5] + " = " + std::to_string(e.min_status));
-		v.push_back(columns[6] + " = " + std::to_string(e.slot_id));
-		v.push_back(columns[7] + " = " + std::to_string(e.min_expansion));
-		v.push_back(columns[8] + " = " + std::to_string(e.max_expansion));
-		v.push_back(columns[9] + " = '" + Strings::Escape(e.content_flags) + "'");
-		v.push_back(columns[10] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
+		v.push_back(columns[5] + " = " + std::to_string(e.augment_one));
+		v.push_back(columns[6] + " = " + std::to_string(e.augment_two));
+		v.push_back(columns[7] + " = " + std::to_string(e.augment_three));
+		v.push_back(columns[8] + " = " + std::to_string(e.augment_four));
+		v.push_back(columns[9] + " = " + std::to_string(e.augment_five));
+		v.push_back(columns[10] + " = " + std::to_string(e.augment_six));
+		v.push_back(columns[11] + " = " + std::to_string(e.min_status));
+		v.push_back(columns[12] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[14] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[16] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -235,6 +271,12 @@ public:
 		v.push_back(std::to_string(e.classes));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.augment_one));
+		v.push_back(std::to_string(e.augment_two));
+		v.push_back(std::to_string(e.augment_three));
+		v.push_back(std::to_string(e.augment_four));
+		v.push_back(std::to_string(e.augment_five));
+		v.push_back(std::to_string(e.augment_six));
 		v.push_back(std::to_string(e.min_status));
 		v.push_back(std::to_string(e.slot_id));
 		v.push_back(std::to_string(e.min_expansion));
@@ -275,6 +317,12 @@ public:
 			v.push_back(std::to_string(e.classes));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.augment_one));
+			v.push_back(std::to_string(e.augment_two));
+			v.push_back(std::to_string(e.augment_three));
+			v.push_back(std::to_string(e.augment_four));
+			v.push_back(std::to_string(e.augment_five));
+			v.push_back(std::to_string(e.augment_six));
 			v.push_back(std::to_string(e.min_status));
 			v.push_back(std::to_string(e.slot_id));
 			v.push_back(std::to_string(e.min_expansion));
@@ -319,12 +367,18 @@ public:
 			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
-			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
-			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
-			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
-			e.content_flags          = row[9] ? row[9] : "";
-			e.content_flags_disabled = row[10] ? row[10] : "";
+			e.augment_one            = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_two            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_three          = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_four           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_five           = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_six            = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.min_status             = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.slot_id                = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			all_entries.push_back(e);
 		}
@@ -354,12 +408,18 @@ public:
 			e.classes                = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
 			e.item_id                = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
 			e.item_charges           = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 1;
-			e.min_status             = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
-			e.slot_id                = row[6] ? static_cast<int32_t>(atoi(row[6])) : -1;
-			e.min_expansion          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
-			e.max_expansion          = row[8] ? static_cast<int8_t>(atoi(row[8])) : -1;
-			e.content_flags          = row[9] ? row[9] : "";
-			e.content_flags_disabled = row[10] ? row[10] : "";
+			e.augment_one            = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.augment_two            = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.augment_three          = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.augment_four           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.augment_five           = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.augment_six            = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.min_status             = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.slot_id                = row[12] ? static_cast<int32_t>(atoi(row[12])) : -1;
+			e.min_expansion          = row[13] ? static_cast<int8_t>(atoi(row[13])) : -1;
+			e.max_expansion          = row[14] ? static_cast<int8_t>(atoi(row[14])) : -1;
+			e.content_flags          = row[15] ? row[15] : "";
+			e.content_flags_disabled = row[16] ? row[16] : "";
 
 			all_entries.push_back(e);
 		}
@@ -439,6 +499,12 @@ public:
 		v.push_back(std::to_string(e.classes));
 		v.push_back(std::to_string(e.item_id));
 		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.augment_one));
+		v.push_back(std::to_string(e.augment_two));
+		v.push_back(std::to_string(e.augment_three));
+		v.push_back(std::to_string(e.augment_four));
+		v.push_back(std::to_string(e.augment_five));
+		v.push_back(std::to_string(e.augment_six));
 		v.push_back(std::to_string(e.min_status));
 		v.push_back(std::to_string(e.slot_id));
 		v.push_back(std::to_string(e.min_expansion));
@@ -472,6 +538,12 @@ public:
 			v.push_back(std::to_string(e.classes));
 			v.push_back(std::to_string(e.item_id));
 			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.augment_one));
+			v.push_back(std::to_string(e.augment_two));
+			v.push_back(std::to_string(e.augment_three));
+			v.push_back(std::to_string(e.augment_four));
+			v.push_back(std::to_string(e.augment_five));
+			v.push_back(std::to_string(e.augment_six));
 			v.push_back(std::to_string(e.min_status));
 			v.push_back(std::to_string(e.slot_id));
 			v.push_back(std::to_string(e.min_expansion));
