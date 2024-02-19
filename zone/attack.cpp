@@ -4103,7 +4103,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		if (IsClient()) {
-			CommonBreakInvisible();
+			//CommonBreakInvisible();
 		}
 
 		if (attacker && attacker->IsClient() && attacker->CastToClient()->sneaking) {
