@@ -239,7 +239,7 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 // this is used for zone routing middleware
 // we pull the zone list from the zone repository and feed from the zone store for now
 // we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
-WorldContentService *WorldContentService::SetContentZones(std::vector<BaseZoneRepository::Zone> zones)
+WorldContentService *WorldContentService::SetContentZones(const std::vector<BaseZoneRepository::Zone>& zones)
 {
 	m_zones = zones;
 
@@ -263,6 +263,11 @@ WorldContentService *WorldContentService::SetContentZones(std::vector<BaseZoneRe
 // example # 2
 void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 {
+	// if we're already in an instance, we don't want to route the player to another instance
+	if (zc->instanceID > 0) {
+		return;
+	}
+
 	for (auto &z: m_zones) {
 		if (z.zoneidnumber == zc->zoneID) {
 			auto f = ContentFlags{
@@ -303,6 +308,8 @@ void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 						z.long_name,
 						instance.notes
 					);
+
+					break;
 				}
 			}
 		}

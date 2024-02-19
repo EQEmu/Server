@@ -169,7 +169,7 @@ public:
 	void SetContentFlag(const std::string &content_flag_name, bool enabled);
 
 	void HandleZoneRoutingMiddleware(ZoneChange_Struct *zc);
-	WorldContentService * SetContentZones(const std::vector<ZoneRepository::Zone> zones);
+	WorldContentService * SetContentZones(const std::vector<ZoneRepository::Zone>& zones);
 private:
 	int current_expansion{};
 	std::vector<ContentFlagsRepository::ContentFlags> content_flags;
