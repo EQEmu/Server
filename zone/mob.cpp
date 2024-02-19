@@ -5548,19 +5548,19 @@ bool Mob::ClearEntityVariables()
 	}
 
 	if (
-		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETED)) ||
-		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETED)) ||
-		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETED))
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
 	) {
 		for (const auto& e : m_EntityVariables) {
 			std::vector<std::any> args = { e.first, e.second };
 
 			if (IsBot()) {
-				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETED, CastToBot(), nullptr, "", 0, &args);
+				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
 			} else if (IsClient()) {
-				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETED, CastToClient(), "", 0, &args);
+				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
 			} else if (IsNPC()) {
-				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETED, CastToNPC(), nullptr, "", 0, &args);
+				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
 			}
 		}
 	}
@@ -5583,18 +5583,18 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 	m_EntityVariables.erase(v);
 
 	if (
-		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETED)) ||
-		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETED)) ||
-		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETED))
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
 	) {
 		std::vector<std::any> args = { v->first, v->second };
 
 		if (IsBot()) {
-			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETED, CastToBot(), nullptr, "", 0, &args);
+			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
 		} else if (IsClient()) {
-			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETED, CastToClient(), "", 0, &args);
+			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
 		} else if (IsNPC()) {
-			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETED, CastToNPC(), nullptr, "", 0, &args);
+			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
 		}
 	}
 
