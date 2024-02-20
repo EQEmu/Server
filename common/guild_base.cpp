@@ -1090,7 +1090,7 @@ bool BaseGuildManager::IsGuildLeader(uint32 guild_id, uint32 char_id) const
 		LogGuilds("Check leader for char [{}]: invalid guild", char_id);
 		return (false);    //invalid guild
 	}
-	LogGuilds("Check leader for guild [{}]\, char [{}]\: leader id=[{}]", guild_id, char_id, res->second->leader);
+	LogGuilds("Check leader for guild [{}], char [{}]: leader id=[{}]", guild_id, char_id, res->second->leader);
 	return (char_id == res->second->leader);
 }
 
