@@ -175,7 +175,14 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_alt_currency_gain",
 	"event_alt_currency_loss",
 	"event_crystal_gain",
-	"event_crystal_loss"
+	"event_crystal_loss",
+	"event_timer_pause",
+	"event_timer_resume",
+	"event_timer_start",
+	"event_timer_stop",
+	"event_entity_variable_delete",
+	"event_entity_variable_set",
+	"event_entity_variable_update"
 };
 
 extern Zone *zone;
@@ -208,40 +215,47 @@ LuaParser::LuaParser() {
 		BotArgumentDispatch[i]       = handle_bot_null;
 	}
 
-	NPCArgumentDispatch[EVENT_SAY]             = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_AGGRO_SAY]       = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_PROXIMITY_SAY]   = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_TRADE]           = handle_npc_event_trade;
-	NPCArgumentDispatch[EVENT_HP]              = handle_npc_event_hp;
-	NPCArgumentDispatch[EVENT_TARGET_CHANGE]   = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_CAST_ON]         = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_KILLED_MERIT]    = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_SLAY]            = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_ENTER]           = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_EXIT]            = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_TASK_ACCEPTED]   = handle_npc_task_accepted;
-	NPCArgumentDispatch[EVENT_POPUP_RESPONSE]  = handle_npc_popup;
-	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
-	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
-	NPCArgumentDispatch[EVENT_HATE_LIST]       = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_COMBAT]          = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_SIGNAL]          = handle_npc_signal;
-	NPCArgumentDispatch[EVENT_TIMER]           = handle_npc_timer;
-	NPCArgumentDispatch[EVENT_DEATH]           = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_COMPLETE]  = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_ZONE]      = handle_npc_death;
-	NPCArgumentDispatch[EVENT_CAST]            = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_CAST_BEGIN]      = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_FEIGN_DEATH]     = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_ENTER_AREA]      = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LEAVE_AREA]      = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LOOT_ZONE]       = handle_npc_loot_zone;
-	NPCArgumentDispatch[EVENT_SPAWN_ZONE]      = handle_npc_spawn_zone;
-	NPCArgumentDispatch[EVENT_PAYLOAD]         = handle_npc_payload;
-	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]    = handle_npc_despawn_zone;
-	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]    = handle_npc_damage;
-	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]    = handle_npc_damage;
-	NPCArgumentDispatch[EVENT_LOOT_ADDED]      = handle_npc_loot_added;
+	NPCArgumentDispatch[EVENT_SAY]                    = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_AGGRO_SAY]              = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_PROXIMITY_SAY]          = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_TRADE]                  = handle_npc_event_trade;
+	NPCArgumentDispatch[EVENT_HP]                     = handle_npc_event_hp;
+	NPCArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_CAST_ON]                = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_KILLED_MERIT]           = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_SLAY]                   = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_ENTER]                  = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_EXIT]                   = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_TASK_ACCEPTED]          = handle_npc_task_accepted;
+	NPCArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_npc_popup;
+	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE]        = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART]        = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_HATE_LIST]              = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_COMBAT]                 = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_SIGNAL]                 = handle_npc_signal;
+	NPCArgumentDispatch[EVENT_TIMER]                  = handle_npc_timer;
+	NPCArgumentDispatch[EVENT_DEATH]                  = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_ZONE]             = handle_npc_death;
+	NPCArgumentDispatch[EVENT_CAST]                   = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_CAST_BEGIN]             = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_FEIGN_DEATH]            = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_ENTER_AREA]             = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LEAVE_AREA]             = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LOOT_ZONE]              = handle_npc_loot_zone;
+	NPCArgumentDispatch[EVENT_SPAWN_ZONE]             = handle_npc_spawn_zone;
+	NPCArgumentDispatch[EVENT_PAYLOAD]                = handle_npc_payload;
+	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]           = handle_npc_despawn_zone;
+	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_LOOT_ADDED]             = handle_npc_loot_added;
+	NPCArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_RESUME]           = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_START]            = handle_npc_timer_pause_resume_start;
+	NPCArgumentDispatch[EVENT_TIMER_STOP]             = handle_npc_timer_stop;
+	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_npc_entity_variable;
+	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_npc_entity_variable;
+	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_npc_entity_variable;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
@@ -322,6 +336,13 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_LOSS]          = handle_player_alt_currency_gain_loss;
 	PlayerArgumentDispatch[EVENT_CRYSTAL_GAIN]               = handle_player_crystal_gain_loss;
 	PlayerArgumentDispatch[EVENT_CRYSTAL_LOSS]               = handle_player_crystal_gain_loss;
+	PlayerArgumentDispatch[EVENT_TIMER_PAUSE]                = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_RESUME]               = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_START]                = handle_player_timer_pause_resume_start;
+	PlayerArgumentDispatch[EVENT_TIMER_STOP]                 = handle_player_timer_stop;
+	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE]     = handle_player_entity_variable;
+	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]        = handle_player_entity_variable;
+	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -334,6 +355,10 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM]  = handle_item_augment;
 	ItemArgumentDispatch[EVENT_AUGMENT_INSERT]  = handle_item_augment_insert;
 	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE]  = handle_item_augment_remove;
+	ItemArgumentDispatch[EVENT_TIMER_PAUSE]     = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_RESUME]    = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_START]     = handle_item_timer_pause_resume_start;
+	ItemArgumentDispatch[EVENT_TIMER_STOP]      = handle_item_timer_stop;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT]               = handle_spell_event;
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT]      = handle_spell_event;
@@ -344,27 +369,34 @@ LuaParser::LuaParser() {
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD]   = handle_encounter_load;
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
-	BotArgumentDispatch[EVENT_CAST]             = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_BEGIN]       = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_ON]          = handle_bot_cast;
-	BotArgumentDispatch[EVENT_COMBAT]           = handle_bot_combat;
-	BotArgumentDispatch[EVENT_DEATH]            = handle_bot_death;
-	BotArgumentDispatch[EVENT_DEATH_COMPLETE]   = handle_bot_death;
-	BotArgumentDispatch[EVENT_POPUP_RESPONSE]   = handle_bot_popup_response;
-	BotArgumentDispatch[EVENT_SAY]              = handle_bot_say;
-	BotArgumentDispatch[EVENT_SIGNAL]           = handle_bot_signal;
-	BotArgumentDispatch[EVENT_SLAY]             = handle_bot_slay;
-	BotArgumentDispatch[EVENT_TARGET_CHANGE]    = handle_bot_target_change;
-	BotArgumentDispatch[EVENT_TIMER]            = handle_bot_timer;
-	BotArgumentDispatch[EVENT_TRADE]            = handle_bot_trade;
-	BotArgumentDispatch[EVENT_USE_SKILL]        = handle_bot_use_skill;
-	BotArgumentDispatch[EVENT_PAYLOAD]          = handle_bot_payload;
-	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT]   = handle_bot_equip_item;
-	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
-	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]     = handle_bot_damage;
-	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]     = handle_bot_damage;
-	BotArgumentDispatch[EVENT_LEVEL_UP]         = handle_bot_level_up;
-	BotArgumentDispatch[EVENT_LEVEL_DOWN]       = handle_bot_level_down;
+	BotArgumentDispatch[EVENT_CAST]                   = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_BEGIN]             = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_ON]                = handle_bot_cast;
+	BotArgumentDispatch[EVENT_COMBAT]                 = handle_bot_combat;
+	BotArgumentDispatch[EVENT_DEATH]                  = handle_bot_death;
+	BotArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_bot_death;
+	BotArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_bot_popup_response;
+	BotArgumentDispatch[EVENT_SAY]                    = handle_bot_say;
+	BotArgumentDispatch[EVENT_SIGNAL]                 = handle_bot_signal;
+	BotArgumentDispatch[EVENT_SLAY]                   = handle_bot_slay;
+	BotArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_bot_target_change;
+	BotArgumentDispatch[EVENT_TIMER]                  = handle_bot_timer;
+	BotArgumentDispatch[EVENT_TRADE]                  = handle_bot_trade;
+	BotArgumentDispatch[EVENT_USE_SKILL]              = handle_bot_use_skill;
+	BotArgumentDispatch[EVENT_PAYLOAD]                = handle_bot_payload;
+	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT]         = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT]       = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_bot_damage;
+	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_bot_damage;
+	BotArgumentDispatch[EVENT_LEVEL_UP]               = handle_bot_level_up;
+	BotArgumentDispatch[EVENT_LEVEL_DOWN]             = handle_bot_level_down;
+	BotArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_RESUME]           = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_START]            = handle_bot_timer_pause_resume_start;
+	BotArgumentDispatch[EVENT_TIMER_STOP]             = handle_bot_timer_stop;
+	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_bot_entity_variable;
+	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
+	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
 #endif
 
 	L = nullptr;

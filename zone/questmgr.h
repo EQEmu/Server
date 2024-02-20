@@ -44,9 +44,9 @@ class QuestManager {
 	};
 
 	struct PausedTimer {
-		Mob * owner;
+		Mob*        owner;
 		std::string name;
-		uint32 time;
+		uint32      time;
 	};
 public:
 	QuestManager();
@@ -76,28 +76,28 @@ public:
 	void disable_spawn2(uint32 spawn2_id);
 	void setstat(int stat, int value);
 	void incstat(int stat, int value);
-	void castspell(int spell_id, int target_id);
-	void selfcast(int spell_id);
+	void castspell(uint16 spell_id, uint16 target_id);
+	void selfcast(uint16 spell_id);
 	void addloot(int item_id, int charges = 0, bool equipitem = true, int aug1 = 0, int aug2 = 0, int aug3 = 0, int aug4 = 0, int aug5 = 0, int aug6 = 0);
 	void Zone(const char *zone_name);
 	void ZoneGroup(const char *zone_name);
 	void ZoneRaid(const char *zone_name);
-	void settimer(const char* timer_name, int seconds, Mob* mob = nullptr);
-	void settimerMS(const char* timer_name, int milliseconds);
-	void settimerMS(const char* timer_name, int milliseconds, EQ::ItemInstance *inst);
-	void settimerMS(const char* timer_name, int milliseconds, Mob *mob);
-	void stoptimer(const char* timer_name);
-	void stoptimer(const char* timer_name, EQ::ItemInstance *inst);
-	void stoptimer(const char* timer_name, Mob *mob);
+	void settimer(const std::string& timer_name, uint32 seconds, Mob* m = nullptr);
+	void settimerMS(const std::string& timer_name, uint32 milliseconds);
+	void settimerMS(const std::string& timer_name, uint32 milliseconds, EQ::ItemInstance* inst);
+	void settimerMS(const std::string& timer_name, uint32 milliseconds, Mob* m);
+	void stoptimer(const std::string& timer_name);
+	void stoptimer(const std::string& timer_name, EQ::ItemInstance* inst);
+	void stoptimer(const std::string& timer_name, Mob* m);
 	void stopalltimers();
-	void stopalltimers(EQ::ItemInstance *inst);
-	void stopalltimers(Mob *mob);
-	void pausetimer(const char* timer_name, Mob* mob = nullptr);
-	void resumetimer(const char* timer_name, Mob* mob = nullptr);
-	bool ispausedtimer(const char* timer_name, Mob* mob = nullptr);
-	bool hastimer(const char* timer_name, Mob* mob = nullptr);
-	uint32 getremainingtimeMS(const char* timer_name, Mob* mob = nullptr);
-	uint32 gettimerdurationMS(const char* timer_name, Mob* mob = nullptr);
+	void stopalltimers(EQ::ItemInstance* inst);
+	void stopalltimers(Mob* m);
+	void pausetimer(const std::string& timer_name, Mob* m = nullptr);
+	void resumetimer(const std::string& timer_name, Mob* m = nullptr);
+	bool ispausedtimer(const std::string& timer_name, Mob* m = nullptr);
+	bool hastimer(const std::string& timer_name, Mob* m = nullptr);
+	uint32 getremainingtimeMS(const std::string& timer_name, Mob* m = nullptr);
+	uint32 gettimerdurationMS(const std::string& timer_name, Mob* m = nullptr);
 	void emote(const char *str);
 	void shout(const char *str);
 	void shout2(const char *str);

@@ -962,7 +962,6 @@ void Client::CompleteConnect()
 	heroforge_wearchange_timer.Start(250);
 
 	RecordStats();
-
 	AutoGrantAAPoints();
 
 	// enforce some rules..
@@ -17160,3 +17159,4 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 		RequestGuildFavorAndTimer(GuildID());
 	}
 }
+

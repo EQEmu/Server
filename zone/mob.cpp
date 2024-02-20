@@ -5580,6 +5580,24 @@ bool Mob::ClearEntityVariables()
 		return false;
 	}
 
+	if (
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
+	) {
+		for (const auto& e : m_EntityVariables) {
+			std::vector<std::any> args = { e.first, e.second };
+
+			if (IsBot()) {
+				parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
+			} else if (IsClient()) {
+				parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+			} else if (IsNPC()) {
+				parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
+			}
+		}
+	}
+
 	m_EntityVariables.clear();
 	return true;
 }
@@ -5596,6 +5614,23 @@ bool Mob::DeleteEntityVariable(std::string variable_name)
 	}
 
 	m_EntityVariables.erase(v);
+
+	if (
+		(IsBot() && parse->BotHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsClient() && parse->PlayerHasQuestSub(EVENT_ENTITY_VARIABLE_DELETE)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_ENTITY_VARIABLE_DELETE))
+	) {
+		std::vector<std::any> args = { v->first, v->second };
+
+		if (IsBot()) {
+			parse->EventBot(EVENT_ENTITY_VARIABLE_DELETE, CastToBot(), nullptr, "", 0, &args);
+		} else if (IsClient()) {
+			parse->EventPlayer(EVENT_ENTITY_VARIABLE_DELETE, CastToClient(), "", 0, &args);
+		} else if (IsNPC()) {
+			parse->EventNPC(EVENT_ENTITY_VARIABLE_DELETE, CastToNPC(), nullptr, "", 0, &args);
+		}
+	}
+
 	return true;
 }
 
@@ -5606,22 +5641,22 @@ std::string Mob::GetEntityVariable(std::string variable_name)
 	}
 
 	const auto& v = m_EntityVariables.find(variable_name);
-	if (v != m_EntityVariables.end()) {
-		return v->second;
-	}
 
-	return std::string();
+	return v != m_EntityVariables.end() ? v->second : std::string();
 }
 
 std::vector<std::string> Mob::GetEntityVariables()
 {
 	std::vector<std::string> l;
+
 	if (m_EntityVariables.empty()) {
 		return l;
 	}
 
+	l.reserve(m_EntityVariables.size());
+
 	for (const auto& v : m_EntityVariables) {
-		l.push_back(v.first);
+		l.emplace_back(v.first);
 	}
 
 	return l;
@@ -5633,18 +5668,41 @@ bool Mob::EntityVariableExists(std::string variable_name)
 		return false;
 	}
 
-	const auto& v = m_EntityVariables.find(variable_name);
-	if (v != m_EntityVariables.end()) {
-		return true;
-	}
-
-	return false;
+	return m_EntityVariables.find(variable_name) != m_EntityVariables.end();
 }
 
 void Mob::SetEntityVariable(std::string variable_name, std::string variable_value)
 {
 	if (variable_name.empty()) {
 		return;
+	}
+
+	const QuestEventID event_id = (
+		!EntityVariableExists(variable_name) ?
+		EVENT_ENTITY_VARIABLE_SET :
+		EVENT_ENTITY_VARIABLE_UPDATE
+	);
+
+	if (
+		(IsBot() && parse->BotHasQuestSub(event_id)) ||
+		(IsClient() && parse->PlayerHasQuestSub(event_id)) ||
+		(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), event_id))
+	) {
+		std::vector<std::any> args;
+
+		if (event_id != EVENT_ENTITY_VARIABLE_UPDATE) {
+			args = { variable_name, variable_value };
+		} else {
+			args = { variable_name, GetEntityVariable(variable_name), variable_value };
+		}
+
+		if (IsBot()) {
+			parse->EventBot(event_id, CastToBot(), nullptr, "", 0, &args);
+		} else if (IsClient()) {
+			parse->EventPlayer(event_id, CastToClient(), "", 0, &args);
+		} else if (IsNPC()) {
+			parse->EventNPC(event_id, CastToNPC(), nullptr, "", 0, &args);
+		}
 	}
 
 	m_EntityVariables[variable_name] = variable_value;
@@ -6077,40 +6135,54 @@ bool Mob::TryFadeEffect(int slot)
 	return false;
 }
 
-void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
+void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 {
-	if(target == nullptr || !IsValidSpell(spell_id) || !IsClient())
+	if (!target || !IsValidSpell(spell_id) || !IsOfClientBotMerc()) {
 		return;
-
-	uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc,spell_id);
-
-	if(!IsValidSpell(focus_spell))
-		return;
-
-	uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
-
-	if(!IsValidSpell(focus_trigger))
-		return;
-
-	// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
-	// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
-	if(IsBeneficialSpell(spell_id))
-	{
-		if(IsBeneficialSpell(focus_trigger))
-			SpellFinished(focus_trigger, target);
-
-		else
-			SpellFinished(focus_trigger, this, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
 	}
-	// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
-	// if the triggered spell is also detrimental, then it will land on the target
-	else
-	{
-		if(IsBeneficialSpell(focus_trigger))
-			SpellFinished(focus_trigger, this);
 
-		else
-			SpellFinished(focus_trigger, target, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
+	const uint16 focus_spell = GetSympatheticFocusEffect(focusSympatheticProc, spell_id);
+
+	if (!IsValidSpell(focus_spell)) {
+		return;
+	}
+
+	const uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
+
+	if (!IsValidSpell(focus_trigger)) {
+		return;
+	}
+
+	if (IsBeneficialSpell(spell_id)) {
+		// For beneficial spells, if the triggered spell is also beneficial then proc it on the target
+		// if the triggered spell is detrimental, then it will trigger on the caster(ie cursed items)
+		if (IsBeneficialSpell(focus_trigger)) {
+			SpellFinished(focus_trigger, target);
+		} else {
+			SpellFinished(
+				focus_trigger,
+				this,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[focus_trigger].resist_difficulty
+			);
+		}
+	} else {
+		// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
+		// if the triggered spell is also detrimental, then it will land on the target
+		if (IsBeneficialSpell(focus_trigger)) {
+			SpellFinished(focus_trigger, this);
+		} else {
+			SpellFinished(
+				focus_trigger,
+				target,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[focus_trigger].resist_difficulty
+			);
+		}
 	}
 
 	CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);

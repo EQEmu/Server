@@ -16,7 +16,7 @@ void command_summon(Client *c, const Seperator *sep)
 
 	if (arguments == 1) {
 		std::string character_name = sep->arg[1];
-		auto character_id = database.GetCharacterID(character_name.c_str());
+		auto character_id = database.GetCharacterID(character_name);
 		if (!character_id) {
 			c->Message(
 				Chat::White,
