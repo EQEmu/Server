@@ -4071,6 +4071,10 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 		//see if any runes want to reduce this damage
 		if (!IsValidSpell(spell_id)) {
+			if (IsClient()) {
+				CommonBreakInvisible();
+			}
+			
 			damage = ReduceDamage(damage);
 			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);
