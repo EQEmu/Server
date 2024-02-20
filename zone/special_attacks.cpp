@@ -286,13 +286,15 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 // We should probably refactor this to take the struct not the packet
 void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 {
+	LogDebug("Entering OPCombatAbility!?");
+
 	if (!GetTarget()) {
 		return;
 	}
 
 	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
 	if (
-		(spellend_timer.Enabled() && (GetClass() != Class::Bard) || RuleB(Custom, MulticlassingEnabled)) || 
+		(spellend_timer.Enabled() && GetClass() != Class::Bard && !RuleB(Custom,MulticlassingEnabled)) || 
 		IsFeared() ||
 		IsStunned() ||
 		IsMezzed() ||
@@ -425,6 +427,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		DoAnim(anim1HWeapon, 0, false);
+
+		LogDebug("Attempting Frenzy: [{}]", GetClassesBits() & GetPlayerClassBit(Class::Berserker));
 
 		if (GetClassesBits() & GetPlayerClassBit(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
