@@ -120,6 +120,17 @@ NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 npc_faction_i
 		}
 	}
 
+	// Maybe we're being asked to load an npc_faction not yet used in the zone
+	// like from npc_edit to assign it.  Load it if possible and try again.
+
+	LoadNPCFaction(npc_faction_id);
+
+	for (auto& e : m_npc_factions) {
+		if (e.id == npc_faction_id) {
+			return &e;
+		}
+	}
+
 	return nullptr;
 }
 
