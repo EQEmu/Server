@@ -49,9 +49,9 @@ public:
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `{}` WHERE `{}` = {}",
-				account_id,
 				TableName(),
-				PrimaryKey()
+				PrimaryKey(),
+				account_id
 			)
 		);
 

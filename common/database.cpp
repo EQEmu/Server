@@ -1854,7 +1854,7 @@ bool Database::CopyCharacter(
 
 	auto account = accounts.front();
 
-	const int source_account_id = account.id;
+	const int destination_account_id = account.id;
 
 	const int64 new_character_id = (CharacterDataRepository::GetMaxId(*this) + 1);
 
@@ -1905,7 +1905,7 @@ bool Database::CopyCharacter(
 				}
 
 				if (column == character_id_column_name) {
-					value = new_character_id;
+					value = std::to_string(new_character_id);
 				}
 
 				if (column == "name" && table_name == "character_data") {
@@ -1913,7 +1913,7 @@ bool Database::CopyCharacter(
 				}
 
 				if (column == "account_id" && table_name == "character_data") {
-					value = source_account_id;
+					value = std::to_string(destination_account_id);
 				}
 
 				new_values.emplace_back(value);

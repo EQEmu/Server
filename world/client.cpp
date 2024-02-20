@@ -806,6 +806,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
+	charid      = e.id;
 	zone_id     = e.zone_id;
 	instance_id = e.zone_instance;
 
