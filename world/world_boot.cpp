@@ -381,6 +381,7 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 
 	LogInfo("Initializing [WorldContentService]");
 	content_service.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
 		->SetExpansionContext()
 		->ReloadContentFlags();
 

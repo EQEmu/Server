@@ -1,28 +1,11 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "world_content_service.h"
+
+#include <utility>
+#include <glm/vec3.hpp>
 #include "../database.h"
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
-#include "../repositories/content_flags_repository.h"
+#include "../repositories/instance_list_repository.h"
 
 
 WorldContentService::WorldContentService()
@@ -119,7 +102,7 @@ std::vector<std::string> WorldContentService::GetContentFlagsDisabled()
 /**
  * @param content_flags
  */
-void WorldContentService::SetContentFlags(const std::vector<ContentFlagsRepository::ContentFlags>& content_flags)
+void WorldContentService::SetContentFlags(const std::vector<ContentFlagsRepository::ContentFlags> &content_flags)
 {
 	WorldContentService::content_flags = content_flags;
 }
@@ -167,14 +150,14 @@ bool WorldContentService::DoesPassContentFiltering(const ContentFlags &f)
 	}
 
 	// if we don't have any enabled flag in enabled flags, we fail
-	for (const auto& flag: Strings::Split(f.content_flags)) {
+	for (const auto &flag: Strings::Split(f.content_flags)) {
 		if (!Strings::Contains(GetContentFlagsEnabled(), flag)) {
 			return false;
 		}
 	}
 
 	// if we don't have any disabled flag in disabled flags, we fail
-	for (const auto& flag: Strings::Split(f.content_flags_disabled)) {
+	for (const auto &flag: Strings::Split(f.content_flags_disabled)) {
 		if (!Strings::Contains(GetContentFlagsDisabled(), flag)) {
 			return false;
 		}
@@ -200,6 +183,7 @@ void WorldContentService::ReloadContentFlags()
 	}
 
 	SetContentFlags(set_content_flags);
+	SetContentZones(ZoneRepository::All(*m_content_database));
 }
 
 Database *WorldContentService::GetDatabase() const
@@ -210,6 +194,18 @@ Database *WorldContentService::GetDatabase() const
 WorldContentService *WorldContentService::SetDatabase(Database *database)
 {
 	WorldContentService::m_database = database;
+
+	return this;
+}
+
+Database *WorldContentService::GetContentDatabase() const
+{
+	return m_content_database;
+}
+
+WorldContentService *WorldContentService::SetContentDatabase(Database *database)
+{
+	WorldContentService::m_content_database = database;
 
 	return this;
 }
@@ -238,3 +234,85 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 
 	ReloadContentFlags();
 }
+
+// SetZones sets the zones for the world content service
+// this is used for zone routing middleware
+// we pull the zone list from the zone repository and feed from the zone store for now
+// we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
+WorldContentService *WorldContentService::SetContentZones(const std::vector<BaseZoneRepository::Zone>& zones)
+{
+	m_zones = zones;
+
+	LogInfo("Loaded [{}] zones", m_zones.size());
+
+	return this;
+}
+
+// HandleZoneRoutingMiddleware is meant to handle content and context aware zone routing
+//
+// example # 1
+// lavastorm (pre-don) version 0 (classic)
+// lavastorm (don) version 1
+// we want to route players to the correct version of lavastorm based on the current server side expansion
+// in order to do that the simplest and cleanest way we intercept the zoning process and route players to an "instance" of the zone
+// the reason why we're doing this is because all of the zoning logic already is handled by two keys "zone_id" and "instance_id"
+// we can leverage static, never expires instances to handle this but to the client they don't see it any other way than a public normal zone
+// scripts handle all the same way, you don't have to think about instances, the middleware will handle the magic
+// the versions of zones are represented by two zone entries that have potentially different min/max expansion and/or different content flags
+// we decide to route the client to the correct version of the zone based on the current server side expansion
+// example # 2
+void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
+{
+	// if we're already in an instance, we don't want to route the player to another instance
+	if (zc->instanceID > 0) {
+		return;
+	}
+
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zc->zoneID) {
+			auto f = ContentFlags{
+				.min_expansion = z.min_expansion,
+				.max_expansion = z.max_expansion,
+				.content_flags = z.content_flags,
+				.content_flags_disabled = z.content_flags_disabled
+			};
+
+			if (DoesPassContentFiltering(f)) {
+				LogInfo(
+					"Attempting to route player to zone [{}] ({}) version [{}] long_name [{}]",
+					z.short_name,
+					z.zoneidnumber,
+					z.version,
+					z.long_name
+				);
+
+				auto instances = InstanceListRepository::GetWhere(
+					*GetDatabase(),
+					fmt::format(
+						"zone = {} AND version = {} AND never_expires = 1 AND is_global = 1",
+						z.zoneidnumber,
+						z.version
+					)
+				);
+
+				if (!instances.empty()) {
+					auto instance = instances.front();
+					zc->instanceID = instance.id;
+
+					LogInfo(
+						"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+						instance.id,
+						z.short_name,
+						z.zoneidnumber,
+						z.version,
+						z.long_name,
+						instance.notes
+					);
+
+					break;
+				}
+			}
+		}
+	}
+}
+

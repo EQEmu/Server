@@ -830,11 +830,21 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", zone_versioned_path, npc_id), // Local versioned by NPC ID ./quests/zone/v0/10.ext
+		fmt::format("{}/{}", zone_versioned_path, npc_name), // Local versioned by NPC Name ./quests/zone/v0/npc.ext
 		fmt::format("{}/{}", zone_path, npc_id), // Local by NPC ID
 		fmt::format("{}/{}", zone_path, npc_name), // Local by NPC Name
 		fmt::format("{}/{}", global_path, npc_id), // Global by NPC ID
 		fmt::format("{}/{}", global_path, npc_name), // Global by NPC ID
+		fmt::format("{}/default", zone_versioned_path), // Zone Default ./quests/zone/v0/default.ext
 		fmt::format("{}/default", zone_path), // Zone Default
 		fmt::format("{}/default", global_path), // Global Default
 	};
@@ -877,7 +887,15 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/player", zone_versioned_path), // Local by Instance Version ./quests/zone/v0/player.ext
 		fmt::format("{}/player_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/player", zone_path), // Local
 		fmt::format("{}/player", global_path) // Global
@@ -969,7 +987,15 @@ QuestInterface* QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}/spells",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", zone_versioned_path, spell_id), // Local versioned by Spell ID ./quests/zone/v0/spells/10.ext
 		fmt::format("{}/{}", zone_path, spell_id), // Local
 		fmt::format("{}/{}", global_path, spell_id), // Global
 		fmt::format("{}/default", zone_path), // Local Default
@@ -1013,7 +1039,15 @@ QuestInterface* QuestParserCollection::GetQIByItemQuest(std::string item_script,
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}/items",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", zone_versioned_path, item_script), // Local versioned by Item Script ./quests/zone/v0/items/10.ext
 		fmt::format("{}/{}", zone_path, item_script), // Local
 		fmt::format("{}/{}", global_path, item_script), // Global
 		fmt::format("{}/default", zone_path), // Local Default
@@ -1057,7 +1091,15 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}/encounters",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", zone_versioned_path, encounter_name), // Local versioned ./quests/zone/v0/encounters/name.ext
 		fmt::format("{}/{}", zone_path, encounter_name), // Local
 		fmt::format("{}/{}", global_path, encounter_name) // Global
 	};
@@ -1099,7 +1141,15 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 		zone->GetShortName()
 	);
 
+	const std::string& zone_versioned_path = fmt::format(
+		"{}/{}/v{}",
+		path.GetQuestsPath(),
+		zone->GetShortName(),
+		zone->GetInstanceVersion()
+	);
+
 	std::vector<std::string> file_names = {
+		fmt::format("{}/bot", zone_versioned_path), // Local versioned by Instance Version ./quests/zone/v0/bot.ext
 		fmt::format("{}/bot_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/bot", zone_path), // Local
 		fmt::format("{}/bot", global_path) // Global

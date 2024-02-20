@@ -71,6 +71,7 @@ extern volatile bool RunLoops;
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
+#include "../common/zone_store.h"
 
 
 extern QueryServ* QServ;
@@ -9108,6 +9109,7 @@ void Client::ShowDevToolsMenu()
 	 */
 	menu_show += Saylink::Silent("#showzonepoints", "Zone Points");
 	menu_show += " | " + Saylink::Silent("#showzonegloballoot", "Zone Global Loot");
+	menu_show += " | " + Saylink::Silent("#show content_flags", "Content Flags");
 
 	/**
 	 * Reload
@@ -9164,14 +9166,6 @@ void Client::ShowDevToolsMenu()
 	SendChatLineBreak();
 
 	Message(Chat::White, "Developer Tools Menu");
-
-	Message(
-		Chat::White,
-		fmt::format(
-			"Current Expansion | {}",
-			content_service.GetCurrentExpansionName()
-		).c_str()
-	);
 
 	Message(
 		Chat::White,
@@ -9286,6 +9280,36 @@ void Client::ShowDevToolsMenu()
 			help_link
 		).c_str()
 	);
+
+	SendChatLineBreak();
+
+	Message(
+		Chat::White,
+		fmt::format(
+			"Current Expansion | {} ({})",
+			content_service.GetCurrentExpansionName(),
+			content_service.GetCurrentExpansion()
+		).c_str()
+	);
+
+
+	auto z = GetZoneVersionWithFallback(zone->GetZoneID(), zone->GetInstanceVersion());
+
+	if (z) {
+		Message(
+			Chat::White,
+			fmt::format(
+				"Current Zone | [{}] ({}) version [{}] instance_id [{}] min/max expansion ({}/{}) content_flags [{}]",
+				z->short_name,
+				z->long_name,
+				z->version,
+				zone->GetInstanceID(),
+				z->min_expansion,
+				z->max_expansion,
+				z->content_flags
+			).c_str()
+		);
+	}
 
 	SendChatLineBreak();
 }
