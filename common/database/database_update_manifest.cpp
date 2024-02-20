@@ -5391,7 +5391,8 @@ MODIFY COLUMN `safe_x` float NOT NULL DEFAULT 0 AFTER `file_name`,
 MODIFY COLUMN `safe_y` float NOT NULL DEFAULT 0 AFTER `safe_x`,
 MODIFY COLUMN `safe_z` float NOT NULL DEFAULT 0 AFTER `safe_y`,
 MODIFY COLUMN `safe_heading` float NOT NULL DEFAULT 0 AFTER `safe_z`;
-		)"
+		)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
