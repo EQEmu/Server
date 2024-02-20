@@ -394,9 +394,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		// ranged attack (archery)
 		if (ca_atk->m_skill == EQ::skills::SkillArchery) {
 			SetAttackTimer();
-			RangedAttack(GetTarget());
 
-			if (CheckDoubleRangedAttack()) {
+			if (RangedAttack(GetTarget()) && CheckDoubleRangedAttack()) {
 				RangedAttack(GetTarget(), true);
 			}
 
@@ -830,12 +829,12 @@ void Mob::RogueAssassinate(Mob* other)
 	DoAnim(anim1HPiercing, 0, false);	//piercing animation
 }
 
-void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
+bool Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//conditions to use an attack checked before we are called
 	if (!other)
-		return;
+		return false;
 	else if (other == this)
-		return;
+		return false;
 	if (!CheckLosFN(other)) {
 		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch
 		return;
@@ -846,7 +845,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		LogCombat("Ranged attack canceled. Timer not up. Attack [{}], ranged [{}]", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
 		// The server and client timers are not exact matches currently, so this would spam too often if enabled
 		//Message(0, "Error: Timer not up. Attack %d, ranged %d", attack_timer.GetRemainingTime(), ranged_timer.GetRemainingTime());
-		return;
+		return false;
 	}
 	const EQ::ItemInstance* RangeWeapon = m_inv[EQ::invslot::slotRange];
 
@@ -857,12 +856,12 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	if (!RangeWeapon || !RangeWeapon->IsClassCommon()) {
 		LogCombat("Ranged attack canceled. Missing or invalid ranged weapon ([{}]) in slot [{}]", GetItemIDAt(EQ::invslot::slotRange), EQ::invslot::slotRange);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have no bow!", GetItemIDAt(EQ::invslot::slotRange));
-		return;
+		return false;
 	}
 	if (!Ammo || !Ammo->IsClassCommon()) {
 		LogCombat("Ranged attack canceled. Missing or invalid ammo item ([{}]) in slot [{}]", GetItemIDAt(EQ::invslot::slotAmmo), EQ::invslot::slotAmmo);
 		Message(0, "Error: Ammo: GetItem(%i)==0, you have no ammo!", GetItemIDAt(EQ::invslot::slotAmmo));
-		return;
+		return false;
 	}
 
 	const EQ::ItemData* RangeItem = RangeWeapon->GetItem();
@@ -871,12 +870,12 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	if (RangeItem->ItemType != EQ::item::ItemTypeBow) {
 		LogCombat("Ranged attack canceled. Ranged item is not a bow. type [{}]", RangeItem->ItemType);
 		Message(0, "Error: Rangeweapon: Item %d is not a bow.", RangeWeapon->GetID());
-		return;
+		return false;
 	}
 	if (AmmoItem->ItemType != EQ::item::ItemTypeArrow) {
 		LogCombat("Ranged attack canceled. Ammo item is not an arrow. type [{}]", AmmoItem->ItemType);
 		Message(0, "Error: Ammo: type %d != %d, you have the wrong type of ammo!", AmmoItem->ItemType, EQ::item::ItemTypeArrow);
-		return;
+		return false;
 	}
 
 	LogCombat("Shooting [{}] with bow [{}] ([{}]) and arrow [{}] ([{}])", other->GetName(), RangeItem->Name, RangeItem->ID, AmmoItem->Name, AmmoItem->ID);
@@ -932,11 +931,11 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	if (float dist = DistanceSquared(m_Position, other->GetPosition()); dist > range) {
 		LogCombat("Ranged attack out of range client should catch this. ([{}] > [{}]).\n", dist, range);
 		MessageString(Chat::Red,TARGET_OUT_OF_RANGE);//Client enforces range and sends the message, this is a backup just incase.
-		return;
+		return false;
 	}
 	else if (dist < (RuleI(Combat, MinRangedAttackDist)*RuleI(Combat, MinRangedAttackDist))){
 		MessageString(Chat::Yellow,RANGED_TOO_CLOSE);//Client enforces range and sends the message, this is a backup just incase.
-		return;
+		return false;
 	}
 
 	if (!IsAttackAllowed(other) ||
@@ -947,7 +946,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		IsFeared() ||
 		IsMezzed() ||
 		(GetAppearance() == eaDead)){
-		return;
+		return false;
 	}
 
 	//Shoots projectile and/or applies the archery damage
@@ -976,6 +975,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 
 	CheckIncreaseSkill(EQ::skills::SkillArchery, GetTarget(), -15);
 	CommonBreakInvisibleFromCombat();
+
+	return true;
 }
 
 void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, const EQ::ItemInstance *Ammo,
