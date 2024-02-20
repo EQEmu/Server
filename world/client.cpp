@@ -50,6 +50,7 @@
 #include "../common/zone_store.h"
 #include "../common/repositories/account_repository.h"
 #include "../common/repositories/player_event_logs_repository.h"
+#include "../common/repositories/inventory_repository.h"
 #include "../common/events/player_event_logs.h"
 
 #include <iostream>
@@ -1613,10 +1614,18 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	inv.SetInventoryVersion(EQ::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
 	inv.SetGMInventory(false); // character cannot have gm flag at this point
 
-	time_t bday = time(nullptr);
+	time_t  bday = time(nullptr);
 	in_addr in;
 
-	int stats_sum = cc->STR + cc->STA + cc->AGI + cc->DEX + cc->WIS + cc->INT + cc->CHA;
+	const uint32 stats_sum = (
+		cc->AGI +
+		cc->CHA +
+		cc->DEX +
+		cc->INT +
+		cc->STA +
+		cc->STR +
+		cc->WIS
+	);
 
 	in.s_addr = GetIP();
 
@@ -1629,7 +1638,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	);
 	LogInfo("Name [{}]", name);
 	LogInfo(
-		"Race [{}] Class [{}] Gender [{}] Deity [{}] Start zone [{}] Tutorial [{}]",
+		"race [{}] class [{}] gender [{}] deity [{}] start_zone [{}] tutorial [{}]",
 		cc->race,
 		cc->class_,
 		cc->gender,
@@ -1637,21 +1646,20 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		cc->start_zone,
 		cc->tutorial ? "true" : "false"
 	);
-	LogInfo("STR STA AGI DEX WIS INT CHA Total");
 	LogInfo(
-		" [{}] [{}] [{}] [{}] [{}] [{}] [{}] [{}]",
-		cc->STR,
-		cc->STA,
+		"AGI [{}] CHA [{}] DEX [{}] INT [{}] STA [{}] STR [{}] WIS [{}] Total [{}]",
 		cc->AGI,
-		cc->DEX,
-		cc->WIS,
-		cc->INT,
 		cc->CHA,
+		cc->DEX,
+		cc->INT,
+		cc->STA,
+		cc->STR,
+		cc->WIS,
 		stats_sum
 	);
-	LogInfo("Face [{}] Eye colors [{}] [{}]", cc->face, cc->eyecolor1, cc->eyecolor2);
-	LogInfo("Hairstyle [{}] Haircolor [{}]", cc->hairstyle, cc->haircolor);
-	LogInfo("Beard [{}] Beardcolor [{}]", cc->beard, cc->beardcolor);
+	LogInfo("Face [{}] Eye Colors [{}] [{}]", cc->face, cc->eyecolor1, cc->eyecolor2);
+	LogInfo("Hair [{}] Hair Color [{}]", cc->hairstyle, cc->haircolor);
+	LogInfo("Beard [{}] Beard Color [{}]", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
 	if (m_ClientVersionBit & EQ::versions::maskSoFAndLater) {
@@ -1669,39 +1677,39 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	/* Convert incoming cc_s to the new PlayerProfile_Struct */
 	memset(&pp, 0, sizeof(PlayerProfile_Struct));	// start building the profile
 
-	strn0cpy(pp.name, name, 63);
+	strn0cpy(pp.name, name, sizeof(pp.name));
 
-	pp.race				= cc->race;
-	pp.class_			= cc->class_;
-	pp.gender			= cc->gender;
-	pp.deity			= cc->deity;
-	pp.STR				= cc->STR;
-	pp.STA				= cc->STA;
-	pp.AGI				= cc->AGI;
-	pp.DEX				= cc->DEX;
-	pp.WIS				= cc->WIS;
-	pp.INT				= cc->INT;
-	pp.CHA				= cc->CHA;
-	pp.face				= cc->face;
-	pp.eyecolor1		= cc->eyecolor1;
-	pp.eyecolor2		= cc->eyecolor2;
-	pp.hairstyle		= cc->hairstyle;
-	pp.haircolor		= cc->haircolor;
-	pp.beard			= cc->beard;
-	pp.beardcolor		= cc->beardcolor;
-	pp.drakkin_heritage		= cc->drakkin_heritage;
-	pp.drakkin_tattoo		= cc->drakkin_tattoo;
-	pp.drakkin_details		= cc->drakkin_details;
-	pp.birthday		= bday;
-	pp.lastlogin	= bday;
-	pp.level			= 1;
-	pp.points			= 5;
-	pp.cur_hp			= 1000; // 1k hp during dev only
-	pp.hunger_level = 6000;
-	pp.thirst_level = 6000;
+	pp.race             = cc->race;
+	pp.class_           = cc->class_;
+	pp.gender           = cc->gender;
+	pp.deity            = cc->deity;
+	pp.STR              = cc->STR;
+	pp.STA              = cc->STA;
+	pp.AGI              = cc->AGI;
+	pp.DEX              = cc->DEX;
+	pp.WIS              = cc->WIS;
+	pp.INT              = cc->INT;
+	pp.CHA              = cc->CHA;
+	pp.face             = cc->face;
+	pp.eyecolor1        = cc->eyecolor1;
+	pp.eyecolor2        = cc->eyecolor2;
+	pp.hairstyle        = cc->hairstyle;
+	pp.haircolor        = cc->haircolor;
+	pp.beard            = cc->beard;
+	pp.beardcolor       = cc->beardcolor;
+	pp.drakkin_heritage = cc->drakkin_heritage;
+	pp.drakkin_tattoo   = cc->drakkin_tattoo;
+	pp.drakkin_details  = cc->drakkin_details;
+	pp.birthday         = bday;
+	pp.lastlogin        = bday;
+	pp.level            = 1;
+	pp.points           = 5;
+	pp.cur_hp           = 1000;
+	pp.hunger_level     = 6000;
+	pp.thirst_level     = 6000;
 
 	/* Set default skills for everybody */
-	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQ::skills::SkillSwimming]     = RuleI(Skills, SwimmingStartValue);
 	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 	/* Set Racial and Class specific language and skills */
@@ -1710,13 +1718,12 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
 
-//	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
+	memset(pp.spell_book, std::numeric_limits<uint8>::max(), (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
+	memset(pp.mem_spells, std::numeric_limits<uint8>::max(), (sizeof(uint32) * EQ::spells::SPELL_GEM_COUNT));
 
-	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
-	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQ::spells::SPELL_GEM_COUNT));
-
-	for (auto& buff : pp.buffs)
-		buff.spellid = 0xFFFF;
+	for (auto& b : pp.buffs) {
+		b.spellid = std::numeric_limits<uint16>::max();
+	}
 
 	/* If server is PVP by default, make all character set to it. */
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
@@ -1728,56 +1735,38 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 			pp.zone_id = RuleI(World, SoFStartZoneID);
 			cc->start_zone = pp.zone_id;
 		}
-	}
-	else {
+	} else {
 		LogInfo("Found [TitaniumStartZoneID] rule setting [{}]", RuleI(World, TitaniumStartZoneID));
 		if (RuleI(World, TitaniumStartZoneID) > 0) { 	/* if there's a startzone variable put them in there */
-
-			pp.zone_id = RuleI(World, TitaniumStartZoneID);
+			pp.zone_id     = RuleI(World, TitaniumStartZoneID);
 			cc->start_zone = pp.zone_id;
 		}
 	}
-	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = content_db.GetStartZone(&pp, cc, m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier);
 
-	if (!ValidStartZone){
+	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
+	const bool is_valid_start_zone = content_db.GetStartZone(&pp, cc, m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier);
+	if (!is_valid_start_zone){
 		return false;
 	}
 
-	/* just in case  */
 	if (!pp.zone_id) {
-		pp.zone_id = 1;		// qeynos
+		pp.zone_id = Zones::QEYNOS;
+
 		pp.x = pp.y = pp.z = -1;
 	}
 
-	/* Set Home Binds  -- yep, all of them */
-	pp.binds[1].zone_id = pp.zone_id;
-	pp.binds[1].x = pp.x;
-	pp.binds[1].y = pp.y;
-	pp.binds[1].z = pp.z;
-	pp.binds[1].heading = pp.heading;
-
-	pp.binds[2].zone_id = pp.zone_id;
-	pp.binds[2].x = pp.x;
-	pp.binds[2].y = pp.y;
-	pp.binds[2].z = pp.z;
-	pp.binds[2].heading = pp.heading;
-
-	pp.binds[3].zone_id = pp.zone_id;
-	pp.binds[3].x = pp.x;
-	pp.binds[3].y = pp.y;
-	pp.binds[3].z = pp.z;
-	pp.binds[3].heading = pp.heading;
-
-	pp.binds[4].zone_id = pp.zone_id;
-	pp.binds[4].x = pp.x;
-	pp.binds[4].y = pp.y;
-	pp.binds[4].z = pp.z;
-	pp.binds[4].heading = pp.heading;
+	for (uint8 slot_id = 1; slot_id < 5; slot_id++) {
+		pp.binds[slot_id].zone_id = pp.zone_id;
+		pp.binds[slot_id].x       = pp.x;
+		pp.binds[slot_id].y       = pp.y;
+		pp.binds[slot_id].z       = pp.z;
+		pp.binds[slot_id].heading = pp.heading;
+	}
 
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
 		pp.zone_id = RuleI(World, TutorialZoneID);
+
 		auto z = GetZone(pp.zone_id);
 		if (z) {
 			pp.x = z->safe_x;
@@ -1787,17 +1776,17 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	}
 
 	/*  Will either be the same as home or tutorial if enabled. */
-	if(RuleB(World, StartZoneSameAsBindOnCreation))	{
+	if (RuleB(World, StartZoneSameAsBindOnCreation)) {
 		pp.binds[0].zone_id = pp.zone_id;
-		pp.binds[0].x = pp.x;
-		pp.binds[0].y = pp.y;
-		pp.binds[0].z = pp.z;
+		pp.binds[0].x       = pp.x;
+		pp.binds[0].y       = pp.y;
+		pp.binds[0].z       = pp.z;
 		pp.binds[0].heading = pp.heading;
 	}
 
 	if (GetZone(pp.zone_id)) {
 		LogInfo(
-			"Current location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			"Current location zone_short_name [{}] zone_id [{}] x [{:.2f}] y [{:.2f}] z [{:.2f}] heading [{:.2f}]",
 			ZoneName(pp.zone_id),
 			pp.zone_id,
 			pp.x,
@@ -1809,37 +1798,34 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	if (GetZone(pp.binds[0].zone_id)) {
 		LogInfo(
-			"Bind location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			"Bind location zone_short_name [{}] zone_id [{}] x [{:.2f}] y [{:.2f}] z [{:.2f}] heading [{:.2f}]",
 			ZoneName(pp.binds[0].zone_id),
 			pp.binds[0].zone_id,
 			pp.binds[0].x,
 			pp.binds[0].y,
-			pp.binds[0].z
+			pp.binds[0].z,
+			pp.binds[4].heading
 		);
 	}
 
 	if (GetZone(pp.binds[4].zone_id)) {
 		LogInfo(
-			"Home location [{}] [{}] [{:.2f}] [{:.2f}] [{:.2f}]",
+			"Home location zone_short_name [{}] zone_id [{}] x [{:.2f}] y [{:.2f}] z [{:.2f}] heading [{:.2f}]",
 			ZoneName(pp.binds[4].zone_id),
 			pp.binds[4].zone_id,
 			pp.binds[4].x,
 			pp.binds[4].y,
-			pp.binds[4].z
+			pp.binds[4].z,
+			pp.binds[4].heading
 		);
 	}
 
-	/* Starting Items inventory */
 	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
-	// now we give the pp and the inv we made to StoreCharacter
-	// to see if we can store it
-	if (!StoreCharacter(GetAccountID(), &pp, &inv)) {
-		LogInfo("Character creation failed: [{}]", pp.name);
-		return false;
-	}
-	LogInfo("Character creation successful: [{}]", pp.name);
-	return true;
+	const bool success = StoreCharacter(GetAccountID(), &pp, &inv);
+
+	LogInfo("Character creation {} for [{}]", success ? "succeeded" : "failed", pp.name);
+	return success;
 }
 
 // returns true if the request is ok, false if there's an error
@@ -2312,56 +2298,51 @@ bool Client::StoreCharacter(
 	EQ::InventoryProfile *p_inventory_profile
 )
 {
-	uint32 character_id = 0;
-	char   zone[50];
-	character_id = database.GetCharacterID(p_player_profile_struct->name);
-
+	const uint32 character_id = database.GetCharacterID(p_player_profile_struct->name);
 	if (!character_id) {
-		LogError("StoreCharacter: no character id");
 		return false;
 	}
 
-	const char *zone_name = ZoneName(p_player_profile_struct->zone_id);
-	if (zone_name == nullptr) {
-		/* Zone not in the DB, something to prevent crash... */
-		strn0cpy(zone, "qeynos", 49);
-		p_player_profile_struct->zone_id = 1;
-	}
-	else {
-		strn0cpy(zone, zone_name, 49);
+	const std::string& zone_name = zone_store.GetZoneName(p_player_profile_struct->zone_id, true);
+	if (Strings::EqualFold(zone_name, "UNKNOWN")) {
+		p_player_profile_struct->zone_id = Zones::QEYNOS;
 	}
 
 	database.SaveCharacterCreate(character_id, account_id, p_player_profile_struct);
 
-	std::string invquery;
-	for (int16  i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invbag::BANK_BAGS_END;) {
-		const EQ::ItemInstance *new_inventory_item = p_inventory_profile->GetItem(i);
-		if (new_inventory_item) {
-			invquery = StringFormat(
-				"INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
-				character_id,
-				i,
-				new_inventory_item->GetItem()->ID,
-				new_inventory_item->GetCharges(),
-				new_inventory_item->GetColor()
-			);
+	std::vector<InventoryRepository::Inventory> v;
 
-			auto results = database.QueryDatabase(invquery);
+	auto e = InventoryRepository::NewEntity();
+
+	e.charid = character_id;
+
+	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invbag::BANK_BAGS_END;) {
+		const auto inst = p_inventory_profile->GetItem(slot_id);
+		if (inst) {
+			e.slotid  = slot_id;
+			e.itemid  = inst->GetItem()->ID;
+			e.charges = inst->GetCharges();
+			e.color   = inst->GetColor();
+
+			v.emplace_back(e);
 		}
 
-		if (i == EQ::invslot::slotCursor) {
-			i = EQ::invbag::GENERAL_BAGS_BEGIN;
+		if (slot_id == EQ::invslot::slotCursor) {
+			slot_id = EQ::invbag::GENERAL_BAGS_BEGIN;
+			continue;
+		} else if (slot_id == EQ::invbag::CURSOR_BAG_END) {
+			slot_id = EQ::invslot::BANK_BEGIN;
+			continue;
+		} else if (slot_id == EQ::invslot::BANK_END) {
+			slot_id = EQ::invbag::BANK_BAGS_BEGIN;
 			continue;
 		}
-		else if (i == EQ::invbag::CURSOR_BAG_END) {
-			i = EQ::invslot::BANK_BEGIN;
-			continue;
-		}
-		else if (i == EQ::invslot::BANK_END) {
-			i = EQ::invbag::BANK_BAGS_BEGIN;
-			continue;
-		}
-		i++;
+
+		slot_id++;
+	}
+
+	if (!v.empty()) {
+		InventoryRepository::InsertMany(database, v);
 	}
 
 	return true;

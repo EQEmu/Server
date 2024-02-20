@@ -13,7 +13,7 @@ void command_movechar(Client *c, const Seperator *sep)
 		database.GetCharNameByID(Strings::ToUnsignedInt(sep->arg[1])) :
 		sep->arg[1]
 	);
-	const uint32 character_id = database.GetCharacterID(character_name.c_str());
+	const uint32 character_id = database.GetCharacterID(character_name);
 	if (!character_id) {
 		c->Message(
 			Chat::White,

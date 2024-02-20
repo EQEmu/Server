@@ -56,7 +56,7 @@ void Adventure::AddPlayer(std::string character_name, bool add_client_to_instanc
 {
 	if(!PlayerExists(character_name))
 	{
-		int32 character_id = database.GetCharacterID(character_name.c_str());
+		int32 character_id = database.GetCharacterID(character_name);
 		if(character_id && add_client_to_instance)
 		{
 			database.AddClientToInstance(instance_id, character_id);
@@ -72,7 +72,7 @@ void Adventure::RemovePlayer(std::string character_name)
 	{
 		if((*iter).compare(character_name) == 0)
 		{
-			int32 character_id = database.GetCharacterID(character_name.c_str());
+			int32 character_id = database.GetCharacterID(character_name);
 			if (character_id)
 			{
 				database.RemoveClientFromInstance(instance_id, character_id);
@@ -312,7 +312,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 				}
 
 				zoneserver_list.SendPacket(current->zone(), current->instance(), pack);
-				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 				delete pack;
 			}
 			else
@@ -337,7 +337,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 					afe.points = 0;
 				}
 				adventure_manager.AddFinishedEvent(afe);
-				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 			}
 		}
 		else
@@ -363,7 +363,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 			}
 			adventure_manager.AddFinishedEvent(afe);
 
-			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;
 	}
