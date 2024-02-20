@@ -514,14 +514,18 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 		}
 		case ServerOP_GuildPermissionUpdate: {
 			if (is_zone_loaded) {
-				auto *sgpus = (ServerGuildPermissionUpdate_Struct *) pack->pBuffer;
-				auto                               res    = m_guilds.find(sgpus->guild_id);
-				if (sgpus->function_value) {
-					res->second->functions[sgpus->function_id].perm_value |= (1UL << (8 - sgpus->rank));
-				}
-				else {
-					res->second->functions[sgpus->function_id].perm_value &= ~(1UL << (8 - sgpus->rank));
-				}
+                auto *sgpus = (ServerGuildPermissionUpdate_Struct *)pack->pBuffer;
+                auto  guild = GetGuildByGuildID(sgpus->guild_id);
+                if (!guild) {
+                    return;
+                }
+
+                if (sgpus->function_value) {
+                    guild->functions[sgpus->function_id].perm_value |= (1UL << (8 - sgpus->rank));
+                }
+                else {
+                    guild->functions[sgpus->function_id].perm_value &= ~(1UL << (8 - sgpus->rank));
+                }
 
 				auto outapp  = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildPermission_Struct));
 				auto *guuacs = (GuildPermission_Struct *) outapp->pBuffer;
@@ -1489,16 +1493,20 @@ bool GuildBankManager::AllowedToWithdraw(uint32 GuildID, uint16 Area, uint16 Slo
 
 void ZoneGuildManager::UpdateRankPermission(uint32 gid, uint32 charid, uint32 fid, uint32 rank, uint32 value)
 {
-	auto res = m_guilds.find(gid);
-	if (value) {
-		res->second->functions[fid].perm_value |= (1UL << (8 - rank));
-	}
-	else {
-		res->second->functions[fid].perm_value &= ~(1UL << (8 - rank));
-	}
-	auto query = fmt::format("UPDATE guild_permissions SET permission = {} WHERE perm_id = {} AND guild_id = {};", res->second->functions[fid].perm_value, fid, gid);
-	auto results = m_db->QueryDatabase(query);
+    auto guild = GetGuildByGuildID(gid);
+    if (!guild) {
+        return;
+    }
 
+    if (value) {
+        guild->functions[fid].perm_value |= (1UL << (8 - rank));
+    }
+    else {
+        guild->functions[fid].perm_value &= ~(1UL << (8 - rank));
+    }
+    auto query   = fmt::format("UPDATE guild_permissions SET permission = {} WHERE perm_id = {} AND guild_id = {};",
+                               guild->functions[fid].perm_value, fid, gid);
+    auto results = m_db->QueryDatabase(query);
 }
 
 void ZoneGuildManager::SendPermissionUpdate(uint32 guild_id, uint32 rank, uint32 function_id, uint32 value)
@@ -1534,21 +1542,20 @@ void ZoneGuildManager::SendRankName(uint32 guild_id, uint32 rank, std::string ra
 
 void ZoneGuildManager::SendAllRankNames(uint32 guild_id, uint32 char_id)
 {
-	auto guild = m_guilds.find(guild_id);
-	auto c = entity_list.GetClientByCharID(char_id);
-	if (c)
-	{
-		auto outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
-		GuildUpdateUCPStruct* gucp = (GuildUpdateUCPStruct*)outapp->pBuffer;
-		for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++)
-		{
-			gucp->payload.rank_name.rank = i;
-			strn0cpy(gucp->payload.rank_name.rank_name, guild->second->rank_names[i].c_str(), sizeof(gucp->payload.rank_name.rank_name));
-			gucp->action = GuildUpdateRanks;
-			c->QueuePacket(outapp);
-		}
-		safe_delete(outapp);
-	}
+    auto guild = GetGuildByGuildID(guild_id);
+    auto c     = entity_list.GetClientByCharID(char_id);
+    if (guild && c) {
+        auto                  outapp = new EQApplicationPacket(OP_GuildUpdate, sizeof(GuildUpdateUCPStruct));
+        GuildUpdateUCPStruct *gucp   = (GuildUpdateUCPStruct *)outapp->pBuffer;
+        for (int i = GUILD_LEADER; i <= GUILD_RECRUIT; i++) {
+            gucp->payload.rank_name.rank = i;
+            strn0cpy(gucp->payload.rank_name.rank_name, guild->rank_names[i].c_str(),
+                     sizeof(gucp->payload.rank_name.rank_name));
+            gucp->action = GuildUpdateRanks;
+            c->QueuePacket(outapp);
+        }
+        safe_delete(outapp);
+    }
 }
 
 BaseGuildManager::GuildInfo* ZoneGuildManager::GetGuildByGuildID(uint32 guild_id)
