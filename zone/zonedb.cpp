@@ -3988,7 +3988,9 @@ bool ZoneDatabase::SummonAllCharacterCorpses(
 		}
 	}
 
-	CharacterCorpsesRepository::ReplaceMany(*this, l);
+	if (!l.empty()) {
+		CharacterCorpsesRepository::ReplaceMany(*this, l);
+	}
 
 	return corpse_count > 0;
 }
