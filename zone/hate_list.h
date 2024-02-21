@@ -36,6 +36,13 @@ struct struct_HateList {
 	uint32 last_modified; // we need to remove this if it gets higher than 10 mins
 };
 
+enum class HateListCountType {
+	Bot    = 0,
+	Client = 1,
+	NPC    = 2,
+	All    = 3,
+};
+
 class HateList {
 public:
 	HateList();
@@ -51,6 +58,7 @@ public:
 	bool IsEntOnHateList(Mob* m);
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
+	uint32 GetHateListCount(HateListCountType count_type = HateListCountType::All);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
 	int GetSummonedPetCountOnHateList();
