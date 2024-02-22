@@ -1164,14 +1164,27 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 
 	// check for items being illegally attained
 	if (weapon_item) {
-		if (!weapon_item->GetItem())
+		if (!weapon_item->GetItem()) {
 			return 0;
+		}
 
-		if (weapon_item->GetItemRequiredLevel(true) > GetLevel())
+		if (weapon_item->GetItemRequiredLevel(true) > GetLevel()) {
 			return 0;
+		}
 
-		if (!weapon_item->IsEquipable(GetBaseRace(), GetClass()))
+		if (!weapon_item->IsClassEquipable(GetClass())) {
 			return 0;
+		}
+
+		if (
+			!weapon_item->IsRaceEquipable(GetBaseRace()) &&
+			(
+				!IsBot() ||
+				(IsBot() && !RuleB(Bots, AllowBotEquipAnyRaceGear))
+			)
+		) {
+			return 0;
+		}
 	}
 
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
@@ -4074,7 +4087,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsClient()) {
 				CommonBreakInvisible();
 			}
-			
+
 			damage = ReduceDamage(damage);
 			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);
