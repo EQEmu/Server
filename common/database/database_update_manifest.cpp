@@ -5391,7 +5391,25 @@ MODIFY COLUMN `safe_x` float NOT NULL DEFAULT 0 AFTER `file_name`,
 MODIFY COLUMN `safe_y` float NOT NULL DEFAULT 0 AFTER `safe_x`,
 MODIFY COLUMN `safe_z` float NOT NULL DEFAULT 0 AFTER `safe_y`,
 MODIFY COLUMN `safe_heading` float NOT NULL DEFAULT 0 AFTER `safe_z`;
-		)"
+		)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9264,
+		.description = "2024_02_18_starting_items_augments.sql",
+		.check = "SHOW COLUMNS FROM `starting_items` LIKE 'augment_one'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `starting_items`
+ADD COLUMN `augment_one` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `item_charges`,
+ADD COLUMN `augment_two` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+ADD COLUMN `augment_three` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+ADD COLUMN `augment_four` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
+		)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

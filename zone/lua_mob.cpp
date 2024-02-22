@@ -3201,6 +3201,30 @@ uint32 Lua_Mob::GetMobTypeIdentifier()
 	return self->GetMobTypeIdentifier();
 }
 
+uint32 Lua_Mob::GetHateListCount()
+{
+	Lua_Safe_Call_Int();
+	return self->GetHateListCount();
+}
+
+uint32 Lua_Mob::GetHateListBotCount()
+{
+	Lua_Safe_Call_Int();
+	return self->GetHateListCount(HateListCountType::Bot);
+}
+
+uint32 Lua_Mob::GetHateListClientCount()
+{
+	Lua_Safe_Call_Int();
+	return self->GetHateListCount(HateListCountType::Client);
+}
+
+uint32 Lua_Mob::GetHateListNPCCount()
+{
+	Lua_Safe_Call_Int();
+	return self->GetHateListCount(HateListCountType::NPC);
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3460,12 +3484,16 @@ luabind::scope lua_register_mob() {
 	.def("GetHateList", &Lua_Mob::GetHateList)
 	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListBots)
 	.def("GetHateListBots", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListBots)
+	.def("GetHateListBotCount", &Lua_Mob::GetHateListBotCount)
 	.def("GetHateListClients", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListClients)
 	.def("GetHateListClients", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListClients)
+	.def("GetHateListClientCount", &Lua_Mob::GetHateListClientCount)
 	.def("GetHateListNPCs", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListNPCs)
 	.def("GetHateListNPCs", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListNPCs)
+	.def("GetHateListNPCCount", &Lua_Mob::GetHateListNPCCount)
 	.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListByDistance)
 	.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(uint32))&Lua_Mob::GetHateListByDistance)
+	.def("GetHateListCount", &Lua_Mob::GetHateListCount)
 	.def("GetHateRandom", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateRandom)
 	.def("GetHateRandomBot", (Lua_Bot(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomBot)
 	.def("GetHateRandomClient", (Lua_Client(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomClient)

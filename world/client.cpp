@@ -2335,10 +2335,16 @@ bool Client::StoreCharacter(
 	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invbag::BANK_BAGS_END;) {
 		const auto inst = p_inventory_profile->GetItem(slot_id);
 		if (inst) {
-			e.slotid  = slot_id;
-			e.itemid  = inst->GetItem()->ID;
-			e.charges = inst->GetCharges();
-			e.color   = inst->GetColor();
+			e.slotid   = slot_id;
+			e.itemid   = inst->GetItem()->ID;
+			e.charges  = inst->GetCharges();
+			e.color    = inst->GetColor();
+			e.augslot1 = inst->GetAugmentItemID(EQ::invaug::SOCKET_BEGIN);
+			e.augslot2 = inst->GetAugmentItemID(EQ::invaug::SOCKET_BEGIN + 1);
+			e.augslot3 = inst->GetAugmentItemID(EQ::invaug::SOCKET_BEGIN + 2);
+			e.augslot4 = inst->GetAugmentItemID(EQ::invaug::SOCKET_BEGIN + 3);
+			e.augslot5 = inst->GetAugmentItemID(EQ::invaug::SOCKET_BEGIN + 4);
+			e.augslot6 = inst->GetAugmentItemID(EQ::invaug::SOCKET_END);
 
 			v.emplace_back(e);
 		}
@@ -2385,7 +2391,7 @@ void Client::RecordPossibleHack(const std::string& message)
 	}
 }
 
-void Client::SendGuildTributeFavorAndTimer(uint32 favor, uint32 time_remaining) 
+void Client::SendGuildTributeFavorAndTimer(uint32 favor, uint32 time_remaining)
 {
 	auto cle = GetCLE();
 	if (!cle) {

@@ -114,6 +114,9 @@ void Zone::ReloadNPCFactions()
 
 NpcFactionRepository::NpcFaction* Zone::GetNPCFaction(const uint32 npc_faction_id)
 {
+	// Maybe we're being asked to load an npc_faction not yet used in the zone
+	LoadNPCFaction(npc_faction_id);
+
 	for (auto& e : m_npc_factions) {
 		if (e.id == npc_faction_id) {
 			return &e;

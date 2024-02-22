@@ -683,7 +683,33 @@ int64 HateList::GetEntHateAmount(Mob *in_entity, bool damage)
 }
 
 bool HateList::IsHateListEmpty() {
-	return(list.size() == 0);
+	return list.empty();
+}
+
+uint32 HateList::GetHateListCount(HateListCountType count_type)
+{
+	if (count_type == HateListCountType::All) {
+		return list.size();
+	}
+
+	uint32 count = 0;
+
+	for (const auto& e : list) {
+		Mob* m = e->entity_on_hatelist;
+
+		if (
+			m &&
+			(
+				(count_type == HateListCountType::Bot && m->IsBot()) ||
+				(count_type == HateListCountType::Client && m->IsClient()) ||
+				(count_type == HateListCountType::NPC && m->IsNPC())
+			)
+		) {
+			count++;
+		}
+	}
+
+	return count;
 }
 
 void HateList::PrintHateListToClient(Client *c)

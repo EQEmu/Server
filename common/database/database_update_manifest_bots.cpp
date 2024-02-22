@@ -124,6 +124,22 @@ ALTER TABLE `bot_pet_buffs` DROP FOREIGN KEY `FK_bot_pet_buffs_1`;
 ALTER TABLE `bot_pet_inventories` DROP FOREIGN KEY `FK_bot_pet_inventories_1`;
 ALTER TABLE `bot_stances` DROP FOREIGN KEY `FK_bot_stances_1`;
 )"
+	},
+	ManifestEntry{
+		.version = 9043,
+		.description = "2024_02_18_bot_starting_items_augments.sql",
+		.check = "SHOW COLUMNS FROM `bot_starting_items` LIKE 'augment_one'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `bot_starting_items`
+ADD COLUMN `augment_one` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `item_charges`,
+ADD COLUMN `augment_two` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_one`,
+ADD COLUMN `augment_three` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_two`,
+ADD COLUMN `augment_four` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_three`,
+ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
+ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

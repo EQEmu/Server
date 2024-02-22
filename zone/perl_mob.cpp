@@ -3340,6 +3340,26 @@ std::string Perl_Mob_GetRacePlural(Mob* self)
 	return self->GetRacePlural();
 }
 
+uint32 Perl_Mob_GetHateListCount(Mob* self)
+{
+	return self->GetHateListCount();
+}
+
+uint32 Perl_Mob_GetHateListBotCount(Mob* self)
+{
+	return self->GetHateListCount(HateListCountType::Bot);
+}
+
+uint32 Perl_Mob_GetHateListClientCount(Mob* self)
+{
+	return self->GetHateListCount(HateListCountType::Client);
+}
+
+uint32 Perl_Mob_GetHateListNPCCount(Mob* self)
+{
+	return self->GetHateListCount(HateListCountType::NPC);
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3585,12 +3605,16 @@ void perl_register_mob()
 	package.add("GetHateList", &Perl_Mob_GetHateList);
 	package.add("GetHateListBots", (perl::array(*)(Mob*))&Perl_Mob_GetHateListBots);
 	package.add("GetHateListBots", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListBots);
+	package.add("GetHateListBotCount", &Perl_Mob_GetHateListBotCount);
 	package.add("GetHateListClients", (perl::array(*)(Mob*))&Perl_Mob_GetHateListClients);
 	package.add("GetHateListClients", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListClients);
+	package.add("GetHateListClientCount", &Perl_Mob_GetHateListClientCount);
 	package.add("GetHateListNPCs", (perl::array(*)(Mob*))&Perl_Mob_GetHateListNPCs);
 	package.add("GetHateListNPCs", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListNPCs);
+	package.add("GetHateListNPCCount", &Perl_Mob_GetHateListNPCCount);
 	package.add("GetHateListByDistance", (perl::array(*)(Mob*))&Perl_Mob_GetHateListByDistance);
 	package.add("GetHateListByDistance", (perl::array(*)(Mob*, uint32))&Perl_Mob_GetHateListByDistance);
+	package.add("GetHateListCount", &Perl_Mob_GetHateListCount);
 	package.add("GetHateRandom", &Perl_Mob_GetHateRandom);
 	package.add("GetHateRandomBot", &Perl_Mob_GetHateRandomBot);
 	package.add("GetHateRandomClient", &Perl_Mob_GetHateRandomClient);

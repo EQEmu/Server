@@ -460,7 +460,13 @@ bool SharedDatabase::SetStartingItems(
 {
 	const EQ::ItemData *item_data;
 
-	const auto &l = StartingItemsRepository::All(*this);
+	const auto& l = StartingItemsRepository::GetWhere(
+		*this,
+		fmt::format(
+			"TRUE {}",
+			ContentFilterCriteria::apply()
+		)
+	);
 
 	if (l.empty()) {
 		return false;
@@ -514,7 +520,16 @@ bool SharedDatabase::SetStartingItems(
 			continue;
 		}
 
-		const auto *inst = CreateBaseItem(item_data, item_charges);
+		const auto* inst = CreateItem(
+			item_data,
+			item_charges,
+			e.augment_one,
+			e.augment_two,
+			e.augment_three,
+			e.augment_four,
+			e.augment_five,
+			e.augment_six
+		);
 
 		if (slot < EQ::invslot::slotCharm) {
 			slot = inv->FindFreeSlot(false, false);
