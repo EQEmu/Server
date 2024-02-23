@@ -2980,12 +2980,16 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 	if (parse->HasQuestSub(GetNPCTypeID(), EVENT_DEATH_COMPLETE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {} {} {} {} {} {}",
 			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
 			static_cast<int>(attack_skill),
-			entity_id
+			entity_id,
+			m_combat_record.GetStartTime(),
+			m_combat_record.GetEndTime(),
+			m_combat_record.GetDamageReceived(),
+			m_combat_record.GetHealingReceived()
 		);
 
 		std::vector<std::any> args = { corpse };
@@ -2996,12 +3000,16 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	// Zone controller process EVENT_DEATH_ZONE (Death events)
 	if (parse->HasQuestSub(ZONE_CONTROLLER_NPC_ID, EVENT_DEATH_ZONE)) {
 		const auto& export_string = fmt::format(
-			"{} {} {} {} {}",
+			"{} {} {} {} {} {} {} {} {}",
 			killer_mob ? killer_mob->GetID() : 0,
 			damage,
 			spell,
 			static_cast<int>(attack_skill),
-			entity_id
+			entity_id,
+			m_combat_record.GetStartTime(),
+			m_combat_record.GetEndTime(),
+			m_combat_record.GetDamageReceived(),
+			m_combat_record.GetHealingReceived()
 		);
 
 		std::vector<std::any> args = { corpse, this };
@@ -4074,7 +4082,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			if (IsClient()) {
 				CommonBreakInvisible();
 			}
-			
+
 			damage = ReduceDamage(damage);
 			LogCombat("Melee Damage reduced to [{}]", damage);
 			damage = ReduceAllDamage(damage);

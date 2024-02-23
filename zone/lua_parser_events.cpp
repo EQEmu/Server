@@ -321,6 +321,18 @@ void handle_npc_death(
 	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[4]));
 	lua_setfield(L, -2, "killed_entity_id");
 
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[5]));
+	lua_setfield(L, -2, "combat_start_time");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[6]));
+	lua_setfield(L, -2, "combat_end_time");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[7]));
+	lua_setfield(L, -2, "damage_received");
+
+	lua_pushinteger(L, Strings::ToBigInt(sep.arg[8]));
+	lua_setfield(L, -2, "healing_received");
+
 	if (extra_pointers && extra_pointers->size() >= 1) {
 		Lua_Corpse l_corpse(std::any_cast<Corpse*>(extra_pointers->at(0)));
 		luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
