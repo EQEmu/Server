@@ -2185,7 +2185,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				if (owner) {
 					if (owner->IsBot()) {
 						SetPetOwnerBot(true);
-					} else if (entity_list.GetNPCByID(GetOwnerID())) {
+					} else if (owner->IsNPC()) {
 						SetPetOwnerNPC(true);
 					}
 				}
