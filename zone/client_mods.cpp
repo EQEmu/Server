@@ -720,7 +720,7 @@ int64 Client::CalcBaseManaRegen()
 
 int64 Client::CalcManaRegen(bool bCombat)
 {
-	int64 regen = 0;
+	int64 regen = 1;
 	auto level = GetLevel();
 	// so the new formulas break down with older skill caps where you don't have the skill until 4 or 8
 	// so for servers that want to use the old skill progression they can set this rule so they

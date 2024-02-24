@@ -129,13 +129,12 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 	if (drop_limit == 0 && min_drop == 0) {
 		for (const auto &e: le) {
 			for (int j = 0; j < e.multiplier; ++j) {
-				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
+				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {							
 					const EQ::ItemData *database_item = database.GetItem(e.item_id);
 					AddLootDrop(database_item, e);
 				}
 			}
 		}
-
 		return;
 	}
 
@@ -249,6 +248,164 @@ bool NPC::MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntr
 	return true;
 }
 
+uint32 NPC::DoUpgradeLoot(uint32 itemID) {
+	/* Affix Map (+ x000000)
+	+1 Awakened
+	+2 Radiant
+	+10 Awakened + Hardy
+	+11 Awakened + Robust
+	+12 Awakened + Vital
+	+13 Awakened + Mindful
+	+14 Awakened + Mental
+	+15 Awakened + Cerebral
+	+16 Awakened + Enduring
+	+17 Awakened + Stalwart
+	+18 Awakened + Fortified
+	+19 Awakened + Fierce
+	+20 Awakened + Savage
+	+21 Awakened + Vicious
+	+22 Awakened + Esoteric
+	+23 Awakened + Arcane
+	+24 Awakened + Eldritch
+	+25 Awakened + Soothing
+	+26 Awakened + Mystic
+	+27 Awakened + Vital
+	+28 Awakened + Hardy + Forged or Wrought
+	+29 Awakened + Hardy + Honed or Tempered
+	+30 Awakened + Hardy + Polished or Brutal
+	+31 Awakened + Robust + Forged or Wrought
+	+32 Awakened + Robust + Honed or Tempered
+	+33 Awakened + Robust + Polished or Brutal
+	+34 Awakened + Vital + Forged or Wrought
+	+35 Awakened + Vital + Honed or Tempered
+	+36 Awakened + Vital + Polished or Brutal
+	+37 Awakened + Mindful + Forged or Wrought
+	+38 Awakened + Mindful + Honed or Tempered
+	+39 Awakened + Mindful + Polished or Brutal
+	+40 Awakened + Mental + Forged or Wrought
+	+41 Awakened + Mental + Honed or Tempered
+	+42 Awakened + Mental + Polished or Brutal
+	+43 Awakened + Cerebral + Forged or Wrought
+	+44 Awakened + Cerebral + Honed or Tempered
+	+45 Awakened + Cerebral + Polished or Brutal
+	+46 Awakened + Enduring + Forged or Wrought
+	+47 Awakened + Enduring + Honed or Tempered
+	+48 Awakened + Enduring + Polished or Brutal
+	+49 Awakened + Stalwart + Forged or Wrought
+	+50 Awakened + Stalwart + Honed or Tempered
+	+51 Awakened + Stalwart + Polished or Brutal
+	+52 Awakened + Fortified + Forged or Wrought
+	+53 Awakened + Fortified + Honed or Tempered
+	+54 Awakened + Fortified + Polished or Brutal
+	+55 Awakened + Fierce + Forged or Wrought
+	+56 Awakened + Fierce + Honed or Tempered
+	+57 Awakened + Fierce + Polished or Brutal
+	+58 Awakened + Savage + Forged or Wrought
+	+59 Awakened + Savage + Honed or Tempered
+	+60 Awakened + Savage + Polished or Brutal
+	+61 Awakened + Vicious + Forged or Wrought
+	+62 Awakened + Vicious + Honed or Tempered
+	+63 Awakened + Vicious + Polished or Brutal
+	+64 Awakened + Esoteric + Forged or Wrought
+	+65 Awakened + Esoteric + Honed or Tempered
+	+66 Awakened + Esoteric + Polished or Brutal
+	+67 Awakened + Arcane + Forged or Wrought
+	+68 Awakened + Arcane + Honed or Tempered
+	+69 Awakened + Arcane + Polished or Brutal
+	+70 Awakened + Eldritch + Forged or Wrought
+	+71 Awakened + Eldritch + Honed or Tempered
+	+72 Awakened + Eldritch + Polished or Brutal
+	+73 Awakened + Soothing + Forged or Wrought
+	+74 Awakened + Soothing + Honed or Tempered
+	+75 Awakened + Soothing + Polished or Brutal
+	+76 Awakened + Mystic + Forged or Wrought
+	+77 Awakened + Mystic + Honed or Tempered
+	+78 Awakened + Mystic + Polished or Brutal
+	+79 Radiant + Hardy
+	+80 Radiant + Robust
+	+81 Radiant + Vital
+	+82 Radiant + Mindful
+	+83 Radiant + Mental
+	+84 Radiant + Cerebral
+	+85 Radiant + Enduring
+	+86 Radiant + Stalwart
+	+87 Radiant + Fortified
+	+88 Radiant + Fierce
+	+89 Radiant + Savage
+	+90 Radiant + Vicious
+	+91 Radiant + Esoteric
+	+92 Radiant + Arcane
+	+93 Radiant + Eldritch
+	+94 Radiant + Soothing
+	+95 Radiant + Mystic
+	+96 Radiant + Hardy + Forged or Wrought
+	+97 Radiant + Hardy + Honed or Tempered
+	+98 Radiant + Hardy + Polished or Brutal
+	+99 Radiant + Robust + Forged or Wrought
+	+100 Radiant + Robust + Honed or Tempered
+	+101 Radiant + Robust + Polished or Brutal
+	+102 Radiant + Vital + Forged or Wrought
+	+103 Radiant + Vital + Honed or Tempered
+	+104 Radiant + Vital + Polished or Brutal
+	+105 Radiant + Mindful + Forged or Wrought
+	+106 Radiant + Mindful + Honed or Tempered
+	+107 Radiant + Mindful + Polished or Brutal
+	+108 Radiant + Mental + Forged or Wrought
+	+109 Radiant + Mental + Honed or Tempered
+	+110 Radiant + Mental + Polished or Brutal
+	+111 Radiant + Cerebral + Forged or Wrought
+	+112 Radiant + Cerebral + Honed or Tempered
+	+113 Radiant + Cerebral + Polished or Brutal
+	+114 Radiant + Enduring + Forged or Wrought
+	+115 Radiant + Enduring + Honed or Tempered
+	+116 Radiant + Enduring + Polished or Brutal
+	+117 Radiant + Stalwart + Forged or Wrought
+	+118 Radiant + Stalwart + Honed or Tempered
+	+119 Radiant + Stalwart + Polished or Brutal
+	+120 Radiant + Fortified + Forged or Wrought
+	+121 Radiant + Fortified + Honed or Tempered
+	+122 Radiant + Fortified + Polished or Brutal
+	+123 Radiant + Fierce + Forged or Wrought
+	+124 Radiant + Fierce + Honed or Tempered
+	+125 Radiant + Fierce + Polished or Brutal
+	+126 Radiant + Savage + Forged or Wrought
+	+127 Radiant + Savage + Honed or Tempered
+	+128 Radiant + Savage + Polished or Brutal
+	+129 Radiant + Vicious + Forged or Wrought
+	+130 Radiant + Vicious + Honed or Tempered
+	+131 Radiant + Vicious + Polished or Brutal
+	+132 Radiant + Esoteric + Forged or Wrought
+	+133 Radiant + Esoteric + Honed or Tempered
+	+134 Radiant + Esoteric + Polished or Brutal
+	+135 Radiant + Arcane + Forged or Wrought
+	+136 Radiant + Arcane + Honed or Tempered
+	+137 Radiant + Arcane + Polished or Brutal
+	+138 Radiant + Eldritch + Forged or Wrought
+	+139 Radiant + Eldritch + Honed or Tempered
+	+140 Radiant + Eldritch + Polished or Brutal
+	+141 Radiant + Soothing + Forged or Wrought
+	+142 Radiant + Soothing + Honed or Tempered
+	+143 Radiant + Soothing + Polished or Brutal
+	+144 Radiant + Mystic + Forged or Wrought
+	+145 Radiant + Mystic + Honed or Tempered
+	+146 Radiant + Mystic + Polished or Brutal
+	*/
+	if (RuleB(Custom, DoItemUpgrades)) {
+		auto roll = zone->random.Real(0.0, 100.0); // Roll a number between 0 and 100
+		auto newID = itemID;
+		if (roll <= RuleR(Custom, RadiantItemDropRate)) {
+			newID += 2000000;
+		} else if (roll <= RuleR(Custom, AwakenedItemDropRate)) { 
+			// Rolled Awakened/RC
+			newID += 1000000;
+		}
+		if (database.GetItem(newID)) {
+			itemID = newID;
+		}
+	}
+	return itemID;
+}
+
 //if itemlist is null, just send wear changes
 void NPC::AddLootDrop(
 	const EQ::ItemData *item2,
@@ -264,6 +421,10 @@ void NPC::AddLootDrop(
 {
 	if (!item2) {
 		return;
+	}
+
+	if (RuleB(Custom, DoItemUpgrades)) {
+		item2 = database.GetItem(DoUpgradeLoot(item2->ID));
 	}
 
 	auto item = new LootItem;

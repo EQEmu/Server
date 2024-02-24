@@ -165,7 +165,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	return x;
 }
 
-uint32 Client::GetApocItemUpgrade(uint32 item_id) {
+uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		uint32 new_item_id = item_id;
 

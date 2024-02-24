@@ -510,6 +510,8 @@ public:
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
 	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
 
+	uint32 GetApocItemUpgrade(uint32 item_id);
+
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
 	void TempName(const char *newname = nullptr);
