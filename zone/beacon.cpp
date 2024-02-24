@@ -140,11 +140,8 @@ bool Beacon::Process()
 		if (caster && spell_iterations-- && max_targets) {
 			// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
 			// I don't think any other cases that get here matter
-			const bool affect_caster = (
-				!caster->IsNPC() &&
-				!caster->IsAIControlled() &&
-				spells[spell_id].target_type != ST_AECaster
-			);
+			const bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) &&
+				spells[spell_id].target_type != ST_AECaster;
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
 		} else {
 			// spell is done casting, or caster disappeared
@@ -172,7 +169,8 @@ void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 in_resist_
 	caster_id        = caster->GetID();
 	spell_id         = cast_spell_id;
 	resist_adjust    = in_resist_adjust;
-	spell_iterations = ((spells[spell_id].aoe_duration / 2500) < 1) ? 1 : spell_iterations;
+	spell_iterations = spells[spell_id].aoe_duration / 2500;
+	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
 
 	if (spells[spell_id].aoe_max_targets) {
 		max_targets = spells[spell_id].aoe_max_targets;
