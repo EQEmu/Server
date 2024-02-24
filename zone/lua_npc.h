@@ -102,7 +102,7 @@ public:
 	int GetFollowID();
 	int GetFollowDistance();
 	bool GetFollowCanRun();
-	int GetNPCSpellsID();
+	uint32 GetNPCSpellsID();
 	int GetSpawnPointID();
 	float GetSpawnPointX();
 	float GetSpawnPointY();
@@ -184,6 +184,7 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	bool GetNPCAggro();
 	void SetNPCAggro(bool in_npc_aggro);
+	uint32 GetNPCSpellsEffectsID();
 };
 
 #endif
