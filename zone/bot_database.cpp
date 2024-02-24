@@ -2353,10 +2353,6 @@ std::vector<uint32> BotDatabase::GetBotIDsByCharacterID(const uint32 character_i
 		)
 	);
 
-	if (l.empty()) {
-		return v;
-	}
-
 	for (const auto& e : l) {
 		v.push_back(e.bot_id);
 	}
