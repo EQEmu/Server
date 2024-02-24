@@ -574,6 +574,9 @@ public:
 	bool IsCharmed();
 	bool IsFamiliar();
 	bool IsTargetLockPet();
+	bool IsPetOwnerBot();
+	bool IsPetOwnerClient();
+	bool IsPetOwnerNPC();
 };
 
 #endif
