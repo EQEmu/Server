@@ -5782,6 +5782,57 @@ std::string Perl__convert_money_to_string(perl::hash table)
 	return Strings::Money(platinum, gold, silver, copper);
 }
 
+uint8 Perl__GetBotClassByID(uint32 bot_id)
+{
+	return database.botdb.GetBotClassByID(bot_id);
+}
+
+uint8 Perl__GetBotGenderByID(uint32 bot_id)
+{
+	return database.botdb.GetBotGenderByID(bot_id);
+}
+
+perl::array Perl__GetBotIDsByCharacterID(uint32 character_id)
+{
+	perl::array result;
+
+	const auto bot_ids = database.botdb.GetBotIDsByCharacterID(character_id);
+
+	for (int i = 0; i < bot_ids.size(); i++) {
+		result.push_back(bot_ids[i]);
+	}
+
+	return result;
+}
+
+perl::array Perl__GetBotIDsByCharacterID(uint32 character_id, uint8 class_id)
+{
+	perl::array result;
+
+	const auto bot_ids = database.botdb.GetBotIDsByCharacterID(character_id, class_id);
+
+	for (int i = 0; i < bot_ids.size(); i++) {
+		result.push_back(bot_ids[i]);
+	}
+
+	return result;
+}
+
+uint8 Perl__GetBotLevelByID(uint32 bot_id)
+{
+	return database.botdb.GetBotLevelByID(bot_id);
+}
+
+std::string Perl__GetBotNameByID(uint32 bot_id)
+{
+	return database.botdb.GetBotNameByID(bot_id);
+}
+
+uint16 Perl__GetBotRaceByID(uint32 bot_id)
+{
+	return database.botdb.GetBotRaceByID(bot_id);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -5812,6 +5863,13 @@ void perl_register_quest()
 	package.add("FlagInstanceByGroupLeader", &Perl__FlagInstanceByGroupLeader);
 	package.add("FlagInstanceByRaidLeader", &Perl__FlagInstanceByRaidLeader);
 	package.add("FlyMode", &Perl__FlyMode);
+	package.add("GetBotClassByID", &Perl__GetBotClassByID);
+	package.add("GetBotGenderByID", &Perl__GetBotGenderByID);
+	package.add("GetBotIDsByCharacterID", (perl::array(*)(uint32))&Perl__GetBotIDsByCharacterID);
+	package.add("GetBotIDsByCharacterID", (perl::array(*)(uint32, uint8))&Perl__GetBotIDsByCharacterID);
+	package.add("GetBotLevelByID", &Perl__GetBotLevelByID);
+	package.add("GetBotNameByID", &Perl__GetBotNameByID);
+	package.add("GetBotRaceByID", &Perl__GetBotRaceByID);
 	package.add("GetCharactersInInstance", &Perl__GetCharactersInInstance);
 	package.add("GetInstanceID", &Perl__GetInstanceID);
 	package.add("GetInstanceIDByCharID", &Perl__GetInstanceIDByCharID);
