@@ -3789,8 +3789,8 @@ void perl_register_mob()
 	package.add("IsSilenced", &Perl_Mob_IsSilenced);
 	package.add("IsStunned", &Perl_Mob_IsStunned);
 	package.add("IsTargetable", &Perl_Mob_IsTargetable);
-	package.add("IsTargeted", &Perl_Mob_IsTargeted)
-	package.add("IsTargetLockPet", &Perl_Mob_IsTargetLockPet);;
+	package.add("IsTargeted", &Perl_Mob_IsTargeted);
+	package.add("IsTargetLockPet", &Perl_Mob_IsTargetLockPet);
 	package.add("IsTemporaryPet", &Perl_Mob_IsTemporaryPet);
 	package.add("IsTrackable", &Perl_Mob_IsTrackable);
 	package.add("IsTrap", &Perl_Mob_IsTrap);
