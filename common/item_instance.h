@@ -300,6 +300,7 @@ namespace EQ
 		int GetItemHeroicCorrup(bool augments = false) const;
 		int GetItemHaste(bool augments = false) const;
 		uint32 GetItemGuildFavor() const;
+		std::vector<uint32> GetAugmentIDs() const;
 
 	protected:
 		//////////////////////////

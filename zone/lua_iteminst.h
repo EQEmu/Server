@@ -89,6 +89,7 @@ public:
 	std::string GetName();
 	void ItemSay(const char* text);
 	void ItemSay(const char* text, uint8 language_id);
+	luabind::object GetAugmentIDs(lua_State* L);
 
 private:
 	bool cloned_;
