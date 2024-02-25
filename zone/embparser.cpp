@@ -2024,6 +2024,13 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
 			ExportVar(package_name.c_str(), "killed_entity_id", sep.arg[4]);
 
+			if (sep.arg[5]) {
+				ExportVar(package_name.c_str(), "combat_start_time", sep.arg[5]);
+				ExportVar(package_name.c_str(), "combat_end_time", sep.arg[6]);
+				ExportVar(package_name.c_str(), "damage_received", sep.arg[7]);
+				ExportVar(package_name.c_str(), "healing_received", sep.arg[8]);
+			}
+
 			if (extra_pointers && extra_pointers->size() >= 1) {
 				Corpse* corpse = std::any_cast<Corpse*>(extra_pointers->at(0));
 				if (corpse) {
