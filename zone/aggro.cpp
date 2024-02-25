@@ -638,15 +638,15 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_BOT) && IsBot()) {
+	if (IsBot() && target->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient()) {
+	if (IsClient() && target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC()) {
+	if (IsNPC() && target->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
 		return false;
 	}
 

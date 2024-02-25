@@ -5194,15 +5194,15 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		return;
 	}
 
-	if (on->GetSpecialAbility(IMMUNE_DAMAGE_BOT) && IsBot()) {
+	if (IsBot() && on->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
 		return;
 	}
 
-	if (on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient()) {
+	if (IsClient() && on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
 		return;
 	}
 
-	if (on->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC()) {
+	if (IsNPC() && on->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
 		return;
 	}
 
