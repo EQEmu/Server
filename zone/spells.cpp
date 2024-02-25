@@ -223,7 +223,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	// check to see if target is a caster mob before performing a mana tap
 	if(GetTarget() && IsManaTapSpell(spell_id)) {
-		if (RuleB(Spells, ManaTapsRequireNPCMana) &&  GetTarget()->GetMana() == 0) {
+		if (!RuleB(Spells, ManaTapsOnAnyClass) && GetTarget()->GetCasterClass() != 'N' && RuleB(Spells, ManaTapsRequireNPCMana) &&  GetTarget()->GetMana() == 0) {
 			InterruptSpell(TARGET_NO_MANA, 0x121, spell_id);
 			return false;
 		}
