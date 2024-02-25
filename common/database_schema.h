@@ -234,6 +234,7 @@ namespace DatabaseSchema {
 			"spawn_conditions",
 			"spawnentry",
 			"spawngroup",
+			"spells_unblockable",
 			"spells_new",
 			"start_zones",
 			"starting_items",
