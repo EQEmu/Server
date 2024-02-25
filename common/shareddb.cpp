@@ -1642,6 +1642,25 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
 
 }
 
+void SharedDatabase::LoadUnblockableSpells(SPDat_Spell_Struct* sp, int32 max_spell_id)
+{
+	const auto& l = SpellsUnblockableRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`spell_id` BETWEEN 0 AND {}",
+			max_spell_id
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	for (const auto& e: l) {
+		sp[e.spell_id].is_unblockable = e.is_unblockable;
+	}
+}
+
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {
 	return nullptr;	// nothing here for now... database and/or sharemem pulls later
 }
