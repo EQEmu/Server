@@ -230,13 +230,23 @@ void WorldGuildManager::ProcessZonePacket(ServerPacket *pack) {
 	case ServerOP_GuildChannel:
 	case ServerOP_GuildURL:
 	case ServerOP_GuildMemberRemove:
-	case ServerOP_GuildMemberAdd:
 	case ServerOP_GuildSendGuildList:
 	case ServerOP_GuildMembersList:
 	{
 		zoneserver_list.SendPacketToBootedZones(pack);
 		break;
 	}
+    case ServerOP_GuildMemberAdd: 
+	{
+        auto in    = (ServerOP_GuildMessage_Struct *)pack->pBuffer;
+        auto guild = GetGuildByGuildID(in->guild_id);
+        if (!guild) {
+            BaseGuildManager::RefreshGuild(in->guild_id);
+        }
+
+        zoneserver_list.SendPacketToBootedZones(pack);
+        break;
+    }
 	default:
 		LogGuilds("Unknown packet {:#04x} received from zone??", pack->opcode);
 		break;
