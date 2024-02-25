@@ -3360,6 +3360,26 @@ uint32 Perl_Mob_GetHateListNPCCount(Mob* self)
 	return self->GetHateListCount(HateListCountType::NPC);
 }
 
+bool Perl_Mob_IsAnimation(Mob* self)
+{
+	return self->IsAnimation();
+}
+
+bool Perl_Mob_IsCharmed(Mob* self)
+{
+	return self->IsCharmed();
+}
+
+bool Perl_Mob_IsFamiliar(Mob* self)
+{
+	return self->IsFamiliar();
+}
+
+bool Perl_Mob_IsTargetLockPet(Mob* self)
+{
+	return self->IsTargetLockPet();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3725,6 +3745,7 @@ void perl_register_mob()
 	package.add("InterruptSpell", (void(*)(Mob*, uint16))&Perl_Mob_InterruptSpell);
 	package.add("IsAIControlled", &Perl_Mob_IsAIControlled);
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
+	package.add("IsAnimation", &Perl_Mob_IsAnimation);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*, bool))&Perl_Mob_IsAttackAllowed);
 	package.add("IsAura", &Perl_Mob_IsAura);
@@ -3734,6 +3755,7 @@ void perl_register_mob()
 	package.add("IsBlind", &Perl_Mob_IsBlind);
 	package.add("IsBot", &Perl_Mob_IsBot);
 	package.add("IsCasting", &Perl_Mob_IsCasting);
+	package.add("IsCharmed", &Perl_Mob_IsCharmed);
 	package.add("IsClient", &Perl_Mob_IsClient);
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);
 	package.add("IsDoor", &Perl_Mob_IsDoor);
@@ -3741,6 +3763,7 @@ void perl_register_mob()
 	package.add("IsEncounter", &Perl_Mob_IsEncounter);
 	package.add("IsEngaged", &Perl_Mob_IsEngaged);
 	package.add("IsEnraged", &Perl_Mob_IsEnraged);
+	package.add("IsFamiliar", &Perl_Mob_IsFamiliar);
 	package.add("IsFeared", &Perl_Mob_IsFeared);
 	package.add("IsFindable", &Perl_Mob_IsFindable);
 	package.add("IsHorse", &Perl_Mob_IsHorse);
@@ -3767,6 +3790,7 @@ void perl_register_mob()
 	package.add("IsStunned", &Perl_Mob_IsStunned);
 	package.add("IsTargetable", &Perl_Mob_IsTargetable);
 	package.add("IsTargeted", &Perl_Mob_IsTargeted);
+	package.add("IsTargetLockPet", &Perl_Mob_IsTargetLockPet);
 	package.add("IsTemporaryPet", &Perl_Mob_IsTemporaryPet);
 	package.add("IsTrackable", &Perl_Mob_IsTrackable);
 	package.add("IsTrap", &Perl_Mob_IsTrap);
