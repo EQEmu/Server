@@ -5423,7 +5423,8 @@ CREATE TABLE `spells_unblockable`  (
   `is_unblockable` tinyint(1) UNSIGNED NOT NULL DEFAULT 1,
   PRIMARY KEY (`spell_id`)
 );
-)"
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
