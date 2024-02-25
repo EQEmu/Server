@@ -411,7 +411,7 @@ void Client::SendGuildTributes()
 			gtas->ability.tiers[ti].tribute_item_id = htonl(t.second.tiers[ti].tribute_item_id);
 			gtas->ability.tiers[ti].level = htonl(t.second.tiers[ti].level);
 		}
-		strcpy(gtas->ability.name, t.second.name.data());
+		strn0cpy(gtas->ability.name, t.second.name.data(), t.second.name.length());
 		FastQueuePacket(&outapp);
 	}
 }
@@ -432,7 +432,7 @@ void Client::SendGuildTributeDetails(uint32 tribute_id, uint32 tier)
 	t->tribute_id = tribute_id;
 	t->tier = tier;
 	t->tribute_id2 = tribute_id;
-	strncpy(&t->description, td.description.c_str(), len);
+	strn0cpy(&t->description, td.description.c_str(), len);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -556,7 +556,7 @@ void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle* in)
 	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
 	GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
 
-	strncpy(data->player_name, in->player_name, 64);
+	strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
 	data->guild_id              = in->guild_id;
 	data->no_donations          = in->no_donations;
 	data->tribute_toggle        = in->tribute_toggle;
