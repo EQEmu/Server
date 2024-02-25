@@ -2162,7 +2162,9 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			}
 		}
 
-		if (swarm_owner->IsNPC()) {
+		if (swarm_owner->IsBot()) {
+			SetPetOwnerBot(true);
+		} else if (swarm_owner->IsNPC()) {
 			SetPetOwnerNPC(true);
 		}
 	} else if (GetOwnerID()) {
@@ -2179,8 +2181,13 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 					}
 				}
 			} else {
-				if (entity_list.GetNPCByID(GetOwnerID())) {
-					SetPetOwnerNPC(true);
+				Mob* owner = entity_list.GetMob(GetOwnerID());
+				if (owner) {
+					if (owner->IsBot()) {
+						SetPetOwnerBot(true);
+					} else if (owner->IsNPC()) {
+						SetPetOwnerNPC(true);
+					}
 				}
 			}
 		}

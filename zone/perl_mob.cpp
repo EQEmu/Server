@@ -3380,6 +3380,21 @@ bool Perl_Mob_IsTargetLockPet(Mob* self)
 	return self->IsTargetLockPet();
 }
 
+bool Perl_Mob_IsPetOwnerBot(Mob* self)
+{
+	return self->IsPetOwnerBot();
+}
+
+bool Perl_Mob_IsPetOwnerClient(Mob* self)
+{
+	return self->IsPetOwnerClient();
+}
+
+bool Perl_Mob_IsPetOwnerNPC(Mob* self)
+{
+	return self->IsPetOwnerNPC();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3782,6 +3797,9 @@ void perl_register_mob()
 	package.add("IsOfClientBotMerc", &Perl_Mob_IsOfClientBotMerc);
 	package.add("IsPausedTimer", &Perl_Mob_IsPausedTimer);
 	package.add("IsPet", &Perl_Mob_IsPet);
+	package.add("IsPetOwnerBot", &Perl_Mob_IsPetOwnerBot);
+	package.add("IsPetOwnerClient", &Perl_Mob_IsPetOwnerClient);
+	package.add("IsPetOwnerNPC", &Perl_Mob_IsPetOwnerNPC);
 	package.add("IsPlayerCorpse", &Perl_Mob_IsPlayerCorpse);
 	package.add("IsRoamer", &Perl_Mob_IsRoamer);
 	package.add("IsRooted", &Perl_Mob_IsRooted);
