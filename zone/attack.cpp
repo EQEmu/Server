@@ -3185,7 +3185,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 			if (
 				!owner->GetSpecialAbility(IMMUNE_AGGRO) &&
 				!(owner->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
-				!(owner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT) &&
+				!(owner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
 				!(owner->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC))
 			) {
 				if (owner->IsClient() && !CheckAggro(owner)) {
