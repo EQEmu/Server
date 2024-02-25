@@ -378,7 +378,7 @@ bool Lua_NPC::GetFollowCanRun() {
 	return self->GetFollowCanRun();
 }
 
-int Lua_NPC::GetNPCSpellsID() {
+uint32 Lua_NPC::GetNPCSpellsID() {
 	Lua_Safe_Call_Int();
 	return self->GetNPCSpellsID();
 }
@@ -825,6 +825,12 @@ void Lua_NPC::SetNPCAggro(bool in_npc_aggro)
 	self->SetNPCAggro(in_npc_aggro);
 }
 
+uint32 Lua_NPC::GetNPCSpellsEffectsID()
+{
+	Lua_Safe_Call_Int();
+	return self->GetNPCSpellsEffectsID();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -887,8 +893,8 @@ luabind::scope lua_register_npc() {
 	.def("GetNPCAggro", (bool(Lua_NPC::*)(void))&Lua_NPC::GetNPCAggro)
 	.def("GetNPCFactionID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCFactionID)
 	.def("GetNPCHate", (int64(Lua_NPC::*)(Lua_Mob))&Lua_NPC::GetNPCHate)
-	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
-	.def("GetNPCSpellsID", (int(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
+	.def("GetNPCSpellsEffectsID", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsEffectsID)
+	.def("GetNPCSpellsID", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetNPCSpellsID)
 	.def("GetNPCStat", (float(Lua_NPC::*)(std::string))&Lua_NPC::GetNPCStat)
 	.def("GetPetSpellID", (int(Lua_NPC::*)(void))&Lua_NPC::GetPetSpellID)
 	.def("GetPlatinum", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetPlatinum)
