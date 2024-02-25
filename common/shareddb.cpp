@@ -45,6 +45,7 @@
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
 #include "repositories/character_corpses_repository.h"
+#include "repositories/spells_unblockable_repository.h"
 
 namespace ItemField
 {
@@ -1770,6 +1771,25 @@ void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpe
             sp[spellID].damage_shield_type = Strings::ToUnsignedInt(row[1]);
     }
 
+}
+
+void SharedDatabase::LoadUnblockableSpells(SPDat_Spell_Struct* sp, int32 max_spell_id)
+{
+	const auto& l = SpellsUnblockableRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`spell_id` BETWEEN 0 AND {}",
+			max_spell_id
+		)
+	);
+
+	if (l.empty()) {
+		return;
+	}
+
+	for (const auto& e: l) {
+		sp[e.spell_id].is_unblockable = e.is_unblockable;
+	}
 }
 
 const EvolveInfo* SharedDatabase::GetEvolveInfo(uint32 loregroup) {

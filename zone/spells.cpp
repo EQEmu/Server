@@ -3066,6 +3066,10 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return 0;
 	}
 
+	if (IsUnblockableSpell(spellid2)) {
+		return 0;
+	}
+
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
 		Message(0, "You must wait before you can be affected by this spell again.");
 		return -1;
@@ -3520,16 +3524,78 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 		if (IsValidSpell(curbuf.spellid)) {
 			// there's a buff in this slot
-			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
-					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
+			ret = CheckStackConflict(
+				curbuf.spellid,
+				curbuf.casterlevel,
+				spell_id,
+				caster_level,
+				entity_list.GetMobID(curbuf.casterid),
+				caster,
+				buffslot
+			);
 			if (ret == -1) {	// stop the spell
-				LogSpells("Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
-						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
-				if (caster && caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
-					if (caster->GetClass() != Class::Bard) {
-						caster->Message(Chat::Red, "Your %s did not take hold on %s. (Blocked by %s.)", spells[spell_id].name, GetName(), spells[curbuf.spellid].name);
+				LogSpells(
+					"Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
+					spell_id,
+					curbuf.spellid,
+					buffslot,
+					curbuf.casterlevel
+				);
+
+				if (caster) {
+					if (caster->IsClient() && RuleB(Client, UseLiveBlockedMessage) && caster->GetClass() != Class::Bard) {
+						caster->Message(
+							Chat::Red,
+							fmt::format(
+								"Your {} did not take hold on {}. (Blocked by {}.)",
+								spells[spell_id].name,
+								GetName(),
+								spells[curbuf.spellid].name
+							).c_str()
+						);
+					}
+
+					const bool caster_has_block_event = (
+						(caster->IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(caster->IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(caster->IsNPC() && parse->HasQuestSub(caster->GetNPCTypeID(), EVENT_SPELL_BLOCKED))
+					);
+
+					const bool cast_on_has_block_event = (
+						(IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_SPELL_BLOCKED))
+					);
+
+					if (caster_has_block_event || cast_on_has_block_event) {
+						const std::string& export_string = fmt::format(
+							"{} {}",
+							curbuf.spellid,
+							spell_id
+						);
+
+						if (caster_has_block_event) {
+							if (caster->IsBot()) {
+								parse->EventBot(EVENT_SPELL_BLOCKED, caster->CastToBot(), this, export_string, 0);
+							} else if (caster->IsClient()) {
+								parse->EventPlayer(EVENT_SPELL_BLOCKED, caster->CastToClient(), export_string, 0);
+							} else if (caster->IsNPC()) {
+								parse->EventNPC(EVENT_SPELL_BLOCKED, caster->CastToNPC(), this, export_string, 0);
+							}
+						}
+
+						if (cast_on_has_block_event) {
+							if (IsBot()) {
+								parse->EventBot(EVENT_SPELL_BLOCKED, CastToBot(), caster, export_string, 0);
+							} else if (IsClient()) {
+								parse->EventPlayer(EVENT_SPELL_BLOCKED, CastToClient(), export_string, 0);
+							} else if (IsNPC()) {
+								parse->EventNPC(EVENT_SPELL_BLOCKED, CastToNPC(), caster, export_string, 0);
+							}
+						}
 					}
 				}
+
 				return -1;
 			}
 			if (ret == 1) {	// set a flag to indicate that there will be overwriting

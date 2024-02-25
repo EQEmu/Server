@@ -5410,6 +5410,20 @@ ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_fou
 ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
 		)",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9265,
+		.description = "2024_02_25_spells_unblockable.sql",
+		.check = "SHOW TABLES LIKE 'spells_unblockable'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `spells_unblockable`  (
+  `spell_id` int(11) UNSIGNED NOT NULL DEFAULT 0,
+  `is_unblockable` tinyint(1) UNSIGNED NOT NULL DEFAULT 1,
+  PRIMARY KEY (`spell_id`)
+);
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

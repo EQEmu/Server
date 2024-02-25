@@ -182,7 +182,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_timer_stop",
 	"event_entity_variable_delete",
 	"event_entity_variable_set",
-	"event_entity_variable_update"
+	"event_entity_variable_update",
+	"event_spell_blocked"
 };
 
 extern Zone *zone;
@@ -256,6 +257,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_npc_entity_variable;
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_npc_entity_variable;
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_npc_entity_variable;
+	NPCArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_npc_spell_blocked;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
@@ -343,6 +345,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE]     = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]        = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
+	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -397,6 +400,7 @@ LuaParser::LuaParser() {
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
 	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
+	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
 #endif
 
 	L = nullptr;
