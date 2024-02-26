@@ -275,6 +275,20 @@ EQ::ItemData* Perl_QuestItem_GetUnscaledItem(EQ::ItemInstance* self) {
 	return const_cast<EQ::ItemData*>(self->GetUnscaledItem());
 }
 
+perl::array Perl_QuestItem_GetAugmentIDs(EQ::ItemInstance* self)
+{
+	perl::array result;
+
+	const auto& augment_ids = self->GetAugmentIDs();
+
+	for (int i = 0; i < augment_ids.size(); i++) {
+		result.push_back(augment_ids[i]);
+	}
+
+	return result;
+}
+
+
 void perl_register_questitem()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -287,6 +301,7 @@ void perl_register_questitem()
 	package.add("CountAugmentByID", &Perl_QuestItem_CountAugmentByID);
 	package.add("DeleteCustomData", &Perl_QuestItem_DeleteCustomData);
 	package.add("GetAugment", &Perl_QuestItem_GetAugment);
+	package.add("GetAugmentIDs", &Perl_QuestItem_GetAugmentIDs);
 	package.add("GetAugmentItemID", &Perl_QuestItem_GetAugmentItemID);
 	package.add("GetAugmentType", &Perl_QuestItem_GetAugmentType);
 	package.add("GetCharges", &Perl_QuestItem_GetCharges);

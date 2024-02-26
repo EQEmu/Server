@@ -570,6 +570,13 @@ public:
 	uint32 GetHateListBotCount();
 	uint32 GetHateListClientCount();
 	uint32 GetHateListNPCCount();
+	bool IsAnimation();
+	bool IsCharmed();
+	bool IsFamiliar();
+	bool IsTargetLockPet();
+	bool IsPetOwnerBot();
+	bool IsPetOwnerClient();
+	bool IsPetOwnerNPC();
 };
 
 #endif

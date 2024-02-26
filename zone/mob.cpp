@@ -392,6 +392,7 @@ Mob::Mob(
 	pet_stop          = false;
 	pet_regroup       = false;
 	_IsTempPet        = false;
+	pet_owner_bot     = false;
 	pet_owner_client  = false;
 	pet_owner_npc     = false;
 	pet_targetlock_id = 0;

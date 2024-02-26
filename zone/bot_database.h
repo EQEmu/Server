@@ -160,6 +160,13 @@ public:
 
 	uint32 GetRaceClassBitmask(uint32 bot_race);
 
+	const uint8 GetBotClassByID(const uint32 bot_id);
+	const uint8 GetBotGenderByID(const uint32 bot_id);
+	std::vector<uint32> GetBotIDsByCharacterID(const uint32 character_id, uint8 class_id = Class::None);
+	const uint8 GetBotLevelByID(const uint32 bot_id);
+	const std::string& GetBotNameByID(const uint32 bot_id);
+	const uint16 GetBotRaceByID(const uint32 bot_id);
+
 	class fail {
 	public:
 		/* fail::Bot functions   */

@@ -3225,6 +3225,48 @@ uint32 Lua_Mob::GetHateListNPCCount()
 	return self->GetHateListCount(HateListCountType::NPC);
 }
 
+bool Lua_Mob::IsAnimation()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsAnimation();
+}
+
+bool Lua_Mob::IsCharmed()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsCharmed();
+}
+
+bool Lua_Mob::IsFamiliar()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsFamiliar();
+}
+
+bool Lua_Mob::IsTargetLockPet()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsTargetLockPet();
+}
+
+bool Lua_Mob::IsPetOwnerBot()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPetOwnerBot();
+}
+
+bool Lua_Mob::IsPetOwnerClient()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPetOwnerClient();
+}
+
+bool Lua_Mob::IsPetOwnerNPC()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPetOwnerNPC();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3601,15 +3643,18 @@ luabind::scope lua_register_mob() {
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
 	.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
+	.def("IsAnimation", &Lua_Mob::IsAnimation)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::IsAttackAllowed)
 	.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
 	.def("IsBerserk", &Lua_Mob::IsBerserk)
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
 	.def("IsCasting", &Lua_Mob::IsCasting)
+	.def("IsCharmed", &Lua_Mob::IsCharmed)
 	.def("IsEliteMaterialItem", (uint32(Lua_Mob::*)(uint8))&Lua_Mob::IsEliteMaterialItem)
 	.def("IsEngaged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEngaged)
 	.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
+	.def("IsFamiliar", &Lua_Mob::IsFamiliar)
 	.def("IsFeared", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFeared)
 	.def("IsFindable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFindable)
 	.def("IsHorse", &Lua_Mob::IsHorse)
@@ -3621,6 +3666,9 @@ luabind::scope lua_register_mob() {
 	.def("IsMoving", &Lua_Mob::IsMoving)
 	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
+	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
+	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)
+	.def("IsPetOwnerNPC", &Lua_Mob::IsPetOwnerNPC)
 	.def("IsRoamer", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRoamer)
 	.def("IsRooted", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRooted)
 	.def("IsRunning", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRunning)
@@ -3628,6 +3676,7 @@ luabind::scope lua_register_mob() {
 	.def("IsStunned", (bool(Lua_Mob::*)(void))&Lua_Mob::IsStunned)
 	.def("IsTargetable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTargetable)
 	.def("IsTargeted", &Lua_Mob::IsTargeted)
+	.def("IsTargetLockPet", &Lua_Mob::IsTargetLockPet)
 	.def("IsTemporaryPet", &Lua_Mob::IsTemporaryPet)
 	.def("IsTrackable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTrackable)
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)

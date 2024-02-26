@@ -1079,10 +1079,12 @@ public:
 	inline int16 GetTempPetCount() const { return count_TempPet; }
 	inline void SetTempPetCount(int16 i) { count_TempPet = i; }
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
+	inline bool IsPetOwnerBot() const { return pet_owner_bot; }
+	inline void SetPetOwnerBot(bool b) { pet_owner_bot = b; }
 	inline bool IsPetOwnerClient() const { return pet_owner_client; }
-	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
+	inline void SetPetOwnerClient(bool b) { pet_owner_client = b; }
 	inline bool IsPetOwnerNPC() const { return pet_owner_npc; }
-	inline void SetPetOwnerNPC(bool value) { pet_owner_npc = value; }
+	inline void SetPetOwnerNPC(bool b) { pet_owner_npc = b; }
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 	inline bool IsHorse() { return is_horse; }
@@ -1845,8 +1847,9 @@ protected:
 	bool hasTempPet;
 	bool _IsTempPet;
 	int16 count_TempPet;
-	bool pet_owner_client; //Flags regular and pets as belonging to a client
-	bool pet_owner_npc;    //Flags regular and pets as belonging to a npc
+	bool pet_owner_bot;    // Flags pets as belonging to a Bot
+	bool pet_owner_client; // Flags pets as belonging to a Client
+	bool pet_owner_npc;    // Flags pets as belonging to an NPC
 	uint32 pet_targetlock_id;
 
 	glm::vec3 m_TargetRing;

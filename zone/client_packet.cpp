@@ -7764,15 +7764,6 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 
 	case GuildBankDeposit:	// Deposit Item
 	{
-		if (GuildBanks->IsAreaFull(GuildID(), GuildBankDepositArea))
-		{
-			MessageString(Chat::Red, GUILD_BANK_FULL);
-
-			GuildBankDepositAck(true, sentAction);
-
-			return;
-		}
-
 		EQ::ItemInstance *CursorItemInst = GetInv().GetItem(EQ::invslot::slotCursor);
 
 		bool Allowed = true;
@@ -7787,6 +7778,18 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 		}
 
 		const EQ::ItemData* CursorItem = CursorItemInst->GetItem();
+
+		if (GuildBanks->IsAreaFull(GuildID(), GuildBankDepositArea))
+		{
+			MessageString(Chat::Red, GUILD_BANK_FULL);
+			GuildBankDepositAck(true, sentAction);
+			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+				GetInv().PopItem(EQ::invslot::slotCursor);
+				PushItemOnCursor(CursorItem, true);
+			}
+
+			return;
+		}
 
 		if (!CursorItem->NoDrop || CursorItemInst->IsAttuned())
 		{
@@ -7815,6 +7818,7 @@ void Client::Handle_OP_GuildBank(const EQApplicationPacket *app)
 			GuildBankDepositAck(true, sentAction);
 
 			if (ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+				GetInv().PopItem(EQ::invslot::slotCursor);
 				PushItemOnCursor(CursorItem, true);
 			}
 			return;

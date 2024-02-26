@@ -786,6 +786,11 @@ void Perl_NPC_SetNPCAggro(NPC* self, bool in_npc_aggro) // @categories Script Ut
 	self->SetNPCAggro(in_npc_aggro);
 }
 
+uint32 Perl_NPC_GetNPCSpellsEffectsID(NPC* self)
+{
+	return self->GetNPCSpellsEffectsID();
+}
+
 
 void perl_register_npc()
 {
@@ -851,6 +856,7 @@ void perl_register_npc()
 	package.add("GetNPCAggro", &Perl_NPC_GetNPCAggro);
 	package.add("GetNPCFactionID", &Perl_NPC_GetNPCFactionID);
 	package.add("GetNPCHate", &Perl_NPC_GetNPCHate);
+	package.add("GetNPCSpellsEffectsID", &Perl_NPC_GetNPCSpellsEffectsID);
 	package.add("GetNPCSpellsID", &Perl_NPC_GetNPCSpellsID);
 	package.add("GetNPCStat", &Perl_NPC_GetNPCStat);
 	package.add("GetPetSpellID", &Perl_NPC_GetPetSpellID);

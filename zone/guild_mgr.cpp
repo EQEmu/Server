@@ -801,7 +801,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 				outapp->WriteUInt32(Item->Icon);
 				if (Item->Stackable) {
 					outapp->WriteUInt32(guild_bank->Items.DepositArea[i].Quantity);
-					outapp->WriteUInt8(Item->StackSize == guild_bank->Items.DepositArea[i].Quantity ? 0 : 1);
+					outapp->WriteUInt8(Item->StackSize == guild_bank->Items.DepositArea[i].Quantity ? 1 : 1);
 				} else {
 					outapp->WriteUInt32(1);
 					outapp->WriteUInt8(0);
@@ -825,7 +825,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 				outapp->WriteUInt32(Item->Icon);
 				if (Item->Stackable) {
 					outapp->WriteUInt32(guild_bank->Items.MainArea[i].Quantity);
-					outapp->WriteUInt8(Item->StackSize == guild_bank->Items.MainArea[i].Quantity ? 0 : 1);
+					outapp->WriteUInt8(Item->StackSize == guild_bank->Items.MainArea[i].Quantity ? 1 : 1);
 				} else {
 					outapp->WriteUInt32(1);
 					outapp->WriteUInt8(0);
@@ -862,7 +862,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 			{
 				if(guild_bank->Items.DepositArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
-							guild_bank->Items.DepositArea[i].Quantity, guild_bank->Items.DepositArea[i].Permissions, 0, 0);
+							guild_bank->Items.DepositArea[i].Quantity, guild_bank->Items.DepositArea[i].Permissions, 1, 0);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankDepositArea, 1, Item->ID, Item->Icon,
 							guild_bank->Items.DepositArea[i].Quantity, guild_bank->Items.DepositArea[i].Permissions, 1, 0);
@@ -900,7 +900,7 @@ void GuildBankManager::SendGuildBank(Client *c)
 			{
 				if(guild_bank->Items.MainArea[i].Quantity == Item->StackSize)
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
-							guild_bank->Items.MainArea[i].Quantity, guild_bank->Items.MainArea[i].Permissions, 0, Useable);
+							guild_bank->Items.MainArea[i].Quantity, guild_bank->Items.MainArea[i].Permissions, 1, Useable);
 				else
 					gbius->Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, Item->ID, Item->Icon,
 							guild_bank->Items.MainArea[i].Quantity, guild_bank->Items.MainArea[i].Permissions, 1, Useable);
@@ -1022,7 +1022,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 	else
 	{
 		if(QtyOrCharges == Item->StackSize)
-			gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 0, 0);
+			gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 1, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 1, 0);
 	}
@@ -1089,7 +1089,7 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
 	{
 		if((*iter)->Items.MainArea[mainSlot].Quantity == Item->StackSize)
 			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 0, 0);
+					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 1, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon,
 					(*iter)->Items.MainArea[mainSlot].Quantity, 0, 1, 0);
@@ -1145,7 +1145,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
 	{
 		if((*iter)->Items.MainArea[slotID].Quantity == Item->StackSize)
 			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
-					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
+					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 1, 0);
 		else
 			gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon,
 					(*iter)->Items.MainArea[slotID].Quantity, (*iter)->Items.MainArea[slotID].Permissions, 1, 0);
@@ -1388,7 +1388,7 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 			GuildBankItemUpdate_Struct gbius;
 
 			if(BankArea[i].Quantity == Item->StackSize)
-				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 0, 0);
+				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 1, 0);
 			else
 				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 1, 0);
 
