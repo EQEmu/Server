@@ -1168,6 +1168,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 
 		if (weapon_item->GetItemRequiredLevel(true) > GetLevel()) {
 			return 0;
+		}
 		
 		if (IsClient()) {
 			if (!weapon_item->IsEquipable(GetBaseRace(), CastToClient()->GetClassesBits()))
