@@ -3060,14 +3060,24 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
 
-	LogSpells("Check Stacking on old [{}] ([{}]) @ lvl [{}] (by [{}]) vs. new [{}] ([{}]) @ lvl [{}] (by [{}])", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
+	LogSpells(
+		"Check Stacking on old [{}] ([{}]) @ lvl [{}] (by [{}]) vs. new [{}] ([{}]) @ lvl [{}] (by [{}])",
+		sp1.name,
+		spellid1,
+		caster_level1,
+		!caster1 ? "Nobody" : caster1->GetName(),
+		sp2.name,
+		spellid2,
+		caster_level2,
+		!caster2 ? "Nobody" : caster2->GetName()
+	);
 
 	if (IsResurrectionEffects(spellid1)) {
 		return 0;
 	}
 
 	if (IsUnblockableSpell(spellid2)) {
-		return 0;
+		return 1;
 	}
 
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
@@ -3533,7 +3543,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				caster,
 				buffslot
 			);
-			if (ret == -1) {	// stop the spell
+
+			if (ret == -1) { // stop the spell
 				LogSpells(
 					"Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
 					spell_id,
@@ -3584,7 +3595,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 							}
 						}
 
-						if (cast_on_has_block_event) {
+						if (cast_on_has_block_event && caster != this) {
 							if (IsBot()) {
 								parse->EventBot(EVENT_SPELL_BLOCKED, CastToBot(), caster, export_string, 0);
 							} else if (IsClient()) {
