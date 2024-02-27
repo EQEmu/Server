@@ -138,9 +138,46 @@ void NPC::SpellProcess()
 	Mob::SpellProcess();
 }
 
+int Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
+	if (RuleB(Spells, UseSpellImpliedTargeting)) {
+		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
+			if (GetPet()) {
+				return GetPetID();
+			}
+		}
+
+		if (spells[spell_id].target_type == ST_Self || IsPBAENukeSpell(spell_id)) {
+			return GetID();
+		}
+
+		//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
+		if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
+			Mob* spell_target = entity_list.GetMobID(target_id);
+			if (spell_target) {
+				Mob* targets_target = spell_target->GetTarget();
+				if (targets_target) {
+					// If either this is beneficial and the target is not a player or player's pet or vis versa
+					if ((IsBeneficialSpell(spell_id) && (!(spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient()))))
+						|| (IsDetrimentalSpell(spell_id) && (spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient())))) {
+						//Check if the target's target is a valid target; we can use DoCastingChecksOnTarget() here because we can let it handle the failure as vanilla would
+						if (DoCastingChecksOnTarget(true, spell_id, targets_target)) {
+							target_id = targets_target->GetID();
+						}
+						else {							
+							return target_id;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	LogDebug("Did not find any valid targets in implied target processing.");
+	return target_id;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // functions related to begin/finish casting, fizzling etc
-
 //
 // only CastSpell and DoCastSpell should be setting casting_spell_id.
 // basically casting_spell_id is only set when casting a triggered spell from
@@ -169,6 +206,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		send_spellbar_enable = false;
 	}
 
+	if (target_id == -1) {
+		StopCastSpell(spell_id, send_spellbar_enable);
+		Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
+		return false;
+	}
+
 	if (!IsValidSpell(spell_id) ||
 		casting_spell_id ||
 		delaytimer ||
@@ -179,53 +222,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
-	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
-		Mob* spell_target = entity_list.GetMobID(target_id);
-		uint16 cached_target_id = 0;
-
-		if (spell_target) {
-			Mob* targets_target = spell_target->GetTarget();
-
-			if (IsBeneficialSpell(spell_id)) {
-				
-				if (spell_target->IsClient() || spell_target->IsPetOwnerClient()) {
-					cached_target_id = spell_target->GetID();
-				}
-
-				else if (targets_target && (targets_target->IsClient() && targets_target->IsPetOwnerClient())) {
-					cached_target_id = targets_target->GetID();
-				}
-
-				if (cached_target_id == 0) {
-					cached_target_id = this->GetID();
-				}
-			} 
-			else if (IsDetrimentalSpell(spell_id)) {
-				if (!spell_target->IsClient()) {
-					cached_target_id = spell_target->GetID();
-				}
-
-				else if (targets_target && !targets_target->IsClient()) {
-					cached_target_id = targets_target->GetID();
-				}
-			}
-
-			if (cached_target_id > 0) {
-				Mob* cached_target_mob = entity_list.GetMobID(cached_target_id);
-				if (cached_target_mob && DoCastingChecksOnTarget(true, spell_id, cached_target_mob)) {
-					target_id = cached_target_id; 
-				} else {
-					StopCastSpell(spell_id, send_spellbar_enable);
-					Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
-					return false;
-				}
-			} else {				
-				StopCastSpell(spell_id, send_spellbar_enable);
-				Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
-				return false;
-			}
-		}
-	}
+	target_id = GetSpellImpliedTargetID(spell_id, target_id);
 
 	if (!DoCastingChecksOnCaster(spell_id, slot) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
@@ -453,57 +450,6 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	} else {
 		orgcasttime = cast_time;
 	}
-
-	/*
-	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
-		Mob* spell_target = entity_list.GetMobID(target_id);
-		uint16 cached_target_id = 0; // Temporary storage for the proposed target ID
-
-		if (spell_target) {
-			Mob* targets_target = spell_target->GetTarget();
-
-			if (IsBeneficialSpell(spell_id)) {
-				// Check the original target if it's a client
-				if (spell_target->IsClient()) {
-					cached_target_id = spell_target->GetID();
-				}
-				// Check the target's target if it's a client
-				else if (targets_target && targets_target->IsClient()) {
-					cached_target_id = targets_target->GetID();
-				}
-
-				// If no suitable target found yet, default to the caster
-				if (cached_target_id == 0) {
-					cached_target_id = this->GetID(); // Default to the caster
-				}
-			} 
-			else if (IsDetrimentalSpell(spell_id)) {
-				// Check the original target if it's not a client
-				if (!spell_target->IsClient()) {
-					cached_target_id = spell_target->GetID();
-				}
-				// Check the target's target if it's not a client
-				else if (targets_target && !targets_target->IsClient()) {
-					cached_target_id = targets_target->GetID();
-				}
-			}
-
-			// Validate the cached_target_id with DoCastingChecksOnTarget
-			if (cached_target_id > 0) {
-				Mob* cached_target_mob = entity_list.GetMobID(cached_target_id);
-				if (cached_target_mob && DoCastingChecksOnTarget(true, spell_id, cached_target_mob)) {
-					target_id = cached_target_id; // Update target_id only if checks pass
-				} else {
-					StopCastSpell(spell_id, true);
-					return false; // Stop casting if checks fail or no valid target is found
-				}
-			} else {
-				// If no target was cached (applicable for detrimental spells), stop casting
-				StopCastSpell(spell_id, true);
-				return false;
-			}
-		}
-	} */
 
 	// we checked for spells not requiring targets above
 	if(target_id == 0) {
@@ -2438,6 +2384,11 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 
 	if(!IsValidSpell(spell_id))
 		return false;
+
+	//if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
+	//	auto target_id = GetSpellImpliedTargetID(spell_id, spell_target->GetID());
+	//	spell_target = entity_list.GetMob(target_id);
+	//}
 
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && !spell_target->IsBot() && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
