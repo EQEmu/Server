@@ -575,7 +575,12 @@ void DatabaseDumpService::RemoveSqlBackup()
 {
 	std::string file = fmt::format("{}.sql", GetDumpFileNameWithPath());
 	if (File::Exists(file)) {
-		std::filesystem::remove(file);
+		try {
+			std::filesystem::remove(file);
+		}
+		catch (std::exception &e) {
+			LogError("std::filesystem::remove err [{}]", e.what());
+		}
 	}
 
 	RemoveCredentialsFile();
