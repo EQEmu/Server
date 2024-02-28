@@ -141,6 +141,7 @@ namespace Logs {
 		Zoning,
 		EqTime,
 		Corpses,
+		XTargets,
 		MaxCategoryID /* Don't Remove this */
 	};
 

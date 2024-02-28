@@ -6782,6 +6782,13 @@ void Client::AddAutoXTarget(Mob *m, bool send)
 			break;
 		}
 	}
+
+	LogXTargets(
+		"Adding [{}] to [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
@@ -6799,6 +6806,13 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 	if (r) {
 		r->UpdateRaidXTargets();
 	}
+
+	LogXTargets(
+		"Removing [{}] from [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)
