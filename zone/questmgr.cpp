@@ -759,11 +759,7 @@ void QuestManager::stoptimer(const std::string& timer_name)
 	);
 
 	for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
-		LogInfo("Current [{}] Timer [{}]", e->name, timer_name);
-
 		if (e->mob && e->mob == owner && e->name == timer_name) {
-			LogInfo("Matched [{}] Timer [{}]", e->name, timer_name);
-
 			if (has_stop_event) {
 				if (owner->IsClient()) {
 					parse->EventPlayer(EVENT_TIMER_STOP, owner->CastToClient(), timer_name, 0);
