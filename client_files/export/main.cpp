@@ -168,7 +168,7 @@ void ExportSpells(SharedDatabase *db)
 				if (implied_targeting && i == 98) {
 					// Modify the targettype field value if necessary
 					if (fieldValue == "14" || fieldValue == "38") {
-						fieldValue = "1"; // Change targettype to 6
+						fieldValue = "6"; // Change targettype to 6
 					}
 				}
 
