@@ -3829,7 +3829,7 @@ void Mob::BuffProcess()
 				{
 					bool suspended = false;
 
-					if (RuleB(Custom, SuspendGroupBuffs)) {						
+					if (RuleB(Custom, SuspendGroupBuffs) && IsBeneficialSpell(buffs[buffs_i].spellid)) {						
 						uint32 spellid = buffs[buffs_i].spellid;
 						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
 							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);

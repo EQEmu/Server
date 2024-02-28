@@ -3210,7 +3210,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			pet_buff.ticsremaining  = p->Buffs[slot_id].duration;
 			pet_buff.counters       = p->Buffs[slot_id].counters;
 			pet_buff.instrument_mod = p->Buffs[slot_id].bard_modifier;
-			pet_buff.castername     = p->Buffs[slot_id].caster_name;
+			pet_buff.castername     = p->Buffs[slot_id].caster_name;			
 
 			pet_buffs.push_back(pet_buff);
 		}
@@ -3393,6 +3393,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 			p->Buffs[e.slot].duration      = e.ticsremaining;
 			p->Buffs[e.slot].counters      = e.counters;
 			p->Buffs[e.slot].bard_modifier = e.instrument_mod;
+			strn0cpy(p->Buffs[e.slot].caster_name, e.castername.c_str(), sizeof(p->Buffs[e.slot].caster_name));
 		}
 	}
 
