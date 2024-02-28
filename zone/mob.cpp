@@ -5227,7 +5227,11 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
-	on = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
+	Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
+
+	if (new_target) {
+		on = new_target;
+	}
 
 	if (on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
 		return;
@@ -6150,7 +6154,11 @@ void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 		return;
 	}
 
-	target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, target->GetID()));
+	Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, target->GetID()));
+
+	if (new_target) {
+		target = new_target;
+	}
 
 	const uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
 

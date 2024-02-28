@@ -150,6 +150,10 @@ int Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			return GetID();
 		}
 
+		if (IsBeneficialSpell(spell_id) && !target_id > 0) {
+			return GetID();
+		}
+
 		//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
 		if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
 			Mob* spell_target = entity_list.GetMobID(target_id);
