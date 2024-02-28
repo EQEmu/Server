@@ -89,7 +89,7 @@ uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
 		}
 
 		forage_items[count]   = e.Itemid;
-		forage_chances[count] = e.chance;
+		forage_chances[count] = e.chance + current_chance;
 
 		current_chance = forage_chances[count];
 
