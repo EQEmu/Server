@@ -286,6 +286,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							dmg = caster->GetActReflectedSpellDamage(spell_id, (int64)(spells[spell_id].base_value[i] * partial / 100), reflect_effectiveness);
 						}
 						else {
+							//maybe allowing pets to cast spells as if the owner cast them by a % number.
+							if (RuleI(Spells, PetsScaleWithOwnerPercent) > 0 && caster->GetOwner() && caster->GetOwner()->IsClient() && !IsCharmed())
+							{	
+								//share stats
+								Client* owner = caster->GetOwner()->CastToClient();
+								dmg = owner->GetActSpellDamage(spell_id, dmg, this, RuleI(Spells, PetsScaleWithOwnerPercent));								
+							}
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
 						}
 						caster->ResourceTap(-dmg, spell_id);
