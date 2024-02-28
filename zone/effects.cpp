@@ -39,7 +39,7 @@ float Mob::GetActSpellRange(uint16 spell_id, float range)
 	return (range * extrange) / 100;
 }
 
-int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
+int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int percent_modifier) {
 	if (spells[spell_id].target_type == ST_Self) {
 		return value;
 	}
@@ -157,6 +157,12 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 				value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
 			}
 
+			if (percent_modifier > 0) {
+				int addedValue = value - base_value;
+				addedValue = (addedValue * percent_modifier) / 100;
+				value = base_value + addedValue;
+			}
+
 			return value;
 		}
 	}
@@ -200,6 +206,12 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 		if (value < -legacy_manaburn_cap) {
 			value = -legacy_manaburn_cap;
 		}
+	}
+
+	if (percent_modifier > 0) {
+		int addedValue = value - base_value;
+		addedValue = (addedValue * percent_modifier) / 100;
+		value = base_value + addedValue;
 	}
 
 	return value;

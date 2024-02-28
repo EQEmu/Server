@@ -350,7 +350,7 @@ public:
 	void NegateSpellEffectBonuses(uint16 spell_id);
 	bool NegateSpellEffect(uint16 spell_id, int effect_id);
 	float GetActSpellRange(uint16 spell_id, float range);
-	int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr);
+	int64 GetActSpellDamage(uint16 spell_id, int64 value, Mob* target = nullptr, int percent_modifier = 0);
 	int64 GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_buff_tic = true);
 	int64 GetActSpellHealing(uint16 spell_id, int64 value, Mob* target = nullptr, bool from_buff_tic = false);
 	int32 GetActSpellCost(uint16 spell_id, int32 cost);
