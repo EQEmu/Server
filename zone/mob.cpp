@@ -1285,7 +1285,12 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	if (texture > 0) {
 		for (i = 0; i < 9; i++) {
-			if (i == EQ::textures::weaponPrimary || i == EQ::textures::weaponSecondary || texture == 255) {
+			if (
+				i == EQ::textures::weaponPrimary ||
+				i == EQ::textures::weaponSecondary ||
+				i == EQ::textures::armorHead ||
+				texture == std::numeric_limits<uint8>::max()
+			) {
 				continue;
 			}
 			ns->spawn.equipment.Slot[i].Material = texture;
