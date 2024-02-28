@@ -2313,7 +2313,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		booktxt2 = content_db.GetBook(bookString.c_str(), &book_language);
 	}
 
-	if (RuleB(Custom, UseDynamicItemDiscoveryTags)) {
+	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && itemID > 999999) {
 		if (book->type == 2 && itemID > 0) {
 			auto discover_charname = GetDiscoverer(itemID);
 			if (!discover_charname.empty()) {
