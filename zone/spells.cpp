@@ -210,6 +210,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		send_spellbar_enable = false;
 	}
 
+	target_id = GetSpellImpliedTargetID(spell_id, target_id);
+
 	if (target_id == -1) {
 		StopCastSpell(spell_id, send_spellbar_enable);
 		Message(Chat::SpellFailure, "You cannot find a valid target for this spell.");
@@ -224,9 +226,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			IsValidSpell(spell_id), casting_spell_id, delaytimer, spellend_timer.Enabled());
 		StopCastSpell(spell_id, send_spellbar_enable);
 		return false;
-	}
-
-	target_id = GetSpellImpliedTargetID(spell_id, target_id);
+	}	
 
 	if (!DoCastingChecksOnCaster(spell_id, slot) ||
 		!DoCastingChecksZoneRestrictions(true, spell_id) ||
@@ -419,6 +419,18 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	SaveSpellLoc();
 	LogSpells("Casting [{}] Started at ({},{},{})", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
+
+	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && GetClass() == Class::Bard) {
+		FilteredMessageString(this, Chat::Spells, FilterPCSpells, 12205, spells[spell_id].name);
+		entity_list.FilteredMessageCloseString(this, 
+											   true, 
+											   RuleI(Range, SpellMessages), 
+											   Chat::Spells, 
+											   (IsClient() ? FilterPCSpells : FilterNPCSpells), 
+											   12206,
+											   0,
+											   GetCleanName());
+	}
 
 	// if this spell doesn't require a target, or if it's an optional target
 	// and a target wasn't provided, then it's us; unless TGB is on and this
