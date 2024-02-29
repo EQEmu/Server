@@ -552,6 +552,12 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	c.guild_auto_consent      = pp->guildAutoconsent;
 	c.RestTimer               = pp->RestTimer;
 
+
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		std::string insertQuery = StringFormat("REPLACE INTO data_buckets (`key`, `value`,`character_id`) VALUES ('GestaltClasses', '%d', %d)", pp->classes, character_id);
+    	auto results = QueryDatabase(insertQuery);
+	}	
+
 	CharacterDataRepository::ReplaceOne(*this, c);
 
 	std::vector<CharacterBindRepository::CharacterBind> character_binds;

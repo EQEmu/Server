@@ -1696,7 +1696,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	strn0cpy(pp.name, name, sizeof(pp.name));
 
 	pp.race             = cc->race;
-	pp.class_           = cc->class_;
+	pp.class_           = RuleB(Custom, MulticlassingEnabled) ? Class::Bard : cc->class_;
 	pp.gender           = cc->gender;
 	pp.deity            = cc->deity;
 	pp.STR              = cc->STR;
@@ -1723,6 +1723,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.cur_hp           = 1000;
 	pp.hunger_level     = 6000;
 	pp.thirst_level     = 6000;
+	pp.classes          = GetPlayerClassBit(cc->class_);
 
 	/* Set default skills for everybody */
 	pp.skills[EQ::skills::SkillSwimming]     = RuleI(Skills, SwimmingStartValue);
@@ -1836,7 +1837,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		);
 	}
 
-	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
+	content_db.SetStartingItems(&pp, &inv, pp.race, cc->class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
 	const bool success = StoreCharacter(GetAccountID(), &pp, &inv);
 
