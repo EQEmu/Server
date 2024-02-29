@@ -1221,14 +1221,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.animation	= 0;
 	ns->spawn.findable	= findable?1:0;
 
-	if (RuleB(Custom, MulticlassingEnabled) && IsClient()) {
-		if (CastToClient()->GetClassesBits() & GetPlayerClassBit(Class::Monk)) {
-			if (ns->spawn.race == Race::Human || ns->spawn.race == Race::Iksar || ns->spawn.race == Race::Froglok2) {
-				ns->spawn.class_ = Class::Monk;
-			}
-		}
-	}
-
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQ::lightsource::LightActive];
 
