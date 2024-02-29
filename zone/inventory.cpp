@@ -167,10 +167,15 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 
 uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 	if (RuleB(Custom, DoItemUpgrades)) {
+
+		LogDebug("Attempting Upgrade for: [{}]", item_id);
+
 		uint32 new_item_id = item_id;
 
 		if (item_id < 1000000) { // this is a normal item
 			int roll = zone->random.Int(1, 100);
+
+			LogDebug("Upgrade Rolled: [{}]", roll);
 
 			if (roll <= RuleI(Item, RoseColoredQuestWeightDrop)) {
 				new_item_id += 1000000;
@@ -182,12 +187,37 @@ uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 				const EQ::ItemData* item = database.GetItem(new_item_id);
 				if (item != nullptr) {
 					item_id = new_item_id;
+					LogDebug("Found eligible upgrade for [{}] is [{}]", item_id, new_item_id);
+				} else {
+					LogDebug("Unable to find a valid upgrade for [{}]", item_id);
 				}
 			}
 		}
 	}
 	return item_id;
 }
+
+uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
+	if (RuleB(Custom, DoItemUpgrades)) {
+		uint32 new_item_id = item_id;
+		if (item_id < 1000000) { // this is a normal item		
+			new_item_id += 2000000;
+
+			if (new_item_id != item_id) {
+				const EQ::ItemData* item = database.GetItem(new_item_id);
+				if (item != nullptr) {
+					item_id = new_item_id;
+					LogDebug("Found eligible upgrade for [{}] is [{}]", item_id, new_item_id);
+				} else {
+					LogDebug("Unable to find a valid upgrade for [{}]", item_id);
+				}
+			}
+		}
+	}
+	
+	return item_id;
+}
+
 
 bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
 	item_id = GetApocItemUpgrade(item_id);

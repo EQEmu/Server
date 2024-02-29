@@ -1102,9 +1102,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 
-			item = database.GetItem(GetApocItemUpgrade(itr->first));
+			auto item_id = GetMaxItemUpgrade(itr->first);
+
+			item = database.GetItem(item_id);
 			if (item) {
-				SummonItem(itr->first, itr->second);
+				SummonItem(item_id, itr->second);
 				if (GetGroup()) {
 					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
 				}
