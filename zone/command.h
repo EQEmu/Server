@@ -85,6 +85,7 @@ void command_feature(Client *c, const Seperator *sep);
 void command_find(Client *c, const Seperator *sep);
 void command_fixmob(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
+void command_forage(Client* c, const Seperator* sep);
 void command_gearup(Client *c, const Seperator *sep);
 void command_giveitem(Client *c, const Seperator *sep);
 void command_givemoney(Client *c, const Seperator *sep);
