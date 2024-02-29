@@ -1003,7 +1003,7 @@ double Mob::RollD20(int offense, int mitigation)
 	auto atk_roll = zone->random.Roll0(offense + 5);
 	auto def_roll = zone->random.Roll0(mitigation + 5);
 
-	int avg = (offense + mitigation + 10) / 2;
+	int avg = std::max(1, (offense + mitigation + 10) / 2);
 	int index = std::max(0, (atk_roll - def_roll) + (avg / 2));
 
 	index = EQ::Clamp((index * 20) / avg, 0, 19);
