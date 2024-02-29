@@ -1,3 +1,35 @@
+## [22.45.1] 2/29/2024
+
+### Character Creation
+
+* Improved Random Name Generator ([#4081](https://github.com/EQEmu/Server/pull/4081)) @catapultam-habeo 2024-02-27
+
+### Code
+
+* Fix Server Rules Documentation Generation ([#4125](https://github.com/EQEmu/Server/pull/4125)) @Kinglykrab 2024-02-26
+* Remove unnecessary stoptimer logs ([#4128](https://github.com/EQEmu/Server/pull/4128)) @Kinglykrab 2024-02-28
+
+### Commands
+
+* Add `#forage` command ([#4133](https://github.com/EQEmu/Server/pull/4133)) @joligario 2024-02-29
+
+### Crash
+
+* Fix crash issue during database dump ([#4127](https://github.com/EQEmu/Server/pull/4127)) @Akkadius 2024-02-29
+
+### Crash Fix
+
+* D20 crash if mitigation average resulted in 0 ([#4131](https://github.com/EQEmu/Server/pull/4131)) @nytmyr 2024-02-29
+
+### Fixes
+
+* Fix forage returning first result from table ([#4130](https://github.com/EQEmu/Server/pull/4130)) @nytmyr 2024-02-29
+* Who /all displays incorrect guild name ([#4123](https://github.com/EQEmu/Server/pull/4123)) @neckkola 2024-02-25
+
+### Quest API
+
+* Add Pet Owner Methods to Perl/Lua ([#4115](https://github.com/EQEmu/Server/pull/4115)) @Kinglykrab 2024-02-25
+
 ## [22.45.0] 2/24/2024
 
 ### Beacon
