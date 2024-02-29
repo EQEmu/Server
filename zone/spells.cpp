@@ -2883,7 +2883,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			spell_target->GetPet() && 
 			spell_target->HasPetAffinity() &&
 			!spell_target->GetPet()->IsCharmed()) {
-				SpellOnTarget(spell_id, GetPet());
+				SpellOnTarget(spell_id, spell_target->GetPet());
 			}
 	}
 
