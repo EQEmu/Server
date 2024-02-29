@@ -543,6 +543,8 @@ bool Client::Process() {
 			{
 				ItemTimerCheck();
 			}
+			
+			SendEdgeStatBulkUpdate();
 		}
 	}
 

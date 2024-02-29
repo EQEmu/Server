@@ -420,13 +420,14 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	SaveSpellLoc();
 	LogSpells("Casting [{}] Started at ({},{},{})", spell_id, m_SpellLocation.x, m_SpellLocation.y, m_SpellLocation.z);
 
+	// Replace missing cast messages for 'Bards'
 	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && GetClass() == Class::Bard) {
-		FilteredMessageString(this, Chat::Spells, FilterPCSpells, 12205, spells[spell_id].name);
+		FilteredMessageString(this, Chat::Spells, (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 12205, spells[spell_id].name);
 		entity_list.FilteredMessageCloseString(this, 
 											   true, 
 											   RuleI(Range, SpellMessages), 
 											   Chat::Spells, 
-											   (IsClient() ? FilterPCSpells : FilterNPCSpells), 
+											   (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 
 											   12206,
 											   0,
 											   GetCleanName());

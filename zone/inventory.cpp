@@ -3255,6 +3255,26 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 		{
 			return GetCHA();
 		}
+		case eStatHPRegen:
+		{
+			return GetHPRegen();
+		}
+		case eStatManaRegen:
+		{
+			return GetManaRegen();
+		}
+		case eStatEndurRegen:
+		{
+			return GetEnduranceRegen();
+		}
+		case eStatHaste:
+		{
+			return GetHaste();
+		}
+		case eStatATK:
+		{
+			return GetTotalATK();
+		}
 		default:
 		{
 			return 0;

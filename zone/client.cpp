@@ -2313,13 +2313,22 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		booktxt2 = content_db.GetBook(bookString.c_str(), &book_language);
 	}
 
-	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && itemID > 999999) {
-		if (book->type == 2 && itemID > 0) {
+	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2 && itemID > 0) {
+		if (itemID > 999999) {			
 			auto discover_charname = GetDiscoverer(itemID);
+
 			if (!discover_charname.empty()) {
 				// Append the discovery information to booktxt2
 				booktxt2 += "<br>Discovered by: " + discover_charname;
-			}        
+			}
+		} else {
+			const auto* item_data = database.GetItem(itemID);			
+			if (item_data) {
+				std::string item_name = item_data->Name;
+				if (item_name.find("Fine Steel") == 0) {
+					booktxt2 += "<br>Discovered by: Enchanted Loom";
+				}
+			}
 		}
 	}
 
