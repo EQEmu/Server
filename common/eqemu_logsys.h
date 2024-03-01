@@ -242,6 +242,7 @@ namespace Logs {
 		"Zoning",
 		"EqTime",
 		"Corpses",
+		"XTargets"
 	};
 }
 
