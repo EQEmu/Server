@@ -97,8 +97,8 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
 
-		if (RuleS(World, IPExemptionZone)) {
-			std::string IPExemptZones = RuleS(World, IPExemptionZone);
+		if (RuleS(World, IPExemptionZones)) {
+			std::string IPExemptZones = RuleS(World, IPExemptionZones);
 			std::vector<std::string> zones;
 			std::stringstream ss(IPExemptZones);
 			std::string temp;
