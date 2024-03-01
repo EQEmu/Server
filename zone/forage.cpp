@@ -257,7 +257,7 @@ bool Client::CanFish() {
 	return true;
 }
 
-void Client::GoFish()
+void Client::GoFish(bool guarantee, bool use_no_bait)
 {
 
 	//TODO: generate a message if we're already fishing
@@ -306,7 +306,7 @@ void Client::GoFish()
 		fishing_skill = 100+((fishing_skill-100)/2);
 	}
 
-	if (zone->random.Int(0,175) < fishing_skill) {
+	if (guarantee || zone->random.Int(0,175) < fishing_skill) {
 		uint32 food_id = 0;
 
 		//25% chance to fish an item.
@@ -343,8 +343,10 @@ void Client::GoFish()
 			}
 		}
 
-		//consume bait, should we always consume bait on success?
-		DeleteItemInInventory(bslot, 1, true);	//do we need client update?
+		if (!use_no_bait) {
+			//consume bait, should we always consume bait on success?
+			DeleteItemInInventory(bslot, 1, true);    //do we need client update?
+		}
 
 		if(food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
