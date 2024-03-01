@@ -2,5 +2,5 @@
 
 void command_fish(Client *c, const Seperator *sep)
 {
-	c->GoFish(true, true);
+	c->GoFish(true, false);
 }
