@@ -257,7 +257,7 @@ bool Client::CanFish() {
 	return true;
 }
 
-void Client::GoFish(bool guarantee, bool use_no_bait)
+void Client::GoFish(bool guarantee, bool use_bait)
 {
 
 	//TODO: generate a message if we're already fishing
@@ -343,7 +343,7 @@ void Client::GoFish(bool guarantee, bool use_no_bait)
 			}
 		}
 
-		if (!use_no_bait) {
+		if (use_bait) {
 			//consume bait, should we always consume bait on success?
 			DeleteItemInInventory(bslot, 1, true);    //do we need client update?
 		}
