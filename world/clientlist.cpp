@@ -106,7 +106,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 				zones.push_back(temp);
 			}
 			
-			if (std::find(zones.begin(), zones.end(), zoneStr) != zones.end()) {
+			if (std::find(zones.begin(), zones.end(), std::to_string(cle->zone())) != zones.end()) {
 				iterator.Advance();
 				continue;
 			}	
