@@ -28,6 +28,9 @@
 #ifndef RULE_BOOL
 #define RULE_BOOL(cat, rule, default_value, notes)
 #endif
+#ifndef RULE_STRING
+#define RULE_STRING(cat, rule, default_value, notes)
+#endif
 #ifndef RULE_CATEGORY_END
 #define RULE_CATEGORY_END()
 #endif
@@ -324,6 +327,7 @@ RULE_INT(World, MaximumQuestErrors, 30, "Changes the maximum number of quest err
 RULE_INT(World, BootHour, 0, "Sets the in-game hour world will set when it first boots. 0-24 are valid options, where 0 disables this rule")
 RULE_BOOL(World, UseItemLinksForKeyRing, false, "Uses item links for Key Ring Listing instead of item name")
 RULE_BOOL(World, UseOldShadowKnightClassExport, true, "Disable to have Shadowknight show as Shadow Knight (live-like)")
+RULE_STRING(World, MOTD, "", "Server MOTD sent on login, change from empty to have this be used instead of variables table 'motd' value")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -950,4 +954,5 @@ RULE_CATEGORY_END()
 #undef RULE_INT
 #undef RULE_REAL
 #undef RULE_BOOL
+#undef RULE_STRING
 #undef RULE_CATEGORY_END

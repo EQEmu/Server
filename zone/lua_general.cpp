@@ -5653,6 +5653,10 @@ bool get_ruleb(int rule) {
 	return RuleManager::Instance()->GetBoolRule((RuleManager::BoolType)rule);
 }
 
+std::string get_rules(int rule) {
+	return RuleManager::Instance()->GetStringRule((RuleManager::StringType)rule);
+}
+
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 	[(
@@ -7245,6 +7249,12 @@ luabind::scope lua_register_rules_const() {
 		luabind::value(#rule, RuleManager::Bool__##rule),
 #include "../common/ruletypes.h"
 		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
+#undef RULE_BOOL
+#define RULE_STRING(cat, rule, default_value, notes) \
+		luabind::value(#rule, RuleManager::String__##rule),
+#include "../common/ruletypes.h"
+		luabind::value("_StringRuleCount", RuleManager::_StringRuleCount)
+#undef RULE_STRING
 	)];
 }
 
@@ -7266,6 +7276,13 @@ luabind::scope lua_register_ruleb() {
 	return luabind::namespace_("RuleB")
 		[
 			luabind::def("Get", &get_ruleb)
+		];
+}
+
+luabind::scope lua_register_rules() {
+	return luabind::namespace_("RuleS")
+		[
+			luabind::def("Get", &get_rules)
 		];
 }
 
