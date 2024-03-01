@@ -98,17 +98,13 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 		cle = iterator.GetData();
 
 		if (RuleS(World, IPExemptionZones)) {
-			std::string IPExemptZones = RuleS(World, IPExemptionZones);
-			std::vector<std::string> zones;
-			std::stringstream ss(IPExemptZones);
-			std::string temp;
-			while (getline(ss, temp, ',')) {
-				zones.push_back(temp);
-			}
-			
-			if (std::find(zones.begin(), zones.end(), std::to_string(cle->zone())) != zones.end()) {
-				iterator.Advance();
-				continue;
+			const auto zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
+
+			for (const auto &z : zones) {
+				if (Strings::ToUnsignedInt(z) == cle->zone()) {
+					iterator.Advance();
+					continue;
+				}
 			}	
 		}
 
