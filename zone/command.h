@@ -83,6 +83,7 @@ void command_faction(Client *c, const Seperator *sep);
 void command_faction_association(Client *c, const Seperator *sep);
 void command_feature(Client *c, const Seperator *sep);
 void command_find(Client *c, const Seperator *sep);
+void command_fish(Client* c, const Seperator* sep);
 void command_fixmob(Client *c, const Seperator *sep);
 void command_flagedit(Client *c, const Seperator *sep);
 void command_forage(Client* c, const Seperator* sep);
