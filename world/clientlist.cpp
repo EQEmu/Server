@@ -96,6 +96,12 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
+
+		if (RuleI(World, IPExemptionZone) > 0 && cle->zone() == RuleI(World, IPExemptionZone)) {
+			iterator.Advance();
+			continue;
+		}
+
 		if (
 			cle->GetIP() == in_ip &&
 			(
