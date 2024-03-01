@@ -7248,7 +7248,7 @@ luabind::scope lua_register_rules_const() {
 #define RULE_BOOL(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Bool__##rule),
 #include "../common/ruletypes.h"
-		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
+		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount),
 #undef RULE_BOOL
 #define RULE_STRING(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::String__##rule),
