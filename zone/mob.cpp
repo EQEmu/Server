@@ -1220,10 +1220,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	UpdateActiveLight();
 	ns->spawn.light		= m_Light.Type[EQ::lightsource::LightActive];
 
-	if (IsNPC() && race == ERUDITE)
-		ns->spawn.showhelm = 1;
-	else
-		ns->spawn.showhelm = (helmtexture && helmtexture != 0xFF) ? 1 : 0;
+	ns->spawn.showhelm = helmtexture != std::numeric_limits<uint8>::max() ? 1 : 0;
 
 	ns->spawn.invis		= (invisible || hidden) ? 1 : 0;	// TODO: load this before spawning players
 	ns->spawn.NPC		= IsClient() ? 0 : 1;
@@ -1272,10 +1269,8 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
-	//for (i = 0; i < _MaterialCount; i++)
-	for (i = 0; i < 9; i++) {
-		// Only Player Races Wear Armor
-		if (IsPlayerRace(race) || i > 6) {
+	for (i = 0; i < EQ::textures::materialCount; i++) {
+		if (IsPlayerRace(race) || i > EQ::textures::armorFeet) {
 			ns->spawn.equipment.Slot[i].Material        = GetEquipmentMaterial(i);
 			ns->spawn.equipment.Slot[i].EliteModel      = IsEliteMaterialItem(i);
 			ns->spawn.equipment.Slot[i].HerosForgeModel = GetHerosForgeModel(i);
@@ -1283,13 +1278,42 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		}
 	}
 
-	if (texture > 0) {
-		for (i = 0; i < 9; i++) {
-			if (i == EQ::textures::weaponPrimary || i == EQ::textures::weaponSecondary || texture == 255) {
-				continue;
-			}
-			ns->spawn.equipment.Slot[i].Material = texture;
+	for (i = 0; i < EQ::textures::weaponPrimary; i++) {
+		if (texture == std::numeric_limits<uint8>::max()) {
+			continue;
 		}
+
+		if (i == EQ::textures::armorHead && helmtexture != texture) {
+			ns->spawn.equipment.Slot[i].Material = helmtexture;
+			continue;
+		}
+
+		if (i == EQ::textures::armorArms && armtexture != 0) {
+			ns->spawn.equipment.Slot[i].Material = armtexture;
+			continue;
+		}
+
+		if (i == EQ::textures::armorWrist && bracertexture != 0) {
+			ns->spawn.equipment.Slot[i].Material = bracertexture;
+			continue;
+		}
+
+		if (i == EQ::textures::armorHands && handtexture != 0) {
+			ns->spawn.equipment.Slot[i].Material = handtexture;
+			continue;
+		}
+
+		if (i == EQ::textures::armorLegs && legtexture != 0) {
+			ns->spawn.equipment.Slot[i].Material = legtexture;
+			continue;
+		}
+
+		if (i == EQ::textures::armorFeet && feettexture != 0) {
+			ns->spawn.equipment.Slot[i].Material = feettexture;
+			continue;
+		}
+
+		ns->spawn.equipment.Slot[i].Material = texture;
 	}
 
 	memset(ns->spawn.set_to_0xFF, 0xFF, sizeof(ns->spawn.set_to_0xFF));
