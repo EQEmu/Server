@@ -40,8 +40,6 @@ extern WorldServer worldserver;
 Raid::Raid(uint32 raidID)
 : GroupIDConsumer(raidID)
 {
-	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
-	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	for (auto& gm : group_mentor) {
 		gm.mentor_percent = 0;
 		gm.mentoree = nullptr;
@@ -65,8 +63,6 @@ Raid::Raid(uint32 raidID)
 Raid::Raid(Client* nLeader)
 : GroupIDConsumer()
 {
-	memset(&raid_aa, 0, sizeof(RaidLeadershipAA_Struct));
-	memset(group_aa, 0, sizeof(GroupLeadershipAA_Struct) * MAX_RAID_GROUPS);
 	for (auto& gm : group_mentor) {
 		gm.mentor_percent = 0;
 		gm.mentoree = nullptr;
@@ -451,13 +447,13 @@ void Raid::SaveRaidLeaderAA()
 void Raid::UpdateGroupAAs(uint32 gid)
 {
 
-	if (gid > MAX_RAID_GROUPS) {
+	if (gid > MAX_RAID_GROUPS || gid == RAID_GROUPLESS || gid < 0) {
 		return;
 	}
 
 	Client *gl = GetGroupLeader(gid);
 
-	if (gl) {
+	if (gl && gl->IsClient()) {
 		gl->GetGroupAAs(&group_aa[gid]);
 	} else {
 		memset(&group_aa[gid], 0, sizeof(GroupLeadershipAA_Struct));
