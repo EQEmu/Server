@@ -647,7 +647,7 @@ bool Client::HandleGenerateRandomNamePacket(const EQApplicationPacket *app) {
 		if (database.CheckNameFilter(newName)) {
 			std::string query = StringFormat("SELECT `name` FROM `character_data` WHERE `name` = '%s'", newName);
 			auto res = database.QueryDatabase(query);
-			if (res.Success() && res.RowCount() == 0) {				
+			if (res.Success() && res.RowCount() == 0) {
 				unique = true;
 			}
 		}
@@ -919,14 +919,19 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	auto outapp = new EQApplicationPacket(OP_MOTD);
-	std::string motd_message;
-	if (database.GetVariable("MOTD", motd_message)) {
-		outapp->size = motd_message.length() + 1;
+	std::string motd = RuleS(World, MOTD);
+	if (!motd.empty()) {
+		outapp->size    = motd.length() + 1;
 		outapp->pBuffer = new uchar[outapp->size];
 		memset(outapp->pBuffer, 0, outapp->size);
-		strcpy((char*)outapp->pBuffer, motd_message.c_str());
+		strcpy((char*) outapp->pBuffer, motd.c_str());
+	} else if (database.GetVariable("MOTD", motd)) {
+		outapp->size    = motd.length() + 1;
+		outapp->pBuffer = new uchar[outapp->size];
+		memset(outapp->pBuffer, 0, outapp->size);
+		strcpy((char*) outapp->pBuffer, motd.c_str());
 	} else { // Null Message of the Day. :)
-		outapp->size = 1;
+		outapp->size    = 1;
 		outapp->pBuffer = new uchar[outapp->size];
 		outapp->pBuffer[0] = 0;
 	}

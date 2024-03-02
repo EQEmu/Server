@@ -96,10 +96,13 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
-
-		if (RuleI(World, IPExemptionZone) > 0 && cle->zone() == RuleI(World, IPExemptionZone)) {
-			iterator.Advance();
-			continue;
+		
+		const auto zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
+		for (const auto &z : zones) {
+			if (Strings::ToUnsignedInt(z) == cle->zone()) {
+				iterator.Advance();
+				continue;
+			}
 		}
 
 		if (

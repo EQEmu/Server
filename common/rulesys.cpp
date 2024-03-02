@@ -34,8 +34,8 @@ const char *RuleManager::s_categoryNames[_CatCount + 1] = {
 	"InvalidCategory"
 };
 
-const RuleManager::RuleInfo RuleManager::s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + 1] = {
-	/* this is done in three steps so we can reliably get to them by index*/
+const RuleManager::RuleInfo RuleManager::s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + StringRuleCount + 1] = {
+	/* this is done in three steps, so we can reliably get to them by index*/
 	#define RULE_INT(category_name, rule_name, default_value, notes) \
 		{ #category_name ":" #rule_name, Category__##category_name, IntRule, Int__##rule_name, notes },
 	#include "ruletypes.h"
@@ -44,6 +44,9 @@ const RuleManager::RuleInfo RuleManager::s_RuleInfo[IntRuleCount + RealRuleCount
 	#include "ruletypes.h"
 	#define RULE_BOOL(category_name, rule_name, default_value, notes) \
 		{ #category_name ":" #rule_name, Category__##category_name, BoolRule, Bool__##rule_name, notes },
+	#include "ruletypes.h"
+	#define RULE_STRING(category_name, rule_name, default_value, notes) \
+		{ #category_name ":" #rule_name, Category__##category_name, StringRule, String__##rule_name, notes },
 	#include "ruletypes.h"
 	{ "Invalid Rule", _CatCount, IntRule }
 };
@@ -114,6 +117,9 @@ bool RuleManager::GetRule(const std::string &rule_name, std::string &rule_value)
 		case BoolRule:
 			rule_value = m_RuleBoolValues[index] ? "true" : "false";
 			break;
+		case StringRule:
+			rule_value = m_RuleStringValues[index];
+			break;
 	}
 
 	return true;
@@ -151,6 +157,10 @@ bool RuleManager::SetRule(const std::string &rule_name, const std::string &rule_
 		case BoolRule:
 			m_RuleBoolValues[index] = static_cast<uint32>(Strings::ToBool(rule_value));
 			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
+			break;
+		case StringRule:
+			m_RuleStringValues[index] = rule_value;
+			LogRules("Set rule [{}] to value [{}]", rule_name, rule_value);
 			break;
 	}
 
@@ -215,11 +225,13 @@ std::string RuleManager::_GetRuleName(RuleType type, uint16 index) {
 			return s_RuleInfo[index + IntRuleCount].name;
 		case BoolRule:
 			return s_RuleInfo[index + IntRuleCount + RealRuleCount].name;
+		case StringRule:
+			return s_RuleInfo[index + IntRuleCount + RealRuleCount + StringRuleCount].name;
 		default:
 			break;
 	}
 
-	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount].name;
+	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + StringRuleCount].name;
 }
 
 //assumes index is valid!
@@ -231,11 +243,13 @@ const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 			return s_RuleInfo[index + IntRuleCount].notes;
 		case BoolRule:
 			return s_RuleInfo[index + IntRuleCount + RealRuleCount].notes;
+		case StringRule:
+			return s_RuleInfo[index + IntRuleCount + RealRuleCount + StringRuleCount].notes;
 		default:
 			break;
 	}
 
-	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount].notes;
+	return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + StringRuleCount].notes;
 }
 
 bool RuleManager::LoadRules(Database *db, const std::string &rule_set_name, bool reload) {
@@ -343,6 +357,10 @@ void RuleManager::SaveRules(Database *db, const std::string &rule_set_name) {
 	for (i = 0; i < BoolRuleCount; i++) {
 		_SaveRule(db, BoolRule, i);
 	}
+
+	for (i = 0; i < StringRuleCount; i++) {
+		_SaveRule(db, StringRule, i);
+	}
 }
 
 void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
@@ -366,6 +384,9 @@ void RuleManager::_SaveRule(Database *db, RuleType type, uint16 index) {
 			break;
 		case BoolRule:
 			rule_value = m_RuleBoolValues[index] ? "true" : "false";
+			break;
+		case StringRule:
+			rule_value = m_RuleStringValues[index];
 			break;
 	}
 
@@ -444,6 +465,10 @@ bool RuleManager::UpdateInjectedRules(Database *db, const std::string &rule_set_
 				break;
 			case BoolRule:
 				rule_data[r.name].first = fmt::format("{}", m_RuleBoolValues[r.rule_index] ? "true" : "false");
+				rule_data[r.name].second = &r.notes;
+				break;
+			case StringRule:
+				rule_data[r.name].first = m_RuleStringValues[r.rule_index];
 				rule_data[r.name].second = &r.notes;
 				break;
 			default:
@@ -552,7 +577,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 				}
 			}
 
-			return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount];
+			return s_RuleInfo[IntRuleCount + RealRuleCount + BoolRuleCount + StringRuleCount];
 		}(e.rule_name);
 
 		if (Strings::Contains(rule.name, e.rule_name)) {
@@ -616,4 +641,9 @@ float RuleManager::GetRealRule(RuleManager::RealType t) const
 bool RuleManager::GetBoolRule(RuleManager::BoolType t) const
 {
 	return m_RuleBoolValues[t] == 1;
+}
+
+std::string RuleManager::GetStringRule(RuleManager::StringType t) const
+{
+	return m_RuleStringValues[t];
 }
