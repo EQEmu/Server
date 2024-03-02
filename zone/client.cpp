@@ -284,6 +284,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	PendingSacrifice = false;
 	controlling_boat_id = 0;
 	controlled_mob_id = 0;
+	qGlobals = nullptr;
 
 	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(0);
@@ -311,7 +312,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	aa_los_them_mob = nullptr;
 	los_status = false;
 	los_status_facing = false;
-	qGlobals = nullptr;
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
