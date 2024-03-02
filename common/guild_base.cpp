@@ -342,41 +342,14 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id)
 	return true;
 }
 
-uint32 BaseGuildManager::_GetFreeGuildID()
-{
-	GuildsRepository::DeleteWhere(*m_db, "`name` = ''");
-
-	GuildsRepository::Guilds out;
-	out.id          = 0;
-	out.leader      = 0;
-	out.minstatus   = 0;
-	out.tribute     = 0;
-	out.name        = "";
-	out.motd        = "";
-	out.motd_setter = "";
-	out.url         = "";
-	out.channel     = "";
-	auto last_insert_id = GuildsRepository::InsertOne(*m_db, out);
-	if (last_insert_id.id > 0) {
-		LogGuilds("Located a free guild ID [{}] in the database", last_insert_id.id);
-		return last_insert_id.id;
-	}
-
-	LogGuilds("Unable to find a free guild ID in the database");
-	return GUILD_NONE;
-}
-
 uint32 BaseGuildManager::CreateGuild(std::string name, uint32 leader_char_id)
 {
-	uint32 guild_id = UpdateDbCreateGuild(name, leader_char_id);
-	if (guild_id == GUILD_NONE) {
-		return (GUILD_NONE);
-	}
-	//RefreshGuild(guild_id);
-	//SendGuildRefresh(guild_id, true, false, false, false);
-	//SendCharRefresh(GUILD_NONE, guild_id, leader_char_id);
+    uint32 guild_id = UpdateDbCreateGuild(name, leader_char_id);
+    if (guild_id == GUILD_NONE) {
+        return (GUILD_NONE);
+    }
 
-	return guild_id;
+    return guild_id;
 }
 
 bool BaseGuildManager::DeleteGuild(uint32 guild_id)
@@ -539,8 +512,8 @@ bool BaseGuildManager::SetPublicNote(uint32 charid, std::string public_note)
 
 uint32 BaseGuildManager::UpdateDbCreateGuild(std::string name, uint32 leader)
 {
-	auto new_id = _GetFreeGuildID();
-	if (new_id == GUILD_NONE) {
+	auto new_id = GuildsRepository::GetMaxId(*m_db) + 1;
+	if (!new_id) {
 		return GUILD_NONE;
 	}
 
