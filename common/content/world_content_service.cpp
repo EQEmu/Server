@@ -303,7 +303,7 @@ WorldContentService * WorldContentService::LoadStaticGlobalZoneInstances()
 {
 	m_zone_instances = InstanceListRepository::GetWhere(*GetDatabase(), fmt::format("never_expires = 1 AND is_global = 1"));
 
-	LogInfo("Loaded [{}] zone_instances", m_zones.size());
+	LogInfo("Loaded [{}] zone_instances", m_zone_instances.size());
 
 	return this;
 }
