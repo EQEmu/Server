@@ -3798,6 +3798,8 @@ void NPC::DescribeSpecialAbilities(Client* c)
 		IMMUNE_OPEN,
 		IMMUNE_ASSASSINATE,
 		IMMUNE_HEADSHOT,
+		IMMUNE_AGGRO_BOT,
+		IMMUNE_DAMAGE_BOT
 	};
 
 	// These abilities have parameters that need to be parsed out individually

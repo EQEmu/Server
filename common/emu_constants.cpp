@@ -698,6 +698,8 @@ const std::map<uint32, std::string>& EQ::constants::GetSpecialAbilityMap()
 		{ IMMUNE_OPEN,               "Immune to Open" },
 		{ IMMUNE_ASSASSINATE,        "Immune to Assassinate" },
 		{ IMMUNE_HEADSHOT,           "Immune to Headshot" },
+		{ IMMUNE_AGGRO_BOT,          "Immune to Bot Aggro" },
+		{ IMMUNE_DAMAGE_BOT,         "Immune to Bot Damage" },
 	};
 
 	return special_ability_map;

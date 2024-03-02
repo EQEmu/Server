@@ -621,28 +621,38 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 //	NPC *npc1, *npc2;
 	int reverse;
 
-	if(!zone->CanDoCombat())
-		return false;
-
-	// some special cases
-	if(!target)
-		return false;
-
-	if(this == target)	// you can attack yourself
-		return true;
-
-	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
+	if (!zone->CanDoCombat()) {
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
+	// some special cases
+	if (!target) {
 		return false;
+	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
-		return false;
+	if (this == target) {    // you can attack yourself
+		return true;
+	}
 
-	if (target->IsHorse())
+	if (target->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		return false;
+	}
+
+	if (IsBot() && target->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
+		return false;
+	}
+
+	if (IsClient() && target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
+		return false;
+	}
+
+	if (IsNPC() && target->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
+		return false;
+	}
+
+	if (target->IsHorse()) {
+		return false;
+	}
 
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();

@@ -656,7 +656,9 @@ enum {
 	IMMUNE_OPEN               = 53,
 	IMMUNE_ASSASSINATE        = 54,
 	IMMUNE_HEADSHOT           = 55,
-	MAX_SPECIAL_ATTACK        = 56
+	IMMUNE_AGGRO_BOT          = 56,
+	IMMUNE_DAMAGE_BOT         = 57,
+	MAX_SPECIAL_ATTACK        = 58
 };
 
 

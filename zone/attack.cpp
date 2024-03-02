@@ -3091,26 +3091,37 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		TryTriggerOnCastRequirement();
 	}
 
-	if (IsClient() && !IsAIControlled())
+	if (IsClient() && !IsAIControlled()) {
 		return;
+	}
 
-	if (IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO))
+	if (IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO)) {
 		return;
+	}
 
-	if (GetSpecialAbility(IMMUNE_AGGRO_NPC) && other->IsNPC())
+	if (other->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) {
 		return;
+	}
 
-	if (GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient())
+	if (other->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) {
 		return;
+	}
 
-	if (IsValidSpell(spell_id) && IsNoDetrimentalSpellAggroSpell(spell_id))
+	if (other->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
 		return;
+	}
 
-	if (other == myowner)
+	if (IsValidSpell(spell_id) && IsNoDetrimentalSpellAggroSpell(spell_id)) {
 		return;
+	}
 
-	if (other->GetSpecialAbility(IMMUNE_AGGRO_ON))
+	if (other == myowner) {
 		return;
+	}
+
+	if (other->GetSpecialAbility(IMMUNE_AGGRO_ON)) {
+		return;
+	}
 
 	if (GetSpecialAbility(NPC_TUNNELVISION)) {
 		int tv_mod = GetSpecialAbilityParam(NPC_TUNNELVISION, 0);
@@ -3194,8 +3205,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 			// owner must get on list, but he's not actually gained any hate yet
 			if (
 				!owner->GetSpecialAbility(IMMUNE_AGGRO) &&
-				!(GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && owner->IsClient()) &&
-				!(GetSpecialAbility(IMMUNE_AGGRO_NPC) && owner->IsNPC())
+				!(owner->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
+				!(owner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
+				!(owner->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC))
 			) {
 				if (owner->IsClient() && !CheckAggro(owner)) {
 					owner->CastToClient()->AddAutoXTarget(this);
@@ -3209,8 +3221,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		if (
 			!mypet->IsFamiliar() &&
 			!mypet->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && IsClient()) &&
-			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && IsNPC())
+			!(IsBot() && mypet->GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
+			!(IsClient() && mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
+			!(IsNPC() && mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC))
 		) {
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -3219,8 +3232,9 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		if (
 			myowner->IsAIControlled() &&
 			!myowner->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && myowner->IsClient()) &&
-			!(GetSpecialAbility(IMMUNE_AGGRO_NPC) && myowner->IsNPC())
+			!(myowner->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
+			!(myowner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
+			!(myowner->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC))
 		) {
 			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -4060,8 +4074,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			!pet->GetSpecialAbility(IMMUNE_AGGRO) &&
 			!pet->IsEngaged() &&
 			attacker &&
-			!(pet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && attacker->IsClient()) &&
-			!(pet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && attacker->IsNPC()) &&
+			!(attacker->IsBot() && pet->GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
+			!(attacker->IsClient() && pet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
+			!(attacker->IsNPC() && pet->GetSpecialAbility(IMMUNE_AGGRO_NPC)) &&
 			attacker != this &&
 			!attacker->IsCorpse() &&
 			!pet->IsGHeld() &&
