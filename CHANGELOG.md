@@ -1,3 +1,35 @@
+## [22.46.0] 3/2/2024
+
+### Commands
+
+* Add #fish Command ([#4136](https://github.com/EQEmu/Server/pull/4136)) @Kinglykrab 2024-03-01
+
+### Crash Fix
+
+* Raid::UpdateGroupAAs ([#4139](https://github.com/EQEmu/Server/pull/4139)) @neckkola 2024-03-02
+* Update to location of qGlobals initialization ([#4144](https://github.com/EQEmu/Server/pull/4144)) @neckkola 2024-03-02
+
+### Feature
+
+* Exempt a zone from IP-limit checks. ([#4137](https://github.com/EQEmu/Server/pull/4137)) @catapultam-habeo 2024-03-02
+
+### Fixes
+
+* Cleanup NPC Mana Tap Logic ([#4134](https://github.com/EQEmu/Server/pull/4134)) @noudess 2024-03-02
+* Fix Bots/Bot Pets ending up on XTargets ([#4132](https://github.com/EQEmu/Server/pull/4132)) @Kinglykrab 2024-03-02
+* Fix issue with NPC Secondary Textures ([#4129](https://github.com/EQEmu/Server/pull/4129)) @Kinglykrab 2024-03-01
+* GetBotNameByID Temporary Reference Warning ([#4145](https://github.com/EQEmu/Server/pull/4145)) @Kinglykrab 2024-03-02
+* Update FreeGuildID Routine ([#4143](https://github.com/EQEmu/Server/pull/4143)) @neckkola 2024-03-02
+* Use std::clamp for Mob::ChangeSize ([#4140](https://github.com/EQEmu/Server/pull/4140)) @joligario 2024-03-02
+
+### Quest API
+
+* Add Bot Special Attacks for Immune Aggro/Damage ([#4108](https://github.com/EQEmu/Server/pull/4108)) @Kinglykrab 2024-03-02
+
+### Zone
+
+* Zone Routing Improvements ([#4142](https://github.com/EQEmu/Server/pull/4142)) @Akkadius 2024-03-02
+
 ## [22.45.1] 2/29/2024
 
 ### Character Creation
