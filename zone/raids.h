@@ -292,8 +292,8 @@ protected:
 	bool disbandCheck;
 	bool forceDisband;
 	std::string motd;
-	RaidLeadershipAA_Struct raid_aa;
-	GroupLeadershipAA_Struct group_aa[MAX_RAID_GROUPS];
+	RaidLeadershipAA_Struct raid_aa{};
+	GroupLeadershipAA_Struct group_aa[MAX_RAID_GROUPS]{};
 
 	GroupMentor group_mentor[MAX_RAID_GROUPS];
 

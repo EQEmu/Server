@@ -4392,17 +4392,15 @@ void Mob::SendWearChangeAndLighting(int8 last_texture) {
 
 void Mob::ChangeSize(float in_size = 0, bool unrestricted)
 {
+	size = std::clamp(in_size, 1.0f, 255.0f);
+
 	if (!unrestricted) {
 		if (IsClient() || petid != 0) {
-			EQ::Clamp(in_size, 3.0f, 15.0f);
+			size = std::clamp(in_size, 3.0f, 15.0f);
 		}
 	}
 
-	EQ::Clamp(in_size, 1.0f, 255.0f);
-
-	size = in_size;
-
-	SendAppearancePacket(AppearanceType::Size, static_cast<uint32>(in_size));
+	SendAppearancePacket(AppearanceType::Size, static_cast<uint32>(size));
 }
 
 Mob* Mob::GetOwnerOrSelf()
