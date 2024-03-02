@@ -52,6 +52,7 @@
 #include "../common/repositories/player_event_logs_repository.h"
 #include "../common/repositories/inventory_repository.h"
 #include "../common/events/player_event_logs.h"
+#include "../common/content/world_content_service.h"
 
 #include <iostream>
 #include <iomanip>
@@ -769,6 +770,18 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		LogInfo("Could not get CharInfo for [{}]", char_name);
 		eqs->Close();
 		return true;
+	}
+
+	auto r = content_service.FindZone(zone_id, instance_id);
+	if (r.zone_id && r.instance.id != instance_id) {
+		LogInfo(
+			"Zone [{}] has been remapped to instance_id [{}] from instance_id [{}] for client [{}]",
+			r.zone.short_name,
+			r.instance.id,
+			instance_id,
+			char_name
+		);
+		instance_id = r.instance.id;
 	}
 
 	// Make sure this account owns this character

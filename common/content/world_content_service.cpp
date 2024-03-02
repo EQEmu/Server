@@ -178,12 +178,13 @@ void WorldContentService::ReloadContentFlags()
 		LogInfo(
 			"Loaded content flag [{}] [{}]",
 			f.flag_name,
-			(f.enabled ? "Enabled" : "Disabled")
+			(f.enabled ? "enabled" : "disabled")
 		);
 	}
 
 	SetContentFlags(set_content_flags);
-	SetContentZones(ZoneRepository::All(*m_content_database));
+	LoadZones();
+	LoadStaticGlobalZoneInstances();
 }
 
 Database *WorldContentService::GetDatabase() const
@@ -235,19 +236,6 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 	ReloadContentFlags();
 }
 
-// SetZones sets the zones for the world content service
-// this is used for zone routing middleware
-// we pull the zone list from the zone repository and feed from the zone store for now
-// we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
-WorldContentService *WorldContentService::SetContentZones(const std::vector<BaseZoneRepository::Zone>& zones)
-{
-	m_zones = zones;
-
-	LogInfo("Loaded [{}] zones", m_zones.size());
-
-	return this;
-}
-
 // HandleZoneRoutingMiddleware is meant to handle content and context aware zone routing
 //
 // example # 1
@@ -260,16 +248,52 @@ WorldContentService *WorldContentService::SetContentZones(const std::vector<Base
 // scripts handle all the same way, you don't have to think about instances, the middleware will handle the magic
 // the versions of zones are represented by two zone entries that have potentially different min/max expansion and/or different content flags
 // we decide to route the client to the correct version of the zone based on the current server side expansion
-// example # 2
 void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 {
-	// if we're already in an instance, we don't want to route the player to another instance
-	if (zc->instanceID > 0) {
+	auto r = FindZone(zc->zoneID, zc->instanceID);
+	if (r.zone_id == 0) {
 		return;
 	}
 
+	zc->instanceID = r.instance.id;
+}
+
+// LoadStaticGlobalZoneInstances loads all static global zone instances
+// these are zones that are never set to expire and are global
+// these are used commonly in v1/v2/v3 versions of the same zone for expansion routing
+WorldContentService * WorldContentService::LoadStaticGlobalZoneInstances()
+{
+	m_zone_instances = InstanceListRepository::GetWhere(*GetDatabase(), fmt::format("never_expires = 1 AND is_global = 1"));
+
+	LogInfo("Loaded [{}] zone_instances", m_zone_instances.size());
+
+	return this;
+}
+
+// LoadZones sets the zones for the world content service
+// this is used for zone routing middleware
+// we pull the zone list from the zone repository and feed from the zone store for now
+// we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
+WorldContentService * WorldContentService::LoadZones()
+{
+	m_zones = ZoneRepository::All(*GetContentDatabase());
+
+	LogInfo("Loaded [{}] zones", m_zones.size());
+
+	return this;
+}
+
+// FindZone is critical to the zone routing middleware and any logic that needs to route players to the correct zone
+// era contextual routing, multiple version of zones, etc
+WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id, uint32 instance_id)
+{
+	// if we're already in a regular instance, we don't want to route the player to another instance
+	if (instance_id > RuleI(Instances, ReservedInstances)) {
+		return WorldContentService::FindZoneResult{};
+	}
+
 	for (auto &z: m_zones) {
-		if (z.zoneidnumber == zc->zoneID) {
+		if (z.zoneidnumber == zone_id) {
 			auto f = ContentFlags{
 				.min_expansion = z.min_expansion,
 				.max_expansion = z.max_expansion,
@@ -286,33 +310,45 @@ void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 					z.long_name
 				);
 
-				auto instances = InstanceListRepository::GetWhere(
-					*GetDatabase(),
-					fmt::format(
-						"zone = {} AND version = {} AND never_expires = 1 AND is_global = 1",
-						z.zoneidnumber,
-						z.version
-					)
+				// first pass, explicit match on public static global zone instances
+				for (auto &i: m_zone_instances) {
+					if (i.zone == zone_id && i.version == z.version) {
+						LogInfo(
+							"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+							i.id,
+							z.short_name,
+							z.zoneidnumber,
+							z.version,
+							z.long_name,
+							i.notes
+						);
+
+						return WorldContentService::FindZoneResult{
+							.zone_id = static_cast<uint32>(z.zoneidnumber),
+							.instance = i,
+							.zone = z
+						};
+					}
+				}
+
+				LogInfo(
+					"Routed player to non-instance zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+					z.short_name,
+					z.zoneidnumber,
+					z.version,
+					z.long_name,
+					z.note
 				);
 
-				if (!instances.empty()) {
-					auto instance = instances.front();
-					zc->instanceID = instance.id;
-
-					LogInfo(
-						"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
-						instance.id,
-						z.short_name,
-						z.zoneidnumber,
-						z.version,
-						z.long_name,
-						instance.notes
-					);
-
-					break;
-				}
+				return WorldContentService::FindZoneResult{
+					.zone_id = static_cast<uint32>(z.zoneidnumber),
+					.instance = InstanceListRepository::NewEntity(),
+					.zone = z
+				};
 			}
 		}
 	}
+
+	return WorldContentService::FindZoneResult{};
 }
 

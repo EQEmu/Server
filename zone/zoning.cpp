@@ -405,11 +405,23 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 		zc->success
 	);
 
-	strcpy(zc2->char_name, zc->char_name);
+	strn0cpy(zc2->char_name, zc->char_name, 64);
 	zc2->zoneID = zone->GetZoneID();
 	zc2->success = 1;
-	outapp->priority = 6;
-	FastQueuePacket(&outapp);
+	zc2->instanceID = zone->GetInstanceID();
+
+	// this fixes an issue where when we do a zone cancel what often ends up happening is we are sending
+	// the client the wrong coordinates to zone back to. Often times it is the x,y,z of the destination zone
+	// because we saved the destination x,y,z on the client profile before we rejected the zone request.
+	// we're using rewind location because it should be where the client relatively was before we rejected the zone request.
+	// it also prevents the client from getting caught up in a zone loop because if we sent them exactly back to where they
+	// originated the request we could end up in a situation where the client is caught in a zone loop.
+	m_Position.x = m_RewindLocation.x;
+	m_Position.y = m_RewindLocation.y;
+	m_Position.z = m_RewindLocation.z;
+	zc2->x       = m_Position.x;
+	zc2->y       = m_Position.y;
+	zc2->z       = m_Position.z;
 
 	LogZoning(
 		"(zc2) Client [{}] char_name [{}] zoning to [{}] ({}) cancelled instance_id [{}] x [{}] y [{}] z [{}] zone_reason [{}] success [{}]",
@@ -424,6 +436,9 @@ void Client::SendZoneCancel(ZoneChange_Struct *zc) {
 		zc2->zone_reason,
 		zc2->success
 	);
+
+	outapp->priority = 6;
+	FastQueuePacket(&outapp);
 
 	//reset to unsolicited.
 	zone_mode = ZoneUnsolicited;
@@ -740,10 +755,34 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		pZoneName = strcpy(new char[zd->long_name.length() + 1], zd->long_name.c_str());
 	}
 
+	// If we are zoning to the same zone, we need to use the current instance ID if it is not specified.
+	if (zoneID == zone->GetZoneID() && instance_id == 0) {
+		instance_id = zone->GetInstanceID();
+	}
+
+	auto r = content_service.FindZone(zoneID, instance_id);
+	if (r.zone_id) {
+		zoneID      = r.zone_id;
+		instance_id = r.instance.id;
+		LogZoning(
+			"Client caught HandleZoneRoutingMiddleware [{}] zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+			GetCleanName(),
+			zoneID,
+			instance_id,
+			x,
+			y,
+			z,
+			heading,
+			ignorerestrictions,
+			static_cast<int>(zm)
+		);
+	}
+
 	LogInfo(
-		"Client [{}] zone_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+		"Client [{}] zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
 		GetCleanName(),
 		zoneID,
+		instance_id,
 		x,
 		y,
 		z,
@@ -867,9 +906,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
 		}
-		else if(zm == ZoneSolicited || zm == ZoneToSafeCoords) {
-			auto outapp =
-			    new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
+		else if (zm == ZoneSolicited || zm == ZoneToSafeCoords) {
+			auto outapp = new EQApplicationPacket(OP_RequestClientZoneChange, sizeof(RequestClientZoneChange_Struct));
 			RequestClientZoneChange_Struct* gmg = (RequestClientZoneChange_Struct*) outapp->pBuffer;
 
 			gmg->zone_id = zoneID;
@@ -879,6 +917,17 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			gmg->heading = heading;
 			gmg->instance_id = instance_id;
 			gmg->type = 0x01;				//an observed value, not sure of meaning
+
+			LogZoning(
+				"Player [{}] has requested zoning to zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}]",
+				GetCleanName(),
+				zoneID,
+				instance_id,
+				x,
+				y,
+				z,
+				heading
+			);
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);

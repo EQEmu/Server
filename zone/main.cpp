@@ -403,7 +403,6 @@ int main(int argc, char **argv)
 
 	content_service.SetDatabase(&database)
 		->SetContentDatabase(&content_db)
-		->SetContentZones(zone_store.GetZones())
 		->SetExpansionContext()
 		->ReloadContentFlags();
 

@@ -6285,7 +6285,17 @@ void Client::SendZonePoints()
 			zp->zpe[i].z = data->target_z;
 			zp->zpe[i].heading = data->target_heading;
 			zp->zpe[i].zoneid = data->target_zone_id;
-			zp->zpe[i].zoneinstance = data->target_zone_instance;
+
+			// if the target zone is the same as the current zone, use the instance of the current zone
+			// if we don't use the same instance_id that the client was sent, the client will forcefully
+			// issue a zone change request when they should be simply moving to a different point in the same zone
+			// because the client will think the zone point target is different from the current instance
+			auto target_instance = data->target_zone_instance;
+			if (data->target_zone_id == zone->GetZoneID() && data->target_zone_instance == 0) {
+				target_instance = zone->GetInstanceID();
+			}
+
+			zp->zpe[i].zoneinstance = target_instance;
 			i++;
 		}
 		iterator.Advance();
