@@ -6765,23 +6765,36 @@ void Client::UpdateClientXTarget(Client *c)
 // IT IS NOT SAFE TO CALL THIS IF IT'S NOT INITIAL AGGRO
 void Client::AddAutoXTarget(Mob *m, bool send)
 {
+	if (m->IsBot() || (m->IsPet() && m->IsPetOwnerBot())) {
+		return;
+	}
+
 	m_activeautohatermgr->increment_count(m);
 
-	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m))
+	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m)) {
 		return;
+	}
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
-		{
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type == Auto && XTargets[i].ID == 0) {
 			XTargets[i].ID = m->GetID();
-			if (send) // if we don't send we're bulk sending updates later on
+
+			if (send) { // if we don't send we're bulk sending updates later on
 				SendXTargetPacket(i, m);
-			else
+			} else {
 				XTargets[i].dirty = true;
+			}
+
 			break;
 		}
 	}
+
+	LogXTargets(
+		"Adding [{}] to [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
@@ -6790,15 +6803,23 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 	// now we may need to clean up our CurrentTargetNPC entries
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].Type == CurrentTargetNPC && XTargets[i].ID == m->GetID()) {
-			XTargets[i].Type = Auto;
-			XTargets[i].ID = 0;
+			XTargets[i].Type  = Auto;
+			XTargets[i].ID    = 0;
 			XTargets[i].dirty = true;
 		}
 	}
+
 	auto r = GetRaid();
 	if (r) {
 		r->UpdateRaidXTargets();
 	}
+
+	LogXTargets(
+		"Removing [{}] from [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)

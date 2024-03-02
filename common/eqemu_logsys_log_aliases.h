@@ -834,6 +834,16 @@
         OutF(LogSys, Logs::Detail, Logs::Corpses, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogXTargets(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::XTargets))\
+        OutF(LogSys, Logs::General, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogXTargetsDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::XTargets))\
+        OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
