@@ -1289,20 +1289,20 @@ bool ZoneDatabase::GetTradeRecipe(
 			return false;
 		}
 
-		const auto item = database.GetItem(inst->GetItem()->ID);
+		const auto item = database.GetItem(inst->GetItem()->ID % 1000000);
 		if (!item) {
-			LogTradeskills("item [{}] not found!", inst->GetItem()->ID);
+			LogTradeskills("item [{}] not found!", inst->GetItem()->ID % 1000000);
 			continue;
 		}
 
 		if (first) {
-			buf2 += fmt::format("{}", item->ID);
+			buf2 += fmt::format("{}", (item->ID % 1000000));
 			first = false;
 		} else {
-			buf2 += fmt::format(", {}", item->ID);
+			buf2 += fmt::format(", {}", (item->ID % 1000000));
 		}
 
-		sum += item->ID;
+		sum += (item->ID % 1000000);
 		count++;
 
 		LogTradeskills(
@@ -1454,12 +1454,12 @@ bool ZoneDatabase::GetTradeRecipe(
 				return false;
 			}
 
-			const auto item = database.GetItem(inst->GetItem()->ID);
+			const auto item = database.GetItem(inst->GetItem()->ID % 1000000);
 			if (!item) {
 				continue;
 			}
 
-			if (item->ID == Strings::ToUnsignedInt(row[0])) {
+			if ((item->ID % 1000000) == Strings::ToUnsignedInt(row[0])) {
 				component_count++;
 			}
 
