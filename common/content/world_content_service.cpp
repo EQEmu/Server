@@ -183,7 +183,8 @@ void WorldContentService::ReloadContentFlags()
 	}
 
 	SetContentFlags(set_content_flags);
-	SetContentZones(ZoneRepository::All(*m_content_database));
+	LoadZones();
+	LoadStaticGlobalZoneInstances();
 }
 
 Database *WorldContentService::GetDatabase() const
@@ -235,19 +236,6 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 	ReloadContentFlags();
 }
 
-// SetZones sets the zones for the world content service
-// this is used for zone routing middleware
-// we pull the zone list from the zone repository and feed from the zone store for now
-// we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
-WorldContentService *WorldContentService::SetContentZones(const std::vector<BaseZoneRepository::Zone>& zones)
-{
-	m_zones = zones;
-
-	LogInfo("Loaded [{}] zones", m_zones.size());
-
-	return this;
-}
-
 // HandleZoneRoutingMiddleware is meant to handle content and context aware zone routing
 //
 // example # 1
@@ -286,33 +274,50 @@ void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 					z.long_name
 				);
 
-				auto instances = InstanceListRepository::GetWhere(
-					*GetDatabase(),
-					fmt::format(
-						"zone = {} AND version = {} AND never_expires = 1 AND is_global = 1",
-						z.zoneidnumber,
-						z.version
-					)
-				);
+				for (auto &i: m_zone_instances) {
+					if (i.zone == z.zoneidnumber && i.version == z.version) {
+						zc->instanceID = i.id;
 
-				if (!instances.empty()) {
-					auto instance = instances.front();
-					zc->instanceID = instance.id;
+						LogInfo(
+							"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+							i.id,
+							z.short_name,
+							z.zoneidnumber,
+							z.version,
+							z.long_name,
+							i.notes
+						);
 
-					LogInfo(
-						"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
-						instance.id,
-						z.short_name,
-						z.zoneidnumber,
-						z.version,
-						z.long_name,
-						instance.notes
-					);
-
-					break;
+						return;
+					}
 				}
 			}
 		}
 	}
+}
+
+// LoadStaticGlobalZoneInstances loads all static global zone instances
+// these are zones that are never set to expire and are global
+// these are used commonly in v1/v2/v3 versions of the same zone for expansion routing
+WorldContentService * WorldContentService::LoadStaticGlobalZoneInstances()
+{
+	m_zone_instances = InstanceListRepository::GetWhere(*GetDatabase(), fmt::format("never_expires = 1 AND is_global = 1"));
+
+	LogInfo("Loaded [{}] zone_instances", m_zones.size());
+
+	return this;
+}
+
+// LoadZones sets the zones for the world content service
+// this is used for zone routing middleware
+// we pull the zone list from the zone repository and feed from the zone store for now
+// we're holding a copy in the content service - but we're talking 250kb of data in memory to handle routing of zoning
+WorldContentService * WorldContentService::LoadZones()
+{
+	m_zones = ZoneRepository::All(*GetContentDatabase());
+
+	LogInfo("Loaded [{}] zones", m_zones.size());
+
+	return this;
 }
 
