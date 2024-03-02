@@ -774,7 +774,13 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	auto r = content_service.FindZone(zone_id, instance_id);
 	if (r.zone_id && r.instance.id != instance_id) {
-		LogInfo("Zone [{}] has been remapped to instance_id [{}] from instance_id [{}]", r.zone.short_name, r.instance.id, instance_id);
+		LogInfo(
+			"Zone [{}] has been remapped to instance_id [{}] from instance_id [{}] for client [{}]",
+			r.zone.short_name,
+			r.instance.id,
+			instance_id,
+			char_name
+		);
 		instance_id = r.instance.id;
 	}
 
