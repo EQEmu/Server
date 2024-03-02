@@ -221,18 +221,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
 
-	// check to see if target is a caster mob before performing a mana tap
 	if(GetTarget() && IsManaTapSpell(spell_id)) {
-		if (
-			GetTarget()->GetCasterClass() == 'N' &&
-			(
-				!RuleB(Spells, ManaTapsRequireNPCMana) ||
-				(
-					RuleB(Spells, ManaTapsRequireNPCMana) &&
-					GetTarget()->GetMana() == 0
-				)
-			)
-		) {
+		// If melee, block if ManaTapsOnAnyClass rule is false
+		// if caster, block if ManaTapsRequireNPCMana and no mana
+		bool melee_block = !RuleB(Spells, ManaTapsOnAnyClass);
+		bool caster_block = (GetTarget()->GetCasterClass() != 'N' && RuleB(Spells, ManaTapsRequireNPCMana) &&  GetTarget()->GetMana() == 0);
+		if (melee_block || caster_block) {
 			InterruptSpell(TARGET_NO_MANA, 0x121, spell_id);
 			return false;
 		}
