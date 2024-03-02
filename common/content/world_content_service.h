@@ -170,6 +170,14 @@ public:
 	void SetContentFlag(const std::string &content_flag_name, bool enabled);
 
 	void HandleZoneRoutingMiddleware(ZoneChange_Struct *zc);
+
+	struct FindZoneResult {
+		uint32                               zone_id = 0;
+		InstanceListRepository::InstanceList instance;
+		ZoneRepository::Zone                 zone;
+	};
+
+	FindZoneResult FindZone(uint32 zone_id, uint32 instance_id);
 private:
 	int current_expansion{};
 	std::vector<ContentFlagsRepository::ContentFlags> content_flags;

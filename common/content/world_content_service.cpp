@@ -178,7 +178,7 @@ void WorldContentService::ReloadContentFlags()
 		LogInfo(
 			"Loaded content flag [{}] [{}]",
 			f.flag_name,
-			(f.enabled ? "Enabled" : "Disabled")
+			(f.enabled ? "enabled" : "disabled")
 		);
 	}
 
@@ -248,52 +248,14 @@ void WorldContentService::SetContentFlag(const std::string &content_flag_name, b
 // scripts handle all the same way, you don't have to think about instances, the middleware will handle the magic
 // the versions of zones are represented by two zone entries that have potentially different min/max expansion and/or different content flags
 // we decide to route the client to the correct version of the zone based on the current server side expansion
-// example # 2
 void WorldContentService::HandleZoneRoutingMiddleware(ZoneChange_Struct *zc)
 {
-	// if we're already in an instance, we don't want to route the player to another instance
-	if (zc->instanceID > 0) {
+	auto r = FindZone(zc->zoneID, zc->instanceID);
+	if (r.zone_id == 0) {
 		return;
 	}
 
-	for (auto &z: m_zones) {
-		if (z.zoneidnumber == zc->zoneID) {
-			auto f = ContentFlags{
-				.min_expansion = z.min_expansion,
-				.max_expansion = z.max_expansion,
-				.content_flags = z.content_flags,
-				.content_flags_disabled = z.content_flags_disabled
-			};
-
-			if (DoesPassContentFiltering(f)) {
-				LogInfo(
-					"Attempting to route player to zone [{}] ({}) version [{}] long_name [{}]",
-					z.short_name,
-					z.zoneidnumber,
-					z.version,
-					z.long_name
-				);
-
-				for (auto &i: m_zone_instances) {
-					if (i.zone == z.zoneidnumber && i.version == z.version) {
-						zc->instanceID = i.id;
-
-						LogInfo(
-							"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
-							i.id,
-							z.short_name,
-							z.zoneidnumber,
-							z.version,
-							z.long_name,
-							i.notes
-						);
-
-						return;
-					}
-				}
-			}
-		}
-	}
+	zc->instanceID = r.instance.id;
 }
 
 // LoadStaticGlobalZoneInstances loads all static global zone instances
@@ -319,5 +281,74 @@ WorldContentService * WorldContentService::LoadZones()
 	LogInfo("Loaded [{}] zones", m_zones.size());
 
 	return this;
+}
+
+// FindZone is critical to the zone routing middleware and any logic that needs to route players to the correct zone
+// era contextual routing, multiple version of zones, etc
+WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id, uint32 instance_id)
+{
+	// if we're already in a regular instance, we don't want to route the player to another instance
+	if (instance_id > RuleI(Instances, ReservedInstances)) {
+		return WorldContentService::FindZoneResult{};
+	}
+
+	for (auto &z: m_zones) {
+		if (z.zoneidnumber == zone_id) {
+			auto f = ContentFlags{
+				.min_expansion = z.min_expansion,
+				.max_expansion = z.max_expansion,
+				.content_flags = z.content_flags,
+				.content_flags_disabled = z.content_flags_disabled
+			};
+
+			if (DoesPassContentFiltering(f)) {
+				LogInfo(
+					"Attempting to route player to zone [{}] ({}) version [{}] long_name [{}]",
+					z.short_name,
+					z.zoneidnumber,
+					z.version,
+					z.long_name
+				);
+
+				// first pass, explicit match on public static global zone instances
+				for (auto &i: m_zone_instances) {
+					if (i.zone == zone_id && i.version == z.version) {
+						LogInfo(
+							"Routed player to instance [{}] of zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+							i.id,
+							z.short_name,
+							z.zoneidnumber,
+							z.version,
+							z.long_name,
+							i.notes
+						);
+
+						return WorldContentService::FindZoneResult{
+							.zone_id = static_cast<uint32>(z.zoneidnumber),
+							.instance = i,
+							.zone = z
+						};
+					}
+				}
+
+				LogInfo(
+					"Routed player to non-instance zone [{}] ({}) version [{}] long_name [{}] notes [{}]",
+					z.short_name,
+					z.zoneidnumber,
+					z.version,
+					z.long_name,
+					z.note
+				);
+
+				return WorldContentService::FindZoneResult{
+					.zone_id = static_cast<uint32>(z.zoneidnumber),
+					.instance = InstanceListRepository::NewEntity(),
+					.zone = z
+				};
+			}
+		}
+	}
+
+	return WorldContentService::FindZoneResult{};
 }
 

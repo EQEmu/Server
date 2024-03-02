@@ -760,31 +760,22 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		instance_id = zone->GetInstanceID();
 	}
 
-	// used for v1/v2 zone routing
-	if (instance_id == 0) {
-		// we do this to reuse the middleware routing logic
-		auto zc = new ZoneChange_Struct{
-			.char_name = "",
-			.zoneID = static_cast<uint16>(zoneID),
-			.instanceID = static_cast<uint16>(instance_id),
-		};
-		content_service.HandleZoneRoutingMiddleware(zc);
-		if (zc->instanceID > 0) {
-			LogZoning(
-				"Client caught HandleZoneRoutingMiddleware [{}] zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
-				GetCleanName(),
-				zoneID,
-				zc->instanceID,
-				x,
-				y,
-				z,
-				heading,
-				ignorerestrictions,
-				static_cast<int>(zm)
-			);
-			instance_id = zc->instanceID;
-		}
-		safe_delete(zc);
+	auto r = content_service.FindZone(zoneID, instance_id);
+	if (r.zone_id) {
+		zoneID      = r.zone_id;
+		instance_id = r.instance.id;
+		LogZoning(
+			"Client caught HandleZoneRoutingMiddleware [{}] zone_id [{}] instance_id [{}] x [{}] y [{}] z [{}] heading [{}] ignorerestrictions [{}] zone_mode [{}]",
+			GetCleanName(),
+			zoneID,
+			instance_id,
+			x,
+			y,
+			z,
+			heading,
+			ignorerestrictions,
+			static_cast<int>(zm)
+		);
 	}
 
 	LogInfo(
