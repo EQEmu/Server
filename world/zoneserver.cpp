@@ -1100,7 +1100,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			auto smotd = (ServerMotd_Struct*) pack->pBuffer;
-			database.SetVariable("MOTD", smotd->motd);
+			RuleManager::Instance()->SetRule("MOTD", smotd->motd, &database, true, true);
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
