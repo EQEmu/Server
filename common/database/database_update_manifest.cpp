@@ -5410,6 +5410,17 @@ ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_fou
 ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
 		)",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9265,
+		.description = "2024_03_02_rule_values_rule_value_length.sql",
+		.check = "SHOW COLUMNS FROM `rule_values` LIKE 'rule_value'",
+		.condition = "contains",
+		.match = "varchar(30)",
+		.sql = R"(
+ALTER TABLE `rule_values`
+MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `rule_name`;
+		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
