@@ -158,6 +158,8 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	LogInfo("Zone bootup type [{}] short_name [{}] zone_id [{}] instance_id [{}]",
 		(is_static) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
 	parse->Init();
+	parse->ReloadQuests();
+	zone->Repop();
 	UpdateWindowTitle(nullptr);
 
 	// Dynamic zones need to Sync here.
