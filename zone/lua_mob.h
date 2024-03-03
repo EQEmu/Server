@@ -591,7 +591,6 @@ public:
 	bool IsOfClientBot();
 	bool IsOfClientBotMerc();
 	bool IsTrap();
-
 };
 
 #endif
