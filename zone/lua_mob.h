@@ -578,6 +578,8 @@ public:
 	bool IsPetOwnerClient();
 	bool IsPetOwnerNPC();
 	bool IsDestructibleObject();
+	bool IsBoat();
+	bool IsControllableBoat();
 };
 
 #endif
