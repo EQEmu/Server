@@ -3410,6 +3410,11 @@ bool Perl_Mob_IsControllableBoat(Mob* self)
 	return self->IsControllableBoat();
 }
 
+int Perl_Mob_GetHeroicStrikethrough(Mob* self)
+{
+	return self->GetHeroicStrikethrough();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3675,6 +3680,7 @@ void perl_register_mob()
 	package.add("GetHateTopNPC", &Perl_Mob_GetHateTopNPC);
 	package.add("GetHeading", &Perl_Mob_GetHeading);
 	package.add("GetHelmTexture", &Perl_Mob_GetHelmTexture);
+	package.add("GetHeroicStrikethrough", &Perl_Mob_GetHeroicStrikethrough);
 	package.add("GetHerosForgeModel", &Perl_Mob_GetHerosForgeModel);
 	package.add("GetID", &Perl_Mob_GetID);
 	package.add("GetINT", &Perl_Mob_GetINT);

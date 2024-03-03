@@ -3285,6 +3285,12 @@ bool Lua_Mob::IsControllableBoat()
 	return self->IsControllableBoat();
 }
 
+int Lua_Mob::GetHeroicStrikethrough()
+{
+	Lua_Safe_Call_Int();
+	return self->GetHeroicStrikethrough();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3564,6 +3570,7 @@ luabind::scope lua_register_mob() {
 	.def("GetHateTopNPC", (Lua_NPC(Lua_Mob::*)(void))&Lua_Mob::GetHateTopNPC)
 	.def("GetHeading", &Lua_Mob::GetHeading)
 	.def("GetHelmTexture", &Lua_Mob::GetHelmTexture)
+	.def("GetHeroicStrikethrough", &Lua_Mob::GetHeroicStrikethrough)
 	.def("GetHerosForgeModel", (int32(Lua_Mob::*)(uint8))&Lua_Mob::GetHerosForgeModel)
 	.def("GetINT", &Lua_Mob::GetINT)
 	.def("GetInvisibleLevel", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetInvisibleLevel)
