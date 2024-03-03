@@ -1,3 +1,9 @@
+## [22.46.1] 3/2/2024
+
+### Fixes
+
+* Change `UnburyCorpse` to use repository methods ([#4147](https://github.com/EQEmu/Server/pull/4147)) @joligario 2024-03-03
+
 ## [22.46.0] 3/2/2024
 
 ### Commands
