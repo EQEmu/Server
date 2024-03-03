@@ -580,6 +580,7 @@ public:
 	bool IsDestructibleObject();
 	bool IsBoat();
 	bool IsControllableBoat();
+	int GetHeroicStrikethrough();
 };
 
 #endif
