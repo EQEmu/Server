@@ -3395,6 +3395,11 @@ bool Perl_Mob_IsPetOwnerNPC(Mob* self)
 	return self->IsPetOwnerNPC();
 }
 
+bool Perl_Mob_IsDestructibleObject(Mob* self)
+{
+	return self->IsDestructibleObject();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3773,6 +3778,7 @@ void perl_register_mob()
 	package.add("IsCharmed", &Perl_Mob_IsCharmed);
 	package.add("IsClient", &Perl_Mob_IsClient);
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);
+	package.add("IsDestructibleObject", &Perl_Mob_IsDestructibleObject);
 	package.add("IsDoor", &Perl_Mob_IsDoor);
 	package.add("IsEliteMaterialItem", &Perl_Mob_IsEliteMaterialItem);
 	package.add("IsEncounter", &Perl_Mob_IsEncounter);

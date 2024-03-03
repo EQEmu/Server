@@ -3267,6 +3267,12 @@ bool Lua_Mob::IsPetOwnerNPC()
 	return self->IsPetOwnerNPC();
 }
 
+bool Lua_Mob::IsDestructibleObject()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsDestructibleObject();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3651,6 +3657,7 @@ luabind::scope lua_register_mob() {
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
 	.def("IsCasting", &Lua_Mob::IsCasting)
 	.def("IsCharmed", &Lua_Mob::IsCharmed)
+	.def("IsDestructibleObject", &Lua_Mob::IsDestructibleObject)
 	.def("IsEliteMaterialItem", (uint32(Lua_Mob::*)(uint8))&Lua_Mob::IsEliteMaterialItem)
 	.def("IsEngaged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEngaged)
 	.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
