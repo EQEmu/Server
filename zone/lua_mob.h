@@ -577,6 +577,21 @@ public:
 	bool IsPetOwnerBot();
 	bool IsPetOwnerClient();
 	bool IsPetOwnerNPC();
+	bool IsAura();
+	bool IsBeacon();
+	bool IsBot();
+	bool IsClient();
+	bool IsCorpse();
+	bool IsDoor();
+	bool IsEncounter();
+	bool IsMerc();
+	bool IsNPC();
+	bool IsNPCCorpse();
+	bool IsObject();
+	bool IsOfClientBot();
+	bool IsOfClientBotMerc();
+	bool IsTrap();
+
 };
 
 #endif

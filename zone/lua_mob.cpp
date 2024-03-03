@@ -3267,6 +3267,90 @@ bool Lua_Mob::IsPetOwnerNPC()
 	return self->IsPetOwnerNPC();
 }
 
+bool Lua_Mob::IsAura()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsAura();
+}
+
+bool Lua_Mob::IsBeacon()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsBeacon();
+}
+
+bool Lua_Mob::IsBot()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsBot();
+}
+
+bool Lua_Mob::IsClient()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsClient();
+}
+
+bool Lua_Mob::IsCorpse()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsCorpse();
+}
+
+bool Lua_Mob::IsDoor()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsDoor();
+}
+
+bool Lua_Mob::IsEncounter()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsEncounter();
+}
+
+bool Lua_Mob::IsMerc()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsMerc();
+}
+
+bool Lua_Mob::IsNPC()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsNPC();
+}
+
+bool Lua_Mob::IsNPCCorpse()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsNPCCorpse();
+}
+
+bool Lua_Mob::IsObject()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsObject();
+}
+
+bool Lua_Mob::IsOfClientBot()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsOfClientBot();
+}
+
+bool Lua_Mob::IsOfClientBotMerc()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsOfClientBotMerc();
+}
+
+bool Lua_Mob::IsTrap()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsTrap();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3646,12 +3730,19 @@ luabind::scope lua_register_mob() {
 	.def("IsAnimation", &Lua_Mob::IsAnimation)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob,bool))&Lua_Mob::IsAttackAllowed)
+	.def("IsAura", &Lua_Mob::IsAura)
+	.def("IsBeacon", &Lua_Mob::IsBeacon)
 	.def("IsBeneficialAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsBeneficialAllowed)
 	.def("IsBerserk", &Lua_Mob::IsBerserk)
 	.def("IsBlind", (bool(Lua_Mob::*)(void))&Lua_Mob::IsBlind)
+	.def("IsBot", &Lua_Mob::IsBot)
 	.def("IsCasting", &Lua_Mob::IsCasting)
 	.def("IsCharmed", &Lua_Mob::IsCharmed)
+	.def("IsClient", &Lua_Mob::IsClient)
+	.def("IsCorpse", &Lua_Mob::IsCorpse)
+	.def("IsDoor", &Lua_Mob::IsDoor)
 	.def("IsEliteMaterialItem", (uint32(Lua_Mob::*)(uint8))&Lua_Mob::IsEliteMaterialItem)
+	.def("IsEncounter", &Lua_Mob::IsEncounter)
 	.def("IsEngaged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEngaged)
 	.def("IsEnraged", (bool(Lua_Mob::*)(void))&Lua_Mob::IsEnraged)
 	.def("IsFamiliar", &Lua_Mob::IsFamiliar)
@@ -3662,8 +3753,14 @@ luabind::scope lua_register_mob() {
 	.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
 	.def("IsInvisible", (bool(Lua_Mob::*)(void))&Lua_Mob::IsInvisible)
 	.def("IsMeleeDisabled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMeleeDisabled)
+	.def("IsMerc", &Lua_Mob::IsMerc)
 	.def("IsMezzed", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMezzed)
 	.def("IsMoving", &Lua_Mob::IsMoving)
+	.def("IsNPC", &Lua_Mob::IsNPC)
+	.def("IsNPCCorpse", &Lua_Mob::IsNPCCorpse)
+	.def("IsObject", &Lua_Mob::IsObject)
+	.def("IsOfClientBot", &Lua_Mob::IsOfClientBot)
+	.def("IsOfClientBotMerc", &Lua_Mob::IsOfClientBotMerc)
 	.def("IsPausedTimer", &Lua_Mob::IsPausedTimer)
 	.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
@@ -3679,6 +3776,7 @@ luabind::scope lua_register_mob() {
 	.def("IsTargetLockPet", &Lua_Mob::IsTargetLockPet)
 	.def("IsTemporaryPet", &Lua_Mob::IsTemporaryPet)
 	.def("IsTrackable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTrackable)
+	.def("IsTrap", &Lua_Mob::IsTrap)
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
 	.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)
 	.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
