@@ -3415,6 +3415,11 @@ int Perl_Mob_GetHeroicStrikethrough(Mob* self)
 	return self->GetHeroicStrikethrough();
 }
 
+bool Perl_Mob_IsAlwaysAggro(Mob* self)
+{
+	return self->AlwaysAggro();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3780,6 +3785,7 @@ void perl_register_mob()
 	package.add("InterruptSpell", (void(*)(Mob*))&Perl_Mob_InterruptSpell);
 	package.add("InterruptSpell", (void(*)(Mob*, uint16))&Perl_Mob_InterruptSpell);
 	package.add("IsAIControlled", &Perl_Mob_IsAIControlled);
+	package.add("IsAlwaysAggro", &Perl_Mob_IsAlwaysAggro);
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
 	package.add("IsAnimation", &Perl_Mob_IsAnimation);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
