@@ -2290,20 +2290,8 @@ void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, Dynamic
 	}
 
 	// dz should be named the version-based zone name (used in choose zone window and dz window on live)
-    auto zone_info = zone_store.GetZone(dz_request.GetZoneID(), dz_request.GetZoneVersion());
-
-	// use version 0 name for this if there is no zone with the specified version
-    if (!zone_info) {
-      zone_info = zone_store.GetZone(dz_request.GetZoneID());
-    }
-
-	// fall back to task title if that doesn't exist somehow
-    if (zone_info) { 
-      dz_request.SetName(zone_info->long_name.empty() ? task->title : zone_info->long_name);
-    } else {
-      dz_request.SetName(task->title);        
-    }
-
+	auto zone_info = zone_store.GetZoneWithFallback(dz_request.GetZoneID(), dz_request.GetZoneVersion());
+	dz_request.SetName(zone_info && !zone_info->long_name.empty() ? zone_info->long_name : task->title);
 	dz_request.SetMinPlayers(task->min_players);
 	dz_request.SetMaxPlayers(task->max_players);
 
