@@ -3291,6 +3291,12 @@ int Lua_Mob::GetHeroicStrikethrough()
 	return self->GetHeroicStrikethrough();
 }
 
+bool Lua_Mob::IsAlwaysAggro()
+{
+	Lua_Safe_Call_Bool();
+	return self->AlwaysAggro();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3667,6 +3673,7 @@ luabind::scope lua_register_mob() {
 	.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
 	.def("InterruptSpell", (void(Lua_Mob::*)(void))&Lua_Mob::InterruptSpell)
 	.def("IsAIControlled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAIControlled)
+	.def("IsAlwaysAggro", &Lua_Mob::IsAlwaysAggro)
 	.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
 	.def("IsAnimation", &Lua_Mob::IsAnimation)
 	.def("IsAttackAllowed", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsAttackAllowed)

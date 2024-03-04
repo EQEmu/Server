@@ -581,6 +581,7 @@ public:
 	bool IsBoat();
 	bool IsControllableBoat();
 	int GetHeroicStrikethrough();
+	bool IsAlwaysAggro();
 };
 
 #endif
