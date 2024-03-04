@@ -5422,7 +5422,6 @@ ALTER TABLE `guild_bank`
 ADD COLUMN `id` INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
 ADD PRIMARY KEY (`id`);
 		)",
-		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
