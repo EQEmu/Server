@@ -161,7 +161,7 @@ int Lua_Client::GetClassesBitmask() {
 }
 
 bool Lua_Client::AddExtraClass(int class_id) {
-	Lua_Safe_Call_Void();
+	Lua_Safe_Call_Bool();
 	return self->AddExtraClass(class_id);
 }
 
