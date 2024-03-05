@@ -3,6 +3,7 @@
 void command_goto(Client *c, const Seperator *sep)
 {
 	std::string arg1 = sep->arg[1];
+	std::string arg4 = sep->arg[4];
 
 	bool goto_via_target_no_args = sep->arg[1][0] == '\0' && c->GetTarget();
 	bool goto_via_player_name    = !sep->IsNumber(1) && !arg1.empty();
@@ -52,7 +53,7 @@ void command_goto(Client *c, const Seperator *sep)
 			Strings::ToFloat(sep->arg[1]),
 			Strings::ToFloat(sep->arg[2]),
 			Strings::ToFloat(sep->arg[3]),
-			(sep->arg[4] ? Strings::ToFloat(sep->arg[4]) : c->GetHeading())
+			(!arg4.empty() ? Strings::ToFloat(sep->arg[4]) : c->GetHeading())
 		);
 	}
 	else {

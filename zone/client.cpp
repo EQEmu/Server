@@ -284,6 +284,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	PendingSacrifice = false;
 	controlling_boat_id = 0;
 	controlled_mob_id = 0;
+	qGlobals = nullptr;
 
 	if (!RuleB(Character, PerCharacterQglobalMaxLevel) && !RuleB(Character, PerCharacterBucketMaxLevel)) {
 		SetClientMaxLevel(0);
@@ -311,7 +312,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	aa_los_them_mob = nullptr;
 	los_status = false;
 	los_status_facing = false;
-	qGlobals = nullptr;
 	HideCorpseMode = HideCorpseNone;
 	PendingGuildInvitation = false;
 
@@ -6420,7 +6420,17 @@ void Client::SendZonePoints()
 			zp->zpe[i].z = data->target_z;
 			zp->zpe[i].heading = data->target_heading;
 			zp->zpe[i].zoneid = data->target_zone_id;
-			zp->zpe[i].zoneinstance = data->target_zone_instance;
+
+			// if the target zone is the same as the current zone, use the instance of the current zone
+			// if we don't use the same instance_id that the client was sent, the client will forcefully
+			// issue a zone change request when they should be simply moving to a different point in the same zone
+			// because the client will think the zone point target is different from the current instance
+			auto target_instance = data->target_zone_instance;
+			if (data->target_zone_id == zone->GetZoneID() && data->target_zone_instance == 0) {
+				target_instance = zone->GetInstanceID();
+			}
+
+			zp->zpe[i].zoneinstance = target_instance;
 			i++;
 		}
 		iterator.Advance();
@@ -6900,23 +6910,36 @@ void Client::UpdateClientXTarget(Client *c)
 // IT IS NOT SAFE TO CALL THIS IF IT'S NOT INITIAL AGGRO
 void Client::AddAutoXTarget(Mob *m, bool send)
 {
+	if (m->IsBot() || (m->IsPet() && m->IsPetOwnerBot())) {
+		return;
+	}
+
 	m_activeautohatermgr->increment_count(m);
 
-	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m))
+	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m)) {
 		return;
+	}
 
-	for(int i = 0; i < GetMaxXTargets(); ++i)
-	{
-		if((XTargets[i].Type == Auto) && (XTargets[i].ID == 0))
-		{
+	for (int i = 0; i < GetMaxXTargets(); ++i) {
+		if (XTargets[i].Type == Auto && XTargets[i].ID == 0) {
 			XTargets[i].ID = m->GetID();
-			if (send) // if we don't send we're bulk sending updates later on
+
+			if (send) { // if we don't send we're bulk sending updates later on
 				SendXTargetPacket(i, m);
-			else
+			} else {
 				XTargets[i].dirty = true;
+			}
+
 			break;
 		}
 	}
+
+	LogXTargets(
+		"Adding [{}] to [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
@@ -6925,15 +6948,23 @@ void Client::RemoveXTarget(Mob *m, bool OnlyAutoSlots)
 	// now we may need to clean up our CurrentTargetNPC entries
 	for (int i = 0; i < GetMaxXTargets(); ++i) {
 		if (XTargets[i].Type == CurrentTargetNPC && XTargets[i].ID == m->GetID()) {
-			XTargets[i].Type = Auto;
-			XTargets[i].ID = 0;
+			XTargets[i].Type  = Auto;
+			XTargets[i].ID    = 0;
 			XTargets[i].dirty = true;
 		}
 	}
+
 	auto r = GetRaid();
 	if (r) {
 		r->UpdateRaidXTargets();
 	}
+
+	LogXTargets(
+		"Removing [{}] from [{}] ({}) XTargets",
+		m->GetCleanName(),
+		GetCleanName(),
+		GetID()
+	);
 }
 
 void Client::UpdateXTargetType(XTargetType Type, Mob *m, const char *Name)

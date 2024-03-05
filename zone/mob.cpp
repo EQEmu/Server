@@ -5237,14 +5237,15 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 
 }
 
-void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on, int level_override) {
+void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on, int level_override)
+{
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
 	if (!on) {
 		return;
 	}
 
-	if(!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if (!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
@@ -5255,20 +5256,40 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		on = new_target;
 	}
 
-	if (on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
-		return;
+	Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
 
-	if (on->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
-		return;
+	if (new_target) {
+		on = new_target;
+	}
 
-	if (IsNoCast())
+	if (IsBot() && on->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
 		return;
+	}
 
-	if(!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
-		if(IsClient()){
-			Message(0, "Invalid spell proc %u", spell_id);
+	if (IsClient() && on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
+		return;
+	}
+
+	if (IsNPC() && on->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
+		return;
+	}
+
+	if (IsNoCast()) {
+		return;
+	}
+
+	if (!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
+		if (IsClient()) {
+			Message(
+				Chat::White,
+				fmt::format(
+					"Invalid spell ID for proc {}.",
+					spell_id
+				).c_str()
+			);
 			LogSpells("Player [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
 		}
+
 		return;
 	}
 
@@ -5282,7 +5303,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
-	if(inst && IsClient()) {
+	if (inst && IsClient()) {
 		//const cast is dirty but it would require redoing a ton of interfaces at this point
 		//It should be safe as we don't have any truly const EQ::ItemInstance floating around anywhere.
 		//So we'll live with it for now
@@ -5302,30 +5323,76 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		}
 	}
 
-	bool twinproc = false;
-	int32 twinproc_chance = 0;
+	bool  twin_proc        = false;
+	int32 twin_proc_chance = 0;
 
 	if (IsClient() || IsBot()) {
-		twinproc_chance = GetFocusEffect(focusTwincast, spell_id);
+		twin_proc_chance = GetFocusEffect(focusTwincast, spell_id);
 	}
 
-	if (twinproc_chance && zone->random.Roll(twinproc_chance)) {
-		twinproc = true;
+	if (twin_proc_chance && zone->random.Roll(twin_proc_chance)) {
+		twin_proc = true;
 	}
 
-	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id)) && spells[spell_id].target_type != ST_TargetsTarget) { // NPC innate procs don't take this path ever
-		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
-		if (twinproc) {
-			SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
+	if (
+		IsBeneficialSpell(spell_id) &&
+		(
+			!IsNPC() ||
+			(
+				IsNPC() &&
+				CastToNPC()->GetInnateProcSpellID() != spell_id
+			)
+		) &&
+		spells[spell_id].target_type != ST_TargetsTarget
+	) { // NPC innate procs don't take this path ever
+		SpellFinished(
+			spell_id,
+			this,
+			EQ::spells::CastingSlot::Item,
+			0,
+			-1,
+			spells[spell_id].resist_difficulty,
+			true,
+			level_override
+		);
+
+		if (twin_proc) {
+			SpellFinished(
+				spell_id,
+				this,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[spell_id].resist_difficulty,
+				true,
+				level_override
+			);
+		}
+	} else if (!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
+		SpellFinished(
+			spell_id,
+			on,
+			EQ::spells::CastingSlot::Item,
+			0,
+			-1,
+			spells[spell_id].resist_difficulty,
+			true,
+			level_override
+		);
+
+		if (twin_proc && (!(on->IsClient() && on->CastToClient()->dead))) {
+			SpellFinished(
+				spell_id,
+				on,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[spell_id].resist_difficulty,
+				true,
+				level_override
+			);
 		}
 	}
-	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
-		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
-		if (twinproc && (!(on->IsClient() && on->CastToClient()->dead))) {
-			SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
-		}
-	}
-	return;
 }
 
 uint32 Mob::GetZoneID() const {

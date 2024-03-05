@@ -5,6 +5,7 @@
 #include <vector>
 #include "../repositories/content_flags_repository.h"
 #include "../repositories/zone_repository.h"
+#include "../repositories/instance_list_repository.h"
 
 class Database;
 
@@ -169,7 +170,14 @@ public:
 	void SetContentFlag(const std::string &content_flag_name, bool enabled);
 
 	void HandleZoneRoutingMiddleware(ZoneChange_Struct *zc);
-	WorldContentService * SetContentZones(const std::vector<ZoneRepository::Zone>& zones);
+
+	struct FindZoneResult {
+		uint32                               zone_id = 0;
+		InstanceListRepository::InstanceList instance;
+		ZoneRepository::Zone                 zone;
+	};
+
+	FindZoneResult FindZone(uint32 zone_id, uint32 instance_id);
 private:
 	int current_expansion{};
 	std::vector<ContentFlagsRepository::ContentFlags> content_flags;
@@ -180,6 +188,9 @@ private:
 
 	// holds a record of the zone table from the database
 	std::vector<ZoneRepository::Zone> m_zones = {};
+	WorldContentService *LoadStaticGlobalZoneInstances();
+	std::vector<InstanceListRepository::InstanceList> m_zone_instances;
+	WorldContentService * LoadZones();
 };
 
 extern WorldContentService content_service;

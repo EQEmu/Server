@@ -142,6 +142,7 @@ std::vector<Reload> reload_types = {
 	Reload{.command = "base_data", .opcode = ServerOP_ReloadBaseData, .desc = "Base Data"},
 	Reload{.command = "blocked_spells", .opcode = ServerOP_ReloadBlockedSpells, .desc = "Blocked Spells"},
 	Reload{.command = "commands", .opcode = ServerOP_ReloadCommands, .desc = "Commands"},
+	Reload{.command = "content_flags", .opcode = ServerOP_ReloadContentFlags, .desc = "Content Flags"},
 	Reload{.command = "data_buckets_cache", .opcode = ServerOP_ReloadDataBucketsCache, .desc = "Data Buckets Cache"},
 	Reload{.command = "doors", .opcode = ServerOP_ReloadDoors, .desc = "Doors"},
 	Reload{.command = "dztemplates", .opcode = ServerOP_ReloadDzTemplates, .desc = "Dynamic Zone Templates"},

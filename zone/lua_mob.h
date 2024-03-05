@@ -577,6 +577,11 @@ public:
 	bool IsPetOwnerBot();
 	bool IsPetOwnerClient();
 	bool IsPetOwnerNPC();
+	bool IsDestructibleObject();
+	bool IsBoat();
+	bool IsControllableBoat();
+	int GetHeroicStrikethrough();
+	bool IsAlwaysAggro();
 };
 
 #endif

@@ -2367,7 +2367,7 @@ const uint8 BotDatabase::GetBotLevelByID(const uint32 bot_id)
 	return e.bot_id ? e.level : 0;
 }
 
-const std::string& BotDatabase::GetBotNameByID(const uint32 bot_id)
+const std::string BotDatabase::GetBotNameByID(const uint32 bot_id)
 {
 	const auto& e = BotDataRepository::FindOne(database, bot_id);
 

@@ -188,6 +188,11 @@ int main(int argc, char **argv)
 		RegisterConsoleFunctions(console);
 	}
 
+	content_service.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
+		->SetExpansionContext()
+		->ReloadContentFlags();
+
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
 	server_connection = std::make_unique<EQ::Net::ServertalkServer>();
 

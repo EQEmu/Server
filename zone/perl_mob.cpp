@@ -3395,6 +3395,31 @@ bool Perl_Mob_IsPetOwnerNPC(Mob* self)
 	return self->IsPetOwnerNPC();
 }
 
+bool Perl_Mob_IsDestructibleObject(Mob* self)
+{
+	return self->IsDestructibleObject();
+}
+
+bool Perl_Mob_IsBoat(Mob* self)
+{
+	return self->IsBoat();
+}
+
+bool Perl_Mob_IsControllableBoat(Mob* self)
+{
+	return self->IsControllableBoat();
+}
+
+int Perl_Mob_GetHeroicStrikethrough(Mob* self)
+{
+	return self->GetHeroicStrikethrough();
+}
+
+bool Perl_Mob_IsAlwaysAggro(Mob* self)
+{
+	return self->AlwaysAggro();
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3660,6 +3685,7 @@ void perl_register_mob()
 	package.add("GetHateTopNPC", &Perl_Mob_GetHateTopNPC);
 	package.add("GetHeading", &Perl_Mob_GetHeading);
 	package.add("GetHelmTexture", &Perl_Mob_GetHelmTexture);
+	package.add("GetHeroicStrikethrough", &Perl_Mob_GetHeroicStrikethrough);
 	package.add("GetHerosForgeModel", &Perl_Mob_GetHerosForgeModel);
 	package.add("GetID", &Perl_Mob_GetID);
 	package.add("GetINT", &Perl_Mob_GetINT);
@@ -3759,6 +3785,7 @@ void perl_register_mob()
 	package.add("InterruptSpell", (void(*)(Mob*))&Perl_Mob_InterruptSpell);
 	package.add("InterruptSpell", (void(*)(Mob*, uint16))&Perl_Mob_InterruptSpell);
 	package.add("IsAIControlled", &Perl_Mob_IsAIControlled);
+	package.add("IsAlwaysAggro", &Perl_Mob_IsAlwaysAggro);
 	package.add("IsAmnesiad", &Perl_Mob_IsAmnesiad);
 	package.add("IsAnimation", &Perl_Mob_IsAnimation);
 	package.add("IsAttackAllowed", (bool(*)(Mob*, Mob*))&Perl_Mob_IsAttackAllowed);
@@ -3768,11 +3795,14 @@ void perl_register_mob()
 	package.add("IsBeneficialAllowed", &Perl_Mob_IsBeneficialAllowed);
 	package.add("IsBerserk", &Perl_Mob_IsBerserk);
 	package.add("IsBlind", &Perl_Mob_IsBlind);
+	package.add("IsBoat", &Perl_Mob_IsBoat);
 	package.add("IsBot", &Perl_Mob_IsBot);
 	package.add("IsCasting", &Perl_Mob_IsCasting);
 	package.add("IsCharmed", &Perl_Mob_IsCharmed);
 	package.add("IsClient", &Perl_Mob_IsClient);
+	package.add("IsControllableBoat", &Perl_Mob_IsControllableBoat);
 	package.add("IsCorpse", &Perl_Mob_IsCorpse);
+	package.add("IsDestructibleObject", &Perl_Mob_IsDestructibleObject);
 	package.add("IsDoor", &Perl_Mob_IsDoor);
 	package.add("IsEliteMaterialItem", &Perl_Mob_IsEliteMaterialItem);
 	package.add("IsEncounter", &Perl_Mob_IsEncounter);

@@ -213,23 +213,23 @@ public:
 		const glm::vec4& position
 	)
 	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE `{}` SET `is_buried` = 0, `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `time_of_death` = {}, `was_at_graveyard` = 0 WHERE `{}` = {}",
-				TableName(),
-				zone_id,
-				instance_id,
-				position.x,
-				position.y,
-				position.z,
-				position.w,
-				std::time(nullptr),
-				PrimaryKey(),
-				corpse_id
-			)
-		);
+		auto corpse = FindOne(db, corpse_id);
 
-		return results.Success() ? results.RowsAffected() : 0;
+		if (corpse.id == 0) {
+			return 0;
+		}
+
+		corpse.is_buried		= 0;
+		corpse.zone_id			= zone_id;
+		corpse.instance_id		= instance_id;
+		corpse.x				= position.x;
+		corpse.y				= position.y;
+		corpse.z				= position.z;
+		corpse.heading			= position.w;
+		corpse.time_of_death	= time(nullptr);
+		corpse.was_at_graveyard = 0;
+
+		return UpdateOne(db, corpse);
 	}
 };
 

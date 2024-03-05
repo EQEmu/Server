@@ -807,7 +807,7 @@ void SpawnConditionManager::UpdateSpawnEvent(SpawnEvent &event)
 	e.next_month  = event.next.month;
 	e.next_year   = event.next.year;
 	e.enabled     = event.enabled ? 1 : 0;
-	e.next_minute = event.strict;
+	e.strict      = event.strict ? 1 : 0;
 
 	SpawnEventsRepository::UpdateOne(database, e);
 }
