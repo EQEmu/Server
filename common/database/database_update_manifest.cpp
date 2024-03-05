@@ -5410,6 +5410,18 @@ ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_fou
 ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
 		)",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9265,
+		.description = "2024_03_03_add_id_to_guild_bank.sql",
+		.check = "SHOW COLUMNS FROM `guild_bank` LIKE 'id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `guild_bank`
+ADD COLUMN `id` INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+ADD PRIMARY KEY (`id`);
+		)",
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
