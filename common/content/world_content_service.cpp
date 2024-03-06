@@ -287,9 +287,14 @@ WorldContentService * WorldContentService::LoadZones()
 // era contextual routing, multiple version of zones, etc
 WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id, uint32 instance_id)
 {
-	// if we're already in a regular instance, we don't want to route the player to another instance
-	if (instance_id > RuleI(Instances, ReservedInstances)) {
-		return WorldContentService::FindZoneResult{};
+	// if there's an active dynamic instance, we don't need to route
+	if (instance_id > 0) {
+		auto inst = InstanceListRepository::FindOne(*GetDatabase(), instance_id);
+		if (inst.id != 0 && !inst.is_global && !inst.never_expires) {
+			return WorldContentService::FindZoneResult{
+				.zone_id = 0,
+			};
+		}
 	}
 
 	for (auto &z: m_zones) {
@@ -349,6 +354,6 @@ WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id
 		}
 	}
 
-	return WorldContentService::FindZoneResult{};
+	return WorldContentService::FindZoneResult{.zone_id = 0};
 }
 
