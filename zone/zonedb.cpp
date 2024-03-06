@@ -4270,7 +4270,7 @@ void ZoneDatabase::SetAAEXPModifierByCharID(
 		instance_version,
 		EXPModifier{
 			.aa_modifier = aa_modifier,
-			.exp_modifier = -1.0f
+			.exp_modifier = zone->GetEXPModifierByCharacterID(character_id)
 		}
 	);
 }
@@ -4288,7 +4288,7 @@ void ZoneDatabase::SetEXPModifierByCharID(
 		zone_id,
 		instance_version,
 		EXPModifier{
-			.aa_modifier = -1.0f,
+			.aa_modifier = zone->GetAAEXPModifierByCharacterID(character_id),
 			.exp_modifier = exp_modifier
 		}
 	);
