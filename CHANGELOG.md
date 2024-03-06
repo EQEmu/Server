@@ -1,3 +1,45 @@
+## [22.47.0] 3/5/2024
+
+### Crash Fix
+
+* Added a guild_mgr check ([#4163](https://github.com/EQEmu/Server/pull/4163)) @neckkola 2024-03-06
+* Goto Command could crash using Developer Tools ([#4158](https://github.com/EQEmu/Server/pull/4158)) @neckkola 2024-03-04
+* Groundspawn Memory Corruption ([#4157](https://github.com/EQEmu/Server/pull/4157)) @neckkola 2024-03-04
+* Update to location of qGlobals initialization ([#4144](https://github.com/EQEmu/Server/pull/4144)) @neckkola 2024-03-02
+
+### Feature
+
+* Adds rules to control level requirements for Double Backstab, Assassinate, and Double Bowshot  (#4159) ([#29](https://github.com/EQEmu/Server/pull/29)) @catapultam-habeo 2024-03-04
+* Adjust String-based Rules Length ([#4138](https://github.com/EQEmu/Server/pull/4138)) @Kinglykrab 2024-03-06
+* Exempt a zone from IP-limit checks. ([#4137](https://github.com/EQEmu/Server/pull/4137)) @catapultam-habeo 2024-03-02
+
+### Fixes
+
+* Add id to the guild_bank table ([#4155](https://github.com/EQEmu/Server/pull/4155)) @neckkola 2024-03-05
+* Fix Bots/Bot Pets ending up on XTargets ([#4132](https://github.com/EQEmu/Server/pull/4132)) @Kinglykrab 2024-03-02
+* Fix Character EXP Modifiers default ([#4161](https://github.com/EQEmu/Server/pull/4161)) @Kinglykrab 2024-03-06
+* Fix Spawns Not Parsing Quest on Zone Bootup ([#4149](https://github.com/EQEmu/Server/pull/4149)) @Kinglykrab 2024-03-05
+* Fix typo when updating spawn events in spawn condition manager ([#4160](https://github.com/EQEmu/Server/pull/4160)) @joligario 2024-03-05
+* GetBotNameByID Temporary Reference Warning ([#4145](https://github.com/EQEmu/Server/pull/4145)) @Kinglykrab 2024-03-02
+* Prevent NPE when creating DZ using ad-hoc version IDs ([#4141](https://github.com/EQEmu/Server/pull/4141)) @catapultam-habeo 2024-03-05
+* Update FreeGuildID Routine ([#4143](https://github.com/EQEmu/Server/pull/4143)) @neckkola 2024-03-02
+
+### Quest API
+
+* Add Bot Special Attacks for Immune Aggro/Damage ([#4108](https://github.com/EQEmu/Server/pull/4108)) @Kinglykrab 2024-03-02
+* Add GetHeroicStrikethrough() to Perl/Lua ([#4150](https://github.com/EQEmu/Server/pull/4150)) @Kinglykrab 2024-03-03
+* Add IsAlwaysAggro() to Perl/Lua ([#4152](https://github.com/EQEmu/Server/pull/4152)) @Kinglykrab 2024-03-04
+* Add IsBoat()/IsControllableBoat() to Perl/Lua ([#4151](https://github.com/EQEmu/Server/pull/4151)) @Kinglykrab 2024-03-03
+* Add IsDestructibleObject() to Perl/Lua ([#4153](https://github.com/EQEmu/Server/pull/4153)) @Kinglykrab 2024-03-03
+
+### Zone
+
+* Zone Routing Improvements ([#4142](https://github.com/EQEmu/Server/pull/4142)) @Akkadius 2024-03-02
+
+### Zoning
+
+* Zone routing adjustment ([#4162](https://github.com/EQEmu/Server/pull/4162)) @Akkadius 2024-03-06
+
 ## [22.46.1] 3/2/2024
 
 ### Fixes
