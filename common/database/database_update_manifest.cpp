@@ -5422,6 +5422,17 @@ ALTER TABLE `guild_bank`
 ADD COLUMN `id` INT UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
 ADD PRIMARY KEY (`id`);
 		)",
+	},
+	ManifestEntry{
+		.version = 9266,
+		.description = "2024_03_02_rule_values_rule_value_length.sql",
+		.check = "SHOW COLUMNS FROM `rule_values` LIKE 'rule_value'",
+		.condition = "contains",
+		.match = "varchar(30)",
+		.sql = R"(
+ALTER TABLE `rule_values`
+MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `rule_name`;
+		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
