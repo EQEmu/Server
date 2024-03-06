@@ -68,6 +68,7 @@ extern volatile bool RunLoops;
 #include "../common/repositories/discovered_items_repository.h"
 #include "../common/repositories/inventory_repository.h"
 #include "../common/repositories/keyring_repository.h"
+#include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 #include "dialogue_window.h"
@@ -2294,29 +2295,23 @@ void Client::ReadBook(BookRequest_Struct *book) {
 
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = book->window;
-
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
-			// SoF+ need to look up book type for the output message.
-			const EQ::ItemInstance *inst = nullptr;
-
-			if (book->invslot <= EQ::invbag::GENERAL_BAGS_END)
-			{
-				inst = m_inv[book->invslot];
-			}
-
-			if(inst)
-				out->type = inst->GetItem()->Book;
-			else
-				out->type = book->type;
-		}
-		else {
-			out->type = book->type;
-		}
+		out->type = book->type;
 		out->invslot = book->invslot;
 		out->target_id = book->target_id;
 		out->can_cast = 0; // todo: implement
-		out->can_scribe = 0; // todo: implement
+		out->can_scribe = false;
+
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && book->invslot <= EQ::invbag::GENERAL_BAGS_END)
+		{
+			const EQ::ItemInstance* inst = m_inv[book->invslot];
+			if (inst && inst->GetItem())
+			{
+				auto recipe = TradeskillRecipeRepository::GetWhere(content_db,
+					fmt::format("learned_by_item_id = {} LIMIT 1", inst->GetItem()->ID));
+				out->type = inst->GetItem()->Book;
+				out->can_scribe = !recipe.empty();
+			}
+		}
 
 		memcpy(out->booktext, booktxt2.c_str(), length);
 

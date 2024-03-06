@@ -59,6 +59,24 @@ public:
 		return NewEntity();
 	}
 
+	// insert with ON DUPLICATE KEY UPDATE to leave rows that exist unchanged
+	static int InsertUpdateMany(Database& db, const std::vector<CharRecipeList>& entries)
+	{
+		std::vector<std::string> values;
+		values.reserve(entries.size());
+
+		for (const auto& e: entries)
+		{
+			values.emplace_back(fmt::format("({},{},{})", e.char_id, e.recipe_id, e.madecount));
+		}
+
+		auto results = db.QueryDatabase(fmt::format(
+			"INSERT INTO {0} (char_id, recipe_id, madecount) VALUES {1} ON DUPLICATE KEY UPDATE {2}={2}",
+			TableName(), fmt::join(values, ","), PrimaryKey()));
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
 };
 
 #endif //EQEMU_CHAR_RECIPE_LIST_REPOSITORY_H

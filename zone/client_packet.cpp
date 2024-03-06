@@ -4168,10 +4168,11 @@ void Client::Handle_OP_BookButton(const EQApplicationPacket* app)
 	BookButton_Struct* book = reinterpret_cast<BookButton_Struct*>(app->pBuffer);
 
 	const EQ::ItemInstance* const inst = GetInv().GetItem(book->invslot);
-	if (inst && inst->GetItem()->Book)
+	if (inst && inst->GetItem())
 	{
-		// todo: if scribe book learn recipes and delete book from inventory
-		// todo: if cast book use its spell on target and delete book from inventory (unless reusable?)
+		// todo: cast spell button (unknown if anything on live uses this)
+		ScribeRecipes(inst->GetItem()->ID);
+		DeleteItemInInventory(book->invslot, 1, true);
 	}
 
 	EQApplicationPacket outapp(OP_FinishWindow, 0);
