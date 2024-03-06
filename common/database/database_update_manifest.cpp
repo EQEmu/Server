@@ -5433,6 +5433,17 @@ ADD PRIMARY KEY (`id`);
 ALTER TABLE `rule_values`
 MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `rule_name`;
 		)"
+	},
+	ManifestEntry{
+		.version = 9267,
+		.description = "2024_03_06_rule_values_rule_value_default.sql",
+		.check = "SHOW COLUMNS FROM `rule_values` LIKE 'rule_value'",
+		.condition = "contains",
+		.match = "NO",
+		.sql = R"(
+ALTER TABLE `rule_values`
+MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `rule_name`;
+		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
