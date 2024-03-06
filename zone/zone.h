@@ -269,10 +269,15 @@ public:
 	void SendReloadMessage(std::string reload_type);
 
 	void ClearEXPModifier(Client* c);
+	void ClearEXPModifierByCharacterID(const uint32 character_id);
 	float GetAAEXPModifier(Client* c);
+	float GetAAEXPModifierByCharacterID(const uint32 character_id);
 	float GetEXPModifier(Client* c);
+	float GetEXPModifierByCharacterID(const uint32 character_id);
 	void SetAAEXPModifier(Client* c, float aa_modifier);
+	void SetAAEXPModifierByCharacterID(const uint32 character_id, float aa_modifier);
 	void SetEXPModifier(Client* c, float exp_modifier);
+	void SetEXPModifierByCharacterID(const uint32 character_id, float exp_modifier);
 
 	void AddAggroMob() { aggroedmobs++; }
 	void AddAuth(ServerZoneIncomingClient_Struct *szic);

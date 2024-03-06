@@ -74,9 +74,11 @@ public:
 			};
 		}
 
+		const auto& m = l.front();
+
 		return EXPModifier{
-			.aa_modifier = l[0].aa_modifier,
-			.exp_modifier = l[0].exp_modifier
+			.aa_modifier = m.aa_modifier,
+			.exp_modifier = m.exp_modifier
 		};
 	}
 
