@@ -3696,29 +3696,31 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_GuildTributeUpdateDonations:
-	{
-		GuildTributeUpdate* in = (GuildTributeUpdate*)pack->pBuffer;
+	case ServerOP_GuildTributeUpdateDonations: {
+		auto in     = (GuildTributeUpdate *) pack->pBuffer;
+		auto outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
+		auto data   = (GuildTributeOptInOutReply_Struct *) outapp->pBuffer;
 
-		EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
-		GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
-
-		data->guild_id = in->guild_id;
+		data->guild_id              = in->guild_id;
+		data->no_donations          = in->member_favor;
+		data->tribute_toggle        = in->member_enabled ? true : false;
+		data->tribute_trophy_toggle = 0; // not yet implemented
+		data->time                  = in->member_time;
+		data->command               = 1;
 		strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
-		data->no_donations = in->member_favor;
-		data->tribute_toggle = in->member_enabled ? true : false;
-		data->tribute_trophy_toggle = 0; //not yet implemented
-		data->time = in->member_time;
-		data->command = 1;
 
 		entity_list.QueueClientsGuild(outapp, in->guild_id);
 		safe_delete(outapp);
 
-		//my new items
 		outapp = new EQApplicationPacket(OP_GuildTributeToggleReply, sizeof(GuildTributeSendActive_Struct));
-		GuildTributeSendActive_Struct *out = (GuildTributeSendActive_Struct *) outapp->pBuffer;
+		auto out = (GuildTributeSendActive_Struct *) outapp->pBuffer;
 
 		auto guild = guild_mgr.GetGuildByGuildID(in->guild_id);
+		if (!guild) {
+			safe_delete(outapp)
+			return;
+		}
+
 		out->not_used          = in->guild_id;
 		out->guild_favor       = guild->tribute.favor;
 		out->tribute_enabled   = guild->tribute.enabled;
