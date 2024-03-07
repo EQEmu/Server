@@ -805,7 +805,7 @@ int QuestParserCollection::EventBotGlobal(
 
 QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -871,7 +871,7 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 
 QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -922,7 +922,7 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 
 QuestInterface* QuestParserCollection::GetQIByGlobalNPCQuest(std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -947,7 +947,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalNPCQuest(std::string& filena
 
 QuestInterface* QuestParserCollection::GetQIByGlobalPlayerQuest(std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -971,7 +971,7 @@ QuestInterface* QuestParserCollection::GetQIByGlobalPlayerQuest(std::string& fil
 
 QuestInterface* QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -1023,7 +1023,7 @@ QuestInterface* QuestParserCollection::GetQIBySpellQuest(uint32 spell_id, std::s
 
 QuestInterface* QuestParserCollection::GetQIByItemQuest(std::string item_script, std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -1075,7 +1075,7 @@ QuestInterface* QuestParserCollection::GetQIByItemQuest(std::string item_script,
 
 QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encounter_name, std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -1125,7 +1125,7 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 
 QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 
@@ -1176,7 +1176,7 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 
 QuestInterface* QuestParserCollection::GetQIByGlobalBotQuest(std::string& filename)
 {
-	if (!zone || !zone->IsLoaded()) {
+	if (!zone) {
 		return nullptr;
 	}
 

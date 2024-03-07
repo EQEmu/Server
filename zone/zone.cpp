@@ -3165,6 +3165,11 @@ void Zone::ClearEXPModifier(Client* c)
 	exp_modifiers.erase(c->CharacterID());
 }
 
+void Zone::ClearEXPModifierByCharacterID(const uint32 character_id)
+{
+	exp_modifiers.erase(character_id);
+}
+
 float Zone::GetAAEXPModifier(Client* c)
 {
 	const auto& l = exp_modifiers.find(c->CharacterID());
@@ -3177,9 +3182,33 @@ float Zone::GetAAEXPModifier(Client* c)
 	return v.aa_modifier;
 }
 
+float Zone::GetAAEXPModifierByCharacterID(const uint32 character_id)
+{
+	const auto& l = exp_modifiers.find(character_id);
+	if (l == exp_modifiers.end()) {
+		return 1.0f;
+	}
+
+	const auto& v = l->second;
+
+	return v.aa_modifier;
+}
+
 float Zone::GetEXPModifier(Client* c)
 {
 	const auto& l = exp_modifiers.find(c->CharacterID());
+	if (l == exp_modifiers.end()) {
+		return 1.0f;
+	}
+
+	const auto& v = l->second;
+
+	return v.exp_modifier;
+}
+
+float Zone::GetEXPModifierByCharacterID(const uint32 character_id)
+{
+	const auto& l = exp_modifiers.find(character_id);
 	if (l == exp_modifiers.end()) {
 		return 1.0f;
 	}
@@ -3209,6 +3238,26 @@ void Zone::SetAAEXPModifier(Client* c, float aa_modifier)
 	);
 }
 
+void Zone::SetAAEXPModifierByCharacterID(const uint32 character_id, float aa_modifier)
+{
+	auto l = exp_modifiers.find(character_id);
+	if (l == exp_modifiers.end()) {
+		return;
+	}
+
+	auto& m = l->second;
+
+	m.aa_modifier = aa_modifier;
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
+		GetZoneID(),
+		GetInstanceVersion(),
+		m
+	);
+}
+
 void Zone::SetEXPModifier(Client* c, float exp_modifier)
 {
 	auto l = exp_modifiers.find(c->CharacterID());
@@ -3223,6 +3272,26 @@ void Zone::SetEXPModifier(Client* c, float exp_modifier)
 	CharacterExpModifiersRepository::SetEXPModifier(
 		database,
 		c->CharacterID(),
+		GetZoneID(),
+		GetInstanceVersion(),
+		m
+	);
+}
+
+void Zone::SetEXPModifierByCharacterID(const uint32 character_id, float exp_modifier)
+{
+	auto l = exp_modifiers.find(character_id);
+	if (l == exp_modifiers.end()) {
+		return;
+	}
+
+	auto& m = l->second;
+
+	m.exp_modifier = exp_modifier;
+
+	CharacterExpModifiersRepository::SetEXPModifier(
+		database,
+		character_id,
 		GetZoneID(),
 		GetInstanceVersion(),
 		m
