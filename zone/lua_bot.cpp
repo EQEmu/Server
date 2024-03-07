@@ -659,6 +659,11 @@ void Lua_Bot::SetBucket(std::string bucket_name, std::string bucket_value, std::
 	self->SetBucket(bucket_name, bucket_value, expiration);
 }
 
+void Lua_Bot::DeleteBot() {
+	Lua_Safe_Call_Void();
+	self->DeleteBot();
+}
+
 luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot")
 	.def(luabind::constructor<>())
@@ -698,6 +703,7 @@ luabind::scope lua_register_bot() {
 	.def("ClearSpellRecastTimer", (void(Lua_Bot::*)(uint16))&Lua_Bot::ClearSpellRecastTimer)
 	.def("CountBotItem", (uint32(Lua_Bot::*)(uint32))&Lua_Bot::CountBotItem)
 	.def("CountItemEquippedByID", (int(Lua_Bot::*)(uint32))&Lua_Bot::CountItemEquippedByID)
+	.def("DeleteBot", (void(Lua_Bot::*)(void))&Lua_Bot::DeleteBot)
 	.def("DeleteBucket", (void(Lua_Bot::*)(std::string))&Lua_Bot::DeleteBucket)
 	.def("Escape", (void(Lua_Bot::*)(void))&Lua_Bot::Escape)
 	.def("Fling", (void(Lua_Bot::*)(float,float,float))&Lua_Bot::Fling)
