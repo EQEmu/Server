@@ -622,7 +622,7 @@ void Corpse::CalcCorpseName()
 	EntityList::RemoveNumbers(name);
 	char tmp[64];
 	if (m_is_player_corpse) {
-		snprintf(tmp, sizeof(tmp), "'s corpse%d", GetID());
+		snprintf(tmp, sizeof(tmp), "`s corpse%d", GetID());
 	}
 	else {
 		snprintf(tmp, sizeof(tmp), "`s_corpse%d", GetID());

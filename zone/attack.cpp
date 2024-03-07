@@ -2012,10 +2012,9 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 			}
 
 			entity_list.AddCorpse(new_corpse, GetID());
+			new_corpse->Spawn();
 			SetID(0);
 
-			//send the become corpse packet to everybody else in the zone.
-			entity_list.QueueClients(this, &app2, true);
 			ApplyIllusionToCorpse(illusion_spell_id, new_corpse);
 			leave_corpse = true;
 		}
@@ -2861,7 +2860,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.LimitRemoveNPC(this);
 		entity_list.AddCorpse(corpse, GetID());
-
+		corpse->Spawn();
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
