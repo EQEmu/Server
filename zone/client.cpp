@@ -12425,24 +12425,31 @@ uint32 Client::GetClassesBits() const
 }
 
 bool Client::AddExtraClass(int class_id) {
-    if (RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker) {
-        int classes_bits = GetClassesBits();
-        int class_count = __builtin_popcount(classes_bits);
-        int n_class_bit = GetPlayerClassBit(class_id);
+	if (RuleB(Custom, MulticlassingEnabled) && class_id >= Class::Warrior && class_id <= Class::Berserker) {
+		int classes_bits = GetClassesBits();
 
-        if (class_count > 2 || (classes_bits & n_class_bit)) {
-            return false;
-        } else {
+		// Manual popcount implementation
+		int value = classes_bits;
+		int class_count = 0;
+		while (value) {
+			class_count += value & 1;
+			value >>= 1;
+		}
+
+		int n_class_bit = GetPlayerClassBit(class_id);
+
+		if (class_count > 2 || (classes_bits & n_class_bit)) {
+			return false;
+		}
+		else {
 			SetBucket("GestaltClasses", std::to_string(classes_bits | n_class_bit));
-
 			m_pp.classes = classes_bits | n_class_bit;
-
 			CalcBonuses();
 			SendEdgeStatBulkUpdate();
 			SendAlternateAdvancementTable();
 		}
 
-        return true;
-    }
+		return true;
+	}
 	return false;
 }
