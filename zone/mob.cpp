@@ -5250,10 +5250,11 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		return;
 	}
 
-	Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
-
-	if (new_target) {
-		on = new_target;
+	if (IsClient()) {
+		Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
+		if (new_target) {
+			on = new_target;
+		}
 	}
 
 	if (IsBot() && on->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
