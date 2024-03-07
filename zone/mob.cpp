@@ -5340,6 +5340,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		) &&
 		spells[spell_id].target_type != ST_TargetsTarget
 	) { // NPC innate procs don't take this path ever
+		LogSpellsDetail("Entering SpellFinished from ExecWeaponProc (Branch A). Target: [{}], Spell: [{}]", this, spell_id);
 		SpellFinished(
 			spell_id,
 			this,
@@ -5364,6 +5365,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 			);
 		}
 	} else if (!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
+		LogSpellsDetail("Entering SpellFinished from ExecWeaponProc (Branch B). Target: [{}], Spell: [{}]", on->GetName(), spell_id);
 		SpellFinished(
 			spell_id,
 			on,
