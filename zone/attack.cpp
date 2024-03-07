@@ -4998,7 +4998,7 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 				}
 			}
 			else {
-				LogCombat("Attacking weapon ([{}]) successfully procing spell [{}] ([{}] percent chance)", weapon->Name, weapon->Proc.Effect, WPC * 100);
+				LogCombat("Attacking weapon ([{}]) successfully procing spell [{}] ([{}] percent chance, on [{}])", weapon->Name, weapon->Proc.Effect, WPC * 100, on->GetName());
 				ExecWeaponProc(inst, weapon->Proc.Effect, on);
 				proced = true;
 			}

@@ -5283,6 +5283,8 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 				).c_str()
 			);
 			LogSpells("Player [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
+		} else {
+			LogSpells("NPC [{}] Weapon Procced invalid spell [{}]", GetName(), spell_id);
 		}
 
 		return;
