@@ -5340,7 +5340,7 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		) &&
 		spells[spell_id].target_type != ST_TargetsTarget
 	) { // NPC innate procs don't take this path ever
-		LogSpellsDetail("Entering SpellFinished from ExecWeaponProc (Branch A). Target: [{}], Spell: [{}]", this, spell_id);
+		LogSpellsDetail("Entering SpellFinished from ExecWeaponProc (Branch A). Target: [{}], Spell: [{}]", this->GetName(), spell_id);
 		SpellFinished(
 			spell_id,
 			this,
