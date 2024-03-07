@@ -5431,7 +5431,7 @@ ADD PRIMARY KEY (`id`);
 		.match = "varchar(30)",
 		.sql = R"(
 ALTER TABLE `rule_values`
-MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `rule_name`;
+MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `rule_name`;
 		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
