@@ -139,7 +139,7 @@ void NPC::SpellProcess()
 }
 
 int Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
-	if (RuleB(Spells, UseSpellImpliedTargeting)) {
+	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
 		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
 			if (GetPet()) {
 				return GetPetID();
