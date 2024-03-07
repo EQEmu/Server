@@ -60,6 +60,7 @@ public:
 	uint32 GetBotID();
 	void Camp();
 	void Camp(bool save_to_database);
+	void DeleteBot();
 	Lua_ItemInst GetAugmentAt(int16 slot_id, uint8 augment_index);
 	int GetAugmentIDAt(int16 slot_id, uint8 augment_index);
 	luabind::object GetAugmentIDsBySlotID(lua_State* L, int16 slot_id) const;
