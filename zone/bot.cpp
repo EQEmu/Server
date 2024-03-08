@@ -7648,9 +7648,9 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	va_end(ap);
 
 	if (speaker->IsRaidGrouped()) {
-		Raid* raid = entity_list.GetRaidByBotName(speaker->GetName());
-		if (raid) {
-			for (const auto& m : raid->members) {
+		Raid* r = entity_list.GetRaidByBotName(speaker->GetName());
+		if (r) {
+			for (const auto& m : r->members) {
 				if (m.member && !m.is_bot) {
 					m.member->FilteredMessageString(
 						speaker,
@@ -7667,9 +7667,9 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	else if (speaker->HasGroup()) {
 		Group* g = speaker->GetGroup();
 		if (g) {
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (g->members[i] && !g->members[i]->IsBot()) {
-					g->members[i]->FilteredMessageString(
+			for (auto& m : g->members) {
+				if (m && !m->IsBot()) {
+					m->FilteredMessageString(
 						speaker,
 						Chat::PetResponse,
 						FilterSocials,
