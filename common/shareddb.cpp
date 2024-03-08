@@ -1314,12 +1314,33 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? Strings::ToUnsignedInt(row[ItemField::charmfileid]) : 0;
 		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
 		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
-		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
+		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);		
 
 		if (RuleB(Custom, UseDynamicItemDiscoveryTags)) {
 			snprintf(item.CharmFile, sizeof(item.CharmFile), "%d#%s", item.ID, row[ItemField::charmfile]);
 		}
 
+		// THJ Custom Stuff
+		if (RuleB(Custom, UseTHJItemMutations)) {
+			char modifiedName[64] = "";
+			if (strncmp(row[ItemField::name], "Rose Colored ", 13) == 0) {
+				snprintf(modifiedName, sizeof(modifiedName), "%s (Latent)", row[ItemField::name] + 13);
+			}
+			else if (strncmp(row[ItemField::name], "Apocryphal ", 11) == 0) {
+				snprintf(modifiedName, sizeof(modifiedName), "%s (Awakened)", row[ItemField::name] + 11);
+			}
+			else {
+				snprintf(modifiedName, sizeof(modifiedName), "%s (Mundane)", row[ItemField::name] + 10);
+			}
+
+			strn0cpy(item.Name, modifiedName, sizeof(item.Name));
+
+			// Bard Instrument that isn't a weapon which fits in primary\secondary
+			if (item.Slots & (8192 | 16384) && item.Classes & GetPlayerClassBit(Class::Bard) && item.Damage <= 0) {
+				item.Slots = item.Slots | 2048;
+			}
+		}
+		
 		try {
 			hash.insert(item.ID, item);
 		} catch (std::exception &ex) {
