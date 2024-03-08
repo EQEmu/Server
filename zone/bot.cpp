@@ -7650,9 +7650,9 @@ void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	if (speaker->IsRaidGrouped()) {
 		Raid* raid = entity_list.GetRaidByBotName(speaker->GetName());
 		if (raid) {
-			for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
-				if (raid->members[x].member && entity_list.IsMobInZone(raid->members[x].member) && !raid->members[x].member->IsBot()) {
-					raid->members[x].member->FilteredMessageString(
+			for (const auto& m : raid->members) {
+				if (m.member && !m.is_bot) {
+					m.member->FilteredMessageString(
 						speaker,
 						Chat::PetResponse,
 						FilterSocials,
