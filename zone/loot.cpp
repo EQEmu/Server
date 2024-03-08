@@ -390,19 +390,22 @@ uint32 NPC::DoUpgradeLoot(uint32 itemID) {
 	+145 Radiant + Mystic + Honed or Tempered
 	+146 Radiant + Mystic + Polished or Brutal
 	*/
+
 	if (RuleB(Custom, DoItemUpgrades)) {
 		auto roll = zone->random.Real(0.0, 100.0); // Roll a number between 0 and 100
 		auto newID = itemID;
-		if (roll <= RuleR(Custom, RadiantItemDropRate)) {
+
+		if (roll <= RuleR(Custom, Tier2ItemDropRate)) {
 			newID += 2000000;
-		} else if (roll <= RuleR(Custom, AwakenedItemDropRate)) { 
-			// Rolled Awakened/RC
+		} else if (roll <= RuleR(Custom, Tier1ItemDropRate)) {
 			newID += 1000000;
 		}
+
 		if (database.GetItem(newID)) {
 			itemID = newID;
 		}
 	}
+	
 	return itemID;
 }
 

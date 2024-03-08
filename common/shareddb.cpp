@@ -1329,11 +1329,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			else if (strncmp(row[ItemField::name], "Apocryphal ", 11) == 0) {
 				snprintf(modifiedName, sizeof(modifiedName), "%s (Awakened)", row[ItemField::name] + 11);
 			}
-			else {
-				snprintf(modifiedName, sizeof(modifiedName), "%s (Mundane)", row[ItemField::name] + 10);
-			}
 
-			strn0cpy(item.Name, modifiedName, sizeof(item.Name));
+			if (modifiedName != "") {
+				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
+			}
 
 			// Bard Instrument that isn't a weapon which fits in primary\secondary
 			if (item.Slots & (8192 | 16384) && item.Classes & GetPlayerClassBit(Class::Bard) && item.Damage <= 0) {
