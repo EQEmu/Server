@@ -11482,7 +11482,7 @@ void Client::SetAAPoints(uint32 points)
 	QuestEventID event_id = points > current_points ? EVENT_AA_GAIN : EVENT_AA_LOSS;
 	const uint32 change   = event_id == EVENT_AA_GAIN ? points - current_points : current_points - points;
 
-	if (parse->PlayerHasQuestSub(EVENT_AA_GAIN)) {
+	if (parse->PlayerHasQuestSub(event_id)) {
 		parse->EventPlayer(event_id, this, std::to_string(change), 0);
 	}
 
