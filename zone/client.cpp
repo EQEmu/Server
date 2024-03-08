@@ -11473,6 +11473,37 @@ void Client::SetLockSavePosition(bool lock_save_position)
 	Client::m_lock_save_position = lock_save_position;
 }
 
+void Client::SetAAPoints(uint32 points)
+{
+	const uint32 current_points = m_pp.aapoints;
+
+	m_pp.aapoints = points;
+
+	QuestEventID event_id = points > current_points ? EVENT_AA_GAIN : EVENT_AA_LOSS;
+	const uint32 change   = event_id == EVENT_AA_GAIN ? points - current_points : current_points - points;
+
+	if (parse->PlayerHasQuestSub(EVENT_AA_GAIN)) {
+		parse->EventPlayer(event_id, this, std::to_string(change), 0);
+	}
+
+	SendAlternateAdvancementStats();
+}
+
+bool Client::RemoveAAPoints(uint32 points)
+{
+	if (m_pp.aapoints < points) {
+		return false;
+	}
+
+	m_pp.aapoints -= points;
+
+	if (parse->PlayerHasQuestSub(EVENT_AA_LOSS)) {
+		parse->EventPlayer(EVENT_AA_LOSS, this, std::to_string(points), 0);
+	}
+
+	SendAlternateAdvancementStats();
+}
+
 void Client::AddAAPoints(uint32 points)
 {
 	m_pp.aapoints += points;

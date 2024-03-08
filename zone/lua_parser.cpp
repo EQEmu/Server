@@ -182,7 +182,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_timer_stop",
 	"event_entity_variable_delete",
 	"event_entity_variable_set",
-	"event_entity_variable_update"
+	"event_entity_variable_update",
+	"event_aa_loss"
 };
 
 extern Zone *zone;
@@ -343,6 +344,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE]     = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]        = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
+	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
