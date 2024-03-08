@@ -6775,7 +6775,7 @@ void Client::UpdateClientXTarget(Client *c)
 // IT IS NOT SAFE TO CALL THIS IF IT'S NOT INITIAL AGGRO
 void Client::AddAutoXTarget(Mob *m, bool send)
 {
-	if (m->IsBot() || (m->IsPet() && m->IsPetOwnerBot()) || (m->IsTempPet() && IsPetOwnerBot()) {
+	if (m->IsBot() || (m->IsPet() && m->IsPetOwnerBot()) || (m->IsTempPet() && IsPetOwnerBot())) {
 		return;
 	}
 
