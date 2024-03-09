@@ -64,7 +64,7 @@ void NpcScaleManager::ScaleNPC(
 
 	if (always_scale || npc->GetMaxHP() == 0) {
 		npc->ModifyNPCStat("max_hp", std::to_string(scale_data.hp));
-		npc->Heal();
+		npc->RestoreHealth();
 	}
 
 	if (always_scale || npc->GetAccuracyRating() == 0) {

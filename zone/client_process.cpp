@@ -1064,9 +1064,9 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			);
 			SpellOnTarget(resurrection_sickness_spell_id, this);
 		} else if (SpellID == SPELL_DIVINE_REZ) {
-			SetHP(GetMaxHP());
-			SetMana(GetMaxMana());
-			SetEndurance(GetMaxEndurance());
+			RestoreHealth();
+			RestoreMana();
+			RestoreEndurance();
 		} else {
 			SetHP(GetMaxHP() / 20);
 			SetMana(GetMaxMana() / 20);
@@ -2177,9 +2177,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			FastQueuePacket(&outapp);
 
 			CalcBonuses();
-			SetHP(GetMaxHP());
-			SetMana(GetMaxMana());
-			SetEndurance(GetMaxEndurance());
+			RestoreHealth();
+			RestoreMana();
+			RestoreEndurance();
 
 			m_Position.x = chosen->x;
 			m_Position.y = chosen->y;

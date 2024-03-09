@@ -246,7 +246,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	charm_atk              = npc_type_data->charm_atk;
 
 	CalcMaxMana();
-	SetMana(GetMaxMana());
+	RestoreMana();
 
 	MerchantType          = npc_type_data->merchanttype;
 	merchant_open         = (
@@ -448,7 +448,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	npc_scale_manager->ScaleNPC(this);
 
-	SetMana(GetMaxMana());
+	RestoreMana();
 
 	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 		m_can_open_doors = false;
