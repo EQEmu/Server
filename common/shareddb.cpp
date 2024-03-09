@@ -1322,7 +1322,9 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// THJ Custom Stuff
 		if (RuleB(Custom, UseTHJItemMutations)) {
-			char modifiedName[64] = "";
+			char modifiedName[64];
+			strn0cpy(modifiedName, item.Name, sizeof(modifiedName));
+
 			if (strncmp(row[ItemField::name], "Rose Colored ", 13) == 0) {
 				snprintf(modifiedName, sizeof(modifiedName), "%s (Latent)", row[ItemField::name] + 13);
 			}
@@ -1330,16 +1332,16 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 				snprintf(modifiedName, sizeof(modifiedName), "%s (Awakened)", row[ItemField::name] + 11);
 			}
 
-			if (modifiedName != "") {
+			if (modifiedName[0] != '\0') {
 				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
 			}
 
-			// Bard Instrument that isn't a weapon which fits in primary\secondary
-			if (item.Slots & (8192 | 16384) && item.Classes & GetPlayerClassBit(Class::Bard) && item.Damage <= 0) {
-				item.Slots = item.Slots | 2048;
+			// Bard Instrument that isn't a weapon which fits in primary/secondary
+			if ((item.Slots & (8192 | 16384)) && (item.Classes & GetPlayerClassBit(Class::Bard)) && (item.Damage <= 0)) {
+				item.Slots |= 2048;
 			}
 		}
-		
+
 		try {
 			hash.insert(item.ID, item);
 		} catch (std::exception &ex) {

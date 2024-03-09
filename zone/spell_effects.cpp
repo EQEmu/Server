@@ -798,7 +798,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					CastToNPC()->SaveGuardSpotCharm();
 				}
 				InterruptSpell();
-				entity_list.RemoveDebuffs(this);
+				//entity_list.RemoveDebuffs(this);
 				entity_list.RemoveFromHateLists(this);
 				WipeHateList();
 
@@ -3885,27 +3885,15 @@ void Mob::BuffProcess()
 				}
 			}
 
-			if(IsClient())
-			{
-				if(buffs[buffs_i].UpdateClient == true)
-				{
-					CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
-					CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
-					buffs[buffs_i].UpdateClient = false;					
-				}
-			} else if (RuleB(Custom, FadeNPCDebuffsOutofCombat)) {
-				int spellid = buffs[buffs_i].spellid;
-				if (!IsEngaged() && 
-				    IsDetrimentalSpell(spellid) && 
-					(buffs[buffs_i].ticsremaining) > 0 && 
-					!IsCharmSpell(spellid) && 
-					!IsHarmonySpell(spellid) && 
-					!IsAllianceSpell(spellid) && 
-					!IsMesmerizeSpell(spellid) && 
-					(!IsResistDebuffSpell(spellid) && IsCharmed())) {
-					BuffFadeBySlot(buffs_i);
-				}
-			}
+            if(IsClient())
+            {
+                if(buffs[buffs_i].UpdateClient == true)
+                {
+                    CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
+                    CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
+                    buffs[buffs_i].UpdateClient = false;                    
+                }
+            }
 		}
 	}	
 }
