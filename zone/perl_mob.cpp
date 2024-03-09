@@ -3420,6 +3420,11 @@ bool Perl_Mob_IsAlwaysAggro(Mob* self)
 	return self->AlwaysAggro();
 }
 
+std::string Perl_Mob_GetDeityName(Mob* self)
+{
+	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3628,6 +3633,7 @@ void perl_register_mob()
 	package.add("GetDR", &Perl_Mob_GetDR);
 	package.add("GetDamageAmount", &Perl_Mob_GetDamageAmount);
 	package.add("GetDeity", &Perl_Mob_GetDeity);
+	package.add("GetDeityName", &Perl_Mob_GetDeityName);
 	package.add("GetDisplayAC", &Perl_Mob_GetDisplayAC);
 	package.add("GetDrakkinDetails", &Perl_Mob_GetDrakkinDetails);
 	package.add("GetDrakkinHeritage", &Perl_Mob_GetDrakkinHeritage);

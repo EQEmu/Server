@@ -582,6 +582,7 @@ public:
 	bool IsControllableBoat();
 	int GetHeroicStrikethrough();
 	bool IsAlwaysAggro();
+	std::string GetDeityName();
 };
 
 #endif
