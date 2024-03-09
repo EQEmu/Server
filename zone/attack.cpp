@@ -4489,45 +4489,67 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		//Note: if players can become pets, they will not receive damage messages of their own
-		//this was done to simplify the code here (since we can only effectively skip one mob on queue)
-		eqFilterType filter;
+		//this was done to simplify the code here (since we can only effectively skip one mob on queue)		
 		Mob* skip = attacker;
+		eqFilterType filter;				
 		if (attacker && attacker->IsPet() && !attacker->IsBot()) {
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
 			if (owner && owner->IsClient()) {
-				if (FromDamageShield && damage > 0) {
-					//special crap for spell damage, looks hackish to me
-					char val1[20] = { 0 };
-					owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
-				}
-				else {
-					if (damage > 0) {
-						if (IsValidSpell(spell_id)) {
-							filter = iBuffTic ? FilterDOT : FilterSpellDamage;
-						} else {
-							filter = FilterPetHits;
+				if ((IsValidSpell(spell_id) || FromDamageShield) && damage > 0) {
+					char val1[20] = { 0 }; // special crap for spell damage, looks hackish to me
+					if (FromDamageShield) {
+						owner->MessageString(Chat::NonMelee, OTHER_HIT_NONMELEE, GetCleanName(), ConvertArray(damage, val1));
+					} else {
+						if (iBuffTic) {
+							entity_list.FilteredMessageCloseString(
+								attacker, /* Sender */
+								true, /* Skip Sender */
+								RuleI(Range, SpellMessages),
+								Chat::DotDamage, /* Type: 325 */
+								FilterPetSpells, /* FilterType: 19 */
+								OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
+								attacker,		/* sent above */
+								GetCleanName(), /* Message1 */
+								itoa(damage), /* Message2 */
+								spells[spell_id].name, /* Message3 */
+								attacker->GetCleanName() /* Message4 */
+							);
+						} else {						
+							entity_list.FilteredMessageCloseString(
+								attacker, /* Sender */
+								true, /* Sender is attacker, so do not skip */
+								RuleI(Range, SpellMessages),
+								Chat::NonMelee, /* 283 */
+								FilterPetSpells,
+								HIT_NON_MELEE, /* %1 hit %2 for %3 points of non-melee damage. */
+								0,
+								attacker->GetCleanName(),
+								GetCleanName(), /* Message1 */
+								ConvertArray(damage, val1) /* Message2 */
+							);
 						}
+					}
+				} else {						
+					if (damage > 0) {
+						filter = FilterPetHits;
 					} else if (damage == -5) {
-						filter = FilterNone;    //cant filter invulnerable
+						filter = FilterNone;
 					} else {
 						filter = FilterPetMisses;
 					}
 
-					if (!FromDamageShield) {
-						entity_list.QueueCloseClients(
-							attacker, /* Sender */
-							outapp, /* packet */
-							false, /* Skip Sender */
-							((IsValidSpell(spell_id)) ? RuleI(Range, SpellMessages) : RuleI(Range, DamageMessages)),
-							0, /* don't skip anyone on spell */
-							true, /* Packet ACK */
-							filter /* eqFilterType filter */
-						);
-					}
+					entity_list.QueueCloseClients(
+						attacker, /* Sender */
+						outapp, /* packet */
+						false, /* Skip Sender */
+						RuleI(Range, DamageMessages),
+						0, /* don't skip anyone on spell */
+						true, /* Packet ACK */
+						filter /* eqFilterType filter */
+					);
 				}
 			}
-
 			skip = owner;
 		}
 		else {
@@ -4711,9 +4733,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				OTHER_HIT_DOT,  /* MessageFormat: %1 has taken %2 damage from %3 by %4. */
 				attacker,		/* sent above */
 				GetCleanName(), /* Message1 */
-				itoa(damage), /* Message2 */
-				attacker->GetCleanName(), /* Message3 */
-				spells[spell_id].name /* Message4 */
+				itoa(damage), /* Message2 */				
+				spells[spell_id].name, /* Message3 */
+				attacker->GetCleanName() /* Message4 */
 			);
 		}
 	}

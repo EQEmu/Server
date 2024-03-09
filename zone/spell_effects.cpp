@@ -3895,7 +3895,14 @@ void Mob::BuffProcess()
 				}
 			} else if (RuleB(Custom, FadeNPCDebuffsOutofCombat)) {
 				int spellid = buffs[buffs_i].spellid;
-				if (!IsEngaged() && IsDetrimentalSpell(spellid) && (buffs[buffs_i].ticsremaining) > 0 && !IsCharmSpell(spellid) && !IsHarmonySpell(spellid) && !IsAllianceSpell(spellid) && !IsMesmerizeSpell(spellid)) {
+				if (!IsEngaged() && 
+				    IsDetrimentalSpell(spellid) && 
+					(buffs[buffs_i].ticsremaining) > 0 && 
+					!IsCharmSpell(spellid) && 
+					!IsHarmonySpell(spellid) && 
+					!IsAllianceSpell(spellid) && 
+					!IsMesmerizeSpell(spellid) && 
+					(!IsResistDebuffSpell(spellid) && IsCharmed())) {
 					BuffFadeBySlot(buffs_i);
 				}
 			}

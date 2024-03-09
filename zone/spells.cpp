@@ -4347,11 +4347,33 @@ bool Mob::SpellOnTarget(
 				LogSpells("Spell [{}] was completely resisted by [{}]", spell_id, spelltar->GetName());
 
 				if (spells[spell_id].resist_type == RESIST_PHYSICAL){
-					MessageString(Chat::SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
+					if (IsPet() && GetOwner()) {
+						GetOwner()->Message(Chat::SpellFailure, "%s resisted your pet's %s ability.", spelltar->GetCleanName(), spells[spell_id].name);
+					} else {
+						MessageString(Chat::SpellFailure, PHYSICAL_RESIST_FAIL,spells[spell_id].name);
+					}
 					spelltar->MessageString(Chat::SpellFailure, YOU_RESIST, spells[spell_id].name);
 				} else {
-					MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					if (IsPet() && GetOwner()) {
+						GetOwner()->Message(Chat::SpellFailure, "%s resisted your pet's %s spell.", spelltar->GetCleanName(), spells[spell_id].name);
+					} else {
+						MessageString(Chat::SpellFailure, TARGET_RESISTED, spells[spell_id].name);
+					}
+					
 					spelltar->MessageString(Chat::SpellFailure, YOU_RESIST, spells[spell_id].name);
+
+					/*
+					if (RuleB(Spells, BroadcastResistMessages)) {
+						entity_list.FilteredMessageClose(
+							this,
+							true,
+							RuleI(Range, SpellMessages),
+							Chat::SpellFailure,
+							IsClient() ? FilterPCSpells : FilterNPCSpells,
+							sprintf("%s resisted %s's %s spell.", spelltar->GetCleanName(), GetCleanName(), spells[spell_id].name)
+						);						
+					}
+					*/				
 				}
 
 				if (spelltar->IsAIControlled()) {

@@ -504,6 +504,7 @@ RULE_BOOL(Spells, ManaTapsRequireNPCMana, false, "Enabling will require target t
 RULE_INT(Spells, HarmTouchCritRatio, 200, "Harmtouch crit bonus, on top of BaseCritRatio")
 RULE_BOOL(Spells, UseClassicSpellFocus, false, "Enabling will tell the server to handle random focus damage as classic spell imports lack the limit values.")
 RULE_BOOL(Spells, ManaTapsOnAnyClass, false, "Enabling this will allow you to cast mana taps on any class, this will bypass ManaTapsRequireNPCMana rule.")
+//RULE_BOOL(Spells, BroadcastResistMessages, true, "Enable to send Spell Resist Messages to nearby clients")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
