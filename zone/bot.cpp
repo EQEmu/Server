@@ -7640,18 +7640,58 @@ void Bot::SetDefaultBotStance() {
 	_botStance = defaultStance;
 }
 
-void Bot::BotGroupSay(Mob *speaker, const char *msg, ...) {
+void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
 	char buf[1000];
 	va_list ap;
 	va_start(ap, msg);
 	vsnprintf(buf, 1000, msg, ap);
 	va_end(ap);
-	if (speaker->HasGroup()) {
-		Group *g = speaker->GetGroup();
-		if (g)
-			g->GroupMessage(speaker->CastToMob(), Language::CommonTongue, Language::MaxValue, buf);
-	} else
-		speaker->Say("%s", buf);
+
+	if (speaker->IsRaidGrouped()) {
+		Raid* r = entity_list.GetRaidByBotName(speaker->GetName());
+		if (r) {
+			for (const auto& m : r->members) {
+				if (m.member && !m.is_bot) {
+					m.member->FilteredMessageString(
+						speaker,
+						Chat::PetResponse,
+						FilterSocials,
+						GENERIC_SAY,
+						speaker->GetCleanName(),
+						buf
+					);
+				}
+			}
+		}
+	}
+	else if (speaker->HasGroup()) {
+		Group* g = speaker->GetGroup();
+		if (g) {
+			for (auto& m : g->members) {
+				if (m && !m->IsBot()) {
+					m->FilteredMessageString(
+						speaker,
+						Chat::PetResponse,
+						FilterSocials,
+						GENERIC_SAY,
+						speaker->GetCleanName(),
+						buf
+					);
+				}
+			}
+		}
+	}
+	else {
+		//speaker->Say("%s", buf);
+		speaker->GetOwner()->FilteredMessageString(
+			speaker,
+			Chat::PetResponse,
+			FilterSocials,
+			GENERIC_SAY,
+			speaker->GetCleanName(),
+			buf
+		);
+	}
 }
 
 bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
