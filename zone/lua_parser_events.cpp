@@ -1667,6 +1667,18 @@ void handle_player_entity_variable(
 	}
 }
 
+void handle_player_aa_loss(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+) {
+	lua_pushinteger(L, Strings::ToInt(data));
+	lua_setfield(L, -2, "aa_lost");
+}
+
 // Item
 void handle_item_click(
 	QuestInterface *parse,
