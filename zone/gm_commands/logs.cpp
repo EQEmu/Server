@@ -82,7 +82,7 @@ void command_logs(Client *c, const Seperator *sep)
 				}
 
 				gmsay.emplace_back(
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						fmt::format("#logs set gmsay {} {}", index, i), false, std::to_string(i)
 					)
 				);
@@ -96,7 +96,7 @@ void command_logs(Client *c, const Seperator *sep)
 				}
 
 				file.emplace_back(
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						fmt::format("#logs set file {} {}", index, i), false, std::to_string(i)
 					)
 				);
@@ -110,7 +110,7 @@ void command_logs(Client *c, const Seperator *sep)
 				}
 
 				console.emplace_back(
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						fmt::format("#logs set console {} {}", index, i), false, std::to_string(i)
 					)
 				);
@@ -124,7 +124,7 @@ void command_logs(Client *c, const Seperator *sep)
 				}
 
 				discord.emplace_back(
-					EQ::SayLinkEngine::GenerateQuestSaylink(
+					Saylink::Create(
 						fmt::format("#logs set discord {} {}", index, i), false, std::to_string(i)
 					)
 				);
