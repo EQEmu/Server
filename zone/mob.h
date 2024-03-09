@@ -1337,7 +1337,7 @@ public:
 
 	inline void RestoreEndurance() { SetEndurance(GetMaxEndurance()); }
 	inline void RestoreHealth() { SetMaxHP(); SendHPUpdate(); }
-	inline void RestoreMana() { SetMana(GetMaxMana()); };
+	inline void RestoreMana() { SetMana(GetMaxMana()); }
 
 	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);
