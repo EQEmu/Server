@@ -2756,35 +2756,28 @@ void NPC::SetSwarmTarget(int target_id)
 int64 NPC::CalcMaxMana()
 {
 	if (npc_mana == 0) {
-		switch (GetCasterClass()) {
-			case 'I':
-				max_mana = (((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'W':
-				max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			default:
-				max_mana = 0;
-				break;
+		if (IsIntelligenceCasterClass()) {
+			max_mana = (((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+		} else if (IsWisdomCasterClass()) {
+			max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+		} else {
+			max_mana = 0;
 		}
+
 		if (max_mana < 0) {
 			max_mana = 0;
 		}
 
 		return max_mana;
-	}
-	else {
-		switch (GetCasterClass()) {
-			case 'I':
-				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			case 'W':
-				max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
-				break;
-			default:
-				max_mana = 0;
-				break;
+	} else {
+		if (IsIntelligenceCasterClass()) {
+			max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
+		} else if (IsWisdomCasterClass()) {
+			max_mana = npc_mana + spellbonuses.Mana + itembonuses.Mana;
+		} else {
+			max_mana = 0;
 		}
+
 		if (max_mana < 0) {
 			max_mana = 0;
 		}

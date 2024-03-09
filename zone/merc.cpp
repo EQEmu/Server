@@ -489,23 +489,12 @@ int64 Merc::CalcBaseHP()
 
 int64 Merc::CalcMaxMana()
 {
-	switch(GetCasterClass())
-	{
-	case 'I':
-	case 'W': {
+	if (IsIntelligenceCasterClass() || IsWisdomCasterClass()) {
 		max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + GroupLeadershipAAManaEnhancement());
-		break;
-			  }
-	case 'N': {
+	} else {
 		max_mana = 0;
-		break;
-			  }
-	default: {
-		LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
-		max_mana = 0;
-		break;
-			 }
 	}
+
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
@@ -565,12 +554,13 @@ int64 Merc::CalcManaRegen()
 		regen = mana_regen + spellbonuses.ManaRegen + itembonuses.ManaRegen;
 	}
 
-	if(GetCasterClass() == 'I')
+	if (IsIntelligenceCasterClass()) {
 		regen += (itembonuses.HeroicINT / 25);
-	else if(GetCasterClass() == 'W')
+	} else if (IsWisdomCasterClass()) {
 		regen += (itembonuses.HeroicWIS / 25);
-	else
+	} else {
 		regen = 0;
+	}
 
 	//AAs
 	regen += aabonuses.ManaRegen;
@@ -581,14 +571,11 @@ int64 Merc::CalcManaRegen()
 int64 Merc::CalcManaRegenCap()
 {
 	int64 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
-	switch(GetCasterClass())
-	{
-	case 'I':
+
+	if (IsIntelligenceCasterClass()) {
 		cap += (itembonuses.HeroicINT / 25);
-		break;
-	case 'W':
+	} else if (IsWisdomCasterClass()) {
 		cap += (itembonuses.HeroicWIS / 25);
-		break;
 	}
 
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
@@ -1166,7 +1153,7 @@ void Merc::AI_Process() {
 						float newX = 0;
 						float newY = 0;
 						float newZ = 0;
-						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != ARCHETYPE_CASTER) {
+						if (PlotPositionAroundTarget(GetTarget(), newX, newY, newZ, false) && GetArchetype() != Archetype::Caster) {
 							RunTo(newX, newY, newZ);
 							return;
 						}
@@ -1314,7 +1301,7 @@ void Merc::AI_Process() {
 			if(AI_EngagedCastCheck()) {
 				MercMeditate(false);
 			}
-			else if(GetArchetype() == ARCHETYPE_CASTER)
+			else if(GetArchetype() == Archetype::Caster)
 				MercMeditate(true);
 		}
 	}
@@ -1337,7 +1324,7 @@ void Merc::AI_Process() {
 			//TODO: Implement passive stances.
 			//if(GetStance() != MercStancePassive) {
 			if(!AI_IdleCastCheck() && !IsCasting()) {
-				if(GetArchetype() == ARCHETYPE_CASTER) {
+				if(GetArchetype() == Archetype::Caster) {
 					MercMeditate(true);
 				}
 			}
@@ -1792,7 +1779,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 										if( !IsImmuneToSpell(selectedMercSpell.spellid, this)
 											&& (CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-												if( GetArchetype() == ARCHETYPE_MELEE && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+												if( GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
 													continue;
 												}
 
@@ -1819,7 +1806,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 												if( !tar->IsImmuneToSpell(selectedMercSpell.spellid, this)
 													&& (tar->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
-														if( tar->GetArchetype() == ARCHETYPE_MELEE && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
+														if( tar->GetArchetype() == Archetype::Melee && IsEffectInSpell(selectedMercSpell.spellid, SE_IncreaseSpellHaste)) {
 															continue;
 														}
 

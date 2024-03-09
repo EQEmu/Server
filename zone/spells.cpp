@@ -224,8 +224,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if(GetTarget() && IsManaTapSpell(spell_id)) {
 		// If melee, block if ManaTapsOnAnyClass rule is false
 		// if caster, block if ManaTapsRequireNPCMana and no mana
-		bool melee_block = !RuleB(Spells, ManaTapsOnAnyClass);
-		bool caster_block = (GetTarget()->GetCasterClass() != 'N' && RuleB(Spells, ManaTapsRequireNPCMana) &&  GetTarget()->GetMana() == 0);
+		bool melee_block  = !RuleB(Spells, ManaTapsOnAnyClass);
+		bool caster_block = (
+			!GetTarget()->IsPureMeleeClass() &&
+			RuleB(Spells, ManaTapsRequireNPCMana) &&
+			GetTarget()->GetMana() == 0
+		);
 		if (melee_block || caster_block) {
 			InterruptSpell(TARGET_NO_MANA, 0x121, spell_id);
 			return false;
@@ -1105,10 +1109,10 @@ bool Client::CheckFizzle(uint16 spell_id)
 		// CALCULATE EFFECTIVE CASTING STAT VALUE
 		float prime_stat_reduction = 0.0f;
 
-		if (GetCasterClass() == 'W') {
-			prime_stat_reduction = (GetWIS() - 75) / 10.0;
-		} else if (GetCasterClass() == 'I') {
+		if (IsIntelligenceCasterClass()) {
 			prime_stat_reduction = (GetINT() - 75) / 10.0;
+		} else if (IsWisdomCasterClass()) {
+			prime_stat_reduction = (GetWIS() - 75) / 10.0;
 		}
 
 		// BARDS ARE SPECIAL - they add both CHA and DEX mods to get casting rates similar to full casters without spec skill
@@ -1183,10 +1187,10 @@ bool Client::CheckFizzle(uint16 spell_id)
 	// if you have high int/wis you fizzle less, you fizzle more if you are stupid
 	if (GetClass() == Class::Bard) {
 		diff -= (GetCHA() - 110) / 20.0;
-	} else if (GetCasterClass() == 'W') {
-		diff -= (GetWIS() - 125) / 20.0;
-	} else if (GetCasterClass() == 'I') {
+	} else if (IsIntelligenceCasterClass()) {
 		diff -= (GetINT() - 125) / 20.0;
+	} else if (IsWisdomCasterClass()) {
+		diff -= (GetWIS() - 125) / 20.0;
 	}
 
 	// base fizzlechance is lets say 5%, we can make it lower for AA skills or whatever

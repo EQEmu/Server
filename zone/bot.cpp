@@ -2287,7 +2287,7 @@ bool Bot::TryMeditate() {
 	if (!IsMoving() && !spellend_timer.Enabled()) {
 		if (GetTarget() && AI_EngagedCastCheck()) {
 			BotMeditate(false);
-		} else if (GetArchetype() == ARCHETYPE_CASTER) {
+		} else if (GetArchetype() == Archetype::Caster) {
 			BotMeditate(true);
 		}
 
@@ -2755,7 +2755,7 @@ Mob* Bot::GetBotTarget(Client* bot_owner)
 			}
 		}
 
-		if (GetArchetype() == ARCHETYPE_CASTER) {
+		if (GetArchetype() == Archetype::Caster) {
 			BotMeditate(true);
 		}
 	}
@@ -5189,31 +5189,26 @@ void Bot::ProcessBotOwnerRefDelete(Mob* botOwner) {
 	}
 }
 
-int64 Bot::CalcMaxMana() {
-	switch(GetCasterClass()) {
-		case 'I':
-			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += itembonuses.heroic_max_mana;
-		case 'W': {
-			max_mana = (GenerateBaseManaPoints() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
-			max_mana += itembonuses.heroic_max_mana;
-			break;
-		}
-		case 'N': {
-			max_mana = 0;
-			break;
-		}
-		default: {
-			LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
-			max_mana = 0;
-			break;
-		}
+int64 Bot::CalcMaxMana()
+{
+	if (IsIntelligenceCasterClass() || IsWisdomCasterClass()) {
+		max_mana = (
+			GenerateBaseManaPoints() +
+			itembonuses.Mana +
+			spellbonuses.Mana +
+			aabonuses.Mana +
+			GroupLeadershipAAManaEnhancement()
+		);
+		max_mana += itembonuses.heroic_max_mana;
+	} else {
+		max_mana = 0;
 	}
 
-	if (current_mana > max_mana)
+	if (current_mana > max_mana) {
 		current_mana = max_mana;
-	else if (max_mana < 0)
+	} else if (max_mana < 0) {
 		max_mana = 0;
+	}
 
 	return max_mana;
 }
@@ -5528,87 +5523,107 @@ bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot
 	return Result;
 }
 
-int32 Bot::GenerateBaseManaPoints() {
-	int32 bot_mana = 0;
-	int32 WisInt = 0;
+int32 Bot::GenerateBaseManaPoints()
+{
+	int32 bot_mana        = 0;
+	int32 WisInt          = 0;
 	int32 MindLesserFactor, MindFactor;
-	int wisint_mana = 0;
-	int base_mana = 0;
-	int ConvertedWisInt = 0;
-	switch(GetCasterClass()) {
-		case 'I':
-			WisInt = INT;
-			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201)
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
-				}
-				else
-					ConvertedWisInt = WisInt;
+	int   wisint_mana     = 0;
+	int   base_mana       = 0;
+	int   ConvertedWisInt = 0;
 
-				if (GetLevel() < 41) {
-					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
-					base_mana = (GetLevel() * 15);
-				} else if (GetLevel() < 81) {
-					wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
-					base_mana = (600 + ((GetLevel() - 40) * 30));
-				} else {
-					wisint_mana = (9 * ConvertedWisInt);
-					base_mana = (1800 + ((GetLevel() - 80) * 18));
+	if (IsIntelligenceCasterClass()) {
+		WisInt = INT;
+
+		if (
+			GetOwner() &&
+			GetOwner()->CastToClient() &&
+			GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD &&
+			RuleB(Character, SoDClientUseSoDHPManaEnd)
+		) {
+			if (WisInt > 100) {
+				ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
+				if (WisInt > 201) {
+					ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
 				}
-				bot_mana = (base_mana + wisint_mana);
 			} else {
-				if (((WisInt - 199) / 2) > 0)
-					MindLesserFactor = ((WisInt - 199) / 2);
-				else
-					MindLesserFactor = 0;
-
-				MindFactor = WisInt - MindLesserFactor;
-				if (WisInt > 100)
-					bot_mana = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-				else
-					bot_mana = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+				ConvertedWisInt = WisInt;
 			}
-			break;
-		case 'W':
-			WisInt = WIS;
-			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-				if (WisInt > 100) {
-					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
-					if (WisInt > 201)
-						ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
-				} else
-					ConvertedWisInt = WisInt;
 
-				if (GetLevel() < 41) {
-					wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
-					base_mana = (GetLevel() * 15);
-				} else if (GetLevel() < 81) {
-					wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
-					base_mana = (600 + ((GetLevel() - 40) * 30));
-				} else {
-					wisint_mana = (9 * ConvertedWisInt);
-					base_mana = (1800 + ((GetLevel() - 80) * 18));
-				}
-				bot_mana = (base_mana + wisint_mana);
+			if (GetLevel() < 41) {
+				wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
+				base_mana   = (GetLevel() * 15);
+			} else if (GetLevel() < 81) {
+				wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
+				base_mana   = (600 + ((GetLevel() - 40) * 30));
 			} else {
-				if (((WisInt - 199) / 2) > 0)
-					MindLesserFactor = ((WisInt - 199) / 2);
-				else
-					MindLesserFactor = 0;
-
-				MindFactor = (WisInt - MindLesserFactor);
-				if (WisInt > 100)
-					bot_mana = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-				else
-					bot_mana = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+				wisint_mana = (9 * ConvertedWisInt);
+				base_mana   = (1800 + ((GetLevel() - 80) * 18));
 			}
-			break;
-		default:
-			bot_mana = 0;
-			break;
+
+			bot_mana = (base_mana + wisint_mana);
+		} else {
+			if (((WisInt - 199) / 2) > 0) {
+				MindLesserFactor = ((WisInt - 199) / 2);
+			} else {
+				MindLesserFactor = 0;
+			}
+
+			MindFactor = WisInt - MindLesserFactor;
+			if (WisInt > 100) {
+				bot_mana = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+			} else {
+				bot_mana = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+			}
+		}
+	} else if (IsWisdomCasterClass()) {
+		WisInt = WIS;
+
+		if (
+			GetOwner() &&
+			GetOwner()->CastToClient() &&
+			GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD &&
+			RuleB(Character, SoDClientUseSoDHPManaEnd)
+		) {
+			if (WisInt > 100) {
+				ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
+				if (WisInt > 201) {
+					ConvertedWisInt -= ((WisInt - 201) * 5 / 4);
+				}
+			} else {
+				ConvertedWisInt = WisInt;
+			}
+
+			if (GetLevel() < 41) {
+				wisint_mana = (GetLevel() * 75 * ConvertedWisInt / 1000);
+				base_mana   = (GetLevel() * 15);
+			} else if (GetLevel() < 81) {
+				wisint_mana = ((3 * ConvertedWisInt) + ((GetLevel() - 40) * 15 * ConvertedWisInt / 100));
+				base_mana   = (600 + ((GetLevel() - 40) * 30));
+			} else {
+				wisint_mana = (9 * ConvertedWisInt);
+				base_mana   = (1800 + ((GetLevel() - 80) * 18));
+			}
+
+			bot_mana = (base_mana + wisint_mana);
+		} else {
+			if (((WisInt - 199) / 2) > 0) {
+				MindLesserFactor = ((WisInt - 199) / 2);
+			} else {
+				MindLesserFactor = 0;
+			}
+
+			MindFactor = (WisInt - MindLesserFactor);
+			if (WisInt > 100) {
+				bot_mana = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+			} else {
+				bot_mana = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+			}
+		}
+	} else {
+		bot_mana = 0;
 	}
+
 	max_mana = bot_mana;
 	return bot_mana;
 }
