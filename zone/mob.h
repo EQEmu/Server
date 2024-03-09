@@ -1335,8 +1335,8 @@ public:
 	inline virtual bool IsBlockedBuff(int32 SpellID) { return false; }
 	inline virtual bool IsBlockedPetBuff(int32 SpellID) { return false; }
 
-	inline void RestoreEndurance() { SetEndurance(GetMaxEndurance()); };
-	inline void RestoreHealth() { SetMaxHP(); SendHPUpdate(); };
+	inline void RestoreEndurance() { SetEndurance(GetMaxEndurance()); }
+	inline void RestoreHealth() { SetMaxHP(); SendHPUpdate(); }
 	inline void RestoreMana() { SetMana(GetMaxMana()); };
 
 	std::string GetGlobal(const char *varname);
