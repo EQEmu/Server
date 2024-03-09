@@ -100,11 +100,16 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 		cle = iterator.GetData();
 
 		if (!zones.empty() && cle->zone()) {
-			for (const auto& z : zones) {
-				if (Strings::ToUnsignedInt(z) == cle->zone()) {
-					iterator.Advance();
-					continue;
+			auto it = std::ranges::find_if(
+				zones,
+				[cle](const auto& z) {
+					return Strings::ToUnsignedInt(z) == cle->zone();
 				}
+			);
+
+			if (it != zones.end()) {
+				iterator.Advance();
+				continue;
 			}
 		}
 
