@@ -11502,6 +11502,8 @@ bool Client::RemoveAAPoints(uint32 points)
 	}
 
 	SendAlternateAdvancementStats();
+
+	return true;
 }
 
 void Client::AddAAPoints(uint32 points)
