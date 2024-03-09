@@ -1022,23 +1022,23 @@ bool Mob::IsWarriorClass() const
 {
 	switch (GetClass()) {
 		case Class::Warrior:
-		case Class::WarriorGM:
-		case Class::Rogue:
-		case Class::RogueGM:
-		case Class::Monk:
-		case Class::MonkGM:
 		case Class::Paladin:
-		case Class::PaladinGM:
-		case Class::ShadowKnight:
-		case Class::ShadowKnightGM:
 		case Class::Ranger:
-		case Class::RangerGM:
-		case Class::Beastlord:
-		case Class::BeastlordGM:
-		case Class::Berserker:
-		case Class::BerserkerGM:
+		case Class::ShadowKnight:
+		case Class::Monk:
 		case Class::Bard:
+		case Class::Rogue:
+		case Class::Beastlord:
+		case Class::Berserker:
+		case Class::WarriorGM:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::MonkGM:
 		case Class::BardGM:
+		case Class::RogueGM:
+		case Class::BeastlordGM:
+		case Class::BerserkerGM:
 			return true;
 		default:
 			break;
