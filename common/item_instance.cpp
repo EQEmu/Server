@@ -1812,6 +1812,34 @@ std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
 	return augments;
 }
 
+std::string EQ::ItemInstance::DetermineMoneyStringForParcels(uint32 cp) const
+{
+    uint32 plat   = cp / 1000;
+    uint32 gold   = (cp - plat * 1000) / 100;
+    uint32 silver = (cp - plat * 1000 - gold * 100) / 10;
+    uint32 copper = (cp - plat * 1000 - gold * 100 - silver * 10);
+
+    if (!plat && !gold && !silver && !copper) {
+        return std::string("No Money");
+    }
+
+    std::string money {};
+    if (plat) {
+        money += fmt::format("{}p ", plat);
+    }
+    if (gold) {
+        money += fmt::format("{}g ", gold);
+    }
+    if (silver) {
+        money += fmt::format("{}s ", silver);
+    }
+    if (copper) {
+        money += fmt::format("{}c", copper);
+    }
+
+    return fmt::format("Money ({})", money);
+}
+
 //
 // class EvolveInfo
 //

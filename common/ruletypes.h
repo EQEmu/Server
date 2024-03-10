@@ -959,6 +959,16 @@ RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt I
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Parcel)
+RULE_BOOL(Parcel, EnableParcelMerchants, true, "Enable or Disable Parcel Merchants.  Requires RoF+ Clients.")
+RULE_BOOL(Parcel, EnableDirectToInventoryDelivery, false, "Enable or Disable RoF2 bazaar purchases to be delivered directly to the buyer's inventory.")
+RULE_BOOL(Parcel, DeleteOnDuplicate, false, "Delete retrieved item if it creates a lore conflict.")
+RULE_BOOL(Parcel, EnablePruning, false, "Enable the automatic pruning of sent parcels.  Uses rule ParcelPruneDelay for prune delay.")
+RULE_INT(Parcel, ParcelDeliveryDelay, 30000, "Sets the time that a player must wait between sending parcels.")
+RULE_INT(Parcel, ParcelMaxItems, 50, "The maximum number of parcels a player is allowed to have in their mailbox.")
+RULE_INT(Parcel, ParcelPruneDelay, 30, "The number of days after which a parcel is deleted. Items are lost!")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL

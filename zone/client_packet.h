@@ -335,3 +335,6 @@
 	void Handle_OP_SharedTaskAccept(const EQApplicationPacket *app);
 	void Handle_OP_SharedTaskQuit(const EQApplicationPacket *app);
 	void Handle_OP_SharedTaskPlayerList(const EQApplicationPacket *app);
+
+	void Handle_OP_ShopSendParcel(const EQApplicationPacket *app);
+	void Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app);

@@ -301,6 +301,7 @@ namespace EQ
 		int GetItemHaste(bool augments = false) const;
 		uint32 GetItemGuildFavor() const;
 		std::vector<uint32> GetAugmentIDs() const;
+		std::string DetermineMoneyStringForParcels(uint32 cp) const;
 
 	protected:
 		//////////////////////////

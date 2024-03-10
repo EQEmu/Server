@@ -36,6 +36,7 @@
 #include "../classes.h"
 #include "../races.h"
 #include "../raid.h"
+#include "../../zone/parcels.h"
 
 #include <iostream>
 #include <sstream>
@@ -1582,27 +1583,86 @@ namespace RoF2
 		uchar* __emu_buffer = in->pBuffer;
 
 		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		EQ::OutBuffer ob;
-		EQ::OutBuffer::pos_type last_pos = ob.tellp();
+		switch(old_item_pkt->PacketType) 			
+		{
+			case ItemPacketParcel: {
+				ParcelMessaging_Struct       pms{};
+				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(pms);
 
-		ob.write((const char*)__emu_buffer, 4);
+				uint32 serial_length      = pms.serialized_item.length();
+				uint32 packet_type        = pms.packet_type;
+				uint32 date_sent          = pms.sent_time;
+				uint32 player_name_length = pms.player_name.length();
+				uint32 note_length        = pms.note.length();
+				char   *serial            = new char[serial_length];
+				char   *player_name       = new char[player_name_length];
+				char   *note              = new char[note_length];
 
-		SerializeItem(ob, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
-		if (ob.tellp() == last_pos) {
-			LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
-			delete in;
-			return;
-		}
+				strncpy(player_name, pms.player_name.c_str(), player_name_length);
+				strncpy(note, pms.note.c_str(), note_length);
+				strncpy(serial, pms.serialized_item.c_str(), serial_length);
 
-		in->size = ob.size();
-		in->pBuffer = ob.detach();
+				auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
 
-		delete[] __emu_buffer;
+				EQ::OutBuffer           ob;
+				EQ::OutBuffer::pos_type last_pos = ob.tellp();
+				ob.write(reinterpret_cast<const char *>(&pms.packet_type), 4);
 
-		dest->FastQueuePacket(&in, ack_req);
-	}
+				SerializeItem(ob, (const EQ::ItemInstance *) int_struct->inst, pms.slot_id, 0, ItemPacketParcel);
+
+				if (ob.tellp() == last_pos) {
+					LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
+
+					safe_delete(in);
+					return;
+				}
+
+				ob.write((const char *) &date_sent, 4);
+				ob.write((const char *) &player_name_length, 4);
+				ob.write(player_name, player_name_length);
+				ob.write((const char *) &note_length, 4);
+				ob.write(note, note_length);
+
+				in->size    = ob.size();
+				in->pBuffer = ob.detach();
+				safe_delete_array(note);
+				safe_delete_array(player_name);
+				safe_delete_array(serial);
+				safe_delete_array(__emu_buffer);
+
+				dest->FastQueuePacket(&in, ack_req);
+
+				break;
+			}
+            default: {
+                EQ::InternalSerializedItem_Struct *int_struct = (EQ::InternalSerializedItem_Struct *)(&__emu_buffer[4]);
+
+                EQ::OutBuffer           ob;
+                EQ::OutBuffer::pos_type last_pos = ob.tellp();
+
+                ob.write((const char *)__emu_buffer, 4);
+
+                SerializeItem(ob, (const EQ::ItemInstance *)int_struct->inst, int_struct->slot_id, 0,
+                              old_item_pkt->PacketType);
+                if (ob.tellp() == last_pos) {
+                    LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
+                               int_struct->slot_id);
+                    delete in;
+                    return;
+                }
+
+                in->size    = ob.size();
+                in->pBuffer = ob.detach();
+
+                delete[] __emu_buffer;
+
+                dest->FastQueuePacket(&in, ack_req);
+            }
+        }
+    }
 
 	ENCODE(OP_ItemVerifyReply)
 	{
@@ -3159,21 +3219,6 @@ namespace RoF2
 		//OUT(itemslot);
 		OUT(quantity);
 		OUT(price);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ShopRequest)
-	{
-		ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
-		SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-
-		OUT(npcid);
-		OUT(playerid);
-		OUT(command);
-		OUT(rate);
-		eq->unknown01 = 3;	// Not sure what these values do yet, but list won't display without them
-		eq->unknown02 = 2592000;
 
 		FINISH_ENCODE();
 	}
@@ -5307,15 +5352,17 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_ShopRequest)
+	DECODE(OP_ShopSendParcel)
 	{
-		DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
-		SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+		DECODE_LENGTH_EXACT(structs::Parcel_Struct);
+		SETUP_DIRECT_DECODE(Parcel_Struct, structs::Parcel_Struct);
 
-		IN(npcid);
-		IN(playerid);
-		IN(command);
-		IN(rate);
+		IN(npc_id);
+		IN(quantity);
+		IN(money_flag);
+		emu->item_slot = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		strn0cpy(emu->send_to, eq->send_to, sizeof(emu->send_to));
+		strn0cpy(emu->note, eq->note, sizeof(emu->note));
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5533,12 +5580,19 @@ namespace RoF2
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
-		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
+		if (packet_type == ItemPacketParcel) {
+			strn0cpy(
+				hdr.unknown000, fmt::format("{:03}PAR{:010}\0", inst->GetMerchantSlot(), item->ID).c_str(),
+				sizeof(hdr.unknown000));
+		}
+		else {
+			snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
+		}
 
 		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
-		structs::InventorySlot_Struct slot_id;
+		structs::InventorySlot_Struct slot_id{};
 		switch (packet_type) {
 		case ItemPacketLoot:
 			slot_id = ServerToRoF2CorpseSlot(slot_id_in);
@@ -5556,7 +5610,7 @@ namespace RoF2
 		hdr.merchant_slot = (inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1);
 		hdr.scaled_value = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
 		hdr.instance_id = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
-		hdr.unknown028 = 0;
+		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
 		hdr.last_cast_time = inst->GetRecastTimestamp();
 		hdr.charges = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254) ? 0xFFFFFFFF : inst->GetCharges()));
 		hdr.inst_nodrop = (inst->IsAttuned() ? 1 : 0);
@@ -5621,9 +5675,16 @@ namespace RoF2
 
 		ob.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
 
-		if (strlen(item->Name) > 0)
-			ob.write(item->Name, strlen(item->Name));
-		ob.write("\0", 1);
+		if (strlen(item->Name) > 0) {
+			if (item->ID == PARCEL_MONEY_ITEM_ID) {
+				auto money = inst->DetermineMoneyStringForParcels(inst->GetPrice());
+				ob.write(money.c_str(), money.length());
+			}
+			else {
+				ob.write(item->Name, strlen(item->Name));
+			}
+			ob.write("\0", 1);
+		}
 
 		if (strlen(item->Lore) > 0)
 			ob.write(item->Lore, strlen(item->Lore));
@@ -5638,7 +5699,13 @@ namespace RoF2
 		RoF2::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
 
-		ibs.id = item->ID;
+		if (item->ID == PARCEL_MONEY_ITEM_ID) {
+			ibs.id = inst->GetSerialNumber();
+		}
+		else {
+			ibs.id = item->ID;
+		}
+
 		ibs.weight = item->Weight;
 		ibs.norent = item->NoRent;
 		ibs.nodrop = item->NoDrop;
