@@ -1212,7 +1212,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SummonItem:
 			{
-				const EQ::ItemData *item = database.GetItem(spell.base_value[i]);
+				int item_id = spell.base_value[i];
+				if (RuleB(Custom, DoItemUpgrades)) {
+					item_id = GetMaxItemUpgrade(item_id);
+				}
+
+				const EQ::ItemData *item = database.GetItem(item_id);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item: %s (id %d)", itemname, spell.base_value[i]);
@@ -1248,7 +1253,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			case SE_SummonItemIntoBag:
 			{
-				const EQ::ItemData *item = database.GetItem(spell.base_value[i]);
+				int item_id = spell.base_value[i];
+				if (RuleB(Custom, DoItemUpgrades)) {
+					item_id = GetMaxItemUpgrade(item_id);
+				}
+
+				const EQ::ItemData *item = database.GetItem(item_id);
 #ifdef SPELL_EFFECT_SPAM
 				const char *itemname = item ? item->Name : "*Unknown Item*";
 				snprintf(effect_desc, _EDLEN, "Summon Item In Bag: %s (id %d)", itemname, spell.base_value[i]);
