@@ -1389,6 +1389,24 @@ void Database::SetGroupLeaderName(uint32 gid, const char* name) {
 	}
 }
 
+std::string Database::GetGroupLeaderName(uint32 group_id)
+{
+	const std::string& query = fmt::format(
+		"SELECT `leadername` FROM `group_leaders` WHERE `gid` = {}",
+		group_id
+	);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success() || !results.RowCount()) {
+		return std::string();
+	}
+
+	auto row = results.begin();
+
+	return row[0];
+}
+
 char *Database::GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank, char* assist, char* puller, char *marknpc, char *mentoree, int *mentor_percent, GroupLeadershipAA_Struct* GLAA)
 {
 	std::string query = StringFormat("SELECT `leadername`, `maintank`, `assist`, `puller`, `marknpc`, `mentoree`, `mentor_percent`, `leadershipaa` FROM `group_leaders` WHERE `gid` = %lu",(unsigned long)gid);

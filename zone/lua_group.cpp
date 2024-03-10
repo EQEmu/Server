@@ -72,7 +72,7 @@ Lua_Mob Lua_Group::GetLeader() {
 	return self->GetLeader();
 }
 
-const char *Lua_Group::GetLeaderName() {
+std::string Lua_Group::GetLeaderName() {
 	Lua_Safe_Call_String();
 	return self->GetLeaderName();
 }
