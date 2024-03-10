@@ -26,7 +26,7 @@ public:
 		return reinterpret_cast<const Buffs_Struct*>(GetLuaPtrData());
 	}
 
-	uint8 GetCasterID();
+	uint16 GetCasterID();
 	uint8 GetCasterLevel();
 	std::string GetCasterName();
 	int GetCastOnX();

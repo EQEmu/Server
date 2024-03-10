@@ -4,7 +4,7 @@
 #include "embperl.h"
 #include "common.h"
 
-uint8 Perl_Buff_GetCasterID(Buffs_Struct* self)
+uint16 Perl_Buff_GetCasterID(Buffs_Struct* self)
 {
 	return self->casterid;
 }

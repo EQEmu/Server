@@ -6,7 +6,7 @@
 
 #include "lua_buff.h"
 
-uint8 Lua_Buff::GetCasterID()
+uint16 Lua_Buff::GetCasterID()
 {
 	Lua_Safe_Call_Int();
 	return self->casterid;
