@@ -1788,7 +1788,8 @@ bool BotDatabase::CreateCloneBotInventory(const uint32 bot_id, const uint32 clon
 	}
 
 	for (auto& e : l) {
-		e.bot_id = clone_id;
+		e.inventories_index = 0;
+		e.bot_id            = clone_id;
 	}
 
 	return BotInventoriesRepository::InsertMany(database, l);
