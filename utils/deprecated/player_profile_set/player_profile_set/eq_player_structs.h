@@ -2762,9 +2762,12 @@ struct GetItems_Struct{
 	sint32	Charges[80];
 };
 
-struct BecomeTrader_Struct{
-	int32 ID;
-	int32 Code;
+struct BecomeTrader_Struct {
+	uint32 action;
+	uint32 zone_id;
+	uint32 trader_id;
+	uint32 entity_id;
+	char   trader_name[64];
 };
 
 struct Trader_ShowItems_Struct{

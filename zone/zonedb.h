@@ -389,11 +389,11 @@ public:
 	/* Traders  */
 	void	SaveTraderItem(uint32 char_id,uint32 itemid,uint32 uniqueid, int32 charges,uint32 itemcost,uint8 slot);
 	void	UpdateTraderItemCharges(int char_id, uint32 ItemInstID, int32 charges);
-	void	UpdateTraderItemPrice(int CharID, uint32 ItemID, uint32 Charges, uint32 NewPrice);
+	void	UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 charges, uint32 new_price);
 	void	DeleteTraderItem(uint32 char_id);
 	void	DeleteTraderItem(uint32 char_id,uint16 slot_id);
 
-	EQ::ItemInstance* LoadSingleTraderItem(uint32 char_id, int uniqueid);
+	EQ::ItemInstance* LoadSingleTraderItem(uint32 char_id, int serial_number);
 	Trader_Struct* LoadTraderItem(uint32 char_id);
 	TraderCharges_Struct* LoadTraderItemWithCharges(uint32 char_id);
 

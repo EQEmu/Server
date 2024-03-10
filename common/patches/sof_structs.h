@@ -2771,8 +2771,8 @@ struct GetItems_Struct{
 };
 
 struct BecomeTrader_Struct{
-	uint32 ID;
-	uint32 Code;
+	uint32 trader_id;
+	uint32 action;
 };
 
 struct Trader_ShowItems_Struct{
@@ -2782,15 +2782,15 @@ struct Trader_ShowItems_Struct{
 };
 
 struct TraderBuy_Struct {
-/*000*/ uint32   Action;
-/*004*/ uint32   Price;
-/*008*/ uint32   TraderID;
-/*012*/ char    ItemName[64];
-/*076*/ uint32   Unknown076;
-/*080*/ uint32   ItemID;
-/*084*/ uint32   AlreadySold;
-/*088*/ uint32   Quantity;
-/*092*/ uint32   Unknown092;
+/*000*/ uint32  action;
+/*004*/ uint32  price;
+/*008*/ uint32  trader_id;
+/*012*/ char    item_name[64];
+/*076*/ uint32  unknown_076;
+/*080*/ uint32  item_id;
+/*084*/ uint32  already_sold;
+/*088*/ uint32  quantity;
+/*092*/ uint32  unknown_092;
 };
 
 struct TraderItemUpdate_Struct{

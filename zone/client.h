@@ -280,10 +280,18 @@ public:
 	void AI_Stop();
 	void AI_Process();
 	void AI_SpellCast();
-	void Trader_ShowItems();
+	void TraderShowItems();
 	void Trader_CustomerBrowsing(Client *Customer);
-	void Trader_EndTrader();
-	void Trader_StartTrader();
+
+	void TraderEndTrader();
+	void TraderPriceUpdate2(const EQApplicationPacket *app);
+	void SendBazaarDone(uint32 trader_id);
+	void SendBulkBazaarTraders();
+	void DoBazaarInspect(const BazaarInspect_Struct &in);
+
+	void SendTraderMode(BazaarTraderBarterActions status);
+	void TraderStartTrader(const EQApplicationPacket *app);
+	void TraderPriceUpdate(const EQApplicationPacket *app);
 	uint8 WithCustomer(uint16 NewCustomer);
 	void KeyRingLoad();
 	void KeyRingAdd(uint32 item_id);
@@ -316,14 +324,15 @@ public:
 	void SendColoredText(uint32 color, std::string message);
 	void SendBazaarResults(uint32 trader_id, uint32 in_class, uint32 in_race, uint32 item_stat, uint32 item_slot, uint32 item_type, char item_name[64], uint32 min_price, uint32 max_price);
 	void SendTraderItem(uint32 item_id,uint16 quantity);
+	void DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	EQ::ItemInstance* FindTraderItemBySerialNumber(int32 SerialNumber);
-	void FindAndNukeTraderItem(int32 item_id,int16 quantity,Client* customer,uint16 traderslot);
-	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
+	void FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client* customer, uint16 trader_slot);
+	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 trader_slot, int32 serial_number, int32 item_id = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
-	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
+	void BuyTraderItem(TraderBuy_Struct* tbs, Client* trader, const EQApplicationPacket* app);
 	void FinishTrade(
 		Mob *with,
 		bool finalizer = false,
@@ -335,7 +344,7 @@ public:
 	void DoParcelCancel();
 	void DoParcelSend(const Parcel_Struct *parcel_in);
 	void DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in);
-	void SendParcel(const Parcel_Struct &parcel);
+	void SendParcel(Parcel_Struct &parcel);
 	void SendParcelStatus();
 	void SendParcelAck();
 	void SendParcelRetrieveAck();
@@ -354,6 +363,13 @@ public:
 	std::map<uint32, CharacterParcelsRepository::CharacterParcels> GetParcels() { return m_parcels; }
 	int32 FindNextFreeParcelSlot(uint32 char_id);
 	void SendParcelIconStatus();
+
+	void SendBecomeTraderToWorld(Client *trader, BazaarTraderBarterActions action);
+	void SendBecomeTrader(BazaarTraderBarterActions action, uint32 trader_id);
+
+	bool IsThereACustomer() const { return customer_id ? true : false; }
+	uint32 GetCustomerID() { return customer_id; }
+	void SetCustomerID(uint32 id) { customer_id = id; }
 
 	void SendBuyerResults(char *SearchQuery, uint32 SearchID);
 	void ShowBuyLines(const EQApplicationPacket *app);
@@ -485,7 +501,7 @@ public:
 
 	void ServerFilter(SetServerFilter_Struct* filter);
 	void BulkSendTraderInventory(uint32 char_id);
-	void SendSingleTraderItem(uint32 char_id, int uniqueid);
+	void SendSingleTraderItem(uint32 char_id, int serial_number);
 	void BulkSendMerchantInventory(int merchant_id, int npcid);
 
 	inline uint8 GetLanguageSkill(uint8 language_id) const { return m_pp.languages[language_id]; }
@@ -1067,7 +1083,11 @@ public:
 	bool IsValidSlot(uint32 slot);
 	bool IsBankSlot(uint32 slot);
 
-	inline bool IsTrader() const { return(Trader); }
+	bool IsTrader() const { return trader; }
+	void SetTrader(bool status) { trader = status; }
+	uint16 GetTraderID() { return trader_id; }
+	void SetTraderID(uint16 id) { trader_id = id; }
+
 	inline bool IsBuyer() const { return(Buyer); }
 	eqFilterMode GetFilter(eqFilterType filter_id) const { return ClientFilters[filter_id]; }
 	void SetFilter(eqFilterType filter_id, eqFilterMode filter_mode) { ClientFilters[filter_id] = filter_mode; }
@@ -1800,8 +1820,6 @@ private:
 	void RemoveBandolier(const EQApplicationPacket *app);
 	void SetBandolier(const EQApplicationPacket *app);
 
-	void HandleTraderPriceUpdate(const EQApplicationPacket *app);
-
 	int32 CalcItemATKCap() final;
 	int32 CalcHaste();
 
@@ -1880,13 +1898,13 @@ private:
 	uint16 controlling_boat_id;
 	uint16 controlled_mob_id;
 	uint16 TrackingID;
-	uint16 CustomerID;
-	uint16 TraderID;
+	bool   trader;
+	uint16 trader_id;
+	uint16 customer_id;
 	uint32 account_creation;
 	uint8 firstlogon;
 	uint32 mercid; // current merc
 	uint8 mercSlot; // selected merc slot
-	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
 	int32                                                          m_parcel_platinum;

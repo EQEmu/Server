@@ -3907,10 +3907,48 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					c.second->SetEngagedWithParcelMerchant(false);
 					c.second->DoParcelCancel();
 
-					auto out = new EQApplicationPacket(OP_ShopEndConfirm);
-					c.second->QueuePacket(out);
-					safe_delete(out);
-					return;
+                auto out = new EQApplicationPacket(OP_ShopEndConfirm);
+                c.second->QueuePacket(out);
+                safe_delete(out);
+                return;
+            }
+        }
+        break;
+	}
+		case ServerOP_TraderMessaging: {
+			auto            in = (TraderMessaging_Struct *) pack->pBuffer;
+			for (auto const &c: entity_list.GetClientList()) {
+				if (c.second->ClientVersion() >= EQ::versions::ClientVersion::RoF2) {
+					auto outapp    = new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
+					auto out       = (BecomeTrader_Struct *) outapp->pBuffer;
+					switch (in->action) {
+						case TraderOn: {
+							out->action = AddTraderToBazaarWindow;
+							break;
+						}
+						case TraderOff: {
+							out->action = RemoveTraderFromBazaarWindow;
+							break;
+						}
+						default: {
+							out->action = 0;
+						}
+					}
+					out->entity_id = in->entity_id;
+					out->zone_id   = in->zone_id;
+					out->trader_id = in->trader_id;
+					strn0cpy(out->trader_name, in->trader_name, sizeof(out->trader_name));
+
+					c.second->QueuePacket(outapp);
+					safe_delete(outapp);
+				}
+				if (zone && zone->GetZoneID() == Zones::BAZAAR) {
+					if (in->action == TraderOn) {
+						c.second->SendBecomeTrader(TraderOn, in->entity_id);
+					}
+					else {
+						c.second->SendBecomeTrader(TraderOff, in->entity_id);
+					}
 				}
 			}
 			break;

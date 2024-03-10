@@ -195,6 +195,7 @@
 #define PARCEL_DELAY                734     //%1 tells you, 'You must give me a chance to send the last parcel before I can send another!'
 #define PARCEL_DUPLICATE_DELETE     737     //Duplicate lore items are not allowed! Your duplicate %1 has been deleted!
 #define PARCEL_DELIVER_3            741     //%1 told you, 'I will deliver the stack of %2 %3 to %4 as soon as possible!'
+#define TRADER_MODE_FAILED_ROF2		785 	//Your attempt to become a trader has failed.
 #define PARCEL_INV_FULL             790     //%1 tells you, 'Your inventory appears full!  Unable to retrieve parceled item.'
 #define AA_CAP						1000	//You have reached the AA point cap, and cannot gain any further experience until some of your stored AA point pool is used.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
@@ -427,6 +428,9 @@
 #define GENERIC_STRING				6688	//%1 (used to any basic message)
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
+#define TRADER_MODE_OFF				6741 	//Bazaar Trader Mode *OFF*
+#define TRADER_MODE_ON				6742 	//Bazaar Trader Mode *ON*
+#define TRADER_SET_PRICE			6754 	//To become a merchant you must assign a price to an item in your list. Do this by selecting an item, then selecting a money amount, and then clicking set price.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
 #define PET_NOW_HOLDING				6834	//Now holding, Master.  I will not start attacks until ordered.
 #define PET_ON_GHOLD				6843	//Pet greater hold has been set to on.
