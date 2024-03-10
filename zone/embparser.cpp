@@ -56,6 +56,7 @@ void perl_register_doors();
 void perl_register_expedition();
 void perl_register_expedition_lock_messages();
 void perl_register_bot();
+void perl_register_buff();
 #endif // EMBPERL_XS_CLASSES
 #endif // EMBPERL_XS
 
@@ -1175,6 +1176,7 @@ void PerlembParser::MapFunctions()
 	perl_register_expedition();
 	perl_register_expedition_lock_messages();
 	perl_register_bot();
+	perl_register_buff();
 #endif // EMBPERL_XS_CLASSES
 }
 
