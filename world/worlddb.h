@@ -19,7 +19,6 @@
 #define WORLDDB_H_
 
 #include "../common/shareddb.h"
-#include "../common/zone_numbers.h"
 #include "../common/eq_packet.h"
 
 struct PlayerProfile_Struct;
@@ -29,21 +28,16 @@ struct CharacterSelect_Struct;
 
 class WorldDatabase : public SharedDatabase {
 public:
-	bool GetStartZone(PlayerProfile_Struct* p_player_profile_struct, CharCreate_Struct* p_char_create_struct, bool is_titanium);
+	bool GetStartZone(PlayerProfile_Struct* pp, CharCreate_Struct* p_char_create_struct, bool is_titanium);
 	void GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit);
-	int MoveCharacterToBind(int CharID, uint8 bindnum = 0);
+	int MoveCharacterToBind(int character_id, uint8 bind_number = 0);
+	int MoveCharacterToInstanceSafeReturn(int character_id, int instance_zone_id, int instance_id);
 
 	void GetLauncherList(std::vector<std::string> &result);
 	bool GetCharacterLevel(const char *name, int &level);
 
 	bool LoadCharacterCreateAllocations();
 	bool LoadCharacterCreateCombos();
-
-	bool StoreCharacter(
-		uint32 account_id,
-		PlayerProfile_Struct *p_player_profile_struct,
-		EQ::InventoryProfile *p_inventory_profile
-	);
 
 private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);

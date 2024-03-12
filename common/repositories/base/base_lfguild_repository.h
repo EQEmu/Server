@@ -1,49 +1,33 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LFGUILD_REPOSITORY_H
 #define EQEMU_BASE_LFGUILD_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseLfguildRepository {
 public:
 	struct Lfguild {
-		int         type;
+		uint8_t     type;
 		std::string name;
 		std::string comment;
-		int         fromlevel;
-		int         tolevel;
-		int         classes;
-		int         aacount;
-		int         timezone;
-		int         timeposted;
+		uint8_t     fromlevel;
+		uint8_t     tolevel;
+		uint32_t    classes;
+		uint32_t    aacount;
+		uint32_t    timezone;
+		uint32_t    timeposted;
 	};
 
 	static std::string PrimaryKey()
@@ -66,24 +50,29 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"type",
+			"name",
+			"comment",
+			"fromlevel",
+			"tolevel",
+			"classes",
+			"aacount",
+			"timezone",
+			"timeposted",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -95,7 +84,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -105,28 +94,28 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Lfguild NewEntity()
 	{
-		Lfguild entry{};
+		Lfguild e{};
 
-		entry.type       = 0;
-		entry.name       = "";
-		entry.comment    = "";
-		entry.fromlevel  = 0;
-		entry.tolevel    = 0;
-		entry.classes    = 0;
-		entry.aacount    = 0;
-		entry.timezone   = 0;
-		entry.timeposted = 0;
+		e.type       = 0;
+		e.name       = "";
+		e.comment    = "";
+		e.fromlevel  = 0;
+		e.tolevel    = 0;
+		e.classes    = 0;
+		e.aacount    = 0;
+		e.timezone   = 0;
+		e.timeposted = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Lfguild GetLfguildEntry(
+	static Lfguild GetLfguild(
 		const std::vector<Lfguild> &lfguilds,
 		int lfguild_id
 	)
@@ -141,42 +130,45 @@ public:
 	}
 
 	static Lfguild FindOne(
+		Database& db,
 		int lfguild_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				lfguild_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int lfguild_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -189,30 +181,31 @@ public:
 	}
 
 	static int UpdateOne(
-		Lfguild lfguild_entry
+		Database& db,
+		const Lfguild &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(lfguild_entry.type));
-		update_values.push_back(columns[1] + " = '" + EscapeString(lfguild_entry.name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(lfguild_entry.comment) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(lfguild_entry.fromlevel));
-		update_values.push_back(columns[4] + " = " + std::to_string(lfguild_entry.tolevel));
-		update_values.push_back(columns[5] + " = " + std::to_string(lfguild_entry.classes));
-		update_values.push_back(columns[6] + " = " + std::to_string(lfguild_entry.aacount));
-		update_values.push_back(columns[7] + " = " + std::to_string(lfguild_entry.timezone));
-		update_values.push_back(columns[8] + " = " + std::to_string(lfguild_entry.timeposted));
+		v.push_back(columns[0] + " = " + std::to_string(e.type));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.comment) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.fromlevel));
+		v.push_back(columns[4] + " = " + std::to_string(e.tolevel));
+		v.push_back(columns[5] + " = " + std::to_string(e.classes));
+		v.push_back(columns[6] + " = " + std::to_string(e.aacount));
+		v.push_back(columns[7] + " = " + std::to_string(e.timezone));
+		v.push_back(columns[8] + " = " + std::to_string(e.timeposted));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				lfguild_entry.type
+				e.type
 			)
 		);
 
@@ -220,79 +213,81 @@ public:
 	}
 
 	static Lfguild InsertOne(
-		Lfguild lfguild_entry
+		Database& db,
+		Lfguild e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(lfguild_entry.type));
-		insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
-		insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
-		insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
-		insert_values.push_back(std::to_string(lfguild_entry.tolevel));
-		insert_values.push_back(std::to_string(lfguild_entry.classes));
-		insert_values.push_back(std::to_string(lfguild_entry.aacount));
-		insert_values.push_back(std::to_string(lfguild_entry.timezone));
-		insert_values.push_back(std::to_string(lfguild_entry.timeposted));
+		v.push_back(std::to_string(e.type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.comment) + "'");
+		v.push_back(std::to_string(e.fromlevel));
+		v.push_back(std::to_string(e.tolevel));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.aacount));
+		v.push_back(std::to_string(e.timezone));
+		v.push_back(std::to_string(e.timeposted));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			lfguild_entry.type = results.LastInsertedID();
-			return lfguild_entry;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		lfguild_entry = NewEntity();
+		e = NewEntity();
 
-		return lfguild_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Lfguild> lfguild_entries
+		Database& db,
+		const std::vector<Lfguild> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &lfguild_entry: lfguild_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(lfguild_entry.type));
-			insert_values.push_back("'" + EscapeString(lfguild_entry.name) + "'");
-			insert_values.push_back("'" + EscapeString(lfguild_entry.comment) + "'");
-			insert_values.push_back(std::to_string(lfguild_entry.fromlevel));
-			insert_values.push_back(std::to_string(lfguild_entry.tolevel));
-			insert_values.push_back(std::to_string(lfguild_entry.classes));
-			insert_values.push_back(std::to_string(lfguild_entry.aacount));
-			insert_values.push_back(std::to_string(lfguild_entry.timezone));
-			insert_values.push_back(std::to_string(lfguild_entry.timeposted));
+			v.push_back(std::to_string(e.type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.comment) + "'");
+			v.push_back(std::to_string(e.fromlevel));
+			v.push_back(std::to_string(e.tolevel));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.aacount));
+			v.push_back(std::to_string(e.timezone));
+			v.push_back(std::to_string(e.timeposted));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Lfguild> All()
+	static std::vector<Lfguild> All(Database& db)
 	{
 		std::vector<Lfguild> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -302,29 +297,29 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Lfguild> GetWhere(std::string where_filter)
+	static std::vector<Lfguild> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Lfguild> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -335,27 +330,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Lfguild entry{};
+			Lfguild e{};
 
-			entry.type       = atoi(row[0]);
-			entry.name       = row[1] ? row[1] : "";
-			entry.comment    = row[2] ? row[2] : "";
-			entry.fromlevel  = atoi(row[3]);
-			entry.tolevel    = atoi(row[4]);
-			entry.classes    = atoi(row[5]);
-			entry.aacount    = atoi(row[6]);
-			entry.timezone   = atoi(row[7]);
-			entry.timeposted = atoi(row[8]);
+			e.type       = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name       = row[1] ? row[1] : "";
+			e.comment    = row[2] ? row[2] : "";
+			e.fromlevel  = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.tolevel    = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.classes    = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aacount    = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.timezone   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.timeposted = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -366,9 +361,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -378,6 +373,104 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Lfguild &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back("'" + Strings::Escape(e.comment) + "'");
+		v.push_back(std::to_string(e.fromlevel));
+		v.push_back(std::to_string(e.tolevel));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.aacount));
+		v.push_back(std::to_string(e.timezone));
+		v.push_back(std::to_string(e.timeposted));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Lfguild> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back("'" + Strings::Escape(e.comment) + "'");
+			v.push_back(std::to_string(e.fromlevel));
+			v.push_back(std::to_string(e.tolevel));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.aacount));
+			v.push_back(std::to_string(e.timezone));
+			v.push_back(std::to_string(e.timeposted));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LFGUILD_REPOSITORY_H

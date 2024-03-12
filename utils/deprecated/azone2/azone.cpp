@@ -1118,7 +1118,7 @@ void QTBuilder::AddPlaceable(FileLoader *fileloader, char *ZoneFileName, bool Li
 		if((ch==EOF)||(ch=='\n')) {
 			IniBuffer[StrIndex] = '\0';
 			if(State == ReadingModelNumbers) {
-				ModelNumber = atoi(IniBuffer);
+				ModelNumber = Strings::ToInt(IniBuffer);
 				if((ModelNumber >= 0) && (ModelNumber < fileloader->model_data.model_count))
 				{
 					fileloader->model_data.models[ModelNumber]->IncludeInMap = true;
@@ -1146,7 +1146,7 @@ void QTBuilder::AddPlaceable(FileLoader *fileloader, char *ZoneFileName, bool Li
 				}
 			}
 			else  {
-				ModelNumber = atoi(IniBuffer);
+				ModelNumber = Strings::ToInt(IniBuffer);
 				if((ModelNumber >= 0) && (ModelNumber < fileloader->model_data.model_count))
 				{
 					fileloader->model_data.models[ModelNumber]->IncludeInMap = true;
@@ -1323,7 +1323,7 @@ void QTBuilder::AddPlaceableV4(FileLoader *fileloader, char *ZoneFileName, bool 
 						Group = true;
 						strcpy(IniBuffer, IniBuffer+1);
 					}
-					ModelNumber = atoi(IniBuffer);
+					ModelNumber = Strings::ToInt(IniBuffer);
 					if(!Group)
 					{
 						if((ModelNumber >= 0) && (ModelNumber < fileloader->model_data.model_count))
@@ -1369,7 +1369,7 @@ void QTBuilder::AddPlaceableV4(FileLoader *fileloader, char *ZoneFileName, bool 
 						Group = true;
 						strcpy(IniBuffer, IniBuffer+1);
 					}
-					ModelNumber = atoi(IniBuffer);
+					ModelNumber = Strings::ToInt(IniBuffer);
 					if(!Group)
 					{
 						if((ModelNumber >= 0) && (ModelNumber < fileloader->model_data.model_count))

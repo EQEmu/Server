@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -738,7 +738,7 @@ struct LeadershipAA_Struct {
 * Size: 20 Octets
 */
 struct BindStruct {
-   /*000*/ uint32 zoneId;
+   /*000*/ uint32 zone_id;
    /*004*/ float x;
    /*008*/ float y;
    /*012*/ float z;
@@ -1423,6 +1423,23 @@ struct GuildUpdate_Struct {
 	GuildsListEntry_Struct entry;
 };
 
+struct GuildTributeDonateItemRequest_Struct {
+	/*000*/ uint32 	slot;
+	/*004*/ uint32 	quantity;
+	/*008*/ uint32	tribute_master_id;
+	/*012*/ uint32 	unknown12;
+	/*016*/ uint32	guild_id;
+	/*020*/ uint32 	unknown20;
+	/*024*/ uint32	unknown24;
+};
+
+struct GuildTributeDonateItemReply_Struct {
+	/*000*/ uint32	slot;
+	/*004*/ uint32	quantity;
+	/*008*/ uint32	unknown8;
+	/*012*/	uint32	favor;
+};
+
 /*
 ** Money Loot
 ** Length: 22 Bytes
@@ -1509,7 +1526,7 @@ struct GMZoneRequest_Struct {
 /*0068*/	float	x;
 /*0072*/	float	y;
 /*0076*/	float	z;
-/*0080*/	char	unknown0080[4];
+/*0080*/	float	heading;
 /*0084*/	uint32	success;		// 0 if command failed, 1 if succeeded?
 /*0088*/
 //	/*072*/	int8	success;		// =0 client->server, =1 server->client, -X=specific error
@@ -1761,8 +1778,7 @@ struct AdventureRequestResponse_Struct{
 struct Illusion_Struct {
 /*000*/	uint32	spawnid;
 /*004*/	char	charname[64];
-/*068*/	uint16	race;
-/*070*/	char	unknown070[2];
+/*068*/	int race;
 /*072*/	uint8	gender;
 /*073*/	uint8	texture;
 /*074*/	uint8	helmtexture;
@@ -2605,7 +2621,7 @@ struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint32 min_dmg;
 	uint32 max_dmg;
 };
-struct Ground_Spawn{
+struct GroundSpawn{
 	float max_x;
 	float max_y;
 	float min_x;
@@ -2617,8 +2633,8 @@ struct Ground_Spawn{
 	uint32 max_allowed;
 	uint32 respawntimer;
 };
-struct Ground_Spawns {
-	struct Ground_Spawn spawn[50]; //Assigned max number to allow
+struct GroundSpawns {
+	struct GroundSpawn spawn[50]; //Assigned max number to allow
 };
 
 //struct PetitionBug_Struct{
@@ -3018,23 +3034,39 @@ struct leadExpUpdateStruct {
    /*0028*/ uint32 unknown0028;
 };
 
-
-
 struct RaidGeneral_Struct {
-/*00*/	uint32		action;	//=10
-/*04*/	char		player_name[64];	//should both be the player's name
-/*04*/	char		leader_name[64];
+/*000*/	uint32		action;	//=10
+/*004*/	char		player_name[64];	//should both be the player's name
+/*068*/	char		leader_name[64];
 /*132*/	uint32		parameter;
 };
 
-struct RaidAdd_Struct {
-/*000*/	uint32		action;	//=0
-/*004*/	char		player_name[64];	//should both be the player's name
-/*068*/	char		leader_name[64];
-/*132*/	uint8		_class;
-/*133*/	uint8		level;
-/*134*/	uint8		has_group;
-/*135*/	uint8		unknown135;	//seems to be 0x42 or 0
+struct RaidAddMember_Struct {
+/*000*/	RaidGeneral_Struct raidGen;
+/*136*/	uint8		_class;
+/*137*/	uint8		level;
+/*138*/	uint8		isGroupLeader;
+/*139*/	uint8		unknown139;	//seems to be 0x42 or 0
+};
+
+struct RaidNote_Struct {
+/*000*/ RaidGeneral_Struct general;
+/*136*/ char note[64];
+};
+
+struct RaidMOTD_Struct {
+/*000*/ RaidGeneral_Struct general; // leader_name and action only used
+/*136*/ char motd[1024]; // max size is 1024, but reply is variable
+};
+
+struct RaidLeadershipUpdate_Struct {
+	/*000*/	uint32 action;
+	/*004*/	char player_name[64];
+//	/*068*/	uint32 Unknown068;
+	/*072*/	char leader_name[64];
+	/*136*/	GroupLeadershipAA_Struct group; //unneeded
+	/*200*/	RaidLeadershipAA_Struct raid;
+	/*264*/	char Unknown264[128];
 };
 
 struct RaidCreate_Struct {
@@ -3180,8 +3212,8 @@ struct UseAA_Struct {
 
 struct AA_Ability {
 /*00*/	uint32 skill_id;
-/*04*/	uint32 base1;
-/*08*/	uint32 base2;
+/*04*/	uint32 base_value;
+/*08*/	uint32 limit_value;
 /*12*/	uint32 slot;
 };
 
@@ -3323,29 +3355,29 @@ struct ExpeditionInviteResponse_Struct
 /*075*/ uint8  unknown079;     // padding/garbage?
 };
 
-struct ExpeditionInfo_Struct
+struct DynamicZoneInfo_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 assigned; // padded bool
 /*008*/ uint32 max_players;
-/*012*/ char   expedition_name[128];
+/*012*/ char   dz_name[128];
 /*140*/ char   leader_name[64];
 };
 
-struct ExpeditionMemberEntry_Struct
+struct DynamicZoneMemberEntry_Struct
 {
-/*000*/ char name[1];            // variable length, null terminated, max 0x40 (64)
-/*000*/ uint8 expedition_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
+/*000*/ char name[1];        // variable length, null terminated, max 0x40 (64)
+/*000*/ uint8 online_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
 };
 
-struct ExpeditionMemberList_Struct
+struct DynamicZoneMemberList_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 member_count;
-/*008*/ ExpeditionMemberEntry_Struct members[0]; // variable length
+/*008*/ DynamicZoneMemberEntry_Struct members[0]; // variable length
 };
 
-struct ExpeditionMemberListName_Struct
+struct DynamicZoneMemberListName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 add_name;   // padded bool, 0: remove name, 1: add name with unknown status
@@ -3367,7 +3399,7 @@ struct ExpeditionLockoutTimers_Struct
 /*008*/ ExpeditionLockoutTimerEntry_Struct timers[0];
 };
 
-struct ExpeditionSetLeaderName_Struct
+struct DynamicZoneLeaderName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ char   leader_name[64];
@@ -3397,7 +3429,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;
@@ -3493,7 +3525,7 @@ struct LFGuild_GuildToggle_Struct
 /*540*/ uint32	TimeZone;
 /*544*/ uint8	Toggle;
 /*545*/ uint8	Unknown545[3];
-/*548*/ uint32	Expires;
+/*548*/ uint32	TimePosted;
 /*552*/ char	Name[64];
 /*616*/
 };
@@ -3682,6 +3714,34 @@ struct SayLinkBodyFrame_Struct {
 /*036*/	char EvolveLevel[1];
 /*037*/	char Hash[8];
 /*045*/
+};
+
+struct GuildSetRank_Struct
+{
+	/*00*/	uint32	unknown00;
+	/*04*/	uint32	unknown04;
+	/*08*/	uint32	rank;
+	/*72*/	char	member_name[64];
+	/*76*/	uint32	banker;
+};
+
+struct GuildMemberAdd_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown04;
+	/*008*/ uint32 level;
+	/*012*/ uint32 class_;
+	/*016*/ uint32 rank_;
+	/*020*/ uint32 zone_id;
+	/*024*/ uint32 last_on;
+	/*028*/ char   player_name[64];
+};
+
+struct GuildMemberRank_Struct {
+	/*000*/ uint32 guild_id;
+	/*004*/ uint32 unknown_004;
+	/*008*/ uint32 rank_;
+	/*012*/ char   player_name[64];
+	/*076*/ uint32 alt_banker; //Banker/Alt bit 00 - none 10 - Alt 11 - Alt and Banker 01 - Banker.  Banker not functional for RoF2+
 };
 
 	}; /*structs*/

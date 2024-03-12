@@ -2,17 +2,17 @@
 #define DFLTCC_COMMON_H
 
 #ifdef ZLIB_COMPAT
-#include "zlib.h"
+#include "../../zlib.h"
 #else
-#include "zlib-ng.h"
+#include "../../zlib-ng.h"
 #endif
-#include "zutil.h"
+#include "../../zutil.h"
 
-void ZLIB_INTERNAL *dfltcc_alloc_state(PREFIX3(streamp) strm, uInt items, uInt size);
-void ZLIB_INTERNAL dfltcc_copy_state(void *dst, const void *src, uInt size);
-void ZLIB_INTERNAL dfltcc_reset(PREFIX3(streamp) strm, uInt size);
-void ZLIB_INTERNAL *dfltcc_alloc_window(PREFIX3(streamp) strm, uInt items, uInt size);
-void ZLIB_INTERNAL dfltcc_free_window(PREFIX3(streamp) strm, void *w);
+void Z_INTERNAL *dfltcc_alloc_state(PREFIX3(streamp) strm, uInt items, uInt size);
+void Z_INTERNAL dfltcc_copy_state(void *dst, const void *src, uInt size);
+void Z_INTERNAL dfltcc_reset(PREFIX3(streamp) strm, uInt size);
+void Z_INTERNAL *dfltcc_alloc_window(PREFIX3(streamp) strm, uInt items, uInt size);
+void Z_INTERNAL dfltcc_free_window(PREFIX3(streamp) strm, void *w);
 
 #define ZALLOC_STATE dfltcc_alloc_state
 

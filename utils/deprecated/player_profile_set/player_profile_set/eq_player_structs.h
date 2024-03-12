@@ -720,7 +720,7 @@ struct RaidLeadershipAA_Struct {
 * Size: 20 Octets
 */
 struct BindStruct {
-   /*000*/ uint32 zoneId;
+   /*000*/ uint32 zone_id;
    /*004*/ float x;
    /*008*/ float y;
    /*012*/ float z;
@@ -1486,7 +1486,7 @@ struct GMZoneRequest_Struct {
 /*0068*/	float	x;
 /*0072*/	float	y;
 /*0076*/	float	z;
-/*0080*/	char	unknown0080[4];
+/*0080*/	float	heading;
 /*0084*/	int32	success;		// 0 if command failed, 1 if succeeded?
 /*0088*/
 //	/*072*/	sint8	success;		// =0 client->server, =1 server->client, -X=specific error

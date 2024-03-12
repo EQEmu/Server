@@ -3,24 +3,13 @@
  * For conditions of distribution and use, see copyright notice in zlib.h
  */
 
-/* @(#) $Id$ */
-
 #include "zbuild.h"
 #include "zutil.h"
 #include "functable.h"
 #include "adler32_p.h"
 
-uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len);
-static uint32_t adler32_combine_(uint32_t adler1, uint32_t adler2, z_off64_t len2);
-
-#define DO1(buf, i)  {adler += (buf)[i]; sum2 += adler;}
-#define DO2(buf, i)  DO1(buf, i); DO1(buf, i+1);
-#define DO4(buf, i)  DO2(buf, i); DO2(buf, i+2);
-#define DO8(buf, i)  DO4(buf, i); DO4(buf, i+4);
-#define DO16(buf)    DO8(buf, 0); DO8(buf, 8);
-
 /* ========================================================================= */
-uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
+Z_INTERNAL uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
     uint32_t sum2;
     unsigned n;
 
@@ -29,15 +18,15 @@ uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
     adler &= 0xffff;
 
     /* in case user likes doing a byte at a time, keep it fast */
-    if (len == 1)
+    if (UNLIKELY(len == 1))
         return adler32_len_1(adler, buf, sum2);
 
     /* initial Adler-32 value (deferred check for len == 1 speed) */
-    if (buf == NULL)
+    if (UNLIKELY(buf == NULL))
         return 1L;
 
     /* in case short lengths are provided, keep it somewhat fast */
-    if (len < 16)
+    if (UNLIKELY(len < 16))
         return adler32_len_16(adler, buf, len, sum2);
 
     /* do length NMAX blocks -- requires just one modulo operation */
@@ -50,15 +39,15 @@ uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
 #endif
         do {
 #ifdef UNROLL_MORE
-            DO16(buf);          /* 16 sums unrolled */
+            DO16(adler, sum2, buf);          /* 16 sums unrolled */
             buf += 16;
 #else
-            DO8(buf, 0);         /* 8 sums unrolled */
+            DO8(adler, sum2, buf, 0);         /* 8 sums unrolled */
             buf += 8;
 #endif
         } while (--n);
-        MOD(adler);
-        MOD(sum2);
+        adler %= BASE;
+        sum2 %= BASE;
     }
 
     /* do remaining bytes (less than NMAX, still just one modulo) */
@@ -66,12 +55,12 @@ uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
 #ifdef UNROLL_MORE
         while (len >= 16) {
             len -= 16;
-            DO16(buf);
+            DO16(adler, sum2, buf);
             buf += 16;
 #else
         while (len >= 8) {
             len -= 8;
-            DO8(buf, 0);
+            DO8(adler, sum2, buf, 0);
             buf += 8;
 #endif
         }
@@ -80,22 +69,34 @@ uint32_t adler32_c(uint32_t adler, const unsigned char *buf, size_t len) {
             adler += *buf++;
             sum2 += adler;
         }
-        MOD(adler);
-        MOD(sum2);
+        adler %= BASE;
+        sum2 %= BASE;
     }
 
     /* return recombined sums */
     return adler | (sum2 << 16);
 }
 
-uint32_t ZEXPORT PREFIX(adler32_z)(uint32_t adler, const unsigned char *buf, size_t len) {
+#ifdef ZLIB_COMPAT
+unsigned long Z_EXPORT PREFIX(adler32_z)(unsigned long adler, const unsigned char *buf, size_t len) {
+    return (unsigned long)functable.adler32((uint32_t)adler, buf, len);
+}
+#else
+uint32_t Z_EXPORT PREFIX(adler32_z)(uint32_t adler, const unsigned char *buf, size_t len) {
     return functable.adler32(adler, buf, len);
 }
+#endif
 
 /* ========================================================================= */
-uint32_t ZEXPORT PREFIX(adler32)(uint32_t adler, const unsigned char *buf, uint32_t len) {
+#ifdef ZLIB_COMPAT
+unsigned long Z_EXPORT PREFIX(adler32)(unsigned long adler, const unsigned char *buf, unsigned int len) {
+    return (unsigned long)functable.adler32((uint32_t)adler, buf, len);
+}
+#else
+uint32_t Z_EXPORT PREFIX(adler32)(uint32_t adler, const unsigned char *buf, uint32_t len) {
     return functable.adler32(adler, buf, len);
 }
+#endif
 
 /* ========================================================================= */
 static uint32_t adler32_combine_(uint32_t adler1, uint32_t adler2, z_off64_t len2) {
@@ -108,11 +109,11 @@ static uint32_t adler32_combine_(uint32_t adler1, uint32_t adler2, z_off64_t len
         return 0xffffffff;
 
     /* the derivation of this formula is left as an exercise for the reader */
-    MOD63(len2);                /* assumes len2 >= 0 */
+    len2 %= BASE;                 /* assumes len2 >= 0 */
     rem = (unsigned)len2;
     sum1 = adler1 & 0xffff;
     sum2 = rem * sum1;
-    MOD(sum2);
+    sum2 %= BASE;
     sum1 += (adler2 & 0xffff) + BASE - 1;
     sum2 += ((adler1 >> 16) & 0xffff) + ((adler2 >> 16) & 0xffff) + BASE - rem;
     if (sum1 >= BASE) sum1 -= BASE;
@@ -123,10 +124,16 @@ static uint32_t adler32_combine_(uint32_t adler1, uint32_t adler2, z_off64_t len
 }
 
 /* ========================================================================= */
-uint32_t ZEXPORT PREFIX(adler32_combine)(uint32_t adler1, uint32_t adler2, z_off_t len2) {
-    return adler32_combine_(adler1, adler2, len2);
+#ifdef ZLIB_COMPAT
+unsigned long Z_EXPORT PREFIX(adler32_combine)(unsigned long adler1, unsigned long adler2, z_off_t len2) {
+    return (unsigned long)adler32_combine_((uint32_t)adler1, (uint32_t)adler2, len2);
 }
 
-uint32_t ZEXPORT PREFIX(adler32_combine64)(uint32_t adler1, uint32_t adler2, z_off64_t len2) {
+unsigned long Z_EXPORT PREFIX4(adler32_combine)(unsigned long adler1, unsigned long adler2, z_off64_t len2) {
+    return (unsigned long)adler32_combine_((uint32_t)adler1, (uint32_t)adler2, len2);
+}
+#else
+uint32_t Z_EXPORT PREFIX4(adler32_combine)(uint32_t adler1, uint32_t adler2, z_off64_t len2) {
     return adler32_combine_(adler1, adler2, len2);
 }
+#endif

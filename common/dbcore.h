@@ -12,6 +12,10 @@
 
 #include <mysql.h>
 #include <string.h>
+#include <mutex>
+
+#define CR_SERVER_GONE_ERROR    2006
+#define CR_SERVER_LOST          2013
 
 class DBcore {
 public:
@@ -23,19 +27,26 @@ public:
 	~DBcore();
 	eStatus GetStatus() { return pStatus; }
 	MySQLRequestResult QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce = true);
-	MySQLRequestResult QueryDatabase(std::string query, bool retryOnFailureOnce = true);
+	MySQLRequestResult QueryDatabase(const std::string& query, bool retryOnFailureOnce = true);
+	MySQLRequestResult QueryDatabaseMulti(const std::string &query);
 	void TransactionBegin();
 	void TransactionCommit();
 	void TransactionRollback();
+	std::string Escape(const std::string& s);
 	uint32 DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen);
 	void ping();
-	MYSQL *getMySQL() { return &mysql; }
-	void SetMysql(MYSQL *mysql);
 
 	const std::string &GetOriginHost() const;
 	void SetOriginHost(const std::string &origin_host);
 
-	bool DoesTableExist(std::string table_name);
+	bool DoesTableExist(const std::string& table_name);
+
+	void SetMySQL(const DBcore &o)
+	{
+		mysql      = o.mysql;
+		mysqlOwner = false;
+	}
+	void SetMutex(Mutex *mutex);
 
 protected:
 	bool Open(
@@ -53,9 +64,12 @@ protected:
 private:
 	bool Open(uint32 *errnum = nullptr, char *errbuf = nullptr);
 
-	MYSQL   mysql;
-	Mutex   MDatabase;
+	MYSQL*  mysql;
+	bool    mysqlOwner;
+	Mutex   *m_mutex;
 	eStatus pStatus;
+
+	std::mutex m_query_lock{};
 
 	std::string origin_host;
 
@@ -67,8 +81,20 @@ private:
 	uint32 pPort;
 	bool   pSSL;
 
+	// allows multiple queries to be executed within the same query
+	// do not use this under normal operation
+	// we use this during database migrations only currently
+	void SetMultiStatementsOn()
+	{
+		mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON);
+	}
+
+	// disables multiple statements to be executed in one query
+	void SetMultiStatementsOff()
+	{
+		mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
+	}
 };
 
 
 #endif
-

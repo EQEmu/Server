@@ -1,45 +1,30 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_TASKS_REPOSITORY_H
 #define EQEMU_BASE_CHARACTER_TASKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseCharacterTasksRepository {
 public:
 	struct CharacterTasks {
-		int charid;
-		int taskid;
-		int slot;
-		int type;
-		int acceptedtime;
+		uint32_t charid;
+		uint32_t taskid;
+		uint32_t slot;
+		int8_t   type;
+		uint32_t acceptedtime;
+		int8_t   was_rewarded;
 	};
 
 	static std::string PrimaryKey()
@@ -55,27 +40,30 @@ public:
 			"slot",
 			"type",
 			"acceptedtime",
+			"was_rewarded",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"charid",
+			"taskid",
+			"slot",
+			"type",
+			"acceptedtime",
+			"was_rewarded",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -87,7 +75,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -97,24 +85,25 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static CharacterTasks NewEntity()
 	{
-		CharacterTasks entry{};
+		CharacterTasks e{};
 
-		entry.charid       = 0;
-		entry.taskid       = 0;
-		entry.slot         = 0;
-		entry.type         = 0;
-		entry.acceptedtime = 0;
+		e.charid       = 0;
+		e.taskid       = 0;
+		e.slot         = 0;
+		e.type         = 0;
+		e.acceptedtime = 0;
+		e.was_rewarded = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterTasks GetCharacterTasksEntry(
+	static CharacterTasks GetCharacterTasks(
 		const std::vector<CharacterTasks> &character_taskss,
 		int character_tasks_id
 	)
@@ -129,38 +118,42 @@ public:
 	}
 
 	static CharacterTasks FindOne(
+		Database& db,
 		int character_tasks_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_tasks_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
+			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int character_tasks_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -173,26 +166,28 @@ public:
 	}
 
 	static int UpdateOne(
-		CharacterTasks character_tasks_entry
+		Database& db,
+		const CharacterTasks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_tasks_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_tasks_entry.taskid));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_tasks_entry.slot));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_tasks_entry.type));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_tasks_entry.acceptedtime));
+		v.push_back(columns[0] + " = " + std::to_string(e.charid));
+		v.push_back(columns[1] + " = " + std::to_string(e.taskid));
+		v.push_back(columns[2] + " = " + std::to_string(e.slot));
+		v.push_back(columns[3] + " = " + std::to_string(e.type));
+		v.push_back(columns[4] + " = " + std::to_string(e.acceptedtime));
+		v.push_back(columns[5] + " = " + std::to_string(e.was_rewarded));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_tasks_entry.charid
+				e.charid
 			)
 		);
 
@@ -200,71 +195,75 @@ public:
 	}
 
 	static CharacterTasks InsertOne(
-		CharacterTasks character_tasks_entry
+		Database& db,
+		CharacterTasks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_tasks_entry.charid));
-		insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-		insert_values.push_back(std::to_string(character_tasks_entry.slot));
-		insert_values.push_back(std::to_string(character_tasks_entry.type));
-		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.taskid));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.acceptedtime));
+		v.push_back(std::to_string(e.was_rewarded));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_tasks_entry.charid = results.LastInsertedID();
-			return character_tasks_entry;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		character_tasks_entry = NewEntity();
+		e = NewEntity();
 
-		return character_tasks_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<CharacterTasks> character_tasks_entries
+		Database& db,
+		const std::vector<CharacterTasks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_tasks_entry: character_tasks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_tasks_entry.charid));
-			insert_values.push_back(std::to_string(character_tasks_entry.taskid));
-			insert_values.push_back(std::to_string(character_tasks_entry.slot));
-			insert_values.push_back(std::to_string(character_tasks_entry.type));
-			insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.taskid));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.acceptedtime));
+			v.push_back(std::to_string(e.was_rewarded));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<CharacterTasks> All()
+	static std::vector<CharacterTasks> All(Database& db)
 	{
 		std::vector<CharacterTasks> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -274,25 +273,26 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
+			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterTasks> GetWhere(std::string where_filter)
+	static std::vector<CharacterTasks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterTasks> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -303,23 +303,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterTasks entry{};
+			CharacterTasks e{};
 
-			entry.charid       = atoi(row[0]);
-			entry.taskid       = atoi(row[1]);
-			entry.slot         = atoi(row[2]);
-			entry.type         = atoi(row[3]);
-			entry.acceptedtime = atoi(row[4]);
+			e.charid       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.taskid       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.slot         = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.type         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.acceptedtime = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.was_rewarded = row[5] ? static_cast<int8_t>(atoi(row[5])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -330,9 +331,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -342,6 +343,98 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterTasks &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.taskid));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.acceptedtime));
+		v.push_back(std::to_string(e.was_rewarded));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterTasks> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.taskid));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.acceptedtime));
+			v.push_back(std::to_string(e.was_rewarded));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_TASKS_REPOSITORY_H

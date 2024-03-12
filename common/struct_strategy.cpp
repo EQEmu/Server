@@ -71,14 +71,6 @@ namespace StructStrategyFactory {
 		strategies[first_opcode] = structs;
 	}
 
-	const StructStrategy *FindPatch(EmuOpcode first_opcode) {
-		std::map<EmuOpcode, const StructStrategy *>::const_iterator res;
-		res = strategies.find(first_opcode);
-		if(res == strategies.end())
-			return(nullptr);
-		return(res->second);
-	}
-
 };
 
 

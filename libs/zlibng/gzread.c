@@ -4,6 +4,7 @@
  */
 
 #include "zbuild.h"
+#include "zutil_p.h"
 #include "gzguts.h"
 
 /* Local functions */
@@ -83,11 +84,11 @@ static int gz_look(gz_state *state) {
     /* allocate read buffers and inflate memory */
     if (state->size == 0) {
         /* allocate buffers */
-        state->in = (unsigned char *)malloc(state->want);
-        state->out = (unsigned char *)malloc(state->want << 1);
+        state->in = (unsigned char *)zng_alloc(state->want);
+        state->out = (unsigned char *)zng_alloc(state->want << 1);
         if (state->in == NULL || state->out == NULL) {
-            free(state->out);
-            free(state->in);
+            zng_free(state->out);
+            zng_free(state->in);
             gz_error(state, Z_MEM_ERROR, "out of memory");
             return -1;
         }
@@ -100,8 +101,8 @@ static int gz_look(gz_state *state) {
         state->strm.avail_in = 0;
         state->strm.next_in = NULL;
         if (PREFIX(inflateInit2)(&(state->strm), 15 + 16) != Z_OK) {    /* gunzip */
-            free(state->out);
-            free(state->in);
+            zng_free(state->out);
+            zng_free(state->in);
             state->size = 0;
             gz_error(state, Z_MEM_ERROR, "out of memory");
             return -1;
@@ -343,7 +344,7 @@ static size_t gz_read(gz_state *state, void *buf, size_t len) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzread)(gzFile file, void *buf, unsigned len) {
+int Z_EXPORT PREFIX(gzread)(gzFile file, void *buf, unsigned len) {
     gz_state *state;
 
     /* get internal structure */
@@ -375,7 +376,7 @@ int ZEXPORT PREFIX(gzread)(gzFile file, void *buf, unsigned len) {
 }
 
 /* -- see zlib.h -- */
-size_t ZEXPORT PREFIX(gzfread)(void *buf, size_t size, size_t nitems, gzFile file) {
+size_t Z_EXPORT PREFIX(gzfread)(void *buf, size_t size, size_t nitems, gzFile file) {
     size_t len;
     gz_state *state;
 
@@ -394,11 +395,11 @@ size_t ZEXPORT PREFIX(gzfread)(void *buf, size_t size, size_t nitems, gzFile fil
         return 0;
 
     /* compute bytes to read -- error on overflow */
-    len = nitems * size;
-    if (size && len / size != nitems) {
+    if (size && SIZE_MAX / size < nitems) {
         gz_error(state, Z_STREAM_ERROR, "request does not fit in a size_t");
         return 0;
     }
+    len = nitems * size;
 
     /* read len or fewer bytes to buf, return the number of full items read */
     return len ? gz_read(state, buf, len) / size : 0;
@@ -407,7 +408,7 @@ size_t ZEXPORT PREFIX(gzfread)(void *buf, size_t size, size_t nitems, gzFile fil
 /* -- see zlib.h -- */
 #undef gzgetc
 #undef zng_gzgetc
-int ZEXPORT PREFIX(gzgetc)(gzFile file) {
+int Z_EXPORT PREFIX(gzgetc)(gzFile file) {
     unsigned char buf[1];
     gz_state *state;
 
@@ -431,12 +432,12 @@ int ZEXPORT PREFIX(gzgetc)(gzFile file) {
     return gz_read(state, buf, 1) < 1 ? -1 : buf[0];
 }
 
-int ZEXPORT PREFIX(gzgetc_)(gzFile file) {
+int Z_EXPORT PREFIX(gzgetc_)(gzFile file) {
     return PREFIX(gzgetc)(file);
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzungetc)(int c, gzFile file) {
+int Z_EXPORT PREFIX(gzungetc)(int c, gzFile file) {
     gz_state *state;
 
     /* get internal structure */
@@ -492,7 +493,7 @@ int ZEXPORT PREFIX(gzungetc)(int c, gzFile file) {
 }
 
 /* -- see zlib.h -- */
-char * ZEXPORT PREFIX(gzgets)(gzFile file, char *buf, int len) {
+char * Z_EXPORT PREFIX(gzgets)(gzFile file, char *buf, int len) {
     unsigned left, n;
     char *str;
     unsigned char *eol;
@@ -519,29 +520,31 @@ char * ZEXPORT PREFIX(gzgets)(gzFile file, char *buf, int len) {
        the contents, let the user worry about that) */
     str = buf;
     left = (unsigned)len - 1;
-    if (left) do {
-        /* assure that something is in the output buffer */
-        if (state->x.have == 0 && gz_fetch(state) == -1)
-            return NULL;                /* error */
-        if (state->x.have == 0) {       /* end of file */
-            state->past = 1;            /* read past end */
-            break;                      /* return what we have */
-        }
+    if (left) {
+        do {
+            /* assure that something is in the output buffer */
+            if (state->x.have == 0 && gz_fetch(state) == -1)
+                return NULL;                /* error */
+            if (state->x.have == 0) {       /* end of file */
+                state->past = 1;            /* read past end */
+                break;                      /* return what we have */
+            }
 
-        /* look for end-of-line in current output buffer */
-        n = state->x.have > left ? left : state->x.have;
-        eol = (unsigned char *)memchr(state->x.next, '\n', n);
-        if (eol != NULL)
-            n = (unsigned)(eol - state->x.next) + 1;
+            /* look for end-of-line in current output buffer */
+            n = state->x.have > left ? left : state->x.have;
+            eol = (unsigned char *)memchr(state->x.next, '\n', n);
+            if (eol != NULL)
+                n = (unsigned)(eol - state->x.next) + 1;
 
-        /* copy through end-of-line, or remainder if not found */
-        memcpy(buf, state->x.next, n);
-        state->x.have -= n;
-        state->x.next += n;
-        state->x.pos += n;
-        left -= n;
-        buf += n;
-    } while (left && eol == NULL);
+            /* copy through end-of-line, or remainder if not found */
+            memcpy(buf, state->x.next, n);
+            state->x.have -= n;
+            state->x.next += n;
+            state->x.pos += n;
+            left -= n;
+            buf += n;
+        } while (left && eol == NULL);
+    }
 
     /* return terminated string, or if nothing, end of file */
     if (buf == str)
@@ -551,7 +554,7 @@ char * ZEXPORT PREFIX(gzgets)(gzFile file, char *buf, int len) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzdirect)(gzFile file) {
+int Z_EXPORT PREFIX(gzdirect)(gzFile file) {
     gz_state *state;
 
     /* get internal structure */
@@ -570,7 +573,7 @@ int ZEXPORT PREFIX(gzdirect)(gzFile file) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzclose_r)(gzFile file) {
+int Z_EXPORT PREFIX(gzclose_r)(gzFile file) {
     int ret, err;
     gz_state *state;
 
@@ -587,13 +590,13 @@ int ZEXPORT PREFIX(gzclose_r)(gzFile file) {
     /* free memory and close file */
     if (state->size) {
         PREFIX(inflateEnd)(&(state->strm));
-        free(state->out);
-        free(state->in);
+        zng_free(state->out);
+        zng_free(state->in);
     }
     err = state->err == Z_BUF_ERROR ? Z_BUF_ERROR : Z_OK;
     gz_error(state, Z_OK, NULL);
     free(state->path);
     ret = close(state->fd);
-    free(state);
+    zng_free(state);
     return ret ? Z_ERRNO : err;
 }

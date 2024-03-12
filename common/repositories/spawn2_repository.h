@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_SPAWN2_REPOSITORY_H
 #define EQEMU_SPAWN2_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_spawn2_repository.h"
 
 class Spawn2Repository: public BaseSpawn2Repository {
@@ -64,7 +44,35 @@ public:
      */
 
 	// Custom extended repository methods here
+	static uint32 GetPathGridBySpawn2ID(Database& db, uint32 spawn2_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT `pathgrid` FROM `{}` WHERE `id` = {}",
+				TableName(),
+				spawn2_id
+			)
+		);
 
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToUnsignedInt(row[0]);
+	}
+
+	static void SetPathGridBySpawn2ID(Database& db, uint32 spawn2_id, uint32 grid_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `spawn2` SET `pathgrid` = {} WHERE `id` = {}",
+				grid_id,
+				spawn2_id
+			)
+		);
+	}
 };
 
 #endif //EQEMU_SPAWN2_REPOSITORY_H

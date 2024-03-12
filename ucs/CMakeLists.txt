@@ -1,5 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
-
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 SET(ucs_sources
 	chatchannel.cpp
 	clientlist.cpp

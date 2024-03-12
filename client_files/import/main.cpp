@@ -23,11 +23,17 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/string_util.h"
+#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
+#include "../../common/repositories/base_data_repository.h"
+#include "../../common/file.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
+PathManager path;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -38,6 +44,8 @@ int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Import Utility");
 	if(!EQEmuConfig::LoadConfig()) {
@@ -77,11 +85,13 @@ int main(int argc, char **argv) {
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
 	}
 
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	ImportSpells(&content_db);
 	ImportSkillCaps(&content_db);
@@ -124,9 +134,10 @@ bool IsStringField(int i) {
 
 void ImportSpells(SharedDatabase *db) {
 	LogInfo("Importing Spells");
-	FILE *f = fopen("import/spells_us.txt", "r");
+	std::string file = fmt::format("{}/import/spells_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/spells_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -145,8 +156,8 @@ void ImportSpells(SharedDatabase *db) {
 			}
 		}
 
-		std::string escaped = ::EscapeString(buffer);
-		auto split = SplitString(escaped, '^');
+		std::string escaped = ::Strings::Escape(buffer);
+		auto split = Strings::Split(escaped, '^');
 		int line_columns = (int)split.size();
 
 		std::string sql;
@@ -213,9 +224,10 @@ void ImportSpells(SharedDatabase *db) {
 void ImportSkillCaps(SharedDatabase *db) {
 	LogInfo("Importing Skill Caps");
 
-	FILE *f = fopen("import/SkillCaps.txt", "r");
+	std::string file = fmt::format("{}/import/SkillCaps.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/SkillCaps.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -224,17 +236,17 @@ void ImportSkillCaps(SharedDatabase *db) {
 
 	char buffer[2048];
 	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 4) {
 			continue;
 		}
 
 		int class_id, skill_id, level, cap;
-		class_id = atoi(split[0].c_str());
-		skill_id = atoi(split[1].c_str());
-		level = atoi(split[2].c_str());
-		cap = atoi(split[3].c_str());
+		class_id = Strings::ToInt(split[0].c_str());
+		skill_id = Strings::ToInt(split[1].c_str());
+		level = Strings::ToInt(split[2].c_str());
+		cap = Strings::ToInt(split[3].c_str());
 
 		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
 			class_id, skill_id, level, cap);
@@ -245,57 +257,54 @@ void ImportSkillCaps(SharedDatabase *db) {
 	fclose(f);
 }
 
-void ImportBaseData(SharedDatabase *db) {
+void ImportBaseData(SharedDatabase *db)
+{
 	LogInfo("Importing Base Data");
 
-	FILE *f = fopen("import/BaseData.txt", "r");
-	if(!f) {
-		LogError("Unable to open import/BaseData.txt to read, skipping.");
-		return;
+	const std::string& file_name = fmt::format("{}/import/BaseData.txt", path.GetServerPath());
+
+	const auto& file_contents = File::GetContents(file_name);
+	if (!file_contents.error.empty()) {
+		LogError("{}", file_contents.error);
 	}
 
-	std::string delete_sql = "DELETE FROM base_data";
-	db->QueryDatabase(delete_sql);
+	db->QueryDatabase("DELETE FROM base_data");
 
-	char buffer[2048];
-	while(fgets(buffer, 2048, f)) {
-		auto split = SplitString(buffer, '^');
+	std::vector<BaseDataRepository::BaseData> v;
 
-		if(split.size() < 10) {
+	auto e = BaseDataRepository::NewEntity();
+
+	for (const auto& line: Strings::Split(file_contents.contents, "\n")) {
+		const auto& line_data = Strings::Split(line, '^');
+
+		if (line_data.size() < 10) {
 			continue;
 		}
 
-		std::string sql;
-		int level, class_id;
-		double hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac;
+		e.level     = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[0]));
+		e.class_    = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[1]));
+		e.hp        = Strings::ToFloat(line_data[2]);
+		e.mana      = Strings::ToFloat(line_data[3]);
+		e.end       = Strings::ToFloat(line_data[4]);
+		e.hp_regen  = Strings::ToFloat(line_data[5]);
+		e.end_regen = Strings::ToFloat(line_data[6]);
+		e.hp_fac    = Strings::ToFloat(line_data[7]);
+		e.mana_fac  = Strings::ToFloat(line_data[8]);
+		e.end_fac   = Strings::ToFloat(line_data[9]);
 
-		level = atoi(split[0].c_str());
-		class_id = atoi(split[1].c_str());
-		hp = atof(split[2].c_str());
-		mana = atof(split[3].c_str());
-		end = atof(split[4].c_str());
-		unk1 = atof(split[5].c_str());
-		unk2 = atof(split[6].c_str());
-		hp_fac = atof(split[7].c_str());
-		mana_fac = atof(split[8].c_str());
-		end_fac = atof(split[9].c_str());
-
-		sql = StringFormat("INSERT INTO base_data(level, class, hp, mana, end, unk1, unk2, hp_fac, "
-			"mana_fac, end_fac) VALUES(%d, %d, %f, %f, %f, %f, %f, %f, %f, %f)",
-			level, class_id, hp, mana, end, unk1, unk2, hp_fac, mana_fac, end_fac);
-
-		db->QueryDatabase(sql);
+		v.emplace_back(e);
 	}
 
-	fclose(f);
+	BaseDataRepository::InsertMany(*db, v);
 }
 
 void ImportDBStrings(SharedDatabase *db) {
 	LogInfo("Importing DB Strings");
 
-	FILE *f = fopen("import/dbstr_us.txt", "r");
+	std::string file = fmt::format("{}/import/dbstr_us.txt", path.GetServerPath());
+	FILE *f = fopen(file.c_str(), "r");
 	if(!f) {
-		LogError("Unable to open import/dbstr_us.txt to read, skipping.");
+		LogError("Unable to open {} to read, skipping.", file);
 		return;
 	}
 
@@ -317,7 +326,7 @@ void ImportDBStrings(SharedDatabase *db) {
 			}
 		}
 
-		auto split = SplitString(buffer, '^');
+		auto split = Strings::Split(buffer, '^');
 
 		if(split.size() < 2) {
 			continue;
@@ -327,11 +336,11 @@ void ImportDBStrings(SharedDatabase *db) {
 		int id, type;
 		std::string value;
 
-		id = atoi(split[0].c_str());
-		type = atoi(split[1].c_str());
+		id = Strings::ToInt(split[0].c_str());
+		type = Strings::ToInt(split[1].c_str());
 
 		if(split.size() >= 3) {
-			value = ::EscapeString(split[2]);
+			value = ::Strings::Escape(split[2]);
 		}
 
 		sql = StringFormat("INSERT INTO db_str(id, type, value) VALUES(%u, %u, '%s')",

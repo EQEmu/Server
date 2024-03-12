@@ -38,12 +38,8 @@ void EQStreamProxy::SetOpcodeManager(OpcodeManager **opm)
 }
 
 void EQStreamProxy::QueuePacket(const EQApplicationPacket *p, bool ack_req) {
-	if(p == nullptr)
+	if (p == nullptr) {
 		return;
-
-	if (p->GetOpcode() != OP_SpecialMesg) {
-		Log(Logs::General, Logs::PacketServerClient, "[%s - 0x%04x] [Size: %u]", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size());
-		Log(Logs::General, Logs::PacketServerClientWithDump, "[%s - 0x%04x] [Size: %u] %s", OpcodeManager::EmuToName(p->GetOpcode()), p->GetOpcode(), p->Size(), DumpPacketToString(p).c_str());
 	}
 
 	EQApplicationPacket *newp = p->Copy();
@@ -110,5 +106,10 @@ bool EQStreamProxy::CheckState(EQStreamState state) {
 		return(m_stream->CheckState(state));
 
 	return false;
+}
+
+OpcodeManager *EQStreamProxy::GetOpcodeManager() const
+{
+	return (*m_opcodes);
 }
 

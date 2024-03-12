@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -19,7 +19,7 @@
 
 #include "titanium_limits.h"
 
-#include "../string_util.h"
+#include "../strings.h"
 
 
 int16 Titanium::invtype::GetInvTypeSize(int16 inv_type)

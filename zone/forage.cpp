@@ -20,7 +20,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "entity.h"
 #include "forage.h"
@@ -30,10 +30,13 @@
 #include "titles.h"
 #include "water_map.h"
 #include "zonedb.h"
-#include "zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/forage_repository.h"
+#include "../common/repositories/fishing_repository.h"
+#include "../common/events/player_event_logs.h"
+#include "worldserver.h"
 
-#include <iostream>
+extern WorldServer worldserver;
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -45,142 +48,145 @@ struct NPCType;
 //for a given zone.
 #define FORAGE_ITEM_LIMIT 50
 
-uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
+uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
+{
+	uint32 forage_items[FORAGE_ITEM_LIMIT];
 
-	uint32 item[FORAGE_ITEM_LIMIT];
-	uint32 chance[FORAGE_ITEM_LIMIT];
-	uint32 ret;
-
-	for (int c=0; c < FORAGE_ITEM_LIMIT; c++) {
-		item[c] = 0;
+	for (uint16 slot_id = 0; slot_id < FORAGE_ITEM_LIMIT; slot_id++) {
+		forage_items[slot_id] = 0;
 	}
 
-	uint32 chancepool = 0;
-    std::string query = fmt::format(
-    	SQL(
-    		SELECT
-			  itemid,
-			  chance
-			FROM
-			  forage
-			WHERE
-			  zoneid = '{}'
-			  and level <= '{}'
-			  {}
-			LIMIT
-			 {}
-    		),
-    	ZoneID,
-    	skill,
-    	ContentFilterCriteria::apply(),
-    	FORAGE_ITEM_LIMIT
+	const auto& l = ForageRepository::GetWhere(
+		*this,
+		fmt::format(
+			"(`zoneid` = {} || `zoneid` = 0) AND `level` <= {} {} LIMIT {}",
+			zone_id,
+			skill_level,
+			ContentFilterCriteria::apply(),
+			FORAGE_ITEM_LIMIT
+		)
 	);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
+
+	if (l.empty()) {
 		return 0;
 	}
 
-	uint8     index = 0;
-	for (auto row   = results.begin(); row != results.end(); ++row, ++index) {
-		if (index >= FORAGE_ITEM_LIMIT) {
+	LogInfo(
+		"Loaded [{}] Forage Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
+
+	int forage_chances[FORAGE_ITEM_LIMIT];
+
+	int    current_chance = 0;
+	uint32 item_id        = 0;
+	uint8  count          = 0;
+
+	for (const auto& e : l) {
+		if (count >= FORAGE_ITEM_LIMIT) {
 			break;
 		}
 
-		item[index]   = atoi(row[0]);
-		chance[index] = atoi(row[1]) + chancepool;
-		LogError("Possible Forage: [{}] with a [{}] chance", item[index], chance[index]);
-		chancepool = chance[index];
+		forage_items[count]   = e.Itemid;
+		forage_chances[count] = e.chance + current_chance;
+
+		current_chance = forage_chances[count];
+
+		count++;
 	}
 
-	if(chancepool == 0 || index < 1)
+	if (current_chance == 0 || count < 1) {
 		return 0;
-
-	if(index == 1) {
-		return item[0];
 	}
 
-	ret = 0;
+	if (count == 1) {
+		return forage_items[0];
+	}
 
-	uint32 rindex = zone->random.Int(1, chancepool);
+	const int roll = zone->random.Int(1, current_chance);
 
-	for(int i = 0; i < index; i++) {
-		if(rindex <= chance[i]) {
-			ret = item[i];
+	for (uint16 slot_id = 0; slot_id < count; slot_id++) {
+		if (roll <= forage_chances[slot_id]) {
+			item_id = forage_items[slot_id];
 			break;
 		}
 	}
 
-	return ret;
+	return item_id;
 }
 
-uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, uint8 &npc_chance)
+uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance)
 {
-	uint32 item[50];
-	uint32 chance[50];
-	uint32 npc_ids[50];
-	uint32 npc_chances[50];
-	uint32 chancepool = 0;
-	uint32 ret = 0;
+	uint32 fishing_items[50];
+	int fishing_chances[50];
 
-	for (int c=0; c<50; c++) {
-		item[c]=0;
-		chance[c]=0;
+	for (uint16 slot_id = 0; slot_id < 50; slot_id++) {
+		fishing_items[slot_id]   = 0;
+		fishing_chances[slot_id] = 0;
 	}
 
-    std::string query = fmt::format(
-    	SQL(
-    	SELECT
-		  itemid,
-		  chance,
-		  npc_id,
-		  npc_chance
-		FROM
-		  fishing
-		WHERE
-		  (zoneid = '{}' || zoneid = 0)
-		  AND skill_level <= '{}'
-		  {}
-		),
-		ZoneID,
-		skill,
-		ContentFilterCriteria::apply()
+	const auto& l = FishingRepository::GetWhere(
+		*this,
+		fmt::format(
+			"(`zoneid` = {} || `zoneid` = 0) AND `skill_level` <= {} {}",
+			zone_id,
+			skill_level,
+			ContentFilterCriteria::apply()
+		)
 	);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+
+	if (l.empty()) {
 		return 0;
-    }
+	}
 
-    uint8 index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        if (index >= 50)
-            break;
+	LogInfo(
+		"Loaded [{}] Fishing Item{}",
+		Strings::Commify(l.size()),
+		l.size() != 1 ? "s" : ""
+	);
 
-        item[index] = atoi(row[0]);
-        chance[index] = atoi(row[1])+chancepool;
-        chancepool = chance[index];
+	uint32 npc_ids[50];
+	uint32 npc_chances[50];
 
-        npc_ids[index] = atoi(row[2]);
-        npc_chances[index] = atoi(row[3]);
-    }
+	int    current_chance = 0;
+	uint32 item_id        = 0;
+	uint8  count          = 0;
 
-	npc_id = 0;
+	for (const auto &e: l) {
+		if (count >= 50) {
+			break;
+		}
+
+		fishing_items[count]   = e.Itemid;
+		fishing_chances[count] = e.chance + current_chance;
+		npc_ids[count]         = e.npc_id;
+		npc_chances[count]     = e.npc_chance;
+
+		current_chance = fishing_chances[count];
+	}
+
+	npc_id     = 0;
 	npc_chance = 0;
-	if (index <= 0)
-        return 0;
 
-    uint32 random = zone->random.Int(1, chancepool);
-    for (int i = 0; i < index; i++)
-    {
-        if (random > chance[i])
-            continue;
+	if (count <= 0) {
+		return 0;
+	}
 
-        ret = item[i];
-        npc_id = npc_ids[i];
-        npc_chance = npc_chances[i];
-        break;
-    }
+	const int roll = zone->random.Int(1, current_chance);
 
-	return ret;
+	for (uint16 i = 0; i < count; i++) {
+		if (roll > fishing_chances[i]) {
+			continue;
+		}
+
+		item_id    = fishing_items[i];
+		npc_id     = npc_ids[i];
+		npc_chance = npc_chances[i];
+		break;
+	}
+
+	return item_id;
 }
 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
@@ -251,7 +257,7 @@ bool Client::CanFish() {
 	return true;
 }
 
-void Client::GoFish()
+void Client::GoFish(bool guarantee, bool use_bait)
 {
 
 	//TODO: generate a message if we're already fishing
@@ -300,14 +306,14 @@ void Client::GoFish()
 		fishing_skill = 100+((fishing_skill-100)/2);
 	}
 
-	if (zone->random.Int(0,175) < fishing_skill) {
+	if (guarantee || zone->random.Int(0,175) < fishing_skill) {
 		uint32 food_id = 0;
 
 		//25% chance to fish an item.
 		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
-			food_id = content_db.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
+			food_id = content_db.LoadFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
@@ -337,8 +343,10 @@ void Client::GoFish()
 			}
 		}
 
-		//consume bait, should we always consume bait on success?
-		DeleteItemInInventory(bslot, 1, true);	//do we need client update?
+		if (use_bait) {
+			//consume bait, should we always consume bait on success?
+			DeleteItemInInventory(bslot, 1, true);    //do we need client update?
+		}
 
 		if(food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
@@ -367,16 +375,26 @@ void Client::GoFish()
 					PushItemOnCursor(*inst);
 					SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 					if (RuleB(TaskSystem, EnableTaskSystem))
-						UpdateTasksForItem(ActivityFish, food_id);
+						UpdateTasksForItem(TaskActivityType::Fish, food_id);
 
 					safe_delete(inst);
 					inst = m_inv.GetItem(EQ::invslot::slotCursor);
 				}
 
 				if (inst) {
-					std::vector<EQ::Any> args;
-					args.push_back(inst);
-					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+					if (player_event_logs.IsEventEnabled(PlayerEvent::FISH_SUCCESS)) {
+						auto e = PlayerEvent::FishSuccessEvent{
+							.item_id = inst->GetItem()->ID,
+							.item_name = inst->GetItem()->Name,
+						};
+
+						RecordPlayerEventLog(PlayerEvent::FISH_SUCCESS, e);
+					}
+
+					if (parse->PlayerHasQuestSub(EVENT_FISH_SUCCESS)) {
+						std::vector<std::any> args = { inst };
+						parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
+					}
 				}
 			}
 		}
@@ -395,7 +413,10 @@ void Client::GoFish()
 				MessageString(Chat::Skills, FISHING_FAILED);	//You didn't catch anything.
 		}
 
-		parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FISH_FAILURE, PlayerEvent::EmptyEvent{});
+		if (parse->PlayerHasQuestSub(EVENT_FISH_FAILURE)) {
+			parse->EventPlayer(EVENT_FISH_FAILURE, this, "", 0);
+		}
 	}
 
 	//chance to break fishing pole...
@@ -419,7 +440,6 @@ void Client::GoFish()
 }
 
 void Client::ForageItem(bool guarantee) {
-
 	int skill_level = GetSkill(EQ::skills::SkillForage);
 
 	//be wary of the string ids in switch below when changing this.
@@ -439,12 +459,12 @@ void Client::ForageItem(bool guarantee) {
 		uint32 foragedfood = 0;
 		uint32 stringid = FORAGE_NOEAT;
 
-		if (zone->random.Roll(25)) {
-			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
+		if (zone->random.Roll(RuleI(Zone, ForageChance))) {
+			foragedfood = content_db.LoadForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
-		if(foragedfood == 0) {
+		if (foragedfood == 0 && RuleB(Character, UseForageCommonFood)) {
 			uint8 index = 0;
 			index = zone->random.Int(0, MAX_COMMON_FOOD_IDS-1);
 			foragedfood = common_food_ids[index];
@@ -452,66 +472,77 @@ void Client::ForageItem(bool guarantee) {
 
 		const EQ::ItemData* food_item = database.GetItem(foragedfood);
 
-		if(!food_item) {
+		if (!food_item) {
 			LogError("nullptr returned from database.GetItem in ClientForageItem");
 			return;
 		}
 
-		if(foragedfood == 13106)
+		if (foragedfood == 13106) {
 			stringid = FORAGE_GRUBS;
-		else
+		} else {
 			switch(food_item->ItemType) {
 			case EQ::item::ItemTypeFood:
 				stringid = FORAGE_FOOD;
 				break;
 			case EQ::item::ItemTypeDrink:
-				if(strstr(food_item->Name, "ater"))
+				if (strstr(food_item->Name, "ater")) {
 					stringid = FORAGE_WATER;
-				else
+				} else {
 					stringid = FORAGE_DRINK;
+				}
 				break;
 			default:
 				break;
 			}
+		}
 
 		MessageString(Chat::Skills, stringid);
 		EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
-		if(inst != nullptr) {
+		if (inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
-			if(CheckLoreConflict(inst->GetItem()))
-			{
+			if (CheckLoreConflict(inst->GetItem())) {
 				MessageString(Chat::White, DUP_LORE);
 				safe_delete(inst);
-			}
-			else {
+			} else {
 				PushItemOnCursor(*inst);
 				SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
-				if(RuleB(TaskSystem, EnableTaskSystem))
-					UpdateTasksForItem(ActivityForage, foragedfood);
+				if(RuleB(TaskSystem, EnableTaskSystem)) {
+					UpdateTasksForItem(TaskActivityType::Forage, foragedfood);
+				}
 
 				safe_delete(inst);
 				inst = m_inv.GetItem(EQ::invslot::slotCursor);
 			}
 
-			if(inst) {
-				std::vector<EQ::Any> args;
-				args.push_back(inst);
-				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+			if (inst) {
+				if (player_event_logs.IsEventEnabled(PlayerEvent::FORAGE_SUCCESS)) {
+					auto e = PlayerEvent::ForageSuccessEvent{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name
+					};
+					RecordPlayerEventLog(PlayerEvent::FORAGE_SUCCESS, e);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_FORAGE_SUCCESS)) {
+					std::vector<std::any> args = { inst };
+					parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
+				}
 			}
 		}
 
 		int ChanceSecondForage = aabonuses.ForageAdditionalItems + itembonuses.ForageAdditionalItems + spellbonuses.ForageAdditionalItems;
-		if(!guarantee && zone->random.Roll(ChanceSecondForage)) {
+		if (!guarantee && zone->random.Roll(ChanceSecondForage)) {
 			MessageString(Chat::Skills, FORAGE_MASTERY);
 			ForageItem(true);
 		}
-
 	} else {
 		MessageString(Chat::Skills, FORAGE_FAILED);
-		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+		RecordPlayerEventLog(PlayerEvent::FORAGE_FAILURE, PlayerEvent::EmptyEvent{});
+
+		if (parse->PlayerHasQuestSub(EVENT_FORAGE_FAILURE)) {
+			parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
+		}
 	}
 
 	CheckIncreaseSkill(EQ::skills::SkillForage, nullptr, 5);
-
 }
-

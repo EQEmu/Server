@@ -1,4 +1,5 @@
-#include "../common/string_util.h"
+#include "../common/strings.h"
+#include "../common/repositories/auras_repository.h"
 
 #include "aura.h"
 #include "client.h"
@@ -77,7 +78,10 @@ void Aura::ProcessOnAllFriendlies(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
-		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc()) {
+		if (!mob) {
+			continue;
+		}
+		if (mob->IsClient() || mob->IsPetOwnerClient() || mob->IsMerc() || mob->IsBot()) {
 			auto it = casted_on.find(mob->GetID());
 
 			if (it != casted_on.end()) { // we are already on the list, let's check for removal
@@ -141,8 +145,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (c->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), c->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), c->GetPosition()) > distance) {
@@ -156,8 +160,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (m->GetOwner()->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
@@ -175,8 +179,8 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 			if (owner->GetID() == m_owner) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
@@ -187,6 +191,9 @@ void Aura::ProcessOnAllGroupMembers(Mob *owner)
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
+			if (!mob) {
+				continue;
+			}
 			// step 1: check if we're already managing this NPC's buff
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
@@ -383,8 +390,8 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			if (m->GetOwner()->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), m->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), m->GetPosition()) > distance) {
@@ -402,8 +409,8 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 			if (owner->GetID() == group_member->GetID()) {
 				return DistanceSquared(GetPosition(), n->GetPosition()) <= distance;
 			}
-			else if (idx == 0xFFFFFFFF || raid->members[idx].GroupNumber != group_id ||
-					 raid->members[idx].GroupNumber == 0xFFFFFFFF) {
+			else if (idx == 0xFFFFFFFF || raid->members[idx].group_number != group_id ||
+					 raid->members[idx].group_number == 0xFFFFFFFF) {
 				return false;
 			}
 			else if (DistanceSquared(GetPosition(), n->GetPosition()) > distance) {
@@ -414,6 +421,9 @@ void Aura::ProcessOnGroupMembersPets(Mob *owner)
 
 		for (auto &e : mob_list) {
 			auto mob = e.second;
+			if (!mob) {
+				continue;
+			}
 			// step 1: check if we're already managing this NPC's buff
 			auto it  = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
@@ -572,6 +582,10 @@ void Aura::ProcessTotem(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
@@ -624,11 +638,15 @@ void Aura::ProcessEnterTrap(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
 		// might need more checks ...
-		if (owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
+		if (mob != owner && owner->IsAttackAllowed(mob) && DistanceSquared(GetPosition(), mob->GetPosition()) <= distance) {
 			SpellFinished(spell_id, mob);
 			owner->RemoveAura(GetID(), false); // if we're a buff (ex. NEC) we don't want to strip :P
 			break;
@@ -642,11 +660,15 @@ void Aura::ProcessExitTrap(Mob *owner)
 
 	for (auto &e : mob_list) {
 		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
 		if (mob == this) {
 			continue;
 		}
 		// might need more checks ...
-		if (owner->IsAttackAllowed(mob)) {
+		if (mob != owner && owner->IsAttackAllowed(mob)) {
 			bool in_range = DistanceSquared(GetPosition(), mob->GetPosition()) <= distance;
 			auto it       = casted_on.find(mob->GetID());
 			if (it != casted_on.end()) {
@@ -669,6 +691,10 @@ void Aura::ProcessSpawns()
 {
 	const auto &clients = entity_list.GetCloseMobList(this, distance);
 	for (auto  &e : clients) {
+		if (!e.second) {
+			continue;
+		}
+
 		if (!e.second->IsClient()) {
 			continue;
 		}
@@ -794,7 +820,7 @@ bool Aura::ShouldISpawnFor(Client *c)
 			return false;
 		}
 
-		if (raid->members[idx].GroupNumber != group_id) { // in our raid, but not our group
+		if (raid->members[idx].group_number != group_id) { // in our raid, but not our group
 			return false;
 		}
 
@@ -902,51 +928,51 @@ void Mob::MakeAura(uint16 spell_id)
 	}
 }
 
-bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord &record)
+bool ZoneDatabase::GetAuraEntry(uint16 spell_id, AuraRecord& r)
 {
-	auto query = StringFormat(
-		"SELECT npc_type, name, spell_id, distance, aura_type, spawn_type, movement, "
-		"duration, icon, cast_time FROM auras WHERE type='%d'",
-		spell_id
+	const auto& l = AurasRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`type` = {}",
+			spell_id
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
+	if (l.empty()) {
 		return false;
 	}
 
-	if (results.RowCount() != 1) {
-		return false;
-	}
+	auto& e = l.front();
 
-	auto row = results.begin();
+	strn0cpy(r.name, e.name.c_str(), sizeof(r.name));
 
-	record.npc_type = atoi(row[0]);
-	strn0cpy(record.name, row[1], 64);
-	record.spell_id   = atoi(row[2]);
-	record.distance   = atoi(row[3]);
-	record.distance *= record.distance; // so we can avoid sqrt
-	record.aura_type  = atoi(row[4]);
-	record.spawn_type = atoi(row[5]);
-	record.movement   = atoi(row[6]);
-	record.duration   = atoi(row[7]) * 1000; // DB is in seconds
-	record.icon       = atoi(row[8]);
-	record.cast_time  = atoi(row[9]) * 1000; // DB is in seconds
+	r.npc_type   = e.npc_type;
+	r.spell_id   = e.spell_id;
+	r.distance   = e.distance * e.distance;
+	r.aura_type  = e.aura_type;
+	r.spawn_type = e.spawn_type;
+	r.movement   = e.movement;
+	r.duration   = e.duration * 1000; // Database is in seconds
+	r.icon       = e.icon;
+	r.cast_time  = e.cast_time * 1000; // Database is in seconds
 
 	return true;
 }
 
 void Mob::AddAura(Aura *aura, AuraRecord &record)
 {
+	if (!aura) {
+		return;
+	}
+
 	LogAura(
-		"[AddAura] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
 		aura->GetID(),
 		aura->GetCleanName()
 	);
 
 	// this is called only when it's safe
-	assert(aura != nullptr);
 	strn0cpy(aura_mgr.auras[aura_mgr.count].name, aura->GetCleanName(), 64);
 	aura_mgr.auras[aura_mgr.count].spawn_id = aura->GetID();
 	aura_mgr.auras[aura_mgr.count].aura     = aura;
@@ -973,15 +999,18 @@ void Mob::AddAura(Aura *aura, AuraRecord &record)
 
 void Mob::AddTrap(Aura *aura, AuraRecord &record)
 {
+	if (!aura) {
+		return;
+	}
+
 	LogAura(
-		"[AddTrap] aura owner [{}] spawn_id [{}] aura_name [{}]",
+		"aura owner [{}] spawn_id [{}] aura_name [{}]",
 		GetCleanName(),
 		aura->GetID(),
 		aura->GetCleanName()
 	);
 
 	// this is called only when it's safe
-	assert(aura != nullptr);
 	strn0cpy(trap_mgr.auras[trap_mgr.count].name, aura->GetCleanName(), 64);
 	trap_mgr.auras[trap_mgr.count].spawn_id = aura->GetID();
 	trap_mgr.auras[trap_mgr.count].aura     = aura;
@@ -1023,7 +1052,7 @@ void Mob::RemoveAllAuras()
 		for (auto &e : aura_mgr.auras) {
 			if (e.aura) {
 				LogAura(
-					"[RemoveAllAuras] aura owner [{}] spawn_id [{}] aura_name [{}]",
+					"aura owner [{}] spawn_id [{}] aura_name [{}]",
 					GetCleanName(),
 					e.spawn_id,
 					e.name
@@ -1040,7 +1069,7 @@ void Mob::RemoveAllAuras()
 		for (auto &e : trap_mgr.auras) {
 			if (e.aura) {
 				LogAura(
-					"[RemoveAllAuras] trap owner [{}] spawn_id [{}] aura_name [{}]",
+					"trap owner [{}] spawn_id [{}] aura_name [{}]",
 					GetCleanName(),
 					e.spawn_id,
 					e.name
@@ -1060,7 +1089,7 @@ void Mob::RemoveAura(int spawn_id, bool skip_strip, bool expired)
 		auto &aura = aura_mgr.auras[i];
 		if (aura.spawn_id == spawn_id) {
 			LogAura(
-				"[RemoveAura] mob [{}] spawn_id [{}] skip_strip [{}] expired [{}]",
+				"mob [{}] spawn_id [{}] skip_strip [{}] expired [{}]",
 				GetCleanName(),
 				spawn_id,
 				skip_strip ? "true" : "false",

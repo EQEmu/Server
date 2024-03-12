@@ -23,9 +23,6 @@
 
 EQDB EQDB::s_EQDB;
 
-EQDB::EQDB() {
-}
-
 unsigned int EQDB::field_count() {
 	return mysql_field_count(mysql_ref);
 }

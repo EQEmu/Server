@@ -1,54 +1,38 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H
 #define EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseSpawnEventsRepository {
 public:
 	struct SpawnEvents {
-		int         id;
+		uint32_t    id;
 		std::string zone;
-		int         cond_id;
+		uint32_t    cond_id;
 		std::string name;
-		int         period;
-		int         next_minute;
-		int         next_hour;
-		int         next_day;
-		int         next_month;
-		int         next_year;
-		int         enabled;
-		int         action;
-		int         argument;
-		int         strict;
+		uint32_t    period;
+		uint8_t     next_minute;
+		uint8_t     next_hour;
+		uint8_t     next_day;
+		uint8_t     next_month;
+		uint32_t    next_year;
+		int8_t      enabled;
+		uint8_t     action;
+		int32_t     argument;
+		int8_t      strict;
 	};
 
 	static std::string PrimaryKey()
@@ -76,24 +60,34 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"zone",
+			"cond_id",
+			"name",
+			"period",
+			"next_minute",
+			"next_hour",
+			"next_day",
+			"next_month",
+			"next_year",
+			"enabled",
+			"action",
+			"argument",
+			"strict",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -105,7 +99,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -115,33 +109,33 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static SpawnEvents NewEntity()
 	{
-		SpawnEvents entry{};
+		SpawnEvents e{};
 
-		entry.id          = 0;
-		entry.zone        = "";
-		entry.cond_id     = 0;
-		entry.name        = "";
-		entry.period      = 0;
-		entry.next_minute = 0;
-		entry.next_hour   = 0;
-		entry.next_day    = 0;
-		entry.next_month  = 0;
-		entry.next_year   = 0;
-		entry.enabled     = 1;
-		entry.action      = 0;
-		entry.argument    = 0;
-		entry.strict      = 0;
+		e.id          = 0;
+		e.zone        = "";
+		e.cond_id     = 0;
+		e.name        = "";
+		e.period      = 0;
+		e.next_minute = 0;
+		e.next_hour   = 0;
+		e.next_day    = 0;
+		e.next_month  = 0;
+		e.next_year   = 0;
+		e.enabled     = 1;
+		e.action      = 0;
+		e.argument    = 0;
+		e.strict      = 0;
 
-		return entry;
+		return e;
 	}
 
-	static SpawnEvents GetSpawnEventsEntry(
+	static SpawnEvents GetSpawnEvents(
 		const std::vector<SpawnEvents> &spawn_eventss,
 		int spawn_events_id
 	)
@@ -156,47 +150,50 @@ public:
 	}
 
 	static SpawnEvents FindOne(
+		Database& db,
 		int spawn_events_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spawn_events_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SpawnEvents entry{};
+			SpawnEvents e{};
 
-			entry.id          = atoi(row[0]);
-			entry.zone        = row[1] ? row[1] : "";
-			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3] ? row[3] : "";
-			entry.period      = atoi(row[4]);
-			entry.next_minute = atoi(row[5]);
-			entry.next_hour   = atoi(row[6]);
-			entry.next_day    = atoi(row[7]);
-			entry.next_month  = atoi(row[8]);
-			entry.next_year   = atoi(row[9]);
-			entry.enabled     = atoi(row[10]);
-			entry.action      = atoi(row[11]);
-			entry.argument    = atoi(row[12]);
-			entry.strict      = atoi(row[13]);
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone        = row[1] ? row[1] : "";
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.name        = row[3] ? row[3] : "";
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int spawn_events_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -209,34 +206,35 @@ public:
 	}
 
 	static int UpdateOne(
-		SpawnEvents spawn_events_entry
+		Database& db,
+		const SpawnEvents &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(spawn_events_entry.zone) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(spawn_events_entry.cond_id));
-		update_values.push_back(columns[3] + " = '" + EscapeString(spawn_events_entry.name) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(spawn_events_entry.period));
-		update_values.push_back(columns[5] + " = " + std::to_string(spawn_events_entry.next_minute));
-		update_values.push_back(columns[6] + " = " + std::to_string(spawn_events_entry.next_hour));
-		update_values.push_back(columns[7] + " = " + std::to_string(spawn_events_entry.next_day));
-		update_values.push_back(columns[8] + " = " + std::to_string(spawn_events_entry.next_month));
-		update_values.push_back(columns[9] + " = " + std::to_string(spawn_events_entry.next_year));
-		update_values.push_back(columns[10] + " = " + std::to_string(spawn_events_entry.enabled));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawn_events_entry.action));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawn_events_entry.argument));
-		update_values.push_back(columns[13] + " = " + std::to_string(spawn_events_entry.strict));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.cond_id));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.period));
+		v.push_back(columns[5] + " = " + std::to_string(e.next_minute));
+		v.push_back(columns[6] + " = " + std::to_string(e.next_hour));
+		v.push_back(columns[7] + " = " + std::to_string(e.next_day));
+		v.push_back(columns[8] + " = " + std::to_string(e.next_month));
+		v.push_back(columns[9] + " = " + std::to_string(e.next_year));
+		v.push_back(columns[10] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[11] + " = " + std::to_string(e.action));
+		v.push_back(columns[12] + " = " + std::to_string(e.argument));
+		v.push_back(columns[13] + " = " + std::to_string(e.strict));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				spawn_events_entry.id
+				e.id
 			)
 		);
 
@@ -244,87 +242,91 @@ public:
 	}
 
 	static SpawnEvents InsertOne(
-		SpawnEvents spawn_events_entry
+		Database& db,
+		SpawnEvents e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
-		insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-		insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
-		insert_values.push_back(std::to_string(spawn_events_entry.period));
-		insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
-		insert_values.push_back(std::to_string(spawn_events_entry.next_hour));
-		insert_values.push_back(std::to_string(spawn_events_entry.next_day));
-		insert_values.push_back(std::to_string(spawn_events_entry.next_month));
-		insert_values.push_back(std::to_string(spawn_events_entry.next_year));
-		insert_values.push_back(std::to_string(spawn_events_entry.enabled));
-		insert_values.push_back(std::to_string(spawn_events_entry.action));
-		insert_values.push_back(std::to_string(spawn_events_entry.argument));
-		insert_values.push_back(std::to_string(spawn_events_entry.strict));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.cond_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.period));
+		v.push_back(std::to_string(e.next_minute));
+		v.push_back(std::to_string(e.next_hour));
+		v.push_back(std::to_string(e.next_day));
+		v.push_back(std::to_string(e.next_month));
+		v.push_back(std::to_string(e.next_year));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.action));
+		v.push_back(std::to_string(e.argument));
+		v.push_back(std::to_string(e.strict));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			spawn_events_entry.id = results.LastInsertedID();
-			return spawn_events_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		spawn_events_entry = NewEntity();
+		e = NewEntity();
 
-		return spawn_events_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<SpawnEvents> spawn_events_entries
+		Database& db,
+		const std::vector<SpawnEvents> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawn_events_entry: spawn_events_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.zone) + "'");
-			insert_values.push_back(std::to_string(spawn_events_entry.cond_id));
-			insert_values.push_back("'" + EscapeString(spawn_events_entry.name) + "'");
-			insert_values.push_back(std::to_string(spawn_events_entry.period));
-			insert_values.push_back(std::to_string(spawn_events_entry.next_minute));
-			insert_values.push_back(std::to_string(spawn_events_entry.next_hour));
-			insert_values.push_back(std::to_string(spawn_events_entry.next_day));
-			insert_values.push_back(std::to_string(spawn_events_entry.next_month));
-			insert_values.push_back(std::to_string(spawn_events_entry.next_year));
-			insert_values.push_back(std::to_string(spawn_events_entry.enabled));
-			insert_values.push_back(std::to_string(spawn_events_entry.action));
-			insert_values.push_back(std::to_string(spawn_events_entry.argument));
-			insert_values.push_back(std::to_string(spawn_events_entry.strict));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.cond_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.period));
+			v.push_back(std::to_string(e.next_minute));
+			v.push_back(std::to_string(e.next_hour));
+			v.push_back(std::to_string(e.next_day));
+			v.push_back(std::to_string(e.next_month));
+			v.push_back(std::to_string(e.next_year));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.action));
+			v.push_back(std::to_string(e.argument));
+			v.push_back(std::to_string(e.strict));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<SpawnEvents> All()
+	static std::vector<SpawnEvents> All(Database& db)
 	{
 		std::vector<SpawnEvents> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -334,34 +336,34 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpawnEvents entry{};
+			SpawnEvents e{};
 
-			entry.id          = atoi(row[0]);
-			entry.zone        = row[1] ? row[1] : "";
-			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3] ? row[3] : "";
-			entry.period      = atoi(row[4]);
-			entry.next_minute = atoi(row[5]);
-			entry.next_hour   = atoi(row[6]);
-			entry.next_day    = atoi(row[7]);
-			entry.next_month  = atoi(row[8]);
-			entry.next_year   = atoi(row[9]);
-			entry.enabled     = atoi(row[10]);
-			entry.action      = atoi(row[11]);
-			entry.argument    = atoi(row[12]);
-			entry.strict      = atoi(row[13]);
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone        = row[1] ? row[1] : "";
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.name        = row[3] ? row[3] : "";
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<SpawnEvents> GetWhere(std::string where_filter)
+	static std::vector<SpawnEvents> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<SpawnEvents> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -372,32 +374,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpawnEvents entry{};
+			SpawnEvents e{};
 
-			entry.id          = atoi(row[0]);
-			entry.zone        = row[1] ? row[1] : "";
-			entry.cond_id     = atoi(row[2]);
-			entry.name        = row[3] ? row[3] : "";
-			entry.period      = atoi(row[4]);
-			entry.next_minute = atoi(row[5]);
-			entry.next_hour   = atoi(row[6]);
-			entry.next_day    = atoi(row[7]);
-			entry.next_month  = atoi(row[8]);
-			entry.next_year   = atoi(row[9]);
-			entry.enabled     = atoi(row[10]);
-			entry.action      = atoi(row[11]);
-			entry.argument    = atoi(row[12]);
-			entry.strict      = atoi(row[13]);
+			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.zone        = row[1] ? row[1] : "";
+			e.cond_id     = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.name        = row[3] ? row[3] : "";
+			e.period      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.next_minute = row[5] ? static_cast<uint8_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.next_hour   = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.next_day    = row[7] ? static_cast<uint8_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.next_month  = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.next_year   = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.enabled     = row[10] ? static_cast<int8_t>(atoi(row[10])) : 1;
+			e.action      = row[11] ? static_cast<uint8_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.argument    = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.strict      = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -408,9 +410,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -420,6 +422,114 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpawnEvents &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.cond_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.period));
+		v.push_back(std::to_string(e.next_minute));
+		v.push_back(std::to_string(e.next_hour));
+		v.push_back(std::to_string(e.next_day));
+		v.push_back(std::to_string(e.next_month));
+		v.push_back(std::to_string(e.next_year));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.action));
+		v.push_back(std::to_string(e.argument));
+		v.push_back(std::to_string(e.strict));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpawnEvents> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.cond_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.period));
+			v.push_back(std::to_string(e.next_minute));
+			v.push_back(std::to_string(e.next_hour));
+			v.push_back(std::to_string(e.next_day));
+			v.push_back(std::to_string(e.next_month));
+			v.push_back(std::to_string(e.next_year));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.action));
+			v.push_back(std::to_string(e.argument));
+			v.push_back(std::to_string(e.strict));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPAWN_EVENTS_REPOSITORY_H

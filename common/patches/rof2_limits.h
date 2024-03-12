@@ -158,6 +158,7 @@ namespace RoF2
 				slotCursor
 			};
 
+			constexpr int16 format_as(InventorySlots slot) { return static_cast<int16>(slot); }
 		} // namespace enum_
 		using namespace enum_;
 

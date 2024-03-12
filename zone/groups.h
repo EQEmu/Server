@@ -37,8 +37,6 @@ public:
 	GroupIDConsumer() { id = 0; }
 	GroupIDConsumer(uint32 gid) { id = gid; }
 	inline const uint32 GetID()	const { return id; }
-	void	SetOldLeaderName(const char* oldleader) { strcpy(oldleadername, oldleader); }
-	char*	GetOldLeaderName() { return oldleadername; }
 
 protected:
 	friend class EntityList;
@@ -46,7 +44,6 @@ protected:
 	inline void SetID(uint32 set_id) { id = set_id; }
 private:
 	uint32 id;
-	char	oldleadername[64]; // Keeps the previous leader name, so when the entity is destroyed we can still transfer leadership.
 };
 
 class Group : public GroupIDConsumer {
@@ -61,36 +58,33 @@ public:
 	void	SendLeadershipAAUpdate();
 	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
 	bool	DelMemberOOZ(const char *Name);
-	bool	DelMemberOOZ(const char *Name, bool checkleader);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
 	void	DisbandGroup(bool joinraid = false);
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
 	void	GetClientList(std::list<Client*>& client_list, bool clear_list = true);
-#ifdef BOTS
 	void	GetBotList(std::list<Bot*>& bot_list, bool clear_list = true);
-#endif
-	bool	IsGroupMember(Mob* client);
-	bool	IsGroupMember(const char *Name);
+	bool	IsGroupMember(Mob* c);
+	bool	IsGroupMember(const char* name);
 	bool	Process();
 	bool	IsGroup()			{ return true; }
 	void	SendGroupJoinOOZ(Mob* NewMember);
 	void	CastGroupSpell(Mob* caster,uint16 spellid);
-	void	GroupBardPulse(Mob* caster,uint16 spellid);
-	void	SplitExp(uint32 exp, Mob* other);
+	void	SplitExp(const uint64 exp, Mob* other);
 	void	GroupMessage(Mob* sender,uint8 language,uint8 lang_skill,const char* message);
 	void	GroupMessageString(Mob* sender, uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
 	uint32	GetTotalGroupDamage(Mob* other);
 	void	SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter = nullptr);
-	inline	void SetLeader(Mob* newleader){ leader=newleader; };
+	inline	void SetLeader(Mob* c){ leader = c; };
 	inline	Mob* GetLeader() { return leader; };
-	const char*	GetLeaderName() { return membername[0]; };
+	const char*	GetLeaderName() { return GetGroupLeaderName(GetID()).c_str(); };
 	void	SendHPManaEndPacketsTo(Mob* newmember);
 	void	SendHPPacketsFrom(Mob* member);
 	void	SendManaPacketFrom(Mob* member);
-	void SendEndurancePacketFrom(Mob* member);
+	void	SendEndurancePacketFrom(Mob* member);
 	bool	UpdatePlayer(Mob* update);
 	void	MemberZoned(Mob* removemob);
-	inline	bool IsLeader(Mob* leadertest) { return leadertest==leader; };
+	bool	IsLeader(const char* name);
+	inline bool IsLeader(Mob* m) { return m == leader; };
 	uint8	GroupCount();
 	uint32	GetHighestLevel();
 	uint32	GetLowestLevel();
@@ -147,10 +141,10 @@ public:
 	void	QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_required = true, bool ignore_sender = true, float distance = 0);
 	void	ChangeLeader(Mob* newleader);
 	const char *GetClientNameByIndex(uint8 index);
-	void UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
-	void SetDirtyAutoHaters();
+	void	UpdateXTargetMarkedNPC(uint32 Number, Mob *m);
+	void	SetDirtyAutoHaters();
 	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
-	void JoinRaidXTarget(Raid *raid, bool first = false);
+	void	JoinRaidXTarget(Raid *raid, bool first = false);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();
@@ -159,11 +153,11 @@ public:
 
 	bool DoesAnyMemberHaveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, int max_check_count = 0);
 
-	Mob* members[MAX_GROUP_MEMBERS];
-	char	membername[MAX_GROUP_MEMBERS][64];
-	uint8	MemberRoles[MAX_GROUP_MEMBERS];
-	bool	disbandcheck;
-	bool	castspell;
+	Mob*	members[MAX_GROUP_MEMBERS] {nullptr};
+	char	membername[MAX_GROUP_MEMBERS][64] {""};
+	uint8	MemberRoles[MAX_GROUP_MEMBERS] {0};
+	bool	disbandcheck {false};
+	bool	castspell {false};
 
 private:
 	Mob*	leader;
@@ -183,6 +177,8 @@ private:
 	int mentor_percent;
 
 	XTargetAutoHaters m_autohatermgr;
+
+	std::string GetGroupLeaderName(uint32 group_id);
 };
 
 #endif

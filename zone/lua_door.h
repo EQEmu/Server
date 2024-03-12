@@ -62,6 +62,7 @@ public:
 	void ForceOpen(Lua_Mob sender, bool alt_mode);
 	void ForceClose(Lua_Mob sender);
 	void ForceClose(Lua_Mob sender, bool alt_mode);
+	uint32 GetID();
 };
 
 #endif

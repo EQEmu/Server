@@ -19,11 +19,13 @@
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
 
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "../common/events/player_event_logs.h"
+#include "bot.h"
+#include "../common/repositories/character_corpse_items_repository.h"
 
 extern WorldServer worldserver;
 
@@ -170,7 +172,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	if (!item->LoreFlag) { return false; }
 	if (item->LoreGroup == 0) { return false; }
 
-	if (item->LoreGroup == 0xFFFFFFFF) // Standard lore items; look everywhere except the shared bank, return the result
+	if (item->LoreGroup == -1) // Standard lore items; look everywhere except the shared bank, return the result
 		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
 
 	// If the item has a lore group, we check for other items with the same group and return the result
@@ -178,7 +180,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
-	this->EVENT_ITEM_ScriptStopReturn();
+	EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
 
@@ -186,25 +188,57 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// make sure the item exists
 	if(item == nullptr) {
-		Message(Chat::Red, "Item %u does not exist.", item_id);
-		LogInventory("Player [{}] on account [{}] attempted to create an item with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item_id, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Item {} does not exist.",
+				item_id
+			).c_str()
+		);
+		LogInventory(
+			"Player [{}] on account [{}] attempted to create an item with an invalid id.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item_id,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 	// check that there is not a lore conflict between base item and existing inventory
 	else if(CheckLoreConflict(item)) {
 		// DuplicateLoreMessage(item_id);
-		Message(Chat::Red, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"You already have a lore {} ({}) in your inventory.",
+				database.CreateItemLink(item_id),
+				item_id
+			).c_str()
+		);
 		return false;
 	}
 	// check to make sure we are augmenting an augmentable item
 	else if (((!item->IsClassCommon()) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5 | aug6)) {
 		Message(Chat::Red, "You can not augment an augment or a non-common class item.");
-		LogInventory("Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		LogInventory(
+			"Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 
@@ -214,33 +248,49 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// check to make sure we are a GM if the item is GM-only
 	/*
-	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+	else if(item->MinStatus && ((Admin() < item->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 		Message(Chat::Red, "You are not a GM or do not have the status to summon this item.");
-		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
-			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
+			GetName(), account_name, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 		return false;
 	}
 	*/
 
 	uint32 augments[EQ::invaug::SOCKET_COUNT] = { aug1, aug2, aug3, aug4, aug5, aug6 };
-
-	uint32 classes	= item->Classes;
-	uint32 races	= item->Races;
-	uint32 slots	= item->Slots;
-
-	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
-	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
-	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-
+	uint32 classes = item->Classes;
+	uint32 races = item->Races;
+	uint32 slots = item->Slots;
+	bool enforce_wearable = RuleB(Inventory, EnforceAugmentWear);
+	bool enforce_restrictions = RuleB(Inventory, EnforceAugmentRestriction);
+	bool enforce_usable = RuleB(Inventory, EnforceAugmentUsability);
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
+		int augment_slot = iter + 1;
 		const EQ::ItemData* augtest = database.GetItem(augments[iter]);
-
 		if(augtest == nullptr) {
 			if(augments[iter]) {
-				Message(Chat::Red, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Augment {} in Augment Slot {} does not exist.",
+						augments[iter],
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					augment_slot,
+					item->ID,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -249,15 +299,42 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check that there is not a lore conflict between augment and existing inventory
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
-				Message(Chat::Red, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"You already have a lore {} ({}) in your inventory.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID
+					).c_str()
+				);
 
 				return false;
 			}
 			// check that augment is an actual augment
 			else if(augtest->AugType == 0) {
-				Message(Chat::Red, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to use a non-augment item (Aug[{}]) as an augment.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"{} ({}) in Augment Slot {} is not an actual augment.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID,
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to use a non-augment item (Augment Slot [{}]) as an augment.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					item->ID,
+					augment_slot,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -266,235 +343,194 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 			// check to make sure we are a GM if the augment is GM-only
 			/*
-			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
+			else if(augtest->MinStatus && ((Admin() < augtest->MinStatus) || (Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 				Message(Chat::Red, "You are not a GM or do not have the status to summon this augment.");
 				LogInventory("Player [{}] on account [{}] attempted to create a GM-only augment (Aug[{}]) with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], MinStatus: [{}])\n",
-					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+					GetName(), account_name, augment_slot, Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 				return false;
 			}
 			*/
 
 			// check for augment type allowance
-			if(enforcewear) {
+			if(enforce_wearable) {
 				if ((item->AugSlotType[iter] == EQ::item::AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(Chat::Red, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"Augment {} ({}) in Augment Slot {} is not capable of being socketed in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				if(item->AugSlotVisible[iter] == 0) {
-					Message(Chat::Red, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
-					LogInventory("Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) has not evolved enough to accept {} ({}) in Augment Slot {}.",
+							database.CreateItemLink(item->ID),
+							item->ID,
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
 			// check for augment to item restriction
-			if(enforcerestr) {
-				bool restrictfail = false;
-				uint8 it = item->ItemType;
+			if (enforce_restrictions) {
+				bool is_restricted = IsAugmentRestricted(item->ItemType, augtest->AugRestrict);
 
-				switch(augtest->AugRestrict) {
-				case EQ::item::AugRestrictionAny:
-					break;
-				case EQ::item::AugRestrictionArmor:
-					switch(it) {
-					case EQ::item::ItemTypeArmor:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HWeapons:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBlunt:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionPiercing:
-					switch(it) {
-					case EQ::item::ItemType1HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionHandToHand:
-					switch(it) {
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HSlash:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HBlunt:
-					switch(it) {
-					case EQ::item::ItemType2HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HPierce:
-					switch(it) {
-					case EQ::item::ItemType2HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionBows:
-					switch(it) {
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionShields:
-					switch(it) {
-					case EQ::item::ItemTypeShield:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				// These 3 are in-work
-				case EQ::item::AugRestrictionUnknown1:
-				case EQ::item::AugRestrictionUnknown2:
-				case EQ::item::AugRestrictionUnknown3:
-				default:
-					restrictfail = true;
-					break;
-				}
-
-				if(restrictfail) {
-					Message(Chat::Red, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				if (is_restricted) {
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} is restricted from being augmented in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
-			if(enforceusable) {
+			if(enforce_usable) {
 				// check for class usability
 				if(item->Classes && !(classes &= augtest->Classes)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any class.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any class.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any class.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for race usability
 				if(item->Races && !(races &= augtest->Races)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any race.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any race.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any race.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for slot usability
 				if(item->Slots && !(slots &= augtest->Slots)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable in any slot.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable in any slot.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable in any slot.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
@@ -506,75 +542,130 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
 	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
-	if(charges <= 0 && item->Stackable)
+	if(charges <= 0 && item->Stackable) {
 		charges = 1;
-
-	// if the charges is -1, then no charge value was passed in set to max charges
-	else if(charges == -1)
+	} else if(charges == -1) { // if the charges is -1, then no charge value was passed in set to max charges
 		charges = item->MaxCharges;
+	}
 
 	// in any other situation just use charges as passed
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
+	auto timestamps = database.GetItemRecastTimestamps(CharacterID());
+	if (inst) {
+		const auto* d = inst->GetItem();
+		if (d->RecastDelay) {
+			if (d->RecastType != RECAST_TYPE_UNLINKED_ITEM) {
+				inst->SetRecastTimestamp(timestamps.count(d->RecastType) ? timestamps.at(d->RecastType) : 0);
+			}
+			else {
+				inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
+			}
+		}
+	}
 
 	if(inst == nullptr) {
 		Message(Chat::Red, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
-		LogError("Player [{}] on account [{}] encountered an unknown item creation error.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+		LogError(
+			"Player [{}] on account [{}] encountered an unknown item creation error.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 
 		return false;
 	}
 
 	// add any validated augments
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
-		if(augments[iter])
+		if(augments[iter]) {
 			inst->PutAugment(&database, iter, augments[iter]);
+		}
 	}
 
 	// attune item
-	if(attuned && inst->GetItem()->Attuneable)
+	if(attuned && inst->GetItem()->Attuneable) {
 		inst->SetAttuned(true);
+	}
 
 	inst->SetOrnamentIcon(ornament_icon);
 	inst->SetOrnamentationIDFile(ornament_idfile);
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
-	if (enforceusable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
+	if (enforce_usable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
 		uint32 slottest = to_slot;
-
 		if(!(slots & ((uint32)1 << slottest))) {
-			Message(0, "This item is not equipable at slot %u - moving to cursor.", to_slot);
-			LogInventory("Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-				GetName(), account_name, to_slot, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+			Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) cannot be equipped in {} ({}), moving to cursor.",
+					database.CreateItemLink(item->ID),
+					item->ID,
+					EQ::invslot::GetInvPossessionsSlotName(to_slot),
+					to_slot
+				).c_str()
+			);
+			LogInventory(
+				"Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n"
+				"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+				GetName(),
+				account_name,
+				to_slot,
+				item->ID,
+				aug1,
+				aug2,
+				aug3,
+				aug4,
+				aug5,
+				aug6
+			);
 			to_slot = EQ::invslot::slotCursor;
 		}
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_CREATION)) {
+		auto e = PlayerEvent::ItemCreationEvent{};
+		e.item_id   = item->ID;
+		e.item_name = item->Name;
+		e.to_slot   = to_slot;
+		e.charges   = charges;
+		e.aug1      = aug1;
+		e.aug2      = aug2;
+		e.aug3      = aug3;
+		e.aug4      = aug4;
+		e.aug5      = aug5;
+		e.aug6      = aug6;
+		e.attuned   = attuned;
+
+		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
 	}
 
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {
 		PushItemOnCursor(*inst);
 		SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
-	}
-	else {
+	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
 
 	safe_delete(inst);
 
 	// discover item and any augments
-	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
-		if(!IsDiscovered(item_id))
-			DiscoverItem(item_id);
-		/*
-		// Augments should have been discovered prior to being placed on an item.
-		for (int iter = AUG_BEGIN; iter < EQ::constants::ITEM_COMMON_SIZE; ++iter) {
-			if(augments[iter] && !IsDiscovered(augments[iter]))
-				DiscoverItem(augments[iter]);
-		}
-		*/
+	if (
+		RuleB(Character, EnableDiscoveredItems) &&
+		!GetGM() &&
+		!IsDiscovered(item_id)
+	) {
+		DiscoverItem(item_id);
 	}
 
 	return true;
@@ -583,12 +674,14 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 // Drop item from inventory to ground (generally only dropped from SLOT_CURSOR)
 void Client::DropItem(int16 slot_id, bool recurse)
 {
-	LogInventory("[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
-		GetCleanName(), CharacterID(), slot_id);
+	LogInventory(
+		"[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
+		GetCleanName(),
+		CharacterID(),
+		slot_id
+	);
 
-	if(GetInv().CheckNoDrop(slot_id, recurse) && RuleI(World, FVNoDropFlag) == 0 ||
-		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2)
-	{
+	if (GetInv().CheckNoDrop(slot_id, recurse) && !CanTradeFVNoDropItem()) {
 		auto invalid_drop = m_inv.GetItem(slot_id);
 		if (!invalid_drop) {
 			LogInventory("Error in InventoryProfile::CheckNoDrop() - returned 'true' for empty slot");
@@ -610,50 +703,102 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				}
 			}
 		}
-		invalid_drop = nullptr;
 
-		database.SetHackerFlag(this->AccountName(), this->GetCleanName(), "Tried to drop an item on the ground that was nodrop!");
+		std::string message = fmt::format(
+			"Tried to drop an item on the ground that was no-drop! item_name [{}] item_id ({})",
+			invalid_drop->GetItem()->Name,
+			invalid_drop->GetItem()->ID
+		);
+
+		invalid_drop = nullptr;
+		RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 		GetInv().DeleteItem(slot_id);
 		return;
 	}
 
 	// Take control of item in client inventory
-	EQ::ItemInstance *inst = m_inv.PopItem(slot_id);
-	if(inst) {
+	auto* inst = m_inv.PopItem(slot_id);
+	if (inst) {
 		if (LogSys.log_settings[Logs::Inventory].is_category_enabled) {
 			LogInventory("DropItem() Processing - full item parse:");
-			LogInventory("depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
-				(inst->GetItem() ? inst->GetItem()->Name : "null data"), inst->GetID(), (inst->IsDroppable(false) ? "true" : "false"));
+			LogInventory(
+				"depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
+				(inst->GetItem() ? inst->GetItem()->Name : "null data"),
+				inst->GetID(),
+				(inst->IsDroppable(false) ? "true" : "false")
+			);
 
-			if (!inst->IsDroppable(false))
+			if (!inst->IsDroppable(false)) {
 				LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
+			}
 
 			for (auto iter1 : *inst->GetContents()) { // depth 1
-				LogInventory("-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
-					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), (iter1.second->IsDroppable(false) ? "true" : "false"));
+				LogInventory(
+					"-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
+					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"),
+					iter1.second->GetID(),
+					(iter1.second->IsDroppable(false) ? "true" : "false")
+				);
 
-				if (!iter1.second->IsDroppable(false))
+				if (!iter1.second->IsDroppable(false)) {
 					LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
+				}
 
 				for (auto iter2 : *iter1.second->GetContents()) { // depth 2
-					LogInventory("--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
-						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), (iter2.second->IsDroppable(false) ? "true" : "false"));
+					LogInventory(
+						"--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
+						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"),
+						iter2.second->GetID(),
+						(iter2.second->IsDroppable(false) ? "true" : "false")
+					);
 
-					if (!iter2.second->IsDroppable(false))
+					if (!iter2.second->IsDroppable(false)) {
 						LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
+					}
 				}
 			}
 		}
 
-		int i = parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
-		if(i != 0) {
-			LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
-			safe_delete(inst);
+
+		int i = 0;
+
+		if (player_event_logs.IsEventEnabled(PlayerEvent::DROPPED_ITEM)) {
+			auto e = PlayerEvent::DroppedItemEvent{
+				.item_id = inst->GetID(),
+				.item_name = inst->GetItem()->Name,
+				.slot_id = slot_id,
+				.charges = (uint32) inst->GetCharges()
+			};
+			RecordPlayerEventLog(PlayerEvent::DROPPED_ITEM, e);
+		}
+
+		if (parse->ItemHasQuestSub(inst, EVENT_DROP_ITEM)) {
+			parse->EventItem(EVENT_DROP_ITEM, this, inst, nullptr, "", slot_id);
+			if (i != 0) {
+				LogInventory("Item drop handled by [EVENT_DROP_ITEM]");
+				safe_delete(inst);
+			}
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_DROP_ITEM_CLIENT)) {
+			std::vector<std::any> args = { inst };
+
+			i = parse->EventPlayer(EVENT_DROP_ITEM_CLIENT, this, "", slot_id, &args);
+			if (i != 0) {
+				LogInventory("Item drop handled by [EVENT_DROP_ITEM_CLIENT]");
+				safe_delete(inst);
+			}
 		}
 	} else {
 		// Item doesn't exist in inventory!
 		LogInventory("DropItem() - No item found in slot [{}]", slot_id);
-		Message(Chat::Red, "Error: Item not found in slot %i", slot_id);
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Error: Item not found in slot {}.",
+				slot_id
+			).c_str()
+		);
 		return;
 	}
 
@@ -666,15 +811,16 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		database.SaveInventory(CharacterID(), nullptr, slot_id);
 	}
 
-	if(!inst)
+	if (!inst) {
 		return;
+	}
 
 	// Package as zone object
 	auto object = new Object(this, inst);
 	entity_list.AddObject(object, true);
 	object->StartDecay();
 
-	LogInventory("Item drop handled ut assolet");
+	LogInventory("[{}] dropped [{}] from slot [{}]", GetCleanName(), inst->GetItem()->Name, slot_id);
 	DropItemQS(inst, false);
 
 	safe_delete(inst);
@@ -686,12 +832,12 @@ void Client::DropItemQS(EQ::ItemInstance* inst, bool pickup) {
 		std::list<void*> event_details;
 		memset(&qs_audit, 0, sizeof(QSPlayerDropItem_Struct));
 
-		qs_audit.char_id = this->character_id;
+		qs_audit.char_id = character_id;
 		qs_audit.pickup = pickup;
-		qs_audit.zone_id = this->GetZoneID();
-		qs_audit.x = (int) this->GetX();
-		qs_audit.y = (int) this->GetY();
-		qs_audit.z = (int) this->GetZ();
+		qs_audit.zone_id = GetZoneID();
+		qs_audit.x = (int) GetX();
+		qs_audit.y = (int) GetY();
+		qs_audit.z = (int) GetZ();
 
 		if (inst) {
 			auto detail = new QSDropItems_Struct;
@@ -844,7 +990,7 @@ void Client::SendCursorBuffer()
 	if (test_item == nullptr) { return; }
 
 	bool lore_pass = true;
-	if (test_item->LoreGroup == 0xFFFFFFFF) {
+	if (test_item->LoreGroup == -1) {
 		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
 	}
 	else if (test_item->LoreGroup != 0) {
@@ -855,7 +1001,16 @@ void Client::SendCursorBuffer()
 		LogInventory("([{}]) Duplicate lore items are not allowed - destroying item [{}](id:[{}]) on cursor",
 			GetName(), test_item->Name, test_item->ID);
 		MessageString(Chat::Loot, 290);
-		parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+
+		if (parse->ItemHasQuestSub(test_inst, EVENT_DESTROY_ITEM)) {
+			parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+			std::vector<std::any> args = { test_inst };
+			parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
+		}
+
 		DeleteItemInInventory(EQ::invslot::slotCursor);
 		SendCursorBuffer();
 	}
@@ -865,7 +1020,7 @@ void Client::SendCursorBuffer()
 }
 
 // Remove item from inventory
-void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_update, bool update_db) {
+void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_update, bool update_db) {
 	#if (EQDEBUG >= 5)
 		LogDebug("DeleteItemInInventory([{}], [{}], [{}])", slot_id, quantity, (client_update) ? "true":"false");
 	#endif
@@ -950,7 +1105,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int8 quantity, bool client_upd
 		if(update_db)
 			database.SaveInventory(character_id, inst, slot_id);
 	}
-
+	
 	if(client_update && IsValidSlot(slot_id)) {
 		EQApplicationPacket* outapp = nullptr;
 		if(inst) {
@@ -1020,17 +1175,17 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		return database.SaveCursor(this->CharacterID(), s, e);
+		return database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
-		return database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		return database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	CalcBonuses();
 	// a lot of wasted checks and calls coded above...
 }
 
-void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, ServerLootItem_Struct** bag_item_data)
+void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, LootItem** bag_item_data)
 {
 	LogInventory("Putting loot item [{}] ([{}]) into slot [{}]", inst.GetItem()->Name, inst.GetItem()->ID, slot_id);
 
@@ -1039,11 +1194,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 	if (slot_id == EQ::invslot::slotCursor) {
 		m_inv.PushCursor(inst);
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 	else {
 		m_inv.PutItem(slot_id, inst);
-		database.SaveInventory(this->CharacterID(), &inst, slot_id);
+		database.SaveInventory(CharacterID(), &inst, slot_id);
 	}
 
 	// Subordinate items in cursor buffer must be sent via ItemPacketSummonItem or we just overwrite the visible cursor and desync the client
@@ -1070,7 +1225,11 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 				bag_item_data[index]->aug_4,
 				bag_item_data[index]->aug_5,
 				bag_item_data[index]->aug_6,
-				bag_item_data[index]->attuned
+				bag_item_data[index]->attuned,
+				bag_item_data[index]->custom_data,
+				bag_item_data[index]->ornamenticon,
+				bag_item_data[index]->ornamentidfile,
+				bag_item_data[index]->ornament_hero_model
 				);
 
 			// Dump bag contents to cursor in the event that owning bag is not the first cursor item
@@ -1101,7 +1260,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 	int16 i;
 	uint32 item_id = item->GetItem()->ID;
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* tmp_inst = m_inv.GetItem(i);
@@ -1115,7 +1274,7 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 		}
 	}
 	for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		for (uint8 j = EQ::invbag::SLOT_BEGIN; j <= EQ::invbag::SLOT_END; j++) {
@@ -1138,12 +1297,12 @@ bool Client::TryStacking(EQ::ItemInstance* item, uint8 type, bool try_worn, bool
 // Locate an available space in inventory to place an item
 // and then put the item there
 // The change will be saved to the database
-bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool try_cursor, ServerLootItem_Struct** bag_item_data)
+bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool try_cursor, LootItem** bag_item_data)
 {
 	// #1: Try to auto equip
 	if (try_worn && inst.IsEquipable(GetBaseRace(), GetClass()) && inst.GetItem()->ReqLevel <= level && (!inst.GetItem()->Attuneable || inst.IsAttuned()) && inst.GetItem()->ItemType != EQ::item::ItemTypeAugmentation) {
 		for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			if (!m_inv[i]) {
@@ -1194,7 +1353,11 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 					if (worn_slot_material != EQ::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
-					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
+
+					if (parse->ItemHasQuestSub(&inst, EVENT_EQUIP_ITEM)) {
+						parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
+					}
+
 					return true;
 				}
 			}
@@ -1235,10 +1398,10 @@ void Client::MoveItemCharges(EQ::ItemInstance &from, int16 to_slot, uint8 type)
 		SendLootItemInPacket(tmp_inst, to_slot);
 		if (to_slot == EQ::invslot::slotCursor) {
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
-			database.SaveInventory(this->CharacterID(), tmp_inst, to_slot);
+			database.SaveInventory(CharacterID(), tmp_inst, to_slot);
 		}
 	}
 }
@@ -1355,6 +1518,7 @@ bool MakeItemLink(char* &ret_link, const ItemData *item, uint32 aug0, uint32 aug
 #endif
 
 int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
+#if 0
 	//pre-Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=70&postdays=0&postorder=asc
 	//Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145
 	if (!inst)	//have to have an item to make the hash
@@ -1440,6 +1604,8 @@ int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
 
 	safe_delete_array(hash_str);
 	return hash;
+#endif
+	return 0;
 }
 
 // This appears to still be in use... The core of this should be incorporated into class EQ::SayLinkEngine
@@ -1474,12 +1640,12 @@ packet with the item number in it, but I cant seem to find it right now
 	safe_delete(outapp);
 	if (send_to_all==false)
 		return;
-	const char* charname = this->GetName();
+	const char* charname = GetName();
 	outapp = new EQApplicationPacket(OP_ItemLinkText,strlen(itemlink)+14+strlen(charname));
 	char buffer3[150] = {0};
 	sprintf(buffer3,"%c%c%c%c%c%c%c%c%c%c%c%c%6s%c%s",0x00,0x00,0x00,0x00,0xD2,0x01,0x00,0x00,0x00,0x00,0x00,0x00,charname,0x00,itemlink);
 	memcpy(outapp->pBuffer,buffer3,outapp->size);
-	entity_list.QueueCloseClients(this->CastToMob(),outapp,true,200,0,false);
+	entity_list.QueueCloseClients(CastToMob(),outapp,true,200,0,false);
 	safe_delete(outapp);
 }
 
@@ -1508,6 +1674,7 @@ bool Client::IsValidSlot(uint32 slot) {
 		(slot == (uint32)EQ::invslot::slotCursor) ||
 		(slot <= EQ::invbag::CURSOR_BAG_END && slot >= EQ::invbag::CURSOR_BAG_BEGIN) ||
 		(slot <= EQ::invslot::TRIBUTE_END && slot >= EQ::invslot::TRIBUTE_BEGIN) ||
+		(slot <= EQ::invslot::GUILD_TRIBUTE_END && slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) ||
 		(slot <= EQ::invslot::SHARED_BANK_END && slot >= EQ::invslot::SHARED_BANK_BEGIN) ||
 		(slot <= EQ::invbag::SHARED_BANK_BAGS_END && slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) ||
 		(slot <= EQ::invslot::TRADE_END && slot >= EQ::invslot::TRADE_BEGIN) ||
@@ -1568,7 +1735,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (!test_item->LoreFlag) { return true; }
 
 			bool lore_pass = true;
-			if (test_item->LoreGroup == 0xFFFFFFFF) {
+			if (test_item->LoreGroup == -1) {
 				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
 			}
 			else if (test_item->LoreGroup != 0) {
@@ -1579,8 +1746,29 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				LogInventory("([{}]) Duplicate lore items are not allowed - destroying item [{}](id:[{}]) on cursor",
 					GetName(), test_item->Name, test_item->ID);
 				MessageString(Chat::Loot, 290);
-				parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+
+				if (parse->ItemHasQuestSub(test_inst, EVENT_DESTROY_ITEM)) {
+					parse->EventItem(EVENT_DESTROY_ITEM, this, test_inst, nullptr, "", 0);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+					std::vector<std::any> args = { test_inst };
+					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
+				}
+
 				DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
+
+				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id = test_inst->GetItem()->ID,
+						.item_name = test_inst->GetItem()->Name,
+						.charges = test_inst->GetCharges(),
+						.reason = "Duplicate lore item",
+					};
+
+					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+				}
+
 			}
 		}
 		return true;
@@ -1592,8 +1780,27 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 
 			EQ::ItemInstance *inst = m_inv.GetItem(EQ::invslot::slotCursor);
-			if(inst) {
-				parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
+
+			if (inst) {
+				if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
+					auto e = PlayerEvent::DestroyItemEvent{
+						.item_id = inst->GetItem()->ID,
+						.item_name = inst->GetItem()->Name,
+						.charges = inst->GetCharges(),
+						.reason = "Client destroy cursor",
+					};
+
+					RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+				}
+
+				if (parse->ItemHasQuestSub(inst, EVENT_DESTROY_ITEM)) {
+					parse->EventItem(EVENT_DESTROY_ITEM, this, inst, nullptr, "", 0);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_DESTROY_ITEM_CLIENT)) {
+					std::vector<std::any> args = { inst };
+					parse->EventPlayer(EVENT_DESTROY_ITEM_CLIENT, this, "", 0, &args);
+				}
 			}
 
 			DeleteItemInInventory(move_in->from_slot);
@@ -1626,11 +1833,13 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{
-			char *hacked_string = nullptr;
-			MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(items) but %s is non-existant or too far away (%u units).",
-				banker ? banker->GetName() : "UNKNOWN NPC", distance);
-			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-			safe_delete_array(hacked_string);
+			auto message = fmt::format(
+				"Player tried to make use of a banker (items) but banker [{}] is "
+				"non-existent or too far away [{}] units",
+				banker ? banker->GetName() : "UNKNOWN NPC", distance
+			);
+			RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+
 			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}
@@ -1671,9 +1880,12 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
 		}
-		if (srcitemid==17899 || srcbagid==17899 || dstitemid==17899 || dstbagid==17899){
-			this->Trader_EndTrader();
-			this->Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
+		if ((srcbagid && srcbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (srcitemid && src_inst && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstitemid && dst_inst && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
+			Trader_EndTrader();
+			Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}
 	}
 
@@ -1727,10 +1939,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Check for No Drop Hacks
 	Mob* with = trade->With();
-	if (((with && with->IsClient() && dst_slot_id >= EQ::invslot::TRADE_BEGIN && dst_slot_id <= EQ::invslot::TRADE_END) ||
+	if (((with && with->IsClient() && !with->CastToClient()->IsBecomeNPC() && dst_slot_id >= EQ::invslot::TRADE_BEGIN && dst_slot_id <= EQ::invslot::TRADE_END) ||
 		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END))
 	&& GetInv().CheckNoDrop(src_slot_id)
-	&& RuleI(World, FVNoDropFlag) == 0 || RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2) {
+	&& !CanTradeFVNoDropItem()) {
 		auto ndh_inst = m_inv[src_slot_id];
 		std::string ndh_item_data;
 		if (ndh_inst == nullptr) {
@@ -1971,28 +2183,84 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if (src_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(src_inst) {
-				parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+				if (parse->ItemHasQuestSub(src_inst, EVENT_UNEQUIP_ITEM)) {
+					parse->EventItem(EVENT_UNEQUIP_ITEM, this, src_inst, nullptr, "", src_slot_id);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {}",
+						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+						src_slot_id
+					);
+
+					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
+				}
 			}
 
-			if(dst_inst) {
-				parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+			if (dst_inst) {
+				if (parse->ItemHasQuestSub(dst_inst, EVENT_EQUIP_ITEM)) {
+					parse->EventItem(EVENT_EQUIP_ITEM, this, dst_inst, nullptr, "", src_slot_id);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {}",
+						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+						src_slot_id
+					);
+
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
+				}
 			}
 		}
 
 		if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {
-			if(dst_inst) {
-				parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+			if (dst_inst) {
+				if (parse->ItemHasQuestSub(dst_inst, EVENT_UNEQUIP_ITEM)) {
+					parse->EventItem(EVENT_UNEQUIP_ITEM, this, dst_inst, nullptr, "", dst_slot_id);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_UNEQUIP_ITEM_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {}",
+						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
+						dst_slot_id
+					);
+
+					std::vector<std::any> args = { dst_inst };
+
+					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID, &args);
+				}
 			}
 
-			if(src_inst) {
-				parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+			if (src_inst) {
+				if (parse->ItemHasQuestSub(src_inst, EVENT_EQUIP_ITEM)) {
+					parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
+				}
+
+				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {}",
+						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
+						dst_slot_id
+					);
+
+					std::vector<std::any> args = { src_inst };
+
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
+				}
 			}
 		}
 	}
 
 	int matslot = SlotConvert2(dst_slot_id);
-	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END && matslot != EQ::textures::armorHead) { // think this is to allow the client to update with /showhelm
+	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {// on Titanium and ROF2 /showhelm works even if sending helm slot
 		SendWearChange(matslot);
+	}
+	// This is part of a bug fix to ensure heroforge graphics display to other clients in zone.
+	if (queue_wearchange_slot >= 0) {
+		heroforge_wearchange_timer.Start(100);
 	}
 
 	// Step 7: Save change to the database
@@ -2021,6 +2289,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 	// Step 8: Re-calc stats
 	CalcBonuses();
+	ApplyWeaponsStance();
 	return true;
 }
 
@@ -2225,11 +2494,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
 				uint8 slot2=SlotConvert(i);
-				EQ::ItemInstance* inst = this->m_inv.GetItem(slot2);
+				EQ::ItemInstance* inst = m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
 					inst->SetColor(armor_color);
-					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
+					database.SaveCharacterMaterialColor(CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->Slot[i].UseTint)
 						m_pp.item_tint.Slot[i].UseTint = 0xFF;
@@ -2255,11 +2524,11 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 
 void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
 	uint8 item_slot = SlotConvert(slot);
-	EQ::ItemInstance* item_instance = this->m_inv.GetItem(item_slot);
+	EQ::ItemInstance* item_instance = m_inv.GetItem(item_slot);
 	if (item_instance) {
 		uint32 armor_color = ((uint32)red << 16) | ((uint32)green << 8) | ((uint32)blue);
-		item_instance->SetColor(armor_color); 
-		database.SaveCharacterMaterialColor(this->CharacterID(), slot, armor_color);
+		item_instance->SetColor(armor_color);
+		database.SaveCharacterMaterialColor(CharacterID(), slot, armor_color);
 		database.SaveInventory(CharacterID(), item_instance, item_slot);
 		m_pp.item_tint.Slot[slot].UseTint = (use_tint ? 0xFF : 0x00);
 	}
@@ -2269,69 +2538,16 @@ void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint
 	SendWearChange(slot);
 }
 
-#if 0
-bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
-	const ItemData* TempItem = 0;
-	EQ::ItemInstance* ins;
-	int x;
-	for(x=EQ::legacy::POSSESSIONS_BEGIN; x <= EQ::legacy::POSSESSIONS_END; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	for(x=EQ::legacy::GENERAL_BAGS_BEGIN; x <= EQ::legacy::GENERAL_BAGS_END; x++)
-	{
-		TempItem = 0;
-		ins = GetInv().GetItem(x);
-		if (ins)
-			TempItem = ins->GetItem();
-		if (TempItem && TempItem->ItemType == type)
-		{
-			if (ins->GetCharges() < amt)
-			{
-				amt -= ins->GetCharges();
-				DeleteItemInInventory(x,amt,true);
-			}
-			else
-			{
-				DeleteItemInInventory(x,amt,true);
-				amt = 0;
-			}
-			if (amt < 1)
-				return true;
-		}
-	}
-	return false;
-}
-#endif
-
-bool Client::DecreaseByID(uint32 type, uint8 amt) {
+bool Client::DecreaseByID(uint32 type, int16 quantity) {
 	const EQ::ItemData* TempItem = nullptr;
 	EQ::ItemInstance* ins = nullptr;
 	int x;
 	int num = 0;
 
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2343,7 +2559,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 
 	for (x = EQ::invbag::GENERAL_BAGS_BEGIN; x <= EQ::invbag::GENERAL_BAGS_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
 		if ((((uint64)1 << (EQ::invslot::GENERAL_BEGIN + ((x - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT))) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
@@ -2357,7 +2573,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	}
 
 	for (x = EQ::invbag::CURSOR_BAG_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; ++x) {
-		if (num >= amt)
+		if (num >= quantity)
 			break;
 
 		TempItem = nullptr;
@@ -2368,14 +2584,14 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 			num += ins->GetCharges();
 	}
 
-	if (num < amt)
+	if (num < quantity)
 		return false;
 
 
 	for (x = EQ::invslot::POSSESSIONS_BEGIN; x <= EQ::invslot::POSSESSIONS_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
-		if (((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << x) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		TempItem = nullptr;
@@ -2385,18 +2601,18 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
 	for (x = EQ::invbag::GENERAL_BAGS_BEGIN; x <= EQ::invbag::GENERAL_BAGS_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
 		if ((((uint64)1 << (EQ::invslot::GENERAL_BEGIN + ((x - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT))) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
@@ -2408,18 +2624,18 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
 	for (x = EQ::invbag::CURSOR_BAG_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; ++x) {
-		if (amt < 1)
+		if (quantity < 1)
 			break;
 
 		TempItem = nullptr;
@@ -2429,13 +2645,13 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 		if (TempItem && TempItem->ID != type)
 			continue;
 
-		if (ins->GetCharges() < amt) {
-			amt -= ins->GetCharges();
-			DeleteItemInInventory(x, amt, true);
+		if (ins->GetCharges() < quantity) {
+			quantity -= ins->GetCharges();
+			DeleteItemInInventory(x, quantity, true);
 		}
 		else {
-			DeleteItemInInventory(x, amt, true);
-			amt = 0;
+			DeleteItemInInventory(x, quantity, true);
+			quantity = 0;
 		}
 	}
 
@@ -2515,8 +2731,8 @@ static bool CopyBagContents(EQ::ItemInstance* new_bag, const EQ::ItemInstance* o
 void Client::DisenchantSummonedBags(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
-			continue; // not useable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
+			continue; // not usable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
 
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
@@ -2619,7 +2835,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 			local.clear();
 
 			auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-			database.SaveCursor(this->CharacterID(), s, e);
+			database.SaveCursor(CharacterID(), s, e);
 		}
 		else {
 			safe_delete(new_inst); // deletes disenchanted bag if not used
@@ -2632,7 +2848,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 void Client::RemoveNoRent(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2643,7 +2859,7 @@ void Client::RemoveNoRent(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv[slot_id];
@@ -2672,7 +2888,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Bank slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Bank slots
 		}
 	}
 
@@ -2684,7 +2900,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Bank Container slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Bank Container slots
 		}
 	}
 
@@ -2692,7 +2908,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank slots
 		}
 	}
 
@@ -2700,7 +2916,7 @@ void Client::RemoveNoRent(bool client_update)
 		auto inst = m_inv[slot_id];
 		if(inst && !inst->GetItem()->NoRent) {
 			LogInventory("NoRent Timer Lapse: Deleting [{}] from slot [{}]", inst->GetItem()->Name, slot_id);
-			DeleteItemInInventory(slot_id, 0, false); // Can't delete from client Shared Bank Container slots
+			DeleteItemInInventory(slot_id); // Can't delete from client Shared Bank Container slots
 		}
 	}
 
@@ -2727,7 +2943,7 @@ void Client::RemoveNoRent(bool client_update)
 		local.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -2735,7 +2951,7 @@ void Client::RemoveNoRent(bool client_update)
 void Client::RemoveDuplicateLore(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2751,7 +2967,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 	}
 
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
-		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		auto inst = m_inv.PopItem(slot_id);
@@ -2858,7 +3074,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		local_2.clear();
 
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
-		database.SaveCursor(this->CharacterID(), s, e);
+		database.SaveCursor(CharacterID(), s, e);
 	}
 }
 
@@ -2920,21 +3136,6 @@ uint32 Client::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 
 	return 0;
 }
-
-#if 0
-int32 Client::GetEquipmentMaterial(uint8 material_slot)
-{
-	const ItemData *item;
-
-	item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-	if(item != 0)
-	{
-		return item->Material;
-	}
-
-	return 0;
-}
-#endif
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const
 {
@@ -3003,31 +3204,6 @@ void Client::SendItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPac
 	FastQueuePacket(&outapp);
 }
 
-EQApplicationPacket* Client::ReturnItemPacket(int16 slot_id, const EQ::ItemInstance* inst, ItemPacketType packet_type)
-{
-	if (!inst)
-		return nullptr;
-
-	// Serialize item into |-delimited string
-	std::string packet = inst->Serialize(slot_id);
-
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	BulkItemPacket_Struct* itempacket = nullptr;
-
-	// Construct packet
-	opcode = OP_ItemPacket;
-	outapp = new EQApplicationPacket(opcode, packet.length()+1);
-	itempacket = (BulkItemPacket_Struct*)outapp->pBuffer;
-	memcpy(itempacket->SerializedItem, packet.c_str(), packet.length());
-
-#if EQDEBUG >= 9
-		DumpPacket(outapp);
-#endif
-
-	return outapp;
-}
-
 static int16 BandolierSlotToWeaponSlot(int BandolierSlot)
 {
 	switch (BandolierSlot)
@@ -3057,7 +3233,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	const EQ::ItemData *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
-	database.DeleteCharacterBandolier(this->CharacterID(), bs->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bs->Number);
 
 	for(int BandolierSlot = bandolierPrimary; BandolierSlot <= bandolierAmmo; BandolierSlot++) {
 		WeaponSlot = BandolierSlotToWeaponSlot(BandolierSlot);
@@ -3067,7 +3243,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 			LogInventory("Char: [{}] adding item [{}] to slot [{}]", GetName(),BaseItem->Name, WeaponSlot);
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID = BaseItem->ID;
 			m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon = BaseItem->Icon;
-			database.SaveCharacterBandolier(this->CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
+			database.SaveCharacterBandolier(CharacterID(), bs->Number, BandolierSlot, m_pp.bandoliers[bs->Number].Items[BandolierSlot].ID, m_pp.bandoliers[bs->Number].Items[BandolierSlot].Icon, bs->Name);
 		}
 		else {
 			LogInventory("Char: [{}] no item in slot [{}]", GetName(), WeaponSlot);
@@ -3086,7 +3262,7 @@ void Client::RemoveBandolier(const EQApplicationPacket *app)
 		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
 		m_pp.bandoliers[bds->Number].Items[i].Icon = 0;
 	}
-	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
+	database.DeleteCharacterBandolier(CharacterID(), bds->Number);
 }
 
 void Client::SetBandolier(const EQApplicationPacket *app)
@@ -3115,8 +3291,11 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(EQ::invslot::slotCursor)) {
-					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID &&
-						m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges() >= 1) { // '> 0' the same, but this matches Inventory::_HasItem conditional check
+					// Below used to check charges but for some reason
+					// m_inv.GetItem(EQ::invslot::slotCursor)->GetCharges()
+					// is returning 0.  We know it exists, so removed check.
+					// TODO: Why is 0 being returned for slotCursor.
+					if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ID == m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID) {
 						slot = EQ::invslot::slotCursor;
 					}
 					else if (m_inv.GetItem(EQ::invslot::slotCursor)->GetItem()->ItemClass == 1) {
@@ -3267,7 +3446,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	if(ItemToReturn->IsStackable()) {
 
 		for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will stack into slot 30 (bags too) before moving.
-			if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
 			EQ::ItemInstance* InvItem = m_inv.GetItem(i);
@@ -3328,7 +3507,7 @@ bool Client::MoveItemToInventory(EQ::ItemInstance *ItemToReturn, bool UpdateClie
 	// We have tried stacking items, now just try and find an empty slot.
 
 	for (int16 i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::slotCursor; i++) { // changed slot max to 30 from 29. client will move into slot 30 (bags too) before pushing onto cursor.
-		if (((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask == 0)
+		if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 			continue;
 
 		EQ::ItemInstance* InvItem = m_inv.GetItem(i);
@@ -3400,6 +3579,11 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 		if (inst == nullptr) { continue; }
 		instmap[index] = inst;
 	}
+	for (int16 index = EQ::invslot::GUILD_TRIBUTE_BEGIN; index <= EQ::invslot::GUILD_TRIBUTE_END; ++index) {
+		auto inst = m_inv[index];
+		if (inst == nullptr) { continue; }
+		instmap[index] = inst;
+	}
 	for (int16 index = EQ::invslot::BANK_BEGIN; index <= EQ::invslot::BANK_END; ++index) {
 		auto inst = m_inv[index];
 		if (inst == nullptr) { continue; }
@@ -3465,7 +3649,6 @@ bool Client::InterrogateInventory(Client* requester, bool log, bool silent, bool
 
 	if (log) {
 		LogError("Target interrogate inventory flag: [{}]", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
-		LogDebug("[CLIENT] Client::InterrogateInventory() -- End");
 	}
 	if (!silent) {
 		requester->Message(Chat::Default, "Target interrogation flag: %s", (GetInterrogateInvState() ? "TRUE" : "FALSE"));
@@ -3537,6 +3720,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	if (
 		(head >= EQ::invslot::EQUIPMENT_BEGIN && head <= EQ::invslot::EQUIPMENT_END) ||
 		(head >= EQ::invslot::TRIBUTE_BEGIN && head <= EQ::invslot::TRIBUTE_END) ||
+		(head >= EQ::invslot::GUILD_TRIBUTE_BEGIN && head <= EQ::invslot::GUILD_TRIBUTE_END) ||
 		(head >= EQ::invslot::WORLD_BEGIN && head <= EQ::invslot::WORLD_END) ||
 		(head >= 8000 && head <= 8101)) {
 		switch (depth)
@@ -3608,7 +3792,7 @@ bool Client::InterrogateInventory_error(int16 head, int16 index, const EQ::ItemI
 	return false;
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, std::string value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, const std::string &value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3616,7 +3800,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, int value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, int value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3624,7 +3808,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, float value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, float value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3632,7 +3816,7 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, std::string identifier, bool value) {
+void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id, const std::string &identifier, bool value) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		inst->SetCustomData(identifier, value);
@@ -3640,10 +3824,1007 @@ void EQ::InventoryProfile::SetCustomItemData(uint32 character_id, int16 slot_id,
 	}
 }
 
-std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, std::string identifier) {
+std::string EQ::InventoryProfile::GetCustomItemData(int16 slot_id, const std::string &identifier) {
 	EQ::ItemInstance *inst = GetItem(slot_id);
 	if(inst) {
 		return inst->GetCustomData(identifier);
 	}
 	return "";
+}
+
+const int EQ::InventoryProfile::GetItemStatValue(uint32 item_id, const std::string &identifier) {
+	if (identifier.empty()) {
+		return 0;
+	}
+
+	const auto* inst = database.CreateItem(item_id);
+	if (!inst) {
+		return 0;
+	}
+
+	const auto* item = inst->GetItem();
+	if (!item) {
+		return 0;
+	}
+
+	int stat = 0;
+
+	if (Strings::EqualFold(identifier, "itemclass")) {
+		stat = static_cast<int>(item->ItemClass);
+	}
+
+	if (Strings::EqualFold(identifier, "id")) {
+		stat = static_cast<int>(item->ID);
+	}
+
+	if (Strings::EqualFold(identifier, "idfile")) {
+		stat = Strings::IsNumber(&item->IDFile[2]) ? Strings::ToInt(&item->IDFile[2]) : 0;
+	}
+
+	if (Strings::EqualFold(identifier, "weight")) {
+		stat = static_cast<int>(item->Weight);
+	}
+
+	if (Strings::EqualFold(identifier, "norent")) {
+		stat = static_cast<int>(item->NoRent);
+	}
+
+	if (Strings::EqualFold(identifier, "nodrop")) {
+		stat = static_cast<int>(item->NoDrop);
+	}
+
+	if (Strings::EqualFold(identifier, "size")) {
+		stat = static_cast<int>(item->Size);
+	}
+
+	if (Strings::EqualFold(identifier, "slots")) {
+		stat = static_cast<int>(item->Slots);
+	}
+
+	if (Strings::EqualFold(identifier, "price")) {
+		stat = static_cast<int>(item->Price);
+	}
+
+	if (Strings::EqualFold(identifier, "icon")) {
+		stat = static_cast<int>(item->Icon);
+	}
+
+	if (Strings::EqualFold(identifier, "loregroup")) {
+		stat = static_cast<int>(item->LoreGroup);
+	}
+
+	if (Strings::EqualFold(identifier, "loreflag")) {
+		stat = static_cast<int>(item->LoreFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "pendingloreflag")) {
+		stat = static_cast<int>(item->PendingLoreFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "artifactflag")) {
+		stat = static_cast<int>(item->ArtifactFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "summonedflag")) {
+		stat = static_cast<int>(item->SummonedFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "fvnodrop")) {
+		stat = static_cast<int>(item->FVNoDrop);
+	}
+
+	if (Strings::EqualFold(identifier, "favor")) {
+		stat = static_cast<int>(item->Favor);
+	}
+
+	if (Strings::EqualFold(identifier, "guildfavor")) {
+		stat = static_cast<int>(item->GuildFavor);
+	}
+
+	if (Strings::EqualFold(identifier, "pointtype")) {
+		stat = static_cast<int>(item->PointType);
+	}
+
+	if (Strings::EqualFold(identifier, "bagtype")) {
+		stat = static_cast<int>(item->BagType);
+	}
+
+	if (Strings::EqualFold(identifier, "bagslots")) {
+		stat = static_cast<int>(item->BagSlots);
+	}
+
+	if (Strings::EqualFold(identifier, "bagsize")) {
+		stat = static_cast<int>(item->BagSize);
+	}
+
+	if (Strings::EqualFold(identifier, "bagwr")) {
+		stat = static_cast<int>(item->BagWR);
+	}
+
+	if (Strings::EqualFold(identifier, "benefitflag")) {
+		stat = static_cast<int>(item->BenefitFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "tradeskills")) {
+		stat = static_cast<int>(item->Tradeskills);
+	}
+
+	if (Strings::EqualFold(identifier, "cr")) {
+		stat = static_cast<int>(item->CR);
+	}
+
+	if (Strings::EqualFold(identifier, "dr")) {
+		stat = static_cast<int>(item->DR);
+	}
+
+	if (Strings::EqualFold(identifier, "pr")) {
+		stat = static_cast<int>(item->PR);
+	}
+
+	if (Strings::EqualFold(identifier, "mr")) {
+		stat = static_cast<int>(item->MR);
+	}
+
+	if (Strings::EqualFold(identifier, "fr")) {
+		stat = static_cast<int>(item->FR);
+	}
+
+	if (Strings::EqualFold(identifier, "astr")) {
+		stat = static_cast<int>(item->AStr);
+	}
+
+	if (Strings::EqualFold(identifier, "asta")) {
+		stat = static_cast<int>(item->ASta);
+	}
+
+	if (Strings::EqualFold(identifier, "aagi")) {
+		stat = static_cast<int>(item->AAgi);
+	}
+
+	if (Strings::EqualFold(identifier, "adex")) {
+		stat = static_cast<int>(item->ADex);
+	}
+
+	if (Strings::EqualFold(identifier, "acha")) {
+		stat = static_cast<int>(item->ACha);
+	}
+
+	if (Strings::EqualFold(identifier, "aint")) {
+		stat = static_cast<int>(item->AInt);
+	}
+
+	if (Strings::EqualFold(identifier, "awis")) {
+		stat = static_cast<int>(item->AWis);
+	}
+
+	if (Strings::EqualFold(identifier, "hp")) {
+		stat = static_cast<int>(item->HP);
+	}
+
+	if (Strings::EqualFold(identifier, "mana")) {
+		stat = static_cast<int>(item->Mana);
+	}
+
+	if (Strings::EqualFold(identifier, "ac")) {
+		stat = static_cast<int>(item->AC);
+	}
+
+	if (Strings::EqualFold(identifier, "deity")) {
+		stat = static_cast<int>(item->Deity);
+	}
+
+	if (Strings::EqualFold(identifier, "skillmodvalue")) {
+		stat = static_cast<int>(item->SkillModValue);
+	}
+
+	if (Strings::EqualFold(identifier, "skillmodtype")) {
+		stat = static_cast<int>(item->SkillModType);
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgrace")) {
+		stat = static_cast<int>(item->BaneDmgRace);
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgamt")) {
+		stat = static_cast<int>(item->BaneDmgAmt);
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgbody")) {
+		stat = static_cast<int>(item->BaneDmgBody);
+	}
+
+	if (Strings::EqualFold(identifier, "magic")) {
+		stat = static_cast<int>(item->Magic);
+	}
+
+	if (Strings::EqualFold(identifier, "casttime_")) {
+		stat = static_cast<int>(item->CastTime_);
+	}
+
+	if (Strings::EqualFold(identifier, "reqlevel")) {
+		stat = static_cast<int>(item->ReqLevel);
+	}
+
+	if (Strings::EqualFold(identifier, "bardtype")) {
+		stat = static_cast<int>(item->BardType);
+	}
+
+	if (Strings::EqualFold(identifier, "bardvalue")) {
+		stat = static_cast<int>(item->BardValue);
+	}
+
+	if (Strings::EqualFold(identifier, "light")) {
+		stat = static_cast<int>(item->Light);
+	}
+
+	if (Strings::EqualFold(identifier, "delay")) {
+		stat = static_cast<int>(item->Delay);
+	}
+
+	if (Strings::EqualFold(identifier, "reclevel")) {
+		stat = static_cast<int>(item->RecLevel);
+	}
+
+	if (Strings::EqualFold(identifier, "recskill")) {
+		stat = static_cast<int>(item->RecSkill);
+	}
+
+	if (Strings::EqualFold(identifier, "elemdmgtype")) {
+		stat = static_cast<int>(item->ElemDmgType);
+	}
+
+	if (Strings::EqualFold(identifier, "elemdmgamt")) {
+		stat = static_cast<int>(item->ElemDmgAmt);
+	}
+
+	if (Strings::EqualFold(identifier, "range")) {
+		stat = static_cast<int>(item->Range);
+	}
+
+	if (Strings::EqualFold(identifier, "damage")) {
+		stat = static_cast<int>(item->Damage);
+	}
+
+	if (Strings::EqualFold(identifier, "color")) {
+		stat = static_cast<int>(item->Color);
+	}
+
+	if (Strings::EqualFold(identifier, "classes")) {
+		stat = static_cast<int>(item->Classes);
+	}
+
+	if (Strings::EqualFold(identifier, "races")) {
+		stat = static_cast<int>(item->Races);
+	}
+
+	if (Strings::EqualFold(identifier, "maxcharges")) {
+		stat = static_cast<int>(item->MaxCharges);
+	}
+
+	if (Strings::EqualFold(identifier, "itemtype")) {
+		stat = static_cast<int>(item->ItemType);
+	}
+
+	if (Strings::EqualFold(identifier, "material")) {
+		stat = static_cast<int>(item->Material);
+	}
+
+	if (Strings::EqualFold(identifier, "casttime")) {
+		stat = static_cast<int>(item->CastTime);
+	}
+
+	if (Strings::EqualFold(identifier, "elitematerial")) {
+		stat = static_cast<int>(item->EliteMaterial);
+	}
+
+	if (Strings::EqualFold(identifier, "herosforgemodel")) {
+		stat = static_cast<int>(item->HerosForgeModel);
+	}
+
+	if (Strings::EqualFold(identifier, "procrate")) {
+		stat = static_cast<int>(item->ProcRate);
+	}
+
+	if (Strings::EqualFold(identifier, "combateffects")) {
+		stat = static_cast<int>(item->CombatEffects);
+	}
+
+	if (Strings::EqualFold(identifier, "shielding")) {
+		stat = static_cast<int>(item->Shielding);
+	}
+
+	if (Strings::EqualFold(identifier, "stunresist")) {
+		stat = static_cast<int>(item->StunResist);
+	}
+
+	if (Strings::EqualFold(identifier, "strikethrough")) {
+		stat = static_cast<int>(item->StrikeThrough);
+	}
+
+	if (Strings::EqualFold(identifier, "extradmgskill")) {
+		stat = static_cast<int>(item->ExtraDmgSkill);
+	}
+
+	if (Strings::EqualFold(identifier, "extradmgamt")) {
+		stat = static_cast<int>(item->ExtraDmgAmt);
+	}
+
+	if (Strings::EqualFold(identifier, "spellshield")) {
+		stat = static_cast<int>(item->SpellShield);
+	}
+
+	if (Strings::EqualFold(identifier, "avoidance")) {
+		stat = static_cast<int>(item->Avoidance);
+	}
+
+	if (Strings::EqualFold(identifier, "accuracy")) {
+		stat = static_cast<int>(item->Accuracy);
+	}
+
+	if (Strings::EqualFold(identifier, "charmfileid")) {
+		stat = static_cast<int>(item->CharmFileID);
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod1")) {
+		stat = static_cast<int>(item->FactionMod1);
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod2")) {
+		stat = static_cast<int>(item->FactionMod2);
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod3")) {
+		stat = static_cast<int>(item->FactionMod3);
+	}
+
+	if (Strings::EqualFold(identifier, "factionmod4")) {
+		stat = static_cast<int>(item->FactionMod4);
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt1")) {
+		stat = static_cast<int>(item->FactionAmt1);
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt2")) {
+		stat = static_cast<int>(item->FactionAmt2);
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt3")) {
+		stat = static_cast<int>(item->FactionAmt3);
+	}
+
+	if (Strings::EqualFold(identifier, "factionamt4")) {
+		stat = static_cast<int>(item->FactionAmt4);
+	}
+
+	if (Strings::EqualFold(identifier, "augtype")) {
+		stat = static_cast<int>(item->AugType);
+	}
+
+	if (Strings::EqualFold(identifier, "ldontheme")) {
+		stat = static_cast<int>(item->LDoNTheme);
+	}
+
+	if (Strings::EqualFold(identifier, "ldonprice")) {
+		stat = static_cast<int>(item->LDoNPrice);
+	}
+
+	if (Strings::EqualFold(identifier, "ldonsold")) {
+		stat = static_cast<int>(item->LDoNSold);
+	}
+
+	if (Strings::EqualFold(identifier, "banedmgraceamt")) {
+		stat = static_cast<int>(item->BaneDmgRaceAmt);
+	}
+
+	if (Strings::EqualFold(identifier, "augrestrict")) {
+		stat = static_cast<int>(item->AugRestrict);
+	}
+
+	if (Strings::EqualFold(identifier, "endur")) {
+		stat = static_cast<int>(item->Endur);
+	}
+
+	if (Strings::EqualFold(identifier, "dotshielding")) {
+		stat = static_cast<int>(item->DotShielding);
+	}
+
+	if (Strings::EqualFold(identifier, "attack")) {
+		stat = static_cast<int>(item->Attack);
+	}
+
+	if (Strings::EqualFold(identifier, "regen")) {
+		stat = static_cast<int>(item->Regen);
+	}
+
+	if (Strings::EqualFold(identifier, "manaregen")) {
+		stat = static_cast<int>(item->ManaRegen);
+	}
+
+	if (Strings::EqualFold(identifier, "enduranceregen")) {
+		stat = static_cast<int>(item->EnduranceRegen);
+	}
+
+	if (Strings::EqualFold(identifier, "haste")) {
+		stat = static_cast<int>(item->Haste);
+	}
+
+	if (Strings::EqualFold(identifier, "damageshield")) {
+		stat = static_cast<int>(item->DamageShield);
+	}
+
+	if (Strings::EqualFold(identifier, "recastdelay")) {
+		stat = static_cast<int>(item->RecastDelay);
+	}
+
+	if (Strings::EqualFold(identifier, "recasttype")) {
+		stat = static_cast<int>(item->RecastType);
+	}
+
+	if (Strings::EqualFold(identifier, "augdistiller")) {
+		stat = static_cast<int>(item->AugDistiller);
+	}
+
+	if (Strings::EqualFold(identifier, "attuneable")) {
+		stat = static_cast<int>(item->Attuneable);
+	}
+
+	if (Strings::EqualFold(identifier, "nopet")) {
+		stat = static_cast<int>(item->NoPet);
+	}
+
+	if (Strings::EqualFold(identifier, "potionbelt")) {
+		stat = static_cast<int>(item->PotionBelt);
+	}
+
+	if (Strings::EqualFold(identifier, "stackable")) {
+		stat = static_cast<int>(item->Stackable);
+	}
+
+	if (Strings::EqualFold(identifier, "notransfer")) {
+		stat = static_cast<int>(item->NoTransfer);
+	}
+
+	if (Strings::EqualFold(identifier, "questitemflag")) {
+		stat = static_cast<int>(item->QuestItemFlag);
+	}
+
+	if (Strings::EqualFold(identifier, "stacksize")) {
+		stat = static_cast<int>(item->StackSize);
+	}
+
+	if (Strings::EqualFold(identifier, "potionbeltslots")) {
+		stat = static_cast<int>(item->PotionBeltSlots);
+	}
+
+	if (Strings::EqualFold(identifier, "book")) {
+		stat = static_cast<int>(item->Book);
+	}
+
+	if (Strings::EqualFold(identifier, "booktype")) {
+		stat = static_cast<int>(item->BookType);
+	}
+
+	if (Strings::EqualFold(identifier, "svcorruption")) {
+		stat = static_cast<int>(item->SVCorruption);
+	}
+
+	if (Strings::EqualFold(identifier, "purity")) {
+		stat = static_cast<int>(item->Purity);
+	}
+
+	if (Strings::EqualFold(identifier, "backstabdmg")) {
+		stat = static_cast<int>(item->BackstabDmg);
+	}
+
+	if (Strings::EqualFold(identifier, "dsmitigation")) {
+		stat = static_cast<int>(item->DSMitigation);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicstr")) {
+		stat = static_cast<int>(item->HeroicStr);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicint")) {
+		stat = static_cast<int>(item->HeroicInt);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicwis")) {
+		stat = static_cast<int>(item->HeroicWis);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicagi")) {
+		stat = static_cast<int>(item->HeroicAgi);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicdex")) {
+		stat = static_cast<int>(item->HeroicDex);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicsta")) {
+		stat = static_cast<int>(item->HeroicSta);
+	}
+
+	if (Strings::EqualFold(identifier, "heroiccha")) {
+		stat = static_cast<int>(item->HeroicCha);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicmr")) {
+		stat = static_cast<int>(item->HeroicMR);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicfr")) {
+		stat = static_cast<int>(item->HeroicFR);
+	}
+
+	if (Strings::EqualFold(identifier, "heroiccr")) {
+		stat = static_cast<int>(item->HeroicCR);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicdr")) {
+		stat = static_cast<int>(item->HeroicDR);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicpr")) {
+		stat = static_cast<int>(item->HeroicPR);
+	}
+
+	if (Strings::EqualFold(identifier, "heroicsvcorrup")) {
+		stat = static_cast<int>(item->HeroicSVCorrup);
+	}
+
+	if (Strings::EqualFold(identifier, "healamt")) {
+		stat = static_cast<int>(item->HealAmt);
+	}
+
+	if (Strings::EqualFold(identifier, "spelldmg")) {
+		stat = static_cast<int>(item->SpellDmg);
+	}
+
+	if (Strings::EqualFold(identifier, "ldonsellbackrate")) {
+		stat = static_cast<int>(item->LDoNSellBackRate);
+	}
+
+	if (Strings::EqualFold(identifier, "scriptfileid")) {
+		stat = static_cast<int>(item->ScriptFileID);
+	}
+
+	if (Strings::EqualFold(identifier, "expendablearrow")) {
+		stat = static_cast<int>(item->ExpendableArrow);
+	}
+
+	if (Strings::EqualFold(identifier, "clairvoyance")) {
+		stat = static_cast<int>(item->Clairvoyance);
+	}
+
+	if (Strings::EqualFold(identifier, "clickeffect")) {
+		stat = static_cast<int>(item->Click.Effect);
+	}
+
+	if (Strings::EqualFold(identifier, "clicktype")) {
+		stat = static_cast<int>(item->Click.Type);
+	}
+
+	if (Strings::EqualFold(identifier, "clicklevel")) {
+		stat = static_cast<int>(item->Click.Level);
+	}
+
+	if (Strings::EqualFold(identifier, "clicklevel2")) {
+		stat = static_cast<int>(item->Click.Level2);
+	}
+
+	if (Strings::EqualFold(identifier, "proceffect")) {
+		stat = static_cast<int>(item->Proc.Effect);
+	}
+
+	if (Strings::EqualFold(identifier, "proctype")) {
+		stat = static_cast<int>(item->Proc.Type);
+	}
+
+	if (Strings::EqualFold(identifier, "proclevel")) {
+		stat = static_cast<int>(item->Proc.Level);
+	}
+
+	if (Strings::EqualFold(identifier, "proclevel2")) {
+		stat = static_cast<int>(item->Proc.Level2);
+	}
+
+	if (Strings::EqualFold(identifier, "worneffect")) {
+		stat = static_cast<int>(item->Worn.Effect);
+	}
+
+	if (Strings::EqualFold(identifier, "worntype")) {
+		stat = static_cast<int>(item->Worn.Type);
+	}
+
+	if (Strings::EqualFold(identifier, "wornlevel")) {
+		stat = static_cast<int>(item->Worn.Level);
+	}
+
+	if (Strings::EqualFold(identifier, "wornlevel2")) {
+		stat = static_cast<int>(item->Worn.Level2);
+	}
+
+	if (Strings::EqualFold(identifier, "focuseffect")) {
+		stat = static_cast<int>(item->Focus.Effect);
+	}
+
+	if (Strings::EqualFold(identifier, "focustype")) {
+		stat = static_cast<int>(item->Focus.Type);
+	}
+
+	if (Strings::EqualFold(identifier, "focuslevel")) {
+		stat = static_cast<int>(item->Focus.Level);
+	}
+
+	if (Strings::EqualFold(identifier, "focuslevel2")) {
+		stat = static_cast<int>(item->Focus.Level2);
+	}
+
+	if (Strings::EqualFold(identifier, "scrolleffect")) {
+		stat = static_cast<int>(item->Scroll.Effect);
+	}
+
+	if (Strings::EqualFold(identifier, "scrolltype")) {
+		stat = static_cast<int>(item->Scroll.Type);
+	}
+
+	if (Strings::EqualFold(identifier, "scrolllevel")) {
+		stat = static_cast<int>(item->Scroll.Level);
+	}
+
+	if (Strings::EqualFold(identifier, "scrolllevel2")) {
+		stat = static_cast<int>(item->Scroll.Level2);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot1type")) {
+		stat = static_cast<int>(item->AugSlotType[0]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot2type")) {
+		stat = static_cast<int>(item->AugSlotType[1]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot3type")) {
+		stat = static_cast<int>(item->AugSlotType[2]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot4type")) {
+		stat = static_cast<int>(item->AugSlotType[3]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot5type")) {
+		stat = static_cast<int>(item->AugSlotType[4]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot6type")) {
+		stat = static_cast<int>(item->AugSlotType[5]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot1visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[0]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot2visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[1]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot3visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[2]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot4visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[3]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot5visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[4]);
+	}
+
+	if (Strings::EqualFold(identifier, "augslot6visible")) {
+		stat = static_cast<int>(item->AugSlotVisible[5]);
+	}
+
+	safe_delete(inst);
+	return stat;
+}
+
+// Returns a slot's item ID (returns INVALID_ID if not found)
+int32 Bot::GetItemIDAt(int16 slot_id) {
+	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+		auto temp_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
+		if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invslot::BANK_END && slot_id >= EQ::invslot::BANK_BEGIN) {
+		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) {
+		auto temp_slot = (slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT;
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+			return INVALID_ID;
+		}
+	}
+
+	const EQ::ItemInstance* inst = m_inv[slot_id];
+	if (inst)
+		return inst->GetItem()->ID;
+
+	// None found
+	return INVALID_ID;
+}
+
+// Returns an augment's ID that's in an item (returns INVALID_ID if not found)
+// Pass in the slot ID of the item and which augslot you want to check (0-5)
+int32 Bot::GetAugmentIDAt(int16 slot_id, uint8 augslot) {
+	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
+		if ((((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invbag::GENERAL_BAGS_END && slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN) {
+		auto temp_slot = EQ::invslot::GENERAL_BEGIN + ((slot_id - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT);
+		if ((((uint64)1 << temp_slot) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invslot::BANK_END && slot_id >= EQ::invslot::BANK_BEGIN) {
+		if ((slot_id - EQ::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+			return INVALID_ID;
+		}
+	}
+	else if (slot_id <= EQ::invbag::BANK_BAGS_END && slot_id >= EQ::invbag::BANK_BAGS_BEGIN) {
+		auto temp_slot = (slot_id - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT;
+		if (temp_slot >= GetInv().GetLookup()->InventoryTypeSize.Bank) {
+			return INVALID_ID;
+		}
+	}
+
+	const EQ::ItemInstance* inst = m_inv[slot_id];
+	if (inst && inst->GetAugmentItemID(augslot)) {
+		return inst->GetAugmentItemID(augslot);
+	}
+
+	// None found
+	return INVALID_ID;
+}
+
+bool Client::IsAugmentRestricted(uint8 item_type, uint32 augment_restriction)
+{
+	switch (augment_restriction) {
+		case EQ::item::AugRestrictionAny:
+			break;
+		case EQ::item::AugRestrictionArmor:
+			switch (item_type) {
+				case EQ::item::ItemTypeArmor:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemType1HPiercing:
+				case EQ::item::ItemTypeMartial:
+				case EQ::item::ItemType2HSlash:
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HPiercing:
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemType1HPiercing:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HWeapons:
+			switch (item_type) {
+				case EQ::item::ItemType2HSlash:
+				case EQ::item::ItemType2HBlunt:
+				case EQ::item::ItemType2HPiercing:
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HSlash:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HBlunt:
+			switch (item_type) {
+				case EQ::item::ItemType1HBlunt:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionPiercing:
+			switch (item_type) {
+				case EQ::item::ItemType1HPiercing:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HSlash:
+			switch (item_type) {
+				case EQ::item::ItemType2HSlash:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HBlunt:
+			switch (item_type) {
+				case EQ::item::ItemType2HBlunt:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction2HPierce:
+			switch (item_type) {
+				case EQ::item::ItemType2HPiercing:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionBows:
+			switch (item_type) {
+				case EQ::item::ItemTypeBow:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionShields:
+			switch (item_type) {
+				case EQ::item::ItemTypeShield:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemType1HSlash:
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestriction1HBluntOrHandToHand:
+			switch (item_type) {
+				case EQ::item::ItemType1HBlunt:
+				case EQ::item::ItemTypeMartial:
+					break;
+				default:
+					return true;
+			}
+			break;
+		case EQ::item::AugRestrictionUnknown1:
+		case EQ::item::AugRestrictionUnknown2:
+		case EQ::item::AugRestrictionUnknown3:
+		default:
+			return true;
+	}
+
+	return false;
+}
+
+void Client::SummonItemIntoInventory(
+	uint32 item_id,
+	int16 charges,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool is_attuned
+)
+{
+	auto *inst = database.CreateItem(
+		item_id,
+		charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6,
+		is_attuned
+	);
+
+	if (!inst) {
+		return;
+	}
+
+	const bool  is_arrow = inst->GetItem()->ItemType == EQ::item::ItemTypeArrow;
+	const int16 slot_id  = m_inv.FindFreeSlot(
+		inst->IsClassBag(),
+		true,
+		inst->GetItem()->Size,
+		is_arrow
+	);
+
+	SummonItem(
+		item_id,
+		charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6,
+		is_attuned,
+		slot_id
+	);
+}
+
+bool Client::HasItemOnCorpse(uint32 item_id)
+{
+	auto corpses = CharacterCorpsesRepository::GetWhere(database, fmt::format("charid = {}", CharacterID()));
+	if (corpses.empty()) {
+		return false;
+	}
+
+	std::vector<uint32> corpse_ids;
+	corpse_ids.reserve(corpses.size());
+
+	for (auto &corpse : corpses) {
+		corpse_ids.push_back(corpse.id);
+	}
+
+	auto items = CharacterCorpseItemsRepository::GetWhere(
+		database,
+		fmt::format(
+			"corpse_id IN ({})",
+			Strings::Join(corpse_ids, ",")
+		)
+	);
+
+	for (auto &item : items) {
+		if (item.item_id == item_id) {
+			return true;
+		}
+	}
+
+	return false;
 }

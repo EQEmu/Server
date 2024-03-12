@@ -129,7 +129,7 @@ namespace EQ
 
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
-				InventoryTypeSize_Struct InventoryTypeSize,
+				const InventoryTypeSize_Struct& InventoryTypeSize,
 				uint64 EquipmentBitmask,
 				uint64 GeneralBitmask,
 				uint64 CursorBitmask,

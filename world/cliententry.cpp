@@ -20,16 +20,18 @@
 #include "clientlist.h"
 #include "login_server.h"
 #include "login_server_list.h"
+#include "shared_task_manager.h"
 #include "worlddb.h"
 #include "zoneserver.h"
 #include "world_config.h"
 #include "../common/guilds.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 extern uint32          numplayers;
 extern LoginServerList loginserverlist;
 extern ClientList      client_list;
 extern volatile bool   RunLoops;
+extern SharedTaskManager shared_task_manager;
 
 /**
  * @param in_id
@@ -56,7 +58,7 @@ ClientListEntry::ClientListEntry(
 	ClearVars(true);
 
 	LogDebug(
-		"ClientListEntry in_id [{0}] in_loginserver_id [{1}] in_loginserver_name [{2}] in_login_name [{3}] in_login_key [{4}] "
+		"in_id [{0}] in_loginserver_id [{1}] in_loginserver_name [{2}] in_login_name [{3}] in_login_key [{4}] "
 		" in_is_world_admin [{5}] ip [{6}] local [{7}]",
 		in_id,
 		in_loginserver_id,
@@ -118,8 +120,9 @@ ClientListEntry::~ClientListEntry()
 		Camp(); // updates zoneserver's numplayers
 		client_list.RemoveCLEReferances(this);
 	}
-	for (auto &elem : tell_queue)
+	for (auto& elem : tell_queue) {
 		safe_delete_array(elem);
+	}
 	tell_queue.clear();
 }
 
@@ -129,21 +132,14 @@ void ClientListEntry::SetChar(uint32 iCharID, const char *iCharName)
 	strn0cpy(pname, iCharName, sizeof(pname));
 }
 
-void ClientListEntry::SetOnline(ZoneServer *iZS, CLE_Status iOnline)
-{
-	if (iZS == this->Server()) {
-		SetOnline(iOnline);
-	}
-}
-
 void ClientListEntry::SetOnline(CLE_Status iOnline)
 {
 	LogClientLogin(
-		"ClientListEntry::SetOnline for [{}] ({}) = [{}] ({})",
+		"Online status [{}] ({}) status [{}] ({})",
 		AccountName(),
 		AccountID(),
 		CLEStatusString[CLE_Status::Online],
-		iOnline
+		static_cast<int>(iOnline)
 	);
 
 	if (iOnline >= CLE_Status::Online && pOnline < CLE_Status::Online) {
@@ -227,6 +223,8 @@ void ClientListEntry::Update(ZoneServer *iZS, ServerClientList_Struct *scl, CLE_
 	panon          = scl->anon;
 	ptellsoff      = scl->tellsoff;
 	pguild_id      = scl->guild_id;
+	pguild_rank    = scl->guild_rank;
+	pguild_tribute_opt_in = scl->guild_tribute_opt_in;
 	pLFG           = scl->LFG;
 	gm             = scl->gm;
 	pClientVersion = scl->ClientVersion;
@@ -249,6 +247,8 @@ void ClientListEntry::LeavingZone(ZoneServer *iZS, CLE_Status iOnline)
 	}
 	SetOnline(iOnline);
 
+	shared_task_manager.RemoveActiveInvitationByCharacterID(CharID());
+
 	if (pzoneserver) {
 		pzoneserver->RemovePlayer();
 		LSUpdate(pzoneserver);
@@ -270,7 +270,7 @@ void ClientListEntry::ClearVars(bool iAll)
 
 		paccountid = 0;
 		memset(paccountname, 0, sizeof(paccountname));
-		padmin = 0;
+		padmin = AccountStatus::Player;
 	}
 	pzoneserver = 0;
 	pzone       = 0;
@@ -282,11 +282,13 @@ void ClientListEntry::ClearVars(bool iAll)
 	panon          = 0;
 	ptellsoff      = 0;
 	pguild_id      = GUILD_NONE;
+	pguild_rank    = 0;
 	pLFG           = 0;
 	gm             = 0;
 	pClientVersion = 0;
-	for (auto &elem : tell_queue)
+	for (auto& elem : tell_queue) {
 		safe_delete_array(elem);
+	}
 	tell_queue.clear();
 }
 
@@ -321,7 +323,7 @@ bool ClientListEntry::CheckStale()
 bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_password)
 {
 	LogDebug(
-		"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}]",
+		"ls_account_id [{0}] key_password [{1}] plskey [{2}]",
 		loginserver_account_id,
 		key_password,
 		plskey
@@ -329,7 +331,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 	if (pLSID == loginserver_account_id && strncmp(plskey, key_password, 10) == 0) {
 
 		LogDebug(
-			"ClientListEntry::CheckAuth ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
+			"ls_account_id [{0}] key_password [{1}] plskey [{2}] lsid [{3}] paccountid [{4}]",
 			loginserver_account_id,
 			key_password,
 			plskey,
@@ -361,7 +363,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 		}
 		std::string lsworldadmin;
 		if (database.GetVariable("honorlsworldadmin", lsworldadmin)) {
-			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0)) {
+			if (Strings::ToInt(lsworldadmin) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == AccountStatus::Player)) {
 				padmin = pworldadmin;
 			}
 		}

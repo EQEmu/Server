@@ -1,56 +1,53 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_TASKS_REPOSITORY_H
 #define EQEMU_BASE_TASKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseTasksRepository {
 public:
 	struct Tasks {
-		int         id;
-		int         type;
-		int         duration;
-		int         duration_code;
+		uint32_t    id;
+		int8_t      type;
+		uint32_t    duration;
+		int8_t      duration_code;
 		std::string title;
 		std::string description;
-		std::string reward;
-		int         rewardid;
-		int         cashreward;
-		int         xpreward;
-		int         rewardmethod;
-		int         minlevel;
-		int         maxlevel;
-		int         repeatable;
-		int         faction_reward;
+		std::string reward_text;
+		std::string reward_id_list;
+		uint32_t    cash_reward;
+		int32_t     exp_reward;
+		uint8_t     reward_method;
+		int32_t     reward_points;
+		int32_t     reward_point_type;
+		uint8_t     min_level;
+		uint8_t     max_level;
+		uint32_t    level_spread;
+		uint32_t    min_players;
+		uint32_t    max_players;
+		uint8_t     repeatable;
+		int32_t     faction_reward;
 		std::string completion_emote;
+		uint32_t    replay_timer_group;
+		uint32_t    replay_timer_seconds;
+		uint32_t    request_timer_group;
+		uint32_t    request_timer_seconds;
+		uint32_t    dz_template_id;
+		int32_t     lock_activity_id;
+		int32_t     faction_amount;
+		int16_t     enabled;
 	};
 
 	static std::string PrimaryKey()
@@ -67,37 +64,75 @@ public:
 			"duration_code",
 			"title",
 			"description",
-			"reward",
-			"rewardid",
-			"cashreward",
-			"xpreward",
-			"rewardmethod",
-			"minlevel",
-			"maxlevel",
+			"reward_text",
+			"reward_id_list",
+			"cash_reward",
+			"exp_reward",
+			"reward_method",
+			"reward_points",
+			"reward_point_type",
+			"min_level",
+			"max_level",
+			"level_spread",
+			"min_players",
+			"max_players",
 			"repeatable",
 			"faction_reward",
 			"completion_emote",
+			"replay_timer_group",
+			"replay_timer_seconds",
+			"request_timer_group",
+			"request_timer_seconds",
+			"dz_template_id",
+			"lock_activity_id",
+			"faction_amount",
+			"enabled",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"type",
+			"duration",
+			"duration_code",
+			"title",
+			"description",
+			"reward_text",
+			"reward_id_list",
+			"cash_reward",
+			"exp_reward",
+			"reward_method",
+			"reward_points",
+			"reward_point_type",
+			"min_level",
+			"max_level",
+			"level_spread",
+			"min_players",
+			"max_players",
+			"repeatable",
+			"faction_reward",
+			"completion_emote",
+			"replay_timer_group",
+			"replay_timer_seconds",
+			"request_timer_group",
+			"request_timer_seconds",
+			"dz_template_id",
+			"lock_activity_id",
+			"faction_amount",
+			"enabled",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -109,7 +144,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -119,35 +154,48 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Tasks NewEntity()
 	{
-		Tasks entry{};
+		Tasks e{};
 
-		entry.id               = 0;
-		entry.type             = 0;
-		entry.duration         = 0;
-		entry.duration_code    = 0;
-		entry.title            = "";
-		entry.description      = "";
-		entry.reward           = "";
-		entry.rewardid         = 0;
-		entry.cashreward       = 0;
-		entry.xpreward         = 0;
-		entry.rewardmethod     = 2;
-		entry.minlevel         = 0;
-		entry.maxlevel         = 0;
-		entry.repeatable       = 1;
-		entry.faction_reward   = 0;
-		entry.completion_emote = "";
+		e.id                    = 0;
+		e.type                  = 0;
+		e.duration              = 0;
+		e.duration_code         = 0;
+		e.title                 = "";
+		e.description           = "";
+		e.reward_text           = "";
+		e.reward_id_list        = "";
+		e.cash_reward           = 0;
+		e.exp_reward            = 0;
+		e.reward_method         = 0;
+		e.reward_points         = 0;
+		e.reward_point_type     = 0;
+		e.min_level             = 0;
+		e.max_level             = 0;
+		e.level_spread          = 0;
+		e.min_players           = 0;
+		e.max_players           = 0;
+		e.repeatable            = 1;
+		e.faction_reward        = 0;
+		e.completion_emote      = "";
+		e.replay_timer_group    = 0;
+		e.replay_timer_seconds  = 0;
+		e.request_timer_group   = 0;
+		e.request_timer_seconds = 0;
+		e.dz_template_id        = 0;
+		e.lock_activity_id      = -1;
+		e.faction_amount        = 0;
+		e.enabled               = 1;
 
-		return entry;
+		return e;
 	}
 
-	static Tasks GetTasksEntry(
+	static Tasks GetTasks(
 		const std::vector<Tasks> &taskss,
 		int tasks_id
 	)
@@ -162,49 +210,65 @@ public:
 	}
 
 	static Tasks FindOne(
+		Database& db,
 		int tasks_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				tasks_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Tasks entry{};
+			Tasks e{};
 
-			entry.id               = atoi(row[0]);
-			entry.type             = atoi(row[1]);
-			entry.duration         = atoi(row[2]);
-			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4] ? row[4] : "";
-			entry.description      = row[5] ? row[5] : "";
-			entry.reward           = row[6] ? row[6] : "";
-			entry.rewardid         = atoi(row[7]);
-			entry.cashreward       = atoi(row[8]);
-			entry.xpreward         = atoi(row[9]);
-			entry.rewardmethod     = atoi(row[10]);
-			entry.minlevel         = atoi(row[11]);
-			entry.maxlevel         = atoi(row[12]);
-			entry.repeatable       = atoi(row[13]);
-			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15] ? row[15] : "";
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.type                  = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.duration_code         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.title                 = row[4] ? row[4] : "";
+			e.description           = row[5] ? row[5] : "";
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.exp_reward            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.reward_points         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.reward_point_type     = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.faction_reward        = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.completion_emote      = row[20] ? row[20] : "";
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.lock_activity_id      = row[26] ? static_cast<int32_t>(atoi(row[26])) : -1;
+			e.faction_amount        = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.enabled               = row[28] ? static_cast<int16_t>(atoi(row[28])) : 1;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int tasks_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -217,37 +281,51 @@ public:
 	}
 
 	static int UpdateOne(
-		Tasks tasks_entry
+		Database& db,
+		const Tasks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(tasks_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(tasks_entry.type));
-		update_values.push_back(columns[2] + " = " + std::to_string(tasks_entry.duration));
-		update_values.push_back(columns[3] + " = " + std::to_string(tasks_entry.duration_code));
-		update_values.push_back(columns[4] + " = '" + EscapeString(tasks_entry.title) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(tasks_entry.description) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(tasks_entry.reward) + "'");
-		update_values.push_back(columns[7] + " = " + std::to_string(tasks_entry.rewardid));
-		update_values.push_back(columns[8] + " = " + std::to_string(tasks_entry.cashreward));
-		update_values.push_back(columns[9] + " = " + std::to_string(tasks_entry.xpreward));
-		update_values.push_back(columns[10] + " = " + std::to_string(tasks_entry.rewardmethod));
-		update_values.push_back(columns[11] + " = " + std::to_string(tasks_entry.minlevel));
-		update_values.push_back(columns[12] + " = " + std::to_string(tasks_entry.maxlevel));
-		update_values.push_back(columns[13] + " = " + std::to_string(tasks_entry.repeatable));
-		update_values.push_back(columns[14] + " = " + std::to_string(tasks_entry.faction_reward));
-		update_values.push_back(columns[15] + " = '" + EscapeString(tasks_entry.completion_emote) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.type));
+		v.push_back(columns[2] + " = " + std::to_string(e.duration));
+		v.push_back(columns[3] + " = " + std::to_string(e.duration_code));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.title) + "'");
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.description) + "'");
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.reward_text) + "'");
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.reward_id_list) + "'");
+		v.push_back(columns[8] + " = " + std::to_string(e.cash_reward));
+		v.push_back(columns[9] + " = " + std::to_string(e.exp_reward));
+		v.push_back(columns[10] + " = " + std::to_string(e.reward_method));
+		v.push_back(columns[11] + " = " + std::to_string(e.reward_points));
+		v.push_back(columns[12] + " = " + std::to_string(e.reward_point_type));
+		v.push_back(columns[13] + " = " + std::to_string(e.min_level));
+		v.push_back(columns[14] + " = " + std::to_string(e.max_level));
+		v.push_back(columns[15] + " = " + std::to_string(e.level_spread));
+		v.push_back(columns[16] + " = " + std::to_string(e.min_players));
+		v.push_back(columns[17] + " = " + std::to_string(e.max_players));
+		v.push_back(columns[18] + " = " + std::to_string(e.repeatable));
+		v.push_back(columns[19] + " = " + std::to_string(e.faction_reward));
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.completion_emote) + "'");
+		v.push_back(columns[21] + " = " + std::to_string(e.replay_timer_group));
+		v.push_back(columns[22] + " = " + std::to_string(e.replay_timer_seconds));
+		v.push_back(columns[23] + " = " + std::to_string(e.request_timer_group));
+		v.push_back(columns[24] + " = " + std::to_string(e.request_timer_seconds));
+		v.push_back(columns[25] + " = " + std::to_string(e.dz_template_id));
+		v.push_back(columns[26] + " = " + std::to_string(e.lock_activity_id));
+		v.push_back(columns[27] + " = " + std::to_string(e.faction_amount));
+		v.push_back(columns[28] + " = " + std::to_string(e.enabled));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				tasks_entry.id
+				e.id
 			)
 		);
 
@@ -255,93 +333,121 @@ public:
 	}
 
 	static Tasks InsertOne(
-		Tasks tasks_entry
+		Database& db,
+		Tasks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(tasks_entry.id));
-		insert_values.push_back(std::to_string(tasks_entry.type));
-		insert_values.push_back(std::to_string(tasks_entry.duration));
-		insert_values.push_back(std::to_string(tasks_entry.duration_code));
-		insert_values.push_back("'" + EscapeString(tasks_entry.title) + "'");
-		insert_values.push_back("'" + EscapeString(tasks_entry.description) + "'");
-		insert_values.push_back("'" + EscapeString(tasks_entry.reward) + "'");
-		insert_values.push_back(std::to_string(tasks_entry.rewardid));
-		insert_values.push_back(std::to_string(tasks_entry.cashreward));
-		insert_values.push_back(std::to_string(tasks_entry.xpreward));
-		insert_values.push_back(std::to_string(tasks_entry.rewardmethod));
-		insert_values.push_back(std::to_string(tasks_entry.minlevel));
-		insert_values.push_back(std::to_string(tasks_entry.maxlevel));
-		insert_values.push_back(std::to_string(tasks_entry.repeatable));
-		insert_values.push_back(std::to_string(tasks_entry.faction_reward));
-		insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.duration_code));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+		v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+		v.push_back(std::to_string(e.cash_reward));
+		v.push_back(std::to_string(e.exp_reward));
+		v.push_back(std::to_string(e.reward_method));
+		v.push_back(std::to_string(e.reward_points));
+		v.push_back(std::to_string(e.reward_point_type));
+		v.push_back(std::to_string(e.min_level));
+		v.push_back(std::to_string(e.max_level));
+		v.push_back(std::to_string(e.level_spread));
+		v.push_back(std::to_string(e.min_players));
+		v.push_back(std::to_string(e.max_players));
+		v.push_back(std::to_string(e.repeatable));
+		v.push_back(std::to_string(e.faction_reward));
+		v.push_back("'" + Strings::Escape(e.completion_emote) + "'");
+		v.push_back(std::to_string(e.replay_timer_group));
+		v.push_back(std::to_string(e.replay_timer_seconds));
+		v.push_back(std::to_string(e.request_timer_group));
+		v.push_back(std::to_string(e.request_timer_seconds));
+		v.push_back(std::to_string(e.dz_template_id));
+		v.push_back(std::to_string(e.lock_activity_id));
+		v.push_back(std::to_string(e.faction_amount));
+		v.push_back(std::to_string(e.enabled));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			tasks_entry.id = results.LastInsertedID();
-			return tasks_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		tasks_entry = NewEntity();
+		e = NewEntity();
 
-		return tasks_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Tasks> tasks_entries
+		Database& db,
+		const std::vector<Tasks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &tasks_entry: tasks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(tasks_entry.id));
-			insert_values.push_back(std::to_string(tasks_entry.type));
-			insert_values.push_back(std::to_string(tasks_entry.duration));
-			insert_values.push_back(std::to_string(tasks_entry.duration_code));
-			insert_values.push_back("'" + EscapeString(tasks_entry.title) + "'");
-			insert_values.push_back("'" + EscapeString(tasks_entry.description) + "'");
-			insert_values.push_back("'" + EscapeString(tasks_entry.reward) + "'");
-			insert_values.push_back(std::to_string(tasks_entry.rewardid));
-			insert_values.push_back(std::to_string(tasks_entry.cashreward));
-			insert_values.push_back(std::to_string(tasks_entry.xpreward));
-			insert_values.push_back(std::to_string(tasks_entry.rewardmethod));
-			insert_values.push_back(std::to_string(tasks_entry.minlevel));
-			insert_values.push_back(std::to_string(tasks_entry.maxlevel));
-			insert_values.push_back(std::to_string(tasks_entry.repeatable));
-			insert_values.push_back(std::to_string(tasks_entry.faction_reward));
-			insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.duration_code));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+			v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+			v.push_back(std::to_string(e.cash_reward));
+			v.push_back(std::to_string(e.exp_reward));
+			v.push_back(std::to_string(e.reward_method));
+			v.push_back(std::to_string(e.reward_points));
+			v.push_back(std::to_string(e.reward_point_type));
+			v.push_back(std::to_string(e.min_level));
+			v.push_back(std::to_string(e.max_level));
+			v.push_back(std::to_string(e.level_spread));
+			v.push_back(std::to_string(e.min_players));
+			v.push_back(std::to_string(e.max_players));
+			v.push_back(std::to_string(e.repeatable));
+			v.push_back(std::to_string(e.faction_reward));
+			v.push_back("'" + Strings::Escape(e.completion_emote) + "'");
+			v.push_back(std::to_string(e.replay_timer_group));
+			v.push_back(std::to_string(e.replay_timer_seconds));
+			v.push_back(std::to_string(e.request_timer_group));
+			v.push_back(std::to_string(e.request_timer_seconds));
+			v.push_back(std::to_string(e.dz_template_id));
+			v.push_back(std::to_string(e.lock_activity_id));
+			v.push_back(std::to_string(e.faction_amount));
+			v.push_back(std::to_string(e.enabled));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Tasks> All()
+	static std::vector<Tasks> All(Database& db)
 	{
 		std::vector<Tasks> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -351,36 +457,49 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tasks entry{};
+			Tasks e{};
 
-			entry.id               = atoi(row[0]);
-			entry.type             = atoi(row[1]);
-			entry.duration         = atoi(row[2]);
-			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4] ? row[4] : "";
-			entry.description      = row[5] ? row[5] : "";
-			entry.reward           = row[6] ? row[6] : "";
-			entry.rewardid         = atoi(row[7]);
-			entry.cashreward       = atoi(row[8]);
-			entry.xpreward         = atoi(row[9]);
-			entry.rewardmethod     = atoi(row[10]);
-			entry.minlevel         = atoi(row[11]);
-			entry.maxlevel         = atoi(row[12]);
-			entry.repeatable       = atoi(row[13]);
-			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15] ? row[15] : "";
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.type                  = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.duration_code         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.title                 = row[4] ? row[4] : "";
+			e.description           = row[5] ? row[5] : "";
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.exp_reward            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.reward_points         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.reward_point_type     = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.faction_reward        = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.completion_emote      = row[20] ? row[20] : "";
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.lock_activity_id      = row[26] ? static_cast<int32_t>(atoi(row[26])) : -1;
+			e.faction_amount        = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.enabled               = row[28] ? static_cast<int16_t>(atoi(row[28])) : 1;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Tasks> GetWhere(std::string where_filter)
+	static std::vector<Tasks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Tasks> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -391,34 +510,47 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Tasks entry{};
+			Tasks e{};
 
-			entry.id               = atoi(row[0]);
-			entry.type             = atoi(row[1]);
-			entry.duration         = atoi(row[2]);
-			entry.duration_code    = atoi(row[3]);
-			entry.title            = row[4] ? row[4] : "";
-			entry.description      = row[5] ? row[5] : "";
-			entry.reward           = row[6] ? row[6] : "";
-			entry.rewardid         = atoi(row[7]);
-			entry.cashreward       = atoi(row[8]);
-			entry.xpreward         = atoi(row[9]);
-			entry.rewardmethod     = atoi(row[10]);
-			entry.minlevel         = atoi(row[11]);
-			entry.maxlevel         = atoi(row[12]);
-			entry.repeatable       = atoi(row[13]);
-			entry.faction_reward   = atoi(row[14]);
-			entry.completion_emote = row[15] ? row[15] : "";
+			e.id                    = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.type                  = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.duration              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.duration_code         = row[3] ? static_cast<int8_t>(atoi(row[3])) : 0;
+			e.title                 = row[4] ? row[4] : "";
+			e.description           = row[5] ? row[5] : "";
+			e.reward_text           = row[6] ? row[6] : "";
+			e.reward_id_list        = row[7] ? row[7] : "";
+			e.cash_reward           = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.exp_reward            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.reward_method         = row[10] ? static_cast<uint8_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.reward_points         = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.reward_point_type     = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.min_level             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.max_level             = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.level_spread          = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.min_players           = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.max_players           = row[17] ? static_cast<uint32_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.repeatable            = row[18] ? static_cast<uint8_t>(strtoul(row[18], nullptr, 10)) : 1;
+			e.faction_reward        = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.completion_emote      = row[20] ? row[20] : "";
+			e.replay_timer_group    = row[21] ? static_cast<uint32_t>(strtoul(row[21], nullptr, 10)) : 0;
+			e.replay_timer_seconds  = row[22] ? static_cast<uint32_t>(strtoul(row[22], nullptr, 10)) : 0;
+			e.request_timer_group   = row[23] ? static_cast<uint32_t>(strtoul(row[23], nullptr, 10)) : 0;
+			e.request_timer_seconds = row[24] ? static_cast<uint32_t>(strtoul(row[24], nullptr, 10)) : 0;
+			e.dz_template_id        = row[25] ? static_cast<uint32_t>(strtoul(row[25], nullptr, 10)) : 0;
+			e.lock_activity_id      = row[26] ? static_cast<int32_t>(atoi(row[26])) : -1;
+			e.faction_amount        = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.enabled               = row[28] ? static_cast<int16_t>(atoi(row[28])) : 1;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -429,9 +561,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -441,6 +573,144 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Tasks &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.duration_code));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+		v.push_back("'" + Strings::Escape(e.description) + "'");
+		v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+		v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+		v.push_back(std::to_string(e.cash_reward));
+		v.push_back(std::to_string(e.exp_reward));
+		v.push_back(std::to_string(e.reward_method));
+		v.push_back(std::to_string(e.reward_points));
+		v.push_back(std::to_string(e.reward_point_type));
+		v.push_back(std::to_string(e.min_level));
+		v.push_back(std::to_string(e.max_level));
+		v.push_back(std::to_string(e.level_spread));
+		v.push_back(std::to_string(e.min_players));
+		v.push_back(std::to_string(e.max_players));
+		v.push_back(std::to_string(e.repeatable));
+		v.push_back(std::to_string(e.faction_reward));
+		v.push_back("'" + Strings::Escape(e.completion_emote) + "'");
+		v.push_back(std::to_string(e.replay_timer_group));
+		v.push_back(std::to_string(e.replay_timer_seconds));
+		v.push_back(std::to_string(e.request_timer_group));
+		v.push_back(std::to_string(e.request_timer_seconds));
+		v.push_back(std::to_string(e.dz_template_id));
+		v.push_back(std::to_string(e.lock_activity_id));
+		v.push_back(std::to_string(e.faction_amount));
+		v.push_back(std::to_string(e.enabled));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Tasks> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.duration_code));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+			v.push_back("'" + Strings::Escape(e.description) + "'");
+			v.push_back("'" + Strings::Escape(e.reward_text) + "'");
+			v.push_back("'" + Strings::Escape(e.reward_id_list) + "'");
+			v.push_back(std::to_string(e.cash_reward));
+			v.push_back(std::to_string(e.exp_reward));
+			v.push_back(std::to_string(e.reward_method));
+			v.push_back(std::to_string(e.reward_points));
+			v.push_back(std::to_string(e.reward_point_type));
+			v.push_back(std::to_string(e.min_level));
+			v.push_back(std::to_string(e.max_level));
+			v.push_back(std::to_string(e.level_spread));
+			v.push_back(std::to_string(e.min_players));
+			v.push_back(std::to_string(e.max_players));
+			v.push_back(std::to_string(e.repeatable));
+			v.push_back(std::to_string(e.faction_reward));
+			v.push_back("'" + Strings::Escape(e.completion_emote) + "'");
+			v.push_back(std::to_string(e.replay_timer_group));
+			v.push_back(std::to_string(e.replay_timer_seconds));
+			v.push_back(std::to_string(e.request_timer_group));
+			v.push_back(std::to_string(e.request_timer_seconds));
+			v.push_back(std::to_string(e.dz_template_id));
+			v.push_back(std::to_string(e.lock_activity_id));
+			v.push_back(std::to_string(e.faction_amount));
+			v.push_back(std::to_string(e.enabled));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_TASKS_REPOSITORY_H

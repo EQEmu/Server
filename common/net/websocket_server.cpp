@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_set>
 #include <array>
+#include "../emu_constants.h"
 
 struct MethodHandlerEntry
 {
@@ -34,8 +35,8 @@ struct EQ::Net::WebsocketServer::Impl
 
 EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 {
-	_impl.reset(new Impl());
-	_impl->server.reset(new EQ::Net::TCPServer());
+	_impl = std::make_unique<Impl>();
+	_impl->server = std::make_unique<EQ::Net::TCPServer>();
 	_impl->server->Listen(addr, port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		auto wsc = _impl->ws_server.get_connection();
 		WebsocketServerConnection *c = new WebsocketServerConnection(this, connection, wsc);
@@ -53,7 +54,7 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 		return websocketpp::lib::error_code();
 	});
 
-	_impl->ping_timer.reset(new EQ::Timer(5000, true, [this](EQ::Timer *t) {
+	_impl->ping_timer = std::make_unique<EQ::Timer>(5000, true, [this](EQ::Timer *t) {
 		auto iter = _impl->connections.begin();
 
 		while (iter != _impl->connections.end()) {
@@ -67,7 +68,7 @@ EQ::Net::WebsocketServer::WebsocketServer(const std::string &addr, int port)
 
 			iter++;
 		}
-	}));
+	});
 
 	_impl->methods.insert(std::make_pair("login", MethodHandlerEntry(std::bind(&WebsocketServer::Login, this, std::placeholders::_1, std::placeholders::_2), 0)));
 	_impl->methods.insert(std::make_pair("subscribe", MethodHandlerEntry(std::bind(&WebsocketServer::Subscribe, this, std::placeholders::_1, std::placeholders::_2), 0)));
@@ -174,13 +175,13 @@ Json::Value EQ::Net::WebsocketServer::Login(WebsocketServerConnection *connectio
 		auto r = _impl->login_handler(connection, user, pass);
 
 		if (r.logged_in) {
-			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
+			connection->SetAuthorized(true, r.account_name, r.account_id, AccountStatus::Max);
 			ret["status"] = "Ok";
 		}
 		else if (user == "admin" && (connection->RemoteIP() == "127.0.0.1" || connection->RemoteIP() == "::")) {
 			r.logged_in = true;
 			r.account_id = 0;
-			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
+			connection->SetAuthorized(true, r.account_name, r.account_id, AccountStatus::Max);
 			ret["status"] = "Ok";
 		}
 		else {

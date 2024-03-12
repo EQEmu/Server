@@ -39,10 +39,6 @@ public:
 	void SendStatus() const;
 
 	const char *GetZone() const { return(m_zone.c_str()); }
-	uint32 GetStartCount() const { return(m_startCount); }
-
-	//should only be called during process init to setup the start timer.
-	static void InitStartTimer();
 
 protected:
 	bool IsRunning() const { return(m_state == StateStarted || m_state == StateStopPending || m_state == StateRestartPending); }

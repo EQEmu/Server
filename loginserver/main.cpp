@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "../common/global_define.h"
 #include "../common/types.h"
 #include "../common/opcodemgr.h"
@@ -30,15 +10,20 @@
 #include "login_server.h"
 #include "loginserver_webserver.h"
 #include "loginserver_command_handler.h"
+#include "../common/strings.h"
+#include "../common/path_manager.h"
 #include <time.h>
 #include <stdlib.h>
 #include <string>
 #include <sstream>
+#include <thread>
 
 LoginServer server;
 EQEmuLogSys LogSys;
 bool        run_server = true;
+PathManager path;
 
+void ResolveAddresses();
 void CatchSignal(int sig_num)
 {
 }
@@ -59,17 +44,10 @@ void LoadDatabaseConnection()
 
 void LoadServerConfig()
 {
-	server.config = EQ::JsonConfigFile::Load("login.json");
+	server.config = EQ::JsonConfigFile::Load(
+		fmt::format("{}/login.json", path.GetServerPath())
+	);
 	LogInfo("Config System Init");
-
-
-	/**
-	 * Logging
-	 */
-	server.options.Trace(server.config.GetVariableBool("logging", "trace", false));
-	server.options.WorldTrace(server.config.GetVariableBool("logging", "world_trace", false));
-	server.options.DumpInPackets(server.config.GetVariableBool("logging", "dump_packets_in", false));
-	server.options.DumpOutPackets(server.config.GetVariableBool("logging", "dump_packets_out", false));
 
 	/**
 	 * Worldservers
@@ -79,8 +57,46 @@ void LoadServerConfig()
 			"worldservers",
 			"reject_duplicate_servers",
 			false
-		));
-	server.options.AllowUnregistered(server.config.GetVariableBool("worldservers", "unregistered_allowed", true));
+		)
+	);
+	server.options.SetShowPlayerCount(server.config.GetVariableBool("worldservers", "show_player_count", false));
+	server.options.AllowUnregistered(
+		server.config.GetVariableBool(
+			"worldservers",
+			"unregistered_allowed",
+			true
+		)
+	);
+	server.options.SetWorldDevTestServersListBottom(
+		server.config.GetVariableBool(
+			"worldservers",
+			"dev_test_servers_list_bottom",
+			false
+		)
+	);
+	server.options.SetWorldSpecialCharacterStartListBottom(
+		server.config.GetVariableBool(
+			"worldservers",
+			"special_character_start_list_bottom",
+			false
+		)
+	);
+
+	/**
+	 * Expansion Display Settings
+	 */
+	server.options.DisplayExpansions(
+		server.config.GetVariableBool(
+			"client_configuration",
+			"display_expansions",
+			false
+		)); //disable by default
+	server.options.MaxExpansions(
+		server.config.GetVariableInt(
+			"client_configuration",
+			"max_expansions_mask",
+			67108863
+		)); //enable display of all expansions
 
 	/**
 	 * Account
@@ -130,6 +146,27 @@ void LoadServerConfig()
 	);
 }
 
+void start_web_server()
+{
+	Sleep(1);
+
+	int web_api_port = server.config.GetVariableInt("web_api", "port", 6000);
+	LogInfo("Webserver API now listening on port [{0}]", web_api_port);
+
+	httplib::Server api;
+
+	api.set_logger(
+		[](const auto &req, const auto &res) {
+			if (!req.path.empty()) {
+				LogInfo("[API] Request [{}] via [{}:{}]", req.path, req.remote_addr, req.remote_port);
+			}
+		}
+	);
+
+	LoginserverWebserver::RegisterRoutes(api);
+	api.listen("0.0.0.0", web_api_port);
+}
+
 int main(int argc, char **argv)
 {
 	RegisterExecutablePlatform(ExePlatformLogin);
@@ -141,6 +178,8 @@ int main(int argc, char **argv)
 		LogSys.LoadLogSettingsDefaults();
 	}
 
+	path.LoadPaths();
+
 	/**
 	 * Command handler
 	 */
@@ -151,7 +190,7 @@ int main(int argc, char **argv)
 		LoadDatabaseConnection();
 
 		LogSys.LoadLogSettingsDefaults();
-		LogSys.log_settings[Logs::Debug].log_to_console      = static_cast<uint8>(Logs::General);
+		LogSys.log_settings[Logs::Debug].log_to_console = static_cast<uint8>(Logs::General);
 		LogSys.log_settings[Logs::Debug].is_category_enabled = 1;
 
 		LoginserverCommandHandler::CommandHandler(argc, argv);
@@ -165,8 +204,10 @@ int main(int argc, char **argv)
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
-		server.db->LoadLogSettings(LogSys.log_settings);
-		LogSys.StartFileLogs();
+		LogSys.SetDatabase(server.db)
+			->SetLogPath("logs")
+			->LoadLogDatabaseSettings()
+			->StartFileLogs();
 	}
 
 	/**
@@ -194,7 +235,7 @@ int main(int argc, char **argv)
 	 * create client manager
 	 */
 	LogInfo("Client Manager Init");
-	server.client_manager           = new ClientManager();
+	server.client_manager = new ClientManager();
 	if (!server.client_manager) {
 		LogError("Client Manager Failed to Start");
 		LogInfo("Server Manager Shutdown");
@@ -214,48 +255,61 @@ int main(int argc, char **argv)
 #endif
 
 	LogInfo("Server Started");
-	if (LogSys.log_settings[Logs::Loginserver].log_to_console == 1) {
-		LogInfo("Loginserver logging set to level [1] for more debugging, enable detail [3]");
-	}
 
 	/**
 	 * Web API
 	 */
-	httplib::Server api;
-	int             web_api_port    = server.config.GetVariableInt("web_api", "port", 6000);
-	bool            web_api_enabled = server.config.GetVariableBool("web_api", "enabled", true);
+	bool web_api_enabled = server.config.GetVariableBool("web_api", "enabled", true);
 	if (web_api_enabled) {
-		api.bind("0.0.0.0", web_api_port);
-		LogInfo("Webserver API now listening on port [{0}]", web_api_port);
-		LoginserverWebserver::RegisterRoutes(api);
+		std::thread web_api_thread(start_web_server);
+		web_api_thread.detach();
 	}
 
-	LogInfo("[Config] [Logging] IsTraceOn [{0}]", server.options.IsTraceOn());
-	LogInfo("[Config] [Logging] IsWorldTraceOn [{0}]", server.options.IsWorldTraceOn());
-	LogInfo("[Config] [Logging] IsDumpInPacketsOn [{0}]", server.options.IsDumpInPacketsOn());
-	LogInfo("[Config] [Logging] IsDumpOutPacketsOn [{0}]", server.options.IsDumpOutPacketsOn());
 	LogInfo("[Config] [Account] CanAutoCreateAccounts [{0}]", server.options.CanAutoCreateAccounts());
+	LogInfo("[Config] [ClientConfiguration] DisplayExpansions [{0}]", server.options.IsDisplayExpansions());
+	LogInfo("[Config] [ClientConfiguration] MaxExpansions [{0}]", server.options.GetMaxExpansions());
+
 #ifdef LSPX
 	LogInfo("[Config] [Account] CanAutoLinkAccounts [{0}]", server.options.CanAutoLinkAccounts());
 #endif
 	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
 	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
+	LogInfo("[Config] [WorldServer] ShowPlayerCount [{0}]", server.options.IsShowPlayerCountEnabled());
+	LogInfo(
+		"[Config] [WorldServer] DevAndTestServersListBottom [{0}]",
+		server.options.IsWorldDevTestServersListBottom()
+	);
+	LogInfo(
+		"[Config] [WorldServer] SpecialCharactersStartListBottom [{0}]",
+		server.options.IsWorldSpecialCharacterStartListBottom()
+	);
 	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
 	LogInfo("[Config] [Security] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
 	LogInfo("[Config] [Security] IsUpdatingInsecurePasswords [{0}]", server.options.IsUpdatingInsecurePasswords());
 
-	while (run_server) {
-		Timer::SetCurrentTime();
-		server.client_manager->Process();
-		EQ::EventLoop::Get().Process();
+	Timer keepalive(INTERSERVER_TIMER); // does auto-reconnect
 
-		if (web_api_enabled) {
-			api.poll();
+	auto loop_fn = [&](EQ::Timer* t) {
+		Timer::SetCurrentTime();
+
+		if (keepalive.Check()) {
+			keepalive.Start();
+			server.db->ping();
 		}
 
-		Sleep(5);
-	}
+		if (!run_server) {
+			EQ::EventLoop::Get().Shutdown();
+			return;
+		}
+
+		server.client_manager->Process();
+	};
+
+	EQ::Timer process_timer(loop_fn);
+	process_timer.Start(32, true);
+
+	EQ::EventLoop::Get().Run();
 
 	LogInfo("Server Shutdown");
 

@@ -4,6 +4,7 @@
  */
 
 #include "zbuild.h"
+#include "zutil_p.h"
 #include <stdarg.h>
 #include "gzguts.h"
 
@@ -21,18 +22,19 @@ static int gz_init(gz_state *state) {
     PREFIX3(stream) *strm = &(state->strm);
 
     /* allocate input buffer (double size for gzprintf) */
-    state->in = (unsigned char *)malloc(state->want << 1);
+    state->in = (unsigned char *)zng_alloc(state->want << 1);
     if (state->in == NULL) {
         gz_error(state, Z_MEM_ERROR, "out of memory");
         return -1;
     }
+    memset(state->in, 0, state->want << 1);
 
     /* only need output buffer and deflate state if compressing */
     if (!state->direct) {
         /* allocate output buffer */
-        state->out = (unsigned char *)malloc(state->want);
+        state->out = (unsigned char *)zng_alloc(state->want);
         if (state->out == NULL) {
-            free(state->in);
+            zng_free(state->in);
             gz_error(state, Z_MEM_ERROR, "out of memory");
             return -1;
         }
@@ -43,8 +45,8 @@ static int gz_init(gz_state *state) {
         strm->opaque = NULL;
         ret = PREFIX(deflateInit2)(strm, state->level, Z_DEFLATED, MAX_WBITS + 16, DEF_MEM_LEVEL, state->strategy);
         if (ret != Z_OK) {
-            free(state->out);
-            free(state->in);
+            zng_free(state->out);
+            zng_free(state->in);
             gz_error(state, Z_MEM_ERROR, "out of memory");
             return -1;
         }
@@ -90,6 +92,15 @@ static int gz_comp(gz_state *state, int flush) {
         return 0;
     }
 
+    /* check for a pending reset */
+    if (state->reset) {
+        /* don't start a new gzip member unless there is data to write */
+        if (strm->avail_in == 0)
+            return 0;
+        PREFIX(deflateReset)(strm);
+        state->reset = 0;
+    }
+
     /* run deflate() on provided input until it produces no more output */
     ret = Z_OK;
     do {
@@ -121,8 +132,7 @@ static int gz_comp(gz_state *state, int flush) {
 
     /* if that completed a deflate stream, allow another to start */
     if (flush == Z_FINISH)
-        PREFIX(deflateReset)(strm);
-
+        state->reset = 1;
     /* all done, no errors */
     return 0;
 }
@@ -203,7 +213,7 @@ static size_t gz_write(gz_state *state, void const *buf, size_t len) {
             return 0;
 
         /* directly compress user buffer to file */
-        state->strm.next_in = (const unsigned char *)buf;
+        state->strm.next_in = (z_const unsigned char *) buf;
         do {
             unsigned n = (unsigned)-1;
             if (n > len)
@@ -221,7 +231,7 @@ static size_t gz_write(gz_state *state, void const *buf, size_t len) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzwrite)(gzFile file, void const *buf, unsigned len) {
+int Z_EXPORT PREFIX(gzwrite)(gzFile file, void const *buf, unsigned len) {
     gz_state *state;
 
     /* get internal structure */
@@ -245,7 +255,7 @@ int ZEXPORT PREFIX(gzwrite)(gzFile file, void const *buf, unsigned len) {
 }
 
 /* -- see zlib.h -- */
-size_t ZEXPORT PREFIX(gzfwrite)(void const *buf, size_t size, size_t nitems, gzFile file) {
+size_t Z_EXPORT PREFIX(gzfwrite)(void const *buf, size_t size, size_t nitems, gzFile file) {
     size_t len;
     gz_state *state;
 
@@ -274,7 +284,7 @@ size_t ZEXPORT PREFIX(gzfwrite)(void const *buf, size_t size, size_t nitems, gzF
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzputc)(gzFile file, int c) {
+int Z_EXPORT PREFIX(gzputc)(gzFile file, int c) {
     unsigned have;
     unsigned char buf[1];
     gz_state *state;
@@ -319,7 +329,7 @@ int ZEXPORT PREFIX(gzputc)(gzFile file, int c) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzputs)(gzFile file, const char *s) {
+int Z_EXPORT PREFIX(gzputs)(gzFile file, const char *s) {
     size_t len, put;
     gz_state *state;
 
@@ -343,7 +353,7 @@ int ZEXPORT PREFIX(gzputs)(gzFile file, const char *s) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORTVA PREFIX(gzvprintf)(gzFile file, const char *format, va_list va) {
+int Z_EXPORTVA PREFIX(gzvprintf)(gzFile file, const char *format, va_list va) {
     int len;
     unsigned left;
     char *next;
@@ -399,7 +409,7 @@ int ZEXPORTVA PREFIX(gzvprintf)(gzFile file, const char *format, va_list va) {
     return len;
 }
 
-int ZEXPORTVA PREFIX(gzprintf)(gzFile file, const char *format, ...) {
+int Z_EXPORTVA PREFIX(gzprintf)(gzFile file, const char *format, ...) {
     va_list va;
     int ret;
 
@@ -410,7 +420,7 @@ int ZEXPORTVA PREFIX(gzprintf)(gzFile file, const char *format, ...) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzflush)(gzFile file, int flush) {
+int Z_EXPORT PREFIX(gzflush)(gzFile file, int flush) {
     gz_state *state;
 
     /* get internal structure */
@@ -439,7 +449,7 @@ int ZEXPORT PREFIX(gzflush)(gzFile file, int flush) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzsetparams)(gzFile file, int level, int strategy) {
+int Z_EXPORT PREFIX(gzsetparams)(gzFile file, int level, int strategy) {
     gz_state *state;
     PREFIX3(stream) *strm;
 
@@ -477,7 +487,7 @@ int ZEXPORT PREFIX(gzsetparams)(gzFile file, int level, int strategy) {
 }
 
 /* -- see zlib.h -- */
-int ZEXPORT PREFIX(gzclose_w)(gzFile file) {
+int Z_EXPORT PREFIX(gzclose_w)(gzFile file) {
     int ret = Z_OK;
     gz_state *state;
 
@@ -503,14 +513,14 @@ int ZEXPORT PREFIX(gzclose_w)(gzFile file) {
     if (state->size) {
         if (!state->direct) {
             (void)PREFIX(deflateEnd)(&(state->strm));
-            free(state->out);
+            zng_free(state->out);
         }
-        free(state->in);
+        zng_free(state->in);
     }
     gz_error(state, Z_OK, NULL);
     free(state->path);
     if (close(state->fd) == -1)
         ret = Z_ERRNO;
-    free(state);
+    zng_free(state);
     return ret;
 }

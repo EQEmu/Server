@@ -1,13 +1,13 @@
 #ifdef LUA_EQEMU
 
-#include "lua.hpp"
+#include "../common/data_verification.h"
+
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
 #include "groups.h"
 #include "masterentity.h"
 #include "lua_group.h"
-#include "lua_entity.h"
 #include "lua_mob.h"
 #include "lua_client.h"
 #include "lua_npc.h"
@@ -17,9 +17,14 @@ void Lua_Group::DisbandGroup() {
 	self->DisbandGroup();
 }
 
-bool Lua_Group::IsGroupMember(Lua_Mob mob) {
+bool Lua_Group::IsGroupMember(const char* name) {
 	Lua_Safe_Call_Bool();
-	return self->IsGroupMember(mob);
+	return self->IsGroupMember(name);
+}
+
+bool Lua_Group::IsGroupMember(Lua_Mob c) {
+	Lua_Safe_Call_Bool();
+	return self->IsGroupMember(c);
 }
 
 void Lua_Group::CastGroupSpell(Lua_Mob caster, int spell_id) {
@@ -27,14 +32,19 @@ void Lua_Group::CastGroupSpell(Lua_Mob caster, int spell_id) {
 	self->CastGroupSpell(caster, spell_id);
 }
 
-void Lua_Group::SplitExp(uint32 exp, Lua_Mob other) {
+void Lua_Group::SplitExp(uint64 exp, Lua_Mob other) {
 	Lua_Safe_Call_Void();
 	self->SplitExp(exp, other);
 }
 
-void Lua_Group::GroupMessage(Lua_Mob sender, int language, const char *message) {
+void Lua_Group::GroupMessage(Lua_Mob sender, const char* message) {
 	Lua_Safe_Call_Void();
-	self->GroupMessage(sender, language, 100, message);
+	self->GroupMessage(sender, Language::CommonTongue, Language::MaxValue, message);
+}
+
+void Lua_Group::GroupMessage(Lua_Mob sender, uint8 language, const char* message) {
+	Lua_Safe_Call_Void();
+	self->GroupMessage(sender, language, Language::MaxValue, message);
 }
 
 uint32 Lua_Group::GetTotalGroupDamage(Lua_Mob other) {
@@ -52,9 +62,9 @@ void Lua_Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 pla
 	self->SplitMoney(copper, silver, gold, platinum, splitter);
 }
 
-void Lua_Group::SetLeader(Lua_Mob leader) {
+void Lua_Group::SetLeader(Lua_Mob c) {
 	Lua_Safe_Call_Void();
-	self->SetLeader(leader);
+	self->SetLeader(c);
 }
 
 Lua_Mob Lua_Group::GetLeader() {
@@ -67,9 +77,14 @@ const char *Lua_Group::GetLeaderName() {
 	return self->GetLeaderName();
 }
 
-bool Lua_Group::IsLeader(Lua_Mob leader) {
+bool Lua_Group::IsLeader(const char* name) {
 	Lua_Safe_Call_Bool();
-	return self->IsLeader(leader);
+	return self->IsLeader(name);
+}
+
+bool Lua_Group::IsLeader(Lua_Mob c) {
+	Lua_Safe_Call_Bool();
+	return self->IsLeader(c);
 }
 
 int Lua_Group::GroupCount() {
@@ -77,12 +92,12 @@ int Lua_Group::GroupCount() {
 	return self->GroupCount();
 }
 
-int Lua_Group::GetHighestLevel() {
+uint32 Lua_Group::GetHighestLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetHighestLevel();
 }
 
-int Lua_Group::GetLowestLevel() {
+uint32 Lua_Group::GetLowestLevel() {
 	Lua_Safe_Call_Int();
 	return self->GetLowestLevel();
 }
@@ -97,14 +112,14 @@ int Lua_Group::GetID() {
 	return self->GetID();
 }
 
-Lua_Mob Lua_Group::GetMember(int index) {
+Lua_Mob Lua_Group::GetMember(int member_index) {
 	Lua_Safe_Call_Class(Lua_Mob);
 
-	if(index >= 6 || index < 0) {
+	if (!EQ::ValueWithin(member_index, 0, 5)) {
 		return Lua_Mob();
 	}
 
-	return self->members[index];
+	return self->members[member_index];
 }
 
 bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name)
@@ -119,31 +134,40 @@ bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, 
 	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
 }
 
+uint32 Lua_Group::GetAverageLevel() {
+	Lua_Safe_Call_Int();
+	return self->GetAvgLevel();
+}
+
 luabind::scope lua_register_group() {
 	return luabind::class_<Lua_Group>("Group")
-		.def(luabind::constructor<>())
-		.property("null", &Lua_Group::Null)
-		.property("valid", &Lua_Group::Valid)
-		.def("DisbandGroup", (void(Lua_Group::*)(void))&Lua_Group::DisbandGroup)
-		.def("IsGroupMember", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsGroupMember)
-		.def("CastGroupSpell", (void(Lua_Group::*)(Lua_Mob,int))&Lua_Group::CastGroupSpell)
-		.def("SplitExp", (void(Lua_Group::*)(uint32,Lua_Mob))&Lua_Group::SplitExp)
-		.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,int,const char* message))&Lua_Group::GroupMessage)
-		.def("GetTotalGroupDamage", (uint32(Lua_Group::*)(Lua_Mob))&Lua_Group::GetTotalGroupDamage)
-		.def("SplitMoney", (void(Lua_Group::*)(uint32,uint32,uint32,uint32))&Lua_Group::SplitMoney)
-		.def("SplitMoney", (void(Lua_Group::*)(uint32,uint32,uint32,uint32,Lua_Client))&Lua_Group::SplitMoney)
-		.def("SetLeader", (void(Lua_Group::*)(Lua_Mob))&Lua_Group::SetLeader)
-		.def("GetLeader", (Lua_Mob(Lua_Group::*)(void))&Lua_Group::GetLeader)
-		.def("GetLeaderName", (const char*(Lua_Group::*)(void))&Lua_Group::GetLeaderName)
-		.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
-		.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
-		.def("GetHighestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
-		.def("GetLowestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
-		.def("TeleportGroup", (void(Lua_Group::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Group::TeleportGroup)
-		.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
-		.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember)
-		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
-		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string, int))&Lua_Group::DoesAnyMemberHaveExpeditionLockout);
+	.def(luabind::constructor<>())
+	.property("null", &Lua_Group::Null)
+	.property("valid", &Lua_Group::Valid)
+	.def("CastGroupSpell", (void(Lua_Group::*)(Lua_Mob,int))&Lua_Group::CastGroupSpell)
+	.def("DisbandGroup", (void(Lua_Group::*)(void))&Lua_Group::DisbandGroup)
+	.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
+	.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string, int))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
+	.def("GetAverageLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetAverageLevel)
+	.def("GetHighestLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetHighestLevel)
+	.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
+	.def("GetLeader", (Lua_Mob(Lua_Group::*)(void))&Lua_Group::GetLeader)
+	.def("GetLeaderName", (const char*(Lua_Group::*)(void))&Lua_Group::GetLeaderName)
+	.def("GetLowestLevel", (uint32(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
+	.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember)
+	.def("GetTotalGroupDamage", (uint32(Lua_Group::*)(Lua_Mob))&Lua_Group::GetTotalGroupDamage)
+	.def("GroupCount", (int(Lua_Group::*)(void))&Lua_Group::GroupCount)
+	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,const char*))&Lua_Group::GroupMessage)
+	.def("GroupMessage", (void(Lua_Group::*)(Lua_Mob,uint8,const char*))&Lua_Group::GroupMessage)
+	.def("IsGroupMember", (bool(Lua_Group::*)(const char*))&Lua_Group::IsGroupMember)
+	.def("IsGroupMember", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsGroupMember)
+	.def("IsLeader", (bool(Lua_Group::*)(const char*))&Lua_Group::IsLeader)
+	.def("IsLeader", (bool(Lua_Group::*)(Lua_Mob))&Lua_Group::IsLeader)
+	.def("SetLeader", (void(Lua_Group::*)(Lua_Mob))&Lua_Group::SetLeader)
+	.def("SplitExp", (void(Lua_Group::*)(uint32,Lua_Mob))&Lua_Group::SplitExp)
+	.def("SplitMoney", (void(Lua_Group::*)(uint32,uint32,uint32,uint32))&Lua_Group::SplitMoney)
+	.def("SplitMoney", (void(Lua_Group::*)(uint32,uint32,uint32,uint32,Lua_Client))&Lua_Group::SplitMoney)
+	.def("TeleportGroup", (void(Lua_Group::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Group::TeleportGroup);
 }
 
 #endif

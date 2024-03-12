@@ -1,13 +1,13 @@
 #include "console_server.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include <fmt/format.h>
 
 EQ::Net::ConsoleServer::ConsoleServer(const std::string &addr, int port)
 {
-	m_server.reset(new EQ::Net::TCPServer());
+	m_server = std::make_unique<EQ::Net::TCPServer>();
 	m_server->Listen(addr, port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		ConsoleServerConnection *c = new ConsoleServerConnection(this, connection);
-		m_connections.insert(std::make_pair(c->GetUUID(), std::unique_ptr<ConsoleServerConnection>(c)));
+		m_connections.emplace(std::make_pair(c->GetUUID(), std::unique_ptr<ConsoleServerConnection>(c)));
 	});
 }
 
@@ -52,11 +52,11 @@ void EQ::Net::ConsoleServer::ConnectionDisconnected(ConsoleServerConnection *c)
 
 void EQ::Net::ConsoleServer::ProcessCommand(ConsoleServerConnection *c, const std::string &cmd)
 {
-	auto split = SplitString(cmd, ' ');
-	
+	auto split = Strings::Split(cmd, ' ');
+
 	if (split.size() > 0) {
 		auto command = split[0];
-		ToLowerString(command);
+		command = Strings::ToLower(command);
 
 		if (command == "help" || command == "?") {
 			c->SendLine("Commands:");
@@ -70,9 +70,9 @@ void EQ::Net::ConsoleServer::ProcessCommand(ConsoleServerConnection *c, const st
 			c->SendPrompt();
 			return;
 		}
-	
+
 		split.erase(split.begin(), split.begin() + 1);
-		
+
 		auto cmd_def = m_commands.find(command);
 		if (cmd_def != m_commands.end()) {
 			if (c->Admin() >= cmd_def->second.status_required) {

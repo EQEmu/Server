@@ -29,7 +29,7 @@ void LoadSkillCaps(SharedDatabase *database, const std::string &prefix) {
 	EQ::IPCMutex mutex("skill_caps");
 	mutex.Lock();
 
-	uint32 class_count = PLAYER_CLASS_COUNT;
+	uint32 class_count = Class::PLAYER_CLASS_COUNT;
 	uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
 	uint32 level_count = HARD_LEVEL_CAP + 1;
 	uint32 size = (class_count * skill_count * level_count * sizeof(uint16));

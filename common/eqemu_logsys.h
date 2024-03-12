@@ -23,8 +23,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
+#include <cstdio>
 #include <functional>
+#include <algorithm>
 
 #ifdef _WIN32
 #ifdef utf16_to_utf8
@@ -37,9 +38,8 @@
 
 namespace Logs {
 	enum DebugLevel {
-		General = 1,	/* 1 - Low-Level general debugging, useful info on single line */
-		Moderate,		/* 2 - Informational based, used in functions, when particular things load */
-		Detail			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+		General = 1,    // 1 - Low-Level general debugging, useful info on single line
+		Detail          // 2 - Use this for very chatty logging you want to leave in but don't want on by default
 	};
 
 	/**
@@ -53,7 +53,7 @@ namespace Logs {
 		AI,
 		Aggro,
 		Attack,
-		PacketClientServer,
+		DeprecatedCS, // deprecated
 		Combat,
 		Commands,
 		Crash,
@@ -64,36 +64,36 @@ namespace Logs {
 		Inventory,
 		Launcher,
 		Netcode,
-		Normal,
+		Normal, // deprecated
 		Object,
 		Pathing,
-		QSServer,
+		QSServer, // deprecated
 		Quests,
 		Rules,
 		Skills,
 		Spawns,
 		Spells,
-		Status,
+		Status, // deprecated
 		TCPConnection,
 		Tasks,
 		Tradeskills,
 		Trading,
 		Tribute,
-		UCSServer,
-		WebInterfaceServer,
-		WorldServer,
-		ZoneServer,
+		UCSServer, // deprecated
+		WebInterfaceServer, // deprecated
+		WorldServer, // deprecated
+		ZoneServer, // deprecated
 		MySQLError,
 		MySQLQuery,
 		Mercenaries,
 		QuestDebug,
-		PacketServerClient,
-		PacketClientServerUnhandled,
-		PacketServerClientWithDump,
-		PacketClientServerWithDump,
-		Loginserver,
+		DeprecatedSC, // deprecated
+		DeprecatedCSU, // deprecated
+		DeprecatedSCD, // deprecated
+		DeprecatedCSD, // deprecated
+		Loginserver, // deprecated
 		ClientLogin,
-		HeadlessClient,
+		HeadlessClient, // deprecated
 		HPUpdate,
 		FixZ,
 		Food,
@@ -103,10 +103,10 @@ namespace Logs {
 		MobAppearance,
 		Info,
 		Warning,
-		Critical,
-		Emergency,
-		Alert,
-		Notice,
+		Critical, // deprecated
+		Emergency, // deprecated
+		Alert, // deprecated
+		Notice, // deprecated
 		AIScanClose,
 		AIYellForHelp,
 		AICastBeneficialClose,
@@ -120,20 +120,41 @@ namespace Logs {
 		Loot,
 		Expeditions,
 		DynamicZones,
-		Group,
+		Scheduler,
+		Cheat,
+		ClientList,
+		DiaWind,
+		HTTP,
+		Saylink,
+		ChecksumVerification,
+		CombatRecord,
+		Hate,
+		Discord,
+		Faction,
+		PacketServerClient,
+		PacketClientServer,
+		PacketServerToServer,
+		Bugs,
+		QuestErrors,
+		PlayerEvents,
+		DataBuckets,
+		Zoning,
+		EqTime,
+		Corpses,
+		XTargets,
 		MaxCategoryID /* Don't Remove this */
 	};
 
 	/**
 	 * If you add to this, make sure you update LogCategory
 	 */
-	static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
+	static const char *LogCategoryName[LogCategory::MaxCategoryID] = {
 		"",
 		"AA",
 		"AI",
 		"Aggro",
 		"Attack",
-		"Packet :: Client -> Server",
+		"Deprecated",
 		"Combat",
 		"Commands",
 		"Crash",
@@ -144,52 +165,52 @@ namespace Logs {
 		"Inventory",
 		"Launcher",
 		"Netcode",
-		"Normal",
+		"Normal (Deprecated)",
 		"Object",
 		"Pathing",
-		"QS Server",
+		"QS Server (Deprecated)",
 		"Quests",
 		"Rules",
 		"Skills",
 		"Spawns",
 		"Spells",
-		"Status",
+		"Status (Deprecated)",
 		"TCP Connection",
 		"Tasks",
 		"Tradeskills",
 		"Trading",
 		"Tribute",
-		"UCS Server",
-		"WebInterface Server",
-		"World Server",
-		"Zone Server",
-		"MySQL Error",
-		"MySQL Query",
+		"UCS Server (Deprecated)",
+		"Web Interface (Deprecated)",
+		"World Server (Deprecated)",
+		"Zone Server (Deprecated)",
+		"QueryErr",
+		"Query",
 		"Mercenaries",
 		"Quest Debug",
-		"Packet :: Server -> Client",
-		"Packet :: Client -> Server Unhandled",
-		"Packet :: Server -> Client (Dump)",
-		"Packet :: Client -> Server (Dump)",
-		"Login Server",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Legacy Packet Logging (Deprecated)",
+		"Login Server (Deprecated)",
 		"Client Login",
-		"Headless Client",
+		"Headless Client (Deprecated)",
 		"HP Update",
 		"FixZ",
 		"Food",
 		"Traps",
 		"NPC Roam Box",
 		"NPC Scaling",
-		"Mob Appearance",
+		"MobAppearance",
 		"Info",
 		"Warning",
-		"Critical",
-		"Emergency",
-		"Alert",
-		"Notice",
-		"AI Scan Close",
-		"AI Yell For Help",
-		"AI Cast Beneficial Close",
+		"Critical (Deprecated)",
+		"Emergency (Deprecated)",
+		"Alert (Deprecated)",
+		"Notice (Deprecated)",
+		"AI Scan",
+		"AI Yell",
+		"AI CastBeneficial",
 		"AOE Cast",
 		"Entity Management",
 		"Flee",
@@ -200,11 +221,36 @@ namespace Logs {
 		"Loot",
 		"Expeditions",
 		"DynamicZones",
-		"Group",
+		"Scheduler",
+		"Cheat",
+		"ClientList",
+		"DialogueWindow",
+		"HTTP",
+		"Saylink",
+		"ChecksumVer",
+		"CombatRecord",
+		"Hate",
+		"Discord",
+		"Faction",
+		"Packet S->C",
+		"Packet C->S",
+		"Packet S->S",
+		"Bugs",
+		"QuestErrors",
+		"PlayerEvents",
+		"DataBuckets",
+		"Zoning",
+		"EqTime",
+		"Corpses",
+		"XTargets"
 	};
 }
 
 #include "eqemu_logsys_log_aliases.h"
+
+class Database;
+
+constexpr uint16 MAX_DISCORD_WEBHOOK_ID = 300;
 
 class EQEmuLogSys {
 public:
@@ -216,7 +262,8 @@ public:
 	 * This should be handled on deconstructor but to be safe we use it anyways.
 	 */
 	void CloseFileLogs();
-	void LoadLogSettingsDefaults();
+	EQEmuLogSys *LoadLogSettingsDefaults();
+	EQEmuLogSys *LoadLogDatabaseSettings();
 
 	/**
 	 * @param directory_name
@@ -246,7 +293,7 @@ public:
 	 * Used in file logs to prepend a timestamp entry for logs
 	 * @param time_stamp
 	 */
-	void SetCurrentTimeStamp(char* time_stamp);
+	void SetCurrentTimeStamp(char *time_stamp);
 
 	/**
 	 * @param log_name
@@ -267,108 +314,104 @@ public:
 		uint8 log_to_file;
 		uint8 log_to_console;
 		uint8 log_to_gmsay;
+		uint8 log_to_discord;
+		int   discord_webhook_id;
 		uint8 is_category_enabled; /* When any log output in a category > 0, set this to 1 as (Enabled) */
 	};
+
+	struct OriginationInfo {
+		std::string zone_short_name;
+		std::string zone_long_name;
+		int         instance_id;
+	};
+
+	OriginationInfo origination_info{};
 
 	/**
 	 * Internally used memory reference for all log settings per category
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
-	 * Database loaded via Database::LoadLogSettings(log_settings)
+	 * Database loaded via LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
-	bool file_logs_enabled = false;
+	// temporary bucket to re-load after silencing
+	LogSettings pre_silence_settings[Logs::LogCategory::MaxCategoryID]{};
 
-	/**
-	 * Sets Executable platform (Zone/World/UCS) etc.
-	 */
-	int log_platform = 0;
+	struct LogEnabled {
+		bool log_to_file_enabled;
+		bool log_to_console_enabled;
+		bool log_to_gmsay_enabled;
+		bool log_to_discord_enabled;
+		bool log_enabled;
+	};
 
-	/**
-	 * File name used in writing logs
-	 */
-	std::string platform_file_name;
+	LogEnabled GetLogsEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
+	bool IsLogEnabled(const Logs::DebugLevel &debug_level, const uint16 &log_category);
 
-	/**
-	 * GMSay Client Message colors mapped by category
-	 *
-	 * @param log_category
-	 * @return
-	 */
+	struct DiscordWebhooks {
+		int         id;
+		std::string webhook_name;
+		std::string webhook_url;
+	};
+
+	const DiscordWebhooks *GetDiscordWebhooks() const;
+
+	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	/**
-	 * @param f
-	 */
-	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	EQEmuLogSys *SetGMSayHandler(const std::function<void(uint16 log_type, const char *func, const std::string &)>& f)
+	{
+		m_on_log_gmsay_hook = f;
+		return this;
+	}
 
-	/**
-	 * @param f
-	 */
-	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
+	EQEmuLogSys *SetDiscordHandler(std::function<void(uint16 log_category, int webhook_id, const std::string &)> f)
+	{
+		m_on_log_discord_hook = f;
+		return this;
+	}
 
-	/**
-	 * Silence console logging
-	 */
+	// console
+	void SetConsoleHandler(
+		std::function<void(
+			uint16 log_type,
+			const std::string &
+		)> f
+	) { m_on_log_console_hook = f; }
 	void SilenceConsoleLogging();
-
-	/**
-	 * Turn on all console logging
-	 */
 	void EnableConsoleLogging();
+
+	// database
+	EQEmuLogSys *SetDatabase(Database *db);
+
+	[[nodiscard]] const std::string &GetLogPath() const;
+	EQEmuLogSys * SetLogPath(const std::string &log_path);
+
+	void DisableMySQLErrorLogs();
+	void EnableMySQLErrorLogs();
 
 private:
 
-	/**
-	 * Callback pointer to zone process for hooking logs to zone using GMSay
-	 */
-	std::function<void(uint16 log_category, const std::string&)> on_log_gmsay_hook;
-	std::function<void(uint16 debug_level, uint16 log_category, const std::string&)> on_log_console_hook;
+	// reference to database
+	Database                                                                        *m_database;
+	std::function<void(uint16 log_category, const char *func, const std::string &)> m_on_log_gmsay_hook;
+	std::function<void(uint16 log_category, int webhook_id, const std::string &)>   m_on_log_discord_hook;
+	std::function<void(uint16 log_category, const std::string &)>                   m_on_log_console_hook;
+	DiscordWebhooks                                                                 m_discord_webhooks[MAX_DISCORD_WEBHOOK_ID]{};
+	bool                                                                            m_file_logs_enabled = false;
+	int                                                                             m_log_platform      = 0;
+	std::string                                                                     m_platform_file_name;
+	std::string                                                                     m_log_path;
 
-	/**
-	 * Formats log messages like '[Category] This is a log message'
-	 */
-	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
-
-	/**
-	 * Linux console color messages mapped by category
-	 *
-	 * @param log_category
-	 * @return
-	 */
-	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
-
-	/**
-	 * Windows console color messages mapped by category
-	 */
-	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
-
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
-	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
-	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
-	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param log_category
-	 * @return
-	 */
-	bool IsRfc5424LogCategory(uint16 log_category);
+	void ProcessConsoleMessage(
+		uint16 log_category,
+		const std::string &message,
+		const char *file,
+		const char *func,
+		int line
+	);
+	void ProcessLogWrite(uint16 log_category, const std::string &message);
+	void InjectTablesIfNotExist();
 };
 
 extern EQEmuLogSys LogSys;

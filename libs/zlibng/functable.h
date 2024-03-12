@@ -9,13 +9,21 @@
 #include "deflate.h"
 
 struct functable_s {
-    void     (* fill_window)    (deflate_state *s);
-    Pos      (* insert_string)  (deflate_state *const s, const Pos str, unsigned int count);
-    uint32_t (* adler32)        (uint32_t adler, const unsigned char *buf, size_t len);
-    uint32_t (* crc32)          (uint32_t crc, const unsigned char *buf, uint64_t len);
+    void     (* insert_string)      (deflate_state *const s, const uint32_t str, uint32_t count);
+    Pos      (* quick_insert_string)(deflate_state *const s, const uint32_t str);
+    uint32_t (* adler32)            (uint32_t adler, const unsigned char *buf, size_t len);
+    uint32_t (* crc32)              (uint32_t crc, const unsigned char *buf, uint64_t len);
+    void     (* slide_hash)         (deflate_state *s);
+    uint32_t (* compare258)         (const unsigned char *src0, const unsigned char *src1);
+    uint32_t (* longest_match)      (deflate_state *const s, Pos cur_match);
+    uint32_t (* chunksize)          (void);
+    uint8_t* (* chunkcopy)          (uint8_t *out, uint8_t const *from, unsigned len);
+    uint8_t* (* chunkcopy_safe)     (uint8_t *out, uint8_t const *from, unsigned len, uint8_t *safe);
+    uint8_t* (* chunkunroll)        (uint8_t *out, unsigned *dist, unsigned *len);
+    uint8_t* (* chunkmemset)        (uint8_t *out, unsigned dist, unsigned len);
+    uint8_t* (* chunkmemset_safe)   (uint8_t *out, unsigned dist, unsigned len, unsigned left);
 };
 
-ZLIB_INTERNAL extern __thread struct functable_s functable;
-
+Z_INTERNAL extern Z_TLS struct functable_s functable;
 
 #endif

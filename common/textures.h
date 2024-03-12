@@ -54,6 +54,8 @@ namespace EQ
 			tintInvalid = textureInvalid
 		};
 
+		constexpr int format_as(TextureSlot slot) { return static_cast<int>(slot); }
+
 		const int8 LastTexture = weaponSecondary;
 		const int8 LastTintableTexture = tintFeet;
 

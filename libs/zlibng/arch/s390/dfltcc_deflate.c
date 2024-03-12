@@ -13,27 +13,26 @@
         $ make
 */
 
-#include "zbuild.h"
-#include "zutil.h"
-#include "deflate.h"
+#include "../../zbuild.h"
+#include "../../zutil.h"
+#include "../../deflate.h"
+#include "../../trees_emit.h"
 #include "dfltcc_deflate.h"
 #include "dfltcc_detail.h"
 
-static inline int dfltcc_are_params_ok(int level, uInt window_bits, int strategy, uint16_t level_mask)
-{
-    return (level_mask & ((uint16_t)1 << level)) != 0 &&
-        (window_bits == HB_BITS) &&
-        (strategy == Z_FIXED || strategy == Z_DEFAULT_STRATEGY);
-}
-
-
-int ZLIB_INTERNAL dfltcc_can_deflate(PREFIX3(streamp) strm)
-{
+static inline int dfltcc_can_deflate_with_params(PREFIX3(streamp) strm, int level, uInt window_bits, int strategy,
+                                       int reproducible) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
 
     /* Unsupported compression settings */
-    if (!dfltcc_are_params_ok(state->level, state->w_bits, state->strategy, dfltcc_state->level_mask))
+    if ((dfltcc_state->level_mask & (1 << level)) == 0)
+        return 0;
+    if (window_bits != HB_BITS)
+        return 0;
+    if (strategy != Z_FIXED && strategy != Z_DEFAULT_STRATEGY)
+        return 0;
+    if (reproducible)
         return 0;
 
     /* Unsupported hardware */
@@ -45,8 +44,13 @@ int ZLIB_INTERNAL dfltcc_can_deflate(PREFIX3(streamp) strm)
     return 1;
 }
 
-static inline void dfltcc_gdht(PREFIX3(streamp) strm)
-{
+int Z_INTERNAL dfltcc_can_deflate(PREFIX3(streamp) strm) {
+    deflate_state *state = (deflate_state *)strm->state;
+
+    return dfltcc_can_deflate_with_params(strm, state->level, state->w_bits, state->strategy, state->reproducible);
+}
+
+static inline void dfltcc_gdht(PREFIX3(streamp) strm) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_param_v0 *param = &GET_DFLTCC_STATE(state)->param;
     size_t avail_in = strm->avail_in;
@@ -54,8 +58,7 @@ static inline void dfltcc_gdht(PREFIX3(streamp) strm)
     dfltcc(DFLTCC_GDHT, param, NULL, NULL, &strm->next_in, &avail_in, NULL);
 }
 
-static inline dfltcc_cc dfltcc_cmpr(PREFIX3(streamp) strm)
-{
+static inline dfltcc_cc dfltcc_cmpr(PREFIX3(streamp) strm) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_param_v0 *param = &GET_DFLTCC_STATE(state)->param;
     size_t avail_in = strm->avail_in;
@@ -72,11 +75,10 @@ static inline dfltcc_cc dfltcc_cmpr(PREFIX3(streamp) strm)
     return cc;
 }
 
-static inline void send_eobs(PREFIX3(streamp) strm, const struct dfltcc_param_v0 *param)
-{
+static inline void send_eobs(PREFIX3(streamp) strm, const struct dfltcc_param_v0 *param) {
     deflate_state *state = (deflate_state *)strm->state;
 
-    send_bits(state, bi_reverse(param->eobs >> (15 - param->eobl), param->eobl), param->eobl);
+    send_bits(state, bi_reverse(param->eobs >> (15 - param->eobl), param->eobl), param->eobl, state->bi_buf, state->bi_valid);
     flush_pending(strm);
     if (state->pending != 0) {
         /* The remaining data is located in pending_out[0:pending]. If someone
@@ -93,8 +95,7 @@ static inline void send_eobs(PREFIX3(streamp) strm, const struct dfltcc_param_v0
 #endif
 }
 
-int ZLIB_INTERNAL dfltcc_deflate(PREFIX3(streamp) strm, int flush, block_state *result)
-{
+int Z_INTERNAL dfltcc_deflate(PREFIX3(streamp) strm, int flush, block_state *result) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
     struct dfltcc_param_v0 *param = &dfltcc_state->param;
@@ -104,31 +105,38 @@ int ZLIB_INTERNAL dfltcc_deflate(PREFIX3(streamp) strm, int flush, block_state *
     int soft_bcc;
     int no_flush;
 
-    if (!dfltcc_can_deflate(strm))
+    if (!dfltcc_can_deflate(strm)) {
+        /* Clear history. */
+        if (flush == Z_FULL_FLUSH)
+            param->hl = 0;
         return 0;
+    }
 
 again:
     masked_avail_in = 0;
     soft_bcc = 0;
     no_flush = flush == Z_NO_FLUSH;
 
-    /* Trailing empty block. Switch to software, except when Continuation Flag
-     * is set, which means that DFLTCC has buffered some output in the
-     * parameter block and needs to be called again in order to flush it.
+    /* No input data. Return, except when Continuation Flag is set, which means
+     * that DFLTCC has buffered some output in the parameter block and needs to
+     * be called again in order to flush it.
      */
-    if (flush == Z_FINISH && strm->avail_in == 0 && !param->cf) {
-        if (param->bcf) {
-            /* A block is still open, and the hardware does not support closing
-             * blocks without adding data. Thus, close it manually.
-             */
+    if (strm->avail_in == 0 && !param->cf) {
+        /* A block is still open, and the hardware does not support closing
+         * blocks without adding data. Thus, close it manually.
+         */
+        if (!no_flush && param->bcf) {
             send_eobs(strm, param);
             param->bcf = 0;
         }
-        return 0;
-    }
-
-    if (strm->avail_in == 0 && !param->cf) {
-        *result = need_more;
+        /* Let one of deflate_* functions write a trailing empty block. */
+        if (flush == Z_FINISH)
+            return 0;
+        /* Clear history. */
+        if (flush == Z_FULL_FLUSH)
+            param->hl = 0;
+        /* Trigger block post-processing if necessary. */
+        *result = no_flush ? need_more : block_done;
         return 1;
     }
 
@@ -154,11 +162,16 @@ again:
             send_eobs(strm, param);
             param->bcf = 0;
             dfltcc_state->block_threshold = strm->total_in + dfltcc_state->block_size;
-            if (strm->avail_out == 0) {
-                *result = need_more;
-                return 1;
-            }
         }
+    }
+
+    /* No space for compressed data. If we proceed, dfltcc_cmpr() will return
+     * DFLTCC_CC_OP1_TOO_SHORT without buffering header bits, but we will still
+     * set BCF=1, which is wrong. Avoid complications and return early.
+     */
+    if (strm->avail_out == 0) {
+        *result = need_more;
+        return 1;
     }
 
     /* The caller gave us too much data. Pass only one block worth of
@@ -180,7 +193,7 @@ again:
     param->cvt = state->wrap == 2 ? CVT_CRC32 : CVT_ADLER32;
     if (!no_flush)
         /* We need to close a block. Always do this in software - when there is
-         * no input data, the hardware will not nohor BCC. */
+         * no input data, the hardware will not honor BCC. */
         soft_bcc = 1;
     if (flush == Z_FINISH && !param->bcf)
         /* We are about to open a BFINAL block, set Block Header Final bit
@@ -195,8 +208,8 @@ again:
     param->sbb = (unsigned int)state->bi_valid;
     if (param->sbb > 0)
         *strm->next_out = (unsigned char)state->bi_buf;
-    if (param->hl)
-        param->nt = 0; /* Honor history */
+    /* Honor history and check value */
+    param->nt = 0;
     param->cv = state->wrap == 2 ? ZSWAP32(strm->adler) : strm->adler;
 
     /* When opening a block, choose a Huffman-Table Type */
@@ -277,31 +290,60 @@ again:
    fly with deflateParams, we need to convert between hardware and software
    window formats.
 */
-int ZLIB_INTERNAL dfltcc_deflate_params(PREFIX3(streamp) strm, int level, int strategy)
-{
+static int dfltcc_was_deflate_used(PREFIX3(streamp) strm) {
     deflate_state *state = (deflate_state *)strm->state;
-    struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
-    struct dfltcc_param_v0 *param = &dfltcc_state->param;
+    struct dfltcc_param_v0 *param = &GET_DFLTCC_STATE(state)->param;
+
+    return strm->total_in > 0 || param->nt == 0 || param->hl > 0;
+}
+
+int Z_INTERNAL dfltcc_deflate_params(PREFIX3(streamp) strm, int level, int strategy, int *flush) {
+    deflate_state *state = (deflate_state *)strm->state;
     int could_deflate = dfltcc_can_deflate(strm);
-    int can_deflate = dfltcc_are_params_ok(level, state->w_bits, strategy, dfltcc_state->level_mask);
+    int can_deflate = dfltcc_can_deflate_with_params(strm, level, state->w_bits, strategy, state->reproducible);
 
     if (can_deflate == could_deflate)
         /* We continue to work in the same mode - no changes needed */
         return Z_OK;
 
-    if (strm->total_in == 0 && param->nt == 1 && param->hl == 0)
+    if (!dfltcc_was_deflate_used(strm))
         /* DFLTCC was not used yet - no changes needed */
         return Z_OK;
 
-    /* Switching between hardware and software is not implemented */
-    return Z_STREAM_ERROR;
+    /* For now, do not convert between window formats - simply get rid of the old data instead */
+    *flush = Z_FULL_FLUSH;
+    return Z_OK;
+}
+
+int Z_INTERNAL dfltcc_deflate_done(PREFIX3(streamp) strm, int flush) {
+    deflate_state *state = (deflate_state *)strm->state;
+    struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
+    struct dfltcc_param_v0 *param = &dfltcc_state->param;
+
+    /* When deflate(Z_FULL_FLUSH) is called with small avail_out, it might
+     * close the block without resetting the compression state. Detect this
+     * situation and return that deflation is not done.
+     */
+    if (flush == Z_FULL_FLUSH && strm->avail_out == 0)
+        return 0;
+
+    /* Return that deflation is not done if DFLTCC is used and either it
+     * buffered some data (Continuation Flag is set), or has not written EOBS
+     * yet (Block-Continuation Flag is set).
+     */
+    return !dfltcc_can_deflate(strm) || (!param->cf && !param->bcf);
+}
+
+int Z_INTERNAL dfltcc_can_set_reproducible(PREFIX3(streamp) strm, int reproducible) {
+    deflate_state *state = (deflate_state *)strm->state;
+
+    return reproducible != state->reproducible && !dfltcc_was_deflate_used(strm);
 }
 
 /*
    Preloading history.
 */
-static void append_history(struct dfltcc_param_v0 *param, unsigned char *history, const unsigned char *buf, uInt count)
-{
+static void append_history(struct dfltcc_param_v0 *param, unsigned char *history, const unsigned char *buf, uInt count) {
     size_t offset;
     size_t n;
 
@@ -331,20 +373,19 @@ static void append_history(struct dfltcc_param_v0 *param, unsigned char *history
     }
 }
 
-int ZLIB_INTERNAL dfltcc_deflate_set_dictionary(PREFIX3(streamp) strm,
-                                                const unsigned char *dictionary, uInt dict_length)
-{
+int Z_INTERNAL dfltcc_deflate_set_dictionary(PREFIX3(streamp) strm,
+                                                const unsigned char *dictionary, uInt dict_length) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
     struct dfltcc_param_v0 *param = &dfltcc_state->param;
 
     append_history(param, state->window, dictionary, dict_length);
     state->strstart = 1; /* Add FDICT to zlib header */
+    state->block_start = state->strstart; /* Make deflate_stored happy */
     return Z_OK;
 }
 
-int ZLIB_INTERNAL dfltcc_deflate_get_dictionary(PREFIX3(streamp) strm, unsigned char *dictionary, uInt *dict_length)
-{
+int Z_INTERNAL dfltcc_deflate_get_dictionary(PREFIX3(streamp) strm, unsigned char *dictionary, uInt *dict_length) {
     deflate_state *state = (deflate_state *)strm->state;
     struct dfltcc_state *dfltcc_state = GET_DFLTCC_STATE(state);
     struct dfltcc_param_v0 *param = &dfltcc_state->param;

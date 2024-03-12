@@ -1,51 +1,27 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
 #define EQEMU_BASE_GUILD_RANKS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseGuildRanksRepository {
 public:
 	struct GuildRanks {
-		int         guild_id;
-		int         rank;
+		uint32_t    guild_id;
+		uint8_t     rank_;
 		std::string title;
-		int         can_hear;
-		int         can_speak;
-		int         can_invite;
-		int         can_remove;
-		int         can_promote;
-		int         can_demote;
-		int         can_motd;
-		int         can_warpeace;
 	};
 
 	static std::string PrimaryKey()
@@ -57,37 +33,28 @@ public:
 	{
 		return {
 			"guild_id",
-			"rank",
+			"`rank`",
 			"title",
-			"can_hear",
-			"can_speak",
-			"can_invite",
-			"can_remove",
-			"can_promote",
-			"can_demote",
-			"can_motd",
-			"can_warpeace",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"guild_id",
+			"`rank`",
+			"title",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -99,7 +66,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -109,30 +76,22 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static GuildRanks NewEntity()
 	{
-		GuildRanks entry{};
+		GuildRanks e{};
 
-		entry.guild_id     = 0;
-		entry.rank         = 0;
-		entry.title        = "";
-		entry.can_hear     = 0;
-		entry.can_speak    = 0;
-		entry.can_invite   = 0;
-		entry.can_remove   = 0;
-		entry.can_promote  = 0;
-		entry.can_demote   = 0;
-		entry.can_motd     = 0;
-		entry.can_warpeace = 0;
+		e.guild_id = 0;
+		e.rank_    = 0;
+		e.title    = "";
 
-		return entry;
+		return e;
 	}
 
-	static GuildRanks GetGuildRanksEntry(
+	static GuildRanks GetGuildRanks(
 		const std::vector<GuildRanks> &guild_rankss,
 		int guild_ranks_id
 	)
@@ -147,44 +106,39 @@ public:
 	}
 
 	static GuildRanks FindOne(
+		Database& db,
 		int guild_ranks_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				guild_ranks_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.title    = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int guild_ranks_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -197,32 +151,25 @@ public:
 	}
 
 	static int UpdateOne(
-		GuildRanks guild_ranks_entry
+		Database& db,
+		const GuildRanks &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(guild_ranks_entry.guild_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(guild_ranks_entry.rank));
-		update_values.push_back(columns[2] + " = '" + EscapeString(guild_ranks_entry.title) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(guild_ranks_entry.can_hear));
-		update_values.push_back(columns[4] + " = " + std::to_string(guild_ranks_entry.can_speak));
-		update_values.push_back(columns[5] + " = " + std::to_string(guild_ranks_entry.can_invite));
-		update_values.push_back(columns[6] + " = " + std::to_string(guild_ranks_entry.can_remove));
-		update_values.push_back(columns[7] + " = " + std::to_string(guild_ranks_entry.can_promote));
-		update_values.push_back(columns[8] + " = " + std::to_string(guild_ranks_entry.can_demote));
-		update_values.push_back(columns[9] + " = " + std::to_string(guild_ranks_entry.can_motd));
-		update_values.push_back(columns[10] + " = " + std::to_string(guild_ranks_entry.can_warpeace));
+		v.push_back(columns[0] + " = " + std::to_string(e.guild_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.rank_));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.title) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				guild_ranks_entry.guild_id
+				e.guild_id
 			)
 		);
 
@@ -230,83 +177,69 @@ public:
 	}
 
 	static GuildRanks InsertOne(
-		GuildRanks guild_ranks_entry
+		Database& db,
+		GuildRanks e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
-		insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-		insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-		insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank_));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			guild_ranks_entry.guild_id = results.LastInsertedID();
-			return guild_ranks_entry;
+			e.guild_id = results.LastInsertedID();
+			return e;
 		}
 
-		guild_ranks_entry = NewEntity();
+		e = NewEntity();
 
-		return guild_ranks_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<GuildRanks> guild_ranks_entries
+		Database& db,
+		const std::vector<GuildRanks> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guild_ranks_entry: guild_ranks_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(guild_ranks_entry.guild_id));
-			insert_values.push_back(std::to_string(guild_ranks_entry.rank));
-			insert_values.push_back("'" + EscapeString(guild_ranks_entry.title) + "'");
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_hear));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_speak));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_invite));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_remove));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_promote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_demote));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
-			insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank_));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<GuildRanks> All()
+	static std::vector<GuildRanks> All(Database& db)
 	{
 		std::vector<GuildRanks> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -316,31 +249,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.title    = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<GuildRanks> GetWhere(std::string where_filter)
+	static std::vector<GuildRanks> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GuildRanks> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -351,29 +276,21 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildRanks entry{};
+			GuildRanks e{};
 
-			entry.guild_id     = atoi(row[0]);
-			entry.rank         = atoi(row[1]);
-			entry.title        = row[2] ? row[2] : "";
-			entry.can_hear     = atoi(row[3]);
-			entry.can_speak    = atoi(row[4]);
-			entry.can_invite   = atoi(row[5]);
-			entry.can_remove   = atoi(row[6]);
-			entry.can_promote  = atoi(row[7]);
-			entry.can_demote   = atoi(row[8]);
-			entry.can_motd     = atoi(row[9]);
-			entry.can_warpeace = atoi(row[10]);
+			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.title    = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -384,9 +301,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -396,6 +313,92 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GuildRanks &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank_));
+		v.push_back("'" + Strings::Escape(e.title) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GuildRanks> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank_));
+			v.push_back("'" + Strings::Escape(e.title) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GUILD_RANKS_REPOSITORY_H

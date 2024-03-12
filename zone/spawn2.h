@@ -32,7 +32,7 @@ public:
 	Spawn2(uint32 spawn2_id, uint32 spawngroup_id,
 		float x, float y, float z, float heading,
 		uint32 respawn, uint32 variance,
-		uint32 timeleft = 0, uint32 grid = 0,
+		uint32 timeleft = 0, uint32 grid = 0, bool in_path_when_zone_idle=false,
 		uint16 cond_id = SC_AlwaysEnabled, int16 min_value = 0, bool in_enabled = true, EmuAppearance anim = eaStanding);
 	~Spawn2();
 
@@ -54,6 +54,7 @@ public:
 	float	GetY()		{ return y; }
 	float	GetZ()		{ return z; }
 	float	GetHeading() { return heading; }
+	bool	PathWhenZoneIdle() { return path_when_zone_idle; }
 	void	SetRespawnTimer(uint32 newrespawntime) { respawn_ = newrespawntime; };
 	void	SetVariance(uint32 newvariance) { variance_ = newvariance; }
 	const uint32 GetVariance() const { return variance_; }
@@ -66,6 +67,7 @@ public:
 	bool	NPCPointerValid() { return (npcthis!=nullptr); }
 	void	SetNPCPointer(NPC* n) { npcthis = n; }
 	void	SetNPCPointerNull() { npcthis = nullptr; }
+	Timer	GetTimer() { return timer; }
 	void	SetTimer(uint32 duration) { timer.Start(duration); }
 	uint32  GetKillCount() { return killcount; }
 protected:
@@ -86,6 +88,7 @@ private:
 	float	heading;
 	uint32	variance_;
 	uint32	grid_;
+	bool	path_when_zone_idle;
 	uint16	condition_id;
 	int16	condition_min_value;
 	bool enabled;
@@ -144,9 +147,9 @@ public:
 	SpawnConditionManager();
 
 	void Process();
-	bool LoadSpawnConditions(const char* zone_name, uint32 instance_id);
+	bool LoadSpawnConditions(const std::string& zone_short_name, uint32 instance_id);
 
-	int16 GetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id);
+	int16 GetCondition(const std::string& zone_short_name, uint32 instance_id, uint16 condition);
 	void SetCondition(const char *zone_short, uint32 instance_id, uint16 condition_id, int16 new_value, bool world_update = false);
 	void ToggleEvent(uint32 event_id, bool enabled, bool strict, bool reset_base);
 	bool Check(uint16 condition, int16 min_value);
@@ -157,13 +160,16 @@ protected:
 	std::vector<SpawnEvent> spawn_events;
 
 	void ExecEvent(SpawnEvent &e, bool send_update);
-	void UpdateDBEvent(SpawnEvent &e);
-	bool LoadDBEvent(uint32 event_id, SpawnEvent &e, std::string &zone_name);
-	void UpdateDBCondition(const char* zone_name, uint32 instance_id, uint16 cond_id, int16 value);
+	void UpdateSpawnEvent(SpawnEvent &e);
+	bool LoadSpawnEvent(uint32 event_id, SpawnEvent& event, std::string& zone_short_name);
+	void UpdateSpawnCondition(const std::string& zone_short_name, uint32 instance_id, uint16 condition, int16 condition_value);
 	void FindNearestEvent();
 
 	Timer minute_timer;
 	TimeOfDay_Struct next_event;
 };
+
+constexpr int format_as(SpawnCondition::OnChange val) { return static_cast<int>(val); }
+constexpr int format_as(SpawnEvent::Action val) { return static_cast<int>(val); }
 
 #endif

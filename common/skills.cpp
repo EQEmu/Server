@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -148,37 +148,9 @@ int32 EQ::skills::GetBaseDamage(SkillType skill)
 	}
 }
 
-bool EQ::skills::IsMeleeDmg(SkillType skill)
-{
-	switch (skill) {
-	case Skill1HBlunt:
-	case Skill1HSlashing:
-	case Skill2HBlunt:
-	case Skill2HSlashing:
-	case SkillBackstab:
-	case SkillBash:
-	case SkillDragonPunch:
-	case SkillEagleStrike:
-	case SkillFlyingKick:
-	case SkillHandtoHand:
-	case SkillKick:
-	case Skill1HPiercing:
-	case SkillRiposte:
-	case SkillRoundKick:
-	case SkillThrowing:
-	case SkillTigerClaw:
-	case SkillFrenzy:
-	case Skill2HPiercing:
-		return true;
-	default:
-		return false;
-	}
-}
-
 const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap()
 {
-	/* VS2013 code
-	static const std::map<SkillUseTypes, std::string> skill_use_types_map = {
+	static const std::map<SkillType, std::string> skill_type_map = {
 		{ Skill1HBlunt, "1H Blunt" },
 		{ Skill1HSlashing, "1H Slashing" },
 		{ Skill2HBlunt, "2H Blunt" },
@@ -258,101 +230,34 @@ const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap(
 		{ SkillTripleAttack, "Triple Attack" },
 		{ Skill2HPiercing, "2H Piercing" }
 	};
-	*/
+	return skill_type_map;
+}
 
-	/* VS2012 code - begin */
-
-	static const char* skill_use_names[SkillCount] = {
-		"1H Blunt",
-		"1H Slashing",
-		"2H Blunt",
-		"2H Slashing",
-		"Abjuration",
-		"Alteration",
-		"Apply Poison",
-		"Archery",
-		"Backstab",
-		"Bind Wound",
-		"Bash",
-		"Block",
-		"Brass Instruments",
-		"Channeling",
-		"Conjuration",
-		"Defense",
-		"Disarm",
-		"Disarm Traps",
-		"Divination",
-		"Dodge",
-		"Double Attack",
-		"Dragon Punch",
-		"Dual Wield",
-		"Eagle Strike",
-		"Evocation",
-		"Feign Death",
-		"Flying Kick",
-		"Forage",
-		"Hand to Hand",
-		"Hide",
-		"Kick",
-		"Meditate",
-		"Mend",
-		"Offense",
-		"Parry",
-		"Pick Lock",
-		"1H Piercing",
-		"Riposte",
-		"Round Kick",
-		"Safe Fall",
-		"Sense Heading",
-		"Singing",
-		"Sneak",
-		"Specialize Abjuration",
-		"Specialize Alteration",
-		"Specialize Conjuration",
-		"Specialize Divination",
-		"Specialize Evocation",
-		"Pick Pockets",
-		"Stringed Instruments",
-		"Swimming",
-		"Throwing",
-		"Tiger Claw",
-		"Tracking",
-		"Wind Instruments",
-		"Fishing",
-		"Make Poison",
-		"Tinkering",
-		"Research",
-		"Alchemy",
-		"Baking",
-		"Tailoring",
-		"Sense Traps",
-		"Blacksmithing",
-		"Fletching",
-		"Brewing",
-		"Alcohol Tolerance",
-		"Begging",
-		"Jewelry Making",
-		"Pottery",
-		"Percussion Instruments",
-		"Intimidation",
-		"Berserking",
-		"Taunt",
-		"Frenzy",
-		"Remove Traps",
-		"Triple Attack",
-		"2H Piercing"
+const std::vector<EQ::skills::SkillType>& EQ::skills::GetExtraDamageSkills()
+{
+	static const std::vector<EQ::skills::SkillType> v = {
+		EQ::skills::SkillBackstab,
+		EQ::skills::SkillBash,
+		EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
+		EQ::skills::SkillEagleStrike,
+		EQ::skills::SkillFlyingKick,
+		EQ::skills::SkillKick,
+		EQ::skills::SkillRoundKick,
+		EQ::skills::SkillRoundKick,
+		EQ::skills::SkillTigerClaw,
+		EQ::skills::SkillFrenzy
 	};
 
-	static std::map<SkillType, std::string> skill_type_map;
+	return v;
+}
 
-	skill_type_map.clear();
-
-	for (int i = Skill1HBlunt; i < SkillCount; ++i)
-		skill_type_map[(SkillType)i] = skill_use_names[i];
-
-	/* VS2012 code - end */
-
-	return skill_type_map;
+std::string EQ::skills::GetSkillName(SkillType skill)
+{
+	if (skill >= Skill1HBlunt && skill <= Skill2HPiercing) {
+		auto skills = GetSkillTypeMap();
+		return skills[skill];
+	}
+	return {};
 }
 
 EQ::SkillProfile::SkillProfile()

@@ -6,19 +6,27 @@ CC=
 CFLAGS=
 SFLAGS=
 INCLUDES=
+ACLEFLAG=
+NEONFLAG=
 SUFFIX=
 
 SRCDIR=.
 SRCTOP=../..
 TOPDIR=$(SRCTOP)
 
-all: adler32_neon.o adler32_neon.lo armfeature.o armfeature.lo crc32_acle.o crc32_acle.lo fill_window_arm.o fill_window_arm.lo insert_string_acle.o insert_string_acle.lo
+all: \
+	adler32_neon.o adler32_neon.lo \
+	armfeature.o armfeature.lo \
+	chunkset_neon.o chunkset_neon.lo \
+	crc32_acle.o crc32_acle.lo \
+	slide_neon.o slide_neon.lo \
+	insert_string_acle.o insert_string_acle.lo
 
 adler32_neon.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/adler32_neon.c
+	$(CC) $(CFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/adler32_neon.c
 
 adler32_neon.lo:
-	$(CC) $(SFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/adler32_neon.c
+	$(CC) $(SFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/adler32_neon.c
 
 armfeature.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/armfeature.c
@@ -26,23 +34,29 @@ armfeature.o:
 armfeature.lo:
 	$(CC) $(SFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/armfeature.c
 
+chunkset_neon.o:
+	$(CC) $(CFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/chunkset_neon.c
+
+chunkset_neon.lo:
+	$(CC) $(SFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/chunkset_neon.c
+
 crc32_acle.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/crc32_acle.c
+	$(CC) $(CFLAGS) $(ACLEFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/crc32_acle.c
 
 crc32_acle.lo:
-	$(CC) $(SFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/crc32_acle.c
+	$(CC) $(SFLAGS) $(ACLEFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/crc32_acle.c
 
-fill_window_arm.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/fill_window_arm.c
+slide_neon.o:
+	$(CC) $(CFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/slide_neon.c
 
-fill_window_arm.lo:
-	$(CC) $(SFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/fill_window_arm.c
+slide_neon.lo:
+	$(CC) $(SFLAGS) $(NEONFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/slide_neon.c
 
 insert_string_acle.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/insert_string_acle.c
+	$(CC) $(CFLAGS) $(ACLEFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/insert_string_acle.c
 
 insert_string_acle.lo:
-	$(CC) $(SFLAGS) $(INCLUDES) -c -o $@ $(SRCDIR)/insert_string_acle.c
+	$(CC) $(SFLAGS) $(ACLEFLAG) $(INCLUDES) -c -o $@ $(SRCDIR)/insert_string_acle.c
 
 mostlyclean: clean
 clean:

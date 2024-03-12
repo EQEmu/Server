@@ -1,5 +1,5 @@
 /*
- * Compute the CRC32 using a parallelized folding approach with the PCLMULQDQ 
+ * Compute the CRC32 using a parallelized folding approach with the PCLMULQDQ
  * instruction.
  *
  * A white paper describing this algorithm can be found at:
@@ -18,14 +18,14 @@
 
 #ifdef X86_PCLMULQDQ_CRC
 
-#include "zbuild.h"
+#include "../../zbuild.h"
 #include <inttypes.h>
 #include <immintrin.h>
 #include <wmmintrin.h>
 
 #include "crc_folding.h"
 
-ZLIB_INTERNAL void crc_fold_init(deflate_state *const s) {
+Z_INTERNAL void crc_fold_init(deflate_state *const s) {
     /* CRC_SAVE */
     _mm_storeu_si128((__m128i *)s->crc0 + 0, _mm_cvtsi32_si128(0x9db42487));
     _mm_storeu_si128((__m128i *)s->crc0 + 1, _mm_setzero_si128());
@@ -227,9 +227,10 @@ static void partial_fold(const size_t len, __m128i *xmm_crc0, __m128i *xmm_crc1,
     *xmm_crc3 = _mm_castps_si128(ps_res);
 }
 
-ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, const unsigned char *src, long len) {
+Z_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, const unsigned char *src, long len) {
     unsigned long algn_diff;
     __m128i xmm_t0, xmm_t1, xmm_t2, xmm_t3;
+    char ALIGNED_(16) partial_buf[16] = { 0 };
 
     /* CRC_LOAD */
     __m128i xmm_crc0 = _mm_loadu_si128((__m128i *)s->crc0 + 0);
@@ -241,11 +242,14 @@ ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, con
     if (len < 16) {
         if (len == 0)
             return;
-        xmm_crc_part = _mm_loadu_si128((__m128i *)src);
+
+        memcpy(partial_buf, src, len);
+        xmm_crc_part = _mm_loadu_si128((const __m128i *)partial_buf);
+        memcpy(dst, partial_buf, len);
         goto partial;
     }
 
-    algn_diff = (0 - (uintptr_t)src) & 0xF;
+    algn_diff = ((uintptr_t)16 - ((uintptr_t)src & 0xF)) & 0xF;
     if (algn_diff) {
         xmm_crc_part = _mm_loadu_si128((__m128i *)src);
         _mm_storeu_si128((__m128i *)dst, xmm_crc_part);
@@ -255,6 +259,8 @@ ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, con
         len -= algn_diff;
 
         partial_fold(algn_diff, &xmm_crc0, &xmm_crc1, &xmm_crc2, &xmm_crc3, &xmm_crc_part);
+    } else {
+        xmm_crc_part = _mm_setzero_si128();
     }
 
     while ((len -= 64) >= 0) {
@@ -305,7 +311,7 @@ ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, con
             goto done;
 
         dst += 48;
-        xmm_crc_part = _mm_load_si128((__m128i *)src + 3);
+        memcpy(&xmm_crc_part, (__m128i *)src + 3, len);
     } else if (len + 32 >= 0) {
         len += 32;
 
@@ -324,7 +330,7 @@ ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, con
             goto done;
 
         dst += 32;
-        xmm_crc_part = _mm_load_si128((__m128i *)src + 2);
+        memcpy(&xmm_crc_part, (__m128i *)src + 2, len);
     } else if (len + 48 >= 0) {
         len += 48;
 
@@ -340,16 +346,18 @@ ZLIB_INTERNAL void crc_fold_copy(deflate_state *const s, unsigned char *dst, con
             goto done;
 
         dst += 16;
-        xmm_crc_part = _mm_load_si128((__m128i *)src + 1);
+        memcpy(&xmm_crc_part, (__m128i *)src + 1, len);
     } else {
         len += 64;
         if (len == 0)
             goto done;
-        xmm_crc_part = _mm_load_si128((__m128i *)src);
+        memcpy(&xmm_crc_part, src, len);
     }
 
+    _mm_storeu_si128((__m128i *)partial_buf, xmm_crc_part);
+    memcpy(dst, partial_buf, len);
+
 partial:
-    _mm_storeu_si128((__m128i *)dst, xmm_crc_part);
     partial_fold(len, &xmm_crc0, &xmm_crc1, &xmm_crc2, &xmm_crc3, &xmm_crc_part);
 done:
     /* CRC_SAVE */
@@ -377,7 +385,7 @@ static const unsigned ALIGNED_(16) crc_mask2[4] = {
     0x00000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF
 };
 
-uint32_t ZLIB_INTERNAL crc_fold_512to32(deflate_state *const s) {
+uint32_t Z_INTERNAL crc_fold_512to32(deflate_state *const s) {
     const __m128i xmm_mask  = _mm_load_si128((__m128i *)crc_mask);
     const __m128i xmm_mask2 = _mm_load_si128((__m128i *)crc_mask2);
 
@@ -447,4 +455,3 @@ uint32_t ZLIB_INTERNAL crc_fold_512to32(deflate_state *const s) {
 }
 
 #endif
-

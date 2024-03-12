@@ -20,7 +20,7 @@
 #define __EQEMU_TESTS_HEXTOI_32_64_H
 
 #include "cppunit/cpptest.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 class hextoi_32_64_Test : public Test::Suite {
 	typedef void(hextoi_32_64_Test::*TestFunction)(void);
@@ -100,12 +100,12 @@ public:
 	// A bit excessive to do an exhaustive test like this
 	// but it usefully tests multi digit hex.
 	void DoubleDigitUpper32Test() {
-		
+
 		std::string prepend = "0x";
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789ABCDEF";
-		uint32 value = 0; 
+		uint32 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			for (std::string::iterator secondDigitIter = hexElements.begin(); secondDigitIter != hexElements.end(); ++secondDigitIter) {
 				std::string hexToTest = prepend + *firstDigitIter + *secondDigitIter;
@@ -122,7 +122,7 @@ public:
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789abcdef";
-		uint32 value = 0; 
+		uint32 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			for (std::string::iterator secondDigitIter = hexElements.begin(); secondDigitIter != hexElements.end(); ++secondDigitIter) {
 				std::string hexToTest = prepend + *firstDigitIter + *secondDigitIter;
@@ -151,7 +151,7 @@ public:
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789ABCDEF";
-		uint64 value = 0; 
+		uint64 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			std::string hexToTest = prepend + *firstDigitIter;
 			TEST_ASSERT(hextoi64(hexToTest.c_str()) == value);
@@ -165,7 +165,7 @@ public:
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789abcdef";
-		uint64 value = 0; 
+		uint64 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			std::string hexToTest = prepend + *firstDigitIter;
 			TEST_ASSERT(hextoi64(hexToTest.c_str()) == value);
@@ -176,12 +176,12 @@ public:
 	// A bit excessive to do an exhaustive test like this
 	// but it usefully tests multi digit hex.
 	void DoubleDigitUpper64Test() {
-		
+
 		std::string prepend = "0x";
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789ABCDEF";
-		uint64 value = 0; 
+		uint64 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			for (std::string::iterator secondDigitIter = hexElements.begin(); secondDigitIter != hexElements.end(); ++secondDigitIter) {
 				std::string hexToTest = prepend + *firstDigitIter + *secondDigitIter;
@@ -198,7 +198,7 @@ public:
 		std::string hexToTest;
 
 		std::string hexElements = "0123456789abcdef";
-		uint64 value = 0; 
+		uint64 value = 0;
 		for (std::string::iterator firstDigitIter = hexElements.begin(); firstDigitIter != hexElements.end(); ++firstDigitIter) {
 			for (std::string::iterator secondDigitIter = hexElements.begin(); secondDigitIter != hexElements.end(); ++secondDigitIter) {
 				std::string hexToTest = prepend + *firstDigitIter + *secondDigitIter;

@@ -13,14 +13,18 @@
 *.gcno
 *.gcov
 
+/adler32_test
+/adler32_testsh
 /example
 /example64
 /examplesh
 /libz.so*
 /libz-ng.so*
+/makefixed
 /minigzip
 /minigzip64
 /minigzipsh
+/switchlevels
 /zlib.pc
 /zlib-ng.pc
 /CVE-2003-0107
@@ -46,8 +50,9 @@ foo.gz
 CMakeCache.txt
 CMakeFiles
 Testing
-*.cmake
+/*.cmake
 *.stackdump
+*._h
 zconf.h
 zconf.h.cmakein
 zconf.h.included
@@ -61,6 +66,7 @@ a.out
 /Makefile
 /arch/arm/Makefile
 /arch/generic/Makefile
+/arch/power/Makefile
 /arch/x86/Makefile
 .kdev4
 *.kdev4
@@ -71,6 +77,10 @@ a.out
 /zlib.dir
 /zlibstatic.dir
 /win32/Debug
+/build/
+/build[.-]*/
+/btmp[12]/
+/pkgtmp[12]/
 
 /.idea
 /cmake-build-debug

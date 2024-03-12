@@ -19,37 +19,19 @@
 #ifndef BOT_STRUCTS
 #define BOT_STRUCTS
 
-#ifdef BOTS
-
 #include "../common/types.h"
 
 #include <sstream>
 
 struct BotsAvailableList {
-	uint32 ID;
-	char Name[64];
-	uint16 Class;
-	uint8 Level;
-	uint16 Race;
-	uint8 Gender;
-	char Owner[64];
-	uint32 Owner_ID;
-};
-
-struct BotGroup {
-	uint32 BotGroupID;
-	uint32 BotID;
-};
-
-struct BotGroupList {
-	std::string BotGroupName;
-	std::string BotGroupLeaderName;
-};
-
-struct SpawnedBotsList {
-	char BotName[64];
-	char ZoneName[64];
-	uint32 BotLeaderCharID;
+	uint32 bot_id;
+	char   bot_name[64];
+	uint16 class_;
+	uint8  level;
+	uint16 race;
+	uint8  gender;
+	char   owner_name[64];
+	uint32 owner_id;
 };
 
 struct BotSpell {
@@ -73,12 +55,41 @@ struct BotCastingRoles {
 	//bool RaidDoter;
 };
 
-struct BotAA {
-	uint32 aa_id;
-	uint8 req_level;
-	uint8 total_levels;
+struct BotSpellSetting {
+	int16  priority;
+	uint8  min_level;
+	uint8  max_level;
+	int8   min_hp;
+	int8   max_hp;
+	bool   is_enabled = true;
 };
 
-#endif // BOTS
+struct BotSpells_Struct {
+	uint32		type;			// 0 = never, must be one (and only one) of the defined values
+	int16		spellid;			// <= 0 = no spell
+	int16		manacost;		// -1 = use spdat, -2 = no cast time
+	uint32		time_cancast;	// when we can cast this spell next
+	int32		recast_delay;
+	int16		priority;
+	int16		resist_adjust;
+	uint8		minlevel;
+	uint8		maxlevel;
+	int16		min_hp;			// >0 won't cast if HP is below
+	int16		max_hp;			// >0 won't cast if HP is above
+	std::string	bucket_name;
+	std::string	bucket_value;
+	uint8		bucket_comparison;
+};
+
+struct BotTimer_Struct {
+	uint32		timer_id;
+	uint32		timer_value;
+	uint32		recast_time;
+	bool		is_spell;
+	bool		is_disc;
+	uint16		spell_id;
+	bool		is_item;
+	uint32		item_id;
+};
 
 #endif // BOT_STRUCTS

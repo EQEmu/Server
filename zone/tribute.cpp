@@ -19,6 +19,10 @@
 #include "../common/global_define.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/features.h"
+#include "../common/repositories/guild_tributes_repository.h"
+#include "../common/guild_base.h"
+#include "guild_mgr.h"
+#include "worldserver.h"
 
 #include "client.h"
 
@@ -26,8 +30,6 @@
 
 #ifdef _WINDOWS
     #include <winsock2.h>
-    #include <windows.h>
-    #include <process.h>
     #define snprintf	_snprintf
 	#define vsnprintf	_vsnprintf
     #define strncasecmp	_strnicmp
@@ -45,19 +47,7 @@ The server periodicly sends tribute timer updates to the client on live,
 but I dont see a point to that right now, so I dont do it.
 
 */
-
-
-class TributeData {
-public:
-	//this level data stored in regular byte order and must be flipped before sending
-	TributeLevel_Struct tiers[MAX_TRIBUTE_TIERS];
-	uint8 tier_count;
-	uint32 unknown;
-	std::string name;
-	std::string description;
-	bool is_guild;	//is a guild tribute item
-};
-
+extern WorldServer worldserver;
 std::map<uint32, TributeData> tribute_list;
 
 void Client::ToggleTribute(bool enabled) {
@@ -138,20 +128,20 @@ void Client::DoTributeUpdate() {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				continue;
 			}
 
 			if(tribute_list.count(tid) != 1) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				continue;
 			}
 
 			//sanity check
 			if(m_pp.tributes[r].tier >= MAX_TRIBUTE_TIERS) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				m_pp.tributes[r].tier = 0;
 				continue;
 			}
@@ -165,7 +155,7 @@ void Client::DoTributeUpdate() {
 			if(inst == nullptr)
 				continue;
 
-			PutItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, *inst, false);
+			PutItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, *inst);
 			SendItemPacket(EQ::invslot::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
 			safe_delete(inst);
 		}
@@ -173,7 +163,7 @@ void Client::DoTributeUpdate() {
 		//unequip tribute items...
 		for (r = 0; r < EQ::invtype::TRIBUTE_SIZE; r++) {
 			if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-				DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+				DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 		}
 	}
 	CalcBonuses();
@@ -231,8 +221,8 @@ void Client::SendTributeDetails(uint32 client_id, uint32 tribute_id) {
 
 	t->client_id = client_id;
 	t->tribute_id = tribute_id;
-	memcpy(t->desc, td.description.c_str(), len);
-	t->desc[len] = '\0';
+	memcpy(t->description, td.description.c_str(), len);
+	t->description[len] = '\0';
 
 	QueuePacket(&outapp);
 }
@@ -247,8 +237,6 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	//figure out what its worth
 	int32 pts = inst->GetItem()->Favor;
 
-	pts = mod_tribute_item_value(pts, m_inv[slot]);
-
 	if(pts < 1) {
 		Message(Chat::Red, "This item is worthless for favor.");
 		return(0);
@@ -261,10 +249,10 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	if(inst->IsStackable()) {
 		if(inst->GetCharges() < (int32)quantity)	//dont have enough....
 			return(0);
-		DeleteItemInInventory(slot, quantity, false);
+		DeleteItemInInventory(slot, quantity);
 	} else {
 		quantity = 1;
-		DeleteItemInInventory(slot, 0, false);
+		DeleteItemInInventory(slot);
 	}
 
 	pts *= quantity;
@@ -338,47 +326,6 @@ void Client::SendTributes() {
 	}
 }
 
-void Client::SendGuildTributes() {
-
-	std::map<uint32, TributeData>::iterator cur,end;
-	cur = tribute_list.begin();
-	end = tribute_list.end();
-
-	for(; cur != end; ++cur) {
-		if(!cur->second.is_guild)
-			continue;	//skip guild tributes here
-		int len = cur->second.name.length();
-
-		//guild tribute has an unknown uint32 at its begining, guild ID?
-		EQApplicationPacket outapp(OP_TributeInfo, sizeof(TributeAbility_Struct) + len + 1 + 4);
-		uint32 *unknown = (uint32 *) outapp.pBuffer;
-		TributeAbility_Struct* tas = (TributeAbility_Struct*) (outapp.pBuffer+4);
-
-		//this is prolly wrong in general, prolly for one specific guild
-		*unknown = 0x8A110000;
-
-		tas->tribute_id = htonl(cur->first);
-		tas->tier_count = htonl(cur->second.unknown);
-
-		//gotta copy over the data from tiers, and flip all the
-		//byte orders, no idea why its flipped here
-		uint32 r, c;
-		c = cur->second.tier_count;
-		TributeLevel_Struct *dest = tas->tiers;
-		TributeLevel_Struct *src = cur->second.tiers;
-		for(r = 0; r < c; r++, dest++, src++) {
-			dest->cost = htonl(src->cost);
-			dest->level = htonl(src->level);
-			dest->tribute_item_id = htonl(src->tribute_item_id);
-		}
-
-		memcpy(tas->name, cur->second.name.c_str(), len);
-		tas->name[len] = '\0';
-
-		QueuePacket(&outapp);
-	}
-}
-
 bool ZoneDatabase::LoadTributes() {
 
 	TributeData tributeData;
@@ -394,7 +341,7 @@ bool ZoneDatabase::LoadTributes() {
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = atoul(row[0]);
+        uint32 id = Strings::ToUnsignedInt(row[0]);
 		tributeData.name = row[1];
 		tributeData.description = row[2];
 		tributeData.unknown = strtoul(row[3], nullptr, 10);
@@ -403,6 +350,8 @@ bool ZoneDatabase::LoadTributes() {
 		tribute_list[id] = tributeData;
     }
 
+	LogInfo("Loaded [{}] tributes", Strings::Commify(results.RowCount()));
+
 	const std::string query2 = "SELECT tribute_id, level, cost, item_id FROM tribute_levels ORDER BY tribute_id, level";
 	results = QueryDatabase(query2);
 	if (!results.Success()) {
@@ -410,7 +359,7 @@ bool ZoneDatabase::LoadTributes() {
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		uint32 id = atoul(row[0]);
+		uint32 id = Strings::ToUnsignedInt(row[0]);
 
 		if (tribute_list.count(id) != 1) {
 			LogError("Error in LoadTributes: unknown tribute [{}] in tribute_levels", (unsigned long) id);
@@ -426,18 +375,254 @@ bool ZoneDatabase::LoadTributes() {
 
 		TributeLevel_Struct &s = cur.tiers[cur.tier_count];
 
-		s.level           = atoul(row[1]);
-		s.cost            = atoul(row[2]);
-		s.tribute_item_id = atoul(row[3]);
+		s.level           = Strings::ToUnsignedInt(row[1]);
+		s.cost            = Strings::ToUnsignedInt(row[2]);
+		s.tribute_item_id = Strings::ToUnsignedInt(row[3]);
 		cur.tier_count++;
 	}
+
+	LogInfo("Loaded [{}] tribute levels", Strings::Commify(results.RowCount()));
 
 	return true;
 }
 
+void Client::SendGuildTributes()
+{
+	for (auto const& t : tribute_list) {
+		if (!t.second.is_guild)
+			continue;	//skip non guild tributes here
+
+		//guild tribute has an unknown uint32 at its begining, guild ID?
+		int len = t.second.name.length() + 1;
+
+		EQApplicationPacket* outapp = new EQApplicationPacket(OP_SendGuildTributes, sizeof(GuildTributeAbility_Struct) + len);
+		GuildTributeAbility_Struct* gtas = (GuildTributeAbility_Struct*)outapp->pBuffer;
+
+		auto tier_count = t.second.tier_count;
+		for (int ti = 0; ti < t.second.tier_count; ti++) {
+			if (RuleB(Guild, UseCharacterMaxLevelForGuildTributes) && t.second.tiers[ti].level > RuleI(Character, MaxLevel)) {
+				tier_count -= 1;
+				continue;
+			}
+			gtas->guild_id = GuildID();
+			gtas->ability.tier_count = htonl(tier_count);
+			gtas->ability.tribute_id = htonl(t.first);
+			gtas->ability.tiers[ti].cost = htonl(t.second.tiers[ti].cost);
+			gtas->ability.tiers[ti].tribute_item_id = htonl(t.second.tiers[ti].tribute_item_id);
+			gtas->ability.tiers[ti].level = htonl(t.second.tiers[ti].level);
+		}
+		strn0cpy(gtas->ability.name, t.second.name.data(), t.second.name.length());
+		FastQueuePacket(&outapp);
+	}
+}
+
+void Client::SendGuildTributeDetails(uint32 tribute_id, uint32 tier)
+{
+	if (tribute_list.count(tribute_id) != 1) {
+		LogGuilds("Details request for invalid tribute [{}]", tribute_id);
+		return;
+	}
+
+	TributeData& td = tribute_list[tribute_id];
+
+	int len = td.description.length();
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildSelectTribute, sizeof(GuildTributeSelectReply_Struct) + len + 1);
+	GuildTributeSelectReply_Struct* t = (GuildTributeSelectReply_Struct*)outapp->pBuffer;
+
+	t->tribute_id = tribute_id;
+	t->tier = tier;
+	t->tribute_id2 = tribute_id;
+	strn0cpy(&t->description, td.description.c_str(), len);
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::DoGuildTributeUpdate()
+{
+	LogTribute("DoGuildTributeUpdate");
+	auto guild = guild_mgr.GetGuildByGuildID(GuildID());
+
+	if (guild && guild->tribute.enabled && GuildTributeOptIn()) {
+		TributeData& d1 = tribute_list[guild->tribute.id_1];
+		uint32 item_id1 = d1.tiers[guild->tribute.id_1_tier].tribute_item_id;
+		TributeData& d2 = tribute_list[guild->tribute.id_2];
+		uint32 item_id2 = d2.tiers[guild->tribute.id_2_tier].tribute_item_id;
+
+		if (item_id1) {
+			LogGuilds("Guild Tribute Item 1 is {}", item_id1);
+			const EQ::ItemInstance* inst = database.CreateItem(item_id1, 1);
+			if (!inst) {
+				LogGuilds("Guild Tribute Item 1 was not found. {}", item_id1);
+				return;
+			}
+			auto inst_level = d1.tiers[guild->tribute.id_1_tier].level;
+			if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN]) {
+				LogGuilds("Guild Tribute DELETE Item in Slot 450");
+				DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN);
+			}
+
+			if ((RuleB(Guild,UseCharacterMaxLevelForGuildTributes) && RuleI(Character, MaxLevel) >= inst_level && GetLevel() >= inst_level) ||
+				!RuleB(Guild, UseCharacterMaxLevelForGuildTributes)) {
+				PutItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN, *inst);
+				SendItemPacket(EQ::invslot::GUILD_TRIBUTE_BEGIN, inst, ItemPacketGuildTribute);
+			}
+
+			safe_delete(inst);
+		}
+
+		if (item_id2) {
+			LogInfo("Guild Tribute Item 2 is {}", item_id2);
+			const EQ::ItemInstance* inst = database.CreateItem(item_id2, 1);
+			if (!inst) {
+				LogGuilds("Guild Tribute Item 1 was not found. {}", item_id2);
+				return;
+			}
+			auto inst_level = d2.tiers[guild->tribute.id_2_tier].level;
+			if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN + 1]) {
+				DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN + 1);
+				LogGuilds("Guild Tribute DELETE Item in Slot 451");
+			}
+
+			if ((RuleB(Guild, UseCharacterMaxLevelForGuildTributes) && RuleI(Character, MaxLevel) >= inst_level && GetLevel() >= inst_level) ||
+				!RuleB(Guild, UseCharacterMaxLevelForGuildTributes)) {
+				PutItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN + 1, *inst);
+				SendItemPacket(EQ::invslot::GUILD_TRIBUTE_BEGIN + 1, inst, ItemPacketGuildTribute);
+			}
+
+			safe_delete(inst);
+		}
+	}
+	else {
+		if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN]) {
+			DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN);
+		}
+		if (m_inv[EQ::invslot::GUILD_TRIBUTE_BEGIN + 1]) {
+			DeleteItemInInventory(EQ::invslot::GUILD_TRIBUTE_BEGIN + 1);
+		}
+	}
+	CalcBonuses();
+}
+
+void Client::SendGuildActiveTributes(uint32 guild_id)
+{
+	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
+
+	auto outapp = new EQApplicationPacket(OP_GuildSendActiveTributes, sizeof(GuildTributeSendActive_Struct));
+	auto gtsa   = (GuildTributeSendActive_Struct *) outapp->pBuffer;
+
+	if (guild) {
+		gtsa->guild_favor       = guild->tribute.favor;
+		gtsa->tribute_timer     = guild->tribute.time_remaining;
+		gtsa->tribute_enabled   = guild->tribute.enabled;
+		gtsa->tribute_id_1      = guild->tribute.id_1;
+		gtsa->tribute_id_1_tier = guild->tribute.id_1_tier;
+		gtsa->tribute_id_2      = guild->tribute.id_2;
+		gtsa->tribute_id_2_tier = guild->tribute.id_2_tier;
+	}
+	else {
+		gtsa->guild_favor       = 0;
+		gtsa->tribute_timer     = 0;
+		gtsa->tribute_enabled   = 0;
+		gtsa->tribute_id_1      = 0xffffffff;
+		gtsa->tribute_id_1_tier = 0;
+		gtsa->tribute_id_2      = 0xffffffff;
+		gtsa->tribute_id_2_tier = 0;
+	}
+
+	QueuePacket(outapp);
+	safe_delete(outapp)
+}
+
+void Client::SendGuildFavorAndTimer(uint32 guild_id)
+{
+	auto guild = guild_mgr.GetGuildByGuildID(guild_id);
+
+	if (guild) {
+		auto outapp = new EQApplicationPacket(OP_GuildTributeFavorAndTimer, sizeof(GuildTributeFavorTimer_Struct));
+		auto gtsa   = (GuildTributeFavorTimer_Struct *) outapp->pBuffer;
+
+		gtsa->guild_favor   = guild->tribute.favor;
+		gtsa->tribute_timer = guild->tribute.time_remaining;
+		gtsa->trophy_timer  = 0; //not yet implemented
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
+void Client::SendGuildTributeOptInToggle(const GuildTributeMemberToggle* in)
+{
+	EQApplicationPacket* outapp = new EQApplicationPacket(OP_GuildOptInOut, sizeof(GuildTributeOptInOutReply_Struct));
+	GuildTributeOptInOutReply_Struct* data = (GuildTributeOptInOutReply_Struct*)outapp->pBuffer;
+
+	strn0cpy(data->player_name, in->player_name, sizeof(data->player_name));
+	data->guild_id              = in->guild_id;
+	data->no_donations          = in->no_donations;
+	data->tribute_toggle        = in->tribute_toggle;
+	data->tribute_trophy_toggle = 0; //not yet implemented
+	data->time                  = time(nullptr);
+	data->command               = in->command;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
+void Client::RequestGuildActiveTributes(uint32 guild_id)
+{
+	auto sp   = new ServerPacket(ServerOP_RequestGuildActiveTributes, sizeof(GuildTributeUpdate));
+	auto data = (GuildTributeUpdate *) sp->pBuffer;
+
+	data->guild_id = GuildID();
+
+	worldserver.SendPacket(sp);
+	safe_delete(sp);
+}
+
+void Client::RequestGuildFavorAndTimer(uint32 guild_id)
+{
+	auto sp   = new ServerPacket(ServerOP_RequestGuildFavorAndTimer, sizeof(GuildTributeUpdate));
+	auto data = (GuildTributeUpdate *) sp->pBuffer;
+
+	data->guild_id = GuildID();
+
+	worldserver.SendPacket(sp);
+	safe_delete(sp);
+}
+
+void Client::SendGuildTributeDonateItemReply(GuildTributeDonateItemRequest_Struct* in, uint32 favor) {
+
+	auto outapp = new EQApplicationPacket(OP_GuildTributeDonateItem, sizeof(GuildTributeDonateItemReply_Struct));
+	auto out = (GuildTributeDonateItemReply_Struct*)outapp->pBuffer;
+
+	out->type      = in->type;
+	out->slot      = in->slot;
+	out->aug_index = in->aug_index;
+	out->sub_index = in->sub_index;
+	out->quantity  = in->quantity;
+	out->unknown10 = in->unknown10;
+	out->unknown20 = in->unknown20;
+	out->favor     = favor;
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+
+}
+
+void Client::SendGuildTributeDonatePlatReply(GuildTributeDonatePlatRequest_Struct* in, uint32 favor) {
+
+	auto outapp = new EQApplicationPacket(OP_GuildTributeDonatePlat, sizeof(GuildTributeDonatePlatReply_Struct));
+	auto out = (GuildTributeDonatePlatReply_Struct*)outapp->pBuffer;
+
+	out->favor    = favor;
+	out->quantity = in->quantity;
+
+	QueuePacket(outapp);
+	safe_delete(outapp)
+
+}
 
 /*
-
 64.37.149.6:1353 == server
 66.90.221.245:3173 == client
 

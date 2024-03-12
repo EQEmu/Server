@@ -29,7 +29,7 @@ public:
 	Rank() { }
 	~Rank() { }
 
-	int id;
+	uint32 id;
 	int upper_hotkey_sid;
 	int lower_hotkey_sid;
 	int title_sid;

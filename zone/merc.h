@@ -52,8 +52,8 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
-	virtual void Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, uint8 killed_by = 0);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
@@ -83,8 +83,6 @@ public:
 	Corpse* GetGroupMemberCorpse();
 
 	// Merc Spell Casting Methods
-	virtual int32 GetActSpellCasttime(uint16 spell_id, int32 casttime);
-	virtual int32 GetActSpellCost(uint16 spell_id, int32 cost);
 	int8 GetChanceToCastBySpellType(uint32 spellType);
 	void SetSpellRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
 	void SetDisciplineRecastTimer(uint16 timer_id, uint16 spellid, uint32 recast_delay);
@@ -124,10 +122,11 @@ public:
 	bool HasOrMayGetAggro();
 	bool UseDiscipline(int32 spell_id, int32 target);
 
-	virtual bool IsMerc() const { return true; }
+	bool IsMerc() const override { return true; }
+	bool IsOfClientBotMerc() const override { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
+	static Merc* LoadMercenary(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c, bool setmax = false);
 	void UpdateMercAppearance();
@@ -152,13 +151,13 @@ public:
 
 	// "GET" Class Methods
 	virtual Mob* GetOwner();
-	Client* GetMercOwner();
+	Client* GetMercenaryOwner();
 	virtual Mob* GetOwnerOrSelf();
-	uint32 GetMercID() { return _MercID; }
-	uint32 GetMercCharacterID( ) { return owner_char_id; }
-	uint32 GetMercTemplateID() { return _MercTemplateID; }
-	uint32 GetMercType() { return _MercType; }
-	uint32 GetMercSubType() { return _MercSubType; }
+	uint32 GetMercenaryID() { return _MercID; }
+	uint32 GetMercenaryCharacterID( ) { return owner_char_id; }
+	uint32 GetMercenaryTemplateID() { return _MercTemplateID; }
+	uint32 GetMercenaryType() { return _MercType; }
+	uint32 GetMercenarySubType() { return _MercSubType; }
 	uint8 GetProficiencyID() { return _ProficiencyID; }
 	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
@@ -183,7 +182,7 @@ public:
 	// stat functions
 	virtual void ScaleStats(int scalepercent, bool setmax = false);
 	virtual void CalcBonuses();
-	int32 GetEndurance() const {return cur_end;} //This gets our current endurance
+	int64 GetEndurance() const {return cur_end;} //This gets our current endurance
 	inline uint8 GetEndurancePercent() { return (uint8)((float)cur_end / (float)max_end * 100.0f); }
 	inline virtual int32 GetATK() const { return ATK; }
 	inline virtual int32 GetATKBonus() const { return itembonuses.ATK + spellbonuses.ATK; }
@@ -227,8 +226,8 @@ public:
 	inline virtual int32 GetCombatEffects() const { return itembonuses.ProcChance; }
 	inline virtual int32 GetDS() const { return itembonuses.DamageShield; }
 	// Mod3
-	inline virtual int32 GetHealAmt() const { return itembonuses.HealAmt; }
-	inline virtual int32 GetSpellDmg() const { return itembonuses.SpellDmg; }
+	inline int32 GetHealAmt() const override { return itembonuses.HealAmt; }
+	inline int32 GetSpellDmg() const override { return itembonuses.SpellDmg; }
 	inline virtual int32 GetClair() const { return itembonuses.Clairvoyance; }
 	inline virtual int32 GetDSMit() const { return itembonuses.DSMitigation; }
 
@@ -258,7 +257,7 @@ public:
 
 	void Sit();
 	void Stand();
-	bool IsSitting();
+	bool IsSitting() const override;
 	bool IsStanding();
 
 	// Merc-specific functions
@@ -269,11 +268,7 @@ public:
 	bool FindTarget();
 
 protected:
-	void CalcItemBonuses(StatBonuses* newbon);
-	void AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon);
-	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
-
-	int16 GetFocusEffect(focusType type, uint16 spell_id);
+	int64 GetFocusEffect(focusType type, uint16 spell_id, bool from_buff_tic = false);
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;
@@ -282,17 +277,14 @@ protected:
 
 	uint16 skills[EQ::skills::HIGHEST_SKILL + 1];
 	uint32 equipment[EQ::invslot::EQUIPMENT_COUNT]; //this is an array of item IDs
-	uint16 d_melee_texture1; //this is an item Material value
-	uint16 d_melee_texture2; //this is an item Material value (offhand)
+	uint32 d_melee_texture1; //this is an item Material value
+	uint32 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
 	uint8 sec_melee_type; //Sets the Secondary Weapon attack message and animation
 
 private:
 
 	int32 CalcAC();
-	int32 GetACMit();
-	int32 GetACAvoid();
-	int32 acmod();
 	int32 CalcATK();
 	//int CalcHaste();
 
@@ -310,21 +302,20 @@ private:
 	int32 CalcPR();
 	int32 CalcCR();
 	int32 CalcCorrup();
-	int32 CalcMaxHP();
-	int32 CalcBaseHP();
-	int32 GetClassHPFactor();
-	int32 CalcHPRegen();
-	int32 CalcHPRegenCap();
-	int32 CalcMaxMana();
-	int32 CalcBaseMana();
-	int32 CalcManaRegen();
-	int32 CalcBaseManaRegen();
-	int32 CalcManaRegenCap();
+	int64 CalcMaxHP();
+	int64 CalcBaseHP();
+	int64 CalcHPRegen();
+	int64 CalcHPRegenCap();
+	int64 CalcMaxMana();
+	int64 CalcBaseMana();
+	int64 CalcManaRegen();
+	int64 CalcBaseManaRegen();
+	int64 CalcManaRegenCap();
 	void CalcMaxEndurance(); //This calculates the maximum endurance we can have
-	int32 CalcBaseEndurance(); //Calculates Base End
-	int32 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
-	int32 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
-	int32 CalcEnduranceRegenCap();
+	int64 CalcBaseEndurance(); //Calculates Base End
+	int64 GetMaxEndurance() const {return max_end;} //This gets our endurance from the last CalcMaxEndurance() call
+	int64 CalcEnduranceRegen(); //Calculates endurance regen used in DoEnduranceRegen()
+	int64 CalcEnduranceRegenCap();
 	void SetEndurance(int32 newEnd); //This sets the current endurance to the new value
 	void DoEnduranceUpkeep(); //does the endurance upkeep
 	void CalcRestState();
@@ -336,7 +327,7 @@ private:
 
 	float GetDefaultSize();
 
-	bool LoadMercSpells();
+	bool LoadMercenarySpells();
 	bool CheckStance(int16 stance);
 	std::vector<MercSpell> GetMercSpells() { return merc_spells; }
 
@@ -376,8 +367,8 @@ private:
 	EQ::constants::StanceType _currentStance;
 
 	EQ::InventoryProfile m_inv;
-	int32 max_end;
-	int32 cur_end;
+	int64 max_end;
+	int64 cur_end;
 	bool _medding;
 	bool _suspended;
 	bool p_depop;

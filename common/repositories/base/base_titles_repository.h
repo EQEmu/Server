@@ -1,54 +1,38 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_TITLES_REPOSITORY_H
 #define EQEMU_BASE_TITLES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseTitlesRepository {
 public:
 	struct Titles {
-		int         id;
-		int         skill_id;
-		int         min_skill_value;
-		int         max_skill_value;
-		int         min_aa_points;
-		int         max_aa_points;
-		int         class;
-		int         gender;
-		int         char_id;
-		int         status;
-		int         item_id;
+		uint32_t    id;
+		int8_t      skill_id;
+		int32_t     min_skill_value;
+		int32_t     max_skill_value;
+		int32_t     min_aa_points;
+		int32_t     max_aa_points;
+		int8_t      class_;
+		int8_t      gender;
+		int32_t     char_id;
+		int32_t     status;
+		int32_t     item_id;
 		std::string prefix;
 		std::string suffix;
-		int         title_set;
+		int32_t     title_set;
 	};
 
 	static std::string PrimaryKey()
@@ -65,7 +49,27 @@ public:
 			"max_skill_value",
 			"min_aa_points",
 			"max_aa_points",
-			"class",
+			"`class`",
+			"gender",
+			"char_id",
+			"status",
+			"item_id",
+			"prefix",
+			"suffix",
+			"title_set",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"skill_id",
+			"min_skill_value",
+			"max_skill_value",
+			"min_aa_points",
+			"max_aa_points",
+			"`class`",
 			"gender",
 			"char_id",
 			"status",
@@ -78,22 +82,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -105,7 +99,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -115,33 +109,33 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Titles NewEntity()
 	{
-		Titles entry{};
+		Titles e{};
 
-		entry.id              = 0;
-		entry.skill_id        = -1;
-		entry.min_skill_value = -1;
-		entry.max_skill_value = -1;
-		entry.min_aa_points   = -1;
-		entry.max_aa_points   = -1;
-		entry.class           = -1;
-		entry.gender          = -1;
-		entry.char_id         = -1;
-		entry.status          = -1;
-		entry.item_id         = -1;
-		entry.prefix          = "";
-		entry.suffix          = "";
-		entry.title_set       = 0;
+		e.id              = 0;
+		e.skill_id        = -1;
+		e.min_skill_value = -1;
+		e.max_skill_value = -1;
+		e.min_aa_points   = -1;
+		e.max_aa_points   = -1;
+		e.class_          = -1;
+		e.gender          = -1;
+		e.char_id         = -1;
+		e.status          = -1;
+		e.item_id         = -1;
+		e.prefix          = "";
+		e.suffix          = "";
+		e.title_set       = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Titles GetTitlesEntry(
+	static Titles GetTitles(
 		const std::vector<Titles> &titless,
 		int titles_id
 	)
@@ -156,47 +150,50 @@ public:
 	}
 
 	static Titles FindOne(
+		Database& db,
 		int titles_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				titles_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.skill_id        = row[1] ? static_cast<int8_t>(atoi(row[1])) : -1;
+			e.min_skill_value = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.max_skill_value = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.min_aa_points   = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.max_aa_points   = row[5] ? static_cast<int32_t>(atoi(row[5])) : -1;
+			e.class_          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.gender          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.char_id         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.status          = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.item_id         = row[10] ? static_cast<int32_t>(atoi(row[10])) : -1;
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int titles_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -209,34 +206,35 @@ public:
 	}
 
 	static int UpdateOne(
-		Titles titles_entry
+		Database& db,
+		const Titles &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(titles_entry.skill_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(titles_entry.min_skill_value));
-		update_values.push_back(columns[3] + " = " + std::to_string(titles_entry.max_skill_value));
-		update_values.push_back(columns[4] + " = " + std::to_string(titles_entry.min_aa_points));
-		update_values.push_back(columns[5] + " = " + std::to_string(titles_entry.max_aa_points));
-		update_values.push_back(columns[6] + " = " + std::to_string(titles_entry.class));
-		update_values.push_back(columns[7] + " = " + std::to_string(titles_entry.gender));
-		update_values.push_back(columns[8] + " = " + std::to_string(titles_entry.char_id));
-		update_values.push_back(columns[9] + " = " + std::to_string(titles_entry.status));
-		update_values.push_back(columns[10] + " = " + std::to_string(titles_entry.item_id));
-		update_values.push_back(columns[11] + " = '" + EscapeString(titles_entry.prefix) + "'");
-		update_values.push_back(columns[12] + " = '" + EscapeString(titles_entry.suffix) + "'");
-		update_values.push_back(columns[13] + " = " + std::to_string(titles_entry.title_set));
+		v.push_back(columns[1] + " = " + std::to_string(e.skill_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.min_skill_value));
+		v.push_back(columns[3] + " = " + std::to_string(e.max_skill_value));
+		v.push_back(columns[4] + " = " + std::to_string(e.min_aa_points));
+		v.push_back(columns[5] + " = " + std::to_string(e.max_aa_points));
+		v.push_back(columns[6] + " = " + std::to_string(e.class_));
+		v.push_back(columns[7] + " = " + std::to_string(e.gender));
+		v.push_back(columns[8] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[9] + " = " + std::to_string(e.status));
+		v.push_back(columns[10] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.prefix) + "'");
+		v.push_back(columns[12] + " = '" + Strings::Escape(e.suffix) + "'");
+		v.push_back(columns[13] + " = " + std::to_string(e.title_set));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				titles_entry.id
+				e.id
 			)
 		);
 
@@ -244,87 +242,91 @@ public:
 	}
 
 	static Titles InsertOne(
-		Titles titles_entry
+		Database& db,
+		Titles e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(titles_entry.skill_id));
-		insert_values.push_back(std::to_string(titles_entry.min_skill_value));
-		insert_values.push_back(std::to_string(titles_entry.max_skill_value));
-		insert_values.push_back(std::to_string(titles_entry.min_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-		insert_values.push_back(std::to_string(titles_entry.class));
-		insert_values.push_back(std::to_string(titles_entry.gender));
-		insert_values.push_back(std::to_string(titles_entry.char_id));
-		insert_values.push_back(std::to_string(titles_entry.status));
-		insert_values.push_back(std::to_string(titles_entry.item_id));
-		insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
-		insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
-		insert_values.push_back(std::to_string(titles_entry.title_set));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.skill_id));
+		v.push_back(std::to_string(e.min_skill_value));
+		v.push_back(std::to_string(e.max_skill_value));
+		v.push_back(std::to_string(e.min_aa_points));
+		v.push_back(std::to_string(e.max_aa_points));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back("'" + Strings::Escape(e.prefix) + "'");
+		v.push_back("'" + Strings::Escape(e.suffix) + "'");
+		v.push_back(std::to_string(e.title_set));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			titles_entry.id = results.LastInsertedID();
-			return titles_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		titles_entry = NewEntity();
+		e = NewEntity();
 
-		return titles_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Titles> titles_entries
+		Database& db,
+		const std::vector<Titles> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &titles_entry: titles_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(titles_entry.skill_id));
-			insert_values.push_back(std::to_string(titles_entry.min_skill_value));
-			insert_values.push_back(std::to_string(titles_entry.max_skill_value));
-			insert_values.push_back(std::to_string(titles_entry.min_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.max_aa_points));
-			insert_values.push_back(std::to_string(titles_entry.class));
-			insert_values.push_back(std::to_string(titles_entry.gender));
-			insert_values.push_back(std::to_string(titles_entry.char_id));
-			insert_values.push_back(std::to_string(titles_entry.status));
-			insert_values.push_back(std::to_string(titles_entry.item_id));
-			insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
-			insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
-			insert_values.push_back(std::to_string(titles_entry.title_set));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.skill_id));
+			v.push_back(std::to_string(e.min_skill_value));
+			v.push_back(std::to_string(e.max_skill_value));
+			v.push_back(std::to_string(e.min_aa_points));
+			v.push_back(std::to_string(e.max_aa_points));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back("'" + Strings::Escape(e.prefix) + "'");
+			v.push_back("'" + Strings::Escape(e.suffix) + "'");
+			v.push_back(std::to_string(e.title_set));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Titles> All()
+	static std::vector<Titles> All(Database& db)
 	{
 		std::vector<Titles> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -334,34 +336,34 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.skill_id        = row[1] ? static_cast<int8_t>(atoi(row[1])) : -1;
+			e.min_skill_value = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.max_skill_value = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.min_aa_points   = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.max_aa_points   = row[5] ? static_cast<int32_t>(atoi(row[5])) : -1;
+			e.class_          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.gender          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.char_id         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.status          = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.item_id         = row[10] ? static_cast<int32_t>(atoi(row[10])) : -1;
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Titles> GetWhere(std::string where_filter)
+	static std::vector<Titles> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Titles> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -372,32 +374,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Titles entry{};
+			Titles e{};
 
-			entry.id              = atoi(row[0]);
-			entry.skill_id        = atoi(row[1]);
-			entry.min_skill_value = atoi(row[2]);
-			entry.max_skill_value = atoi(row[3]);
-			entry.min_aa_points   = atoi(row[4]);
-			entry.max_aa_points   = atoi(row[5]);
-			entry.class           = atoi(row[6]);
-			entry.gender          = atoi(row[7]);
-			entry.char_id         = atoi(row[8]);
-			entry.status          = atoi(row[9]);
-			entry.item_id         = atoi(row[10]);
-			entry.prefix          = row[11] ? row[11] : "";
-			entry.suffix          = row[12] ? row[12] : "";
-			entry.title_set       = atoi(row[13]);
+			e.id              = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.skill_id        = row[1] ? static_cast<int8_t>(atoi(row[1])) : -1;
+			e.min_skill_value = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.max_skill_value = row[3] ? static_cast<int32_t>(atoi(row[3])) : -1;
+			e.min_aa_points   = row[4] ? static_cast<int32_t>(atoi(row[4])) : -1;
+			e.max_aa_points   = row[5] ? static_cast<int32_t>(atoi(row[5])) : -1;
+			e.class_          = row[6] ? static_cast<int8_t>(atoi(row[6])) : -1;
+			e.gender          = row[7] ? static_cast<int8_t>(atoi(row[7])) : -1;
+			e.char_id         = row[8] ? static_cast<int32_t>(atoi(row[8])) : -1;
+			e.status          = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.item_id         = row[10] ? static_cast<int32_t>(atoi(row[10])) : -1;
+			e.prefix          = row[11] ? row[11] : "";
+			e.suffix          = row[12] ? row[12] : "";
+			e.title_set       = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -408,9 +410,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -420,6 +422,114 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Titles &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.skill_id));
+		v.push_back(std::to_string(e.min_skill_value));
+		v.push_back(std::to_string(e.max_skill_value));
+		v.push_back(std::to_string(e.min_aa_points));
+		v.push_back(std::to_string(e.max_aa_points));
+		v.push_back(std::to_string(e.class_));
+		v.push_back(std::to_string(e.gender));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back("'" + Strings::Escape(e.prefix) + "'");
+		v.push_back("'" + Strings::Escape(e.suffix) + "'");
+		v.push_back(std::to_string(e.title_set));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Titles> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.skill_id));
+			v.push_back(std::to_string(e.min_skill_value));
+			v.push_back(std::to_string(e.max_skill_value));
+			v.push_back(std::to_string(e.min_aa_points));
+			v.push_back(std::to_string(e.max_aa_points));
+			v.push_back(std::to_string(e.class_));
+			v.push_back(std::to_string(e.gender));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back("'" + Strings::Escape(e.prefix) + "'");
+			v.push_back("'" + Strings::Escape(e.suffix) + "'");
+			v.push_back(std::to_string(e.title_set));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_TITLES_REPOSITORY_H

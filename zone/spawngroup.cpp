@@ -24,18 +24,18 @@
 #include "spawngroup.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 
 extern EntityList entity_list;
 extern Zone       *zone;
 
-SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit)
-{
+SpawnEntry::SpawnEntry(uint32 in_NPCType, int in_chance, uint16 in_filter, uint8 in_npc_spawn_limit, uint8 in_min_time, uint8 in_max_time) {
 	NPCType                = in_NPCType;
 	chance                 = in_chance;
 	condition_value_filter = in_filter;
 	npc_spawn_limit        = in_npc_spawn_limit;
+	min_time               = in_min_time;
+	max_time               = in_max_time;
 }
 
 SpawnGroup::SpawnGroup(
@@ -78,23 +78,28 @@ uint32 SpawnGroup::GetNPCType(uint16 in_filter)
 		return (0);
 	}
 
-	std::list<SpawnEntry *>::iterator cur, end;
-	std::list<SpawnEntry *>           possible;
-	cur = list_.begin();
-	end = list_.end();
-	for (; cur != end; ++cur) {
-		SpawnEntry *se = *cur;
+	std::list<SpawnEntry *> possible;
+	for (auto &it : list_) {
+		auto se = it.get();
 
 		if (!entity_list.LimitCheckType(se->NPCType, se->npc_spawn_limit)) {
 			continue;
 		}
 
-		if (se->condition_value_filter != in_filter)
+		if (se->min_time != 0 && se->max_time != 0 && se->min_time <= 24 && se->max_time <= 24) {
+			if (!zone->zone_time.IsInbetweenTime(se->min_time, se->max_time)) {
+				continue;
+			}
+		}
+
+		if (se->condition_value_filter != in_filter) {
 			continue;
+		}
 
 		totalchance += se->chance;
 		possible.push_back(se);
 	}
+
 	if (totalchance == 0) {
 		return 0;
 	}
@@ -102,10 +107,7 @@ uint32 SpawnGroup::GetNPCType(uint16 in_filter)
 	int32 roll = 0;
 	roll = zone->random.Int(0, totalchance - 1);
 
-	cur = possible.begin();
-	end = possible.end();
-	for (; cur != end; ++cur) {
-		SpawnEntry *se = *cur;
+	for (auto se : possible) {
 		if (roll < se->chance) {
 			npcType = se->NPCType;
 			break;
@@ -117,42 +119,28 @@ uint32 SpawnGroup::GetNPCType(uint16 in_filter)
 	return npcType;
 }
 
-void SpawnGroup::AddSpawnEntry(SpawnEntry *newEntry)
+void SpawnGroup::AddSpawnEntry(std::unique_ptr<SpawnEntry> &newEntry)
 {
-	list_.push_back(newEntry);
+	list_.push_back(std::move(newEntry));
 }
 
 SpawnGroup::~SpawnGroup()
 {
-	std::list<SpawnEntry *>::iterator cur, end;
-	cur = list_.begin();
-	end = list_.end();
-	for (; cur != end; ++cur) {
-		SpawnEntry *tmp = *cur;
-		safe_delete(tmp);
-	}
 	list_.clear();
 }
 
 SpawnGroupList::~SpawnGroupList()
 {
-	std::map<uint32, SpawnGroup *>::iterator cur, end;
-	cur = m_spawn_groups.begin();
-	end = m_spawn_groups.end();
-	for (; cur != end; ++cur) {
-		SpawnGroup *tmp = cur->second;
-		safe_delete(tmp);
-	}
 	m_spawn_groups.clear();
 }
 
-void SpawnGroupList::AddSpawnGroup(SpawnGroup *new_group)
+void SpawnGroupList::AddSpawnGroup(std::unique_ptr<SpawnGroup> &new_group)
 {
 	if (new_group == nullptr) {
 		return;
 	}
 
-	m_spawn_groups[new_group->id] = new_group;
+	m_spawn_groups[new_group->id] = std::move(new_group);
 }
 
 SpawnGroup *SpawnGroupList::GetSpawnGroup(uint32 in_id)
@@ -161,18 +149,7 @@ SpawnGroup *SpawnGroupList::GetSpawnGroup(uint32 in_id)
 		return nullptr;
 	}
 
-	return (m_spawn_groups[in_id]);
-}
-
-bool SpawnGroupList::RemoveSpawnGroup(uint32 in_id)
-{
-	if (m_spawn_groups.count(in_id) != 1) {
-		return (false);
-	}
-
-	m_spawn_groups.erase(in_id);
-
-	return (true);
+	return (m_spawn_groups[in_id].get());
 }
 
 void SpawnGroupList::ReloadSpawnGroups()
@@ -210,7 +187,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 				WHERE
 				spawn2.spawngroupID = spawngroup.ID
 				AND
-				spawn2.version = {} and zone = '{}'
+				(spawn2.version = {} OR version = -1)
+				AND zone = '{}'
 				{}
 		),
 		version,
@@ -224,24 +202,26 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto new_spawn_group = new SpawnGroup(
-			atoi(row[0]),
+		auto new_spawn_group = std::make_unique<SpawnGroup>(
+			Strings::ToInt(row[0]),
 			row[1],
-			atoi(row[2]),
-			atof(row[3]),
-			atof(row[4]),
-			atof(row[5]),
-			atof(row[6]),
-			atof(row[7]),
-			atoi(row[8]),
-			atoi(row[9]),
-			atoi(row[10]),
-			atoi(row[11]),
-			atoi(row[12])
+			Strings::ToInt(row[2]),
+			Strings::ToFloat(row[3]),
+			Strings::ToFloat(row[4]),
+			Strings::ToFloat(row[5]),
+			Strings::ToFloat(row[6]),
+			Strings::ToFloat(row[7]),
+			Strings::ToInt(row[8]),
+			Strings::ToInt(row[9]),
+			Strings::ToInt(row[10]),
+			Strings::ToInt(row[11]),
+			Strings::ToInt(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
 	}
+
+	LogInfo("Loaded [{}] spawn group(s)", Strings::Commify(results.RowCount()));
 
 	query = fmt::format(
 		SQL(
@@ -252,7 +232,9 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 			chance,
 			condition_value_filter,
 			npc_types.spawn_limit
-				AS sl
+				AS sl,
+				min_time,
+				max_time
 				FROM
 				spawnentry,
 			spawn2,
@@ -262,8 +244,11 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 				AND
 				spawnentry.spawngroupID = spawn2.spawngroupID
 				AND
-				zone = '{}'),
-		zone_name
+				zone = '{}'
+				{}
+					),
+		zone_name,
+		ContentFilterCriteria::apply("spawnentry")
 	);
 
 	results = QueryDatabase(query);
@@ -272,22 +257,26 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto new_spawn_entry = new SpawnEntry(
-			atoi(row[1]),
-			atoi(row[2]),
-			atoi(row[3]),
-			(row[4] ? atoi(row[4]) : 0)
+		auto new_spawn_entry = std::make_unique<SpawnEntry>(
+			Strings::ToInt(row[1]),
+			Strings::ToInt(row[2]),
+			Strings::ToInt(row[3]),
+			(row[4] ? Strings::ToInt(row[4]) : 0),
+			Strings::ToInt(row[5]),
+			Strings::ToInt(row[6])
 		);
 
-		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
 
 		if (!spawn_group) {
-			safe_delete(new_spawn_entry);
 			continue;
 		}
 
 		spawn_group->AddSpawnEntry(new_spawn_entry);
 	}
+
+	LogInfo("Loaded [{}] spawn entries", Strings::Commify(results.RowCount()));
+
 
 	return true;
 }
@@ -330,27 +319,27 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		LogSpawnsDetail(
-			"[LoadSpawnGroupsByID] Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
+			"Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
 			row[0],
 			row[1],
 			row[2],
 			row[3]
 		);
 
-		auto new_spawn_group = new SpawnGroup(
-			atoi(row[0]),
+		auto new_spawn_group = std::make_unique<SpawnGroup>(
+			Strings::ToInt(row[0]),
 			row[1],
-			atoi(row[2]),
-			atof(row[3]),
-			atof(row[4]),
-			atof(row[5]),
-			atof(row[6]),
-			atof(row[7]),
-			atoi(row[8]),
-			atoi(row[9]),
-			atoi(row[10]),
-			atoi(row[11]),
-			atoi(row[12])
+			Strings::ToInt(row[2]),
+			Strings::ToFloat(row[3]),
+			Strings::ToFloat(row[4]),
+			Strings::ToFloat(row[5]),
+			Strings::ToFloat(row[6]),
+			Strings::ToFloat(row[7]),
+			Strings::ToInt(row[8]),
+			Strings::ToInt(row[9]),
+			Strings::ToInt(row[10]),
+			Strings::ToInt(row[11]),
+			Strings::ToInt(row[12])
 		);
 
 		spawn_group_list->AddSpawnGroup(new_spawn_group);
@@ -363,7 +352,9 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 			spawnentry.npcid,
 			spawnentry.chance,
 			spawnentry.condition_value_filter,
-			spawngroup.spawn_limit
+			spawngroup.spawn_limit,
+			spawnentry.min_time,
+			spawnentry.max_time
 				FROM
 				spawnentry,
 			spawngroup
@@ -380,25 +371,28 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		auto new_spawn_entry = new SpawnEntry(
-			atoi(row[1]),
-			atoi(row[2]),
-			atoi(row[3]),
-			(row[4] ? atoi(row[4]) : 0)
+		auto new_spawn_entry = std::make_unique<SpawnEntry>(
+			Strings::ToInt(row[1]),
+			Strings::ToInt(row[2]),
+			Strings::ToInt(row[3]),
+			(row[4] ? Strings::ToInt(row[4]) : 0),
+			Strings::ToInt(row[5]),
+			Strings::ToInt(row[6])
 		);
 
 		LogSpawnsDetail(
-			"[LoadSpawnGroupsByID] Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}]",
+			"Loading spawn_entry spawn_group_id [{}] npc_id [{}] chance [{}] condition_value_filter [{}] spawn_limit [{}] min_time [{}] max_time [{}] ",
 			row[0],
 			row[1],
 			row[2],
 			row[3],
-			row[4]
+			row[4],
+			row[5],
+			row[6]
 		);
 
-		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(atoi(row[0]));
+		SpawnGroup *spawn_group = spawn_group_list->GetSpawnGroup(Strings::ToInt(row[0]));
 		if (!spawn_group) {
-			safe_delete(new_spawn_entry);
 			continue;
 		}
 

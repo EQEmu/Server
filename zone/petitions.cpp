@@ -19,7 +19,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "../common/eqemu_logsys.h"
 #include <string.h>
 #ifdef _WINDOWS
-#include <process.h>
 #else
 #include <pthread.h>
 #endif
@@ -33,7 +32,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 
 #include "../common/eq_packet_structs.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "entity.h"
 #include "petitions.h"
@@ -46,23 +45,23 @@ extern WorldServer worldserver;
 void Petition::SendPetitionToPlayer(Client* clientto) {
 	auto outapp = new EQApplicationPacket(OP_PetitionCheckout, sizeof(Petition_Struct));
 	Petition_Struct* pet = (Petition_Struct*) outapp->pBuffer;
-	strcpy(pet->accountid,this->GetAccountName());
-	strcpy(pet->lastgm,this->GetLastGM());
-	strcpy(pet->charname,this->GetCharName());
-	pet->petnumber = this->petid;
-	pet->charclass = this->GetCharClass();
-	pet->charlevel = this->GetCharLevel();
-	pet->charrace = this->GetCharRace();
-	pet->zone = this->GetZone();
-	//strcpy(pet->zone,this->GetZone());
-	strcpy(pet->petitiontext,this->GetPetitionText());
-	pet->checkouts = this->GetCheckouts();
-	pet->unavail = this->GetUnavails();
-	pet->senttime = this->GetSentTime();
+	strcpy(pet->accountid,GetAccountName());
+	strcpy(pet->lastgm,GetLastGM());
+	strcpy(pet->charname,GetCharName());
+	pet->petnumber = petid;
+	pet->charclass = GetCharClass();
+	pet->charlevel = GetCharLevel();
+	pet->charrace = GetCharRace();
+	pet->zone = GetZone();
+	//strcpy(pet->zone,GetZone());
+	strcpy(pet->petitiontext,GetPetitionText());
+	pet->checkouts = GetCheckouts();
+	pet->unavail = GetUnavails();
+	pet->senttime = GetSentTime();
 	//memset(pet->unknown5, 0, sizeof(pet->unknown5));
 	//pet->unknown5[3] = 0x1f;
-	pet->urgency = this->GetUrgency();
-	strcpy(pet->gmtext, this->GetGMText());
+	pet->urgency = GetUrgency();
+	strcpy(pet->gmtext, GetGMText());
 	clientto->QueuePacket(outapp);
 	safe_delete(outapp);
 	return;
@@ -71,8 +70,8 @@ void Petition::SendPetitionToPlayer(Client* clientto) {
 Petition::Petition(uint32 id)
 {
 	petid = id;
-	charclass = 0;
-	charrace = 0;
+	charclass = Class::None;
+	charrace = Race::Doug;
 	charlevel = 0;
 	checkouts = 0;
 	unavailables = 0;
@@ -85,7 +84,7 @@ Petition::Petition(uint32 id)
 	memset(petitiontext, 0, sizeof(petitiontext));
 	memset(gmtext, 0, sizeof(gmtext));
 
-	//memset(this->zone, 0, sizeof(this->zone));
+	//memset(zone, 0, sizeof(zone));
 	zone = 1;
 }
 Petition* PetitionList::GetPetitionByID(uint32 id_in) {
@@ -270,22 +269,22 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 	}
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        newpet = new Petition(atoi(row[0]));
+        newpet = new Petition(Strings::ToInt(row[0]));
         newpet->SetCName(row[1]);
         newpet->SetAName(row[2]);
         newpet->SetLastGM(row[3]);
         newpet->SetPetitionText(row[4]);
-        newpet->SetZone(atoi(row[5]));
-        newpet->SetUrgency(atoi(row[6]));
-        newpet->SetClass(atoi(row[7]));
-        newpet->SetRace(atoi(row[8]));
-        newpet->SetLevel(atoi(row[9]));
-        newpet->SetCheckouts(atoi(row[10]));
-        newpet->SetUnavails(atoi(row[11]));
-        newpet->SetSentTime2(atol(row[13]));
+        newpet->SetZone(Strings::ToInt(row[5]));
+        newpet->SetUrgency(Strings::ToInt(row[6]));
+        newpet->SetClass(Strings::ToInt(row[7]));
+        newpet->SetRace(Strings::ToInt(row[8]));
+        newpet->SetLevel(Strings::ToInt(row[9]));
+        newpet->SetCheckouts(Strings::ToInt(row[10]));
+        newpet->SetUnavails(Strings::ToInt(row[11]));
+        newpet->SetSentTime(atol(row[13]));
         newpet->SetGMText(row[14]);
 
-        if (atoi(row[12]) == 1)
+        if (Strings::ToInt(row[12]) == 1)
             newpet->SetCheckedOut(true);
         else
             newpet->SetCheckedOut(false);

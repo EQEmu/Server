@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,7 +11,7 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -20,11 +20,14 @@
 #include "say_link.h"
 #include "emu_constants.h"
 
-#include "string_util.h"
+#include "strings.h"
 #include "item_instance.h"
 #include "item_data.h"
 #include "../zone/zonedb.h"
+#include <algorithm>
 
+// static bucket global
+std::vector<SaylinkRepository::Saylink> g_cached_saylinks = {};
 
 bool EQ::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
 {
@@ -101,14 +104,14 @@ const std::string &EQ::SayLinkEngine::GenerateLink()
 		m_Error = true;
 		m_Link  = "<LINKER ERROR>";
 		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
-		LogError(">> LinkType: {}, Lengths: {link: {}({}), body: {}({}), text: {}({})}",
-			m_LinkType,
-			m_Link.length(),
-			EQ::constants::SAY_LINK_MAXIMUM_SIZE,
-			m_LinkBody.length(),
-			EQ::constants::SAY_LINK_BODY_SIZE,
-			m_LinkText.length(),
-			EQ::constants::SAY_LINK_TEXT_SIZE
+		LogError(">> LinkType: {}, Lengths: [link: {}({}), body: {}({}), text: {}({})]",
+				 m_LinkType,
+				 m_Link.length(),
+				 EQ::constants::SAY_LINK_MAXIMUM_SIZE,
+				 m_LinkBody.length(),
+				 EQ::constants::SAY_LINK_BODY_SIZE,
+				 m_LinkText.length(),
+				 EQ::constants::SAY_LINK_TEXT_SIZE
 		);
 		LogError(">> LinkBody: {}", m_LinkBody.c_str());
 		LogError(">> LinkText: {}", m_LinkText.c_str());
@@ -291,37 +294,13 @@ void EQ::SayLinkEngine::generate_text()
 	m_LinkText = "null";
 }
 
-std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name)
+std::string EQ::SayLinkEngine::GenerateQuestSaylink(const std::string& saylink_text, bool silent, const std::string& link_name)
 {
 	uint32 saylink_id = 0;
 
-	/**
-	 * Query for an existing phrase and id in the saylink table
-	 */
-	std::string query = StringFormat(
-		"SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1",
-		EscapeString(saylink_text).c_str());
-
-	auto results = database.QueryDatabase(query);
-
-	if (results.Success()) {
-		if (results.RowCount() >= 1) {
-			for (auto row = results.begin(); row != results.end(); ++row)
-				saylink_id = static_cast<uint32>(atoi(row[0]));
-		}
-		else {
-			std::string insert_query = StringFormat(
-				"INSERT INTO `saylink` (`phrase`) VALUES ('%s')",
-				EscapeString(saylink_text).c_str());
-
-			results = database.QueryDatabase(insert_query);
-			if (!results.Success()) {
-				LogError("Error in saylink phrase queries {}", results.ErrorMessage().c_str());
-			}
-			else {
-				saylink_id = results.LastInsertedID();
-			}
-		}
+	SaylinkRepository::Saylink saylink = GetOrSaveSaylink(saylink_text);
+	if (saylink.id > 0) {
+		saylink_id = saylink.id;
 	}
 
 	/**
@@ -339,4 +318,110 @@ std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bo
 	linker.SetProxyText(link_name.c_str());
 
 	return linker.GenerateLink();
+}
+
+std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
+{
+	LogSaylinkDetail("message [{}]", message);
+
+	std::string new_message;
+	new_message.reserve(strlen(message));
+
+	bool in_bracket_state = false;
+	bool in_link_state = false;
+
+	const char* ch = message;
+	const char* startpos = message;
+	for (; *ch != '\0'; ++ch)
+	{
+		// saylinks not added if spaces touch brackets
+		bool abort_space = in_bracket_state && *ch == ' ' && (*(ch-1) == '[' || *(ch+1) == ']');
+
+		if (in_bracket_state && (*ch == '[' || *ch == '\x12' || abort_space))
+		{
+			// abort due to nested bracket (which starts another) or existing saylink
+			new_message.append(startpos, ch - startpos);
+			in_bracket_state = false;
+		}
+		else if (in_bracket_state && *ch == ']')
+		{
+			if (ch != startpos)
+			{
+				std::string str(startpos, ch - startpos);
+				new_message += EQ::SayLinkEngine::GenerateQuestSaylink(str, false, str);
+			}
+			in_bracket_state = false;
+		}
+
+		if (!in_bracket_state)
+		{
+			new_message.push_back(*ch);
+		}
+
+		if (*ch == '[' && !in_link_state)
+		{
+			startpos = ch + 1;
+			in_bracket_state = true;
+		}
+		else if (*ch == '\x12')
+		{
+			in_link_state = !in_link_state;
+		}
+	}
+
+	LogSaylinkDetail("new_message [{}]", new_message);
+
+	return new_message;
+}
+
+void EQ::SayLinkEngine::LoadCachedSaylinks()
+{
+	auto saylinks = SaylinkRepository::GetWhere(database, "phrase not REGEXP '[A-Z]' and phrase not REGEXP '[0-9]'");
+	LogSaylink("Loaded [{}] saylinks into cache", saylinks.size());
+	g_cached_saylinks = saylinks;
+}
+
+SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string saylink_text)
+{
+	// return cached saylink if exist
+	if (!g_cached_saylinks.empty()) {
+		for (auto &s: g_cached_saylinks) {
+			if (s.phrase == saylink_text) {
+				return s;
+			}
+		}
+	}
+
+	auto saylinks = SaylinkRepository::GetWhere(
+		database,
+		fmt::format("phrase = '{}'", Strings::Escape(saylink_text))
+	);
+
+	// return if found from the database
+	if (!saylinks.empty()) {
+		g_cached_saylinks.emplace_back(saylinks[0]);
+		return saylinks[0];
+	}
+
+	// if not found in database - save
+	auto new_saylink = SaylinkRepository::NewEntity();
+	new_saylink.phrase = saylink_text;
+
+	// persist to database
+	auto link = SaylinkRepository::InsertOne(database, new_saylink);
+	if (link.id > 0) {
+		g_cached_saylinks.emplace_back(link);
+		return link;
+	}
+
+	return {};
+}
+
+std::string Saylink::Create(const std::string &saylink_text, bool silent, const std::string &link_name)
+{
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, (link_name.empty() ? saylink_text : link_name));
+}
+
+std::string Saylink::Silent(const std::string &saylink_text, const std::string &link_name) {
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, true, (link_name.empty() ? saylink_text : link_name));
 }

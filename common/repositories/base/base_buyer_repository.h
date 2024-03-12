@@ -1,46 +1,30 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BUYER_REPOSITORY_H
 #define EQEMU_BASE_BUYER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseBuyerRepository {
 public:
 	struct Buyer {
-		int         charid;
-		int         buyslot;
-		int         itemid;
+		int32_t     charid;
+		int32_t     buyslot;
+		int32_t     itemid;
 		std::string itemname;
-		int         quantity;
-		int         price;
+		int32_t     quantity;
+		int32_t     price;
 	};
 
 	static std::string PrimaryKey()
@@ -60,24 +44,26 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"charid",
+			"buyslot",
+			"itemid",
+			"itemname",
+			"quantity",
+			"price",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -89,7 +75,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -99,25 +85,25 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Buyer NewEntity()
 	{
-		Buyer entry{};
+		Buyer e{};
 
-		entry.charid   = 0;
-		entry.buyslot  = 0;
-		entry.itemid   = 0;
-		entry.itemname = "";
-		entry.quantity = 0;
-		entry.price    = 0;
+		e.charid   = 0;
+		e.buyslot  = 0;
+		e.itemid   = 0;
+		e.itemname = "";
+		e.quantity = 0;
+		e.price    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Buyer GetBuyerEntry(
+	static Buyer GetBuyer(
 		const std::vector<Buyer> &buyers,
 		int buyer_id
 	)
@@ -132,39 +118,42 @@ public:
 	}
 
 	static Buyer FindOne(
+		Database& db,
 		int buyer_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				buyer_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int buyer_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -177,27 +166,28 @@ public:
 	}
 
 	static int UpdateOne(
-		Buyer buyer_entry
+		Database& db,
+		const Buyer &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(buyer_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(buyer_entry.buyslot));
-		update_values.push_back(columns[2] + " = " + std::to_string(buyer_entry.itemid));
-		update_values.push_back(columns[3] + " = '" + EscapeString(buyer_entry.itemname) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(buyer_entry.quantity));
-		update_values.push_back(columns[5] + " = " + std::to_string(buyer_entry.price));
+		v.push_back(columns[0] + " = " + std::to_string(e.charid));
+		v.push_back(columns[1] + " = " + std::to_string(e.buyslot));
+		v.push_back(columns[2] + " = " + std::to_string(e.itemid));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.itemname) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.quantity));
+		v.push_back(columns[5] + " = " + std::to_string(e.price));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				buyer_entry.charid
+				e.charid
 			)
 		);
 
@@ -205,73 +195,75 @@ public:
 	}
 
 	static Buyer InsertOne(
-		Buyer buyer_entry
+		Database& db,
+		Buyer e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(buyer_entry.charid));
-		insert_values.push_back(std::to_string(buyer_entry.buyslot));
-		insert_values.push_back(std::to_string(buyer_entry.itemid));
-		insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
-		insert_values.push_back(std::to_string(buyer_entry.quantity));
-		insert_values.push_back(std::to_string(buyer_entry.price));
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.buyslot));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back("'" + Strings::Escape(e.itemname) + "'");
+		v.push_back(std::to_string(e.quantity));
+		v.push_back(std::to_string(e.price));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			buyer_entry.charid = results.LastInsertedID();
-			return buyer_entry;
+			e.charid = results.LastInsertedID();
+			return e;
 		}
 
-		buyer_entry = NewEntity();
+		e = NewEntity();
 
-		return buyer_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Buyer> buyer_entries
+		Database& db,
+		const std::vector<Buyer> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &buyer_entry: buyer_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(buyer_entry.charid));
-			insert_values.push_back(std::to_string(buyer_entry.buyslot));
-			insert_values.push_back(std::to_string(buyer_entry.itemid));
-			insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
-			insert_values.push_back(std::to_string(buyer_entry.quantity));
-			insert_values.push_back(std::to_string(buyer_entry.price));
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.buyslot));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back("'" + Strings::Escape(e.itemname) + "'");
+			v.push_back(std::to_string(e.quantity));
+			v.push_back(std::to_string(e.price));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Buyer> All()
+	static std::vector<Buyer> All(Database& db)
 	{
 		std::vector<Buyer> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -281,26 +273,26 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Buyer> GetWhere(std::string where_filter)
+	static std::vector<Buyer> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Buyer> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -311,24 +303,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.charid   = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.buyslot  = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.itemid   = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.itemname = row[3] ? row[3] : "";
+			e.quantity = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.price    = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -339,9 +331,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -351,6 +343,98 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Buyer &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.charid));
+		v.push_back(std::to_string(e.buyslot));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back("'" + Strings::Escape(e.itemname) + "'");
+		v.push_back(std::to_string(e.quantity));
+		v.push_back(std::to_string(e.price));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Buyer> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.charid));
+			v.push_back(std::to_string(e.buyslot));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back("'" + Strings::Escape(e.itemname) + "'");
+			v.push_back(std::to_string(e.quantity));
+			v.push_back(std::to_string(e.price));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BUYER_REPOSITORY_H

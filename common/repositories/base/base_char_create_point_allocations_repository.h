@@ -1,55 +1,39 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H
 #define EQEMU_BASE_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseCharCreatePointAllocationsRepository {
 public:
 	struct CharCreatePointAllocations {
-		int id;
-		int base_str;
-		int base_sta;
-		int base_dex;
-		int base_agi;
-		int base_int;
-		int base_wis;
-		int base_cha;
-		int alloc_str;
-		int alloc_sta;
-		int alloc_dex;
-		int alloc_agi;
-		int alloc_int;
-		int alloc_wis;
-		int alloc_cha;
+		uint32_t id;
+		uint32_t base_str;
+		uint32_t base_sta;
+		uint32_t base_dex;
+		uint32_t base_agi;
+		uint32_t base_int;
+		uint32_t base_wis;
+		uint32_t base_cha;
+		uint32_t alloc_str;
+		uint32_t alloc_sta;
+		uint32_t alloc_dex;
+		uint32_t alloc_agi;
+		uint32_t alloc_int;
+		uint32_t alloc_wis;
+		uint32_t alloc_cha;
 	};
 
 	static std::string PrimaryKey()
@@ -78,24 +62,35 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"base_str",
+			"base_sta",
+			"base_dex",
+			"base_agi",
+			"base_int",
+			"base_wis",
+			"base_cha",
+			"alloc_str",
+			"alloc_sta",
+			"alloc_dex",
+			"alloc_agi",
+			"alloc_int",
+			"alloc_wis",
+			"alloc_cha",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -107,7 +102,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -117,34 +112,34 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static CharCreatePointAllocations NewEntity()
 	{
-		CharCreatePointAllocations entry{};
+		CharCreatePointAllocations e{};
 
-		entry.id        = 0;
-		entry.base_str  = 0;
-		entry.base_sta  = 0;
-		entry.base_dex  = 0;
-		entry.base_agi  = 0;
-		entry.base_int  = 0;
-		entry.base_wis  = 0;
-		entry.base_cha  = 0;
-		entry.alloc_str = 0;
-		entry.alloc_sta = 0;
-		entry.alloc_dex = 0;
-		entry.alloc_agi = 0;
-		entry.alloc_int = 0;
-		entry.alloc_wis = 0;
-		entry.alloc_cha = 0;
+		e.id        = 0;
+		e.base_str  = 0;
+		e.base_sta  = 0;
+		e.base_dex  = 0;
+		e.base_agi  = 0;
+		e.base_int  = 0;
+		e.base_wis  = 0;
+		e.base_cha  = 0;
+		e.alloc_str = 0;
+		e.alloc_sta = 0;
+		e.alloc_dex = 0;
+		e.alloc_agi = 0;
+		e.alloc_int = 0;
+		e.alloc_wis = 0;
+		e.alloc_cha = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharCreatePointAllocations GetCharCreatePointAllocationsEntry(
+	static CharCreatePointAllocations GetCharCreatePointAllocations(
 		const std::vector<CharCreatePointAllocations> &char_create_point_allocationss,
 		int char_create_point_allocations_id
 	)
@@ -159,48 +154,51 @@ public:
 	}
 
 	static CharCreatePointAllocations FindOne(
+		Database& db,
 		int char_create_point_allocations_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				char_create_point_allocations_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int char_create_point_allocations_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -213,36 +211,37 @@ public:
 	}
 
 	static int UpdateOne(
-		CharCreatePointAllocations char_create_point_allocations_entry
+		Database& db,
+		const CharCreatePointAllocations &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(char_create_point_allocations_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(char_create_point_allocations_entry.base_str));
-		update_values.push_back(columns[2] + " = " + std::to_string(char_create_point_allocations_entry.base_sta));
-		update_values.push_back(columns[3] + " = " + std::to_string(char_create_point_allocations_entry.base_dex));
-		update_values.push_back(columns[4] + " = " + std::to_string(char_create_point_allocations_entry.base_agi));
-		update_values.push_back(columns[5] + " = " + std::to_string(char_create_point_allocations_entry.base_int));
-		update_values.push_back(columns[6] + " = " + std::to_string(char_create_point_allocations_entry.base_wis));
-		update_values.push_back(columns[7] + " = " + std::to_string(char_create_point_allocations_entry.base_cha));
-		update_values.push_back(columns[8] + " = " + std::to_string(char_create_point_allocations_entry.alloc_str));
-		update_values.push_back(columns[9] + " = " + std::to_string(char_create_point_allocations_entry.alloc_sta));
-		update_values.push_back(columns[10] + " = " + std::to_string(char_create_point_allocations_entry.alloc_dex));
-		update_values.push_back(columns[11] + " = " + std::to_string(char_create_point_allocations_entry.alloc_agi));
-		update_values.push_back(columns[12] + " = " + std::to_string(char_create_point_allocations_entry.alloc_int));
-		update_values.push_back(columns[13] + " = " + std::to_string(char_create_point_allocations_entry.alloc_wis));
-		update_values.push_back(columns[14] + " = " + std::to_string(char_create_point_allocations_entry.alloc_cha));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.base_str));
+		v.push_back(columns[2] + " = " + std::to_string(e.base_sta));
+		v.push_back(columns[3] + " = " + std::to_string(e.base_dex));
+		v.push_back(columns[4] + " = " + std::to_string(e.base_agi));
+		v.push_back(columns[5] + " = " + std::to_string(e.base_int));
+		v.push_back(columns[6] + " = " + std::to_string(e.base_wis));
+		v.push_back(columns[7] + " = " + std::to_string(e.base_cha));
+		v.push_back(columns[8] + " = " + std::to_string(e.alloc_str));
+		v.push_back(columns[9] + " = " + std::to_string(e.alloc_sta));
+		v.push_back(columns[10] + " = " + std::to_string(e.alloc_dex));
+		v.push_back(columns[11] + " = " + std::to_string(e.alloc_agi));
+		v.push_back(columns[12] + " = " + std::to_string(e.alloc_int));
+		v.push_back(columns[13] + " = " + std::to_string(e.alloc_wis));
+		v.push_back(columns[14] + " = " + std::to_string(e.alloc_cha));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				char_create_point_allocations_entry.id
+				e.id
 			)
 		);
 
@@ -250,91 +249,93 @@ public:
 	}
 
 	static CharCreatePointAllocations InsertOne(
-		CharCreatePointAllocations char_create_point_allocations_entry
+		Database& db,
+		CharCreatePointAllocations e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.id));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_cha));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_str));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_sta));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_dex));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_agi));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_int));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_wis));
-		insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_cha));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.base_str));
+		v.push_back(std::to_string(e.base_sta));
+		v.push_back(std::to_string(e.base_dex));
+		v.push_back(std::to_string(e.base_agi));
+		v.push_back(std::to_string(e.base_int));
+		v.push_back(std::to_string(e.base_wis));
+		v.push_back(std::to_string(e.base_cha));
+		v.push_back(std::to_string(e.alloc_str));
+		v.push_back(std::to_string(e.alloc_sta));
+		v.push_back(std::to_string(e.alloc_dex));
+		v.push_back(std::to_string(e.alloc_agi));
+		v.push_back(std::to_string(e.alloc_int));
+		v.push_back(std::to_string(e.alloc_wis));
+		v.push_back(std::to_string(e.alloc_cha));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			char_create_point_allocations_entry.id = results.LastInsertedID();
-			return char_create_point_allocations_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		char_create_point_allocations_entry = NewEntity();
+		e = NewEntity();
 
-		return char_create_point_allocations_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<CharCreatePointAllocations> char_create_point_allocations_entries
+		Database& db,
+		const std::vector<CharCreatePointAllocations> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &char_create_point_allocations_entry: char_create_point_allocations_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.id));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.base_cha));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_str));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_sta));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_dex));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_agi));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_int));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_wis));
-			insert_values.push_back(std::to_string(char_create_point_allocations_entry.alloc_cha));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.base_str));
+			v.push_back(std::to_string(e.base_sta));
+			v.push_back(std::to_string(e.base_dex));
+			v.push_back(std::to_string(e.base_agi));
+			v.push_back(std::to_string(e.base_int));
+			v.push_back(std::to_string(e.base_wis));
+			v.push_back(std::to_string(e.base_cha));
+			v.push_back(std::to_string(e.alloc_str));
+			v.push_back(std::to_string(e.alloc_sta));
+			v.push_back(std::to_string(e.alloc_dex));
+			v.push_back(std::to_string(e.alloc_agi));
+			v.push_back(std::to_string(e.alloc_int));
+			v.push_back(std::to_string(e.alloc_wis));
+			v.push_back(std::to_string(e.alloc_cha));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<CharCreatePointAllocations> All()
+	static std::vector<CharCreatePointAllocations> All(Database& db)
 	{
 		std::vector<CharCreatePointAllocations> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -344,35 +345,35 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharCreatePointAllocations> GetWhere(std::string where_filter)
+	static std::vector<CharCreatePointAllocations> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharCreatePointAllocations> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -383,33 +384,33 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharCreatePointAllocations entry{};
+			CharCreatePointAllocations e{};
 
-			entry.id        = atoi(row[0]);
-			entry.base_str  = atoi(row[1]);
-			entry.base_sta  = atoi(row[2]);
-			entry.base_dex  = atoi(row[3]);
-			entry.base_agi  = atoi(row[4]);
-			entry.base_int  = atoi(row[5]);
-			entry.base_wis  = atoi(row[6]);
-			entry.base_cha  = atoi(row[7]);
-			entry.alloc_str = atoi(row[8]);
-			entry.alloc_sta = atoi(row[9]);
-			entry.alloc_dex = atoi(row[10]);
-			entry.alloc_agi = atoi(row[11]);
-			entry.alloc_int = atoi(row[12]);
-			entry.alloc_wis = atoi(row[13]);
-			entry.alloc_cha = atoi(row[14]);
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.base_str  = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.base_sta  = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.base_dex  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.base_agi  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.base_int  = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.base_wis  = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.base_cha  = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.alloc_str = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.alloc_sta = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.alloc_dex = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.alloc_agi = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.alloc_int = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.alloc_wis = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.alloc_cha = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -420,9 +421,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -432,6 +433,116 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharCreatePointAllocations &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.base_str));
+		v.push_back(std::to_string(e.base_sta));
+		v.push_back(std::to_string(e.base_dex));
+		v.push_back(std::to_string(e.base_agi));
+		v.push_back(std::to_string(e.base_int));
+		v.push_back(std::to_string(e.base_wis));
+		v.push_back(std::to_string(e.base_cha));
+		v.push_back(std::to_string(e.alloc_str));
+		v.push_back(std::to_string(e.alloc_sta));
+		v.push_back(std::to_string(e.alloc_dex));
+		v.push_back(std::to_string(e.alloc_agi));
+		v.push_back(std::to_string(e.alloc_int));
+		v.push_back(std::to_string(e.alloc_wis));
+		v.push_back(std::to_string(e.alloc_cha));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharCreatePointAllocations> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.base_str));
+			v.push_back(std::to_string(e.base_sta));
+			v.push_back(std::to_string(e.base_dex));
+			v.push_back(std::to_string(e.base_agi));
+			v.push_back(std::to_string(e.base_int));
+			v.push_back(std::to_string(e.base_wis));
+			v.push_back(std::to_string(e.base_cha));
+			v.push_back(std::to_string(e.alloc_str));
+			v.push_back(std::to_string(e.alloc_sta));
+			v.push_back(std::to_string(e.alloc_dex));
+			v.push_back(std::to_string(e.alloc_agi));
+			v.push_back(std::to_string(e.alloc_int));
+			v.push_back(std::to_string(e.alloc_wis));
+			v.push_back(std::to_string(e.alloc_cha));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHAR_CREATE_POINT_ALLOCATIONS_REPOSITORY_H

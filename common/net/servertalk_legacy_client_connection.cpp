@@ -3,7 +3,7 @@
 #include "../eqemu_logsys.h"
 
 EQ::Net::ServertalkLegacyClient::ServertalkLegacyClient(const std::string &addr, int port, bool ipv6)
-	: m_timer(std::unique_ptr<EQ::Timer>(new EQ::Timer(100, true, std::bind(&EQ::Net::ServertalkLegacyClient::Connect, this))))
+	: m_timer(std::make_unique<EQ::Timer>(100, true, std::bind(&EQ::Net::ServertalkLegacyClient::Connect, this)))
 {
 	m_port = port;
 	m_ipv6 = ipv6;
@@ -41,7 +41,7 @@ void EQ::Net::ServertalkLegacyClient::SendPacket(ServerPacket *p)
 
 void EQ::Net::ServertalkLegacyClient::OnMessage(uint16_t opcode, std::function<void(uint16_t, EQ::Net::Packet&)> cb)
 {
-	m_message_callbacks.insert(std::make_pair(opcode, cb));
+	m_message_callbacks.emplace(std::make_pair(opcode, cb));
 }
 
 void EQ::Net::ServertalkLegacyClient::OnMessage(std::function<void(uint16_t, EQ::Net::Packet&)> cb)

@@ -63,6 +63,7 @@ public:
 
 		if (!m_started) {
 			m_started = true;
+			mob->turning = true;
 			mob->SetMoving(true);
 
 			if (dist > 15.0f && rotate_to_speed > 0.0 && rotate_to_speed <= 25.0) { //send basic rotation
@@ -84,6 +85,7 @@ public:
 			mob->SetHeading(to);
 			mob->SetMoving(false);
 			mob_movement_manager->SendCommandToClients(mob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
+			mob->turning = false;
 			return true;
 		}
 
@@ -136,7 +138,7 @@ public:
 			return true;
 		}
 
-		//Send a movement packet when you start moving		
+		//Send a movement packet when you start moving
 		double current_time  = static_cast<double>(Timer::GetCurrentTime()) / 1000.0;
 		int    current_speed = 0;
 
@@ -234,7 +236,7 @@ public:
 
 			if (RuleB(Map, FixZWhenPathing)) {
 				m_distance_moved_since_correction += distance_moved;
-				if (m_distance_moved_since_correction > RuleR(Map, DistanceCanTravelBeforeAdjustment)) {
+				if (m_distance_moved_since_correction > (mob->IsEngaged() ? 1 : 10)) {
 					m_distance_moved_since_correction = 0.0;
 					mob->FixZ();
 				}
@@ -569,6 +571,7 @@ public:
 			}
 			mob_movement_manager->SendCommandToClients(mob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		}
+
 		return true;
 	}
 
@@ -604,7 +607,7 @@ public:
 		mob->WipeHateList();
 		mob->Heal();
 
-		return true;
+		return false;
 	}
 
 	virtual bool Started() const
@@ -678,7 +681,7 @@ struct MobMovementManager::Implementation {
 
 MobMovementManager::MobMovementManager()
 {
-	_impl.reset(new Implementation());
+	_impl = std::make_unique<Implementation>();
 }
 
 MobMovementManager::~MobMovementManager()
@@ -1050,6 +1053,13 @@ void MobMovementManager::FillCommandStruct(
 	position_update->delta_z       = FloatToEQ13(delta_z);
 	position_update->delta_heading = FloatToEQ10(delta_heading);
 	position_update->animation     = (mob->IsBot() ? (int) ((float) anim / 1.785714f) : anim);
+
+	if (RuleB(Map, MobPathingVisualDebug)) {
+		mob->DrawDebugCoordinateNode(
+			fmt::format("{} position update", mob->GetCleanName()),
+			mob->GetPosition()
+		);
+	}
 }
 
 /**
@@ -1072,7 +1082,7 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 		return;
 	}
 
-	if (who->IsBoat()) {
+	if (who->GetIsBoat()) {
 		UpdatePathBoat(who, x, y, z, mob_movement_mode);
 	}
 	else if (who->IsUnderwaterOnly()) {
@@ -1090,7 +1100,7 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 		}
 	// Below for npcs that can traverse land or water so they don't sink
 	else if (who->GetFlyMode() == GravityBehavior::Water &&
-			 zone->watermap->InLiquid(who->GetPosition()) && 
+			 zone->watermap->InLiquid(who->GetPosition()) &&
 			 zone->watermap->InLiquid(glm::vec3(x, y, z)) &&
 			 zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
 		auto iter = _impl->Entries.find(who);
@@ -1369,7 +1379,9 @@ void MobMovementManager::UpdatePathBoat(Mob *who, float x, float y, float z, Mob
 {
 	auto eiter = _impl->Entries.find(who);
 	auto &ent  = (*eiter);
+	float to = who->CalculateHeadingToTarget(x, y);
 
+	PushRotateTo(ent.second, who, to, mode);
 	PushSwimTo(ent.second, x, y, z, mode);
 	PushStopMoving(ent.second);
 }
@@ -1383,7 +1395,7 @@ void MobMovementManager::UpdatePathBoat(Mob *who, float x, float y, float z, Mob
  */
 void MobMovementManager::PushTeleportTo(MobMovementEntry &ent, float x, float y, float z, float heading)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new TeleportToCommand(x, y, z, heading)));
+	ent.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new TeleportToCommand(x, y, z, heading)));
 }
 
 /**
@@ -1395,7 +1407,7 @@ void MobMovementManager::PushTeleportTo(MobMovementEntry &ent, float x, float y,
  */
 void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new MoveToCommand(x, y, z, mob_movement_mode)));
+	ent.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new MoveToCommand(x, y, z, mob_movement_mode)));
 }
 
 /**
@@ -1407,7 +1419,7 @@ void MobMovementManager::PushMoveTo(MobMovementEntry &ent, float x, float y, flo
  */
 void MobMovementManager::PushSwimTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mob_movement_mode)));
+	ent.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new SwimToCommand(x, y, z, mob_movement_mode)));
 }
 
 /**
@@ -1435,7 +1447,7 @@ void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to,
 		diff -= 512.0;
 	}
 
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new RotateToCommand(to, diff > 0 ? 1.0 : -1.0, mob_movement_mode)));
+	ent.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new RotateToCommand(to, diff > 0 ? 1.0 : -1.0, mob_movement_mode)));
 }
 
 /**
@@ -1447,7 +1459,7 @@ void MobMovementManager::PushRotateTo(MobMovementEntry &ent, Mob *who, float to,
  */
 void MobMovementManager::PushFlyTo(MobMovementEntry &ent, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	ent.Commands.push_back(std::unique_ptr<IMovementCommand>(new FlyToCommand(x, y, z, mob_movement_mode)));
+	ent.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new FlyToCommand(x, y, z, mob_movement_mode)));
 }
 
 /**
@@ -1455,7 +1467,7 @@ void MobMovementManager::PushFlyTo(MobMovementEntry &ent, float x, float y, floa
  */
 void MobMovementManager::PushStopMoving(MobMovementEntry &mob_movement_entry)
 {
-	mob_movement_entry.Commands.push_back(std::unique_ptr<IMovementCommand>(new StopMovingCommand()));
+	mob_movement_entry.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new StopMovingCommand()));
 }
 
 /**
@@ -1463,7 +1475,7 @@ void MobMovementManager::PushStopMoving(MobMovementEntry &mob_movement_entry)
  */
 void MobMovementManager::PushEvadeCombat(MobMovementEntry &mob_movement_entry)
 {
-	mob_movement_entry.Commands.push_back(std::unique_ptr<IMovementCommand>(new EvadeCombatCommand()));
+	mob_movement_entry.Commands.emplace_back(std::unique_ptr<IMovementCommand>(new EvadeCombatCommand()));
 }
 
 /**
@@ -1475,7 +1487,7 @@ void MobMovementManager::PushEvadeCombat(MobMovementEntry &mob_movement_entry)
  */
 void MobMovementManager::HandleStuckBehavior(Mob *who, float x, float y, float z, MobMovementMode mob_movement_mode)
 {
-	LogDebug("Handle stuck behavior for {0} at ({1}, {2}, {3}) with movement_mode {4}", who->GetName(), x, y, z, mob_movement_mode);
+	LogDebug("Handle stuck behavior for {0} at ({1}, {2}, {3}) with movement_mode {4}", who->GetName(), x, y, z, static_cast<int>(mob_movement_mode));
 
 	auto sb = who->GetStuckBehavior();
 	MobStuckBehavior behavior = RunToTarget;

@@ -10,23 +10,21 @@ EQ::Net::ServertalkServer::~ServertalkServer()
 
 void EQ::Net::ServertalkServer::Listen(const ServertalkServerOptions& opts)
 {
-	m_encrypted = opts.encrypted;
 	m_credentials = opts.credentials;
-	m_allow_downgrade = opts.allow_downgrade;
-	m_server.reset(new EQ::Net::TCPServer());
+	m_server = std::make_unique<EQ::Net::TCPServer>();
 	m_server->Listen(opts.port, opts.ipv6, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
-		m_unident_connections.push_back(std::make_shared<ServertalkServerConnection>(connection, this, m_encrypted, m_allow_downgrade));
+		m_unident_connections.push_back(std::make_shared<ServertalkServerConnection>(connection, this));
 	});
 }
 
 void EQ::Net::ServertalkServer::OnConnectionIdentified(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
 {
-	m_on_ident.insert(std::make_pair(type, cb));
+	m_on_ident.emplace(std::make_pair(type, cb));
 }
 
 void EQ::Net::ServertalkServer::OnConnectionRemoved(const std::string &type, std::function<void(std::shared_ptr<ServertalkServerConnection>)> cb)
 {
-	m_on_disc.insert(std::make_pair(type, cb));
+	m_on_disc.emplace(std::make_pair(type, cb));
 }
 
 void EQ::Net::ServertalkServer::ConnectionDisconnected(ServertalkServerConnection *conn)
@@ -77,7 +75,7 @@ void EQ::Net::ServertalkServer::ConnectionIdentified(ServertalkServerConnection 
 			else {
 				std::vector<std::shared_ptr<EQ::Net::ServertalkServerConnection>> vec;
 				vec.push_back(*iter);
-				m_ident_connections.insert(std::make_pair(conn->GetIdentifier(), vec));
+				m_ident_connections.emplace(std::make_pair(conn->GetIdentifier(), vec));
 			}
 
 			m_unident_connections.erase(iter);

@@ -33,8 +33,9 @@ my $repository_generation_option = $ARGV[2] ? $ARGV[2] : "all";
 #############################################
 # world path
 #############################################
-my $world_path       = $server_path . "/world";
-my $world_path_bin   = $server_path . "/bin/world";
+my $world_binary     = ($^O eq "MSWin32") ? "world.exe" : "world";
+my $world_path       = $server_path . "/" . $world_binary;
+my $world_path_bin   = $server_path . "/bin/" . $world_binary;
 my $found_world_path = "";
 
 if (-e $world_path) {
@@ -67,7 +68,8 @@ my $database_schema = $json->decode($output);
 # database
 #############################################
 my $content;
-open(my $fh, '<', $config_path) or die "cannot open file $config_path"; {
+open(my $fh, '<', $config_path) or die "cannot open file $config_path";
+{
     local $/;
     $content = <$fh>;
 }
@@ -81,7 +83,8 @@ my $database_name = $config->{"server"}{"database"}{"db"};
 my $host          = $config->{"server"}{"database"}{"host"};
 my $user          = $config->{"server"}{"database"}{"username"};
 my $pass          = $config->{"server"}{"database"}{"password"};
-my $dsn           = "dbi:mysql:$database_name:$host:3306";
+my $port          = $config->{"server"}{"database"}{"port"};
+my $dsn           = "dbi:mysql:$database_name:$host:$port";
 my $connect       = DBI->connect($dsn, $user, $pass);
 
 my @tables = ();
@@ -109,6 +112,11 @@ if ($requested_table_to_generate ne "all") {
     @tables = ($requested_table_to_generate);
 }
 
+my @cereal_enabled_tables = (
+    "data_buckets",
+    "player_event_logs"
+);
+
 my $generated_base_repository_files = "";
 my $generated_repository_files      = "";
 
@@ -117,6 +125,7 @@ foreach my $table_to_generate (@tables) {
     my $table_found_in_schema = 0;
 
     my @categories = (
+        "bot_tables",
         "content_tables",
         "version_tables",
         "state_tables",
@@ -128,10 +137,8 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid",                  # Manually created
-        "grid_entries", # Manually created
+        # "grid",         # Manually created
         # "tradeskill_recipe",     # Manually created
-        # "character_recipe_list", # Manually created
         "guild_bank",
         "inventory_versions",
         "raid_leaders",
@@ -155,7 +162,12 @@ foreach my $table_to_generate (@tables) {
         $table_found_in_schema = 0;
     }
 
-    if ($table_found_in_schema == 0) {
+    my $cereal_enabled = 0;
+    if ($table_to_generate ~~ @cereal_enabled_tables) {
+        $cereal_enabled = 1;
+    }
+
+    if ($table_found_in_schema == 0 && ($requested_table_to_generate eq "" || $requested_table_to_generate eq "all")) {
         print "Table [$table_to_generate] not found in schema, skipping\n";
         next;
     }
@@ -182,17 +194,19 @@ foreach my $table_to_generate (@tables) {
 
     $ex->execute($database_name, $table_to_generate);
 
-    my $longest_column_length    = 0;
-    my $longest_data_type_length = 0;
-    while (my @row               = $ex->fetchrow_array()) {
-        my $column_name          = $row[0];
-        my $data_type            = $row[2];
+    my $longest_column_length     = 0;
+    my $longest_data_type_length  = 0;
+    while (my @row                = $ex->fetchrow_array()) {
+        my $column_name           = $row[0];
+        my $column_name_formatted = format_column_name_for_cpp_var($column_name);
+        my $data_type             = $row[2];
+        my $column_type           = $row[3];
 
-        if ($longest_column_length < length($column_name)) {
-            $longest_column_length = length($column_name);
+        if ($longest_column_length < length($column_name_formatted)) {
+            $longest_column_length = length($column_name_formatted);
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         if ($longest_data_type_length < length($struct_data_type)) {
             $longest_data_type_length = length($struct_data_type);
@@ -200,37 +214,43 @@ foreach my $table_to_generate (@tables) {
     }
 
     # 2nd pass
-    my $default_entries      = "";
-    my $insert_one_entries   = "";
-    my $insert_many_entries  = "";
-    my $find_one_entries     = "";
-    my $column_names_quoted  = "";
-    my $table_struct_columns = "";
-    my $update_one_entries   = "";
-    my $all_entries          = "";
-    my $index                = 0;
-    my %table_data           = ();
-    my %table_primary_key    = ();
+    my $default_entries            = "";
+    my $insert_one_entries         = "";
+    my $insert_many_entries        = "";
+    my $find_one_entries           = "";
+    my $column_names_quoted        = "";
+    my $select_column_names_quoted = "";
+    my $table_struct_columns       = "";
+    my $cereal_columns             = "";
+    my $update_one_entries         = "";
+    my $all_entries                = "";
+    my $index                      = 0;
+    my %table_data                 = ();
+    my %table_primary_key          = ();
     $ex->execute($database_name, $table_to_generate);
 
-    while (my @row           = $ex->fetchrow_array()) {
-        my $column_name      = $row[0];
-        my $table_name       = $row[1];
-        my $data_type        = $row[2];
-        my $column_type      = $row[3];
-        my $ordinal_position = $row[4];
-        my $column_key       = $row[5];
-        my $column_default   = ($row[6] ? $row[6] : "");
-        my $extra            = ($row[7] ? $row[7] : "");
+    while (my @row                = $ex->fetchrow_array()) {
+        my $column_name           = $row[0];
+        my $column_name_formatted = format_column_name_for_cpp_var($column_name);
+        my $table_name            = $row[1];
+        my $data_type             = $row[2];
+        my $column_type           = $row[3];
+        my $ordinal_position      = $row[4];
+        my $column_key            = $row[5];
+        my $column_default        = ($row[6] ? $row[6] : "");
+        my $extra                 = ($row[7] ? $row[7] : "");
 
         if (!$table_primary_key{$table_name}) {
-            if (($column_key eq "PRI" && $data_type =~/int/) || ($ordinal_position == 0 && $column_name =~ /id/i)) {
+            if (($column_key eq "PRI" && $data_type =~ /int/) || ($ordinal_position == 0 && $column_name =~ /id/i)) {
                 $table_primary_key{$table_name} = $column_name;
             }
         }
 
         my $default_value = 0;
-        if ($column_default ne "NULL" && $column_default ne "") {
+        if ($column_default eq "current_timestamp()") {
+            $default_value = "std::time(nullptr)"
+        }
+        elsif ($column_default ne "NULL" && $column_default ne "") {
             $column_default =~ s/'/"/g;
             $default_value = $column_default;
         }
@@ -241,54 +261,96 @@ foreach my $table_to_generate (@tables) {
             $default_value = '""';
         }
 
-        my $struct_data_type = translate_mysql_data_type_to_c($data_type);
+        # for datetime values that set default value all zeroed out
+        if ($default_value =~ /0000-00-00 00:00:00/i) {
+            $default_value = 0;
+        }
+
+        my $struct_data_type = translate_mysql_data_type_to_c($data_type, $column_type);
 
         # struct
-        $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name);
+        $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
+
+        if ($cereal_enabled == 1) {
+            $cereal_columns .= sprintf("\t\t\t\tCEREAL_NVP(%s),\n", $column_name_formatted);
+        }
 
         # new entity
-        $default_entries .= sprintf("\t\tentry.%-${longest_column_length}s = %s;\n", $column_name, $default_value);
+        $default_entries .= sprintf("\t\te.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
 
         # column names (string)
-        $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", $column_name);
+        $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
+        if ($data_type =~ /datetime/) {
+            $select_column_names_quoted .= sprintf("\t\t\t\"UNIX_TIMESTAMP(%s)\",\n", format_column_name_for_mysql($column_name));
+        }
+        else {
+            $select_column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
+        }
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name);
+            my $query_value = sprintf('\'" + Strings::Escape(e.%s) + "\'");', $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
-                $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name);
+                $query_value = sprintf('" + std::to_string(e.%s));', $column_name_formatted);
+            }
+            elsif ($data_type =~ /datetime/) {
+                $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
-                "\t\t" . 'update_values.push_back(columns[%s] + " = %s' . "\n",
+                "\t\t" . 'v.push_back(columns[%s] + " = %s' . "\n",
                 $index,
                 $query_value
             );
         }
 
-        # insert one
-        if ($extra ne "auto_increment") {
-            my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
-            if ($data_type =~ /int|float|double|decimal/) {
-                $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
-            }
-
-            $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
-            $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
+        # insert
+        my $value = sprintf("\"'\" + Strings::Escape(e.%s) + \"'\"", $column_name_formatted);
+        if ($data_type =~ /int|float|double|decimal/) {
+            $value = sprintf('std::to_string(e.%s)', $column_name_formatted);
         }
+        elsif ($data_type =~ /datetime/) {
+            $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
+        }
+
+        $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);
+        $insert_many_entries .= sprintf("\t\t\tv.push_back(%s);\n", $value);
 
         # find one / all (select)
-        if ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
+
+        if ($column_type =~ /unsigned/) {
+            if ($data_type =~ /bigint/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoull(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoull(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            }
+            elsif ($data_type =~ /int/) {
+                $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(strtoul(row[%s], nullptr, 10)) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+                $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(strtoul(row[%s], nullptr, 10)) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+            }
         }
-        elsif ($data_type =~ /float|double|decimal/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
+        elsif ($data_type =~ /bigint/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoll(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtoll(row[%s], nullptr, 10) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+        }
+        elsif ($data_type =~ /datetime/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+        }
+        elsif ($data_type =~ /int/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(atoi(row[%s])) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? static_cast<%s>(atoi(row[%s])) : %s;\n", $column_name_formatted, $index, $struct_data_type, $index, $default_value);
+        }
+        elsif ($data_type =~ /float|decimal/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtof(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtof(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+        }
+        elsif ($data_type =~ /double/) {
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? strtod(row[%s], nullptr) : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
         else {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
+            $all_entries      .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);
+            $find_one_entries .= sprintf("\t\t\te.%-${longest_column_length}s = row[%s] ? row[%s] : %s;\n", $column_name_formatted, $index, $index, $default_value);
         }
 
         # print $column_name . "\n";
@@ -354,7 +416,24 @@ foreach my $table_to_generate (@tables) {
         $database_connection = "content_db";
     }
 
+    my $additional_includes = "";
+    if ($cereal_enabled) {
+        chomp($cereal_columns);
+        # remove the last comma "," from string
+        $cereal_columns = substr($cereal_columns, 0, -1);
+
+        $table_struct_columns .= "
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(\n" . $cereal_columns . "\n\t\t\t);\n\t\t}";
+
+        $additional_includes .= "#include <cereal/cereal.hpp>";
+    }
+
     chomp($column_names_quoted);
+    chomp($select_column_names_quoted);
     chomp($table_struct_columns);
     chomp($default_entries);
     chomp($update_one_entries);
@@ -380,6 +459,7 @@ foreach my $table_to_generate (@tables) {
     $new_base_repository =~ s/\{\{DATABASE_CONNECTION}}/$database_connection/g;
     $new_base_repository =~ s/\{\{DEFAULT_ENTRIES}}/$default_entries/g;
     $new_base_repository =~ s/\{\{COLUMNS_LIST_QUOTED}}/$column_names_quoted/g;
+    $new_base_repository =~ s/\{\{SELECT_COLUMNS_LIST_QUOTED}}/$select_column_names_quoted/g;
     $new_base_repository =~ s/\{\{TABLE_STRUCT_COLUMNS}}/$table_struct_columns/g;
     $new_base_repository =~ s/\{\{FIND_ONE_ENTRIES}}/$find_one_entries/g;
     $new_base_repository =~ s/\{\{UPDATE_ONE_ENTRIES}}/$update_one_entries/g;
@@ -387,6 +467,7 @@ foreach my $table_to_generate (@tables) {
     $new_base_repository =~ s/\{\{INSERT_MANY_ENTRIES}}/$insert_many_entries/g;
     $new_base_repository =~ s/\{\{ALL_ENTRIES}}/$all_entries/g;
     $new_base_repository =~ s/\{\{GENERATED_DATE}}/$generated_date/g;
+    $new_base_repository =~ s/\{\{ADDITIONAL_INCLUDES}}\n/$additional_includes/g;
 
     # Extended repository
     my $new_repository = $repository_template;
@@ -398,6 +479,7 @@ foreach my $table_to_generate (@tables) {
     $new_repository =~ s/\{\{DATABASE_CONNECTION}}/$database_connection/g;
     $new_repository =~ s/\{\{DEFAULT_ENTRIES}}/$default_entries/g;
     $new_repository =~ s/\{\{COLUMNS_LIST_QUOTED}}/$column_names_quoted/g;
+    $new_repository =~ s/\{\{SELECT_COLUMNS_LIST_QUOTED}}/$select_column_names_quoted/g;
     $new_repository =~ s/\{\{TABLE_STRUCT_COLUMNS}}/$table_struct_columns/g;
     $new_repository =~ s/\{\{FIND_ONE_ENTRIES}}/$find_one_entries/g;
     $new_repository =~ s/\{\{UPDATE_ONE_ENTRIES}}/$update_one_entries/g;
@@ -431,7 +513,14 @@ foreach my $table_to_generate (@tables) {
     # write extended repository
     #############################################
     if ($repository_generation_option eq "all" || $repository_generation_option eq "extended") {
-        my $generated_repository      = './common/repositories/' . $table_to_generate . '_repository.h';
+        my $generated_repository = './common/repositories/' . $table_to_generate . '_repository.h';
+
+        # check if file exists firsts
+        if (-e $generated_repository) {
+            print "File [$generated_repository] already exists! Can't overwrite extended once created!\n";
+            next;
+        }
+
         my $cmake_generated_reference = $generated_repository;
         $cmake_generated_reference =~ s/.\/common\///g;
         $generated_repository_files .= $cmake_generated_reference . "\n";
@@ -450,33 +539,100 @@ print $generated_base_repository_files . "\n";
 print "\n#Extended Repositories\n";
 print $generated_repository_files . "\n";
 
-sub trim {
+sub trim
+{
     my $string = $_[0];
     $string =~ s/^\s+//;
     $string =~ s/\s+$//;
     return $string;
 }
 
-sub translate_mysql_data_type_to_c {
-    my $mysql_data_type = $_[0];
+sub translate_mysql_data_type_to_c
+{
+    my $mysql_data_type   = $_[0];
+    my $mysql_column_type = $_[1];
 
     my $struct_data_type = "std::string";
-    if ($mysql_data_type =~ /tinyint/) {
-        $struct_data_type = 'int';
-    }
-    elsif ($mysql_data_type =~ /smallint/) {
-        $struct_data_type = 'int';
+    if ($mysql_column_type =~ /unsigned/) {
+        if ($mysql_data_type =~ /bigint/) {
+            $struct_data_type = 'uint64_t';
+        }
+        elsif ($mysql_data_type =~ /tinyint/) {
+            $struct_data_type = 'uint8_t';
+        }
+        elsif ($mysql_data_type =~ /smallint/) {
+            $struct_data_type = 'uint16_t';
+        }
+        elsif ($mysql_data_type =~ /int/) {
+            $struct_data_type = 'uint32_t';
+        }
+        elsif ($mysql_data_type =~ /float|decimal/i) {
+            $struct_data_type = 'float';
+        }
+        elsif ($mysql_data_type =~ /double/i) {
+            $struct_data_type = 'double';
+        }
     }
     elsif ($mysql_data_type =~ /bigint/) {
-        $struct_data_type = 'int';
-        # Use regular int for now until we have 64 support
+        $struct_data_type = 'int64_t';
+    }
+    elsif ($mysql_data_type =~ /tinyint/) {
+        $struct_data_type = 'int8_t';
+    }
+    elsif ($mysql_data_type =~ /smallint/) {
+        $struct_data_type = 'int16_t';
     }
     elsif ($mysql_data_type =~ /int/) {
-        $struct_data_type = 'int';
+        $struct_data_type = 'int32_t';
     }
-    elsif ($mysql_data_type =~ /float|double|decimal/) {
+    elsif ($mysql_data_type =~ /float|decimal/) {
         $struct_data_type = 'float';
+    }
+    elsif ($mysql_data_type =~ /double/) {
+        $struct_data_type = 'double';
+    }
+    elsif ($mysql_data_type =~ /datetime/) {
+        $struct_data_type = 'time_t';
     }
 
     return $struct_data_type;
+}
+
+# This is so we can change reserved words on the cpp side to something that will continue be functional in the compilers
+sub get_reserved_cpp_variable_names
+{
+    return (
+        "class",
+        "int",
+        "key",
+        "rank",
+        "range",
+        "interval",
+        "group"
+    );
+}
+
+sub format_column_name_for_cpp_var
+{
+    my $column_name = $_[0];
+
+    for my $word (get_reserved_cpp_variable_names()) {
+        if ($word eq $column_name) {
+            return $column_name . "_";
+        }
+    }
+
+    return $column_name;
+}
+
+sub format_column_name_for_mysql
+{
+    my $column_name = $_[0];
+    for my $word (get_reserved_cpp_variable_names()) {
+        if ($word eq $column_name) {
+            return "`" . $column_name . "`";
+        }
+    }
+
+    return $column_name;
 }

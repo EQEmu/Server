@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -440,35 +440,35 @@ struct NewZone_Struct {
 /*0704*/	char	zone_short_name2[96];	//zone file name? excludes instance number which can be in previous version.
 /*0800*/	int32	unknown800;	//seen -1
 /*0804*/	char	unknown804[40]; //
-/*0844*/	int32	unknown844;	//seen 600
-/*0848*/	int32	unknown848;
-/*0852*/	uint16	zone_id;
-/*0854*/	uint16	zone_instance;
-/*0856*/	uint32	scriptNPCReceivedanItem;
-/*0860*/	uint32	bCheck;					// padded bool
-/*0864*/	uint32	scriptIDSomething;
-/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
-/*0872*/	uint32	scriptIDSomething3;
-/*0876*/	uint32	SuspendBuffs;
-/*0880*/	uint32	unknown880;	//seen 50
-/*0884*/	uint32	unknown884;	//seen 10
-/*0888*/	uint8	unknown888;	//seen 1
-/*0889*/	uint8	unknown889;	//seen 0 (POK) or 1 (rujj)
-/*0890*/	uint8	unknown890;	//seen 1
-/*0891*/	uint8	unknown891;	//seen 0
-/*0892*/	uint8	unknown892;	//seen 0
-/*0893*/	uint8	unknown893;	//seen 0 - 00
-/*0894*/	uint8	fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
-/*0895*/	uint8	unknown895;	//seen 0 - 00
-/*0896*/	uint32	FastRegenHP;	//seen 180
-/*0900*/	uint32	FastRegenMana;	//seen 180
-/*0904*/	uint32	FastRegenEndurance;	//seen 180
-/*0908*/	uint32	unknown908;	//seen 2
-/*0912*/	uint32	unknown912;	//seen 2
-/*0916*/	float   FogDensity;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
-/*0920*/	uint32	unknown920;	//seen 0
-/*0924*/	uint32	unknown924;	//seen 0
-/*0928*/	uint32	unknown928;	//seen 0
+/*0844*/	int32  unknown844;	//seen 600
+/*0848*/	int32  unknown848;
+/*0852*/	uint16 zone_id;
+/*0854*/	uint16 zone_instance;
+/*0856*/	uint32 scriptNPCReceivedanItem;
+/*0860*/	uint32 bCheck;					// padded bool
+/*0864*/	uint32 scriptIDSomething;
+/*0868*/	uint32 underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+/*0872*/	uint32 scriptIDSomething3;
+/*0876*/	uint32 suspend_buffs;
+/*0880*/	uint32 lava_damage;	//seen 50
+/*0884*/	uint32 min_lava_damage;	//seen 10
+/*0888*/	uint8  unknown888;	//seen 1
+/*0889*/	uint8  unknown889;	//seen 0 (POK) or 1 (rujj)
+/*0890*/	uint8  unknown890;	//seen 1
+/*0891*/	uint8  unknown891;	//seen 0
+/*0892*/	uint8  unknown892;	//seen 0
+/*0893*/	uint8  unknown893;	//seen 0 - 00
+/*0894*/	uint8  fall_damage;	// 0 = Fall Damage on, 1 = Fall Damage off
+/*0895*/	uint8  unknown895;	//seen 0 - 00
+/*0896*/	uint32 fast_regen_hp;	//seen 180
+/*0900*/	uint32 fast_regen_mana;	//seen 180
+/*0904*/	uint32 fast_regen_endurance;	//seen 180
+/*0908*/	uint32 unknown908;	//seen 2
+/*0912*/	uint32 unknown912;	//seen 2
+/*0916*/	float  fog_density;	//Of about 10 or so zones tested, all but one have this set to 0.33 Blightfire had 0.16
+/*0920*/	uint32 unknown920;	//seen 0
+/*0924*/	uint32 unknown924;	//seen 0
+/*0928*/	uint32 unknown928;	//seen 0
 /*0932*/
 };
 
@@ -803,7 +803,7 @@ struct LeadershipAA_Struct {
 * Size: 20 Octets
 */
 struct BindStruct {
-   /*000*/ uint32 zoneId;
+   /*000*/ uint32 zone_id;
    /*004*/ float x;
    /*008*/ float y;
    /*012*/ float z;
@@ -1714,7 +1714,7 @@ struct GMZoneRequest_Struct {
 /*0068*/	float	x;
 /*0072*/	float	y;
 /*0076*/	float	z;
-/*0080*/	char	unknown0080[4];
+/*0080*/	float	heading;
 /*0084*/	uint32	success;		// 0 if command failed, 1 if succeeded?
 /*0088*/
 //	/*072*/	int8	success;		// =0 client->server, =1 server->client, -X=specific error
@@ -2085,7 +2085,7 @@ struct GroupUpdate_Struct_SoD {	// New for SoD
 
 struct GroupMembers_Struct {	// New for SoD
 /*0000*/	uint32	membernumber;	// Guess - number of member in the group (0 to 5?)
-/*0000*/	//char	membername[0];	// Member Name Null Terminated
+/*0000*/	//char	member_name[0];	// Member Name Null Terminated
 /*0000*/	uint8	unknown001[3];	// Seen 0
 /*0000*/	uint32	memberlevel;	// Guess
 /*0000*/	uint8	unknown002[11];	// Seen 0
@@ -2095,7 +2095,7 @@ struct GroupJoin_Struct_SoD {	// New for SoD
 /*0000*/	uint32	unknown0000;	// Matches unknown0136 from GroupFollow_Struct
 /*0004*/	uint32	action;
 /*0008*/	uint8	unknown0008[5];	// Seen 0
-/*0013*/	//char	membername[0];	// Null Terminated?
+/*0013*/	//char	member_name[0];	// Null Terminated?
 /*0000*/	uint8	unknown0013[3];	// Seen 0
 /*0000*/	uint32	unknown0016;	// Matches unknown0132 from GroupFollow_Struct
 /*0000*/	uint8	unknown0020[11];	// Seen 0
@@ -2136,11 +2136,11 @@ struct FaceChange_Struct {
 /*004*/	uint8	hairstyle;
 /*005*/	uint8	beard;
 /*006*/	uint8	face;
-/*007*/ uint8	unknown007;
+/*007*/ uint8   unused_padding;
 /*008*/ uint32	drakkin_heritage;
 /*012*/ uint32	drakkin_tattoo;
 /*016*/ uint32	drakkin_details;
-/*020*/ uint32	unknown020;
+/*020*/ uint32  entity_id;
 /*024*/
 };
 //there are only 10 faces for barbs changing woad just
@@ -2351,12 +2351,21 @@ struct BookText_Struct {
 // This is just a "text file" on the server
 // or in our case, the 'name' column in our books table.
 struct BookRequest_Struct {
-/*0000*/	uint32 window;		// where to display the text (0xFFFFFFFF means new window).
-/*0004*/	uint32 invslot;		// The inventory slot the book is in. Not used, but echoed in the response packet.
-/*0008*/	uint32 type;		// 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
-/*0012*/	uint32 unknown0012;
-/*0016*/	uint16 unknown0016;
-/*0018*/	char txtfile[8194];
+/*0000*/ uint32 window;     // where to display the text (0xFFFFFFFF means new window).
+/*0004*/ uint32 invslot;    // The inventory slot the book is in
+/*0008*/ uint32 type;       // 0 = Scroll, 1 = Book, 2 = Item Info. Possibly others
+/*0012*/ uint32 target_id;
+/*0016*/ uint8 can_cast;
+/*0017*/ uint8 can_scribe;
+/*0018*/ char txtfile[8194];
+};
+
+// used by Scribe and CastSpell book buttons
+struct BookButton_Struct
+{
+/*0000*/ int32 invslot;
+/*0004*/ int32 target_id; // client's target when using the book
+/*0008*/ int32 unused;    // always 0 from button packets
 };
 
 /*
@@ -2539,7 +2548,7 @@ struct EnvDamage2_Struct {
 /*0004*/	uint16 unknown4;
 /*0006*/	uint32 damage;
 /*0010*/	uint8 unknown10[12];
-/*0022*/	uint8 dmgtype; //FA = Lava; FC = Falling
+/*0022*/	uint8 dmgtype; // FA = Lava, FB = Drowning, FC = Falling, FD = Trap
 /*0023*/	uint8 unknown2[4];
 /*0027*/	uint16 constant; //Always FFFF
 /*0029*/	uint16 unknown29;
@@ -3017,7 +3026,7 @@ struct Make_Pet_Struct { //Simple struct for getting pet info
 	uint32 min_dmg;
 	uint32 max_dmg;
 };
-struct Ground_Spawn{
+struct GroundSpawn{
 	float max_x;
 	float max_y;
 	float min_x;
@@ -3029,8 +3038,8 @@ struct Ground_Spawn{
 	uint32 max_allowed;
 	uint32 respawntimer;
 };
-struct Ground_Spawns {
-	struct Ground_Spawn spawn[50]; //Assigned max number to allow
+struct GroundSpawns {
+	struct GroundSpawn spawn[50]; //Assigned max number to allow
 };
 
 //struct PetitionBug_Struct{
@@ -3583,9 +3592,14 @@ struct RaidAddMember_Struct {
 /*139*/	uint8 flags[5]; //no idea if these are needed...
 };
 
+struct RaidNote_Struct {
+/*000*/ RaidGeneral_Struct general;
+/*140*/ char note[64];
+};
+
 struct RaidMOTD_Struct {
 /*000*/ RaidGeneral_Struct general; // leader_name and action only used
-/*140*/ char motd[0]; // max size 1024, but reply is variable
+/*140*/ char motd[1024]; // max size is 1024, but reply is variable
 };
 
 struct RaidLeadershipUpdate_Struct {
@@ -3748,8 +3762,8 @@ struct UseAA_Struct {
 
 struct AA_Ability {
 /*00*/	uint32 skill_id;
-/*04*/	uint32 base1;
-/*08*/	uint32 base2;
+/*04*/	uint32 base_value;
+/*08*/	uint32 limit_value;
 /*12*/	uint32 slot;
 /*16*/
 };
@@ -4196,30 +4210,30 @@ struct ExpeditionInviteResponse_Struct
 /*079*/ uint8  unknown079;     // padding garbage?
 };
 
-struct ExpeditionInfo_Struct
+struct DynamicZoneInfo_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
 /*008*/ uint32 assigned; // padded bool
 /*012*/ uint32 max_players;
-/*016*/ char   expedition_name[128];
+/*016*/ char   dz_name[128];
 /*144*/ char   leader_name[64];
 };
 
-struct ExpeditionMemberEntry_Struct
+struct DynamicZoneMemberEntry_Struct
 {
-/*000*/ char name[1];            // variable length, null terminated, max 0x40 (64)
-/*000*/ uint8 expedition_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
+/*000*/ char name[1];        // variable length, null terminated, max 0x40 (64)
+/*000*/ uint8 online_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
 };
 
-struct ExpeditionMemberList_Struct
+struct DynamicZoneMemberList_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 member_count; // number of players in window
-/*008*/ ExpeditionMemberEntry_Struct members[0]; // variable length
+/*008*/ DynamicZoneMemberEntry_Struct members[0]; // variable length
 };
 
-struct ExpeditionMemberListName_Struct
+struct DynamicZoneMemberListName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
@@ -4242,7 +4256,7 @@ struct ExpeditionLockoutTimers_Struct
 /*008*/ ExpeditionLockoutTimerEntry_Struct timers[0];
 };
 
-struct ExpeditionSetLeaderName_Struct
+struct DynamicZoneLeaderName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
@@ -4276,7 +4290,7 @@ struct DynamicZoneCompassEntry_Struct
 /*000*/ uint16 dz_zone_id;      // target dz id pair
 /*002*/ uint16 dz_instance_id;
 /*004*/ uint32 dz_type;         // 1: Expedition, 2: Tutorial (purple), 3: Task, 4: Mission, 5: Quest (green)
-/*008*/ uint32 unknown008;
+/*008*/ uint32 dz_switch_id;
 /*012*/ float y;
 /*016*/ float x;
 /*020*/ float z;

@@ -16,17 +16,11 @@ public:
 	~LoginServerList();
 
 	void	Add(const char*, uint16, const char*, const char*, bool);
-
-	bool	SendInfo();
 	bool	SendStatus();
-
 	bool	SendPacket(ServerPacket *pack);
 	bool	SendAccountUpdate(ServerPacket *pack);
 	bool	Connected();
-	bool	AllConnected();
-	bool	CanUpdate();
 	size_t GetServerCount() const { return m_list.size(); }
-
 protected:
 	std::list<std::unique_ptr<LoginServer>> m_list;
 };

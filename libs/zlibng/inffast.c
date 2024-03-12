@@ -8,19 +8,21 @@
 #include "inftrees.h"
 #include "inflate.h"
 #include "inffast.h"
-#include "memcopy.h"
+#include "inflate_p.h"
+#include "functable.h"
 
-/* Return the low n bits of the bit accumulator (n < 16) */
-#define BITS(n) \
-    (hold & ((UINT64_C(1) << (n)) - 1))
 
-/* Remove n bits from the bit accumulator */
-#define DROPBITS(n) \
-    do { \
-        hold >>= (n); \
-        bits -= (unsigned)(n); \
-    } while (0)
+/* Load 64 bits from IN and place the bytes at offset BITS in the result. */
+static inline uint64_t load_64_bits(const unsigned char *in, unsigned bits) {
+    uint64_t chunk;
+    memcpy(&chunk, in, sizeof(chunk));
 
+#if BYTE_ORDER == LITTLE_ENDIAN
+    return chunk << bits;
+#else
+    return ZSWAP64(chunk) << bits;
+#endif
+}
 /*
    Decode literal, length, and distance codes and write out the resulting
    literal and match bytes until either not enough input or output is
@@ -60,17 +62,15 @@
       requires strm->avail_out >= 258 for each loop to avoid checking for
       output space.
  */
-void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
+void Z_INTERNAL zng_inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
     /* start: inflate()'s starting value for strm->avail_out */
     struct inflate_state *state;
-    const unsigned char *in;    /* local strm->next_in */
+    z_const unsigned char *in;  /* local strm->next_in */
     const unsigned char *last;  /* have enough input while in < last */
     unsigned char *out;         /* local strm->next_out */
     unsigned char *beg;         /* inflate()'s initial strm->next_out */
     unsigned char *end;         /* while out < end, enough space available */
-#ifdef INFFAST_CHUNKSIZE
     unsigned char *safe;        /* can use chunkcopy provided out < safe */
-#endif
 #ifdef INFLATE_STRICT
     unsigned dmax;              /* maximum distance from zlib header */
 #endif
@@ -136,10 +136,7 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
     out = strm->next_out;
     beg = out - (start - strm->avail_out);
     end = out + (strm->avail_out - (INFLATE_FAST_MIN_LEFT - 1));
-
-#ifdef INFFAST_CHUNKSIZE
     safe = out + strm->avail_out;
-#endif
 #ifdef INFLATE_STRICT
     dmax = state->dmax;
 #endif
@@ -174,15 +171,13 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
         } else if (op & 16) {                     /* length base */
             len = here->val;
             op &= 15;                           /* number of extra bits */
-            if (op) {
-                if (bits < op) {
-                    hold |= load_64_bits(in, bits);
-                    in += 6;
-                    bits += 48;
-                }
-                len += BITS(op);
-                DROPBITS(op);
+            if (bits < op) {
+                hold |= load_64_bits(in, bits);
+                in += 6;
+                bits += 48;
             }
+            len += BITS(op);
+            DROPBITS(op);
             Tracevv((stderr, "inflate:         length %u\n", len));
             if (bits < 15) {
                 hold |= load_64_bits(in, bits);
@@ -204,8 +199,7 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
                 dist += BITS(op);
 #ifdef INFLATE_STRICT
                 if (dist > dmax) {
-                    strm->msg = (char *)"invalid distance too far back";
-                    state->mode = BAD;
+                    SET_BAD("invalid distance too far back");
                     break;
                 }
 #endif
@@ -216,8 +210,7 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
                     op = dist - op;             /* distance back in window */
                     if (op > whave) {
                         if (state->sane) {
-                            strm->msg = (char *)"invalid distance too far back";
-                            state->mode = BAD;
+                            SET_BAD("invalid distance too far back");
                             break;
                         }
 #ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
@@ -240,7 +233,6 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
                         }
 #endif
                     }
-#ifdef INFFAST_CHUNKSIZE
                     from = window;
                     if (wnext == 0) {           /* very common case */
                         from += wsize - op;
@@ -251,7 +243,7 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
                         from += wsize - op;
                         if (op < len) {         /* some from end of window */
                             len -= op;
-                            out = chunkcopysafe(out, from, op, safe);
+                            out = functable.chunkcopy_safe(out, from, op, safe);
                             from = window;      /* more from start of window */
                             op = wnext;
                             /* This (rare) case can create a situation where
@@ -261,81 +253,28 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
                     }
                     if (op < len) {             /* still need some from output */
                         len -= op;
-                        out = chunkcopysafe(out, from, op, safe);
-                        out = chunkunroll(out, &dist, &len);
-                        out = chunkcopysafe(out, out - dist, len, safe);
+                        out = functable.chunkcopy_safe(out, from, op, safe);
+                        out = functable.chunkunroll(out, &dist, &len);
+                        out = functable.chunkcopy_safe(out, out - dist, len, safe);
                     } else {
-                        out = chunkcopysafe(out, from, len, safe);
+                        out = functable.chunkcopy_safe(out, from, len, safe);
                     }
-#else
-                    from = window;
-                    if (wnext == 0) {           /* very common case */
-                        from += wsize - op;
-                        if (op < len) {         /* some from window */
-                            len -= op;
-                            do {
-                                *out++ = *from++;
-                            } while (--op);
-                            from = out - dist;  /* rest from output */
-                        }
-                    } else if (wnext < op) {      /* wrap around window */
-                        from += wsize + wnext - op;
-                        op -= wnext;
-                        if (op < len) {         /* some from end of window */
-                            len -= op;
-                            do {
-                                *out++ = *from++;
-                            } while (--op);
-                            from = window;
-                            if (wnext < len) {  /* some from start of window */
-                                op = wnext;
-                                len -= op;
-                                do {
-                                    *out++ = *from++;
-                                } while (--op);
-                                from = out - dist;      /* rest from output */
-                            }
-                        }
-                    } else {                      /* contiguous in window */
-                        from += wnext - op;
-                        if (op < len) {         /* some from window */
-                            len -= op;
-                            do {
-                                *out++ = *from++;
-                            } while (--op);
-                            from = out - dist;  /* rest from output */
-                        }
-                    }
-
-                    out = chunk_copy(out, from, (int) (out - from), len);
-#endif
                 } else {
-#ifdef INFFAST_CHUNKSIZE
-                    /* Whole reference is in range of current output.  No
-                       range checks are necessary because we start with room
-                       for at least 258 bytes of output, so unroll and roundoff
-                       operations can write beyond `out+len` so long as they
-                       stay within 258 bytes of `out`.
+                    /* Whole reference is in range of current output.  No range checks are
+                       necessary because we start with room for at least 258 bytes of output,
+                       so unroll and roundoff operations can write beyond `out+len` so long
+                       as they stay within 258 bytes of `out`.
                     */
-                    if (dist >= len || dist >= INFFAST_CHUNKSIZE)
-                        out = chunkcopy(out, out - dist, len);
+                    if (dist >= len || dist >= state->chunksize)
+                        out = functable.chunkcopy(out, out - dist, len);
                     else
-                        out = chunkmemset(out, dist, len);
-#else
-                    if (len < sizeof(uint64_t))
-                      out = set_bytes(out, out - dist, dist, len);
-                    else if (dist == 1)
-                      out = byte_memset(out, len);
-                    else
-                      out = chunk_memset(out, out - dist, dist, len);
-#endif
+                        out = functable.chunkmemset(out, dist, len);
                 }
             } else if ((op & 64) == 0) {          /* 2nd level distance code */
                 here = dcode + here->val + BITS(op);
                 goto dodist;
             } else {
-                strm->msg = (char *)"invalid distance code";
-                state->mode = BAD;
+                SET_BAD("invalid distance code");
                 break;
             }
         } else if ((op & 64) == 0) {              /* 2nd level length code */
@@ -346,8 +285,7 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
             state->mode = TYPE;
             break;
         } else {
-            strm->msg = (char *)"invalid literal/length code";
-            state->mode = BAD;
+            SET_BAD("invalid literal/length code");
             break;
         }
     } while (in < last && out < end);
@@ -361,12 +299,10 @@ void ZLIB_INTERNAL inflate_fast(PREFIX3(stream) *strm, unsigned long start) {
     /* update state and return */
     strm->next_in = in;
     strm->next_out = out;
-    strm->avail_in =
-        (unsigned)(in < last ? (INFLATE_FAST_MIN_HAVE - 1) + (last - in)
-                             : (INFLATE_FAST_MIN_HAVE - 1) - (in - last));
-    strm->avail_out =
-        (unsigned)(out < end ? (INFLATE_FAST_MIN_LEFT - 1) + (end - out)
-                             : (INFLATE_FAST_MIN_LEFT - 1) - (out - end));
+    strm->avail_in = (unsigned)(in < last ? (INFLATE_FAST_MIN_HAVE - 1) + (last - in)
+                                          : (INFLATE_FAST_MIN_HAVE - 1) - (in - last));
+    strm->avail_out = (unsigned)(out < end ? (INFLATE_FAST_MIN_LEFT - 1) + (end - out)
+                                           : (INFLATE_FAST_MIN_LEFT - 1) - (out - end));
 
     Assert(bits <= 32, "Remaining bits greater than 32");
     state->hold = (uint32_t)hold;

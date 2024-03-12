@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_ITEMS_REPOSITORY_H
 #define EQEMU_ITEMS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_items_repository.h"
 
 class ItemsRepository: public BaseItemsRepository {
@@ -64,7 +44,35 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<int32> GetItemIDsBySearchCriteria(
+		Database& db,
+		std::string search_string,
+		int query_limit = 0
+	)
+	{
+		auto query = fmt::format(
+			"SELECT `id` FROM {} WHERE LOWER(`name`) LIKE '%%{}%%' ORDER BY id ASC",
+			TableName(),
+			Strings::Escape(search_string)
+		);
 
+		if (query_limit >= 1) {
+			query += fmt::format(" LIMIT {}", query_limit);
+		}
+
+		std::vector<int32> item_id_list;
+
+		auto results = db.QueryDatabase(query);
+		if (!results.Success() || !results.RowCount()) {
+			return item_id_list;
+		}
+
+		for (auto row : results) {
+			item_id_list.emplace_back(Strings::ToInt(row[0]));
+		}
+
+		return item_id_list;
+	}
 };
 
 #endif //EQEMU_ITEMS_REPOSITORY_H

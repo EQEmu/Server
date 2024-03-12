@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eqemu_logsys.h"
 #include "../common/servertalk.h"
 #include "../common/eqemu_config.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "worldserver.h"
 #include "zone_launch.h"
 
@@ -29,7 +29,7 @@ WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char 
 	m_config(config),
 	m_zones(zones)
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey));
+	m_connection = std::make_unique<EQ::Net::ServertalkClient>(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey);
 	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
 		OnConnected();
 	});

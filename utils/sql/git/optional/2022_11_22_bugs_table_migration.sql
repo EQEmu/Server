@@ -1,0 +1,1 @@
+INSERT INTO bug_reports (zone, character_name, ui_path, pos_x, pos_y, pos_z, category_name, optional_info_mask, target_name, bug_report, report_datetime, bug_status) SELECT zone, `name`, ui, x, y, z, `type`, flag, target, bug, `date`, status FROM bugs;

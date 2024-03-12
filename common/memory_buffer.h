@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -41,7 +41,7 @@ namespace EQ
 		MemoryBuffer& operator+=(const MemoryBuffer &rhs);
 		friend MemoryBuffer operator+(MemoryBuffer lhs, const MemoryBuffer& rhs) { return lhs += rhs; }
 		~MemoryBuffer();
-		
+
 		uchar& operator[](size_t pos);
 		const uchar& operator[](size_t pos) const;
 
@@ -64,20 +64,20 @@ namespace EQ
 		size_t Size() const;
 		size_t Capacity();
 		size_t Capacity() const;
-		
+
 		void Resize(size_t sz);
 		void Clear();
 		void Zero();
 
 		template<typename T>
 		void Write(T val) {
-			static_assert(std::is_pod<T>::value, "MemoryBuffer::Write<T>(T val) only works on pod and string types.");
+			static_assert(std::is_standard_layout<T>::value, "MemoryBuffer::Write<T>(T val) only works on pod and string types.");
 			Write((const char*)&val, sizeof(T));
 		}
 
 		template<typename T>
 		T Read() {
-			static_assert(std::is_pod<T>::value, "MemoryBuffer::Read<T>() only works on pod and string types.");
+			static_assert(std::is_standard_layout<T>::value, "MemoryBuffer::Read<T>() only works on pod and string types.");
 			T temp;
 			Read((uchar*)&temp, sizeof(T));
 			return temp;
@@ -102,7 +102,7 @@ namespace EQ
 			read_pos_ += len + 1;
 			return ret;
 		}
-	
+
 		void Write(const char *val, size_t len);
 		void Read(uchar *buf, size_t len);
 		void Read(char *str);
@@ -113,7 +113,7 @@ namespace EQ
 		inline size_t GetReadPosition() { return read_pos_; }
 		inline void SetReadPosition(size_t rp) { read_pos_ = rp; }
 		inline void ReadSkipBytes(size_t skip) { read_pos_ += skip; }
-		
+
 	private:
 		uchar *buffer_;
 		size_t size_;

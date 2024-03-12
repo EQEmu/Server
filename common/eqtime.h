@@ -18,7 +18,7 @@ public:
 	//Constructor/destructor
 	EQTime(TimeOfDay_Struct start_eq, time_t start_real);
 	EQTime();
-	~EQTime();
+	~EQTime() = default;
 
 	//Get functions
 	int GetCurrentEQTimeOfDay( TimeOfDay_Struct *eqTimeOfDay ) { return(GetCurrentEQTimeOfDay(time(nullptr), eqTimeOfDay)); }
@@ -28,6 +28,9 @@ public:
 	uint32 getEQTimeZone() { return timezone; }
 	uint32 getEQTimeZoneHr() { return timezone/60; }
 	uint32 getEQTimeZoneMin() { return timezone%60; }
+	bool IsDayTime();
+	bool IsNightTime();
+	bool IsInbetweenTime(uint8 min_time, uint8 max_time);
 
 	//Set functions
 	int SetCurrentEQTimeOfDay(TimeOfDay_Struct start_eq, time_t start_real);

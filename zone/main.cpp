@@ -22,28 +22,21 @@
 #define PLATFORM_ZONE 1
 
 #include "../common/global_define.h"
-#include "../common/features.h"
-#include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
-#include "../common/version.h"
-#include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
 #include "../common/profanity_manager.h"
-#include "../common/misc_functions.h"
-#include "../common/string_util.h"
-#include "../common/platform.h"
+#include "../common/strings.h"
 #include "../common/crash.h"
-#include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/misc.h"
 
 #include "api_service.h"
 #include "zone_config.h"
@@ -52,37 +45,20 @@
 #include "zone.h"
 #include "queryserv.h"
 #include "command.h"
-#ifdef BOTS
 #include "bot_command.h"
-#endif
 #include "zonedb.h"
-#include "zone_store.h"
-#include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
-#include "tasks.h"
+#include "task_manager.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
 #include "lua_parser.h"
 #include "questmgr.h"
 #include "npc_scale_manager.h"
 
-#include "../common/event/event_loop.h"
-#include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
-#include "../common/net/servertalk_server.h"
-#include "../common/content/world_content_service.h"
-#include "../common/repositories/content_flags_repository.h"
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <stdlib.h>
-#include <stdio.h>
 #include <signal.h>
-#include <time.h>
-#include <ctime>
-#include <thread>
 #include <chrono>
 
 #ifdef _CRTDBG_MAP_ALLOC
@@ -91,12 +67,10 @@
 #endif
 
 #ifdef _WINDOWS
-#include <conio.h>
-#include <process.h>
 #else
+
 #include <pthread.h>
 #include "../common/unix.h"
-#include "zone_store.h"
 
 #endif
 
@@ -107,36 +81,58 @@ volatile bool RunLoops = true;
 
 extern volatile bool is_zone_loaded;
 
-EntityList entity_list;
+#include "zone_event_scheduler.h"
+#include "../common/file.h"
+#include "../common/events/player_event_logs.h"
+#include "../common/path_manager.h"
+#include "../common/database/database_update.h"
+#include "zone_event_scheduler.h"
+#include "zone_cli.h"
+
+EntityList  entity_list;
 WorldServer worldserver;
-ZoneStore zone_store;
-uint32 numclients = 0;
-char errorname[32];
-extern Zone* zone;
-npcDecayTimes_Struct npcCorpseDecayTimes[100];
-TitleManager title_manager;
-QueryServ *QServ = 0;
-TaskManager *taskmanager = 0;
-NpcScaleManager *npc_scale_manager;
-QuestParserCollection *parse = 0;
-EQEmuLogSys LogSys;
-WorldContentService content_service;
+ZoneStore   zone_store;
+uint32      numclients = 0;
+char        errorname[32];
+extern Zone *zone;
+
+npcDecayTimes_Struct  npcCorpseDecayTimes[100];
+TitleManager          title_manager;
+QueryServ             *QServ        = 0;
+TaskManager           *task_manager = 0;
+NpcScaleManager       *npc_scale_manager;
+QuestParserCollection *parse        = 0;
+EQEmuLogSys           LogSys;
+ZoneEventScheduler    event_scheduler;
+WorldContentService   content_service;
+PathManager           path;
+PlayerEventLogs       player_event_logs;
+DatabaseUpdate        database_update;
+
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
 double frame_time = 0.0;
 
 void Shutdown();
-void UpdateWindowTitle(char* iNewTitle);
+void UpdateWindowTitle(char *iNewTitle);
 void CatchSignal(int sig_num);
 
 extern void MapOpcodes();
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv)
+{
 	RegisterExecutablePlatform(ExePlatformZone);
 	LogSys.LoadLogSettingsDefaults();
 
 	set_exception_handler();
+
+	// silence logging if we ran a command
+	if (ZoneCLI::RanConsoleCommand(argc, argv)) {
+		LogSys.SilenceConsoleLogging();
+	}
+
+	path.LoadPaths();
 
 #ifdef USE_MAP_MMFS
 	if (argc == 3 && strcasecmp(argv[1], "convert_map") == 0) {
@@ -160,103 +156,107 @@ int main(int argc, char** argv) {
 
 	QServ = new QueryServ;
 
-	LogInfo("Loading server configuration..");
+	LogInfo("Loading server configuration");
 	if (!ZoneConfig::LoadConfig()) {
 		LogError("Loading server configuration failed");
 		return 1;
 	}
 	Config = ZoneConfig::get();
 
-	const char *zone_name;
-	uint32 instance_id = 0;
+	// static zone booting
+	const char  *zone_name;
+	uint32      instance_id = 0;
 	std::string z_name;
-	if (argc == 4) {
-		instance_id = atoi(argv[3]);
-		worldserver.SetLauncherName(argv[2]);
-		auto zone_port = SplitString(argv[1], ':');
+	if (!ZoneCLI::RanSidecarCommand(argc, argv)) {
+		if (argc == 4) {
+			instance_id = Strings::ToInt(argv[3]);
+			worldserver.SetLauncherName(argv[2]);
+			auto zone_port = Strings::Split(argv[1], ':');
 
-		if (!zone_port.empty()) {
-			z_name = zone_port[0];
+			if (!zone_port.empty()) {
+				z_name = zone_port[0];
+			}
+
+			if (zone_port.size() > 1) {
+				std::string p_name = zone_port[1];
+				Config->SetZonePort(Strings::ToInt(p_name));
+			}
+
+			worldserver.SetLaunchedName(z_name.c_str());
+			if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
+				zone_name = ".";
+			}
+			else {
+				zone_name = z_name.c_str();
+			}
 		}
+		else if (argc == 3) {
+			worldserver.SetLauncherName(argv[2]);
+			auto zone_port = Strings::Split(argv[1], ':');
 
-		if (zone_port.size() > 1) {
-			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
+			if (!zone_port.empty()) {
+				z_name = zone_port[0];
+			}
+
+			if (zone_port.size() > 1) {
+				std::string p_name = zone_port[1];
+				Config->SetZonePort(Strings::ToInt(p_name));
+			}
+
+			worldserver.SetLaunchedName(z_name.c_str());
+			if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
+				zone_name = ".";
+			}
+			else {
+				zone_name = z_name.c_str();
+			}
 		}
+		else if (argc == 2) {
+			worldserver.SetLauncherName("NONE");
+			auto zone_port = Strings::Split(argv[1], ':');
 
-		worldserver.SetLaunchedName(z_name.c_str());
-		if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
-			zone_name = ".";
+			if (!zone_port.empty()) {
+				z_name = zone_port[0];
+			}
+
+			if (zone_port.size() > 1) {
+				std::string p_name = zone_port[1];
+				Config->SetZonePort(Strings::ToInt(p_name));
+			}
+
+			worldserver.SetLaunchedName(z_name.c_str());
+			if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
+				zone_name = ".";
+			}
+			else {
+				zone_name = z_name.c_str();
+			}
 		}
 		else {
-			zone_name = z_name.c_str();
-		}
-	}
-	else if (argc == 3) {
-		worldserver.SetLauncherName(argv[2]);
-		auto zone_port = SplitString(argv[1], ':');
-
-		if (!zone_port.empty()) {
-			z_name = zone_port[0];
-		}
-
-		if (zone_port.size() > 1) {
-			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
-		}
-
-		worldserver.SetLaunchedName(z_name.c_str());
-		if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
 			zone_name = ".";
-		}
-		else {
-			zone_name = z_name.c_str();
-		}
-	}
-	else if (argc == 2) {
-		worldserver.SetLauncherName("NONE");
-		auto zone_port = SplitString(argv[1], ':');
-
-		if (!zone_port.empty()) {
-			z_name = zone_port[0];
-		}
-
-		if (zone_port.size() > 1) {
-			std::string p_name = zone_port[1];
-			Config->SetZonePort(atoi(p_name.c_str()));
-		}
-
-		worldserver.SetLaunchedName(z_name.c_str());
-		if (strncmp(z_name.c_str(), "dynamic_", 8) == 0) {
-			zone_name = ".";
-		}
-		else {
-			zone_name = z_name.c_str();
+			worldserver.SetLaunchedName(".");
+			worldserver.SetLauncherName("NONE");
 		}
 	}
-	else {
-		zone_name = ".";
-		worldserver.SetLaunchedName(".");
-		worldserver.SetLauncherName("NONE");
-	}
 
-	LogInfo("Connecting to MySQL... ");
+	auto mutex = new Mutex;
+
+	LogInfo("Connecting to MySQL");
 	if (!database.Connect(
 		Config->DatabaseHost.c_str(),
 		Config->DatabaseUsername.c_str(),
 		Config->DatabasePassword.c_str(),
 		Config->DatabaseDB.c_str(),
-		Config->DatabasePort)) {
+		Config->DatabasePort
+	)) {
 		LogError("Cannot continue without a database connection");
 		return 1;
 	}
 
-	/**
-	 * Multi-tenancy: Content Database
-	 */
+	// Multi-tenancy: Content Database
 	if (!Config->ContentDbHost.empty()) {
 		if (!content_db.Connect(
-			Config->ContentDbHost.c_str() ,
+			Config->ContentDbHost.c_str(),
 			Config->ContentDbUsername.c_str(),
 			Config->ContentDbPassword.c_str(),
 			Config->ContentDbName.c_str(),
@@ -267,29 +267,65 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
+		// when database and content_db share the same underlying mysql connection
+		// it needs to be protected by a shared mutex otherwise we produce concurrency issues
+		// when database actions are occurring in different threads
+		database.SetMutex(mutex);
+		content_db.SetMutex(mutex);
 	}
 
-	/* Register Log System and Settings */
-	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	//rules:
+	{
+		std::string tmp;
+		if (database.GetVariable("RuleSet", tmp)) {
+			LogInfo("Loading rule set [{}]", tmp.c_str());
+			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
+				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
+			}
+		}
+		else {
+			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+				LogInfo("No rule set configured, using default rules");
+			}
+		}
+
+		EQ::InitializeDynamicLookups();
+	}
+
+	// command handler
+	if (ZoneCLI::RanConsoleCommand(argc, argv) && !ZoneCLI::RanSidecarCommand(argc, argv)) {
+		LogSys.EnableConsoleLogging();
+		ZoneCLI::CommandHandler(argc, argv);
+	}
+
+	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
+		->LoadLogDatabaseSettings()
+		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
+		->StartFileLogs();
+
+	player_event_logs.SetDatabase(&database)->Init();
+
+	const auto c = EQEmuConfig::get();
+	if (c->auto_database_updates) {
+		if (database_update.SetDatabase(&database)->HasPendingUpdates()) {
+			LogWarning("Database is not up to date [world] needs to be ran to apply updates, shutting down in 5 seconds");
+			std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+			LogInfo("Exiting due to pending database updates");
+			std::exit(0);
+		}
+	}
 
 	/* Guilds */
-	guild_mgr.SetDatabase(&database);
+	guild_mgr.SetDatabase(&database)->SetContentDatabase(&content_db);
 	GuildBanks = nullptr;
-
-	/**
-	 * NPC Scale Manager
-	 */
-	npc_scale_manager = new NpcScaleManager;
-	npc_scale_manager->LoadScaleData();
 
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-	LogInfo("CURRENT_VERSION: {}", CURRENT_VERSION);
+	LogInfo("CURRENT_VERSION [{}]", CURRENT_VERSION);
 
 	/*
 	* Setup nice signal handlers
@@ -309,10 +345,8 @@ int main(int argc, char** argv) {
 	}
 #endif
 
-	LogInfo("Mapping Incoming Opcodes");
 	MapOpcodes();
 
-	LogInfo("Loading Variables");
 	database.LoadVariables();
 
 	std::string hotfix_name;
@@ -322,113 +356,85 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	LogInfo("Loading zone names");
+	zone_store.LoadZones(content_db);
 
-	zone_store.LoadZones();
+	if (zone_store.GetZones().empty()) {
+		LogError("Failed to load zones data, check your schema for possible errors");
+		return 1;
+	}
 
-	LogInfo("Loading items");
+	// load these here for now until spells and items can be truly repointed to "content_db"
+	database.SetSharedItemsCount(content_db.GetItemsCount());
+	database.SetSharedSpellsCount(content_db.GetSpellsCount());
+
 	if (!database.LoadItems(hotfix_name)) {
 		LogError("Loading items failed!");
 		LogError("Failed. But ignoring error and going on..");
 	}
 
-	LogInfo("Loading npc faction lists");
-	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
-		LogError("Loading npcs faction lists failed!");
-		return 1;
-	}
-	LogInfo("Loading loot tables");
-	if (!database.LoadLoot(hotfix_name)) {
-		LogError("Loading loot failed!");
-		return 1;
-	}
-	LogInfo("Loading skill caps");
-	if (!database.LoadSkillCaps(std::string(hotfix_name))) {
+	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 		LogError("Loading skill caps failed!");
 		return 1;
 	}
-
-	LogInfo("Loading spells");
 	if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 		LogError("Loading spells failed!");
 		return 1;
 	}
 
-	LogInfo("Loading base data");
-	if (!database.LoadBaseData(hotfix_name)) {
-		LogError("Loading base data failed!");
-		return 1;
-	}
 
-	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
-
-	LogInfo("Loading factions");
 	content_db.LoadFactionData();
-
-	LogInfo("Loading titles");
 	title_manager.LoadTitles();
-
-	LogInfo("Loading tributes");
 	content_db.LoadTributes();
 
-	LogInfo("Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
-	LogInfo("Loading profanity list");
-	if (!EQ::ProfanityManager::LoadProfanityList(&database))
+	if (!EQ::ProfanityManager::LoadProfanityList(&database)) {
 		LogError("Loading profanity list failed!");
-
-	LogInfo("Loading commands");
-	int retval = command_init();
-	if (retval < 0)
-		LogError("Command loading failed");
-	else
-		LogInfo("{} commands loaded", retval);
-
-	//rules:
-	{
-		std::string tmp;
-		if (database.GetVariable("RuleSet", tmp)) {
-			LogInfo("Loading rule set [{}]", tmp.c_str());
-			if (!RuleManager::Instance()->LoadRules(&database, tmp.c_str(), false)) {
-				LogError("Failed to load ruleset [{}], falling back to defaults", tmp.c_str());
-			}
-		}
-		else {
-			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
-				LogInfo("No rule set configured, using default rules");
-			}
-			else {
-				LogInfo("Loaded default rule set 'default'");
-			}
-		}
-
-		EQ::InitializeDynamicLookups();
-		LogInfo("Initialized dynamic dictionary entries");
 	}
 
-	content_service.SetExpansionContext();
+	int retval = command_init();
+	if (retval < 0) {
+		LogError("Command loading failed");
+	}
+	else {
+		LogInfo("Loaded [{}] commands loaded", Strings::Commify(std::to_string(retval)));
+	}
 
-	ZoneStore::LoadContentFlags();
+	content_service.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
+		->SetExpansionContext()
+		->ReloadContentFlags();
 
-#ifdef BOTS
-	LogInfo("Loading bot commands");
-	int botretval = bot_command_init();
-	if (botretval<0)
-		LogError("Bot command loading failed");
-	else
-		LogInfo("[{}] bot commands loaded", botretval);
+	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
 
-	LogInfo("Loading bot spell casting chances");
-	if (!database.botdb.LoadBotSpellCastingChances())
-		LogError("Bot spell casting chances loading failed");
-#endif
+	EQ::SayLinkEngine::LoadCachedSaylinks();
+
+	if (RuleB(Bots, Enabled) && database.DoesTableExist("bot_command_settings")) {
+		LogInfo("Loading bot commands");
+		int botretval = bot_command_init();
+		if (botretval < 0) {
+			LogError("Bot command loading failed");
+		}
+		else {
+			LogInfo("[{}] bot commands loaded", botretval);
+		}
+
+		LogInfo("Loading bot spell casting chances");
+		if (!database.botdb.LoadBotSpellCastingChances()) {
+			LogError("Bot spell casting chances loading failed");
+		}
+	}
+
+	/**
+	 * NPC Scale Manager
+	 */
+	npc_scale_manager = new NpcScaleManager;
+	npc_scale_manager->LoadScaleData();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		Log(Logs::General, Logs::Tasks, "[INIT] Loading Tasks");
-		taskmanager = new TaskManager;
-		taskmanager->LoadTasks();
+		task_manager = new TaskManager;
+		task_manager->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -450,6 +456,12 @@ int main(int argc, char** argv) {
 	parse->ReloadQuests();
 
 	worldserver.Connect();
+	worldserver.SetScheduler(&event_scheduler);
+
+	// sidecar command handler
+	if (ZoneCLI::RanConsoleCommand(argc, argv) && ZoneCLI::RanSidecarCommand(argc, argv)) {
+		ZoneCLI::CommandHandler(argc, argv);
+	}
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 #ifdef EQPROFILE
@@ -482,13 +494,13 @@ int main(int argc, char** argv) {
 
 	Timer quest_timers(100);
 	UpdateWindowTitle(nullptr);
-	std::shared_ptr<EQStreamInterface> eqss;
-	EQStreamInterface *eqsi;
-	std::unique_ptr<EQ::Net::EQStreamManager> eqsm;
+	std::shared_ptr<EQStreamInterface>                 eqss;
+	EQStreamInterface                                  *eqsi;
+	std::unique_ptr<EQ::Net::EQStreamManager>          eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
-	std::unique_ptr<EQ::Net::WebsocketServer> ws_server;
+	std::unique_ptr<EQ::Net::WebsocketServer>          ws_server;
 
-	auto loop_fn = [&](EQ::Timer* t) {
+	auto loop_fn = [&](EQ::Timer *t) {
 		//Advance the timer to our current point in time
 		Timer::SetCurrentTime();
 
@@ -503,8 +515,8 @@ int main(int argc, char** argv) {
 		 * Websocket server
 		 */
 		if (!websocker_server_opened && Config->ZonePort != 0) {
-			LogInfo("Websocket Server listener started ([{}]:[{}])", Config->TelnetIP.c_str(), Config->ZonePort);
-			ws_server.reset(new EQ::Net::WebsocketServer(Config->TelnetIP, Config->ZonePort));
+			LogInfo("Websocket Server listener started on address [{}] port [{}]", Config->TelnetIP.c_str(), Config->ZonePort);
+			ws_server = std::make_unique<EQ::Net::WebsocketServer>(Config->TelnetIP, Config->ZonePort);
 			RegisterApiService(ws_server);
 			websocker_server_opened = true;
 		}
@@ -513,21 +525,27 @@ int main(int argc, char** argv) {
 		 * EQStreamManager
 		 */
 		if (!eqsf_open && Config->ZonePort != 0) {
-			LogInfo("Starting EQ Network server on port {}", Config->ZonePort);
+			LogInfo("Starting EQ Network server on port [{}]", Config->ZonePort);
 
 			EQStreamManagerInterfaceOptions opts(Config->ZonePort, false, RuleB(Network, CompressZoneStream));
-			opts.daybreak_options.resend_delay_ms = RuleI(Network, ResendDelayBaseMS);
+			opts.daybreak_options.resend_delay_ms     = RuleI(Network, ResendDelayBaseMS);
 			opts.daybreak_options.resend_delay_factor = RuleR(Network, ResendDelayFactor);
-			opts.daybreak_options.resend_delay_min = RuleI(Network, ResendDelayMinMS);
-			opts.daybreak_options.resend_delay_max = RuleI(Network, ResendDelayMaxMS);
-			opts.daybreak_options.outgoing_data_rate = RuleR(Network, ClientDataRate);
-			eqsm.reset(new EQ::Net::EQStreamManager(opts));
+			opts.daybreak_options.resend_delay_min    = RuleI(Network, ResendDelayMinMS);
+			opts.daybreak_options.resend_delay_max    = RuleI(Network, ResendDelayMaxMS);
+			opts.daybreak_options.outgoing_data_rate  = RuleR(Network, ClientDataRate);
+			eqsm      = std::make_unique<EQ::Net::EQStreamManager>(opts);
 			eqsf_open = true;
 
-			eqsm->OnNewConnection([&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
-				stream_identifier.AddStream(stream);
-				LogF(Logs::Detail, Logs::WorldServer, "New connection from IP {0}:{1}", stream->GetRemoteIP(), ntohs(stream->GetRemotePort()));
-			});
+			eqsm->OnNewConnection(
+				[&stream_identifier](std::shared_ptr<EQ::Net::EQStream> stream) {
+					stream_identifier.AddStream(stream);
+					LogInfo(
+						"New connection from address [{}] port [{}]",
+						long2ip(stream->GetRemoteIP()),
+						ntohs(stream->GetRemotePort())
+					);
+				}
+			);
 		}
 
 		//give the stream identifier a chance to do its work....
@@ -536,7 +554,7 @@ int main(int argc, char** argv) {
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr	in;
+			struct in_addr in;
 			in.s_addr = eqsi->GetRemoteIP();
 			LogInfo("New client from [{}]:[{}]", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 			auto client = new Client(eqsi);
@@ -548,7 +566,15 @@ int main(int argc, char** argv) {
 		}
 		else {
 			if (worldwasconnected && is_zone_loaded) {
-				entity_list.ChannelMessageFromWorld(0, 0, ChatChannel_Broadcast, 0, 0, 100, "WARNING: World server connection lost");
+				entity_list.ChannelMessageFromWorld(
+					0,
+					0,
+					ChatChannel_Broadcast,
+					0,
+					0,
+					100,
+					"WARNING: World server connection lost"
+				);
 				worldwasconnected = false;
 			}
 		}
@@ -561,11 +587,11 @@ int main(int argc, char** argv) {
 				entity_list.CorpseProcess();
 				entity_list.TrapProcess();
 				entity_list.RaidProcess();
-
 				entity_list.Process();
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
+				event_scheduler.Process(zone, &content_service);
 
 				if (zone) {
 					if (!zone->Process()) {
@@ -604,17 +630,20 @@ int main(int argc, char** argv) {
 
 	safe_delete(Config);
 
-	if (zone != 0)
+	if (zone != 0) {
 		Zone::Shutdown(true);
+	}
 	//Fix for Linux world server problem.
-	safe_delete(taskmanager);
+	safe_delete(task_manager);
+	safe_delete(npc_scale_manager);
 	command_deinit();
-#ifdef BOTS
 	bot_command_deinit();
-#endif
 	safe_delete(parse);
 	LogInfo("Proper zone shutdown complete.");
 	LogSys.CloseFileLogs();
+
+	safe_delete(mutex);
+
 	return 0;
 }
 
@@ -626,7 +655,8 @@ void Shutdown()
 	EQ::EventLoop::Get().Shutdown();
 }
 
-void CatchSignal(int sig_num) {
+void CatchSignal(int sig_num)
+{
 #ifdef _WINDOWS
 	LogInfo("Recieved signal: [{}]", sig_num);
 #endif
@@ -634,7 +664,8 @@ void CatchSignal(int sig_num) {
 }
 
 /* Update Window Title with relevant information */
-void UpdateWindowTitle(char* iNewTitle) {
+void UpdateWindowTitle(char *iNewTitle)
+{
 #ifdef _WINDOWS
 	char tmp[500];
 	if (iNewTitle) {

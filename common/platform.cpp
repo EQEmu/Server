@@ -22,51 +22,58 @@
 
 EQEmuExePlatform exe_platform = ExePlatformNone;
 
-void RegisterExecutablePlatform(EQEmuExePlatform p) {
+void RegisterExecutablePlatform(EQEmuExePlatform p)
+{
 	exe_platform = p;
 }
 
-const EQEmuExePlatform& GetExecutablePlatform() {
+const EQEmuExePlatform &GetExecutablePlatform()
+{
 	return exe_platform;
 }
 
-/**
- * @return
- */
-int GetExecutablePlatformInt(){
+int GetExecutablePlatformInt()
+{
 	return exe_platform;
 }
 
-/**
- * Returns platform name by string
- *
- * @return
- */
+bool IsWorld()
+{
+	return exe_platform == EQEmuExePlatform::ExePlatformWorld;
+}
+
+bool IsQueryServ()
+{
+	return exe_platform == EQEmuExePlatform::ExePlatformQueryServ;
+}
+
 std::string GetPlatformName()
 {
 	switch (GetExecutablePlatformInt()) {
 		case EQEmuExePlatform::ExePlatformWorld:
-			return "WorldServer";
+			return "World";
 		case EQEmuExePlatform::ExePlatformQueryServ:
-			return "QueryServer";
+			return "QS";
 		case EQEmuExePlatform::ExePlatformZone:
-			return "ZoneServer";
+			return "Zone";
 		case EQEmuExePlatform::ExePlatformUCS:
 			return "UCS";
 		case EQEmuExePlatform::ExePlatformLogin:
-			return "LoginServer";
-		case EQEmuExePlatform::ExePlatformSocket_Server:
-			return "SocketServer";
+			return "Login";
 		case EQEmuExePlatform::ExePlatformSharedMemory:
-			return "SharedMemory";
+			return "SharedMem";
 		case EQEmuExePlatform::ExePlatformClientImport:
-			return "ClientImport";
+			return "Import";
 		case EQEmuExePlatform::ExePlatformClientExport:
-			return "ClientExport";
+			return "Export";
 		case EQEmuExePlatform::ExePlatformLaunch:
 			return "Launch";
 		case EQEmuExePlatform::ExePlatformHC:
 			return "HC";
+		case EQEmuExePlatform::ExePlatformTests:
+			return "Tests";
+		case EQEmuExePlatform::ExePlatformZoneSidecar:
+			return "ZoneSidecar";
 		default:
 			return "";
 	}

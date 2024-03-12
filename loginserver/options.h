@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_OPTIONS_H
 #define EQEMU_OPTIONS_H
 
@@ -33,9 +13,8 @@ public:
 	 */
 	Options() :
 		allow_unregistered(true),
-		trace(false),
-		dump_in_packets(false),
-		dump_out_packets(false),
+		display_expansions(false),
+		max_expansions_mask(0),
 		encryption_mode(5),
 		reject_duplicate_servers(false),
 		allow_password_login(true),
@@ -48,49 +27,17 @@ public:
 	inline void AllowUnregistered(bool b) { allow_unregistered = b; }
 
 	/**
+	* Returns the value of expansion display settings.
+	*/
+	inline void DisplayExpansions(bool b) { display_expansions = b; }
+	inline void MaxExpansions(int i) { max_expansions_mask = i; }
+	inline bool IsDisplayExpansions() const { return display_expansions; }
+	inline int GetMaxExpansions() const { return max_expansions_mask; }
+
+	/**
 	* Returns the value of allow_unregistered.
 	*/
 	inline bool IsUnregisteredAllowed() const { return allow_unregistered; }
-
-	/**
-	* Sets trace.
-	*/
-	inline void Trace(bool b) { trace = b; }
-
-	/**
-	* Returns the value of trace.
-	*/
-	inline bool IsTraceOn() const { return trace; }
-
-	/**
-	* Sets trace.
-	*/
-	inline void WorldTrace(bool b) { world_trace = b; }
-
-	/**
-	* Returns the value of trace.
-	*/
-	inline bool IsWorldTraceOn() const { return world_trace; }
-
-	/**
-	* Sets dump_in_packets.
-	*/
-	inline void DumpInPackets(bool b) { dump_in_packets = b; }
-
-	/**
-	* Returns the value of dump_in_packets.
-	*/
-	inline bool IsDumpInPacketsOn() const { return dump_in_packets; }
-
-	/**
-	* Sets dump_out_packets.
-	*/
-	inline void DumpOutPackets(bool b) { dump_out_packets = b; }
-
-	/**
-	* Returns the value of dump_out_packets.
-	*/
-	inline bool IsDumpOutPacketsOn() const { return dump_out_packets; }
 
 	/**
 	* Sets encryption_mode.
@@ -124,31 +71,56 @@ public:
 	inline void AutoLinkAccounts(bool b) { auto_link_accounts = b; }
 	inline bool CanAutoLinkAccounts() const { return auto_link_accounts; }
 
-	inline void EQEmuLoginServerAddress(std::string v) { eqemu_loginserver_address = v; }
+	inline void EQEmuLoginServerAddress(const std::string& v) { eqemu_loginserver_address = v; }
 	inline std::string GetEQEmuLoginServerAddress() const { return eqemu_loginserver_address; }
 
-	inline void DefaultLoginServerName(std::string v) { default_loginserver_name = v; }
+	inline void DefaultLoginServerName(const std::string& v) { default_loginserver_name = v; }
 	inline std::string GetDefaultLoginServerName() const { return default_loginserver_name; }
 
 	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }
 	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
 
+	inline bool IsShowPlayerCountEnabled() const
+	{
+		return show_player_count;
+	}
+	inline void SetShowPlayerCount(bool show_player_count)
+	{
+		Options::show_player_count = show_player_count;
+	}
+	inline bool IsWorldDevTestServersListBottom() const { return world_dev_test_servers_list_bottom; }
+	inline void SetWorldDevTestServersListBottom(bool dev_test_servers_list_bottom)
+	{
+		Options::world_dev_test_servers_list_bottom = dev_test_servers_list_bottom;
+	}
+
+	inline bool IsWorldSpecialCharacterStartListBottom() const
+	{
+		return world_special_character_start_list_bottom;
+	}
+	inline void SetWorldSpecialCharacterStartListBottom(bool world_special_character_start_list_bottom)
+	{
+		Options::world_special_character_start_list_bottom = world_special_character_start_list_bottom;
+	}
+
 private:
 	bool        allow_unregistered;
-	bool        trace;
-	bool        world_trace;
-	bool        dump_in_packets;
-	bool        dump_out_packets;
+	bool        display_expansions;
 	bool        reject_duplicate_servers;
+	bool        world_dev_test_servers_list_bottom;
+	bool        world_special_character_start_list_bottom;
 	bool        allow_token_login;
 	bool        allow_password_login;
+	bool        show_player_count;
 	bool        auto_create_accounts;
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
 	int         encryption_mode;
+	int         max_expansions_mask;
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };
+
 
 #endif
 

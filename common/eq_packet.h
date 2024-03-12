@@ -80,11 +80,8 @@ public:
 
 protected:
 
-	static bool ValidateCRC(const unsigned char *buffer, int length, uint32 Key);
 	static uint32 Decompress(const unsigned char *buffer, const uint32 length, unsigned char *newbuf, uint32 newbufsize);
 	static uint32 Compress(const unsigned char *buffer, const uint32 length, unsigned char *newbuf, uint32 newbufsize);
-	static void ChatDecode(unsigned char *buffer, int size, int DecodeKey);
-	static void ChatEncode(unsigned char *buffer, int size, int EncodeKey);
 
 	uint16 GetRawOpcode() const { return(opcode); }
 

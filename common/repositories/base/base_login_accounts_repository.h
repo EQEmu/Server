@@ -1,49 +1,33 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_LOGIN_ACCOUNTS_REPOSITORY_H
 #define EQEMU_BASE_LOGIN_ACCOUNTS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseLoginAccountsRepository {
 public:
 	struct LoginAccounts {
-		int         id;
+		uint32_t    id;
 		std::string account_name;
 		std::string account_password;
 		std::string account_email;
 		std::string source_loginserver;
 		std::string last_ip_address;
-		std::string last_login_date;
-		std::string created_at;
-		std::string updated_at;
+		time_t      last_login_date;
+		time_t      created_at;
+		time_t      updated_at;
 	};
 
 	static std::string PrimaryKey()
@@ -66,24 +50,29 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"account_name",
+			"account_password",
+			"account_email",
+			"source_loginserver",
+			"last_ip_address",
+			"UNIX_TIMESTAMP(last_login_date)",
+			"UNIX_TIMESTAMP(created_at)",
+			"UNIX_TIMESTAMP(updated_at)",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -95,7 +84,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -105,28 +94,28 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static LoginAccounts NewEntity()
 	{
-		LoginAccounts entry{};
+		LoginAccounts e{};
 
-		entry.id                 = 0;
-		entry.account_name       = "";
-		entry.account_password   = "";
-		entry.account_email      = "";
-		entry.source_loginserver = "";
-		entry.last_ip_address    = "";
-		entry.last_login_date    = 0;
-		entry.created_at         = 0;
-		entry.updated_at         = current_timestamp();
+		e.id                 = 0;
+		e.account_name       = "";
+		e.account_password   = "";
+		e.account_email      = "";
+		e.source_loginserver = "";
+		e.last_ip_address    = "";
+		e.last_login_date    = 0;
+		e.created_at         = 0;
+		e.updated_at         = std::time(nullptr);
 
-		return entry;
+		return e;
 	}
 
-	static LoginAccounts GetLoginAccountsEntry(
+	static LoginAccounts GetLoginAccounts(
 		const std::vector<LoginAccounts> &login_accountss,
 		int login_accounts_id
 	)
@@ -141,42 +130,45 @@ public:
 	}
 
 	static LoginAccounts FindOne(
+		Database& db,
 		int login_accounts_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				login_accounts_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			LoginAccounts entry{};
+			LoginAccounts e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1] ? row[1] : "";
-			entry.account_password   = row[2] ? row[2] : "";
-			entry.account_email      = row[3] ? row[3] : "";
-			entry.source_loginserver = row[4] ? row[4] : "";
-			entry.last_ip_address    = row[5] ? row[5] : "";
-			entry.last_login_date    = row[6] ? row[6] : "";
-			entry.created_at         = row[7] ? row[7] : "";
-			entry.updated_at         = row[8] ? row[8] : "";
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_name       = row[1] ? row[1] : "";
+			e.account_password   = row[2] ? row[2] : "";
+			e.account_email      = row[3] ? row[3] : "";
+			e.source_loginserver = row[4] ? row[4] : "";
+			e.last_ip_address    = row[5] ? row[5] : "";
+			e.last_login_date    = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.created_at         = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.updated_at         = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int login_accounts_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -189,30 +181,31 @@ public:
 	}
 
 	static int UpdateOne(
-		LoginAccounts login_accounts_entry
+		Database& db,
+		const LoginAccounts &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(login_accounts_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(login_accounts_entry.account_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(login_accounts_entry.account_password) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(login_accounts_entry.account_email) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(login_accounts_entry.last_ip_address) + "'");
-		update_values.push_back(columns[6] + " = '" + EscapeString(login_accounts_entry.last_login_date) + "'");
-		update_values.push_back(columns[7] + " = '" + EscapeString(login_accounts_entry.created_at) + "'");
-		update_values.push_back(columns[8] + " = '" + EscapeString(login_accounts_entry.updated_at) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.account_name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.account_password) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.account_email) + "'");
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.source_loginserver) + "'");
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back(columns[8] + " = FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				login_accounts_entry.id
+				e.id
 			)
 		);
 
@@ -220,79 +213,81 @@ public:
 	}
 
 	static LoginAccounts InsertOne(
-		LoginAccounts login_accounts_entry
+		Database& db,
+		LoginAccounts e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(login_accounts_entry.id));
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_name) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_password) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.account_email) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.last_ip_address) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.last_login_date) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.created_at) + "'");
-		insert_values.push_back("'" + EscapeString(login_accounts_entry.updated_at) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.account_name) + "'");
+		v.push_back("'" + Strings::Escape(e.account_password) + "'");
+		v.push_back("'" + Strings::Escape(e.account_email) + "'");
+		v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
+		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			login_accounts_entry.id = results.LastInsertedID();
-			return login_accounts_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		login_accounts_entry = NewEntity();
+		e = NewEntity();
 
-		return login_accounts_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<LoginAccounts> login_accounts_entries
+		Database& db,
+		const std::vector<LoginAccounts> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &login_accounts_entry: login_accounts_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(login_accounts_entry.id));
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_name) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_password) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.account_email) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.source_loginserver) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.last_ip_address) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.last_login_date) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.created_at) + "'");
-			insert_values.push_back("'" + EscapeString(login_accounts_entry.updated_at) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.account_name) + "'");
+			v.push_back("'" + Strings::Escape(e.account_password) + "'");
+			v.push_back("'" + Strings::Escape(e.account_email) + "'");
+			v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
+			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<LoginAccounts> All()
+	static std::vector<LoginAccounts> All(Database& db)
 	{
 		std::vector<LoginAccounts> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -302,29 +297,29 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginAccounts entry{};
+			LoginAccounts e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1] ? row[1] : "";
-			entry.account_password   = row[2] ? row[2] : "";
-			entry.account_email      = row[3] ? row[3] : "";
-			entry.source_loginserver = row[4] ? row[4] : "";
-			entry.last_ip_address    = row[5] ? row[5] : "";
-			entry.last_login_date    = row[6] ? row[6] : "";
-			entry.created_at         = row[7] ? row[7] : "";
-			entry.updated_at         = row[8] ? row[8] : "";
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_name       = row[1] ? row[1] : "";
+			e.account_password   = row[2] ? row[2] : "";
+			e.account_email      = row[3] ? row[3] : "";
+			e.source_loginserver = row[4] ? row[4] : "";
+			e.last_ip_address    = row[5] ? row[5] : "";
+			e.last_login_date    = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.created_at         = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.updated_at         = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<LoginAccounts> GetWhere(std::string where_filter)
+	static std::vector<LoginAccounts> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<LoginAccounts> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -335,27 +330,27 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			LoginAccounts entry{};
+			LoginAccounts e{};
 
-			entry.id                 = atoi(row[0]);
-			entry.account_name       = row[1] ? row[1] : "";
-			entry.account_password   = row[2] ? row[2] : "";
-			entry.account_email      = row[3] ? row[3] : "";
-			entry.source_loginserver = row[4] ? row[4] : "";
-			entry.last_ip_address    = row[5] ? row[5] : "";
-			entry.last_login_date    = row[6] ? row[6] : "";
-			entry.created_at         = row[7] ? row[7] : "";
-			entry.updated_at         = row[8] ? row[8] : "";
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.account_name       = row[1] ? row[1] : "";
+			e.account_password   = row[2] ? row[2] : "";
+			e.account_email      = row[3] ? row[3] : "";
+			e.source_loginserver = row[4] ? row[4] : "";
+			e.last_ip_address    = row[5] ? row[5] : "";
+			e.last_login_date    = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.created_at         = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
+			e.updated_at         = strtoll(row[8] ? row[8] : "-1", nullptr, 10);
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -366,9 +361,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -378,6 +373,104 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const LoginAccounts &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.account_name) + "'");
+		v.push_back("'" + Strings::Escape(e.account_password) + "'");
+		v.push_back("'" + Strings::Escape(e.account_email) + "'");
+		v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
+		v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<LoginAccounts> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.account_name) + "'");
+			v.push_back("'" + Strings::Escape(e.account_password) + "'");
+			v.push_back("'" + Strings::Escape(e.account_email) + "'");
+			v.push_back("'" + Strings::Escape(e.source_loginserver) + "'");
+			v.push_back("'" + Strings::Escape(e.last_ip_address) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.last_login_date > 0 ? std::to_string(e.last_login_date) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.created_at > 0 ? std::to_string(e.created_at) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.updated_at > 0 ? std::to_string(e.updated_at) : "null") + ")");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_LOGIN_ACCOUNTS_REPOSITORY_H

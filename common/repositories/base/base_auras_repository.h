@@ -1,51 +1,35 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_AURAS_REPOSITORY_H
 #define EQEMU_BASE_AURAS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseAurasRepository {
 public:
 	struct Auras {
-		int         type;
-		int         npc_type;
+		int32_t     type;
+		int32_t     npc_type;
 		std::string name;
-		int         spell_id;
-		int         distance;
-		int         aura_type;
-		int         spawn_type;
-		int         movement;
-		int         duration;
-		int         icon;
-		int         cast_time;
+		int32_t     spell_id;
+		int32_t     distance;
+		int32_t     aura_type;
+		int32_t     spawn_type;
+		int32_t     movement;
+		int32_t     duration;
+		int32_t     icon;
+		int32_t     cast_time;
 	};
 
 	static std::string PrimaryKey()
@@ -70,24 +54,31 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"type",
+			"npc_type",
+			"name",
+			"spell_id",
+			"distance",
+			"aura_type",
+			"spawn_type",
+			"movement",
+			"duration",
+			"icon",
+			"cast_time",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -99,7 +90,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -109,30 +100,30 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Auras NewEntity()
 	{
-		Auras entry{};
+		Auras e{};
 
-		entry.type       = 0;
-		entry.npc_type   = 0;
-		entry.name       = "";
-		entry.spell_id   = 0;
-		entry.distance   = 60;
-		entry.aura_type  = 1;
-		entry.spawn_type = 0;
-		entry.movement   = 0;
-		entry.duration   = 5400;
-		entry.icon       = -1;
-		entry.cast_time  = 0;
+		e.type       = 0;
+		e.npc_type   = 0;
+		e.name       = "";
+		e.spell_id   = 0;
+		e.distance   = 60;
+		e.aura_type  = 1;
+		e.spawn_type = 0;
+		e.movement   = 0;
+		e.duration   = 5400;
+		e.icon       = -1;
+		e.cast_time  = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Auras GetAurasEntry(
+	static Auras GetAuras(
 		const std::vector<Auras> &aurass,
 		int auras_id
 	)
@@ -147,44 +138,47 @@ public:
 	}
 
 	static Auras FindOne(
+		Database& db,
 		int auras_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				auras_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int auras_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -197,32 +191,33 @@ public:
 	}
 
 	static int UpdateOne(
-		Auras auras_entry
+		Database& db,
+		const Auras &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(auras_entry.type));
-		update_values.push_back(columns[1] + " = " + std::to_string(auras_entry.npc_type));
-		update_values.push_back(columns[2] + " = '" + EscapeString(auras_entry.name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(auras_entry.spell_id));
-		update_values.push_back(columns[4] + " = " + std::to_string(auras_entry.distance));
-		update_values.push_back(columns[5] + " = " + std::to_string(auras_entry.aura_type));
-		update_values.push_back(columns[6] + " = " + std::to_string(auras_entry.spawn_type));
-		update_values.push_back(columns[7] + " = " + std::to_string(auras_entry.movement));
-		update_values.push_back(columns[8] + " = " + std::to_string(auras_entry.duration));
-		update_values.push_back(columns[9] + " = " + std::to_string(auras_entry.icon));
-		update_values.push_back(columns[10] + " = " + std::to_string(auras_entry.cast_time));
+		v.push_back(columns[0] + " = " + std::to_string(e.type));
+		v.push_back(columns[1] + " = " + std::to_string(e.npc_type));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.spell_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.distance));
+		v.push_back(columns[5] + " = " + std::to_string(e.aura_type));
+		v.push_back(columns[6] + " = " + std::to_string(e.spawn_type));
+		v.push_back(columns[7] + " = " + std::to_string(e.movement));
+		v.push_back(columns[8] + " = " + std::to_string(e.duration));
+		v.push_back(columns[9] + " = " + std::to_string(e.icon));
+		v.push_back(columns[10] + " = " + std::to_string(e.cast_time));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				auras_entry.type
+				e.type
 			)
 		);
 
@@ -230,83 +225,85 @@ public:
 	}
 
 	static Auras InsertOne(
-		Auras auras_entry
+		Database& db,
+		Auras e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(auras_entry.type));
-		insert_values.push_back(std::to_string(auras_entry.npc_type));
-		insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
-		insert_values.push_back(std::to_string(auras_entry.spell_id));
-		insert_values.push_back(std::to_string(auras_entry.distance));
-		insert_values.push_back(std::to_string(auras_entry.aura_type));
-		insert_values.push_back(std::to_string(auras_entry.spawn_type));
-		insert_values.push_back(std::to_string(auras_entry.movement));
-		insert_values.push_back(std::to_string(auras_entry.duration));
-		insert_values.push_back(std::to_string(auras_entry.icon));
-		insert_values.push_back(std::to_string(auras_entry.cast_time));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.npc_type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.distance));
+		v.push_back(std::to_string(e.aura_type));
+		v.push_back(std::to_string(e.spawn_type));
+		v.push_back(std::to_string(e.movement));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.cast_time));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			auras_entry.type = results.LastInsertedID();
-			return auras_entry;
+			e.type = results.LastInsertedID();
+			return e;
 		}
 
-		auras_entry = NewEntity();
+		e = NewEntity();
 
-		return auras_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Auras> auras_entries
+		Database& db,
+		const std::vector<Auras> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &auras_entry: auras_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(auras_entry.type));
-			insert_values.push_back(std::to_string(auras_entry.npc_type));
-			insert_values.push_back("'" + EscapeString(auras_entry.name) + "'");
-			insert_values.push_back(std::to_string(auras_entry.spell_id));
-			insert_values.push_back(std::to_string(auras_entry.distance));
-			insert_values.push_back(std::to_string(auras_entry.aura_type));
-			insert_values.push_back(std::to_string(auras_entry.spawn_type));
-			insert_values.push_back(std::to_string(auras_entry.movement));
-			insert_values.push_back(std::to_string(auras_entry.duration));
-			insert_values.push_back(std::to_string(auras_entry.icon));
-			insert_values.push_back(std::to_string(auras_entry.cast_time));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.npc_type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.distance));
+			v.push_back(std::to_string(e.aura_type));
+			v.push_back(std::to_string(e.spawn_type));
+			v.push_back(std::to_string(e.movement));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.cast_time));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Auras> All()
+	static std::vector<Auras> All(Database& db)
 	{
 		std::vector<Auras> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -316,31 +313,31 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Auras> GetWhere(std::string where_filter)
+	static std::vector<Auras> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Auras> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -351,29 +348,29 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Auras entry{};
+			Auras e{};
 
-			entry.type       = atoi(row[0]);
-			entry.npc_type   = atoi(row[1]);
-			entry.name       = row[2] ? row[2] : "";
-			entry.spell_id   = atoi(row[3]);
-			entry.distance   = atoi(row[4]);
-			entry.aura_type  = atoi(row[5]);
-			entry.spawn_type = atoi(row[6]);
-			entry.movement   = atoi(row[7]);
-			entry.duration   = atoi(row[8]);
-			entry.icon       = atoi(row[9]);
-			entry.cast_time  = atoi(row[10]);
+			e.type       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.npc_type   = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.name       = row[2] ? row[2] : "";
+			e.spell_id   = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.distance   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 60;
+			e.aura_type  = row[5] ? static_cast<int32_t>(atoi(row[5])) : 1;
+			e.spawn_type = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.movement   = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.duration   = row[8] ? static_cast<int32_t>(atoi(row[8])) : 5400;
+			e.icon       = row[9] ? static_cast<int32_t>(atoi(row[9])) : -1;
+			e.cast_time  = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -384,9 +381,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -396,6 +393,108 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Auras &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.npc_type));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.spell_id));
+		v.push_back(std::to_string(e.distance));
+		v.push_back(std::to_string(e.aura_type));
+		v.push_back(std::to_string(e.spawn_type));
+		v.push_back(std::to_string(e.movement));
+		v.push_back(std::to_string(e.duration));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.cast_time));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Auras> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.npc_type));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.spell_id));
+			v.push_back(std::to_string(e.distance));
+			v.push_back(std::to_string(e.aura_type));
+			v.push_back(std::to_string(e.spawn_type));
+			v.push_back(std::to_string(e.movement));
+			v.push_back(std::to_string(e.duration));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.cast_time));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_AURAS_REPOSITORY_H

@@ -24,7 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errmsg.h>
 #include <mysqld_error.h>
 #include <limits.h>
 #include <ctype.h>
@@ -47,59 +46,10 @@
 
 #include "database.h"
 #include "../common/eq_packet_structs.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/servertalk.h"
 
-Database::Database()
-{
-	DBInitVars();
-}
-
-/*
-Establish a connection to a mysql database with the supplied parameters
-*/
-
-Database::Database(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
-{
-	DBInitVars();
-	Connect(host, user, passwd, database, port);
-}
-
-bool Database::Connect(const char *host, const char *user, const char *passwd, const char *database, uint32 port)
-{
-	uint32 errnum = 0;
-	char   errbuf[MYSQL_ERRMSG_SIZE];
-	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogError("Failed to connect to database: Error: {}", errbuf);
-		HandleMysqlError(errnum);
-
-		return false;
-	}
-	else {
-		LogInfo("Using database [{}] at [{}]:[{}]", database, host, port);
-		return true;
-	}
-}
-
-void Database::DBInitVars()
-{
-
-}
-
-
-void Database::HandleMysqlError(uint32 errnum)
-{
-}
-
-/*
-
-Close the connection to the database
-*/
-Database::~Database()
-{
-}
-
-void Database::AddSpeech(
+void QSDatabase::AddSpeech(
 	const char *from,
 	const char *to,
 	const char *message,
@@ -134,7 +84,7 @@ void Database::AddSpeech(
 
 }
 
-void Database::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
+void QSDatabase::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
 {
 
 	std::string query = StringFormat(
@@ -173,7 +123,7 @@ void Database::LogPlayerDropItem(QSPlayerDropItem_Struct *QS)
 	}
 }
 
-void Database::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
+void QSDatabase::LogPlayerTrade(PlayerLogTrade_Struct *QS, uint32 detailCount)
 {
 
 	std::string query   = StringFormat(
@@ -182,10 +132,10 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
 		"`char1_sp` = '%i', `char1_cp` = '%i', `char1_items` = '%i', "
 		"`char2_id` = '%i', `char2_pp` = '%i', `char2_gp` = '%i', "
 		"`char2_sp` = '%i', `char2_cp` = '%i', `char2_items` = '%i'",
-		QS->char1_id, QS->char1_money.platinum, QS->char1_money.gold,
-		QS->char1_money.silver, QS->char1_money.copper, QS->char1_count,
-		QS->char2_id, QS->char2_money.platinum, QS->char2_money.gold,
-		QS->char2_money.silver, QS->char2_money.copper, QS->char2_count
+		QS->character_1_id, QS->character_1_money.platinum, QS->character_1_money.gold,
+		QS->character_1_money.silver, QS->character_1_money.copper, QS->character_1_item_count,
+		QS->character_2_id, QS->character_2_money.platinum, QS->character_2_money.gold,
+		QS->character_2_money.silver, QS->character_2_money.copper, QS->character_2_item_count
 	);
 	auto        results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -205,10 +155,10 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
 			"`from_id` = '%i', `from_slot` = '%i', `to_id` = '%i', `to_slot` = '%i', "
 			"`item_id` = '%i', `charges` = '%i', `aug_1` = '%i', `aug_2` = '%i', "
 			"`aug_3` = '%i', `aug_4` = '%i', `aug_5` = '%i'",
-			lastIndex, QS->items[i].from_id, QS->items[i].from_slot,
-			QS->items[i].to_id, QS->items[i].to_slot, QS->items[i].item_id,
-			QS->items[i].charges, QS->items[i].aug_1, QS->items[i].aug_2,
-			QS->items[i].aug_3, QS->items[i].aug_4, QS->items[i].aug_5
+			lastIndex, QS->item_entries[i].from_character_id, QS->item_entries[i].from_slot,
+			QS->item_entries[i].to_character_id, QS->item_entries[i].to_slot, QS->item_entries[i].item_id,
+			QS->item_entries[i].charges, QS->item_entries[i].aug_1, QS->item_entries[i].aug_2,
+			QS->item_entries[i].aug_3, QS->item_entries[i].aug_4, QS->item_entries[i].aug_5
 		);
 		results = QueryDatabase(query);
 		if (!results.Success()) {
@@ -220,7 +170,7 @@ void Database::LogPlayerTrade(QSPlayerLogTrade_Struct *QS, uint32 detailCount)
 
 }
 
-void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
+void QSDatabase::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 {
 
 	std::string query   = StringFormat(
@@ -259,6 +209,8 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 			QS->items[i].aug_2, QS->items[i].aug_3, QS->items[i].aug_4,
 			QS->items[i].aug_5
 		);
+		auto results = QueryDatabase(query);
+
 		if (!results.Success()) {
 			LogInfo("Failed Handin Log Record Entry Insert: [{}]", results.ErrorMessage().c_str());
 			LogInfo("[{}]", query.c_str());
@@ -267,7 +219,7 @@ void Database::LogPlayerHandin(QSPlayerLogHandin_Struct *QS, uint32 detailCount)
 
 }
 
-void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
+void QSDatabase::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
 {
 
 	std::string query   = StringFormat(
@@ -304,7 +256,7 @@ void Database::LogPlayerNPCKill(QSPlayerLogNPCKill_Struct *QS, uint32 members)
 
 }
 
-void Database::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
+void QSDatabase::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
 {
 
 	std::string query   = StringFormat(
@@ -343,7 +295,7 @@ void Database::LogPlayerDelete(QSPlayerLogDelete_Struct *QS, uint32 items)
 
 }
 
-void Database::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
+void QSDatabase::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
 {
 	/* These are item moves */
 
@@ -383,7 +335,7 @@ void Database::LogPlayerMove(QSPlayerLogMove_Struct *QS, uint32 items)
 	}
 }
 
-void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint32 items)
+void QSDatabase::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint32 items)
 {
 	/* Merchant transactions are from the perspective of the merchant, not the player */
 	std::string query   = StringFormat(
@@ -431,7 +383,7 @@ void Database::LogMerchantTransaction(QSMerchantLogTransaction_Struct *QS, uint3
 }
 
 // this function does not delete the ServerPacket, so it must be handled at call site
-void Database::GeneralQueryReceive(ServerPacket *pack)
+void QSDatabase::GeneralQueryReceive(ServerPacket *pack)
 {
 	/*
 		These are general queries passed from anywhere in zone instead of packing structures and breaking them down again and again
@@ -447,90 +399,4 @@ void Database::GeneralQueryReceive(ServerPacket *pack)
 	}
 
 	safe_delete_array(queryBuffer);
-}
-
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
-{
-	std::string query =
-					"SELECT "
-					"log_category_id, "
-					"log_category_description, "
-					"log_to_console, "
-					"log_to_file, "
-					"log_to_gmsay "
-					"FROM "
-					"logsys_categories "
-					"ORDER BY log_category_id";
-
-	auto results         = QueryDatabase(query);
-	int  log_category_id = 0;
-
-	int *categories_in_database = new int[1000];
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		log_category_id = atoi(row[0]);
-		if (log_category_id <= Logs::None || log_category_id >= Logs::MaxCategoryID) {
-			continue;
-		}
-
-		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
-		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
-		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
-
-		/**
-		 * Determine if any output method is enabled for the category
-		 * and set it to 1 so it can used to check if category is enabled
-		 */
-		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
-		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
-		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
-
-		if (is_category_enabled) {
-			log_settings[log_category_id].is_category_enabled = 1;
-		}
-
-		/**
-		 * This determines whether or not the process needs to actually file log anything.
-		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
-		 */
-		if (log_settings[log_category_id].log_to_file > 0) {
-			LogSys.file_logs_enabled = true;
-		}
-
-		categories_in_database[log_category_id] = 1;
-	}
-
-	/**
-	 * Auto inject categories that don't exist in the database...
-	 */
-	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		if (categories_in_database[log_index] != 1) {
-
-			LogInfo(
-				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
-				Logs::LogCategoryName[log_index]
-			);
-
-			auto inject_query = fmt::format(
-				"INSERT INTO logsys_categories "
-				"(log_category_id, "
-				"log_category_description, "
-				"log_to_console, "
-				"log_to_file, "
-				"log_to_gmsay) "
-				"VALUES "
-				"({0}, '{1}', {2}, {3}, {4})",
-				log_index,
-				EscapeString(Logs::LogCategoryName[log_index]),
-				std::to_string(log_settings[log_index].log_to_console),
-				std::to_string(log_settings[log_index].log_to_file),
-				std::to_string(log_settings[log_index].log_to_gmsay)
-			);
-
-			QueryDatabase(inject_query);
-		}
-	}
-
-	delete[] categories_in_database;
 }

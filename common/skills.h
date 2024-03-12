@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 
 namespace EQ
@@ -161,16 +162,19 @@ namespace EQ
 	// server profile does not reflect this yet..so, prefixed with 'PACKET_'
 #define PACKET_SKILL_ARRAY_SIZE 100
 
+		constexpr int format_as(SkillType skill) { return static_cast<int>(skill); }
+
 		bool IsTradeskill(SkillType skill);
 		bool IsSpecializedSkill(SkillType skill);
 		float GetSkillMeleePushForce(SkillType skill);
 		bool IsBardInstrumentSkill(SkillType skill);
 		bool IsCastingSkill(SkillType skill);
 		int32 GetBaseDamage(SkillType skill);
-		bool IsMeleeDmg(SkillType skill);
 
 		extern const std::map<SkillType, std::string>& GetSkillTypeMap();
+		extern const std::vector<SkillType>& GetExtraDamageSkills();
 
+		std::string GetSkillName(SkillType skill);
 	} /*skills*/
 
 	struct SkillProfile { // prototype - not implemented
@@ -304,7 +308,7 @@ namespace EQ
 
 		uint32 operator[](int skill_id) const { return const_cast<SkillProfile*>(this)->GetSkill(skill_id); }
 	};
-	
+
 } /*EQEmu*/
 
 #endif /*COMMON_SKILLS_H*/

@@ -17,8 +17,8 @@
 */
 
 #include "../common/global_define.h"
+#include "../common/events/player_event_logs.h"
 
-#include <stdlib.h>
 #include <list>
 
 #ifndef WIN32
@@ -26,152 +26,163 @@
 #endif
 
 #include "../common/rulesys.h"
-#include "../common/string_util.h"
 
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
-#include "zone_store.h"
-#include "../common/repositories/character_recipe_list_repository.h"
+#include "worldserver.h"
+#include "../common/repositories/char_recipe_list_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/tradeskill_recipe_entries_repository.h"
 
 extern QueryServ* QServ;
+extern WorldServer worldserver;
 
 static const EQ::skills::SkillType TradeskillUnknown = EQ::skills::Skill1HBlunt; /* an arbitrary non-tradeskill */
 
 void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augment, Object *worldo)
 {
-	if (!user || !in_augment)
-	{
+	if (!user || !in_augment) {
 		LogError("Client or AugmentItem_Struct not set in Object::HandleAugmentation");
 		return;
 	}
 
 	EQ::ItemInstance* container = nullptr;
 
-	if (worldo)
-	{
+	if (worldo) {
 		container = worldo->m_inst;
-	}
-	else
-	{
-		// Check to see if they have an inventory container type 53 that is used for this.
+	} else { // Check to see if they have an inventory container type 53 that is used for this.
 		EQ::InventoryProfile& user_inv = user->GetInv();
 		EQ::ItemInstance* inst = nullptr;
 
 		inst = user_inv.GetItem(in_augment->container_slot);
-		if (inst)
-		{
+		if (inst) {
 			const EQ::ItemData* item = inst->GetItem();
-			if (item && inst->IsType(EQ::item::ItemClassBag) && item->BagType == 53)
-			{
-				// We have found an appropriate inventory augmentation sealer
+			if (item && inst->IsType(EQ::item::ItemClassBag) && (item->BagType == EQ::item::BagTypeAugmentationSealer || item->BagType == RuleI(Inventory, AlternateAugmentationSealer))) { // We have found an appropriate inventory augmentation sealer
 				container = inst;
 
 				// Verify that no more than two items are in container to guarantee no inadvertant wipes.
-				uint8 itemsFound = 0;
-				for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++)
-				{
+				uint8 items_found = 0;
+				for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
 					const EQ::ItemInstance* inst = container->GetItem(i);
-					if (inst)
-					{
-						itemsFound++;
+					if (inst) {
+						items_found++;
 					}
 				}
 
-				if (itemsFound != 2)
-				{
-					user->Message(Chat::Red, "Error: Too many/few items in augmentation container.");
+				if (items_found < 2) {
+					user->Message(Chat::Red, "Error: Too few items in augmentation container.");
+					return;
+				} else if (items_found > 2) {
+					user->Message(Chat::Red, "Error: Too many items in augmentation container.");
 					return;
 				}
 			}
 		}
 	}
 
-	if(!container)
-	{
+	if(!container) {
 		LogError("Player tried to augment an item without a container set");
 		user->Message(Chat::Red, "Error: This item is not a container!");
 		return;
 	}
 
 	EQ::ItemInstance *tobe_auged = nullptr, *auged_with = nullptr;
-	int8 slot=-1;
+	int8 slot = -1;
 
-	// Verify 2 items in the augmentation device
-	if (container->GetItem(0) && container->GetItem(1))
-	{
+	if (container->GetItem(0) && container->GetItem(1)) { // Verify 2 items in the augmentation device
 		// Verify 1 item is augmentable and the other is not
-		if (container->GetItem(0)->IsAugmentable() && !container->GetItem(1)->IsAugmentable())
-		{
+		if (container->GetItem(0)->IsAugmentable() && !container->GetItem(1)->IsAugmentable()) {
 			tobe_auged = container->GetItem(0);
 			auged_with = container->GetItem(1);
-		}
-		else if (!container->GetItem(0)->IsAugmentable() && container->GetItem(1)->IsAugmentable())
-		{
+		} else if (!container->GetItem(0)->IsAugmentable() && container->GetItem(1)->IsAugmentable()) {
 			tobe_auged = container->GetItem(1);
 			auged_with = container->GetItem(0);
-		}
-		else
-		{
+		} else {
 			// Either 2 augmentable items found or none found
 			// This should never occur due to client restrictions, but prevent in case of a hack
-			user->Message(Chat::Red, "Error: Must be 1 augmentable item in the sealer");
+			user->Message(Chat::Red, "Error: There must be 1 augmentable item in the sealer.");
 			return;
 		}
-	}
-	else
-	{
-		// This happens if the augment button is clicked more than once quickly while augmenting
-		if (!container->GetItem(0))
-		{
-			user->Message(Chat::Red, "Error: No item in slot 0 of sealer");
+	} else { // This happens if the augment button is clicked more than once quickly while augmenting
+		if (!container->GetItem(0))	{
+			user->Message(Chat::Red, "Error: No item in the first slot of sealer.");
 		}
-		if (!container->GetItem(1))
-		{
-			user->Message(Chat::Red, "Error: No item in slot 1 of sealer");
+
+		if (!container->GetItem(1)) {
+			user->Message(Chat::Red, "Error: No item in the second slot of sealer.");
 		}
 		return;
 	}
 
-	bool deleteItems = false;
+	if (
+		RuleB(Inventory, EnforceAugmentRestriction) &&
+		user->IsAugmentRestricted(tobe_auged->GetItemType(), auged_with->GetAugmentRestriction())
+	) {
+		user->MessageString(Chat::Red, AUGMENT_RESTRICTED);
+		return;
+	}
 
-	EQ::ItemInstance *itemOneToPush = nullptr, *itemTwoToPush = nullptr;
+	if (
+		!RuleB(Inventory, AllowMultipleOfSameAugment) &&
+		tobe_auged->ContainsAugmentByID(auged_with->GetID())
+	) {
+		user->Message(Chat::Red, "Error: Cannot put multiple of the same augment in an item.");
+		return;
+	}
 
-	// Adding augment
-	if (in_augment->augment_slot == -1)
-	{
-		if (((slot=tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType()))!=-1) &&
-			(tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)))
-		{
+	bool delete_items = false;
+
+	EQ::ItemInstance *item_one_to_push = nullptr, *item_two_to_push = nullptr;
+
+	if (in_augment->augment_slot == -1) { // Adding augment
+		if (
+			((slot = tobe_auged->AvailableAugmentSlot(auged_with->GetAugmentType())) != -1) &&
+			tobe_auged->AvailableWearSlot(auged_with->GetItem()->Slots)
+		) {
 			tobe_auged->PutAugment(slot, *auged_with);
 
 			EQ::ItemInstance *aug = tobe_auged->GetAugment(slot);
 			if(aug) {
-				std::vector<EQ::Any> args;
+				std::vector<std::any> args;
 				args.push_back(aug);
-				parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+
+				if (parse->ItemHasQuestSub(tobe_auged, EVENT_AUGMENT_ITEM)) {
+					parse->EventItem(EVENT_AUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+				}
 
 				args.assign(1, tobe_auged);
-				parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
+
+				if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_INSERT)) {
+					parse->EventItem(EVENT_AUGMENT_INSERT, user, aug, nullptr, "", slot, &args);
+				}
+
+				args.push_back(aug);
+
+				if (parse->PlayerHasQuestSub(EVENT_AUGMENT_INSERT_CLIENT)) {
+					const auto& export_string = fmt::format(
+						"{} {} {} {}",
+						tobe_auged->GetID(),
+						-1,
+						aug->GetID(),
+						slot
+					);
+
+					parse->EventPlayer(EVENT_AUGMENT_INSERT_CLIENT, user, export_string, 0, &args);
+				}
 			}
 
-			itemOneToPush = tobe_auged->Clone();
-			deleteItems = true;
+			item_one_to_push = tobe_auged->Clone();
+			delete_items = true;
+		} else {
+			user->Message(Chat::Red, "Error: No available slot for augment.");
 		}
-		else
-		{
-			user->Message(Chat::Red, "Error: No available slot for augment");
-		}
-	}
-	else
-	{
+	} else {
 		EQ::ItemInstance *old_aug = nullptr;
-		bool isSolvent = auged_with->GetItem()->ItemType == EQ::item::ItemTypeAugmentationSolvent;
-		if (!isSolvent && auged_with->GetItem()->ItemType != EQ::item::ItemTypeAugmentationDistiller)
-		{
+		bool is_solvent = auged_with->GetItem()->ItemType == EQ::item::ItemTypeAugmentationSolvent;
+		if (!is_solvent && auged_with->GetItem()->ItemType != EQ::item::ItemTypeAugmentationDistiller) {
 			LogError("Player tried to remove an augment without a solvent or distiller");
 			user->Message(Chat::Red, "Error: Missing an augmentation solvent or distiller for removing this augment.");
 
@@ -180,40 +191,42 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 
 		EQ::ItemInstance *aug = tobe_auged->GetAugment(in_augment->augment_slot);
 		if (aug) {
-			if (!isSolvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller)
-			{
+			if (!is_solvent && auged_with->GetItem()->ID != aug->GetItem()->AugDistiller) {
 				LogError("Player tried to safely remove an augment with the wrong distiller (item [{}] vs expected [{}])", auged_with->GetItem()->ID, aug->GetItem()->AugDistiller);
 				user->Message(Chat::Red, "Error: Wrong augmentation distiller for safely removing this augment.");
 				return;
 			}
-			std::vector<EQ::Any> args;
+			std::vector<std::any> args;
 			args.push_back(aug);
-			parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+
+			if (parse->ItemHasQuestSub(tobe_auged, EVENT_UNAUGMENT_ITEM)) {
+				parse->EventItem(EVENT_UNAUGMENT_ITEM, user, tobe_auged, nullptr, "", slot, &args);
+			}
 
 			args.assign(1, tobe_auged);
-			args.push_back(&isSolvent);
+			args.push_back(&is_solvent);
 
-			parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
+			if (parse->ItemHasQuestSub(aug, EVENT_AUGMENT_REMOVE)) {
+				parse->EventItem(EVENT_AUGMENT_REMOVE, user, aug, nullptr, "", slot, &args);
+			}
 		}
 
-		if (isSolvent)
+		if (is_solvent) {
 			tobe_auged->DeleteAugment(in_augment->augment_slot);
-		else
+		} else {
 			old_aug = tobe_auged->RemoveAugment(in_augment->augment_slot);
+		}
 
-		itemOneToPush = tobe_auged->Clone();
-		if (old_aug)
-			itemTwoToPush = old_aug->Clone();
+		item_one_to_push = tobe_auged->Clone();
+		if (old_aug) {
+			item_two_to_push = old_aug->Clone();
+		}
 
-
-
-		deleteItems = true;
+		delete_items = true;
 	}
 
-	if (deleteItems)
-	{
-		if (worldo)
-		{
+	if (delete_items) {
+		if (worldo) {
 			container->Clear();
 			auto outapp = new EQApplicationPacket(OP_ClearObject, sizeof(ClearObject_Struct));
 			ClearObject_Struct *cos = (ClearObject_Struct *)outapp->pBuffer;
@@ -221,34 +234,26 @@ void Object::HandleAugmentation(Client* user, const AugmentItem_Struct* in_augme
 			user->QueuePacket(outapp);
 			safe_delete(outapp);
 			database.DeleteWorldContainer(worldo->m_id, zone->GetZoneID());
-		}
-		else
-		{
-			// Delete items in our inventory container...
-			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++)
-			{
+		} else { // Delete items in our inventory container...
+			for (uint8 i = EQ::invbag::SLOT_BEGIN; i < EQ::invtype::WORLD_SIZE; i++) {
 				const EQ::ItemInstance* inst = container->GetItem(i);
-				if (inst)
-				{
+				if (inst) {
 					user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_augment->container_slot, i), 0, true);
 				}
 			}
-			// Explicitly mark container as cleared.
-			container->Clear();
+
+			container->Clear(); // Explicitly mark container as cleared.
 		}
 	}
 
 	// Must push items after the items in inventory are deleted - necessary due to lore items...
-	if (itemOneToPush)
-	{
-		user->PushItemOnCursor(*itemOneToPush, true);
+	if (item_one_to_push) {
+		user->PushItemOnCursor(*item_one_to_push, true);
 	}
 
-	if (itemTwoToPush)
-	{
-		user->PushItemOnCursor(*itemTwoToPush, true);
+	if (item_two_to_push) {
+		user->PushItemOnCursor(*item_two_to_push, true);
 	}
-
 }
 
 // Perform tradeskill combine
@@ -256,17 +261,20 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 {
 	if (!user || !in_combine) {
 		LogError("Client or NewCombine_Struct not set in Object::HandleCombine");
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
 		return;
 	}
 
 	LogTradeskills(
-		"[HandleCombine] container_slot [{}] guildtribute_slot [{}]",
+		"container_slot [{}] guildtribute_slot [{}]",
 		in_combine->container_slot,
 		in_combine->guildtribute_slot
 	);
 
 	EQ::InventoryProfile &user_inv  = user->GetInv();
-	PlayerProfile_Struct    &user_pp   = user->GetPP();
+	PlayerProfile_Struct &user_pp   = user->GetPP();
 	EQ::ItemInstance     *container = nullptr;
 	EQ::ItemInstance     *inst      = nullptr;
 
@@ -281,6 +289,9 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				Chat::Red,
 				"Error: Server is not aware of the tradeskill container you are attempting to use"
 			);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 		c_type         = worldo->m_type;
@@ -307,13 +318,16 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	if (!inst || !inst->IsType(EQ::item::ItemClassBag)) {
 		user->Message(Chat::Red, "Error: Server does not recognize specified tradeskill container");
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
 		return;
 	}
 
 	container = inst;
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeTransformationmold) {
-		const EQ::ItemInstance *inst    = container->GetItem(0);
-		bool                      AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
+		const EQ::ItemInstance *inst = container->GetItem(0);
+		bool AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && EQ::ItemInstance::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
 			const EQ::ItemData *new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
@@ -330,7 +344,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				inst->IsAttuned(),
 				EQ::invslot::slotCursor,
 				container->GetItem()->Icon,
-				atoi(container->GetItem()->IDFile + 2)
+				Strings::ToInt(container->GetItem()->IDFile + 2)
 			);
 
 			user->MessageString(Chat::LightBlue, TRANSFORM_COMPLETE, inst->GetItem()->Name);
@@ -346,7 +360,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		safe_delete(outapp);
 
 		LogTradeskills(
-			"[HandleCombine] inst_item [{}] container_item [{}]",
+			"inst_item [{}] container_item [{}]",
 			inst->GetItem()->ID,
 			container->GetItem()->ID
 		);
@@ -355,10 +369,10 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeDetransformationmold) {
-		LogTradeskillsDetail("[HandleCombine] Check 1");
+		LogTradeskillsDetail("Check 1");
 
 		const EQ::ItemInstance* inst = container->GetItem(0);
-		if (inst && inst->GetOrnamentationIcon() && inst->GetOrnamentationIcon()) {
+		if (inst && inst->GetOrnamentationIcon()) {
 			const EQ::ItemData* new_weapon = inst->GetItem();
 			user->DeleteItemInInventory(EQ::InventoryProfile::CalcSlotId(in_combine->container_slot, 0), 0, true);
 			container->Clear();
@@ -375,11 +389,27 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	DBTradeskillRecipe_Struct spec;
-	if (!content_db.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
+	bool is_augmented = false;
 
-		LogTradeskillsDetail("[HandleCombine] Check 2");
+	if (parse->PlayerHasQuestSub(EVENT_COMBINE)) {
+		if (parse->EventPlayer(EVENT_COMBINE, user, std::to_string(in_combine->container_slot), 0) == 1) {
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
+	}
 
-		user->MessageString(Chat::Emote,TRADESKILL_NOCOMBINE);
+	if (!content_db.GetTradeRecipe(container, c_type, some_id, user, &spec, &is_augmented)) {
+
+		LogTradeskillsDetail("Check 2");
+
+		if (!is_augmented) {
+			user->MessageString(Chat::Emote, TRADESKILL_NOCOMBINE);
+		} else {
+			user->Message(Chat::Emote, "You must remove augments from all component items before you can attempt this combine.");
+		}
+
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -394,7 +424,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// bit 6 (0x20): unlisted recipe flag
 	if ((spec.must_learn & 0xF) == 1 && !spec.has_learnt) {
 
-		LogTradeskillsDetail("[HandleCombine] Check 3");
+		LogTradeskillsDetail("Check 3");
 
 		// Made up message for the client. Just giving a DNC is the other option.
 		user->Message(Chat::LightBlue, "You need to learn how to combine these first.");
@@ -418,35 +448,60 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 
 	//changing from a switch to string of if's since we don't need to iterate through all of the skills in the SkillType enum
 	if (spec.tradeskill == EQ::skills::SkillAlchemy) {
-		if (user_pp.class_ != SHAMAN) {
+		if (user_pp.class_ != Class::Shaman) {
 			user->Message(Chat::Red, "This tradeskill can only be performed by a shaman.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 		else if (user_pp.level < MIN_LEVEL_ALCHEMY) {
 			user->Message(Chat::Red, "You cannot perform alchemy until you reach level %i.", MIN_LEVEL_ALCHEMY);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillTinkering) {
 		if (user_pp.race != GNOME) {
 			user->Message(Chat::Red, "Only gnomes can tinker.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
 	else if (spec.tradeskill == EQ::skills::SkillMakePoison) {
-		if (user_pp.class_ != ROGUE) {
+		if (user_pp.class_ != Class::Rogue) {
 			user->Message(Chat::Red, "Only rogues can mix poisons.");
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
 			return;
 		}
 	}
 
-	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
-	if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, fmt::format("check_zone {}", zone->GetZoneID()), spec.recipe_id) != 0) {
-		user->Message(Chat::Emote, "You cannot make this combine because the location requirement has not been met.");
+	// Check if Combine would result in Lore conflict
+	if (user->CheckTradeskillLoreConflict(spec.recipe_id)) {
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
+	}
+
+	// final check for any additional quest requirements .. "check_zone" in this case - exported as variable [validate_type]
+	if (parse->PlayerHasQuestSub(EVENT_COMBINE_VALIDATE)) {
+		if (parse->EventPlayer(EVENT_COMBINE_VALIDATE, user, fmt::format("check_zone {}", zone->GetZoneID()), spec.recipe_id) != 0) {
+			user->Message(
+				Chat::Emote,
+				"You cannot make this combine because the location requirement has not been met."
+			);
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}
 	}
 
 	// Send acknowledgement packets to client
@@ -496,11 +551,36 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 		}
 	}
+
 	if (success) {
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name.c_str(), spec.recipe_id);
+		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_SUCCESS)) {
+			auto e = PlayerEvent::CombineEvent{
+				.recipe_id = spec.recipe_id,
+				.recipe_name = spec.name,
+				.made_count = spec.madecount,
+				.tradeskill_id = (uint32) spec.tradeskill
+			};
+			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_SUCCESS, e);
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_SUCCESS)) {
+			parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+		}
 	}
 	else {
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
+		if (player_event_logs.IsEventEnabled(PlayerEvent::COMBINE_FAILURE)) {
+			auto e = PlayerEvent::CombineEvent{
+				.recipe_id = spec.recipe_id,
+				.recipe_name = spec.name,
+				.made_count = spec.madecount,
+				.tradeskill_id = (uint32) spec.tradeskill
+			};
+			RecordPlayerEventLogWithClient(user, PlayerEvent::COMBINE_FAILURE, e);
+		}
+
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_FAILURE)) {
+			parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		}
 	}
 }
 
@@ -518,7 +598,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
 	//ask the database for the recipe to make sure it exists...
 	DBTradeskillRecipe_Struct spec;
-	if (!content_db.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user->CharacterID(), &spec)) {
+	if (!content_db.GetTradeRecipe(rac->recipe_id, rac->object_type, rac->some_id, user, &spec)) {
 		LogError("Unknown recipe for HandleAutoCombine: [{}]\n", rac->recipe_id);
 		user->QueuePacket(outapp);
 		safe_delete(outapp);
@@ -535,10 +615,19 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 		return;
 	}
 
+	// Character does not have the required skill.
+	if (spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed) {
+		// Notify client.
+		user->Message(Chat::Red, "You are not skilled enough.");
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
     //pull the list of components
-	std::string query = StringFormat("SELECT tre.item_id, tre.componentcount "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "WHERE tre.componentcount > 0 AND tre.recipe_id = %u",
+	const auto query = fmt::format("SELECT item_id, componentcount "
+                                    "FROM tradeskill_recipe_entries "
+                                    "WHERE componentcount > 0 AND recipe_id = {}",
                                     rac->recipe_id);
     auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
@@ -575,8 +664,8 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 
     uint8 needItemIndex = 0;
 	for (auto row = results.begin(); row != results.end(); ++row, ++needItemIndex) {
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
+		uint32 item = (uint32)Strings::ToInt(row[0]);
+		uint8 num = (uint8) Strings::ToInt(row[1]);
 
 		needcount += num;
 
@@ -609,6 +698,13 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 				user->MessageString(Chat::Skills, TRADESKILL_MISSING_ITEM, item->Name);
 		}
 
+		return;
+	}
+
+	// Check if Combine would result in Lore conflict
+	if (user->CheckTradeskillLoreConflict(rac->recipe_id)) {
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
 		return;
 	}
 
@@ -664,94 +760,15 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	if(success && spec.replace_container) {
 //		user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 	}
-	if (success)
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name.c_str(), spec.recipe_id);
-	else
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
-}
 
-EQ::skills::SkillType Object::TypeToSkill(uint32 type)
-{
-	switch(type) { // grouped and ordered by SkillUseTypes name - new types need to be verified for proper SkillUseTypes and use
-/*SkillAlchemy*/
-	case EQ::item::BagTypeMedicineBag:
-		return EQ::skills::SkillAlchemy;
-
-/*SkillBaking*/
-	//case EQ::item::BagTypeMixingBowl: // No idea...
-	case EQ::item::BagTypeOven:
-		return EQ::skills::SkillBaking;
-
-/*SkillBlacksmithing*/
-	case EQ::item::BagTypeForge:
-	//case EQ::item::BagTypeKoadaDalForge:
-	case EQ::item::BagTypeTeirDalForge:
-	case EQ::item::BagTypeOggokForge:
-	case EQ::item::BagTypeStormguardForge:
-	//case EQ::item::BagTypeAkanonForge:
-	//case EQ::item::BagTypeNorthmanForge:
-	//case EQ::item::BagTypeCabilisForge:
-	//case EQ::item::BagTypeFreeportForge:
-	//case EQ::item::BagTypeRoyalQeynosForge:
-	//case EQ::item::BagTypeTrollForge:
-	case EQ::item::BagTypeFierDalForge:
-	case EQ::item::BagTypeValeForge:
-	//case EQ::item::BagTypeErudForge:
-	//case EQ::item::BagTypeGuktaForge:
-		return EQ::skills::SkillBlacksmithing;
-
-/*SkillBrewing*/
-	//case EQ::item::BagTypeIceCreamChurn: // No idea...
-	case EQ::item::BagTypeBrewBarrel:
-		return EQ::skills::SkillBrewing;
-
-/*SkillFishing*/
-	case EQ::item::BagTypeTackleBox:
-		return EQ::skills::SkillFishing;
-
-/*SkillFletching*/
-	case EQ::item::BagTypeFletchingKit:
-	//case EQ::item::BagTypeFierDalFletchingKit:
-		return EQ::skills::SkillFletching;
-
-/*SkillJewelryMaking*/
-	case EQ::item::BagTypeJewelersKit:
-		return EQ::skills::SkillJewelryMaking;
-
-/*SkillMakePoison*/
-	// This is a guess and needs to be verified... (Could be SkillAlchemy)
-	//case EQ::item::BagTypeMortar:
-		// return SkillMakePoison;
-
-/*SkillPottery*/
-	case EQ::item::BagTypePotteryWheel:
-	case EQ::item::BagTypeKiln:
-	//case EQ::item::BagTypeIksarPotteryWheel:
-		return EQ::skills::SkillPottery;
-
-/*SkillResearch*/
-	//case EQ::item::BagTypeLexicon:
-	case EQ::item::BagTypeWizardsLexicon:
-	case EQ::item::BagTypeMagesLexicon:
-	case EQ::item::BagTypeNecromancersLexicon:
-	case EQ::item::BagTypeEnchantersLexicon:
-	//case EQ::item::BagTypeConcordanceofResearch:
-		return EQ::skills::SkillResearch;
-
-/*SkillTailoring*/
-	case EQ::item::BagTypeSewingKit:
-	//case EQ::item::BagTypeHalflingTailoringKit:
-	//case EQ::item::BagTypeErudTailoringKit:
-	//case EQ::item::BagTypeFierDalTailoringKit:
-		return EQ::skills::SkillTailoring;
-
-/*SkillTinkering*/
-	case EQ::item::BagTypeToolBox:
-		return EQ::skills::SkillTinkering;
-
-/*Undefined*/
-	default:
-		return TradeskillUnknown;
+	if (success) {
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_SUCCESS)) {
+			parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+		}
+	} else {
+		if (parse->PlayerHasQuestSub(EVENT_COMBINE_FAILURE)) {
+			parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+		}
 	}
 }
 
@@ -770,38 +787,50 @@ void Client::SendTradeskillSearchResults(
 		return;
 	}
 
-	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(CharacterID());
+
+	auto character_learned_recipe_list = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format("char_id = {}", CharacterID())
+	);
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr ||
-			row[5] == nullptr) {
+			row[4] == nullptr || row[5] == nullptr) {
 			continue;
 		}
 
-		uint32     recipe_id  = (uint32) atoi(row[0]);
+		uint32     recipe_id  = (uint32) Strings::ToInt(row[0]);
 		const char *name      = row[1];
-		uint32     trivial    = (uint32) atoi(row[2]);
-		uint32     comp_count = (uint32) atoi(row[3]);
-		uint32     tradeskill = (uint16) atoi(row[5]);
+		uint32     trivial    = (uint32) Strings::ToInt(row[2]);
+		uint32     comp_count = (uint32) Strings::ToInt(row[3]);
+		uint32     tradeskill = (uint16) Strings::ToInt(row[4]);
+		uint32     must_learn = (uint16) Strings::ToInt(row[5]);
+
 
 		// Skip the recipes that exceed the threshold in skill difference
 		// Recipes that have either been made before or were
 		// explicitly learned are excempt from that limit
+		auto character_learned_recipe = CharRecipeListRepository::GetCharRecipeListEntry(
+			character_learned_recipe_list,
+			recipe_id
+		);
+
 		if (RuleB(Skills, UseLimitTradeskillSearchSkillDiff) &&
 			((int32) trivial - (int32) GetSkill((EQ::skills::SkillType) tradeskill)) >
 			RuleI(Skills, MaxTradeskillSearchSkillDiff)) {
 
 			LogTradeskills("Checking limit recipe_id [{}] name [{}]", recipe_id, name);
 
-			auto character_learned_recipe = CharacterRecipeListRepository::GetRecipe(
-				character_learned_recipe_list,
-				recipe_id
-			);
-
-			if (character_learned_recipe.made_count == 0) {
+			if (character_learned_recipe.madecount == 0) {
 				continue;
 			}
 		}
+
+		//Skip recipes that must be learned
+		if ((must_learn & 0xf) && !character_learned_recipe.recipe_id) {
+			continue;
+		}
+
 
 		auto               outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
@@ -872,9 +901,9 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 		if(row[2] == nullptr || row[3] == nullptr)
 			continue;
 
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
-		uint32 icon = (uint32) atoi(row[2]);
+		uint32 item = (uint32)Strings::ToInt(row[0]);
+		uint8 num = (uint8) Strings::ToInt(row[1]);
+		uint32 icon = (uint32) Strings::ToInt(row[2]);
 
 		const char *name = row[3];
 		len = strlen(name);
@@ -923,10 +952,16 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 
 //returns true on success
 bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
-	if(spec == nullptr)
-		return(false);
+	if (!spec) {
+		return false;
+	}
 
 	uint16 user_skill = GetSkill(spec->tradeskill);
+
+	if (RuleI(Skills, TradeSkillClamp) != 0 && user_skill > RuleI(Skills, TradeSkillClamp)) {
+		user_skill = RuleI(Skills, TradeSkillClamp);
+	}
+
 	float chance = 0.0;
 	float skillup_modifier = 0.0;
 	int16 thirdstat = 0;
@@ -947,34 +982,37 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	// Remember: skillup_modifier is (float). Lower is better
 	switch(spec->tradeskill) {
 	case EQ::skills::SkillFletching:
-		skillup_modifier = RuleI(Character, TradeskillUpFletching);
+		skillup_modifier = RuleR(Character, TradeskillUpFletching);
 		break;
 	case EQ::skills::SkillAlchemy:
-		skillup_modifier = RuleI(Character, TradeskillUpAlchemy);
+		skillup_modifier = RuleR(Character, TradeskillUpAlchemy);
 		break;
 	case EQ::skills::SkillJewelryMaking:
-		skillup_modifier = RuleI(Character, TradeskillUpJewelcrafting);
+		skillup_modifier = RuleR(Character, TradeskillUpJewelcrafting);
 		break;
 	case EQ::skills::SkillPottery:
-		skillup_modifier = RuleI(Character, TradeskillUpPottery);
+		skillup_modifier = RuleR(Character, TradeskillUpPottery);
 		break;
 	case EQ::skills::SkillBaking:
-		skillup_modifier = RuleI(Character, TradeskillUpBaking);
+		skillup_modifier = RuleR(Character, TradeskillUpBaking);
 		break;
 	case EQ::skills::SkillBrewing:
-		skillup_modifier = RuleI(Character, TradeskillUpBrewing);
+		skillup_modifier = RuleR(Character, TradeskillUpBrewing);
 		break;
 	case EQ::skills::SkillBlacksmithing:
-		skillup_modifier = RuleI(Character, TradeskillUpBlacksmithing);
+		skillup_modifier = RuleR(Character, TradeskillUpBlacksmithing);
 		break;
 	case EQ::skills::SkillResearch:
-		skillup_modifier = RuleI(Character, TradeskillUpResearch);
+		skillup_modifier = RuleR(Character, TradeskillUpResearch);
 		break;
 	case EQ::skills::SkillMakePoison:
-		skillup_modifier = RuleI(Character, TradeskillUpMakePoison);
+		skillup_modifier = RuleR(Character, TradeskillUpMakePoison);
 		break;
 	case EQ::skills::SkillTinkering:
-		skillup_modifier = RuleI(Character, TradeskillUpTinkering);
+		skillup_modifier = RuleR(Character, TradeskillUpTinkering);
+		break;
+	case EQ::skills::SkillTailoring:
+		skillup_modifier = RuleR(Character, TradeskillUpTailoring);
 		break;
 	default:
 		skillup_modifier = 2;
@@ -1024,6 +1062,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		// above critical still stands.
 		// Mastery modifier is: 10%/25%/50% for rank one/two/three
 		chance = 95.0f + (float(user_skill - spec->trivial) / 40.0f);
+
+		if (RuleB(Skills, TrivialTradeskillCombinesNoFail)) {
+			chance = 100;
+		}
+
 		MessageString(Chat::Emote, TRADESKILL_TRIVIAL);
 	} else if(chance < 5) {
 		// Minimum chance is always 5
@@ -1043,8 +1086,6 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	const EQ::ItemData* item = nullptr;
 
-	chance = mod_tradeskill_chance(chance, spec);
-
 	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
 
 		success_modifier = 1;
@@ -1060,9 +1101,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		itr = spec->onsuccess.begin();
 		while(itr != spec->onsuccess.end() && !spec->quest) {
 
-			SummonItem(itr->first, itr->second);
 			item = database.GetItem(itr->first);
 			if (item) {
+				SummonItem(itr->first, itr->second);
 				if (GetGroup()) {
 					entity_list.MessageGroup(this, true, Chat::Skills, "%s has successfully fashioned %s!", GetName(), item->Name);
 				}
@@ -1079,8 +1120,8 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 						spec->tradeskill,
 						spec->trivial,
 						chance,
-						this->GetZoneID(),
-						this->GetInstanceID()
+						GetZoneID(),
+						GetInstanceID()
 					).c_str()
 				);
 			}
@@ -1088,12 +1129,12 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			/* QS: Player_Log_Trade_Skill_Events */
 			if (RuleB(QueryServ, PlayerLogTradeSkillEvents)) {
 
-				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
+				std::string event_desc = StringFormat("Success :: fashioned recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
+				QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
 			}
 
 			if (RuleB(TaskSystem, EnableTaskSystem)) {
-				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
+				UpdateTasksForItem(TaskActivityType::TradeSkill, itr->first, itr->second);
 			}
 
 			++itr;
@@ -1110,16 +1151,16 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		MessageString(Chat::Emote,TRADESKILL_FAILED);
 
 		LogTradeskills("Tradeskill failed");
-			if (this->GetGroup())
+			if (GetGroup())
 		{
-			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),this->GetGender() == 0 ? "his" : this->GetGender() == 1 ? "her" : "its");
+			entity_list.MessageGroup(this, true, Chat::Skills,"%s was unsuccessful in %s tradeskill attempt.",GetName(),GetGender() == Gender::Male ? "his" : GetGender() == Gender::Female ? "her" : "its");
 
 		}
 
 		/* QS: Player_Log_Trade_Skill_Events */
 		if (RuleB(QueryServ, PlayerLogTradeSkillEvents)){
-			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, this->GetZoneID(), this->GetInstanceID());
-			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, this->CharacterID(), event_desc);
+			std::string event_desc = StringFormat("Failed :: recipe_id:%i tskillid:%i trivial:%i chance:%4.2f  in zoneid:%i instid:%i", spec->recipe_id, spec->tradeskill, spec->trivial, chance, GetZoneID(), GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Trade_Skill_Events, CharacterID(), event_desc);
 		}
 
 		itr = spec->onfail.begin();
@@ -1138,9 +1179,11 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			itr = spec->salvage.begin();
 			uint8 sc = 0;
 			while(itr != spec->salvage.end()) {
-				for(sc = 0; sc < itr->second; sc++)
-					if(zone->random.Roll(SalvageChance))
+				for (sc = 0; sc < itr->second; sc++) {
+					if (zone->random.Roll(SalvageChance)) {
 						SummonItem(itr->first, 1);
+					}
+				}
 				++itr;
 			}
 		}
@@ -1155,6 +1198,7 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 
 	if(!CanIncreaseTradeskill(tradeskill))
 		return;	//not allowed to go higher.
+	uint16 maxskill = MaxSkill(tradeskill);
 
 	float chance_stage2 = 0;
 
@@ -1178,41 +1222,49 @@ void Client::CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float
 		}
 	}
 
-	chance_stage2 = mod_tradeskill_skillup(chance_stage2);
-
 	if (chance_stage2 > zone->random.Real(0, 99)) {
 		//Only if stage1 and stage2 succeeded you get a skillup.
 		SetSkill(tradeskill, current_raw_skill + 1);
-
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			tradeskill,
+			current_raw_skill + 1,
+			maxskill,
+			1
+		);
+		parse->EventPlayer(EVENT_SKILL_UP, this, export_string, 0);
 		if(title_manager.IsNewTradeSkillTitleAvailable(tradeskill, current_raw_skill + 1))
 			NotifyNewTitlesAvailable();
 	}
 
-	LogTradeskills("[CheckIncreaseTradeskill] skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
-	LogTradeskills("[CheckIncreaseTradeskill] Stage1 chance was: [{}] percent", chance_stage1);
-	LogTradeskills("[CheckIncreaseTradeskill] Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
+	LogTradeskills("skillup_modifier: [{}] , success_modifier: [{}] , stat modifier: [{}]", skillup_modifier , success_modifier , stat_modifier);
+	LogTradeskills("Stage1 chance was: [{}] percent", chance_stage1);
+	LogTradeskills("Stage2 chance was: [{}] percent. 0 percent means stage1 failed", chance_stage2);
 }
 
 bool ZoneDatabase::GetTradeRecipe(
-	const EQ::ItemInstance *container,
+	const EQ::ItemInstance* container,
 	uint8 c_type,
 	uint32 some_id,
-	uint32 char_id,
-	DBTradeskillRecipe_Struct *spec
+	Client* c,
+	DBTradeskillRecipe_Struct* spec,
+	bool* is_augmented
 )
 {
-	if (container == nullptr) {
-		LogTradeskills("[GetTradeRecipe] Container null");
+	if (!container) {
 		return false;
 	}
 
-	std::string containers;// make where clause segment for container(s)
-	if (some_id == 0) {
-		containers = StringFormat("= %u", c_type); // world combiner so no item number
+	if (!c) {
+		return false;
 	}
-	else {
-		containers = StringFormat("IN (%u,%u)", c_type, some_id);
-	} // container in inventory
+
+	std::string containers; // make where clause segment for container(s)
+	if (!some_id) { // world combiner so no item number
+		containers = fmt::format("= {}", c_type);
+	} else { // container in inventory
+		containers = fmt::format("IN ({}, {})", c_type, some_id);
+	}
 
 	//Could prolly watch for stacks in this loop and handle them properly...
 	//just increment sum and count accordingly
@@ -1220,126 +1272,142 @@ bool ZoneDatabase::GetTradeRecipe(
 	std::string buf2;
 	uint32      count = 0;
 	uint32      sum   = 0;
-	for (uint8  i     = 0; i < 10; i++) { // <watch> TODO: need to determine if this is bound to world/item container size
-		LogTradeskills("[GetTradeRecipe] Fetching item [{}]", i);
 
-		const EQ::ItemInstance *inst = container->GetItem(i);
+	for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invbag::SLOT_COUNT; slot_id++) { // <watch> TODO: need to determine if this is bound to world/item container size
+		LogTradeskills("Fetching item [{}]", slot_id);
+
+		const auto inst = container->GetItem(slot_id);
 		if (!inst) {
 			continue;
 		}
 
-		const EQ::ItemData *item = database.GetItem(inst->GetItem()->ID);
+		if (inst->IsAugmented()) {
+			*is_augmented = true;
+			return false;
+		}
+
+		const auto item = database.GetItem(inst->GetItem()->ID);
 		if (!item) {
-			LogTradeskills("[GetTradeRecipe] item [{}] not found!", inst->GetItem()->ID);
+			LogTradeskills("item [{}] not found!", inst->GetItem()->ID);
 			continue;
 		}
 
 		if (first) {
-			buf2 += StringFormat("%d", item->ID);
+			buf2 += fmt::format("{}", item->ID);
 			first = false;
-		}
-		else {
-			buf2 += StringFormat(",%d", item->ID);
+		} else {
+			buf2 += fmt::format(", {}", item->ID);
 		}
 
 		sum += item->ID;
 		count++;
 
 		LogTradeskills(
-			"[GetTradeRecipe] Item in container index [{}] item [{}] found [{}]",
-			i,
+			"Item in container index [{}] item [{}] found [{}]",
+			slot_id,
 			item->ID,
 			count
 		);
 	}
 
-	//no items == no recipe
-	if (count == 0) {
+	// no items == no recipe
+	if (!count) {
 		return false;
 	}
 
-	std::string query = StringFormat("SELECT tre.recipe_id "
-                                    "FROM tradeskill_recipe_entries AS tre "
-                                    "INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
-                                    "WHERE tr.enabled AND (( tre.item_id IN(%s) AND tre.componentcount > 0) "
-                                    "OR ( tre.item_id %s AND tre.iscontainer=1 ))"
-                                    "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-                                    "AND sum(tre.item_id * tre.componentcount) = %u",
-                                    buf2.c_str(), containers.c_str(), count, sum);
-    auto results = QueryDatabase(query);
+	std::string query = fmt::format(
+		"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre "
+		"INNER JOIN tradeskill_recipe AS tr ON (tre.recipe_id = tr.id) "
+		"WHERE tr.enabled AND ((tre.item_id IN ({}) AND tre.componentcount > 0) "
+		"OR (tre.item_id {} AND tre.iscontainer = 1))"
+		"GROUP BY tre.recipe_id HAVING SUM(tre.componentcount) = {} "
+		"AND SUM(tre.item_id * tre.componentcount) = {}",
+		buf2,
+		containers,
+		count,
+		sum
+	);
+
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogError("Error in GetTradeRecipe search, query: [{}]", query.c_str());
-		LogError("Error in GetTradeRecipe search, error: [{}]", results.ErrorMessage().c_str());
+		LogError("Error in search, query: [{}]", query.c_str());
+		LogError("Error in search, error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
-
-    if (results.RowCount() > 1) {
-        //multiple recipes, partial match... do an extra query to get it exact.
-        //this happens when combining components for a smaller recipe
-        //which is completely contained within another recipe
-        first = true;
-        uint32 index = 0;
-        buf2 = "";
-        for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-            uint32 recipeid = (uint32)atoi(row[0]);
-            if(first) {
-                buf2 += StringFormat("%u", recipeid);
-                first = false;
-            } else
-                buf2 += StringFormat(",%u", recipeid);
-
-            //length limit on buf2
-            if(index == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
-        		LogError("GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries", index + 1, results.RowCount());
-                break;
-            }
-        }
-
-        query = StringFormat("SELECT tre.recipe_id "
-                            "FROM tradeskill_recipe_entries AS tre "
-							 "WHERE tre.recipe_id IN (%s) "
-							 "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-							 "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum
-		);
-		results = QueryDatabase(query);
-		if (!results.Success()) {
-			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
-			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
-			return false;
-		}
-	}
-
-    if (results.RowCount() < 1)
-        return false;
 
 	if (results.RowCount() > 1) {
-		//The recipe is not unique, so we need to compare the container were using.
-		uint32 containerId = 0;
+		//multiple recipes, partial match... do an extra query to get it exact.
+		//this happens when combining components for a smaller recipe
+		//which is completely contained within another recipe
+		first = true;
+		uint32 index = 0;
+		buf2 = "";
+		for (auto row : results) {
+			const uint32 recipe_id = Strings::ToUnsignedInt(row[0]);
+			if (first) {
+				buf2 += fmt::format("{}", recipe_id);
+				first = false;
+			} else {
+				buf2 += fmt::format(", {}", recipe_id);
+			}
 
-		if (some_id) { //Standard container
-			containerId = some_id;
-		}
-		else if (c_type) {//World container
-			containerId = c_type;
-		}
-		else { //Invalid container
-			return false;
+			// length limit on buf2
+			if (index == 214) { // Maximum number of recipe matches (19 * 215 = 4096)
+				LogError(
+					"Warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries",
+					index + 1,
+					results.RowCount());
+				break;
+			}
+
+			++index;
 		}
 
-		query   = StringFormat(
-			"SELECT tre.recipe_id "
-			"FROM tradeskill_recipe_entries AS tre "
-			"WHERE tre.recipe_id IN (%s) "
-			"AND tre.item_id = %u;", buf2.c_str(), containerId
+		query = fmt::format(
+			"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre "
+			"WHERE tre.recipe_id IN ({}) GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = {} "
+			"AND sum(tre.item_id * tre.componentcount) = {}",
+			buf2,
+			count,
+			sum
 		);
 		results = QueryDatabase(query);
 		if (!results.Success()) {
-			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
-			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
+			LogError("Re-query: [{}]", query.c_str());
+			LogError("Error: [{}]", results.ErrorMessage().c_str());
+			return false;
+		}
+	}
+
+	if (results.RowCount() < 1) {
+		return false;
+	}
+
+	if (results.RowCount() > 1) { //The recipe is not unique, so we need to compare the container were using.
+		uint32 container_item_id = 0;
+
+		if (some_id) { // Standard container
+			container_item_id = some_id;
+		} else if (c_type) { // World container
+			container_item_id = c_type;
+		} else { // Invalid container
 			return false;
 		}
 
-		if (results.RowCount() == 0) { //Recipe contents matched more than 1 recipe, but not in this container
+		query = fmt::format(
+			"SELECT tre.recipe_id FROM tradeskill_recipe_entries AS tre WHERE tre.recipe_id IN ({}) AND tre.item_id = {}",
+			buf2,
+			container_item_id
+		);
+
+		results = QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Re-query: [{}]", query);
+			LogError("Error: [{}]", results.ErrorMessage());
+			return false;
+		}
+
+		if (!results.RowCount()) { //Recipe contents matched more than 1 recipe, but not in this container
 			LogError("Combine error: Incorrect container is being used!");
 			return false;
 		}
@@ -1348,84 +1416,87 @@ bool ZoneDatabase::GetTradeRecipe(
 			LogError(
 				"Combine error: Recipe is not unique! [{}] matches found for container [{}]. Continuing with first recipe match",
 				results.RowCount(),
-				containerId
+				container_item_id
 			);
 		}
 	}
 
 	auto row = results.begin();
-	uint32 recipe_id = (uint32)atoi(row[0]);
+	const uint32 recipe_id = Strings::ToUnsignedInt(row[0]);
 
 	//Right here we verify that we actually have ALL of the tradeskill components..
 	//instead of part which is possible with experimentation.
 	//This is here because something's up with the query above.. it needs to be rethought out
-	bool has_components = true;
-	query = StringFormat("SELECT item_id, componentcount "
-                        "FROM tradeskill_recipe_entries "
-                        "WHERE recipe_id = %i AND componentcount > 0",
-                        recipe_id);
-	results = QueryDatabase(query);
-    if (!results.Success()) {
-        return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
-    }
+	query = fmt::format(
+		"SELECT item_id, componentcount FROM tradeskill_recipe_entries WHERE componentcount > 0 AND recipe_id = {}",
+		recipe_id
+	);
 
-	if (results.RowCount() == 0) {
-		return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	results = QueryDatabase(query);
+	if (!results.Success() || !results.RowCount()) {
+		return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		int component_count = 0;
 
-		for (int x = EQ::invbag::SLOT_BEGIN; x < EQ::invtype::WORLD_SIZE; x++) {
-            const EQ::ItemInstance* inst = container->GetItem(x);
-            if(!inst)
-                continue;
+		for (uint8 slot_id = EQ::invbag::SLOT_BEGIN; slot_id < EQ::invtype::WORLD_SIZE; slot_id++) {
+			const auto inst = container->GetItem(slot_id);
+			if (!inst) {
+				continue;
+			}
 
-			const EQ::ItemData* item = database.GetItem(inst->GetItem()->ID);
-            if (!item)
-                continue;
+			if (inst->IsAugmented()) {
+				*is_augmented = true;
+				return false;
+			}
 
-			if (item->ID == atoi(row[0])) {
+			const auto item = database.GetItem(inst->GetItem()->ID);
+			if (!item) {
+				continue;
+			}
+
+			if (item->ID == Strings::ToUnsignedInt(row[0])) {
 				component_count++;
 			}
 
 			LogTradeskills(
-				"[GetTradeRecipe] Component count loop [{}] item [{}] recipe component_count [{}]",
+				"Component count loop [{}] item [{}] recipe component_count [{}]",
 				component_count,
 				item->ID,
-				atoi(row[1])
+				Strings::ToInt(row[1])
 			);
 		}
 
-		if (component_count != atoi(row[1])) {
+		if (component_count != Strings::ToInt(row[1])) {
 			return false;
 		}
 	}
 
-	return GetTradeRecipe(recipe_id, c_type, some_id, char_id, spec);
+	return GetTradeRecipe(recipe_id, c_type, some_id, c, spec);
 }
 
 bool ZoneDatabase::GetTradeRecipe(
 	uint32 recipe_id,
 	uint8 c_type,
 	uint32 some_id,
-	uint32 char_id,
-	DBTradeskillRecipe_Struct *spec
+	Client* c,
+	DBTradeskillRecipe_Struct* spec
 )
 {
+	if (!c) {
+		return false;
+	}
 
 	std::string container_where_filter;
-	if (some_id == 0) {
-		// world combiner so no item number
-		container_where_filter = StringFormat("= %u", c_type);
-	}
-	else {
-		// container in inventory
-		container_where_filter = StringFormat("IN (%u,%u)", c_type, some_id);
+	if (!some_id) { // world combiner so no item number
+		container_where_filter = fmt::format("= {}", c_type);
+	} else { // container in inventory
+		container_where_filter = fmt::format("IN ({}, {})", c_type, some_id);
 	}
 
-	std::string query = StringFormat(
-		SQL (
+	std::string query = fmt::format(
+		SQL(
 			SELECT
 			tradeskill_recipe.id,
 			tradeskill_recipe.tradeskill,
@@ -1440,86 +1511,91 @@ bool ZoneDatabase::GetTradeRecipe(
 				tradeskill_recipe
 				INNER JOIN tradeskill_recipe_entries ON tradeskill_recipe.id = tradeskill_recipe_entries.recipe_id
 			WHERE
-				tradeskill_recipe.id = %lu
-				AND tradeskill_recipe_entries.item_id %s
+				tradeskill_recipe.id = {}
+				AND tradeskill_recipe_entries.item_id {}
 				AND tradeskill_recipe.enabled
 				GROUP BY
 				tradeskill_recipe.id
-			)
-		,
-		(unsigned long) recipe_id,
-		container_where_filter.c_str()
+		),
+		recipe_id,
+		container_where_filter
 	);
-    auto results = QueryDatabase(query);
+	auto results = QueryDatabase(query);
 	if (!results.Success()) {
-		LogError("Error in GetTradeRecipe, query: [{}]", query.c_str());
-		LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
+		LogError("Error, query: [{}]", query.c_str());
+		LogError("Error: [{}]", results.ErrorMessage().c_str());
 		return false;
 	}
 
-	if (results.RowCount() != 1) {
+	if (!results.RowCount()) {
 		return false;
 	}
 
 	auto row = results.begin();
 
-	spec->tradeskill        = (EQ::skills::SkillType) atoi(row[1]);
-	spec->skill_needed      = (int16) atoi(row[2]);
-	spec->trivial           = (uint16) atoi(row[3]);
-	spec->nofail            = atoi(row[4]) ? true : false;
-	spec->replace_container = atoi(row[5]) ? true : false;
+	spec->tradeskill        = static_cast<EQ::skills::SkillType>(Strings::ToUnsignedInt(row[1]));
+	spec->skill_needed      = Strings::ToInt(row[2]);
+	spec->trivial           = Strings::ToUnsignedInt(row[3]);
+	spec->nofail            = Strings::ToBool(row[4]);
+	spec->replace_container = Strings::ToBool(row[5]);
 	spec->name              = row[6];
-	spec->must_learn        = (uint8) atoi(row[7]);
-	spec->quest             = atoi(row[8]) ? true : false;
+	spec->must_learn        = Strings::ToUnsignedInt(row[7]);
+	spec->quest             = Strings::ToBool(row[8]);
 	spec->has_learnt        = false;
 	spec->madecount         = 0;
 	spec->recipe_id         = recipe_id;
 
-	auto character_learned_recipe_list = CharacterRecipeListRepository::GetLearnedRecipeList(char_id);
-	auto character_learned_recipe      = CharacterRecipeListRepository::GetRecipe(
-		character_learned_recipe_list,
-		recipe_id
+	auto r = CharRecipeListRepository::GetWhere(
+		database,
+		fmt::format(
+			"char_id = {} and recipe_id = {}",
+			c->CharacterID(),
+			recipe_id
+		)
 	);
 
-	if (character_learned_recipe.made_count > 0) {
-		LogTradeskills("[GetTradeRecipe] made_count [{}]", character_learned_recipe.made_count);
+	if (!r.empty() && r[0].recipe_id) { //If this exists we learned it
+		LogTradeskills("made_count [{}]", r[0].madecount);
 
 		spec->has_learnt = true;
-		spec->madecount = (uint32)character_learned_recipe.made_count;
+		spec->madecount  = static_cast<uint32>(r[0].madecount);
 	}
 
 	//Pull the on-success items...
-	query = StringFormat("SELECT item_id,successcount FROM tradeskill_recipe_entries "
-                        "WHERE successcount > 0 AND recipe_id = %u", recipe_id);
-    results = QueryDatabase(query);
+	query = fmt::format(
+		"SELECT item_id, successcount FROM tradeskill_recipe_entries WHERE successcount > 0 AND recipe_id = {}",
+		recipe_id
+	);
+	results = QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
 	}
 
-	if(results.RowCount() < 1 && !spec->quest) {
-		LogError("Error in GetTradeRecept success: no success items returned");
+	if (!results.RowCount() && !spec->quest) {
+		LogError("Error in success: no success items returned");
 		return false;
 	}
 
 	spec->onsuccess.clear();
-	for(auto row = results.begin(); row != results.end(); ++row) {
-		uint32 item = (uint32)atoi(row[0]);
-		uint8 num = (uint8) atoi(row[1]);
-		spec->onsuccess.push_back(std::pair<uint32,uint8>(item, num));
+	for(auto row : results) {
+		const uint32 item_id       = Strings::ToUnsignedInt(row[0]);
+		const uint8  success_count = Strings::ToUnsignedInt(row[1]);
+		spec->onsuccess.emplace_back(std::pair<uint32, uint8>(item_id, success_count));
 	}
 
-    spec->onfail.clear();
+	spec->onfail.clear();
+
 	//Pull the on-fail items...
-	query   = StringFormat(
-		"SELECT item_id, failcount FROM tradeskill_recipe_entries "
-		"WHERE failcount > 0 AND recipe_id = %u", recipe_id
+	query = fmt::format(
+		"SELECT item_id, failcount FROM tradeskill_recipe_entries WHERE failcount > 0 AND recipe_id = {}",
+		recipe_id
 	);
 	results = QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			uint32 item = (uint32) atoi(row[0]);
-			uint8  num  = (uint8) atoi(row[1]);
-			spec->onfail.push_back(std::pair<uint32, uint8>(item, num));
+		for (auto row : results) {
+			const uint32 item_id    = Strings::ToUnsignedInt(row[0]);
+			const uint8  fail_count = Strings::ToUnsignedInt(row[1]);
+			spec->onfail.emplace_back(std::pair<uint32, uint8>(item_id, fail_count));
 		}
 	}
 
@@ -1531,18 +1607,17 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	// Pull the salvage list
-	query = StringFormat(
-		"SELECT item_id, salvagecount "
-		"FROM tradeskill_recipe_entries "
-		"WHERE salvagecount > 0 AND recipe_id = %u", recipe_id
+	query = fmt::format(
+		"SELECT item_id, salvagecount FROM tradeskill_recipe_entries WHERE salvagecount > 0 AND recipe_id = {}",
+		recipe_id
 	);
 
 	results = QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.begin(); ++row) {
-			uint32 item = (uint32) atoi(row[0]);
-			uint8  num  = (uint8) atoi(row[1]);
-			spec->salvage.push_back(std::pair<uint32, uint8>(item, num));
+		for (auto row : results) {
+			const uint32 item_id    = Strings::ToUnsignedInt(row[0]);
+			const uint8  salvage_count = Strings::ToUnsignedInt(row[1]);
+			spec->salvage.emplace_back(std::pair<uint32, uint8>(item_id, salvage_count));
 		}
 	}
 
@@ -1582,14 +1657,14 @@ void Client::LearnRecipe(uint32 recipe_id)
 		return;
 	}
 
-	auto tradeskill_recipe = TradeskillRecipeRepository::FindOne(recipe_id);
+	auto tradeskill_recipe = TradeskillRecipeRepository::FindOne(content_db, recipe_id);
 	if (tradeskill_recipe.id == 0) {
 		LogError("Invalid recipe [{}]", recipe_id);
 		return;
 	}
 
 	LogTradeskills(
-		"[LearnRecipe] recipe_id [{}] name [{}] learned [{}]",
+		"recipe_id [{}] name [{}] learned [{}]",
 		recipe_id,
 		tradeskill_recipe.name,
 		results.RowCount()
@@ -1609,6 +1684,86 @@ void Client::LearnRecipe(uint32 recipe_id)
 			CharacterID()
 		)
 	);
+}
+
+std::vector<uint32> ZoneDatabase::GetRecipeComponentItemIDs(RecipeCountType count_type, uint32 recipe_id)
+{
+	std::vector<uint32> l;
+
+	const auto& tr = TradeskillRecipeRepository::FindOne(content_db, recipe_id);
+	if (!tr.id) {
+		return l;
+	}
+
+	std::string c;
+	switch (count_type) {
+		case RecipeCountType::Success:
+			c = "successcount";
+			break;
+		case RecipeCountType::Fail:
+			c = "failcount";
+			break;
+		case RecipeCountType::Component:
+			c = "componentcount";
+			break;
+		case RecipeCountType::Salvage:
+			c = "salvagecount";
+			break;
+		case RecipeCountType::Container:
+			c = "iscontainer";
+			break;
+	}
+
+	const auto& tre = TradeskillRecipeEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"recipe_id = {} AND {} >= 1 ORDER BY id ASC",
+			recipe_id,
+			c
+		)
+	);
+	if (tre.empty()) {
+		return l;
+	}
+
+	for (const auto& e : tre) {
+		l.emplace_back(e.item_id);
+	}
+
+	return l;
+}
+
+int8 ZoneDatabase::GetRecipeComponentCount(RecipeCountType count_type, uint32 recipe_id, uint32 item_id)
+{
+	const auto& tr = TradeskillRecipeRepository::FindOne(content_db, recipe_id);
+	if (!tr.id) {
+		return -1;
+	}
+
+	const auto& tre = TradeskillRecipeEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"recipe_id = {} AND item_id = {} ORDER BY id ASC LIMIT 1",
+			recipe_id,
+			item_id
+		)
+	);
+	if (tre.empty()) {
+		return -1;
+	}
+
+	switch (count_type) {
+		case RecipeCountType::Success:
+			return tre[0].successcount;
+		case RecipeCountType::Fail:
+			return tre[0].failcount;
+		case RecipeCountType::Component:
+			return tre[0].componentcount;
+		case RecipeCountType::Salvage:
+			return tre[0].salvagecount;
+		default:
+			return -1;
+	}
 }
 
 bool Client::CanIncreaseTradeskill(EQ::skills::SkillType tradeskill) {
@@ -1675,3 +1830,66 @@ bool ZoneDatabase::DisableRecipe(uint32 recipe_id)
 
 	return false;
 }
+
+bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
+{
+	auto recipe_entries = TradeskillRecipeEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"recipe_id = {} ORDER BY componentcount DESC",
+			recipe_id
+		)
+	);
+	if (recipe_entries.empty()) {
+		return false;
+	}
+
+	// validate which items from the recipe we will call CheckLoreConflict on
+	for (const auto &tre : recipe_entries) {
+		if (tre.item_id) {
+			auto tre_inst = database.GetItem(tre.item_id);
+
+			// To compare items we iterate against each item in the recipe that have a loregroup.
+			for (auto &tre_update_item : recipe_entries) {
+				bool fi_is_valid = tre_update_item.item_id && tre_inst && tre_inst->LoreGroup != 0;
+
+				if (fi_is_valid) {
+					auto tre_update_item_inst = database.GetItem(tre_update_item.item_id);
+					bool ei_is_valid = tre_update_item_inst && tre_update_item_inst->LoreGroup != 0;
+
+					if (ei_is_valid) {
+						bool unique_lore_group_match = tre_inst->LoreGroup > 0 && tre_inst->LoreGroup == tre_update_item_inst->LoreGroup;
+						bool component_count_is_valid = tre_update_item.componentcount == 0 && tre.componentcount > 0;
+
+						// If the recipe item is a component, and matches a unique lore group (> 0) or the item_id matches another entry in the recipe
+						// zero out the item_id, this will prevent us from doing a lore check inadvertently where
+						// the item is a component, and returned on success, fail, salvage.
+						// or uses an item that is part of a unique loregroup that returns an item of the same unique loregroup
+						if (ei_is_valid && (tre_update_item.item_id == tre.item_id || unique_lore_group_match) && component_count_is_valid) {
+							tre_update_item.item_id = 0;
+						}
+					}
+				}
+			}
+
+			if (tre_inst) {
+				if (tre_inst->LoreGroup == 0 || tre.componentcount > 0 || tre.iscontainer) {
+					continue;
+				}
+
+				if (CheckLoreConflict(tre_inst)) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemData);
+					linker.SetItemData(tre_inst);
+					auto item_link = linker.GenerateLink();
+					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+

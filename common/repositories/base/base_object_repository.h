@@ -1,68 +1,52 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_OBJECT_REPOSITORY_H
 #define EQEMU_BASE_OBJECT_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseObjectRepository {
 public:
 	struct Object {
-		int         id;
-		int         zoneid;
-		int         version;
+		int32_t     id;
+		uint32_t    zoneid;
+		int16_t     version;
 		float       xpos;
 		float       ypos;
 		float       zpos;
 		float       heading;
-		int         itemid;
-		int         charges;
+		int32_t     itemid;
+		uint16_t    charges;
 		std::string objectname;
-		int         type;
-		int         icon;
-		int         unknown08;
-		int         unknown10;
-		int         unknown20;
-		int         unknown24;
-		int         unknown60;
-		int         unknown64;
-		int         unknown68;
-		int         unknown72;
-		int         unknown76;
-		int         unknown84;
+		int32_t     type;
+		int32_t     icon;
+		float       size_percentage;
+		int32_t     unknown24;
+		int32_t     unknown60;
+		int32_t     unknown64;
+		int32_t     unknown68;
+		int32_t     unknown72;
+		int32_t     unknown76;
+		int32_t     unknown84;
 		float       size;
+		int32_t     solid_type;
+		int32_t     incline;
 		float       tilt_x;
 		float       tilt_y;
 		std::string display_name;
-		int         min_expansion;
-		int         max_expansion;
+		int8_t      min_expansion;
+		int8_t      max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
 	};
@@ -87,9 +71,7 @@ public:
 			"objectname",
 			"type",
 			"icon",
-			"unknown08",
-			"unknown10",
-			"unknown20",
+			"size_percentage",
 			"unknown24",
 			"unknown60",
 			"unknown64",
@@ -98,6 +80,44 @@ public:
 			"unknown76",
 			"unknown84",
 			"size",
+			"solid_type",
+			"incline",
+			"tilt_x",
+			"tilt_y",
+			"display_name",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"zoneid",
+			"version",
+			"xpos",
+			"ypos",
+			"zpos",
+			"heading",
+			"itemid",
+			"charges",
+			"objectname",
+			"type",
+			"icon",
+			"size_percentage",
+			"unknown24",
+			"unknown60",
+			"unknown64",
+			"unknown68",
+			"unknown72",
+			"unknown76",
+			"unknown84",
+			"size",
+			"solid_type",
+			"incline",
 			"tilt_x",
 			"tilt_y",
 			"display_name",
@@ -110,22 +130,12 @@ public:
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -137,7 +147,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -147,49 +157,49 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Object NewEntity()
 	{
-		Object entry{};
+		Object e{};
 
-		entry.id                     = 0;
-		entry.zoneid                 = 0;
-		entry.version                = 0;
-		entry.xpos                   = 0;
-		entry.ypos                   = 0;
-		entry.zpos                   = 0;
-		entry.heading                = 0;
-		entry.itemid                 = 0;
-		entry.charges                = 0;
-		entry.objectname             = "";
-		entry.type                   = 0;
-		entry.icon                   = 0;
-		entry.unknown08              = 0;
-		entry.unknown10              = 0;
-		entry.unknown20              = 0;
-		entry.unknown24              = 0;
-		entry.unknown60              = 0;
-		entry.unknown64              = 0;
-		entry.unknown68              = 0;
-		entry.unknown72              = 0;
-		entry.unknown76              = 0;
-		entry.unknown84              = 0;
-		entry.size                   = 100;
-		entry.tilt_x                 = 0;
-		entry.tilt_y                 = 0;
-		entry.display_name           = "";
-		entry.min_expansion          = 0;
-		entry.max_expansion          = 0;
-		entry.content_flags          = "";
-		entry.content_flags_disabled = "";
+		e.id                     = 0;
+		e.zoneid                 = 0;
+		e.version                = 0;
+		e.xpos                   = 0;
+		e.ypos                   = 0;
+		e.zpos                   = 0;
+		e.heading                = 0;
+		e.itemid                 = 0;
+		e.charges                = 0;
+		e.objectname             = "";
+		e.type                   = 0;
+		e.icon                   = 0;
+		e.size_percentage        = 0;
+		e.unknown24              = 0;
+		e.unknown60              = 0;
+		e.unknown64              = 0;
+		e.unknown68              = 0;
+		e.unknown72              = 0;
+		e.unknown76              = 0;
+		e.unknown84              = 0;
+		e.size                   = 100;
+		e.solid_type             = 0;
+		e.incline                = 0;
+		e.tilt_x                 = 0;
+		e.tilt_y                 = 0;
+		e.display_name           = "";
+		e.min_expansion          = -1;
+		e.max_expansion          = -1;
+		e.content_flags          = "";
+		e.content_flags_disabled = "";
 
-		return entry;
+		return e;
 	}
 
-	static Object GetObjectEntry(
+	static Object GetObject(
 		const std::vector<Object> &objects,
 		int object_id
 	)
@@ -204,63 +214,66 @@ public:
 	}
 
 	static Object FindOne(
+		Database& db,
 		int object_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				object_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.xpos                   = row[3] ? strtof(row[3], nullptr) : 0;
+			e.ypos                   = row[4] ? strtof(row[4], nullptr) : 0;
+			e.zpos                   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.itemid                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.charges                = row[8] ? static_cast<uint16_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.icon                   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.size_percentage        = row[12] ? strtof(row[12], nullptr) : 0;
+			e.unknown24              = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.unknown60              = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.unknown64              = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.unknown68              = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.unknown72              = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.unknown76              = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.unknown84              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.size                   = row[20] ? strtof(row[20], nullptr) : 100;
+			e.solid_type             = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.incline                = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
+			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
+			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int object_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -273,50 +286,51 @@ public:
 	}
 
 	static int UpdateOne(
-		Object object_entry
+		Database& db,
+		const Object &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(object_entry.zoneid));
-		update_values.push_back(columns[2] + " = " + std::to_string(object_entry.version));
-		update_values.push_back(columns[3] + " = " + std::to_string(object_entry.xpos));
-		update_values.push_back(columns[4] + " = " + std::to_string(object_entry.ypos));
-		update_values.push_back(columns[5] + " = " + std::to_string(object_entry.zpos));
-		update_values.push_back(columns[6] + " = " + std::to_string(object_entry.heading));
-		update_values.push_back(columns[7] + " = " + std::to_string(object_entry.itemid));
-		update_values.push_back(columns[8] + " = " + std::to_string(object_entry.charges));
-		update_values.push_back(columns[9] + " = '" + EscapeString(object_entry.objectname) + "'");
-		update_values.push_back(columns[10] + " = " + std::to_string(object_entry.type));
-		update_values.push_back(columns[11] + " = " + std::to_string(object_entry.icon));
-		update_values.push_back(columns[12] + " = " + std::to_string(object_entry.unknown08));
-		update_values.push_back(columns[13] + " = " + std::to_string(object_entry.unknown10));
-		update_values.push_back(columns[14] + " = " + std::to_string(object_entry.unknown20));
-		update_values.push_back(columns[15] + " = " + std::to_string(object_entry.unknown24));
-		update_values.push_back(columns[16] + " = " + std::to_string(object_entry.unknown60));
-		update_values.push_back(columns[17] + " = " + std::to_string(object_entry.unknown64));
-		update_values.push_back(columns[18] + " = " + std::to_string(object_entry.unknown68));
-		update_values.push_back(columns[19] + " = " + std::to_string(object_entry.unknown72));
-		update_values.push_back(columns[20] + " = " + std::to_string(object_entry.unknown76));
-		update_values.push_back(columns[21] + " = " + std::to_string(object_entry.unknown84));
-		update_values.push_back(columns[22] + " = " + std::to_string(object_entry.size));
-		update_values.push_back(columns[23] + " = " + std::to_string(object_entry.tilt_x));
-		update_values.push_back(columns[24] + " = " + std::to_string(object_entry.tilt_y));
-		update_values.push_back(columns[25] + " = '" + EscapeString(object_entry.display_name) + "'");
-		update_values.push_back(columns[26] + " = " + std::to_string(object_entry.min_expansion));
-		update_values.push_back(columns[27] + " = " + std::to_string(object_entry.max_expansion));
-		update_values.push_back(columns[28] + " = '" + EscapeString(object_entry.content_flags) + "'");
-		update_values.push_back(columns[29] + " = '" + EscapeString(object_entry.content_flags_disabled) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.zoneid));
+		v.push_back(columns[2] + " = " + std::to_string(e.version));
+		v.push_back(columns[3] + " = " + std::to_string(e.xpos));
+		v.push_back(columns[4] + " = " + std::to_string(e.ypos));
+		v.push_back(columns[5] + " = " + std::to_string(e.zpos));
+		v.push_back(columns[6] + " = " + std::to_string(e.heading));
+		v.push_back(columns[7] + " = " + std::to_string(e.itemid));
+		v.push_back(columns[8] + " = " + std::to_string(e.charges));
+		v.push_back(columns[9] + " = '" + Strings::Escape(e.objectname) + "'");
+		v.push_back(columns[10] + " = " + std::to_string(e.type));
+		v.push_back(columns[11] + " = " + std::to_string(e.icon));
+		v.push_back(columns[12] + " = " + std::to_string(e.size_percentage));
+		v.push_back(columns[13] + " = " + std::to_string(e.unknown24));
+		v.push_back(columns[14] + " = " + std::to_string(e.unknown60));
+		v.push_back(columns[15] + " = " + std::to_string(e.unknown64));
+		v.push_back(columns[16] + " = " + std::to_string(e.unknown68));
+		v.push_back(columns[17] + " = " + std::to_string(e.unknown72));
+		v.push_back(columns[18] + " = " + std::to_string(e.unknown76));
+		v.push_back(columns[19] + " = " + std::to_string(e.unknown84));
+		v.push_back(columns[20] + " = " + std::to_string(e.size));
+		v.push_back(columns[21] + " = " + std::to_string(e.solid_type));
+		v.push_back(columns[22] + " = " + std::to_string(e.incline));
+		v.push_back(columns[23] + " = " + std::to_string(e.tilt_x));
+		v.push_back(columns[24] + " = " + std::to_string(e.tilt_y));
+		v.push_back(columns[25] + " = '" + Strings::Escape(e.display_name) + "'");
+		v.push_back(columns[26] + " = " + std::to_string(e.min_expansion));
+		v.push_back(columns[27] + " = " + std::to_string(e.max_expansion));
+		v.push_back(columns[28] + " = '" + Strings::Escape(e.content_flags) + "'");
+		v.push_back(columns[29] + " = '" + Strings::Escape(e.content_flags_disabled) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				object_entry.id
+				e.id
 			)
 		);
 
@@ -324,119 +338,123 @@ public:
 	}
 
 	static Object InsertOne(
-		Object object_entry
+		Database& db,
+		Object e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(object_entry.zoneid));
-		insert_values.push_back(std::to_string(object_entry.version));
-		insert_values.push_back(std::to_string(object_entry.xpos));
-		insert_values.push_back(std::to_string(object_entry.ypos));
-		insert_values.push_back(std::to_string(object_entry.zpos));
-		insert_values.push_back(std::to_string(object_entry.heading));
-		insert_values.push_back(std::to_string(object_entry.itemid));
-		insert_values.push_back(std::to_string(object_entry.charges));
-		insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
-		insert_values.push_back(std::to_string(object_entry.type));
-		insert_values.push_back(std::to_string(object_entry.icon));
-		insert_values.push_back(std::to_string(object_entry.unknown08));
-		insert_values.push_back(std::to_string(object_entry.unknown10));
-		insert_values.push_back(std::to_string(object_entry.unknown20));
-		insert_values.push_back(std::to_string(object_entry.unknown24));
-		insert_values.push_back(std::to_string(object_entry.unknown60));
-		insert_values.push_back(std::to_string(object_entry.unknown64));
-		insert_values.push_back(std::to_string(object_entry.unknown68));
-		insert_values.push_back(std::to_string(object_entry.unknown72));
-		insert_values.push_back(std::to_string(object_entry.unknown76));
-		insert_values.push_back(std::to_string(object_entry.unknown84));
-		insert_values.push_back(std::to_string(object_entry.size));
-		insert_values.push_back(std::to_string(object_entry.tilt_x));
-		insert_values.push_back(std::to_string(object_entry.tilt_y));
-		insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
-		insert_values.push_back(std::to_string(object_entry.min_expansion));
-		insert_values.push_back(std::to_string(object_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
-		insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.xpos));
+		v.push_back(std::to_string(e.ypos));
+		v.push_back(std::to_string(e.zpos));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back(std::to_string(e.charges));
+		v.push_back("'" + Strings::Escape(e.objectname) + "'");
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.size_percentage));
+		v.push_back(std::to_string(e.unknown24));
+		v.push_back(std::to_string(e.unknown60));
+		v.push_back(std::to_string(e.unknown64));
+		v.push_back(std::to_string(e.unknown68));
+		v.push_back(std::to_string(e.unknown72));
+		v.push_back(std::to_string(e.unknown76));
+		v.push_back(std::to_string(e.unknown84));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.solid_type));
+		v.push_back(std::to_string(e.incline));
+		v.push_back(std::to_string(e.tilt_x));
+		v.push_back(std::to_string(e.tilt_y));
+		v.push_back("'" + Strings::Escape(e.display_name) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			object_entry.id = results.LastInsertedID();
-			return object_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		object_entry = NewEntity();
+		e = NewEntity();
 
-		return object_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Object> object_entries
+		Database& db,
+		const std::vector<Object> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &object_entry: object_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(object_entry.zoneid));
-			insert_values.push_back(std::to_string(object_entry.version));
-			insert_values.push_back(std::to_string(object_entry.xpos));
-			insert_values.push_back(std::to_string(object_entry.ypos));
-			insert_values.push_back(std::to_string(object_entry.zpos));
-			insert_values.push_back(std::to_string(object_entry.heading));
-			insert_values.push_back(std::to_string(object_entry.itemid));
-			insert_values.push_back(std::to_string(object_entry.charges));
-			insert_values.push_back("'" + EscapeString(object_entry.objectname) + "'");
-			insert_values.push_back(std::to_string(object_entry.type));
-			insert_values.push_back(std::to_string(object_entry.icon));
-			insert_values.push_back(std::to_string(object_entry.unknown08));
-			insert_values.push_back(std::to_string(object_entry.unknown10));
-			insert_values.push_back(std::to_string(object_entry.unknown20));
-			insert_values.push_back(std::to_string(object_entry.unknown24));
-			insert_values.push_back(std::to_string(object_entry.unknown60));
-			insert_values.push_back(std::to_string(object_entry.unknown64));
-			insert_values.push_back(std::to_string(object_entry.unknown68));
-			insert_values.push_back(std::to_string(object_entry.unknown72));
-			insert_values.push_back(std::to_string(object_entry.unknown76));
-			insert_values.push_back(std::to_string(object_entry.unknown84));
-			insert_values.push_back(std::to_string(object_entry.size));
-			insert_values.push_back(std::to_string(object_entry.tilt_x));
-			insert_values.push_back(std::to_string(object_entry.tilt_y));
-			insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
-			insert_values.push_back(std::to_string(object_entry.min_expansion));
-			insert_values.push_back(std::to_string(object_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
-			insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.xpos));
+			v.push_back(std::to_string(e.ypos));
+			v.push_back(std::to_string(e.zpos));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back(std::to_string(e.charges));
+			v.push_back("'" + Strings::Escape(e.objectname) + "'");
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.size_percentage));
+			v.push_back(std::to_string(e.unknown24));
+			v.push_back(std::to_string(e.unknown60));
+			v.push_back(std::to_string(e.unknown64));
+			v.push_back(std::to_string(e.unknown68));
+			v.push_back(std::to_string(e.unknown72));
+			v.push_back(std::to_string(e.unknown76));
+			v.push_back(std::to_string(e.unknown84));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.solid_type));
+			v.push_back(std::to_string(e.incline));
+			v.push_back(std::to_string(e.tilt_x));
+			v.push_back(std::to_string(e.tilt_y));
+			v.push_back("'" + Strings::Escape(e.display_name) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Object> All()
+	static std::vector<Object> All(Database& db)
 	{
 		std::vector<Object> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -446,50 +464,50 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.xpos                   = row[3] ? strtof(row[3], nullptr) : 0;
+			e.ypos                   = row[4] ? strtof(row[4], nullptr) : 0;
+			e.zpos                   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.itemid                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.charges                = row[8] ? static_cast<uint16_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.icon                   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.size_percentage        = row[12] ? strtof(row[12], nullptr) : 0;
+			e.unknown24              = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.unknown60              = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.unknown64              = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.unknown68              = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.unknown72              = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.unknown76              = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.unknown84              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.size                   = row[20] ? strtof(row[20], nullptr) : 100;
+			e.solid_type             = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.incline                = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
+			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
+			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Object> GetWhere(std::string where_filter)
+	static std::vector<Object> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Object> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -500,48 +518,48 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Object entry{};
+			Object e{};
 
-			entry.id                     = atoi(row[0]);
-			entry.zoneid                 = atoi(row[1]);
-			entry.version                = atoi(row[2]);
-			entry.xpos                   = static_cast<float>(atof(row[3]));
-			entry.ypos                   = static_cast<float>(atof(row[4]));
-			entry.zpos                   = static_cast<float>(atof(row[5]));
-			entry.heading                = static_cast<float>(atof(row[6]));
-			entry.itemid                 = atoi(row[7]);
-			entry.charges                = atoi(row[8]);
-			entry.objectname             = row[9] ? row[9] : "";
-			entry.type                   = atoi(row[10]);
-			entry.icon                   = atoi(row[11]);
-			entry.unknown08              = atoi(row[12]);
-			entry.unknown10              = atoi(row[13]);
-			entry.unknown20              = atoi(row[14]);
-			entry.unknown24              = atoi(row[15]);
-			entry.unknown60              = atoi(row[16]);
-			entry.unknown64              = atoi(row[17]);
-			entry.unknown68              = atoi(row[18]);
-			entry.unknown72              = atoi(row[19]);
-			entry.unknown76              = atoi(row[20]);
-			entry.unknown84              = atoi(row[21]);
-			entry.size                   = static_cast<float>(atof(row[22]));
-			entry.tilt_x                 = static_cast<float>(atof(row[23]));
-			entry.tilt_y                 = static_cast<float>(atof(row[24]));
-			entry.display_name           = row[25] ? row[25] : "";
-			entry.min_expansion          = atoi(row[26]);
-			entry.max_expansion          = atoi(row[27]);
-			entry.content_flags          = row[28] ? row[28] : "";
-			entry.content_flags_disabled = row[29] ? row[29] : "";
+			e.id                     = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.zoneid                 = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.version                = row[2] ? static_cast<int16_t>(atoi(row[2])) : 0;
+			e.xpos                   = row[3] ? strtof(row[3], nullptr) : 0;
+			e.ypos                   = row[4] ? strtof(row[4], nullptr) : 0;
+			e.zpos                   = row[5] ? strtof(row[5], nullptr) : 0;
+			e.heading                = row[6] ? strtof(row[6], nullptr) : 0;
+			e.itemid                 = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.charges                = row[8] ? static_cast<uint16_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.objectname             = row[9] ? row[9] : "";
+			e.type                   = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.icon                   = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.size_percentage        = row[12] ? strtof(row[12], nullptr) : 0;
+			e.unknown24              = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.unknown60              = row[14] ? static_cast<int32_t>(atoi(row[14])) : 0;
+			e.unknown64              = row[15] ? static_cast<int32_t>(atoi(row[15])) : 0;
+			e.unknown68              = row[16] ? static_cast<int32_t>(atoi(row[16])) : 0;
+			e.unknown72              = row[17] ? static_cast<int32_t>(atoi(row[17])) : 0;
+			e.unknown76              = row[18] ? static_cast<int32_t>(atoi(row[18])) : 0;
+			e.unknown84              = row[19] ? static_cast<int32_t>(atoi(row[19])) : 0;
+			e.size                   = row[20] ? strtof(row[20], nullptr) : 100;
+			e.solid_type             = row[21] ? static_cast<int32_t>(atoi(row[21])) : 0;
+			e.incline                = row[22] ? static_cast<int32_t>(atoi(row[22])) : 0;
+			e.tilt_x                 = row[23] ? strtof(row[23], nullptr) : 0;
+			e.tilt_y                 = row[24] ? strtof(row[24], nullptr) : 0;
+			e.display_name           = row[25] ? row[25] : "";
+			e.min_expansion          = row[26] ? static_cast<int8_t>(atoi(row[26])) : -1;
+			e.max_expansion          = row[27] ? static_cast<int8_t>(atoi(row[27])) : -1;
+			e.content_flags          = row[28] ? row[28] : "";
+			e.content_flags_disabled = row[29] ? row[29] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -552,9 +570,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -564,6 +582,146 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Object &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.zoneid));
+		v.push_back(std::to_string(e.version));
+		v.push_back(std::to_string(e.xpos));
+		v.push_back(std::to_string(e.ypos));
+		v.push_back(std::to_string(e.zpos));
+		v.push_back(std::to_string(e.heading));
+		v.push_back(std::to_string(e.itemid));
+		v.push_back(std::to_string(e.charges));
+		v.push_back("'" + Strings::Escape(e.objectname) + "'");
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.icon));
+		v.push_back(std::to_string(e.size_percentage));
+		v.push_back(std::to_string(e.unknown24));
+		v.push_back(std::to_string(e.unknown60));
+		v.push_back(std::to_string(e.unknown64));
+		v.push_back(std::to_string(e.unknown68));
+		v.push_back(std::to_string(e.unknown72));
+		v.push_back(std::to_string(e.unknown76));
+		v.push_back(std::to_string(e.unknown84));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.solid_type));
+		v.push_back(std::to_string(e.incline));
+		v.push_back(std::to_string(e.tilt_x));
+		v.push_back(std::to_string(e.tilt_y));
+		v.push_back("'" + Strings::Escape(e.display_name) + "'");
+		v.push_back(std::to_string(e.min_expansion));
+		v.push_back(std::to_string(e.max_expansion));
+		v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+		v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Object> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.zoneid));
+			v.push_back(std::to_string(e.version));
+			v.push_back(std::to_string(e.xpos));
+			v.push_back(std::to_string(e.ypos));
+			v.push_back(std::to_string(e.zpos));
+			v.push_back(std::to_string(e.heading));
+			v.push_back(std::to_string(e.itemid));
+			v.push_back(std::to_string(e.charges));
+			v.push_back("'" + Strings::Escape(e.objectname) + "'");
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.icon));
+			v.push_back(std::to_string(e.size_percentage));
+			v.push_back(std::to_string(e.unknown24));
+			v.push_back(std::to_string(e.unknown60));
+			v.push_back(std::to_string(e.unknown64));
+			v.push_back(std::to_string(e.unknown68));
+			v.push_back(std::to_string(e.unknown72));
+			v.push_back(std::to_string(e.unknown76));
+			v.push_back(std::to_string(e.unknown84));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.solid_type));
+			v.push_back(std::to_string(e.incline));
+			v.push_back(std::to_string(e.tilt_x));
+			v.push_back(std::to_string(e.tilt_y));
+			v.push_back("'" + Strings::Escape(e.display_name) + "'");
+			v.push_back(std::to_string(e.min_expansion));
+			v.push_back(std::to_string(e.max_expansion));
+			v.push_back("'" + Strings::Escape(e.content_flags) + "'");
+			v.push_back("'" + Strings::Escape(e.content_flags_disabled) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_OBJECT_REPOSITORY_H

@@ -507,11 +507,11 @@ void MainFrame::SaveActivity(wxCommandEvent& event)
 	ourAct.optional = mActivityOptional->GetValue();
 
 	getStr = mActID->GetValue();
-	ourAct.activityId = atoi(getStr.mb_str());
+	ourAct.activityId = Strings::ToInt(getStr.mb_str());
 	getStr.Clear();
 
 	getStr = mActStep->GetValue();
-	ourAct.step = atoi(getStr.mb_str());
+	ourAct.step = Strings::ToInt(getStr.mb_str());
 	getStr.Clear();
 
 	int type = mActType->GetSelection();
@@ -530,17 +530,17 @@ void MainFrame::SaveActivity(wxCommandEvent& event)
 	}
 
 	getStr = mActDeliver->GetValue();
-	ourAct.deliverToNpc = atoi(getStr.mb_str());
+	ourAct.deliverToNpc = Strings::ToInt(getStr.mb_str());
 	getStr.Clear();
 
 	ourAct.goalmethod = mActMethod->GetSelection();
 
 	getStr = mActGoalID->GetValue();
-	ourAct.goalid = atoi(getStr.mb_str());
+	ourAct.goalid = Strings::ToInt(getStr.mb_str());
 	getStr.Clear();
 
 	getStr = mActGoalCount->GetValue();
-	ourAct.goalcount = atoi(getStr.mb_str());
+	ourAct.goalcount = Strings::ToInt(getStr.mb_str());
 	getStr.Clear();
 
 	if(ourAct.activityId == openedActivity.activityid && ourAct.id == openedActivity.id){

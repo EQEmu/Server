@@ -1,61 +1,45 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_NPC_SPELLS_REPOSITORY_H
 #define EQEMU_BASE_NPC_SPELLS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseNpcSpellsRepository {
 public:
 	struct NpcSpells {
-		int         id;
+		uint32_t    id;
 		std::string name;
-		int         parent_list;
-		int         attack_proc;
-		int         proc_chance;
-		int         range_proc;
-		int         rproc_chance;
-		int         defensive_proc;
-		int         dproc_chance;
-		int         fail_recast;
-		int         engaged_no_sp_recast_min;
-		int         engaged_no_sp_recast_max;
-		int         engaged_b_self_chance;
-		int         engaged_b_other_chance;
-		int         engaged_d_chance;
-		int         pursue_no_sp_recast_min;
-		int         pursue_no_sp_recast_max;
-		int         pursue_d_chance;
-		int         idle_no_sp_recast_min;
-		int         idle_no_sp_recast_max;
-		int         idle_b_chance;
+		uint32_t    parent_list;
+		int16_t     attack_proc;
+		int8_t      proc_chance;
+		int16_t     range_proc;
+		int16_t     rproc_chance;
+		int16_t     defensive_proc;
+		int16_t     dproc_chance;
+		uint32_t    fail_recast;
+		uint32_t    engaged_no_sp_recast_min;
+		uint32_t    engaged_no_sp_recast_max;
+		uint8_t     engaged_b_self_chance;
+		uint8_t     engaged_b_other_chance;
+		uint8_t     engaged_d_chance;
+		uint32_t    pursue_no_sp_recast_min;
+		uint32_t    pursue_no_sp_recast_max;
+		uint8_t     pursue_d_chance;
+		uint32_t    idle_no_sp_recast_min;
+		uint32_t    idle_no_sp_recast_max;
+		uint8_t     idle_b_chance;
 	};
 
 	static std::string PrimaryKey()
@@ -90,24 +74,41 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"name",
+			"parent_list",
+			"attack_proc",
+			"proc_chance",
+			"range_proc",
+			"rproc_chance",
+			"defensive_proc",
+			"dproc_chance",
+			"fail_recast",
+			"engaged_no_sp_recast_min",
+			"engaged_no_sp_recast_max",
+			"engaged_b_self_chance",
+			"engaged_b_other_chance",
+			"engaged_d_chance",
+			"pursue_no_sp_recast_min",
+			"pursue_no_sp_recast_max",
+			"pursue_d_chance",
+			"idle_no_sp_recast_min",
+			"idle_no_sp_recast_max",
+			"idle_b_chance",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -119,7 +120,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -129,40 +130,40 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static NpcSpells NewEntity()
 	{
-		NpcSpells entry{};
+		NpcSpells e{};
 
-		entry.id                       = 0;
-		entry.name                     = "";
-		entry.parent_list              = 0;
-		entry.attack_proc              = -1;
-		entry.proc_chance              = 3;
-		entry.range_proc               = -1;
-		entry.rproc_chance             = 0;
-		entry.defensive_proc           = -1;
-		entry.dproc_chance             = 0;
-		entry.fail_recast              = 0;
-		entry.engaged_no_sp_recast_min = 0;
-		entry.engaged_no_sp_recast_max = 0;
-		entry.engaged_b_self_chance    = 0;
-		entry.engaged_b_other_chance   = 0;
-		entry.engaged_d_chance         = 0;
-		entry.pursue_no_sp_recast_min  = 0;
-		entry.pursue_no_sp_recast_max  = 0;
-		entry.pursue_d_chance          = 0;
-		entry.idle_no_sp_recast_min    = 0;
-		entry.idle_no_sp_recast_max    = 0;
-		entry.idle_b_chance            = 0;
+		e.id                       = 0;
+		e.name                     = "";
+		e.parent_list              = 0;
+		e.attack_proc              = -1;
+		e.proc_chance              = 3;
+		e.range_proc               = -1;
+		e.rproc_chance             = 0;
+		e.defensive_proc           = -1;
+		e.dproc_chance             = 0;
+		e.fail_recast              = 0;
+		e.engaged_no_sp_recast_min = 0;
+		e.engaged_no_sp_recast_max = 0;
+		e.engaged_b_self_chance    = 0;
+		e.engaged_b_other_chance   = 0;
+		e.engaged_d_chance         = 0;
+		e.pursue_no_sp_recast_min  = 0;
+		e.pursue_no_sp_recast_max  = 0;
+		e.pursue_d_chance          = 0;
+		e.idle_no_sp_recast_min    = 0;
+		e.idle_no_sp_recast_max    = 0;
+		e.idle_b_chance            = 0;
 
-		return entry;
+		return e;
 	}
 
-	static NpcSpells GetNpcSpellsEntry(
+	static NpcSpells GetNpcSpells(
 		const std::vector<NpcSpells> &npc_spellss,
 		int npc_spells_id
 	)
@@ -177,54 +178,57 @@ public:
 	}
 
 	static NpcSpells FindOne(
+		Database& db,
 		int npc_spells_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				npc_spells_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			NpcSpells entry{};
+			NpcSpells e{};
 
-			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1] ? row[1] : "";
-			entry.parent_list              = atoi(row[2]);
-			entry.attack_proc              = atoi(row[3]);
-			entry.proc_chance              = atoi(row[4]);
-			entry.range_proc               = atoi(row[5]);
-			entry.rproc_chance             = atoi(row[6]);
-			entry.defensive_proc           = atoi(row[7]);
-			entry.dproc_chance             = atoi(row[8]);
-			entry.fail_recast              = atoi(row[9]);
-			entry.engaged_no_sp_recast_min = atoi(row[10]);
-			entry.engaged_no_sp_recast_max = atoi(row[11]);
-			entry.engaged_b_self_chance    = atoi(row[12]);
-			entry.engaged_b_other_chance   = atoi(row[13]);
-			entry.engaged_d_chance         = atoi(row[14]);
-			entry.pursue_no_sp_recast_min  = atoi(row[15]);
-			entry.pursue_no_sp_recast_max  = atoi(row[16]);
-			entry.pursue_d_chance          = atoi(row[17]);
-			entry.idle_no_sp_recast_min    = atoi(row[18]);
-			entry.idle_no_sp_recast_max    = atoi(row[19]);
-			entry.idle_b_chance            = atoi(row[20]);
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                     = row[1] ? row[1] : "";
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int npc_spells_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -237,41 +241,42 @@ public:
 	}
 
 	static int UpdateOne(
-		NpcSpells npc_spells_entry
+		Database& db,
+		const NpcSpells &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(npc_spells_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(npc_spells_entry.parent_list));
-		update_values.push_back(columns[3] + " = " + std::to_string(npc_spells_entry.attack_proc));
-		update_values.push_back(columns[4] + " = " + std::to_string(npc_spells_entry.proc_chance));
-		update_values.push_back(columns[5] + " = " + std::to_string(npc_spells_entry.range_proc));
-		update_values.push_back(columns[6] + " = " + std::to_string(npc_spells_entry.rproc_chance));
-		update_values.push_back(columns[7] + " = " + std::to_string(npc_spells_entry.defensive_proc));
-		update_values.push_back(columns[8] + " = " + std::to_string(npc_spells_entry.dproc_chance));
-		update_values.push_back(columns[9] + " = " + std::to_string(npc_spells_entry.fail_recast));
-		update_values.push_back(columns[10] + " = " + std::to_string(npc_spells_entry.engaged_no_sp_recast_min));
-		update_values.push_back(columns[11] + " = " + std::to_string(npc_spells_entry.engaged_no_sp_recast_max));
-		update_values.push_back(columns[12] + " = " + std::to_string(npc_spells_entry.engaged_b_self_chance));
-		update_values.push_back(columns[13] + " = " + std::to_string(npc_spells_entry.engaged_b_other_chance));
-		update_values.push_back(columns[14] + " = " + std::to_string(npc_spells_entry.engaged_d_chance));
-		update_values.push_back(columns[15] + " = " + std::to_string(npc_spells_entry.pursue_no_sp_recast_min));
-		update_values.push_back(columns[16] + " = " + std::to_string(npc_spells_entry.pursue_no_sp_recast_max));
-		update_values.push_back(columns[17] + " = " + std::to_string(npc_spells_entry.pursue_d_chance));
-		update_values.push_back(columns[18] + " = " + std::to_string(npc_spells_entry.idle_no_sp_recast_min));
-		update_values.push_back(columns[19] + " = " + std::to_string(npc_spells_entry.idle_no_sp_recast_max));
-		update_values.push_back(columns[20] + " = " + std::to_string(npc_spells_entry.idle_b_chance));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.parent_list));
+		v.push_back(columns[3] + " = " + std::to_string(e.attack_proc));
+		v.push_back(columns[4] + " = " + std::to_string(e.proc_chance));
+		v.push_back(columns[5] + " = " + std::to_string(e.range_proc));
+		v.push_back(columns[6] + " = " + std::to_string(e.rproc_chance));
+		v.push_back(columns[7] + " = " + std::to_string(e.defensive_proc));
+		v.push_back(columns[8] + " = " + std::to_string(e.dproc_chance));
+		v.push_back(columns[9] + " = " + std::to_string(e.fail_recast));
+		v.push_back(columns[10] + " = " + std::to_string(e.engaged_no_sp_recast_min));
+		v.push_back(columns[11] + " = " + std::to_string(e.engaged_no_sp_recast_max));
+		v.push_back(columns[12] + " = " + std::to_string(e.engaged_b_self_chance));
+		v.push_back(columns[13] + " = " + std::to_string(e.engaged_b_other_chance));
+		v.push_back(columns[14] + " = " + std::to_string(e.engaged_d_chance));
+		v.push_back(columns[15] + " = " + std::to_string(e.pursue_no_sp_recast_min));
+		v.push_back(columns[16] + " = " + std::to_string(e.pursue_no_sp_recast_max));
+		v.push_back(columns[17] + " = " + std::to_string(e.pursue_d_chance));
+		v.push_back(columns[18] + " = " + std::to_string(e.idle_no_sp_recast_min));
+		v.push_back(columns[19] + " = " + std::to_string(e.idle_no_sp_recast_max));
+		v.push_back(columns[20] + " = " + std::to_string(e.idle_b_chance));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				npc_spells_entry.id
+				e.id
 			)
 		);
 
@@ -279,101 +284,105 @@ public:
 	}
 
 	static NpcSpells InsertOne(
-		NpcSpells npc_spells_entry
+		Database& db,
+		NpcSpells e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back("'" + EscapeString(npc_spells_entry.name) + "'");
-		insert_values.push_back(std::to_string(npc_spells_entry.parent_list));
-		insert_values.push_back(std::to_string(npc_spells_entry.attack_proc));
-		insert_values.push_back(std::to_string(npc_spells_entry.proc_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.range_proc));
-		insert_values.push_back(std::to_string(npc_spells_entry.rproc_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.defensive_proc));
-		insert_values.push_back(std::to_string(npc_spells_entry.dproc_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.fail_recast));
-		insert_values.push_back(std::to_string(npc_spells_entry.engaged_no_sp_recast_min));
-		insert_values.push_back(std::to_string(npc_spells_entry.engaged_no_sp_recast_max));
-		insert_values.push_back(std::to_string(npc_spells_entry.engaged_b_self_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.engaged_b_other_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.engaged_d_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.pursue_no_sp_recast_min));
-		insert_values.push_back(std::to_string(npc_spells_entry.pursue_no_sp_recast_max));
-		insert_values.push_back(std::to_string(npc_spells_entry.pursue_d_chance));
-		insert_values.push_back(std::to_string(npc_spells_entry.idle_no_sp_recast_min));
-		insert_values.push_back(std::to_string(npc_spells_entry.idle_no_sp_recast_max));
-		insert_values.push_back(std::to_string(npc_spells_entry.idle_b_chance));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.parent_list));
+		v.push_back(std::to_string(e.attack_proc));
+		v.push_back(std::to_string(e.proc_chance));
+		v.push_back(std::to_string(e.range_proc));
+		v.push_back(std::to_string(e.rproc_chance));
+		v.push_back(std::to_string(e.defensive_proc));
+		v.push_back(std::to_string(e.dproc_chance));
+		v.push_back(std::to_string(e.fail_recast));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+		v.push_back(std::to_string(e.engaged_b_self_chance));
+		v.push_back(std::to_string(e.engaged_b_other_chance));
+		v.push_back(std::to_string(e.engaged_d_chance));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+		v.push_back(std::to_string(e.pursue_d_chance));
+		v.push_back(std::to_string(e.idle_no_sp_recast_min));
+		v.push_back(std::to_string(e.idle_no_sp_recast_max));
+		v.push_back(std::to_string(e.idle_b_chance));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			npc_spells_entry.id = results.LastInsertedID();
-			return npc_spells_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		npc_spells_entry = NewEntity();
+		e = NewEntity();
 
-		return npc_spells_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<NpcSpells> npc_spells_entries
+		Database& db,
+		const std::vector<NpcSpells> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &npc_spells_entry: npc_spells_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back("'" + EscapeString(npc_spells_entry.name) + "'");
-			insert_values.push_back(std::to_string(npc_spells_entry.parent_list));
-			insert_values.push_back(std::to_string(npc_spells_entry.attack_proc));
-			insert_values.push_back(std::to_string(npc_spells_entry.proc_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.range_proc));
-			insert_values.push_back(std::to_string(npc_spells_entry.rproc_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.defensive_proc));
-			insert_values.push_back(std::to_string(npc_spells_entry.dproc_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.fail_recast));
-			insert_values.push_back(std::to_string(npc_spells_entry.engaged_no_sp_recast_min));
-			insert_values.push_back(std::to_string(npc_spells_entry.engaged_no_sp_recast_max));
-			insert_values.push_back(std::to_string(npc_spells_entry.engaged_b_self_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.engaged_b_other_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.engaged_d_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.pursue_no_sp_recast_min));
-			insert_values.push_back(std::to_string(npc_spells_entry.pursue_no_sp_recast_max));
-			insert_values.push_back(std::to_string(npc_spells_entry.pursue_d_chance));
-			insert_values.push_back(std::to_string(npc_spells_entry.idle_no_sp_recast_min));
-			insert_values.push_back(std::to_string(npc_spells_entry.idle_no_sp_recast_max));
-			insert_values.push_back(std::to_string(npc_spells_entry.idle_b_chance));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.parent_list));
+			v.push_back(std::to_string(e.attack_proc));
+			v.push_back(std::to_string(e.proc_chance));
+			v.push_back(std::to_string(e.range_proc));
+			v.push_back(std::to_string(e.rproc_chance));
+			v.push_back(std::to_string(e.defensive_proc));
+			v.push_back(std::to_string(e.dproc_chance));
+			v.push_back(std::to_string(e.fail_recast));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+			v.push_back(std::to_string(e.engaged_b_self_chance));
+			v.push_back(std::to_string(e.engaged_b_other_chance));
+			v.push_back(std::to_string(e.engaged_d_chance));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+			v.push_back(std::to_string(e.pursue_d_chance));
+			v.push_back(std::to_string(e.idle_no_sp_recast_min));
+			v.push_back(std::to_string(e.idle_no_sp_recast_max));
+			v.push_back(std::to_string(e.idle_b_chance));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<NpcSpells> All()
+	static std::vector<NpcSpells> All(Database& db)
 	{
 		std::vector<NpcSpells> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -383,41 +392,41 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcSpells entry{};
+			NpcSpells e{};
 
-			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1] ? row[1] : "";
-			entry.parent_list              = atoi(row[2]);
-			entry.attack_proc              = atoi(row[3]);
-			entry.proc_chance              = atoi(row[4]);
-			entry.range_proc               = atoi(row[5]);
-			entry.rproc_chance             = atoi(row[6]);
-			entry.defensive_proc           = atoi(row[7]);
-			entry.dproc_chance             = atoi(row[8]);
-			entry.fail_recast              = atoi(row[9]);
-			entry.engaged_no_sp_recast_min = atoi(row[10]);
-			entry.engaged_no_sp_recast_max = atoi(row[11]);
-			entry.engaged_b_self_chance    = atoi(row[12]);
-			entry.engaged_b_other_chance   = atoi(row[13]);
-			entry.engaged_d_chance         = atoi(row[14]);
-			entry.pursue_no_sp_recast_min  = atoi(row[15]);
-			entry.pursue_no_sp_recast_max  = atoi(row[16]);
-			entry.pursue_d_chance          = atoi(row[17]);
-			entry.idle_no_sp_recast_min    = atoi(row[18]);
-			entry.idle_no_sp_recast_max    = atoi(row[19]);
-			entry.idle_b_chance            = atoi(row[20]);
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                     = row[1] ? row[1] : "";
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<NpcSpells> GetWhere(std::string where_filter)
+	static std::vector<NpcSpells> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<NpcSpells> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -428,39 +437,39 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			NpcSpells entry{};
+			NpcSpells e{};
 
-			entry.id                       = atoi(row[0]);
-			entry.name                     = row[1] ? row[1] : "";
-			entry.parent_list              = atoi(row[2]);
-			entry.attack_proc              = atoi(row[3]);
-			entry.proc_chance              = atoi(row[4]);
-			entry.range_proc               = atoi(row[5]);
-			entry.rproc_chance             = atoi(row[6]);
-			entry.defensive_proc           = atoi(row[7]);
-			entry.dproc_chance             = atoi(row[8]);
-			entry.fail_recast              = atoi(row[9]);
-			entry.engaged_no_sp_recast_min = atoi(row[10]);
-			entry.engaged_no_sp_recast_max = atoi(row[11]);
-			entry.engaged_b_self_chance    = atoi(row[12]);
-			entry.engaged_b_other_chance   = atoi(row[13]);
-			entry.engaged_d_chance         = atoi(row[14]);
-			entry.pursue_no_sp_recast_min  = atoi(row[15]);
-			entry.pursue_no_sp_recast_max  = atoi(row[16]);
-			entry.pursue_d_chance          = atoi(row[17]);
-			entry.idle_no_sp_recast_min    = atoi(row[18]);
-			entry.idle_no_sp_recast_max    = atoi(row[19]);
-			entry.idle_b_chance            = atoi(row[20]);
+			e.id                       = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name                     = row[1] ? row[1] : "";
+			e.parent_list              = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.attack_proc              = row[3] ? static_cast<int16_t>(atoi(row[3])) : -1;
+			e.proc_chance              = row[4] ? static_cast<int8_t>(atoi(row[4])) : 3;
+			e.range_proc               = row[5] ? static_cast<int16_t>(atoi(row[5])) : -1;
+			e.rproc_chance             = row[6] ? static_cast<int16_t>(atoi(row[6])) : 0;
+			e.defensive_proc           = row[7] ? static_cast<int16_t>(atoi(row[7])) : -1;
+			e.dproc_chance             = row[8] ? static_cast<int16_t>(atoi(row[8])) : 0;
+			e.fail_recast              = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_min = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.engaged_no_sp_recast_max = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.engaged_b_self_chance    = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.engaged_b_other_chance   = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.engaged_d_chance         = row[14] ? static_cast<uint8_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_min  = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.pursue_no_sp_recast_max  = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
+			e.pursue_d_chance          = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_min    = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
+			e.idle_no_sp_recast_max    = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.idle_b_chance            = row[20] ? static_cast<uint8_t>(strtoul(row[20], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -471,9 +480,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -483,6 +492,128 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const NpcSpells &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.parent_list));
+		v.push_back(std::to_string(e.attack_proc));
+		v.push_back(std::to_string(e.proc_chance));
+		v.push_back(std::to_string(e.range_proc));
+		v.push_back(std::to_string(e.rproc_chance));
+		v.push_back(std::to_string(e.defensive_proc));
+		v.push_back(std::to_string(e.dproc_chance));
+		v.push_back(std::to_string(e.fail_recast));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+		v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+		v.push_back(std::to_string(e.engaged_b_self_chance));
+		v.push_back(std::to_string(e.engaged_b_other_chance));
+		v.push_back(std::to_string(e.engaged_d_chance));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+		v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+		v.push_back(std::to_string(e.pursue_d_chance));
+		v.push_back(std::to_string(e.idle_no_sp_recast_min));
+		v.push_back(std::to_string(e.idle_no_sp_recast_max));
+		v.push_back(std::to_string(e.idle_b_chance));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<NpcSpells> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.parent_list));
+			v.push_back(std::to_string(e.attack_proc));
+			v.push_back(std::to_string(e.proc_chance));
+			v.push_back(std::to_string(e.range_proc));
+			v.push_back(std::to_string(e.rproc_chance));
+			v.push_back(std::to_string(e.defensive_proc));
+			v.push_back(std::to_string(e.dproc_chance));
+			v.push_back(std::to_string(e.fail_recast));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_min));
+			v.push_back(std::to_string(e.engaged_no_sp_recast_max));
+			v.push_back(std::to_string(e.engaged_b_self_chance));
+			v.push_back(std::to_string(e.engaged_b_other_chance));
+			v.push_back(std::to_string(e.engaged_d_chance));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_min));
+			v.push_back(std::to_string(e.pursue_no_sp_recast_max));
+			v.push_back(std::to_string(e.pursue_d_chance));
+			v.push_back(std::to_string(e.idle_no_sp_recast_min));
+			v.push_back(std::to_string(e.idle_no_sp_recast_max));
+			v.push_back(std::to_string(e.idle_b_chance));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_NPC_SPELLS_REPOSITORY_H

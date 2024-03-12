@@ -7,14 +7,11 @@
 class OrientedBoundingBox
 {
 public:
-	OrientedBoundingBox() { }
+	OrientedBoundingBox() = default;
 	OrientedBoundingBox(const glm::vec3 &pos, const glm::vec3 &rot, const glm::vec3 &scale, const glm::vec3 &extents);
-	~OrientedBoundingBox() { }
+	~OrientedBoundingBox() = default;
 
 	bool ContainsPoint(const glm::vec3 &p) const;
-	
-	glm::mat4& GetTransformation() { return transformation; }
-	glm::mat4& GetInvertedTransformation() { return inverted_transformation; }
 private:
 	float min_x, max_x;
 	float min_y, max_y;

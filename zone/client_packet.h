@@ -56,6 +56,7 @@
 	void Handle_OP_Bind_Wound(const EQApplicationPacket *app);
 	void Handle_OP_BlockedBuffs(const EQApplicationPacket *app);
 	void Handle_OP_BoardBoat(const EQApplicationPacket *app);
+	void Handle_OP_BookButton(const EQApplicationPacket *app);
 	void Handle_OP_Buff(const EQApplicationPacket *app);
 	void Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app);
 	void Handle_OP_Bug(const EQApplicationPacket *app);
@@ -97,8 +98,8 @@
 	void Handle_OP_Disarm(const EQApplicationPacket *app);
 	void Handle_OP_DisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_DoGroupLeadershipAbility(const EQApplicationPacket *app);
-	void Handle_OP_DuelResponse(const EQApplicationPacket *app);
-	void Handle_OP_DuelResponse2(const EQApplicationPacket *app);
+	void Handle_OP_DuelDecline(const EQApplicationPacket *app);
+	void Handle_OP_DuelAccept(const EQApplicationPacket *app);
 	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_Dye(const EQApplicationPacket *app);
 	void Handle_OP_DzAddPlayer(const EQApplicationPacket *app);
@@ -165,7 +166,14 @@
 	void Handle_OP_GuildPublicNote(const EQApplicationPacket *app);
 	void Handle_OP_GuildRemove(const EQApplicationPacket *app);
 	void Handle_OP_GuildStatus(const EQApplicationPacket *app);
-	void Handle_OP_GuildUpdateURLAndChannel(const EQApplicationPacket *app);
+	void Handle_OP_GuildTributeModifyBenefits(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeOptInOut(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeSaveActiveTributes(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeSelect(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeToggle(const EQApplicationPacket* app);
+	void Handle_OP_GuildUpdate(const EQApplicationPacket *app);
+	void Handle_OP_GuildTributeDonateItem(const EQApplicationPacket* app);
+	void Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket* app);
 	void Handle_OP_GuildWar(const EQApplicationPacket *app);
 	void Handle_OP_Heartbeat(const EQApplicationPacket *app);
 	void Handle_OP_Hide(const EQApplicationPacket *app);
@@ -241,7 +249,9 @@
 	void Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app);
 	void Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app);
 	void Handle_OP_RaidCommand(const EQApplicationPacket *app);
-	void Handle_OP_RandomReq(const EQApplicationPacket *app);
+	void Handle_OP_RaidDelegateAbility(const EQApplicationPacket* app);
+	void Handle_OP_RaidClearNPCMarks(const EQApplicationPacket* app);
+	void Handle_OP_RandomReq(const EQApplicationPacket* app);
 	void Handle_OP_ReadBook(const EQApplicationPacket *app);
 	void Handle_OP_RecipeAutoCombine(const EQApplicationPacket *app);
 	void Handle_OP_RecipeDetails(const EQApplicationPacket *app);
@@ -282,6 +292,7 @@
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
+	void Handle_OP_TaskTimers(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);
@@ -313,3 +324,14 @@
 	void Handle_OP_YellForHelp(const EQApplicationPacket *app);
 	void Handle_OP_ZoneChange(const EQApplicationPacket *app);
 	void Handle_OP_ResetAA(const EQApplicationPacket *app);
+	void Handle_OP_MovementHistoryList(const EQApplicationPacket* app);
+	void Handle_OP_UnderWorld(const EQApplicationPacket* app);
+
+	// shared tasks
+	void Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAccept(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskQuit(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskPlayerList(const EQApplicationPacket *app);

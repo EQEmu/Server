@@ -86,17 +86,6 @@ LauncherLink *LauncherList::Get(const char *name) {
 	return(res->second);
 }
 
-LauncherLink *LauncherList::FindByZone(const char *short_name) {
-	std::map<std::string, LauncherLink *>::iterator cur, end;
-	cur = m_launchers.begin();
-	end = m_launchers.end();
-	for (; cur != end; ++cur) {
-		if (cur->second->ContainsZone(short_name))
-			return(cur->second);
-	}
-	return(nullptr);
-}
-
 void LauncherList::Add(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn) {
 	auto it = new LauncherLink(nextID++, conn);
 	LogInfo("Adding pending launcher [{}]", it->GetID());
@@ -129,15 +118,6 @@ int LauncherList::GetLauncherCount() {
 	return(m_launchers.size());
 }
 
-void LauncherList::GetLauncherNameList(std::vector<std::string> &res) {
-	std::map<std::string, EQLConfig *>::iterator cur, end;
-	cur = m_configs.begin();
-	end = m_configs.end();
-	for (; cur != end; ++cur) {
-		res.push_back(cur->first);
-	}
-}
-
 void LauncherList::LoadList() {
 	std::vector<std::string> launchers;
 
@@ -158,10 +138,6 @@ EQLConfig *LauncherList::GetConfig(const char *name) {
 		return(nullptr);
 	}
 	return(res->second);
-}
-
-void LauncherList::CreateLauncher(const char *name, uint8 dynamic_count) {
-	m_configs[name] = EQLConfig::CreateLauncher(name, dynamic_count);
 }
 
 void LauncherList::Remove(const char *name) {

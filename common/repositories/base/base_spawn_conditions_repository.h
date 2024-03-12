@@ -1,44 +1,28 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_SPAWN_CONDITIONS_REPOSITORY_H
 #define EQEMU_BASE_SPAWN_CONDITIONS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseSpawnConditionsRepository {
 public:
 	struct SpawnConditions {
 		std::string zone;
-		int         id;
-		int         value;
-		int         onchange;
+		uint32_t    id;
+		int32_t     value;
+		uint8_t     onchange;
 		std::string name;
 	};
 
@@ -58,24 +42,25 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"zone",
+			"id",
+			"value",
+			"onchange",
+			"name",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -87,7 +72,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -97,24 +82,24 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static SpawnConditions NewEntity()
 	{
-		SpawnConditions entry{};
+		SpawnConditions e{};
 
-		entry.zone     = "";
-		entry.id       = 1;
-		entry.value    = 0;
-		entry.onchange = 0;
-		entry.name     = "";
+		e.zone     = "";
+		e.id       = 1;
+		e.value    = 0;
+		e.onchange = 0;
+		e.name     = "";
 
-		return entry;
+		return e;
 	}
 
-	static SpawnConditions GetSpawnConditionsEntry(
+	static SpawnConditions GetSpawnConditions(
 		const std::vector<SpawnConditions> &spawn_conditionss,
 		int spawn_conditions_id
 	)
@@ -129,38 +114,41 @@ public:
 	}
 
 	static SpawnConditions FindOne(
+		Database& db,
 		int spawn_conditions_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				spawn_conditions_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			SpawnConditions entry{};
+			SpawnConditions e{};
 
-			entry.zone     = row[0] ? row[0] : "";
-			entry.id       = atoi(row[1]);
-			entry.value    = atoi(row[2]);
-			entry.onchange = atoi(row[3]);
-			entry.name     = row[4] ? row[4] : "";
+			e.zone     = row[0] ? row[0] : "";
+			e.id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
+			e.value    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.onchange = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.name     = row[4] ? row[4] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int spawn_conditions_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -173,26 +161,27 @@ public:
 	}
 
 	static int UpdateOne(
-		SpawnConditions spawn_conditions_entry
+		Database& db,
+		const SpawnConditions &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(spawn_conditions_entry.zone) + "'");
-		update_values.push_back(columns[1] + " = " + std::to_string(spawn_conditions_entry.id));
-		update_values.push_back(columns[2] + " = " + std::to_string(spawn_conditions_entry.value));
-		update_values.push_back(columns[3] + " = " + std::to_string(spawn_conditions_entry.onchange));
-		update_values.push_back(columns[4] + " = '" + EscapeString(spawn_conditions_entry.name) + "'");
+		v.push_back(columns[0] + " = '" + Strings::Escape(e.zone) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.id));
+		v.push_back(columns[2] + " = " + std::to_string(e.value));
+		v.push_back(columns[3] + " = " + std::to_string(e.onchange));
+		v.push_back(columns[4] + " = '" + Strings::Escape(e.name) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				spawn_conditions_entry.id
+				e.id
 			)
 		);
 
@@ -200,71 +189,73 @@ public:
 	}
 
 	static SpawnConditions InsertOne(
-		SpawnConditions spawn_conditions_entry
+		Database& db,
+		SpawnConditions e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
-		insert_values.push_back(std::to_string(spawn_conditions_entry.id));
-		insert_values.push_back(std::to_string(spawn_conditions_entry.value));
-		insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
-		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.value));
+		v.push_back(std::to_string(e.onchange));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			spawn_conditions_entry.id = results.LastInsertedID();
-			return spawn_conditions_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		spawn_conditions_entry = NewEntity();
+		e = NewEntity();
 
-		return spawn_conditions_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<SpawnConditions> spawn_conditions_entries
+		Database& db,
+		const std::vector<SpawnConditions> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &spawn_conditions_entry: spawn_conditions_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.zone) + "'");
-			insert_values.push_back(std::to_string(spawn_conditions_entry.id));
-			insert_values.push_back(std::to_string(spawn_conditions_entry.value));
-			insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
-			insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.value));
+			v.push_back(std::to_string(e.onchange));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<SpawnConditions> All()
+	static std::vector<SpawnConditions> All(Database& db)
 	{
 		std::vector<SpawnConditions> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -274,25 +265,25 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpawnConditions entry{};
+			SpawnConditions e{};
 
-			entry.zone     = row[0] ? row[0] : "";
-			entry.id       = atoi(row[1]);
-			entry.value    = atoi(row[2]);
-			entry.onchange = atoi(row[3]);
-			entry.name     = row[4] ? row[4] : "";
+			e.zone     = row[0] ? row[0] : "";
+			e.id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
+			e.value    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.onchange = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.name     = row[4] ? row[4] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<SpawnConditions> GetWhere(std::string where_filter)
+	static std::vector<SpawnConditions> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<SpawnConditions> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -303,23 +294,23 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			SpawnConditions entry{};
+			SpawnConditions e{};
 
-			entry.zone     = row[0] ? row[0] : "";
-			entry.id       = atoi(row[1]);
-			entry.value    = atoi(row[2]);
-			entry.onchange = atoi(row[3]);
-			entry.name     = row[4] ? row[4] : "";
+			e.zone     = row[0] ? row[0] : "";
+			e.id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 1;
+			e.value    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
+			e.onchange = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.name     = row[4] ? row[4] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -330,9 +321,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -342,6 +333,96 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const SpawnConditions &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back("'" + Strings::Escape(e.zone) + "'");
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.value));
+		v.push_back(std::to_string(e.onchange));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<SpawnConditions> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back("'" + Strings::Escape(e.zone) + "'");
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.value));
+			v.push_back(std::to_string(e.onchange));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_SPAWN_CONDITIONS_REPOSITORY_H

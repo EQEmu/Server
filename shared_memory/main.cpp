@@ -26,17 +26,18 @@
 #include "../common/crash.h"
 #include "../common/rulesys.h"
 #include "../common/eqemu_exception.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "items.h"
-#include "npc_faction.h"
-#include "loot.h"
 #include "skill_caps.h"
 #include "spells.h"
-#include "base_data.h"
 #include "../common/content/world_content_service.h"
+#include "../common/zone_store.h"
+#include "../common/path_manager.h"
 
 EQEmuLogSys LogSys;
 WorldContentService content_service;
+ZoneStore zone_store;
+PathManager path;
 
 #ifdef _WINDOWS
 #include <direct.h>
@@ -80,6 +81,8 @@ int main(int argc, char **argv)
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
 
+	path.LoadPaths();
+
 	LogInfo("Shared Memory Loader Program");
 	if (!EQEmuConfig::LoadConfig()) {
 		LogError("Unable to load configuration file");
@@ -117,12 +120,13 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
 	}
 
-	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	std::string shared_mem_directory = Config->SharedMemDir;
 	if (MakeDirectory(shared_mem_directory)) {
@@ -156,17 +160,17 @@ int main(int argc, char **argv)
 			if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
 				LogInfo("No rule set configured, using default rules");
 			}
-			else {
-				LogInfo("Loaded default rule set 'default'");
-			}
 		}
 
 		EQ::InitializeDynamicLookups();
-		LogInfo("Initialized dynamic dictionary entries");
 	}
 
 
 	content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+	content_service.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
+		->SetExpansionContext()
+		->ReloadContentFlags();
 
 	LogInfo(
 		"Current expansion is [{}] ({})",
@@ -178,40 +182,17 @@ int main(int argc, char **argv)
 
 	bool load_all        = true;
 	bool load_items      = false;
-	bool load_factions   = false;
 	bool load_loot       = false;
 	bool load_skill_caps = false;
 	bool load_spells     = false;
-	bool load_bd         = false;
 
 	if (argc > 1) {
 		for (int i = 1; i < argc; ++i) {
 			switch (argv[i][0]) {
-				case 'b':
-					if (strcasecmp("base_data", argv[i]) == 0) {
-						load_bd  = true;
-						load_all = false;
-					}
-					break;
-
 				case 'i':
 					if (strcasecmp("items", argv[i]) == 0) {
 						load_items = true;
 						load_all   = false;
-					}
-					break;
-
-				case 'f':
-					if (strcasecmp("factions", argv[i]) == 0) {
-						load_factions = true;
-						load_all      = false;
-					}
-					break;
-
-				case 'l':
-					if (strcasecmp("loot", argv[i]) == 0) {
-						load_loot = true;
-						load_all  = false;
 					}
 					break;
 
@@ -226,7 +207,7 @@ int main(int argc, char **argv)
 					}
 					break;
 				case '-': {
-					auto split = SplitString(argv[i], '=');
+					auto split = Strings::Split(argv[i], '=');
 					if (split.size() >= 2) {
 						auto command  = split[0];
 						auto argument = split[1];
@@ -255,26 +236,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (load_all || load_factions) {
-		LogInfo("Loading factions");
-		try {
-			LoadFactions(&content_db, hotfix_name);
-		} catch (std::exception &ex) {
-			LogError("{}", ex.what());
-			return 1;
-		}
-	}
-
-	if (load_all || load_loot) {
-		LogInfo("Loading loot");
-		try {
-			LoadLoot(&content_db, hotfix_name);
-		} catch (std::exception &ex) {
-			LogError("{}", ex.what());
-			return 1;
-		}
-	}
-
 	if (load_all || load_skill_caps) {
 		LogInfo("Loading skill caps");
 		try {
@@ -289,16 +250,6 @@ int main(int argc, char **argv)
 		LogInfo("Loading spells");
 		try {
 			LoadSpells(&content_db, hotfix_name);
-		} catch (std::exception &ex) {
-			LogError("{}", ex.what());
-			return 1;
-		}
-	}
-
-	if (load_all || load_bd) {
-		LogInfo("Loading base data");
-		try {
-			LoadBaseData(&content_db, hotfix_name);
 		} catch (std::exception &ex) {
 			LogError("{}", ex.what());
 			return 1;

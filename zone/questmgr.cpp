@@ -17,12 +17,14 @@
 */
 
 #include "../common/classes.h"
+#include "../common/data_verification.h"
 #include "../common/global_define.h"
 #include "../common/rulesys.h"
 #include "../common/skills.h"
 #include "../common/spdat.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/say_link.h"
+#include "../common/events/player_event_logs.h"
 
 #include "entity.h"
 #include "event_codes.h"
@@ -35,15 +37,17 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
-#include "zone_store.h"
+#include "dialogue_window.h"
+
+#include "../common/repositories/tradeskill_recipe_repository.h"
+#include "../common/repositories/instance_list_repository.h"
+#include "../common/repositories/grid_entries_repository.h"
 
 #include <iostream>
 #include <limits.h>
 #include <list>
 
-#ifdef BOTS
 #include "bot.h"
-#endif
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -56,6 +60,7 @@ QuestManager quest_manager;
 	Mob *owner = nullptr; \
 	Client *initiator = nullptr; \
 	EQ::ItemInstance* questitem = nullptr; \
+	const SPDat_Spell_Struct* questspell = nullptr; \
 	bool depop_npc = false; \
 	std::string encounter; \
 	do { \
@@ -64,6 +69,7 @@ QuestManager quest_manager;
 			owner = e.owner; \
 			initiator = e.initiator; \
 			questitem = e.questitem; \
+			questspell = e.questspell; \
 			depop_npc = e.depop_npc; \
 			encounter = e.encounter; \
 		} \
@@ -71,7 +77,6 @@ QuestManager quest_manager;
 
 QuestManager::QuestManager() {
 	HaveProximitySays = false;
-	item_timers = 0;
 }
 
 QuestManager::~QuestManager() {
@@ -83,25 +88,45 @@ void QuestManager::Process() {
 	end = QTimerList.end();
 	while (cur != end) {
 		if (cur->Timer_.Enabled() && cur->Timer_.Check()) {
-			if(entity_list.IsMobInZone(cur->mob)) {
-				if(cur->mob->IsNPC()) {
-					parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
-				} else if (cur->mob->IsEncounter()) {
-					parse->EventEncounter(EVENT_TIMER, cur->mob->CastToEncounter()->GetEncounterName(), cur->name, 0, nullptr);
-				} else {
-					//this is inheriently unsafe if we ever make it so more than npc/client start timers
-					parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+			if (cur->mob) {
+				if (cur->mob->IsNPC()) {
+					if (parse->HasQuestSub(cur->mob->GetNPCTypeID(), EVENT_TIMER)) {
+						parse->EventNPC(EVENT_TIMER, cur->mob->CastToNPC(), nullptr, cur->name, 0);
+					}
+				}
+				else if (cur->mob->IsEncounter()) {
+					parse->EventEncounter(
+						EVENT_TIMER,
+						cur->mob->CastToEncounter()->GetEncounterName(),
+						cur->name,
+						0,
+						nullptr
+					);
+				}
+				else if (cur->mob->IsClient()) {
+					if (parse->PlayerHasQuestSub(EVENT_TIMER)) {
+						//this is inheriently unsafe if we ever make it so more than npc/client start timers
+						parse->EventPlayer(EVENT_TIMER, cur->mob->CastToClient(), cur->name, 0);
+					}
+				}
+				else if (cur->mob->IsBot()) {
+					if (parse->BotHasQuestSub(EVENT_TIMER)) {
+						parse->EventBot(EVENT_TIMER, cur->mob->CastToBot(), nullptr, cur->name, 0);
+					}
 				}
 
 				//we MUST reset our iterator since the quest could have removed/added any
 				//number of timers... worst case we have to check a bunch of timers twice
 				cur = QTimerList.begin();
-				end = QTimerList.end();	//dunno if this is needed, cant hurt...
-			} else {
+				end = QTimerList.end();    //dunno if this is needed, cant hurt...
+			}
+			else {
 				cur = QTimerList.erase(cur);
 			}
-		} else
+		}
+		else {
 			++cur;
+		}
 	}
 
 	auto cur_iter = STimerList.begin();
@@ -117,11 +142,12 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, std::string encounter) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, const SPDat_Spell_Struct* _questspell, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
 	run.questitem = _questitem;
+	run.questspell = _questspell;
 	run.depop_npc = false;
 	run.encounter = encounter;
 	quests_running_.push(run);
@@ -185,24 +211,25 @@ void QuestManager::summonitem(uint32 itemid, int16 charges) {
 
 void QuestManager::write(const char *file, const char *str) {
 	FILE * pFile;
-	pFile = fopen (file, "a");
+	pFile = fopen (fmt::format("{}/{}", path.GetServerPath(), file).c_str(), "a");
 	if(!pFile)
 		return;
 	fprintf(pFile, "%s\n", str);
 	fclose (pFile);
 }
 
-Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
-	const NPCType* tmp = 0;
-	if (tmp = content_db.LoadNPCTypesData(npc_type))
-	{
-		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
+Mob* QuestManager::spawn2(int npc_id, int grid, int unused, const glm::vec4& position) {
+	const NPCType* t = 0;
+	if (t = content_db.LoadNPCTypesData(npc_id)) {
+		auto npc = new NPC(t, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
-		if (npc->DropsGlobalLoot())
+		if (npc->DropsGlobalLoot()) {
 			npc->CheckGlobalLootTables();
-		entity_list.AddNPC(npc,true,true);
-		if(grid > 0)
-		{
+		}
+
+		entity_list.AddNPC(npc, true, true);
+
+		if (grid) {
 			npc->AssignWaypoints(grid);
 		}
 
@@ -334,22 +361,25 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 
 void QuestManager::enable_spawn2(uint32 spawn2_id)
 {
-	database.UpdateSpawn2Status(spawn2_id, 1);
+	database.UpdateSpawn2Status(spawn2_id, 1, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
-	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
-	ssc->id = spawn2_id;
-	ssc->new_status = 1;
+	auto *ssc = (ServerSpawnStatusChange_Struct *) pack->pBuffer;
+	ssc->id          = spawn2_id;
+	ssc->new_status  = true;
+	ssc->instance_id = zone->GetInstanceID();
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
 
 void QuestManager::disable_spawn2(uint32 spawn2_id)
 {
-	database.UpdateSpawn2Status(spawn2_id, 0);
+	database.UpdateSpawn2Status(spawn2_id, 0, zone->GetInstanceID());
 	auto pack = new ServerPacket(ServerOP_SpawnStatusChange, sizeof(ServerSpawnStatusChange_Struct));
-	ServerSpawnStatusChange_Struct* ssc = (ServerSpawnStatusChange_Struct*) pack->pBuffer;
-	ssc->id = spawn2_id;
-	ssc->new_status = 0;
+	auto *ssc = (ServerSpawnStatusChange_Struct *) pack->pBuffer;
+	ssc->id          = spawn2_id;
+	ssc->new_status  = false;
+	ssc->instance_id = zone->GetInstanceID();
+
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
@@ -366,81 +396,83 @@ void QuestManager::incstat(int stat, int value) {
 		initiator->IncStats(stat, value);
 }
 
-void QuestManager::castspell(int spell_id, int target_id) {
+void QuestManager::castspell(uint16 spell_id, uint16 target_id)
+{
 	QuestManagerCurrentQuestVars();
+
 	if (owner) {
-		Mob *tgt = entity_list.GetMob(target_id);
-		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+		Mob* t = entity_list.GetMob(target_id);
+		if (t) {
+			owner->SpellFinished(
+				spell_id,
+				t,
+				EQ::spells::CastingSlot::Item,
+				0,
+				-1,
+				spells[spell_id].resist_difficulty
+			);
+		}
 	}
 }
 
-void QuestManager::selfcast(int spell_id) {
+void QuestManager::selfcast(uint16 spell_id)
+{
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+
+	if (initiator) {
+		initiator->SpellFinished(
+			spell_id,
+			initiator,
+			EQ::spells::CastingSlot::Item,
+			0,
+			-1,
+			spells[spell_id].resist_difficulty
+		);
+	}
 }
 
-void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
+void QuestManager::addloot(
+	int item_id,
+	int charges,
+	bool equipitem,
+	int aug1,
+	int aug2,
+	int aug3,
+	int aug4,
+	int aug5,
+	int aug6
+) {
 	QuestManagerCurrentQuestVars();
-	if(item_id != 0){
-		if(owner->IsNPC())
+	if (!owner) {
+		return;
+	}
+
+	if (item_id != 0) {
+		if (owner->IsNPC()) {
 			owner->CastToNPC()->AddItem(item_id, charges, equipitem, aug1, aug2, aug3, aug4, aug5, aug6);
+		}
 	}
 }
 
 void QuestManager::Zone(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator)
 	{
-		auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-		ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-		ztz->response = 0;
-		ztz->current_zone_id = zone->GetZoneID();
-		ztz->current_instance_id = zone->GetInstanceID();
-		ztz->requested_zone_id = ZoneID(zone_name);
-		ztz->admin = initiator->Admin();
-		strcpy(ztz->name, initiator->GetName());
-		ztz->guild_id = initiator->GuildID();
-		ztz->ignorerestrictions = 3;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
+		initiator->MoveZone(zone_name);
 	}
 }
 
 void QuestManager::ZoneGroup(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	if (initiator) {
 		if (!initiator->GetGroup()) {
-			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-			ztz->response = 0;
-			ztz->current_zone_id = zone->GetZoneID();
-			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = ZoneID(zone_name);
-			ztz->admin = initiator->Admin();
-			strcpy(ztz->name, initiator->GetName());
-			ztz->guild_id = initiator->GuildID();
-			ztz->ignorerestrictions = 3;
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
+			initiator->MoveZone(zone_name);
 		} else {
 			auto client_group = initiator->GetGroup();
 			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 					auto group_member = client_group->members[member_index]->CastToClient();
-					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-					ztz->response = 0;
-					ztz->current_zone_id = zone->GetZoneID();
-					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = ZoneID(zone_name);
-					ztz->admin = group_member->Admin();
-					strcpy(ztz->name, group_member->GetName());
-					ztz->guild_id = group_member->GuildID();
-					ztz->ignorerestrictions = 3;
-					worldserver.SendPacket(pack);
-					safe_delete(pack);
+					group_member->MoveZone(zone_name);
 				}
 			}
 		}
@@ -449,289 +481,713 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 
 void QuestManager::ZoneRaid(const char *zone_name) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	if (initiator) {
 		if (!initiator->GetRaid()) {
-			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-			ztz->response = 0;
-			ztz->current_zone_id = zone->GetZoneID();
-			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = ZoneID(zone_name);
-			ztz->admin = initiator->Admin();
-			strcpy(ztz->name, initiator->GetName());
-			ztz->guild_id = initiator->GuildID();
-			ztz->ignorerestrictions = 3;
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
+			initiator->MoveZone(zone_name);
 		} else {
 			auto client_raid = initiator->GetRaid();
-			for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-				if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-					auto raid_member = client_raid->members[member_index].member->CastToClient();
-					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
-					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
-					ztz->response = 0;
-					ztz->current_zone_id = zone->GetZoneID();
-					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = ZoneID(zone_name);
-					ztz->admin = raid_member->Admin();
-					strcpy(ztz->name, raid_member->GetName());
-					ztz->guild_id = raid_member->GuildID();
-					ztz->ignorerestrictions = 3;
-					worldserver.SendPacket(pack);
-					safe_delete(pack);
+			for (const auto& m : client_raid->members) {
+				if (m.is_bot) {
+					continue;
+				}
+
+				if (m.member && m.member->IsClient()) {
+					auto raid_member = m.member->CastToClient();
+					raid_member->MoveZone(zone_name);
 				}
 			}
 		}
 	}
 }
 
-void QuestManager::settimer(const char *timer_name, int seconds) {
+void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* m)
+{
 	QuestManagerCurrentQuestVars();
 
-	if(questitem) {
+	if (questitem) {
 		questitem->SetTimer(timer_name, seconds * 1000);
+
+		if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_START)) {
+			const std::string& export_string = fmt::format(
+				"{} {}",
+				timer_name,
+				seconds * 1000
+			);
+
+			parse->EventItem(EVENT_TIMER_START, nullptr, questitem, nullptr, export_string, 0);
+		}
+
 		return;
 	}
 
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
-
-	end = QTimerList.end();
-	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
-			cur->Timer_.Enable();
-			cur->Timer_.Start(seconds * 1000, false);
-			return;
-		}
-		++cur;
+	if (!m && !owner) {
+		return;
 	}
 
-	QTimerList.push_back(QuestTimer(seconds * 1000, owner, timer_name));
+	Mob* mob = m ? m : owner;
+
+	if (!mob) {
+		return;
+	}
+
+	const bool has_start_event = (
+		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
+		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
+		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_START))
+	);
+
+	if (!QTimerList.empty()) {
+		for (auto e : QTimerList) {
+			if (e.mob && e.mob == mob && e.name == timer_name) {
+				e.Timer_.Enable();
+				e.Timer_.Start(seconds * 1000, false);
+
+				if (has_start_event) {
+					const std::string& export_string = fmt::format(
+						"{} {}",
+						timer_name,
+						seconds * 1000
+					);
+
+					if (mob->IsClient()) {
+						parse->EventPlayer(EVENT_TIMER_START, mob->CastToClient(), export_string, 0);
+					} else if (mob->IsBot()) {
+						parse->EventBot(EVENT_TIMER_START, mob->CastToBot(), nullptr, export_string, 0);
+					} else if (mob->IsNPC()) {
+						parse->EventNPC(EVENT_TIMER_START, mob->CastToNPC(), nullptr, export_string, 0);
+					}
+				}
+
+				return;
+			}
+		}
+	}
+
+	QTimerList.emplace_back(QuestTimer(seconds * 1000, mob, timer_name));
+
+	if (has_start_event) {
+		const std::string& export_string = fmt::format(
+			"{} {}",
+			timer_name,
+			seconds * 1000
+		);
+
+		if (mob->IsClient()) {
+			parse->EventPlayer(EVENT_TIMER_START, mob->CastToClient(), export_string, 0);
+		} else if (mob->IsBot()) {
+			parse->EventBot(EVENT_TIMER_START, mob->CastToBot(), nullptr, export_string, 0);
+		} else if (mob->IsNPC()) {
+			parse->EventNPC(EVENT_TIMER_START, mob->CastToNPC(), nullptr, export_string, 0);
+		}
+	}
 }
 
-void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
+void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds)
+{
 	QuestManagerCurrentQuestVars();
 
-	if(questitem) {
-		questitem->SetTimer(timer_name, milliseconds);
+	if (!owner) {
 		return;
 	}
 
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+	const bool has_start_event = (
+		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
+		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
+		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_START))
+	);
 
-	end = QTimerList.end();
-	while (cur != end) {
-		if(cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
-			cur->Timer_.Enable();
-			cur->Timer_.Start(milliseconds, false);
-			return;
+	if (questitem) {
+		questitem->SetTimer(timer_name, milliseconds);
+
+		if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_START)) {
+			const std::string& export_string = fmt::format(
+				"{} {}",
+				timer_name,
+				milliseconds
+			);
+
+			parse->EventItem(EVENT_TIMER_START, nullptr, questitem, nullptr, export_string, 0);
 		}
-		++cur;
+
+		return;
 	}
 
-	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
+	if (!QTimerList.empty()) {
+		for (auto e : QTimerList) {
+			if (e.mob && e.mob == owner && e.name == timer_name) {
+				e.Timer_.Enable();
+				e.Timer_.Start(milliseconds, false);
+
+				if (has_start_event) {
+					const std::string& export_string = fmt::format(
+						"{} {}",
+						e.name,
+						milliseconds
+					);
+
+					if (owner->IsClient()) {
+						parse->EventPlayer(EVENT_TIMER_START, owner->CastToClient(), export_string, 0);
+					} else if (owner->IsBot()) {
+						parse->EventBot(EVENT_TIMER_START, owner->CastToBot(), nullptr, export_string, 0);
+					} else if (owner->IsNPC()) {
+						parse->EventNPC(EVENT_TIMER_START, owner->CastToNPC(), nullptr, export_string, 0);
+					}
+				}
+
+				return;
+			}
+		}
+	}
+
+	QTimerList.emplace_back(QuestTimer(milliseconds, owner, timer_name));
+
+	if (has_start_event) {
+		const std::string& export_string = fmt::format(
+			"{} {}",
+			timer_name,
+			milliseconds
+		);
+
+		if (owner->IsClient()) {
+			parse->EventPlayer(EVENT_TIMER_START, owner->CastToClient(), export_string, 0);
+		} else if (owner->IsBot()) {
+			parse->EventBot(EVENT_TIMER_START, owner->CastToBot(), nullptr, export_string, 0);
+		} else if (owner->IsNPC()) {
+			parse->EventNPC(EVENT_TIMER_START, owner->CastToNPC(), nullptr, export_string, 0);
+		}
+	}
 }
 
-void QuestManager::settimerMS(const char *timer_name, int milliseconds, EQ::ItemInstance *inst) {
+void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds, EQ::ItemInstance* inst)
+{
 	if (inst) {
 		inst->SetTimer(timer_name, milliseconds);
 	}
 }
 
-void QuestManager::settimerMS(const char *timer_name, int milliseconds, Mob *mob) {
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
-
-	end = QTimerList.end();
-	while (cur != end) {
-		if (cur->mob && cur->mob == mob && cur->name == timer_name)
-		{
-			cur->Timer_.Enable();
-			cur->Timer_.Start(milliseconds, false);
-			return;
-		}
-		++cur;
+void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds, Mob* m)
+{
+	if (!m) {
+		return;
 	}
 
-	QTimerList.push_back(QuestTimer(milliseconds, mob, timer_name));
+	const bool has_start_event = (
+		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_START)) ||
+		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_START)) ||
+		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_START))
+	);
+
+	if (!QTimerList.empty()) {
+		for (auto e : QTimerList) {
+			if (e.mob && e.mob == m && e.name == timer_name) {
+				e.Timer_.Enable();
+				e.Timer_.Start(milliseconds, false);
+
+				if (has_start_event) {
+					const std::string& export_string = fmt::format(
+						"{} {}",
+						timer_name,
+						milliseconds
+					);
+
+					if (m->IsClient()) {
+						parse->EventPlayer(EVENT_TIMER_START, m->CastToClient(), export_string, 0);
+					} else if (m->IsBot()) {
+						parse->EventBot(EVENT_TIMER_START, m->CastToBot(), nullptr, export_string, 0);
+					} else if (m->IsNPC()) {
+						parse->EventNPC(EVENT_TIMER_START, m->CastToNPC(), nullptr, export_string, 0);
+					}
+				}
+
+				return;
+			}
+		}
+	}
+
+	QTimerList.emplace_back(QuestTimer(milliseconds, m, timer_name));
+
+	if (has_start_event) {
+		const std::string& export_string = fmt::format(
+			"{} {}",
+			timer_name,
+			milliseconds
+		);
+
+		if (m->IsClient()) {
+			parse->EventPlayer(EVENT_TIMER_START, m->CastToClient(), export_string, 0);
+		} else if (m->IsBot()) {
+			parse->EventBot(EVENT_TIMER_START, m->CastToBot(), nullptr, export_string, 0);
+		} else if (m->IsNPC()) {
+			parse->EventNPC(EVENT_TIMER_START, m->CastToNPC(), nullptr, export_string, 0);
+		}
+	}
 }
 
-void QuestManager::stoptimer(const char *timer_name) {
+void QuestManager::stoptimer(const std::string& timer_name)
+{
 	QuestManagerCurrentQuestVars();
 
 	if (questitem) {
 		questitem->StopTimer(timer_name);
+
+		if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_STOP)) {
+			parse->EventItem(EVENT_TIMER_STOP, nullptr, questitem, nullptr, timer_name, 0);
+		}
+
 		return;
 	}
 
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+	if (!owner) {
+		return;
+	}
 
-	end = QTimerList.end();
-	while (cur != end) {
-		if (cur->mob && cur->mob == owner && cur->name == timer_name) {
-			QTimerList.erase(cur);
-			return;
+	if (QTimerList.empty()) {
+		return;
+	}
+
+	const bool has_stop_event = (
+		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
+		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
+		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_STOP))
+	);
+
+	for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
+		if (e->mob && e->mob == owner && e->name == timer_name) {
+			if (has_stop_event) {
+				if (owner->IsClient()) {
+					parse->EventPlayer(EVENT_TIMER_STOP, owner->CastToClient(), timer_name, 0);
+				} else if (owner->IsBot()) {
+					parse->EventBot(EVENT_TIMER_STOP, owner->CastToBot(), nullptr, timer_name, 0);
+				} else if (owner->IsNPC()) {
+					parse->EventNPC(EVENT_TIMER_STOP, owner->CastToNPC(), nullptr, timer_name, 0);
+				}
+			}
+
+			QTimerList.erase(e);
+			break;
 		}
-		++cur;
 	}
 }
 
-void QuestManager::stoptimer(const char *timer_name, EQ::ItemInstance *inst) {
+void QuestManager::stoptimer(const std::string& timer_name, EQ::ItemInstance* inst)
+{
 	if (inst) {
 		inst->StopTimer(timer_name);
 	}
 }
 
-void QuestManager::stoptimer(const char *timer_name, Mob *mob) {
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+void QuestManager::stoptimer(const std::string& timer_name, Mob* m)
+{
+	if (!m) {
+		return;
+	}
 
-	end = QTimerList.end();
-	while (cur != end) {
-		if (cur->mob && cur->mob == mob && cur->name == timer_name) {
-			QTimerList.erase(cur);
-			return;
+	if (QTimerList.empty()) {
+		return;
+	}
+
+	const bool has_stop_event = (
+		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
+		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
+		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_STOP))
+	);
+
+	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
+		if (e->mob && e->mob == m) {
+			if (has_stop_event) {
+				if (m->IsClient()) {
+					parse->EventPlayer(EVENT_TIMER_STOP, m->CastToClient(), e->name, 0);
+				} else if (m->IsBot()) {
+					parse->EventBot(EVENT_TIMER_STOP, m->CastToBot(), nullptr, e->name, 0);
+				} else if (m->IsNPC()) {
+					parse->EventNPC(EVENT_TIMER_STOP, m->CastToNPC(), nullptr, e->name, 0);
+				}
+			}
+
+			QTimerList.erase(e);
+			break;
 		}
-		++cur;
 	}
 }
 
-void QuestManager::stopalltimers() {
+void QuestManager::stopalltimers()
+{
 	QuestManagerCurrentQuestVars();
 
-	if(questitem) {
+	if (questitem) {
+		if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_STOP)) {
+			auto item_timers = questitem->GetTimers();
+
+			if (item_timers.empty()) {
+				return;
+			}
+
+			for (auto e = item_timers.begin(); e != item_timers.end(); ++e) {
+				if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_STOP)) {
+					parse->EventItem(EVENT_TIMER_STOP, nullptr, questitem, nullptr, e->first, 0);
+				}
+			}
+		}
+
 		questitem->ClearTimers();
 		return;
 	}
 
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
+	if (!owner) {
+		return;
+	}
 
-	end = QTimerList.end();
-	while (cur != end) {
-		if(cur->mob && cur->mob == owner)
-			cur = QTimerList.erase(cur);
-		else
-			++cur;
+	if (QTimerList.empty()) {
+		return;
+	}
+
+	const bool has_stop_event = (
+		(owner->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
+		(owner->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
+		(owner->IsNPC() && parse->HasQuestSub(owner->GetNPCTypeID(), EVENT_TIMER_STOP))
+	);
+
+	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
+		if (e->mob && e->mob == owner) {
+			if (has_stop_event) {
+				if (owner->IsClient()) {
+					parse->EventPlayer(EVENT_TIMER_STOP, owner->CastToClient(), e->name, 0);
+				} else if (owner->IsBot()) {
+					parse->EventBot(EVENT_TIMER_STOP, owner->CastToBot(), nullptr, e->name, 0);
+				} else if (owner->IsNPC()) {
+					parse->EventNPC(EVENT_TIMER_STOP, owner->CastToNPC(), nullptr, e->name, 0);
+				}
+			}
+
+			e = QTimerList.erase(e);
+		} else {
+			++e;
+		}
 	}
 }
 
-void QuestManager::stopalltimers(EQ::ItemInstance *inst) {
+void QuestManager::stopalltimers(EQ::ItemInstance* inst)
+{
 	if (inst) {
+		if (parse->ItemHasQuestSub(inst, EVENT_TIMER_STOP)) {
+			auto item_timers = inst->GetTimers();
+
+			if (item_timers.empty()) {
+				return;
+			}
+
+			for (auto e = item_timers.begin(); e != item_timers.begin(); ++e) {
+				if (parse->ItemHasQuestSub(inst, EVENT_TIMER_STOP)) {
+					parse->EventItem(EVENT_TIMER_STOP, nullptr, inst, nullptr, e->first, 0);
+				}
+			}
+		}
+
 		inst->ClearTimers();
 	}
 }
 
-void QuestManager::stopalltimers(Mob *mob) {
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end, tmp;
-
-	end = QTimerList.end();
-	while (cur != end) {
-		if (cur->mob && cur->mob == mob)
-			cur = QTimerList.erase(cur);
-		else
-			++cur;
-	}
-}
-
-void QuestManager::pausetimer(const char *timer_name) {
-	QuestManagerCurrentQuestVars();
-
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
-	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
-	PausedTimer pt;
-	uint32 milliseconds = 0;
-
-	pend = PTimerList.end();
-	while (pcur != pend)
-	{
-		if (pcur->owner && pcur->owner == owner && pcur->name == timer_name)
-		{
-			LogQuests("Timer [{}] is already paused for [{}]. Returning", timer_name, owner->GetName());
-			return;
-		}
-		++pcur;
-	}
-
-	end = QTimerList.end();
-	while (cur != end)
-	{
-		if (cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
-			milliseconds = cur->Timer_.GetRemainingTime();
-			QTimerList.erase(cur);
-			break;
-		}
-		++cur;
-	}
-
-	std::string timername = timer_name;
-	pt.name = timername;
-	pt.owner = owner;
-	pt.time = milliseconds;
-	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
-	PTimerList.push_back(pt);
-}
-
-void QuestManager::resumetimer(const char *timer_name) {
-	QuestManagerCurrentQuestVars();
-
-	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
-	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
-	PausedTimer pt;
-	uint32 milliseconds = 0;
-
-	pend = PTimerList.end();
-	while (pcur != pend)
-	{
-		if (pcur->owner && pcur->owner == owner && pcur->name == timer_name)
-		{
-			milliseconds = pcur->time;
-			PTimerList.erase(pcur);
-			break;
-		}
-		++pcur;
-	}
-
-	if (milliseconds == 0)
-	{
-		LogQuests("Paused timer [{}] not found or has expired. Returning", timer_name);
+void QuestManager::stopalltimers(Mob* m)
+{
+	if (!m) {
 		return;
 	}
 
-	end = QTimerList.end();
-	while (cur != end)
-	{
-		if (cur->mob && cur->mob == owner && cur->name == timer_name)
-		{
-			cur->Timer_.Enable();
-			cur->Timer_.Start(milliseconds, false);
-			LogQuests("Resuming timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
-			return;
-		}
-		++cur;
+	if (QTimerList.empty()) {
+		return;
 	}
 
-	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
-	LogQuests("Creating a new timer and resuming [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
+	const bool has_stop_event = (
+		(m->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_STOP)) ||
+		(m->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_STOP)) ||
+		(m->IsNPC() && parse->HasQuestSub(m->GetNPCTypeID(), EVENT_TIMER_STOP))
+	);
+
+	for (auto e = QTimerList.begin(); e != QTimerList.end();) {
+		if (e->mob && e->mob == m) {
+			if (has_stop_event) {
+				if (m->IsClient()) {
+					parse->EventPlayer(EVENT_TIMER_STOP, m->CastToClient(), e->name, 0);
+				} else if (m->IsBot()) {
+					parse->EventBot(EVENT_TIMER_STOP, m->CastToBot(), nullptr, e->name, 0);
+				} else if (m->IsNPC()) {
+					parse->EventNPC(EVENT_TIMER_STOP, m->CastToNPC(), nullptr, e->name, 0);
+				}
+			}
+
+			e = QTimerList.erase(e);
+		} else {
+			++e;
+		}
+	}
+}
+
+void QuestManager::pausetimer(const std::string& timer_name, Mob* m)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!m && !owner) {
+		return;
+	}
+
+	Mob* mob = m ? m : owner;
+
+	if (!mob) {
+		return;
+	}
+
+	if (QTimerList.empty()) {
+		return;
+	}
+
+	for (const auto& e : PTimerList) {
+		if (e.owner && e.owner == mob && e.name == timer_name) {
+			LogQuests("Timer [{}] is already paused for [{}]", timer_name, owner->GetName());
+			return;
+		}
+	}
+
+	uint32 milliseconds = 0;
+
+	const bool has_pause_event = (
+		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_PAUSE)) ||
+		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_PAUSE)) ||
+		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_PAUSE))
+	);
+
+	if (!QTimerList.empty()) {
+		for (auto e = QTimerList.begin(); e != QTimerList.end(); ++e) {
+			if (e->mob && e->mob == mob && e->name == timer_name) {
+				milliseconds = e->Timer_.GetRemainingTime();
+				QTimerList.erase(e);
+				break;
+			}
+		}
+	}
+
+	PTimerList.emplace_back(
+		PausedTimer{
+			.owner = owner,
+			.name = timer_name,
+			.time = milliseconds
+		}
+	);
+
+	if (has_pause_event) {
+		const std::string& export_string = fmt::format(
+			"{} {}",
+			timer_name,
+			milliseconds
+		);
+
+		if (mob->IsClient()) {
+			parse->EventPlayer(EVENT_TIMER_PAUSE, mob->CastToClient(), export_string, 0);
+		} else if (mob->IsBot()) {
+			parse->EventBot(EVENT_TIMER_PAUSE, mob->CastToBot(), nullptr, export_string, 0);
+		} else if (mob->IsNPC()) {
+			parse->EventNPC(EVENT_TIMER_PAUSE, mob->CastToNPC(), nullptr, export_string, 0);
+		}
+	}
+
+	LogQuests("Pausing timer [{}] for [{}] with [{}] ms remaining", timer_name, owner->GetName(), milliseconds);
+}
+
+void QuestManager::resumetimer(const std::string& timer_name, Mob* m)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!m && !owner) {
+		return;
+	}
+
+	uint32 milliseconds = 0;
+
+	Mob* mob = m ? m : owner;
+
+	if (!mob) {
+		return;
+	}
+
+	if (PTimerList.empty()) {
+		return;
+	}
+
+	for (auto e = PTimerList.begin(); e != PTimerList.end(); ++e) {
+		if (e->owner && e->owner == mob && e->name == timer_name) {
+			milliseconds = e->time;
+			PTimerList.erase(e);
+			break;
+		}
+	}
+
+	if (!milliseconds) {
+		LogQuests("Paused timer [{}] not found or has expired.", timer_name);
+		return;
+	}
+
+	const bool has_resume_event = (
+		(mob->IsClient() && parse->PlayerHasQuestSub(EVENT_TIMER_RESUME)) ||
+		(mob->IsBot() && parse->BotHasQuestSub(EVENT_TIMER_RESUME)) ||
+		(mob->IsNPC() && parse->HasQuestSub(mob->GetNPCTypeID(), EVENT_TIMER_RESUME))
+	);
+
+	if (!QTimerList.empty()) {
+		for (auto e : QTimerList) {
+			if (e.mob && e.mob == mob && e.name == timer_name) {
+				e.Timer_.Enable();
+				e.Timer_.Start(milliseconds, false);
+				LogQuests(
+					"Resuming timer [{}] for [{}] with [{}] ms remaining",
+					timer_name,
+					owner->GetName(),
+					milliseconds
+				);
+
+				if (has_resume_event) {
+					const std::string& export_string = fmt::format(
+						"{} {}",
+						timer_name,
+						milliseconds
+					);
+
+					if (mob->IsClient()) {
+						parse->EventPlayer(EVENT_TIMER_RESUME, mob->CastToClient(), export_string, 0);
+					} else if (mob->IsBot()) {
+						parse->EventBot(EVENT_TIMER_RESUME, mob->CastToBot(), nullptr, export_string, 0);
+					} else if (mob->IsNPC()) {
+						parse->EventNPC(EVENT_TIMER_RESUME, mob->CastToNPC(), nullptr, export_string, 0);
+					}
+				}
+				return;
+			}
+		}
+	}
+
+	QTimerList.emplace_back(QuestTimer(milliseconds, m, timer_name));
+
+	if (has_resume_event) {
+		const std::string& export_string = fmt::format(
+			"{} {}",
+			timer_name,
+			milliseconds
+		);
+
+		if (mob->IsClient()) {
+			parse->EventPlayer(EVENT_TIMER_RESUME, mob->CastToClient(), export_string, 0);
+		} else if (mob->IsBot()) {
+			parse->EventBot(EVENT_TIMER_RESUME, mob->CastToBot(), nullptr, export_string, 0);
+		} else if (mob->IsNPC()) {
+			parse->EventNPC(EVENT_TIMER_RESUME, mob->CastToNPC(), nullptr, export_string, 0);
+		}
+	}
+
+	LogQuests(
+		"Creating a new timer and resuming [{}] for [{}] with [{}] ms remaining",
+		timer_name,
+		owner->GetName(),
+		milliseconds
+	);
 
 }
 
-bool QuestManager::ispausedtimer(const char *timer_name) {
+bool QuestManager::ispausedtimer(const std::string& timer_name, Mob* m)
+{
 	QuestManagerCurrentQuestVars();
 
-	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
-
-	pend = PTimerList.end();
-	while (pcur != pend)
-	{
-		if (pcur->owner && pcur->owner == owner && pcur->name == timer_name)
-		{
-			return true;
-		}
-		++pcur;
+	if (!m && !owner) {
+		return false;
 	}
 
-	return false;
+	Mob* mob = m ? m : owner;
+
+	if (!mob) {
+		return false;
+	}
+
+	const auto& e = std::find_if(
+		PTimerList.begin(),
+		PTimerList.end(),
+		[&timer_name, &mob](PausedTimer e) {
+			return e.owner && e.owner == mob && e.name == timer_name;
+		}
+	);
+
+	return e != PTimerList.end();
+}
+
+bool QuestManager::hastimer(const std::string& timer_name, Mob* m)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!m && !owner) {
+		return false;
+	}
+
+	Mob* mob = m ? m : owner;
+
+	if (!mob) {
+		return false;
+	}
+
+	const auto& e = std::find_if(
+		QTimerList.begin(),
+		QTimerList.end(),
+		[&timer_name, &mob](QuestTimer e) {
+			return e.mob && e.mob == mob && e.name == timer_name;
+		}
+	);
+
+	return e != QTimerList.end();
+}
+
+uint32 QuestManager::getremainingtimeMS(const std::string& timer_name, Mob* m)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!m && !owner) {
+		return 0;
+	}
+
+	const auto mob = m ? m : owner;
+
+	if (!mob) {
+		return 0;
+	}
+
+	const auto& e = std::find_if(
+		QTimerList.begin(),
+		QTimerList.end(),
+		[&timer_name, &mob](QuestTimer e) {
+			return e.mob && e.mob == mob && e.name == timer_name;
+		}
+	);
+
+	return e != QTimerList.end() ? e->Timer_.GetRemainingTime() : 0;
+}
+
+uint32 QuestManager::gettimerdurationMS(const std::string& timer_name, Mob* m)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!m && !owner) {
+		return 0;
+	}
+
+	const auto mob = m ? m : owner;
+
+	if (!mob) {
+		return 0;
+	}
+
+	const auto& e = std::find_if(
+		QTimerList.begin(),
+		QTimerList.end(),
+		[&timer_name, &mob](QuestTimer e) {
+			return e.mob && e.mob == mob && e.name == timer_name;
+		}
+	);
+
+	return e != QTimerList.end() ? e->Timer_.GetDuration() : 0;
 }
 
 void QuestManager::emote(const char *str) {
@@ -761,18 +1217,39 @@ void QuestManager::shout2(const char *str) {
 	if (!owner) {
 		LogQuests("QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file");
 		return;
-	}
-	else {
-		worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
+	} else {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::Player,
+			Chat::Red,
+			fmt::format(
+				"{} shouts, '{}'",
+				owner->GetCleanName(),
+				str
+			).c_str()
+		);
 	}
 }
 
 void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid, uint32 to_minstatus) {
 	QuestManagerCurrentQuestVars();
-	if(send_to_world)
-		worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
-	else
-		entity_list.MessageStatus(to_guilddbid, to_minstatus, color, "%s", str);
+	if(send_to_world) {
+		worldserver.SendEmoteMessage(
+			0,
+			to_guilddbid,
+			to_minstatus,
+			color,
+			str
+		);
+	} else {
+		entity_list.MessageStatus(
+			to_guilddbid,
+			to_minstatus,
+			color,
+			str
+		);
+	}
 }
 
 void QuestManager::depop(int npc_type) {
@@ -830,12 +1307,10 @@ void QuestManager::depop_withtimer(int npc_type) {
 }
 
 void QuestManager::depopall(int npc_type) {
-	QuestManagerCurrentQuestVars();
-	if(owner && owner->IsNPC() && (npc_type > 0)) {
+	if (npc_type) {
 		entity_list.DepopAll(npc_type);
-	}
-	else {
-		LogQuests("QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file");
+	} else {
+		LogQuests("QuestManager::depopall called with nullptr owner, non-NPC owner, or invalid NPC Type ID. Probably syntax error in quest file.");
 	}
 }
 
@@ -848,21 +1323,22 @@ void QuestManager::depopzone(bool StartSpawnTimer) {
 	}
 }
 
-void QuestManager::repopzone() {
-	if(zone) {
-		zone->Repop();
-	}
-	else {
+void QuestManager::repopzone(bool is_forced)
+{
+	if (zone) {
+		zone->Repop(is_forced);
+	} else {
 		LogQuests("QuestManager::repopzone called with nullptr zone. Probably syntax error in quest file");
 	}
 }
 
 void QuestManager::processmobswhilezoneempty(bool on) {
-	if(zone) {
-		zone->process_mobs_while_empty = on;
-	}
-	else {
-		LogQuests("QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file");
+	if (zone) {
+		zone->quest_idle_override = on;
+	} else {
+		LogQuests(
+			"QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file"
+		);
 	}
 }
 
@@ -897,101 +1373,87 @@ void QuestManager::sfollow() {
 	owner->SetFollowID(0);
 }
 
-void QuestManager::changedeity(int diety_id) {
+void QuestManager::changedeity(int deity_id) {
 	QuestManagerCurrentQuestVars();
 	//Changes the deity.
 	if(initiator)
 	{
-		if(initiator->IsClient())
-		{
-			initiator->SetDeity(diety_id);
-			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", diety_id);
-			initiator->Save(1);
-			initiator->Kick("Deity change by QuestManager");
-		}
-		else
-		{
-			initiator->Message(Chat::Yellow,"Error changing Deity");
-		}
+		initiator->SetDeity(deity_id);
+		initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", deity_id);
+		initiator->Save(1);
+		initiator->Kick("Deity change by QuestManager");
 	}
 }
 
 void QuestManager::exp(int amt) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator)
 		initiator->AddEXP(amt);
 }
 
 void QuestManager::level(int newlevel) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator)
 		initiator->SetLevel(newlevel, true);
 }
 
-void QuestManager::traindisc(int discipline_tome_item_id) {
+void QuestManager::traindisc(uint32 discipline_tome_item_id) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator) {
 		initiator->TrainDiscipline(discipline_tome_item_id);
+	}
 }
 
-bool QuestManager::isdisctome(int item_id) {
-	const EQ::ItemData *item = database.GetItem(item_id);
-	if(item == nullptr) {
-		return(false);
+bool QuestManager::isdisctome(uint32 item_id) {
+	const auto &item = database.GetItem(item_id);
+	if (!item) {
+		return false;
 	}
 
 	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
-		return(false);
+		return false;
 	}
 
 	//Need a way to determine the difference between a spell and a tome
 	//so they cant turn in a spell and get it as a discipline
 	//this is kinda a hack:
-	if(!(
-		item->Name[0] == 'T' &&
-		item->Name[1] == 'o' &&
-		item->Name[2] == 'm' &&
-		item->Name[3] == 'e' &&
-		item->Name[4] == ' '
-		) && !(
-		item->Name[0] == 'S' &&
-		item->Name[1] == 'k' &&
-		item->Name[2] == 'i' &&
-		item->Name[3] == 'l' &&
-		item->Name[4] == 'l' &&
-		item->Name[5] == ':' &&
-		item->Name[6] == ' '
-		)) {
-		return(false);
-	}
 
-	//we know for sure none of the int casters get disciplines
-	uint32 cbit = 0;
-	cbit |= 1 << (WIZARD-1);
-	cbit |= 1 << (ENCHANTER-1);
-	cbit |= 1 << (MAGICIAN-1);
-	cbit |= 1 << (NECROMANCER-1);
-	if(item->Classes & cbit) {
-		return(false);
-	}
+	const std::string item_name = item->Name;
 
-	uint32 spell_id = item->Scroll.Effect;
-	if(!IsValidSpell(spell_id)) {
-		return(false);
-	}
-
-	//we know for sure none of the int casters get disciplines
-	const SPDat_Spell_Struct &spell = spells[spell_id];
-	if(
-		spell.classes[WIZARD - 1] != 255 &&
-		spell.classes[ENCHANTER - 1] != 255 &&
-		spell.classes[MAGICIAN - 1] != 255 &&
-		spell.classes[NECROMANCER - 1] != 255
+	if (
+		!Strings::BeginsWith(item_name, "Tome of ") &&
+		!Strings::BeginsWith(item_name, "Skill: ")
 	) {
-		return(false);
+		return false;
 	}
 
-	return(true);
+	//we know for sure none of the int casters get disciplines
+	uint32 class_bit = 0;
+	class_bit |= 1 << (Class::Wizard - 1);
+	class_bit |= 1 << (Class::Enchanter - 1);
+	class_bit |= 1 << (Class::Magician - 1);
+	class_bit |= 1 << (Class::Necromancer - 1);
+	if (item->Classes & class_bit) {
+		return false;
+	}
+
+	const auto& spell_id = static_cast<uint32>(item->Scroll.Effect);
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	//we know for sure none of the int casters get disciplines
+	const auto& spell = spells[spell_id];
+	if(
+		spell.classes[Class::Wizard - 1] != 255 &&
+		spell.classes[Class::Enchanter - 1] != 255 &&
+		spell.classes[Class::Magician - 1] != 255 &&
+		spell.classes[Class::Necromancer - 1] != 255
+	) {
+		return false;
+	}
+
+	return true;
 }
 
 std::string QuestManager::getracename(uint16 race_id) {
@@ -1008,20 +1470,32 @@ std::string QuestManager::getspellname(uint32 spell_id) {
 }
 
 std::string QuestManager::getskillname(int skill_id) {
-	if (skill_id >= 0 && skill_id < EQ::skills::SkillCount) {
-		std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
-		for (auto skills_iter : Skills) {
-			if (skill_id == skills_iter.first) {
-				return skills_iter.second;
-			}
-		}
-	}
-	return std::string();
+	return EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skill_id));
+}
+
+std::string QuestManager::getldonthemename(uint32 theme_id) {
+	return EQ::constants::GetLDoNThemeName(theme_id);
+}
+
+std::string QuestManager::getfactionname(int faction_id) {
+	return content_db.GetFactionName(faction_id);
+}
+
+std::string QuestManager::getlanguagename(uint8 language_id) {
+	return EQ::constants::GetLanguageName(language_id);
+}
+
+std::string QuestManager::getbodytypename(uint32 bodytype_id) {
+	return EQ::constants::GetBodyTypeName(static_cast<bodyType>(bodytype_id));
+}
+
+std::string QuestManager::getconsiderlevelname(uint8 consider_level) {
+	return EQ::constants::GetConsiderLevelName(consider_level);
 }
 
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator)
 		initiator->GoToSafeCoords(zone->GetZoneID(), zone->GetInstanceID());
 }
 
@@ -1044,26 +1518,53 @@ void QuestManager::snow(int weather) {
 	safe_delete(outapp);
 }
 
-void QuestManager::surname(const char *name) {
+void QuestManager::rename(std::string name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		std::string current_name = initiator->GetName();
+		if (initiator->ChangeFirstName(name.c_str(), current_name.c_str())) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Successfully renamed to {}, kicking to character select.",
+					name
+				).c_str()
+			);
+			initiator->Kick("Name was changed.");
+		} else {
+			initiator->Message(
+				Chat::Red,
+				fmt::format(
+					"Failed to rename {} to {}.",
+					current_name, name
+				).c_str()
+			);
+		}
+	}
+}
+
+void QuestManager::surname(std::string last_name) {
 	QuestManagerCurrentQuestVars();
 	//Changes the last name.
-	if(initiator)
-	{
-		if(initiator->IsClient())
-		{
-			initiator->ChangeLastName(name);
-			initiator->Message(Chat::Yellow,"Your surname has been changed/set to: %s", name);
-		}
-		else
-		{
-			initiator->Message(Chat::Yellow,"Error changing/setting surname");
-		}
+	if (initiator) {
+		initiator->ChangeLastName(last_name);
+		initiator->Message(
+			Chat::White,
+			fmt::format(
+				"Your last name has been set to \"{}\".",
+				last_name
+			).c_str()
+		);
 	}
 }
 
 void QuestManager::permaclass(int class_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the class specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseClass(class_id);
 	initiator->Save(2);
 	initiator->Kick("Base class change by QuestManager");
@@ -1071,7 +1572,11 @@ void QuestManager::permaclass(int class_id) {
 
 void QuestManager::permarace(int race_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the race specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseRace(race_id);
 	initiator->Save(2);
 	initiator->Kick("Base race change by QuestManager");
@@ -1079,7 +1584,11 @@ void QuestManager::permarace(int race_id) {
 
 void QuestManager::permagender(int gender_id) {
 	QuestManagerCurrentQuestVars();
-	//Makes the client the gender specified
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetBaseGender(gender_id);
 	initiator->Save(2);
 	initiator->Kick("Base gender change by QuestManager");
@@ -1087,322 +1596,173 @@ void QuestManager::permagender(int gender_id) {
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
-	int book_slot = initiator->GetNextAvailableSpellBookSlot();
-	int spell_id = 0;
-	int count = 0;
 
-	uint32 char_id = initiator->CharacterID();
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
-
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
-		if (book_slot == -1) {
-			initiator->Message(
-				13,
-				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
-				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-				spell_id
-			);
-
-			break;
-		}
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return count;
-		}
-		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
-			return count;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-			if (spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return count;
-			}
-
-			if (!IsDiscipline(spell_id_) && !initiator->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
-				if (SpellGlobalRule) {
-					// bool to see if the character has the required QGlobal to scribe it if one exists in the Spell_Globals table
-					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id_, char_id);
-					if (SpellGlobalCheckResult) {
-						initiator->ScribeSpell(spell_id_, book_slot);
-						++count;
-					}
-				}
-				else if (SpellBucketRule) {
-					// bool to see if the character has the required bucket to train it if one exists in the spell_buckets table
-					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id_, char_id);
-					if (SpellBucketCheckResult) {
-						initiator->ScribeSpell(spell_id_, book_slot);
-						++count;
-					}
-				}
-				else {
-					initiator->ScribeSpell(spell_id_, book_slot);
-					++count;
-				}
-			}
-
-			break;
-		}
-
-		book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
+	if (!initiator) {
+		return 0;
 	}
 
-	return count; // how many spells were scribed successfully
+	return initiator->ScribeSpells(min_level, max_level);
 }
 
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
-	int spell_id = 0;
-	int count = 0;
 
-	uint32 char_id = initiator->CharacterID();
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
-
-	bool change = false;
-
-	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return count;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-			if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return count;
-			}
-
-			if (!IsDiscipline(spell_id_))
-				break;
-
-			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
-				if (initiator->GetPP().disciplines.values[r] == spell_id_) {
-					initiator->Message(Chat::Red, "You already know this discipline.");
-					break; // continue the 1st loop
-				}
-				else if (initiator->GetPP().disciplines.values[r] == 0) {
-					if (SpellGlobalRule) {
-						// bool to see if the character has the required QGlobal to train it if one exists in the Spell_Globals table
-						SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id_, char_id);
-						if (SpellGlobalCheckResult) {
-							initiator->GetPP().disciplines.values[r] = spell_id_;
-							database.SaveCharacterDisc(char_id, r, spell_id_);
-							change = true;
-							initiator->Message(Chat::White, "You have learned a new discipline!");
-							++count; // success counter
-						}
-						break; // continue the 1st loop
-					}
-					else if (SpellBucketRule) {
-						// bool to see if the character has the required bucket to train it if one exists in the spell_buckets table
-						SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id_, char_id);
-						if (SpellBucketCheckResult) {
-							initiator->GetPP().disciplines.values[r] = spell_id_;
-							database.SaveCharacterDisc(char_id, r, spell_id_);
-							change = true;
-							initiator->Message(Chat::White, "You have learned a new discipline!");
-							++count;
-						}
-						break;
-					}
-					else {
-						initiator->GetPP().disciplines.values[r] = spell_id_;
-						database.SaveCharacterDisc(char_id, r, spell_id_);
-						change = true;;
-						initiator->Message(Chat::White, "You have learned a new discipline!");
-						++count; // success counter
-						break; // continue the 1st loop
-					}
-				}
-			}
-
-			break;
-		}
+	if (!initiator) {
+		return 0;
 	}
 
-	if (change)
-		initiator->SendDisciplineUpdate();
-
-	return count; // how many disciplines were learned successfully
+	return initiator->LearnDisciplines(min_level, max_level);
 }
 
 void QuestManager::unscribespells() {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->UnscribeSpellAll();
 }
 
 void QuestManager::untraindiscs() {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->UntrainDiscAll();
 }
 
-void QuestManager::givecash(int copper, int silver, int gold, int platinum) {
+void QuestManager::givecash(uint32 copper, uint32 silver, uint32 gold, uint32 platinum) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient() && ((copper + silver + gold + platinum) > 0))
-	{
-		initiator->AddMoneyToPP(copper, silver, gold, platinum, true);
-
-		std::string tmp;
-		if (platinum > 0)
-		{
-			tmp = "You receive ";
-			tmp += itoa(platinum);
-			tmp += " platinum";
-		}
-		if (gold > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(gold);
-			tmp += " gold";
-		}
-		if(silver > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(silver);
-			tmp += " silver";
-		}
-		if(copper > 0)
-		{
-			if (tmp.length() == 0)
-				tmp = "You receive ";
-			else
-				tmp += ",";
-
-			tmp += itoa(copper);
-			tmp += " copper";
-		}
-		tmp += " pieces.";
-		if (initiator)
-			initiator->Message(Chat::OOC, tmp.c_str());
+	if (
+		initiator &&
+		(
+			copper ||
+			silver ||
+			gold ||
+			platinum
+		)
+	) {
+		initiator->CashReward(
+			copper,
+			silver,
+			gold,
+			platinum
+		);
 	}
 }
 
 void QuestManager::pvp(const char *mode) {
 	QuestManagerCurrentQuestVars();
-	if (!strcasecmp(mode,"on"))
-	{
-		if (initiator)
-			initiator->SetPVP(true);
+
+	if (!initiator) {
+		return;
 	}
-	else
-		if (initiator)
-			initiator->SetPVP(false);
+
+	initiator->SetPVP(Strings::ToBool(mode));
 }
 
 void QuestManager::movepc(int zone_id, float x, float y, float z, float heading) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
-		initiator->MovePC(zone_id, x, y, z, heading);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->MovePC(zone_id, x, y, z, heading);
 }
 
 void QuestManager::gmmove(float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
-		initiator->GMMove(x, y, z);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->GMMove(x, y, z);
 }
 
 void QuestManager::movegrp(int zoneid, float x, float y, float z) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
-	{
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if (g != nullptr) {
-			g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
-		}
-		else {
-			Raid *r = entity_list.GetRaidByClient(initiator);
-			if (r != nullptr) {
-				uint32 gid = r->GetGroup(initiator);
-				if (gid >= 0 && gid < 12) {
-					r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, gid);
-				}
-				else {
-					initiator->MovePC(zoneid, x, y, z, 0.0f);
-				}
-			}
-			else {
+
+	if (!initiator) {
+		return;
+	}
+
+	if (Group *g = entity_list.GetGroupByClient(initiator)) {
+		g->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f);
+	} else {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			const auto group_id = r->GetGroup(initiator);
+			if (EQ::ValueWithin(group_id, 0, MAX_RAID_GROUPS)) {
+				r->TeleportGroup(owner, zoneid, 0, x, y, z, 0.0f, group_id);
+			} else {
 				initiator->MovePC(zoneid, x, y, z, 0.0f);
 			}
+		} else {
+			initiator->MovePC(zoneid, x, y, z, 0.0f);
 		}
 	}
 }
 
-void QuestManager::doanim(int anim_id) {
+void QuestManager::doanim(int animation_id, int animation_speed, bool ackreq, eqFilterType filter) {
 	QuestManagerCurrentQuestVars();
-	owner->DoAnim(anim_id);
+
+	if (!owner) {
+		return;
+	}
+
+	owner->DoAnim(animation_id, animation_speed, ackreq, filter);
 }
 
 void QuestManager::addskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
+
+	if (!initiator) {
 		return;
-	if (initiator && initiator->IsClient())
-		initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
+	}
+
+	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
+		return;
+	}
+
+	initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
-void QuestManager::setlanguage(int skill_id, int value) {
+void QuestManager::setlanguage(uint8 language_id, uint8 language_skill) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
-		initiator->SetLanguageSkill(skill_id, value);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SetLanguageSkill(language_id, language_skill);
 }
 
 void QuestManager::setskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
+
+	if (!initiator) {
 		return;
-	if (initiator && initiator->IsClient())
-		initiator->SetSkill((EQ::skills::SkillType) skill_id, value);
+	}
+
+	if (!EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::HIGHEST_SKILL)) {
+		return;
+	}
+
+	initiator->SetSkill((EQ::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
 	QuestManagerCurrentQuestVars();
-	if (!initiator)
+	if (!initiator) {
 		return;
-	if (initiator && initiator->IsClient()) {
-		EQ::skills::SkillType sk;
-		for (sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; sk = (EQ::skills::SkillType)(sk + 1)) {
-			initiator->SetSkill(sk, value);
-		}
+	}
+
+	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+		initiator->SetSkill(s.first, value);
 	}
 }
 
@@ -1452,13 +1812,14 @@ void QuestManager::attacknpctype(int npc_type_id) {
 
 void QuestManager::save() {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient())
+	if (initiator)
 		initiator->Save();
 }
 
 void QuestManager::faction(int faction_id, int faction_value, int temp) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	running_quest run = quests_running_.top();
+	if(run.owner->IsCharmed() == false && initiator) {
 		if(faction_id != 0 && faction_value != 0) {
 			initiator->SetFactionLevel2(
 				initiator->CharacterID(),
@@ -1468,6 +1829,16 @@ void QuestManager::faction(int faction_id, int faction_value, int temp) {
 				initiator->GetDeity(),
 				faction_value,
 				temp);
+		}
+	}
+}
+
+void QuestManager::rewardfaction(int faction_id, int faction_value) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		if (faction_id != 0 && faction_value != 0) {
+			zone->LoadFactionAssociation(faction_id);
+			initiator->RewardFaction(faction_id, faction_value);
 		}
 	}
 }
@@ -1484,43 +1855,79 @@ void QuestManager::setsky(uint8 new_sky) {
 
 void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
 	QuestManagerCurrentQuestVars();
-	if (initiator && initiator->IsClient()) {
+	if (initiator) {
 		guild_mgr.SetGuild(initiator->CharacterID(), new_guild_id, new_rank);
 	}
 }
 
 void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 	QuestManagerCurrentQuestVars();
-	uint32 cid = database.GetCharacterID(leader);
-	char hString[250];
-			if (cid == 0) {
-				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild leader not found.");
-				return;
-			}
+	uint32 character_id = database.GetCharacterID(leader);
+	if (character_id == 0) {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::QuestTroupe,
+			Chat::Yellow,
+			"Guild Error | Guild leader not found."
+		);
+		return;
+	}
 
-			uint32 tmp = guild_mgr.FindGuildByLeader(cid);
-			if (tmp != GUILD_NONE) {
-				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %u '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
-				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
+	uint32 tmp = guild_mgr.FindGuildByLeader(character_id);
+	if (tmp != GUILD_NONE) {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::QuestTroupe,
+			Chat::Yellow,
+			fmt::format(
+				"Guild Error | {} already is the leader of {} ({}).",
+				leader,
+				guild_mgr.GetGuildName(tmp),
+				tmp
+			).c_str()
+		);
+	} else {
+		uint32 gid = guild_mgr.CreateGuild(guild_name, character_id);
+		if (gid == GUILD_NONE) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::QuestTroupe,
+				Chat::Yellow,
+				"Guild Error | Guild creation failed."
+			);
+		} else {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::QuestTroupe,
+				Chat::Yellow,
+				fmt::format(
+					"Guild Created | Leader: {} ({}) ID: {}",
+					leader,
+					character_id,
+					gid
+				).c_str()
+			);
+			if (!guild_mgr.SetGuild(character_id, gid, GUILD_LEADER)) {
+				worldserver.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					"Unable to set guild leader's guild in the database. Use #guild set."
+				);
 			}
-			else {
-				uint32 gid = guild_mgr.CreateGuild(guild_name, cid);
-				if (gid == GUILD_NONE)
-					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild creation failed");
-				else {
-					sprintf(hString, "Guild Creation: Guild created: Leader: %u, number %u: %s", cid, gid, leader);
-					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
-					if(!guild_mgr.SetGuild(cid, gid, GUILD_LEADER))
-						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
-				}
-
-			}
+		}
+	}
 }
 
 void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= true*/)
 {
 	if (zone)
-		zone->SetTime(new_hour + 1, new_min, update_world);
+		zone->SetTime(new_hour, new_min, update_world);
 }
 
 void QuestManager::itemlink(int item_id) {
@@ -1540,10 +1947,10 @@ void QuestManager::itemlink(int item_id) {
 
 void QuestManager::signalwith(int npc_id, int signal_id, int wait_ms) {
 	if(wait_ms > 0) {
-		STimerList.push_back(SignalTimer(wait_ms, npc_id, signal_id));
+		STimerList.emplace_back(SignalTimer(wait_ms, npc_id, signal_id));
 		return;
 	} else {
-		STimerList.push_back(SignalTimer(0, npc_id, signal_id));
+		STimerList.emplace_back(SignalTimer(0, npc_id, signal_id));
 		return;
 	}
 }
@@ -1572,7 +1979,7 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 			7			all			all			all
 	*/
 
-	if (initiator && initiator->IsClient()){ // some events like waypoint and spawn don't have a player involved
+	if (initiator){ // some events like waypoint and spawn don't have a player involved
 		qgCharid=initiator->CharacterID();
 	}
 	else {
@@ -1593,7 +2000,7 @@ void QuestManager::setglobal(const char *varname, const char *newvalue, int opti
 	InsertQuestGlobal(qgCharid, qgNpcid, qgZoneid, varname, newvalue, QGVarDuration(duration));
 
 	/* QS: PlayerLogQGlobalUpdate */
-	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator){
 		std::string event_desc = StringFormat("Update :: qglobal:%s to qvalue:%s zoneid:%i instid:%i", varname, newvalue, initiator->GetZoneID(), initiator->GetInstanceID());
 		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
 	}
@@ -1678,13 +2085,13 @@ void QuestManager::delglobal(const char *varname) {
 	int qgCharid = 0;
 	int qgNpcid = owner ? owner->GetNPCTypeID() : 0; // encounter scripts don't have an owner
 
-	if (initiator && initiator->IsClient()) // some events like waypoint and spawn don't have a player involved
+	if (initiator) // some events like waypoint and spawn don't have a player involved
 		qgCharid=initiator->CharacterID();
 	else
 		qgCharid=-qgNpcid;		// make char id negative npc id as a fudge
 
 	/* QS: PlayerLogQGlobalUpdate */
-	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator && initiator->IsClient()){
+	if (RuleB(QueryServ, PlayerLogQGlobalUpdate) && qgCharid && qgCharid > 0 && initiator){
 		std::string event_desc = StringFormat("Deleted :: qglobal:%s zoneid:%i instid:%i", varname, initiator->GetZoneID(), initiator->GetInstanceID());
 		QServ->PlayerLogEvent(Player_Log_QGlobal_Update, qgCharid, event_desc);
 	}
@@ -1733,7 +2140,7 @@ int QuestManager::QGVarDuration(const char *fmt)
 
 	// Set val to value after type character
 	// e.g., for "M3924", set to 3924
-	int val = atoi(&fmt[0] + 1);
+	int val = Strings::ToInt(&fmt[0] + 1);
 
 	switch (fmt[0])
 	{
@@ -1778,15 +2185,22 @@ int QuestManager::QGVarDuration(const char *fmt)
 void QuestManager::ding() {
 	QuestManagerCurrentQuestVars();
 	//makes a sound.
-	if (initiator && initiator->IsClient())
+	if (initiator)
 		initiator->SendSound();
 
 }
 
-void QuestManager::rebind(int zoneid, const glm::vec3& location) {
+void QuestManager::rebind(int zone_id, const glm::vec3& location) {
 	QuestManagerCurrentQuestVars();
-	if(initiator && initiator->IsClient()) {
-		initiator->SetBindPoint(0, zoneid, 0, location);
+	if(initiator) {
+		initiator->SetBindPoint(0, zone_id, 0, location);
+	}
+}
+
+void QuestManager::rebind(int zone_id, const glm::vec4& location) {
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		initiator->SetBindPoint2(0, zone_id, 0, location);
 	}
 }
 
@@ -1830,22 +2244,44 @@ void QuestManager::resume() {
 	owner->CastToNPC()->ResumeWandering();
 }
 
-void QuestManager::addldonpoints(int32 points, uint32 theme) {
+void QuestManager::addldonpoints(uint32 theme_id, int points)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNPoints(points, theme);
+	if (initiator) {
+		initiator->UpdateLDoNPoints(theme_id, points);
+	}
 }
 
-void QuestManager::addldonwin(int32 wins, uint32 theme) {
+void QuestManager::addldonloss(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNWins(theme, wins);
+	if (initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id);
+	}
 }
 
-void QuestManager::addldonloss(int32 losses, uint32 theme) {
+void QuestManager::addldonwin(uint32 theme_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->UpdateLDoNLosses(theme, losses);
+	if (initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, true);
+	}
+}
+
+void QuestManager::removeldonloss(uint32 theme_id)
+{
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, false, true);
+	}
+}
+
+void QuestManager::removeldonwin(uint32 theme_id)
+{
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, true, true);
+	}
 }
 
 void QuestManager::setnexthpevent(int at) {
@@ -1883,23 +2319,46 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	}
 }
 
-void QuestManager::set_proximity(float minx, float maxx, float miny, float maxy, float minz, float maxz, bool bSay)
+void QuestManager::set_proximity_range(float x_range, float y_range, float z_range, bool enable_say)
 {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC()) {
 		return;
 	}
 
-	entity_list.AddProximity(owner->CastToNPC());
+	auto n = owner->CastToNPC();
 
-	owner->CastToNPC()->proximity->min_x         = minx;
-	owner->CastToNPC()->proximity->max_x         = maxx;
-	owner->CastToNPC()->proximity->min_y         = miny;
-	owner->CastToNPC()->proximity->max_y         = maxy;
-	owner->CastToNPC()->proximity->min_z         = minz;
-	owner->CastToNPC()->proximity->max_z         = maxz;
-	owner->CastToNPC()->proximity->say           = bSay;
-	owner->CastToNPC()->proximity->proximity_set = true;
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = n->GetX() - x_range;
+	n->proximity->max_x         = n->GetX() + x_range;
+	n->proximity->min_y         = n->GetY() - y_range;
+	n->proximity->max_y         = n->GetY() + y_range;
+	n->proximity->min_z         = n->GetZ() - z_range;
+	n->proximity->max_z         = n->GetZ() + z_range;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
+}
+
+void QuestManager::set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
+{
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC()) {
+		return;
+	}
+
+	auto n = owner->CastToNPC();
+
+	entity_list.AddProximity(n);
+
+	n->proximity->min_x         = min_x;
+	n->proximity->max_x         = max_x;
+	n->proximity->min_y         = min_y;
+	n->proximity->max_y         = max_y;
+	n->proximity->min_z         = min_z;
+	n->proximity->max_z         = max_z;
+	n->proximity->say           = enable_say;
+	n->proximity->proximity_set = true;
 }
 
 void QuestManager::clear_proximity() {
@@ -1928,38 +2387,48 @@ void QuestManager::setanim(int npc_type, int animnum) {
 }
 
 //displays an in game path based on a waypoint grid
-void QuestManager::showgrid(int grid) {
+void QuestManager::showgrid(int grid_id)
+{
 	QuestManagerCurrentQuestVars();
-	if(initiator == nullptr)
+
+	if (!initiator) {
 		return;
+	}
 
-	FindPerson_Point pt;
-	std::vector<FindPerson_Point> pts;
+	std::vector<FindPerson_Point> v;
 
-	pt.x = initiator->GetX();
-	pt.y = initiator->GetY();
-	pt.z = initiator->GetZ();
-	pts.push_back(pt);
+	v.push_back(
+		FindPerson_Point{
+			.y = initiator->GetY(),
+			.x = initiator->GetX(),
+			.z = initiator->GetZ()
+		}
+	);
 
-	// Retrieve all waypoints for this grid
-	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
-                                    "WHERE `gridid` = %i AND `zoneid` = %i "
-                                    "ORDER BY `number`", grid, zone->GetZoneID());
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-        LogQuests("Error loading grid [{}] for showgrid(): [{}]", grid, results.ErrorMessage().c_str());
+	const auto& l = GridEntriesRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"`gridid` = {} AND `zoneid` = {} ORDER BY `number`",
+			grid_id,
+			zone->GetZoneID()
+		)
+	);
+
+	if (l.empty()) {
 		return;
-    }
+	}
 
-    for(auto row = results.begin(); row != results.end(); ++row) {
-        pt.x = atof(row[0]);
-        pt.y = atof(row[1]);
-        pt.z = atof(row[2]);
+	for (const auto& e : l) {
+		v.push_back(
+			FindPerson_Point{
+				.y = e.y,
+				.x = e.x,
+				.z = e.z
+			}
+		);
+	}
 
-        pts.push_back(pt);
-    }
-
-    initiator->SendPathPacket(pts);
+    initiator->SendPathPacket(v);
 
 }
 
@@ -1980,22 +2449,42 @@ void QuestManager::toggle_spawn_event(int event_id, bool enable, bool strict, bo
 
 bool QuestManager::has_zone_flag(int zone_id) {
 	QuestManagerCurrentQuestVars();
-	return initiator ? initiator->HasZoneFlag(zone_id) : false;
+
+	if (!initiator) {
+		return false;
+	}
+
+	return initiator->HasZoneFlag(zone_id);
 }
 
 void QuestManager::set_zone_flag(int zone_id) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->SetZoneFlag(zone_id);
 }
 
 void QuestManager::clear_zone_flag(int zone_id) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->ClearZoneFlag(zone_id);
 }
 
-void QuestManager::sethp(int hpperc) {
+void QuestManager::sethp(int64 hpperc) {
 	QuestManagerCurrentQuestVars();
-	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
+
+	if (!owner) {
+		return;
+	}
+
+	int64 newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
 	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false, 0, false);
 }
 
@@ -2023,28 +2512,17 @@ bool QuestManager::summonallplayercorpses(uint32 char_id, const glm::vec4& posit
 	return true;
 }
 
-int QuestManager::getplayercorpsecount(uint32 char_id) {
-	if (char_id > 0) {
-		return database.CountCharacterCorpses(char_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecount(uint32 character_id) {
+	return character_id ? database.CountCharacterCorpses(character_id) : 0;
 
 }
 
-int QuestManager::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id) {
-	if (char_id > 0 && zone_id > 0) {
-		return database.CountCharacterCorpsesByZoneID(char_id, zone_id);
-	}
-	return 0;
+int64 QuestManager::getplayercorpsecountbyzoneid(uint32 character_id, uint32 zone_id) {
+	return (character_id && zone_id) ? database.CountCharacterCorpsesByZoneID(character_id, zone_id) : 0;
 }
 
-uint32 QuestManager::getplayerburiedcorpsecount(uint32 char_id) {
-	uint32 Result = 0;
-
-	if(char_id > 0) {
-		Result = database.GetCharacterBuriedCorpseCount(char_id);
-	}
-	return Result;
+int64 QuestManager::getplayerburiedcorpsecount(uint32 character_id) {
+	return character_id ? database.GetCharacterBuriedCorpseCount(character_id) : 0;
 }
 
 bool QuestManager::buryplayercorpse(uint32 char_id)
@@ -2111,180 +2589,307 @@ bool QuestManager::isdooropen(uint32 doorid) {
 	}
 	return false;
 }
-void QuestManager::npcrace(int race_id)
+
+void QuestManager::npcrace(uint16 race_id)
 {
 	QuestManagerCurrentQuestVars();
-	owner->SendIllusionPacket(race_id);
+
+	if (!owner) {
+		return;
+	}
+
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void QuestManager::npcgender(int gender_id)
+void QuestManager::npcgender(uint8 gender_id)
 {
 	QuestManagerCurrentQuestVars();
-	owner->SendIllusionPacket(owner->GetRace(), gender_id);
-}
-void QuestManager::npcsize(int newsize)
-{
-	QuestManagerCurrentQuestVars();
-	owner->ChangeSize(newsize, true);
-}
-void QuestManager::npctexture(int newtexture)
-{
-	QuestManagerCurrentQuestVars();
-	owner->SendIllusionPacket(owner->GetRace(), 0xFF, newtexture);
+
+	if (!owner) {
+		return;
+	}
+
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = owner->GetRace(),
+		}
+	);
 }
 
-void QuestManager::playerrace(int race_id)
+void QuestManager::npcsize(float size)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->SendIllusionPacket(race_id);
+
+	if (!owner) {
+		return;
+	}
+
+	owner->ChangeSize(size, true);
 }
 
-void QuestManager::playergender(int gender_id)
+void QuestManager::npctexture(uint8 texture)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->SendIllusionPacket(initiator->GetRace(), gender_id);
+
+	if (!owner) {
+		return;
+	}
+
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = owner->GetRace(),
+			.texture = texture,
+		}
+	);
 }
 
-void QuestManager::playersize(int newsize)
+void QuestManager::playerrace(uint16 race_id)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->ChangeSize(newsize, true);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = race_id,
+		}
+	);
 }
 
-void QuestManager::playertexture(int newtexture)
+void QuestManager::playergender(uint8 gender_id)
 {
 	QuestManagerCurrentQuestVars();
-	initiator->SendIllusionPacket(initiator->GetRace(), 0xFF, newtexture);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.gender_id = gender_id,
+			.race_id = initiator->GetRace(),
+		}
+	);
 }
 
-void QuestManager::playerfeature(char *feature, int setting)
+void QuestManager::playersize(float size)
 {
 	QuestManagerCurrentQuestVars();
-	uint16 Race = initiator->GetRace();
-	uint8 Gender = initiator->GetGender();
-	uint8 Texture = 0xFF;
-	uint8 HelmTexture = 0xFF;
-	uint8 HairColor = initiator->GetHairColor();
-	uint8 BeardColor = initiator->GetBeardColor();
-	uint8 EyeColor1 = initiator->GetEyeColor1();
-	uint8 EyeColor2 = initiator->GetEyeColor2();
-	uint8 HairStyle = initiator->GetHairStyle();
-	uint8 LuclinFace = initiator->GetLuclinFace();
-	uint8 Beard = initiator->GetBeard();
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->ChangeSize(size, true);
+}
+
+void QuestManager::playertexture(uint8 texture)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.race_id = initiator->GetRace(),
+			.texture = texture,
+		}
+	);
+}
+
+void QuestManager::playerfeature(const char* feature, int setting)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
+	uint16 Race            = initiator->GetRace();
+	uint8  Gender          = initiator->GetGender();
+	uint8  Texture         = 0xFF;
+	uint8  HelmTexture     = 0xFF;
+	uint8  HairColor       = initiator->GetHairColor();
+	uint8  BeardColor      = initiator->GetBeardColor();
+	uint8  EyeColor1       = initiator->GetEyeColor1();
+	uint8  EyeColor2       = initiator->GetEyeColor2();
+	uint8  HairStyle       = initiator->GetHairStyle();
+	uint8  LuclinFace      = initiator->GetLuclinFace();
+	uint8  Beard           = initiator->GetBeard();
 	uint32 DrakkinHeritage = initiator->GetDrakkinHeritage();
-	uint32 DrakkinTattoo = initiator->GetDrakkinTattoo();
-	uint32 DrakkinDetails = initiator->GetDrakkinDetails();
-	float Size = initiator->GetSize();
+	uint32 DrakkinTattoo   = initiator->GetDrakkinTattoo();
+	uint32 DrakkinDetails  = initiator->GetDrakkinDetails();
+	float  Size            = initiator->GetSize();
 
-	if (!strcasecmp(feature,"race"))
+	if (!strcasecmp(feature, "race")) {
 		Race = setting;
-	else if (!strcasecmp(feature,"gender"))
+	} else if (!strcasecmp(feature, "gender")) {
 		Gender = setting;
-	else if (!strcasecmp(feature,"texture"))
+	} else if (!strcasecmp(feature, "texture")) {
 		Texture = setting;
-	else if (!strcasecmp(feature,"helm"))
+	} else if (!strcasecmp(feature, "helm")) {
 		HelmTexture = setting;
-	else if (!strcasecmp(feature,"haircolor"))
+	} else if (!strcasecmp(feature, "haircolor")) {
 		HairColor = setting;
-	else if (!strcasecmp(feature,"beardcolor"))
+	} else if (!strcasecmp(feature, "beardcolor")) {
 		BeardColor = setting;
-	else if (!strcasecmp(feature,"eyecolor1"))
+	} else if (!strcasecmp(feature, "eyecolor1")) {
 		EyeColor1 = setting;
-	else if (!strcasecmp(feature,"eyecolor2"))
+	} else if (!strcasecmp(feature, "eyecolor2")) {
 		EyeColor2 = setting;
-	else if (!strcasecmp(feature,"hair"))
+	} else if (!strcasecmp(feature, "hair")) {
 		HairStyle = setting;
-	else if (!strcasecmp(feature,"face"))
+	} else if (!strcasecmp(feature, "face")) {
 		LuclinFace = setting;
-	else if (!strcasecmp(feature,"beard"))
+	} else if (!strcasecmp(feature, "beard")) {
 		Beard = setting;
-	else if (!strcasecmp(feature,"heritage"))
+	} else if (!strcasecmp(feature, "heritage")) {
 		DrakkinHeritage = setting;
-	else if (!strcasecmp(feature,"tattoo"))
+	} else if (!strcasecmp(feature, "tattoo")) {
 		DrakkinTattoo = setting;
-	else if (!strcasecmp(feature,"details"))
+	} else if (!strcasecmp(feature, "details")) {
 		DrakkinDetails = setting;
-	else if (!strcasecmp(feature,"size"))
-		Size = (float)setting / 10;	//dividing by 10 to allow 1 decimal place for adjusting size
-	else
+	} else if (!strcasecmp(feature, "size")) {
+		Size = (float) setting / 10;    //dividing by 10 to allow 1 decimal place for adjusting size
+	} else {
 		return;
+	}
 
-	initiator->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
-										EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
-										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
+	initiator->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = Beard,
+			.beard_color = BeardColor,
+			.drakkin_details = DrakkinDetails,
+			.drakkin_heritage = DrakkinHeritage,
+			.drakkin_tattoo = DrakkinTattoo,
+			.eye_color_one = EyeColor1,
+			.eye_color_two = EyeColor2,
+			.face = LuclinFace,
+			.gender_id = Gender,
+			.hair = HairStyle,
+			.hair_color = HairColor,
+			.helmet_texture = HelmTexture,
+			.race_id = Race,
+			.size = Size,
+			.texture = Texture,
+		}
+	);
 }
 
-void QuestManager::npcfeature(char *feature, int setting)
+void QuestManager::npcfeature(const char* feature, int setting)
 {
 	QuestManagerCurrentQuestVars();
-	uint16 Race = owner->GetRace();
-	uint8 Gender = owner->GetGender();
-	uint8 Texture = owner->GetTexture();
-	uint8 HelmTexture = owner->GetHelmTexture();
-	uint8 HairColor = owner->GetHairColor();
-	uint8 BeardColor = owner->GetBeardColor();
-	uint8 EyeColor1 = owner->GetEyeColor1();
-	uint8 EyeColor2 = owner->GetEyeColor2();
-	uint8 HairStyle = owner->GetHairStyle();
-	uint8 LuclinFace = owner->GetLuclinFace();
-	uint8 Beard = owner->GetBeard();
-	uint32 DrakkinHeritage = owner->GetDrakkinHeritage();
-	uint32 DrakkinTattoo = owner->GetDrakkinTattoo();
-	uint32 DrakkinDetails = owner->GetDrakkinDetails();
-	float Size = owner->GetSize();
 
-	if (!strcasecmp(feature,"race"))
-		Race = setting;
-	else if (!strcasecmp(feature,"gender"))
-		Gender = setting;
-	else if (!strcasecmp(feature,"texture"))
-		Texture = setting;
-	else if (!strcasecmp(feature,"helm"))
-		HelmTexture = setting;
-	else if (!strcasecmp(feature,"haircolor"))
-		HairColor = setting;
-	else if (!strcasecmp(feature,"beardcolor"))
-		BeardColor = setting;
-	else if (!strcasecmp(feature,"eyecolor1"))
-		EyeColor1 = setting;
-	else if (!strcasecmp(feature,"eyecolor2"))
-		EyeColor2 = setting;
-	else if (!strcasecmp(feature,"hair"))
-		HairStyle = setting;
-	else if (!strcasecmp(feature,"face"))
-		LuclinFace = setting;
-	else if (!strcasecmp(feature,"beard"))
-		Beard = setting;
-	else if (!strcasecmp(feature,"heritage"))
-		DrakkinHeritage = setting;
-	else if (!strcasecmp(feature,"tattoo"))
-		DrakkinTattoo = setting;
-	else if (!strcasecmp(feature,"details"))
-		DrakkinDetails = setting;
-	else if (!strcasecmp(feature,"size"))
-		Size = (float)setting / 10;	//dividing by 10 to allow 1 decimal place for adjusting size
-	else
+	if (!owner) {
 		return;
+	}
 
-	owner->SendIllusionPacket(Race, Gender, Texture, HelmTexture, HairColor, BeardColor,
-										EyeColor1, EyeColor2, HairStyle, LuclinFace, Beard, 0xFF,
-										DrakkinHeritage, DrakkinTattoo, DrakkinDetails, Size);
+	uint16 Race            = owner->GetRace();
+	uint8  Gender          = owner->GetGender();
+	uint8  Texture         = owner->GetTexture();
+	uint8  HelmTexture     = owner->GetHelmTexture();
+	uint8  HairColor       = owner->GetHairColor();
+	uint8  BeardColor      = owner->GetBeardColor();
+	uint8  EyeColor1       = owner->GetEyeColor1();
+	uint8  EyeColor2       = owner->GetEyeColor2();
+	uint8  HairStyle       = owner->GetHairStyle();
+	uint8  LuclinFace      = owner->GetLuclinFace();
+	uint8  Beard           = owner->GetBeard();
+	uint32 DrakkinHeritage = owner->GetDrakkinHeritage();
+	uint32 DrakkinTattoo   = owner->GetDrakkinTattoo();
+	uint32 DrakkinDetails  = owner->GetDrakkinDetails();
+	float  Size            = owner->GetSize();
+
+	if (!strcasecmp(feature, "race")) {
+		Race = setting;
+	} else if (!strcasecmp(feature, "gender")) {
+		Gender = setting;
+	} else if (!strcasecmp(feature, "texture")) {
+		Texture = setting;
+	} else if (!strcasecmp(feature, "helm")) {
+		HelmTexture = setting;
+	} else if (!strcasecmp(feature, "haircolor")) {
+		HairColor = setting;
+	} else if (!strcasecmp(feature, "beardcolor")) {
+		BeardColor = setting;
+	} else if (!strcasecmp(feature, "eyecolor1")) {
+		EyeColor1 = setting;
+	} else if (!strcasecmp(feature, "eyecolor2")) {
+		EyeColor2 = setting;
+	} else if (!strcasecmp(feature, "hair")) {
+		HairStyle = setting;
+	} else if (!strcasecmp(feature, "face")) {
+		LuclinFace = setting;
+	} else if (!strcasecmp(feature, "beard")) {
+		Beard = setting;
+	} else if (!strcasecmp(feature, "heritage")) {
+		DrakkinHeritage = setting;
+	} else if (!strcasecmp(feature, "tattoo")) {
+		DrakkinTattoo = setting;
+	} else if (!strcasecmp(feature, "details")) {
+		DrakkinDetails = setting;
+	} else if (!strcasecmp(feature, "size")) {
+		Size = (float) setting / 10;    //dividing by 10 to allow 1 decimal place for adjusting size
+	} else {
+		return;
+	}
+
+	owner->SendIllusionPacket(
+		AppearanceStruct{
+			.beard = Beard,
+			.beard_color = BeardColor,
+			.drakkin_details = DrakkinDetails,
+			.drakkin_heritage = DrakkinHeritage,
+			.drakkin_tattoo = DrakkinTattoo,
+			.eye_color_one = EyeColor1,
+			.eye_color_two = EyeColor2,
+			.face = LuclinFace,
+			.gender_id = Gender,
+			.hair = HairStyle,
+			.hair_color = HairColor,
+			.helmet_texture = HelmTexture,
+			.race_id = Race,
+			.size = Size,
+			.texture = Texture,
+		}
+	);
 }
 
 void QuestManager::popup(const char *title, const char *text, uint32 popupid, uint32 buttons, uint32 Duration)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->SendPopupToClient(title, text, popupid, buttons, Duration);
+
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendPopupToClient(title, text, popupid, buttons, Duration);
 }
 
-#ifdef BOTS
+int QuestManager::createbotcount(uint8 class_id) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		return initiator->GetBotCreationLimit(class_id);
+	}
 
-int QuestManager::createbotcount() {
 	return RuleI(Bots, CreationLimit);
 }
 
-int QuestManager::spawnbotcount() {
+int QuestManager::spawnbotcount(uint8 class_id) {
+	QuestManagerCurrentQuestVars();
+	if (initiator) {
+		return initiator->GetBotSpawnLimit(class_id);
+	}
+
 	return RuleI(Bots, SpawnLimit);
 }
 
@@ -2296,91 +2901,221 @@ bool QuestManager::botquest()
 bool QuestManager::createBot(const char *name, const char *lastname, uint8 level, uint16 race, uint8 botclass, uint8 gender)
 {
 	QuestManagerCurrentQuestVars();
-	uint32 MaxBotCreate = RuleI(Bots, CreationLimit);
 
-	if (initiator && initiator->IsClient())
-	{
-		if(Bot::SpawnedBotCount(initiator->CharacterID()) >= MaxBotCreate)
-		{
-			initiator->Message(Chat::Yellow,"You have the maximum number of bots allowed.");
+	if (initiator) {
+		auto bot_creation_limit = initiator->GetBotCreationLimit();
+		auto bot_creation_limit_class = initiator->GetBotCreationLimit(botclass);
+		auto bot_spawn_limit = initiator->GetBotSpawnLimit();
+		auto bot_spawn_limit_class = initiator->GetBotSpawnLimit(botclass);
+
+		uint32 bot_count = 0;
+		uint32 bot_class_count = 0;
+		if (!database.botdb.QueryBotCount(initiator->CharacterID(), botclass, bot_count, bot_class_count)) {
+			initiator->Message(Chat::White, "Failed to query bot count.");
+			return false;
+		}
+
+		if (bot_creation_limit >= 0 && bot_count >= bot_creation_limit) {
+			std::string message;
+
+			if (bot_creation_limit) {
+				message = fmt::format(
+					"You cannot create anymore than {} bot{}.",
+					bot_creation_limit,
+					bot_creation_limit != 1 ? "s" : ""
+				);
+			} else {
+				message = "You cannot create any bots.";
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		if (bot_creation_limit_class >= 0 && bot_class_count >= bot_creation_limit_class) {
+			std::string message;
+
+			if (bot_creation_limit_class) {
+				message = fmt::format(
+					"You cannot create anymore than {} {} bot{}.",
+					bot_creation_limit_class,
+					GetClassIDName(botclass),
+					bot_creation_limit_class != 1 ? "s" : ""
+				);
+			} else {
+				message = fmt::format(
+					"You cannot create any {} bots.",
+					GetClassIDName(botclass)
+				);
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		auto spawned_bot_count = Bot::SpawnedBotCount(initiator->CharacterID());
+
+		if (
+			bot_spawn_limit >= 0 &&
+			spawned_bot_count >= bot_spawn_limit &&
+			!initiator->GetGM()
+		) {
+			std::string message;
+			if (bot_spawn_limit) {
+				message = fmt::format(
+					"You cannot have more than {} spawned bot{}.",
+					bot_spawn_limit,
+					bot_spawn_limit != 1 ? "s" : ""
+				);
+			} else {
+				message = "You are not currently allowed to spawn any bots.";
+			}
+
+			initiator->Message(Chat::White, message.c_str());
+			return false;
+		}
+
+		auto spawned_bot_count_class = Bot::SpawnedBotCount(initiator->CharacterID(), botclass);
+
+		if (
+			bot_spawn_limit_class >= 0 &&
+			spawned_bot_count_class >= bot_spawn_limit_class &&
+			!initiator->GetGM()
+		) {
+			std::string message;
+			if (bot_spawn_limit_class) {
+				message = fmt::format(
+					"You cannot have more than {} spawned {} bot{}.",
+					bot_spawn_limit_class,
+					GetClassIDName(botclass),
+					bot_spawn_limit_class != 1 ? "s" : ""
+				);
+			} else {
+				message = fmt::format(
+					"You are not currently allowed to spawn any {} bots.",
+					GetClassIDName(botclass)
+				);
+			}
+
+			initiator->Message(Chat::White, message.c_str());
 			return false;
 		}
 
 		std::string test_name = name;
 		bool available_flag = false;
-		if(!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
-			initiator->Message(Chat::White, "%s for '%s'", BotDatabase::fail::QueryNameAvailablity(), (char*)name);
+		if (!database.botdb.QueryNameAvailablity(test_name, available_flag)) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to query name availability for '{}'.",
+					test_name
+				).c_str()
+			);
 			return false;
 		}
+
 		if (!available_flag) {
-			initiator->Message(Chat::White, "The name %s is already being used or is invalid. Please choose a different name.", (char*)name);
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"The name {} is already being used or is invalid. Please choose a different name.",
+					test_name
+				).c_str()
+			);
 			return false;
 		}
 
-		Bot* NewBot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
+		Bot* new_bot = new Bot(Bot::CreateDefaultNPCTypeStructForBot(name, lastname, level, race, botclass, gender), initiator);
 
-		if(NewBot)
-		{
-			if(!NewBot->IsValidRaceClassCombo()) {
-				initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
-				return false;
+		if (!new_bot->IsValidRaceClassCombo()) {
+			initiator->Message(Chat::White, "That Race/Class combination cannot be created.");
+			return false;
+		}
+
+		if (!new_bot->IsValidName()) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.",
+					new_bot->GetCleanName()
+				).c_str()
+			);
+			return false;
+		}
+
+		// Now that all validation is complete, we can save our newly created bot
+		if (!new_bot->Save()) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Unable to save {} as a bot.",
+					new_bot->GetCleanName()
+				).c_str()
+			);
+		} else {
+			new_bot->AddBotStartingItems(race, botclass);
+
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"{} saved as bot ID {}.",
+					new_bot->GetCleanName(),
+					new_bot->GetBotID()
+				).c_str()
+			);
+
+			if (parse->PlayerHasQuestSub(EVENT_BOT_CREATE)) {
+				const auto &export_string = fmt::format(
+					"{} {} {} {} {}",
+					name,
+					new_bot->GetBotID(),
+					race,
+					botclass,
+					gender
+				);
+
+				parse->EventPlayer(EVENT_BOT_CREATE, initiator, export_string, 0);
 			}
 
-			if(!NewBot->IsValidName()) {
-				initiator->Message(Chat::White, "%s has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.", NewBot->GetCleanName());
-				return false;
-			}
-
-			// Now that all validation is complete, we can save our newly created bot
-			if(!NewBot->Save())
-			{
-				initiator->Message(Chat::White, "Unable to save %s as a bot.", NewBot->GetCleanName());
-			}
-			else
-			{
-				initiator->Message(Chat::White, "%s saved as bot %u.", NewBot->GetCleanName(), NewBot->GetBotID());
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
 }
 
-#endif //BOTS
-
-void QuestManager::taskselector(int taskcount, int *tasks) {
+void QuestManager::taskselector(const std::vector<int>& tasks, bool ignore_cooldown) {
 	QuestManagerCurrentQuestVars();
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
-		initiator->TaskQuestSetSelector(owner, taskcount, tasks);
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
+		initiator->TaskQuestSetSelector(owner, tasks, ignore_cooldown);
 }
 void QuestManager::enabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->EnableTask(taskcount, tasks);
 }
 
 void QuestManager::disabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->DisableTask(taskcount, tasks);
 }
 
 bool QuestManager::istaskenabled(int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		return initiator->IsTaskEnabled(taskid);
 
 	return false;
 }
 
-void QuestManager::tasksetselector(int tasksetid) {
+void QuestManager::tasksetselector(int tasksetid, bool ignore_cooldown) {
 	QuestManagerCurrentQuestVars();
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
-		initiator->TaskSetSelector(owner, tasksetid);
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
+		initiator->TaskSetSelector(owner, tasksetid, ignore_cooldown);
 }
 
 bool QuestManager::istaskactive(int task) {
@@ -2426,13 +3161,6 @@ void QuestManager::resettaskactivity(int task, int activity) {
 		initiator->ResetTaskActivity(task, activity);
 }
 
-void QuestManager::taskexploredarea(int exploreid) {
-	QuestManagerCurrentQuestVars();
-
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator)
-		initiator->UpdateTasksOnExplore(exploreid);
-}
-
 void QuestManager::assigntask(int taskid, bool enforce_level_requirement) {
 	QuestManagerCurrentQuestVars();
 
@@ -2468,8 +3196,8 @@ int QuestManager::enabledtaskcount(int taskset) {
 int QuestManager::firsttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->FirstTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->FirstTaskInSet(taskset);
 
 	return -1;
 }
@@ -2477,8 +3205,8 @@ int QuestManager::firsttaskinset(int taskset) {
 int QuestManager::lasttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->LastTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->LastTaskInSet(taskset);
 
 	return -1;
 }
@@ -2486,8 +3214,8 @@ int QuestManager::lasttaskinset(int taskset) {
 int QuestManager::nexttaskinset(int taskset, int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->NextTaskInSet(taskset, taskid);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->NextTaskInSet(taskset, taskid);
 
 	return -1;
 }
@@ -2495,16 +3223,16 @@ int QuestManager::nexttaskinset(int taskset, int taskid) {
 int QuestManager::activespeaktask() {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
-		return initiator->ActiveSpeakTask(owner->GetNPCTypeID());
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && owner->IsNPC())
+		return initiator->ActiveSpeakTask(owner->CastToNPC());
 	return 0;
 }
 
 int QuestManager::activespeakactivity(int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner)
-		return initiator->ActiveSpeakActivity(owner->GetNPCTypeID(), taskid);
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && owner->IsNPC())
+		return initiator->ActiveSpeakActivity(owner->CastToNPC(), taskid);
 
 	return 0;
 }
@@ -2539,8 +3267,8 @@ int QuestManager::completedtasksinset(int taskset) {
 bool QuestManager::istaskappropriate(int task) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
-		return taskmanager->AppropriateLevel(task, initiator->GetLevel());
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
+		return task_manager->ValidateLevel(task, initiator->GetLevel());
 
 	return false;
 }
@@ -2549,27 +3277,36 @@ std::string QuestManager::gettaskname(uint32 task_id) {
 	QuestManagerCurrentQuestVars();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		return taskmanager->GetTaskName(task_id);
+		return task_manager->GetTaskName(task_id);
 	}
 
 	return std::string();
 }
 
-void QuestManager::clearspawntimers() {
-	if(!zone)
-        return;
+int QuestManager::GetCurrentDzTaskID() {
+	QuestManagerCurrentQuestVars();
 
-	//TODO: Dec 19, 2008, replace with code updated for current spawn timers.
-    LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
-	iterator.Reset();
-	while (iterator.MoreElements()) {
-		std::string query = StringFormat("DELETE FROM respawn_times "
-                                        "WHERE id = %lu AND instance_id = %lu",
-                                        (unsigned long)iterator.GetData()->GetID(),
-                                        (unsigned long)zone->GetInstanceID());
-        auto results = database.QueryDatabase(query);
-		iterator.Advance();
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		return task_manager->GetCurrentDzTaskID();
 	}
+
+	return 0;
+}
+
+void QuestManager::EndCurrentDzTask(bool send_fail) {
+	QuestManagerCurrentQuestVars();
+
+	if (RuleB(TaskSystem, EnableTaskSystem) && zone && task_manager) {
+		task_manager->EndCurrentDzTask(send_fail);
+	}
+}
+
+void QuestManager::clearspawntimers() {
+	if (!zone) {
+        return;
+	}
+
+	zone->ClearSpawnTimers();
 }
 
 void QuestManager::ze(int type, const char *str) {
@@ -2577,53 +3314,91 @@ void QuestManager::ze(int type, const char *str) {
 }
 
 void QuestManager::we(int type, const char *str) {
-	worldserver.SendEmoteMessage(0, 0, type, str);
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		type,
+		str
+	);
+}
+
+void QuestManager::SendChannelMessage(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(0, 0, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void QuestManager::SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(from, 0, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void QuestManager::SendChannelMessage(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message)
+{
+	worldserver.SendChannelMessage(from, to, channel_number, guild_id, language_id, language_skill, message);
+}
+
+void QuestManager::message(uint32 type, const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->Message(type, message);
+}
+
+void QuestManager::whisper(const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator || !owner) {
+		return;
+	}
+
+	initiator->Message(
+		Chat::EchoChat1,
+		fmt::format(
+			"{} whispers, '{}'",
+			owner->GetCleanName(),
+			message
+		).c_str()
+	);
 }
 
 int QuestManager::getlevel(uint8 type)
 {
 	QuestManagerCurrentQuestVars();
-	if (type == 0)
-	{
-		return (initiator->GetLevel());
-	}
-	else if(type == 1)
-	{
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if (g != nullptr)
-			return (g->GetAvgLevel());
-		else
-			return 0;
-	}
-	else if(type == 2)
-	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
-		if (r != nullptr)
-			return (r->GetAvgLevel());
-		else
-			return 0;
-	}
-	else if(type == 3)
-	{
-		Raid *r = entity_list.GetRaidByClient(initiator);
-		if(r != nullptr)
-		{
-			return (r->GetAvgLevel());
-		}
-		Group *g = entity_list.GetGroupByClient(initiator);
-		if(g != nullptr)
-		{
-			return (g->GetAvgLevel());
-		}
-		else
-			return (initiator->GetLevel());
-	}
-	else if(type == 4 && initiator->IsClient())
-	{
-		return (initiator->CastToClient()->GetLevel2());
-	}
-	else
+
+	if (!initiator) {
 		return 0;
+	}
+
+	if (type == 0) {
+		return initiator->GetLevel();
+	} else if (type == 1) {
+		if (Group *g = entity_list.GetGroupByClient(initiator)) {
+			return g->GetAvgLevel();
+		} else {
+			return 0;
+		}
+	} else if (type == 2) {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			return r->GetAvgLevel();
+		} else {
+			return 0;
+		}
+	} else if (type == 3) {
+		if (Raid *r = entity_list.GetRaidByClient(initiator)) {
+			return r->GetAvgLevel();
+		}
+
+		if (Group *g = entity_list.GetGroupByClient(initiator)) {
+			return g->GetAvgLevel();
+		} else {
+			return initiator->GetLevel();
+		}
+	} else if (type == 4) {
+		return initiator->CastToClient()->GetLevel2();
+	} else {
+		return 0;
+	}
 }
 
 uint16 QuestManager::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
@@ -2640,47 +3415,41 @@ uint16 QuestManager::CreateGroundObjectFromModel(const char *model, const glm::v
 	return entid;
 }
 
-void QuestManager::ModifyNPCStat(const char *identifier, const char *newValue)
+void QuestManager::ModifyNPCStat(std::string stat, std::string value)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner){
-		if(owner->IsNPC())
-		{
-			owner->CastToNPC()->ModifyNPCStat(identifier, newValue);
-		}
+	if (owner && owner->IsNPC()) {
+		owner->CastToNPC()->ModifyNPCStat(stat, value);
 	}
 }
 
-int QuestManager::collectitems_processSlot(int16 slot_id, uint32 item_id,
-	bool remove)
-{
+int QuestManager::collectitems_processSlot(
+	int16 slot_id,
+	uint32 item_id,
+	bool remove
+) {
 	QuestManagerCurrentQuestVars();
-	EQ::ItemInstance *item = nullptr;
-	int quantity = 0;
 
-	item = initiator->GetInv().GetItem(slot_id);
-
-	// If we have found matching item, add quantity
-	if (item && item->GetID() == item_id)
-	{
-		// If item is stackable, add its charges (quantity)
-		if (item->IsStackable())
-		{
-			quantity = item->GetCharges();
-		}
-		else
-		{
-			quantity = 1;
-		}
-
-		// Remove item from inventory
-		if (remove)
-		{
-			initiator->DeleteItemInInventory(slot_id, 0, true);
-		}
+	if (!initiator) {
+		return 0;
 	}
 
-	return quantity;
+	const auto item = initiator->GetInv().GetItem(slot_id);
+
+	// If we have found matching item, add quantity
+	if (item && item->GetID() == item_id) {
+		// If item is stackable, add its charges (quantity)
+		const auto quantity = item->IsStackable() ? item->GetCharges() : 1;
+
+		// Remove item from inventory
+		if (remove) {
+			initiator->DeleteItemInInventory(slot_id, 0, true);
+		}
+
+		return quantity;
+	}
+
+	return 0;
 }
 
 // Returns number of item_id that exist in inventory
@@ -2690,13 +3459,11 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id)
-	{
+	for (slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQ::invbag::GENERAL_BAGS_END; ++slot_id)
-	{
+	for (slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQ::invbag::GENERAL_BAGS_END; ++slot_id) {
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
@@ -2705,96 +3472,57 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 
 int QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
-	int quantity = 0;
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				quantity += item->IsStackable() ? item->GetCharges() : 1;
-			}
-		}
+
+	if (!initiator) {
+		return 0;
 	}
 
-	return quantity;
+	return initiator->CountItem(item_id);
 }
 
 void QuestManager::removeitem(uint32 item_id, uint32 quantity) {
 	QuestManagerCurrentQuestVars();
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {		
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity)
-				break;
 
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					initiator->DeleteItemInInventory(slot_id, stack_size, true);
-				} else {
-					int amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						initiator->DeleteItemInInventory(slot_id, amount_left, true);
-					}
-				}
-			}
-		}
+	if (!initiator) {
+		return;
 	}
+
+	initiator->RemoveItem(item_id, quantity);
 }
 
-void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
+void QuestManager::UpdateSpawnTimer(uint32 spawn2_id, uint32 new_time)
 {
 	bool found = false;
 
-	database.UpdateRespawnTime(id, 0, (newTime/1000));
+	database.UpdateRespawnTime(spawn2_id, 0, (new_time / 1000));
+
 	LinkedListIterator<Spawn2*> iterator(zone->spawn2_list);
+
 	iterator.Reset();
-	while (iterator.MoreElements())
-	{
-		if(iterator.GetData()->GetID() == id)
-		{
-			if(!iterator.GetData()->NPCPointerValid())
-			{
-				iterator.GetData()->SetTimer(newTime);
+
+	while (iterator.MoreElements()) {
+		if (iterator.GetData()->GetID() == spawn2_id) {
+			if (!iterator.GetData()->NPCPointerValid()) {
+				iterator.GetData()->SetTimer(new_time);
 			}
+
 			found = true;
 			break;
 		}
+
 		iterator.Advance();
 	}
 
-	if(!found)
-	{
+	if (!found) {
 		//Spawn wasn't in this zone...
 		//Tell the other zones to update their spawn time for this spawn point
 		auto pack = new ServerPacket(ServerOP_UpdateSpawn, sizeof(UpdateSpawnTimer_Struct));
-		UpdateSpawnTimer_Struct *ust = (UpdateSpawnTimer_Struct*) pack->pBuffer;
-		ust->id = id;
-		ust->duration = newTime;
+
+		auto ust  = (UpdateSpawnTimer_Struct*) pack->pBuffer;
+
+		ust->id       = spawn2_id;
+		ust->duration = new_time;
+
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
@@ -2804,7 +3532,7 @@ void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
 void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity) {
 	Mob* merchant = entity_list.GetMobByNpcTypeID(NPCid);
 
-	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
+	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != Class::Merchant))
 		return;	// don't do anything if NPCid isn't a merchant
 
 	const EQ::ItemData* item = nullptr;
@@ -2817,7 +3545,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	Mob* merchant = entity_list.GetMobByNpcTypeID(NPCid);
 
-	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
+	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != Class::Merchant))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
 	const EQ::ItemData* item = nullptr;
@@ -2841,23 +3569,62 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 }
 
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
-const char* QuestManager::varlink(char* perltext, int item_id) {
+std::string QuestManager::varlink(
+	uint32 item_id,
+	int16 charges,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6,
+	bool attuned
+) {
 	QuestManagerCurrentQuestVars();
-	const EQ::ItemData* item = database.GetItem(item_id);
-	if (!item)
+	const auto *item = database.CreateItem(
+		item_id,
+		charges,
+		aug1,
+		aug2,
+		aug3,
+		aug4,
+		aug5,
+		aug6,
+		attuned
+	);
+	if (!item) {
 		return "INVALID ITEM ID IN VARLINK";
+	}
 
 	EQ::SayLinkEngine linker;
-	linker.SetLinkType(EQ::saylink::SayLinkItemData);
-	linker.SetItemData(item);
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+	linker.SetItemInst(item);
 
-	strcpy(perltext, linker.GenerateLink().c_str());
+	return linker.GenerateLink();
+}
 
-	return perltext;
+std::string QuestManager::getitemcomment(uint32 item_id) {
+	const auto* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMCOMMENT";
+	}
+
+	std::string item_comment = item_data->Comment;
+	return item_comment;
+}
+
+std::string QuestManager::getitemlore(uint32 item_id) {
+	const auto* item_data = database.GetItem(item_id);
+	if (!item_data) {
+		return "INVALID ITEM ID IN GETITEMLORE";
+	}
+
+	std::string item_lore = item_data->Lore;
+	return item_lore;
 }
 
 std::string QuestManager::getitemname(uint32 item_id) {
-	const EQ::ItemData* item_data = database.GetItem(item_id);
+	const auto* item_data = database.GetItem(item_id);
 	if (!item_data) {
 		return "INVALID ITEM ID IN GETITEMNAME";
 	}
@@ -2866,37 +3633,49 @@ std::string QuestManager::getitemname(uint32 item_id) {
 	return item_name;
 }
 
-const char *QuestManager::getnpcnamebyid(uint32 npc_id) {
+std::string QuestManager::getnpcnamebyid(uint32 npc_id) {
+	std::string res;
 	if (npc_id > 0) {
-		return database.GetNPCNameByID(npc_id);
+		res = database.GetNPCNameByID(npc_id);
 	}
-	return "";
+	return res;
 }
 
-uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
+std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
+	std::string res;
+	if (npc_id > 0) {
+		res = database.GetCleanNPCNameByID(npc_id);
+	}
+	return res;
+}
+
+uint16 QuestManager::CreateInstance(const std::string& zone_short_name, int16 instance_version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		uint32 zone_id = ZoneID(zone);
-		if(zone_id == 0)
-			return 0;
 
-		uint16 id = 0;
-		if(!database.GetUnusedInstanceID(id))
-		{
-			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
-			return 0;
-		}
-
-		if(!database.CreateInstance(id, zone_id, version, duration))
-		{
-			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
-			return 0;
-		}
-		return id;
+	uint32 zone_id = ZoneID(zone_short_name);
+	if (!zone_id) {
+		return 0;
 	}
-	return 0;
+
+	uint16 instance_id = 0;
+	if (!database.GetUnusedInstanceID(instance_id)) {
+		if (initiator) {
+			initiator->Message(Chat::Red, "Server was unable to find a free instance id.");
+		}
+
+		return 0;
+	}
+
+	if (!database.CreateInstance(instance_id, zone_id, instance_version, duration)) {
+		if (initiator) {
+			initiator->Message(Chat::Red, "Server was unable to create a new instance.");
+		}
+
+		return 0;
+	}
+
+	return instance_id;
 }
 
 void QuestManager::DestroyInstance(uint16 instance_id)
@@ -2906,80 +3685,97 @@ void QuestManager::DestroyInstance(uint16 instance_id)
 
 void QuestManager::UpdateInstanceTimer(uint16 instance_id, uint32 new_duration)
 {
-	std::string query = StringFormat("UPDATE instance_list SET duration = %lu, start_time = UNIX_TIMESTAMP() WHERE id = %lu",
-		(unsigned long)new_duration, (unsigned long)instance_id);
-	auto results = database.QueryDatabase(query);
+	auto e = InstanceListRepository::FindOne(database, instance_id);
 
-	if (results.Success()) {
+	if (!e.id) {
+		return;
+	}
+
+	e.duration   = new_duration;
+	e.start_time = std::time(nullptr);
+
+	const int updated = InstanceListRepository::UpdateOne(database, e);
+
+	if (updated) {
 		auto pack = new ServerPacket(ServerOP_InstanceUpdateTime, sizeof(ServerInstanceUpdateTime_Struct));
-		ServerInstanceUpdateTime_Struct *ut = (ServerInstanceUpdateTime_Struct*) pack->pBuffer;
-		ut->instance_id = instance_id;
+
+		auto ut = (ServerInstanceUpdateTime_Struct*) pack->pBuffer;
+
+		ut->instance_id  = instance_id;
 		ut->new_duration = new_duration;
+
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
 	}
 }
 
-uint32 QuestManager::GetInstanceTimer() {
-	if (zone && zone->GetInstanceID() > 0 && zone->GetInstanceTimer()) {
-		uint32 ttime = zone->GetInstanceTimer()->GetRemainingTime();
-		return ttime;
+uint32 QuestManager::GetInstanceTimer()
+{
+	if (zone && zone->GetInstanceID() && zone->GetInstanceTimer()) {
+		return zone->GetInstanceTimer()->GetRemainingTime();
 	}
+
 	return 0;
 }
 
-uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
-	if (instance_id == 0)
-		return 0;
-
-	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
-	auto results = database.QueryDatabase(query);
-
-	if (results.Success()) {
-		auto row = results.begin();
-		uint32 timer = atoi(row[0]);
-		return timer;
-	}
-	return 0;
+uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id)
+{
+	return instance_id ? InstanceListRepository::GetRemainingTimeByInstanceID(database, instance_id) : 0;
 }
 
 uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		return database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version);
-	}
-	return 0;
+
+	return initiator ? database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version) : 0;
 }
 
-uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
-	return database.GetInstanceID(ZoneID(zone), char_id, version);
+std::vector<uint16> QuestManager::GetInstanceIDs(std::string zone_name, uint32 character_id)
+{
+	if (!character_id) {
+		QuestManagerCurrentQuestVars();
+
+		if (initiator) {
+			return database.GetInstanceIDs(ZoneID(zone_name), initiator->CharacterID());
+		}
+
+		return { };
+	}
+
+	return database.GetInstanceIDs(ZoneID(zone_name), character_id);
+}
+
+uint16 QuestManager::GetInstanceIDByCharID(
+	const std::string &zone_short_name,
+	int16 instance_version,
+	uint32 character_id
+)
+{
+	return database.GetInstanceID(ZoneID(zone_short_name), character_id, instance_version);
 }
 
 void QuestManager::AssignToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
+
+	if (initiator) {
 		database.AddClientToInstance(instance_id, initiator->CharacterID());
 	}
 }
 
-void QuestManager::AssignToInstanceByCharID(uint16 instance_id, uint32 char_id) {
-	database.AddClientToInstance(instance_id, char_id);
+void QuestManager::AssignToInstanceByCharID(uint16 instance_id, uint32 character_id)
+{
+	database.AddClientToInstance(instance_id, character_id);
 }
 
 void QuestManager::AssignGroupToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		Group *g = initiator->GetGroup();
-		if (g)
-		{
-			uint32 gid = g->GetID();
-			database.AssignGroupToInstance(gid, instance_id);
+
+	if (initiator) {
+		Group* g = initiator->GetGroup();
+		if (g) {
+			database.AssignGroupToInstance(g->GetID(), instance_id);
 		}
 	}
 }
@@ -2987,13 +3783,11 @@ void QuestManager::AssignGroupToInstance(uint16 instance_id)
 void QuestManager::AssignRaidToInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		Raid *r = initiator->GetRaid();
-		if(r)
-		{
-			uint32 rid = r->GetID();
-			database.AssignRaidToInstance(rid, instance_id);
+
+	if (initiator) {
+		Raid* r = initiator->GetRaid();
+		if (r) {
+			database.AssignRaidToInstance(r->GetID(), instance_id);
 		}
 	}
 }
@@ -3001,12 +3795,13 @@ void QuestManager::AssignRaidToInstance(uint16 instance_id)
 void QuestManager::RemoveFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID()))
+
+	if (initiator) {
+		if (database.RemoveClientFromInstance(instance_id, initiator->CharacterID())) {
 			initiator->Message(Chat::Say, "Removed client from instance.");
-		else
+		} else {
 			initiator->Message(Chat::Say, "Failed to remove client from instance.");
+		}
 	}
 }
 
@@ -3015,22 +3810,28 @@ void QuestManager::RemoveFromInstanceByCharID(uint16 instance_id, uint32 char_id
 }
 
 bool QuestManager::CheckInstanceByCharID(uint16 instance_id, uint32 char_id) {
-	return database.CharacterInInstanceGroup(instance_id, char_id);
+	return database.CheckInstanceByCharID(instance_id, char_id);
 }
 
 void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 {
 	QuestManagerCurrentQuestVars();
-	if (initiator)
-	{
-		std::list<uint32> charid_list;
 
-		if (database.RemoveClientsFromInstance(instance_id))
+	if (initiator) {
+		std::list<uint32> character_ids;
+
+		if (database.RemoveClientsFromInstance(instance_id)) {
 			initiator->Message(Chat::Say, "Removed all players from instance.");
-		else
-		{
-			database.GetCharactersInInstance(instance_id, charid_list);
-			initiator->Message(Chat::Say, "Failed to remove %i player(s) from instance.", charid_list.size()); // once the expedition system is in, this message it not relevant
+		} else {
+			database.GetCharactersInInstance(instance_id, character_ids);
+			initiator->Message(
+				Chat::Say,
+				fmt::format(
+					"Failed to remove {} player{} from instance.",
+					character_ids.size(),
+					character_ids.size() != 1 ? "s" : ""
+				).c_str()
+			);
 		}
 	}
 }
@@ -3038,8 +3839,8 @@ void QuestManager::RemoveAllFromInstance(uint16 instance_id)
 void QuestManager::MovePCInstance(int zone_id, int instance_id, const glm::vec4& position)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
+
+	if (initiator) {
 		initiator->MovePC(zone_id, instance_id, position.x, position.y, position.z, position.w);
 	}
 }
@@ -3047,10 +3848,10 @@ void QuestManager::MovePCInstance(int zone_id, int instance_id, const glm::vec4&
 void QuestManager::FlagInstanceByGroupLeader(uint32 zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		Group *g = initiator->GetGroup();
-		if(g){
+
+	if (initiator) {
+		Group* g = initiator->GetGroup();
+		if (g) {
 			database.FlagInstanceByGroupLeader(zone, version, initiator->CharacterID(), g->GetID());
 		}
 	}
@@ -3059,11 +3860,10 @@ void QuestManager::FlagInstanceByGroupLeader(uint32 zone, int16 version)
 void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-	{
-		Raid *r = initiator->GetRaid();
-		if(r)
-		{
+
+	if (initiator) {
+		Raid* r = initiator->GetRaid();
+		if (r) {
 			database.FlagInstanceByRaidLeader(zone, version, initiator->CharacterID(), r->GetID());
 		}
 	}
@@ -3073,14 +3873,15 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 {
 	QuestManagerCurrentQuestVars();
 
-	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return Saylink::Create(saylink_text, silent, link_name);
 }
 
-const char* QuestManager::getcharnamebyid(uint32 char_id) {
+std::string QuestManager::getcharnamebyid(uint32 char_id) {
+	std::string res;
 	if (char_id > 0) {
-		return database.GetCharNameByID(char_id);
+		res = database.GetCharNameByID(char_id);
 	}
-	return "";
+	return res;
 }
 
 uint32 QuestManager::getcharidbyname(const char* name) {
@@ -3091,28 +3892,12 @@ std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
 	return GetClassIDName(class_id, level);
 }
 
-int QuestManager::getcurrencyid(uint32 item_id) {
-	auto iter = zone->AlternateCurrencies.begin();
-	while (iter != zone->AlternateCurrencies.end()) {
-		if (item_id == (*iter).item_id) {
-			return (*iter).id;
-		}
-		++iter;
-	}
-	return 0;
+uint32 QuestManager::getcurrencyid(uint32 item_id) {
+	return zone->GetCurrencyID(item_id);
 }
 
-int QuestManager::getcurrencyitemid(int currency_id) {
-	if (currency_id > 0) {
-		auto iter = zone->AlternateCurrencies.begin();
-		while (iter != zone->AlternateCurrencies.end()) {
-			if (currency_id == (*iter).id) {
-				return (*iter).item_id;
-			}
-			++iter;
-		}
-	}
-	return 0;
+uint32 QuestManager::getcurrencyitemid(uint32 currency_id) {
+	return zone->GetCurrencyItemID(currency_id);
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {
@@ -3164,12 +3949,12 @@ void QuestManager::FlyMode(GravityBehavior flymode)
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		initiator->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		initiator->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		initiator->SetFlyMode(flymode);
 	}
 	else if(owner)
 	{
-		owner->SendAppearancePacket(AT_Levitate, static_cast<int>(flymode));
+		owner->SendAppearancePacket(AppearanceType::FlyMode, static_cast<int>(flymode));
 		owner->SetFlyMode(flymode);
 	}
 }
@@ -3178,28 +3963,36 @@ uint8 QuestManager::FactionValue()
 {
 	QuestManagerCurrentQuestVars();
 	FACTION_VALUE oldfac;
-	uint8 newfac = 0;
-	if(initiator && owner->IsNPC()) {
-		oldfac = initiator->GetFactionLevel(initiator->GetID(), owner->GetID(), initiator->GetFactionRace(), initiator->GetClass(), initiator->GetDeity(), owner->GetPrimaryFaction(), owner);
+	uint8         newfac = 0;
+	if (initiator && owner && owner->IsNPC()) {
+		oldfac = initiator->GetFactionLevel(
+			initiator->GetID(),
+			owner->GetID(),
+			initiator->GetFactionRace(),
+			initiator->GetClass(),
+			initiator->GetDeity(),
+			owner->GetPrimaryFaction(),
+			owner
+		);
 
 		// now, reorder the faction to have it make sense (higher values are better)
 		switch (oldfac) {
 			case FACTION_SCOWLS:
 				newfac = 1;
 				break;
-			case FACTION_THREATENLY:
+			case FACTION_THREATENINGLY:
 				newfac = 2;
 				break;
-			case FACTION_DUBIOUS:
+			case FACTION_DUBIOUSLY:
 				newfac = 3;
 				break;
-			case FACTION_APPREHENSIVE:
+			case FACTION_APPREHENSIVELY:
 				newfac = 4;
 				break;
-			case FACTION_INDIFFERENT:
+			case FACTION_INDIFFERENTLY:
 				newfac = 5;
 				break;
-			case FACTION_AMIABLE:
+			case FACTION_AMIABLY:
 				newfac = 6;
 				break;
 			case FACTION_KINDLY:
@@ -3219,69 +4012,76 @@ uint8 QuestManager::FactionValue()
 
 void QuestManager::enabletitle(int titleset) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->EnableTitle(titleset);
 }
 
 bool QuestManager::checktitle(int titleset) {
 	QuestManagerCurrentQuestVars();
-	return initiator ? initiator->CheckTitle(titleset) : false;
+
+	if (!initiator) {
+		return false;
+	}
+
+	return initiator->CheckTitle(titleset);
 }
 
 void QuestManager::removetitle(int titleset) {
 	QuestManagerCurrentQuestVars();
+
+	if (!initiator) {
+		return;
+	}
+
 	initiator->RemoveTitle(titleset);
 }
 
-void QuestManager::wearchange(uint8 slot, uint16 texture, uint32 hero_forge_model /*= 0*/, uint32 elite_material /*= 0*/)
+void QuestManager::wearchange(uint8 slot, uint32 texture, uint32 hero_forge_model, uint32 elite_material)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner){
-		owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
-		if(owner->IsNPC()) {
-			owner->CastToNPC()->NPCSlotTexture(slot, texture);
-		}
+
+	if (!owner) {
+		return;
+	}
+
+	owner->SendTextureWC(slot, texture, hero_forge_model, elite_material);
+	if (owner->IsNPC()) {
+		owner->CastToNPC()->NPCSlotTexture(slot, texture);
 	}
 }
 
 void QuestManager::voicetell(const char *str, int macronum, int racenum, int gendernum)
 {
 	QuestManagerCurrentQuestVars();
-	if(owner && str)
-	{
+
+	if (!owner) {
+		return;
+	}
+
+	if (str) {
 		Client *c = entity_list.GetClientByName(str);
 
-		if(c)
-		{
+		if (c) {
 			auto outapp = new EQApplicationPacket(OP_VoiceMacroOut, sizeof(VoiceMacroOut_Struct));
-
-			VoiceMacroOut_Struct* vmo = (VoiceMacroOut_Struct*)outapp->pBuffer;
-
+			auto* vmo = (VoiceMacroOut_Struct *) outapp->pBuffer;
 			strn0cpy(vmo->From, owner->GetCleanName(), sizeof(vmo->From));
-
-			vmo->Type = 1;
-
-			vmo->Voice = (racenum * 2) + gendernum;
-
+			vmo->Type        = 1;
+			vmo->Voice       = (racenum * 2) + gendernum;
 			vmo->MacroNumber = macronum;
-
 			c->QueuePacket(outapp);
-
 			safe_delete(outapp);
+		} else {
+			LogQuests("from [{}]. Client [{}] not found", owner->GetName(), str);
 		}
-		else
-			LogQuests("QuestManager::voicetell from [{}]. Client [{}] not found", owner->GetName(), str);
 	}
 }
 
-void QuestManager::LearnRecipe(uint32 recipe_id) {
-	QuestManagerCurrentQuestVars();
-	if(!initiator)
-		return;
-	initiator->LearnRecipe(recipe_id);
-}
-
 void QuestManager::SendMail(const char *to, const char *from, const char *subject, const char *message) {
-	if(to == nullptr || from == nullptr || subject == nullptr || message == nullptr) {
+	if (!to || !from || !subject || !message) {
 		return;
 	}
 
@@ -3311,875 +4111,15 @@ int32 QuestManager::GetZoneID(const char *zone) {
 
 std::string QuestManager::GetZoneLongName(std::string zone_short_name)
 {
-	return zone_store.GetZoneLongName(
-		zone_store.GetZoneID(zone_short_name)
-	);
+	return ZoneLongName(ZoneID(zone_short_name), true);
 }
 
-void QuestManager::CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskAssignPlayer, sizeof(CZTaskAssignPlayer_Struct));
-		CZTaskAssignPlayer_Struct* CZTA = (CZTaskAssignPlayer_Struct*) pack->pBuffer;
-		CZTA->npc_entity_id = owner->GetID();
-		CZTA->character_id = character_id;
-		CZTA->task_id = task_id;
-		CZTA->enforce_level_requirement = enforce_level_requirement;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
+std::string QuestManager::GetZoneLongNameByID(uint32 zone_id) {
+	return ZoneLongName(zone_id, true);
 }
 
-void QuestManager::CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskAssignGroup, sizeof(CZTaskAssignGroup_Struct));
-		CZTaskAssignGroup_Struct* CZTA = (CZTaskAssignGroup_Struct*) pack->pBuffer;
-		CZTA->npc_entity_id = owner->GetID();
-		CZTA->group_id = group_id;
-		CZTA->task_id = task_id;
-		CZTA->enforce_level_requirement = enforce_level_requirement;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskAssignRaid, sizeof(CZTaskAssignRaid_Struct));
-		CZTaskAssignRaid_Struct* CZTA = (CZTaskAssignRaid_Struct*) pack->pBuffer;
-		CZTA->npc_entity_id = owner->GetID();
-		CZTA->raid_id = raid_id;
-		CZTA->task_id = task_id;
-		CZTA->enforce_level_requirement = enforce_level_requirement;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneAssignTaskByGuildID(int guild_id, uint32 task_id, bool enforce_level_requirement) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskAssignGuild, sizeof(CZTaskAssignGuild_Struct));
-		CZTaskAssignGuild_Struct* CZTA = (CZTaskAssignGuild_Struct*) pack->pBuffer;
-		CZTA->npc_entity_id = owner->GetID();
-		CZTA->guild_id = guild_id;
-		CZTA->task_id = task_id;
-		CZTA->enforce_level_requirement = enforce_level_requirement;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneCastSpellByCharID(int character_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZCastSpellPlayer, sizeof(CZCastSpellPlayer_Struct));
-	CZCastSpellPlayer_Struct* CZCS = (CZCastSpellPlayer_Struct*) pack->pBuffer;
-	CZCS->character_id = character_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneCastSpellByGroupID(int group_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZCastSpellGroup, sizeof(CZCastSpellGroup_Struct));
-	CZCastSpellGroup_Struct* CZCS = (CZCastSpellGroup_Struct*) pack->pBuffer;
-	CZCS->group_id = group_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneCastSpellByRaidID(int raid_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZCastSpellRaid, sizeof(CZCastSpellRaid_Struct));
-	CZCastSpellRaid_Struct* CZCS = (CZCastSpellRaid_Struct*) pack->pBuffer;
-	CZCS->raid_id = raid_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneCastSpellByGuildID(int guild_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZCastSpellGuild, sizeof(CZCastSpellGuild_Struct));
-	CZCastSpellGuild_Struct* CZCS = (CZCastSpellGuild_Struct*) pack->pBuffer;
-	CZCS->guild_id = guild_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneDisableTaskByCharID(int character_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskDisablePlayer, sizeof(CZTaskDisablePlayer_Struct));
-	CZTaskDisablePlayer_Struct* CZTD = (CZTaskDisablePlayer_Struct*) pack->pBuffer;
-	CZTD->character_id = character_id;
-	CZTD->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneDisableTaskByGroupID(int group_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskDisableGroup, sizeof(CZTaskDisableGroup_Struct));
-	CZTaskDisableGroup_Struct* CZTD = (CZTaskDisableGroup_Struct*) pack->pBuffer;
-	CZTD->group_id = group_id;
-	CZTD->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneDisableTaskByRaidID(int raid_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskDisableRaid, sizeof(CZTaskDisableRaid_Struct));
-	CZTaskDisableRaid_Struct* CZTD = (CZTaskDisableRaid_Struct*) pack->pBuffer;
-	CZTD->raid_id = raid_id;
-	CZTD->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneDisableTaskByGuildID(int guild_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskDisableGuild, sizeof(CZTaskDisableGuild_Struct));
-	CZTaskDisableGuild_Struct* CZTD = (CZTaskDisableGuild_Struct*) pack->pBuffer;
-	CZTD->guild_id = guild_id;
-	CZTD->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneEnableTaskByCharID(int character_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskEnablePlayer, sizeof(CZTaskEnablePlayer_Struct));
-	CZTaskEnablePlayer_Struct* CZTE = (CZTaskEnablePlayer_Struct*) pack->pBuffer;
-	CZTE->character_id = character_id;
-	CZTE->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneEnableTaskByGroupID(int group_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskEnableGroup, sizeof(CZTaskEnableGroup_Struct));
-	CZTaskEnableGroup_Struct* CZTE = (CZTaskEnableGroup_Struct*) pack->pBuffer;
-	CZTE->group_id = group_id;
-	CZTE->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneEnableTaskByRaidID(int raid_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskEnableRaid, sizeof(CZTaskEnableRaid_Struct));
-	CZTaskEnableRaid_Struct* CZTE = (CZTaskEnableRaid_Struct*) pack->pBuffer;
-	CZTE->raid_id = raid_id;
-	CZTE->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneEnableTaskByGuildID(int guild_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskEnableGuild, sizeof(CZTaskEnableGuild_Struct));
-	CZTaskEnableGuild_Struct* CZTE = (CZTaskEnableGuild_Struct*) pack->pBuffer;
-	CZTE->guild_id = guild_id;
-	CZTE->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneFailTaskByCharID(int character_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskFailPlayer, sizeof(CZTaskFailPlayer_Struct));
-	CZTaskFailPlayer_Struct* CZTF = (CZTaskFailPlayer_Struct*) pack->pBuffer;
-	CZTF->character_id = character_id;
-	CZTF->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneFailTaskByGroupID(int group_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskFailGroup, sizeof(CZTaskFailGroup_Struct));
-	CZTaskFailGroup_Struct* CZTF = (CZTaskFailGroup_Struct*) pack->pBuffer;
-	CZTF->group_id = group_id;
-	CZTF->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneFailTaskByRaidID(int raid_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskFailRaid, sizeof(CZTaskFailRaid_Struct));
-	CZTaskFailRaid_Struct* CZTF = (CZTaskFailRaid_Struct*) pack->pBuffer;
-	CZTF->raid_id = raid_id;
-	CZTF->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneFailTaskByGuildID(int guild_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskFailGuild, sizeof(CZTaskFailGuild_Struct));
-	CZTaskFailGuild_Struct* CZTF = (CZTaskFailGuild_Struct*) pack->pBuffer;
-	CZTF->guild_id = guild_id;
-	CZTF->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMarqueeByCharID(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMarqueePlayer, sizeof(CZMarqueePlayer_Struct) + message_len);
-	CZMarqueePlayer_Struct* CZMS = (CZMarqueePlayer_Struct*) pack->pBuffer;
-	CZMS->character_id = character_id;
-	CZMS->type = type;
-	CZMS->priority = priority;
-	CZMS->fade_in = fade_in;
-	CZMS->fade_out = fade_out;
-	CZMS->duration = duration;
-	strn0cpy(CZMS->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMarqueeByGroupID(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMarqueeGroup, sizeof(CZMarqueeGroup_Struct) + message_len);
-	CZMarqueeGroup_Struct* CZMS = (CZMarqueeGroup_Struct*) pack->pBuffer;
-	CZMS->group_id = group_id;
-	CZMS->type = type;
-	CZMS->priority = priority;
-	CZMS->fade_in = fade_in;
-	CZMS->fade_out = fade_out;
-	CZMS->duration = duration;
-	strn0cpy(CZMS->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMarqueeByRaidID(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMarqueeRaid, sizeof(CZMarqueeRaid_Struct) + message_len);
-	CZMarqueeRaid_Struct* CZMS = (CZMarqueeRaid_Struct*) pack->pBuffer;
-	CZMS->raid_id = raid_id;
-	CZMS->type = type;
-	CZMS->priority = priority;
-	CZMS->fade_in = fade_in;
-	CZMS->fade_out = fade_out;
-	CZMS->duration = duration;
-	strn0cpy(CZMS->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMarqueeByGuildID(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMarqueeGuild, sizeof(CZMarqueeGuild_Struct) + message_len);
-	CZMarqueeGuild_Struct* CZMS = (CZMarqueeGuild_Struct*) pack->pBuffer;
-	CZMS->guild_id = guild_id;
-	CZMS->type = type;
-	CZMS->priority = priority;
-	CZMS->fade_in = fade_in;
-	CZMS->fade_out = fade_out;
-	CZMS->duration = duration;
-	strn0cpy(CZMS->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMessagePlayerByName(uint32 type, const char *character_name, const char *message) {
-	uint32 message_len = strlen(character_name) + 1;
-	uint32 message_len2 = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMessagePlayer, sizeof(CZMessagePlayer_Struct) + message_len + message_len2);
-	CZMessagePlayer_Struct* CZSC = (CZMessagePlayer_Struct*) pack->pBuffer;
-	CZSC->type = type;
-	strn0cpy(CZSC->character_name, character_name, 64);
-	strn0cpy(CZSC->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMessagePlayerByGroupID(uint32 type, int group_id, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMessageGroup, sizeof(CZMessageGroup_Struct) + message_len);
-	CZMessageGroup_Struct* CZGM = (CZMessageGroup_Struct*) pack->pBuffer;
-	CZGM->type = type;
-	CZGM->group_id = group_id;
-	strn0cpy(CZGM->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMessagePlayerByRaidID(uint32 type, int raid_id, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMessageRaid, sizeof(CZMessageRaid_Struct) + message_len);
-	CZMessageRaid_Struct* CZRM = (CZMessageRaid_Struct*) pack->pBuffer;
-	CZRM->type = type;
-	CZRM->raid_id = raid_id;
-	strn0cpy(CZRM->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMessagePlayerByGuildID(uint32 type, int guild_id, const char *message) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMessageGuild, sizeof(CZMessageGuild_Struct) + message_len);
-	CZMessageGuild_Struct* CZGM = (CZMessageGuild_Struct*) pack->pBuffer;
-	CZGM->type = type;
-	CZGM->guild_id = guild_id;
-	strn0cpy(CZGM->message, message, 512);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMovePlayerByCharID(int character_id, const char *zone_short_name) {
-	uint32 message_len = strlen(zone_short_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMovePlayer, sizeof(CZMovePlayer_Struct) + message_len);
-	CZMovePlayer_Struct* CZGM = (CZMovePlayer_Struct*) pack->pBuffer;
-	CZGM->character_id = character_id;
-	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMovePlayerByGroupID(int group_id, const char *zone_short_name) {
-	uint32 message_len = strlen(zone_short_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMoveGroup, sizeof(CZMoveGroup_Struct) + message_len);
-	CZMoveGroup_Struct* CZGM = (CZMoveGroup_Struct*) pack->pBuffer;
-	CZGM->group_id = group_id;
-	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMovePlayerByRaidID(int raid_id, const char *zone_short_name) {
-	uint32 message_len = strlen(zone_short_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMoveRaid, sizeof(CZMoveRaid_Struct) + message_len);
-	CZMoveRaid_Struct* CZRM = (CZMoveRaid_Struct*) pack->pBuffer;
-	CZRM->raid_id = raid_id;
-	strn0cpy(CZRM->zone_short_name, zone_short_name, 32);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMovePlayerByGuildID(int guild_id, const char *zone_short_name) {
-	uint32 message_len = strlen(zone_short_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZMoveGuild, sizeof(CZMoveGuild_Struct) + message_len);
-	CZMoveGuild_Struct* CZGM = (CZMoveGuild_Struct*) pack->pBuffer;
-	CZGM->guild_id = guild_id;
-	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMoveInstanceByCharID(int character_id, uint16 instance_id) {
-	auto pack = new ServerPacket(ServerOP_CZMoveInstancePlayer, sizeof(CZMoveInstancePlayer_Struct));
-	CZMoveInstancePlayer_Struct* CZMS = (CZMoveInstancePlayer_Struct*) pack->pBuffer;
-	CZMS->character_id = character_id;
-	CZMS->instance_id = instance_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMoveInstanceByGroupID(int group_id, uint16 instance_id) {
-	auto pack = new ServerPacket(ServerOP_CZMoveInstanceGroup, sizeof(CZMoveInstanceGroup_Struct));
-	CZMoveInstanceGroup_Struct* CZMS = (CZMoveInstanceGroup_Struct*) pack->pBuffer;
-	CZMS->group_id = group_id;
-	CZMS->instance_id = instance_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMoveInstanceByRaidID(int raid_id, uint16 instance_id) {
-	auto pack = new ServerPacket(ServerOP_CZMoveInstanceRaid, sizeof(CZMoveInstanceRaid_Struct));
-	CZMoveInstanceRaid_Struct* CZMS = (CZMoveInstanceRaid_Struct*) pack->pBuffer;
-	CZMS->raid_id = raid_id;
-	CZMS->instance_id = instance_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneMoveInstanceByGuildID(int guild_id, uint16 instance_id) {
-	auto pack = new ServerPacket(ServerOP_CZMoveInstanceGuild, sizeof(CZMoveInstanceGuild_Struct));
-	CZMoveInstanceGuild_Struct* CZMS = (CZMoveInstanceGuild_Struct*) pack->pBuffer;
-	CZMS->guild_id = guild_id;
-	CZMS->instance_id = instance_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveSpellByCharID(int character_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZRemoveSpellPlayer, sizeof(CZRemoveSpellPlayer_Struct));
-	CZRemoveSpellPlayer_Struct* CZCS = (CZRemoveSpellPlayer_Struct*) pack->pBuffer;
-	CZCS->character_id = character_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveSpellByGroupID(int group_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZRemoveSpellGroup, sizeof(CZRemoveSpellGroup_Struct));
-	CZRemoveSpellGroup_Struct* CZCS = (CZRemoveSpellGroup_Struct*) pack->pBuffer;
-	CZCS->group_id = group_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveSpellByRaidID(int raid_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZRemoveSpellRaid, sizeof(CZRemoveSpellRaid_Struct));
-	CZRemoveSpellRaid_Struct* CZCS = (CZRemoveSpellRaid_Struct*) pack->pBuffer;
-	CZCS->raid_id = raid_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveSpellByGuildID(int guild_id, uint32 spell_id) {
-	auto pack = new ServerPacket(ServerOP_CZRemoveSpellGuild, sizeof(CZRemoveSpellGuild_Struct));
-	CZRemoveSpellGuild_Struct* CZCS = (CZRemoveSpellGuild_Struct*) pack->pBuffer;
-	CZCS->guild_id = guild_id;
-	CZCS->spell_id = spell_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveTaskByCharID(int character_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskRemovePlayer, sizeof(CZTaskRemovePlayer_Struct));
-	CZTaskRemovePlayer_Struct* CZCS = (CZTaskRemovePlayer_Struct*) pack->pBuffer;
-	CZCS->character_id = character_id;
-	CZCS->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveTaskByGroupID(int group_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskRemoveGroup, sizeof(CZTaskRemoveGroup_Struct));
-	CZTaskRemoveGroup_Struct* CZCS = (CZTaskRemoveGroup_Struct*) pack->pBuffer;
-	CZCS->group_id = group_id;
-	CZCS->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveTaskByRaidID(int raid_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskRemoveRaid, sizeof(CZTaskRemoveRaid_Struct));
-	CZTaskRemoveRaid_Struct* CZCS = (CZTaskRemoveRaid_Struct*) pack->pBuffer;
-	CZCS->raid_id = raid_id;
-	CZCS->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneRemoveTaskByGuildID(int guild_id, uint32 task_id) {
-	auto pack = new ServerPacket(ServerOP_CZTaskRemoveGuild, sizeof(CZTaskRemoveGuild_Struct));
-	CZTaskRemoveGuild_Struct* CZCS = (CZTaskRemoveGuild_Struct*) pack->pBuffer;
-	CZCS->guild_id = guild_id;
-	CZCS->task_id = task_id;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneResetActivityByCharID(int character_id, uint32 task_id, int activity_id) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityResetPlayer, sizeof(CZResetActivityPlayer_Struct));
-		CZResetActivityPlayer_Struct* CZCA = (CZResetActivityPlayer_Struct*) pack->pBuffer;
-		CZCA->character_id = character_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneResetActivityByGroupID(int group_id, uint32 task_id, int activity_id) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityResetGroup, sizeof(CZResetActivityGroup_Struct));
-		CZResetActivityGroup_Struct* CZCA = (CZResetActivityGroup_Struct*) pack->pBuffer;
-		CZCA->group_id = group_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneResetActivityByRaidID(int raid_id, uint32 task_id, int activity_id) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityResetRaid, sizeof(CZResetActivityRaid_Struct));
-		CZResetActivityRaid_Struct* CZCA = (CZResetActivityRaid_Struct*) pack->pBuffer;
-		CZCA->raid_id = raid_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneResetActivityByGuildID(int guild_id, uint32 task_id, int activity_id) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityResetGuild, sizeof(CZResetActivityGuild_Struct));
-		CZResetActivityGuild_Struct* CZCA = (CZResetActivityGuild_Struct*) pack->pBuffer;
-		CZCA->guild_id = guild_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
-	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*) pack->pBuffer;
-	CZSN->npctype_id = npctype_id;
-	CZSN->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSignalPlayerByCharID(int character_id, uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_CZSignalClient, sizeof(CZClientSignal_Struct));
-	CZClientSignal_Struct* CZSC = (CZClientSignal_Struct*) pack->pBuffer;
-	CZSC->character_id = character_id;
-	CZSC->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSetEntityVariableByClientName(const char *character_name, const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	uint32 message_len3 = strlen(character_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByClientName, sizeof(CZSetEntVarByClientName_Struct) + message_len + message_len2 + message_len3);
-	CZSetEntVarByClientName_Struct* CZ = (CZSetEntVarByClientName_Struct*) pack->pBuffer;
-	strn0cpy(CZ->character_name, character_name, 64);
-	strn0cpy(CZ->variable_name, variable_name, 256);
-	strn0cpy(CZ->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSetEntityVariableByGroupID(int group_id, const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByGroupID, sizeof(CZSetEntVarByGroupID_Struct) + message_len + message_len2);
-	CZSetEntVarByGroupID_Struct* CZ = (CZSetEntVarByGroupID_Struct*) pack->pBuffer;
-	CZ->group_id = group_id;
-	strn0cpy(CZ->variable_name, variable_name, 256);
-	strn0cpy(CZ->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSetEntityVariableByRaidID(int raid_id, const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByRaidID, sizeof(CZSetEntVarByRaidID_Struct) + message_len + message_len2);
-	CZSetEntVarByRaidID_Struct* CZ = (CZSetEntVarByRaidID_Struct*) pack->pBuffer;
-	CZ->raid_id = raid_id;
-	strn0cpy(CZ->variable_name, variable_name, 256);
-	strn0cpy(CZ->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSetEntityVariableByGuildID(int guild_id, const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByGuildID, sizeof(CZSetEntVarByGuildID_Struct) + message_len + message_len2);
-	CZSetEntVarByGuildID_Struct* CZ = (CZSetEntVarByGuildID_Struct*) pack->pBuffer;
-	CZ->guild_id = guild_id;
-	strn0cpy(CZ->variable_name, variable_name, 256);
-	strn0cpy(CZ->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByNPCTypeID, sizeof(CZSetEntVarByNPCTypeID_Struct) + message_len + message_len2);
-	CZSetEntVarByNPCTypeID_Struct* CZSNBYNID = (CZSetEntVarByNPCTypeID_Struct*) pack->pBuffer;
-	CZSNBYNID->npctype_id = npctype_id;
-	strn0cpy(CZSNBYNID->variable_name, variable_name, 256);
-	strn0cpy(CZSNBYNID->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSignalPlayerByGroupID(int group_id, uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_CZSignalGroup, sizeof(CZGroupSignal_Struct));
-	CZGroupSignal_Struct* CZGS = (CZGroupSignal_Struct*) pack->pBuffer;
-	CZGS->group_id = group_id;
-	CZGS->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSignalPlayerByRaidID(int raid_id, uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_CZSignalRaid, sizeof(CZRaidSignal_Struct));
-	CZRaidSignal_Struct* CZRS = (CZRaidSignal_Struct*) pack->pBuffer;
-	CZRS->raid_id = raid_id;
-	CZRS->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSignalPlayerByGuildID(int guild_id, uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_CZSignalGuild, sizeof(CZGuildSignal_Struct));
-	CZGuildSignal_Struct* CZGS = (CZGuildSignal_Struct*) pack->pBuffer;
-	CZGS->guild_id = guild_id;
-	CZGS->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneSignalPlayerByName(const char *character_name, uint32 signal) {
-	uint32 message_len = strlen(character_name) + 1;
-	auto pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
-	CZClientSignalByName_Struct* CZSC = (CZClientSignalByName_Struct*) pack->pBuffer;
-	strn0cpy(CZSC->character_name, character_name, 64);
-	CZSC->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::CrossZoneUpdateActivityByCharID(int character_id, uint32 task_id, int activity_id, int activity_count) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityUpdatePlayer, sizeof(CZTaskActivityUpdatePlayer_Struct));
-		CZTaskActivityUpdatePlayer_Struct* CZCA = (CZTaskActivityUpdatePlayer_Struct*) pack->pBuffer;
-		CZCA->character_id = character_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		CZCA->activity_count = activity_count;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneUpdateActivityByGroupID(int group_id, uint32 task_id, int activity_id, int activity_count) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityUpdateGroup, sizeof(CZTaskActivityUpdateGroup_Struct));
-		CZTaskActivityUpdateGroup_Struct* CZCA = (CZTaskActivityUpdateGroup_Struct*) pack->pBuffer;
-		CZCA->group_id = group_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		CZCA->activity_count = activity_count;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneUpdateActivityByRaidID(int raid_id, uint32 task_id, int activity_id, int activity_count) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityUpdateRaid, sizeof(CZTaskActivityUpdateRaid_Struct));
-		CZTaskActivityUpdateRaid_Struct* CZCA = (CZTaskActivityUpdateRaid_Struct*) pack->pBuffer;
-		CZCA->raid_id = raid_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		CZCA->activity_count = activity_count;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::CrossZoneUpdateActivityByGuildID(int guild_id, uint32 task_id, int activity_id, int activity_count) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_CZTaskActivityUpdateGuild, sizeof(CZTaskActivityUpdateGuild_Struct));
-		CZTaskActivityUpdateGuild_Struct* CZCA = (CZTaskActivityUpdateGuild_Struct*) pack->pBuffer;
-		CZCA->guild_id = guild_id;
-		CZCA->task_id = task_id;
-		CZCA->activity_id = activity_id;
-		CZCA->activity_count = activity_count;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::WorldWideAssignTask(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
-	QuestManagerCurrentQuestVars();
-	if (initiator && owner) {
-		auto pack = new ServerPacket(ServerOP_WWAssignTask, sizeof(WWAssignTask_Struct));
-		WWAssignTask_Struct* WWTA = (WWAssignTask_Struct*) pack->pBuffer;
-		WWTA->npc_entity_id = owner->GetID();
-		WWTA->task_id = task_id;
-		WWTA->enforce_level_requirement = enforce_level_requirement;
-		WWTA->min_status = min_status;
-		WWTA->max_status = max_status;
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
-}
-
-void QuestManager::WorldWideCastSpell(uint32 spell_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWCastSpell, sizeof(WWCastSpell_Struct));
-	WWCastSpell_Struct* WWCS = (WWCastSpell_Struct*) pack->pBuffer;
-	WWCS->spell_id = spell_id;
-	WWCS->min_status = min_status;
-	WWCS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideDisableTask(uint32 task_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWDisableTask, sizeof(WWDisableTask_Struct));
-	WWDisableTask_Struct* WWDT = (WWDisableTask_Struct*) pack->pBuffer;
-	WWDT->task_id = task_id;
-	WWDT->min_status = min_status;
-	WWDT->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideEnableTask(uint32 task_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWEnableTask, sizeof(WWEnableTask_Struct));
-	WWEnableTask_Struct* WWET = (WWEnableTask_Struct*) pack->pBuffer;
-	WWET->task_id = task_id;
-	WWET->min_status = min_status;
-	WWET->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideFailTask(uint32 task_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWFailTask, sizeof(WWFailTask_Struct));
-	WWFailTask_Struct* WWFT = (WWFailTask_Struct*) pack->pBuffer;
-	WWFT->task_id = task_id;
-	WWFT->min_status = min_status;
-	WWFT->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideMarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status, uint8 max_status) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_WWMarquee, sizeof(WWMarquee_Struct) + message_len);
-	WWMarquee_Struct* WWMS = (WWMarquee_Struct*) pack->pBuffer;
-	WWMS->type = type;
-	WWMS->priority = priority;
-	WWMS->fade_in = fade_in;
-	WWMS->fade_out = fade_out;
-	WWMS->duration = duration;
-	strn0cpy(WWMS->message, message, 512);
-	WWMS->min_status = min_status;
-	WWMS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideMessage(uint32 type, const char *message, uint8 min_status, uint8 max_status) {
-	uint32 message_len = strlen(message) + 1;
-	auto pack = new ServerPacket(ServerOP_WWMessage, sizeof(WWMessage_Struct) + message_len);
-	WWMessage_Struct* WWMS = (WWMessage_Struct*) pack->pBuffer;
-	WWMS->type = type;
-	strn0cpy(WWMS->message, message, 512);
-	WWMS->min_status = min_status;
-	WWMS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideMove(const char *zone_short_name, uint8 min_status, uint8 max_status) {
-	uint32 message_len = strlen(zone_short_name) + 1;
-	auto pack = new ServerPacket(ServerOP_WWMove, sizeof(WWMove_Struct) + message_len);
-	WWMove_Struct* WWMS = (WWMove_Struct*) pack->pBuffer;;
-	strn0cpy(WWMS->zone_short_name, zone_short_name, 32);
-	WWMS->min_status = min_status;
-	WWMS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideMoveInstance(uint16 instance_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWMoveInstance, sizeof(WWMoveInstance_Struct));
-	WWMoveInstance_Struct* WWMS = (WWMoveInstance_Struct*) pack->pBuffer;
-	WWMS->instance_id = instance_id;
-	WWMS->min_status = min_status;
-	WWMS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideRemoveSpell(uint32 spell_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWRemoveSpell, sizeof(WWRemoveSpell_Struct));
-	WWRemoveSpell_Struct* WWRS = (WWRemoveSpell_Struct*) pack->pBuffer;
-	WWRS->spell_id = spell_id;
-	WWRS->min_status = min_status;
-	WWRS->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideRemoveTask(uint32 task_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWRemoveTask, sizeof(WWRemoveTask_Struct));
-	WWRemoveTask_Struct* WWRT = (WWRemoveTask_Struct*) pack->pBuffer;
-	WWRT->task_id = task_id;
-	WWRT->min_status = min_status;
-	WWRT->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideResetActivity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWResetActivity, sizeof(WWResetActivity_Struct));
-	WWResetActivity_Struct* WWRA = (WWResetActivity_Struct*) pack->pBuffer;
-	WWRA->task_id = task_id;
-	WWRA->activity_id = activity_id;
-	WWRA->min_status = min_status;
-	WWRA->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideSetEntityVariableClient(const char *variable_name, const char *variable_value, uint8 min_status, uint8 max_status) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_WWSetEntityVariableClient, sizeof(WWSetEntVarClient_Struct) + message_len + message_len2);
-	WWSetEntVarClient_Struct* WWSC = (WWSetEntVarClient_Struct*) pack->pBuffer;
-	strn0cpy(WWSC->variable_name, variable_name, 256);
-	strn0cpy(WWSC->variable_value, variable_value, 256);
-	WWSC->min_status = min_status;
-	WWSC->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideSetEntityVariableNPC(const char *variable_name, const char *variable_value) {
-	uint32 message_len = strlen(variable_name) + 1;
-	uint32 message_len2 = strlen(variable_value) + 1;
-	auto pack = new ServerPacket(ServerOP_WWSetEntityVariableNPC, sizeof(WWSetEntVarNPC_Struct) + message_len + message_len2);
-	WWSetEntVarNPC_Struct* WWSN = (WWSetEntVarNPC_Struct*) pack->pBuffer;
-	strn0cpy(WWSN->variable_name, variable_name, 256);
-	strn0cpy(WWSN->variable_value, variable_value, 256);
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideSignalClient(uint32 signal, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWSignalClient, sizeof(WWSignalClient_Struct));
-	WWSignalClient_Struct* WWSC = (WWSignalClient_Struct*) pack->pBuffer;
-	WWSC->signal = signal;
-	WWSC->min_status = min_status;
-	WWSC->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideSignalNPC(uint32 signal) {
-	auto pack = new ServerPacket(ServerOP_WWSignalNPC, sizeof(WWSignalNPC_Struct));
-	WWSignalNPC_Struct* WWSN = (WWSignalNPC_Struct*) pack->pBuffer;
-	WWSN->signal = signal;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
-}
-
-void QuestManager::WorldWideUpdateActivity(uint32 task_id, int activity_id, int activity_count, uint8 min_status, uint8 max_status) {
-	auto pack = new ServerPacket(ServerOP_WWUpdateActivity, sizeof(WWUpdateActivity_Struct));
-	WWUpdateActivity_Struct* WWUA = (WWUpdateActivity_Struct*) pack->pBuffer;
-	WWUA->task_id = task_id;
-	WWUA->activity_id = activity_id;
-	WWUA->activity_count = activity_count;
-	WWUA->min_status = min_status;
-	WWUA->max_status = max_status;
-	worldserver.SendPacket(pack);
-	safe_delete(pack);
+std::string QuestManager::GetZoneShortName(uint32 zone_id) {
+	return ZoneName(zone_id, true);
 }
 
 bool QuestManager::EnableRecipe(uint32 recipe_id)
@@ -4229,6 +4169,15 @@ NPC *QuestManager::GetNPC() const {
 	return nullptr;
 }
 
+Bot *QuestManager::GetBot() const {
+	if (!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return (e.owner && e.owner->IsBot()) ? e.owner->CastToBot() : nullptr;
+	}
+
+	return nullptr;
+}
+
 Mob *QuestManager::GetOwner() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -4238,10 +4187,28 @@ Mob *QuestManager::GetOwner() const {
 	return nullptr;
 }
 
+EQ::InventoryProfile *QuestManager::GetInventory() const {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return &e.initiator->GetInv();
+	}
+
+	return nullptr;
+}
+
 EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
 		return e.questitem;
+	}
+
+	return nullptr;
+}
+
+const SPDat_Spell_Struct *QuestManager::GetQuestSpell() {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return e.questspell;
 	}
 
 	return nullptr;
@@ -4257,73 +4224,674 @@ std::string QuestManager::GetEncounter() const {
 }
 
 void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
-	if (strcasecmp(type.c_str(), "ztype") == 0)
-		zone->newzone_data.ztype = atoi(value.c_str());
-	else if (strcasecmp(type.c_str(), "fog_red") == 0) {
+	if (!strcasecmp(type.c_str(), "ztype"))
+		zone->newzone_data.ztype = Strings::ToInt(value);
+	else if (!strcasecmp(type.c_str(), "fog_red")) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_red[i] = atoi(value.c_str());
+			zone->newzone_data.fog_red[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_green") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_green")) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_green[i] = atoi(value.c_str());
+			zone->newzone_data.fog_green[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_blue") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_blue")) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_blue[i] = atoi(value.c_str());
+			zone->newzone_data.fog_blue[i] = Strings::ToInt(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_minclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_minclip")) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_minclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_minclip[i] = Strings::ToFloat(value);
 		}
-	} else if (strcasecmp(type.c_str(), "fog_maxclip") == 0) {
+	} else if (!strcasecmp(type.c_str(), "fog_maxclip")) {
 		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.fog_maxclip[i] = atof(value.c_str());
+			zone->newzone_data.fog_maxclip[i] = Strings::ToFloat(value);
 		}
+	} else if (!strcasecmp(type.c_str(), "gravity")) {
+		zone->newzone_data.gravity = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "time_type")) {
+		zone->newzone_data.time_type = Strings::ToInt(value);
+	} else if (!strcasecmp(type.c_str(), "rain_chance")) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_chance[i] = Strings::ToInt(value);
+		}
+	} else if (!strcasecmp(type.c_str(), "rain_duration")) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.rain_duration[i] = Strings::ToInt(value);
+		}
+	} else if (!strcasecmp(type.c_str(), "snow_chance")) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_chance[i] = Strings::ToInt(value);
+		}
+	} else if (!strcasecmp(type.c_str(), "snow_duration")) {
+		for (int i = 0; i < 4; i++) {
+			zone->newzone_data.snow_duration[i] = Strings::ToInt(value);
+		}
+	} else if (!strcasecmp(type.c_str(), "sky")) {
+		zone->newzone_data.sky = Strings::ToInt(value);
+	} else if (!strcasecmp(type.c_str(), "safe_x")) {
+		zone->newzone_data.safe_x = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "safe_y")) {
+		zone->newzone_data.safe_y = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "safe_z")) {
+		zone->newzone_data.safe_z = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "safe_heading")) {
+		zone->newzone_data.safe_heading = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "max_z")) {
+		zone->newzone_data.max_z = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "underworld")) {
+		zone->newzone_data.underworld = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "minclip")) {
+		zone->newzone_data.minclip = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "maxclip")) {
+		zone->newzone_data.maxclip = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "fog_density")) {
+		zone->newzone_data.fog_density = Strings::ToFloat(value);
+	} else if (!strcasecmp(type.c_str(), "suspendbuffs")) {
+		zone->newzone_data.suspend_buffs = Strings::ToInt(value);
+	} else if (!strcasecmp(type.c_str(), "lavadamage")) {
+		zone->newzone_data.lava_damage = Strings::ToInt(value);
+	} else if (!strcasecmp(type.c_str(), "minlavadamage")) {
+		zone->newzone_data.min_lava_damage = Strings::ToInt(value);
 	}
-	else if (strcasecmp(type.c_str(), "gravity") == 0)
-		zone->newzone_data.gravity = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "time_type") == 0)
-		zone->newzone_data.time_type = atoi(value.c_str());
-	else if (strcasecmp(type.c_str(), "rain_chance") == 0) {
-		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_chance[i] = atoi(value.c_str());
-		}
-	} else if (strcasecmp(type.c_str(), "rain_duration") == 0) {
-		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.rain_duration[i] = atoi(value.c_str());
-		}
-	} else if (strcasecmp(type.c_str(), "snow_chance") == 0) {
-		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_chance[i] = atoi(value.c_str());
-		}
-	} else if (strcasecmp(type.c_str(), "snow_duration") == 0) {
-		for (int i = 0; i < 4; i++) {
-			zone->newzone_data.snow_duration[i] = atoi(value.c_str());
-		}
-	}
-	else if (strcasecmp(type.c_str(), "sky") == 0)
-		zone->newzone_data.sky = atoi(value.c_str());
-	else if (strcasecmp(type.c_str(), "safe_x") == 0)
-		zone->newzone_data.safe_x = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "safe_y") == 0)
-		zone->newzone_data.safe_y = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "safe_z") == 0)
-		zone->newzone_data.safe_z = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "max_z") == 0)
-		zone->newzone_data.max_z = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "underworld") == 0)
-		zone->newzone_data.underworld = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "minclip") == 0)
-		zone->newzone_data.minclip = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "maxclip") == 0)
-		zone->newzone_data.maxclip = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "fog_density") == 0)
-		zone->newzone_data.fog_density = atof(value.c_str());
-	else if (strcasecmp(type.c_str(), "suspendbuffs") == 0)
-		zone->newzone_data.SuspendBuffs = atoi(value.c_str());
 
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
+}
+
+EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned) const {
+	if (database.GetItem(item_id)) {
+		return database.CreateItem(
+			item_id,
+			charges,
+			augment_one,
+			augment_two,
+			augment_three,
+			augment_four,
+			augment_five,
+			augment_six,
+			attuned
+		);
+	}
+	return nullptr;
+}
+
+std::string QuestManager::gethexcolorcode(std::string color_name) {
+
+	for (auto color : html_colors) {
+		if (!strcasecmp(color.first.c_str(), color_name.c_str())) {
+			return color.second;
+		}
+	}
+
+	return std::string();
+}
+
+float QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetAAEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
+float QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id, int16 instance_version) const {
+	return database.GetEXPModifierByCharID(character_id, zone_id, instance_version);
+}
+
+void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, float aa_modifier, int16 instance_version) {
+	database.SetAAEXPModifierByCharID(character_id, zone_id, aa_modifier, instance_version);
+}
+
+void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, float exp_modifier, int16 instance_version) {
+	database.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
+}
+
+std::string QuestManager::getgendername(uint32 gender_id) {
+	std::string gender_name = GetGenderName(gender_id);
+	return gender_name;
+}
+
+std::string QuestManager::getdeityname(uint32 deity_id) {
+	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(deity_id));
+}
+
+std::string QuestManager::getinventoryslotname(int16 slot_id) {
+	return EQ::invslot::GetInvPossessionsSlotName(slot_id);
+}
+
+const int QuestManager::getitemstat(uint32 item_id, std::string stat_identifier) {
+	QuestManagerCurrentQuestVars();
+	return EQ::InventoryProfile::GetItemStatValue(item_id, stat_identifier);
+}
+
+int QuestManager::getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot) {
+	QuestManagerCurrentQuestVars();
+	return GetSpellStatValue(spell_id, stat_identifier.c_str(), slot);
+}
+
+void QuestManager::CrossZoneDialogueWindow(uint8 update_type, int update_identifier, const char* message, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZDialogueWindow, sizeof(CZDialogueWindow_Struct));
+	CZDialogueWindow_Struct* CZDW = (CZDialogueWindow_Struct*)pack->pBuffer;
+	CZDW->update_type = update_type;
+	CZDW->update_identifier = update_identifier;
+	strn0cpy(CZDW->message, message, 4096);
+	strn0cpy(CZDW->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneLDoNUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 theme_id, int points, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZLDoNUpdate, sizeof(CZLDoNUpdate_Struct));
+	CZLDoNUpdate_Struct* CZLU = (CZLDoNUpdate_Struct*)pack->pBuffer;
+	CZLU->update_type = update_type;
+	CZLU->update_subtype = update_subtype;
+	CZLU->update_identifier = update_identifier;
+	CZLU->theme_id = theme_id;
+	CZLU->points = points;
+	strn0cpy(CZLU->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMarquee(uint8 update_type, int update_identifier, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZMarquee, sizeof(CZMarquee_Struct));
+	CZMarquee_Struct* CZM = (CZMarquee_Struct*)pack->pBuffer;
+	CZM->update_type = update_type;
+	CZM->update_identifier = update_identifier;
+	CZM->type = type;
+	CZM->priority = priority;
+	CZM->fade_in = fade_in;
+	CZM->fade_out = fade_out;
+	CZM->duration = duration;
+	strn0cpy(CZM->message, message, 512);
+	strn0cpy(CZM->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMessage(uint8 update_type, int update_identifier, uint32 type, const char* message, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZMessage, sizeof(CZMarquee_Struct));
+	CZMessage_Struct* CZM = (CZMessage_Struct*)pack->pBuffer;
+	CZM->update_type = update_type;
+	CZM->update_identifier = update_identifier;
+	CZM->type = type;
+	strn0cpy(CZM->message, message, 512);
+	strn0cpy(CZM->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMove(const CZMove_Struct& m)
+{
+	auto pack = new ServerPacket(ServerOP_CZMove, sizeof(CZMove_Struct));
+	auto s = (CZMove_Struct*) pack->pBuffer;
+
+	if (!m.client_name.empty()) {
+		s->client_name = m.client_name;
+	}
+
+	s->coordinates       = m.coordinates;
+	s->instance_id       = m.instance_id;
+	s->update_type       = m.update_type;
+	s->update_subtype    = m.update_subtype;
+	s->update_identifier = m.update_identifier;
+
+	if (!m.zone_short_name.empty()) {
+		s->zone_short_name = m.zone_short_name;
+	}
+
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariable(uint8 update_type, int update_identifier, const char* variable_name, const char* variable_value, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariable, sizeof(CZSetEntityVariable_Struct));
+	CZSetEntityVariable_Struct* CZM = (CZSetEntityVariable_Struct*)pack->pBuffer;
+	CZM->update_type = update_type;
+	CZM->update_identifier = update_identifier;
+	strn0cpy(CZM->variable_name, variable_name, 256);
+	strn0cpy(CZM->variable_value, variable_value, 256);
+	strn0cpy(CZM->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSignal(uint8 update_type, int update_identifier, int signal_id, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZSignal, sizeof(CZSignal_Struct));
+	CZSignal_Struct* CZS = (CZSignal_Struct*)pack->pBuffer;
+	CZS->update_type = update_type;
+	CZS->update_identifier = update_identifier;
+	CZS->signal_id = signal_id;
+	strn0cpy(CZS->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSpell(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 spell_id, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZSpell, sizeof(CZSpell_Struct));
+	CZSpell_Struct* CZS = (CZSpell_Struct*)pack->pBuffer;
+	CZS->update_type = update_type;
+	CZS->update_subtype = update_subtype;
+	CZS->update_identifier = update_identifier;
+	CZS->spell_id = spell_id;
+	strn0cpy(CZS->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneTaskUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 task_identifier, int task_subidentifier, int update_count, bool enforce_level_requirement, const char* client_name) {
+	auto pack = new ServerPacket(ServerOP_CZTaskUpdate, sizeof(CZTaskUpdate_Struct));
+	CZTaskUpdate_Struct* CZTU = (CZTaskUpdate_Struct*)pack->pBuffer;
+	CZTU->update_type = update_type;
+	CZTU->update_subtype = update_subtype;
+	CZTU->update_identifier = update_identifier;
+	CZTU->task_identifier = task_identifier;
+	CZTU->task_subidentifier = task_subidentifier;
+	CZTU->update_count = update_count;
+	CZTU->enforce_level_requirement = enforce_level_requirement;
+	strn0cpy(CZTU->client_name, client_name, 64);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideDialogueWindow(const char* message, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWDialogueWindow, sizeof(WWDialogueWindow_Struct));
+	WWDialogueWindow_Struct* WWDW = (WWDialogueWindow_Struct*)pack->pBuffer;
+	strn0cpy(WWDW->message, message, 4096);
+	WWDW->min_status = min_status;
+	WWDW->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideLDoNUpdate(uint8 update_type, uint32 theme_id, int points, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWLDoNUpdate, sizeof(WWLDoNUpdate_Struct));
+	WWLDoNUpdate_Struct* WWLU = (WWLDoNUpdate_Struct*)pack->pBuffer;
+	WWLU->update_type = update_type;
+	WWLU->theme_id = theme_id;
+	WWLU->points = points;
+	WWLU->min_status = min_status;
+	WWLU->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideMarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWMarquee, sizeof(WWMarquee_Struct));
+	WWMarquee_Struct* WWM = (WWMarquee_Struct*)pack->pBuffer;
+	WWM->type = type;
+	WWM->priority = priority;
+	WWM->fade_in = fade_in;
+	WWM->fade_out = fade_out;
+	WWM->duration = duration;
+	strn0cpy(WWM->message, message, 512);
+	WWM->min_status = min_status;
+	WWM->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideMessage(uint32 type, const char* message, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWMessage, sizeof(WWMarquee_Struct));
+	WWMessage_Struct* WWM = (WWMessage_Struct*)pack->pBuffer;
+	WWM->type = type;
+	strn0cpy(WWM->message, message, 512);
+	WWM->min_status = min_status;
+	WWM->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideMove(uint8 update_type, const char* zone_short_name, uint16 instance_id, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWMove, sizeof(WWMove_Struct));
+	WWMove_Struct* WWM = (WWMove_Struct*)pack->pBuffer;
+	WWM->update_type = update_type;
+	strn0cpy(WWM->zone_short_name, zone_short_name, 32);
+	WWM->instance_id = instance_id;
+	WWM->min_status = min_status;
+	WWM->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideSetEntityVariable(uint8 update_type, const char* variable_name, const char* variable_value, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWSetEntityVariable, sizeof(WWSetEntityVariable_Struct));
+	WWSetEntityVariable_Struct* WWSEV = (WWSetEntityVariable_Struct*)pack->pBuffer;
+	WWSEV->update_type = update_type;
+	strn0cpy(WWSEV->variable_name, variable_name, 256);
+	strn0cpy(WWSEV->variable_value, variable_value, 256);
+	WWSEV->min_status = min_status;
+	WWSEV->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideSignal(uint8 update_type, int signal_id, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWSignal, sizeof(WWSignal_Struct));
+	WWSignal_Struct* WWS = (WWSignal_Struct*)pack->pBuffer;
+	WWS->update_type = update_type;
+	WWS->signal_id = signal_id;
+	WWS->min_status = min_status;
+	WWS->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideSpell(uint8 update_type, uint32 spell_id, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWSpell, sizeof(WWSpell_Struct));
+	WWSpell_Struct* WWS = (WWSpell_Struct*)pack->pBuffer;
+	WWS->update_type = update_type;
+	WWS->spell_id = spell_id;
+	WWS->min_status = min_status;
+	WWS->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::WorldWideTaskUpdate(uint8 update_type, uint32 task_identifier, int task_subidentifier, int update_count, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
+	auto pack = new ServerPacket(ServerOP_WWTaskUpdate, sizeof(WWTaskUpdate_Struct));
+	WWTaskUpdate_Struct* WWTU = (WWTaskUpdate_Struct*)pack->pBuffer;
+	WWTU->update_type = update_type;
+	WWTU->task_identifier = task_identifier;
+	WWTU->task_subidentifier = task_subidentifier;
+	WWTU->update_count = update_count;
+	WWTU->enforce_level_requirement = enforce_level_requirement;
+	WWTU->min_status = min_status;
+	WWTU->max_status = max_status;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+const SPDat_Spell_Struct* QuestManager::getspell(uint32 spell_id) {
+    if (spells[spell_id].id) {
+        return &spells[spell_id];
+    }
+    return nullptr;
+}
+
+std::string QuestManager::getenvironmentaldamagename(uint8 damage_type) {
+	std::string environmental_damage_name = EQ::constants::GetEnvironmentalDamageName(damage_type);
+	return environmental_damage_name;
+}
+
+void QuestManager::TrackNPC(uint32 entity_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SetTrackingID(entity_id);
+}
+
+int QuestManager::GetRecipeMadeCount(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return 0;
+	}
+
+	return initiator->GetRecipeMadeCount(recipe_id);
+}
+
+std::string QuestManager::GetRecipeName(uint32 recipe_id) {
+	auto r = TradeskillRecipeRepository::GetWhere(
+		database,
+		fmt::format("id = {}", recipe_id)
+	);
+
+	if (!r.empty() && r[0].id) {
+		return r[0].name;
+	}
+
+	return std::string();
+}
+
+bool QuestManager::HasRecipeLearned(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return false;
+	}
+
+	return initiator->HasRecipeLearned(recipe_id);
+}
+
+void QuestManager::LearnRecipe(uint32 recipe_id) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->LearnRecipe(recipe_id);
+}
+
+void QuestManager::marquee(uint32 type, std::string message, uint32 duration)
+{
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendMarqueeMessage(type, message, duration);
+}
+
+void QuestManager::marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, std::string message)
+{
+	QuestManagerCurrentQuestVars();
+	if (!initiator) {
+		return;
+	}
+
+	initiator->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
+}
+
+bool QuestManager::DoAugmentSlotsMatch(uint32 item_one, uint32 item_two)
+{
+	const auto* inst_one = database.GetItem(item_one);
+	if (!inst_one) {
+		return false;
+	}
+
+	const auto* inst_two = database.GetItem(item_two);
+	if (!inst_two) {
+		return false;
+	}
+
+	for (auto i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
+		if (inst_one->AugSlotType[i] != inst_two->AugSlotType[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+int8 QuestManager::DoesAugmentFit(EQ::ItemInstance* inst, uint32 augment_id, uint8 augment_slot)
+{
+	if (!inst) {
+		return INVALID_INDEX;
+	}
+
+	const auto* aug_inst = database.GetItem(augment_id);
+	if (!aug_inst) {
+		return INVALID_INDEX;
+	}
+
+	if (augment_slot != 255) {
+		return !inst->IsAugmentSlotAvailable(aug_inst->AugType, augment_slot) ? INVALID_INDEX : augment_slot;
+	}
+
+	return inst->AvailableAugmentSlot(aug_inst->AugType);
+}
+
+void QuestManager::SendPlayerHandinEvent() {
+	QuestManagerCurrentQuestVars();
+	if (!owner || !owner->IsNPC() || !initiator) {
+		return;
+	}
+
+	if (
+		!initiator->EntityVariableExists("HANDIN_ITEMS") &&
+		!initiator->EntityVariableExists("HANDIN_MONEY") &&
+		!initiator->EntityVariableExists("RETURN_ITEMS") &&
+		!initiator->EntityVariableExists("RETURN_MONEY")
+	) {
+		return;
+	}
+
+	auto handin_items = initiator->GetEntityVariable("HANDIN_ITEMS");
+	auto return_items = initiator->GetEntityVariable("RETURN_ITEMS");
+	auto handin_money = initiator->GetEntityVariable("HANDIN_MONEY");
+	auto return_money = initiator->GetEntityVariable("RETURN_MONEY");
+
+	std::vector<PlayerEvent::HandinEntry> hi = {};
+	std::vector<PlayerEvent::HandinEntry> ri = {};
+	PlayerEvent::HandinMoney              hm{};
+	PlayerEvent::HandinMoney              rm{};
+
+	// Handin Items
+	if (!handin_items.empty()) {
+		if (Strings::Contains(handin_items, ",")) {
+			const auto handin_data = Strings::Split(handin_items, ",");
+			for (const auto &h: handin_data) {
+				const auto item_data = Strings::Split(h, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+					if (item_id != 0) {
+						const auto *item = database.GetItem(item_id);
+
+						if (item) {
+							hi.emplace_back(
+								PlayerEvent::HandinEntry{
+									.item_id = item_id,
+									.item_name = item->Name,
+									.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+									.attuned = Strings::ToInt(item_data[2]) ? true : false
+								}
+							);
+						}
+					}
+				}
+			}
+		}
+		else if (Strings::Contains(handin_items, "|")) {
+			const auto item_data = Strings::Split(handin_items, "|");
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+				const auto *item = database.GetItem(item_id);
+
+				if (item) {
+					hi.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
+						}
+					);
+				}
+			}
+		}
+	}
+
+	// Handin Money
+	if (!handin_money.empty()) {
+		const auto hms = Strings::Split(handin_money, "|");
+		hm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(hms[0]));
+		hm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(hms[1]));
+		hm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(hms[2]));
+		hm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(hms[3]));
+	}
+
+	// Return Items
+	if (!return_items.empty()) {
+		if (Strings::Contains(return_items, ",")) {
+			const auto return_data = Strings::Split(return_items, ",");
+			for (const auto &r: return_data) {
+				const auto item_data = Strings::Split(r, "|");
+				if (
+					item_data.size() == 3 &&
+					Strings::IsNumber(item_data[0]) &&
+					Strings::IsNumber(item_data[1]) &&
+					Strings::IsNumber(item_data[2])
+					) {
+					const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+					const auto *item   = database.GetItem(item_id);
+
+					if (item) {
+						ri.emplace_back(
+							PlayerEvent::HandinEntry{
+								.item_id = item_id,
+								.item_name = item->Name,
+								.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+								.attuned = Strings::ToInt(item_data[2]) ? true : false
+							}
+						);
+					}
+				}
+			}
+		}
+		else if (Strings::Contains(return_items, "|")) {
+			const auto item_data = Strings::Split(return_items, "|");
+			if (
+				item_data.size() == 3 &&
+				Strings::IsNumber(item_data[0]) &&
+				Strings::IsNumber(item_data[1]) &&
+				Strings::IsNumber(item_data[2])
+				) {
+				const auto item_id = static_cast<uint32>(Strings::ToUnsignedInt(item_data[0]));
+				const auto *item   = database.GetItem(item_id);
+
+				if (item) {
+					ri.emplace_back(
+						PlayerEvent::HandinEntry{
+							.item_id = item_id,
+							.item_name = item->Name,
+							.charges = static_cast<uint16>(Strings::ToUnsignedInt(item_data[1])),
+							.attuned = Strings::ToInt(item_data[2]) ? true : false
+						}
+					);
+				}
+			}
+		}
+	}
+
+	// Return Money
+	if (!return_money.empty()) {
+		const auto rms = Strings::Split(return_money, "|");
+		rm.copper   = static_cast<uint32>(Strings::ToUnsignedInt(rms[0]));
+		rm.silver   = static_cast<uint32>(Strings::ToUnsignedInt(rms[1]));
+		rm.gold     = static_cast<uint32>(Strings::ToUnsignedInt(rms[2]));
+		rm.platinum = static_cast<uint32>(Strings::ToUnsignedInt(rms[3]));
+	}
+
+	initiator->DeleteEntityVariable("HANDIN_ITEMS");
+	initiator->DeleteEntityVariable("HANDIN_MONEY");
+	initiator->DeleteEntityVariable("RETURN_ITEMS");
+	initiator->DeleteEntityVariable("RETURN_MONEY");
+
+	bool handed_in_money = hm.platinum > 0 || hm.gold > 0 || hm.silver > 0 || hm.copper > 0;
+
+	bool event_has_data_to_record = (
+		!hi.empty() || handed_in_money
+	);
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::NPC_HANDIN) && event_has_data_to_record) {
+		auto e = PlayerEvent::HandinEvent{
+			.npc_id = owner->CastToNPC()->GetNPCTypeID(),
+			.npc_name = owner->GetCleanName(),
+			.handin_items = hi,
+			.handin_money = hm,
+			.return_items = ri,
+			.return_money = rm
+		};
+
+		RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
+	}
 }

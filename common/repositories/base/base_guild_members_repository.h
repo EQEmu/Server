@@ -1,49 +1,34 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H
 #define EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseGuildMembersRepository {
 public:
 	struct GuildMembers {
-		int         char_id;
-		int         guild_id;
-		int         rank;
-		int         tribute_enable;
-		int         total_tribute;
-		int         last_tribute;
-		int         banker;
+		int32_t     char_id;
+		uint32_t    guild_id;
+		uint8_t     rank_;
+		uint8_t     tribute_enable;
+		uint32_t    total_tribute;
+		uint32_t    last_tribute;
+		uint8_t     banker;
 		std::string public_note;
-		int         alt;
+		uint8_t     alt;
+		uint8_t     online;
 	};
 
 	static std::string PrimaryKey()
@@ -56,34 +41,41 @@ public:
 		return {
 			"char_id",
 			"guild_id",
-			"rank",
+			"`rank`",
 			"tribute_enable",
 			"total_tribute",
 			"last_tribute",
 			"banker",
 			"public_note",
 			"alt",
+			"online",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"char_id",
+			"guild_id",
+			"`rank`",
+			"tribute_enable",
+			"total_tribute",
+			"last_tribute",
+			"banker",
+			"public_note",
+			"alt",
+			"online",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string SelectColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -95,7 +87,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -105,28 +97,29 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static GuildMembers NewEntity()
 	{
-		GuildMembers entry{};
+		GuildMembers e{};
 
-		entry.char_id        = 0;
-		entry.guild_id       = 0;
-		entry.rank           = 0;
-		entry.tribute_enable = 0;
-		entry.total_tribute  = 0;
-		entry.last_tribute   = 0;
-		entry.banker         = 0;
-		entry.public_note    = "";
-		entry.alt            = 0;
+		e.char_id        = 0;
+		e.guild_id       = 0;
+		e.rank_          = 0;
+		e.tribute_enable = 0;
+		e.total_tribute  = 0;
+		e.last_tribute   = 0;
+		e.banker         = 0;
+		e.public_note    = "";
+		e.alt            = 0;
+		e.online         = 0;
 
-		return entry;
+		return e;
 	}
 
-	static GuildMembers GetGuildMembersEntry(
+	static GuildMembers GetGuildMembers(
 		const std::vector<GuildMembers> &guild_memberss,
 		int guild_members_id
 	)
@@ -141,42 +134,46 @@ public:
 	}
 
 	static GuildMembers FindOne(
+		Database& db,
 		int guild_members_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				guild_members_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GuildMembers entry{};
+			GuildMembers e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.guild_id       = atoi(row[1]);
-			entry.rank           = atoi(row[2]);
-			entry.tribute_enable = atoi(row[3]);
-			entry.total_tribute  = atoi(row[4]);
-			entry.last_tribute   = atoi(row[5]);
-			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7] ? row[7] : "";
-			entry.alt            = atoi(row[8]);
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_          = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.total_tribute  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.last_tribute   = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.banker         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.public_note    = row[7] ? row[7] : "";
+			e.alt            = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.online         = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int guild_members_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -189,30 +186,32 @@ public:
 	}
 
 	static int UpdateOne(
-		GuildMembers guild_members_entry
+		Database& db,
+		const GuildMembers &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(guild_members_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(guild_members_entry.guild_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(guild_members_entry.rank));
-		update_values.push_back(columns[3] + " = " + std::to_string(guild_members_entry.tribute_enable));
-		update_values.push_back(columns[4] + " = " + std::to_string(guild_members_entry.total_tribute));
-		update_values.push_back(columns[5] + " = " + std::to_string(guild_members_entry.last_tribute));
-		update_values.push_back(columns[6] + " = " + std::to_string(guild_members_entry.banker));
-		update_values.push_back(columns[7] + " = '" + EscapeString(guild_members_entry.public_note) + "'");
-		update_values.push_back(columns[8] + " = " + std::to_string(guild_members_entry.alt));
+		v.push_back(columns[0] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.guild_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.rank_));
+		v.push_back(columns[3] + " = " + std::to_string(e.tribute_enable));
+		v.push_back(columns[4] + " = " + std::to_string(e.total_tribute));
+		v.push_back(columns[5] + " = " + std::to_string(e.last_tribute));
+		v.push_back(columns[6] + " = " + std::to_string(e.banker));
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.public_note) + "'");
+		v.push_back(columns[8] + " = " + std::to_string(e.alt));
+		v.push_back(columns[9] + " = " + std::to_string(e.online));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				guild_members_entry.char_id
+				e.char_id
 			)
 		);
 
@@ -220,79 +219,83 @@ public:
 	}
 
 	static GuildMembers InsertOne(
-		GuildMembers guild_members_entry
+		Database& db,
+		GuildMembers e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(guild_members_entry.char_id));
-		insert_values.push_back(std::to_string(guild_members_entry.guild_id));
-		insert_values.push_back(std::to_string(guild_members_entry.rank));
-		insert_values.push_back(std::to_string(guild_members_entry.tribute_enable));
-		insert_values.push_back(std::to_string(guild_members_entry.total_tribute));
-		insert_values.push_back(std::to_string(guild_members_entry.last_tribute));
-		insert_values.push_back(std::to_string(guild_members_entry.banker));
-		insert_values.push_back("'" + EscapeString(guild_members_entry.public_note) + "'");
-		insert_values.push_back(std::to_string(guild_members_entry.alt));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank_));
+		v.push_back(std::to_string(e.tribute_enable));
+		v.push_back(std::to_string(e.total_tribute));
+		v.push_back(std::to_string(e.last_tribute));
+		v.push_back(std::to_string(e.banker));
+		v.push_back("'" + Strings::Escape(e.public_note) + "'");
+		v.push_back(std::to_string(e.alt));
+		v.push_back(std::to_string(e.online));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			guild_members_entry.char_id = results.LastInsertedID();
-			return guild_members_entry;
+			e.char_id = results.LastInsertedID();
+			return e;
 		}
 
-		guild_members_entry = NewEntity();
+		e = NewEntity();
 
-		return guild_members_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<GuildMembers> guild_members_entries
+		Database& db,
+		const std::vector<GuildMembers> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &guild_members_entry: guild_members_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(guild_members_entry.char_id));
-			insert_values.push_back(std::to_string(guild_members_entry.guild_id));
-			insert_values.push_back(std::to_string(guild_members_entry.rank));
-			insert_values.push_back(std::to_string(guild_members_entry.tribute_enable));
-			insert_values.push_back(std::to_string(guild_members_entry.total_tribute));
-			insert_values.push_back(std::to_string(guild_members_entry.last_tribute));
-			insert_values.push_back(std::to_string(guild_members_entry.banker));
-			insert_values.push_back("'" + EscapeString(guild_members_entry.public_note) + "'");
-			insert_values.push_back(std::to_string(guild_members_entry.alt));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank_));
+			v.push_back(std::to_string(e.tribute_enable));
+			v.push_back(std::to_string(e.total_tribute));
+			v.push_back(std::to_string(e.last_tribute));
+			v.push_back(std::to_string(e.banker));
+			v.push_back("'" + Strings::Escape(e.public_note) + "'");
+			v.push_back(std::to_string(e.alt));
+			v.push_back(std::to_string(e.online));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<GuildMembers> All()
+	static std::vector<GuildMembers> All(Database& db)
 	{
 		std::vector<GuildMembers> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -302,29 +305,30 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildMembers entry{};
+			GuildMembers e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.guild_id       = atoi(row[1]);
-			entry.rank           = atoi(row[2]);
-			entry.tribute_enable = atoi(row[3]);
-			entry.total_tribute  = atoi(row[4]);
-			entry.last_tribute   = atoi(row[5]);
-			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7] ? row[7] : "";
-			entry.alt            = atoi(row[8]);
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_          = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.total_tribute  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.last_tribute   = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.banker         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.public_note    = row[7] ? row[7] : "";
+			e.alt            = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.online         = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<GuildMembers> GetWhere(std::string where_filter)
+	static std::vector<GuildMembers> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GuildMembers> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -335,27 +339,28 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GuildMembers entry{};
+			GuildMembers e{};
 
-			entry.char_id        = atoi(row[0]);
-			entry.guild_id       = atoi(row[1]);
-			entry.rank           = atoi(row[2]);
-			entry.tribute_enable = atoi(row[3]);
-			entry.total_tribute  = atoi(row[4]);
-			entry.last_tribute   = atoi(row[5]);
-			entry.banker         = atoi(row[6]);
-			entry.public_note    = row[7] ? row[7] : "";
-			entry.alt            = atoi(row[8]);
+			e.char_id        = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.guild_id       = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.rank_          = row[2] ? static_cast<uint8_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.tribute_enable = row[3] ? static_cast<uint8_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.total_tribute  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.last_tribute   = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.banker         = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.public_note    = row[7] ? row[7] : "";
+			e.alt            = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.online         = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -366,9 +371,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -378,6 +383,106 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GuildMembers &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.guild_id));
+		v.push_back(std::to_string(e.rank_));
+		v.push_back(std::to_string(e.tribute_enable));
+		v.push_back(std::to_string(e.total_tribute));
+		v.push_back(std::to_string(e.last_tribute));
+		v.push_back(std::to_string(e.banker));
+		v.push_back("'" + Strings::Escape(e.public_note) + "'");
+		v.push_back(std::to_string(e.alt));
+		v.push_back(std::to_string(e.online));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GuildMembers> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.guild_id));
+			v.push_back(std::to_string(e.rank_));
+			v.push_back(std::to_string(e.tribute_enable));
+			v.push_back(std::to_string(e.total_tribute));
+			v.push_back(std::to_string(e.last_tribute));
+			v.push_back(std::to_string(e.banker));
+			v.push_back("'" + Strings::Escape(e.public_note) + "'");
+			v.push_back(std::to_string(e.alt));
+			v.push_back(std::to_string(e.online));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GUILD_MEMBERS_REPOSITORY_H

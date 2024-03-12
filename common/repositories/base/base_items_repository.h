@@ -1,325 +1,309 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_ITEMS_REPOSITORY_H
 #define EQEMU_BASE_ITEMS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseItemsRepository {
 public:
 	struct Items {
-		int         id;
-		int         minstatus;
+		int32_t     id;
+		int16_t     minstatus;
 		std::string Name;
-		int         aagi;
-		int         ac;
-		int         accuracy;
-		int         acha;
-		int         adex;
-		int         aint;
-		int         artifactflag;
-		int         asta;
-		int         astr;
-		int         attack;
-		int         augrestrict;
-		int         augslot1type;
-		int         augslot1visible;
-		int         augslot2type;
-		int         augslot2visible;
-		int         augslot3type;
-		int         augslot3visible;
-		int         augslot4type;
-		int         augslot4visible;
-		int         augslot5type;
-		int         augslot5visible;
-		int         augslot6type;
-		int         augslot6visible;
-		int         augtype;
-		int         avoidance;
-		int         awis;
-		int         bagsize;
-		int         bagslots;
-		int         bagtype;
-		int         bagwr;
-		int         banedmgamt;
-		int         banedmgraceamt;
-		int         banedmgbody;
-		int         banedmgrace;
-		int         bardtype;
-		int         bardvalue;
-		int         book;
-		int         casttime;
-		int         casttime_;
+		int32_t     aagi;
+		int32_t     ac;
+		int32_t     accuracy;
+		int32_t     acha;
+		int32_t     adex;
+		int32_t     aint;
+		uint8_t     artifactflag;
+		int32_t     asta;
+		int32_t     astr;
+		int32_t     attack;
+		int32_t     augrestrict;
+		int8_t      augslot1type;
+		int8_t      augslot1visible;
+		int8_t      augslot2type;
+		int8_t      augslot2visible;
+		int8_t      augslot3type;
+		int8_t      augslot3visible;
+		int8_t      augslot4type;
+		int8_t      augslot4visible;
+		int8_t      augslot5type;
+		int8_t      augslot5visible;
+		int8_t      augslot6type;
+		int8_t      augslot6visible;
+		int32_t     augtype;
+		int32_t     avoidance;
+		int32_t     awis;
+		int32_t     bagsize;
+		int32_t     bagslots;
+		int32_t     bagtype;
+		int32_t     bagwr;
+		int32_t     banedmgamt;
+		int32_t     banedmgraceamt;
+		int32_t     banedmgbody;
+		int32_t     banedmgrace;
+		int32_t     bardtype;
+		int32_t     bardvalue;
+		int32_t     book;
+		int32_t     casttime;
+		int32_t     casttime_;
 		std::string charmfile;
 		std::string charmfileid;
-		int         classes;
-		int         color;
+		int32_t     classes;
+		uint32_t    color;
 		std::string combateffects;
-		int         extradmgskill;
-		int         extradmgamt;
-		int         price;
-		int         cr;
-		int         damage;
-		int         damageshield;
-		int         deity;
-		int         delay;
-		int         augdistiller;
-		int         dotshielding;
-		int         dr;
-		int         clicktype;
-		int         clicklevel2;
-		int         elemdmgtype;
-		int         elemdmgamt;
-		int         endur;
-		int         factionamt1;
-		int         factionamt2;
-		int         factionamt3;
-		int         factionamt4;
-		int         factionmod1;
-		int         factionmod2;
-		int         factionmod3;
-		int         factionmod4;
+		int32_t     extradmgskill;
+		int32_t     extradmgamt;
+		int32_t     price;
+		int32_t     cr;
+		int32_t     damage;
+		int32_t     damageshield;
+		int32_t     deity;
+		int32_t     delay;
+		uint32_t    augdistiller;
+		int32_t     dotshielding;
+		int32_t     dr;
+		int32_t     clicktype;
+		int32_t     clicklevel2;
+		int32_t     elemdmgtype;
+		int32_t     elemdmgamt;
+		int32_t     endur;
+		int32_t     factionamt1;
+		int32_t     factionamt2;
+		int32_t     factionamt3;
+		int32_t     factionamt4;
+		int32_t     factionmod1;
+		int32_t     factionmod2;
+		int32_t     factionmod3;
+		int32_t     factionmod4;
 		std::string filename;
-		int         focuseffect;
-		int         fr;
-		int         fvnodrop;
-		int         haste;
-		int         clicklevel;
-		int         hp;
-		int         regen;
-		int         icon;
+		int32_t     focuseffect;
+		int32_t     fr;
+		int32_t     fvnodrop;
+		int32_t     haste;
+		int32_t     clicklevel;
+		int32_t     hp;
+		int32_t     regen;
+		int32_t     icon;
 		std::string idfile;
-		int         itemclass;
-		int         itemtype;
-		int         ldonprice;
-		int         ldontheme;
-		int         ldonsold;
-		int         light;
+		int32_t     itemclass;
+		int32_t     itemtype;
+		int32_t     ldonprice;
+		int32_t     ldontheme;
+		int32_t     ldonsold;
+		int32_t     light;
 		std::string lore;
-		int         loregroup;
-		int         magic;
-		int         mana;
-		int         manaregen;
-		int         enduranceregen;
-		int         material;
-		int         herosforgemodel;
-		int         maxcharges;
-		int         mr;
-		int         nodrop;
-		int         norent;
-		int         pendingloreflag;
-		int         pr;
-		int         procrate;
-		int         races;
-		int         range;
-		int         reclevel;
-		int         recskill;
-		int         reqlevel;
+		int32_t     loregroup;
+		int32_t     magic;
+		int32_t     mana;
+		int32_t     manaregen;
+		int32_t     enduranceregen;
+		int32_t     material;
+		int32_t     herosforgemodel;
+		int32_t     maxcharges;
+		int32_t     mr;
+		int32_t     nodrop;
+		int32_t     norent;
+		uint8_t     pendingloreflag;
+		int32_t     pr;
+		int32_t     procrate;
+		int32_t     races;
+		int32_t     range_;
+		int32_t     reclevel;
+		int32_t     recskill;
+		int32_t     reqlevel;
 		float       sellrate;
-		int         shielding;
-		int         size;
-		int         skillmodtype;
-		int         skillmodvalue;
-		int         slots;
-		int         clickeffect;
-		int         spellshield;
-		int         strikethrough;
-		int         stunresist;
-		int         summonedflag;
-		int         tradeskills;
-		int         favor;
-		int         weight;
-		int         UNK012;
-		int         UNK013;
-		int         benefitflag;
-		int         UNK054;
-		int         UNK059;
-		int         booktype;
-		int         recastdelay;
-		int         recasttype;
-		int         guildfavor;
-		int         UNK123;
-		int         UNK124;
-		int         attuneable;
-		int         nopet;
-		std::string updated;
+		int32_t     shielding;
+		int32_t     size;
+		int32_t     skillmodtype;
+		int32_t     skillmodvalue;
+		int32_t     slots;
+		int32_t     clickeffect;
+		int32_t     spellshield;
+		int32_t     strikethrough;
+		int32_t     stunresist;
+		uint8_t     summonedflag;
+		int32_t     tradeskills;
+		int32_t     favor;
+		int32_t     weight;
+		int32_t     UNK012;
+		int32_t     UNK013;
+		int32_t     benefitflag;
+		int32_t     UNK054;
+		int32_t     UNK059;
+		int32_t     booktype;
+		int32_t     recastdelay;
+		int32_t     recasttype;
+		int32_t     guildfavor;
+		int32_t     UNK123;
+		int32_t     UNK124;
+		int32_t     attuneable;
+		int32_t     nopet;
+		time_t      updated;
 		std::string comment;
-		int         UNK127;
-		int         pointtype;
-		int         potionbelt;
-		int         potionbeltslots;
-		int         stacksize;
-		int         notransfer;
-		int         stackable;
+		int32_t     UNK127;
+		int32_t     pointtype;
+		int32_t     potionbelt;
+		int32_t     potionbeltslots;
+		int32_t     stacksize;
+		int32_t     notransfer;
+		int32_t     stackable;
 		std::string UNK134;
-		int         UNK137;
-		int         proceffect;
-		int         proctype;
-		int         proclevel2;
-		int         proclevel;
-		int         UNK142;
-		int         worneffect;
-		int         worntype;
-		int         wornlevel2;
-		int         wornlevel;
-		int         UNK147;
-		int         focustype;
-		int         focuslevel2;
-		int         focuslevel;
-		int         UNK152;
-		int         scrolleffect;
-		int         scrolltype;
-		int         scrolllevel2;
-		int         scrolllevel;
-		int         UNK157;
-		std::string serialized;
-		std::string verified;
+		int32_t     UNK137;
+		int32_t     proceffect;
+		int32_t     proctype;
+		int32_t     proclevel2;
+		int32_t     proclevel;
+		int32_t     UNK142;
+		int32_t     worneffect;
+		int32_t     worntype;
+		int32_t     wornlevel2;
+		int32_t     wornlevel;
+		int32_t     UNK147;
+		int32_t     focustype;
+		int32_t     focuslevel2;
+		int32_t     focuslevel;
+		int32_t     UNK152;
+		int32_t     scrolleffect;
+		int32_t     scrolltype;
+		int32_t     scrolllevel2;
+		int32_t     scrolllevel;
+		int32_t     UNK157;
+		time_t      serialized;
+		time_t      verified;
 		std::string serialization;
 		std::string source;
-		int         UNK033;
+		int32_t     UNK033;
 		std::string lorefile;
-		int         UNK014;
-		int         svcorruption;
-		int         skillmodmax;
-		int         UNK060;
-		int         augslot1unk2;
-		int         augslot2unk2;
-		int         augslot3unk2;
-		int         augslot4unk2;
-		int         augslot5unk2;
-		int         augslot6unk2;
-		int         UNK120;
-		int         UNK121;
-		int         questitemflag;
+		int32_t     UNK014;
+		int32_t     svcorruption;
+		int32_t     skillmodmax;
+		int32_t     UNK060;
+		int32_t     augslot1unk2;
+		int32_t     augslot2unk2;
+		int32_t     augslot3unk2;
+		int32_t     augslot4unk2;
+		int32_t     augslot5unk2;
+		int32_t     augslot6unk2;
+		int32_t     UNK120;
+		int32_t     UNK121;
+		int32_t     questitemflag;
 		std::string UNK132;
-		int         clickunk5;
+		int32_t     clickunk5;
 		std::string clickunk6;
-		int         clickunk7;
-		int         procunk1;
-		int         procunk2;
-		int         procunk3;
-		int         procunk4;
+		int32_t     clickunk7;
+		int32_t     procunk1;
+		int32_t     procunk2;
+		int32_t     procunk3;
+		int32_t     procunk4;
 		std::string procunk6;
-		int         procunk7;
-		int         wornunk1;
-		int         wornunk2;
-		int         wornunk3;
-		int         wornunk4;
-		int         wornunk5;
+		int32_t     procunk7;
+		int32_t     wornunk1;
+		int32_t     wornunk2;
+		int32_t     wornunk3;
+		int32_t     wornunk4;
+		int32_t     wornunk5;
 		std::string wornunk6;
-		int         wornunk7;
-		int         focusunk1;
-		int         focusunk2;
-		int         focusunk3;
-		int         focusunk4;
-		int         focusunk5;
+		int32_t     wornunk7;
+		int32_t     focusunk1;
+		int32_t     focusunk2;
+		int32_t     focusunk3;
+		int32_t     focusunk4;
+		int32_t     focusunk5;
 		std::string focusunk6;
-		int         focusunk7;
-		int         scrollunk1;
-		int         scrollunk2;
-		int         scrollunk3;
-		int         scrollunk4;
-		int         scrollunk5;
+		int32_t     focusunk7;
+		uint32_t    scrollunk1;
+		int32_t     scrollunk2;
+		int32_t     scrollunk3;
+		int32_t     scrollunk4;
+		int32_t     scrollunk5;
 		std::string scrollunk6;
-		int         scrollunk7;
-		int         UNK193;
-		int         purity;
-		int         evoitem;
-		int         evoid;
-		int         evolvinglevel;
-		int         evomax;
+		int32_t     scrollunk7;
+		int32_t     UNK193;
+		int32_t     purity;
+		int32_t     evoitem;
+		int32_t     evoid;
+		int32_t     evolvinglevel;
+		int32_t     evomax;
 		std::string clickname;
 		std::string procname;
 		std::string wornname;
 		std::string focusname;
 		std::string scrollname;
-		int         dsmitigation;
-		int         heroic_str;
-		int         heroic_int;
-		int         heroic_wis;
-		int         heroic_agi;
-		int         heroic_dex;
-		int         heroic_sta;
-		int         heroic_cha;
-		int         heroic_pr;
-		int         heroic_dr;
-		int         heroic_fr;
-		int         heroic_cr;
-		int         heroic_mr;
-		int         heroic_svcorrup;
-		int         healamt;
-		int         spelldmg;
-		int         clairvoyance;
-		int         backstabdmg;
+		int16_t     dsmitigation;
+		int16_t     heroic_str;
+		int16_t     heroic_int;
+		int16_t     heroic_wis;
+		int16_t     heroic_agi;
+		int16_t     heroic_dex;
+		int16_t     heroic_sta;
+		int16_t     heroic_cha;
+		int16_t     heroic_pr;
+		int16_t     heroic_dr;
+		int16_t     heroic_fr;
+		int16_t     heroic_cr;
+		int16_t     heroic_mr;
+		int16_t     heroic_svcorrup;
+		int16_t     healamt;
+		int16_t     spelldmg;
+		int16_t     clairvoyance;
+		int16_t     backstabdmg;
 		std::string created;
-		int         elitematerial;
-		int         ldonsellbackrate;
-		int         scriptfileid;
-		int         expendablearrow;
-		int         powersourcecapacity;
-		int         bardeffect;
-		int         bardeffecttype;
-		int         bardlevel2;
-		int         bardlevel;
-		int         bardunk1;
-		int         bardunk2;
-		int         bardunk3;
-		int         bardunk4;
-		int         bardunk5;
+		int16_t     elitematerial;
+		int16_t     ldonsellbackrate;
+		int32_t     scriptfileid;
+		int16_t     expendablearrow;
+		int32_t     powersourcecapacity;
+		int32_t     bardeffect;
+		int16_t     bardeffecttype;
+		int16_t     bardlevel2;
+		int16_t     bardlevel;
+		int16_t     bardunk1;
+		int16_t     bardunk2;
+		int16_t     bardunk3;
+		int16_t     bardunk4;
+		int16_t     bardunk5;
 		std::string bardname;
-		int         bardunk7;
-		int         UNK214;
-		int         subtype;
-		int         UNK220;
-		int         UNK221;
-		int         heirloom;
-		int         UNK223;
-		int         UNK224;
-		int         UNK225;
-		int         UNK226;
-		int         UNK227;
-		int         UNK228;
-		int         UNK229;
-		int         UNK230;
-		int         UNK231;
-		int         UNK232;
-		int         UNK233;
-		int         UNK234;
-		int         placeable;
-		int         UNK236;
-		int         UNK237;
-		int         UNK238;
-		int         UNK239;
-		int         UNK240;
-		int         UNK241;
-		int         epicitem;
+		int16_t     bardunk7;
+		int16_t     UNK214;
+		int32_t     subtype;
+		int32_t     UNK220;
+		int32_t     UNK221;
+		int32_t     heirloom;
+		int32_t     UNK223;
+		int32_t     UNK224;
+		int32_t     UNK225;
+		int32_t     UNK226;
+		int32_t     UNK227;
+		int32_t     UNK228;
+		int32_t     UNK229;
+		int32_t     UNK230;
+		int32_t     UNK231;
+		int32_t     UNK232;
+		int32_t     UNK233;
+		int32_t     UNK234;
+		int32_t     placeable;
+		int32_t     UNK236;
+		int32_t     UNK237;
+		int32_t     UNK238;
+		int32_t     UNK239;
+		int32_t     UNK240;
+		int32_t     UNK241;
+		int32_t     epicitem;
 	};
 
 	static std::string PrimaryKey()
@@ -433,7 +417,7 @@ public:
 			"pr",
 			"procrate",
 			"races",
-			"range",
+			"`range`",
 			"reclevel",
 			"recskill",
 			"reqlevel",
@@ -618,24 +602,305 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"minstatus",
+			"Name",
+			"aagi",
+			"ac",
+			"accuracy",
+			"acha",
+			"adex",
+			"aint",
+			"artifactflag",
+			"asta",
+			"astr",
+			"attack",
+			"augrestrict",
+			"augslot1type",
+			"augslot1visible",
+			"augslot2type",
+			"augslot2visible",
+			"augslot3type",
+			"augslot3visible",
+			"augslot4type",
+			"augslot4visible",
+			"augslot5type",
+			"augslot5visible",
+			"augslot6type",
+			"augslot6visible",
+			"augtype",
+			"avoidance",
+			"awis",
+			"bagsize",
+			"bagslots",
+			"bagtype",
+			"bagwr",
+			"banedmgamt",
+			"banedmgraceamt",
+			"banedmgbody",
+			"banedmgrace",
+			"bardtype",
+			"bardvalue",
+			"book",
+			"casttime",
+			"casttime_",
+			"charmfile",
+			"charmfileid",
+			"classes",
+			"color",
+			"combateffects",
+			"extradmgskill",
+			"extradmgamt",
+			"price",
+			"cr",
+			"damage",
+			"damageshield",
+			"deity",
+			"delay",
+			"augdistiller",
+			"dotshielding",
+			"dr",
+			"clicktype",
+			"clicklevel2",
+			"elemdmgtype",
+			"elemdmgamt",
+			"endur",
+			"factionamt1",
+			"factionamt2",
+			"factionamt3",
+			"factionamt4",
+			"factionmod1",
+			"factionmod2",
+			"factionmod3",
+			"factionmod4",
+			"filename",
+			"focuseffect",
+			"fr",
+			"fvnodrop",
+			"haste",
+			"clicklevel",
+			"hp",
+			"regen",
+			"icon",
+			"idfile",
+			"itemclass",
+			"itemtype",
+			"ldonprice",
+			"ldontheme",
+			"ldonsold",
+			"light",
+			"lore",
+			"loregroup",
+			"magic",
+			"mana",
+			"manaregen",
+			"enduranceregen",
+			"material",
+			"herosforgemodel",
+			"maxcharges",
+			"mr",
+			"nodrop",
+			"norent",
+			"pendingloreflag",
+			"pr",
+			"procrate",
+			"races",
+			"`range`",
+			"reclevel",
+			"recskill",
+			"reqlevel",
+			"sellrate",
+			"shielding",
+			"size",
+			"skillmodtype",
+			"skillmodvalue",
+			"slots",
+			"clickeffect",
+			"spellshield",
+			"strikethrough",
+			"stunresist",
+			"summonedflag",
+			"tradeskills",
+			"favor",
+			"weight",
+			"UNK012",
+			"UNK013",
+			"benefitflag",
+			"UNK054",
+			"UNK059",
+			"booktype",
+			"recastdelay",
+			"recasttype",
+			"guildfavor",
+			"UNK123",
+			"UNK124",
+			"attuneable",
+			"nopet",
+			"UNIX_TIMESTAMP(updated)",
+			"comment",
+			"UNK127",
+			"pointtype",
+			"potionbelt",
+			"potionbeltslots",
+			"stacksize",
+			"notransfer",
+			"stackable",
+			"UNK134",
+			"UNK137",
+			"proceffect",
+			"proctype",
+			"proclevel2",
+			"proclevel",
+			"UNK142",
+			"worneffect",
+			"worntype",
+			"wornlevel2",
+			"wornlevel",
+			"UNK147",
+			"focustype",
+			"focuslevel2",
+			"focuslevel",
+			"UNK152",
+			"scrolleffect",
+			"scrolltype",
+			"scrolllevel2",
+			"scrolllevel",
+			"UNK157",
+			"UNIX_TIMESTAMP(serialized)",
+			"UNIX_TIMESTAMP(verified)",
+			"serialization",
+			"source",
+			"UNK033",
+			"lorefile",
+			"UNK014",
+			"svcorruption",
+			"skillmodmax",
+			"UNK060",
+			"augslot1unk2",
+			"augslot2unk2",
+			"augslot3unk2",
+			"augslot4unk2",
+			"augslot5unk2",
+			"augslot6unk2",
+			"UNK120",
+			"UNK121",
+			"questitemflag",
+			"UNK132",
+			"clickunk5",
+			"clickunk6",
+			"clickunk7",
+			"procunk1",
+			"procunk2",
+			"procunk3",
+			"procunk4",
+			"procunk6",
+			"procunk7",
+			"wornunk1",
+			"wornunk2",
+			"wornunk3",
+			"wornunk4",
+			"wornunk5",
+			"wornunk6",
+			"wornunk7",
+			"focusunk1",
+			"focusunk2",
+			"focusunk3",
+			"focusunk4",
+			"focusunk5",
+			"focusunk6",
+			"focusunk7",
+			"scrollunk1",
+			"scrollunk2",
+			"scrollunk3",
+			"scrollunk4",
+			"scrollunk5",
+			"scrollunk6",
+			"scrollunk7",
+			"UNK193",
+			"purity",
+			"evoitem",
+			"evoid",
+			"evolvinglevel",
+			"evomax",
+			"clickname",
+			"procname",
+			"wornname",
+			"focusname",
+			"scrollname",
+			"dsmitigation",
+			"heroic_str",
+			"heroic_int",
+			"heroic_wis",
+			"heroic_agi",
+			"heroic_dex",
+			"heroic_sta",
+			"heroic_cha",
+			"heroic_pr",
+			"heroic_dr",
+			"heroic_fr",
+			"heroic_cr",
+			"heroic_mr",
+			"heroic_svcorrup",
+			"healamt",
+			"spelldmg",
+			"clairvoyance",
+			"backstabdmg",
+			"created",
+			"elitematerial",
+			"ldonsellbackrate",
+			"scriptfileid",
+			"expendablearrow",
+			"powersourcecapacity",
+			"bardeffect",
+			"bardeffecttype",
+			"bardlevel2",
+			"bardlevel",
+			"bardunk1",
+			"bardunk2",
+			"bardunk3",
+			"bardunk4",
+			"bardunk5",
+			"bardname",
+			"bardunk7",
+			"UNK214",
+			"subtype",
+			"UNK220",
+			"UNK221",
+			"heirloom",
+			"UNK223",
+			"UNK224",
+			"UNK225",
+			"UNK226",
+			"UNK227",
+			"UNK228",
+			"UNK229",
+			"UNK230",
+			"UNK231",
+			"UNK232",
+			"UNK233",
+			"UNK234",
+			"placeable",
+			"UNK236",
+			"UNK237",
+			"UNK238",
+			"UNK239",
+			"UNK240",
+			"UNK241",
+			"epicitem",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -647,7 +912,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -657,304 +922,304 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static Items NewEntity()
 	{
-		Items entry{};
+		Items e{};
 
-		entry.id                  = 0;
-		entry.minstatus           = 0;
-		entry.Name                = "";
-		entry.aagi                = 0;
-		entry.ac                  = 0;
-		entry.accuracy            = 0;
-		entry.acha                = 0;
-		entry.adex                = 0;
-		entry.aint                = 0;
-		entry.artifactflag        = 0;
-		entry.asta                = 0;
-		entry.astr                = 0;
-		entry.attack              = 0;
-		entry.augrestrict         = 0;
-		entry.augslot1type        = 0;
-		entry.augslot1visible     = 0;
-		entry.augslot2type        = 0;
-		entry.augslot2visible     = 0;
-		entry.augslot3type        = 0;
-		entry.augslot3visible     = 0;
-		entry.augslot4type        = 0;
-		entry.augslot4visible     = 0;
-		entry.augslot5type        = 0;
-		entry.augslot5visible     = 0;
-		entry.augslot6type        = 0;
-		entry.augslot6visible     = 0;
-		entry.augtype             = 0;
-		entry.avoidance           = 0;
-		entry.awis                = 0;
-		entry.bagsize             = 0;
-		entry.bagslots            = 0;
-		entry.bagtype             = 0;
-		entry.bagwr               = 0;
-		entry.banedmgamt          = 0;
-		entry.banedmgraceamt      = 0;
-		entry.banedmgbody         = 0;
-		entry.banedmgrace         = 0;
-		entry.bardtype            = 0;
-		entry.bardvalue           = 0;
-		entry.book                = 0;
-		entry.casttime            = 0;
-		entry.casttime_           = 0;
-		entry.charmfile           = "";
-		entry.charmfileid         = "";
-		entry.classes             = 0;
-		entry.color               = 0;
-		entry.combateffects       = "";
-		entry.extradmgskill       = 0;
-		entry.extradmgamt         = 0;
-		entry.price               = 0;
-		entry.cr                  = 0;
-		entry.damage              = 0;
-		entry.damageshield        = 0;
-		entry.deity               = 0;
-		entry.delay               = 0;
-		entry.augdistiller        = 0;
-		entry.dotshielding        = 0;
-		entry.dr                  = 0;
-		entry.clicktype           = 0;
-		entry.clicklevel2         = 0;
-		entry.elemdmgtype         = 0;
-		entry.elemdmgamt          = 0;
-		entry.endur               = 0;
-		entry.factionamt1         = 0;
-		entry.factionamt2         = 0;
-		entry.factionamt3         = 0;
-		entry.factionamt4         = 0;
-		entry.factionmod1         = 0;
-		entry.factionmod2         = 0;
-		entry.factionmod3         = 0;
-		entry.factionmod4         = 0;
-		entry.filename            = "";
-		entry.focuseffect         = 0;
-		entry.fr                  = 0;
-		entry.fvnodrop            = 0;
-		entry.haste               = 0;
-		entry.clicklevel          = 0;
-		entry.hp                  = 0;
-		entry.regen               = 0;
-		entry.icon                = 0;
-		entry.idfile              = "";
-		entry.itemclass           = 0;
-		entry.itemtype            = 0;
-		entry.ldonprice           = 0;
-		entry.ldontheme           = 0;
-		entry.ldonsold            = 0;
-		entry.light               = 0;
-		entry.lore                = "";
-		entry.loregroup           = 0;
-		entry.magic               = 0;
-		entry.mana                = 0;
-		entry.manaregen           = 0;
-		entry.enduranceregen      = 0;
-		entry.material            = 0;
-		entry.herosforgemodel     = 0;
-		entry.maxcharges          = 0;
-		entry.mr                  = 0;
-		entry.nodrop              = 0;
-		entry.norent              = 0;
-		entry.pendingloreflag     = 0;
-		entry.pr                  = 0;
-		entry.procrate            = 0;
-		entry.races               = 0;
-		entry.range               = 0;
-		entry.reclevel            = 0;
-		entry.recskill            = 0;
-		entry.reqlevel            = 0;
-		entry.sellrate            = 0;
-		entry.shielding           = 0;
-		entry.size                = 0;
-		entry.skillmodtype        = 0;
-		entry.skillmodvalue       = 0;
-		entry.slots               = 0;
-		entry.clickeffect         = 0;
-		entry.spellshield         = 0;
-		entry.strikethrough       = 0;
-		entry.stunresist          = 0;
-		entry.summonedflag        = 0;
-		entry.tradeskills         = 0;
-		entry.favor               = 0;
-		entry.weight              = 0;
-		entry.UNK012              = 0;
-		entry.UNK013              = 0;
-		entry.benefitflag         = 0;
-		entry.UNK054              = 0;
-		entry.UNK059              = 0;
-		entry.booktype            = 0;
-		entry.recastdelay         = 0;
-		entry.recasttype          = 0;
-		entry.guildfavor          = 0;
-		entry.UNK123              = 0;
-		entry.UNK124              = 0;
-		entry.attuneable          = 0;
-		entry.nopet               = 0;
-		entry.updated             = "0000-00-00 00:00:00";
-		entry.comment             = "";
-		entry.UNK127              = 0;
-		entry.pointtype           = 0;
-		entry.potionbelt          = 0;
-		entry.potionbeltslots     = 0;
-		entry.stacksize           = 0;
-		entry.notransfer          = 0;
-		entry.stackable           = 0;
-		entry.UNK134              = "";
-		entry.UNK137              = 0;
-		entry.proceffect          = 0;
-		entry.proctype            = 0;
-		entry.proclevel2          = 0;
-		entry.proclevel           = 0;
-		entry.UNK142              = 0;
-		entry.worneffect          = 0;
-		entry.worntype            = 0;
-		entry.wornlevel2          = 0;
-		entry.wornlevel           = 0;
-		entry.UNK147              = 0;
-		entry.focustype           = 0;
-		entry.focuslevel2         = 0;
-		entry.focuslevel          = 0;
-		entry.UNK152              = 0;
-		entry.scrolleffect        = 0;
-		entry.scrolltype          = 0;
-		entry.scrolllevel2        = 0;
-		entry.scrolllevel         = 0;
-		entry.UNK157              = 0;
-		entry.serialized          = 0;
-		entry.verified            = 0;
-		entry.serialization       = "";
-		entry.source              = "";
-		entry.UNK033              = 0;
-		entry.lorefile            = "";
-		entry.UNK014              = 0;
-		entry.svcorruption        = 0;
-		entry.skillmodmax         = 0;
-		entry.UNK060              = 0;
-		entry.augslot1unk2        = 0;
-		entry.augslot2unk2        = 0;
-		entry.augslot3unk2        = 0;
-		entry.augslot4unk2        = 0;
-		entry.augslot5unk2        = 0;
-		entry.augslot6unk2        = 0;
-		entry.UNK120              = 0;
-		entry.UNK121              = 0;
-		entry.questitemflag       = 0;
-		entry.UNK132              = "";
-		entry.clickunk5           = 0;
-		entry.clickunk6           = "";
-		entry.clickunk7           = 0;
-		entry.procunk1            = 0;
-		entry.procunk2            = 0;
-		entry.procunk3            = 0;
-		entry.procunk4            = 0;
-		entry.procunk6            = "";
-		entry.procunk7            = 0;
-		entry.wornunk1            = 0;
-		entry.wornunk2            = 0;
-		entry.wornunk3            = 0;
-		entry.wornunk4            = 0;
-		entry.wornunk5            = 0;
-		entry.wornunk6            = "";
-		entry.wornunk7            = 0;
-		entry.focusunk1           = 0;
-		entry.focusunk2           = 0;
-		entry.focusunk3           = 0;
-		entry.focusunk4           = 0;
-		entry.focusunk5           = 0;
-		entry.focusunk6           = "";
-		entry.focusunk7           = 0;
-		entry.scrollunk1          = 0;
-		entry.scrollunk2          = 0;
-		entry.scrollunk3          = 0;
-		entry.scrollunk4          = 0;
-		entry.scrollunk5          = 0;
-		entry.scrollunk6          = "";
-		entry.scrollunk7          = 0;
-		entry.UNK193              = 0;
-		entry.purity              = 0;
-		entry.evoitem             = 0;
-		entry.evoid               = 0;
-		entry.evolvinglevel       = 0;
-		entry.evomax              = 0;
-		entry.clickname           = "";
-		entry.procname            = "";
-		entry.wornname            = "";
-		entry.focusname           = "";
-		entry.scrollname          = "";
-		entry.dsmitigation        = 0;
-		entry.heroic_str          = 0;
-		entry.heroic_int          = 0;
-		entry.heroic_wis          = 0;
-		entry.heroic_agi          = 0;
-		entry.heroic_dex          = 0;
-		entry.heroic_sta          = 0;
-		entry.heroic_cha          = 0;
-		entry.heroic_pr           = 0;
-		entry.heroic_dr           = 0;
-		entry.heroic_fr           = 0;
-		entry.heroic_cr           = 0;
-		entry.heroic_mr           = 0;
-		entry.heroic_svcorrup     = 0;
-		entry.healamt             = 0;
-		entry.spelldmg            = 0;
-		entry.clairvoyance        = 0;
-		entry.backstabdmg         = 0;
-		entry.created             = "";
-		entry.elitematerial       = 0;
-		entry.ldonsellbackrate    = 0;
-		entry.scriptfileid        = 0;
-		entry.expendablearrow     = 0;
-		entry.powersourcecapacity = 0;
-		entry.bardeffect          = 0;
-		entry.bardeffecttype      = 0;
-		entry.bardlevel2          = 0;
-		entry.bardlevel           = 0;
-		entry.bardunk1            = 0;
-		entry.bardunk2            = 0;
-		entry.bardunk3            = 0;
-		entry.bardunk4            = 0;
-		entry.bardunk5            = 0;
-		entry.bardname            = "";
-		entry.bardunk7            = 0;
-		entry.UNK214              = 0;
-		entry.subtype             = 0;
-		entry.UNK220              = 0;
-		entry.UNK221              = 0;
-		entry.heirloom            = 0;
-		entry.UNK223              = 0;
-		entry.UNK224              = 0;
-		entry.UNK225              = 0;
-		entry.UNK226              = 0;
-		entry.UNK227              = 0;
-		entry.UNK228              = 0;
-		entry.UNK229              = 0;
-		entry.UNK230              = 0;
-		entry.UNK231              = 0;
-		entry.UNK232              = 0;
-		entry.UNK233              = 0;
-		entry.UNK234              = 0;
-		entry.placeable           = 0;
-		entry.UNK236              = 0;
-		entry.UNK237              = 0;
-		entry.UNK238              = 0;
-		entry.UNK239              = 0;
-		entry.UNK240              = 0;
-		entry.UNK241              = 0;
-		entry.epicitem            = 0;
+		e.id                  = 0;
+		e.minstatus           = 0;
+		e.Name                = "";
+		e.aagi                = 0;
+		e.ac                  = 0;
+		e.accuracy            = 0;
+		e.acha                = 0;
+		e.adex                = 0;
+		e.aint                = 0;
+		e.artifactflag        = 0;
+		e.asta                = 0;
+		e.astr                = 0;
+		e.attack              = 0;
+		e.augrestrict         = 0;
+		e.augslot1type        = 0;
+		e.augslot1visible     = 0;
+		e.augslot2type        = 0;
+		e.augslot2visible     = 0;
+		e.augslot3type        = 0;
+		e.augslot3visible     = 0;
+		e.augslot4type        = 0;
+		e.augslot4visible     = 0;
+		e.augslot5type        = 0;
+		e.augslot5visible     = 0;
+		e.augslot6type        = 0;
+		e.augslot6visible     = 0;
+		e.augtype             = 0;
+		e.avoidance           = 0;
+		e.awis                = 0;
+		e.bagsize             = 0;
+		e.bagslots            = 0;
+		e.bagtype             = 0;
+		e.bagwr               = 0;
+		e.banedmgamt          = 0;
+		e.banedmgraceamt      = 0;
+		e.banedmgbody         = 0;
+		e.banedmgrace         = 0;
+		e.bardtype            = 0;
+		e.bardvalue           = 0;
+		e.book                = 0;
+		e.casttime            = 0;
+		e.casttime_           = 0;
+		e.charmfile           = "";
+		e.charmfileid         = "";
+		e.classes             = 0;
+		e.color               = 0;
+		e.combateffects       = "";
+		e.extradmgskill       = 0;
+		e.extradmgamt         = 0;
+		e.price               = 0;
+		e.cr                  = 0;
+		e.damage              = 0;
+		e.damageshield        = 0;
+		e.deity               = 0;
+		e.delay               = 0;
+		e.augdistiller        = 0;
+		e.dotshielding        = 0;
+		e.dr                  = 0;
+		e.clicktype           = 0;
+		e.clicklevel2         = 0;
+		e.elemdmgtype         = 0;
+		e.elemdmgamt          = 0;
+		e.endur               = 0;
+		e.factionamt1         = 0;
+		e.factionamt2         = 0;
+		e.factionamt3         = 0;
+		e.factionamt4         = 0;
+		e.factionmod1         = 0;
+		e.factionmod2         = 0;
+		e.factionmod3         = 0;
+		e.factionmod4         = 0;
+		e.filename            = "";
+		e.focuseffect         = 0;
+		e.fr                  = 0;
+		e.fvnodrop            = 0;
+		e.haste               = 0;
+		e.clicklevel          = 0;
+		e.hp                  = 0;
+		e.regen               = 0;
+		e.icon                = 0;
+		e.idfile              = "";
+		e.itemclass           = 0;
+		e.itemtype            = 0;
+		e.ldonprice           = 0;
+		e.ldontheme           = 0;
+		e.ldonsold            = 0;
+		e.light               = 0;
+		e.lore                = "";
+		e.loregroup           = 0;
+		e.magic               = 0;
+		e.mana                = 0;
+		e.manaregen           = 0;
+		e.enduranceregen      = 0;
+		e.material            = 0;
+		e.herosforgemodel     = 0;
+		e.maxcharges          = 0;
+		e.mr                  = 0;
+		e.nodrop              = 0;
+		e.norent              = 0;
+		e.pendingloreflag     = 0;
+		e.pr                  = 0;
+		e.procrate            = 0;
+		e.races               = 0;
+		e.range_              = 0;
+		e.reclevel            = 0;
+		e.recskill            = 0;
+		e.reqlevel            = 0;
+		e.sellrate            = 0;
+		e.shielding           = 0;
+		e.size                = 0;
+		e.skillmodtype        = 0;
+		e.skillmodvalue       = 0;
+		e.slots               = 0;
+		e.clickeffect         = 0;
+		e.spellshield         = 0;
+		e.strikethrough       = 0;
+		e.stunresist          = 0;
+		e.summonedflag        = 0;
+		e.tradeskills         = 0;
+		e.favor               = 0;
+		e.weight              = 0;
+		e.UNK012              = 0;
+		e.UNK013              = 0;
+		e.benefitflag         = 0;
+		e.UNK054              = 0;
+		e.UNK059              = 0;
+		e.booktype            = 0;
+		e.recastdelay         = 0;
+		e.recasttype          = 0;
+		e.guildfavor          = 0;
+		e.UNK123              = 0;
+		e.UNK124              = 0;
+		e.attuneable          = 0;
+		e.nopet               = 0;
+		e.updated             = 0;
+		e.comment             = "";
+		e.UNK127              = 0;
+		e.pointtype           = 0;
+		e.potionbelt          = 0;
+		e.potionbeltslots     = 0;
+		e.stacksize           = 0;
+		e.notransfer          = 0;
+		e.stackable           = 0;
+		e.UNK134              = "";
+		e.UNK137              = 0;
+		e.proceffect          = 0;
+		e.proctype            = 0;
+		e.proclevel2          = 0;
+		e.proclevel           = 0;
+		e.UNK142              = 0;
+		e.worneffect          = 0;
+		e.worntype            = 0;
+		e.wornlevel2          = 0;
+		e.wornlevel           = 0;
+		e.UNK147              = 0;
+		e.focustype           = 0;
+		e.focuslevel2         = 0;
+		e.focuslevel          = 0;
+		e.UNK152              = 0;
+		e.scrolleffect        = 0;
+		e.scrolltype          = 0;
+		e.scrolllevel2        = 0;
+		e.scrolllevel         = 0;
+		e.UNK157              = 0;
+		e.serialized          = 0;
+		e.verified            = 0;
+		e.serialization       = "";
+		e.source              = "";
+		e.UNK033              = 0;
+		e.lorefile            = "";
+		e.UNK014              = 0;
+		e.svcorruption        = 0;
+		e.skillmodmax         = 0;
+		e.UNK060              = 0;
+		e.augslot1unk2        = 0;
+		e.augslot2unk2        = 0;
+		e.augslot3unk2        = 0;
+		e.augslot4unk2        = 0;
+		e.augslot5unk2        = 0;
+		e.augslot6unk2        = 0;
+		e.UNK120              = 0;
+		e.UNK121              = 0;
+		e.questitemflag       = 0;
+		e.UNK132              = "";
+		e.clickunk5           = 0;
+		e.clickunk6           = "";
+		e.clickunk7           = 0;
+		e.procunk1            = 0;
+		e.procunk2            = 0;
+		e.procunk3            = 0;
+		e.procunk4            = 0;
+		e.procunk6            = "";
+		e.procunk7            = 0;
+		e.wornunk1            = 0;
+		e.wornunk2            = 0;
+		e.wornunk3            = 0;
+		e.wornunk4            = 0;
+		e.wornunk5            = 0;
+		e.wornunk6            = "";
+		e.wornunk7            = 0;
+		e.focusunk1           = 0;
+		e.focusunk2           = 0;
+		e.focusunk3           = 0;
+		e.focusunk4           = 0;
+		e.focusunk5           = 0;
+		e.focusunk6           = "";
+		e.focusunk7           = 0;
+		e.scrollunk1          = 0;
+		e.scrollunk2          = 0;
+		e.scrollunk3          = 0;
+		e.scrollunk4          = 0;
+		e.scrollunk5          = 0;
+		e.scrollunk6          = "";
+		e.scrollunk7          = 0;
+		e.UNK193              = 0;
+		e.purity              = 0;
+		e.evoitem             = 0;
+		e.evoid               = 0;
+		e.evolvinglevel       = 0;
+		e.evomax              = 0;
+		e.clickname           = "";
+		e.procname            = "";
+		e.wornname            = "";
+		e.focusname           = "";
+		e.scrollname          = "";
+		e.dsmitigation        = 0;
+		e.heroic_str          = 0;
+		e.heroic_int          = 0;
+		e.heroic_wis          = 0;
+		e.heroic_agi          = 0;
+		e.heroic_dex          = 0;
+		e.heroic_sta          = 0;
+		e.heroic_cha          = 0;
+		e.heroic_pr           = 0;
+		e.heroic_dr           = 0;
+		e.heroic_fr           = 0;
+		e.heroic_cr           = 0;
+		e.heroic_mr           = 0;
+		e.heroic_svcorrup     = 0;
+		e.healamt             = 0;
+		e.spelldmg            = 0;
+		e.clairvoyance        = 0;
+		e.backstabdmg         = 0;
+		e.created             = "";
+		e.elitematerial       = 0;
+		e.ldonsellbackrate    = 0;
+		e.scriptfileid        = 0;
+		e.expendablearrow     = 0;
+		e.powersourcecapacity = 0;
+		e.bardeffect          = 0;
+		e.bardeffecttype      = 0;
+		e.bardlevel2          = 0;
+		e.bardlevel           = 0;
+		e.bardunk1            = 0;
+		e.bardunk2            = 0;
+		e.bardunk3            = 0;
+		e.bardunk4            = 0;
+		e.bardunk5            = 0;
+		e.bardname            = "";
+		e.bardunk7            = 0;
+		e.UNK214              = 0;
+		e.subtype             = 0;
+		e.UNK220              = 0;
+		e.UNK221              = 0;
+		e.heirloom            = 0;
+		e.UNK223              = 0;
+		e.UNK224              = 0;
+		e.UNK225              = 0;
+		e.UNK226              = 0;
+		e.UNK227              = 0;
+		e.UNK228              = 0;
+		e.UNK229              = 0;
+		e.UNK230              = 0;
+		e.UNK231              = 0;
+		e.UNK232              = 0;
+		e.UNK233              = 0;
+		e.UNK234              = 0;
+		e.placeable           = 0;
+		e.UNK236              = 0;
+		e.UNK237              = 0;
+		e.UNK238              = 0;
+		e.UNK239              = 0;
+		e.UNK240              = 0;
+		e.UNK241              = 0;
+		e.epicitem            = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Items GetItemsEntry(
+	static Items GetItems(
 		const std::vector<Items> &itemss,
 		int items_id
 	)
@@ -969,318 +1234,321 @@ public:
 	}
 
 	static Items FindOne(
+		Database& db,
 		int items_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				items_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Items entry{};
+			Items e{};
 
-			entry.id                  = atoi(row[0]);
-			entry.minstatus           = atoi(row[1]);
-			entry.Name                = row[2] ? row[2] : "";
-			entry.aagi                = atoi(row[3]);
-			entry.ac                  = atoi(row[4]);
-			entry.accuracy            = atoi(row[5]);
-			entry.acha                = atoi(row[6]);
-			entry.adex                = atoi(row[7]);
-			entry.aint                = atoi(row[8]);
-			entry.artifactflag        = atoi(row[9]);
-			entry.asta                = atoi(row[10]);
-			entry.astr                = atoi(row[11]);
-			entry.attack              = atoi(row[12]);
-			entry.augrestrict         = atoi(row[13]);
-			entry.augslot1type        = atoi(row[14]);
-			entry.augslot1visible     = atoi(row[15]);
-			entry.augslot2type        = atoi(row[16]);
-			entry.augslot2visible     = atoi(row[17]);
-			entry.augslot3type        = atoi(row[18]);
-			entry.augslot3visible     = atoi(row[19]);
-			entry.augslot4type        = atoi(row[20]);
-			entry.augslot4visible     = atoi(row[21]);
-			entry.augslot5type        = atoi(row[22]);
-			entry.augslot5visible     = atoi(row[23]);
-			entry.augslot6type        = atoi(row[24]);
-			entry.augslot6visible     = atoi(row[25]);
-			entry.augtype             = atoi(row[26]);
-			entry.avoidance           = atoi(row[27]);
-			entry.awis                = atoi(row[28]);
-			entry.bagsize             = atoi(row[29]);
-			entry.bagslots            = atoi(row[30]);
-			entry.bagtype             = atoi(row[31]);
-			entry.bagwr               = atoi(row[32]);
-			entry.banedmgamt          = atoi(row[33]);
-			entry.banedmgraceamt      = atoi(row[34]);
-			entry.banedmgbody         = atoi(row[35]);
-			entry.banedmgrace         = atoi(row[36]);
-			entry.bardtype            = atoi(row[37]);
-			entry.bardvalue           = atoi(row[38]);
-			entry.book                = atoi(row[39]);
-			entry.casttime            = atoi(row[40]);
-			entry.casttime_           = atoi(row[41]);
-			entry.charmfile           = row[42] ? row[42] : "";
-			entry.charmfileid         = row[43] ? row[43] : "";
-			entry.classes             = atoi(row[44]);
-			entry.color               = atoi(row[45]);
-			entry.combateffects       = row[46] ? row[46] : "";
-			entry.extradmgskill       = atoi(row[47]);
-			entry.extradmgamt         = atoi(row[48]);
-			entry.price               = atoi(row[49]);
-			entry.cr                  = atoi(row[50]);
-			entry.damage              = atoi(row[51]);
-			entry.damageshield        = atoi(row[52]);
-			entry.deity               = atoi(row[53]);
-			entry.delay               = atoi(row[54]);
-			entry.augdistiller        = atoi(row[55]);
-			entry.dotshielding        = atoi(row[56]);
-			entry.dr                  = atoi(row[57]);
-			entry.clicktype           = atoi(row[58]);
-			entry.clicklevel2         = atoi(row[59]);
-			entry.elemdmgtype         = atoi(row[60]);
-			entry.elemdmgamt          = atoi(row[61]);
-			entry.endur               = atoi(row[62]);
-			entry.factionamt1         = atoi(row[63]);
-			entry.factionamt2         = atoi(row[64]);
-			entry.factionamt3         = atoi(row[65]);
-			entry.factionamt4         = atoi(row[66]);
-			entry.factionmod1         = atoi(row[67]);
-			entry.factionmod2         = atoi(row[68]);
-			entry.factionmod3         = atoi(row[69]);
-			entry.factionmod4         = atoi(row[70]);
-			entry.filename            = row[71] ? row[71] : "";
-			entry.focuseffect         = atoi(row[72]);
-			entry.fr                  = atoi(row[73]);
-			entry.fvnodrop            = atoi(row[74]);
-			entry.haste               = atoi(row[75]);
-			entry.clicklevel          = atoi(row[76]);
-			entry.hp                  = atoi(row[77]);
-			entry.regen               = atoi(row[78]);
-			entry.icon                = atoi(row[79]);
-			entry.idfile              = row[80] ? row[80] : "";
-			entry.itemclass           = atoi(row[81]);
-			entry.itemtype            = atoi(row[82]);
-			entry.ldonprice           = atoi(row[83]);
-			entry.ldontheme           = atoi(row[84]);
-			entry.ldonsold            = atoi(row[85]);
-			entry.light               = atoi(row[86]);
-			entry.lore                = row[87] ? row[87] : "";
-			entry.loregroup           = atoi(row[88]);
-			entry.magic               = atoi(row[89]);
-			entry.mana                = atoi(row[90]);
-			entry.manaregen           = atoi(row[91]);
-			entry.enduranceregen      = atoi(row[92]);
-			entry.material            = atoi(row[93]);
-			entry.herosforgemodel     = atoi(row[94]);
-			entry.maxcharges          = atoi(row[95]);
-			entry.mr                  = atoi(row[96]);
-			entry.nodrop              = atoi(row[97]);
-			entry.norent              = atoi(row[98]);
-			entry.pendingloreflag     = atoi(row[99]);
-			entry.pr                  = atoi(row[100]);
-			entry.procrate            = atoi(row[101]);
-			entry.races               = atoi(row[102]);
-			entry.range               = atoi(row[103]);
-			entry.reclevel            = atoi(row[104]);
-			entry.recskill            = atoi(row[105]);
-			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = static_cast<float>(atof(row[107]));
-			entry.shielding           = atoi(row[108]);
-			entry.size                = atoi(row[109]);
-			entry.skillmodtype        = atoi(row[110]);
-			entry.skillmodvalue       = atoi(row[111]);
-			entry.slots               = atoi(row[112]);
-			entry.clickeffect         = atoi(row[113]);
-			entry.spellshield         = atoi(row[114]);
-			entry.strikethrough       = atoi(row[115]);
-			entry.stunresist          = atoi(row[116]);
-			entry.summonedflag        = atoi(row[117]);
-			entry.tradeskills         = atoi(row[118]);
-			entry.favor               = atoi(row[119]);
-			entry.weight              = atoi(row[120]);
-			entry.UNK012              = atoi(row[121]);
-			entry.UNK013              = atoi(row[122]);
-			entry.benefitflag         = atoi(row[123]);
-			entry.UNK054              = atoi(row[124]);
-			entry.UNK059              = atoi(row[125]);
-			entry.booktype            = atoi(row[126]);
-			entry.recastdelay         = atoi(row[127]);
-			entry.recasttype          = atoi(row[128]);
-			entry.guildfavor          = atoi(row[129]);
-			entry.UNK123              = atoi(row[130]);
-			entry.UNK124              = atoi(row[131]);
-			entry.attuneable          = atoi(row[132]);
-			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
-			entry.comment             = row[135] ? row[135] : "";
-			entry.UNK127              = atoi(row[136]);
-			entry.pointtype           = atoi(row[137]);
-			entry.potionbelt          = atoi(row[138]);
-			entry.potionbeltslots     = atoi(row[139]);
-			entry.stacksize           = atoi(row[140]);
-			entry.notransfer          = atoi(row[141]);
-			entry.stackable           = atoi(row[142]);
-			entry.UNK134              = row[143] ? row[143] : "";
-			entry.UNK137              = atoi(row[144]);
-			entry.proceffect          = atoi(row[145]);
-			entry.proctype            = atoi(row[146]);
-			entry.proclevel2          = atoi(row[147]);
-			entry.proclevel           = atoi(row[148]);
-			entry.UNK142              = atoi(row[149]);
-			entry.worneffect          = atoi(row[150]);
-			entry.worntype            = atoi(row[151]);
-			entry.wornlevel2          = atoi(row[152]);
-			entry.wornlevel           = atoi(row[153]);
-			entry.UNK147              = atoi(row[154]);
-			entry.focustype           = atoi(row[155]);
-			entry.focuslevel2         = atoi(row[156]);
-			entry.focuslevel          = atoi(row[157]);
-			entry.UNK152              = atoi(row[158]);
-			entry.scrolleffect        = atoi(row[159]);
-			entry.scrolltype          = atoi(row[160]);
-			entry.scrolllevel2        = atoi(row[161]);
-			entry.scrolllevel         = atoi(row[162]);
-			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
-			entry.serialization       = row[166] ? row[166] : "";
-			entry.source              = row[167] ? row[167] : "";
-			entry.UNK033              = atoi(row[168]);
-			entry.lorefile            = row[169] ? row[169] : "";
-			entry.UNK014              = atoi(row[170]);
-			entry.svcorruption        = atoi(row[171]);
-			entry.skillmodmax         = atoi(row[172]);
-			entry.UNK060              = atoi(row[173]);
-			entry.augslot1unk2        = atoi(row[174]);
-			entry.augslot2unk2        = atoi(row[175]);
-			entry.augslot3unk2        = atoi(row[176]);
-			entry.augslot4unk2        = atoi(row[177]);
-			entry.augslot5unk2        = atoi(row[178]);
-			entry.augslot6unk2        = atoi(row[179]);
-			entry.UNK120              = atoi(row[180]);
-			entry.UNK121              = atoi(row[181]);
-			entry.questitemflag       = atoi(row[182]);
-			entry.UNK132              = row[183] ? row[183] : "";
-			entry.clickunk5           = atoi(row[184]);
-			entry.clickunk6           = row[185] ? row[185] : "";
-			entry.clickunk7           = atoi(row[186]);
-			entry.procunk1            = atoi(row[187]);
-			entry.procunk2            = atoi(row[188]);
-			entry.procunk3            = atoi(row[189]);
-			entry.procunk4            = atoi(row[190]);
-			entry.procunk6            = row[191] ? row[191] : "";
-			entry.procunk7            = atoi(row[192]);
-			entry.wornunk1            = atoi(row[193]);
-			entry.wornunk2            = atoi(row[194]);
-			entry.wornunk3            = atoi(row[195]);
-			entry.wornunk4            = atoi(row[196]);
-			entry.wornunk5            = atoi(row[197]);
-			entry.wornunk6            = row[198] ? row[198] : "";
-			entry.wornunk7            = atoi(row[199]);
-			entry.focusunk1           = atoi(row[200]);
-			entry.focusunk2           = atoi(row[201]);
-			entry.focusunk3           = atoi(row[202]);
-			entry.focusunk4           = atoi(row[203]);
-			entry.focusunk5           = atoi(row[204]);
-			entry.focusunk6           = row[205] ? row[205] : "";
-			entry.focusunk7           = atoi(row[206]);
-			entry.scrollunk1          = atoi(row[207]);
-			entry.scrollunk2          = atoi(row[208]);
-			entry.scrollunk3          = atoi(row[209]);
-			entry.scrollunk4          = atoi(row[210]);
-			entry.scrollunk5          = atoi(row[211]);
-			entry.scrollunk6          = row[212] ? row[212] : "";
-			entry.scrollunk7          = atoi(row[213]);
-			entry.UNK193              = atoi(row[214]);
-			entry.purity              = atoi(row[215]);
-			entry.evoitem             = atoi(row[216]);
-			entry.evoid               = atoi(row[217]);
-			entry.evolvinglevel       = atoi(row[218]);
-			entry.evomax              = atoi(row[219]);
-			entry.clickname           = row[220] ? row[220] : "";
-			entry.procname            = row[221] ? row[221] : "";
-			entry.wornname            = row[222] ? row[222] : "";
-			entry.focusname           = row[223] ? row[223] : "";
-			entry.scrollname          = row[224] ? row[224] : "";
-			entry.dsmitigation        = atoi(row[225]);
-			entry.heroic_str          = atoi(row[226]);
-			entry.heroic_int          = atoi(row[227]);
-			entry.heroic_wis          = atoi(row[228]);
-			entry.heroic_agi          = atoi(row[229]);
-			entry.heroic_dex          = atoi(row[230]);
-			entry.heroic_sta          = atoi(row[231]);
-			entry.heroic_cha          = atoi(row[232]);
-			entry.heroic_pr           = atoi(row[233]);
-			entry.heroic_dr           = atoi(row[234]);
-			entry.heroic_fr           = atoi(row[235]);
-			entry.heroic_cr           = atoi(row[236]);
-			entry.heroic_mr           = atoi(row[237]);
-			entry.heroic_svcorrup     = atoi(row[238]);
-			entry.healamt             = atoi(row[239]);
-			entry.spelldmg            = atoi(row[240]);
-			entry.clairvoyance        = atoi(row[241]);
-			entry.backstabdmg         = atoi(row[242]);
-			entry.created             = row[243] ? row[243] : "";
-			entry.elitematerial       = atoi(row[244]);
-			entry.ldonsellbackrate    = atoi(row[245]);
-			entry.scriptfileid        = atoi(row[246]);
-			entry.expendablearrow     = atoi(row[247]);
-			entry.powersourcecapacity = atoi(row[248]);
-			entry.bardeffect          = atoi(row[249]);
-			entry.bardeffecttype      = atoi(row[250]);
-			entry.bardlevel2          = atoi(row[251]);
-			entry.bardlevel           = atoi(row[252]);
-			entry.bardunk1            = atoi(row[253]);
-			entry.bardunk2            = atoi(row[254]);
-			entry.bardunk3            = atoi(row[255]);
-			entry.bardunk4            = atoi(row[256]);
-			entry.bardunk5            = atoi(row[257]);
-			entry.bardname            = row[258] ? row[258] : "";
-			entry.bardunk7            = atoi(row[259]);
-			entry.UNK214              = atoi(row[260]);
-			entry.subtype             = atoi(row[261]);
-			entry.UNK220              = atoi(row[262]);
-			entry.UNK221              = atoi(row[263]);
-			entry.heirloom            = atoi(row[264]);
-			entry.UNK223              = atoi(row[265]);
-			entry.UNK224              = atoi(row[266]);
-			entry.UNK225              = atoi(row[267]);
-			entry.UNK226              = atoi(row[268]);
-			entry.UNK227              = atoi(row[269]);
-			entry.UNK228              = atoi(row[270]);
-			entry.UNK229              = atoi(row[271]);
-			entry.UNK230              = atoi(row[272]);
-			entry.UNK231              = atoi(row[273]);
-			entry.UNK232              = atoi(row[274]);
-			entry.UNK233              = atoi(row[275]);
-			entry.UNK234              = atoi(row[276]);
-			entry.placeable           = atoi(row[277]);
-			entry.UNK236              = atoi(row[278]);
-			entry.UNK237              = atoi(row[279]);
-			entry.UNK238              = atoi(row[280]);
-			entry.UNK239              = atoi(row[281]);
-			entry.UNK240              = atoi(row[282]);
-			entry.UNK241              = atoi(row[283]);
-			entry.epicitem            = atoi(row[284]);
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.minstatus           = row[1] ? static_cast<int16_t>(atoi(row[1])) : 0;
+			e.Name                = row[2] ? row[2] : "";
+			e.aagi                = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.ac                  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.accuracy            = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.acha                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.adex                = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.aint                = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.artifactflag        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.asta                = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.astr                = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.attack              = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.augrestrict         = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.augslot1type        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.augslot1visible     = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.augslot2type        = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.augslot2visible     = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.augslot3type        = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.augslot3visible     = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.augslot4type        = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.augslot4visible     = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.augslot5type        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e.augslot5visible     = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e.augslot6type        = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
+			e.augslot6visible     = row[25] ? static_cast<int8_t>(atoi(row[25])) : 0;
+			e.augtype             = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.avoidance           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.awis                = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.bagsize             = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.bagslots            = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.bagtype             = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.bagwr               = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.banedmgamt          = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.banedmgraceamt      = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.banedmgbody         = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.banedmgrace         = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.bardtype            = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.bardvalue           = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.book                = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.casttime            = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.casttime_           = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.charmfile           = row[42] ? row[42] : "";
+			e.charmfileid         = row[43] ? row[43] : "";
+			e.classes             = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.color               = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.combateffects       = row[46] ? row[46] : "";
+			e.extradmgskill       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.extradmgamt         = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.price               = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.cr                  = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.damage              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.damageshield        = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.deity               = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.delay               = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.augdistiller        = row[55] ? static_cast<uint32_t>(strtoul(row[55], nullptr, 10)) : 0;
+			e.dotshielding        = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.dr                  = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.clicktype           = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.clicklevel2         = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.elemdmgtype         = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.elemdmgamt          = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.endur               = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.factionamt1         = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.factionamt2         = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.factionamt3         = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.factionamt4         = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.factionmod1         = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.factionmod2         = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.factionmod3         = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.factionmod4         = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.filename            = row[71] ? row[71] : "";
+			e.focuseffect         = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.fr                  = row[73] ? static_cast<int32_t>(atoi(row[73])) : 0;
+			e.fvnodrop            = row[74] ? static_cast<int32_t>(atoi(row[74])) : 0;
+			e.haste               = row[75] ? static_cast<int32_t>(atoi(row[75])) : 0;
+			e.clicklevel          = row[76] ? static_cast<int32_t>(atoi(row[76])) : 0;
+			e.hp                  = row[77] ? static_cast<int32_t>(atoi(row[77])) : 0;
+			e.regen               = row[78] ? static_cast<int32_t>(atoi(row[78])) : 0;
+			e.icon                = row[79] ? static_cast<int32_t>(atoi(row[79])) : 0;
+			e.idfile              = row[80] ? row[80] : "";
+			e.itemclass           = row[81] ? static_cast<int32_t>(atoi(row[81])) : 0;
+			e.itemtype            = row[82] ? static_cast<int32_t>(atoi(row[82])) : 0;
+			e.ldonprice           = row[83] ? static_cast<int32_t>(atoi(row[83])) : 0;
+			e.ldontheme           = row[84] ? static_cast<int32_t>(atoi(row[84])) : 0;
+			e.ldonsold            = row[85] ? static_cast<int32_t>(atoi(row[85])) : 0;
+			e.light               = row[86] ? static_cast<int32_t>(atoi(row[86])) : 0;
+			e.lore                = row[87] ? row[87] : "";
+			e.loregroup           = row[88] ? static_cast<int32_t>(atoi(row[88])) : 0;
+			e.magic               = row[89] ? static_cast<int32_t>(atoi(row[89])) : 0;
+			e.mana                = row[90] ? static_cast<int32_t>(atoi(row[90])) : 0;
+			e.manaregen           = row[91] ? static_cast<int32_t>(atoi(row[91])) : 0;
+			e.enduranceregen      = row[92] ? static_cast<int32_t>(atoi(row[92])) : 0;
+			e.material            = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.herosforgemodel     = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
+			e.maxcharges          = row[95] ? static_cast<int32_t>(atoi(row[95])) : 0;
+			e.mr                  = row[96] ? static_cast<int32_t>(atoi(row[96])) : 0;
+			e.nodrop              = row[97] ? static_cast<int32_t>(atoi(row[97])) : 0;
+			e.norent              = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
+			e.pendingloreflag     = row[99] ? static_cast<uint8_t>(strtoul(row[99], nullptr, 10)) : 0;
+			e.pr                  = row[100] ? static_cast<int32_t>(atoi(row[100])) : 0;
+			e.procrate            = row[101] ? static_cast<int32_t>(atoi(row[101])) : 0;
+			e.races               = row[102] ? static_cast<int32_t>(atoi(row[102])) : 0;
+			e.range_              = row[103] ? static_cast<int32_t>(atoi(row[103])) : 0;
+			e.reclevel            = row[104] ? static_cast<int32_t>(atoi(row[104])) : 0;
+			e.recskill            = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
+			e.reqlevel            = row[106] ? static_cast<int32_t>(atoi(row[106])) : 0;
+			e.sellrate            = row[107] ? strtof(row[107], nullptr) : 0;
+			e.shielding           = row[108] ? static_cast<int32_t>(atoi(row[108])) : 0;
+			e.size                = row[109] ? static_cast<int32_t>(atoi(row[109])) : 0;
+			e.skillmodtype        = row[110] ? static_cast<int32_t>(atoi(row[110])) : 0;
+			e.skillmodvalue       = row[111] ? static_cast<int32_t>(atoi(row[111])) : 0;
+			e.slots               = row[112] ? static_cast<int32_t>(atoi(row[112])) : 0;
+			e.clickeffect         = row[113] ? static_cast<int32_t>(atoi(row[113])) : 0;
+			e.spellshield         = row[114] ? static_cast<int32_t>(atoi(row[114])) : 0;
+			e.strikethrough       = row[115] ? static_cast<int32_t>(atoi(row[115])) : 0;
+			e.stunresist          = row[116] ? static_cast<int32_t>(atoi(row[116])) : 0;
+			e.summonedflag        = row[117] ? static_cast<uint8_t>(strtoul(row[117], nullptr, 10)) : 0;
+			e.tradeskills         = row[118] ? static_cast<int32_t>(atoi(row[118])) : 0;
+			e.favor               = row[119] ? static_cast<int32_t>(atoi(row[119])) : 0;
+			e.weight              = row[120] ? static_cast<int32_t>(atoi(row[120])) : 0;
+			e.UNK012              = row[121] ? static_cast<int32_t>(atoi(row[121])) : 0;
+			e.UNK013              = row[122] ? static_cast<int32_t>(atoi(row[122])) : 0;
+			e.benefitflag         = row[123] ? static_cast<int32_t>(atoi(row[123])) : 0;
+			e.UNK054              = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
+			e.UNK059              = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
+			e.booktype            = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
+			e.recastdelay         = row[127] ? static_cast<int32_t>(atoi(row[127])) : 0;
+			e.recasttype          = row[128] ? static_cast<int32_t>(atoi(row[128])) : 0;
+			e.guildfavor          = row[129] ? static_cast<int32_t>(atoi(row[129])) : 0;
+			e.UNK123              = row[130] ? static_cast<int32_t>(atoi(row[130])) : 0;
+			e.UNK124              = row[131] ? static_cast<int32_t>(atoi(row[131])) : 0;
+			e.attuneable          = row[132] ? static_cast<int32_t>(atoi(row[132])) : 0;
+			e.nopet               = row[133] ? static_cast<int32_t>(atoi(row[133])) : 0;
+			e.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
+			e.comment             = row[135] ? row[135] : "";
+			e.UNK127              = row[136] ? static_cast<int32_t>(atoi(row[136])) : 0;
+			e.pointtype           = row[137] ? static_cast<int32_t>(atoi(row[137])) : 0;
+			e.potionbelt          = row[138] ? static_cast<int32_t>(atoi(row[138])) : 0;
+			e.potionbeltslots     = row[139] ? static_cast<int32_t>(atoi(row[139])) : 0;
+			e.stacksize           = row[140] ? static_cast<int32_t>(atoi(row[140])) : 0;
+			e.notransfer          = row[141] ? static_cast<int32_t>(atoi(row[141])) : 0;
+			e.stackable           = row[142] ? static_cast<int32_t>(atoi(row[142])) : 0;
+			e.UNK134              = row[143] ? row[143] : "";
+			e.UNK137              = row[144] ? static_cast<int32_t>(atoi(row[144])) : 0;
+			e.proceffect          = row[145] ? static_cast<int32_t>(atoi(row[145])) : 0;
+			e.proctype            = row[146] ? static_cast<int32_t>(atoi(row[146])) : 0;
+			e.proclevel2          = row[147] ? static_cast<int32_t>(atoi(row[147])) : 0;
+			e.proclevel           = row[148] ? static_cast<int32_t>(atoi(row[148])) : 0;
+			e.UNK142              = row[149] ? static_cast<int32_t>(atoi(row[149])) : 0;
+			e.worneffect          = row[150] ? static_cast<int32_t>(atoi(row[150])) : 0;
+			e.worntype            = row[151] ? static_cast<int32_t>(atoi(row[151])) : 0;
+			e.wornlevel2          = row[152] ? static_cast<int32_t>(atoi(row[152])) : 0;
+			e.wornlevel           = row[153] ? static_cast<int32_t>(atoi(row[153])) : 0;
+			e.UNK147              = row[154] ? static_cast<int32_t>(atoi(row[154])) : 0;
+			e.focustype           = row[155] ? static_cast<int32_t>(atoi(row[155])) : 0;
+			e.focuslevel2         = row[156] ? static_cast<int32_t>(atoi(row[156])) : 0;
+			e.focuslevel          = row[157] ? static_cast<int32_t>(atoi(row[157])) : 0;
+			e.UNK152              = row[158] ? static_cast<int32_t>(atoi(row[158])) : 0;
+			e.scrolleffect        = row[159] ? static_cast<int32_t>(atoi(row[159])) : 0;
+			e.scrolltype          = row[160] ? static_cast<int32_t>(atoi(row[160])) : 0;
+			e.scrolllevel2        = row[161] ? static_cast<int32_t>(atoi(row[161])) : 0;
+			e.scrolllevel         = row[162] ? static_cast<int32_t>(atoi(row[162])) : 0;
+			e.UNK157              = row[163] ? static_cast<int32_t>(atoi(row[163])) : 0;
+			e.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			e.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
+			e.serialization       = row[166] ? row[166] : "";
+			e.source              = row[167] ? row[167] : "";
+			e.UNK033              = row[168] ? static_cast<int32_t>(atoi(row[168])) : 0;
+			e.lorefile            = row[169] ? row[169] : "";
+			e.UNK014              = row[170] ? static_cast<int32_t>(atoi(row[170])) : 0;
+			e.svcorruption        = row[171] ? static_cast<int32_t>(atoi(row[171])) : 0;
+			e.skillmodmax         = row[172] ? static_cast<int32_t>(atoi(row[172])) : 0;
+			e.UNK060              = row[173] ? static_cast<int32_t>(atoi(row[173])) : 0;
+			e.augslot1unk2        = row[174] ? static_cast<int32_t>(atoi(row[174])) : 0;
+			e.augslot2unk2        = row[175] ? static_cast<int32_t>(atoi(row[175])) : 0;
+			e.augslot3unk2        = row[176] ? static_cast<int32_t>(atoi(row[176])) : 0;
+			e.augslot4unk2        = row[177] ? static_cast<int32_t>(atoi(row[177])) : 0;
+			e.augslot5unk2        = row[178] ? static_cast<int32_t>(atoi(row[178])) : 0;
+			e.augslot6unk2        = row[179] ? static_cast<int32_t>(atoi(row[179])) : 0;
+			e.UNK120              = row[180] ? static_cast<int32_t>(atoi(row[180])) : 0;
+			e.UNK121              = row[181] ? static_cast<int32_t>(atoi(row[181])) : 0;
+			e.questitemflag       = row[182] ? static_cast<int32_t>(atoi(row[182])) : 0;
+			e.UNK132              = row[183] ? row[183] : "";
+			e.clickunk5           = row[184] ? static_cast<int32_t>(atoi(row[184])) : 0;
+			e.clickunk6           = row[185] ? row[185] : "";
+			e.clickunk7           = row[186] ? static_cast<int32_t>(atoi(row[186])) : 0;
+			e.procunk1            = row[187] ? static_cast<int32_t>(atoi(row[187])) : 0;
+			e.procunk2            = row[188] ? static_cast<int32_t>(atoi(row[188])) : 0;
+			e.procunk3            = row[189] ? static_cast<int32_t>(atoi(row[189])) : 0;
+			e.procunk4            = row[190] ? static_cast<int32_t>(atoi(row[190])) : 0;
+			e.procunk6            = row[191] ? row[191] : "";
+			e.procunk7            = row[192] ? static_cast<int32_t>(atoi(row[192])) : 0;
+			e.wornunk1            = row[193] ? static_cast<int32_t>(atoi(row[193])) : 0;
+			e.wornunk2            = row[194] ? static_cast<int32_t>(atoi(row[194])) : 0;
+			e.wornunk3            = row[195] ? static_cast<int32_t>(atoi(row[195])) : 0;
+			e.wornunk4            = row[196] ? static_cast<int32_t>(atoi(row[196])) : 0;
+			e.wornunk5            = row[197] ? static_cast<int32_t>(atoi(row[197])) : 0;
+			e.wornunk6            = row[198] ? row[198] : "";
+			e.wornunk7            = row[199] ? static_cast<int32_t>(atoi(row[199])) : 0;
+			e.focusunk1           = row[200] ? static_cast<int32_t>(atoi(row[200])) : 0;
+			e.focusunk2           = row[201] ? static_cast<int32_t>(atoi(row[201])) : 0;
+			e.focusunk3           = row[202] ? static_cast<int32_t>(atoi(row[202])) : 0;
+			e.focusunk4           = row[203] ? static_cast<int32_t>(atoi(row[203])) : 0;
+			e.focusunk5           = row[204] ? static_cast<int32_t>(atoi(row[204])) : 0;
+			e.focusunk6           = row[205] ? row[205] : "";
+			e.focusunk7           = row[206] ? static_cast<int32_t>(atoi(row[206])) : 0;
+			e.scrollunk1          = row[207] ? static_cast<uint32_t>(strtoul(row[207], nullptr, 10)) : 0;
+			e.scrollunk2          = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.scrollunk3          = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
+			e.scrollunk4          = row[210] ? static_cast<int32_t>(atoi(row[210])) : 0;
+			e.scrollunk5          = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
+			e.scrollunk6          = row[212] ? row[212] : "";
+			e.scrollunk7          = row[213] ? static_cast<int32_t>(atoi(row[213])) : 0;
+			e.UNK193              = row[214] ? static_cast<int32_t>(atoi(row[214])) : 0;
+			e.purity              = row[215] ? static_cast<int32_t>(atoi(row[215])) : 0;
+			e.evoitem             = row[216] ? static_cast<int32_t>(atoi(row[216])) : 0;
+			e.evoid               = row[217] ? static_cast<int32_t>(atoi(row[217])) : 0;
+			e.evolvinglevel       = row[218] ? static_cast<int32_t>(atoi(row[218])) : 0;
+			e.evomax              = row[219] ? static_cast<int32_t>(atoi(row[219])) : 0;
+			e.clickname           = row[220] ? row[220] : "";
+			e.procname            = row[221] ? row[221] : "";
+			e.wornname            = row[222] ? row[222] : "";
+			e.focusname           = row[223] ? row[223] : "";
+			e.scrollname          = row[224] ? row[224] : "";
+			e.dsmitigation        = row[225] ? static_cast<int16_t>(atoi(row[225])) : 0;
+			e.heroic_str          = row[226] ? static_cast<int16_t>(atoi(row[226])) : 0;
+			e.heroic_int          = row[227] ? static_cast<int16_t>(atoi(row[227])) : 0;
+			e.heroic_wis          = row[228] ? static_cast<int16_t>(atoi(row[228])) : 0;
+			e.heroic_agi          = row[229] ? static_cast<int16_t>(atoi(row[229])) : 0;
+			e.heroic_dex          = row[230] ? static_cast<int16_t>(atoi(row[230])) : 0;
+			e.heroic_sta          = row[231] ? static_cast<int16_t>(atoi(row[231])) : 0;
+			e.heroic_cha          = row[232] ? static_cast<int16_t>(atoi(row[232])) : 0;
+			e.heroic_pr           = row[233] ? static_cast<int16_t>(atoi(row[233])) : 0;
+			e.heroic_dr           = row[234] ? static_cast<int16_t>(atoi(row[234])) : 0;
+			e.heroic_fr           = row[235] ? static_cast<int16_t>(atoi(row[235])) : 0;
+			e.heroic_cr           = row[236] ? static_cast<int16_t>(atoi(row[236])) : 0;
+			e.heroic_mr           = row[237] ? static_cast<int16_t>(atoi(row[237])) : 0;
+			e.heroic_svcorrup     = row[238] ? static_cast<int16_t>(atoi(row[238])) : 0;
+			e.healamt             = row[239] ? static_cast<int16_t>(atoi(row[239])) : 0;
+			e.spelldmg            = row[240] ? static_cast<int16_t>(atoi(row[240])) : 0;
+			e.clairvoyance        = row[241] ? static_cast<int16_t>(atoi(row[241])) : 0;
+			e.backstabdmg         = row[242] ? static_cast<int16_t>(atoi(row[242])) : 0;
+			e.created             = row[243] ? row[243] : "";
+			e.elitematerial       = row[244] ? static_cast<int16_t>(atoi(row[244])) : 0;
+			e.ldonsellbackrate    = row[245] ? static_cast<int16_t>(atoi(row[245])) : 0;
+			e.scriptfileid        = row[246] ? static_cast<int32_t>(atoi(row[246])) : 0;
+			e.expendablearrow     = row[247] ? static_cast<int16_t>(atoi(row[247])) : 0;
+			e.powersourcecapacity = row[248] ? static_cast<int32_t>(atoi(row[248])) : 0;
+			e.bardeffect          = row[249] ? static_cast<int32_t>(atoi(row[249])) : 0;
+			e.bardeffecttype      = row[250] ? static_cast<int16_t>(atoi(row[250])) : 0;
+			e.bardlevel2          = row[251] ? static_cast<int16_t>(atoi(row[251])) : 0;
+			e.bardlevel           = row[252] ? static_cast<int16_t>(atoi(row[252])) : 0;
+			e.bardunk1            = row[253] ? static_cast<int16_t>(atoi(row[253])) : 0;
+			e.bardunk2            = row[254] ? static_cast<int16_t>(atoi(row[254])) : 0;
+			e.bardunk3            = row[255] ? static_cast<int16_t>(atoi(row[255])) : 0;
+			e.bardunk4            = row[256] ? static_cast<int16_t>(atoi(row[256])) : 0;
+			e.bardunk5            = row[257] ? static_cast<int16_t>(atoi(row[257])) : 0;
+			e.bardname            = row[258] ? row[258] : "";
+			e.bardunk7            = row[259] ? static_cast<int16_t>(atoi(row[259])) : 0;
+			e.UNK214              = row[260] ? static_cast<int16_t>(atoi(row[260])) : 0;
+			e.subtype             = row[261] ? static_cast<int32_t>(atoi(row[261])) : 0;
+			e.UNK220              = row[262] ? static_cast<int32_t>(atoi(row[262])) : 0;
+			e.UNK221              = row[263] ? static_cast<int32_t>(atoi(row[263])) : 0;
+			e.heirloom            = row[264] ? static_cast<int32_t>(atoi(row[264])) : 0;
+			e.UNK223              = row[265] ? static_cast<int32_t>(atoi(row[265])) : 0;
+			e.UNK224              = row[266] ? static_cast<int32_t>(atoi(row[266])) : 0;
+			e.UNK225              = row[267] ? static_cast<int32_t>(atoi(row[267])) : 0;
+			e.UNK226              = row[268] ? static_cast<int32_t>(atoi(row[268])) : 0;
+			e.UNK227              = row[269] ? static_cast<int32_t>(atoi(row[269])) : 0;
+			e.UNK228              = row[270] ? static_cast<int32_t>(atoi(row[270])) : 0;
+			e.UNK229              = row[271] ? static_cast<int32_t>(atoi(row[271])) : 0;
+			e.UNK230              = row[272] ? static_cast<int32_t>(atoi(row[272])) : 0;
+			e.UNK231              = row[273] ? static_cast<int32_t>(atoi(row[273])) : 0;
+			e.UNK232              = row[274] ? static_cast<int32_t>(atoi(row[274])) : 0;
+			e.UNK233              = row[275] ? static_cast<int32_t>(atoi(row[275])) : 0;
+			e.UNK234              = row[276] ? static_cast<int32_t>(atoi(row[276])) : 0;
+			e.placeable           = row[277] ? static_cast<int32_t>(atoi(row[277])) : 0;
+			e.UNK236              = row[278] ? static_cast<int32_t>(atoi(row[278])) : 0;
+			e.UNK237              = row[279] ? static_cast<int32_t>(atoi(row[279])) : 0;
+			e.UNK238              = row[280] ? static_cast<int32_t>(atoi(row[280])) : 0;
+			e.UNK239              = row[281] ? static_cast<int32_t>(atoi(row[281])) : 0;
+			e.UNK240              = row[282] ? static_cast<int32_t>(atoi(row[282])) : 0;
+			e.UNK241              = row[283] ? static_cast<int32_t>(atoi(row[283])) : 0;
+			e.epicitem            = row[284] ? static_cast<int32_t>(atoi(row[284])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int items_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -1293,306 +1561,307 @@ public:
 	}
 
 	static int UpdateOne(
-		Items items_entry
+		Database& db,
+		const Items &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(items_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(items_entry.minstatus));
-		update_values.push_back(columns[2] + " = '" + EscapeString(items_entry.Name) + "'");
-		update_values.push_back(columns[3] + " = " + std::to_string(items_entry.aagi));
-		update_values.push_back(columns[4] + " = " + std::to_string(items_entry.ac));
-		update_values.push_back(columns[5] + " = " + std::to_string(items_entry.accuracy));
-		update_values.push_back(columns[6] + " = " + std::to_string(items_entry.acha));
-		update_values.push_back(columns[7] + " = " + std::to_string(items_entry.adex));
-		update_values.push_back(columns[8] + " = " + std::to_string(items_entry.aint));
-		update_values.push_back(columns[9] + " = " + std::to_string(items_entry.artifactflag));
-		update_values.push_back(columns[10] + " = " + std::to_string(items_entry.asta));
-		update_values.push_back(columns[11] + " = " + std::to_string(items_entry.astr));
-		update_values.push_back(columns[12] + " = " + std::to_string(items_entry.attack));
-		update_values.push_back(columns[13] + " = " + std::to_string(items_entry.augrestrict));
-		update_values.push_back(columns[14] + " = " + std::to_string(items_entry.augslot1type));
-		update_values.push_back(columns[15] + " = " + std::to_string(items_entry.augslot1visible));
-		update_values.push_back(columns[16] + " = " + std::to_string(items_entry.augslot2type));
-		update_values.push_back(columns[17] + " = " + std::to_string(items_entry.augslot2visible));
-		update_values.push_back(columns[18] + " = " + std::to_string(items_entry.augslot3type));
-		update_values.push_back(columns[19] + " = " + std::to_string(items_entry.augslot3visible));
-		update_values.push_back(columns[20] + " = " + std::to_string(items_entry.augslot4type));
-		update_values.push_back(columns[21] + " = " + std::to_string(items_entry.augslot4visible));
-		update_values.push_back(columns[22] + " = " + std::to_string(items_entry.augslot5type));
-		update_values.push_back(columns[23] + " = " + std::to_string(items_entry.augslot5visible));
-		update_values.push_back(columns[24] + " = " + std::to_string(items_entry.augslot6type));
-		update_values.push_back(columns[25] + " = " + std::to_string(items_entry.augslot6visible));
-		update_values.push_back(columns[26] + " = " + std::to_string(items_entry.augtype));
-		update_values.push_back(columns[27] + " = " + std::to_string(items_entry.avoidance));
-		update_values.push_back(columns[28] + " = " + std::to_string(items_entry.awis));
-		update_values.push_back(columns[29] + " = " + std::to_string(items_entry.bagsize));
-		update_values.push_back(columns[30] + " = " + std::to_string(items_entry.bagslots));
-		update_values.push_back(columns[31] + " = " + std::to_string(items_entry.bagtype));
-		update_values.push_back(columns[32] + " = " + std::to_string(items_entry.bagwr));
-		update_values.push_back(columns[33] + " = " + std::to_string(items_entry.banedmgamt));
-		update_values.push_back(columns[34] + " = " + std::to_string(items_entry.banedmgraceamt));
-		update_values.push_back(columns[35] + " = " + std::to_string(items_entry.banedmgbody));
-		update_values.push_back(columns[36] + " = " + std::to_string(items_entry.banedmgrace));
-		update_values.push_back(columns[37] + " = " + std::to_string(items_entry.bardtype));
-		update_values.push_back(columns[38] + " = " + std::to_string(items_entry.bardvalue));
-		update_values.push_back(columns[39] + " = " + std::to_string(items_entry.book));
-		update_values.push_back(columns[40] + " = " + std::to_string(items_entry.casttime));
-		update_values.push_back(columns[41] + " = " + std::to_string(items_entry.casttime_));
-		update_values.push_back(columns[42] + " = '" + EscapeString(items_entry.charmfile) + "'");
-		update_values.push_back(columns[43] + " = '" + EscapeString(items_entry.charmfileid) + "'");
-		update_values.push_back(columns[44] + " = " + std::to_string(items_entry.classes));
-		update_values.push_back(columns[45] + " = " + std::to_string(items_entry.color));
-		update_values.push_back(columns[46] + " = '" + EscapeString(items_entry.combateffects) + "'");
-		update_values.push_back(columns[47] + " = " + std::to_string(items_entry.extradmgskill));
-		update_values.push_back(columns[48] + " = " + std::to_string(items_entry.extradmgamt));
-		update_values.push_back(columns[49] + " = " + std::to_string(items_entry.price));
-		update_values.push_back(columns[50] + " = " + std::to_string(items_entry.cr));
-		update_values.push_back(columns[51] + " = " + std::to_string(items_entry.damage));
-		update_values.push_back(columns[52] + " = " + std::to_string(items_entry.damageshield));
-		update_values.push_back(columns[53] + " = " + std::to_string(items_entry.deity));
-		update_values.push_back(columns[54] + " = " + std::to_string(items_entry.delay));
-		update_values.push_back(columns[55] + " = " + std::to_string(items_entry.augdistiller));
-		update_values.push_back(columns[56] + " = " + std::to_string(items_entry.dotshielding));
-		update_values.push_back(columns[57] + " = " + std::to_string(items_entry.dr));
-		update_values.push_back(columns[58] + " = " + std::to_string(items_entry.clicktype));
-		update_values.push_back(columns[59] + " = " + std::to_string(items_entry.clicklevel2));
-		update_values.push_back(columns[60] + " = " + std::to_string(items_entry.elemdmgtype));
-		update_values.push_back(columns[61] + " = " + std::to_string(items_entry.elemdmgamt));
-		update_values.push_back(columns[62] + " = " + std::to_string(items_entry.endur));
-		update_values.push_back(columns[63] + " = " + std::to_string(items_entry.factionamt1));
-		update_values.push_back(columns[64] + " = " + std::to_string(items_entry.factionamt2));
-		update_values.push_back(columns[65] + " = " + std::to_string(items_entry.factionamt3));
-		update_values.push_back(columns[66] + " = " + std::to_string(items_entry.factionamt4));
-		update_values.push_back(columns[67] + " = " + std::to_string(items_entry.factionmod1));
-		update_values.push_back(columns[68] + " = " + std::to_string(items_entry.factionmod2));
-		update_values.push_back(columns[69] + " = " + std::to_string(items_entry.factionmod3));
-		update_values.push_back(columns[70] + " = " + std::to_string(items_entry.factionmod4));
-		update_values.push_back(columns[71] + " = '" + EscapeString(items_entry.filename) + "'");
-		update_values.push_back(columns[72] + " = " + std::to_string(items_entry.focuseffect));
-		update_values.push_back(columns[73] + " = " + std::to_string(items_entry.fr));
-		update_values.push_back(columns[74] + " = " + std::to_string(items_entry.fvnodrop));
-		update_values.push_back(columns[75] + " = " + std::to_string(items_entry.haste));
-		update_values.push_back(columns[76] + " = " + std::to_string(items_entry.clicklevel));
-		update_values.push_back(columns[77] + " = " + std::to_string(items_entry.hp));
-		update_values.push_back(columns[78] + " = " + std::to_string(items_entry.regen));
-		update_values.push_back(columns[79] + " = " + std::to_string(items_entry.icon));
-		update_values.push_back(columns[80] + " = '" + EscapeString(items_entry.idfile) + "'");
-		update_values.push_back(columns[81] + " = " + std::to_string(items_entry.itemclass));
-		update_values.push_back(columns[82] + " = " + std::to_string(items_entry.itemtype));
-		update_values.push_back(columns[83] + " = " + std::to_string(items_entry.ldonprice));
-		update_values.push_back(columns[84] + " = " + std::to_string(items_entry.ldontheme));
-		update_values.push_back(columns[85] + " = " + std::to_string(items_entry.ldonsold));
-		update_values.push_back(columns[86] + " = " + std::to_string(items_entry.light));
-		update_values.push_back(columns[87] + " = '" + EscapeString(items_entry.lore) + "'");
-		update_values.push_back(columns[88] + " = " + std::to_string(items_entry.loregroup));
-		update_values.push_back(columns[89] + " = " + std::to_string(items_entry.magic));
-		update_values.push_back(columns[90] + " = " + std::to_string(items_entry.mana));
-		update_values.push_back(columns[91] + " = " + std::to_string(items_entry.manaregen));
-		update_values.push_back(columns[92] + " = " + std::to_string(items_entry.enduranceregen));
-		update_values.push_back(columns[93] + " = " + std::to_string(items_entry.material));
-		update_values.push_back(columns[94] + " = " + std::to_string(items_entry.herosforgemodel));
-		update_values.push_back(columns[95] + " = " + std::to_string(items_entry.maxcharges));
-		update_values.push_back(columns[96] + " = " + std::to_string(items_entry.mr));
-		update_values.push_back(columns[97] + " = " + std::to_string(items_entry.nodrop));
-		update_values.push_back(columns[98] + " = " + std::to_string(items_entry.norent));
-		update_values.push_back(columns[99] + " = " + std::to_string(items_entry.pendingloreflag));
-		update_values.push_back(columns[100] + " = " + std::to_string(items_entry.pr));
-		update_values.push_back(columns[101] + " = " + std::to_string(items_entry.procrate));
-		update_values.push_back(columns[102] + " = " + std::to_string(items_entry.races));
-		update_values.push_back(columns[103] + " = " + std::to_string(items_entry.range));
-		update_values.push_back(columns[104] + " = " + std::to_string(items_entry.reclevel));
-		update_values.push_back(columns[105] + " = " + std::to_string(items_entry.recskill));
-		update_values.push_back(columns[106] + " = " + std::to_string(items_entry.reqlevel));
-		update_values.push_back(columns[107] + " = " + std::to_string(items_entry.sellrate));
-		update_values.push_back(columns[108] + " = " + std::to_string(items_entry.shielding));
-		update_values.push_back(columns[109] + " = " + std::to_string(items_entry.size));
-		update_values.push_back(columns[110] + " = " + std::to_string(items_entry.skillmodtype));
-		update_values.push_back(columns[111] + " = " + std::to_string(items_entry.skillmodvalue));
-		update_values.push_back(columns[112] + " = " + std::to_string(items_entry.slots));
-		update_values.push_back(columns[113] + " = " + std::to_string(items_entry.clickeffect));
-		update_values.push_back(columns[114] + " = " + std::to_string(items_entry.spellshield));
-		update_values.push_back(columns[115] + " = " + std::to_string(items_entry.strikethrough));
-		update_values.push_back(columns[116] + " = " + std::to_string(items_entry.stunresist));
-		update_values.push_back(columns[117] + " = " + std::to_string(items_entry.summonedflag));
-		update_values.push_back(columns[118] + " = " + std::to_string(items_entry.tradeskills));
-		update_values.push_back(columns[119] + " = " + std::to_string(items_entry.favor));
-		update_values.push_back(columns[120] + " = " + std::to_string(items_entry.weight));
-		update_values.push_back(columns[121] + " = " + std::to_string(items_entry.UNK012));
-		update_values.push_back(columns[122] + " = " + std::to_string(items_entry.UNK013));
-		update_values.push_back(columns[123] + " = " + std::to_string(items_entry.benefitflag));
-		update_values.push_back(columns[124] + " = " + std::to_string(items_entry.UNK054));
-		update_values.push_back(columns[125] + " = " + std::to_string(items_entry.UNK059));
-		update_values.push_back(columns[126] + " = " + std::to_string(items_entry.booktype));
-		update_values.push_back(columns[127] + " = " + std::to_string(items_entry.recastdelay));
-		update_values.push_back(columns[128] + " = " + std::to_string(items_entry.recasttype));
-		update_values.push_back(columns[129] + " = " + std::to_string(items_entry.guildfavor));
-		update_values.push_back(columns[130] + " = " + std::to_string(items_entry.UNK123));
-		update_values.push_back(columns[131] + " = " + std::to_string(items_entry.UNK124));
-		update_values.push_back(columns[132] + " = " + std::to_string(items_entry.attuneable));
-		update_values.push_back(columns[133] + " = " + std::to_string(items_entry.nopet));
-		update_values.push_back(columns[134] + " = '" + EscapeString(items_entry.updated) + "'");
-		update_values.push_back(columns[135] + " = '" + EscapeString(items_entry.comment) + "'");
-		update_values.push_back(columns[136] + " = " + std::to_string(items_entry.UNK127));
-		update_values.push_back(columns[137] + " = " + std::to_string(items_entry.pointtype));
-		update_values.push_back(columns[138] + " = " + std::to_string(items_entry.potionbelt));
-		update_values.push_back(columns[139] + " = " + std::to_string(items_entry.potionbeltslots));
-		update_values.push_back(columns[140] + " = " + std::to_string(items_entry.stacksize));
-		update_values.push_back(columns[141] + " = " + std::to_string(items_entry.notransfer));
-		update_values.push_back(columns[142] + " = " + std::to_string(items_entry.stackable));
-		update_values.push_back(columns[143] + " = '" + EscapeString(items_entry.UNK134) + "'");
-		update_values.push_back(columns[144] + " = " + std::to_string(items_entry.UNK137));
-		update_values.push_back(columns[145] + " = " + std::to_string(items_entry.proceffect));
-		update_values.push_back(columns[146] + " = " + std::to_string(items_entry.proctype));
-		update_values.push_back(columns[147] + " = " + std::to_string(items_entry.proclevel2));
-		update_values.push_back(columns[148] + " = " + std::to_string(items_entry.proclevel));
-		update_values.push_back(columns[149] + " = " + std::to_string(items_entry.UNK142));
-		update_values.push_back(columns[150] + " = " + std::to_string(items_entry.worneffect));
-		update_values.push_back(columns[151] + " = " + std::to_string(items_entry.worntype));
-		update_values.push_back(columns[152] + " = " + std::to_string(items_entry.wornlevel2));
-		update_values.push_back(columns[153] + " = " + std::to_string(items_entry.wornlevel));
-		update_values.push_back(columns[154] + " = " + std::to_string(items_entry.UNK147));
-		update_values.push_back(columns[155] + " = " + std::to_string(items_entry.focustype));
-		update_values.push_back(columns[156] + " = " + std::to_string(items_entry.focuslevel2));
-		update_values.push_back(columns[157] + " = " + std::to_string(items_entry.focuslevel));
-		update_values.push_back(columns[158] + " = " + std::to_string(items_entry.UNK152));
-		update_values.push_back(columns[159] + " = " + std::to_string(items_entry.scrolleffect));
-		update_values.push_back(columns[160] + " = " + std::to_string(items_entry.scrolltype));
-		update_values.push_back(columns[161] + " = " + std::to_string(items_entry.scrolllevel2));
-		update_values.push_back(columns[162] + " = " + std::to_string(items_entry.scrolllevel));
-		update_values.push_back(columns[163] + " = " + std::to_string(items_entry.UNK157));
-		update_values.push_back(columns[164] + " = '" + EscapeString(items_entry.serialized) + "'");
-		update_values.push_back(columns[165] + " = '" + EscapeString(items_entry.verified) + "'");
-		update_values.push_back(columns[166] + " = '" + EscapeString(items_entry.serialization) + "'");
-		update_values.push_back(columns[167] + " = '" + EscapeString(items_entry.source) + "'");
-		update_values.push_back(columns[168] + " = " + std::to_string(items_entry.UNK033));
-		update_values.push_back(columns[169] + " = '" + EscapeString(items_entry.lorefile) + "'");
-		update_values.push_back(columns[170] + " = " + std::to_string(items_entry.UNK014));
-		update_values.push_back(columns[171] + " = " + std::to_string(items_entry.svcorruption));
-		update_values.push_back(columns[172] + " = " + std::to_string(items_entry.skillmodmax));
-		update_values.push_back(columns[173] + " = " + std::to_string(items_entry.UNK060));
-		update_values.push_back(columns[174] + " = " + std::to_string(items_entry.augslot1unk2));
-		update_values.push_back(columns[175] + " = " + std::to_string(items_entry.augslot2unk2));
-		update_values.push_back(columns[176] + " = " + std::to_string(items_entry.augslot3unk2));
-		update_values.push_back(columns[177] + " = " + std::to_string(items_entry.augslot4unk2));
-		update_values.push_back(columns[178] + " = " + std::to_string(items_entry.augslot5unk2));
-		update_values.push_back(columns[179] + " = " + std::to_string(items_entry.augslot6unk2));
-		update_values.push_back(columns[180] + " = " + std::to_string(items_entry.UNK120));
-		update_values.push_back(columns[181] + " = " + std::to_string(items_entry.UNK121));
-		update_values.push_back(columns[182] + " = " + std::to_string(items_entry.questitemflag));
-		update_values.push_back(columns[183] + " = '" + EscapeString(items_entry.UNK132) + "'");
-		update_values.push_back(columns[184] + " = " + std::to_string(items_entry.clickunk5));
-		update_values.push_back(columns[185] + " = '" + EscapeString(items_entry.clickunk6) + "'");
-		update_values.push_back(columns[186] + " = " + std::to_string(items_entry.clickunk7));
-		update_values.push_back(columns[187] + " = " + std::to_string(items_entry.procunk1));
-		update_values.push_back(columns[188] + " = " + std::to_string(items_entry.procunk2));
-		update_values.push_back(columns[189] + " = " + std::to_string(items_entry.procunk3));
-		update_values.push_back(columns[190] + " = " + std::to_string(items_entry.procunk4));
-		update_values.push_back(columns[191] + " = '" + EscapeString(items_entry.procunk6) + "'");
-		update_values.push_back(columns[192] + " = " + std::to_string(items_entry.procunk7));
-		update_values.push_back(columns[193] + " = " + std::to_string(items_entry.wornunk1));
-		update_values.push_back(columns[194] + " = " + std::to_string(items_entry.wornunk2));
-		update_values.push_back(columns[195] + " = " + std::to_string(items_entry.wornunk3));
-		update_values.push_back(columns[196] + " = " + std::to_string(items_entry.wornunk4));
-		update_values.push_back(columns[197] + " = " + std::to_string(items_entry.wornunk5));
-		update_values.push_back(columns[198] + " = '" + EscapeString(items_entry.wornunk6) + "'");
-		update_values.push_back(columns[199] + " = " + std::to_string(items_entry.wornunk7));
-		update_values.push_back(columns[200] + " = " + std::to_string(items_entry.focusunk1));
-		update_values.push_back(columns[201] + " = " + std::to_string(items_entry.focusunk2));
-		update_values.push_back(columns[202] + " = " + std::to_string(items_entry.focusunk3));
-		update_values.push_back(columns[203] + " = " + std::to_string(items_entry.focusunk4));
-		update_values.push_back(columns[204] + " = " + std::to_string(items_entry.focusunk5));
-		update_values.push_back(columns[205] + " = '" + EscapeString(items_entry.focusunk6) + "'");
-		update_values.push_back(columns[206] + " = " + std::to_string(items_entry.focusunk7));
-		update_values.push_back(columns[207] + " = " + std::to_string(items_entry.scrollunk1));
-		update_values.push_back(columns[208] + " = " + std::to_string(items_entry.scrollunk2));
-		update_values.push_back(columns[209] + " = " + std::to_string(items_entry.scrollunk3));
-		update_values.push_back(columns[210] + " = " + std::to_string(items_entry.scrollunk4));
-		update_values.push_back(columns[211] + " = " + std::to_string(items_entry.scrollunk5));
-		update_values.push_back(columns[212] + " = '" + EscapeString(items_entry.scrollunk6) + "'");
-		update_values.push_back(columns[213] + " = " + std::to_string(items_entry.scrollunk7));
-		update_values.push_back(columns[214] + " = " + std::to_string(items_entry.UNK193));
-		update_values.push_back(columns[215] + " = " + std::to_string(items_entry.purity));
-		update_values.push_back(columns[216] + " = " + std::to_string(items_entry.evoitem));
-		update_values.push_back(columns[217] + " = " + std::to_string(items_entry.evoid));
-		update_values.push_back(columns[218] + " = " + std::to_string(items_entry.evolvinglevel));
-		update_values.push_back(columns[219] + " = " + std::to_string(items_entry.evomax));
-		update_values.push_back(columns[220] + " = '" + EscapeString(items_entry.clickname) + "'");
-		update_values.push_back(columns[221] + " = '" + EscapeString(items_entry.procname) + "'");
-		update_values.push_back(columns[222] + " = '" + EscapeString(items_entry.wornname) + "'");
-		update_values.push_back(columns[223] + " = '" + EscapeString(items_entry.focusname) + "'");
-		update_values.push_back(columns[224] + " = '" + EscapeString(items_entry.scrollname) + "'");
-		update_values.push_back(columns[225] + " = " + std::to_string(items_entry.dsmitigation));
-		update_values.push_back(columns[226] + " = " + std::to_string(items_entry.heroic_str));
-		update_values.push_back(columns[227] + " = " + std::to_string(items_entry.heroic_int));
-		update_values.push_back(columns[228] + " = " + std::to_string(items_entry.heroic_wis));
-		update_values.push_back(columns[229] + " = " + std::to_string(items_entry.heroic_agi));
-		update_values.push_back(columns[230] + " = " + std::to_string(items_entry.heroic_dex));
-		update_values.push_back(columns[231] + " = " + std::to_string(items_entry.heroic_sta));
-		update_values.push_back(columns[232] + " = " + std::to_string(items_entry.heroic_cha));
-		update_values.push_back(columns[233] + " = " + std::to_string(items_entry.heroic_pr));
-		update_values.push_back(columns[234] + " = " + std::to_string(items_entry.heroic_dr));
-		update_values.push_back(columns[235] + " = " + std::to_string(items_entry.heroic_fr));
-		update_values.push_back(columns[236] + " = " + std::to_string(items_entry.heroic_cr));
-		update_values.push_back(columns[237] + " = " + std::to_string(items_entry.heroic_mr));
-		update_values.push_back(columns[238] + " = " + std::to_string(items_entry.heroic_svcorrup));
-		update_values.push_back(columns[239] + " = " + std::to_string(items_entry.healamt));
-		update_values.push_back(columns[240] + " = " + std::to_string(items_entry.spelldmg));
-		update_values.push_back(columns[241] + " = " + std::to_string(items_entry.clairvoyance));
-		update_values.push_back(columns[242] + " = " + std::to_string(items_entry.backstabdmg));
-		update_values.push_back(columns[243] + " = '" + EscapeString(items_entry.created) + "'");
-		update_values.push_back(columns[244] + " = " + std::to_string(items_entry.elitematerial));
-		update_values.push_back(columns[245] + " = " + std::to_string(items_entry.ldonsellbackrate));
-		update_values.push_back(columns[246] + " = " + std::to_string(items_entry.scriptfileid));
-		update_values.push_back(columns[247] + " = " + std::to_string(items_entry.expendablearrow));
-		update_values.push_back(columns[248] + " = " + std::to_string(items_entry.powersourcecapacity));
-		update_values.push_back(columns[249] + " = " + std::to_string(items_entry.bardeffect));
-		update_values.push_back(columns[250] + " = " + std::to_string(items_entry.bardeffecttype));
-		update_values.push_back(columns[251] + " = " + std::to_string(items_entry.bardlevel2));
-		update_values.push_back(columns[252] + " = " + std::to_string(items_entry.bardlevel));
-		update_values.push_back(columns[253] + " = " + std::to_string(items_entry.bardunk1));
-		update_values.push_back(columns[254] + " = " + std::to_string(items_entry.bardunk2));
-		update_values.push_back(columns[255] + " = " + std::to_string(items_entry.bardunk3));
-		update_values.push_back(columns[256] + " = " + std::to_string(items_entry.bardunk4));
-		update_values.push_back(columns[257] + " = " + std::to_string(items_entry.bardunk5));
-		update_values.push_back(columns[258] + " = '" + EscapeString(items_entry.bardname) + "'");
-		update_values.push_back(columns[259] + " = " + std::to_string(items_entry.bardunk7));
-		update_values.push_back(columns[260] + " = " + std::to_string(items_entry.UNK214));
-		update_values.push_back(columns[261] + " = " + std::to_string(items_entry.subtype));
-		update_values.push_back(columns[262] + " = " + std::to_string(items_entry.UNK220));
-		update_values.push_back(columns[263] + " = " + std::to_string(items_entry.UNK221));
-		update_values.push_back(columns[264] + " = " + std::to_string(items_entry.heirloom));
-		update_values.push_back(columns[265] + " = " + std::to_string(items_entry.UNK223));
-		update_values.push_back(columns[266] + " = " + std::to_string(items_entry.UNK224));
-		update_values.push_back(columns[267] + " = " + std::to_string(items_entry.UNK225));
-		update_values.push_back(columns[268] + " = " + std::to_string(items_entry.UNK226));
-		update_values.push_back(columns[269] + " = " + std::to_string(items_entry.UNK227));
-		update_values.push_back(columns[270] + " = " + std::to_string(items_entry.UNK228));
-		update_values.push_back(columns[271] + " = " + std::to_string(items_entry.UNK229));
-		update_values.push_back(columns[272] + " = " + std::to_string(items_entry.UNK230));
-		update_values.push_back(columns[273] + " = " + std::to_string(items_entry.UNK231));
-		update_values.push_back(columns[274] + " = " + std::to_string(items_entry.UNK232));
-		update_values.push_back(columns[275] + " = " + std::to_string(items_entry.UNK233));
-		update_values.push_back(columns[276] + " = " + std::to_string(items_entry.UNK234));
-		update_values.push_back(columns[277] + " = " + std::to_string(items_entry.placeable));
-		update_values.push_back(columns[278] + " = " + std::to_string(items_entry.UNK236));
-		update_values.push_back(columns[279] + " = " + std::to_string(items_entry.UNK237));
-		update_values.push_back(columns[280] + " = " + std::to_string(items_entry.UNK238));
-		update_values.push_back(columns[281] + " = " + std::to_string(items_entry.UNK239));
-		update_values.push_back(columns[282] + " = " + std::to_string(items_entry.UNK240));
-		update_values.push_back(columns[283] + " = " + std::to_string(items_entry.UNK241));
-		update_values.push_back(columns[284] + " = " + std::to_string(items_entry.epicitem));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.minstatus));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.Name) + "'");
+		v.push_back(columns[3] + " = " + std::to_string(e.aagi));
+		v.push_back(columns[4] + " = " + std::to_string(e.ac));
+		v.push_back(columns[5] + " = " + std::to_string(e.accuracy));
+		v.push_back(columns[6] + " = " + std::to_string(e.acha));
+		v.push_back(columns[7] + " = " + std::to_string(e.adex));
+		v.push_back(columns[8] + " = " + std::to_string(e.aint));
+		v.push_back(columns[9] + " = " + std::to_string(e.artifactflag));
+		v.push_back(columns[10] + " = " + std::to_string(e.asta));
+		v.push_back(columns[11] + " = " + std::to_string(e.astr));
+		v.push_back(columns[12] + " = " + std::to_string(e.attack));
+		v.push_back(columns[13] + " = " + std::to_string(e.augrestrict));
+		v.push_back(columns[14] + " = " + std::to_string(e.augslot1type));
+		v.push_back(columns[15] + " = " + std::to_string(e.augslot1visible));
+		v.push_back(columns[16] + " = " + std::to_string(e.augslot2type));
+		v.push_back(columns[17] + " = " + std::to_string(e.augslot2visible));
+		v.push_back(columns[18] + " = " + std::to_string(e.augslot3type));
+		v.push_back(columns[19] + " = " + std::to_string(e.augslot3visible));
+		v.push_back(columns[20] + " = " + std::to_string(e.augslot4type));
+		v.push_back(columns[21] + " = " + std::to_string(e.augslot4visible));
+		v.push_back(columns[22] + " = " + std::to_string(e.augslot5type));
+		v.push_back(columns[23] + " = " + std::to_string(e.augslot5visible));
+		v.push_back(columns[24] + " = " + std::to_string(e.augslot6type));
+		v.push_back(columns[25] + " = " + std::to_string(e.augslot6visible));
+		v.push_back(columns[26] + " = " + std::to_string(e.augtype));
+		v.push_back(columns[27] + " = " + std::to_string(e.avoidance));
+		v.push_back(columns[28] + " = " + std::to_string(e.awis));
+		v.push_back(columns[29] + " = " + std::to_string(e.bagsize));
+		v.push_back(columns[30] + " = " + std::to_string(e.bagslots));
+		v.push_back(columns[31] + " = " + std::to_string(e.bagtype));
+		v.push_back(columns[32] + " = " + std::to_string(e.bagwr));
+		v.push_back(columns[33] + " = " + std::to_string(e.banedmgamt));
+		v.push_back(columns[34] + " = " + std::to_string(e.banedmgraceamt));
+		v.push_back(columns[35] + " = " + std::to_string(e.banedmgbody));
+		v.push_back(columns[36] + " = " + std::to_string(e.banedmgrace));
+		v.push_back(columns[37] + " = " + std::to_string(e.bardtype));
+		v.push_back(columns[38] + " = " + std::to_string(e.bardvalue));
+		v.push_back(columns[39] + " = " + std::to_string(e.book));
+		v.push_back(columns[40] + " = " + std::to_string(e.casttime));
+		v.push_back(columns[41] + " = " + std::to_string(e.casttime_));
+		v.push_back(columns[42] + " = '" + Strings::Escape(e.charmfile) + "'");
+		v.push_back(columns[43] + " = '" + Strings::Escape(e.charmfileid) + "'");
+		v.push_back(columns[44] + " = " + std::to_string(e.classes));
+		v.push_back(columns[45] + " = " + std::to_string(e.color));
+		v.push_back(columns[46] + " = '" + Strings::Escape(e.combateffects) + "'");
+		v.push_back(columns[47] + " = " + std::to_string(e.extradmgskill));
+		v.push_back(columns[48] + " = " + std::to_string(e.extradmgamt));
+		v.push_back(columns[49] + " = " + std::to_string(e.price));
+		v.push_back(columns[50] + " = " + std::to_string(e.cr));
+		v.push_back(columns[51] + " = " + std::to_string(e.damage));
+		v.push_back(columns[52] + " = " + std::to_string(e.damageshield));
+		v.push_back(columns[53] + " = " + std::to_string(e.deity));
+		v.push_back(columns[54] + " = " + std::to_string(e.delay));
+		v.push_back(columns[55] + " = " + std::to_string(e.augdistiller));
+		v.push_back(columns[56] + " = " + std::to_string(e.dotshielding));
+		v.push_back(columns[57] + " = " + std::to_string(e.dr));
+		v.push_back(columns[58] + " = " + std::to_string(e.clicktype));
+		v.push_back(columns[59] + " = " + std::to_string(e.clicklevel2));
+		v.push_back(columns[60] + " = " + std::to_string(e.elemdmgtype));
+		v.push_back(columns[61] + " = " + std::to_string(e.elemdmgamt));
+		v.push_back(columns[62] + " = " + std::to_string(e.endur));
+		v.push_back(columns[63] + " = " + std::to_string(e.factionamt1));
+		v.push_back(columns[64] + " = " + std::to_string(e.factionamt2));
+		v.push_back(columns[65] + " = " + std::to_string(e.factionamt3));
+		v.push_back(columns[66] + " = " + std::to_string(e.factionamt4));
+		v.push_back(columns[67] + " = " + std::to_string(e.factionmod1));
+		v.push_back(columns[68] + " = " + std::to_string(e.factionmod2));
+		v.push_back(columns[69] + " = " + std::to_string(e.factionmod3));
+		v.push_back(columns[70] + " = " + std::to_string(e.factionmod4));
+		v.push_back(columns[71] + " = '" + Strings::Escape(e.filename) + "'");
+		v.push_back(columns[72] + " = " + std::to_string(e.focuseffect));
+		v.push_back(columns[73] + " = " + std::to_string(e.fr));
+		v.push_back(columns[74] + " = " + std::to_string(e.fvnodrop));
+		v.push_back(columns[75] + " = " + std::to_string(e.haste));
+		v.push_back(columns[76] + " = " + std::to_string(e.clicklevel));
+		v.push_back(columns[77] + " = " + std::to_string(e.hp));
+		v.push_back(columns[78] + " = " + std::to_string(e.regen));
+		v.push_back(columns[79] + " = " + std::to_string(e.icon));
+		v.push_back(columns[80] + " = '" + Strings::Escape(e.idfile) + "'");
+		v.push_back(columns[81] + " = " + std::to_string(e.itemclass));
+		v.push_back(columns[82] + " = " + std::to_string(e.itemtype));
+		v.push_back(columns[83] + " = " + std::to_string(e.ldonprice));
+		v.push_back(columns[84] + " = " + std::to_string(e.ldontheme));
+		v.push_back(columns[85] + " = " + std::to_string(e.ldonsold));
+		v.push_back(columns[86] + " = " + std::to_string(e.light));
+		v.push_back(columns[87] + " = '" + Strings::Escape(e.lore) + "'");
+		v.push_back(columns[88] + " = " + std::to_string(e.loregroup));
+		v.push_back(columns[89] + " = " + std::to_string(e.magic));
+		v.push_back(columns[90] + " = " + std::to_string(e.mana));
+		v.push_back(columns[91] + " = " + std::to_string(e.manaregen));
+		v.push_back(columns[92] + " = " + std::to_string(e.enduranceregen));
+		v.push_back(columns[93] + " = " + std::to_string(e.material));
+		v.push_back(columns[94] + " = " + std::to_string(e.herosforgemodel));
+		v.push_back(columns[95] + " = " + std::to_string(e.maxcharges));
+		v.push_back(columns[96] + " = " + std::to_string(e.mr));
+		v.push_back(columns[97] + " = " + std::to_string(e.nodrop));
+		v.push_back(columns[98] + " = " + std::to_string(e.norent));
+		v.push_back(columns[99] + " = " + std::to_string(e.pendingloreflag));
+		v.push_back(columns[100] + " = " + std::to_string(e.pr));
+		v.push_back(columns[101] + " = " + std::to_string(e.procrate));
+		v.push_back(columns[102] + " = " + std::to_string(e.races));
+		v.push_back(columns[103] + " = " + std::to_string(e.range_));
+		v.push_back(columns[104] + " = " + std::to_string(e.reclevel));
+		v.push_back(columns[105] + " = " + std::to_string(e.recskill));
+		v.push_back(columns[106] + " = " + std::to_string(e.reqlevel));
+		v.push_back(columns[107] + " = " + std::to_string(e.sellrate));
+		v.push_back(columns[108] + " = " + std::to_string(e.shielding));
+		v.push_back(columns[109] + " = " + std::to_string(e.size));
+		v.push_back(columns[110] + " = " + std::to_string(e.skillmodtype));
+		v.push_back(columns[111] + " = " + std::to_string(e.skillmodvalue));
+		v.push_back(columns[112] + " = " + std::to_string(e.slots));
+		v.push_back(columns[113] + " = " + std::to_string(e.clickeffect));
+		v.push_back(columns[114] + " = " + std::to_string(e.spellshield));
+		v.push_back(columns[115] + " = " + std::to_string(e.strikethrough));
+		v.push_back(columns[116] + " = " + std::to_string(e.stunresist));
+		v.push_back(columns[117] + " = " + std::to_string(e.summonedflag));
+		v.push_back(columns[118] + " = " + std::to_string(e.tradeskills));
+		v.push_back(columns[119] + " = " + std::to_string(e.favor));
+		v.push_back(columns[120] + " = " + std::to_string(e.weight));
+		v.push_back(columns[121] + " = " + std::to_string(e.UNK012));
+		v.push_back(columns[122] + " = " + std::to_string(e.UNK013));
+		v.push_back(columns[123] + " = " + std::to_string(e.benefitflag));
+		v.push_back(columns[124] + " = " + std::to_string(e.UNK054));
+		v.push_back(columns[125] + " = " + std::to_string(e.UNK059));
+		v.push_back(columns[126] + " = " + std::to_string(e.booktype));
+		v.push_back(columns[127] + " = " + std::to_string(e.recastdelay));
+		v.push_back(columns[128] + " = " + std::to_string(e.recasttype));
+		v.push_back(columns[129] + " = " + std::to_string(e.guildfavor));
+		v.push_back(columns[130] + " = " + std::to_string(e.UNK123));
+		v.push_back(columns[131] + " = " + std::to_string(e.UNK124));
+		v.push_back(columns[132] + " = " + std::to_string(e.attuneable));
+		v.push_back(columns[133] + " = " + std::to_string(e.nopet));
+		v.push_back(columns[134] + " = FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
+		v.push_back(columns[135] + " = '" + Strings::Escape(e.comment) + "'");
+		v.push_back(columns[136] + " = " + std::to_string(e.UNK127));
+		v.push_back(columns[137] + " = " + std::to_string(e.pointtype));
+		v.push_back(columns[138] + " = " + std::to_string(e.potionbelt));
+		v.push_back(columns[139] + " = " + std::to_string(e.potionbeltslots));
+		v.push_back(columns[140] + " = " + std::to_string(e.stacksize));
+		v.push_back(columns[141] + " = " + std::to_string(e.notransfer));
+		v.push_back(columns[142] + " = " + std::to_string(e.stackable));
+		v.push_back(columns[143] + " = '" + Strings::Escape(e.UNK134) + "'");
+		v.push_back(columns[144] + " = " + std::to_string(e.UNK137));
+		v.push_back(columns[145] + " = " + std::to_string(e.proceffect));
+		v.push_back(columns[146] + " = " + std::to_string(e.proctype));
+		v.push_back(columns[147] + " = " + std::to_string(e.proclevel2));
+		v.push_back(columns[148] + " = " + std::to_string(e.proclevel));
+		v.push_back(columns[149] + " = " + std::to_string(e.UNK142));
+		v.push_back(columns[150] + " = " + std::to_string(e.worneffect));
+		v.push_back(columns[151] + " = " + std::to_string(e.worntype));
+		v.push_back(columns[152] + " = " + std::to_string(e.wornlevel2));
+		v.push_back(columns[153] + " = " + std::to_string(e.wornlevel));
+		v.push_back(columns[154] + " = " + std::to_string(e.UNK147));
+		v.push_back(columns[155] + " = " + std::to_string(e.focustype));
+		v.push_back(columns[156] + " = " + std::to_string(e.focuslevel2));
+		v.push_back(columns[157] + " = " + std::to_string(e.focuslevel));
+		v.push_back(columns[158] + " = " + std::to_string(e.UNK152));
+		v.push_back(columns[159] + " = " + std::to_string(e.scrolleffect));
+		v.push_back(columns[160] + " = " + std::to_string(e.scrolltype));
+		v.push_back(columns[161] + " = " + std::to_string(e.scrolllevel2));
+		v.push_back(columns[162] + " = " + std::to_string(e.scrolllevel));
+		v.push_back(columns[163] + " = " + std::to_string(e.UNK157));
+		v.push_back(columns[164] + " = FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back(columns[165] + " = FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
+		v.push_back(columns[166] + " = '" + Strings::Escape(e.serialization) + "'");
+		v.push_back(columns[167] + " = '" + Strings::Escape(e.source) + "'");
+		v.push_back(columns[168] + " = " + std::to_string(e.UNK033));
+		v.push_back(columns[169] + " = '" + Strings::Escape(e.lorefile) + "'");
+		v.push_back(columns[170] + " = " + std::to_string(e.UNK014));
+		v.push_back(columns[171] + " = " + std::to_string(e.svcorruption));
+		v.push_back(columns[172] + " = " + std::to_string(e.skillmodmax));
+		v.push_back(columns[173] + " = " + std::to_string(e.UNK060));
+		v.push_back(columns[174] + " = " + std::to_string(e.augslot1unk2));
+		v.push_back(columns[175] + " = " + std::to_string(e.augslot2unk2));
+		v.push_back(columns[176] + " = " + std::to_string(e.augslot3unk2));
+		v.push_back(columns[177] + " = " + std::to_string(e.augslot4unk2));
+		v.push_back(columns[178] + " = " + std::to_string(e.augslot5unk2));
+		v.push_back(columns[179] + " = " + std::to_string(e.augslot6unk2));
+		v.push_back(columns[180] + " = " + std::to_string(e.UNK120));
+		v.push_back(columns[181] + " = " + std::to_string(e.UNK121));
+		v.push_back(columns[182] + " = " + std::to_string(e.questitemflag));
+		v.push_back(columns[183] + " = '" + Strings::Escape(e.UNK132) + "'");
+		v.push_back(columns[184] + " = " + std::to_string(e.clickunk5));
+		v.push_back(columns[185] + " = '" + Strings::Escape(e.clickunk6) + "'");
+		v.push_back(columns[186] + " = " + std::to_string(e.clickunk7));
+		v.push_back(columns[187] + " = " + std::to_string(e.procunk1));
+		v.push_back(columns[188] + " = " + std::to_string(e.procunk2));
+		v.push_back(columns[189] + " = " + std::to_string(e.procunk3));
+		v.push_back(columns[190] + " = " + std::to_string(e.procunk4));
+		v.push_back(columns[191] + " = '" + Strings::Escape(e.procunk6) + "'");
+		v.push_back(columns[192] + " = " + std::to_string(e.procunk7));
+		v.push_back(columns[193] + " = " + std::to_string(e.wornunk1));
+		v.push_back(columns[194] + " = " + std::to_string(e.wornunk2));
+		v.push_back(columns[195] + " = " + std::to_string(e.wornunk3));
+		v.push_back(columns[196] + " = " + std::to_string(e.wornunk4));
+		v.push_back(columns[197] + " = " + std::to_string(e.wornunk5));
+		v.push_back(columns[198] + " = '" + Strings::Escape(e.wornunk6) + "'");
+		v.push_back(columns[199] + " = " + std::to_string(e.wornunk7));
+		v.push_back(columns[200] + " = " + std::to_string(e.focusunk1));
+		v.push_back(columns[201] + " = " + std::to_string(e.focusunk2));
+		v.push_back(columns[202] + " = " + std::to_string(e.focusunk3));
+		v.push_back(columns[203] + " = " + std::to_string(e.focusunk4));
+		v.push_back(columns[204] + " = " + std::to_string(e.focusunk5));
+		v.push_back(columns[205] + " = '" + Strings::Escape(e.focusunk6) + "'");
+		v.push_back(columns[206] + " = " + std::to_string(e.focusunk7));
+		v.push_back(columns[207] + " = " + std::to_string(e.scrollunk1));
+		v.push_back(columns[208] + " = " + std::to_string(e.scrollunk2));
+		v.push_back(columns[209] + " = " + std::to_string(e.scrollunk3));
+		v.push_back(columns[210] + " = " + std::to_string(e.scrollunk4));
+		v.push_back(columns[211] + " = " + std::to_string(e.scrollunk5));
+		v.push_back(columns[212] + " = '" + Strings::Escape(e.scrollunk6) + "'");
+		v.push_back(columns[213] + " = " + std::to_string(e.scrollunk7));
+		v.push_back(columns[214] + " = " + std::to_string(e.UNK193));
+		v.push_back(columns[215] + " = " + std::to_string(e.purity));
+		v.push_back(columns[216] + " = " + std::to_string(e.evoitem));
+		v.push_back(columns[217] + " = " + std::to_string(e.evoid));
+		v.push_back(columns[218] + " = " + std::to_string(e.evolvinglevel));
+		v.push_back(columns[219] + " = " + std::to_string(e.evomax));
+		v.push_back(columns[220] + " = '" + Strings::Escape(e.clickname) + "'");
+		v.push_back(columns[221] + " = '" + Strings::Escape(e.procname) + "'");
+		v.push_back(columns[222] + " = '" + Strings::Escape(e.wornname) + "'");
+		v.push_back(columns[223] + " = '" + Strings::Escape(e.focusname) + "'");
+		v.push_back(columns[224] + " = '" + Strings::Escape(e.scrollname) + "'");
+		v.push_back(columns[225] + " = " + std::to_string(e.dsmitigation));
+		v.push_back(columns[226] + " = " + std::to_string(e.heroic_str));
+		v.push_back(columns[227] + " = " + std::to_string(e.heroic_int));
+		v.push_back(columns[228] + " = " + std::to_string(e.heroic_wis));
+		v.push_back(columns[229] + " = " + std::to_string(e.heroic_agi));
+		v.push_back(columns[230] + " = " + std::to_string(e.heroic_dex));
+		v.push_back(columns[231] + " = " + std::to_string(e.heroic_sta));
+		v.push_back(columns[232] + " = " + std::to_string(e.heroic_cha));
+		v.push_back(columns[233] + " = " + std::to_string(e.heroic_pr));
+		v.push_back(columns[234] + " = " + std::to_string(e.heroic_dr));
+		v.push_back(columns[235] + " = " + std::to_string(e.heroic_fr));
+		v.push_back(columns[236] + " = " + std::to_string(e.heroic_cr));
+		v.push_back(columns[237] + " = " + std::to_string(e.heroic_mr));
+		v.push_back(columns[238] + " = " + std::to_string(e.heroic_svcorrup));
+		v.push_back(columns[239] + " = " + std::to_string(e.healamt));
+		v.push_back(columns[240] + " = " + std::to_string(e.spelldmg));
+		v.push_back(columns[241] + " = " + std::to_string(e.clairvoyance));
+		v.push_back(columns[242] + " = " + std::to_string(e.backstabdmg));
+		v.push_back(columns[243] + " = '" + Strings::Escape(e.created) + "'");
+		v.push_back(columns[244] + " = " + std::to_string(e.elitematerial));
+		v.push_back(columns[245] + " = " + std::to_string(e.ldonsellbackrate));
+		v.push_back(columns[246] + " = " + std::to_string(e.scriptfileid));
+		v.push_back(columns[247] + " = " + std::to_string(e.expendablearrow));
+		v.push_back(columns[248] + " = " + std::to_string(e.powersourcecapacity));
+		v.push_back(columns[249] + " = " + std::to_string(e.bardeffect));
+		v.push_back(columns[250] + " = " + std::to_string(e.bardeffecttype));
+		v.push_back(columns[251] + " = " + std::to_string(e.bardlevel2));
+		v.push_back(columns[252] + " = " + std::to_string(e.bardlevel));
+		v.push_back(columns[253] + " = " + std::to_string(e.bardunk1));
+		v.push_back(columns[254] + " = " + std::to_string(e.bardunk2));
+		v.push_back(columns[255] + " = " + std::to_string(e.bardunk3));
+		v.push_back(columns[256] + " = " + std::to_string(e.bardunk4));
+		v.push_back(columns[257] + " = " + std::to_string(e.bardunk5));
+		v.push_back(columns[258] + " = '" + Strings::Escape(e.bardname) + "'");
+		v.push_back(columns[259] + " = " + std::to_string(e.bardunk7));
+		v.push_back(columns[260] + " = " + std::to_string(e.UNK214));
+		v.push_back(columns[261] + " = " + std::to_string(e.subtype));
+		v.push_back(columns[262] + " = " + std::to_string(e.UNK220));
+		v.push_back(columns[263] + " = " + std::to_string(e.UNK221));
+		v.push_back(columns[264] + " = " + std::to_string(e.heirloom));
+		v.push_back(columns[265] + " = " + std::to_string(e.UNK223));
+		v.push_back(columns[266] + " = " + std::to_string(e.UNK224));
+		v.push_back(columns[267] + " = " + std::to_string(e.UNK225));
+		v.push_back(columns[268] + " = " + std::to_string(e.UNK226));
+		v.push_back(columns[269] + " = " + std::to_string(e.UNK227));
+		v.push_back(columns[270] + " = " + std::to_string(e.UNK228));
+		v.push_back(columns[271] + " = " + std::to_string(e.UNK229));
+		v.push_back(columns[272] + " = " + std::to_string(e.UNK230));
+		v.push_back(columns[273] + " = " + std::to_string(e.UNK231));
+		v.push_back(columns[274] + " = " + std::to_string(e.UNK232));
+		v.push_back(columns[275] + " = " + std::to_string(e.UNK233));
+		v.push_back(columns[276] + " = " + std::to_string(e.UNK234));
+		v.push_back(columns[277] + " = " + std::to_string(e.placeable));
+		v.push_back(columns[278] + " = " + std::to_string(e.UNK236));
+		v.push_back(columns[279] + " = " + std::to_string(e.UNK237));
+		v.push_back(columns[280] + " = " + std::to_string(e.UNK238));
+		v.push_back(columns[281] + " = " + std::to_string(e.UNK239));
+		v.push_back(columns[282] + " = " + std::to_string(e.UNK240));
+		v.push_back(columns[283] + " = " + std::to_string(e.UNK241));
+		v.push_back(columns[284] + " = " + std::to_string(e.epicitem));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				items_entry.id
+				e.id
 			)
 		);
 
@@ -1600,631 +1869,633 @@ public:
 	}
 
 	static Items InsertOne(
-		Items items_entry
+		Database& db,
+		Items e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(items_entry.id));
-		insert_values.push_back(std::to_string(items_entry.minstatus));
-		insert_values.push_back("'" + EscapeString(items_entry.Name) + "'");
-		insert_values.push_back(std::to_string(items_entry.aagi));
-		insert_values.push_back(std::to_string(items_entry.ac));
-		insert_values.push_back(std::to_string(items_entry.accuracy));
-		insert_values.push_back(std::to_string(items_entry.acha));
-		insert_values.push_back(std::to_string(items_entry.adex));
-		insert_values.push_back(std::to_string(items_entry.aint));
-		insert_values.push_back(std::to_string(items_entry.artifactflag));
-		insert_values.push_back(std::to_string(items_entry.asta));
-		insert_values.push_back(std::to_string(items_entry.astr));
-		insert_values.push_back(std::to_string(items_entry.attack));
-		insert_values.push_back(std::to_string(items_entry.augrestrict));
-		insert_values.push_back(std::to_string(items_entry.augslot1type));
-		insert_values.push_back(std::to_string(items_entry.augslot1visible));
-		insert_values.push_back(std::to_string(items_entry.augslot2type));
-		insert_values.push_back(std::to_string(items_entry.augslot2visible));
-		insert_values.push_back(std::to_string(items_entry.augslot3type));
-		insert_values.push_back(std::to_string(items_entry.augslot3visible));
-		insert_values.push_back(std::to_string(items_entry.augslot4type));
-		insert_values.push_back(std::to_string(items_entry.augslot4visible));
-		insert_values.push_back(std::to_string(items_entry.augslot5type));
-		insert_values.push_back(std::to_string(items_entry.augslot5visible));
-		insert_values.push_back(std::to_string(items_entry.augslot6type));
-		insert_values.push_back(std::to_string(items_entry.augslot6visible));
-		insert_values.push_back(std::to_string(items_entry.augtype));
-		insert_values.push_back(std::to_string(items_entry.avoidance));
-		insert_values.push_back(std::to_string(items_entry.awis));
-		insert_values.push_back(std::to_string(items_entry.bagsize));
-		insert_values.push_back(std::to_string(items_entry.bagslots));
-		insert_values.push_back(std::to_string(items_entry.bagtype));
-		insert_values.push_back(std::to_string(items_entry.bagwr));
-		insert_values.push_back(std::to_string(items_entry.banedmgamt));
-		insert_values.push_back(std::to_string(items_entry.banedmgraceamt));
-		insert_values.push_back(std::to_string(items_entry.banedmgbody));
-		insert_values.push_back(std::to_string(items_entry.banedmgrace));
-		insert_values.push_back(std::to_string(items_entry.bardtype));
-		insert_values.push_back(std::to_string(items_entry.bardvalue));
-		insert_values.push_back(std::to_string(items_entry.book));
-		insert_values.push_back(std::to_string(items_entry.casttime));
-		insert_values.push_back(std::to_string(items_entry.casttime_));
-		insert_values.push_back("'" + EscapeString(items_entry.charmfile) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.charmfileid) + "'");
-		insert_values.push_back(std::to_string(items_entry.classes));
-		insert_values.push_back(std::to_string(items_entry.color));
-		insert_values.push_back("'" + EscapeString(items_entry.combateffects) + "'");
-		insert_values.push_back(std::to_string(items_entry.extradmgskill));
-		insert_values.push_back(std::to_string(items_entry.extradmgamt));
-		insert_values.push_back(std::to_string(items_entry.price));
-		insert_values.push_back(std::to_string(items_entry.cr));
-		insert_values.push_back(std::to_string(items_entry.damage));
-		insert_values.push_back(std::to_string(items_entry.damageshield));
-		insert_values.push_back(std::to_string(items_entry.deity));
-		insert_values.push_back(std::to_string(items_entry.delay));
-		insert_values.push_back(std::to_string(items_entry.augdistiller));
-		insert_values.push_back(std::to_string(items_entry.dotshielding));
-		insert_values.push_back(std::to_string(items_entry.dr));
-		insert_values.push_back(std::to_string(items_entry.clicktype));
-		insert_values.push_back(std::to_string(items_entry.clicklevel2));
-		insert_values.push_back(std::to_string(items_entry.elemdmgtype));
-		insert_values.push_back(std::to_string(items_entry.elemdmgamt));
-		insert_values.push_back(std::to_string(items_entry.endur));
-		insert_values.push_back(std::to_string(items_entry.factionamt1));
-		insert_values.push_back(std::to_string(items_entry.factionamt2));
-		insert_values.push_back(std::to_string(items_entry.factionamt3));
-		insert_values.push_back(std::to_string(items_entry.factionamt4));
-		insert_values.push_back(std::to_string(items_entry.factionmod1));
-		insert_values.push_back(std::to_string(items_entry.factionmod2));
-		insert_values.push_back(std::to_string(items_entry.factionmod3));
-		insert_values.push_back(std::to_string(items_entry.factionmod4));
-		insert_values.push_back("'" + EscapeString(items_entry.filename) + "'");
-		insert_values.push_back(std::to_string(items_entry.focuseffect));
-		insert_values.push_back(std::to_string(items_entry.fr));
-		insert_values.push_back(std::to_string(items_entry.fvnodrop));
-		insert_values.push_back(std::to_string(items_entry.haste));
-		insert_values.push_back(std::to_string(items_entry.clicklevel));
-		insert_values.push_back(std::to_string(items_entry.hp));
-		insert_values.push_back(std::to_string(items_entry.regen));
-		insert_values.push_back(std::to_string(items_entry.icon));
-		insert_values.push_back("'" + EscapeString(items_entry.idfile) + "'");
-		insert_values.push_back(std::to_string(items_entry.itemclass));
-		insert_values.push_back(std::to_string(items_entry.itemtype));
-		insert_values.push_back(std::to_string(items_entry.ldonprice));
-		insert_values.push_back(std::to_string(items_entry.ldontheme));
-		insert_values.push_back(std::to_string(items_entry.ldonsold));
-		insert_values.push_back(std::to_string(items_entry.light));
-		insert_values.push_back("'" + EscapeString(items_entry.lore) + "'");
-		insert_values.push_back(std::to_string(items_entry.loregroup));
-		insert_values.push_back(std::to_string(items_entry.magic));
-		insert_values.push_back(std::to_string(items_entry.mana));
-		insert_values.push_back(std::to_string(items_entry.manaregen));
-		insert_values.push_back(std::to_string(items_entry.enduranceregen));
-		insert_values.push_back(std::to_string(items_entry.material));
-		insert_values.push_back(std::to_string(items_entry.herosforgemodel));
-		insert_values.push_back(std::to_string(items_entry.maxcharges));
-		insert_values.push_back(std::to_string(items_entry.mr));
-		insert_values.push_back(std::to_string(items_entry.nodrop));
-		insert_values.push_back(std::to_string(items_entry.norent));
-		insert_values.push_back(std::to_string(items_entry.pendingloreflag));
-		insert_values.push_back(std::to_string(items_entry.pr));
-		insert_values.push_back(std::to_string(items_entry.procrate));
-		insert_values.push_back(std::to_string(items_entry.races));
-		insert_values.push_back(std::to_string(items_entry.range));
-		insert_values.push_back(std::to_string(items_entry.reclevel));
-		insert_values.push_back(std::to_string(items_entry.recskill));
-		insert_values.push_back(std::to_string(items_entry.reqlevel));
-		insert_values.push_back(std::to_string(items_entry.sellrate));
-		insert_values.push_back(std::to_string(items_entry.shielding));
-		insert_values.push_back(std::to_string(items_entry.size));
-		insert_values.push_back(std::to_string(items_entry.skillmodtype));
-		insert_values.push_back(std::to_string(items_entry.skillmodvalue));
-		insert_values.push_back(std::to_string(items_entry.slots));
-		insert_values.push_back(std::to_string(items_entry.clickeffect));
-		insert_values.push_back(std::to_string(items_entry.spellshield));
-		insert_values.push_back(std::to_string(items_entry.strikethrough));
-		insert_values.push_back(std::to_string(items_entry.stunresist));
-		insert_values.push_back(std::to_string(items_entry.summonedflag));
-		insert_values.push_back(std::to_string(items_entry.tradeskills));
-		insert_values.push_back(std::to_string(items_entry.favor));
-		insert_values.push_back(std::to_string(items_entry.weight));
-		insert_values.push_back(std::to_string(items_entry.UNK012));
-		insert_values.push_back(std::to_string(items_entry.UNK013));
-		insert_values.push_back(std::to_string(items_entry.benefitflag));
-		insert_values.push_back(std::to_string(items_entry.UNK054));
-		insert_values.push_back(std::to_string(items_entry.UNK059));
-		insert_values.push_back(std::to_string(items_entry.booktype));
-		insert_values.push_back(std::to_string(items_entry.recastdelay));
-		insert_values.push_back(std::to_string(items_entry.recasttype));
-		insert_values.push_back(std::to_string(items_entry.guildfavor));
-		insert_values.push_back(std::to_string(items_entry.UNK123));
-		insert_values.push_back(std::to_string(items_entry.UNK124));
-		insert_values.push_back(std::to_string(items_entry.attuneable));
-		insert_values.push_back(std::to_string(items_entry.nopet));
-		insert_values.push_back("'" + EscapeString(items_entry.updated) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
-		insert_values.push_back(std::to_string(items_entry.UNK127));
-		insert_values.push_back(std::to_string(items_entry.pointtype));
-		insert_values.push_back(std::to_string(items_entry.potionbelt));
-		insert_values.push_back(std::to_string(items_entry.potionbeltslots));
-		insert_values.push_back(std::to_string(items_entry.stacksize));
-		insert_values.push_back(std::to_string(items_entry.notransfer));
-		insert_values.push_back(std::to_string(items_entry.stackable));
-		insert_values.push_back("'" + EscapeString(items_entry.UNK134) + "'");
-		insert_values.push_back(std::to_string(items_entry.UNK137));
-		insert_values.push_back(std::to_string(items_entry.proceffect));
-		insert_values.push_back(std::to_string(items_entry.proctype));
-		insert_values.push_back(std::to_string(items_entry.proclevel2));
-		insert_values.push_back(std::to_string(items_entry.proclevel));
-		insert_values.push_back(std::to_string(items_entry.UNK142));
-		insert_values.push_back(std::to_string(items_entry.worneffect));
-		insert_values.push_back(std::to_string(items_entry.worntype));
-		insert_values.push_back(std::to_string(items_entry.wornlevel2));
-		insert_values.push_back(std::to_string(items_entry.wornlevel));
-		insert_values.push_back(std::to_string(items_entry.UNK147));
-		insert_values.push_back(std::to_string(items_entry.focustype));
-		insert_values.push_back(std::to_string(items_entry.focuslevel2));
-		insert_values.push_back(std::to_string(items_entry.focuslevel));
-		insert_values.push_back(std::to_string(items_entry.UNK152));
-		insert_values.push_back(std::to_string(items_entry.scrolleffect));
-		insert_values.push_back(std::to_string(items_entry.scrolltype));
-		insert_values.push_back(std::to_string(items_entry.scrolllevel2));
-		insert_values.push_back(std::to_string(items_entry.scrolllevel));
-		insert_values.push_back(std::to_string(items_entry.UNK157));
-		insert_values.push_back("'" + EscapeString(items_entry.serialized) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.verified) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
-		insert_values.push_back(std::to_string(items_entry.UNK033));
-		insert_values.push_back("'" + EscapeString(items_entry.lorefile) + "'");
-		insert_values.push_back(std::to_string(items_entry.UNK014));
-		insert_values.push_back(std::to_string(items_entry.svcorruption));
-		insert_values.push_back(std::to_string(items_entry.skillmodmax));
-		insert_values.push_back(std::to_string(items_entry.UNK060));
-		insert_values.push_back(std::to_string(items_entry.augslot1unk2));
-		insert_values.push_back(std::to_string(items_entry.augslot2unk2));
-		insert_values.push_back(std::to_string(items_entry.augslot3unk2));
-		insert_values.push_back(std::to_string(items_entry.augslot4unk2));
-		insert_values.push_back(std::to_string(items_entry.augslot5unk2));
-		insert_values.push_back(std::to_string(items_entry.augslot6unk2));
-		insert_values.push_back(std::to_string(items_entry.UNK120));
-		insert_values.push_back(std::to_string(items_entry.UNK121));
-		insert_values.push_back(std::to_string(items_entry.questitemflag));
-		insert_values.push_back("'" + EscapeString(items_entry.UNK132) + "'");
-		insert_values.push_back(std::to_string(items_entry.clickunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.clickunk6) + "'");
-		insert_values.push_back(std::to_string(items_entry.clickunk7));
-		insert_values.push_back(std::to_string(items_entry.procunk1));
-		insert_values.push_back(std::to_string(items_entry.procunk2));
-		insert_values.push_back(std::to_string(items_entry.procunk3));
-		insert_values.push_back(std::to_string(items_entry.procunk4));
-		insert_values.push_back("'" + EscapeString(items_entry.procunk6) + "'");
-		insert_values.push_back(std::to_string(items_entry.procunk7));
-		insert_values.push_back(std::to_string(items_entry.wornunk1));
-		insert_values.push_back(std::to_string(items_entry.wornunk2));
-		insert_values.push_back(std::to_string(items_entry.wornunk3));
-		insert_values.push_back(std::to_string(items_entry.wornunk4));
-		insert_values.push_back(std::to_string(items_entry.wornunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.wornunk6) + "'");
-		insert_values.push_back(std::to_string(items_entry.wornunk7));
-		insert_values.push_back(std::to_string(items_entry.focusunk1));
-		insert_values.push_back(std::to_string(items_entry.focusunk2));
-		insert_values.push_back(std::to_string(items_entry.focusunk3));
-		insert_values.push_back(std::to_string(items_entry.focusunk4));
-		insert_values.push_back(std::to_string(items_entry.focusunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.focusunk6) + "'");
-		insert_values.push_back(std::to_string(items_entry.focusunk7));
-		insert_values.push_back(std::to_string(items_entry.scrollunk1));
-		insert_values.push_back(std::to_string(items_entry.scrollunk2));
-		insert_values.push_back(std::to_string(items_entry.scrollunk3));
-		insert_values.push_back(std::to_string(items_entry.scrollunk4));
-		insert_values.push_back(std::to_string(items_entry.scrollunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.scrollunk6) + "'");
-		insert_values.push_back(std::to_string(items_entry.scrollunk7));
-		insert_values.push_back(std::to_string(items_entry.UNK193));
-		insert_values.push_back(std::to_string(items_entry.purity));
-		insert_values.push_back(std::to_string(items_entry.evoitem));
-		insert_values.push_back(std::to_string(items_entry.evoid));
-		insert_values.push_back(std::to_string(items_entry.evolvinglevel));
-		insert_values.push_back(std::to_string(items_entry.evomax));
-		insert_values.push_back("'" + EscapeString(items_entry.clickname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.procname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.wornname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.focusname) + "'");
-		insert_values.push_back("'" + EscapeString(items_entry.scrollname) + "'");
-		insert_values.push_back(std::to_string(items_entry.dsmitigation));
-		insert_values.push_back(std::to_string(items_entry.heroic_str));
-		insert_values.push_back(std::to_string(items_entry.heroic_int));
-		insert_values.push_back(std::to_string(items_entry.heroic_wis));
-		insert_values.push_back(std::to_string(items_entry.heroic_agi));
-		insert_values.push_back(std::to_string(items_entry.heroic_dex));
-		insert_values.push_back(std::to_string(items_entry.heroic_sta));
-		insert_values.push_back(std::to_string(items_entry.heroic_cha));
-		insert_values.push_back(std::to_string(items_entry.heroic_pr));
-		insert_values.push_back(std::to_string(items_entry.heroic_dr));
-		insert_values.push_back(std::to_string(items_entry.heroic_fr));
-		insert_values.push_back(std::to_string(items_entry.heroic_cr));
-		insert_values.push_back(std::to_string(items_entry.heroic_mr));
-		insert_values.push_back(std::to_string(items_entry.heroic_svcorrup));
-		insert_values.push_back(std::to_string(items_entry.healamt));
-		insert_values.push_back(std::to_string(items_entry.spelldmg));
-		insert_values.push_back(std::to_string(items_entry.clairvoyance));
-		insert_values.push_back(std::to_string(items_entry.backstabdmg));
-		insert_values.push_back("'" + EscapeString(items_entry.created) + "'");
-		insert_values.push_back(std::to_string(items_entry.elitematerial));
-		insert_values.push_back(std::to_string(items_entry.ldonsellbackrate));
-		insert_values.push_back(std::to_string(items_entry.scriptfileid));
-		insert_values.push_back(std::to_string(items_entry.expendablearrow));
-		insert_values.push_back(std::to_string(items_entry.powersourcecapacity));
-		insert_values.push_back(std::to_string(items_entry.bardeffect));
-		insert_values.push_back(std::to_string(items_entry.bardeffecttype));
-		insert_values.push_back(std::to_string(items_entry.bardlevel2));
-		insert_values.push_back(std::to_string(items_entry.bardlevel));
-		insert_values.push_back(std::to_string(items_entry.bardunk1));
-		insert_values.push_back(std::to_string(items_entry.bardunk2));
-		insert_values.push_back(std::to_string(items_entry.bardunk3));
-		insert_values.push_back(std::to_string(items_entry.bardunk4));
-		insert_values.push_back(std::to_string(items_entry.bardunk5));
-		insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
-		insert_values.push_back(std::to_string(items_entry.bardunk7));
-		insert_values.push_back(std::to_string(items_entry.UNK214));
-		insert_values.push_back(std::to_string(items_entry.subtype));
-		insert_values.push_back(std::to_string(items_entry.UNK220));
-		insert_values.push_back(std::to_string(items_entry.UNK221));
-		insert_values.push_back(std::to_string(items_entry.heirloom));
-		insert_values.push_back(std::to_string(items_entry.UNK223));
-		insert_values.push_back(std::to_string(items_entry.UNK224));
-		insert_values.push_back(std::to_string(items_entry.UNK225));
-		insert_values.push_back(std::to_string(items_entry.UNK226));
-		insert_values.push_back(std::to_string(items_entry.UNK227));
-		insert_values.push_back(std::to_string(items_entry.UNK228));
-		insert_values.push_back(std::to_string(items_entry.UNK229));
-		insert_values.push_back(std::to_string(items_entry.UNK230));
-		insert_values.push_back(std::to_string(items_entry.UNK231));
-		insert_values.push_back(std::to_string(items_entry.UNK232));
-		insert_values.push_back(std::to_string(items_entry.UNK233));
-		insert_values.push_back(std::to_string(items_entry.UNK234));
-		insert_values.push_back(std::to_string(items_entry.placeable));
-		insert_values.push_back(std::to_string(items_entry.UNK236));
-		insert_values.push_back(std::to_string(items_entry.UNK237));
-		insert_values.push_back(std::to_string(items_entry.UNK238));
-		insert_values.push_back(std::to_string(items_entry.UNK239));
-		insert_values.push_back(std::to_string(items_entry.UNK240));
-		insert_values.push_back(std::to_string(items_entry.UNK241));
-		insert_values.push_back(std::to_string(items_entry.epicitem));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.minstatus));
+		v.push_back("'" + Strings::Escape(e.Name) + "'");
+		v.push_back(std::to_string(e.aagi));
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.accuracy));
+		v.push_back(std::to_string(e.acha));
+		v.push_back(std::to_string(e.adex));
+		v.push_back(std::to_string(e.aint));
+		v.push_back(std::to_string(e.artifactflag));
+		v.push_back(std::to_string(e.asta));
+		v.push_back(std::to_string(e.astr));
+		v.push_back(std::to_string(e.attack));
+		v.push_back(std::to_string(e.augrestrict));
+		v.push_back(std::to_string(e.augslot1type));
+		v.push_back(std::to_string(e.augslot1visible));
+		v.push_back(std::to_string(e.augslot2type));
+		v.push_back(std::to_string(e.augslot2visible));
+		v.push_back(std::to_string(e.augslot3type));
+		v.push_back(std::to_string(e.augslot3visible));
+		v.push_back(std::to_string(e.augslot4type));
+		v.push_back(std::to_string(e.augslot4visible));
+		v.push_back(std::to_string(e.augslot5type));
+		v.push_back(std::to_string(e.augslot5visible));
+		v.push_back(std::to_string(e.augslot6type));
+		v.push_back(std::to_string(e.augslot6visible));
+		v.push_back(std::to_string(e.augtype));
+		v.push_back(std::to_string(e.avoidance));
+		v.push_back(std::to_string(e.awis));
+		v.push_back(std::to_string(e.bagsize));
+		v.push_back(std::to_string(e.bagslots));
+		v.push_back(std::to_string(e.bagtype));
+		v.push_back(std::to_string(e.bagwr));
+		v.push_back(std::to_string(e.banedmgamt));
+		v.push_back(std::to_string(e.banedmgraceamt));
+		v.push_back(std::to_string(e.banedmgbody));
+		v.push_back(std::to_string(e.banedmgrace));
+		v.push_back(std::to_string(e.bardtype));
+		v.push_back(std::to_string(e.bardvalue));
+		v.push_back(std::to_string(e.book));
+		v.push_back(std::to_string(e.casttime));
+		v.push_back(std::to_string(e.casttime_));
+		v.push_back("'" + Strings::Escape(e.charmfile) + "'");
+		v.push_back("'" + Strings::Escape(e.charmfileid) + "'");
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.color));
+		v.push_back("'" + Strings::Escape(e.combateffects) + "'");
+		v.push_back(std::to_string(e.extradmgskill));
+		v.push_back(std::to_string(e.extradmgamt));
+		v.push_back(std::to_string(e.price));
+		v.push_back(std::to_string(e.cr));
+		v.push_back(std::to_string(e.damage));
+		v.push_back(std::to_string(e.damageshield));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.delay));
+		v.push_back(std::to_string(e.augdistiller));
+		v.push_back(std::to_string(e.dotshielding));
+		v.push_back(std::to_string(e.dr));
+		v.push_back(std::to_string(e.clicktype));
+		v.push_back(std::to_string(e.clicklevel2));
+		v.push_back(std::to_string(e.elemdmgtype));
+		v.push_back(std::to_string(e.elemdmgamt));
+		v.push_back(std::to_string(e.endur));
+		v.push_back(std::to_string(e.factionamt1));
+		v.push_back(std::to_string(e.factionamt2));
+		v.push_back(std::to_string(e.factionamt3));
+		v.push_back(std::to_string(e.factionamt4));
+		v.push_back(std::to_string(e.factionmod1));
+		v.push_back(std::to_string(e.factionmod2));
+		v.push_back(std::to_string(e.factionmod3));
+		v.push_back(std::to_string(e.factionmod4));
+		v.push_back("'" + Strings::Escape(e.filename) + "'");
+		v.push_back(std::to_string(e.focuseffect));
+		v.push_back(std::to_string(e.fr));
+		v.push_back(std::to_string(e.fvnodrop));
+		v.push_back(std::to_string(e.haste));
+		v.push_back(std::to_string(e.clicklevel));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.regen));
+		v.push_back(std::to_string(e.icon));
+		v.push_back("'" + Strings::Escape(e.idfile) + "'");
+		v.push_back(std::to_string(e.itemclass));
+		v.push_back(std::to_string(e.itemtype));
+		v.push_back(std::to_string(e.ldonprice));
+		v.push_back(std::to_string(e.ldontheme));
+		v.push_back(std::to_string(e.ldonsold));
+		v.push_back(std::to_string(e.light));
+		v.push_back("'" + Strings::Escape(e.lore) + "'");
+		v.push_back(std::to_string(e.loregroup));
+		v.push_back(std::to_string(e.magic));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.manaregen));
+		v.push_back(std::to_string(e.enduranceregen));
+		v.push_back(std::to_string(e.material));
+		v.push_back(std::to_string(e.herosforgemodel));
+		v.push_back(std::to_string(e.maxcharges));
+		v.push_back(std::to_string(e.mr));
+		v.push_back(std::to_string(e.nodrop));
+		v.push_back(std::to_string(e.norent));
+		v.push_back(std::to_string(e.pendingloreflag));
+		v.push_back(std::to_string(e.pr));
+		v.push_back(std::to_string(e.procrate));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.range_));
+		v.push_back(std::to_string(e.reclevel));
+		v.push_back(std::to_string(e.recskill));
+		v.push_back(std::to_string(e.reqlevel));
+		v.push_back(std::to_string(e.sellrate));
+		v.push_back(std::to_string(e.shielding));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.skillmodtype));
+		v.push_back(std::to_string(e.skillmodvalue));
+		v.push_back(std::to_string(e.slots));
+		v.push_back(std::to_string(e.clickeffect));
+		v.push_back(std::to_string(e.spellshield));
+		v.push_back(std::to_string(e.strikethrough));
+		v.push_back(std::to_string(e.stunresist));
+		v.push_back(std::to_string(e.summonedflag));
+		v.push_back(std::to_string(e.tradeskills));
+		v.push_back(std::to_string(e.favor));
+		v.push_back(std::to_string(e.weight));
+		v.push_back(std::to_string(e.UNK012));
+		v.push_back(std::to_string(e.UNK013));
+		v.push_back(std::to_string(e.benefitflag));
+		v.push_back(std::to_string(e.UNK054));
+		v.push_back(std::to_string(e.UNK059));
+		v.push_back(std::to_string(e.booktype));
+		v.push_back(std::to_string(e.recastdelay));
+		v.push_back(std::to_string(e.recasttype));
+		v.push_back(std::to_string(e.guildfavor));
+		v.push_back(std::to_string(e.UNK123));
+		v.push_back(std::to_string(e.UNK124));
+		v.push_back(std::to_string(e.attuneable));
+		v.push_back(std::to_string(e.nopet));
+		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.comment) + "'");
+		v.push_back(std::to_string(e.UNK127));
+		v.push_back(std::to_string(e.pointtype));
+		v.push_back(std::to_string(e.potionbelt));
+		v.push_back(std::to_string(e.potionbeltslots));
+		v.push_back(std::to_string(e.stacksize));
+		v.push_back(std::to_string(e.notransfer));
+		v.push_back(std::to_string(e.stackable));
+		v.push_back("'" + Strings::Escape(e.UNK134) + "'");
+		v.push_back(std::to_string(e.UNK137));
+		v.push_back(std::to_string(e.proceffect));
+		v.push_back(std::to_string(e.proctype));
+		v.push_back(std::to_string(e.proclevel2));
+		v.push_back(std::to_string(e.proclevel));
+		v.push_back(std::to_string(e.UNK142));
+		v.push_back(std::to_string(e.worneffect));
+		v.push_back(std::to_string(e.worntype));
+		v.push_back(std::to_string(e.wornlevel2));
+		v.push_back(std::to_string(e.wornlevel));
+		v.push_back(std::to_string(e.UNK147));
+		v.push_back(std::to_string(e.focustype));
+		v.push_back(std::to_string(e.focuslevel2));
+		v.push_back(std::to_string(e.focuslevel));
+		v.push_back(std::to_string(e.UNK152));
+		v.push_back(std::to_string(e.scrolleffect));
+		v.push_back(std::to_string(e.scrolltype));
+		v.push_back(std::to_string(e.scrolllevel2));
+		v.push_back(std::to_string(e.scrolllevel));
+		v.push_back(std::to_string(e.UNK157));
+		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.serialization) + "'");
+		v.push_back("'" + Strings::Escape(e.source) + "'");
+		v.push_back(std::to_string(e.UNK033));
+		v.push_back("'" + Strings::Escape(e.lorefile) + "'");
+		v.push_back(std::to_string(e.UNK014));
+		v.push_back(std::to_string(e.svcorruption));
+		v.push_back(std::to_string(e.skillmodmax));
+		v.push_back(std::to_string(e.UNK060));
+		v.push_back(std::to_string(e.augslot1unk2));
+		v.push_back(std::to_string(e.augslot2unk2));
+		v.push_back(std::to_string(e.augslot3unk2));
+		v.push_back(std::to_string(e.augslot4unk2));
+		v.push_back(std::to_string(e.augslot5unk2));
+		v.push_back(std::to_string(e.augslot6unk2));
+		v.push_back(std::to_string(e.UNK120));
+		v.push_back(std::to_string(e.UNK121));
+		v.push_back(std::to_string(e.questitemflag));
+		v.push_back("'" + Strings::Escape(e.UNK132) + "'");
+		v.push_back(std::to_string(e.clickunk5));
+		v.push_back("'" + Strings::Escape(e.clickunk6) + "'");
+		v.push_back(std::to_string(e.clickunk7));
+		v.push_back(std::to_string(e.procunk1));
+		v.push_back(std::to_string(e.procunk2));
+		v.push_back(std::to_string(e.procunk3));
+		v.push_back(std::to_string(e.procunk4));
+		v.push_back("'" + Strings::Escape(e.procunk6) + "'");
+		v.push_back(std::to_string(e.procunk7));
+		v.push_back(std::to_string(e.wornunk1));
+		v.push_back(std::to_string(e.wornunk2));
+		v.push_back(std::to_string(e.wornunk3));
+		v.push_back(std::to_string(e.wornunk4));
+		v.push_back(std::to_string(e.wornunk5));
+		v.push_back("'" + Strings::Escape(e.wornunk6) + "'");
+		v.push_back(std::to_string(e.wornunk7));
+		v.push_back(std::to_string(e.focusunk1));
+		v.push_back(std::to_string(e.focusunk2));
+		v.push_back(std::to_string(e.focusunk3));
+		v.push_back(std::to_string(e.focusunk4));
+		v.push_back(std::to_string(e.focusunk5));
+		v.push_back("'" + Strings::Escape(e.focusunk6) + "'");
+		v.push_back(std::to_string(e.focusunk7));
+		v.push_back(std::to_string(e.scrollunk1));
+		v.push_back(std::to_string(e.scrollunk2));
+		v.push_back(std::to_string(e.scrollunk3));
+		v.push_back(std::to_string(e.scrollunk4));
+		v.push_back(std::to_string(e.scrollunk5));
+		v.push_back("'" + Strings::Escape(e.scrollunk6) + "'");
+		v.push_back(std::to_string(e.scrollunk7));
+		v.push_back(std::to_string(e.UNK193));
+		v.push_back(std::to_string(e.purity));
+		v.push_back(std::to_string(e.evoitem));
+		v.push_back(std::to_string(e.evoid));
+		v.push_back(std::to_string(e.evolvinglevel));
+		v.push_back(std::to_string(e.evomax));
+		v.push_back("'" + Strings::Escape(e.clickname) + "'");
+		v.push_back("'" + Strings::Escape(e.procname) + "'");
+		v.push_back("'" + Strings::Escape(e.wornname) + "'");
+		v.push_back("'" + Strings::Escape(e.focusname) + "'");
+		v.push_back("'" + Strings::Escape(e.scrollname) + "'");
+		v.push_back(std::to_string(e.dsmitigation));
+		v.push_back(std::to_string(e.heroic_str));
+		v.push_back(std::to_string(e.heroic_int));
+		v.push_back(std::to_string(e.heroic_wis));
+		v.push_back(std::to_string(e.heroic_agi));
+		v.push_back(std::to_string(e.heroic_dex));
+		v.push_back(std::to_string(e.heroic_sta));
+		v.push_back(std::to_string(e.heroic_cha));
+		v.push_back(std::to_string(e.heroic_pr));
+		v.push_back(std::to_string(e.heroic_dr));
+		v.push_back(std::to_string(e.heroic_fr));
+		v.push_back(std::to_string(e.heroic_cr));
+		v.push_back(std::to_string(e.heroic_mr));
+		v.push_back(std::to_string(e.heroic_svcorrup));
+		v.push_back(std::to_string(e.healamt));
+		v.push_back(std::to_string(e.spelldmg));
+		v.push_back(std::to_string(e.clairvoyance));
+		v.push_back(std::to_string(e.backstabdmg));
+		v.push_back("'" + Strings::Escape(e.created) + "'");
+		v.push_back(std::to_string(e.elitematerial));
+		v.push_back(std::to_string(e.ldonsellbackrate));
+		v.push_back(std::to_string(e.scriptfileid));
+		v.push_back(std::to_string(e.expendablearrow));
+		v.push_back(std::to_string(e.powersourcecapacity));
+		v.push_back(std::to_string(e.bardeffect));
+		v.push_back(std::to_string(e.bardeffecttype));
+		v.push_back(std::to_string(e.bardlevel2));
+		v.push_back(std::to_string(e.bardlevel));
+		v.push_back(std::to_string(e.bardunk1));
+		v.push_back(std::to_string(e.bardunk2));
+		v.push_back(std::to_string(e.bardunk3));
+		v.push_back(std::to_string(e.bardunk4));
+		v.push_back(std::to_string(e.bardunk5));
+		v.push_back("'" + Strings::Escape(e.bardname) + "'");
+		v.push_back(std::to_string(e.bardunk7));
+		v.push_back(std::to_string(e.UNK214));
+		v.push_back(std::to_string(e.subtype));
+		v.push_back(std::to_string(e.UNK220));
+		v.push_back(std::to_string(e.UNK221));
+		v.push_back(std::to_string(e.heirloom));
+		v.push_back(std::to_string(e.UNK223));
+		v.push_back(std::to_string(e.UNK224));
+		v.push_back(std::to_string(e.UNK225));
+		v.push_back(std::to_string(e.UNK226));
+		v.push_back(std::to_string(e.UNK227));
+		v.push_back(std::to_string(e.UNK228));
+		v.push_back(std::to_string(e.UNK229));
+		v.push_back(std::to_string(e.UNK230));
+		v.push_back(std::to_string(e.UNK231));
+		v.push_back(std::to_string(e.UNK232));
+		v.push_back(std::to_string(e.UNK233));
+		v.push_back(std::to_string(e.UNK234));
+		v.push_back(std::to_string(e.placeable));
+		v.push_back(std::to_string(e.UNK236));
+		v.push_back(std::to_string(e.UNK237));
+		v.push_back(std::to_string(e.UNK238));
+		v.push_back(std::to_string(e.UNK239));
+		v.push_back(std::to_string(e.UNK240));
+		v.push_back(std::to_string(e.UNK241));
+		v.push_back(std::to_string(e.epicitem));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			items_entry.id = results.LastInsertedID();
-			return items_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		items_entry = NewEntity();
+		e = NewEntity();
 
-		return items_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<Items> items_entries
+		Database& db,
+		const std::vector<Items> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &items_entry: items_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(items_entry.id));
-			insert_values.push_back(std::to_string(items_entry.minstatus));
-			insert_values.push_back("'" + EscapeString(items_entry.Name) + "'");
-			insert_values.push_back(std::to_string(items_entry.aagi));
-			insert_values.push_back(std::to_string(items_entry.ac));
-			insert_values.push_back(std::to_string(items_entry.accuracy));
-			insert_values.push_back(std::to_string(items_entry.acha));
-			insert_values.push_back(std::to_string(items_entry.adex));
-			insert_values.push_back(std::to_string(items_entry.aint));
-			insert_values.push_back(std::to_string(items_entry.artifactflag));
-			insert_values.push_back(std::to_string(items_entry.asta));
-			insert_values.push_back(std::to_string(items_entry.astr));
-			insert_values.push_back(std::to_string(items_entry.attack));
-			insert_values.push_back(std::to_string(items_entry.augrestrict));
-			insert_values.push_back(std::to_string(items_entry.augslot1type));
-			insert_values.push_back(std::to_string(items_entry.augslot1visible));
-			insert_values.push_back(std::to_string(items_entry.augslot2type));
-			insert_values.push_back(std::to_string(items_entry.augslot2visible));
-			insert_values.push_back(std::to_string(items_entry.augslot3type));
-			insert_values.push_back(std::to_string(items_entry.augslot3visible));
-			insert_values.push_back(std::to_string(items_entry.augslot4type));
-			insert_values.push_back(std::to_string(items_entry.augslot4visible));
-			insert_values.push_back(std::to_string(items_entry.augslot5type));
-			insert_values.push_back(std::to_string(items_entry.augslot5visible));
-			insert_values.push_back(std::to_string(items_entry.augslot6type));
-			insert_values.push_back(std::to_string(items_entry.augslot6visible));
-			insert_values.push_back(std::to_string(items_entry.augtype));
-			insert_values.push_back(std::to_string(items_entry.avoidance));
-			insert_values.push_back(std::to_string(items_entry.awis));
-			insert_values.push_back(std::to_string(items_entry.bagsize));
-			insert_values.push_back(std::to_string(items_entry.bagslots));
-			insert_values.push_back(std::to_string(items_entry.bagtype));
-			insert_values.push_back(std::to_string(items_entry.bagwr));
-			insert_values.push_back(std::to_string(items_entry.banedmgamt));
-			insert_values.push_back(std::to_string(items_entry.banedmgraceamt));
-			insert_values.push_back(std::to_string(items_entry.banedmgbody));
-			insert_values.push_back(std::to_string(items_entry.banedmgrace));
-			insert_values.push_back(std::to_string(items_entry.bardtype));
-			insert_values.push_back(std::to_string(items_entry.bardvalue));
-			insert_values.push_back(std::to_string(items_entry.book));
-			insert_values.push_back(std::to_string(items_entry.casttime));
-			insert_values.push_back(std::to_string(items_entry.casttime_));
-			insert_values.push_back("'" + EscapeString(items_entry.charmfile) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.charmfileid) + "'");
-			insert_values.push_back(std::to_string(items_entry.classes));
-			insert_values.push_back(std::to_string(items_entry.color));
-			insert_values.push_back("'" + EscapeString(items_entry.combateffects) + "'");
-			insert_values.push_back(std::to_string(items_entry.extradmgskill));
-			insert_values.push_back(std::to_string(items_entry.extradmgamt));
-			insert_values.push_back(std::to_string(items_entry.price));
-			insert_values.push_back(std::to_string(items_entry.cr));
-			insert_values.push_back(std::to_string(items_entry.damage));
-			insert_values.push_back(std::to_string(items_entry.damageshield));
-			insert_values.push_back(std::to_string(items_entry.deity));
-			insert_values.push_back(std::to_string(items_entry.delay));
-			insert_values.push_back(std::to_string(items_entry.augdistiller));
-			insert_values.push_back(std::to_string(items_entry.dotshielding));
-			insert_values.push_back(std::to_string(items_entry.dr));
-			insert_values.push_back(std::to_string(items_entry.clicktype));
-			insert_values.push_back(std::to_string(items_entry.clicklevel2));
-			insert_values.push_back(std::to_string(items_entry.elemdmgtype));
-			insert_values.push_back(std::to_string(items_entry.elemdmgamt));
-			insert_values.push_back(std::to_string(items_entry.endur));
-			insert_values.push_back(std::to_string(items_entry.factionamt1));
-			insert_values.push_back(std::to_string(items_entry.factionamt2));
-			insert_values.push_back(std::to_string(items_entry.factionamt3));
-			insert_values.push_back(std::to_string(items_entry.factionamt4));
-			insert_values.push_back(std::to_string(items_entry.factionmod1));
-			insert_values.push_back(std::to_string(items_entry.factionmod2));
-			insert_values.push_back(std::to_string(items_entry.factionmod3));
-			insert_values.push_back(std::to_string(items_entry.factionmod4));
-			insert_values.push_back("'" + EscapeString(items_entry.filename) + "'");
-			insert_values.push_back(std::to_string(items_entry.focuseffect));
-			insert_values.push_back(std::to_string(items_entry.fr));
-			insert_values.push_back(std::to_string(items_entry.fvnodrop));
-			insert_values.push_back(std::to_string(items_entry.haste));
-			insert_values.push_back(std::to_string(items_entry.clicklevel));
-			insert_values.push_back(std::to_string(items_entry.hp));
-			insert_values.push_back(std::to_string(items_entry.regen));
-			insert_values.push_back(std::to_string(items_entry.icon));
-			insert_values.push_back("'" + EscapeString(items_entry.idfile) + "'");
-			insert_values.push_back(std::to_string(items_entry.itemclass));
-			insert_values.push_back(std::to_string(items_entry.itemtype));
-			insert_values.push_back(std::to_string(items_entry.ldonprice));
-			insert_values.push_back(std::to_string(items_entry.ldontheme));
-			insert_values.push_back(std::to_string(items_entry.ldonsold));
-			insert_values.push_back(std::to_string(items_entry.light));
-			insert_values.push_back("'" + EscapeString(items_entry.lore) + "'");
-			insert_values.push_back(std::to_string(items_entry.loregroup));
-			insert_values.push_back(std::to_string(items_entry.magic));
-			insert_values.push_back(std::to_string(items_entry.mana));
-			insert_values.push_back(std::to_string(items_entry.manaregen));
-			insert_values.push_back(std::to_string(items_entry.enduranceregen));
-			insert_values.push_back(std::to_string(items_entry.material));
-			insert_values.push_back(std::to_string(items_entry.herosforgemodel));
-			insert_values.push_back(std::to_string(items_entry.maxcharges));
-			insert_values.push_back(std::to_string(items_entry.mr));
-			insert_values.push_back(std::to_string(items_entry.nodrop));
-			insert_values.push_back(std::to_string(items_entry.norent));
-			insert_values.push_back(std::to_string(items_entry.pendingloreflag));
-			insert_values.push_back(std::to_string(items_entry.pr));
-			insert_values.push_back(std::to_string(items_entry.procrate));
-			insert_values.push_back(std::to_string(items_entry.races));
-			insert_values.push_back(std::to_string(items_entry.range));
-			insert_values.push_back(std::to_string(items_entry.reclevel));
-			insert_values.push_back(std::to_string(items_entry.recskill));
-			insert_values.push_back(std::to_string(items_entry.reqlevel));
-			insert_values.push_back(std::to_string(items_entry.sellrate));
-			insert_values.push_back(std::to_string(items_entry.shielding));
-			insert_values.push_back(std::to_string(items_entry.size));
-			insert_values.push_back(std::to_string(items_entry.skillmodtype));
-			insert_values.push_back(std::to_string(items_entry.skillmodvalue));
-			insert_values.push_back(std::to_string(items_entry.slots));
-			insert_values.push_back(std::to_string(items_entry.clickeffect));
-			insert_values.push_back(std::to_string(items_entry.spellshield));
-			insert_values.push_back(std::to_string(items_entry.strikethrough));
-			insert_values.push_back(std::to_string(items_entry.stunresist));
-			insert_values.push_back(std::to_string(items_entry.summonedflag));
-			insert_values.push_back(std::to_string(items_entry.tradeskills));
-			insert_values.push_back(std::to_string(items_entry.favor));
-			insert_values.push_back(std::to_string(items_entry.weight));
-			insert_values.push_back(std::to_string(items_entry.UNK012));
-			insert_values.push_back(std::to_string(items_entry.UNK013));
-			insert_values.push_back(std::to_string(items_entry.benefitflag));
-			insert_values.push_back(std::to_string(items_entry.UNK054));
-			insert_values.push_back(std::to_string(items_entry.UNK059));
-			insert_values.push_back(std::to_string(items_entry.booktype));
-			insert_values.push_back(std::to_string(items_entry.recastdelay));
-			insert_values.push_back(std::to_string(items_entry.recasttype));
-			insert_values.push_back(std::to_string(items_entry.guildfavor));
-			insert_values.push_back(std::to_string(items_entry.UNK123));
-			insert_values.push_back(std::to_string(items_entry.UNK124));
-			insert_values.push_back(std::to_string(items_entry.attuneable));
-			insert_values.push_back(std::to_string(items_entry.nopet));
-			insert_values.push_back("'" + EscapeString(items_entry.updated) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.comment) + "'");
-			insert_values.push_back(std::to_string(items_entry.UNK127));
-			insert_values.push_back(std::to_string(items_entry.pointtype));
-			insert_values.push_back(std::to_string(items_entry.potionbelt));
-			insert_values.push_back(std::to_string(items_entry.potionbeltslots));
-			insert_values.push_back(std::to_string(items_entry.stacksize));
-			insert_values.push_back(std::to_string(items_entry.notransfer));
-			insert_values.push_back(std::to_string(items_entry.stackable));
-			insert_values.push_back("'" + EscapeString(items_entry.UNK134) + "'");
-			insert_values.push_back(std::to_string(items_entry.UNK137));
-			insert_values.push_back(std::to_string(items_entry.proceffect));
-			insert_values.push_back(std::to_string(items_entry.proctype));
-			insert_values.push_back(std::to_string(items_entry.proclevel2));
-			insert_values.push_back(std::to_string(items_entry.proclevel));
-			insert_values.push_back(std::to_string(items_entry.UNK142));
-			insert_values.push_back(std::to_string(items_entry.worneffect));
-			insert_values.push_back(std::to_string(items_entry.worntype));
-			insert_values.push_back(std::to_string(items_entry.wornlevel2));
-			insert_values.push_back(std::to_string(items_entry.wornlevel));
-			insert_values.push_back(std::to_string(items_entry.UNK147));
-			insert_values.push_back(std::to_string(items_entry.focustype));
-			insert_values.push_back(std::to_string(items_entry.focuslevel2));
-			insert_values.push_back(std::to_string(items_entry.focuslevel));
-			insert_values.push_back(std::to_string(items_entry.UNK152));
-			insert_values.push_back(std::to_string(items_entry.scrolleffect));
-			insert_values.push_back(std::to_string(items_entry.scrolltype));
-			insert_values.push_back(std::to_string(items_entry.scrolllevel2));
-			insert_values.push_back(std::to_string(items_entry.scrolllevel));
-			insert_values.push_back(std::to_string(items_entry.UNK157));
-			insert_values.push_back("'" + EscapeString(items_entry.serialized) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.verified) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.serialization) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.source) + "'");
-			insert_values.push_back(std::to_string(items_entry.UNK033));
-			insert_values.push_back("'" + EscapeString(items_entry.lorefile) + "'");
-			insert_values.push_back(std::to_string(items_entry.UNK014));
-			insert_values.push_back(std::to_string(items_entry.svcorruption));
-			insert_values.push_back(std::to_string(items_entry.skillmodmax));
-			insert_values.push_back(std::to_string(items_entry.UNK060));
-			insert_values.push_back(std::to_string(items_entry.augslot1unk2));
-			insert_values.push_back(std::to_string(items_entry.augslot2unk2));
-			insert_values.push_back(std::to_string(items_entry.augslot3unk2));
-			insert_values.push_back(std::to_string(items_entry.augslot4unk2));
-			insert_values.push_back(std::to_string(items_entry.augslot5unk2));
-			insert_values.push_back(std::to_string(items_entry.augslot6unk2));
-			insert_values.push_back(std::to_string(items_entry.UNK120));
-			insert_values.push_back(std::to_string(items_entry.UNK121));
-			insert_values.push_back(std::to_string(items_entry.questitemflag));
-			insert_values.push_back("'" + EscapeString(items_entry.UNK132) + "'");
-			insert_values.push_back(std::to_string(items_entry.clickunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.clickunk6) + "'");
-			insert_values.push_back(std::to_string(items_entry.clickunk7));
-			insert_values.push_back(std::to_string(items_entry.procunk1));
-			insert_values.push_back(std::to_string(items_entry.procunk2));
-			insert_values.push_back(std::to_string(items_entry.procunk3));
-			insert_values.push_back(std::to_string(items_entry.procunk4));
-			insert_values.push_back("'" + EscapeString(items_entry.procunk6) + "'");
-			insert_values.push_back(std::to_string(items_entry.procunk7));
-			insert_values.push_back(std::to_string(items_entry.wornunk1));
-			insert_values.push_back(std::to_string(items_entry.wornunk2));
-			insert_values.push_back(std::to_string(items_entry.wornunk3));
-			insert_values.push_back(std::to_string(items_entry.wornunk4));
-			insert_values.push_back(std::to_string(items_entry.wornunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.wornunk6) + "'");
-			insert_values.push_back(std::to_string(items_entry.wornunk7));
-			insert_values.push_back(std::to_string(items_entry.focusunk1));
-			insert_values.push_back(std::to_string(items_entry.focusunk2));
-			insert_values.push_back(std::to_string(items_entry.focusunk3));
-			insert_values.push_back(std::to_string(items_entry.focusunk4));
-			insert_values.push_back(std::to_string(items_entry.focusunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.focusunk6) + "'");
-			insert_values.push_back(std::to_string(items_entry.focusunk7));
-			insert_values.push_back(std::to_string(items_entry.scrollunk1));
-			insert_values.push_back(std::to_string(items_entry.scrollunk2));
-			insert_values.push_back(std::to_string(items_entry.scrollunk3));
-			insert_values.push_back(std::to_string(items_entry.scrollunk4));
-			insert_values.push_back(std::to_string(items_entry.scrollunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.scrollunk6) + "'");
-			insert_values.push_back(std::to_string(items_entry.scrollunk7));
-			insert_values.push_back(std::to_string(items_entry.UNK193));
-			insert_values.push_back(std::to_string(items_entry.purity));
-			insert_values.push_back(std::to_string(items_entry.evoitem));
-			insert_values.push_back(std::to_string(items_entry.evoid));
-			insert_values.push_back(std::to_string(items_entry.evolvinglevel));
-			insert_values.push_back(std::to_string(items_entry.evomax));
-			insert_values.push_back("'" + EscapeString(items_entry.clickname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.procname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.wornname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.focusname) + "'");
-			insert_values.push_back("'" + EscapeString(items_entry.scrollname) + "'");
-			insert_values.push_back(std::to_string(items_entry.dsmitigation));
-			insert_values.push_back(std::to_string(items_entry.heroic_str));
-			insert_values.push_back(std::to_string(items_entry.heroic_int));
-			insert_values.push_back(std::to_string(items_entry.heroic_wis));
-			insert_values.push_back(std::to_string(items_entry.heroic_agi));
-			insert_values.push_back(std::to_string(items_entry.heroic_dex));
-			insert_values.push_back(std::to_string(items_entry.heroic_sta));
-			insert_values.push_back(std::to_string(items_entry.heroic_cha));
-			insert_values.push_back(std::to_string(items_entry.heroic_pr));
-			insert_values.push_back(std::to_string(items_entry.heroic_dr));
-			insert_values.push_back(std::to_string(items_entry.heroic_fr));
-			insert_values.push_back(std::to_string(items_entry.heroic_cr));
-			insert_values.push_back(std::to_string(items_entry.heroic_mr));
-			insert_values.push_back(std::to_string(items_entry.heroic_svcorrup));
-			insert_values.push_back(std::to_string(items_entry.healamt));
-			insert_values.push_back(std::to_string(items_entry.spelldmg));
-			insert_values.push_back(std::to_string(items_entry.clairvoyance));
-			insert_values.push_back(std::to_string(items_entry.backstabdmg));
-			insert_values.push_back("'" + EscapeString(items_entry.created) + "'");
-			insert_values.push_back(std::to_string(items_entry.elitematerial));
-			insert_values.push_back(std::to_string(items_entry.ldonsellbackrate));
-			insert_values.push_back(std::to_string(items_entry.scriptfileid));
-			insert_values.push_back(std::to_string(items_entry.expendablearrow));
-			insert_values.push_back(std::to_string(items_entry.powersourcecapacity));
-			insert_values.push_back(std::to_string(items_entry.bardeffect));
-			insert_values.push_back(std::to_string(items_entry.bardeffecttype));
-			insert_values.push_back(std::to_string(items_entry.bardlevel2));
-			insert_values.push_back(std::to_string(items_entry.bardlevel));
-			insert_values.push_back(std::to_string(items_entry.bardunk1));
-			insert_values.push_back(std::to_string(items_entry.bardunk2));
-			insert_values.push_back(std::to_string(items_entry.bardunk3));
-			insert_values.push_back(std::to_string(items_entry.bardunk4));
-			insert_values.push_back(std::to_string(items_entry.bardunk5));
-			insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
-			insert_values.push_back(std::to_string(items_entry.bardunk7));
-			insert_values.push_back(std::to_string(items_entry.UNK214));
-			insert_values.push_back(std::to_string(items_entry.subtype));
-			insert_values.push_back(std::to_string(items_entry.UNK220));
-			insert_values.push_back(std::to_string(items_entry.UNK221));
-			insert_values.push_back(std::to_string(items_entry.heirloom));
-			insert_values.push_back(std::to_string(items_entry.UNK223));
-			insert_values.push_back(std::to_string(items_entry.UNK224));
-			insert_values.push_back(std::to_string(items_entry.UNK225));
-			insert_values.push_back(std::to_string(items_entry.UNK226));
-			insert_values.push_back(std::to_string(items_entry.UNK227));
-			insert_values.push_back(std::to_string(items_entry.UNK228));
-			insert_values.push_back(std::to_string(items_entry.UNK229));
-			insert_values.push_back(std::to_string(items_entry.UNK230));
-			insert_values.push_back(std::to_string(items_entry.UNK231));
-			insert_values.push_back(std::to_string(items_entry.UNK232));
-			insert_values.push_back(std::to_string(items_entry.UNK233));
-			insert_values.push_back(std::to_string(items_entry.UNK234));
-			insert_values.push_back(std::to_string(items_entry.placeable));
-			insert_values.push_back(std::to_string(items_entry.UNK236));
-			insert_values.push_back(std::to_string(items_entry.UNK237));
-			insert_values.push_back(std::to_string(items_entry.UNK238));
-			insert_values.push_back(std::to_string(items_entry.UNK239));
-			insert_values.push_back(std::to_string(items_entry.UNK240));
-			insert_values.push_back(std::to_string(items_entry.UNK241));
-			insert_values.push_back(std::to_string(items_entry.epicitem));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.minstatus));
+			v.push_back("'" + Strings::Escape(e.Name) + "'");
+			v.push_back(std::to_string(e.aagi));
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.accuracy));
+			v.push_back(std::to_string(e.acha));
+			v.push_back(std::to_string(e.adex));
+			v.push_back(std::to_string(e.aint));
+			v.push_back(std::to_string(e.artifactflag));
+			v.push_back(std::to_string(e.asta));
+			v.push_back(std::to_string(e.astr));
+			v.push_back(std::to_string(e.attack));
+			v.push_back(std::to_string(e.augrestrict));
+			v.push_back(std::to_string(e.augslot1type));
+			v.push_back(std::to_string(e.augslot1visible));
+			v.push_back(std::to_string(e.augslot2type));
+			v.push_back(std::to_string(e.augslot2visible));
+			v.push_back(std::to_string(e.augslot3type));
+			v.push_back(std::to_string(e.augslot3visible));
+			v.push_back(std::to_string(e.augslot4type));
+			v.push_back(std::to_string(e.augslot4visible));
+			v.push_back(std::to_string(e.augslot5type));
+			v.push_back(std::to_string(e.augslot5visible));
+			v.push_back(std::to_string(e.augslot6type));
+			v.push_back(std::to_string(e.augslot6visible));
+			v.push_back(std::to_string(e.augtype));
+			v.push_back(std::to_string(e.avoidance));
+			v.push_back(std::to_string(e.awis));
+			v.push_back(std::to_string(e.bagsize));
+			v.push_back(std::to_string(e.bagslots));
+			v.push_back(std::to_string(e.bagtype));
+			v.push_back(std::to_string(e.bagwr));
+			v.push_back(std::to_string(e.banedmgamt));
+			v.push_back(std::to_string(e.banedmgraceamt));
+			v.push_back(std::to_string(e.banedmgbody));
+			v.push_back(std::to_string(e.banedmgrace));
+			v.push_back(std::to_string(e.bardtype));
+			v.push_back(std::to_string(e.bardvalue));
+			v.push_back(std::to_string(e.book));
+			v.push_back(std::to_string(e.casttime));
+			v.push_back(std::to_string(e.casttime_));
+			v.push_back("'" + Strings::Escape(e.charmfile) + "'");
+			v.push_back("'" + Strings::Escape(e.charmfileid) + "'");
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.color));
+			v.push_back("'" + Strings::Escape(e.combateffects) + "'");
+			v.push_back(std::to_string(e.extradmgskill));
+			v.push_back(std::to_string(e.extradmgamt));
+			v.push_back(std::to_string(e.price));
+			v.push_back(std::to_string(e.cr));
+			v.push_back(std::to_string(e.damage));
+			v.push_back(std::to_string(e.damageshield));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.delay));
+			v.push_back(std::to_string(e.augdistiller));
+			v.push_back(std::to_string(e.dotshielding));
+			v.push_back(std::to_string(e.dr));
+			v.push_back(std::to_string(e.clicktype));
+			v.push_back(std::to_string(e.clicklevel2));
+			v.push_back(std::to_string(e.elemdmgtype));
+			v.push_back(std::to_string(e.elemdmgamt));
+			v.push_back(std::to_string(e.endur));
+			v.push_back(std::to_string(e.factionamt1));
+			v.push_back(std::to_string(e.factionamt2));
+			v.push_back(std::to_string(e.factionamt3));
+			v.push_back(std::to_string(e.factionamt4));
+			v.push_back(std::to_string(e.factionmod1));
+			v.push_back(std::to_string(e.factionmod2));
+			v.push_back(std::to_string(e.factionmod3));
+			v.push_back(std::to_string(e.factionmod4));
+			v.push_back("'" + Strings::Escape(e.filename) + "'");
+			v.push_back(std::to_string(e.focuseffect));
+			v.push_back(std::to_string(e.fr));
+			v.push_back(std::to_string(e.fvnodrop));
+			v.push_back(std::to_string(e.haste));
+			v.push_back(std::to_string(e.clicklevel));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.regen));
+			v.push_back(std::to_string(e.icon));
+			v.push_back("'" + Strings::Escape(e.idfile) + "'");
+			v.push_back(std::to_string(e.itemclass));
+			v.push_back(std::to_string(e.itemtype));
+			v.push_back(std::to_string(e.ldonprice));
+			v.push_back(std::to_string(e.ldontheme));
+			v.push_back(std::to_string(e.ldonsold));
+			v.push_back(std::to_string(e.light));
+			v.push_back("'" + Strings::Escape(e.lore) + "'");
+			v.push_back(std::to_string(e.loregroup));
+			v.push_back(std::to_string(e.magic));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.manaregen));
+			v.push_back(std::to_string(e.enduranceregen));
+			v.push_back(std::to_string(e.material));
+			v.push_back(std::to_string(e.herosforgemodel));
+			v.push_back(std::to_string(e.maxcharges));
+			v.push_back(std::to_string(e.mr));
+			v.push_back(std::to_string(e.nodrop));
+			v.push_back(std::to_string(e.norent));
+			v.push_back(std::to_string(e.pendingloreflag));
+			v.push_back(std::to_string(e.pr));
+			v.push_back(std::to_string(e.procrate));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.range_));
+			v.push_back(std::to_string(e.reclevel));
+			v.push_back(std::to_string(e.recskill));
+			v.push_back(std::to_string(e.reqlevel));
+			v.push_back(std::to_string(e.sellrate));
+			v.push_back(std::to_string(e.shielding));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.skillmodtype));
+			v.push_back(std::to_string(e.skillmodvalue));
+			v.push_back(std::to_string(e.slots));
+			v.push_back(std::to_string(e.clickeffect));
+			v.push_back(std::to_string(e.spellshield));
+			v.push_back(std::to_string(e.strikethrough));
+			v.push_back(std::to_string(e.stunresist));
+			v.push_back(std::to_string(e.summonedflag));
+			v.push_back(std::to_string(e.tradeskills));
+			v.push_back(std::to_string(e.favor));
+			v.push_back(std::to_string(e.weight));
+			v.push_back(std::to_string(e.UNK012));
+			v.push_back(std::to_string(e.UNK013));
+			v.push_back(std::to_string(e.benefitflag));
+			v.push_back(std::to_string(e.UNK054));
+			v.push_back(std::to_string(e.UNK059));
+			v.push_back(std::to_string(e.booktype));
+			v.push_back(std::to_string(e.recastdelay));
+			v.push_back(std::to_string(e.recasttype));
+			v.push_back(std::to_string(e.guildfavor));
+			v.push_back(std::to_string(e.UNK123));
+			v.push_back(std::to_string(e.UNK124));
+			v.push_back(std::to_string(e.attuneable));
+			v.push_back(std::to_string(e.nopet));
+			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.comment) + "'");
+			v.push_back(std::to_string(e.UNK127));
+			v.push_back(std::to_string(e.pointtype));
+			v.push_back(std::to_string(e.potionbelt));
+			v.push_back(std::to_string(e.potionbeltslots));
+			v.push_back(std::to_string(e.stacksize));
+			v.push_back(std::to_string(e.notransfer));
+			v.push_back(std::to_string(e.stackable));
+			v.push_back("'" + Strings::Escape(e.UNK134) + "'");
+			v.push_back(std::to_string(e.UNK137));
+			v.push_back(std::to_string(e.proceffect));
+			v.push_back(std::to_string(e.proctype));
+			v.push_back(std::to_string(e.proclevel2));
+			v.push_back(std::to_string(e.proclevel));
+			v.push_back(std::to_string(e.UNK142));
+			v.push_back(std::to_string(e.worneffect));
+			v.push_back(std::to_string(e.worntype));
+			v.push_back(std::to_string(e.wornlevel2));
+			v.push_back(std::to_string(e.wornlevel));
+			v.push_back(std::to_string(e.UNK147));
+			v.push_back(std::to_string(e.focustype));
+			v.push_back(std::to_string(e.focuslevel2));
+			v.push_back(std::to_string(e.focuslevel));
+			v.push_back(std::to_string(e.UNK152));
+			v.push_back(std::to_string(e.scrolleffect));
+			v.push_back(std::to_string(e.scrolltype));
+			v.push_back(std::to_string(e.scrolllevel2));
+			v.push_back(std::to_string(e.scrolllevel));
+			v.push_back(std::to_string(e.UNK157));
+			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.serialization) + "'");
+			v.push_back("'" + Strings::Escape(e.source) + "'");
+			v.push_back(std::to_string(e.UNK033));
+			v.push_back("'" + Strings::Escape(e.lorefile) + "'");
+			v.push_back(std::to_string(e.UNK014));
+			v.push_back(std::to_string(e.svcorruption));
+			v.push_back(std::to_string(e.skillmodmax));
+			v.push_back(std::to_string(e.UNK060));
+			v.push_back(std::to_string(e.augslot1unk2));
+			v.push_back(std::to_string(e.augslot2unk2));
+			v.push_back(std::to_string(e.augslot3unk2));
+			v.push_back(std::to_string(e.augslot4unk2));
+			v.push_back(std::to_string(e.augslot5unk2));
+			v.push_back(std::to_string(e.augslot6unk2));
+			v.push_back(std::to_string(e.UNK120));
+			v.push_back(std::to_string(e.UNK121));
+			v.push_back(std::to_string(e.questitemflag));
+			v.push_back("'" + Strings::Escape(e.UNK132) + "'");
+			v.push_back(std::to_string(e.clickunk5));
+			v.push_back("'" + Strings::Escape(e.clickunk6) + "'");
+			v.push_back(std::to_string(e.clickunk7));
+			v.push_back(std::to_string(e.procunk1));
+			v.push_back(std::to_string(e.procunk2));
+			v.push_back(std::to_string(e.procunk3));
+			v.push_back(std::to_string(e.procunk4));
+			v.push_back("'" + Strings::Escape(e.procunk6) + "'");
+			v.push_back(std::to_string(e.procunk7));
+			v.push_back(std::to_string(e.wornunk1));
+			v.push_back(std::to_string(e.wornunk2));
+			v.push_back(std::to_string(e.wornunk3));
+			v.push_back(std::to_string(e.wornunk4));
+			v.push_back(std::to_string(e.wornunk5));
+			v.push_back("'" + Strings::Escape(e.wornunk6) + "'");
+			v.push_back(std::to_string(e.wornunk7));
+			v.push_back(std::to_string(e.focusunk1));
+			v.push_back(std::to_string(e.focusunk2));
+			v.push_back(std::to_string(e.focusunk3));
+			v.push_back(std::to_string(e.focusunk4));
+			v.push_back(std::to_string(e.focusunk5));
+			v.push_back("'" + Strings::Escape(e.focusunk6) + "'");
+			v.push_back(std::to_string(e.focusunk7));
+			v.push_back(std::to_string(e.scrollunk1));
+			v.push_back(std::to_string(e.scrollunk2));
+			v.push_back(std::to_string(e.scrollunk3));
+			v.push_back(std::to_string(e.scrollunk4));
+			v.push_back(std::to_string(e.scrollunk5));
+			v.push_back("'" + Strings::Escape(e.scrollunk6) + "'");
+			v.push_back(std::to_string(e.scrollunk7));
+			v.push_back(std::to_string(e.UNK193));
+			v.push_back(std::to_string(e.purity));
+			v.push_back(std::to_string(e.evoitem));
+			v.push_back(std::to_string(e.evoid));
+			v.push_back(std::to_string(e.evolvinglevel));
+			v.push_back(std::to_string(e.evomax));
+			v.push_back("'" + Strings::Escape(e.clickname) + "'");
+			v.push_back("'" + Strings::Escape(e.procname) + "'");
+			v.push_back("'" + Strings::Escape(e.wornname) + "'");
+			v.push_back("'" + Strings::Escape(e.focusname) + "'");
+			v.push_back("'" + Strings::Escape(e.scrollname) + "'");
+			v.push_back(std::to_string(e.dsmitigation));
+			v.push_back(std::to_string(e.heroic_str));
+			v.push_back(std::to_string(e.heroic_int));
+			v.push_back(std::to_string(e.heroic_wis));
+			v.push_back(std::to_string(e.heroic_agi));
+			v.push_back(std::to_string(e.heroic_dex));
+			v.push_back(std::to_string(e.heroic_sta));
+			v.push_back(std::to_string(e.heroic_cha));
+			v.push_back(std::to_string(e.heroic_pr));
+			v.push_back(std::to_string(e.heroic_dr));
+			v.push_back(std::to_string(e.heroic_fr));
+			v.push_back(std::to_string(e.heroic_cr));
+			v.push_back(std::to_string(e.heroic_mr));
+			v.push_back(std::to_string(e.heroic_svcorrup));
+			v.push_back(std::to_string(e.healamt));
+			v.push_back(std::to_string(e.spelldmg));
+			v.push_back(std::to_string(e.clairvoyance));
+			v.push_back(std::to_string(e.backstabdmg));
+			v.push_back("'" + Strings::Escape(e.created) + "'");
+			v.push_back(std::to_string(e.elitematerial));
+			v.push_back(std::to_string(e.ldonsellbackrate));
+			v.push_back(std::to_string(e.scriptfileid));
+			v.push_back(std::to_string(e.expendablearrow));
+			v.push_back(std::to_string(e.powersourcecapacity));
+			v.push_back(std::to_string(e.bardeffect));
+			v.push_back(std::to_string(e.bardeffecttype));
+			v.push_back(std::to_string(e.bardlevel2));
+			v.push_back(std::to_string(e.bardlevel));
+			v.push_back(std::to_string(e.bardunk1));
+			v.push_back(std::to_string(e.bardunk2));
+			v.push_back(std::to_string(e.bardunk3));
+			v.push_back(std::to_string(e.bardunk4));
+			v.push_back(std::to_string(e.bardunk5));
+			v.push_back("'" + Strings::Escape(e.bardname) + "'");
+			v.push_back(std::to_string(e.bardunk7));
+			v.push_back(std::to_string(e.UNK214));
+			v.push_back(std::to_string(e.subtype));
+			v.push_back(std::to_string(e.UNK220));
+			v.push_back(std::to_string(e.UNK221));
+			v.push_back(std::to_string(e.heirloom));
+			v.push_back(std::to_string(e.UNK223));
+			v.push_back(std::to_string(e.UNK224));
+			v.push_back(std::to_string(e.UNK225));
+			v.push_back(std::to_string(e.UNK226));
+			v.push_back(std::to_string(e.UNK227));
+			v.push_back(std::to_string(e.UNK228));
+			v.push_back(std::to_string(e.UNK229));
+			v.push_back(std::to_string(e.UNK230));
+			v.push_back(std::to_string(e.UNK231));
+			v.push_back(std::to_string(e.UNK232));
+			v.push_back(std::to_string(e.UNK233));
+			v.push_back(std::to_string(e.UNK234));
+			v.push_back(std::to_string(e.placeable));
+			v.push_back(std::to_string(e.UNK236));
+			v.push_back(std::to_string(e.UNK237));
+			v.push_back(std::to_string(e.UNK238));
+			v.push_back(std::to_string(e.UNK239));
+			v.push_back(std::to_string(e.UNK240));
+			v.push_back(std::to_string(e.UNK241));
+			v.push_back(std::to_string(e.epicitem));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Items> All()
+	static std::vector<Items> All(Database& db)
 	{
 		std::vector<Items> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -2234,305 +2505,305 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Items entry{};
+			Items e{};
 
-			entry.id                  = atoi(row[0]);
-			entry.minstatus           = atoi(row[1]);
-			entry.Name                = row[2] ? row[2] : "";
-			entry.aagi                = atoi(row[3]);
-			entry.ac                  = atoi(row[4]);
-			entry.accuracy            = atoi(row[5]);
-			entry.acha                = atoi(row[6]);
-			entry.adex                = atoi(row[7]);
-			entry.aint                = atoi(row[8]);
-			entry.artifactflag        = atoi(row[9]);
-			entry.asta                = atoi(row[10]);
-			entry.astr                = atoi(row[11]);
-			entry.attack              = atoi(row[12]);
-			entry.augrestrict         = atoi(row[13]);
-			entry.augslot1type        = atoi(row[14]);
-			entry.augslot1visible     = atoi(row[15]);
-			entry.augslot2type        = atoi(row[16]);
-			entry.augslot2visible     = atoi(row[17]);
-			entry.augslot3type        = atoi(row[18]);
-			entry.augslot3visible     = atoi(row[19]);
-			entry.augslot4type        = atoi(row[20]);
-			entry.augslot4visible     = atoi(row[21]);
-			entry.augslot5type        = atoi(row[22]);
-			entry.augslot5visible     = atoi(row[23]);
-			entry.augslot6type        = atoi(row[24]);
-			entry.augslot6visible     = atoi(row[25]);
-			entry.augtype             = atoi(row[26]);
-			entry.avoidance           = atoi(row[27]);
-			entry.awis                = atoi(row[28]);
-			entry.bagsize             = atoi(row[29]);
-			entry.bagslots            = atoi(row[30]);
-			entry.bagtype             = atoi(row[31]);
-			entry.bagwr               = atoi(row[32]);
-			entry.banedmgamt          = atoi(row[33]);
-			entry.banedmgraceamt      = atoi(row[34]);
-			entry.banedmgbody         = atoi(row[35]);
-			entry.banedmgrace         = atoi(row[36]);
-			entry.bardtype            = atoi(row[37]);
-			entry.bardvalue           = atoi(row[38]);
-			entry.book                = atoi(row[39]);
-			entry.casttime            = atoi(row[40]);
-			entry.casttime_           = atoi(row[41]);
-			entry.charmfile           = row[42] ? row[42] : "";
-			entry.charmfileid         = row[43] ? row[43] : "";
-			entry.classes             = atoi(row[44]);
-			entry.color               = atoi(row[45]);
-			entry.combateffects       = row[46] ? row[46] : "";
-			entry.extradmgskill       = atoi(row[47]);
-			entry.extradmgamt         = atoi(row[48]);
-			entry.price               = atoi(row[49]);
-			entry.cr                  = atoi(row[50]);
-			entry.damage              = atoi(row[51]);
-			entry.damageshield        = atoi(row[52]);
-			entry.deity               = atoi(row[53]);
-			entry.delay               = atoi(row[54]);
-			entry.augdistiller        = atoi(row[55]);
-			entry.dotshielding        = atoi(row[56]);
-			entry.dr                  = atoi(row[57]);
-			entry.clicktype           = atoi(row[58]);
-			entry.clicklevel2         = atoi(row[59]);
-			entry.elemdmgtype         = atoi(row[60]);
-			entry.elemdmgamt          = atoi(row[61]);
-			entry.endur               = atoi(row[62]);
-			entry.factionamt1         = atoi(row[63]);
-			entry.factionamt2         = atoi(row[64]);
-			entry.factionamt3         = atoi(row[65]);
-			entry.factionamt4         = atoi(row[66]);
-			entry.factionmod1         = atoi(row[67]);
-			entry.factionmod2         = atoi(row[68]);
-			entry.factionmod3         = atoi(row[69]);
-			entry.factionmod4         = atoi(row[70]);
-			entry.filename            = row[71] ? row[71] : "";
-			entry.focuseffect         = atoi(row[72]);
-			entry.fr                  = atoi(row[73]);
-			entry.fvnodrop            = atoi(row[74]);
-			entry.haste               = atoi(row[75]);
-			entry.clicklevel          = atoi(row[76]);
-			entry.hp                  = atoi(row[77]);
-			entry.regen               = atoi(row[78]);
-			entry.icon                = atoi(row[79]);
-			entry.idfile              = row[80] ? row[80] : "";
-			entry.itemclass           = atoi(row[81]);
-			entry.itemtype            = atoi(row[82]);
-			entry.ldonprice           = atoi(row[83]);
-			entry.ldontheme           = atoi(row[84]);
-			entry.ldonsold            = atoi(row[85]);
-			entry.light               = atoi(row[86]);
-			entry.lore                = row[87] ? row[87] : "";
-			entry.loregroup           = atoi(row[88]);
-			entry.magic               = atoi(row[89]);
-			entry.mana                = atoi(row[90]);
-			entry.manaregen           = atoi(row[91]);
-			entry.enduranceregen      = atoi(row[92]);
-			entry.material            = atoi(row[93]);
-			entry.herosforgemodel     = atoi(row[94]);
-			entry.maxcharges          = atoi(row[95]);
-			entry.mr                  = atoi(row[96]);
-			entry.nodrop              = atoi(row[97]);
-			entry.norent              = atoi(row[98]);
-			entry.pendingloreflag     = atoi(row[99]);
-			entry.pr                  = atoi(row[100]);
-			entry.procrate            = atoi(row[101]);
-			entry.races               = atoi(row[102]);
-			entry.range               = atoi(row[103]);
-			entry.reclevel            = atoi(row[104]);
-			entry.recskill            = atoi(row[105]);
-			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = static_cast<float>(atof(row[107]));
-			entry.shielding           = atoi(row[108]);
-			entry.size                = atoi(row[109]);
-			entry.skillmodtype        = atoi(row[110]);
-			entry.skillmodvalue       = atoi(row[111]);
-			entry.slots               = atoi(row[112]);
-			entry.clickeffect         = atoi(row[113]);
-			entry.spellshield         = atoi(row[114]);
-			entry.strikethrough       = atoi(row[115]);
-			entry.stunresist          = atoi(row[116]);
-			entry.summonedflag        = atoi(row[117]);
-			entry.tradeskills         = atoi(row[118]);
-			entry.favor               = atoi(row[119]);
-			entry.weight              = atoi(row[120]);
-			entry.UNK012              = atoi(row[121]);
-			entry.UNK013              = atoi(row[122]);
-			entry.benefitflag         = atoi(row[123]);
-			entry.UNK054              = atoi(row[124]);
-			entry.UNK059              = atoi(row[125]);
-			entry.booktype            = atoi(row[126]);
-			entry.recastdelay         = atoi(row[127]);
-			entry.recasttype          = atoi(row[128]);
-			entry.guildfavor          = atoi(row[129]);
-			entry.UNK123              = atoi(row[130]);
-			entry.UNK124              = atoi(row[131]);
-			entry.attuneable          = atoi(row[132]);
-			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
-			entry.comment             = row[135] ? row[135] : "";
-			entry.UNK127              = atoi(row[136]);
-			entry.pointtype           = atoi(row[137]);
-			entry.potionbelt          = atoi(row[138]);
-			entry.potionbeltslots     = atoi(row[139]);
-			entry.stacksize           = atoi(row[140]);
-			entry.notransfer          = atoi(row[141]);
-			entry.stackable           = atoi(row[142]);
-			entry.UNK134              = row[143] ? row[143] : "";
-			entry.UNK137              = atoi(row[144]);
-			entry.proceffect          = atoi(row[145]);
-			entry.proctype            = atoi(row[146]);
-			entry.proclevel2          = atoi(row[147]);
-			entry.proclevel           = atoi(row[148]);
-			entry.UNK142              = atoi(row[149]);
-			entry.worneffect          = atoi(row[150]);
-			entry.worntype            = atoi(row[151]);
-			entry.wornlevel2          = atoi(row[152]);
-			entry.wornlevel           = atoi(row[153]);
-			entry.UNK147              = atoi(row[154]);
-			entry.focustype           = atoi(row[155]);
-			entry.focuslevel2         = atoi(row[156]);
-			entry.focuslevel          = atoi(row[157]);
-			entry.UNK152              = atoi(row[158]);
-			entry.scrolleffect        = atoi(row[159]);
-			entry.scrolltype          = atoi(row[160]);
-			entry.scrolllevel2        = atoi(row[161]);
-			entry.scrolllevel         = atoi(row[162]);
-			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
-			entry.serialization       = row[166] ? row[166] : "";
-			entry.source              = row[167] ? row[167] : "";
-			entry.UNK033              = atoi(row[168]);
-			entry.lorefile            = row[169] ? row[169] : "";
-			entry.UNK014              = atoi(row[170]);
-			entry.svcorruption        = atoi(row[171]);
-			entry.skillmodmax         = atoi(row[172]);
-			entry.UNK060              = atoi(row[173]);
-			entry.augslot1unk2        = atoi(row[174]);
-			entry.augslot2unk2        = atoi(row[175]);
-			entry.augslot3unk2        = atoi(row[176]);
-			entry.augslot4unk2        = atoi(row[177]);
-			entry.augslot5unk2        = atoi(row[178]);
-			entry.augslot6unk2        = atoi(row[179]);
-			entry.UNK120              = atoi(row[180]);
-			entry.UNK121              = atoi(row[181]);
-			entry.questitemflag       = atoi(row[182]);
-			entry.UNK132              = row[183] ? row[183] : "";
-			entry.clickunk5           = atoi(row[184]);
-			entry.clickunk6           = row[185] ? row[185] : "";
-			entry.clickunk7           = atoi(row[186]);
-			entry.procunk1            = atoi(row[187]);
-			entry.procunk2            = atoi(row[188]);
-			entry.procunk3            = atoi(row[189]);
-			entry.procunk4            = atoi(row[190]);
-			entry.procunk6            = row[191] ? row[191] : "";
-			entry.procunk7            = atoi(row[192]);
-			entry.wornunk1            = atoi(row[193]);
-			entry.wornunk2            = atoi(row[194]);
-			entry.wornunk3            = atoi(row[195]);
-			entry.wornunk4            = atoi(row[196]);
-			entry.wornunk5            = atoi(row[197]);
-			entry.wornunk6            = row[198] ? row[198] : "";
-			entry.wornunk7            = atoi(row[199]);
-			entry.focusunk1           = atoi(row[200]);
-			entry.focusunk2           = atoi(row[201]);
-			entry.focusunk3           = atoi(row[202]);
-			entry.focusunk4           = atoi(row[203]);
-			entry.focusunk5           = atoi(row[204]);
-			entry.focusunk6           = row[205] ? row[205] : "";
-			entry.focusunk7           = atoi(row[206]);
-			entry.scrollunk1          = atoi(row[207]);
-			entry.scrollunk2          = atoi(row[208]);
-			entry.scrollunk3          = atoi(row[209]);
-			entry.scrollunk4          = atoi(row[210]);
-			entry.scrollunk5          = atoi(row[211]);
-			entry.scrollunk6          = row[212] ? row[212] : "";
-			entry.scrollunk7          = atoi(row[213]);
-			entry.UNK193              = atoi(row[214]);
-			entry.purity              = atoi(row[215]);
-			entry.evoitem             = atoi(row[216]);
-			entry.evoid               = atoi(row[217]);
-			entry.evolvinglevel       = atoi(row[218]);
-			entry.evomax              = atoi(row[219]);
-			entry.clickname           = row[220] ? row[220] : "";
-			entry.procname            = row[221] ? row[221] : "";
-			entry.wornname            = row[222] ? row[222] : "";
-			entry.focusname           = row[223] ? row[223] : "";
-			entry.scrollname          = row[224] ? row[224] : "";
-			entry.dsmitigation        = atoi(row[225]);
-			entry.heroic_str          = atoi(row[226]);
-			entry.heroic_int          = atoi(row[227]);
-			entry.heroic_wis          = atoi(row[228]);
-			entry.heroic_agi          = atoi(row[229]);
-			entry.heroic_dex          = atoi(row[230]);
-			entry.heroic_sta          = atoi(row[231]);
-			entry.heroic_cha          = atoi(row[232]);
-			entry.heroic_pr           = atoi(row[233]);
-			entry.heroic_dr           = atoi(row[234]);
-			entry.heroic_fr           = atoi(row[235]);
-			entry.heroic_cr           = atoi(row[236]);
-			entry.heroic_mr           = atoi(row[237]);
-			entry.heroic_svcorrup     = atoi(row[238]);
-			entry.healamt             = atoi(row[239]);
-			entry.spelldmg            = atoi(row[240]);
-			entry.clairvoyance        = atoi(row[241]);
-			entry.backstabdmg         = atoi(row[242]);
-			entry.created             = row[243] ? row[243] : "";
-			entry.elitematerial       = atoi(row[244]);
-			entry.ldonsellbackrate    = atoi(row[245]);
-			entry.scriptfileid        = atoi(row[246]);
-			entry.expendablearrow     = atoi(row[247]);
-			entry.powersourcecapacity = atoi(row[248]);
-			entry.bardeffect          = atoi(row[249]);
-			entry.bardeffecttype      = atoi(row[250]);
-			entry.bardlevel2          = atoi(row[251]);
-			entry.bardlevel           = atoi(row[252]);
-			entry.bardunk1            = atoi(row[253]);
-			entry.bardunk2            = atoi(row[254]);
-			entry.bardunk3            = atoi(row[255]);
-			entry.bardunk4            = atoi(row[256]);
-			entry.bardunk5            = atoi(row[257]);
-			entry.bardname            = row[258] ? row[258] : "";
-			entry.bardunk7            = atoi(row[259]);
-			entry.UNK214              = atoi(row[260]);
-			entry.subtype             = atoi(row[261]);
-			entry.UNK220              = atoi(row[262]);
-			entry.UNK221              = atoi(row[263]);
-			entry.heirloom            = atoi(row[264]);
-			entry.UNK223              = atoi(row[265]);
-			entry.UNK224              = atoi(row[266]);
-			entry.UNK225              = atoi(row[267]);
-			entry.UNK226              = atoi(row[268]);
-			entry.UNK227              = atoi(row[269]);
-			entry.UNK228              = atoi(row[270]);
-			entry.UNK229              = atoi(row[271]);
-			entry.UNK230              = atoi(row[272]);
-			entry.UNK231              = atoi(row[273]);
-			entry.UNK232              = atoi(row[274]);
-			entry.UNK233              = atoi(row[275]);
-			entry.UNK234              = atoi(row[276]);
-			entry.placeable           = atoi(row[277]);
-			entry.UNK236              = atoi(row[278]);
-			entry.UNK237              = atoi(row[279]);
-			entry.UNK238              = atoi(row[280]);
-			entry.UNK239              = atoi(row[281]);
-			entry.UNK240              = atoi(row[282]);
-			entry.UNK241              = atoi(row[283]);
-			entry.epicitem            = atoi(row[284]);
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.minstatus           = row[1] ? static_cast<int16_t>(atoi(row[1])) : 0;
+			e.Name                = row[2] ? row[2] : "";
+			e.aagi                = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.ac                  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.accuracy            = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.acha                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.adex                = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.aint                = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.artifactflag        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.asta                = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.astr                = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.attack              = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.augrestrict         = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.augslot1type        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.augslot1visible     = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.augslot2type        = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.augslot2visible     = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.augslot3type        = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.augslot3visible     = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.augslot4type        = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.augslot4visible     = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.augslot5type        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e.augslot5visible     = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e.augslot6type        = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
+			e.augslot6visible     = row[25] ? static_cast<int8_t>(atoi(row[25])) : 0;
+			e.augtype             = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.avoidance           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.awis                = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.bagsize             = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.bagslots            = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.bagtype             = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.bagwr               = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.banedmgamt          = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.banedmgraceamt      = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.banedmgbody         = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.banedmgrace         = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.bardtype            = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.bardvalue           = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.book                = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.casttime            = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.casttime_           = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.charmfile           = row[42] ? row[42] : "";
+			e.charmfileid         = row[43] ? row[43] : "";
+			e.classes             = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.color               = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.combateffects       = row[46] ? row[46] : "";
+			e.extradmgskill       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.extradmgamt         = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.price               = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.cr                  = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.damage              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.damageshield        = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.deity               = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.delay               = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.augdistiller        = row[55] ? static_cast<uint32_t>(strtoul(row[55], nullptr, 10)) : 0;
+			e.dotshielding        = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.dr                  = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.clicktype           = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.clicklevel2         = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.elemdmgtype         = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.elemdmgamt          = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.endur               = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.factionamt1         = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.factionamt2         = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.factionamt3         = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.factionamt4         = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.factionmod1         = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.factionmod2         = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.factionmod3         = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.factionmod4         = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.filename            = row[71] ? row[71] : "";
+			e.focuseffect         = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.fr                  = row[73] ? static_cast<int32_t>(atoi(row[73])) : 0;
+			e.fvnodrop            = row[74] ? static_cast<int32_t>(atoi(row[74])) : 0;
+			e.haste               = row[75] ? static_cast<int32_t>(atoi(row[75])) : 0;
+			e.clicklevel          = row[76] ? static_cast<int32_t>(atoi(row[76])) : 0;
+			e.hp                  = row[77] ? static_cast<int32_t>(atoi(row[77])) : 0;
+			e.regen               = row[78] ? static_cast<int32_t>(atoi(row[78])) : 0;
+			e.icon                = row[79] ? static_cast<int32_t>(atoi(row[79])) : 0;
+			e.idfile              = row[80] ? row[80] : "";
+			e.itemclass           = row[81] ? static_cast<int32_t>(atoi(row[81])) : 0;
+			e.itemtype            = row[82] ? static_cast<int32_t>(atoi(row[82])) : 0;
+			e.ldonprice           = row[83] ? static_cast<int32_t>(atoi(row[83])) : 0;
+			e.ldontheme           = row[84] ? static_cast<int32_t>(atoi(row[84])) : 0;
+			e.ldonsold            = row[85] ? static_cast<int32_t>(atoi(row[85])) : 0;
+			e.light               = row[86] ? static_cast<int32_t>(atoi(row[86])) : 0;
+			e.lore                = row[87] ? row[87] : "";
+			e.loregroup           = row[88] ? static_cast<int32_t>(atoi(row[88])) : 0;
+			e.magic               = row[89] ? static_cast<int32_t>(atoi(row[89])) : 0;
+			e.mana                = row[90] ? static_cast<int32_t>(atoi(row[90])) : 0;
+			e.manaregen           = row[91] ? static_cast<int32_t>(atoi(row[91])) : 0;
+			e.enduranceregen      = row[92] ? static_cast<int32_t>(atoi(row[92])) : 0;
+			e.material            = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.herosforgemodel     = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
+			e.maxcharges          = row[95] ? static_cast<int32_t>(atoi(row[95])) : 0;
+			e.mr                  = row[96] ? static_cast<int32_t>(atoi(row[96])) : 0;
+			e.nodrop              = row[97] ? static_cast<int32_t>(atoi(row[97])) : 0;
+			e.norent              = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
+			e.pendingloreflag     = row[99] ? static_cast<uint8_t>(strtoul(row[99], nullptr, 10)) : 0;
+			e.pr                  = row[100] ? static_cast<int32_t>(atoi(row[100])) : 0;
+			e.procrate            = row[101] ? static_cast<int32_t>(atoi(row[101])) : 0;
+			e.races               = row[102] ? static_cast<int32_t>(atoi(row[102])) : 0;
+			e.range_              = row[103] ? static_cast<int32_t>(atoi(row[103])) : 0;
+			e.reclevel            = row[104] ? static_cast<int32_t>(atoi(row[104])) : 0;
+			e.recskill            = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
+			e.reqlevel            = row[106] ? static_cast<int32_t>(atoi(row[106])) : 0;
+			e.sellrate            = row[107] ? strtof(row[107], nullptr) : 0;
+			e.shielding           = row[108] ? static_cast<int32_t>(atoi(row[108])) : 0;
+			e.size                = row[109] ? static_cast<int32_t>(atoi(row[109])) : 0;
+			e.skillmodtype        = row[110] ? static_cast<int32_t>(atoi(row[110])) : 0;
+			e.skillmodvalue       = row[111] ? static_cast<int32_t>(atoi(row[111])) : 0;
+			e.slots               = row[112] ? static_cast<int32_t>(atoi(row[112])) : 0;
+			e.clickeffect         = row[113] ? static_cast<int32_t>(atoi(row[113])) : 0;
+			e.spellshield         = row[114] ? static_cast<int32_t>(atoi(row[114])) : 0;
+			e.strikethrough       = row[115] ? static_cast<int32_t>(atoi(row[115])) : 0;
+			e.stunresist          = row[116] ? static_cast<int32_t>(atoi(row[116])) : 0;
+			e.summonedflag        = row[117] ? static_cast<uint8_t>(strtoul(row[117], nullptr, 10)) : 0;
+			e.tradeskills         = row[118] ? static_cast<int32_t>(atoi(row[118])) : 0;
+			e.favor               = row[119] ? static_cast<int32_t>(atoi(row[119])) : 0;
+			e.weight              = row[120] ? static_cast<int32_t>(atoi(row[120])) : 0;
+			e.UNK012              = row[121] ? static_cast<int32_t>(atoi(row[121])) : 0;
+			e.UNK013              = row[122] ? static_cast<int32_t>(atoi(row[122])) : 0;
+			e.benefitflag         = row[123] ? static_cast<int32_t>(atoi(row[123])) : 0;
+			e.UNK054              = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
+			e.UNK059              = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
+			e.booktype            = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
+			e.recastdelay         = row[127] ? static_cast<int32_t>(atoi(row[127])) : 0;
+			e.recasttype          = row[128] ? static_cast<int32_t>(atoi(row[128])) : 0;
+			e.guildfavor          = row[129] ? static_cast<int32_t>(atoi(row[129])) : 0;
+			e.UNK123              = row[130] ? static_cast<int32_t>(atoi(row[130])) : 0;
+			e.UNK124              = row[131] ? static_cast<int32_t>(atoi(row[131])) : 0;
+			e.attuneable          = row[132] ? static_cast<int32_t>(atoi(row[132])) : 0;
+			e.nopet               = row[133] ? static_cast<int32_t>(atoi(row[133])) : 0;
+			e.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
+			e.comment             = row[135] ? row[135] : "";
+			e.UNK127              = row[136] ? static_cast<int32_t>(atoi(row[136])) : 0;
+			e.pointtype           = row[137] ? static_cast<int32_t>(atoi(row[137])) : 0;
+			e.potionbelt          = row[138] ? static_cast<int32_t>(atoi(row[138])) : 0;
+			e.potionbeltslots     = row[139] ? static_cast<int32_t>(atoi(row[139])) : 0;
+			e.stacksize           = row[140] ? static_cast<int32_t>(atoi(row[140])) : 0;
+			e.notransfer          = row[141] ? static_cast<int32_t>(atoi(row[141])) : 0;
+			e.stackable           = row[142] ? static_cast<int32_t>(atoi(row[142])) : 0;
+			e.UNK134              = row[143] ? row[143] : "";
+			e.UNK137              = row[144] ? static_cast<int32_t>(atoi(row[144])) : 0;
+			e.proceffect          = row[145] ? static_cast<int32_t>(atoi(row[145])) : 0;
+			e.proctype            = row[146] ? static_cast<int32_t>(atoi(row[146])) : 0;
+			e.proclevel2          = row[147] ? static_cast<int32_t>(atoi(row[147])) : 0;
+			e.proclevel           = row[148] ? static_cast<int32_t>(atoi(row[148])) : 0;
+			e.UNK142              = row[149] ? static_cast<int32_t>(atoi(row[149])) : 0;
+			e.worneffect          = row[150] ? static_cast<int32_t>(atoi(row[150])) : 0;
+			e.worntype            = row[151] ? static_cast<int32_t>(atoi(row[151])) : 0;
+			e.wornlevel2          = row[152] ? static_cast<int32_t>(atoi(row[152])) : 0;
+			e.wornlevel           = row[153] ? static_cast<int32_t>(atoi(row[153])) : 0;
+			e.UNK147              = row[154] ? static_cast<int32_t>(atoi(row[154])) : 0;
+			e.focustype           = row[155] ? static_cast<int32_t>(atoi(row[155])) : 0;
+			e.focuslevel2         = row[156] ? static_cast<int32_t>(atoi(row[156])) : 0;
+			e.focuslevel          = row[157] ? static_cast<int32_t>(atoi(row[157])) : 0;
+			e.UNK152              = row[158] ? static_cast<int32_t>(atoi(row[158])) : 0;
+			e.scrolleffect        = row[159] ? static_cast<int32_t>(atoi(row[159])) : 0;
+			e.scrolltype          = row[160] ? static_cast<int32_t>(atoi(row[160])) : 0;
+			e.scrolllevel2        = row[161] ? static_cast<int32_t>(atoi(row[161])) : 0;
+			e.scrolllevel         = row[162] ? static_cast<int32_t>(atoi(row[162])) : 0;
+			e.UNK157              = row[163] ? static_cast<int32_t>(atoi(row[163])) : 0;
+			e.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			e.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
+			e.serialization       = row[166] ? row[166] : "";
+			e.source              = row[167] ? row[167] : "";
+			e.UNK033              = row[168] ? static_cast<int32_t>(atoi(row[168])) : 0;
+			e.lorefile            = row[169] ? row[169] : "";
+			e.UNK014              = row[170] ? static_cast<int32_t>(atoi(row[170])) : 0;
+			e.svcorruption        = row[171] ? static_cast<int32_t>(atoi(row[171])) : 0;
+			e.skillmodmax         = row[172] ? static_cast<int32_t>(atoi(row[172])) : 0;
+			e.UNK060              = row[173] ? static_cast<int32_t>(atoi(row[173])) : 0;
+			e.augslot1unk2        = row[174] ? static_cast<int32_t>(atoi(row[174])) : 0;
+			e.augslot2unk2        = row[175] ? static_cast<int32_t>(atoi(row[175])) : 0;
+			e.augslot3unk2        = row[176] ? static_cast<int32_t>(atoi(row[176])) : 0;
+			e.augslot4unk2        = row[177] ? static_cast<int32_t>(atoi(row[177])) : 0;
+			e.augslot5unk2        = row[178] ? static_cast<int32_t>(atoi(row[178])) : 0;
+			e.augslot6unk2        = row[179] ? static_cast<int32_t>(atoi(row[179])) : 0;
+			e.UNK120              = row[180] ? static_cast<int32_t>(atoi(row[180])) : 0;
+			e.UNK121              = row[181] ? static_cast<int32_t>(atoi(row[181])) : 0;
+			e.questitemflag       = row[182] ? static_cast<int32_t>(atoi(row[182])) : 0;
+			e.UNK132              = row[183] ? row[183] : "";
+			e.clickunk5           = row[184] ? static_cast<int32_t>(atoi(row[184])) : 0;
+			e.clickunk6           = row[185] ? row[185] : "";
+			e.clickunk7           = row[186] ? static_cast<int32_t>(atoi(row[186])) : 0;
+			e.procunk1            = row[187] ? static_cast<int32_t>(atoi(row[187])) : 0;
+			e.procunk2            = row[188] ? static_cast<int32_t>(atoi(row[188])) : 0;
+			e.procunk3            = row[189] ? static_cast<int32_t>(atoi(row[189])) : 0;
+			e.procunk4            = row[190] ? static_cast<int32_t>(atoi(row[190])) : 0;
+			e.procunk6            = row[191] ? row[191] : "";
+			e.procunk7            = row[192] ? static_cast<int32_t>(atoi(row[192])) : 0;
+			e.wornunk1            = row[193] ? static_cast<int32_t>(atoi(row[193])) : 0;
+			e.wornunk2            = row[194] ? static_cast<int32_t>(atoi(row[194])) : 0;
+			e.wornunk3            = row[195] ? static_cast<int32_t>(atoi(row[195])) : 0;
+			e.wornunk4            = row[196] ? static_cast<int32_t>(atoi(row[196])) : 0;
+			e.wornunk5            = row[197] ? static_cast<int32_t>(atoi(row[197])) : 0;
+			e.wornunk6            = row[198] ? row[198] : "";
+			e.wornunk7            = row[199] ? static_cast<int32_t>(atoi(row[199])) : 0;
+			e.focusunk1           = row[200] ? static_cast<int32_t>(atoi(row[200])) : 0;
+			e.focusunk2           = row[201] ? static_cast<int32_t>(atoi(row[201])) : 0;
+			e.focusunk3           = row[202] ? static_cast<int32_t>(atoi(row[202])) : 0;
+			e.focusunk4           = row[203] ? static_cast<int32_t>(atoi(row[203])) : 0;
+			e.focusunk5           = row[204] ? static_cast<int32_t>(atoi(row[204])) : 0;
+			e.focusunk6           = row[205] ? row[205] : "";
+			e.focusunk7           = row[206] ? static_cast<int32_t>(atoi(row[206])) : 0;
+			e.scrollunk1          = row[207] ? static_cast<uint32_t>(strtoul(row[207], nullptr, 10)) : 0;
+			e.scrollunk2          = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.scrollunk3          = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
+			e.scrollunk4          = row[210] ? static_cast<int32_t>(atoi(row[210])) : 0;
+			e.scrollunk5          = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
+			e.scrollunk6          = row[212] ? row[212] : "";
+			e.scrollunk7          = row[213] ? static_cast<int32_t>(atoi(row[213])) : 0;
+			e.UNK193              = row[214] ? static_cast<int32_t>(atoi(row[214])) : 0;
+			e.purity              = row[215] ? static_cast<int32_t>(atoi(row[215])) : 0;
+			e.evoitem             = row[216] ? static_cast<int32_t>(atoi(row[216])) : 0;
+			e.evoid               = row[217] ? static_cast<int32_t>(atoi(row[217])) : 0;
+			e.evolvinglevel       = row[218] ? static_cast<int32_t>(atoi(row[218])) : 0;
+			e.evomax              = row[219] ? static_cast<int32_t>(atoi(row[219])) : 0;
+			e.clickname           = row[220] ? row[220] : "";
+			e.procname            = row[221] ? row[221] : "";
+			e.wornname            = row[222] ? row[222] : "";
+			e.focusname           = row[223] ? row[223] : "";
+			e.scrollname          = row[224] ? row[224] : "";
+			e.dsmitigation        = row[225] ? static_cast<int16_t>(atoi(row[225])) : 0;
+			e.heroic_str          = row[226] ? static_cast<int16_t>(atoi(row[226])) : 0;
+			e.heroic_int          = row[227] ? static_cast<int16_t>(atoi(row[227])) : 0;
+			e.heroic_wis          = row[228] ? static_cast<int16_t>(atoi(row[228])) : 0;
+			e.heroic_agi          = row[229] ? static_cast<int16_t>(atoi(row[229])) : 0;
+			e.heroic_dex          = row[230] ? static_cast<int16_t>(atoi(row[230])) : 0;
+			e.heroic_sta          = row[231] ? static_cast<int16_t>(atoi(row[231])) : 0;
+			e.heroic_cha          = row[232] ? static_cast<int16_t>(atoi(row[232])) : 0;
+			e.heroic_pr           = row[233] ? static_cast<int16_t>(atoi(row[233])) : 0;
+			e.heroic_dr           = row[234] ? static_cast<int16_t>(atoi(row[234])) : 0;
+			e.heroic_fr           = row[235] ? static_cast<int16_t>(atoi(row[235])) : 0;
+			e.heroic_cr           = row[236] ? static_cast<int16_t>(atoi(row[236])) : 0;
+			e.heroic_mr           = row[237] ? static_cast<int16_t>(atoi(row[237])) : 0;
+			e.heroic_svcorrup     = row[238] ? static_cast<int16_t>(atoi(row[238])) : 0;
+			e.healamt             = row[239] ? static_cast<int16_t>(atoi(row[239])) : 0;
+			e.spelldmg            = row[240] ? static_cast<int16_t>(atoi(row[240])) : 0;
+			e.clairvoyance        = row[241] ? static_cast<int16_t>(atoi(row[241])) : 0;
+			e.backstabdmg         = row[242] ? static_cast<int16_t>(atoi(row[242])) : 0;
+			e.created             = row[243] ? row[243] : "";
+			e.elitematerial       = row[244] ? static_cast<int16_t>(atoi(row[244])) : 0;
+			e.ldonsellbackrate    = row[245] ? static_cast<int16_t>(atoi(row[245])) : 0;
+			e.scriptfileid        = row[246] ? static_cast<int32_t>(atoi(row[246])) : 0;
+			e.expendablearrow     = row[247] ? static_cast<int16_t>(atoi(row[247])) : 0;
+			e.powersourcecapacity = row[248] ? static_cast<int32_t>(atoi(row[248])) : 0;
+			e.bardeffect          = row[249] ? static_cast<int32_t>(atoi(row[249])) : 0;
+			e.bardeffecttype      = row[250] ? static_cast<int16_t>(atoi(row[250])) : 0;
+			e.bardlevel2          = row[251] ? static_cast<int16_t>(atoi(row[251])) : 0;
+			e.bardlevel           = row[252] ? static_cast<int16_t>(atoi(row[252])) : 0;
+			e.bardunk1            = row[253] ? static_cast<int16_t>(atoi(row[253])) : 0;
+			e.bardunk2            = row[254] ? static_cast<int16_t>(atoi(row[254])) : 0;
+			e.bardunk3            = row[255] ? static_cast<int16_t>(atoi(row[255])) : 0;
+			e.bardunk4            = row[256] ? static_cast<int16_t>(atoi(row[256])) : 0;
+			e.bardunk5            = row[257] ? static_cast<int16_t>(atoi(row[257])) : 0;
+			e.bardname            = row[258] ? row[258] : "";
+			e.bardunk7            = row[259] ? static_cast<int16_t>(atoi(row[259])) : 0;
+			e.UNK214              = row[260] ? static_cast<int16_t>(atoi(row[260])) : 0;
+			e.subtype             = row[261] ? static_cast<int32_t>(atoi(row[261])) : 0;
+			e.UNK220              = row[262] ? static_cast<int32_t>(atoi(row[262])) : 0;
+			e.UNK221              = row[263] ? static_cast<int32_t>(atoi(row[263])) : 0;
+			e.heirloom            = row[264] ? static_cast<int32_t>(atoi(row[264])) : 0;
+			e.UNK223              = row[265] ? static_cast<int32_t>(atoi(row[265])) : 0;
+			e.UNK224              = row[266] ? static_cast<int32_t>(atoi(row[266])) : 0;
+			e.UNK225              = row[267] ? static_cast<int32_t>(atoi(row[267])) : 0;
+			e.UNK226              = row[268] ? static_cast<int32_t>(atoi(row[268])) : 0;
+			e.UNK227              = row[269] ? static_cast<int32_t>(atoi(row[269])) : 0;
+			e.UNK228              = row[270] ? static_cast<int32_t>(atoi(row[270])) : 0;
+			e.UNK229              = row[271] ? static_cast<int32_t>(atoi(row[271])) : 0;
+			e.UNK230              = row[272] ? static_cast<int32_t>(atoi(row[272])) : 0;
+			e.UNK231              = row[273] ? static_cast<int32_t>(atoi(row[273])) : 0;
+			e.UNK232              = row[274] ? static_cast<int32_t>(atoi(row[274])) : 0;
+			e.UNK233              = row[275] ? static_cast<int32_t>(atoi(row[275])) : 0;
+			e.UNK234              = row[276] ? static_cast<int32_t>(atoi(row[276])) : 0;
+			e.placeable           = row[277] ? static_cast<int32_t>(atoi(row[277])) : 0;
+			e.UNK236              = row[278] ? static_cast<int32_t>(atoi(row[278])) : 0;
+			e.UNK237              = row[279] ? static_cast<int32_t>(atoi(row[279])) : 0;
+			e.UNK238              = row[280] ? static_cast<int32_t>(atoi(row[280])) : 0;
+			e.UNK239              = row[281] ? static_cast<int32_t>(atoi(row[281])) : 0;
+			e.UNK240              = row[282] ? static_cast<int32_t>(atoi(row[282])) : 0;
+			e.UNK241              = row[283] ? static_cast<int32_t>(atoi(row[283])) : 0;
+			e.epicitem            = row[284] ? static_cast<int32_t>(atoi(row[284])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Items> GetWhere(std::string where_filter)
+	static std::vector<Items> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Items> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -2543,303 +2814,303 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Items entry{};
+			Items e{};
 
-			entry.id                  = atoi(row[0]);
-			entry.minstatus           = atoi(row[1]);
-			entry.Name                = row[2] ? row[2] : "";
-			entry.aagi                = atoi(row[3]);
-			entry.ac                  = atoi(row[4]);
-			entry.accuracy            = atoi(row[5]);
-			entry.acha                = atoi(row[6]);
-			entry.adex                = atoi(row[7]);
-			entry.aint                = atoi(row[8]);
-			entry.artifactflag        = atoi(row[9]);
-			entry.asta                = atoi(row[10]);
-			entry.astr                = atoi(row[11]);
-			entry.attack              = atoi(row[12]);
-			entry.augrestrict         = atoi(row[13]);
-			entry.augslot1type        = atoi(row[14]);
-			entry.augslot1visible     = atoi(row[15]);
-			entry.augslot2type        = atoi(row[16]);
-			entry.augslot2visible     = atoi(row[17]);
-			entry.augslot3type        = atoi(row[18]);
-			entry.augslot3visible     = atoi(row[19]);
-			entry.augslot4type        = atoi(row[20]);
-			entry.augslot4visible     = atoi(row[21]);
-			entry.augslot5type        = atoi(row[22]);
-			entry.augslot5visible     = atoi(row[23]);
-			entry.augslot6type        = atoi(row[24]);
-			entry.augslot6visible     = atoi(row[25]);
-			entry.augtype             = atoi(row[26]);
-			entry.avoidance           = atoi(row[27]);
-			entry.awis                = atoi(row[28]);
-			entry.bagsize             = atoi(row[29]);
-			entry.bagslots            = atoi(row[30]);
-			entry.bagtype             = atoi(row[31]);
-			entry.bagwr               = atoi(row[32]);
-			entry.banedmgamt          = atoi(row[33]);
-			entry.banedmgraceamt      = atoi(row[34]);
-			entry.banedmgbody         = atoi(row[35]);
-			entry.banedmgrace         = atoi(row[36]);
-			entry.bardtype            = atoi(row[37]);
-			entry.bardvalue           = atoi(row[38]);
-			entry.book                = atoi(row[39]);
-			entry.casttime            = atoi(row[40]);
-			entry.casttime_           = atoi(row[41]);
-			entry.charmfile           = row[42] ? row[42] : "";
-			entry.charmfileid         = row[43] ? row[43] : "";
-			entry.classes             = atoi(row[44]);
-			entry.color               = atoi(row[45]);
-			entry.combateffects       = row[46] ? row[46] : "";
-			entry.extradmgskill       = atoi(row[47]);
-			entry.extradmgamt         = atoi(row[48]);
-			entry.price               = atoi(row[49]);
-			entry.cr                  = atoi(row[50]);
-			entry.damage              = atoi(row[51]);
-			entry.damageshield        = atoi(row[52]);
-			entry.deity               = atoi(row[53]);
-			entry.delay               = atoi(row[54]);
-			entry.augdistiller        = atoi(row[55]);
-			entry.dotshielding        = atoi(row[56]);
-			entry.dr                  = atoi(row[57]);
-			entry.clicktype           = atoi(row[58]);
-			entry.clicklevel2         = atoi(row[59]);
-			entry.elemdmgtype         = atoi(row[60]);
-			entry.elemdmgamt          = atoi(row[61]);
-			entry.endur               = atoi(row[62]);
-			entry.factionamt1         = atoi(row[63]);
-			entry.factionamt2         = atoi(row[64]);
-			entry.factionamt3         = atoi(row[65]);
-			entry.factionamt4         = atoi(row[66]);
-			entry.factionmod1         = atoi(row[67]);
-			entry.factionmod2         = atoi(row[68]);
-			entry.factionmod3         = atoi(row[69]);
-			entry.factionmod4         = atoi(row[70]);
-			entry.filename            = row[71] ? row[71] : "";
-			entry.focuseffect         = atoi(row[72]);
-			entry.fr                  = atoi(row[73]);
-			entry.fvnodrop            = atoi(row[74]);
-			entry.haste               = atoi(row[75]);
-			entry.clicklevel          = atoi(row[76]);
-			entry.hp                  = atoi(row[77]);
-			entry.regen               = atoi(row[78]);
-			entry.icon                = atoi(row[79]);
-			entry.idfile              = row[80] ? row[80] : "";
-			entry.itemclass           = atoi(row[81]);
-			entry.itemtype            = atoi(row[82]);
-			entry.ldonprice           = atoi(row[83]);
-			entry.ldontheme           = atoi(row[84]);
-			entry.ldonsold            = atoi(row[85]);
-			entry.light               = atoi(row[86]);
-			entry.lore                = row[87] ? row[87] : "";
-			entry.loregroup           = atoi(row[88]);
-			entry.magic               = atoi(row[89]);
-			entry.mana                = atoi(row[90]);
-			entry.manaregen           = atoi(row[91]);
-			entry.enduranceregen      = atoi(row[92]);
-			entry.material            = atoi(row[93]);
-			entry.herosforgemodel     = atoi(row[94]);
-			entry.maxcharges          = atoi(row[95]);
-			entry.mr                  = atoi(row[96]);
-			entry.nodrop              = atoi(row[97]);
-			entry.norent              = atoi(row[98]);
-			entry.pendingloreflag     = atoi(row[99]);
-			entry.pr                  = atoi(row[100]);
-			entry.procrate            = atoi(row[101]);
-			entry.races               = atoi(row[102]);
-			entry.range               = atoi(row[103]);
-			entry.reclevel            = atoi(row[104]);
-			entry.recskill            = atoi(row[105]);
-			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = static_cast<float>(atof(row[107]));
-			entry.shielding           = atoi(row[108]);
-			entry.size                = atoi(row[109]);
-			entry.skillmodtype        = atoi(row[110]);
-			entry.skillmodvalue       = atoi(row[111]);
-			entry.slots               = atoi(row[112]);
-			entry.clickeffect         = atoi(row[113]);
-			entry.spellshield         = atoi(row[114]);
-			entry.strikethrough       = atoi(row[115]);
-			entry.stunresist          = atoi(row[116]);
-			entry.summonedflag        = atoi(row[117]);
-			entry.tradeskills         = atoi(row[118]);
-			entry.favor               = atoi(row[119]);
-			entry.weight              = atoi(row[120]);
-			entry.UNK012              = atoi(row[121]);
-			entry.UNK013              = atoi(row[122]);
-			entry.benefitflag         = atoi(row[123]);
-			entry.UNK054              = atoi(row[124]);
-			entry.UNK059              = atoi(row[125]);
-			entry.booktype            = atoi(row[126]);
-			entry.recastdelay         = atoi(row[127]);
-			entry.recasttype          = atoi(row[128]);
-			entry.guildfavor          = atoi(row[129]);
-			entry.UNK123              = atoi(row[130]);
-			entry.UNK124              = atoi(row[131]);
-			entry.attuneable          = atoi(row[132]);
-			entry.nopet               = atoi(row[133]);
-			entry.updated             = row[134] ? row[134] : "";
-			entry.comment             = row[135] ? row[135] : "";
-			entry.UNK127              = atoi(row[136]);
-			entry.pointtype           = atoi(row[137]);
-			entry.potionbelt          = atoi(row[138]);
-			entry.potionbeltslots     = atoi(row[139]);
-			entry.stacksize           = atoi(row[140]);
-			entry.notransfer          = atoi(row[141]);
-			entry.stackable           = atoi(row[142]);
-			entry.UNK134              = row[143] ? row[143] : "";
-			entry.UNK137              = atoi(row[144]);
-			entry.proceffect          = atoi(row[145]);
-			entry.proctype            = atoi(row[146]);
-			entry.proclevel2          = atoi(row[147]);
-			entry.proclevel           = atoi(row[148]);
-			entry.UNK142              = atoi(row[149]);
-			entry.worneffect          = atoi(row[150]);
-			entry.worntype            = atoi(row[151]);
-			entry.wornlevel2          = atoi(row[152]);
-			entry.wornlevel           = atoi(row[153]);
-			entry.UNK147              = atoi(row[154]);
-			entry.focustype           = atoi(row[155]);
-			entry.focuslevel2         = atoi(row[156]);
-			entry.focuslevel          = atoi(row[157]);
-			entry.UNK152              = atoi(row[158]);
-			entry.scrolleffect        = atoi(row[159]);
-			entry.scrolltype          = atoi(row[160]);
-			entry.scrolllevel2        = atoi(row[161]);
-			entry.scrolllevel         = atoi(row[162]);
-			entry.UNK157              = atoi(row[163]);
-			entry.serialized          = row[164] ? row[164] : "";
-			entry.verified            = row[165] ? row[165] : "";
-			entry.serialization       = row[166] ? row[166] : "";
-			entry.source              = row[167] ? row[167] : "";
-			entry.UNK033              = atoi(row[168]);
-			entry.lorefile            = row[169] ? row[169] : "";
-			entry.UNK014              = atoi(row[170]);
-			entry.svcorruption        = atoi(row[171]);
-			entry.skillmodmax         = atoi(row[172]);
-			entry.UNK060              = atoi(row[173]);
-			entry.augslot1unk2        = atoi(row[174]);
-			entry.augslot2unk2        = atoi(row[175]);
-			entry.augslot3unk2        = atoi(row[176]);
-			entry.augslot4unk2        = atoi(row[177]);
-			entry.augslot5unk2        = atoi(row[178]);
-			entry.augslot6unk2        = atoi(row[179]);
-			entry.UNK120              = atoi(row[180]);
-			entry.UNK121              = atoi(row[181]);
-			entry.questitemflag       = atoi(row[182]);
-			entry.UNK132              = row[183] ? row[183] : "";
-			entry.clickunk5           = atoi(row[184]);
-			entry.clickunk6           = row[185] ? row[185] : "";
-			entry.clickunk7           = atoi(row[186]);
-			entry.procunk1            = atoi(row[187]);
-			entry.procunk2            = atoi(row[188]);
-			entry.procunk3            = atoi(row[189]);
-			entry.procunk4            = atoi(row[190]);
-			entry.procunk6            = row[191] ? row[191] : "";
-			entry.procunk7            = atoi(row[192]);
-			entry.wornunk1            = atoi(row[193]);
-			entry.wornunk2            = atoi(row[194]);
-			entry.wornunk3            = atoi(row[195]);
-			entry.wornunk4            = atoi(row[196]);
-			entry.wornunk5            = atoi(row[197]);
-			entry.wornunk6            = row[198] ? row[198] : "";
-			entry.wornunk7            = atoi(row[199]);
-			entry.focusunk1           = atoi(row[200]);
-			entry.focusunk2           = atoi(row[201]);
-			entry.focusunk3           = atoi(row[202]);
-			entry.focusunk4           = atoi(row[203]);
-			entry.focusunk5           = atoi(row[204]);
-			entry.focusunk6           = row[205] ? row[205] : "";
-			entry.focusunk7           = atoi(row[206]);
-			entry.scrollunk1          = atoi(row[207]);
-			entry.scrollunk2          = atoi(row[208]);
-			entry.scrollunk3          = atoi(row[209]);
-			entry.scrollunk4          = atoi(row[210]);
-			entry.scrollunk5          = atoi(row[211]);
-			entry.scrollunk6          = row[212] ? row[212] : "";
-			entry.scrollunk7          = atoi(row[213]);
-			entry.UNK193              = atoi(row[214]);
-			entry.purity              = atoi(row[215]);
-			entry.evoitem             = atoi(row[216]);
-			entry.evoid               = atoi(row[217]);
-			entry.evolvinglevel       = atoi(row[218]);
-			entry.evomax              = atoi(row[219]);
-			entry.clickname           = row[220] ? row[220] : "";
-			entry.procname            = row[221] ? row[221] : "";
-			entry.wornname            = row[222] ? row[222] : "";
-			entry.focusname           = row[223] ? row[223] : "";
-			entry.scrollname          = row[224] ? row[224] : "";
-			entry.dsmitigation        = atoi(row[225]);
-			entry.heroic_str          = atoi(row[226]);
-			entry.heroic_int          = atoi(row[227]);
-			entry.heroic_wis          = atoi(row[228]);
-			entry.heroic_agi          = atoi(row[229]);
-			entry.heroic_dex          = atoi(row[230]);
-			entry.heroic_sta          = atoi(row[231]);
-			entry.heroic_cha          = atoi(row[232]);
-			entry.heroic_pr           = atoi(row[233]);
-			entry.heroic_dr           = atoi(row[234]);
-			entry.heroic_fr           = atoi(row[235]);
-			entry.heroic_cr           = atoi(row[236]);
-			entry.heroic_mr           = atoi(row[237]);
-			entry.heroic_svcorrup     = atoi(row[238]);
-			entry.healamt             = atoi(row[239]);
-			entry.spelldmg            = atoi(row[240]);
-			entry.clairvoyance        = atoi(row[241]);
-			entry.backstabdmg         = atoi(row[242]);
-			entry.created             = row[243] ? row[243] : "";
-			entry.elitematerial       = atoi(row[244]);
-			entry.ldonsellbackrate    = atoi(row[245]);
-			entry.scriptfileid        = atoi(row[246]);
-			entry.expendablearrow     = atoi(row[247]);
-			entry.powersourcecapacity = atoi(row[248]);
-			entry.bardeffect          = atoi(row[249]);
-			entry.bardeffecttype      = atoi(row[250]);
-			entry.bardlevel2          = atoi(row[251]);
-			entry.bardlevel           = atoi(row[252]);
-			entry.bardunk1            = atoi(row[253]);
-			entry.bardunk2            = atoi(row[254]);
-			entry.bardunk3            = atoi(row[255]);
-			entry.bardunk4            = atoi(row[256]);
-			entry.bardunk5            = atoi(row[257]);
-			entry.bardname            = row[258] ? row[258] : "";
-			entry.bardunk7            = atoi(row[259]);
-			entry.UNK214              = atoi(row[260]);
-			entry.subtype             = atoi(row[261]);
-			entry.UNK220              = atoi(row[262]);
-			entry.UNK221              = atoi(row[263]);
-			entry.heirloom            = atoi(row[264]);
-			entry.UNK223              = atoi(row[265]);
-			entry.UNK224              = atoi(row[266]);
-			entry.UNK225              = atoi(row[267]);
-			entry.UNK226              = atoi(row[268]);
-			entry.UNK227              = atoi(row[269]);
-			entry.UNK228              = atoi(row[270]);
-			entry.UNK229              = atoi(row[271]);
-			entry.UNK230              = atoi(row[272]);
-			entry.UNK231              = atoi(row[273]);
-			entry.UNK232              = atoi(row[274]);
-			entry.UNK233              = atoi(row[275]);
-			entry.UNK234              = atoi(row[276]);
-			entry.placeable           = atoi(row[277]);
-			entry.UNK236              = atoi(row[278]);
-			entry.UNK237              = atoi(row[279]);
-			entry.UNK238              = atoi(row[280]);
-			entry.UNK239              = atoi(row[281]);
-			entry.UNK240              = atoi(row[282]);
-			entry.UNK241              = atoi(row[283]);
-			entry.epicitem            = atoi(row[284]);
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.minstatus           = row[1] ? static_cast<int16_t>(atoi(row[1])) : 0;
+			e.Name                = row[2] ? row[2] : "";
+			e.aagi                = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
+			e.ac                  = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
+			e.accuracy            = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
+			e.acha                = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.adex                = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.aint                = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.artifactflag        = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.asta                = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.astr                = row[11] ? static_cast<int32_t>(atoi(row[11])) : 0;
+			e.attack              = row[12] ? static_cast<int32_t>(atoi(row[12])) : 0;
+			e.augrestrict         = row[13] ? static_cast<int32_t>(atoi(row[13])) : 0;
+			e.augslot1type        = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
+			e.augslot1visible     = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
+			e.augslot2type        = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.augslot2visible     = row[17] ? static_cast<int8_t>(atoi(row[17])) : 0;
+			e.augslot3type        = row[18] ? static_cast<int8_t>(atoi(row[18])) : 0;
+			e.augslot3visible     = row[19] ? static_cast<int8_t>(atoi(row[19])) : 0;
+			e.augslot4type        = row[20] ? static_cast<int8_t>(atoi(row[20])) : 0;
+			e.augslot4visible     = row[21] ? static_cast<int8_t>(atoi(row[21])) : 0;
+			e.augslot5type        = row[22] ? static_cast<int8_t>(atoi(row[22])) : 0;
+			e.augslot5visible     = row[23] ? static_cast<int8_t>(atoi(row[23])) : 0;
+			e.augslot6type        = row[24] ? static_cast<int8_t>(atoi(row[24])) : 0;
+			e.augslot6visible     = row[25] ? static_cast<int8_t>(atoi(row[25])) : 0;
+			e.augtype             = row[26] ? static_cast<int32_t>(atoi(row[26])) : 0;
+			e.avoidance           = row[27] ? static_cast<int32_t>(atoi(row[27])) : 0;
+			e.awis                = row[28] ? static_cast<int32_t>(atoi(row[28])) : 0;
+			e.bagsize             = row[29] ? static_cast<int32_t>(atoi(row[29])) : 0;
+			e.bagslots            = row[30] ? static_cast<int32_t>(atoi(row[30])) : 0;
+			e.bagtype             = row[31] ? static_cast<int32_t>(atoi(row[31])) : 0;
+			e.bagwr               = row[32] ? static_cast<int32_t>(atoi(row[32])) : 0;
+			e.banedmgamt          = row[33] ? static_cast<int32_t>(atoi(row[33])) : 0;
+			e.banedmgraceamt      = row[34] ? static_cast<int32_t>(atoi(row[34])) : 0;
+			e.banedmgbody         = row[35] ? static_cast<int32_t>(atoi(row[35])) : 0;
+			e.banedmgrace         = row[36] ? static_cast<int32_t>(atoi(row[36])) : 0;
+			e.bardtype            = row[37] ? static_cast<int32_t>(atoi(row[37])) : 0;
+			e.bardvalue           = row[38] ? static_cast<int32_t>(atoi(row[38])) : 0;
+			e.book                = row[39] ? static_cast<int32_t>(atoi(row[39])) : 0;
+			e.casttime            = row[40] ? static_cast<int32_t>(atoi(row[40])) : 0;
+			e.casttime_           = row[41] ? static_cast<int32_t>(atoi(row[41])) : 0;
+			e.charmfile           = row[42] ? row[42] : "";
+			e.charmfileid         = row[43] ? row[43] : "";
+			e.classes             = row[44] ? static_cast<int32_t>(atoi(row[44])) : 0;
+			e.color               = row[45] ? static_cast<uint32_t>(strtoul(row[45], nullptr, 10)) : 0;
+			e.combateffects       = row[46] ? row[46] : "";
+			e.extradmgskill       = row[47] ? static_cast<int32_t>(atoi(row[47])) : 0;
+			e.extradmgamt         = row[48] ? static_cast<int32_t>(atoi(row[48])) : 0;
+			e.price               = row[49] ? static_cast<int32_t>(atoi(row[49])) : 0;
+			e.cr                  = row[50] ? static_cast<int32_t>(atoi(row[50])) : 0;
+			e.damage              = row[51] ? static_cast<int32_t>(atoi(row[51])) : 0;
+			e.damageshield        = row[52] ? static_cast<int32_t>(atoi(row[52])) : 0;
+			e.deity               = row[53] ? static_cast<int32_t>(atoi(row[53])) : 0;
+			e.delay               = row[54] ? static_cast<int32_t>(atoi(row[54])) : 0;
+			e.augdistiller        = row[55] ? static_cast<uint32_t>(strtoul(row[55], nullptr, 10)) : 0;
+			e.dotshielding        = row[56] ? static_cast<int32_t>(atoi(row[56])) : 0;
+			e.dr                  = row[57] ? static_cast<int32_t>(atoi(row[57])) : 0;
+			e.clicktype           = row[58] ? static_cast<int32_t>(atoi(row[58])) : 0;
+			e.clicklevel2         = row[59] ? static_cast<int32_t>(atoi(row[59])) : 0;
+			e.elemdmgtype         = row[60] ? static_cast<int32_t>(atoi(row[60])) : 0;
+			e.elemdmgamt          = row[61] ? static_cast<int32_t>(atoi(row[61])) : 0;
+			e.endur               = row[62] ? static_cast<int32_t>(atoi(row[62])) : 0;
+			e.factionamt1         = row[63] ? static_cast<int32_t>(atoi(row[63])) : 0;
+			e.factionamt2         = row[64] ? static_cast<int32_t>(atoi(row[64])) : 0;
+			e.factionamt3         = row[65] ? static_cast<int32_t>(atoi(row[65])) : 0;
+			e.factionamt4         = row[66] ? static_cast<int32_t>(atoi(row[66])) : 0;
+			e.factionmod1         = row[67] ? static_cast<int32_t>(atoi(row[67])) : 0;
+			e.factionmod2         = row[68] ? static_cast<int32_t>(atoi(row[68])) : 0;
+			e.factionmod3         = row[69] ? static_cast<int32_t>(atoi(row[69])) : 0;
+			e.factionmod4         = row[70] ? static_cast<int32_t>(atoi(row[70])) : 0;
+			e.filename            = row[71] ? row[71] : "";
+			e.focuseffect         = row[72] ? static_cast<int32_t>(atoi(row[72])) : 0;
+			e.fr                  = row[73] ? static_cast<int32_t>(atoi(row[73])) : 0;
+			e.fvnodrop            = row[74] ? static_cast<int32_t>(atoi(row[74])) : 0;
+			e.haste               = row[75] ? static_cast<int32_t>(atoi(row[75])) : 0;
+			e.clicklevel          = row[76] ? static_cast<int32_t>(atoi(row[76])) : 0;
+			e.hp                  = row[77] ? static_cast<int32_t>(atoi(row[77])) : 0;
+			e.regen               = row[78] ? static_cast<int32_t>(atoi(row[78])) : 0;
+			e.icon                = row[79] ? static_cast<int32_t>(atoi(row[79])) : 0;
+			e.idfile              = row[80] ? row[80] : "";
+			e.itemclass           = row[81] ? static_cast<int32_t>(atoi(row[81])) : 0;
+			e.itemtype            = row[82] ? static_cast<int32_t>(atoi(row[82])) : 0;
+			e.ldonprice           = row[83] ? static_cast<int32_t>(atoi(row[83])) : 0;
+			e.ldontheme           = row[84] ? static_cast<int32_t>(atoi(row[84])) : 0;
+			e.ldonsold            = row[85] ? static_cast<int32_t>(atoi(row[85])) : 0;
+			e.light               = row[86] ? static_cast<int32_t>(atoi(row[86])) : 0;
+			e.lore                = row[87] ? row[87] : "";
+			e.loregroup           = row[88] ? static_cast<int32_t>(atoi(row[88])) : 0;
+			e.magic               = row[89] ? static_cast<int32_t>(atoi(row[89])) : 0;
+			e.mana                = row[90] ? static_cast<int32_t>(atoi(row[90])) : 0;
+			e.manaregen           = row[91] ? static_cast<int32_t>(atoi(row[91])) : 0;
+			e.enduranceregen      = row[92] ? static_cast<int32_t>(atoi(row[92])) : 0;
+			e.material            = row[93] ? static_cast<int32_t>(atoi(row[93])) : 0;
+			e.herosforgemodel     = row[94] ? static_cast<int32_t>(atoi(row[94])) : 0;
+			e.maxcharges          = row[95] ? static_cast<int32_t>(atoi(row[95])) : 0;
+			e.mr                  = row[96] ? static_cast<int32_t>(atoi(row[96])) : 0;
+			e.nodrop              = row[97] ? static_cast<int32_t>(atoi(row[97])) : 0;
+			e.norent              = row[98] ? static_cast<int32_t>(atoi(row[98])) : 0;
+			e.pendingloreflag     = row[99] ? static_cast<uint8_t>(strtoul(row[99], nullptr, 10)) : 0;
+			e.pr                  = row[100] ? static_cast<int32_t>(atoi(row[100])) : 0;
+			e.procrate            = row[101] ? static_cast<int32_t>(atoi(row[101])) : 0;
+			e.races               = row[102] ? static_cast<int32_t>(atoi(row[102])) : 0;
+			e.range_              = row[103] ? static_cast<int32_t>(atoi(row[103])) : 0;
+			e.reclevel            = row[104] ? static_cast<int32_t>(atoi(row[104])) : 0;
+			e.recskill            = row[105] ? static_cast<int32_t>(atoi(row[105])) : 0;
+			e.reqlevel            = row[106] ? static_cast<int32_t>(atoi(row[106])) : 0;
+			e.sellrate            = row[107] ? strtof(row[107], nullptr) : 0;
+			e.shielding           = row[108] ? static_cast<int32_t>(atoi(row[108])) : 0;
+			e.size                = row[109] ? static_cast<int32_t>(atoi(row[109])) : 0;
+			e.skillmodtype        = row[110] ? static_cast<int32_t>(atoi(row[110])) : 0;
+			e.skillmodvalue       = row[111] ? static_cast<int32_t>(atoi(row[111])) : 0;
+			e.slots               = row[112] ? static_cast<int32_t>(atoi(row[112])) : 0;
+			e.clickeffect         = row[113] ? static_cast<int32_t>(atoi(row[113])) : 0;
+			e.spellshield         = row[114] ? static_cast<int32_t>(atoi(row[114])) : 0;
+			e.strikethrough       = row[115] ? static_cast<int32_t>(atoi(row[115])) : 0;
+			e.stunresist          = row[116] ? static_cast<int32_t>(atoi(row[116])) : 0;
+			e.summonedflag        = row[117] ? static_cast<uint8_t>(strtoul(row[117], nullptr, 10)) : 0;
+			e.tradeskills         = row[118] ? static_cast<int32_t>(atoi(row[118])) : 0;
+			e.favor               = row[119] ? static_cast<int32_t>(atoi(row[119])) : 0;
+			e.weight              = row[120] ? static_cast<int32_t>(atoi(row[120])) : 0;
+			e.UNK012              = row[121] ? static_cast<int32_t>(atoi(row[121])) : 0;
+			e.UNK013              = row[122] ? static_cast<int32_t>(atoi(row[122])) : 0;
+			e.benefitflag         = row[123] ? static_cast<int32_t>(atoi(row[123])) : 0;
+			e.UNK054              = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
+			e.UNK059              = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
+			e.booktype            = row[126] ? static_cast<int32_t>(atoi(row[126])) : 0;
+			e.recastdelay         = row[127] ? static_cast<int32_t>(atoi(row[127])) : 0;
+			e.recasttype          = row[128] ? static_cast<int32_t>(atoi(row[128])) : 0;
+			e.guildfavor          = row[129] ? static_cast<int32_t>(atoi(row[129])) : 0;
+			e.UNK123              = row[130] ? static_cast<int32_t>(atoi(row[130])) : 0;
+			e.UNK124              = row[131] ? static_cast<int32_t>(atoi(row[131])) : 0;
+			e.attuneable          = row[132] ? static_cast<int32_t>(atoi(row[132])) : 0;
+			e.nopet               = row[133] ? static_cast<int32_t>(atoi(row[133])) : 0;
+			e.updated             = strtoll(row[134] ? row[134] : "-1", nullptr, 10);
+			e.comment             = row[135] ? row[135] : "";
+			e.UNK127              = row[136] ? static_cast<int32_t>(atoi(row[136])) : 0;
+			e.pointtype           = row[137] ? static_cast<int32_t>(atoi(row[137])) : 0;
+			e.potionbelt          = row[138] ? static_cast<int32_t>(atoi(row[138])) : 0;
+			e.potionbeltslots     = row[139] ? static_cast<int32_t>(atoi(row[139])) : 0;
+			e.stacksize           = row[140] ? static_cast<int32_t>(atoi(row[140])) : 0;
+			e.notransfer          = row[141] ? static_cast<int32_t>(atoi(row[141])) : 0;
+			e.stackable           = row[142] ? static_cast<int32_t>(atoi(row[142])) : 0;
+			e.UNK134              = row[143] ? row[143] : "";
+			e.UNK137              = row[144] ? static_cast<int32_t>(atoi(row[144])) : 0;
+			e.proceffect          = row[145] ? static_cast<int32_t>(atoi(row[145])) : 0;
+			e.proctype            = row[146] ? static_cast<int32_t>(atoi(row[146])) : 0;
+			e.proclevel2          = row[147] ? static_cast<int32_t>(atoi(row[147])) : 0;
+			e.proclevel           = row[148] ? static_cast<int32_t>(atoi(row[148])) : 0;
+			e.UNK142              = row[149] ? static_cast<int32_t>(atoi(row[149])) : 0;
+			e.worneffect          = row[150] ? static_cast<int32_t>(atoi(row[150])) : 0;
+			e.worntype            = row[151] ? static_cast<int32_t>(atoi(row[151])) : 0;
+			e.wornlevel2          = row[152] ? static_cast<int32_t>(atoi(row[152])) : 0;
+			e.wornlevel           = row[153] ? static_cast<int32_t>(atoi(row[153])) : 0;
+			e.UNK147              = row[154] ? static_cast<int32_t>(atoi(row[154])) : 0;
+			e.focustype           = row[155] ? static_cast<int32_t>(atoi(row[155])) : 0;
+			e.focuslevel2         = row[156] ? static_cast<int32_t>(atoi(row[156])) : 0;
+			e.focuslevel          = row[157] ? static_cast<int32_t>(atoi(row[157])) : 0;
+			e.UNK152              = row[158] ? static_cast<int32_t>(atoi(row[158])) : 0;
+			e.scrolleffect        = row[159] ? static_cast<int32_t>(atoi(row[159])) : 0;
+			e.scrolltype          = row[160] ? static_cast<int32_t>(atoi(row[160])) : 0;
+			e.scrolllevel2        = row[161] ? static_cast<int32_t>(atoi(row[161])) : 0;
+			e.scrolllevel         = row[162] ? static_cast<int32_t>(atoi(row[162])) : 0;
+			e.UNK157              = row[163] ? static_cast<int32_t>(atoi(row[163])) : 0;
+			e.serialized          = strtoll(row[164] ? row[164] : "-1", nullptr, 10);
+			e.verified            = strtoll(row[165] ? row[165] : "-1", nullptr, 10);
+			e.serialization       = row[166] ? row[166] : "";
+			e.source              = row[167] ? row[167] : "";
+			e.UNK033              = row[168] ? static_cast<int32_t>(atoi(row[168])) : 0;
+			e.lorefile            = row[169] ? row[169] : "";
+			e.UNK014              = row[170] ? static_cast<int32_t>(atoi(row[170])) : 0;
+			e.svcorruption        = row[171] ? static_cast<int32_t>(atoi(row[171])) : 0;
+			e.skillmodmax         = row[172] ? static_cast<int32_t>(atoi(row[172])) : 0;
+			e.UNK060              = row[173] ? static_cast<int32_t>(atoi(row[173])) : 0;
+			e.augslot1unk2        = row[174] ? static_cast<int32_t>(atoi(row[174])) : 0;
+			e.augslot2unk2        = row[175] ? static_cast<int32_t>(atoi(row[175])) : 0;
+			e.augslot3unk2        = row[176] ? static_cast<int32_t>(atoi(row[176])) : 0;
+			e.augslot4unk2        = row[177] ? static_cast<int32_t>(atoi(row[177])) : 0;
+			e.augslot5unk2        = row[178] ? static_cast<int32_t>(atoi(row[178])) : 0;
+			e.augslot6unk2        = row[179] ? static_cast<int32_t>(atoi(row[179])) : 0;
+			e.UNK120              = row[180] ? static_cast<int32_t>(atoi(row[180])) : 0;
+			e.UNK121              = row[181] ? static_cast<int32_t>(atoi(row[181])) : 0;
+			e.questitemflag       = row[182] ? static_cast<int32_t>(atoi(row[182])) : 0;
+			e.UNK132              = row[183] ? row[183] : "";
+			e.clickunk5           = row[184] ? static_cast<int32_t>(atoi(row[184])) : 0;
+			e.clickunk6           = row[185] ? row[185] : "";
+			e.clickunk7           = row[186] ? static_cast<int32_t>(atoi(row[186])) : 0;
+			e.procunk1            = row[187] ? static_cast<int32_t>(atoi(row[187])) : 0;
+			e.procunk2            = row[188] ? static_cast<int32_t>(atoi(row[188])) : 0;
+			e.procunk3            = row[189] ? static_cast<int32_t>(atoi(row[189])) : 0;
+			e.procunk4            = row[190] ? static_cast<int32_t>(atoi(row[190])) : 0;
+			e.procunk6            = row[191] ? row[191] : "";
+			e.procunk7            = row[192] ? static_cast<int32_t>(atoi(row[192])) : 0;
+			e.wornunk1            = row[193] ? static_cast<int32_t>(atoi(row[193])) : 0;
+			e.wornunk2            = row[194] ? static_cast<int32_t>(atoi(row[194])) : 0;
+			e.wornunk3            = row[195] ? static_cast<int32_t>(atoi(row[195])) : 0;
+			e.wornunk4            = row[196] ? static_cast<int32_t>(atoi(row[196])) : 0;
+			e.wornunk5            = row[197] ? static_cast<int32_t>(atoi(row[197])) : 0;
+			e.wornunk6            = row[198] ? row[198] : "";
+			e.wornunk7            = row[199] ? static_cast<int32_t>(atoi(row[199])) : 0;
+			e.focusunk1           = row[200] ? static_cast<int32_t>(atoi(row[200])) : 0;
+			e.focusunk2           = row[201] ? static_cast<int32_t>(atoi(row[201])) : 0;
+			e.focusunk3           = row[202] ? static_cast<int32_t>(atoi(row[202])) : 0;
+			e.focusunk4           = row[203] ? static_cast<int32_t>(atoi(row[203])) : 0;
+			e.focusunk5           = row[204] ? static_cast<int32_t>(atoi(row[204])) : 0;
+			e.focusunk6           = row[205] ? row[205] : "";
+			e.focusunk7           = row[206] ? static_cast<int32_t>(atoi(row[206])) : 0;
+			e.scrollunk1          = row[207] ? static_cast<uint32_t>(strtoul(row[207], nullptr, 10)) : 0;
+			e.scrollunk2          = row[208] ? static_cast<int32_t>(atoi(row[208])) : 0;
+			e.scrollunk3          = row[209] ? static_cast<int32_t>(atoi(row[209])) : 0;
+			e.scrollunk4          = row[210] ? static_cast<int32_t>(atoi(row[210])) : 0;
+			e.scrollunk5          = row[211] ? static_cast<int32_t>(atoi(row[211])) : 0;
+			e.scrollunk6          = row[212] ? row[212] : "";
+			e.scrollunk7          = row[213] ? static_cast<int32_t>(atoi(row[213])) : 0;
+			e.UNK193              = row[214] ? static_cast<int32_t>(atoi(row[214])) : 0;
+			e.purity              = row[215] ? static_cast<int32_t>(atoi(row[215])) : 0;
+			e.evoitem             = row[216] ? static_cast<int32_t>(atoi(row[216])) : 0;
+			e.evoid               = row[217] ? static_cast<int32_t>(atoi(row[217])) : 0;
+			e.evolvinglevel       = row[218] ? static_cast<int32_t>(atoi(row[218])) : 0;
+			e.evomax              = row[219] ? static_cast<int32_t>(atoi(row[219])) : 0;
+			e.clickname           = row[220] ? row[220] : "";
+			e.procname            = row[221] ? row[221] : "";
+			e.wornname            = row[222] ? row[222] : "";
+			e.focusname           = row[223] ? row[223] : "";
+			e.scrollname          = row[224] ? row[224] : "";
+			e.dsmitigation        = row[225] ? static_cast<int16_t>(atoi(row[225])) : 0;
+			e.heroic_str          = row[226] ? static_cast<int16_t>(atoi(row[226])) : 0;
+			e.heroic_int          = row[227] ? static_cast<int16_t>(atoi(row[227])) : 0;
+			e.heroic_wis          = row[228] ? static_cast<int16_t>(atoi(row[228])) : 0;
+			e.heroic_agi          = row[229] ? static_cast<int16_t>(atoi(row[229])) : 0;
+			e.heroic_dex          = row[230] ? static_cast<int16_t>(atoi(row[230])) : 0;
+			e.heroic_sta          = row[231] ? static_cast<int16_t>(atoi(row[231])) : 0;
+			e.heroic_cha          = row[232] ? static_cast<int16_t>(atoi(row[232])) : 0;
+			e.heroic_pr           = row[233] ? static_cast<int16_t>(atoi(row[233])) : 0;
+			e.heroic_dr           = row[234] ? static_cast<int16_t>(atoi(row[234])) : 0;
+			e.heroic_fr           = row[235] ? static_cast<int16_t>(atoi(row[235])) : 0;
+			e.heroic_cr           = row[236] ? static_cast<int16_t>(atoi(row[236])) : 0;
+			e.heroic_mr           = row[237] ? static_cast<int16_t>(atoi(row[237])) : 0;
+			e.heroic_svcorrup     = row[238] ? static_cast<int16_t>(atoi(row[238])) : 0;
+			e.healamt             = row[239] ? static_cast<int16_t>(atoi(row[239])) : 0;
+			e.spelldmg            = row[240] ? static_cast<int16_t>(atoi(row[240])) : 0;
+			e.clairvoyance        = row[241] ? static_cast<int16_t>(atoi(row[241])) : 0;
+			e.backstabdmg         = row[242] ? static_cast<int16_t>(atoi(row[242])) : 0;
+			e.created             = row[243] ? row[243] : "";
+			e.elitematerial       = row[244] ? static_cast<int16_t>(atoi(row[244])) : 0;
+			e.ldonsellbackrate    = row[245] ? static_cast<int16_t>(atoi(row[245])) : 0;
+			e.scriptfileid        = row[246] ? static_cast<int32_t>(atoi(row[246])) : 0;
+			e.expendablearrow     = row[247] ? static_cast<int16_t>(atoi(row[247])) : 0;
+			e.powersourcecapacity = row[248] ? static_cast<int32_t>(atoi(row[248])) : 0;
+			e.bardeffect          = row[249] ? static_cast<int32_t>(atoi(row[249])) : 0;
+			e.bardeffecttype      = row[250] ? static_cast<int16_t>(atoi(row[250])) : 0;
+			e.bardlevel2          = row[251] ? static_cast<int16_t>(atoi(row[251])) : 0;
+			e.bardlevel           = row[252] ? static_cast<int16_t>(atoi(row[252])) : 0;
+			e.bardunk1            = row[253] ? static_cast<int16_t>(atoi(row[253])) : 0;
+			e.bardunk2            = row[254] ? static_cast<int16_t>(atoi(row[254])) : 0;
+			e.bardunk3            = row[255] ? static_cast<int16_t>(atoi(row[255])) : 0;
+			e.bardunk4            = row[256] ? static_cast<int16_t>(atoi(row[256])) : 0;
+			e.bardunk5            = row[257] ? static_cast<int16_t>(atoi(row[257])) : 0;
+			e.bardname            = row[258] ? row[258] : "";
+			e.bardunk7            = row[259] ? static_cast<int16_t>(atoi(row[259])) : 0;
+			e.UNK214              = row[260] ? static_cast<int16_t>(atoi(row[260])) : 0;
+			e.subtype             = row[261] ? static_cast<int32_t>(atoi(row[261])) : 0;
+			e.UNK220              = row[262] ? static_cast<int32_t>(atoi(row[262])) : 0;
+			e.UNK221              = row[263] ? static_cast<int32_t>(atoi(row[263])) : 0;
+			e.heirloom            = row[264] ? static_cast<int32_t>(atoi(row[264])) : 0;
+			e.UNK223              = row[265] ? static_cast<int32_t>(atoi(row[265])) : 0;
+			e.UNK224              = row[266] ? static_cast<int32_t>(atoi(row[266])) : 0;
+			e.UNK225              = row[267] ? static_cast<int32_t>(atoi(row[267])) : 0;
+			e.UNK226              = row[268] ? static_cast<int32_t>(atoi(row[268])) : 0;
+			e.UNK227              = row[269] ? static_cast<int32_t>(atoi(row[269])) : 0;
+			e.UNK228              = row[270] ? static_cast<int32_t>(atoi(row[270])) : 0;
+			e.UNK229              = row[271] ? static_cast<int32_t>(atoi(row[271])) : 0;
+			e.UNK230              = row[272] ? static_cast<int32_t>(atoi(row[272])) : 0;
+			e.UNK231              = row[273] ? static_cast<int32_t>(atoi(row[273])) : 0;
+			e.UNK232              = row[274] ? static_cast<int32_t>(atoi(row[274])) : 0;
+			e.UNK233              = row[275] ? static_cast<int32_t>(atoi(row[275])) : 0;
+			e.UNK234              = row[276] ? static_cast<int32_t>(atoi(row[276])) : 0;
+			e.placeable           = row[277] ? static_cast<int32_t>(atoi(row[277])) : 0;
+			e.UNK236              = row[278] ? static_cast<int32_t>(atoi(row[278])) : 0;
+			e.UNK237              = row[279] ? static_cast<int32_t>(atoi(row[279])) : 0;
+			e.UNK238              = row[280] ? static_cast<int32_t>(atoi(row[280])) : 0;
+			e.UNK239              = row[281] ? static_cast<int32_t>(atoi(row[281])) : 0;
+			e.UNK240              = row[282] ? static_cast<int32_t>(atoi(row[282])) : 0;
+			e.UNK241              = row[283] ? static_cast<int32_t>(atoi(row[283])) : 0;
+			e.epicitem            = row[284] ? static_cast<int32_t>(atoi(row[284])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -2850,9 +3121,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -2862,6 +3133,656 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Items &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.minstatus));
+		v.push_back("'" + Strings::Escape(e.Name) + "'");
+		v.push_back(std::to_string(e.aagi));
+		v.push_back(std::to_string(e.ac));
+		v.push_back(std::to_string(e.accuracy));
+		v.push_back(std::to_string(e.acha));
+		v.push_back(std::to_string(e.adex));
+		v.push_back(std::to_string(e.aint));
+		v.push_back(std::to_string(e.artifactflag));
+		v.push_back(std::to_string(e.asta));
+		v.push_back(std::to_string(e.astr));
+		v.push_back(std::to_string(e.attack));
+		v.push_back(std::to_string(e.augrestrict));
+		v.push_back(std::to_string(e.augslot1type));
+		v.push_back(std::to_string(e.augslot1visible));
+		v.push_back(std::to_string(e.augslot2type));
+		v.push_back(std::to_string(e.augslot2visible));
+		v.push_back(std::to_string(e.augslot3type));
+		v.push_back(std::to_string(e.augslot3visible));
+		v.push_back(std::to_string(e.augslot4type));
+		v.push_back(std::to_string(e.augslot4visible));
+		v.push_back(std::to_string(e.augslot5type));
+		v.push_back(std::to_string(e.augslot5visible));
+		v.push_back(std::to_string(e.augslot6type));
+		v.push_back(std::to_string(e.augslot6visible));
+		v.push_back(std::to_string(e.augtype));
+		v.push_back(std::to_string(e.avoidance));
+		v.push_back(std::to_string(e.awis));
+		v.push_back(std::to_string(e.bagsize));
+		v.push_back(std::to_string(e.bagslots));
+		v.push_back(std::to_string(e.bagtype));
+		v.push_back(std::to_string(e.bagwr));
+		v.push_back(std::to_string(e.banedmgamt));
+		v.push_back(std::to_string(e.banedmgraceamt));
+		v.push_back(std::to_string(e.banedmgbody));
+		v.push_back(std::to_string(e.banedmgrace));
+		v.push_back(std::to_string(e.bardtype));
+		v.push_back(std::to_string(e.bardvalue));
+		v.push_back(std::to_string(e.book));
+		v.push_back(std::to_string(e.casttime));
+		v.push_back(std::to_string(e.casttime_));
+		v.push_back("'" + Strings::Escape(e.charmfile) + "'");
+		v.push_back("'" + Strings::Escape(e.charmfileid) + "'");
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.color));
+		v.push_back("'" + Strings::Escape(e.combateffects) + "'");
+		v.push_back(std::to_string(e.extradmgskill));
+		v.push_back(std::to_string(e.extradmgamt));
+		v.push_back(std::to_string(e.price));
+		v.push_back(std::to_string(e.cr));
+		v.push_back(std::to_string(e.damage));
+		v.push_back(std::to_string(e.damageshield));
+		v.push_back(std::to_string(e.deity));
+		v.push_back(std::to_string(e.delay));
+		v.push_back(std::to_string(e.augdistiller));
+		v.push_back(std::to_string(e.dotshielding));
+		v.push_back(std::to_string(e.dr));
+		v.push_back(std::to_string(e.clicktype));
+		v.push_back(std::to_string(e.clicklevel2));
+		v.push_back(std::to_string(e.elemdmgtype));
+		v.push_back(std::to_string(e.elemdmgamt));
+		v.push_back(std::to_string(e.endur));
+		v.push_back(std::to_string(e.factionamt1));
+		v.push_back(std::to_string(e.factionamt2));
+		v.push_back(std::to_string(e.factionamt3));
+		v.push_back(std::to_string(e.factionamt4));
+		v.push_back(std::to_string(e.factionmod1));
+		v.push_back(std::to_string(e.factionmod2));
+		v.push_back(std::to_string(e.factionmod3));
+		v.push_back(std::to_string(e.factionmod4));
+		v.push_back("'" + Strings::Escape(e.filename) + "'");
+		v.push_back(std::to_string(e.focuseffect));
+		v.push_back(std::to_string(e.fr));
+		v.push_back(std::to_string(e.fvnodrop));
+		v.push_back(std::to_string(e.haste));
+		v.push_back(std::to_string(e.clicklevel));
+		v.push_back(std::to_string(e.hp));
+		v.push_back(std::to_string(e.regen));
+		v.push_back(std::to_string(e.icon));
+		v.push_back("'" + Strings::Escape(e.idfile) + "'");
+		v.push_back(std::to_string(e.itemclass));
+		v.push_back(std::to_string(e.itemtype));
+		v.push_back(std::to_string(e.ldonprice));
+		v.push_back(std::to_string(e.ldontheme));
+		v.push_back(std::to_string(e.ldonsold));
+		v.push_back(std::to_string(e.light));
+		v.push_back("'" + Strings::Escape(e.lore) + "'");
+		v.push_back(std::to_string(e.loregroup));
+		v.push_back(std::to_string(e.magic));
+		v.push_back(std::to_string(e.mana));
+		v.push_back(std::to_string(e.manaregen));
+		v.push_back(std::to_string(e.enduranceregen));
+		v.push_back(std::to_string(e.material));
+		v.push_back(std::to_string(e.herosforgemodel));
+		v.push_back(std::to_string(e.maxcharges));
+		v.push_back(std::to_string(e.mr));
+		v.push_back(std::to_string(e.nodrop));
+		v.push_back(std::to_string(e.norent));
+		v.push_back(std::to_string(e.pendingloreflag));
+		v.push_back(std::to_string(e.pr));
+		v.push_back(std::to_string(e.procrate));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.range_));
+		v.push_back(std::to_string(e.reclevel));
+		v.push_back(std::to_string(e.recskill));
+		v.push_back(std::to_string(e.reqlevel));
+		v.push_back(std::to_string(e.sellrate));
+		v.push_back(std::to_string(e.shielding));
+		v.push_back(std::to_string(e.size));
+		v.push_back(std::to_string(e.skillmodtype));
+		v.push_back(std::to_string(e.skillmodvalue));
+		v.push_back(std::to_string(e.slots));
+		v.push_back(std::to_string(e.clickeffect));
+		v.push_back(std::to_string(e.spellshield));
+		v.push_back(std::to_string(e.strikethrough));
+		v.push_back(std::to_string(e.stunresist));
+		v.push_back(std::to_string(e.summonedflag));
+		v.push_back(std::to_string(e.tradeskills));
+		v.push_back(std::to_string(e.favor));
+		v.push_back(std::to_string(e.weight));
+		v.push_back(std::to_string(e.UNK012));
+		v.push_back(std::to_string(e.UNK013));
+		v.push_back(std::to_string(e.benefitflag));
+		v.push_back(std::to_string(e.UNK054));
+		v.push_back(std::to_string(e.UNK059));
+		v.push_back(std::to_string(e.booktype));
+		v.push_back(std::to_string(e.recastdelay));
+		v.push_back(std::to_string(e.recasttype));
+		v.push_back(std::to_string(e.guildfavor));
+		v.push_back(std::to_string(e.UNK123));
+		v.push_back(std::to_string(e.UNK124));
+		v.push_back(std::to_string(e.attuneable));
+		v.push_back(std::to_string(e.nopet));
+		v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.comment) + "'");
+		v.push_back(std::to_string(e.UNK127));
+		v.push_back(std::to_string(e.pointtype));
+		v.push_back(std::to_string(e.potionbelt));
+		v.push_back(std::to_string(e.potionbeltslots));
+		v.push_back(std::to_string(e.stacksize));
+		v.push_back(std::to_string(e.notransfer));
+		v.push_back(std::to_string(e.stackable));
+		v.push_back("'" + Strings::Escape(e.UNK134) + "'");
+		v.push_back(std::to_string(e.UNK137));
+		v.push_back(std::to_string(e.proceffect));
+		v.push_back(std::to_string(e.proctype));
+		v.push_back(std::to_string(e.proclevel2));
+		v.push_back(std::to_string(e.proclevel));
+		v.push_back(std::to_string(e.UNK142));
+		v.push_back(std::to_string(e.worneffect));
+		v.push_back(std::to_string(e.worntype));
+		v.push_back(std::to_string(e.wornlevel2));
+		v.push_back(std::to_string(e.wornlevel));
+		v.push_back(std::to_string(e.UNK147));
+		v.push_back(std::to_string(e.focustype));
+		v.push_back(std::to_string(e.focuslevel2));
+		v.push_back(std::to_string(e.focuslevel));
+		v.push_back(std::to_string(e.UNK152));
+		v.push_back(std::to_string(e.scrolleffect));
+		v.push_back(std::to_string(e.scrolltype));
+		v.push_back(std::to_string(e.scrolllevel2));
+		v.push_back(std::to_string(e.scrolllevel));
+		v.push_back(std::to_string(e.UNK157));
+		v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+		v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.serialization) + "'");
+		v.push_back("'" + Strings::Escape(e.source) + "'");
+		v.push_back(std::to_string(e.UNK033));
+		v.push_back("'" + Strings::Escape(e.lorefile) + "'");
+		v.push_back(std::to_string(e.UNK014));
+		v.push_back(std::to_string(e.svcorruption));
+		v.push_back(std::to_string(e.skillmodmax));
+		v.push_back(std::to_string(e.UNK060));
+		v.push_back(std::to_string(e.augslot1unk2));
+		v.push_back(std::to_string(e.augslot2unk2));
+		v.push_back(std::to_string(e.augslot3unk2));
+		v.push_back(std::to_string(e.augslot4unk2));
+		v.push_back(std::to_string(e.augslot5unk2));
+		v.push_back(std::to_string(e.augslot6unk2));
+		v.push_back(std::to_string(e.UNK120));
+		v.push_back(std::to_string(e.UNK121));
+		v.push_back(std::to_string(e.questitemflag));
+		v.push_back("'" + Strings::Escape(e.UNK132) + "'");
+		v.push_back(std::to_string(e.clickunk5));
+		v.push_back("'" + Strings::Escape(e.clickunk6) + "'");
+		v.push_back(std::to_string(e.clickunk7));
+		v.push_back(std::to_string(e.procunk1));
+		v.push_back(std::to_string(e.procunk2));
+		v.push_back(std::to_string(e.procunk3));
+		v.push_back(std::to_string(e.procunk4));
+		v.push_back("'" + Strings::Escape(e.procunk6) + "'");
+		v.push_back(std::to_string(e.procunk7));
+		v.push_back(std::to_string(e.wornunk1));
+		v.push_back(std::to_string(e.wornunk2));
+		v.push_back(std::to_string(e.wornunk3));
+		v.push_back(std::to_string(e.wornunk4));
+		v.push_back(std::to_string(e.wornunk5));
+		v.push_back("'" + Strings::Escape(e.wornunk6) + "'");
+		v.push_back(std::to_string(e.wornunk7));
+		v.push_back(std::to_string(e.focusunk1));
+		v.push_back(std::to_string(e.focusunk2));
+		v.push_back(std::to_string(e.focusunk3));
+		v.push_back(std::to_string(e.focusunk4));
+		v.push_back(std::to_string(e.focusunk5));
+		v.push_back("'" + Strings::Escape(e.focusunk6) + "'");
+		v.push_back(std::to_string(e.focusunk7));
+		v.push_back(std::to_string(e.scrollunk1));
+		v.push_back(std::to_string(e.scrollunk2));
+		v.push_back(std::to_string(e.scrollunk3));
+		v.push_back(std::to_string(e.scrollunk4));
+		v.push_back(std::to_string(e.scrollunk5));
+		v.push_back("'" + Strings::Escape(e.scrollunk6) + "'");
+		v.push_back(std::to_string(e.scrollunk7));
+		v.push_back(std::to_string(e.UNK193));
+		v.push_back(std::to_string(e.purity));
+		v.push_back(std::to_string(e.evoitem));
+		v.push_back(std::to_string(e.evoid));
+		v.push_back(std::to_string(e.evolvinglevel));
+		v.push_back(std::to_string(e.evomax));
+		v.push_back("'" + Strings::Escape(e.clickname) + "'");
+		v.push_back("'" + Strings::Escape(e.procname) + "'");
+		v.push_back("'" + Strings::Escape(e.wornname) + "'");
+		v.push_back("'" + Strings::Escape(e.focusname) + "'");
+		v.push_back("'" + Strings::Escape(e.scrollname) + "'");
+		v.push_back(std::to_string(e.dsmitigation));
+		v.push_back(std::to_string(e.heroic_str));
+		v.push_back(std::to_string(e.heroic_int));
+		v.push_back(std::to_string(e.heroic_wis));
+		v.push_back(std::to_string(e.heroic_agi));
+		v.push_back(std::to_string(e.heroic_dex));
+		v.push_back(std::to_string(e.heroic_sta));
+		v.push_back(std::to_string(e.heroic_cha));
+		v.push_back(std::to_string(e.heroic_pr));
+		v.push_back(std::to_string(e.heroic_dr));
+		v.push_back(std::to_string(e.heroic_fr));
+		v.push_back(std::to_string(e.heroic_cr));
+		v.push_back(std::to_string(e.heroic_mr));
+		v.push_back(std::to_string(e.heroic_svcorrup));
+		v.push_back(std::to_string(e.healamt));
+		v.push_back(std::to_string(e.spelldmg));
+		v.push_back(std::to_string(e.clairvoyance));
+		v.push_back(std::to_string(e.backstabdmg));
+		v.push_back("'" + Strings::Escape(e.created) + "'");
+		v.push_back(std::to_string(e.elitematerial));
+		v.push_back(std::to_string(e.ldonsellbackrate));
+		v.push_back(std::to_string(e.scriptfileid));
+		v.push_back(std::to_string(e.expendablearrow));
+		v.push_back(std::to_string(e.powersourcecapacity));
+		v.push_back(std::to_string(e.bardeffect));
+		v.push_back(std::to_string(e.bardeffecttype));
+		v.push_back(std::to_string(e.bardlevel2));
+		v.push_back(std::to_string(e.bardlevel));
+		v.push_back(std::to_string(e.bardunk1));
+		v.push_back(std::to_string(e.bardunk2));
+		v.push_back(std::to_string(e.bardunk3));
+		v.push_back(std::to_string(e.bardunk4));
+		v.push_back(std::to_string(e.bardunk5));
+		v.push_back("'" + Strings::Escape(e.bardname) + "'");
+		v.push_back(std::to_string(e.bardunk7));
+		v.push_back(std::to_string(e.UNK214));
+		v.push_back(std::to_string(e.subtype));
+		v.push_back(std::to_string(e.UNK220));
+		v.push_back(std::to_string(e.UNK221));
+		v.push_back(std::to_string(e.heirloom));
+		v.push_back(std::to_string(e.UNK223));
+		v.push_back(std::to_string(e.UNK224));
+		v.push_back(std::to_string(e.UNK225));
+		v.push_back(std::to_string(e.UNK226));
+		v.push_back(std::to_string(e.UNK227));
+		v.push_back(std::to_string(e.UNK228));
+		v.push_back(std::to_string(e.UNK229));
+		v.push_back(std::to_string(e.UNK230));
+		v.push_back(std::to_string(e.UNK231));
+		v.push_back(std::to_string(e.UNK232));
+		v.push_back(std::to_string(e.UNK233));
+		v.push_back(std::to_string(e.UNK234));
+		v.push_back(std::to_string(e.placeable));
+		v.push_back(std::to_string(e.UNK236));
+		v.push_back(std::to_string(e.UNK237));
+		v.push_back(std::to_string(e.UNK238));
+		v.push_back(std::to_string(e.UNK239));
+		v.push_back(std::to_string(e.UNK240));
+		v.push_back(std::to_string(e.UNK241));
+		v.push_back(std::to_string(e.epicitem));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Items> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.minstatus));
+			v.push_back("'" + Strings::Escape(e.Name) + "'");
+			v.push_back(std::to_string(e.aagi));
+			v.push_back(std::to_string(e.ac));
+			v.push_back(std::to_string(e.accuracy));
+			v.push_back(std::to_string(e.acha));
+			v.push_back(std::to_string(e.adex));
+			v.push_back(std::to_string(e.aint));
+			v.push_back(std::to_string(e.artifactflag));
+			v.push_back(std::to_string(e.asta));
+			v.push_back(std::to_string(e.astr));
+			v.push_back(std::to_string(e.attack));
+			v.push_back(std::to_string(e.augrestrict));
+			v.push_back(std::to_string(e.augslot1type));
+			v.push_back(std::to_string(e.augslot1visible));
+			v.push_back(std::to_string(e.augslot2type));
+			v.push_back(std::to_string(e.augslot2visible));
+			v.push_back(std::to_string(e.augslot3type));
+			v.push_back(std::to_string(e.augslot3visible));
+			v.push_back(std::to_string(e.augslot4type));
+			v.push_back(std::to_string(e.augslot4visible));
+			v.push_back(std::to_string(e.augslot5type));
+			v.push_back(std::to_string(e.augslot5visible));
+			v.push_back(std::to_string(e.augslot6type));
+			v.push_back(std::to_string(e.augslot6visible));
+			v.push_back(std::to_string(e.augtype));
+			v.push_back(std::to_string(e.avoidance));
+			v.push_back(std::to_string(e.awis));
+			v.push_back(std::to_string(e.bagsize));
+			v.push_back(std::to_string(e.bagslots));
+			v.push_back(std::to_string(e.bagtype));
+			v.push_back(std::to_string(e.bagwr));
+			v.push_back(std::to_string(e.banedmgamt));
+			v.push_back(std::to_string(e.banedmgraceamt));
+			v.push_back(std::to_string(e.banedmgbody));
+			v.push_back(std::to_string(e.banedmgrace));
+			v.push_back(std::to_string(e.bardtype));
+			v.push_back(std::to_string(e.bardvalue));
+			v.push_back(std::to_string(e.book));
+			v.push_back(std::to_string(e.casttime));
+			v.push_back(std::to_string(e.casttime_));
+			v.push_back("'" + Strings::Escape(e.charmfile) + "'");
+			v.push_back("'" + Strings::Escape(e.charmfileid) + "'");
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.color));
+			v.push_back("'" + Strings::Escape(e.combateffects) + "'");
+			v.push_back(std::to_string(e.extradmgskill));
+			v.push_back(std::to_string(e.extradmgamt));
+			v.push_back(std::to_string(e.price));
+			v.push_back(std::to_string(e.cr));
+			v.push_back(std::to_string(e.damage));
+			v.push_back(std::to_string(e.damageshield));
+			v.push_back(std::to_string(e.deity));
+			v.push_back(std::to_string(e.delay));
+			v.push_back(std::to_string(e.augdistiller));
+			v.push_back(std::to_string(e.dotshielding));
+			v.push_back(std::to_string(e.dr));
+			v.push_back(std::to_string(e.clicktype));
+			v.push_back(std::to_string(e.clicklevel2));
+			v.push_back(std::to_string(e.elemdmgtype));
+			v.push_back(std::to_string(e.elemdmgamt));
+			v.push_back(std::to_string(e.endur));
+			v.push_back(std::to_string(e.factionamt1));
+			v.push_back(std::to_string(e.factionamt2));
+			v.push_back(std::to_string(e.factionamt3));
+			v.push_back(std::to_string(e.factionamt4));
+			v.push_back(std::to_string(e.factionmod1));
+			v.push_back(std::to_string(e.factionmod2));
+			v.push_back(std::to_string(e.factionmod3));
+			v.push_back(std::to_string(e.factionmod4));
+			v.push_back("'" + Strings::Escape(e.filename) + "'");
+			v.push_back(std::to_string(e.focuseffect));
+			v.push_back(std::to_string(e.fr));
+			v.push_back(std::to_string(e.fvnodrop));
+			v.push_back(std::to_string(e.haste));
+			v.push_back(std::to_string(e.clicklevel));
+			v.push_back(std::to_string(e.hp));
+			v.push_back(std::to_string(e.regen));
+			v.push_back(std::to_string(e.icon));
+			v.push_back("'" + Strings::Escape(e.idfile) + "'");
+			v.push_back(std::to_string(e.itemclass));
+			v.push_back(std::to_string(e.itemtype));
+			v.push_back(std::to_string(e.ldonprice));
+			v.push_back(std::to_string(e.ldontheme));
+			v.push_back(std::to_string(e.ldonsold));
+			v.push_back(std::to_string(e.light));
+			v.push_back("'" + Strings::Escape(e.lore) + "'");
+			v.push_back(std::to_string(e.loregroup));
+			v.push_back(std::to_string(e.magic));
+			v.push_back(std::to_string(e.mana));
+			v.push_back(std::to_string(e.manaregen));
+			v.push_back(std::to_string(e.enduranceregen));
+			v.push_back(std::to_string(e.material));
+			v.push_back(std::to_string(e.herosforgemodel));
+			v.push_back(std::to_string(e.maxcharges));
+			v.push_back(std::to_string(e.mr));
+			v.push_back(std::to_string(e.nodrop));
+			v.push_back(std::to_string(e.norent));
+			v.push_back(std::to_string(e.pendingloreflag));
+			v.push_back(std::to_string(e.pr));
+			v.push_back(std::to_string(e.procrate));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.range_));
+			v.push_back(std::to_string(e.reclevel));
+			v.push_back(std::to_string(e.recskill));
+			v.push_back(std::to_string(e.reqlevel));
+			v.push_back(std::to_string(e.sellrate));
+			v.push_back(std::to_string(e.shielding));
+			v.push_back(std::to_string(e.size));
+			v.push_back(std::to_string(e.skillmodtype));
+			v.push_back(std::to_string(e.skillmodvalue));
+			v.push_back(std::to_string(e.slots));
+			v.push_back(std::to_string(e.clickeffect));
+			v.push_back(std::to_string(e.spellshield));
+			v.push_back(std::to_string(e.strikethrough));
+			v.push_back(std::to_string(e.stunresist));
+			v.push_back(std::to_string(e.summonedflag));
+			v.push_back(std::to_string(e.tradeskills));
+			v.push_back(std::to_string(e.favor));
+			v.push_back(std::to_string(e.weight));
+			v.push_back(std::to_string(e.UNK012));
+			v.push_back(std::to_string(e.UNK013));
+			v.push_back(std::to_string(e.benefitflag));
+			v.push_back(std::to_string(e.UNK054));
+			v.push_back(std::to_string(e.UNK059));
+			v.push_back(std::to_string(e.booktype));
+			v.push_back(std::to_string(e.recastdelay));
+			v.push_back(std::to_string(e.recasttype));
+			v.push_back(std::to_string(e.guildfavor));
+			v.push_back(std::to_string(e.UNK123));
+			v.push_back(std::to_string(e.UNK124));
+			v.push_back(std::to_string(e.attuneable));
+			v.push_back(std::to_string(e.nopet));
+			v.push_back("FROM_UNIXTIME(" + (e.updated > 0 ? std::to_string(e.updated) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.comment) + "'");
+			v.push_back(std::to_string(e.UNK127));
+			v.push_back(std::to_string(e.pointtype));
+			v.push_back(std::to_string(e.potionbelt));
+			v.push_back(std::to_string(e.potionbeltslots));
+			v.push_back(std::to_string(e.stacksize));
+			v.push_back(std::to_string(e.notransfer));
+			v.push_back(std::to_string(e.stackable));
+			v.push_back("'" + Strings::Escape(e.UNK134) + "'");
+			v.push_back(std::to_string(e.UNK137));
+			v.push_back(std::to_string(e.proceffect));
+			v.push_back(std::to_string(e.proctype));
+			v.push_back(std::to_string(e.proclevel2));
+			v.push_back(std::to_string(e.proclevel));
+			v.push_back(std::to_string(e.UNK142));
+			v.push_back(std::to_string(e.worneffect));
+			v.push_back(std::to_string(e.worntype));
+			v.push_back(std::to_string(e.wornlevel2));
+			v.push_back(std::to_string(e.wornlevel));
+			v.push_back(std::to_string(e.UNK147));
+			v.push_back(std::to_string(e.focustype));
+			v.push_back(std::to_string(e.focuslevel2));
+			v.push_back(std::to_string(e.focuslevel));
+			v.push_back(std::to_string(e.UNK152));
+			v.push_back(std::to_string(e.scrolleffect));
+			v.push_back(std::to_string(e.scrolltype));
+			v.push_back(std::to_string(e.scrolllevel2));
+			v.push_back(std::to_string(e.scrolllevel));
+			v.push_back(std::to_string(e.UNK157));
+			v.push_back("FROM_UNIXTIME(" + (e.serialized > 0 ? std::to_string(e.serialized) : "null") + ")");
+			v.push_back("FROM_UNIXTIME(" + (e.verified > 0 ? std::to_string(e.verified) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.serialization) + "'");
+			v.push_back("'" + Strings::Escape(e.source) + "'");
+			v.push_back(std::to_string(e.UNK033));
+			v.push_back("'" + Strings::Escape(e.lorefile) + "'");
+			v.push_back(std::to_string(e.UNK014));
+			v.push_back(std::to_string(e.svcorruption));
+			v.push_back(std::to_string(e.skillmodmax));
+			v.push_back(std::to_string(e.UNK060));
+			v.push_back(std::to_string(e.augslot1unk2));
+			v.push_back(std::to_string(e.augslot2unk2));
+			v.push_back(std::to_string(e.augslot3unk2));
+			v.push_back(std::to_string(e.augslot4unk2));
+			v.push_back(std::to_string(e.augslot5unk2));
+			v.push_back(std::to_string(e.augslot6unk2));
+			v.push_back(std::to_string(e.UNK120));
+			v.push_back(std::to_string(e.UNK121));
+			v.push_back(std::to_string(e.questitemflag));
+			v.push_back("'" + Strings::Escape(e.UNK132) + "'");
+			v.push_back(std::to_string(e.clickunk5));
+			v.push_back("'" + Strings::Escape(e.clickunk6) + "'");
+			v.push_back(std::to_string(e.clickunk7));
+			v.push_back(std::to_string(e.procunk1));
+			v.push_back(std::to_string(e.procunk2));
+			v.push_back(std::to_string(e.procunk3));
+			v.push_back(std::to_string(e.procunk4));
+			v.push_back("'" + Strings::Escape(e.procunk6) + "'");
+			v.push_back(std::to_string(e.procunk7));
+			v.push_back(std::to_string(e.wornunk1));
+			v.push_back(std::to_string(e.wornunk2));
+			v.push_back(std::to_string(e.wornunk3));
+			v.push_back(std::to_string(e.wornunk4));
+			v.push_back(std::to_string(e.wornunk5));
+			v.push_back("'" + Strings::Escape(e.wornunk6) + "'");
+			v.push_back(std::to_string(e.wornunk7));
+			v.push_back(std::to_string(e.focusunk1));
+			v.push_back(std::to_string(e.focusunk2));
+			v.push_back(std::to_string(e.focusunk3));
+			v.push_back(std::to_string(e.focusunk4));
+			v.push_back(std::to_string(e.focusunk5));
+			v.push_back("'" + Strings::Escape(e.focusunk6) + "'");
+			v.push_back(std::to_string(e.focusunk7));
+			v.push_back(std::to_string(e.scrollunk1));
+			v.push_back(std::to_string(e.scrollunk2));
+			v.push_back(std::to_string(e.scrollunk3));
+			v.push_back(std::to_string(e.scrollunk4));
+			v.push_back(std::to_string(e.scrollunk5));
+			v.push_back("'" + Strings::Escape(e.scrollunk6) + "'");
+			v.push_back(std::to_string(e.scrollunk7));
+			v.push_back(std::to_string(e.UNK193));
+			v.push_back(std::to_string(e.purity));
+			v.push_back(std::to_string(e.evoitem));
+			v.push_back(std::to_string(e.evoid));
+			v.push_back(std::to_string(e.evolvinglevel));
+			v.push_back(std::to_string(e.evomax));
+			v.push_back("'" + Strings::Escape(e.clickname) + "'");
+			v.push_back("'" + Strings::Escape(e.procname) + "'");
+			v.push_back("'" + Strings::Escape(e.wornname) + "'");
+			v.push_back("'" + Strings::Escape(e.focusname) + "'");
+			v.push_back("'" + Strings::Escape(e.scrollname) + "'");
+			v.push_back(std::to_string(e.dsmitigation));
+			v.push_back(std::to_string(e.heroic_str));
+			v.push_back(std::to_string(e.heroic_int));
+			v.push_back(std::to_string(e.heroic_wis));
+			v.push_back(std::to_string(e.heroic_agi));
+			v.push_back(std::to_string(e.heroic_dex));
+			v.push_back(std::to_string(e.heroic_sta));
+			v.push_back(std::to_string(e.heroic_cha));
+			v.push_back(std::to_string(e.heroic_pr));
+			v.push_back(std::to_string(e.heroic_dr));
+			v.push_back(std::to_string(e.heroic_fr));
+			v.push_back(std::to_string(e.heroic_cr));
+			v.push_back(std::to_string(e.heroic_mr));
+			v.push_back(std::to_string(e.heroic_svcorrup));
+			v.push_back(std::to_string(e.healamt));
+			v.push_back(std::to_string(e.spelldmg));
+			v.push_back(std::to_string(e.clairvoyance));
+			v.push_back(std::to_string(e.backstabdmg));
+			v.push_back("'" + Strings::Escape(e.created) + "'");
+			v.push_back(std::to_string(e.elitematerial));
+			v.push_back(std::to_string(e.ldonsellbackrate));
+			v.push_back(std::to_string(e.scriptfileid));
+			v.push_back(std::to_string(e.expendablearrow));
+			v.push_back(std::to_string(e.powersourcecapacity));
+			v.push_back(std::to_string(e.bardeffect));
+			v.push_back(std::to_string(e.bardeffecttype));
+			v.push_back(std::to_string(e.bardlevel2));
+			v.push_back(std::to_string(e.bardlevel));
+			v.push_back(std::to_string(e.bardunk1));
+			v.push_back(std::to_string(e.bardunk2));
+			v.push_back(std::to_string(e.bardunk3));
+			v.push_back(std::to_string(e.bardunk4));
+			v.push_back(std::to_string(e.bardunk5));
+			v.push_back("'" + Strings::Escape(e.bardname) + "'");
+			v.push_back(std::to_string(e.bardunk7));
+			v.push_back(std::to_string(e.UNK214));
+			v.push_back(std::to_string(e.subtype));
+			v.push_back(std::to_string(e.UNK220));
+			v.push_back(std::to_string(e.UNK221));
+			v.push_back(std::to_string(e.heirloom));
+			v.push_back(std::to_string(e.UNK223));
+			v.push_back(std::to_string(e.UNK224));
+			v.push_back(std::to_string(e.UNK225));
+			v.push_back(std::to_string(e.UNK226));
+			v.push_back(std::to_string(e.UNK227));
+			v.push_back(std::to_string(e.UNK228));
+			v.push_back(std::to_string(e.UNK229));
+			v.push_back(std::to_string(e.UNK230));
+			v.push_back(std::to_string(e.UNK231));
+			v.push_back(std::to_string(e.UNK232));
+			v.push_back(std::to_string(e.UNK233));
+			v.push_back(std::to_string(e.UNK234));
+			v.push_back(std::to_string(e.placeable));
+			v.push_back(std::to_string(e.UNK236));
+			v.push_back(std::to_string(e.UNK237));
+			v.push_back(std::to_string(e.UNK238));
+			v.push_back(std::to_string(e.UNK239));
+			v.push_back(std::to_string(e.UNK240));
+			v.push_back(std::to_string(e.UNK241));
+			v.push_back(std::to_string(e.epicitem));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_ITEMS_REPOSITORY_H

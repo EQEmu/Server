@@ -1,57 +1,41 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ *
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_CURRENCY_REPOSITORY_H
 #define EQEMU_BASE_CHARACTER_CURRENCY_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseCharacterCurrencyRepository {
 public:
 	struct CharacterCurrency {
-		int id;
-		int platinum;
-		int gold;
-		int silver;
-		int copper;
-		int platinum_bank;
-		int gold_bank;
-		int silver_bank;
-		int copper_bank;
-		int platinum_cursor;
-		int gold_cursor;
-		int silver_cursor;
-		int copper_cursor;
-		int radiant_crystals;
-		int career_radiant_crystals;
-		int ebon_crystals;
-		int career_ebon_crystals;
+		uint32_t id;
+		uint32_t platinum;
+		uint32_t gold;
+		uint32_t silver;
+		uint32_t copper;
+		uint32_t platinum_bank;
+		uint32_t gold_bank;
+		uint32_t silver_bank;
+		uint32_t copper_bank;
+		uint32_t platinum_cursor;
+		uint32_t gold_cursor;
+		uint32_t silver_cursor;
+		uint32_t copper_cursor;
+		uint32_t radiant_crystals;
+		uint32_t career_radiant_crystals;
+		uint32_t ebon_crystals;
+		uint32_t career_ebon_crystals;
 	};
 
 	static std::string PrimaryKey()
@@ -82,24 +66,37 @@ public:
 		};
 	}
 
-	static std::string ColumnsRaw()
+	static std::vector<std::string> SelectColumns()
 	{
-		return std::string(implode(", ", Columns()));
+		return {
+			"id",
+			"platinum",
+			"gold",
+			"silver",
+			"copper",
+			"platinum_bank",
+			"gold_bank",
+			"silver_bank",
+			"copper_bank",
+			"platinum_cursor",
+			"gold_cursor",
+			"silver_cursor",
+			"copper_cursor",
+			"radiant_crystals",
+			"career_radiant_crystals",
+			"ebon_crystals",
+			"career_ebon_crystals",
+		};
 	}
 
-	static std::string InsertColumnsRaw()
+	static std::string ColumnsRaw()
 	{
-		std::vector<std::string> insert_columns;
+		return std::string(Strings::Implode(", ", Columns()));
+	}
 
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -111,7 +108,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -121,36 +118,36 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
 	static CharacterCurrency NewEntity()
 	{
-		CharacterCurrency entry{};
+		CharacterCurrency e{};
 
-		entry.id                      = 0;
-		entry.platinum                = 0;
-		entry.gold                    = 0;
-		entry.silver                  = 0;
-		entry.copper                  = 0;
-		entry.platinum_bank           = 0;
-		entry.gold_bank               = 0;
-		entry.silver_bank             = 0;
-		entry.copper_bank             = 0;
-		entry.platinum_cursor         = 0;
-		entry.gold_cursor             = 0;
-		entry.silver_cursor           = 0;
-		entry.copper_cursor           = 0;
-		entry.radiant_crystals        = 0;
-		entry.career_radiant_crystals = 0;
-		entry.ebon_crystals           = 0;
-		entry.career_ebon_crystals    = 0;
+		e.id                      = 0;
+		e.platinum                = 0;
+		e.gold                    = 0;
+		e.silver                  = 0;
+		e.copper                  = 0;
+		e.platinum_bank           = 0;
+		e.gold_bank               = 0;
+		e.silver_bank             = 0;
+		e.copper_bank             = 0;
+		e.platinum_cursor         = 0;
+		e.gold_cursor             = 0;
+		e.silver_cursor           = 0;
+		e.copper_cursor           = 0;
+		e.radiant_crystals        = 0;
+		e.career_radiant_crystals = 0;
+		e.ebon_crystals           = 0;
+		e.career_ebon_crystals    = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterCurrency GetCharacterCurrencyEntry(
+	static CharacterCurrency GetCharacterCurrency(
 		const std::vector<CharacterCurrency> &character_currencys,
 		int character_currency_id
 	)
@@ -165,50 +162,53 @@ public:
 	}
 
 	static CharacterCurrency FindOne(
+		Database& db,
 		int character_currency_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_currency_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterCurrency entry{};
+			CharacterCurrency e{};
 
-			entry.id                      = atoi(row[0]);
-			entry.platinum                = atoi(row[1]);
-			entry.gold                    = atoi(row[2]);
-			entry.silver                  = atoi(row[3]);
-			entry.copper                  = atoi(row[4]);
-			entry.platinum_bank           = atoi(row[5]);
-			entry.gold_bank               = atoi(row[6]);
-			entry.silver_bank             = atoi(row[7]);
-			entry.copper_bank             = atoi(row[8]);
-			entry.platinum_cursor         = atoi(row[9]);
-			entry.gold_cursor             = atoi(row[10]);
-			entry.silver_cursor           = atoi(row[11]);
-			entry.copper_cursor           = atoi(row[12]);
-			entry.radiant_crystals        = atoi(row[13]);
-			entry.career_radiant_crystals = atoi(row[14]);
-			entry.ebon_crystals           = atoi(row[15]);
-			entry.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.platinum                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.gold                    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.silver                  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.copper                  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.platinum_bank           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.gold_bank               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.silver_bank             = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.copper_bank             = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.platinum_cursor         = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.gold_cursor             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.silver_cursor           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.copper_cursor           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.radiant_crystals        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.career_radiant_crystals = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ebon_crystals           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.career_ebon_crystals    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int character_currency_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -221,38 +221,39 @@ public:
 	}
 
 	static int UpdateOne(
-		CharacterCurrency character_currency_entry
+		Database& db,
+		const CharacterCurrency &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_currency_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_currency_entry.platinum));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_currency_entry.gold));
-		update_values.push_back(columns[3] + " = " + std::to_string(character_currency_entry.silver));
-		update_values.push_back(columns[4] + " = " + std::to_string(character_currency_entry.copper));
-		update_values.push_back(columns[5] + " = " + std::to_string(character_currency_entry.platinum_bank));
-		update_values.push_back(columns[6] + " = " + std::to_string(character_currency_entry.gold_bank));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_currency_entry.silver_bank));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_currency_entry.copper_bank));
-		update_values.push_back(columns[9] + " = " + std::to_string(character_currency_entry.platinum_cursor));
-		update_values.push_back(columns[10] + " = " + std::to_string(character_currency_entry.gold_cursor));
-		update_values.push_back(columns[11] + " = " + std::to_string(character_currency_entry.silver_cursor));
-		update_values.push_back(columns[12] + " = " + std::to_string(character_currency_entry.copper_cursor));
-		update_values.push_back(columns[13] + " = " + std::to_string(character_currency_entry.radiant_crystals));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_currency_entry.career_radiant_crystals));
-		update_values.push_back(columns[15] + " = " + std::to_string(character_currency_entry.ebon_crystals));
-		update_values.push_back(columns[16] + " = " + std::to_string(character_currency_entry.career_ebon_crystals));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.platinum));
+		v.push_back(columns[2] + " = " + std::to_string(e.gold));
+		v.push_back(columns[3] + " = " + std::to_string(e.silver));
+		v.push_back(columns[4] + " = " + std::to_string(e.copper));
+		v.push_back(columns[5] + " = " + std::to_string(e.platinum_bank));
+		v.push_back(columns[6] + " = " + std::to_string(e.gold_bank));
+		v.push_back(columns[7] + " = " + std::to_string(e.silver_bank));
+		v.push_back(columns[8] + " = " + std::to_string(e.copper_bank));
+		v.push_back(columns[9] + " = " + std::to_string(e.platinum_cursor));
+		v.push_back(columns[10] + " = " + std::to_string(e.gold_cursor));
+		v.push_back(columns[11] + " = " + std::to_string(e.silver_cursor));
+		v.push_back(columns[12] + " = " + std::to_string(e.copper_cursor));
+		v.push_back(columns[13] + " = " + std::to_string(e.radiant_crystals));
+		v.push_back(columns[14] + " = " + std::to_string(e.career_radiant_crystals));
+		v.push_back(columns[15] + " = " + std::to_string(e.ebon_crystals));
+		v.push_back(columns[16] + " = " + std::to_string(e.career_ebon_crystals));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_currency_entry.id
+				e.id
 			)
 		);
 
@@ -260,95 +261,97 @@ public:
 	}
 
 	static CharacterCurrency InsertOne(
-		CharacterCurrency character_currency_entry
+		Database& db,
+		CharacterCurrency e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_currency_entry.id));
-		insert_values.push_back(std::to_string(character_currency_entry.platinum));
-		insert_values.push_back(std::to_string(character_currency_entry.gold));
-		insert_values.push_back(std::to_string(character_currency_entry.silver));
-		insert_values.push_back(std::to_string(character_currency_entry.copper));
-		insert_values.push_back(std::to_string(character_currency_entry.platinum_bank));
-		insert_values.push_back(std::to_string(character_currency_entry.gold_bank));
-		insert_values.push_back(std::to_string(character_currency_entry.silver_bank));
-		insert_values.push_back(std::to_string(character_currency_entry.copper_bank));
-		insert_values.push_back(std::to_string(character_currency_entry.platinum_cursor));
-		insert_values.push_back(std::to_string(character_currency_entry.gold_cursor));
-		insert_values.push_back(std::to_string(character_currency_entry.silver_cursor));
-		insert_values.push_back(std::to_string(character_currency_entry.copper_cursor));
-		insert_values.push_back(std::to_string(character_currency_entry.radiant_crystals));
-		insert_values.push_back(std::to_string(character_currency_entry.career_radiant_crystals));
-		insert_values.push_back(std::to_string(character_currency_entry.ebon_crystals));
-		insert_values.push_back(std::to_string(character_currency_entry.career_ebon_crystals));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.platinum_bank));
+		v.push_back(std::to_string(e.gold_bank));
+		v.push_back(std::to_string(e.silver_bank));
+		v.push_back(std::to_string(e.copper_bank));
+		v.push_back(std::to_string(e.platinum_cursor));
+		v.push_back(std::to_string(e.gold_cursor));
+		v.push_back(std::to_string(e.silver_cursor));
+		v.push_back(std::to_string(e.copper_cursor));
+		v.push_back(std::to_string(e.radiant_crystals));
+		v.push_back(std::to_string(e.career_radiant_crystals));
+		v.push_back(std::to_string(e.ebon_crystals));
+		v.push_back(std::to_string(e.career_ebon_crystals));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_currency_entry.id = results.LastInsertedID();
-			return character_currency_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_currency_entry = NewEntity();
+		e = NewEntity();
 
-		return character_currency_entry;
+		return e;
 	}
 
 	static int InsertMany(
-		std::vector<CharacterCurrency> character_currency_entries
+		Database& db,
+		const std::vector<CharacterCurrency> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_currency_entry: character_currency_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_currency_entry.id));
-			insert_values.push_back(std::to_string(character_currency_entry.platinum));
-			insert_values.push_back(std::to_string(character_currency_entry.gold));
-			insert_values.push_back(std::to_string(character_currency_entry.silver));
-			insert_values.push_back(std::to_string(character_currency_entry.copper));
-			insert_values.push_back(std::to_string(character_currency_entry.platinum_bank));
-			insert_values.push_back(std::to_string(character_currency_entry.gold_bank));
-			insert_values.push_back(std::to_string(character_currency_entry.silver_bank));
-			insert_values.push_back(std::to_string(character_currency_entry.copper_bank));
-			insert_values.push_back(std::to_string(character_currency_entry.platinum_cursor));
-			insert_values.push_back(std::to_string(character_currency_entry.gold_cursor));
-			insert_values.push_back(std::to_string(character_currency_entry.silver_cursor));
-			insert_values.push_back(std::to_string(character_currency_entry.copper_cursor));
-			insert_values.push_back(std::to_string(character_currency_entry.radiant_crystals));
-			insert_values.push_back(std::to_string(character_currency_entry.career_radiant_crystals));
-			insert_values.push_back(std::to_string(character_currency_entry.ebon_crystals));
-			insert_values.push_back(std::to_string(character_currency_entry.career_ebon_crystals));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.platinum_bank));
+			v.push_back(std::to_string(e.gold_bank));
+			v.push_back(std::to_string(e.silver_bank));
+			v.push_back(std::to_string(e.copper_bank));
+			v.push_back(std::to_string(e.platinum_cursor));
+			v.push_back(std::to_string(e.gold_cursor));
+			v.push_back(std::to_string(e.silver_cursor));
+			v.push_back(std::to_string(e.copper_cursor));
+			v.push_back(std::to_string(e.radiant_crystals));
+			v.push_back(std::to_string(e.career_radiant_crystals));
+			v.push_back(std::to_string(e.ebon_crystals));
+			v.push_back(std::to_string(e.career_ebon_crystals));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<CharacterCurrency> All()
+	static std::vector<CharacterCurrency> All(Database& db)
 	{
 		std::vector<CharacterCurrency> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -358,37 +361,37 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCurrency entry{};
+			CharacterCurrency e{};
 
-			entry.id                      = atoi(row[0]);
-			entry.platinum                = atoi(row[1]);
-			entry.gold                    = atoi(row[2]);
-			entry.silver                  = atoi(row[3]);
-			entry.copper                  = atoi(row[4]);
-			entry.platinum_bank           = atoi(row[5]);
-			entry.gold_bank               = atoi(row[6]);
-			entry.silver_bank             = atoi(row[7]);
-			entry.copper_bank             = atoi(row[8]);
-			entry.platinum_cursor         = atoi(row[9]);
-			entry.gold_cursor             = atoi(row[10]);
-			entry.silver_cursor           = atoi(row[11]);
-			entry.copper_cursor           = atoi(row[12]);
-			entry.radiant_crystals        = atoi(row[13]);
-			entry.career_radiant_crystals = atoi(row[14]);
-			entry.ebon_crystals           = atoi(row[15]);
-			entry.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.platinum                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.gold                    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.silver                  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.copper                  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.platinum_bank           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.gold_bank               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.silver_bank             = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.copper_bank             = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.platinum_cursor         = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.gold_cursor             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.silver_cursor           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.copper_cursor           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.radiant_crystals        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.career_radiant_crystals = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ebon_crystals           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.career_ebon_crystals    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterCurrency> GetWhere(std::string where_filter)
+	static std::vector<CharacterCurrency> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterCurrency> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -399,35 +402,35 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterCurrency entry{};
+			CharacterCurrency e{};
 
-			entry.id                      = atoi(row[0]);
-			entry.platinum                = atoi(row[1]);
-			entry.gold                    = atoi(row[2]);
-			entry.silver                  = atoi(row[3]);
-			entry.copper                  = atoi(row[4]);
-			entry.platinum_bank           = atoi(row[5]);
-			entry.gold_bank               = atoi(row[6]);
-			entry.silver_bank             = atoi(row[7]);
-			entry.copper_bank             = atoi(row[8]);
-			entry.platinum_cursor         = atoi(row[9]);
-			entry.gold_cursor             = atoi(row[10]);
-			entry.silver_cursor           = atoi(row[11]);
-			entry.copper_cursor           = atoi(row[12]);
-			entry.radiant_crystals        = atoi(row[13]);
-			entry.career_radiant_crystals = atoi(row[14]);
-			entry.ebon_crystals           = atoi(row[15]);
-			entry.career_ebon_crystals    = atoi(row[16]);
+			e.id                      = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.platinum                = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.gold                    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.silver                  = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.copper                  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.platinum_bank           = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.gold_bank               = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.silver_bank             = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.copper_bank             = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.platinum_cursor         = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.gold_cursor             = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.silver_cursor           = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
+			e.copper_cursor           = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.radiant_crystals        = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.career_radiant_crystals = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.ebon_crystals           = row[15] ? static_cast<uint32_t>(strtoul(row[15], nullptr, 10)) : 0;
+			e.career_ebon_crystals    = row[16] ? static_cast<uint32_t>(strtoul(row[16], nullptr, 10)) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -438,9 +441,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
@@ -450,6 +453,120 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterCurrency &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.platinum));
+		v.push_back(std::to_string(e.gold));
+		v.push_back(std::to_string(e.silver));
+		v.push_back(std::to_string(e.copper));
+		v.push_back(std::to_string(e.platinum_bank));
+		v.push_back(std::to_string(e.gold_bank));
+		v.push_back(std::to_string(e.silver_bank));
+		v.push_back(std::to_string(e.copper_bank));
+		v.push_back(std::to_string(e.platinum_cursor));
+		v.push_back(std::to_string(e.gold_cursor));
+		v.push_back(std::to_string(e.silver_cursor));
+		v.push_back(std::to_string(e.copper_cursor));
+		v.push_back(std::to_string(e.radiant_crystals));
+		v.push_back(std::to_string(e.career_radiant_crystals));
+		v.push_back(std::to_string(e.ebon_crystals));
+		v.push_back(std::to_string(e.career_ebon_crystals));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterCurrency> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.platinum));
+			v.push_back(std::to_string(e.gold));
+			v.push_back(std::to_string(e.silver));
+			v.push_back(std::to_string(e.copper));
+			v.push_back(std::to_string(e.platinum_bank));
+			v.push_back(std::to_string(e.gold_bank));
+			v.push_back(std::to_string(e.silver_bank));
+			v.push_back(std::to_string(e.copper_bank));
+			v.push_back(std::to_string(e.platinum_cursor));
+			v.push_back(std::to_string(e.gold_cursor));
+			v.push_back(std::to_string(e.silver_cursor));
+			v.push_back(std::to_string(e.copper_cursor));
+			v.push_back(std::to_string(e.radiant_crystals));
+			v.push_back(std::to_string(e.career_radiant_crystals));
+			v.push_back(std::to_string(e.ebon_crystals));
+			v.push_back(std::to_string(e.career_ebon_crystals));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_CURRENCY_REPOSITORY_H

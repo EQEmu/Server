@@ -1,21 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2009 EQEMu Development Team (http://eqemulator.net)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-		are required to give you total support for your newly bought product;
-		without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-		A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
 #include "../common/features.h"
 #include "client.h"
 
@@ -23,116 +5,61 @@
 
 #include "../common/global_define.h"
 #include "embperl.h"
-
-#ifdef seed
-#undef seed
-#endif
-
-#include "../common/linked_list.h"
 #include "hate_list.h"
 
-#ifdef THIS        /* this macro seems to leak out on some systems */
-#undef THIS
-#endif
-
-XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetEnt) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
-	{
-		struct_HateList *THIS;
-		Mob             *RETVAL;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->entity_on_hatelist;
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
+int64_t Perl_HateEntry_GetDamage(struct_HateList* self) // @categories Script Utility, Hate and Aggro
+{
+	return self->hatelist_damage;
 }
 
-XS(XS_HateEntry_GetHate); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetHate) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
-	{
-		struct_HateList *THIS;
-		int32 RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->stored_hate_amount;
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+Mob* Perl_HateEntry_GetEnt(struct_HateList* self) // @categories Script Utility, Hate and Aggro
+{
+	return self->entity_on_hatelist;
 }
 
-XS(XS_HateEntry_GetDamage); /* prototype to pass -Wmissing-prototypes */
-XS(XS_HateEntry_GetDamage) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
-	{
-		struct_HateList *THIS;
-		int32 RETVAL;
-		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->hatelist_damage;
-		XSprePUSH;
-		PUSHi((IV) RETVAL);
-	}
-	XSRETURN(1);
+bool Perl_HateEntry_GetFrenzy(struct_HateList* self) // @categories Script Utility, Hate and Aggro
+{
+	return self->is_entity_frenzy;
 }
 
-#ifdef __cplusplus
-extern "C"
-#endif
+int64_t Perl_HateEntry_GetHate(struct_HateList* self) // @categories Script Utility, Hate and Aggro
+{
+	return self->stored_hate_amount;
+}
 
-XS(boot_HateEntry);
-XS(boot_HateEntry) {
-	dXSARGS;
-	char file[256];
-	strncpy(file, __FILE__, 256);
-	file[255] = 0;
+void Perl_HateEntry_SetDamage(struct_HateList* self, int64 value) // @categories Script Utility, Hate and Aggro
+{
+	self->hatelist_damage = value;
+}
 
-	if (items != 1)
-		fprintf(stderr, "boot_quest does not take any arguments.");
-	char buf[128];
+void Perl_HateEntry_SetEnt(struct_HateList* self, Mob* mob) // @categories Script Utility, Hate and Aggro
+{
+	self->entity_on_hatelist = mob;
+}
 
-	//add the strcpy stuff to get rid of const warnings....
+void Perl_HateEntry_SetFrenzy(struct_HateList* self, bool is_frenzy) // @categories Script Utility, Hate and Aggro
+{
+	self->is_entity_frenzy = is_frenzy;
+}
 
-	XS_VERSION_BOOTCHECK;
+void Perl_HateEntry_SetHate(struct_HateList* self, int64 value) // @categories Script Utility, Hate and Aggro
+{
+	self->stored_hate_amount = value;
+}
 
-	newXSproto(strcpy(buf, "GetEnt"), XS_HateEntry_GetEnt, file, "$");
-	newXSproto(strcpy(buf, "GetDamage"), XS_HateEntry_GetDamage, file, "$");
-	newXSproto(strcpy(buf, "GetHate"), XS_HateEntry_GetHate, file, "$");
+void perl_register_hateentry()
+{
+	perl::interpreter perl(PERL_GET_THX);
 
-	XSRETURN_YES;
+	auto package = perl.new_class<struct_HateList>("HateEntry");
+	package.add("GetDamage", &Perl_HateEntry_GetDamage);
+	package.add("GetEnt", &Perl_HateEntry_GetEnt);
+	package.add("GetFrenzy", &Perl_HateEntry_GetFrenzy);
+	package.add("GetHate", &Perl_HateEntry_GetHate);
+	package.add("SetDamage", &Perl_HateEntry_SetDamage);
+	package.add("SetEnt", &Perl_HateEntry_SetEnt);
+	package.add("SetFrenzy", &Perl_HateEntry_SetFrenzy);
+	package.add("SetHate", &Perl_HateEntry_SetHate);
 }
 
 #endif //EMBPERL_XS_CLASSES

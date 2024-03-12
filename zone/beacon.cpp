@@ -39,39 +39,85 @@ class Zone;
 #include "entity.h"
 #include "mob.h"
 
-
-#ifdef BOTS
-#include "bot.h"
-#endif
-
-
-#include "../common/spdat.h"
-
 extern EntityList entity_list;
 extern Zone* zone;
 
 // if lifetime is 0 this is a permanent beacon.. not sure if that'll be
 // useful for anything
-Beacon::Beacon(Mob *at_mob, int lifetime)
-:Mob
-(
-	nullptr, nullptr, 0, 0, 0, INVISIBLE_MAN, 0, BT_NoTarget, 0, 0, 0, 0, 0, at_mob->GetPosition(), 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, EQ::TintProfile(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false
+Beacon::Beacon(const glm::vec4 &in_pos, int lifetime) : Mob(
+	nullptr, // in_name
+	nullptr, // in_lastname
+	0, // in_cur_hp
+	0, // in_max_hp
+	Gender::Male, // in_gender
+	Race::InvisibleMan, // in_race
+	Class::None, // in_class
+	BT_NoTarget, // in_bodytype
+	0, // in_deity
+	0, // in_level
+	0, // in_npctype_id
+	0.0f, // in_size
+	0.0f, // in_runspeed
+	in_pos, // position
+	0, // in_light
+	0, // in_texture
+	0, // in_helmtexture
+	0, // in_ac
+	0, // in_atk
+	0, // in_str
+	0, // in_sta
+	0, // in_dex
+	0, // in_agi
+	0, // in_int
+	0, // in_wis
+	0, // in_cha
+	0, // in_haircolor
+	0, // in_beardcolor
+	0, // in_eyecolor1
+	0, // in_eyecolor2
+	0, // in_hairstyle
+	0, // in_luclinface
+	0, // in_beard
+	0, // in_drakkin_heritage
+	0, // in_drakkin_tattoo
+	0, // in_drakkin_details
+	EQ::TintProfile(), // in_armor_tint
+	0, // in_aa_title
+	0, // in_see_invis
+	0, // in_see_invis_undead
+	0, // in_see_hide
+	0, // in_see_improved_hide
+	0, // in_hp_regen
+	0, // in_mana_regen
+	0, // in_qglobal
+	0, // in_maxlevel
+	0, // in_scalerate
+	0, // in_armtexture
+	0, // in_bracertexture
+	0, // in_handtexture
+	0, // in_legtexture
+	0, // in_feettexture
+	0, // in_usemodel
+	false, // in_always_aggros_foes
+	0, //in_heroic_strikethrough
+	false // in_keeps_sold_items
 ),
-		remove_timer(lifetime),
-		spell_timer(0)
+	  remove_timer(lifetime),
+	  spell_timer(0)
 {
 	remove_timer.Disable();
 	spell_timer.Disable();
-	remove_me = false;
-	spell_id = 0xFFFF;
-	resist_adjust = 0;
-	spell_iterations = 0;
-	caster_id = 0;
-	max_targets = 4; // default
 
-	if(lifetime)
+	remove_me        = false;
+	spell_id         = UINT16_MAX;
+	resist_adjust    = 0;
+	spell_iterations = 0;
+	caster_id        = 0;
+	max_targets      = 4;
+
+	if (lifetime) {
 		remove_timer.Start();
+	}
 }
 
 Beacon::~Beacon()
@@ -81,56 +127,55 @@ Beacon::~Beacon()
 
 bool Beacon::Process()
 {
-	if(remove_me)
-	{
+	if (remove_me) {
 		return false;
 	}
 
-	if
-	(
+	if (
 		spell_timer.Enabled() &&
 		spell_timer.Check() &&
 		IsValidSpell(spell_id)
-	)
-	{
-		Mob *caster = entity_list.GetMob(caster_id);
-		if(caster && spell_iterations-- && max_targets)
-		{
+	) {
+		Mob* caster = entity_list.GetMob(caster_id);
+		if (caster && spell_iterations-- && max_targets) {
 			// NPCs should never be affected by an AE they cast. PB AEs shouldn't affect caster either
 			// I don't think any other cases that get here matter
-			bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) && spells[spell_id].targettype != ST_AECaster;
+			const bool affect_caster = (!caster->IsNPC() && !caster->IsAIControlled()) &&
+				spells[spell_id].target_type != ST_AECaster;
 			entity_list.AESpell(caster, this, spell_id, affect_caster, resist_adjust, &max_targets);
-		}
-		else
-		{
+		} else {
 			// spell is done casting, or caster disappeared
-			spell_id = 0xFFFF;
+			caster_id        = 0;
+			spell_id         = UINT16_MAX;
 			spell_iterations = 0;
+
 			spell_timer.Disable();
-			caster_id = 0;
 		}
 	}
 
-	if(remove_timer.Enabled() && remove_timer.Check())
-	{
+	if (remove_timer.Enabled() && remove_timer.Check()) {
 		return false;
 	}
 
 	return true;
 }
 
-void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 resist_adjust)
+void Beacon::AELocationSpell(Mob *caster, uint16 cast_spell_id, int16 in_resist_adjust)
 {
-	if(!IsValidSpell(cast_spell_id) || !caster)
+	if (!IsValidSpell(cast_spell_id) || !caster) {
 		return;
+	}
 
-	caster_id = caster->GetID();
-	spell_id = cast_spell_id;
-	this->resist_adjust = resist_adjust;
-	spell_iterations = spells[spell_id].AEDuration / 2500;
+	caster_id        = caster->GetID();
+	spell_id         = cast_spell_id;
+	resist_adjust    = in_resist_adjust;
+	spell_iterations = spells[spell_id].aoe_duration / 2500;
 	spell_iterations = spell_iterations < 1 ? 1 : spell_iterations;	// at least 1
-	if (spells[spell_id].aemaxtargets)
-		max_targets = spells[spell_id].aemaxtargets;
+
+	if (spells[spell_id].aoe_max_targets) {
+		max_targets = spells[spell_id].aoe_max_targets;
+	}
+
 	spell_timer.Start(2500);
 	spell_timer.Trigger();
 }

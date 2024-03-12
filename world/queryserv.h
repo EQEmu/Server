@@ -4,6 +4,7 @@
 #include "../common/types.h"
 #include "../common/net/servertalk_server.h"
 #include "../common/servertalk.h"
+#include "../common/event/timer.h"
 
 class QueryServConnection
 {
@@ -14,8 +15,10 @@ public:
 	void HandleGenericMessage(uint16_t opcode, EQ::Net::Packet &p);
 	void HandleLFGuildUpdateMessage(uint16_t opcode, EQ::Net::Packet &p);
 	bool SendPacket(ServerPacket* pack);
+	void OnKeepAlive(EQ::Timer *t);
 private:
 	std::map<std::string, std::shared_ptr<EQ::Net::ServertalkServerConnection>> m_streams;
+	std::unique_ptr<EQ::Timer> m_keepalive;
 };
 
 #endif /*QueryServ_H_*/

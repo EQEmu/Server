@@ -21,7 +21,7 @@
 #include "timer.h"
 #include "ptimer.h"
 #include "database.h"
-#include "string_util.h"
+#include "strings.h"
 
 #ifdef _WINDOWS
 	#include <winsock2.h>
@@ -288,9 +288,9 @@ bool PTimerList::Load(Database *db) {
 	PersistentTimer *cur;
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-		type = atoi(row[0]);
-		start_time = strtoul(row[1], nullptr, 10);
-		timer_time = strtoul(row[2], nullptr, 10);
+		type = Strings::ToUnsignedInt(row[0]);
+		start_time = Strings::ToUnsignedInt(row[1]);
+		timer_time = Strings::ToUnsignedInt(row[2]);
 		enabled = (row[3][0] == '1');
 
 		//if it expired allready, dont bother.

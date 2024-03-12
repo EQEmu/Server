@@ -28,8 +28,6 @@
 #include "../common/eq_packet_structs.h"
 #include "cliententry.h"
 
-#define CLIENT_TIMEOUT 30000
-
 class EQApplicationPacket;
 class EQStreamInterface;
 
@@ -39,7 +37,6 @@ public:
 	~Client();
 
 	bool	Process();
-	void	ReceiveData(uchar* buf, int len);
 	void	SendCharInfo();
 	void	SendMaxCharCreate();
 	void	SendMembership();
@@ -54,7 +51,8 @@ public:
 	void	SendLogServer();
 	void	SendApproveWorld();
 	void	SendPostEnterWorld();
-	bool	GenPassKey(char* key);
+	void    SendGuildTributeFavorAndTimer(uint32 favor, uint32 time_remaining);
+	void    SendGuildTributeOptInToggle(const GuildTributeMemberToggle* in);
 
 	inline uint32		GetIP()				{ return ip; }
 	inline uint16		GetPort()			{ return port; }
@@ -103,9 +101,7 @@ private:
 
 	ClientListEntry* cle;
 	Timer	connect;
-	bool firstlogin;
 	bool seen_character_select;
-	bool realfirstlogin;
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
@@ -116,8 +112,14 @@ private:
 	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
+	bool HandleChecksumPacket(const EQApplicationPacket *app);
+	bool ChecksumVerificationCRCEQGame(uint64 checksum);
+	bool ChecksumVerificationCRCSkillCaps(uint64 checksum);
+	bool ChecksumVerificationCRCBaseData(uint64 checksum);
 
 	EQStreamInterface* eqs;
+	bool CanTradeFVNoDropItem();
+	void RecordPossibleHack(const std::string& message);
 };
 
 bool CheckCharCreateInfoSoF(CharCreate_Struct *cc);
