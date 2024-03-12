@@ -2692,7 +2692,7 @@ bool Bot::IsValidTarget(
 		tar_distance > leash_distance ||
 		(!GetAttackingFlag() && !CheckLosFN(tar) && !leash_owner->CheckLosFN(tar)) ||
 		!IsAttackAllowed(tar)
-		) {
+	) {
 		invalid_target_state = true;
 	}
 
