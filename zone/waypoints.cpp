@@ -606,8 +606,8 @@ float Mob::CalculateDistance(float x, float y, float z) {
 float Mob::CalculateDistance(Mob* mob) {
 	return sqrtf(
 		((m_Position.x - mob->GetX()) * (m_Position.x - mob->GetX())) +
-		((m_Position.y - mob->GetX()) * (m_Position.y - mob->GetY())) +
-		((m_Position.z - mob->GetX()) * (m_Position.z - mob->GetZ()))
+		((m_Position.y - mob->GetY()) * (m_Position.y - mob->GetY())) +
+		((m_Position.z - mob->GetZ()) * (m_Position.z - mob->GetZ()))
 	);
 }
 
