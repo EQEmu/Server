@@ -1025,14 +1025,8 @@ public:
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id, bool recurse = true);
 	void DropItemQS(EQ::ItemInstance* inst, bool pickup);
-<<<<<<< HEAD
-	
-=======
 	bool HasItemOnCorpse(uint32 item_id);
-
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
-
->>>>>>> master
 	int GetItemLinkHash(const EQ::ItemInstance* inst); // move to ItemData..or make use of the pre-calculated database field
 
 	void SendItemLink(const EQ::ItemInstance* inst, bool sendtoall=false);
