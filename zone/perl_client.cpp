@@ -3113,6 +3113,36 @@ bool Perl_Client_RemoveAlternateCurrencyValue(Client* self, uint32 currency_id, 
 	return self->RemoveAlternateCurrencyValue(currency_id, amount);
 }
 
+perl::array Perl_Client_GetRaidOrGroupOrSelf(Client* self)
+{
+	perl::array result;
+
+	const auto& l = self->GetRaidOrGroupOrSelf();
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e);
+	}
+
+	return result;
+}
+
+perl::array Perl_Client_GetRaidOrGroupOrSelf(Client* self, bool clients_only)
+{
+	perl::array result;
+
+	const auto& l = self->GetRaidOrGroupOrSelf(clients_only);
+
+	result.reserve(l.size());
+
+	for (const auto& e : l) {
+		result.push_back(e);
+	}
+
+	return result;
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3346,6 +3376,8 @@ void perl_register_client()
 	package.add("GetRaceBitmask", &Perl_Client_GetRaceBitmask);
 	package.add("GetRadiantCrystals", &Perl_Client_GetRadiantCrystals);
 	package.add("GetRaid", &Perl_Client_GetRaid);
+	package.add("GetRaidOrGroupOrSelf", (perl::array(*)(Client*))&Perl_Client_GetRaidOrGroupOrSelf);
+	package.add("GetRaidOrGroupOrSelf", (perl::array(*)(Client*, bool))&Perl_Client_GetRaidOrGroupOrSelf);
 	package.add("GetRaidPoints", &Perl_Client_GetRaidPoints);
 	package.add("GetRawItemAC", &Perl_Client_GetRawItemAC);
 	package.add("GetRawSkill", &Perl_Client_GetRawSkill);

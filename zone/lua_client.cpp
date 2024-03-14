@@ -20,6 +20,10 @@
 
 struct InventoryWhere { };
 
+struct Lua_Mob_List {
+	std::vector<Lua_Mob> entries;
+};
+
 void Lua_Client::SendSound() {
 	Lua_Safe_Call_Void();
 	self->SendSound();
@@ -3308,6 +3312,40 @@ bool Lua_Client::RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount)
 	return self->RemoveAlternateCurrencyValue(currency_id, amount);
 }
 
+Lua_Mob_List Lua_Client::GetRaidOrGroupOrSelf()
+{
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = self->GetRaidOrGroupOrSelf();
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		ret.entries.emplace_back(Lua_Mob(e));
+	}
+
+	return ret;
+}
+
+Lua_Mob_List Lua_Client::GetRaidOrGroupOrSelf(bool clients_only)
+{
+	Lua_Safe_Call_Class(Lua_Mob_List);
+
+	Lua_Mob_List ret;
+
+	const auto& l = self->GetRaidOrGroupOrSelf(clients_only);
+
+	ret.entries.reserve(l.size());
+
+	for (const auto& e : l) {
+		ret.entries.emplace_back(Lua_Mob(e));
+	}
+
+	return ret;
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3542,6 +3580,8 @@ luabind::scope lua_register_client() {
 	.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 	.def("GetRadiantCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetRadiantCrystals)
 	.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
+	.def("GetRaidOrGroupOrSelf", (Lua_Mob_List(Lua_Client::*)(void))&Lua_Client::GetRaidOrGroupOrSelf)
+	.def("GetRaidOrGroupOrSelf", (Lua_Mob_List(Lua_Client::*)(bool))&Lua_Client::GetRaidOrGroupOrSelf)
 	.def("GetRaidPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetRaidPoints)
 	.def("GetRaceAbbreviation", (std::string(Lua_Client::*)(void))&Lua_Client::GetRaceAbbreviation)
 	.def("GetRawItemAC", (int(Lua_Client::*)(void))&Lua_Client::GetRawItemAC)
