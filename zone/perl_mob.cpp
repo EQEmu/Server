@@ -3425,6 +3425,19 @@ std::string Perl_Mob_GetDeityName(Mob* self)
 	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
 }
 
+perl::array Perl_Mob_GetBuffs(Mob* self)
+{
+	perl::array result;
+
+	const auto& buffs = self->GetBuffs();
+
+	for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
+		result.push_back(&buffs[slot_id]);
+	}
+
+	return result;
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3610,6 +3623,7 @@ void perl_register_mob()
 	package.add("GetBucketExpires", &Perl_Mob_GetBucketExpires);
 	package.add("GetBucketKey", &Perl_Mob_GetBucketKey);
 	package.add("GetBucketRemaining", &Perl_Mob_GetBucketRemaining);
+	package.add("GetBuffs", &Perl_Mob_GetBuffs);
 	package.add("GetBuffSlotFromType", &Perl_Mob_GetBuffSlotFromType);
 	package.add("GetBuffSpellIDs", &Perl_Mob_GetBuffSpellIDs);
 	package.add("GetBuffStatValueBySpell", &Perl_Mob_GetBuffStatValueBySpell);

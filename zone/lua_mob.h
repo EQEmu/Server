@@ -583,6 +583,7 @@ public:
 	int GetHeroicStrikethrough();
 	bool IsAlwaysAggro();
 	std::string GetDeityName();
+	luabind::object GetBuffs(lua_State* L);
 };
 
 #endif
