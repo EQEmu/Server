@@ -1654,20 +1654,19 @@ void Perl__FlagInstanceByRaidLeader(uint32 zone, uint16 version)
 	quest_manager.FlagInstanceByRaidLeader(zone, version);
 }
 
-std::string Perl__saylink(const char* text)
+std::string Perl__saylink(std::string text)
 {
-	// const cast is safe since, target api doesn't modify it
-	return quest_manager.saylink(const_cast<char*>(text), false, text);
+	return Saylink::Create(text);
 }
 
-std::string Perl__saylink(const char* text, bool silent)
+std::string Perl__saylink(std::string text, bool silent)
 {
-	return quest_manager.saylink(const_cast<char*>(text), silent, text);
+	return Saylink::Create(text, silent);
 }
 
-std::string Perl__saylink(const char* text, bool silent, const char* link_name)
+std::string Perl__saylink(std::string text, bool silent, std::string link_name)
 {
-	return quest_manager.saylink(const_cast<char*>(text), silent, link_name);
+	return Saylink::Create(text, silent, link_name);
 }
 
 std::string Perl__getcharnamebyid(uint32 char_id)
@@ -5833,6 +5832,16 @@ uint16 Perl__GetBotRaceByID(uint32 bot_id)
 	return database.botdb.GetBotRaceByID(bot_id);
 }
 
+std::string Perl__silent_saylink(std::string text)
+{
+	return Saylink::Silent(text);
+}
+
+std::string Perl__silent_saylink(std::string text, std::string link_name)
+{
+	return Saylink::Silent(text, link_name);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6644,9 +6653,9 @@ void perl_register_quest()
 	package.add("say", (void(*)(const char*, uint8, int))&Perl__say);
 	package.add("say", (void(*)(const char*, uint8, int, int))&Perl__say);
 	package.add("say", (void(*)(const char*, uint8, int, int, int))&Perl__say);
-	package.add("saylink", (std::string(*)(const char*))&Perl__saylink);
-	package.add("saylink", (std::string(*)(const char*, bool))&Perl__saylink);
-	package.add("saylink", (std::string(*)(const char*, bool, const char*))&Perl__saylink);
+	package.add("saylink", (std::string(*)(std::string))&Perl__saylink);
+	package.add("saylink", (std::string(*)(std::string, bool))&Perl__saylink);
+	package.add("saylink", (std::string(*)(std::string, bool, std::string))&Perl__saylink);
 	package.add("scribespells", (int(*)(int))&Perl__scribespells);
 	package.add("scribespells", (int(*)(int, int))&Perl__scribespells);
 	package.add("secondstotime", &Perl__secondstotime);
@@ -6698,6 +6707,8 @@ void perl_register_quest()
 	package.add("signal", (void(*)(int, int))&Perl__signal);
 	package.add("signalwith", (void(*)(int, int))&Perl__signalwith);
 	package.add("signalwith", (void(*)(int, int, int))&Perl__signalwith);
+	package.add("silent_saylink", (std::string(*)(std::string))&Perl__silent_saylink);
+	package.add("silent_saylink", (std::string(*)(std::string, std::string))&Perl__silent_saylink);
 	package.add("snow", &Perl__snow);
 	package.add("spawn", &Perl__spawn);
 	package.add("spawn2", &Perl__spawn2);

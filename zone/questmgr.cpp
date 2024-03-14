@@ -3869,13 +3869,6 @@ void QuestManager::FlagInstanceByRaidLeader(uint32 zone, int16 version)
 	}
 }
 
-std::string QuestManager::saylink(char *saylink_text, bool silent, const char *link_name)
-{
-	QuestManagerCurrentQuestVars();
-
-	return Saylink::Create(saylink_text, silent, link_name);
-}
-
 std::string QuestManager::getcharnamebyid(uint32 char_id) {
 	std::string res;
 	if (char_id > 0) {
