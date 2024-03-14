@@ -1306,8 +1306,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_journal_mode(),
 			lua_register_expedition(),
 			lua_register_expedition_lock_messages(),
-			lua_register_buff(),
-			lua_register_buffs()
+			lua_register_buff()
 		)];
 
 	} catch(std::exception &ex) {

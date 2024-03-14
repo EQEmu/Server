@@ -12,7 +12,6 @@ namespace luabind {
 }
 
 luabind::scope lua_register_buff();
-luabind::scope lua_register_buffs();
 
 class Lua_Buff : public Lua_Ptr<const Buffs_Struct>
 {
