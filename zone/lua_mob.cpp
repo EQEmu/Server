@@ -3304,18 +3304,19 @@ std::string Lua_Mob::GetDeityName()
 	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
 }
 
-Lua_Buffs Lua_Mob::GetBuffs() {
-	Lua_Safe_Call_Class(Lua_Buffs);
-	Lua_Buffs ret;
-
-	const auto& buffs = self->GetBuffs();
-
-	for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
-		Lua_Buff e(&buffs[slot_id]);
-		ret.entries.push_back(e);
+luabind::object Lua_Mob::GetBuffs(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l    = self->GetBuffs();
+		int  i    = 1;
+		for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
+			t[i] = l[slot_id];
+			i++;
+		}
 	}
 
-	return ret;
+	return t;
 }
 
 luabind::scope lua_register_mob() {

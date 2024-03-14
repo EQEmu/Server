@@ -13,7 +13,6 @@ class Lua_Bot;
 class Lua_NPC;
 class Lua_Client;
 struct Lua_Mob_List;
-struct Lua_Buffs;
 
 namespace luabind {
 	struct scope;
@@ -584,7 +583,7 @@ public:
 	int GetHeroicStrikethrough();
 	bool IsAlwaysAggro();
 	std::string GetDeityName();
-	Lua_Buffs GetBuffs();
+	luabind::object GetBuffs(lua_State* L);
 };
 
 #endif

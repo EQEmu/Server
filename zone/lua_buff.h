@@ -48,10 +48,5 @@ public:
 	bool SendsClientUpdate();
 };
 
-struct Lua_Buffs
-{
-	std::vector<Lua_Buff> entries;
-};
-
 #endif
 #endif

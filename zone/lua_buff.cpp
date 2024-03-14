@@ -151,9 +151,4 @@ luabind::scope lua_register_buff() {
 	.def("SendsClientUpdate", &Lua_Buff::SendsClientUpdate);
 }
 
-luabind::scope lua_register_buffs() {
-	return luabind::class_<Lua_Buffs>("Buffs")
-		.def_readwrite("entries", &Lua_Buffs::entries, luabind::return_stl_iterator);
-}
-
 #endif
