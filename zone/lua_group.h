@@ -39,7 +39,7 @@ public:
 	void SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Lua_Client splitter);
 	void SetLeader(Lua_Mob c);
 	Lua_Mob GetLeader();
-	const char *GetLeaderName();
+	std::string GetLeaderName();
 	bool IsLeader(const char* name);
 	bool IsLeader(Lua_Mob c);
 	int GroupCount();

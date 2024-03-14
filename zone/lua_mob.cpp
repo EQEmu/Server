@@ -3,18 +3,19 @@
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 
-#include "client.h"
-#include "npc.h"
 #include "bot.h"
+#include "client.h"
+#include "dialogue_window.h"
 #include "lua_bot.h"
+#include "lua_buff.h"
+#include "lua_client.h"
+#include "lua_hate_list.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
 #include "lua_npc.h"
-#include "lua_hate_list.h"
-#include "lua_client.h"
 #include "lua_stat_bonuses.h"
-#include "dialogue_window.h"
+#include "npc.h"
 
 struct SpecialAbilities { };
 
@@ -3297,6 +3298,27 @@ bool Lua_Mob::IsAlwaysAggro()
 	return self->AlwaysAggro();
 }
 
+std::string Lua_Mob::GetDeityName()
+{
+	Lua_Safe_Call_String();
+	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
+}
+
+luabind::object Lua_Mob::GetBuffs(lua_State* L) {
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l    = self->GetBuffs();
+		int  i    = 1;
+		for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
+			t[i] = l[slot_id];
+			i++;
+		}
+	}
+
+	return t;
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3499,6 +3521,7 @@ luabind::scope lua_register_mob() {
 	.def("GetBucketExpires", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketExpires)
 	.def("GetBucketKey", (std::string(Lua_Mob::*)(void))&Lua_Mob::GetBucketKey)
 	.def("GetBucketRemaining", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketRemaining)
+	.def("GetBuffs", &Lua_Mob::GetBuffs)
 	.def("GetBuffSlotFromType", &Lua_Mob::GetBuffSlotFromType)
 	.def("GetBuffSpellIDs", &Lua_Mob::GetBuffSpellIDs)
 	.def("GetBuffStatValueBySlot", (void(Lua_Mob::*)(uint8, const char*))& Lua_Mob::GetBuffStatValueBySlot)
@@ -3522,6 +3545,7 @@ luabind::scope lua_register_mob() {
 	.def("GetDefaultRaceSize", (float(Lua_Mob::*)(int))&Lua_Mob::GetDefaultRaceSize)
 	.def("GetDefaultRaceSize", (float(Lua_Mob::*)(int,int))&Lua_Mob::GetDefaultRaceSize)
 	.def("GetDeity", &Lua_Mob::GetDeity)
+	.def("GetDeityName", &Lua_Mob::GetDeityName)
 	.def("GetDisplayAC", &Lua_Mob::GetDisplayAC)
 	.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
 	.def("GetDrakkinHeritage", &Lua_Mob::GetDrakkinHeritage)

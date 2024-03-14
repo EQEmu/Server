@@ -2152,7 +2152,7 @@ Group *EntityList::GetGroupByLeaderName(const char *leader)
 	iterator = group_list.begin();
 
 	while (iterator != group_list.end()) {
-		if (!strcmp((*iterator)->GetLeaderName(), leader))
+		if (!strcmp((*iterator)->GetLeaderName().c_str(), leader))
 			return *iterator;
 		++iterator;
 	}

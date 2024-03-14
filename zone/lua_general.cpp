@@ -894,25 +894,16 @@ std::string lua_get_item_name(uint32 item_id) {
 	return quest_manager.getitemname(item_id);
 }
 
-std::string lua_say_link(const char *phrase, bool silent, const char *link_name) {
-	char text[256] = { 0 };
-	strncpy(text, phrase, 255);
-
-	return quest_manager.saylink(text, silent, link_name);
+std::string lua_say_link(std::string  text) {
+	return Saylink::Create(text);
 }
 
-std::string lua_say_link(const char *phrase, bool silent) {
-	char text[256] = { 0 };
-	strncpy(text, phrase, 255);
-
-	return quest_manager.saylink(text, silent, text);
+std::string lua_say_link(std::string text, bool silent) {
+	return Saylink::Create(text, silent, text);
 }
 
-std::string lua_say_link(const char *phrase) {
-	char text[256] = { 0 };
-	strncpy(text, phrase, 255);
-
-	return quest_manager.saylink(text, false, text);
+std::string lua_say_link(std::string text, bool silent, std::string link_name) {
+	return Saylink::Create(text, silent, link_name);
 }
 
 void lua_set_rule(std::string rule_name, std::string rule_value) {
@@ -5475,6 +5466,14 @@ uint16 lua_get_bot_race_by_id(uint32 bot_id)
 	return database.botdb.GetBotRaceByID(bot_id);
 }
 
+std::string lua_silent_say_link(std::string text) {
+	return Saylink::Silent(text);
+}
+
+std::string lua_silent_say_link(std::string text, std::string link_name) {
+	return Saylink::Silent(text, link_name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -5828,9 +5827,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_item_comment", (std::string(*)(uint32))&lua_get_item_comment),
 		luabind::def("get_item_lore", (std::string(*)(uint32))&lua_get_item_lore),
 		luabind::def("get_item_name", (std::string(*)(uint32))&lua_get_item_name),
-		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
-		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
-		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(std::string))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(std::string,bool))&lua_say_link),
+		luabind::def("say_link", (std::string(*)(std::string,bool,std::string))&lua_say_link),
 		luabind::def("set_rule", (void(*)(std::string, std::string))&lua_set_rule),
 		luabind::def("get_rule", (std::string(*)(std::string))&lua_get_rule),
 		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
@@ -6269,6 +6268,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_bot_level_by_id", &lua_get_bot_level_by_id),
 		luabind::def("get_bot_name_by_id", &lua_get_bot_name_by_id),
 		luabind::def("get_bot_race_by_id", &lua_get_bot_race_by_id),
+		luabind::def("silent_say_link", (std::string(*)(std::string))&lua_silent_say_link),
+		luabind::def("silent_say_link", (std::string(*)(std::string,std::string))&lua_silent_say_link),
 		/*
 			Cross Zone
 		*/
