@@ -472,7 +472,7 @@ int Lua_Item::GetFactionAmt4() {
 
 const char *Lua_Item::GetCharmFile() {
 	Lua_Safe_Call_String();
-	return self->CharmFile;
+	return self->GetActualCharmFile();
 }
 
 uint32 Lua_Item::GetAugType() {

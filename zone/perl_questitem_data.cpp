@@ -468,7 +468,7 @@ int Perl_QuestItemData_GetFactionAmount4(EQ::ItemData* self)
 
 const char* Perl_QuestItemData_GetCharmFile(EQ::ItemData* self)
 {
-	return self->CharmFile;
+	return self->GetActualCharmFile();
 }
 
 uint32 Perl_QuestItemData_GetAugmentType(EQ::ItemData* self)

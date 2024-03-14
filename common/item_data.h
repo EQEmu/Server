@@ -549,6 +549,8 @@ namespace EQ
 		bool IsTypeShield() const;
 		bool IsQuestItem() const;
 
+		const char* GetActualCharmFile() const;
+
 		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
 		bool CheckLoreConflict(const ItemData* item) const { return CheckLoreConflict(this, item); }
 	};

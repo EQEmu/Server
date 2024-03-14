@@ -251,3 +251,9 @@ bool EQ::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_i
 
 	return false;
 }
+
+const char* EQ::ItemData::GetActualCharmFile() const {
+    const char* delimiterPos = strchr(CharmFile, '#');
+
+    return delimiterPos ? delimiterPos + 1 : CharmFile;
+}
