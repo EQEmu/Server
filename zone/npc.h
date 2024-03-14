@@ -336,6 +336,18 @@ public:
 		uint32 augment_six = 0
 	);
 
+	void AddLootDropFixed(
+		const EQ::ItemData *item2,
+		LootdropEntriesRepository::LootdropEntries loot_drop,
+		bool wear_change = false,
+		uint32 augment_one = 0,
+		uint32 augment_two = 0,
+		uint32 augment_three = 0,
+		uint32 augment_four = 0,
+		uint32 augment_five = 0,
+		uint32 augment_six = 0
+	);
+
 	bool MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntries loot_drop, bool verbose=false);
 
 	void CheckSignal();
