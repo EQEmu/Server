@@ -148,13 +148,6 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	return CanMembersJoin(member_names);
 }
 
-std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
-{
-	char leader_name_buffer[64] = { 0 };
-	database.GetGroupLeadershipInfo(group_id, leader_name_buffer);
-	return std::string(leader_name_buffer);
-}
-
 bool ExpeditionRequest::CanMembersJoin(const std::vector<std::string>& member_names)
 {
 	if (member_names.empty())
