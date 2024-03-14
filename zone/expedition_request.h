@@ -54,7 +54,6 @@ private:
 	bool CanRaidRequest(Raid* raid);
 	bool CanGroupRequest(Group* group);
 	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
-	std::string GetGroupLeaderName(uint32_t group_id);
 	bool IsPlayerCountValidated();
 	bool SaveLeaderLockouts(const std::vector<ExpeditionLockoutTimer>& leader_lockouts);
 	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);

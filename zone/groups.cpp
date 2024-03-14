@@ -620,7 +620,7 @@ bool Group::DelMemberOOZ(const char *Name) {
 		if(!strcasecmp(Name, membername[i]))
 			// This shouldn't be called if the member is in this zone.
 			if(!members[i]) {
-				if(!strncmp(GetLeaderName(), Name, 64))
+				if(!strncmp(GetLeaderName().c_str(), Name, 64))
 				{
 					//TODO: Transfer leadership if leader disbands OOZ.
 					UpdateGroupAAs();
@@ -703,7 +703,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		}
 	}
 
-	if (!GetLeaderName())
+	if (GetLeaderName().empty())
 	{
 		DisbandGroup();
 		return true;
@@ -1676,7 +1676,7 @@ void Group::NotifyMainTank(Client *c, uint8 toggle)
 
 		strn0cpy(grs->Name1, MainTankName.c_str(), sizeof(grs->Name1));
 
-		strn0cpy(grs->Name2, GetLeaderName(), sizeof(grs->Name2));
+		strn0cpy(grs->Name2, GetLeaderName().c_str(), sizeof(grs->Name2));
 
 		grs->RoleNumber = 1;
 
@@ -1729,7 +1729,7 @@ void Group::NotifyMainAssist(Client *c, uint8 toggle)
 
 		strn0cpy(grs->Name1, MainAssistName.c_str(), sizeof(grs->Name1));
 
-		strn0cpy(grs->Name2, GetLeaderName(), sizeof(grs->Name2));
+		strn0cpy(grs->Name2, GetLeaderName().c_str(), sizeof(grs->Name2));
 
 		grs->RoleNumber = 2;
 
@@ -1771,7 +1771,7 @@ void Group::NotifyPuller(Client *c, uint8 toggle)
 
 		strn0cpy(grs->Name1, PullerName.c_str(), sizeof(grs->Name1));
 
-		strn0cpy(grs->Name2, GetLeaderName(), sizeof(grs->Name2));
+		strn0cpy(grs->Name2, GetLeaderName().c_str(), sizeof(grs->Name2));
 
 		grs->RoleNumber = 3;
 
@@ -2511,8 +2511,6 @@ bool Group::IsLeader(const char* name) {
 	return false;
 }
 
-std::string Group::GetGroupLeaderName(uint32 group_id) {
-	char leader_name_buffer[64] = { 0 };
-	database.GetGroupLeadershipInfo(group_id, leader_name_buffer);
-	return std::string(leader_name_buffer);
+std::string Group::GetLeaderName() {
+	return database.GetGroupLeaderName(GetID());
 }
