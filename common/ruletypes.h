@@ -975,6 +975,7 @@ RULE_REAL(Custom, Tier2ItemDropRate, 25, "Percentage chance that a drop will be 
 RULE_REAL(Custom, Tier1ItemDropRate, 50, "Percentage chance that a drop will be upgraded to Tier 1. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Unmodified")
 RULE_BOOL(Custom, TauntTogglesPetTanking, true, "Enable to let pets hold aggro while taunt is on")
 RULE_BOOL(Custom, UseTHJItemMutations, true, "Rename items according to THJ standards and apply other mutations")
+RULE_BOOL(Custom, EatCombatTrades, true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

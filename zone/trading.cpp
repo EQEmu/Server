@@ -761,13 +761,15 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 		// is allowed.
 		if (tradingWith->CheckAggro(this))
 		{
-			for (EQ::ItemInstance* inst : items) {
-				if (!inst || !inst->GetItem()) {
-					continue;
-				}
+			if (RuleB(Custom, EatCombatTrades)) {
+				for (EQ::ItemInstance* inst : items) {
+					if (!inst || !inst->GetItem()) {
+						continue;
+					}
 
-				tradingWith->SayString(TRADE_BACK, GetCleanName());
-				PushItemOnCursor(*inst, true);
+					tradingWith->SayString(TRADE_BACK, GetCleanName());
+					PushItemOnCursor(*inst, true);
+				}
 			}
 		}
 		// Only enforce trade rules if the NPC doesn't have an EVENT_TRADE
