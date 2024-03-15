@@ -3438,7 +3438,7 @@ int Mob::GetHandToHandDamage(void)
 		// everyone uses this in the revamp!
 		int skill = GetSkill(EQ::skills::SkillHandtoHand);
 		int epic = 0;
-		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 46)
+		if (IsClient() && CastToClient()->GetItemIDAt(12) % 1000000 == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -3460,8 +3460,8 @@ int Mob::GetHandToHandDamage(void)
 		9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 		10, 11, 11, 11, 11, 11, 11, 12, 12 }; // 41-49
 	if (GetClassesBits() & GetPlayerClassBit(Class::Monk)) {
-		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
-			return 9;
+		if (IsClient() && CastToClient()->GetItemIDAt(12) % 1000000 == 10652 && GetLevel() > 50)
+			return 18;
 		if (level > 62)
 			return 15;
 		return mnk_dmg[level];
@@ -3481,7 +3481,7 @@ int Mob::GetHandToHandDelay(void)
 		int skill = GetSkill(EQ::skills::SkillHandtoHand);
 		int epic = 0;
 		int iksar = 0;
-		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 46)
+		if (IsClient() && CastToClient()->GetItemIDAt(12) % 1000000 == 10652 && GetLevel() > 46)
 			epic = 280;
 		else if (GetRace() == IKSAR)
 			iksar = 1;
@@ -3520,7 +3520,7 @@ int Mob::GetHandToHandDelay(void)
 
 	if (GetClassesBits() & GetPlayerClassBit(Class::Monk)) {
 		// Have a look to see if we have epic fists on
-		if (IsClient() && CastToClient()->GetItemIDAt(12) == 10652 && GetLevel() > 50)
+		if (IsClient() && CastToClient()->GetItemIDAt(12) % 1000000 == 10652 && GetLevel() > 50)
 			return 16;
 		int level = GetLevel();
 		if (level > 62)

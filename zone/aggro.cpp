@@ -1346,7 +1346,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 		}
 	}
 
-	if (IsBardSong(spell_id) && aggro_amount > RuleI(Aggro, BardAggroCap)) {
+	if (IsBardSong(spell_id) && aggro_amount > RuleI(Aggro, BardAggroCap) && !RuleB(Custom, MulticlassingEnabled)) {
 		aggro_amount = RuleI(Aggro, BardAggroCap);
 	}
 
