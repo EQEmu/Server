@@ -344,14 +344,12 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
 			if (
 				RuleB(Spells, IgnoreSpellDmgLvlRestriction) &&
-				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg()
+				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg()
 			) {
 				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
 			}
 			else if (
-				!spells[spell_id].no_heal_damage_item_mod &&
-				GetSpellDmg() &&
+				!spells[spell_id].no_heal_damage_item_mod && GetSpellDmg() &&
 				spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
 			) {
 				extra_dmg += GetExtraSpellAmt(spell_id, GetSpellDmg(), base_value);
@@ -363,26 +361,14 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 		}
 
 		if (extra_dmg) {
-			//do the normal duration based spell damage over the entire duration.
-			int duration = CalcBuffDuration(this, target, spell_id);
-			if (duration > 0) {
-				//default is for dots to be applied to the entire duration
-				//otherwise they have the option to apply a % of the spell damage per tick.
-				if (RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent) > 0) {
-					//do the spell damage for each tick by a percent
-					int ruleValue = RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent);
-
-					extra_dmg = (extra_dmg * ruleValue) / 100;
-				}
-				else
-				{
-					extra_dmg /= duration;
-				}
+			if (RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent) > 0) {
+				const int value = RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent);
+				if (value != 0) {
+					extra_dmg = (extra_dmg * value) / 100;
+				}				
 			}
-		}
 
-		if (RuleB(Spells, DOTBonusDamageSplitOverDuration)) {
-			if (extra_dmg) {
+			if (RuleB(Spells, DOTBonusDamageSplitOverDuration)) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
 					extra_dmg /= duration;
@@ -574,35 +560,22 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		}
 
 		if (extra_heal) {
-			int duration = CalcBuffDuration(this, target, spell_id);
-			if (duration > 0) {
-
-				//default it to spread the +heal over the entire hot
-				//can bypass with HOTsScaleWithHealAmtPerTickPercent rule.
-				if (RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent) > 0) {
-					int ruleValue = RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent);
-					extra_heal = (extra_heal * ruleValue) / 100;
+			if (RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent) > 0) {
+				const int value = RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent);
+				if (value > 0) {
+					extra_heal = (extra_heal * value) / 100;
 				}
-				else
-				{
-					extra_heal /= duration;
-				}
-				
-				value += extra_heal;
 			}
-		}
 
-		if (extra_heal) {
 			if (RuleB(Spells, HOTBonusHealingSplitOverDuration)) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
 				if (duration > 0) {
 					extra_heal /= duration;
 				}
 			}
-
-			value += extra_heal;
 		}
 
+		value += extra_heal;		
 		value *= critical_modifier;
 	}
 
