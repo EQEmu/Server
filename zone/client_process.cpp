@@ -512,6 +512,7 @@ bool Client::Process() {
 			CalcATK();
 			CalcMaxEndurance();
 			CalcRestState();
+			ClearRestingDetrimentalEffects();
 			DoHPRegen();
 			DoManaRegen();
 			DoEnduranceRegen();
@@ -2029,12 +2030,33 @@ void Client::CalcRestState()
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!IsRestAllowedSpell(buffs[j].spellid))
+				if(!IsRestAllowedSpell(buffs[j].spellid) && !RuleB(Custom, ClearRestingDetrimentalEffectsEnabled))
 					return;
 		}
 	}
 
 	ooc_regen = true;
+}
+
+void Mob::ClearRestingDetrimentalEffects()
+{	 
+	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
+		const auto source_mob = GetOwnerOrSelf();
+		if (source_mob->IsClient() && source_mob->CastToClient()->CanFastRegen()) {
+			const uint32 buff_count = GetMaxTotalSlots();			
+			for (unsigned int j = 0; j < buff_count; j++) {
+				const uint16 buff_id = buffs[j].spellid;
+				if(
+					IsValidSpell(buff_id) && 
+					IsDetrimentalSpell(buff_id) &&
+					(buffs[j].ticsremaining > 0) &&
+					(!IsCharmSpell(buff_id) || !IsResistDebuffSpell(buff_id) || IsClient())
+				) {
+					BuffFadeBySlot(j);					
+				}
+			}
+		}
+	}
 }
 
 void Client::DoTracking()

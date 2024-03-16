@@ -976,6 +976,7 @@ RULE_REAL(Custom, Tier1ItemDropRate, 50, "Percentage chance that a drop will be 
 RULE_BOOL(Custom, TauntTogglesPetTanking, true, "Enable to let pets hold aggro while taunt is on")
 RULE_BOOL(Custom, UseTHJItemMutations, true, "Rename items according to THJ standards and apply other mutations")
 RULE_BOOL(Custom, EatCombatTrades, true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
+RULE_BOOL(Custom, ClearRestingDetrimentalEffectsEnabled, false, "Remove detrimental spell effects from self and pets when OOC regen engages")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
