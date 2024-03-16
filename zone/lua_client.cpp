@@ -3302,6 +3302,12 @@ bool Lua_Client::RemoveAAPoints(uint32 points)
 	return self->RemoveAAPoints(points);
 }
 
+bool Lua_Client::RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount)
+{
+	Lua_Safe_Call_Bool();
+	return self->RemoveAlternateCurrencyValue(currency_id, amount);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3678,6 +3684,7 @@ luabind::scope lua_register_client() {
 	.def("RemoveAAPoints", (bool(Lua_Client::*)(uint32))&Lua_Client::RemoveAAPoints)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
+	.def("RemoveAlternateCurrencyValue", (bool(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveAlternateCurrencyValue)
 	.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)

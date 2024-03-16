@@ -152,6 +152,7 @@ public:
 	bool IsSpecialBindLocation(const glm::vec4& location);
 	bool Process();
 	bool SaveZoneCFG();
+	bool DoesAlternateCurrencyExist(uint32 currency_id);
 
 	int GetNpcPositionUpdateDistance() const;
 	void SetNpcPositionUpdateDistance(int in_npc_position_update_distance);

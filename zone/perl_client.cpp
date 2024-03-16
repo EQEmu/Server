@@ -3108,6 +3108,11 @@ bool Perl_Client_RemoveAAPoints(Client* self, uint32 points)
 	return self->RemoveAAPoints(points);
 }
 
+bool Perl_Client_RemoveAlternateCurrencyValue(Client* self, uint32 currency_id, uint32 amount)
+{
+	return self->RemoveAlternateCurrencyValue(currency_id, amount);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3478,6 +3483,7 @@ void perl_register_client()
 	package.add("RemoveAAPoints", &Perl_Client_RemoveAAPoints);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
+	package.add("RemoveAlternateCurrencyValue", (bool(*)(Client*, uint32, uint32))&Perl_Client_RemoveAlternateCurrencyValue);
 	package.add("RemoveEbonCrystals", &Perl_Client_RemoveEbonCrystals);
 	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);
 	package.add("RemoveFromInstance", &Perl_Client_RemoveFromInstance);
