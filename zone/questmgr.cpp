@@ -2345,10 +2345,6 @@ void QuestManager::set_proximity_range(float x_range, float y_range, float z_ran
 	n->proximity->max_z         = n->GetZ() + z_range;
 	n->proximity->say           = enable_say;
 	n->proximity->proximity_set = true;
-
-	if (enable_say) {
-		HaveProximitySays = enable_say;
-	}
 }
 
 void QuestManager::set_proximity(float min_x, float max_x, float min_y, float max_y, float min_z, float max_z, bool enable_say)
@@ -2370,10 +2366,6 @@ void QuestManager::set_proximity(float min_x, float max_x, float min_y, float ma
 	n->proximity->max_z         = max_z;
 	n->proximity->say           = enable_say;
 	n->proximity->proximity_set = true;
-
-	if (enable_say) {
-		HaveProximitySays = enable_say;
-	}
 }
 
 void QuestManager::clear_proximity() {

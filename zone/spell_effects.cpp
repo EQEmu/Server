@@ -3490,7 +3490,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 	else if (caster_id && instrument_mod > 10) {
 
 		Mob* buff_caster = entity_list.GetMob(caster_id);//If targeted bard song needed to confirm caster is not bard.
-		if (buff_caster && buff_caster->GetClass() != Class::Bard) {
+		if (buff_caster && buff_caster->GetClassesBits() != GetPlayerClassBit(Class::Bard)) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
@@ -6289,7 +6289,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 {
-	if (IsBardSong(spell_id)) {
+	if (!RuleB(Custom, MulticlassingEnabled) && IsBardSong(spell_id)) {
 		return;
 	}
 
@@ -6410,9 +6410,10 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 }
 
 uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
-
-	if (IsBardSong(spell_id))
+	
+	if (!RuleB(Custom, MulticlassingEnabled) && IsBardSong(spell_id)) {
 		return 0;
+	}
 
 	uint16 proc_spellid = 0;
 	float ProcChance = 0.0f;
@@ -6534,10 +6535,11 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
 {
-	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime && !RuleB(Custom, MulticlassingEnabled)) {
-		return 0;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
+			return 0;
+		}
 	}
-
 	int64 realTotal = 0;
 	int64 realTotal2 = 0;
 	int64 realTotal3 = 0;
