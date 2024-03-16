@@ -362,6 +362,25 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 			extra_dmg += GetSkillDmgAmt(spells[spell_id].skill);
 		}
 
+		if (extra_dmg) {
+			//do the normal duration based spell damage over the entire duration.
+			int duration = CalcBuffDuration(this, target, spell_id);
+			if (duration > 0) {
+				//default is for dots to be applied to the entire duration
+				//otherwise they have the option to apply a % of the spell damage per tick.
+				if (RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent) > 0) {
+					//do the spell damage for each tick by a percent
+					int ruleValue = RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent);
+
+					extra_dmg = (extra_dmg * ruleValue) / 100;
+				}
+				else
+				{
+					extra_dmg /= duration;
+				}
+			}
+		}
+
 		if (RuleB(Spells, DOTBonusDamageSplitOverDuration)) {
 			if (extra_dmg) {
 				const int duration = CalcBuffDuration(this, target, spell_id);
@@ -551,6 +570,25 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 				spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5
 			) {
 				extra_heal += GetExtraSpellAmt(spell_id, GetHealAmt(), base_value);
+			}
+		}
+
+		if (extra_heal) {
+			int duration = CalcBuffDuration(this, target, spell_id);
+			if (duration > 0) {
+
+				//default it to spread the +heal over the entire hot
+				//can bypass with HOTsScaleWithHealAmtPerTickPercent rule.
+				if (RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent) > 0) {
+					int ruleValue = RuleI(Spells, HOTsScaleWithHealAmtPerTickPercent);
+					extra_heal = (extra_heal * ruleValue) / 100;
+				}
+				else
+				{
+					extra_heal /= duration;
+				}
+				
+				value += extra_heal;
 			}
 		}
 
