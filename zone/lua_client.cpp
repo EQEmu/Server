@@ -3316,7 +3316,7 @@ luabind::object Lua_Client::GetRaidOrGroupOrSelf(lua_State* L)
 		auto l = self->GetRaidOrGroupOrSelf();
 		int i = 1;
 		for (const auto& e : l) {
-			t[i] = e;
+			t[i] = Lua_Mob(e);
 			i++;
 		}
 	}
@@ -3332,7 +3332,7 @@ luabind::object Lua_Client::GetRaidOrGroupOrSelf(lua_State* L, bool clients_only
 		auto l = self->GetRaidOrGroupOrSelf(clients_only);
 		int i = 1;
 		for (const auto& e : l) {
-			t[i] = e;
+			t[i] = Lua_Mob(e);
 			i++;
 		}
 	}
