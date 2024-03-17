@@ -6620,13 +6620,72 @@ void Client::SendAltCurrencies() {
 
 void Client::SetAlternateCurrencyValue(uint32 currency_id, uint32 new_amount)
 {
+	if (!zone->DoesAlternateCurrencyExist(currency_id)) {
+		return;
+	}
+
+	const uint32 current_amount = alternate_currency[currency_id];
+
+	const bool is_gain = new_amount > current_amount;
+
+	const uint32 change_amount = is_gain ? (new_amount - current_amount) : (current_amount - new_amount);
+
+	if (!change_amount) {
+		return;
+	}
+
 	alternate_currency[currency_id] = new_amount;
 	database.UpdateAltCurrencyValue(CharacterID(), currency_id, new_amount);
 	SendAlternateCurrencyValue(currency_id);
+
+	QuestEventID event_id = is_gain ? EVENT_ALT_CURRENCY_GAIN : EVENT_ALT_CURRENCY_LOSS;
+	if (parse->PlayerHasQuestSub(event_id)) {
+		const std::string &export_string = fmt::format(
+			"{} {} {}",
+			currency_id,
+			change_amount,
+			new_amount
+		);
+
+		parse->EventPlayer(event_id, this, export_string, 0);
+	}
+}
+
+bool Client::RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount)
+{
+	if (!amount || !zone->DoesAlternateCurrencyExist(currency_id)) {
+		return false;
+	}
+
+	const uint32 current_amount = alternate_currency[currency_id];
+	if (current_amount < amount) {
+		return false;
+	}
+
+	const uint32 new_amount = (current_amount - amount);
+
+	alternate_currency[currency_id] = new_amount;
+
+	if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_LOSS)) {
+		const std::string &export_string = fmt::format(
+			"{} {} {}",
+			currency_id,
+			amount,
+			new_amount
+		);
+
+		parse->EventPlayer(EVENT_ALT_CURRENCY_LOSS, this, export_string, 0);
+	}
+
+	return true;
 }
 
 int Client::AddAlternateCurrencyValue(uint32 currency_id, int amount, bool is_scripted)
 {
+	if (!zone->DoesAlternateCurrencyExist(currency_id)) {
+		return 0;
+	}
+
 	/* Added via Quest, rest of the logging methods may be done inline due to information available in that area of the code */
 	if (is_scripted) {
 		/* QS: PlayerLogAlternateCurrencyTransactions :: Cursor to Item Storage */
@@ -6665,7 +6724,6 @@ int Client::AddAlternateCurrencyValue(uint32 currency_id, int amount, bool is_sc
 	SendAlternateCurrencyValue(currency_id);
 
 	QuestEventID event_id = amount > 0 ? EVENT_ALT_CURRENCY_GAIN : EVENT_ALT_CURRENCY_LOSS;
-
 	if (parse->PlayerHasQuestSub(event_id)) {
 		const std::string &export_string = fmt::format(
 			"{} {} {}",
@@ -6706,6 +6764,10 @@ void Client::SendAlternateCurrencyValue(uint32 currency_id, bool send_if_null)
 
 uint32 Client::GetAlternateCurrencyValue(uint32 currency_id) const
 {
+	if (!zone->DoesAlternateCurrencyExist(currency_id)) {
+		return 0;
+	}
+
 	auto iter = alternate_currency.find(currency_id);
 
 	return iter == alternate_currency.end() ? 0 : (*iter).second;
