@@ -12330,7 +12330,7 @@ std::vector<Mob*> Client::GetRaidOrGroupOrSelf(bool clients_only)
 
 		if (r) {
 			for (const auto& m : r->members) {
-				if (m.member && (!clients_only || !m.is_bot)) {
+				if (m.member && (!m.is_bot || !clients_only)) {
 					v.emplace_back(m.member);
 				}
 			}
@@ -12340,7 +12340,7 @@ std::vector<Mob*> Client::GetRaidOrGroupOrSelf(bool clients_only)
 
 		if (g) {
 			for (const auto& m : g->members) {
-				if (m && (!clients_only || !m->IsBot())) {
+				if (m && (m->IsClient() || !clients_only)) {
 					v.emplace_back(m);
 				}
 			}

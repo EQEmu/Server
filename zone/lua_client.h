@@ -10,7 +10,6 @@ class Lua_Group;
 class Lua_Raid;
 class Lua_Inventory;
 class Lua_Packet;
-struct Lua_Mob_List;
 
 namespace luabind {
 	struct scope;
@@ -497,8 +496,8 @@ public:
 	int GetAAEXPPercentage();
 	int GetEXPPercentage();
 	bool IsInAGuild();
-	Lua_Mob_List GetRaidOrGroupOrSelf();
-	Lua_Mob_List GetRaidOrGroupOrSelf(bool clients_only);
+	luabind::object GetRaidOrGroupOrSelf();
+	luabind::object GetRaidOrGroupOrSelf(bool clients_only);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
