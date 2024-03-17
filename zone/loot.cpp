@@ -22,9 +22,7 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 	if (!npctype_id) {
 		return;
 	}
-
-
-
+	
 	if (!is_global) {
 		m_loot_copper   = 0;
 		m_loot_silver   = 0;
