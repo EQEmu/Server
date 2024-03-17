@@ -272,6 +272,8 @@ public:
 	int GetQuiverHaste(int delay);
 	void DoAttackRounds(Mob *target, int hand, bool IsFromSpell = false);
 
+	std::vector<Mob*> GetRaidOrGroupOrSelf(bool clients_only = false);
+
 	void AI_Init();
 	void AI_Start(uint32 iMoveDelay = 0);
 	void AI_Stop();

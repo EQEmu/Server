@@ -12320,3 +12320,34 @@ int Client::GetEXPPercentage()
 
 	return static_cast<int>(std::round(scaled * 100.0 / 330.0)); // unscaled pct
 }
+
+std::vector<Mob*> Client::GetRaidOrGroupOrSelf(bool clients_only)
+{
+	std::vector<Mob*> v;
+
+	if (IsRaidGrouped()) {
+		Raid* r = GetRaid();
+
+		if (r) {
+			for (const auto& m : r->members) {
+				if (m.member && (!m.is_bot || !clients_only)) {
+					v.emplace_back(m.member);
+				}
+			}
+		}
+	} else if (IsGrouped()) {
+		Group* g = GetGroup();
+
+		if (g) {
+			for (const auto& m : g->members) {
+				if (m && (m->IsClient() || !clients_only)) {
+					v.emplace_back(m);
+				}
+			}
+		}
+	} else {
+		v.emplace_back(this);
+	}
+
+	return v;
+}

@@ -3308,6 +3308,38 @@ bool Lua_Client::RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount)
 	return self->RemoveAlternateCurrencyValue(currency_id, amount);
 }
 
+luabind::object Lua_Client::GetRaidOrGroupOrSelf(lua_State* L)
+{
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetRaidOrGroupOrSelf();
+		int i = 1;
+		for (const auto& e : l) {
+			t[i] = Lua_Mob(e);
+			i++;
+		}
+	}
+
+	return t;
+}
+
+luabind::object Lua_Client::GetRaidOrGroupOrSelf(lua_State* L, bool clients_only)
+{
+	auto t = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto l = self->GetRaidOrGroupOrSelf(clients_only);
+		int i = 1;
+		for (const auto& e : l) {
+			t[i] = Lua_Mob(e);
+			i++;
+		}
+	}
+
+	return t;
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3542,6 +3574,8 @@ luabind::scope lua_register_client() {
 	.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 	.def("GetRadiantCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetRadiantCrystals)
 	.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
+	.def("GetRaidOrGroupOrSelf", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetRaidOrGroupOrSelf)
+	.def("GetRaidOrGroupOrSelf", (luabind::object(Lua_Client::*)(lua_State*,bool))&Lua_Client::GetRaidOrGroupOrSelf)
 	.def("GetRaidPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetRaidPoints)
 	.def("GetRaceAbbreviation", (std::string(Lua_Client::*)(void))&Lua_Client::GetRaceAbbreviation)
 	.def("GetRawItemAC", (int(Lua_Client::*)(void))&Lua_Client::GetRawItemAC)
