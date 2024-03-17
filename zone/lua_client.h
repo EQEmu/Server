@@ -496,8 +496,8 @@ public:
 	int GetAAEXPPercentage();
 	int GetEXPPercentage();
 	bool IsInAGuild();
-	luabind::object GetRaidOrGroupOrSelf();
-	luabind::object GetRaidOrGroupOrSelf(bool clients_only);
+	luabind::object GetRaidOrGroupOrSelf(lua_State* L);
+	luabind::object GetRaidOrGroupOrSelf(lua_State* L, bool clients_only);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
