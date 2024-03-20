@@ -3791,9 +3791,10 @@ void Client::GetRaidAAs(RaidLeadershipAA_Struct *into) const {
 
 void Client::EnteringMessages(Client* client)
 {
-	std::string rules;
-	if (database.GetVariable("Rules", rules)) {
-		uint8 flag = database.GetAgreementFlag(client->AccountID());
+	std::string rules = RuleS(World, Rules);
+
+	if (!rules.empty() || database.GetVariable("Rules", rules)) {
+		const uint8 flag = database.GetAgreementFlag(client->AccountID());
 		if (!flag) {
 			auto rules_link = Saylink::Silent(
 				"#serverrules",
