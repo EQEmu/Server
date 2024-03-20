@@ -208,6 +208,7 @@ int command_init(void)
 		command_add("scribespells", "[Max level] [Min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
 		command_add("sendzonespawns", "Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
 		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
+		command_add("serverrules", "Show server rules", AccountStatus::Player, command_serverrules) ||
 		command_add("set", "Set command used to set various things", AccountStatus::Guide, command_set) ||
 		command_add("show", "Show command used to show various things", AccountStatus::Guide, command_show) ||
 		command_add("shutdown", "Shut this zone process down", AccountStatus::GMLeadAdmin, command_shutdown) ||
@@ -897,6 +898,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/scribespells.cpp"
 #include "gm_commands/sendzonespawns.cpp"
 #include "gm_commands/sensetrap.cpp"
+#include "gm_commands/serverrules.cpp"
 #include "gm_commands/set.cpp"
 #include "gm_commands/show.cpp"
 #include "gm_commands/shutdown.cpp"
