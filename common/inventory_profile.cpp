@@ -1508,7 +1508,7 @@ int16 EQ::InventoryProfile::_HasItem(std::map<int16, ItemInstance*>& bucket, uin
 		auto inst = iter->second;
 		if (inst == nullptr) { continue; }
 
-		if (inst->GetID() == item_id || inst->GetID() % 1000000 == item_id) {
+		if (inst->GetID() == item_id || inst->GetID() % 1000000 == item_id % 1000000) {
 			quantity_found += (inst->GetCharges() <= 0) ? 1 : inst->GetCharges();
 			if (quantity_found >= quantity)
 				return iter->first;
