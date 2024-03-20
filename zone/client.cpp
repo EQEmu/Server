@@ -3815,9 +3815,9 @@ void Client::EnteringMessages(Client* client)
 
 void Client::SendRules()
 {
-	std::string rules;
+	std::string rules = RuleS(World, Rules);
 
-	if (!database.GetVariable("Rules", rules)) {
+	if (rules.empty() && !database.GetVariable("Rules", rules)) {
 		return;
 	}
 
