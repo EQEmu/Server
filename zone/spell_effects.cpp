@@ -6289,7 +6289,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 {
-	if (!RuleB(Custom, MulticlassingEnabled) && IsBardSong(spell_id)) {
+	if (IsBardSong(spell_id)) {
 		return;
 	}
 

@@ -1726,7 +1726,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	TryTwincast(this, target, spell_id);
 
-	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+	if (slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1) {
+		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+	}
 
 	if (IsClient() && DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
