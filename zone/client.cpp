@@ -3796,10 +3796,7 @@ void Client::EnteringMessages(Client* client)
 	if (!rules.empty() || database.GetVariable("Rules", rules)) {
 		const uint8 flag = database.GetAgreementFlag(client->AccountID());
 		if (!flag) {
-			auto rules_link = Saylink::Silent(
-				"#serverrules",
-				"rules"
-			);
+			const std::string& rules_link = Saylink::Silent("#serverrules", "rules");
 
 			client->Message(
 				Chat::White,
