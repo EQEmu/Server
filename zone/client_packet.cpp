@@ -5595,8 +5595,13 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 	}
 
 	// Prevent the client from creating more than they have.
-	const uint32 amount  = EQ::ClampUpper(quantity, current_quantity);
+	uint32 amount  = EQ::ClampUpper(quantity, current_quantity);
 	const uint32 item_id = is_radiant ? RuleI(Zone, RadiantCrystalItemID) : RuleI(Zone, EbonCrystalItemID);
+
+	// Prevent pulling more than 1000 out at a time
+	if (amount > 1000) {
+		amount = 1000;
+	}
 
 	const bool success = SummonItem(item_id, amount);
 	if (!success) {
