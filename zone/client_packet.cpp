@@ -5598,9 +5598,15 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 	uint32 amount  = EQ::ClampUpper(quantity, current_quantity);
 	const uint32 item_id = is_radiant ? RuleI(Zone, RadiantCrystalItemID) : RuleI(Zone, EbonCrystalItemID);
 
-	// Prevent pulling more than 1000 out at a time
-	if (amount > 1000) {
-		amount = 1000;
+	const auto item = database.GetItem(item_id);
+	// Prevent pulling more than max stack size or 1,000 (if stackable), whichever is lesser
+	const uint32 max_reclaim_amount = EQ::Clamp(
+		item && item->Stackable ? item->StackSize : ItemStackSizeConstraint::Minimum,
+		ItemStackSizeConstraint::Minimum,
+		ItemStackSizeConstraint::Maximum
+	);
+	if (amount > max_reclaim_amount) {
+		amount = max_reclaim_amount;
 	}
 
 	const bool success = SummonItem(item_id, amount);
