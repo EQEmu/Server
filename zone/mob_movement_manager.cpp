@@ -605,7 +605,7 @@ public:
 
 		mob->BuffFadeAll();
 		mob->WipeHateList();
-		mob->Heal();
+		mob->RestoreHealth();
 
 		return false;
 	}

@@ -546,7 +546,6 @@ public:
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	void SetHP(int64 hp);
 	inline void SetOOCRegen(int64 new_ooc_regen) { ooc_regen = new_ooc_regen; }
-	virtual void Heal();
 	virtual void HealDamage(uint64 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
 	virtual void SetMaxHP() { current_hp = max_hp; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
@@ -1335,6 +1334,10 @@ public:
 
 	inline virtual bool IsBlockedBuff(int32 SpellID) { return false; }
 	inline virtual bool IsBlockedPetBuff(int32 SpellID) { return false; }
+
+	inline void RestoreEndurance() { SetEndurance(GetMaxEndurance()); }
+	inline void RestoreHealth() { SetMaxHP(); SendHPUpdate(); }
+	inline void RestoreMana() { SetMana(GetMaxMana()); }
 
 	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);

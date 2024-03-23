@@ -216,11 +216,6 @@ void Lua_Mob::ThrowingAttack(Lua_Mob other) {
 	self->ThrowingAttack(other);
 }
 
-void Lua_Mob::Heal() {
-	Lua_Safe_Call_Void();
-	self->Heal();
-}
-
 void Lua_Mob::HealDamage(uint64 amount) {
 	Lua_Safe_Call_Void();
 	self->HealDamage(amount);
@@ -3304,12 +3299,13 @@ std::string Lua_Mob::GetDeityName()
 	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
 }
 
-luabind::object Lua_Mob::GetBuffs(lua_State* L) {
+luabind::object Lua_Mob::GetBuffs(lua_State* L)
+{
 	auto t = luabind::newtable(L);
 	if (d_) {
-		auto self = reinterpret_cast<NativeType*>(d_);
-		auto l    = self->GetBuffs();
-		int  i    = 1;
+		auto     self    = reinterpret_cast<NativeType *>(d_);
+		auto     l       = self->GetBuffs();
+		int      i       = 1;
 		for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
 			t[i] = Lua_Buff(&l[slot_id]);
 			i++;
@@ -3317,6 +3313,24 @@ luabind::object Lua_Mob::GetBuffs(lua_State* L) {
 	}
 
 	return t;
+}
+
+void Lua_Mob::RestoreEndurance()
+{
+	Lua_Safe_Call_Void();
+	self->RestoreEndurance();
+}
+
+void Lua_Mob::RestoreHealth()
+{
+	Lua_Safe_Call_Void();
+	self->RestoreHealth();
+}
+
+void Lua_Mob::RestoreMana()
+{
+	Lua_Safe_Call_Void();
+	self->RestoreMana();
 }
 
 luabind::scope lua_register_mob() {
@@ -3691,7 +3705,7 @@ luabind::scope lua_register_mob() {
 	.def("HasTimer", &Lua_Mob::HasTimer)
 	.def("HasTwoHandBluntEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquipped)
 	.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
-	.def("Heal", &Lua_Mob::Heal)
+	.def("Heal", &Lua_Mob::RestoreHealth)
 	.def("HealDamage", (void(Lua_Mob::*)(uint64))&Lua_Mob::HealDamage)
 	.def("HealDamage", (void(Lua_Mob::*)(uint64,Lua_Mob))&Lua_Mob::HealDamage)
 	.def("InterruptSpell", (void(Lua_Mob::*)(int))&Lua_Mob::InterruptSpell)
@@ -3771,6 +3785,9 @@ luabind::scope lua_register_mob() {
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool))&Lua_Mob::ResistSpell)
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int))&Lua_Mob::ResistSpell)
 	.def("ResistSpell", (double(Lua_Mob::*)(int,int,Lua_Mob,bool,int,bool))&Lua_Mob::ResistSpell)
+	.def("RestoreEndurance", &Lua_Mob::RestoreEndurance)
+	.def("RestoreHealth", &Lua_Mob::RestoreHealth)
+	.def("RestoreMana", &Lua_Mob::RestoreMana)
 	.def("ResumeTimer", &Lua_Mob::ResumeTimer)
 	.def("RunTo", (void(Lua_Mob::*)(double, double, double))&Lua_Mob::RunTo)
 	.def("Say", (void(Lua_Mob::*)(const char*))& Lua_Mob::Say)

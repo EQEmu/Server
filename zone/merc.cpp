@@ -73,9 +73,9 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 	// Class should use npc constructor to set light properties
 
-	SetHP(GetMaxHP());
-	SetMana(GetMaxMana());
-	SetEndurance(GetMaxEndurance());
+	RestoreHealth();
+	RestoreMana();
+	RestoreEndurance();
 
 	AI_Start();
 }
@@ -5289,9 +5289,9 @@ bool Merc::Unsuspend(bool setMaxStats) {
 		{
 			if(setMaxStats)
 			{
-				SetHP(GetMaxHP());
-				SetMana(GetMaxMana());
-				SetEndurance(GetMaxEndurance());
+				RestoreHealth();
+				RestoreMana();
+				RestoreEndurance();
 			}
 
 			//check for sufficient funds and remove them last
