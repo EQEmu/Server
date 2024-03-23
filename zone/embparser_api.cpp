@@ -380,12 +380,12 @@ void Perl__settimer(std::string timer_name, uint32 seconds)
 
 void Perl__settimer(std::string timer_name, uint32 seconds, Mob* m)
 {
-	quest_manager.settimer(timer_name, seconds);
+	quest_manager.settimer(timer_name, seconds, m);
 }
 
 void Perl__settimer(std::string timer_name, uint32 seconds, EQ::ItemInstance* inst)
 {
-	quest_manager.settimer(timer_name, seconds);
+	quest_manager.settimerMS(timer_name, seconds * 1000, inst);
 }
 
 void Perl__settimerMS(std::string timer_name, uint32 milliseconds)
@@ -6693,9 +6693,9 @@ void perl_register_quest()
 	package.add("settarget", &Perl__settarget);
 	package.add("settime", (void(*)(int, int))&Perl__settime);
 	package.add("settime", (void(*)(int, int, bool))&Perl__settime);
-	package.add("settimer", (void(*)(std::string, uint32))&Perl__settimer),
-	package.add("settimer", (void(*)(std::string, uint32, EQ::ItemInstance*))&Perl__settimer),
-	package.add("settimer", (void(*)(std::string, uint32, Mob*))&Perl__settimer),
+	package.add("settimer", (void(*)(std::string, uint32))&Perl__settimer);
+	package.add("settimer", (void(*)(std::string, uint32, EQ::ItemInstance*))&Perl__settimer);
+	package.add("settimer", (void(*)(std::string, uint32, Mob*))&Perl__settimer);
 	package.add("settimerMS", (void(*)(std::string, uint32))&Perl__settimerMS);
 	package.add("settimerMS", (void(*)(std::string, uint32, EQ::ItemInstance*))&Perl__settimerMS);
 	package.add("settimerMS", (void(*)(std::string, uint32, Mob*))&Perl__settimerMS);
