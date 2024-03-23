@@ -838,8 +838,11 @@ public:
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr, float in_size = 0.0f);
 	bool IsWarriorClass() const;
-	char GetCasterClass() const;
+	bool IsIntelligenceCasterClass() const;
+	bool IsPureMeleeClass() const;
+	bool IsWisdomCasterClass() const;
 	uint8 GetArchetype() const;
+	const std::string& GetArchetypeName();
 	void SetZone(uint32 zone_id, uint32 instance_id);
 	void SendStatsWindow(Client* c, bool use_window);
 	void ShowStats(Client* client);

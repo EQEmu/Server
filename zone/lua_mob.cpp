@@ -3333,6 +3333,30 @@ void Lua_Mob::RestoreMana()
 	self->RestoreMana();
 }
 
+std::string Lua_Mob::GetArchetypeName()
+{
+	Lua_Safe_Call_String();
+	return self->GetArchetypeName();
+}
+
+bool Lua_Mob::IsIntelligenceCasterClass()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsIntelligenceCasterClass();
+}
+
+bool Lua_Mob::IsPureMeleeClass()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsPureMeleeClass();
+}
+
+bool Lua_Mob::IsWisdomCasterClass()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsWisdomCasterClass();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3524,6 +3548,7 @@ luabind::scope lua_register_mob() {
 	.def("GetAggroRange", (float(Lua_Mob::*)(void))&Lua_Mob::GetAggroRange)
 	.def("GetAllowBeneficial", (bool(Lua_Mob::*)(void))&Lua_Mob::GetAllowBeneficial)
 	.def("GetAppearance", (uint32(Lua_Mob::*)(void))&Lua_Mob::GetAppearance)
+	.def("GetArchetypeName", &Lua_Mob::GetArchetypeName)
 	.def("GetAssistRange", (float(Lua_Mob::*)(void))&Lua_Mob::GetAssistRange)
 	.def("GetBaseGender", &Lua_Mob::GetBaseGender)
 	.def("GetBaseRace", &Lua_Mob::GetBaseRace)
@@ -3732,6 +3757,7 @@ luabind::scope lua_register_mob() {
 	.def("IsFindable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsFindable)
 	.def("IsHorse", &Lua_Mob::IsHorse)
 	.def("IsImmuneToSpell", (bool(Lua_Mob::*)(int,Lua_Mob))&Lua_Mob::IsImmuneToSpell)
+	.def("IsIntelligenceCasterClass", &Lua_Mob::IsIntelligenceCasterClass)
 	.def("IsInvisible", (bool(Lua_Mob::*)(Lua_Mob))&Lua_Mob::IsInvisible)
 	.def("IsInvisible", (bool(Lua_Mob::*)(void))&Lua_Mob::IsInvisible)
 	.def("IsMeleeDisabled", (bool(Lua_Mob::*)(void))&Lua_Mob::IsMeleeDisabled)
@@ -3742,6 +3768,7 @@ luabind::scope lua_register_mob() {
 	.def("IsPetOwnerBot", &Lua_Mob::IsPetOwnerBot)
 	.def("IsPetOwnerClient", &Lua_Mob::IsPetOwnerClient)
 	.def("IsPetOwnerNPC", &Lua_Mob::IsPetOwnerNPC)
+	.def("IsPureMeleeClass", &Lua_Mob::IsPureMeleeClass)
 	.def("IsRoamer", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRoamer)
 	.def("IsRooted", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRooted)
 	.def("IsRunning", (bool(Lua_Mob::*)(void))&Lua_Mob::IsRunning)
@@ -3753,6 +3780,7 @@ luabind::scope lua_register_mob() {
 	.def("IsTemporaryPet", &Lua_Mob::IsTemporaryPet)
 	.def("IsTrackable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTrackable)
 	.def("IsWarriorClass", &Lua_Mob::IsWarriorClass)
+	.def("IsWisdomCasterClass", &Lua_Mob::IsWisdomCasterClass)
 	.def("Kill", (void(Lua_Mob::*)(void))&Lua_Mob::Kill)
 	.def("Mesmerize", (void(Lua_Mob::*)(void))&Lua_Mob::Mesmerize)
 	.def("Message", &Lua_Mob::Message)

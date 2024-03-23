@@ -940,19 +940,16 @@ int Mob::_GetFearSpeed() const {
 	return speed_mod;
 }
 
-int64 Mob::CalcMaxMana() {
-	switch (GetCasterClass()) {
-		case 'I':
-			max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-			break;
-		case 'W':
-			max_mana = (((GetWIS()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-			break;
-		case 'N':
-		default:
-			max_mana = 0;
-			break;
+int64 Mob::CalcMaxMana()
+{
+	if (IsIntelligenceCasterClass()) {
+		max_mana = (((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+	} else if (IsWisdomCasterClass()) {
+		max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+	} else {
+		max_mana = 0;
 	}
+
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
@@ -981,90 +978,155 @@ int64 Mob::GetSpellHPBonuses() {
 	return spell_hp;
 }
 
-char Mob::GetCasterClass() const {
-	switch(class_)
-	{
-	case Class::Cleric:
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::Druid:
-	case Class::Shaman:
-	case Class::Beastlord:
-	case Class::ClericGM:
-	case Class::PaladinGM:
-	case Class::RangerGM:
-	case Class::DruidGM:
-	case Class::ShamanGM:
-	case Class::BeastlordGM:
-		return 'W';
-		break;
-
-	case Class::ShadowKnight:
-	case Class::Bard:
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-	case Class::ShadowKnightGM:
-	case Class::BardGM:
-	case Class::NecromancerGM:
-	case Class::WizardGM:
-	case Class::MagicianGM:
-	case Class::EnchanterGM:
-		return 'I';
-		break;
-
-	default:
-		return 'N';
-		break;
+bool Mob::IsIntelligenceCasterClass() const
+{
+	switch (GetClass()) {
+		case Class::ShadowKnight:
+		case Class::Bard:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
+		case Class::ShadowKnightGM:
+		case Class::BardGM:
+		case Class::NecromancerGM:
+		case Class::WizardGM:
+		case Class::MagicianGM:
+		case Class::EnchanterGM:
+			return true;
 	}
+
+	return false;
 }
 
-uint8 Mob::GetArchetype() const {
-	switch(class_)
-	{
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::ShadowKnight:
-	case Class::Bard:
-	case Class::Beastlord:
-	case Class::PaladinGM:
-	case Class::RangerGM:
-	case Class::ShadowKnightGM:
-	case Class::BardGM:
-	case Class::BeastlordGM:
-		return ARCHETYPE_HYBRID;
-		break;
-	case Class::Cleric:
-	case Class::Druid:
-	case Class::Shaman:
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-	case Class::ClericGM:
-	case Class::DruidGM:
-	case Class::ShamanGM:
-	case Class::NecromancerGM:
-	case Class::WizardGM:
-	case Class::MagicianGM:
-	case Class::EnchanterGM:
-		return ARCHETYPE_CASTER;
-		break;
-	case Class::Warrior:
-	case Class::Monk:
-	case Class::Rogue:
-	case Class::Berserker:
-	case Class::WarriorGM:
-	case Class::MonkGM:
-	case Class::RogueGM:
-	case Class::BerserkerGM:
-		return ARCHETYPE_MELEE;
-		break;
-	default:
-		return ARCHETYPE_HYBRID;
-		break;
+bool Mob::IsPureMeleeClass() const
+{
+	switch (GetClass()) {
+		case Class::Warrior:
+		case Class::Monk:
+		case Class::Rogue:
+		case Class::Berserker:
+		case Class::WarriorGM:
+		case Class::MonkGM:
+		case Class::RogueGM:
+		case Class::BerserkerGM:
+			return true;
+		default:
+			break;
 	}
+
+	return false;
+}
+
+bool Mob::IsWarriorClass() const
+{
+	switch (GetClass()) {
+		case Class::Warrior:
+		case Class::Paladin:
+		case Class::Ranger:
+		case Class::ShadowKnight:
+		case Class::Monk:
+		case Class::Bard:
+		case Class::Rogue:
+		case Class::Beastlord:
+		case Class::Berserker:
+		case Class::WarriorGM:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::MonkGM:
+		case Class::BardGM:
+		case Class::RogueGM:
+		case Class::BeastlordGM:
+		case Class::BerserkerGM:
+			return true;
+		default:
+			break;
+	}
+
+	return false;
+}
+
+bool Mob::IsWisdomCasterClass() const
+{
+	switch (GetClass()) {
+		case Class::Cleric:
+		case Class::Paladin:
+		case Class::Ranger:
+		case Class::Druid:
+		case Class::Shaman:
+		case Class::Beastlord:
+		case Class::ClericGM:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::DruidGM:
+		case Class::ShamanGM:
+		case Class::BeastlordGM:
+			return true;
+	}
+
+	return false;
+}
+
+uint8 Mob::GetArchetype() const
+{
+	switch (GetClass()) {
+		case Class::Paladin:
+		case Class::Ranger:
+		case Class::ShadowKnight:
+		case Class::Bard:
+		case Class::Beastlord:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::BardGM:
+		case Class::BeastlordGM:
+			return Archetype::Hybrid;
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
+		case Class::ClericGM:
+		case Class::DruidGM:
+		case Class::ShamanGM:
+		case Class::NecromancerGM:
+		case Class::WizardGM:
+		case Class::MagicianGM:
+		case Class::EnchanterGM:
+			return Archetype::Caster;
+		case Class::Warrior:
+		case Class::Monk:
+		case Class::Rogue:
+		case Class::Berserker:
+		case Class::WarriorGM:
+		case Class::MonkGM:
+		case Class::RogueGM:
+		case Class::BerserkerGM:
+			return Archetype::Melee;
+		default:
+			break;
+	}
+
+	return Archetype::Hybrid;
+}
+
+const std::string& Mob::GetArchetypeName()
+{
+	switch (GetArchetype()) {
+		case Archetype::Hybrid:
+			return "Hybrid";
+		case Archetype::Caster:
+			return "Caster";
+		case Archetype::Melee:
+			return "Melee";
+		default:
+			break;
+	}
+
+	return "Hybrid";
 }
 
 void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
@@ -4584,39 +4646,6 @@ bool Mob::CanThisClassTripleAttack() const
 			return CastToClient()->HasSkill(EQ::skills::SkillTripleAttack);
 		}
 	}
-}
-
-bool Mob::IsWarriorClass(void) const
-{
-	switch(GetClass())
-	{
-	case Class::Warrior:
-	case Class::WarriorGM:
-	case Class::Rogue:
-	case Class::RogueGM:
-	case Class::Monk:
-	case Class::MonkGM:
-	case Class::Paladin:
-	case Class::PaladinGM:
-	case Class::ShadowKnight:
-	case Class::ShadowKnightGM:
-	case Class::Ranger:
-	case Class::RangerGM:
-	case Class::Beastlord:
-	case Class::BeastlordGM:
-	case Class::Berserker:
-	case Class::BerserkerGM:
-	case Class::Bard:
-	case Class::BardGM:
-		{
-			return true;
-		}
-	default:
-		{
-			return false;
-		}
-	}
-
 }
 
 bool Mob::CanThisClassParry(void) const

@@ -586,6 +586,10 @@ public:
 	void RestoreEndurance();
 	void RestoreHealth();
 	void RestoreMana();
+	std::string GetArchetypeName();
+	bool IsIntelligenceCasterClass();
+	bool IsPureMeleeClass();
+	bool IsWisdomCasterClass();
 };
 
 #endif

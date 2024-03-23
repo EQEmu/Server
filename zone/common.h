@@ -19,9 +19,11 @@
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
 
-#define ARCHETYPE_HYBRID	1
-#define ARCHETYPE_CASTER	2
-#define ARCHETYPE_MELEE		3
+namespace Archetype {
+	constexpr uint8 Hybrid = 1;
+	constexpr uint8 Caster = 2;
+	constexpr uint8 Melee  = 3;
+};
 
 #define CON_GREEN		2
 #define CON_LIGHTBLUE	18
