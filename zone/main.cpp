@@ -372,10 +372,6 @@ int main(int argc, char **argv)
 		LogError("Failed. But ignoring error and going on..");
 	}
 
-	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
-		LogError("Loading skill caps failed!");
-		return 1;
-	}
 	if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 		LogError("Loading spells failed!");
 		return 1;

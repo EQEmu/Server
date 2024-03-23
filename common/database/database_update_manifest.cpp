@@ -5452,6 +5452,22 @@ ADD PRIMARY KEY (`group_id`, `character_id`, `bot_id`, `merc_id`) USING BTREE;
 ALTER TABLE `group_id`
 MODIFY COLUMN `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`;
 )"
+	},
+	ManifestEntry{
+		.version = 9268,
+		.description = "2024_03_23_skill_caps.sql",
+		.check = "SHOW COLUMNS FROM `skill_caps` LIKE 'skill_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `skill_caps`
+CHANGE COLUMN `skillID` `skill_id` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `class` `class_id` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `skill_id`,
+ADD COLUMN `id` int(3) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE,
+ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

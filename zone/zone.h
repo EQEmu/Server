@@ -46,6 +46,7 @@
 #include "../common/repositories/lootdrop_repository.h"
 #include "../common/repositories/lootdrop_entries_repository.h"
 #include "../common/repositories/base_data_repository.h"
+#include "../common/repositories/skill_caps_repository.h"
 
 struct EXPModifier
 {
@@ -452,6 +453,13 @@ public:
 	void LoadBaseData();
 	void ReloadBaseData();
 
+	// Skill Caps
+	inline void ClearSkillCaps() { m_skill_caps.clear(); }
+	SkillCapsRepository::SkillCaps GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level);
+	uint8 GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level);
+	void LoadSkillCaps();
+	void ReloadSkillCaps();
+
 private:
 	bool      allow_mercs;
 	bool      can_bind;
@@ -515,6 +523,9 @@ private:
 
 	// Base Data
 	std::vector<BaseDataRepository::BaseData> m_base_data = { };
+
+	// Skill Caps
+	std::vector<SkillCapsRepository::SkillCaps> m_skill_caps = { };
 };
 
 #endif
