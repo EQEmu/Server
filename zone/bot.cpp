@@ -3343,7 +3343,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 					}
 
 					if (bot_spawn_limit >= 0 && spawned_bots_count >= bot_spawn_limit) {
-						database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+						Group::RemoveFromGroup(b);
 						g->UpdatePlayer(bot_owner);
 						continue;
 					}
@@ -3355,7 +3355,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 						bot_spawn_limit_class >= 0 &&
 						spawned_bot_count_class >= bot_spawn_limit_class
 					) {
-						database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+						Group::RemoveFromGroup(b);
 						g->UpdatePlayer(bot_owner);
 						continue;
 					}
@@ -3375,7 +3375,7 @@ void Bot::LoadAndSpawnAllZonedBots(Client* bot_owner) {
 					}
 
 					if (!bot_owner->HasGroup()) {
-						database.SetGroupID(b->GetCleanName(), 0, b->GetBotID());
+						Group::RemoveFromGroup(b);
 					}
 				}
 			}
@@ -3632,7 +3632,7 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 			bot->SetFollowID(0);
 			if (group->DelMember(bot)) {
 				group->DelMemberOOZ(bot->GetName());
-				database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
+				Group::RemoveFromGroup(bot);
 				if (group->GroupCount() < 2) {
 					group->DisbandGroup();
 				}
@@ -3646,7 +3646,7 @@ bool Bot::RemoveBotFromGroup(Bot* bot, Group* group) {
 				group->members[i]->SetFollowID(0);
 			}
 			group->DisbandGroup();
-			database.SetGroupID(bot->GetCleanName(), 0, bot->GetBotID());
+			Group::RemoveFromGroup(bot);
 		}
 		Result = true;
 	}
@@ -6600,14 +6600,14 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string const& botName) {
 					entity_list.AddGroup(g);
 					database.SetGroupLeaderName(g->GetID(), c->GetName());
 					g->SaveGroupLeaderAA();
-					database.SetGroupID(c->GetName(), g->GetID(), c->CharacterID());
-					database.SetGroupID(invitedBot->GetCleanName(), g->GetID(), invitedBot->GetBotID());
+					g->AddToGroup(c);
+					g->AddToGroup(invitedBot);
 				} else {
 					delete g;
 				}
 			} else {
 				if (AddBotToGroup(invitedBot, c->GetGroup())) {
-					database.SetGroupID(invitedBot->GetCleanName(), c->GetGroup()->GetID(), invitedBot->GetBotID());
+					c->GetGroup()->AddToGroup(invitedBot);
 				}
 			}
 		} else if (invitedBot->HasGroup()) {

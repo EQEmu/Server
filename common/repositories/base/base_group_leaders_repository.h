@@ -105,7 +105,7 @@ public:
 		e.gid            = 0;
 		e.leadername     = "";
 		e.marknpc        = "";
-		e.leadershipaa   = 0;
+		e.leadershipaa   = "";
 		e.maintank       = "";
 		e.assist         = "";
 		e.puller         = "";
@@ -150,7 +150,7 @@ public:
 			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : 0;
+			e.leadershipaa   = row[3] ? row[3] : "";
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
@@ -302,7 +302,7 @@ public:
 			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : 0;
+			e.leadershipaa   = row[3] ? row[3] : "";
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";
@@ -335,7 +335,7 @@ public:
 			e.gid            = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.leadername     = row[1] ? row[1] : "";
 			e.marknpc        = row[2] ? row[2] : "";
-			e.leadershipaa   = row[3] ? row[3] : 0;
+			e.leadershipaa   = row[3] ? row[3] : "";
 			e.maintank       = row[4] ? row[4] : "";
 			e.assist         = row[5] ? row[5] : "";
 			e.puller         = row[6] ? row[6] : "";

@@ -202,16 +202,15 @@ public:
 
 	/* Groups */
 
-	std::string GetGroupLeaderForLogin(std::string character_name);
+	std::string GetGroupLeaderForLogin(const std::string& character_name);
 	char* GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
 
 	std::string GetGroupLeaderName(uint32 group_id);
 
-	uint32	GetGroupID(const char* name);
+	uint32	GetGroupID(const std::string& name);
 
-	void	ClearGroup(uint32 gid = 0);
+	void	ClearGroup(uint32 group_id = 0);
 	void	ClearGroupLeader(uint32 gid = 0);
-	void	SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc = false);
 	void	SetGroupLeaderName(uint32 gid, const char* name);
 
 	/* Raids */

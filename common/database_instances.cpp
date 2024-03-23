@@ -421,20 +421,25 @@ void Database::AssignGroupToInstance(uint32 group_id, uint32 instance_id)
 	auto zone_id = GetInstanceZoneID(instance_id);
 	auto version = GetInstanceVersion(instance_id);
 
-	auto l = GroupIdRepository::GetWhere(
+	const auto& l = GroupIdRepository::GetWhere(
 		*this,
 		fmt::format(
-			"groupid = {}",
+			"`group_id` = {}",
 			group_id
 		)
 	);
+
 	if (l.empty()) {
 		return;
 	}
 
 	for (const auto& e : l) {
-		if (!GetInstanceID(zone_id, e.charid, version)) {
-			AddClientToInstance(instance_id, e.charid);
+		if (!e.character_id) {
+			continue;
+		}
+
+		if (!GetInstanceID(zone_id, e.character_id, version)) {
+			AddClientToInstance(instance_id, e.character_id);
 		}
 	}
 }

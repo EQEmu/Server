@@ -35,6 +35,8 @@
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
 #include "../common/repositories/character_skills_repository.h"
+#include "../common/repositories/group_id_repository.h"
+#include "../common/repositories/group_leaders_repository.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -1280,24 +1282,6 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	safe_delete_array(escape_str);
 }
 
-void Database::SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc) {
-	std::string query;
-	if (id == 0) {
-		// removing from group
-		query = StringFormat("delete from group_id where charid=%i and name='%s' and ismerc=%i",charid, name, ismerc);
-		auto results = QueryDatabase(query);
-
-		if (!results.Success())
-			LogError("Error deleting character from group id: {}", results.ErrorMessage().c_str());
-
-		return;
-	}
-
-	/* Add to the Group */
-	query = StringFormat("REPLACE INTO  `group_id` SET `charid` = %i, `groupid` = %i, `name` = '%s', `ismerc` = '%i'", charid, id, name, ismerc);
-	QueryDatabase(query);
-}
-
 void Database::ClearAllGroups(void)
 {
 	std::string query("DELETE FROM `group_id`");
@@ -1305,71 +1289,65 @@ void Database::ClearAllGroups(void)
 	return;
 }
 
-void Database::ClearGroup(uint32 gid) {
-	ClearGroupLeader(gid);
+void Database::ClearGroup(uint32 group_id) {
+	ClearGroupLeader(group_id);
 
-	if(gid == 0)
-	{
+	if (!group_id) {
 		//clear all groups
 		ClearAllGroups();
 		return;
 	}
 
 	//clear a specific group
-	std::string query = StringFormat("delete from group_id where groupid = %lu", (unsigned long)gid);
-	QueryDatabase(query);
-}
-
-uint32 Database::GetGroupID(const char* name){
-	std::string query = StringFormat("SELECT groupid from group_id where name='%s'", name);
-	auto results = QueryDatabase(query);
-
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() == 0)
-	{
-		// Commenting this out until logging levels can prevent this from going to console
-		//LogDebug(, "Character not in a group: [{}]", name);
-		return 0;
-	}
-
-	auto row = results.begin();
-
-	return Strings::ToUnsignedInt(row[0]);
-}
-
-std::string Database::GetGroupLeaderForLogin(std::string character_name) {
-	uint32 group_id = 0;
-
-	auto query = fmt::format(
-		"SELECT `groupid` FROM `group_id` WHERE `name` = '{}'",
-		character_name
+	GroupIdRepository::DeleteWhere(
+		*this,
+		fmt::format(
+			"`group_id` = {}",
+			group_id
+		)
 	);
-	auto results = QueryDatabase(query);
+}
 
-	if (results.Success() && results.RowCount()) {
-		auto row = results.begin();
-		group_id = Strings::ToUnsignedInt(row[0]);
+uint32 Database::GetGroupID(const std::string& name)
+{
+	const auto& l = GroupIdRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}'",
+			Strings::Escape(name)
+		)
+	);
+
+	if (l.empty()) {
+		return 0;
 	}
 
-	if (!group_id) {
+	auto e = l.front();
+
+	return e.group_id;
+}
+
+std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
+{
+	const auto& g = GroupIdRepository::GetWhere(
+		*this,
+		fmt::format(
+			"`name` = '{}'",
+			Strings::Escape(character_name)
+		)
+	);
+
+	if (g.empty()) {
 		return std::string();
 	}
 
-	query = fmt::format(
-		"SELECT `leadername` FROM `group_leaders` WHERE `gid` = {} LIMIT 1",
-		group_id
-	);
-	results = QueryDatabase(query);
+	auto group = g.front();
 
-	if (results.Success() && results.RowCount()) {
-		auto row = results.begin();
-		return row[0];
-	}
+	const uint32 group_id = group.group_id;
 
-	return std::string();
+	const auto& e = GroupLeadersRepository::FindOne(*this, group_id);
+
+	return e.gid ? e.leadername : std::string();
 }
 
 void Database::SetGroupLeaderName(uint32 gid, const char* name) {

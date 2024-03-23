@@ -5377,7 +5377,7 @@ bool Merc::RemoveMercFromGroup(Merc* merc, Group* group) {
 				{
 					if(merc->GetMercenaryCharacterID() != 0)
 					{
-						database.SetGroupID(merc->GetName(), 0, merc->GetMercenaryCharacterID(), true);
+						Group::RemoveFromGroup(merc);
 					}
 				}
 			}
@@ -5462,7 +5462,7 @@ bool Merc::MercJoinClientGroup() {
 
 			if (AddMercToGroup(this, g))
 			{
-				database.SetGroupID(mercOwner->GetName(), g->GetID(), mercOwner->CharacterID(), false);
+				g->AddToGroup(mercOwner);
 				database.SetGroupLeaderName(g->GetID(), mercOwner->GetName());
 				database.RefreshGroupFromDB(mercOwner);
 				g->SaveGroupLeaderAA();
