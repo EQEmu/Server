@@ -350,6 +350,7 @@ public:
 	int GetRecipeMadeCount(uint32 recipe_id);
 	bool HasRecipeLearned(uint32 recipe_id);
 	bool CanIncreaseTradeskill(EQ::skills::SkillType tradeskill);
+	void ScribeRecipes(uint32_t item_id) const;
 
 	bool GetRevoked() const { return revoked; }
 	void SetRevoked(bool rev) { revoked = rev; }
