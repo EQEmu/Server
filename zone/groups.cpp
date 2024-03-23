@@ -2539,7 +2539,7 @@ void Group::AddToGroup(AddToGroupRequest r)
 	uint32      bot_id       = 0;
 	uint32      character_id = r.character_id;
 	uint32      merc_id      = 0;
-	std::string name         = r.name;
+	std::string name         = r.member_name;
 
 	if (r.mob) {
 		if (r.mob->IsBot()) {
