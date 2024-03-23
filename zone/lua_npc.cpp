@@ -758,7 +758,7 @@ void Lua_NPC::SetLDoNTrapDetected(bool is_detected) {
 void Lua_NPC::ScaleNPC(uint8 npc_level)
 {
 	Lua_Safe_Call_Void();
-	self->ScaleNPC(npc_level);
+	self->ScaleNPC(npc_level, true);
 }
 
 void Lua_NPC::ScaleNPC(uint8 npc_level, bool override_special_abilities)
