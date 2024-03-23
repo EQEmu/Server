@@ -4282,7 +4282,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB (Parcel, EnableParcelMerchants) &&
 		GetEngagedWithParcelMerchant()) {
 		Stand();
-		MessageString(Chat::Yellow, TRADER_BUSY);
+		MessageString(Chat::Yellow, TRADER_BUSY_TWO);
 		return;
 	}
 
