@@ -52,6 +52,13 @@ public:
 	Group(uint32 gid);
 	~Group();
 
+	struct AddToGroupRequest {
+		Mob* mob = nullptr;
+		// Only used cross-zone, otherwise use Mob* mob
+		std::string member_name  = std::string();
+		uint32      character_id = 0;
+	};
+
 	bool	AddMember(Mob* new_member, std::string new_member_name = std::string(), uint32 character_id = 0, bool is_merc = false);
 	void	AddMember(const std::string& new_member_name);
 	void	SendUpdate(uint32 type,Mob* member);
@@ -145,6 +152,9 @@ public:
 	void	SetDirtyAutoHaters();
 	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
 	void	JoinRaidXTarget(Raid *raid, bool first = false);
+	void	AddToGroup(AddToGroupRequest r);
+	void	AddToGroup(Mob* m);
+	static void	RemoveFromGroup(Mob* m);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();

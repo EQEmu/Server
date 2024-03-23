@@ -303,7 +303,7 @@ bool Group::AddMember(Mob* new_member, std::string new_member_name, uint32 chara
 
 			new_member->CastToClient()->Save();
 
-			database.SetGroupID(new_member_name, GetID(), new_member->CastToClient()->CharacterID());
+			AddToGroup(new_member);
 
 			SendMarkedNPCsToMember(new_member->CastToClient());
 
@@ -315,7 +315,7 @@ bool Group::AddMember(Mob* new_member, std::string new_member_name, uint32 chara
 		if (new_member->IsMerc()) {
 			Client* o = new_member->CastToMerc()->GetMercenaryOwner();
 			if (o) {
-				database.SetGroupID(new_member_name, GetID(), o->CharacterID(), 0, true);
+				AddToGroup(new_member);
 			}
 		}
 
@@ -326,7 +326,13 @@ bool Group::AddMember(Mob* new_member, std::string new_member_name, uint32 chara
 		}
 
 	} else {
-		database.SetGroupID(new_member_name, GetID(), character_id, 0, is_merc);
+		AddToGroup(
+			AddToGroupRequest{
+				.mob = nullptr,
+				.member_name = new_member_name,
+				.character_id = character_id,
+			}
+		);
 	}
 
 	if (new_member && new_member->IsClient()) {
@@ -730,7 +736,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 
 	if(oldmember->IsClient())
 	{
-		database.SetGroupID(oldmember->GetCleanName(), 0, oldmember->CastToClient()->CharacterID());
+		RemoveFromGroup(oldmember);
 	}
 
 	if(oldmember->IsMerc())
@@ -738,7 +744,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		Client* owner = oldmember->CastToMerc()->GetMercenaryOwner();
 		if(owner)
 		{
-			database.SetGroupID(oldmember->GetCleanName(), 0, owner->CharacterID(), true);
+			RemoveFromGroup(oldmember);
 		}
 	}
 
@@ -921,7 +927,7 @@ void Group::DisbandGroup(bool joinraid) {
 			}
 
 			strcpy(gu->yourname, members[i]->GetCleanName());
-			database.SetGroupID(members[i]->GetCleanName(), 0, members[i]->CastToClient()->CharacterID());
+			RemoveFromGroup(members[i]);
 			members[i]->CastToClient()->QueuePacket(outapp);
 			SendMarkedNPCsToMember(members[i]->CastToClient(), true);
 			if (!joinraid)
@@ -933,7 +939,7 @@ void Group::DisbandGroup(bool joinraid) {
 			Client* owner = members[i]->CastToMerc()->GetMercenaryOwner();
 			if(owner)
 			{
-				database.SetGroupID(members[i]->GetCleanName(), 0, owner->CharacterID(), true);
+				RemoveFromGroup(members[i]);
 			}
 		}
 
@@ -1242,10 +1248,10 @@ void Client::LeaveGroup() {
 	else
 	{
 		//force things a little
-		database.SetGroupID(GetCleanName(), 0, CharacterID());
-		if (GetMerc())
-		{
-			database.SetGroupID(GetMerc()->GetCleanName(), 0, CharacterID(), 0, true);
+		Group::RemoveFromGroup(this);
+
+		if (GetMerc()) {
+			Group::RemoveFromGroup(GetMerc());
 		}
 	}
 
@@ -2491,4 +2497,70 @@ bool Group::IsLeader(const char* name) {
 
 std::string Group::GetLeaderName() {
 	return database.GetGroupLeaderName(GetID());
+}
+
+void Group::RemoveFromGroup(Mob* m)
+{
+	uint32      bot_id       = 0;
+	uint32      character_id = 0;
+	uint32      merc_id      = 0;
+
+	if (m->IsBot()) {
+		bot_id = m->CastToBot()->GetBotID();
+	} else if (m->IsClient()) {
+		character_id = m->CastToClient()->CharacterID();
+	} else if (m->IsMerc()) {
+		merc_id = m->CastToMerc()->GetMercenaryID();
+	}
+
+	GroupIdRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`character_id` = {} AND `bot_id` = {} AND `merc_id` = {}",
+			character_id,
+			bot_id,
+			merc_id
+		)
+	);
+}
+
+void Group::AddToGroup(Mob* m)
+{
+	AddToGroup(
+		AddToGroupRequest{
+			.mob = m
+		}
+	);
+}
+
+// Handles database-side, should eventually be consolidated to handle memory-based group stuff as well
+void Group::AddToGroup(AddToGroupRequest r)
+{
+	uint32      bot_id       = 0;
+	uint32      character_id = 0;
+	uint32      merc_id      = 0;
+	std::string name         = "";
+
+	if (r.mob) {
+		if (r.mob->IsBot()) {
+			bot_id = r.mob->CastToBot()->GetBotID();
+		} else if (r.mob->IsClient()) {
+			character_id = r.mob->CastToClient()->CharacterID();
+		} else if (r.mob->IsMerc()) {
+			merc_id = r.mob->CastToMerc()->GetMercenaryID();
+		}
+
+		name = r.mob->GetCleanName();
+	}
+
+	GroupIdRepository::ReplaceOne(
+		database,
+		GroupIdRepository::GroupId{
+			.group_id = GetID(),
+			.name = name,
+			.character_id = character_id,
+			.bot_id = bot_id,
+			.merc_id = merc_id
+		}
+	);
 }

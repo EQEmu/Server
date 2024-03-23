@@ -20,10 +20,10 @@ class BaseGroupIdRepository {
 public:
 	struct GroupId {
 		uint32_t    group_id;
+		std::string name;
 		uint32_t    character_id;
 		uint32_t    bot_id;
-		std::string name;
-		uint8_t     is_merc;
+		uint32_t    merc_id;
 	};
 
 	static std::string PrimaryKey()
@@ -35,10 +35,10 @@ public:
 	{
 		return {
 			"group_id",
+			"name",
 			"character_id",
 			"bot_id",
-			"name",
-			"is_merc",
+			"merc_id",
 		};
 	}
 
@@ -46,10 +46,10 @@ public:
 	{
 		return {
 			"group_id",
+			"name",
 			"character_id",
 			"bot_id",
-			"name",
-			"is_merc",
+			"merc_id",
 		};
 	}
 
@@ -91,10 +91,10 @@ public:
 		GroupId e{};
 
 		e.group_id     = 0;
+		e.name         = "";
 		e.character_id = 0;
 		e.bot_id       = 0;
-		e.name         = "";
-		e.is_merc      = 0;
+		e.merc_id      = 0;
 
 		return e;
 	}
@@ -132,10 +132,10 @@ public:
 			GroupId e{};
 
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "";
-			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.name         = row[1] ? row[1] : "";
+			e.character_id = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.bot_id       = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.merc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -170,10 +170,10 @@ public:
 		auto columns = Columns();
 
 		v.push_back(columns[0] + " = " + std::to_string(e.group_id));
-		v.push_back(columns[1] + " = " + std::to_string(e.character_id));
-		v.push_back(columns[2] + " = " + std::to_string(e.bot_id));
-		v.push_back(columns[3] + " = '" + Strings::Escape(e.name) + "'");
-		v.push_back(columns[4] + " = " + std::to_string(e.is_merc));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.character_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.bot_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.merc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -196,10 +196,10 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.group_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.bot_id));
-		v.push_back("'" + Strings::Escape(e.name) + "'");
-		v.push_back(std::to_string(e.is_merc));
+		v.push_back(std::to_string(e.merc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -230,10 +230,10 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.group_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.bot_id));
-			v.push_back("'" + Strings::Escape(e.name) + "'");
-			v.push_back(std::to_string(e.is_merc));
+			v.push_back(std::to_string(e.merc_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -268,10 +268,10 @@ public:
 			GroupId e{};
 
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "";
-			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.name         = row[1] ? row[1] : "";
+			e.character_id = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.bot_id       = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.merc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -297,10 +297,10 @@ public:
 			GroupId e{};
 
 			e.group_id     = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.character_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.bot_id       = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.name         = row[3] ? row[3] : "";
-			e.is_merc      = row[4] ? static_cast<uint8_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.name         = row[1] ? row[1] : "";
+			e.character_id = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.bot_id       = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.merc_id      = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -376,10 +376,10 @@ public:
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.group_id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back(std::to_string(e.character_id));
 		v.push_back(std::to_string(e.bot_id));
-		v.push_back("'" + Strings::Escape(e.name) + "'");
-		v.push_back(std::to_string(e.is_merc));
+		v.push_back(std::to_string(e.merc_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -403,10 +403,10 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.group_id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back(std::to_string(e.character_id));
 			v.push_back(std::to_string(e.bot_id));
-			v.push_back("'" + Strings::Escape(e.name) + "'");
-			v.push_back(std::to_string(e.is_merc));
+			v.push_back(std::to_string(e.merc_id));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

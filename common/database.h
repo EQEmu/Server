@@ -211,7 +211,6 @@ public:
 
 	void	ClearGroup(uint32 group_id = 0);
 	void	ClearGroupLeader(uint32 gid = 0);
-	void	SetGroupID(const std::string& name, uint32 group_id, uint32 character_id, uint32 bot_id = 0, bool is_merc = false);
 	void	SetGroupLeaderName(uint32 gid, const char* name);
 
 	/* Raids */

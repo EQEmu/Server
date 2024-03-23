@@ -1282,41 +1282,6 @@ void Database::AddReport(std::string who, std::string against, std::string lines
 	safe_delete_array(escape_str);
 }
 
-void Database::SetGroupID(
-	const std::string& name,
-	uint32 group_id,
-	uint32 character_id,
-	uint32 bot_id,
-	bool is_merc
-)
-{
-	if (!group_id) {
-		const int deleted = GroupIdRepository::DeleteWhere(
-			*this,
-			fmt::format(
-				"`character_id` = {} AND `bot_id` = {} AND `name` = '{}' AND `is_merc` = {}",
-				character_id,
-				bot_id,
-				name,
-				is_merc ? 1 : 0
-			)
-		);
-
-		return;
-	}
-
-	GroupIdRepository::ReplaceOne(
-		*this,
-		GroupIdRepository::GroupId{
-			.group_id = group_id,
-			.character_id = character_id,
-			.bot_id = bot_id,
-			.name = name,
-			.is_merc = static_cast<uint8_t>(is_merc ? 1 : 0)
-		}
-	);
-}
-
 void Database::ClearAllGroups(void)
 {
 	std::string query("DELETE FROM `group_id`");

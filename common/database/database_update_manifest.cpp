@@ -5442,13 +5442,15 @@ MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci N
 		.match = "",
 		.sql = R"(
 ALTER TABLE `group_id`
-CHANGE COLUMN `groupid` `group_id` int(11) UNSIGNED NOT NULL FIRST,
-CHANGE COLUMN `charid` `character_id` int(11) UNSIGNED NOT NULL AFTER `group_id`,
-CHANGE COLUMN `ismerc` `is_merc` tinyint(1) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`,
-ADD COLUMN `bot_id` int(11) UNSIGNED NOT NULL AFTER `character_id`,
-MODIFY COLUMN `name` varchar(64) NOT NULL DEFAULT 0 AFTER `character_id`,
+CHANGE COLUMN `groupid` `group_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `charid` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `group_id`,
+CHANGE COLUMN `ismerc` `merc_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`,
+ADD COLUMN `bot_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
+MODIFY COLUMN `name` varchar(64) NOT NULL DEFAULT '' AFTER `character_id`,
 DROP PRIMARY KEY,
-ADD PRIMARY KEY (`group_id`, `character_id`, `bot_id`, `is_merc`) USING BTREE;
+ADD PRIMARY KEY (`group_id`, `character_id`, `bot_id`, `merc_id`) USING BTREE;
+ALTER TABLE `group_id`
+MODIFY COLUMN `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`;
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry

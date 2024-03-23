@@ -53,6 +53,7 @@
 #include "../common/repositories/inventory_repository.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/group_id_repository.h"
 
 #include <iostream>
 #include <iomanip>
@@ -881,7 +882,14 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 
 	if(!is_player_zoning) {
-		database.SetGroupID(char_name, 0, charid);
+		GroupIdRepository::DeleteWhere(
+			database,
+			fmt::format(
+				"`character_id` = {} AND `name` = '{}'",
+				charid,
+				Strings::Escape(char_name)
+			)
+		);
 		database.SetLoginFlags(charid, false, false, 1);
 	} else {
 		auto group_id = database.GetGroupID(char_name);

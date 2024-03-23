@@ -4442,7 +4442,7 @@ bool Client::GroupFollow(Client* inviter) {
 			}
 
 			//now we have a group id, can set inviter's id
-			database.SetGroupID(inviter->GetName(), group->GetID(), inviter->CharacterID());
+			group->AddToGroup(inviter);
 			database.SetGroupLeaderName(group->GetID(), inviter->GetName());
 			group->UpdateGroupAAs();
 
