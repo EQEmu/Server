@@ -120,8 +120,7 @@ public:
 	uint32 GetAccountIDByChar(const std::string& name, uint32* character_id = 0);
 	uint32 GetAccountIDByChar(uint32 character_id);
 	uint32 GetAccountIDByName(const std::string& account_name, const std::string& loginserver, int16* status = 0, uint32* lsid = 0);
-	uint32 GetCharacterID(const char *name);
-	uint32 GetCharacterInfo(const std::string& name, uint32* account_id, uint32* zone_id, uint32* instance_id);
+	uint32 GetCharacterID(const std::string& name);
 	uint32 GetGuildIDByCharID(uint32 character_id);
 	uint32 GetGroupIDByCharID(uint32 character_id);
 	uint32 GetRaidIDByCharID(uint32 character_id);

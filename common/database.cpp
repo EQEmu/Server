@@ -977,34 +977,6 @@ bool Database::MoveCharacterToZone(const std::string& name, uint32 zone_id)
 	return CharacterDataRepository::UpdateOne(*this, e);
 }
 
-uint32 Database::GetCharacterInfo(
-	const std::string& name,
-	uint32* account_id,
-	uint32* zone_id,
-	uint32* instance_id
-)
-{
-	const auto& l = CharacterDataRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`name` = '{}'",
-			Strings::Escape(name)
-		)
-	);
-
-	if (l.empty()) {
-		return 0;
-	}
-
-	auto e = l.front();
-
-	*account_id  = e.account_id;
-	*zone_id     = e.zone_id;
-	*instance_id = e.zone_instance;
-
-	return e.id;
-}
-
 bool Database::UpdateLiveChar(const std::string& name, uint32 account_id)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
