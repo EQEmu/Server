@@ -983,12 +983,11 @@ namespace PlayerEvent {
 		}
 	};
 
-	struct ParcelRetrieve
-	{
-        uint32      item_id;
-        uint32      quantity;
-        std::string from_player_name;
-        uint32      sent_date;
+	struct ParcelRetrieve {
+		uint32      item_id;
+		uint32      quantity;
+		std::string from_player_name;
+		uint32      sent_date;
 
 		// cereal
 		template<class Archive>
@@ -1003,13 +1002,12 @@ namespace PlayerEvent {
 		}
 	};
 
-	struct ParcelSend
-	{
-        uint32      item_id;
-        uint32      quantity;
-        std::string from_player_name;
-        std::string to_player_name;
-        uint32      sent_date;
+	struct ParcelSend {
+		uint32      item_id;
+		uint32      quantity;
+		std::string from_player_name;
+		std::string to_player_name;
+		uint32      sent_date;
 
 		// cereal
 		template<class Archive>
@@ -1025,14 +1023,13 @@ namespace PlayerEvent {
 		}
 	};
 
-	struct ParcelDelete
-	{
-        uint32      item_id;
-        uint32      quantity;
-        std::string to_name;
-        std::string from_name;
-        std::string note;
-        uint32      sent_date;
+	struct ParcelDelete {
+		uint32      item_id;
+		uint32      quantity;
+		std::string to_name;
+		std::string from_name;
+		std::string note;
+		uint32      sent_date;
 
 		// cereal
 		template<class Archive>
@@ -1044,10 +1041,9 @@ namespace PlayerEvent {
 				CEREAL_NVP(to_name),
 				CEREAL_NVP(from_name),
 				CEREAL_NVP(note),
-				CEREAL_NVP(sent_date)
-			);
+				CEREAL_NVP(sent_date));
 		}
-	}; 
+	};
 }
 
 #endif //EQEMU_PLAYER_EVENTS_H

@@ -2108,8 +2108,7 @@ struct ParcelRetrieve_Struct
     uint32 parcel_item_id;
 };
 
-struct ParcelMessaging_Struct
-{
+struct ParcelMessaging_Struct {
 	ItemPacketType packet_type;
 	std::string    serialized_item;
 	uint32         sent_time;
@@ -2120,12 +2119,13 @@ struct ParcelMessaging_Struct
 	template<class Archive>
 	void serialize(Archive &archive)
 	{
-		archive(CEREAL_NVP(packet_type),
-				CEREAL_NVP(serialized_item),
-				CEREAL_NVP(sent_time),
-				CEREAL_NVP(player_name),
-				CEREAL_NVP(note),
-				CEREAL_NVP(slot_id)
+		archive(
+			CEREAL_NVP(packet_type),
+			CEREAL_NVP(serialized_item),
+			CEREAL_NVP(sent_time),
+			CEREAL_NVP(player_name),
+			CEREAL_NVP(note),
+			CEREAL_NVP(slot_id)
 		);
 	}
 };

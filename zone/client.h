@@ -341,17 +341,17 @@ public:
 	void SendParcelRetrieveAck();
 	void SendParcelDelete(const ParcelRetrieve_Struct parcel_in);
 	void SendParcelDeliveryToWorld(Parcel_Struct parcel);
-	void SetParcelEnabled(bool status) { parcel_enabled = status; }
-	bool GetParcelEnabled() { return parcel_enabled; }
-	void SetParcelCount(uint32 count) { parcel_count = count; }
-	int32 GetParcelCount() { return parcel_count; }
-	bool GetEngagedWithParcelMerchant() { return parcel_merchant_engaged; }
-	void SetEngagedWithParcelMerchant(bool status) { parcel_merchant_engaged = status; }
+	void SetParcelEnabled(bool status) { m_parcel_enabled = status; }
+	bool GetParcelEnabled() { return m_parcel_enabled; }
+	void SetParcelCount(uint32 count) { m_parcel_count = count; }
+	int32 GetParcelCount() { return m_parcel_count; }
+	bool GetEngagedWithParcelMerchant() { return m_parcel_merchant_engaged; }
+	void SetEngagedWithParcelMerchant(bool status) { m_parcel_merchant_engaged = status; }
 	Timer *GetParcelTimer() { return &parcel_timer; }
 	bool DeleteParcel(uint32 parcel_id);
 	void AddParcel(ParcelsRepository::Parcels parcel);
 	void LoadParcels();
-	std::map<uint32, BaseParcelsRepository::Parcels> GetParcels() { return parcels; }
+	std::map<uint32, BaseParcelsRepository::Parcels> GetParcels() { return m_parcels; }
 	int32 FindNextFreeParcelSlot(std::string &character_name);
 	void SendParcelIconStatus();
 
@@ -1886,14 +1886,14 @@ private:
 	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
-	int32                                            parcel_platinum;
-	int32                                            parcel_gold;
-	int32                                            parcel_silver;
-	int32                                            parcel_copper;
-	int32                                            parcel_count;
-	bool                                             parcel_enabled;
-	bool                                             parcel_merchant_engaged;
-	std::map<uint32, BaseParcelsRepository::Parcels> parcels{};
+	int32                                            m_parcel_platinum;
+	int32                                            m_parcel_gold;
+	int32                                            m_parcel_silver;
+	int32                                            m_parcel_copper;
+	int32                                            m_parcel_count;
+	bool                                             m_parcel_enabled;
+	bool                                             m_parcel_merchant_engaged;
+	std::map<uint32, BaseParcelsRepository::Parcels> m_parcels{};
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 

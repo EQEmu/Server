@@ -1434,13 +1434,13 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 				switch(mc->cointype2) 
 				{
 					case COINTYPE_PP:
-						parcel_platinum += mc->amount; break;
+						m_parcel_platinum += mc->amount; break;
 					case COINTYPE_GP:
-						parcel_gold += mc->amount; break;
+						m_parcel_gold += mc->amount; break;
 					case COINTYPE_SP:
-						parcel_silver += mc->amount; break;
+						m_parcel_silver += mc->amount; break;
 					case COINTYPE_CP:
-						parcel_copper += mc->amount; break;
+						m_parcel_copper += mc->amount; break;
 				}
 			}
 			break;

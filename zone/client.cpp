@@ -376,14 +376,14 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	bot_owner_options[booBuffCounter] = false;
 	bot_owner_options[booMonkWuMessage] = false;
 
-	parcel_platinum         = 0;
-	parcel_gold             = 0;
-	parcel_silver           = 0;
-	parcel_copper           = 0;
-	parcel_count            = 0;
-	parcel_enabled          = true;
-	parcel_merchant_engaged = false;
-	parcels.clear();
+	m_parcel_platinum         = 0;
+	m_parcel_gold             = 0;
+	m_parcel_silver           = 0;
+	m_parcel_copper           = 0;
+	m_parcel_count            = 0;
+	m_parcel_enabled          = true;
+	m_parcel_merchant_engaged = false;
+	m_parcels.clear();
 
 	SetBotPulling(false);
 	SetBotPrecombat(false);

@@ -5580,13 +5580,17 @@ namespace RoF2
 
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
+		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
 		if (packet_type == ItemPacketParcel) {
 			strn0cpy(
-				hdr.unknown000, fmt::format("{:03}PAR{:010}\0", inst->GetMerchantSlot(), item->ID).c_str(),
-				sizeof(hdr.unknown000));
-		}
-		else {
-			snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
+				hdr.unknown000,
+				fmt::format(
+					"{:03}PAR{:010}\0",
+					inst->GetMerchantSlot(),
+					item->ID
+				).c_str(),
+				sizeof(hdr.unknown000)
+			);
 		}
 
 		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
@@ -5699,11 +5703,9 @@ namespace RoF2
 		RoF2::structs::ItemBodyStruct ibs;
 		memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
 
+		ibs.id = item->ID;
 		if (item->ID == PARCEL_MONEY_ITEM_ID) {
 			ibs.id = inst->GetSerialNumber();
-		}
-		else {
-			ibs.id = item->ID;
 		}
 
 		ibs.weight = item->Weight;

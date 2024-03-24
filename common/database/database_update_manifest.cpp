@@ -5528,26 +5528,26 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 				ENGINE=InnoDB
 				AUTO_INCREMENT=1;
 				REPLACE INTO `parcel_merchants` (`merchant_id`, `last_name`) VALUES 
-				(202129, 'Parcels and General Supples'),
-				(3036, 'Parcels and General Supples'),
-				(394025, 'Parcels and General Supples'),
-				(75113, 'Parcels and General Supples'),
-				(49073, 'Parcels and General Supples'),
-				(41021, 'Parcels and General Supples'),
-				(40070, 'Parcels and General Supples'),
-				(106115, 'Parcels and General Supples'),
-				(55150, 'Parcels and General Supples'),
-				(9053, 'Parcels and General Supples'),
-				(382156, 'Parcels and General Supples'),
-				(1032, 'Parcels and General Supples'),
-				(155088, 'Parcels and General Supples'),
-				(23017, 'Parcels and General Supples'),
-				(61065, 'Parcels and General Supples'),
-				(29008, 'Parcels and General Supples'),
-				(67058, 'Parcels and General Supples'),
-				(54067, 'Parcels and General Supples'),
-				(19031, 'Parcels and General Supples'),
-				(50140, 'Parcels and General Supples');
+				(202129, 'Parcels and General Supplies'),
+				(3036, 'Parcels and General Supplies'),
+				(394025, 'Parcels and General Supplies'),
+				(75113, 'Parcels and General Supplies'),
+				(49073, 'Parcels and General Supplies'),
+				(41021, 'Parcels and General Supplies'),
+				(40070, 'Parcels and General Supplies'),
+				(106115, 'Parcels and General Supplies'),
+				(55150, 'Parcels and General Supplies'),
+				(9053, 'Parcels and General Supplies'),
+				(382156, 'Parcels and General Supplies'),
+				(1032, 'Parcels and General Supplies'),
+				(155088, 'Parcels and General Supplies'),
+				(23017, 'Parcels and General Supplies'),
+				(61065, 'Parcels and General Supplies'),
+				(29008, 'Parcels and General Supplies'),
+				(67058, 'Parcels and General Supplies'),
+				(54067, 'Parcels and General Supplies'),
+				(19031, 'Parcels and General Supplies'),
+				(50140, 'Parcels and General Supplies');
 		)"
 }
 // -- template; copy/paste this when you need to create a new entry
