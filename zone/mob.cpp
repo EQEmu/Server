@@ -4789,6 +4789,8 @@ bool Mob::HateSummon() {
 		return false;
 
 	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
+	int times_summoned;
+	
 	if(summon_level == 1 || summon_level == 2) {
 		if(!GetTarget()) {
 			return false;
@@ -4807,24 +4809,35 @@ bool Mob::HateSummon() {
 
 	// now validate the timer
 	int summon_timer_duration = GetSpecialAbilityParam(SPECATK_SUMMON, 0);
-	summon_timer_duration = summon_timer_duration > 0 ? summon_timer_duration : 6000;
+	summon_timer_duration = summon_timer_duration > RuleI(NPC, NPCSummonTimer) ? summon_timer_duration : RuleI(NPC, NPCSummonTimer);
 	Timer *timer = GetSpecialAbilityTimer(SPECATK_SUMMON);
 	if (!timer)
 	{
+		if (RuleB(NPC, SummonTimerScaling)) {
+			times_summoned++;
+		}
 		StartSpecialAbilityTimer(SPECATK_SUMMON, summon_timer_duration);
 	} else {
 		if(!timer->Check())
 			return false;
 
+		if (RuleB(NPC, SummonTimerScaling)) {
+			if (timer && times_summoned >= 1) {
+				times_summoned++;
+				summon_timer_duration += summon_timer_duration * times_summoned;
+			}
+			if (summon_timer_duration >= RuleI(NPC, MaximumSummonTimerMs)) {
+				summon_timer_duration = RuleI(NPC, MaximumSummonTimerMs);
+			}
+		}
 		timer->Start(summon_timer_duration);
 	}
-
+		
 	// get summon target
 	SetTarget(GetHateTop());
 	if(target)
 	{
 		if(summon_level == 1) {
-			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
 			float summoner_zoff = GetZOffset();
 			float summoned_zoff = target->GetZOffset();
@@ -4835,8 +4848,15 @@ bool Mob::HateSummon() {
 
 			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
 			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
-
+			if (zone->CanCastOutdoor() == 1 && new_pos.z > RuleR(Range, MaxZSummonOffsetOutdoor))
+			{
+				return false;
+			}
+			if (zone->CanCastOutdoor() == 0 && new_pos.z > RuleR(Range, MaxZSummonOffsetIndoor)) {
+				return false;
+			}
 			if (target->IsClient()) {
+				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());
 				target->CastToClient()->MovePC(
 					zone->GetZoneID(),
 					zone->GetInstanceID(),
@@ -4853,7 +4873,7 @@ bool Mob::HateSummon() {
 					target->IsPetOwnerClient()
 				);
 				bool set_new_guard_spot = !(IsNPC() && target_is_client_pet);
-
+				entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName());
 				target->GMMove(
 					new_pos.x,
 					new_pos.y,

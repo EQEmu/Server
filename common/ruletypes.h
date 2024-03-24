@@ -634,6 +634,9 @@ RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the NPC will heal on gate if e
 RULE_BOOL(NPC, AnimalsOpenDoors, true, "Determines or not whether animals open doors or not when they approach them")
 RULE_INT(NPC, MaxRaceID, 732, "Maximum Race ID, RoF2 by default supports up to 732")
 RULE_BOOL(NPC, DisableLastNames, false, "Enable to disable NPC Last Names")
+RULE_BOOL(NPC, SummonTimerScaling, false, "Enable to allow SummonTimer to scale to the maximum value defined by Maximum Summon Timer")
+RULE_INT(NPC, MaximumSummonTimerMs, 30000, "Maximum Summon Timeout for mobs to re-summon a player")
+RULE_INT(NPC, NPCSummonTimer, 6000, "Default Summon Timer for NPCs")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
@@ -686,6 +689,8 @@ RULE_INT(Range, ClientPositionUpdates, 300, "Distance in which the own changed p
 RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit messages are sent")
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
 RULE_INT(Range, MaxDistanceToClickDoors, 100, "Max distance that a client can click a door from (Client says 'You can't reach that' at roughly 25-50 for most doors)")
+RULE_REAL(Range,MaxZSummonOffsetIndoor, 10.00, "Maximum distance on Z Axis to which a player can be summoned indoors")
+RULE_REAL(Range,MaxZSummonOffsetOutdoor, 255.00, "Maximum distance on Z Axis to which a player can be summoned outdoors")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bots)
