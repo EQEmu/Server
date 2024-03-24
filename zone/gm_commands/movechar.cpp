@@ -53,7 +53,7 @@ void command_movechar(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const bool  moved        = database.MoveCharacterToZone(character_name.c_str(), zone_id);
+	const bool  moved        = database.MoveCharacterToZone(character_name, zone_id);
 	std::string moved_string = moved ? "Succeeded" : "Failed";
 	c->Message(
 		Chat::White,

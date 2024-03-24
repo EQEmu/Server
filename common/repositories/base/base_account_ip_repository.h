@@ -22,7 +22,7 @@ public:
 		int32_t     accid;
 		std::string ip;
 		int32_t     count;
-		std::string lastused;
+		time_t      lastused;
 	};
 
 	static std::string PrimaryKey()
@@ -46,7 +46,7 @@ public:
 			"accid",
 			"ip",
 			"count",
-			"lastused",
+			"UNIX_TIMESTAMP(lastused)",
 		};
 	}
 
@@ -130,7 +130,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -167,7 +167,7 @@ public:
 		v.push_back(columns[0] + " = " + std::to_string(e.accid));
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.ip) + "'");
 		v.push_back(columns[2] + " = " + std::to_string(e.count));
-		v.push_back(columns[3] + " = '" + Strings::Escape(e.lastused) + "'");
+		v.push_back(columns[3] + " = FROM_UNIXTIME(" + (e.lastused > 0 ? std::to_string(e.lastused) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -192,7 +192,7 @@ public:
 		v.push_back(std::to_string(e.accid));
 		v.push_back("'" + Strings::Escape(e.ip) + "'");
 		v.push_back(std::to_string(e.count));
-		v.push_back("'" + Strings::Escape(e.lastused) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.lastused > 0 ? std::to_string(e.lastused) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -225,7 +225,7 @@ public:
 			v.push_back(std::to_string(e.accid));
 			v.push_back("'" + Strings::Escape(e.ip) + "'");
 			v.push_back(std::to_string(e.count));
-			v.push_back("'" + Strings::Escape(e.lastused) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.lastused > 0 ? std::to_string(e.lastused) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -262,7 +262,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -290,7 +290,7 @@ public:
 			e.accid    = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
 			e.ip       = row[1] ? row[1] : "";
 			e.count    = row[2] ? static_cast<int32_t>(atoi(row[2])) : 1;
-			e.lastused = row[3] ? row[3] : std::time(nullptr);
+			e.lastused = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -368,7 +368,7 @@ public:
 		v.push_back(std::to_string(e.accid));
 		v.push_back("'" + Strings::Escape(e.ip) + "'");
 		v.push_back(std::to_string(e.count));
-		v.push_back("'" + Strings::Escape(e.lastused) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.lastused > 0 ? std::to_string(e.lastused) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -394,7 +394,7 @@ public:
 			v.push_back(std::to_string(e.accid));
 			v.push_back("'" + Strings::Escape(e.ip) + "'");
 			v.push_back(std::to_string(e.count));
-			v.push_back("'" + Strings::Escape(e.lastused) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.lastused > 0 ? std::to_string(e.lastused) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

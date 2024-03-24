@@ -57,9 +57,7 @@ EQ::Net::WebsocketLoginStatus CheckLogin(
 		return ret;
 	}
 
-	char account_name[64];
-	database.GetAccountName(static_cast<uint32>(ret.account_id), account_name);
-	ret.account_name = account_name;
+	ret.account_name = database.GetAccountName(static_cast<uint32>(ret.account_id));
 	ret.logged_in    = true;
 	ret.status       = database.CheckStatus(ret.account_id);
 	return ret;

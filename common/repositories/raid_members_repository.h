@@ -60,7 +60,7 @@ public:
 		);
 		return results.Success() ? results.RowsAffected() : 0;
 	}
-	
+
 	static int UpdateRaidAssister(
 		Database& db,
 		int32_t raid_id,
@@ -97,6 +97,16 @@ public:
 		);
 
 		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static void ClearAllRaids(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}`",
+				TableName()
+			)
+		);
 	}
 };
 #endif //EQEMU_RAID_MEMBERS_REPOSITORY_H

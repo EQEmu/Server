@@ -23,7 +23,7 @@ public:
 		std::string varname;
 		std::string value;
 		std::string information;
-		std::string ts;
+		time_t      ts;
 	};
 
 	static std::string PrimaryKey()
@@ -49,7 +49,7 @@ public:
 			"varname",
 			"value",
 			"information",
-			"ts",
+			"UNIX_TIMESTAMP(ts)",
 		};
 	}
 
@@ -135,7 +135,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -172,7 +172,7 @@ public:
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.varname) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.value) + "'");
 		v.push_back(columns[3] + " = '" + Strings::Escape(e.information) + "'");
-		v.push_back(columns[4] + " = '" + Strings::Escape(e.ts) + "'");
+		v.push_back(columns[4] + " = FROM_UNIXTIME(" + (e.ts > 0 ? std::to_string(e.ts) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -198,7 +198,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.varname) + "'");
 		v.push_back("'" + Strings::Escape(e.value) + "'");
 		v.push_back("'" + Strings::Escape(e.information) + "'");
-		v.push_back("'" + Strings::Escape(e.ts) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.ts > 0 ? std::to_string(e.ts) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -232,7 +232,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.varname) + "'");
 			v.push_back("'" + Strings::Escape(e.value) + "'");
 			v.push_back("'" + Strings::Escape(e.information) + "'");
-			v.push_back("'" + Strings::Escape(e.ts) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.ts > 0 ? std::to_string(e.ts) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -270,7 +270,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -299,7 +299,7 @@ public:
 			e.varname     = row[1] ? row[1] : "";
 			e.value       = row[2] ? row[2] : "";
 			e.information = row[3] ? row[3] : "";
-			e.ts          = row[4] ? row[4] : std::time(nullptr);
+			e.ts          = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -378,7 +378,7 @@ public:
 		v.push_back("'" + Strings::Escape(e.varname) + "'");
 		v.push_back("'" + Strings::Escape(e.value) + "'");
 		v.push_back("'" + Strings::Escape(e.information) + "'");
-		v.push_back("'" + Strings::Escape(e.ts) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.ts > 0 ? std::to_string(e.ts) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -405,7 +405,7 @@ public:
 			v.push_back("'" + Strings::Escape(e.varname) + "'");
 			v.push_back("'" + Strings::Escape(e.value) + "'");
 			v.push_back("'" + Strings::Escape(e.information) + "'");
-			v.push_back("'" + Strings::Escape(e.ts) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.ts > 0 ? std::to_string(e.ts) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
