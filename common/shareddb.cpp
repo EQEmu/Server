@@ -1914,24 +1914,3 @@ void SharedDatabase::SetSharedSpellsCount(uint32 shared_spells_count)
 {
 	SharedDatabase::m_shared_spells_count = shared_spells_count;
 }
-
-uint16 SharedDatabase::GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
-{
-	const auto& l = SkillCapsRepository::GetWhere(
-		*this,
-		fmt::format(
-			"`class_id` = {} AND `skill_id` = {} AND `level` = {} LIMIT 1",
-			class_id,
-			static_cast<uint16>(skill_id),
-			level
-		)
-	);
-
-	if (l.empty()) {
-		return 0;
-	}
-
-	const auto& e = l.front();
-
-	return e.cap;
-}

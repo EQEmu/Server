@@ -8,6 +8,7 @@
 
 #include "zone.h"
 #include "string_ids.h"
+#include "../common/skill_caps.h"
 
 extern volatile bool is_zone_loaded;
 
@@ -65,7 +66,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 	int r;
 	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
-		skills[r] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, GetLevel());
+		skills[r] = skill_caps.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, GetLevel()).cap;
 	}
 
 	size = d->size;
@@ -770,16 +771,16 @@ void Merc::CalcRestState() {
 }
 
 bool Merc::HasSkill(EQ::skills::SkillType skill_id) const {
-	return((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
+	return ((GetSkill(skill_id) > 0) && CanHaveSkill(skill_id));
 }
 
 bool Merc::CanHaveSkill(EQ::skills::SkillType skill_id) const {
-	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
+	return skill_caps.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)).cap > 0;
 	//if you don't have it by max level, then odds are you never will?
 }
 
 uint16 Merc::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	return(content_db.GetSkillCap(class_, skillid, level));
+	return skill_caps.GetSkillCap(class_, skillid, level).cap;
 }
 
 void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {

@@ -55,6 +55,7 @@
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/group_id_repository.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/skill_caps.h"
 
 #include <iostream>
 #include <iomanip>
@@ -2133,7 +2134,7 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 				i == EQ::skills::SkillAlcoholTolerance || i == EQ::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = content_db.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1);
+			pp->skills[i] = skill_caps.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1).cap;
 		}
 	}
 
