@@ -27,6 +27,7 @@
 #include "../common/repositories/bot_starting_items_repository.h"
 #include "../common/data_verification.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/skill_caps.h"
 
 // This constructor is used during the bot create command
 Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm::vec4(), Ground, false), rest_timer(1), ping_timer(1) {
@@ -1171,7 +1172,7 @@ uint16 Bot::GetPrimarySkillValue() {
 }
 
 uint16 Bot::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	return(content_db.GetSkillCap(class_, skillid, level));
+	return skill_caps.GetSkillCap(class_, skillid, level).cap;
 }
 
 uint32 Bot::GetTotalATK() {
@@ -6758,7 +6759,7 @@ void Bot::CalcBotStats(bool showtext) {
 		SetLevel(GetBotOwner()->GetLevel());
 
 	for (int sindex = 0; sindex <= EQ::skills::HIGHEST_SKILL; ++sindex) {
-		skills[sindex] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)sindex, GetLevel());
+		skills[sindex] = skill_caps.GetSkillCap(GetClass(), (EQ::skills::SkillType)sindex, GetLevel()).cap;
 	}
 
 	taunt_timer.Start(1000);

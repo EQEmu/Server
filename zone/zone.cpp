@@ -1185,8 +1185,6 @@ bool Zone::Init(bool is_static) {
 
 	LoadBaseData();
 
-	LoadSkillCaps();
-
 	//Load merchant data
 	LoadMerchants();
 

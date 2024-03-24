@@ -86,6 +86,7 @@ extern volatile bool is_zone_loaded;
 #include "../common/events/player_event_logs.h"
 #include "../common/path_manager.h"
 #include "../common/database/database_update.h"
+#include "../common/skill_caps.h"
 #include "zone_event_scheduler.h"
 #include "zone_cli.h"
 
@@ -108,6 +109,7 @@ WorldContentService   content_service;
 PathManager           path;
 PlayerEventLogs       player_event_logs;
 DatabaseUpdate        database_update;
+SkillCaps             skill_caps;
 
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
@@ -306,6 +308,8 @@ int main(int argc, char **argv)
 		->StartFileLogs();
 
 	player_event_logs.SetDatabase(&database)->Init();
+
+	skill_caps.SetContentDatabase(&content_db)->LoadSkillCaps();
 
 	const auto c = EQEmuConfig::get();
 	if (c->auto_database_updates) {

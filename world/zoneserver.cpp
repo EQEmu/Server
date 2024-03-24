@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/patches/patches.h"
 #include "../zone/data_bucket.h"
 #include "../common/repositories/guild_tributes_repository.h"
+#include "../common/skill_caps.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1411,7 +1412,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_ReloadNPCEmotes:
 		case ServerOP_ReloadObjects:
 		case ServerOP_ReloadPerlExportSettings:
-		case ServerOP_ReloadSkillCaps:
 		case ServerOP_ReloadStaticZoneData:
 		case ServerOP_ReloadTitles:
 		case ServerOP_ReloadTraps:
@@ -1435,6 +1435,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		case ServerOP_WWTaskUpdate:
 		case ServerOP_ZonePlayer: {
 			zoneserver_list.SendPacket(pack);
+			break;
+		}
+		case ServerOP_ReloadSkillCaps: {
+			zoneserver_list.SendPacket(pack);
+			skill_caps.ReloadSkillCaps();
 			break;
 		}
 		case ServerOP_ReloadRules: {

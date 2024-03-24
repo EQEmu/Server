@@ -18,9 +18,9 @@
 */
 
 #include "skills.h"
+#include "classes.h"
 
 #include <string.h>
-
 
 bool EQ::skills::IsTradeskill(SkillType skill)
 {

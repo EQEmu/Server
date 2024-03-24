@@ -160,8 +160,6 @@ public:
 	uint32 GetSharedItemsCount() { return m_shared_items_count; }
 	uint32 GetItemsCount();
 
-	uint16 GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level);
-
 	/**
 	 * spells
 	 */
