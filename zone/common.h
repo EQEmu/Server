@@ -826,7 +826,7 @@ struct ExtraAttackOptions {
 		armor_pen_percent(0.0f), armor_pen_flat(0),
 		crit_percent(1.0f), crit_flat(0.0f),
 		hate_percent(1.0f), hate_flat(0), hit_chance(0),
-		melee_damage_bonus_flat(0), skilldmgtaken_bonus_flat(0)
+		melee_damage_bonus_flat(0), skilldmgtaken_bonus_flat(0), range_percent(0)
 	{ }
 
 	float damage_percent;
