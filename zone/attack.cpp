@@ -4460,7 +4460,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				a->force += a->force * RuleR(Combat, MeleePushForceClientPercent);
 			}
 
-			if (RuleR(Combat, MeleePushForcePetPercent) && IsPet()) {
+			if (RuleR(Combat, MeleePushForcePetPercent) && (IsPet() || IsCharmed()) && GetOwner()->IsClient()) {
 				a->force += a->force * RuleR(Combat, MeleePushForcePetPercent);
 			}
 
