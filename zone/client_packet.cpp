@@ -4284,12 +4284,18 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
-
+	
 	if (GetGM())
 	{
 		OnDisconnect(true);
 		return;
 	}
+
+	if (zone->GetZoneID() == Zones::BAZAAR) {
+		camp_timer.Start(5000, true);
+		return;
+	}
+
 	camp_timer.Start(29000, true);
 	return;
 }
