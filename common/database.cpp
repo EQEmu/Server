@@ -30,17 +30,13 @@
 #include <string.h>
 
 #include "../common/repositories/account_repository.h"
+#include "../common/repositories/adventure_stats_repository.h"
 #include "../common/repositories/character_bind_repository.h"
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
 #include "../common/repositories/character_skills_repository.h"
-#include "../common/repositories/group_id_repository.h"
-#include "../common/repositories/group_leaders_repository.h"
-#include "../common/repositories/adventure_stats_repository.h"
-#include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/data_buckets_repository.h"
-#include "../common/repositories/graveyard_repository.h"
 #include "../common/repositories/group_id_repository.h"
 #include "../common/repositories/group_leaders_repository.h"
 #include "../common/repositories/guild_members_repository.h"
@@ -1046,32 +1042,6 @@ void Database::AddReport(const std::string& who, const std::string& against, con
 	ReportsRepository::InsertOne(*this, e);
 }
 
-void Database::SetGroupID(const std::string& name, uint32 group_id, uint32 character_id, uint32 is_merc)
-{
-	if (!group_id) {
-		const int deleted = GroupIdRepository::DeleteWhere(
-			*this,
-			fmt::format(
-				"`charid` = {} AND `name` = '{}' AND `ismerc` = {}",
-				character_id,
-				Strings::Escape(name),
-				is_merc
-			)
-		);
-
-		return;
-	}
-
-	auto e = GroupIdRepository::NewEntity();
-
-	e.charid  = character_id;
-	e.groupid = group_id;
-	e.name    = name;
-	e.ismerc  = is_merc;
-
-	GroupIdRepository::ReplaceOne(*this, e);
-}
-
 void Database::ClearAllGroups()
 {
 	GroupIdRepository::ClearAllGroups(*this);
@@ -1633,7 +1603,7 @@ uint32 Database::GetGroupIDByCharID(uint32 character_id)
 {
 	const auto& e = GroupIdRepository::FindOne(*this, character_id);
 
-	return e.charid ? e.groupid : 0;
+	return e.character_id ? e.group_id : 0;
 }
 
 uint32 Database::GetRaidIDByCharID(uint32 character_id)
