@@ -509,6 +509,8 @@ public:
 	int GetAAEXPPercentage();
 	int GetEXPPercentage();
 	bool IsInAGuild();
+	luabind::object GetRaidOrGroupOrSelf(lua_State* L);
+	luabind::object GetRaidOrGroupOrSelf(lua_State* L, bool clients_only);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
@@ -580,6 +582,7 @@ public:
 	void CampAllBots();
 	void CampAllBots(uint8 class_id);
 	bool RemoveAAPoints(uint32 points);
+	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
 
 	void DialogueWindow(std::string markdown);
 

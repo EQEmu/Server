@@ -3318,4 +3318,15 @@ void Zone::SetSecondsBeforeIdle(uint32 seconds_before_idle)
 	Zone::m_seconds_before_idle = seconds_before_idle;
 }
 
+bool Zone::DoesAlternateCurrencyExist(uint32 currency_id)
+{
+	return std::any_of(
+		AlternateCurrencies.begin(),
+		AlternateCurrencies.end(),
+		[&](const auto& c) {
+			return c.id == currency_id;
+		}
+	);
+}
+
 #include "zone_loot.cpp"

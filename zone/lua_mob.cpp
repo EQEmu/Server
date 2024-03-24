@@ -3311,7 +3311,7 @@ luabind::object Lua_Mob::GetBuffs(lua_State* L) {
 		auto l    = self->GetBuffs();
 		int  i    = 1;
 		for (int slot_id = 0; slot_id < self->GetMaxBuffSlots(); slot_id++) {
-			t[i] = l[slot_id];
+			t[i] = Lua_Buff(&l[slot_id]);
 			i++;
 		}
 	}
