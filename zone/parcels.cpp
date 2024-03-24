@@ -103,7 +103,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 		database,
 		fmt::format(
 			"`to_name` = '{}' AND `slot_id` = '{}' LIMIT 1",
-			parcel_in.send_to,
+			Strings::Escape(parcel_in.send_to),
 			parcel_in.item_slot
 		)
 	);
@@ -175,12 +175,16 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 
 void Client::DoParcelCancel()
 {
-	if (m_parcel_platinum || m_parcel_gold || m_parcel_silver ||
-		m_parcel_copper) {
+	if (
+		m_parcel_platinum ||
+		m_parcel_gold ||
+		m_parcel_silver ||
+		m_parcel_copper
+	) {
 		m_pp.platinum += m_parcel_platinum;
-		m_pp.gold += m_parcel_gold;
-		m_pp.silver += m_parcel_silver;
-		m_pp.copper += m_parcel_copper;
+		m_pp.gold     += m_parcel_gold;
+		m_pp.silver   += m_parcel_silver;
+		m_pp.copper   += m_parcel_copper;
 		m_parcel_platinum = 0;
 		m_parcel_gold     = 0;
 		m_parcel_silver   = 0;

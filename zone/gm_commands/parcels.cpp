@@ -43,7 +43,7 @@ void command_parcels(Client *c, const Seperator *sep)
 		);
 
 		if (results.empty()) {
-			c->Message(Chat::White,	fmt::format("No parcels could be found for {}",	player_name).c_str());
+			c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
 			return;
 		}
 
@@ -82,11 +82,11 @@ void command_parcels(Client *c, const Seperator *sep)
 
 		auto parcels = player->GetParcels();
 		if (parcels.empty()) {
-			c->Message(Chat::White,fmt::format("No parcels could be found for {}",player_name).c_str());
+			c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
 			return;
 		}
 
-		c->Message(Chat::Yellow,fmt::format("Found {} parcels for {}.",	parcels.size(),	player_name).c_str());
+		c->Message(Chat::Yellow, fmt::format("Found {} parcels for {}.", parcels.size(), player_name).c_str());
 		for (auto const &p: parcels) {
 			c->Message(
 				Chat::Yellow,
@@ -144,13 +144,13 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			auto item = database.GetItem(PARCEL_MONEY_ITEM_ID);
 			if (!item) {
-				c->Message(Chat::Yellow,"Could not find item with id {}",item_id);
+				c->Message(Chat::Yellow, "Could not find item with id {}", item_id);
 				return;
 			}
 
 			auto inst = database.CreateItem(item, 1);
 			if (!inst) {
-				c->Message(Chat::Yellow,"Could not find item with id {}",item_id);
+				c->Message(Chat::Yellow, "Could not find item with id {}", item_id);
 				return;
 			}
 
@@ -203,14 +203,14 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to,parcel_out.to_name.c_str(),sizeof(ps.send_to));
+			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
 
 			c->SendParcelDeliveryToWorld(ps);
 		}
 		else {
 			auto item = database.GetItem(item_id);
 			if (!item) {
-				c->Message(Chat::Yellow,"Could not find an item with id {}",item_id);
+				c->Message(Chat::Yellow, "Could not find an item with id {}", item_id);
 				return;
 			}
 
@@ -219,7 +219,7 @@ void command_parcels(Client *c, const Seperator *sep)
 					quantity > INT16_MAX ? INT16_MAX : (int16) quantity
 			);
 			if (!inst) {
-				c->Message(Chat::Yellow,"Could not find an item with id {}",item_id);
+				c->Message(Chat::Yellow, "Could not find an item with id {}", item_id);
 				return;
 			}
 
@@ -280,7 +280,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to,parcel_out.to_name.c_str(),sizeof(ps.send_to));
+			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
 
 			c->SendParcelDeliveryToWorld(ps);
 		}
