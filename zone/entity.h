@@ -132,18 +132,17 @@ private:
 	uint16 initial_id;
 	time_t spawn_timestamp;
 };
-
+struct Area {
+	int id;
+	int type;
+	float min_x, max_x;
+	float min_y, max_y;
+	float min_z, max_z;
+};
 class EntityList
 {
 public:
-	struct Area {
-		int id;
-		int type;
-		float min_x, max_x;
-		float min_y, max_y;
-		float min_z, max_z;
-	};
-
+	
 	EntityList();
 	~EntityList();
 

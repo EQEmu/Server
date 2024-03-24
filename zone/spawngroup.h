@@ -77,6 +77,13 @@ class SpawnGroupList {
 public:
 	SpawnGroupList() {}
 	~SpawnGroupList();
+	SpawnGroupList(const SpawnGroupList& other) {
+
+    }
+
+    SpawnGroupList& operator=(const SpawnGroupList& other) {
+        return *this;
+    }
 
 	void AddSpawnGroup(std::unique_ptr<SpawnGroup> &new_group);
 	SpawnGroup *GetSpawnGroup(uint32 id);

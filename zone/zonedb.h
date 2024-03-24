@@ -371,11 +371,16 @@ namespace RaidLootTypes {
 }
 
 class ZoneDatabase : public SharedDatabase {
-	typedef std::list<LootItem*> ItemList;
 public:
+	typedef std::list<LootItem*> ItemList;
+
 	ZoneDatabase();
 	ZoneDatabase(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
 	virtual ~ZoneDatabase();
+
+	ZoneDatabase& operator=(const ZoneDatabase&) {
+		return *this;
+	};
 
 	/* Objects and World Containers  */
 	void	LoadWorldContainer(uint32 parentid, EQ::ItemInstance* container);

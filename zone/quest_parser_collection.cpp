@@ -830,6 +830,16 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		zone->GetShortName()
 	);
 
+	const std::string& dotnet_path = fmt::format(
+		"dotnet_quests/{}",
+		zone->GetShortName()
+	);
+
+	const std::string& dotnet_path_global = fmt::format(
+		"dotnet_quests/{}",
+		QUEST_GLOBAL_DIRECTORY
+	);
+
 	const std::string& zone_versioned_path = fmt::format(
 		"{}/{}/v{}",
 		path.GetQuestsPath(),
@@ -842,6 +852,8 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		fmt::format("{}/{}", zone_versioned_path, npc_name), // Local versioned by NPC Name ./quests/zone/v0/npc.ext
 		fmt::format("{}/{}", zone_path, npc_id), // Local by NPC ID
 		fmt::format("{}/{}", zone_path, npc_name), // Local by NPC Name
+		fmt::format("{}/{}", dotnet_path, npc_name), // Local by NPC Name
+		fmt::format("{}/{}", dotnet_path_global, npc_name), // Global by NPC Name
 		fmt::format("{}/{}", global_path, npc_id), // Global by NPC ID
 		fmt::format("{}/{}", global_path, npc_name), // Global by NPC ID
 		fmt::format("{}/default", zone_versioned_path), // Zone Default ./quests/zone/v0/default.ext
@@ -881,6 +893,16 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 		QUEST_GLOBAL_DIRECTORY
 	);
 
+	const std::string& dotnet_path = fmt::format(
+		"dotnet_quests/{}",
+		zone->GetShortName()
+	);
+
+	const std::string& dotnet_path_global = fmt::format(
+		"dotnet_quests/{}",
+		QUEST_GLOBAL_DIRECTORY
+	);
+
 	const std::string& zone_path = fmt::format(
 		"{}/{}",
 		path.GetQuestsPath(),
@@ -898,7 +920,9 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 		fmt::format("{}/player", zone_versioned_path), // Local by Instance Version ./quests/zone/v0/player.ext
 		fmt::format("{}/player_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/player", zone_path), // Local
-		fmt::format("{}/player", global_path) // Global
+		fmt::format("{}/player", global_path), // Global
+		fmt::format("{}/player", dotnet_path), // Local
+		fmt::format("{}/player", dotnet_path_global) // Global
 	};
 
 	std::string file_name;

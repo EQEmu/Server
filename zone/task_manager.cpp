@@ -200,7 +200,7 @@ bool TaskManager::LoadTasks(int single_task)
 		ad->skill_list           = a.skill_list;
 		ad->skill_id             = Strings::IsNumber(a.skill_list) ? Strings::ToInt(a.skill_list) : 0; // for older clients
 		ad->spell_list           = a.spell_list;
-		ad->spell_id             = Strings::IsNumber(a.spell_list) ? Strings::ToInt(a.spell_list) : 0; // for older clients
+		ad->spell_id             = !a.spell_list.empty() && Strings::IsNumber(a.spell_list) ? Strings::ToInt(a.spell_list) : 0; // for older clients
 		ad->description_override = a.description_override;
 		ad->npc_match_list       = a.npc_match_list;
 		ad->item_id_list         = a.item_id_list;

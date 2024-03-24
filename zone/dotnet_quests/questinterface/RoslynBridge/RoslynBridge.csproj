@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    
+    <!-- Use invariant globalization -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  
+  <ItemGroup>
+   <Reference Include="../../../../build/bin/DotNetTypes.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+ 
+    <PackageReference Include="DllExport" Version="1.7.4" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.9.2" />
+    <PackageReference Include="Microsoft.NETCore.DotNetAppHost" Version="8.0.3" />
+  </ItemGroup>
+
+</Project>
