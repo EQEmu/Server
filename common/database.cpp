@@ -986,7 +986,7 @@ bool Database::UpdateLiveChar(const std::string& name, uint32 account_id)
 	return AccountRepository::UpdateOne(*this, e);
 }
 
-const std::string& Database::GetLiveChar(uint32 account_id)
+std::string Database::GetLiveChar(uint32 account_id)
 {
 	auto e = AccountRepository::FindOne(*this, account_id);
 
