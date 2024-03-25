@@ -52,6 +52,7 @@ int DotnetParser::EventGlobalNPC(QuestEventID evt, NPC *npc, Mob *init, std::str
     quest_manager.StartQuest(npc, c);
     event(evt, npc, init, data, extra_data, extra_pointers, false);
     quest_manager.EndQuest();
+    return 0;
 }
 
 int DotnetParser::EventPlayer(QuestEventID evt, Client *client, std::string data, uint32 extra_data,

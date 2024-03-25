@@ -526,7 +526,7 @@ public struct Vec3
         this.z = z;
     }
 }
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
+[StructLayout(LayoutKind.Sequential)]
 public struct Vec4
 {
     public float x, y, z, w;

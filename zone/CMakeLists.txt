@@ -292,7 +292,7 @@ IF (WIN32 AND EQEMU_BUILD_PCH)
 ENDIF()
 
 ADD_DEFINITIONS(-DZONE)
-SET(BUILD_DIR "${CMAKE_SOURCE_DIR}/build/bin")
+SET(BUILD_DIR ${PROJECT_BINARY_DIR}/bin)
 
 ## DOTNET
 ## Swig exec: swig -csharp -c++ -I../../../submodules/fmt/include -outfile DotNetTypes/dotnet_quests.cs questinterface.i

@@ -1,4 +1,3 @@
-#pragma pack(push, 1)
 struct vec2
 {
     float x, y;
@@ -106,5 +105,3 @@ vec4 operator%(float scalar, vec4 const &v);
 vec4 operator%(vec4 const &v1, vec4 const &v2);
 bool operator==(vec4 const &v1, vec4 const &v2);
 bool operator!=(vec4 const &v1, vec4 const &v2);
-
-#pragma pack(pop)

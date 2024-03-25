@@ -9,7 +9,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>
-   <Reference Include="../../../../build/bin/DotNetTypes.dll" />
+    <ProjectReference Include="..\DotNetTypes\DotNetTypes.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DllExport" Version="1.7.4" />

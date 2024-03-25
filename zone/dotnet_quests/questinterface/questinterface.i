@@ -93,6 +93,7 @@
 #include <set>
 #include <vector>
 #include <memory>
+#include <iostream>
 
 // init default values in constructors
 #define GLM_FORCE_CTOR_INIT
@@ -138,10 +139,22 @@
 
 #include "../../../common/eqemu_logsys.h"
 
+void FreeVec4(glm::vec4* ptr) {
+    delete ptr;
+}
+
+void FreeVec3(glm::vec3* ptr) {
+    delete ptr;
+}
+
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
 %}
+
+// Assuming glm::vec4 is the type you're working with
+void FreeVec4(glm::vec4* ptr);
+void FreeVec3(glm::vec3* ptr);
 
 %include <std_list.i>
 %include <std_except.i>
@@ -156,91 +169,43 @@ namespace glm {
     %include "glm.i"
 } // namespace
 
-
-
-// glm::vec3
-// %typemap(cstype) glm::vec3 "Vec3"
-// %typemap(imtype) glm::vec3 "Vec3"
-// %typemap(csin) glm::vec3 "$csinput"
-// %typemap(in) glm::vec3 %{
-//     $1 = glm::vec3($input.x, $input.y, $input.z);
-// %}
-// %typemap(csout) glm::vec3 {
-//     return new Vec3($.x, $1.y, $1.z);
-// }
-// %typemap(out) glm::vec3 %{
-//     $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-// %}
-// %typemap(out) glm::vec3* {
-//     $result = SWIG_NewPointerObj(new glm::vec3($1->x, $1->y, $1->z), $descriptor(glm::vec3 *), SWIG_POINTER_OWN);
-// }
-// %typemap(out) glm::vec3& {
-//     $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-// }
-
-// // glm::vec4
-// %typemap(cstype) glm::vec4 "Vec4"
-// %typemap(imtype) glm::vec4 "Vec4"
-// %typemap(csin) glm::vec4 "$csinput"
-// %typemap(in) glm::vec4 %{
-//     $1 = glm::vec4($input.x, $input.y, $input.z, $input.w);
-// %}
-// %typemap(csout) glm::vec4 {
-//     return new Vec4($1->x, $1->y, $1->z, $1->w);
-// }
-// %typemap(out) glm::vec4 %{
-//     $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-// %}
-// %typemap(out) glm::vec4* {
-//     $result = SWIG_NewPointerObj(new glm::vec4($1->x, $1->y, $1->z, $1->w), $descriptor(glm::vec4 *), SWIG_POINTER_OWN);
-// }
-// %typemap(out) glm::vec4& {
-//     $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-// }
-
-
-
-
-%typemap(cstype) glm::vec4*, glm::vec4& "Vec4"
-%typemap(imtype) glm::vec4*, glm::vec4& "Vec4"
-%typemap(csin) glm::vec4* "new vec4($csinput.x, $csinput.y, $csinput.z, $csinput.w)"
-%typemap(csin) glm::vec4& "$csinput"
-%typemap(in) glm::vec4* %{
-    $1 = new glm::vec4;
-    if (!SWIG_IsOK(SWIG_ConvertPtr($input, (void**)$1, $descriptor(glm::vec4 *), 0))) {
-        SWIG_exception_fail(SWIG_ArgError(res), "Expected a glm::vec4 object");
-    }
+%typemap(cstype) glm::vec4 "Vec4"
+%typemap(imtype) glm::vec4 "nint"
+%typemap(in) glm::vec4 %{
+    $1 = *reinterpret_cast<glm::vec4*>($input);
 %}
-%typemap(freearg) glm::vec4* %{
-    delete $1;
+%typemap(out) glm::vec4 {
+    $result = new glm::vec4($1);
+}
+%typemap(csout, excode=SWIGEXCODE) glm::vec4 {
+    var ptr = $imcall;
+    Vec4 vec = System.Runtime.InteropServices.Marshal.PtrToStructure<Vec4>(ptr);
+    questinterfacePINVOKE.FreeVec4(new System.Runtime.InteropServices.HandleRef(null, (IntPtr)ptr)); // Implement this in C++ and expose via P/Invoke
+    $excode
+    return vec; 
+}
+%typemap(csin) glm::vec4 %{
+    (nint)vec4.getCPtr(new vec4($csinput.x, $csinput.y, $csinput.z, $csinput.w))
 %}
-%typemap(out) glm::vec4* {
-    $result = SWIG_NewPointerObj(new glm::vec4($1->x, $1->y, $1->z, $1->w), $descriptor(glm::vec4 *), SWIG_POINTER_OWN);
-}
-%typemap(out) glm::vec4& {
-    $result = SWIG_NewPointerObj(new vec4($1.x, $1.y, $1.z, $1.w), $descriptor(Vec4 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-}
 
-%typemap(cstype) glm::vec3*, glm::vec3& "Vec3"
-%typemap(imtype) glm::vec3*, glm::vec3& "Vec3"
-%typemap(csin) glm::vec3* "new vec3($csinput.x, $csinput.y, $csinput.z)"
-%typemap(csin) glm::vec3& "$csinput"
-
-%typemap(in) glm::vec3* %{
-    $1 = new glm::vec3;
-    if (!SWIG_IsOK(SWIG_ConvertPtr($input, (void**)$1, $descriptor(glm::vec3 *), 0))) {
-        SWIG_exception_fail(SWIG_ArgError(res), "Expected a glm::vec3 object");
-    }
+%typemap(cstype) glm::vec3 "Vec3"
+%typemap(imtype) glm::vec3 "nint"
+%typemap(in) glm::vec3 %{
+    $1 = *reinterpret_cast<glm::vec3*>($input);
 %}
-%typemap(freearg) glm::vec3* %{
-    delete $1;
+%typemap(out) glm::vec3 {
+    $result = new glm::vec3($1);
+}
+%typemap(csout, excode=SWIGEXCODE) glm::vec3 {
+    var ptr = $imcall;
+    Vec3 vec = System.Runtime.InteropServices.Marshal.PtrToStructure<Vec3>(ptr);
+    questinterfacePINVOKE.FreeVec3(new System.Runtime.InteropServices.HandleRef(null, (IntPtr)ptr)); // Implement this in C++ and expose via P/Invoke
+    $excode
+    return vec; 
+}
+%typemap(csin) glm::vec3 %{
+    (nint)vec3.getCPtr(new vec3($csinput.x, $csinput.y, $csinput.z))
 %}
-%typemap(out) glm::vec3* {
-    $result = SWIG_NewPointerObj(new glm::vec3($1->x, $1->y, $1->z), $descriptor(glm::vec3 *), SWIG_POINTER_OWN);
-}
-%typemap(out) glm::vec3& {
-    $result = SWIG_NewPointerObj(new vec3($1.x, $1.y, $1.z), $descriptor(vec3 *), SWIG_POINTER_OWN | SWIG_POINTER_DISOWN);
-}
 
 %include "../../../common/ruletypes.h"
 %include "../../../common/eq_packet.h"

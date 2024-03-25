@@ -332,7 +332,7 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
 {
     if (initialized)
     {
-        return;
+        return 0;
     }
 
     const string_t root_path = getExecutablePath();

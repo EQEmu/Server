@@ -144,7 +144,6 @@ public static class DotNetQuest
             var npcName = npc.GetOrigName();
             if (questAssembly_.GetType(npcName)?.GetMethod(MethodMap[id]) != null)
             {
-
                 questAssembly_.GetType(npcName).GetMethod(MethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType(npcName)), [new NpcEvent() {
                         npc = npc,
                         mob = mob,

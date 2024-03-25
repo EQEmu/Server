@@ -352,6 +352,7 @@ template <typename T> T SwigValueInit() {
 #include <set>
 #include <vector>
 #include <memory>
+#include <iostream>
 
 // init default values in constructors
 #define GLM_FORCE_CTOR_INIT
@@ -396,6 +397,14 @@ template <typename T> T SwigValueInit() {
 #include "../../../common/item_data.h"
 
 #include "../../../common/eqemu_logsys.h"
+
+void FreeVec4(glm::vec4* ptr) {
+    delete ptr;
+}
+
+void FreeVec3(glm::vec3* ptr) {
+    delete ptr;
+}
 
 using namespace EQ;
 using namespace Logs;
@@ -1922,6 +1931,22 @@ SWIGINTERN bool std_list_Sl_Area_Sg__equals(std::list< Area > *self,std::list< A
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+SWIGEXPORT void SWIGSTDCALL CSharp_FreeVec4(void * jarg1) {
+  glm::vec4 *arg1 = (glm::vec4 *) 0 ;
+  
+  arg1 = (glm::vec4 *)jarg1; 
+  FreeVec4(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_FreeVec3(void * jarg1) {
+  glm::vec3 *arg1 = (glm::vec3 *) 0 ;
+  
+  arg1 = (glm::vec3 *)jarg1; 
+  FreeVec3(arg1);
+}
+
 
 SWIGEXPORT void SWIGSTDCALL CSharp_vec2_x_set(void * jarg1, float jarg2) {
   glm::vec2 *arg1 = (glm::vec2 *) 0 ;
@@ -32520,7 +32545,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_TryMoveAlong__SWIG_2(void * jarg1, void
   arg3 = (float)jarg3; 
   arg4 = (float)jarg4; 
   result = (arg1)->TryMoveAlong((glm::vec4 const &)*arg2,arg3,arg4);
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
@@ -33357,23 +33384,15 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CheckLosFN__SWIG_2(void * jarg1, 
   float arg2 ;
   glm::vec3 arg3 ;
   float arg4 ;
-  glm::vec3 *argp1 ;
-  glm::vec3 *argp3 ;
   bool result;
   
-  argp1 = (glm::vec3 *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec3", 0);
-    return 0;
-  }
-  arg1 = *argp1; 
+  
+  arg1 = *reinterpret_cast<glm::vec3*>(jarg1);
+  
   arg2 = (float)jarg2; 
-  argp3 = (glm::vec3 *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec3", 0);
-    return 0;
-  }
-  arg3 = *argp3; 
+  
+  arg3 = *reinterpret_cast<glm::vec3*>(jarg3);
+  
   arg4 = (float)jarg4; 
   result = (bool)Mob::CheckLosFN(SWIG_STD_MOVE(arg1),arg2,SWIG_STD_MOVE(arg3),arg4);
   jresult = result; 
@@ -42307,7 +42326,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetCurrentWayPoint(void * jarg1) {
   
   arg1 = (Mob *)jarg1; 
   result = ((Mob const *)arg1)->GetCurrentWayPoint();
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
@@ -45589,7 +45610,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DrawDebugCoordinateNode(void * jarg1, con
   Mob *arg1 = (Mob *) 0 ;
   std::string arg2 ;
   glm::vec4 arg3 ;
-  glm::vec4 const *argp3 ;
   
   arg1 = (Mob *)jarg1; 
   if (!jarg2) {
@@ -45597,12 +45617,9 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DrawDebugCoordinateNode(void * jarg1, con
     return ;
   }
   (&arg2)->assign(jarg2); 
-  argp3 = (glm::vec4 *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec4 const", 0);
-    return ;
-  }
-  arg3 = *argp3; 
+  
+  arg3 = *reinterpret_cast<glm::vec4*>(jarg3);
+  
   (arg1)->DrawDebugCoordinateNode(arg2,arg3);
 }
 
@@ -51597,7 +51614,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_GetSpawnPoint(void * jarg1) {
   
   arg1 = (NPC *)jarg1; 
   result = ((NPC const *)arg1)->GetSpawnPoint();
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
@@ -51609,7 +51628,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_GetGuardPoint(void * jarg1) {
   
   arg1 = (NPC *)jarg1; 
   result = ((NPC const *)arg1)->GetGuardPoint();
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
@@ -73860,15 +73881,11 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_trapid_get(void * jarg1) {
 SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetLastPositionBeforeBulkUpdate(void * jarg1, void * jarg2) {
   Client *arg1 = (Client *) 0 ;
   glm::vec4 arg2 ;
-  glm::vec4 *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (glm::vec4 *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null glm::vec4", 0);
-    return ;
-  }
-  arg2 = *argp2; 
+  
+  arg2 = *reinterpret_cast<glm::vec4*>(jarg2);
+  
   (arg1)->SetLastPositionBeforeBulkUpdate(arg2);
 }
 
@@ -85453,7 +85470,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetSafePoint(void * jarg1) {
   
   arg1 = (Zone *)jarg1; 
   result = (arg1)->GetSafePoint();
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
@@ -85465,7 +85484,9 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Zone_GetGraveyardPoint(void * jarg1) {
   
   arg1 = (Zone *)jarg1; 
   result = (arg1)->GetGraveyardPoint();
-  jresult = new glm::vec4(result); 
+  {
+    jresult = new glm::vec4(result);
+  }
   return jresult;
 }
 
