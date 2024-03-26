@@ -12,6 +12,8 @@
 #include "zone_config.h"
 #include "lua_mod.h"
 
+#include "../common/repositories/bug_reports_repository.h"
+
 extern const ZoneConfig *Config;
 
 struct lua_State;

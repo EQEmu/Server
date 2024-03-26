@@ -57,6 +57,7 @@ extern volatile bool RunLoops;
 #include "queryserv.h"
 #include "mob_movement_manager.h"
 #include "cheat_manager.h"
+#include "lua_parser.h"
 
 #include "../common/repositories/character_alternate_abilities_repository.h"
 #include "../common/repositories/account_flags_repository.h"
@@ -11646,6 +11647,14 @@ void Client::RegisterBug(BugReport_Struct* r) {
 	b._unknown_value      = ((r->optional_info_mask & EQ::bug::infoUnknownValue) != 0 ? 1 : 0);
 	b.bug_report          = r->bug_report;
 	b.system_info         = r->system_info;
+
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	LuaParser::Instance()->RegisterBug(this, b, ignoreDefault);
+	if (ignoreDefault) {
+		return;
+	}
+#endif
 
 	auto n = BugReportsRepository::InsertOne(database, b);
 	if (!n.id) {
