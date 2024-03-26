@@ -44,4 +44,5 @@ private:
 	bool m_has_get_exp_for_level;
 	bool m_has_get_experience_for_kill;
 	bool m_has_calc_spell_effect_value_formula;
+	bool m_has_register_bug;
 };
