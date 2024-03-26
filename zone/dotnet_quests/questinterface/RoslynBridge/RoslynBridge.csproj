@@ -12,7 +12,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-   <Reference Include="../../../../build/bin/DotNetTypes.dll" />
+    <ProjectReference Include="..\DotNetTypes\DotNetTypes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

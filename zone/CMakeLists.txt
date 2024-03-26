@@ -402,6 +402,7 @@ set_target_properties(questinterface PROPERTIES
 )
 
 ADD_EXECUTABLE(zone zone.cpp)
+add_dependencies(zone dotnet_compiler dotnet_types_build dotnet_build)
 TARGET_LINK_LIBRARIES(zone dotnet_quests)
 
 
