@@ -198,7 +198,8 @@ public:
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
 	uint64 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 	int64 CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault);
-
+	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignoreDefault);
+	
 private:
 	LuaParser();
 	LuaParser(const LuaParser&);
