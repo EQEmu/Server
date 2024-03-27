@@ -546,7 +546,6 @@ public:
 		bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) = 0;
 	void SetHP(int64 hp);
 	inline void SetOOCRegen(int64 new_ooc_regen) { ooc_regen = new_ooc_regen; }
-	virtual void Heal();
 	virtual void HealDamage(uint64 ammount, Mob* caster = nullptr, uint16 spell_id = SPELL_UNKNOWN);
 	virtual void SetMaxHP() { current_hp = max_hp; }
 	virtual inline uint16 GetBaseRace() const { return base_race; }
@@ -839,8 +838,11 @@ public:
 	virtual void MakePet(uint16 spell_id, const char* pettype, const char *petname = nullptr);
 	virtual void MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower, const char *petname = nullptr, float in_size = 0.0f);
 	bool IsWarriorClass() const;
-	char GetCasterClass() const;
+	bool IsIntelligenceCasterClass() const;
+	bool IsPureMeleeClass() const;
+	bool IsWisdomCasterClass() const;
 	uint8 GetArchetype() const;
+	const std::string& GetArchetypeName();
 	void SetZone(uint32 zone_id, uint32 instance_id);
 	void SendStatsWindow(Client* c, bool use_window);
 	void ShowStats(Client* client);
@@ -1335,6 +1337,10 @@ public:
 
 	inline virtual bool IsBlockedBuff(int32 SpellID) { return false; }
 	inline virtual bool IsBlockedPetBuff(int32 SpellID) { return false; }
+
+	inline void RestoreEndurance() { SetEndurance(GetMaxEndurance()); }
+	inline void RestoreHealth() { SetMaxHP(); SendHPUpdate(); }
+	inline void RestoreMana() { SetMana(GetMaxMana()); }
 
 	std::string GetGlobal(const char *varname);
 	void SetGlobal(const char *varname, const char *newvalue, int options, const char *duration, Mob *other = nullptr);

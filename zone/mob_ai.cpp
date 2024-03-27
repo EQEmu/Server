@@ -1136,7 +1136,7 @@ void Mob::AI_Process() {
 
 			if (DistanceSquaredNoZ(m_Position, npcSpawnPoint) > leash_range) {
 				GMMove(npcSpawnPoint.x, npcSpawnPoint.y, npcSpawnPoint.z, npcSpawnPoint.w);
-				SetHP(GetMaxHP());
+				RestoreHealth();
 				BuffFadeAll();
 				WipeHateList();
 				return;

@@ -203,155 +203,141 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 	}
 }
 
-bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 CharacterID, bool ismerc)
+bool Group::AddMember(Mob* new_member, std::string new_member_name, uint32 character_id, bool is_merc)
 {
-	bool InZone = true;
+	bool in_zone = true;
 
 	// This method should either be passed a Mob*, if the new member is in this zone, or a nullptr Mob*
-	// and the name and CharacterID of the new member, if they are out of zone.
-	if(!newmember && !NewMemberName)
-	{
+	// and the name and character_id of the new member, if they are out of zone.
+	if (!new_member && new_member_name.empty()) {
 		return false;
 	}
 
-	if(GroupCount() >= MAX_GROUP_MEMBERS) //Sanity check for merging groups together.
-	{
+	if (GroupCount() >= MAX_GROUP_MEMBERS) { //Sanity check for merging groups together.
 		return false;
 	}
 
-	if(!newmember)
-	{
-		InZone = false;
-	}
-	else
-	{
-		NewMemberName = newmember->GetCleanName();
+	if (!new_member) {
+		in_zone = false;
+	} else {
+		new_member_name = new_member->GetCleanName();
 
-		if(newmember->IsClient())
-		{
-			CharacterID = newmember->CastToClient()->CharacterID();
+		if (new_member->IsClient()) {
+			character_id = new_member->CastToClient()->CharacterID();
 		}
-		if(newmember->IsMerc())
-		{
-			Client* owner = newmember->CastToMerc()->GetMercenaryOwner();
-			if(owner)
-			{
-				CharacterID = owner->CastToClient()->CharacterID();
+
+		if (new_member->IsMerc()) {
+			Client* o = new_member->CastToMerc()->GetMercenaryOwner();
+			if (o) {
+				character_id = o->CastToClient()->CharacterID();
 			}
-			ismerc = true;
+
+			is_merc = true;
 		}
 	}
 
 	// See if they are already in the group
-	uint32 i = 0;
-	for (i = 0; i < MAX_GROUP_MEMBERS; ++i)
-	{
-		if (!strcasecmp(membername[i], NewMemberName))
-		{
+	for (const auto& m : membername) {
+		if (Strings::EqualFold(m, new_member_name)) {
 			return false;
 		}
 	}
 
 	// Put them in the group
-	for (i = 0; i < MAX_GROUP_MEMBERS; ++i)
-	{
-		if (membername[i][0] == '\0')
-		{
-			if(InZone)
-			{
-				members[i] = newmember;
+	for (int slot_id = 0; slot_id < MAX_GROUP_MEMBERS; ++slot_id) {
+		if (membername[slot_id][0] == '\0') {
+			if (in_zone) {
+				members[slot_id] = new_member;
 			}
-			strcpy(membername[i], NewMemberName);
-			MemberRoles[i] = 0;
+
+			strcpy(membername[slot_id], new_member_name.c_str());
+			MemberRoles[slot_id] = 0;
 			break;
 		}
 	}
 
-	// Is this even possible based on the above loops? Remove?
-	if (i == MAX_GROUP_MEMBERS)
-	{
-		return false;
-	}
-
-	int x=1;
+	int x = 1;
 
 	//build the template join packet
 	auto outapp = new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
-	GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
-	strcpy(gj->membername, NewMemberName);
-	gj->action = groupActJoin;
+
+	auto gj = (GroupJoin_Struct*) outapp->pBuffer;
+
+	strcpy(gj->membername, new_member_name.c_str());
+
+	gj->action     = groupActJoin;
 	gj->leader_aas = LeaderAbilities;
 
-	for (i = 0;i < MAX_GROUP_MEMBERS; i++)
-	{
-		if (members[i] != nullptr && members[i] != newmember)
-		{
+	for (int slot_id = 0; slot_id < MAX_GROUP_MEMBERS; slot_id++) {
+		if (members[slot_id] && members[slot_id] != new_member) {
 			//fill in group join & send it
-			strcpy(gj->yourname, members[i]->GetCleanName());
-			if(members[i]->IsClient())
-			{
-				members[i]->CastToClient()->QueuePacket(outapp);
+			strcpy(gj->yourname, members[slot_id]->GetCleanName());
+			if (members[slot_id]->IsClient()) {
+				members[slot_id]->CastToClient()->QueuePacket(outapp);
 
 				//put new member into existing group members' list(s)
-				strcpy(members[i]->CastToClient()->GetPP().groupMembers[GroupCount()-1], NewMemberName);
+				strcpy(
+					members[slot_id]->CastToClient()->GetPP().groupMembers[GroupCount() - 1],
+					new_member_name.c_str()
+				);
 			}
 
 			//put existing group member(s) into the new member's list
-			if(InZone && newmember && newmember->IsClient())
-			{
-				if(IsLeader(members[i]))
-				{
-					strcpy(newmember->CastToClient()->GetPP().groupMembers[0], members[i]->GetCleanName());
-				}
-				else
-				{
-					strcpy(newmember->CastToClient()->GetPP().groupMembers[x], members[i]->GetCleanName());
+			if (in_zone && new_member && new_member->IsClient()) {
+				if (IsLeader(members[slot_id])) {
+					strcpy(new_member->CastToClient()->GetPP().groupMembers[0], members[slot_id]->GetCleanName());
+				} else {
+					strcpy(new_member->CastToClient()->GetPP().groupMembers[x], members[slot_id]->GetCleanName());
 					++x;
 				}
 			}
 		}
 	}
 
-	if(InZone && newmember)
-	{
+	if (in_zone && new_member) {
 		//put new member in his own list.
-		newmember->SetGrouped(true);
+		new_member->SetGrouped(true);
 
-		if(newmember->IsClient())
-		{
-			strcpy(newmember->CastToClient()->GetPP().groupMembers[x], NewMemberName);
-			newmember->CastToClient()->Save();
-			database.SetGroupID(NewMemberName, GetID(), newmember->CastToClient()->CharacterID(), false);
-			SendMarkedNPCsToMember(newmember->CastToClient());
+		if (new_member->IsClient()) {
+			strcpy(new_member->CastToClient()->GetPP().groupMembers[x], new_member_name.c_str());
 
-			NotifyMainTank(newmember->CastToClient(), 1);
-			NotifyMainAssist(newmember->CastToClient(), 1);
-			NotifyPuller(newmember->CastToClient(), 1);
+			new_member->CastToClient()->Save();
+
+			AddToGroup(new_member);
+
+			SendMarkedNPCsToMember(new_member->CastToClient());
+
+			NotifyMainTank(new_member->CastToClient(), 1);
+			NotifyMainAssist(new_member->CastToClient(), 1);
+			NotifyPuller(new_member->CastToClient(), 1);
 		}
 
-		if(newmember->IsMerc())
-		{
-			Client* owner = newmember->CastToMerc()->GetMercenaryOwner();
-			if(owner)
-			{
-				database.SetGroupID(NewMemberName, GetID(), owner->CharacterID(), true);
+		if (new_member->IsMerc()) {
+			Client* o = new_member->CastToMerc()->GetMercenaryOwner();
+			if (o) {
+				AddToGroup(new_member);
 			}
 		}
 
-		Group* group = newmember->CastToClient()->GetGroup();
-		if (group) {
-			group->SendHPManaEndPacketsTo(newmember);
-			group->SendHPPacketsFrom(newmember);
+		Group* g = new_member->CastToClient()->GetGroup();
+		if (g) {
+			g->SendHPManaEndPacketsTo(new_member);
+			g->SendHPPacketsFrom(new_member);
 		}
 
-	}
-	else
-	{
-		database.SetGroupID(NewMemberName, GetID(), CharacterID, ismerc);
+	} else {
+		AddToGroup(
+			AddToGroupRequest{
+				.mob = nullptr,
+				.member_name = new_member_name,
+				.character_id = character_id,
+			}
+		);
 	}
 
-	if (newmember && newmember->IsClient())
-		newmember->CastToClient()->JoinGroupXTargets(this);
+	if (new_member && new_member->IsClient()) {
+		new_member->CastToClient()->JoinGroupXTargets(this);
+	}
 
 	safe_delete(outapp);
 
@@ -362,20 +348,18 @@ bool Group::AddMember(Mob* newmember, const char *NewMemberName, uint32 Characte
 	return true;
 }
 
-void Group::AddMember(const char *NewMemberName)
+void Group::AddMember(const std::string& new_member_name)
 {
 	// This method should be called when both the new member and the group leader are in a different zone to this one.
-	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
-		if(!strcasecmp(membername[i], NewMemberName))
-		{
+	for (const auto& m : membername) {
+		if (Strings::EqualFold(m, new_member_name)) {
 			return;
 		}
+	}
 
-	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i)
-	{
-		if (membername[i][0] == '\0')
-		{
-			strcpy(membername[i], NewMemberName);
+	for (uint32 i = 0; i < MAX_GROUP_MEMBERS; ++i) {
+		if (membername[i][0] == '\0') {
+			strcpy(membername[i], new_member_name.c_str());
 			MemberRoles[i] = 0;
 			break;
 		}
@@ -752,7 +736,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 
 	if(oldmember->IsClient())
 	{
-		database.SetGroupID(oldmember->GetCleanName(), 0, oldmember->CastToClient()->CharacterID(), false);
+		RemoveFromGroup(oldmember);
 	}
 
 	if(oldmember->IsMerc())
@@ -760,7 +744,7 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 		Client* owner = oldmember->CastToMerc()->GetMercenaryOwner();
 		if(owner)
 		{
-			database.SetGroupID(oldmember->GetCleanName(), 0, owner->CharacterID(), true);
+			RemoveFromGroup(oldmember);
 		}
 	}
 
@@ -943,7 +927,7 @@ void Group::DisbandGroup(bool joinraid) {
 			}
 
 			strcpy(gu->yourname, members[i]->GetCleanName());
-			database.SetGroupID(members[i]->GetCleanName(), 0, members[i]->CastToClient()->CharacterID(), false);
+			RemoveFromGroup(members[i]);
 			members[i]->CastToClient()->QueuePacket(outapp);
 			SendMarkedNPCsToMember(members[i]->CastToClient(), true);
 			if (!joinraid)
@@ -955,7 +939,7 @@ void Group::DisbandGroup(bool joinraid) {
 			Client* owner = members[i]->CastToMerc()->GetMercenaryOwner();
 			if(owner)
 			{
-				database.SetGroupID(members[i]->GetCleanName(), 0, owner->CharacterID(), true);
+				RemoveFromGroup(members[i]);
 			}
 		}
 
@@ -1148,31 +1132,30 @@ void Group::TeleportGroup(Mob* sender, uint32 zoneID, uint16 instance_id, float 
 
 bool Group::LearnMembers() {
 
-	auto rows = GroupIdRepository::GetWhere(
+	const auto& l = GroupIdRepository::GetWhere(
 		database,
 		fmt::format(
-			"groupid = {}",
+			"`group_id` = {}",
 			GetID()
 		)
 	);
 
-	if (rows.empty()) {
+	if (l.empty()) {
 		LogError(
 			"Error getting group members for group [{}]",
 			GetID()
 		);
 	}
 
-	for(int i = 0; i < MAX_GROUP_MEMBERS; ++i)
-	{
+	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i) {
 		members[i] = nullptr;
-		memset(membername[i],0,64);
+		memset(membername[i], 0, 64);
 		MemberRoles[i] = 0;
 	}
 
-	int memberIndex = 0;
-	for (const auto& member : rows) {
-		if (memberIndex >= MAX_GROUP_MEMBERS) {
+	int member_index = 0;
+	for (const auto& e : l) {
+		if (member_index >= MAX_GROUP_MEMBERS) {
 			LogError(
 				"Too many members in group [{}]",
 				GetID()
@@ -1180,14 +1163,15 @@ bool Group::LearnMembers() {
 			break;
 		}
 
-		if (member.name.empty()) {
-			members[memberIndex] = nullptr;
-			membername[memberIndex][0] = '\0';
+		if (e.name.empty()) {
+			members[member_index] = nullptr;
+			membername[member_index][0] = '\0';
 		} else {
-			members[memberIndex] = nullptr;
-			strn0cpy(membername[memberIndex], member.name.c_str(), 64);
+			members[member_index] = nullptr;
+			strn0cpy(membername[member_index], e.name.c_str(), 64);
 		}
-		++memberIndex;
+
+		++member_index;
 	}
 
 	VerifyGroup();
@@ -1264,10 +1248,10 @@ void Client::LeaveGroup() {
 	else
 	{
 		//force things a little
-		database.SetGroupID(GetCleanName(), 0, CharacterID(), false);
-		if (GetMerc())
-		{
-			database.SetGroupID(GetMerc()->GetCleanName(), 0, CharacterID(), true);
+		Group::RemoveFromGroup(this);
+
+		if (GetMerc()) {
+			Group::RemoveFromGroup(GetMerc());
 		}
 	}
 
@@ -2513,4 +2497,70 @@ bool Group::IsLeader(const char* name) {
 
 std::string Group::GetLeaderName() {
 	return database.GetGroupLeaderName(GetID());
+}
+
+void Group::RemoveFromGroup(Mob* m)
+{
+	uint32      bot_id       = 0;
+	uint32      character_id = 0;
+	uint32      merc_id      = 0;
+
+	if (m->IsBot()) {
+		bot_id = m->CastToBot()->GetBotID();
+	} else if (m->IsClient()) {
+		character_id = m->CastToClient()->CharacterID();
+	} else if (m->IsMerc()) {
+		merc_id = m->CastToMerc()->GetMercenaryID();
+	}
+
+	GroupIdRepository::DeleteWhere(
+		database,
+		fmt::format(
+			"`character_id` = {} AND `bot_id` = {} AND `merc_id` = {}",
+			character_id,
+			bot_id,
+			merc_id
+		)
+	);
+}
+
+void Group::AddToGroup(Mob* m)
+{
+	AddToGroup(
+		AddToGroupRequest{
+			.mob = m
+		}
+	);
+}
+
+// Handles database-side, should eventually be consolidated to handle memory-based group stuff as well
+void Group::AddToGroup(AddToGroupRequest r)
+{
+	uint32      bot_id       = 0;
+	uint32      character_id = r.character_id;
+	uint32      merc_id      = 0;
+	std::string name         = r.member_name;
+
+	if (r.mob) {
+		if (r.mob->IsBot()) {
+			bot_id = r.mob->CastToBot()->GetBotID();
+		} else if (r.mob->IsClient()) {
+			character_id = r.mob->CastToClient()->CharacterID();
+		} else if (r.mob->IsMerc()) {
+			merc_id = r.mob->CastToMerc()->GetMercenaryID();
+		}
+
+		name = r.mob->GetCleanName();
+	}
+
+	GroupIdRepository::ReplaceOne(
+		database,
+		GroupIdRepository::GroupId{
+			.group_id = GetID(),
+			.name = name,
+			.character_id = character_id,
+			.bot_id = bot_id,
+			.merc_id = merc_id
+		}
+	);
 }

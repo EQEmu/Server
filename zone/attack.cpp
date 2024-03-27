@@ -1687,13 +1687,6 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 }
 
-//used by complete heal and #heal
-void Mob::Heal()
-{
-	SetMaxHP();
-	SendHPUpdate();
-}
-
 void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special)
 {
 	if (dead || IsCorpse())

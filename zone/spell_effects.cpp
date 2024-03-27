@@ -456,7 +456,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(GetClass() == Class::Bard)
 					break;
 				if(IsManaTapSpell(spell_id)) {
-					if(GetCasterClass() != 'N') {
+					if (!IsPureMeleeClass()) {
 #ifdef SPELL_EFFECT_SPAM
 						snprintf(effect_desc, _EDLEN, "Current Mana: %+i", effect_value);
 #endif
@@ -578,12 +578,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 									GetPet()->BuffFadeByEffect(SE_Charm);
 								}
 							}
-							
+
 							CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
 						} else {
 							GMMove(x, y, z, heading);
 						}
-						
+
 						if (RuleB(Spells, EvacClearAggroInSameZone)) {
 							entity_list.ClearAggro(this);
 						}
@@ -1058,7 +1058,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							cd->hit_heading = action->hit_heading;
 
 							CastToClient()->QueuePacket(action_packet);
-							
+
 							if (caster->IsClient() && caster != this) {
 								caster->CastToClient()->QueuePacket(action_packet);
 							}
@@ -1068,7 +1068,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							if (caster->IsClient() && caster != this) {
 								caster->CastToClient()->QueuePacket(message_packet);
 							}
-							
+
 							CastToClient()->SetBindPoint(spells[spell_id].base_value[i] - 1);
 							Save();
 							safe_delete(action_packet);
@@ -1105,7 +1105,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 					break;
 				}
-				
+
 				DispelMagic(caster, spell_id, effect_value);
 				break;
 			}
@@ -7369,7 +7369,7 @@ bool Mob::PassLimitClass(uint32 Classes_, uint16 Class_)
 	return false;
 }
 
-void Mob::DispelMagic(Mob* caster, uint16 spell_id, int effect_value) 
+void Mob::DispelMagic(Mob* caster, uint16 spell_id, int effect_value)
 {
 	for (int slot = 0; slot < GetMaxTotalSlots(); slot++) {
 		if (

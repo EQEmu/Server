@@ -292,10 +292,6 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 		LogError("Error: Could not load item data. But ignoring");
 	}
 
-	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
-		LogError("Error: Could not load skill cap data. But ignoring");
-	}
-
 	guild_mgr.LoadGuilds();
 	guild_mgr.LoadTributes();
 

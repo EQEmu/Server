@@ -44,17 +44,14 @@ extern WorldServer worldserver;
 
 struct NPCType;
 
-//max number of items which can be in the foraging table
-//for a given zone.
-#define FORAGE_ITEM_LIMIT 50
+//max number of items which can be in the foraging
+// and fishing tables for a given zone.
+constexpr uint8 FORAGE_ITEM_LIMIT = 50;
+constexpr uint8 FISHING_ITEM_LIMIT = 50;
 
 uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
 {
-	uint32 forage_items[FORAGE_ITEM_LIMIT];
-
-	for (uint16 slot_id = 0; slot_id < FORAGE_ITEM_LIMIT; slot_id++) {
-		forage_items[slot_id] = 0;
-	}
+	uint32 forage_items[FORAGE_ITEM_LIMIT] = {};
 
 	const auto& l = ForageRepository::GetWhere(
 		*this,
@@ -77,7 +74,7 @@ uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
 		l.size() != 1 ? "s" : ""
 	);
 
-	int forage_chances[FORAGE_ITEM_LIMIT];
+	int forage_chances[FORAGE_ITEM_LIMIT] = {};
 
 	int    current_chance = 0;
 	uint32 item_id        = 0;
@@ -118,13 +115,8 @@ uint32 ZoneDatabase::LoadForage(uint32 zone_id, uint8 skill_level)
 
 uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_id, uint8 &npc_chance)
 {
-	uint32 fishing_items[50];
-	int fishing_chances[50];
-
-	for (uint16 slot_id = 0; slot_id < 50; slot_id++) {
-		fishing_items[slot_id]   = 0;
-		fishing_chances[slot_id] = 0;
-	}
+	uint32 fishing_items[FISHING_ITEM_LIMIT] = {};
+	int fishing_chances[FISHING_ITEM_LIMIT] = {};
 
 	const auto& l = FishingRepository::GetWhere(
 		*this,
@@ -146,15 +138,15 @@ uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_
 		l.size() != 1 ? "s" : ""
 	);
 
-	uint32 npc_ids[50];
-	uint32 npc_chances[50];
+	uint32 npc_ids[FISHING_ITEM_LIMIT] = {};
+	uint32 npc_chances[FISHING_ITEM_LIMIT] = {};
 
 	int    current_chance = 0;
 	uint32 item_id        = 0;
 	uint8  count          = 0;
 
 	for (const auto &e: l) {
-		if (count >= 50) {
+		if (count >= FISHING_ITEM_LIMIT) {
 			break;
 		}
 
@@ -164,6 +156,8 @@ uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_
 		npc_chances[count]     = e.npc_chance;
 
 		current_chance = fishing_chances[count];
+
+		count++;
 	}
 
 	npc_id     = 0;
@@ -175,7 +169,7 @@ uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_
 
 	const int roll = zone->random.Int(1, current_chance);
 
-	for (uint16 i = 0; i < count; i++) {
+	for (uint8 i = 0; i < count; i++) {
 		if (roll > fishing_chances[i]) {
 			continue;
 		}
@@ -269,32 +263,33 @@ void Client::GoFish(bool guarantee, bool use_bait)
 	fishing_timer.Disable();
 
 	//we're doing this a second time (1st in Client::Handle_OP_Fishing) to make sure that, between when we started fishing & now, we're still able to fish (in case we move, change equip, etc)
-	if (!CanFish())	//if we can't fish here, we don't need to bother with the rest
+	if (!CanFish()) { //if we can't fish here, we don't need to bother with the rest
 		return;
+	}
 
 	//multiple entries yeilds higher probability of dropping...
 	uint32 common_fish_ids[MAX_COMMON_FISH_IDS] = {
-		1038, // Tattered Cloth Sandals
-		1038, // Tattered Cloth Sandals
-		1038, // Tattered Cloth Sandals
+		1038,  // Tattered Cloth Sandals
+		1038,  // Tattered Cloth Sandals
+		1038,  // Tattered Cloth Sandals
 		13019, // Fresh Fish
 		13076, // Fish Scales
 		13076, // Fish Scales
-		7007, // Rusty Dagger
-		7007, // Rusty Dagger
-		7007 // Rusty Dagger
-
+		7007,  // Rusty Dagger
+		7007,  // Rusty Dagger
+		7007   // Rusty Dagger
 	};
 
 	//success formula is not researched at all
 
-	int fishing_skill = GetSkill(EQ::skills::SkillFishing);	//will take into account skill bonuses on pole & bait
+	uint16 fishing_skill = GetSkill(EQ::skills::SkillFishing);	//will take into account skill bonuses on pole & bait
 
 	//make sure we still have a fishing pole on:
-	int32 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
+	int16 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
 	const EQ::ItemInstance* Bait = nullptr;
-	if (bslot != INVALID_INDEX)
+	if (bslot != INVALID_INDEX) {
 		Bait = m_inv.GetItem(bslot);
+	}
 
 	//if the bait isnt equipped, need to add its skill bonus
 	if (bslot >= EQ::invslot::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == EQ::skills::SkillFishing) {
@@ -309,8 +304,8 @@ void Client::GoFish(bool guarantee, bool use_bait)
 	if (guarantee || zone->random.Int(0,175) < fishing_skill) {
 		uint32 food_id = 0;
 
-		//25% chance to fish an item.
-		if (zone->random.Int(0, 399) <= fishing_skill ) {
+		//chance to fish a zone item.
+		if (zone->random.Int(0, RuleI(Zone, FishingChance)) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
 			food_id = content_db.LoadFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
@@ -348,7 +343,7 @@ void Client::GoFish(bool guarantee, bool use_bait)
 			DeleteItemInInventory(bslot, 1, true);    //do we need client update?
 		}
 
-		if(food_id == 0) {
+		if (food_id == 0) {
 			int index = zone->random.Int(0, MAX_COMMON_FISH_IDS-1);
 			food_id = (RuleB(Character, UseNoJunkFishing) ? 13019 : common_fish_ids[index]);
 		}
@@ -449,9 +444,9 @@ void Client::ForageItem(bool guarantee) {
 		13419, // Vegetables
 		13048, // Rabbit Meat
 		13047, // Roots
-		13044, // Pod Of Water
-		14905, // mushroom
-		13106 // Fishing Grubs
+		13044, // Pod of Water
+		14905, // Mushroom
+		13106  // Fishing Grubs
 	};
 
 	// these may need to be fine tuned, I am just guessing here

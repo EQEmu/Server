@@ -22,7 +22,7 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 	if (!npctype_id) {
 		return;
 	}
-
+	
 	if (!is_global) {
 		m_loot_copper   = 0;
 		m_loot_silver   = 0;
@@ -36,6 +36,14 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 	if (!l) {
 		return;
 	}
+
+	LogLootDetail(
+		"Attempting to load loot [{}] loottable [{}] ({}) is_global [{}]",
+		GetCleanName(),
+		loottable_id,
+		l->name,
+		is_global
+	);
 
 	auto content_flags = ContentFlags{
 		.min_expansion = l->min_expansion,
@@ -106,7 +114,12 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 		}
 	}
 
-	LogLootDetail("Loaded [{}] Loot Table [{}]", GetCleanName(), loottable_id);
+	LogLootDetail(
+		"Loaded [{}] Loot Table [{}] is_global [{}]",
+		GetCleanName(),
+		loottable_id,
+		is_global
+	);
 }
 
 void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
@@ -128,10 +141,28 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (drop_limit == 0 && min_drop == 0) {
 		for (const auto &e: le) {
+			LogLootDetail(
+				"-- NPC [{}] Lootdrop [{}] Item [{}] ({}_ Chance [{}] Multiplier [{}]",
+				GetCleanName(),
+				lootdrop_id,
+				database.GetItem(e.item_id)->Name,
+				e.item_id,
+				e.chance,
+				e.multiplier
+			);
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
 					const EQ::ItemData *database_item = database.GetItem(e.item_id);
 					AddLootDrop(database_item, e);
+					LogLootDetail(
+						"---- NPC (Rolled) [{}] Lootdrop [{}] Item [{}] ({}) Chance [{}] Multiplier [{}]",
+						GetCleanName(),
+						lootdrop_id,
+						database_item->Name,
+						e.item_id,
+						e.chance,
+						e.multiplier
+					);
 				}
 			}
 		}

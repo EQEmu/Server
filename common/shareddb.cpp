@@ -45,6 +45,7 @@
 #include "repositories/loottable_repository.h"
 #include "repositories/character_item_recast_repository.h"
 #include "repositories/character_corpses_repository.h"
+#include "repositories/skill_caps_repository.h"
 
 namespace ItemField
 {
@@ -793,8 +794,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 	}
 
 	if (cv_conflict) {
-		char char_name[64] = "";
-		GetCharName(char_id, char_name);
+		const std::string& char_name = GetCharName(char_id);
 		LogError("ClientVersion/Expansion conflict during inventory load at zone entry for [{}] (charid: [{}], inver: [{}], gmi: [{}])",
 			char_name,
 			char_id,
@@ -1624,136 +1624,6 @@ bool SharedDatabase::GetCommandSubSettings(std::vector<CommandSubsettingsReposit
 	}
 
 	return true;
-}
-
-
-bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
-	skill_caps_mmf.reset(nullptr);
-
-	try {
-		const auto Config = EQEmuConfig::get();
-		EQ::IPCMutex mutex("skill_caps");
-		mutex.Lock();
-		std::string file_name = fmt::format("{}/{}{}", path.GetSharedMemoryPath(), prefix, std::string("skill_caps"));
-		LogInfo("Loading [{}]", file_name);
-		skill_caps_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
-
-		LogInfo("Loaded skill caps via shared memory");
-
-		mutex.Unlock();
-	} catch(std::exception &ex) {
-		LogError("Error loading skill caps: {}", ex.what());
-		return false;
-	}
-
-	return true;
-}
-
-void SharedDatabase::LoadSkillCaps(void *data) {
-	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
-	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	const uint32 level_count = HARD_LEVEL_CAP + 1;
-	uint16 *skill_caps_table = static_cast<uint16*>(data);
-
-	const std::string query = "SELECT skillID, class, level, cap FROM skill_caps ORDER BY skillID, class, level";
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-        LogError("Error loading skill caps from database: {}", results.ErrorMessage().c_str());
-        return;
-	}
-
-    for(auto& row = results.begin(); row != results.end(); ++row) {
-	    const uint8 skillID = Strings::ToUnsignedInt(row[0]);
-	    const uint8 class_ = Strings::ToUnsignedInt(row[1]) - 1;
-	    const uint8 level = Strings::ToUnsignedInt(row[2]);
-	    const uint16 cap = Strings::ToUnsignedInt(row[3]);
-
-        if(skillID >= skill_count || class_ >= class_count || level >= level_count)
-            continue;
-
-	    const uint32 index = (((class_ * skill_count) + skillID) * level_count) + level;
-        skill_caps_table[index] = cap;
-    }
-}
-
-uint16 SharedDatabase::GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const
-{
-	if(!skill_caps_mmf) {
-		return 0;
-	}
-
-	if(Class_ == 0)
-		return 0;
-
-	int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
-	if(SkillMaxLevel < 1) {
-		SkillMaxLevel = RuleI(Character, MaxLevel);
-	}
-
-	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
-	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	const uint32 level_count = HARD_LEVEL_CAP + 1;
-	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
-		return 0;
-	}
-
-	if(Level > static_cast<uint8>(SkillMaxLevel)){
-		Level = static_cast<uint8>(SkillMaxLevel);
-	}
-
-	const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count) + Level;
-	const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
-	return skill_caps_table[index];
-}
-
-uint8 SharedDatabase::GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const
-{
-	if(!skill_caps_mmf) {
-		return 0;
-	}
-
-	if(Class_ == 0)
-		return 0;
-
-	int SkillMaxLevel = RuleI(Character, SkillCapMaxLevel);
-	if (SkillMaxLevel < 1) {
-		SkillMaxLevel = RuleI(Character, MaxLevel);
-	}
-
-	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
-	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
-	const uint32 level_count = HARD_LEVEL_CAP + 1;
-	if(Class_ > class_count || static_cast<uint32>(Skill) > skill_count || Level > level_count) {
-		return 0;
-	}
-
-	uint8 ret = 0;
-	if(Level > static_cast<uint8>(SkillMaxLevel)) {
-		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
-		for(uint8 x = 0; x < Level; x++){
-			if(skill_caps_table[index + x]){
-				ret = x;
-				break;
-			}
-		}
-	}
-	else
-	{
-		const uint32 index = ((((Class_ - 1) * skill_count) + Skill) * level_count);
-		const uint16 *skill_caps_table = static_cast<uint16*>(skill_caps_mmf->Get());
-		for(int x = 0; x < SkillMaxLevel; x++){
-			if(skill_caps_table[index + x]){
-				ret = x;
-				break;
-			}
-		}
-	}
-
-	if(ret > GetSkillCap(Class_, Skill, Level))
-		ret = static_cast<uint8>(GetSkillCap(Class_, Skill, Level));
-
-	return ret;
 }
 
 void SharedDatabase::LoadDamageShieldTypes(SPDat_Spell_Struct* sp, int32 iMaxSpellID) {

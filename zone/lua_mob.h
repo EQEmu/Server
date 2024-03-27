@@ -63,7 +63,6 @@ public:
 	void Damage(Lua_Mob from, int64 damage, int spell_id, int attack_skill, bool avoidable, int buffslot, bool buff_tic);
 	void RangedAttack(Lua_Mob other);
 	void ThrowingAttack(Lua_Mob other);
-	void Heal();
 	void HealDamage(uint64 amount);
 	void HealDamage(uint64 amount, Lua_Mob other);
 	uint32 GetLevelCon(int other);
@@ -584,6 +583,13 @@ public:
 	bool IsAlwaysAggro();
 	std::string GetDeityName();
 	luabind::object GetBuffs(lua_State* L);
+	void RestoreEndurance();
+	void RestoreHealth();
+	void RestoreMana();
+	std::string GetArchetypeName();
+	bool IsIntelligenceCasterClass();
+	bool IsPureMeleeClass();
+	bool IsWisdomCasterClass();
 };
 
 #endif

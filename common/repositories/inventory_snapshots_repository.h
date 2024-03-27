@@ -44,7 +44,30 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int64 CountInventorySnapshots(Database& db)
+	{
+		const std::string& query = "SELECT COUNT(*) FROM (SELECT * FROM `inventory_snapshots` a GROUP BY `charid`, `time_index`) b";
 
+		auto results = db.QueryDatabase(query);
+
+		if (!results.Success() || !results.RowCount()) {
+			return -1;
+		}
+
+		auto row = results.begin();
+
+		const int64 count = Strings::ToBigInt(row[0]);
+
+		if (count > std::numeric_limits<int>::max()) {
+			return -2;
+		}
+
+		if (count < 0) {
+			return -3;
+		}
+
+		return count;
+	}
 };
 
 #endif //EQEMU_INVENTORY_SNAPSHOTS_REPOSITORY_H

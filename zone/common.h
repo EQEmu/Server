@@ -19,9 +19,11 @@
 #define HEAD_POSITION 0.9f	//ratio of GetSize() where NPCs see from
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
 
-#define ARCHETYPE_HYBRID	1
-#define ARCHETYPE_CASTER	2
-#define ARCHETYPE_MELEE		3
+namespace Archetype {
+	constexpr uint8 Hybrid = 1;
+	constexpr uint8 Caster = 2;
+	constexpr uint8 Melee  = 3;
+};
 
 #define CON_GREEN		2
 #define CON_LIGHTBLUE	18
@@ -826,7 +828,8 @@ struct ExtraAttackOptions {
 		armor_pen_percent(0.0f), armor_pen_flat(0),
 		crit_percent(1.0f), crit_flat(0.0f),
 		hate_percent(1.0f), hate_flat(0), hit_chance(0),
-		melee_damage_bonus_flat(0), skilldmgtaken_bonus_flat(0)
+		melee_damage_bonus_flat(0), skilldmgtaken_bonus_flat(0),
+		range_percent(0)
 	{ }
 
 	float damage_percent;

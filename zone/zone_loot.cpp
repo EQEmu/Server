@@ -5,18 +5,34 @@
 #include "../common/repositories/lootdrop_repository.h"
 #include "../common/repositories/lootdrop_entries_repository.h"
 
-void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
+void Zone::LoadLootTables(const std::vector<uint32> in_loottable_ids)
 {
 	BenchTimer timer;
 
+	// copy loottable_ids
+	std::vector<uint32> loottable_ids = in_loottable_ids;
+
 	// check if table is already loaded
+	std::vector<uint32> loaded_tables = {};
 	for (const auto &e: loottable_ids) {
 		for (const auto &f: m_loottables) {
 			if (e == f.id) {
 				LogLootDetail("Loottable [{}] already loaded", e);
-				return;
+				loaded_tables.push_back(e);
 			}
 		}
+	}
+
+	// remove loaded tables from loottable_ids
+	for (const auto &e: loaded_tables) {
+		loottable_ids.erase(
+			std::remove(
+				loottable_ids.begin(),
+				loottable_ids.end(),
+				e
+			),
+			loottable_ids.end()
+		);
 	}
 
 	if (loottable_ids.empty()) {
@@ -82,6 +98,9 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 				break;
 			}
 		}
+
+		bool has_entry = false;
+
 		if (!has_table) {
 			// add loottable
 			m_loottables.emplace_back(e);
@@ -89,17 +108,53 @@ void Zone::LoadLootTables(const std::vector<uint32> &loottable_ids)
 			// add loottable entries
 			for (const auto &f: loottable_entries) {
 				if (e.id == f.loottable_id) {
-					m_loottable_entries.emplace_back(f);
+
+					// check if loottable entry already exists in memory
+					has_entry = false;
+					for (const auto &g: m_loottable_entries) {
+						if (f.loottable_id == g.loottable_id && f.lootdrop_id == g.lootdrop_id) {
+							has_entry = true;
+							break;
+						}
+					}
+
+					if (!has_entry) {
+						m_loottable_entries.emplace_back(f);
+					}
 
 					// add lootdrop
 					for (const auto &g: lootdrops) {
 						if (f.lootdrop_id == g.id) {
-							m_lootdrops.emplace_back(g);
+
+							// check if lootdrop already exists in memory
+							has_entry = false;
+							for (const auto &h: m_lootdrops) {
+								if (g.id == h.id) {
+									has_entry = true;
+									break;
+								}
+							}
+
+							if (!has_entry) {
+								m_lootdrops.emplace_back(g);
+							}
 
 							// add lootdrop entries
 							for (const auto &h: lootdrop_entries) {
 								if (g.id == h.lootdrop_id) {
-									m_lootdrop_entries.emplace_back(h);
+
+									// check if lootdrop entry already exists in memory
+									has_entry = false;
+									for (const auto &i: m_lootdrop_entries) {
+										if (h.lootdrop_id == i.lootdrop_id && h.item_id == i.item_id) {
+											has_entry = true;
+											break;
+										}
+									}
+
+									if (!has_entry) {
+										m_lootdrop_entries.emplace_back(h);
+									}
 								}
 							}
 						}

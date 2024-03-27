@@ -537,9 +537,8 @@ void QuestManager::settimer(const std::string& timer_name, uint32 seconds, Mob* 
 	);
 
 	if (!QTimerList.empty()) {
-		for (auto e : QTimerList) {
+		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == mob && e.name == timer_name) {
-				e.Timer_.Enable();
 				e.Timer_.Start(seconds * 1000, false);
 
 				if (has_start_event) {
@@ -613,9 +612,8 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 	}
 
 	if (!QTimerList.empty()) {
-		for (auto e : QTimerList) {
+		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == owner && e.name == timer_name) {
-				e.Timer_.Enable();
 				e.Timer_.Start(milliseconds, false);
 
 				if (has_start_event) {
@@ -678,9 +676,8 @@ void QuestManager::settimerMS(const std::string& timer_name, uint32 milliseconds
 	);
 
 	if (!QTimerList.empty()) {
-		for (auto e : QTimerList) {
+		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == m && e.name == timer_name) {
-				e.Timer_.Enable();
 				e.Timer_.Start(milliseconds, false);
 
 				if (has_start_event) {

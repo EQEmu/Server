@@ -591,7 +591,7 @@ bool Bot::BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 			//Only check archetype if spell is not a group spell
 			//Hybrids get all buffs
 				switch (tar->GetArchetype()) {
-					case ARCHETYPE_CASTER:
+					case Archetype::Caster:
 						//TODO: probably more caster specific spell effects in here
 						if (
 							(
@@ -606,7 +606,7 @@ bool Bot::BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 							continue;
 						}
 						break;
-					case ARCHETYPE_MELEE:
+					case Archetype::Melee:
 						if (
 							(
 								IsEffectInSpell(s.SpellId, SE_IncreaseSpellHaste) ||
@@ -899,7 +899,7 @@ bool Bot::BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 
 			switch (tar->GetArchetype())
 			{
-				case ARCHETYPE_CASTER:
+				case Archetype::Caster:
 					//TODO: probably more caster specific spell effects in here
 					if (IsEffectInSpell(s.SpellId, SE_AttackSpeed) || IsEffectInSpell(s.SpellId, SE_ATK) ||
 						IsEffectInSpell(s.SpellId, SE_STR) || IsEffectInSpell(s.SpellId, SE_ReverseDS))
@@ -907,7 +907,7 @@ bool Bot::BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 						continue;
 					}
 					break;
-				case ARCHETYPE_MELEE:
+				case Archetype::Melee:
 					if (IsEffectInSpell(s.SpellId, SE_IncreaseSpellHaste) || IsEffectInSpell(s.SpellId, SE_ManaPool) ||
 						IsEffectInSpell(s.SpellId, SE_CastingLevel) || IsEffectInSpell(s.SpellId, SE_ManaRegen_v2) ||
 						IsEffectInSpell(s.SpellId, SE_CurrentMana))
