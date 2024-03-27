@@ -1245,9 +1245,9 @@ void handle_player_consider(
 	lua_setfield(L, -2, "entity_id");
 
 	if (extra_pointers && extra_pointers->size() == 1) {
-		Lua_NPC l_npc(std::any_cast<NPC*>(extra_pointers->at(0)));
-		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
-		l_npc_o.push(L);
+		Lua_Mob l_mob(std::any_cast<Mob*>(extra_pointers->at(0)));
+		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
+		l_mob_o.push(L);
 		lua_setfield(L, -2, "other");
 	}
 }
