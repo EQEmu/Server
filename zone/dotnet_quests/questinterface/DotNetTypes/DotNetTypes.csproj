@@ -11,6 +11,7 @@
     
     <!-- Use invariant globalization -->
     <InvariantGlobalization>true</InvariantGlobalization>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

@@ -330,24 +330,35 @@ endif()
 
 MESSAGE(STATUS "Looking for ${NETHOST_LIBRARY_NAME}")
 
+file(GLOB_RECURSE DOTNET_QUESTS_SOURCES 
+     "dotnet_quests/questinterface/DotNetTypes/**/*")
+
 add_custom_target(dotnet_types_build
   COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes" -c Debug --self-contained true --output "${BUILD_DIR}"
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes" -c Release --output "${BUILD_DIR}/dotnet"
+ # DEPENDS ${DOTNET_QUESTS_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes"
   COMMENT "Building DotNetTypes .NET project..."
 )
 
+file(GLOB_RECURSE DOTNET_COMPILER_SOURCES 
+     "dotnet_quests/questinterface/RoslynCompiler/**/*")
+
 add_custom_target(dotnet_compiler
   COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler" -c Debug --self-contained true --output "${BUILD_DIR}"
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler" -c Release --output "${BUILD_DIR}/dotnet"
+ # DEPENDS ${DOTNET_COMPILER_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler"
   COMMENT "Building RoslynCompiler .NET project..."
 )
 
+file(GLOB_RECURSE DOTNET_BRIDGE_SOURCES 
+     "dotnet_quests/questinterface/RoslynBridge/**/*")
 
 add_custom_target(dotnet_build
   COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Debug --self-contained true --output "${BUILD_DIR}"
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Release --output "${BUILD_DIR}/dotnet"
+ # DEPENDS ${DOTNET_BRIDGE_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge"
   COMMENT "Building .NET project..."
 )
@@ -396,9 +407,9 @@ set_target_properties(dotnet_quests PROPERTIES
 )
 
 set_target_properties(questinterface PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}
-    ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR} # For static libs or import libs on Windows
-    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR} # For Windows DLLs
+    LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}/dotnet
+    ARCHIVE_OUTPUT_DIRECTORY ${BUILD_DIR}/dotnet # For static libs or import libs on Windows
+    RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR}/dotnet # For Windows DLLs
 )
 
 ADD_EXECUTABLE(zone zone.cpp)

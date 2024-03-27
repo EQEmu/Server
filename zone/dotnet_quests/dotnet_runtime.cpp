@@ -12,6 +12,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <filesystem>
 
 #include "dotnet_runtime.h"
 
@@ -158,7 +159,7 @@ std::tuple<std::vector<ItemInstance *>, std::vector<Mob *>, std::vector<EQApplic
     std::vector<ItemInstance *> itemVec;
     std::vector<Mob *> mobVec;
     std::vector<EQApplicationPacket *> packetVec;
-    std::vector<std::string> stringVec;
+    std::vector<std::string> stringVec; 
     if (anyVec == nullptr)
     {
         return std::tie(itemVec, mobVec, packetVec, stringVec);
@@ -335,22 +336,18 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
         return 0;
     }
 
-    const string_t root_path = getExecutablePath();
-    const string_t app_path = root_path + STR("RoslynBridge.dll");
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    std::filesystem::path dotnetPath = currentPath / "dotnet" / STR("RoslynBridge.dll");
     //
     // STEP 1: Load HostFxr and get exported hosting functions
     //
-    if (!load_hostfxr(dotnetlib_path.c_str()))
+    if (!load_hostfxr(dotnetPath.c_str()))
     {
         assert(false && "Failure: load_hostfxr()");
         return EXIT_FAILURE;
     }
 
-    //
-    // STEP 2: Initialize and start the .NET Core runtime
-    //
-    const string_t config_path = root_path + STR("RoslynBridge.runtimeconfig.json");
-    load_assembly_and_get_function_pointer = get_dotnet_load_assembly(dotnetlib_path.c_str());
+    load_assembly_and_get_function_pointer = get_dotnet_load_assembly(dotnetPath.c_str());
     assert(load_assembly_and_get_function_pointer != nullptr && "Failure: get_dotnet_load_assembly()");
 
     init_payload p{

@@ -73,6 +73,7 @@ public static class DotNetQuest
 
         // Get the directory path from the full assembly path
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
+        var workingDirectory = Directory.GetCurrentDirectory();
         string executableName = "RoslynCompiler"; // The base name of your executable
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -81,12 +82,13 @@ public static class DotNetQuest
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = Path.Combine(assemblyDirectory, executableName),
+            FileName = Path.Combine(workingDirectory + "/dotnet", executableName),
             Arguments = zone?.GetShortName(),
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            CreateNoWindow = true
+            CreateNoWindow = true,
+            WorkingDirectory = workingDirectory + "/dotnet",
         };
 
         using (var process = Process.Start(startInfo))
@@ -108,7 +110,7 @@ public static class DotNetQuest
                 }
                 else
                 {
-                    questAssembly_ = assemblyContext_.LoadFromAssemblyPath($"{assemblyDirectory}/dotnet_quests/{zone?.GetShortName()}/{zone?.GetShortName()}.dll");
+                    questAssembly_ = assemblyContext_.LoadFromAssemblyPath($"{workingDirectory}/dotnet/dotnet_quests/{zone?.GetShortName()}/{zone?.GetShortName()}.dll");
                     logSys?.QuestDebug($"Successfully compiled .NET quests with {questAssembly_.GetTypes().Count()} exported types.");
                 }
             }
