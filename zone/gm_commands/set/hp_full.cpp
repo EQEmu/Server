@@ -7,7 +7,7 @@ void SetHPFull(Client *c, const Seperator *sep)
 		t = c->GetTarget();
 	}
 
-	t->Heal();
+	t->RestoreHealth();
 
 	c->Message(
 		Chat::White,

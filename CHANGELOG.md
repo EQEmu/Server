@@ -1,3 +1,60 @@
+## [22.48.0] 3/23/2024
+
+### Bots
+
+* IsValidTarget Crash Fix ([#4187](https://github.com/EQEmu/Server/pull/4187)) @nytmyr 2024-03-12
+* Move BotGroupSay to Pet Response ([#4171](https://github.com/EQEmu/Server/pull/4171)) @nytmyr 2024-03-08
+
+### Code
+
+* Cleanup Zone Get Methods ([#4169](https://github.com/EQEmu/Server/pull/4169)) @Kinglykrab 2024-03-09
+
+### Fixes
+
+* An Update to Xtarget to exclude Bot owned Temp/Swarm Pets ([#4172](https://github.com/EQEmu/Server/pull/4172)) @MortimerGreenwald 2024-03-08
+* Fix #serverrules Command ([#4193](https://github.com/EQEmu/Server/pull/4193)) @Kinglykrab 2024-03-20
+* Fix Bot Cloning ([#4186](https://github.com/EQEmu/Server/pull/4186)) @Kinglykrab 2024-03-17
+* Fix Crash in ClientList::GetCLEIP ([#4173](https://github.com/EQEmu/Server/pull/4173)) @Kinglykrab 2024-03-10
+* Fix Default Value in `rule_values` table ([#4166](https://github.com/EQEmu/Server/pull/4166)) @Kinglykrab 2024-03-07
+* Fix EVENT_KILLED_MERIT firing before NPC removal ([#4185](https://github.com/EQEmu/Server/pull/4185)) @Kinglykrab 2024-03-17
+* Fix Empty Groups When Removing Bots ([#4178](https://github.com/EQEmu/Server/pull/4178)) @Kinglykrab 2024-03-14
+* Fix GetLeaderName() for Groups ([#4184](https://github.com/EQEmu/Server/pull/4184)) @Kinglykrab 2024-03-14
+* Fix Mob::CalculateDistance(mob) Typo ([#4183](https://github.com/EQEmu/Server/pull/4183)) @Kinglykrab 2024-03-10
+* Fix Proximity Say ([#4189](https://github.com/EQEmu/Server/pull/4189)) @Kinglykrab 2024-03-15
+* Fix ScaleNPC() in Perl ([#4196](https://github.com/EQEmu/Server/pull/4196)) @Kinglykrab 2024-03-23
+* Fix range_percent ([#4197](https://github.com/EQEmu/Server/pull/4197)) @Kinglykrab 2024-03-22
+* Fix reusing timers ([#4199](https://github.com/EQEmu/Server/pull/4199)) @joligario 2024-03-23
+
+### Hot Fix
+
+* Add bool return to fix Client::RemoveAAPoints ([#4176](https://github.com/EQEmu/Server/pull/4176)) @Kinglykrab 2024-03-09
+
+### Loot
+
+* Fix issue with nested data being loaded multiple times ([#4192](https://github.com/EQEmu/Server/pull/4192)) @Akkadius 2024-03-23
+
+### Misc
+
+* Windows preprocessor define in crash.cpp ([#4191](https://github.com/EQEmu/Server/pull/4191)) @joligario 2024-03-23
+
+### Quest API
+
+* Add Buff Support to Perl/Lua ([#4182](https://github.com/EQEmu/Server/pull/4182)) @Kinglykrab 2024-03-14
+* Add DeleteBot() to Perl/Lua ([#4167](https://github.com/EQEmu/Server/pull/4167)) @nytmyr 2024-03-07
+* Add GetDeityName() to Perl/Lua ([#4180](https://github.com/EQEmu/Server/pull/4180)) @Kinglykrab 2024-03-14
+* Add RemoveAAPoints() and AA Loss Event to Perl/Lua ([#4174](https://github.com/EQEmu/Server/pull/4174)) @Kinglykrab 2024-03-09
+* Add RemoveAlternateCurrencyValue() to Perl/Lua ([#4190](https://github.com/EQEmu/Server/pull/4190)) @Kinglykrab 2024-03-17
+* Add Restore Methods for Health, Mana, and Endurance to Perl/Lua ([#4179](https://github.com/EQEmu/Server/pull/4179)) @Kinglykrab 2024-03-23
+* Add Silent Saylink Methods to Perl/Lua ([#4177](https://github.com/EQEmu/Server/pull/4177)) @Kinglykrab 2024-03-14
+
+### Rules
+
+* Add World:Rules Rule ([#4194](https://github.com/EQEmu/Server/pull/4194)) @Kinglykrab 2024-03-23
+
+### Tradeskills
+
+* Implement learning recipes from books ([#4170](https://github.com/EQEmu/Server/pull/4170)) @hgtw 2024-03-23
+
 ## [22.47.0] 3/5/2024
 
 ### Crash Fix

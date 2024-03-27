@@ -15,7 +15,7 @@
 #include <cstdio>
 #include <vector>
 
-#if WINDOWS
+#ifdef _WINDOWS
 #define popen _popen
 #endif
 

@@ -156,6 +156,7 @@ std::vector<Reload> reload_types = {
 	Reload{.command = "opcodes", .opcode = ServerOP_ReloadOpcodes, .desc = "Opcodes"},
 	Reload{.command = "perl_export", .opcode = ServerOP_ReloadPerlExportSettings, .desc = "Perl Event Export Settings"},
 	Reload{.command = "rules", .opcode = ServerOP_ReloadRules, .desc = "Rules"},
+	Reload{.command = "skill_caps", .opcode = ServerOP_ReloadSkillCaps, .desc = "Skill Caps"},
 	Reload{.command = "static", .opcode = ServerOP_ReloadStaticZoneData, .desc = "Static Zone Data"},
 	Reload{.command = "tasks", .opcode = ServerOP_ReloadTasks, .desc = "Tasks"},
 	Reload{.command = "titles", .opcode = ServerOP_ReloadTitles, .desc = "Titles"},

@@ -49,6 +49,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/patches/patches.h"
 #include "../zone/data_bucket.h"
 #include "../common/repositories/guild_tributes_repository.h"
+#include "../common/skill_caps.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1436,6 +1437,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendPacket(pack);
 			break;
 		}
+		case ServerOP_ReloadSkillCaps: {
+			zoneserver_list.SendPacket(pack);
+			skill_caps.ReloadSkillCaps();
+			break;
+		}
 		case ServerOP_ReloadRules: {
 			zoneserver_list.SendPacket(pack);
 			RuleManager::Instance()->LoadRules(&database, "default", true);
@@ -1494,11 +1500,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Loading items");
 			if (!database.LoadItems(hotfix_name)) {
 				LogInfo("Error: Could not load item data. But ignoring");
-			}
-
-			LogInfo("Loading skill caps");
-			if (!content_db.LoadSkillCaps(hotfix_name)) {
-				LogInfo("Error: Could not load skill cap data. But ignoring");
 			}
 
 			zoneserver_list.SendPacket(pack);

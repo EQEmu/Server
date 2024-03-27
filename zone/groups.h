@@ -52,8 +52,15 @@ public:
 	Group(uint32 gid);
 	~Group();
 
-	bool	AddMember(Mob* newmember, const char* NewMemberName = nullptr, uint32 CharacterID = 0, bool ismerc = false);
-	void	AddMember(const char* NewMemberName);
+	struct AddToGroupRequest {
+		Mob* mob = nullptr;
+		// Only used cross-zone, otherwise use Mob* mob
+		std::string member_name  = std::string();
+		uint32      character_id = 0;
+	};
+
+	bool	AddMember(Mob* new_member, std::string new_member_name = std::string(), uint32 character_id = 0, bool is_merc = false);
+	void	AddMember(const std::string& new_member_name);
 	void	SendUpdate(uint32 type,Mob* member);
 	void	SendLeadershipAAUpdate();
 	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
@@ -145,6 +152,9 @@ public:
 	void	SetDirtyAutoHaters();
 	inline XTargetAutoHaters *GetXTargetAutoMgr() { return &m_autohatermgr; }
 	void	JoinRaidXTarget(Raid *raid, bool first = false);
+	void	AddToGroup(AddToGroupRequest r);
+	void	AddToGroup(Mob* m);
+	static void	RemoveFromGroup(Mob* m);
 
 	void SetGroupMentor(int percent, char *name);
 	void ClearGroupMentor();

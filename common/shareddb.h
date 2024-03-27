@@ -161,14 +161,6 @@ public:
 	uint32 GetItemsCount();
 
 	/**
-	 * skills
-	 */
-	void LoadSkillCaps(void *data);
-	bool LoadSkillCaps(const std::string &prefix);
-	uint16 GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
-	uint8 GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level) const;
-
-	/**
 	 * spells
 	 */
 	int GetMaxSpellID();

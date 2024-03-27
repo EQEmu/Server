@@ -5433,6 +5433,41 @@ ADD PRIMARY KEY (`id`);
 ALTER TABLE `rule_values`
 MODIFY COLUMN `rule_value` text CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL AFTER `rule_name`;
 		)"
+	},
+	ManifestEntry{
+		.version = 9267,
+		.description = "2024_02_18_group_id_bot_id.sql",
+		.check = "SHOW COLUMNS FROM `group_id` LIKE 'bot_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `group_id`
+CHANGE COLUMN `groupid` `group_id` int(11) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `charid` `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `group_id`,
+CHANGE COLUMN `ismerc` `merc_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`,
+ADD COLUMN `bot_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `character_id`,
+MODIFY COLUMN `name` varchar(64) NOT NULL DEFAULT '' AFTER `character_id`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`group_id`, `character_id`, `bot_id`, `merc_id`) USING BTREE;
+ALTER TABLE `group_id`
+MODIFY COLUMN `character_id` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `name`;
+)"
+	},
+	ManifestEntry{
+		.version = 9268,
+		.description = "2024_03_23_skill_caps.sql",
+		.check = "SHOW COLUMNS FROM `skill_caps` LIKE 'skill_id'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `skill_caps`
+CHANGE COLUMN `skillID` `skill_id` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 FIRST,
+CHANGE COLUMN `class` `class_id` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `skill_id`,
+ADD COLUMN `id` int(3) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`id`) USING BTREE,
+ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

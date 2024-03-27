@@ -130,6 +130,11 @@ enum CrystalReclaimTypes
 	Radiant = 4,
 };
 
+namespace ItemStackSizeConstraint {
+	constexpr int16 Minimum = 1;
+	constexpr int16 Maximum = 1000;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 

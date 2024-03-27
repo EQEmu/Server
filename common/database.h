@@ -18,8 +18,8 @@
 #ifndef EQEMU_DATABASE_H
 #define EQEMU_DATABASE_H
 
-#define AUTHENTICATION_TIMEOUT	60
-#define INVALID_ID				0xFFFFFFFF
+#define AUTHENTICATION_TIMEOUT    60
+#define INVALID_ID                0xFFFFFFFF
 
 #include "global_define.h"
 #include "eqemu_logsys.h"
@@ -38,8 +38,7 @@
 class MySQLRequestResult;
 class Client;
 
-namespace EQ
-{
+namespace EQ {
 	class InventoryProfile;
 }
 
@@ -52,10 +51,11 @@ struct npcDecayTimes_Struct {
 
 struct VarCache_Struct {
 	std::map<std::string, std::string> m_cache;
-	uint32 last_update;
+	uint32                             last_update;
 	VarCache_Struct() : last_update(0) { }
-	void Add(const std::string &key, const std::string &value) { m_cache[key] = value; }
-	const std::string *Get(const std::string &key) {
+	void Add(const std::string& key, const std::string& value) { m_cache[key] = value; }
+	const std::string* Get(const std::string& key)
+	{
 		auto it = m_cache.find(key);
 		return (it != m_cache.end() ? &it->second : nullptr);
 	}
@@ -76,37 +76,33 @@ class PTimerList;
 
 #define SQL(...) #__VA_ARGS__
 
-class LogSettings;
 class Database : public DBcore {
 public:
 	Database();
-	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
-	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port, std::string connection_label = "default");
+	Database(
+		const std::string& host,
+		const std::string& user,
+		const std::string& password,
+		const std::string& database,
+		uint32 port
+	);
+	bool Connect(
+		const std::string& host,
+		const std::string& user,
+		const std::string& password,
+		const std::string& database,
+		uint32 port,
+		std::string connection_label = "default"
+	);
 	~Database();
 
 	/* Character Creation */
-
-	bool CreateCharacter(
-		uint32 account_id,
-		char *name,
-		uint16 gender,
-		uint16 race,
-		uint16 class_,
-		uint8 str,
-		uint8 sta,
-		uint8 cha,
-		uint8 dex,
-		uint8 int_,
-		uint8 agi,
-		uint8 wis,
-		uint8 face
-	);
-	bool DeleteCharacter(char *character_name);
-	bool MoveCharacterToZone(const char *charname, uint32 zone_id);
+	bool DeleteCharacter(const std::string& name);
+	bool MoveCharacterToZone(const std::string& name, uint32 zone_id);
 	bool MoveCharacterToZone(uint32 character_id, uint32 zone_id);
-	bool ReserveName(uint32 account_id, char *name);
-	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp);
-	bool UpdateName(const char *oldname, const char *newname);
+	bool ReserveName(uint32 account_id, const std::string& name);
+	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
+	bool UpdateName(const std::string& old_name, const std::string& new_name);
 	bool CopyCharacter(
 		const std::string& source_character_name,
 		const std::string& destination_character_name,
@@ -114,163 +110,171 @@ public:
 	);
 
 	/* General Information Queries */
+	bool AddBannedIP(const std::string& banned_ip, const std::string& notes); //Add IP address to the banned_ips table.
+	bool AddToNameFilter(const std::string& name);
+	bool CheckBannedIPs(const std::string& login_ip); //Check incoming connection against banned IP table.
+	bool CheckGMIPs(const std::string& login_ip, uint32 account_id);
+	bool CheckNameFilter(const std::string& name, bool surname = false);
+	bool CheckUsedName(const std::string& name);
 
-	bool	AddBannedIP(std::string banned_ip, std::string notes); //Add IP address to the banned_ips table.
-	bool	AddToNameFilter(std::string name);
-	bool	CheckBannedIPs(std::string login_ip); //Check incoming connection against banned IP table.
-	bool	CheckGMIPs(std::string login_ip, uint32 account_id);
-	bool	CheckNameFilter(std::string name, bool surname = false);
-	bool	CheckUsedName(std::string name);
+	uint32 GetAccountIDByChar(const std::string& name, uint32* character_id = 0);
+	uint32 GetAccountIDByChar(uint32 character_id);
+	uint32 GetAccountIDByName(const std::string& account_name, const std::string& loginserver, int16* status = 0, uint32* lsid = 0);
+	uint32 GetCharacterID(const std::string& name);
+	uint32 GetGuildIDByCharID(uint32 character_id);
+	uint32 GetGroupIDByCharID(uint32 character_id);
+	uint32 GetRaidIDByCharID(uint32 character_id);
 
-	uint32	GetAccountIDByChar(const char* charname, uint32* oCharID = 0);
-	uint32	GetAccountIDByChar(uint32 char_id);
-	uint32	GetAccountIDByName(std::string account_name, std::string loginserver, int16* status = 0, uint32* lsid = 0);
-	uint32	GetCharacterID(const std::string& name);
-	uint32	GetCharacterInfo(std::string character_name, uint32 *account_id, uint32 *zone_id, uint32 *instance_id);
-	uint32	GetGuildIDByCharID(uint32 char_id);
-	uint32  GetGroupIDByCharID(uint32 char_id);
-	uint32  GetRaidIDByCharID(uint32 char_id);
-
-	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);
-	void	GetCharName(uint32 char_id, char* name);
-	std::string GetCharNameByID(uint32 char_id);
-	std::string GetNPCNameByID(uint32 npc_id);
-	std::string GetCleanNPCNameByID(uint32 npc_id);
-	void	LoginIP(uint32 account_id, std::string login_ip);
+	const std::string& GetAccountName(uint32 account_id, uint32* lsaccount_id = 0);
+	const std::string& GetCharName(uint32 character_id);
+	const std::string& GetCharNameByID(uint32 character_id);
+	const std::string& GetNPCNameByID(uint32 npc_id);
+	const std::string& GetCleanNPCNameByID(uint32 npc_id);
+	void LoginIP(uint32 account_id, const std::string& login_ip);
 
 	/* Instancing */
-
 	bool AddClientToInstance(uint16 instance_id, uint32 character_id);
 	bool CheckInstanceByCharID(uint16 instance_id, uint32 character_id);
 	bool CheckInstanceExists(uint16 instance_id);
 	bool CheckInstanceExpired(uint16 instance_id);
 	bool CreateInstance(uint16 instance_id, uint32 zone_id, uint32 version, uint32 duration);
-	bool GetUnusedInstanceID(uint16 &instance_id);
+	bool GetUnusedInstanceID(uint16& instance_id);
 	bool IsGlobalInstance(uint16 instance_id);
 	bool RemoveClientFromInstance(uint16 instance_id, uint32 char_id);
 	bool RemoveClientsFromInstance(uint16 instance_id);
 	bool VerifyInstanceAlive(uint16 instance_id, uint32 character_id);
 	bool VerifyZoneInstance(uint32 zone_id, uint16 instance_id);
 
-	uint16 GetInstanceID(uint32 zone, uint32 charid, int16 version);
+	uint16 GetInstanceID(uint32 zone, uint32 character_id, int16 version);
 	std::vector<uint16> GetInstanceIDs(uint32 zone_id, uint32 character_id);
 	uint8_t GetInstanceVersion(uint16 instance_id);
-	uint32 GetTimeRemainingInstance(uint16 instance_id, bool &is_perma);
+	uint32 GetTimeRemainingInstance(uint16 instance_id, bool& is_perma);
 	uint32 GetInstanceZoneID(uint16 instance_id);
 
-	void AssignGroupToInstance(uint32 gid, uint32 instance_id);
-	void AssignRaidToInstance(uint32 rid, uint32 instance_id);
+	void AssignGroupToInstance(uint32 group_id, uint32 instance_id);
+	void AssignRaidToInstance(uint32 raid_id, uint32 instance_id);
 	void DeleteInstance(uint16 instance_id);
-	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 charid, uint32 group_id);
-	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 charid, uint32 raid_id);
-	void GetCharactersInInstance(uint16 instance_id, std::list<uint32> &character_ids);
+	void FlagInstanceByGroupLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 group_id);
+	void FlagInstanceByRaidLeader(uint32 zone_id, int16 version, uint32 character_id, uint32 raid_id);
+	void GetCharactersInInstance(uint16 instance_id, std::list<uint32>& character_ids);
 	void PurgeExpiredInstances();
 	void SetInstanceDuration(uint16 instance_id, uint32 new_duration);
 	void CleanupInstanceCorpses();
 
 	/* Adventure related. */
-
-	void UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win = false, bool remove = false);
-	bool GetAdventureStats(uint32 char_id, AdventureStats_Struct *as);
+	void UpdateAdventureStatsEntry(uint32 character_id, uint8 theme_id, bool is_win = false, bool is_remove = false);
+	bool GetAdventureStats(uint32 character_id, AdventureStats_Struct* as);
 
 	/* Account Related */
+	const std::string& GetLiveChar(uint32 account_id);
+	bool SetAccountStatus(const std::string& account_name, int16 status);
+	bool SetLocalPassword(uint32 account_id, const std::string& password);
+	bool UpdateLiveChar(const std::string& name, uint32 account_id);
+	int16 CheckStatus(uint32 account_id);
+	void SetAccountCRCField(uint32 account_id, const std::string& field_name, uint64 checksum);
+	uint32 CheckLogin(const std::string& name, const std::string& password, const std::string& loginserver, int16* status = 0);
+	uint32 CreateAccount(
+		const std::string& name,
+		const std::string& password,
+		int16 status,
+		const std::string& loginserver,
+		uint32 lsaccount_id
+	);
+	uint32 GetAccountIDFromLSID(
+		const std::string& in_loginserver_id,
+		uint32 in_loginserver_account_id,
+		char* in_account_name = 0,
+		int16* in_status = 0
+	);
 
-	bool	DeleteAccount(const char *name, const char* loginserver);
-	bool	GetLiveChar(uint32 account_id, char* cname);
-	bool	SetAccountStatus(const char* name, int16 status);
-	bool	SetAccountStatus(const std::string& account_name, int16 status);
-	bool	SetLocalPassword(uint32 accid, const char* password);
-	bool	UpdateLiveChar(char* charname, uint32 account_id);
+	uint8 GetAgreementFlag(uint32 account_id);
+	void SetAgreementFlag(uint32 account_id);
 
-	int16	CheckStatus(uint32 account_id);
+	int GetIPExemption(const std::string& account_ip);
+	void SetIPExemption(const std::string& account_ip, int exemption_amount);
 
-	void	SetAccountCRCField(uint32 account_id, std::string field_name, uint64 checksum);
-
-	uint32	CheckLogin(const char* name, const char* password, const char *loginserver, int16* oStatus = 0);
-	uint32	CreateAccount(const char* name, const char* password, int16 status, const char* loginserver, uint32 lsaccount_id);
-	uint32	GetAccountIDFromLSID(const std::string& in_loginserver_id, uint32 in_loginserver_account_id, char* in_account_name = 0, int16* in_status = 0);
-	uint8	GetAgreementFlag(uint32 account_id);
-
-	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
-	void	SetAgreementFlag(uint32 account_id);
-
-	int  GetIPExemption(std::string account_ip);
-	void SetIPExemption(std::string account_ip, int exemption_amount);
-
-	int		GetInstanceID(uint32 char_id, uint32 zone_id);
+	int GetInstanceID(uint32 character_id, uint32 zone_id);
 
 
 	/* Groups */
-
-	std::string GetGroupLeaderForLogin(std::string character_name);
-	char* GetGroupLeadershipInfo(uint32 gid, char* leaderbuf, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
-
+	std::string GetGroupLeaderForLogin(const std::string& character_name);
+	char* GetGroupLeadershipInfo(
+		uint32 group_id,
+		char* leaderbuf,
+		char* maintank = nullptr,
+		char* assist = nullptr,
+		char* puller = nullptr,
+		char* marknpc = nullptr,
+		char* mentoree = nullptr,
+		int* mentor_percent = nullptr,
+		GroupLeadershipAA_Struct* GLAA = nullptr
+	);
 	std::string GetGroupLeaderName(uint32 group_id);
-
-	uint32	GetGroupID(const char* name);
-
-	void	ClearGroup(uint32 gid = 0);
-	void	ClearGroupLeader(uint32 gid = 0);
-	void	SetGroupID(const char* name, uint32 id, uint32 charid, uint32 ismerc = false);
-	void	SetGroupLeaderName(uint32 gid, const char* name);
+	uint32 GetGroupID(const std::string& name);
+	void ClearGroup(uint32 group_id = 0);
+	void ClearGroupLeader(uint32 group_id = 0);
+	void SetGroupLeaderName(uint32 group_id, const std::string& name);
 
 	/* Raids */
+	const std::string& GetRaidLeaderName(uint32 raid_id);
+	uint32 GetRaidID(const std::string& name);
+	void ClearRaid(uint32 raid_id = 0);
+	void ClearRaidDetails(uint32 raid_id = 0);
+	void ClearRaidLeader(uint32 group_id = std::numeric_limits<uint32>::max(), uint32 raid_id = 0);
+	void GetGroupLeadershipInfo(
+		uint32 group_id,
+		uint32 raid_id,
+		char* maintank = nullptr,
+		char* assist = nullptr,
+		char* puller = nullptr,
+		char* marknpc = nullptr,
+		char* mentoree = nullptr,
+		int* mentor_percent = nullptr,
+		GroupLeadershipAA_Struct* GLAA = nullptr
+	);
+	void GetRaidLeadershipInfo(
+		uint32 raid_id,
+		char* maintank = nullptr,
+		char* assist = nullptr,
+		char* puller = nullptr,
+		char* marknpc = nullptr,
+		RaidLeadershipAA_Struct* RLAA = nullptr
+	);
+	void SetRaidGroupLeaderInfo(uint32 group_id, uint32 raid_id);
 
-	const char *GetRaidLeaderName(uint32 rid);
-
-	uint32	GetRaidID(const char* name);
-
-	void	ClearRaid(uint32 rid = 0);
-	void	ClearRaidDetails(uint32 rid = 0);
-	void	ClearRaidLeader(uint32 gid = 0xFFFFFFFF, uint32 rid = 0);
-	void	GetGroupLeadershipInfo(uint32 gid, uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, char *mentoree = nullptr, int *mentor_percent = nullptr, GroupLeadershipAA_Struct* GLAA = nullptr);
-	void	GetRaidLeadershipInfo(uint32 rid, char* maintank = nullptr, char* assist = nullptr, char* puller = nullptr, char *marknpc = nullptr, RaidLeadershipAA_Struct* RLAA = nullptr);
-	void	SetRaidGroupLeaderInfo(uint32 gid, uint32 rid);
-
-	void    PurgeAllDeletedDataBuckets();
+	void PurgeAllDeletedDataBuckets();
 
 
 	/* Database Variables */
+	bool GetVariable(const std::string& name, std::string& value);
+	bool SetVariable(const std::string& name, const std::string& value);
+	bool LoadVariables();
 
-	bool	GetVariable(std::string varname, std::string &varvalue);
-	bool	SetVariable(const std::string& varname, const std::string &varvalue);
-	bool	LoadVariables();
+	uint8 GetPEQZone(uint32 zone_id, uint32 version);
+	uint32 GetServerType();
+	void AddReport(const std::string& who, const std::string& against, const std::string& lines);
+	struct TimeOfDay_Struct LoadTime(time_t& realtime);
+	bool SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);
+	void ClearMerchantTemp();
+	void ClearPTimers(uint32 character_id);
+	void SetFirstLogon(uint32 character_id, uint8 first_logon);
+	void SetLFG(uint32 character_id, bool is_lfg);
+	void SetLFP(uint32 character_id, bool is_lfp);
+	void SetLoginFlags(uint32 character_id, bool is_lfp, bool is_lfg, uint8 first_logon);
 
-	/* General Queries */
+	int64 CountInvSnapshots();
+	void ClearInvSnapshots(bool from_now = false);
 
-	bool	GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zoneid = 0, float* graveyard_x = 0, float* graveyard_y = 0, float* graveyard_z = 0, float* graveyard_heading = 0);
-	bool	LoadPTimers(uint32 charid, PTimerList &into);
-
-	uint8	GetPEQZone(uint32 zone_id, uint32 version);
-	uint8	GetMinStatus(uint32 zone_id, uint32 instance_version);
-	uint8	GetRaceSkill(uint8 skillid, uint8 in_race);
-	uint8	GetServerType();
-	uint8	GetSkillCap(uint8 skillid, uint8 in_race, uint8 in_class, uint16 in_level);
-
-	void	AddReport(std::string who, std::string against, std::string lines);
-	struct TimeOfDay_Struct		LoadTime(time_t &realtime);
-	bool	SaveTime(int8 minute, int8 hour, int8 day, int8 month, int16 year);
-	void	ClearMerchantTemp();
-	void	ClearPTimers(uint32 charid);
-	void	SetFirstLogon(uint32 CharID, uint8 firstlogon);
-	void	SetLFG(uint32 CharID, bool LFG);
-	void	SetLFP(uint32 CharID, bool LFP);
-	void	SetLoginFlags(uint32 CharID, bool LFP, bool LFG, uint8 firstlogon);
-
-	int		CountInvSnapshots();
-	void	ClearInvSnapshots(bool from_now = false);
-
-	void SourceDatabaseTableFromUrl(std::string table_name, std::string url);
-	void SourceSqlFromUrl(std::string url);
+	void SourceDatabaseTableFromUrl(const std::string& table_name, const std::string& url);
+	void SourceSqlFromUrl(const std::string& url);
 
 private:
-
-	Mutex Mvarcache;
+	Mutex           Mvarcache;
 	VarCache_Struct varcache;
 
 	/* Groups, utility methods. */
-	void    ClearAllGroupLeaders();
-	void    ClearAllGroups();
+	void ClearAllGroupLeaders();
+	void ClearAllGroups();
 
 	/* Raid, utility methods. */
 	void ClearAllRaids();

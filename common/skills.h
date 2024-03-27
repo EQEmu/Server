@@ -26,7 +26,6 @@
 #include <map>
 #include <vector>
 
-
 namespace EQ
 {
 	namespace skills {
