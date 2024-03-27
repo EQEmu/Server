@@ -440,6 +440,7 @@ int main(int argc, char **argv)
 
 	parse = new QuestParserCollection();
 
+	parse->RegisterQuestInterface(new DotnetParser(), "csx");
 #ifdef LUA_EQEMU
 	parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
 #endif
@@ -450,9 +451,7 @@ int main(int argc, char **argv)
 
 	/* Load Perl Event Export Settings */
 	parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
-
 #endif
-	parse->RegisterQuestInterface(new DotnetParser(), "csx");
 
 	//now we have our parser, load the quests
 	LogInfo("Loading quests");

@@ -30298,14 +30298,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetOOCRegen(void * jarg1, long long jarg2
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_Heal(void * jarg1) {
-  Mob *arg1 = (Mob *) 0 ;
-  
-  arg1 = (Mob *)jarg1; 
-  (arg1)->Heal();
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_Mob_HealDamage__SWIG_0(void * jarg1, unsigned long long jarg2, void * jarg3, unsigned short jarg4) {
   Mob *arg1 = (Mob *) 0 ;
   uint64 arg2 ;
@@ -33961,18 +33953,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsWarriorClass(void * jarg1) {
   
   arg1 = (Mob *)jarg1; 
   result = (bool)((Mob const *)arg1)->IsWarriorClass();
-  jresult = result; 
-  return jresult;
-}
-
-
-SWIGEXPORT char SWIGSTDCALL CSharp_Mob_GetCasterClass(void * jarg1) {
-  char jresult ;
-  Mob *arg1 = (Mob *) 0 ;
-  char result;
-  
-  arg1 = (Mob *)jarg1; 
-  result = (char)((Mob const *)arg1)->GetCasterClass();
   jresult = result; 
   return jresult;
 }
