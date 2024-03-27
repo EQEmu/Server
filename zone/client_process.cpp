@@ -1614,6 +1614,13 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	int trains_class_bit = 1 << (trains_class - 1); // Calculate the bit for trains_class (adjusting for 0-indexing)
 
 	for (int sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; ++sk) {
+		if (RuleB(Custom, MulticlassingEnabled)) {
+			if (GetMaxSkillAfterSpecializationRules((EQ::skills::SkillType)sk, MaxSkillOriginal((EQ::skills::SkillType)sk, trains_class, GetLevel())) <= 0) {
+				gmtrain->skills[sk] = 0;
+				continue;
+			}
+		}
+
 		if (!(classes_bits & trains_class_bit)) {
 			gmtrain->skills[sk] = 0; // If trains_class isn't represented in our classes, set skill to 0
 			continue; // Skip the rest of the loop and continue with the next skill

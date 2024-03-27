@@ -441,7 +441,7 @@ public:
 	inline uint32 GetBindInstanceID(uint32 index = 0) const { return m_pp.binds[index].instance_id; }
 	int64 CalcMaxMana();
 	int64 CalcBaseMana();
-	int64 _CalcBaseMana(int class_id);
+	int64 _CalcBaseMana(uint8 class_id);
 	const int64& SetMana(int64 amount);
 	int64 CalcManaRegenCap() final;
 
@@ -821,8 +821,8 @@ public:
 	void SetHoTT(uint32 mobid);
 	void ShowSkillsWindow();
 
-	uint16 MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint16 level) const;
-	uint16 MaxSkillOriginal(EQ::skills::SkillType skill_id, uint16 class_, uint16 level) const;
+	uint16 MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 level) const;
+	uint16 MaxSkillOriginal(EQ::skills::SkillType skill_id, uint16 class_id, uint16 level) const;
 	inline uint16 MaxSkill(EQ::skills::SkillType skill_id) const { return MaxSkill(skill_id, GetClass(), GetLevel()); }
 	uint8 SkillTrainLevel(EQ::skills::SkillType skill_id, uint16 class_id);
 	void MaxSkills();

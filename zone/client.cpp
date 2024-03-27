@@ -2832,7 +2832,7 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const
 	return false;
 }
 
-uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint8 class_id, uint8 level) const
+uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 level) const
 {	
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
@@ -2849,10 +2849,10 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint8 class_id, uint8 le
 		if (classes_bits & (1 << i)) {
 			uint16 classID = i + 1;
 
-			uint16 skillCap = content_db.GetSkillCap(classID, skill_id, level);
+			auto skillCap = skill_caps.GetSkillCap(classID, skill_id, level);
 			
-			if (skillCap > maxSkill) {
-				maxSkill = skillCap;
+			if (skillCap.cap > maxSkill) {
+				maxSkill = skillCap.cap;
 			}
 		}
 	}
@@ -2860,7 +2860,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint8 class_id, uint8 le
 	return maxSkill;
 }
 
-uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skillid, uint16 class_id, uint16 level) const 
+uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skill_id, uint16 class_id, uint16 level) const 
 {
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
@@ -2873,7 +2873,7 @@ uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skillid, uint16 class_id, 
 	return skill_caps.GetSkillCap(class_id, skill_id, level).cap;
 }
 
-uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint8 class_id)
+uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint16 class_id)
 {
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&

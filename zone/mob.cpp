@@ -978,9 +978,9 @@ int64 Mob::GetSpellHPBonuses() {
 	return spell_hp;
 }
 
-bool Mob::IsIntelligenceCasterClass() const
+bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
 {
-	if (IsClient()) {
+	if (IsClient() && class_id < Class::Warrior) {
 		int classes_bits = CastToClient()->GetClassesBits();
 
 		std::vector<uint16> classes = {
@@ -989,17 +989,20 @@ bool Mob::IsIntelligenceCasterClass() const
 			Class::Necromancer, 
 			Class::Wizard,
 			Class::Enchanter,
+			Class::Magician,
 		};
 
-		for (const auto& class_id : classes) {
-			if (classes_bits & (1 << (class_id - 1))) {
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
 				return true;
 			}
 		}
 
 		return false;
 	} else {
-		switch (GetClass()) {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+		switch (effective_class_id) {
 			case Class::ShadowKnight:
 			case Class::Bard:
 			case Class::Necromancer:
@@ -1017,9 +1020,9 @@ bool Mob::IsIntelligenceCasterClass() const
     }
 }
 
-bool Mob::IsPureMeleeClass() const
+bool Mob::IsPureMeleeClass(uint8 class_id) const
 {
-	if (IsClient()) {
+	if (IsClient() && class_id < Class::Warrior) {
 		int classes_bits = CastToClient()->GetClassesBits();
 
 		std::vector<uint16> classes = {
@@ -1029,15 +1032,17 @@ bool Mob::IsPureMeleeClass() const
 			Class::Berserker,
 		};
 
-		for (const auto& class_id : classes) {
-			if (classes_bits & (1 << (class_id - 1))) {
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
 				return true;
 			}
 		}
 
 		return false;
 	} else {
-        switch(GetClass()) {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
 			case Class::Warrior:
 			case Class::Monk:
 			case Class::Rogue:
@@ -1053,8 +1058,8 @@ bool Mob::IsPureMeleeClass() const
     }
 }
 
-bool Mob::IsWarriorClass(void) const { 
-	if (IsClient()) {
+bool Mob::IsWarriorClass(uint8 class_id) const { 
+	if (IsClient() && class_id < Class::Warrior) {
 		int classes_bits = CastToClient()->GetClassesBits();
 
 		std::vector<uint16> classes = {
@@ -1069,15 +1074,17 @@ bool Mob::IsWarriorClass(void) const {
 			Class::Bard,
 		};
 
-		for (const auto& class_id : classes) {
-			if (classes_bits & (1 << (class_id - 1))) {
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
 				return true;
 			}
 		}
 
 		return false;
 	} else {
-        switch(GetClass()) {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
             case Class::Warrior:
             case Class::WarriorGM:
             case Class::Rogue:
@@ -1103,9 +1110,9 @@ bool Mob::IsWarriorClass(void) const {
     }
 }
 
-bool Mob::IsWisdomCasterClass() const
+bool Mob::IsWisdomCasterClass(uint8 class_id) const
 {
-	if (IsClient()) {
+	if (IsClient() && class_id < Class::Warrior) {
 		int classes_bits = CastToClient()->GetClassesBits();
 
 		std::vector<uint16> classes = {
@@ -1125,7 +1132,9 @@ bool Mob::IsWisdomCasterClass() const
 
 		return false;
 	} else {
-        switch(GetClass()) {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
 			case Class::Cleric:
 			case Class::Paladin:
 			case Class::Ranger:

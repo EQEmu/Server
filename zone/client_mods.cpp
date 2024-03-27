@@ -577,29 +577,26 @@ int64 Client::CalcMaxMana()
 	return max_mana;
 }
 
-int64 Client::CalcBaseMana() {
-    if (RuleB(Custom, MulticlassingEnabled)) {
-        int classes_bits = GetClassesBits();
-        int64 highest_base_mana = 0; // Initialize to zero to ensure we capture the highest value
+int64 Client::CalcBaseMana() {    
+	int classes_bits = GetClassesBits();
+	int64 highest_base_mana = 0;
 
-        for (const auto& class_bitmask : player_class_bitmasks) {
-            uint8 class_id = class_bitmask.first;
-            uint16 class_bit = class_bitmask.second;
-            if ((classes_bits & class_bit) != 0) {
-                int64 class_base_mana = _CalcBaseMana(class_id);
-                if (class_base_mana > highest_base_mana) {
-                    highest_base_mana = class_base_mana; // Update if this class's base mana is higher
-                }
-            }
-        }
+	for (const auto& class_bitmask : player_class_bitmasks) {
+		uint8 class_id = class_bitmask.first;
+		uint16 class_bit = class_bitmask.second;
+		if ((classes_bits & class_bit) != 0) {
+			LogSpells("Checking Class ID [{}], bit [{}]", class_id, class_bit);
+			int64 class_base_mana = _CalcBaseMana(class_id);
+			if (class_base_mana > highest_base_mana) {
+				highest_base_mana = class_base_mana; 
+			}
+		}
+	}
 
-        return highest_base_mana > 0 ? highest_base_mana : 5; // Ensure a minimal mana value is returned
-    } else {
-        return _CalcBaseMana(GetClass());
-    }
+	return highest_base_mana;
 }
 
-int64 Client::_CalcBaseMana(int class_id)
+int64 Client::_CalcBaseMana(uint8 class_id)
 {
 	int   ConvertedWisInt = 0;
 	int   MindLesserFactor, MindFactor;
@@ -608,7 +605,7 @@ int64 Client::_CalcBaseMana(int class_id)
 	int   wisint_mana     = 0;
 	int64 max_m           = 0;
 
-	if (IsIntelligenceCasterClass()) {
+	if (IsIntelligenceCasterClass(class_id)) {
 		WisInt = GetINT();
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
@@ -641,8 +638,7 @@ int64 Client::_CalcBaseMana(int class_id)
 				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
 			}
 		}
-	} 
-	if (IsWisdomCasterClass()) {
+	} else if (IsWisdomCasterClass(class_id)) {
 		WisInt = GetWIS();
 
 		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {

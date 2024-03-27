@@ -276,7 +276,7 @@ void ExportSkillCaps(SharedDatabase* db)
 			if (SkillUsable(db, skill_id, class_id)) {
 				uint32 previous_cap = 0;
 				for (uint8 level = 1; level <= skill_cap_max_level; level++) {
-					int cap = multiclassing ? skills_array[skill][level-1] : GetSkill(db, skill_id, class_id, level);
+					int cap = multiclassing ? skills_array[skill_id][level-1] : GetSkill(db, skill_id, class_id, level);
 					if (cap < previous_cap) {
 						cap = previous_cap;
 					}
