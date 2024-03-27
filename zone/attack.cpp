@@ -2870,17 +2870,17 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		entity_list.AddCorpse(corpse, GetID());
 
 		auto out2 = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-        auto data = (MobRename_Struct *)out2->pBuffer;
-        out2->priority = 6;
+		auto data = (MobRename_Struct *)out2->pBuffer;
+		out2->priority = 6;
 
-        strn0cpy(data->old_name, temp_name.c_str(), sizeof(data->old_name));
-        strn0cpy(data->old_name_again, data->old_name, sizeof(data->old_name_again));
-        strn0cpy(data->new_name, corpse->GetCleanName(), sizeof(data->new_name));
-        data->unknown192 = 0;
-        data->unknown196 = 1;
+		strn0cpy(data->old_name, temp_name.c_str(), sizeof(data->old_name));
+		strn0cpy(data->old_name_again, data->old_name, sizeof(data->old_name_again));
+		strn0cpy(data->new_name, corpse->GetCleanName(), sizeof(data->new_name));
+		data->unknown192 = 0;
+		data->unknown196 = 1;
 
-        entity_list.QueueClients(killer_mob, out2, false);
-        safe_delete(out2);
+		entity_list.QueueClients(killer_mob, out2, false);
+		safe_delete(out2);
 
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
