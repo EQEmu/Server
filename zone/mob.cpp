@@ -940,19 +940,16 @@ int Mob::_GetFearSpeed() const {
 	return speed_mod;
 }
 
-int64 Mob::CalcMaxMana() {
-	switch (GetCasterClass()) {
-		case 'I':
-			max_mana = (((GetINT()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-			break;
-		case 'W':
-			max_mana = (((GetWIS()/2)+1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
-			break;
-		case 'N':
-		default:
-			max_mana = 0;
-			break;
+int64 Mob::CalcMaxMana()
+{
+	if (IsIntelligenceCasterClass()) {
+		max_mana = (((GetINT() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+	} else if (IsWisdomCasterClass()) {
+		max_mana = (((GetWIS() / 2) + 1) * GetLevel()) + spellbonuses.Mana + itembonuses.Mana;
+	} else {
+		max_mana = 0;
 	}
+
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
@@ -981,94 +978,241 @@ int64 Mob::GetSpellHPBonuses() {
 	return spell_hp;
 }
 
-char Mob::GetCasterClass() const {
-    return GetCasterClass(class_);
-}
+bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
+{
+	if (IsClient() && class_id < Class::Warrior) {
+		int classes_bits = CastToClient()->GetClassesBits();
 
-char Mob::GetCasterClass(int class_id) const {
-    switch(class_id) {
-    case Class::Cleric:
-    case Class::Paladin:
-    case Class::Ranger:
-    case Class::Druid:
-    case Class::Shaman:
-    case Class::Beastlord:
-    case Class::ClericGM:
-    case Class::PaladinGM:
-    case Class::RangerGM:
-    case Class::DruidGM:
-    case Class::ShamanGM:
-    case Class::BeastlordGM:
-        return 'W';
-        break;
+		std::vector<uint16> classes = {
+			Class::ShadowKnight, 
+			Class::Bard, 
+			Class::Necromancer, 
+			Class::Wizard,
+			Class::Enchanter,
+			Class::Magician,
+		};
 
-    case Class::ShadowKnight:
-    case Class::Bard:
-    case Class::Necromancer:
-    case Class::Wizard:
-    case Class::Magician:
-    case Class::Enchanter:
-    case Class::ShadowKnightGM:
-    case Class::BardGM:
-    case Class::NecromancerGM:
-    case Class::WizardGM:
-    case Class::MagicianGM:
-    case Class::EnchanterGM:
-        return 'I';
-        break;
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
+				return true;
+			}
+		}
 
-    default:
-        return 'N';
-        break;
+		return false;
+	} else {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+		switch (effective_class_id) {
+			case Class::ShadowKnight:
+			case Class::Bard:
+			case Class::Necromancer:
+			case Class::Wizard:
+			case Class::Magician:
+			case Class::Enchanter:
+			case Class::ShadowKnightGM:
+			case Class::BardGM:
+			case Class::NecromancerGM:
+			case Class::WizardGM:
+			case Class::MagicianGM:
+			case Class::EnchanterGM:
+				return true;
+		}
     }
 }
 
+bool Mob::IsPureMeleeClass(uint8 class_id) const
+{
+	if (IsClient() && class_id < Class::Warrior) {
+		int classes_bits = CastToClient()->GetClassesBits();
 
-uint8 Mob::GetArchetype() const {
-	switch(class_)
-	{
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::ShadowKnight:
-	case Class::Bard:
-	case Class::Beastlord:
-	case Class::PaladinGM:
-	case Class::RangerGM:
-	case Class::ShadowKnightGM:
-	case Class::BardGM:
-	case Class::BeastlordGM:
-		return ARCHETYPE_HYBRID;
-		break;
-	case Class::Cleric:
-	case Class::Druid:
-	case Class::Shaman:
-	case Class::Necromancer:
-	case Class::Wizard:
-	case Class::Magician:
-	case Class::Enchanter:
-	case Class::ClericGM:
-	case Class::DruidGM:
-	case Class::ShamanGM:
-	case Class::NecromancerGM:
-	case Class::WizardGM:
-	case Class::MagicianGM:
-	case Class::EnchanterGM:
-		return ARCHETYPE_CASTER;
-		break;
-	case Class::Warrior:
-	case Class::Monk:
-	case Class::Rogue:
-	case Class::Berserker:
-	case Class::WarriorGM:
-	case Class::MonkGM:
-	case Class::RogueGM:
-	case Class::BerserkerGM:
-		return ARCHETYPE_MELEE;
-		break;
-	default:
-		return ARCHETYPE_HYBRID;
-		break;
+		std::vector<uint16> classes = {
+			Class::Warrior, 
+			Class::Rogue, 
+			Class::Monk, 
+			Class::Berserker,
+		};
+
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
+				return true;
+			}
+		}
+
+		return false;
+	} else {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
+			case Class::Warrior:
+			case Class::Monk:
+			case Class::Rogue:
+			case Class::Berserker:
+			case Class::WarriorGM:
+			case Class::MonkGM:
+			case Class::RogueGM:
+			case Class::BerserkerGM:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
+
+bool Mob::IsWarriorClass(uint8 class_id) const { 
+	if (IsClient() && class_id < Class::Warrior) {
+		int classes_bits = CastToClient()->GetClassesBits();
+
+		std::vector<uint16> classes = {
+			Class::Warrior, 
+			Class::Rogue, 
+			Class::Monk, 
+			Class::Paladin,
+			Class::ShadowKnight, 
+			Class::Ranger, 
+			Class::Beastlord, 
+			Class::Berserker, 
+			Class::Bard,
+		};
+
+		for (const auto& classid : classes) {
+			if (classes_bits & (1 << (classid - 1))) {
+				return true;
+			}
+		}
+
+		return false;
+	} else {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
+            case Class::Warrior:
+            case Class::WarriorGM:
+            case Class::Rogue:
+            case Class::RogueGM:
+            case Class::Monk:
+            case Class::MonkGM:
+            case Class::Paladin:
+            case Class::PaladinGM:
+            case Class::ShadowKnight:
+            case Class::ShadowKnightGM:
+            case Class::Ranger:
+            case Class::RangerGM:
+            case Class::Beastlord:
+            case Class::BeastlordGM:
+            case Class::Berserker:
+            case Class::BerserkerGM:
+            case Class::Bard:
+            case Class::BardGM:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
+
+bool Mob::IsWisdomCasterClass(uint8 class_id) const
+{
+	if (IsClient() && class_id < Class::Warrior) {
+		int classes_bits = CastToClient()->GetClassesBits();
+
+		std::vector<uint16> classes = {
+			Class::Cleric, 
+			Class::Paladin, 
+			Class::Ranger, 
+			Class::Druid,
+			Class::Shaman,
+			Class::Beastlord, 
+		};
+
+		for (const auto& class_id : classes) {
+			if (classes_bits & (1 << (class_id - 1))) {
+				return true;
+			}
+		}
+
+		return false;
+	} else {
+		uint8 effective_class_id = (class_id >= Class::Warrior) ? class_id : GetClass();
+
+        switch(effective_class_id) {
+			case Class::Cleric:
+			case Class::Paladin:
+			case Class::Ranger:
+			case Class::Druid:
+			case Class::Shaman:
+			case Class::Beastlord:
+			case Class::ClericGM:
+			case Class::PaladinGM:
+			case Class::RangerGM:
+			case Class::DruidGM:
+			case Class::ShamanGM:
+			case Class::BeastlordGM:
+                return true;
+            default:
+                return false;
+        }
+    }
+}
+
+uint8 Mob::GetArchetype() const
+{
+	switch (GetClass()) {
+		case Class::Paladin:
+		case Class::Ranger:
+		case Class::ShadowKnight:
+		case Class::Bard:
+		case Class::Beastlord:
+		case Class::PaladinGM:
+		case Class::RangerGM:
+		case Class::ShadowKnightGM:
+		case Class::BardGM:
+		case Class::BeastlordGM:
+			return Archetype::Hybrid;
+		case Class::Cleric:
+		case Class::Druid:
+		case Class::Shaman:
+		case Class::Necromancer:
+		case Class::Wizard:
+		case Class::Magician:
+		case Class::Enchanter:
+		case Class::ClericGM:
+		case Class::DruidGM:
+		case Class::ShamanGM:
+		case Class::NecromancerGM:
+		case Class::WizardGM:
+		case Class::MagicianGM:
+		case Class::EnchanterGM:
+			return Archetype::Caster;
+		case Class::Warrior:
+		case Class::Monk:
+		case Class::Rogue:
+		case Class::Berserker:
+		case Class::WarriorGM:
+		case Class::MonkGM:
+		case Class::RogueGM:
+		case Class::BerserkerGM:
+			return Archetype::Melee;
+		default:
+			break;
 	}
+
+	return Archetype::Hybrid;
+}
+
+const std::string& Mob::GetArchetypeName()
+{
+	switch (GetArchetype()) {
+		case Archetype::Hybrid:
+			return "Hybrid";
+		case Archetype::Caster:
+			return "Caster";
+		case Archetype::Melee:
+			return "Melee";
+		default:
+			break;
+	}
+
+	return "Hybrid";
 }
 
 void Mob::SetSpawnLastNameByClass(NewSpawn_Struct* ns)
@@ -4607,51 +4751,6 @@ uint32 Mob::GetClassesBits() const
 		}
 	}
 }
-
-bool Mob::IsWarriorClass(void) const {
-    if (IsClient() && RuleB(Custom, MulticlassingEnabled)) {
-        int classes_bits = CastToClient()->GetClassesBits();
-
-        std::vector<uint16> warriorLikeClasses = {
-            Class::Warrior, Class::Rogue, Class::Monk, Class::Paladin,
-            Class::ShadowKnight, Class::Ranger, Class::Beastlord, 
-			Class::Berserker, Class::Bard
-        };
-
-        for (const auto& class_id : warriorLikeClasses) {
-            if (classes_bits & (1 << (class_id - 1))) {
-                return true; // Return true if any of the warrior-like classes are set in classes_bits
-            }
-        }
-
-        return false;
-    } else {
-        switch(GetClass()) {
-            case Class::Warrior:
-            case Class::WarriorGM:
-            case Class::Rogue:
-            case Class::RogueGM:
-            case Class::Monk:
-            case Class::MonkGM:
-            case Class::Paladin:
-            case Class::PaladinGM:
-            case Class::ShadowKnight:
-            case Class::ShadowKnightGM:
-            case Class::Ranger:
-            case Class::RangerGM:
-            case Class::Beastlord:
-            case Class::BeastlordGM:
-            case Class::Berserker:
-            case Class::BerserkerGM:
-            case Class::Bard:
-            case Class::BardGM:
-                return true;
-            default:
-                return false;
-        }
-    }
-}
-
 
 bool Mob::CanThisClassParry(void) const
 {

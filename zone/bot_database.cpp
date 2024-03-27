@@ -1922,18 +1922,14 @@ bool BotDatabase::LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 g
 	const auto& l = GroupIdRepository::GetWhere(
 		database,
 		fmt::format(
-			"`groupid` = {} AND `name` IN (SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
+			"`group_id` = {} AND `bot_id` != 0 AND `name` IN (SELECT `name` FROM `bot_data` WHERE `owner_id` = {})",
 			group_id,
 			owner_id
 		)
 	);
 
-	if (l.empty()) {
-		return true;
-	}
-
 	for (const auto& e : l) {
-		group_list.push_back(e.charid);
+		group_list.emplace_back(e.bot_id);
 	}
 
 	return true;

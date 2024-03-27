@@ -116,13 +116,13 @@ void command_lootsim(Client *c, const Seperator *sep)
 				c->Message(Chat::White, fmt::format("# Global Loot Table ID [{}]", id).c_str());
 				c->SendChatLineBreak();
 
-				loot_table = zone->GetLootTable(loottable_id);
+				loot_table = zone->GetLootTable(id);
 				if (!loot_table) {
 					c->Message(Chat::Red, fmt::format("Global Loot table not found [{}]", id).c_str());
 					continue;
 				}
 
-				le = zone->GetLootTableEntries(loottable_id);
+				le = zone->GetLootTableEntries(id);
 
 				// translate above for loop using loot_table_entries
 				for (auto &e: le) {

@@ -545,37 +545,26 @@ int32 Client::GetRawItemAC()
 
 int64 Client::CalcMaxMana()
 {
-	switch (GetCasterClass()) {
-		case 'I':
-		case 'W': {
-				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
-				break;
-			}
-		case 'N': {
-				if (RuleB(Custom, MulticlassingEnabled)) {
-					max_mana = CalcBaseMana();
-				} else {
-					max_mana = 0;
-				}
-				if (RuleB(Custom, MulticlassingEnabled)) {
-					max_mana = CalcBaseMana();
-				} else {
-					max_mana = 0;
-				}
-				break;
-			}
-		default: {
-				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
-				max_mana = 0;
-				break;
-			}
+	if (IsIntelligenceCasterClass() || IsWisdomCasterClass()) {
+		max_mana = (
+			CalcBaseMana() +
+			itembonuses.Mana +
+			spellbonuses.Mana +
+			aabonuses.Mana +
+			GroupLeadershipAAManaEnhancement()
+		);
+	} else {
+		max_mana = 0;
 	}
+
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
+
 	if (current_mana > max_mana) {
 		current_mana = max_mana;
 	}
+
 	int mana_perc_cap = spellbonuses.ManaPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
@@ -583,120 +572,109 @@ int64 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
+
 	LogSpells("for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
-int64 Client::CalcBaseMana() {
-    if (RuleB(Custom, MulticlassingEnabled)) {
-        int classes_bits = GetClassesBits();
-        int64 highest_base_mana = 0; // Initialize to zero to ensure we capture the highest value
+int64 Client::CalcBaseMana() {    
+	int classes_bits = GetClassesBits();
+	int64 highest_base_mana = 0;
 
-        for (const auto& class_bitmask : player_class_bitmasks) {
-            uint8 class_id = class_bitmask.first;
-            uint16 class_bit = class_bitmask.second;
-            if ((classes_bits & class_bit) != 0) {
-                int64 class_base_mana = _CalcBaseMana(class_id);
-                if (class_base_mana > highest_base_mana) {
-                    highest_base_mana = class_base_mana; // Update if this class's base mana is higher
-                }
-            }
-        }
+	for (const auto& class_bitmask : player_class_bitmasks) {
+		uint8 class_id = class_bitmask.first;
+		uint16 class_bit = class_bitmask.second;
+		if ((classes_bits & class_bit) != 0) {
+			LogSpells("Checking Class ID [{}], bit [{}]", class_id, class_bit);
+			int64 class_base_mana = _CalcBaseMana(class_id);
+			if (class_base_mana > highest_base_mana) {
+				highest_base_mana = class_base_mana; 
+			}
+		}
+	}
 
-        return highest_base_mana > 0 ? highest_base_mana : 5; // Ensure a minimal mana value is returned
-    } else {
-        return _CalcBaseMana(GetClass());
-    }
+	return highest_base_mana;
 }
 
-int64 Client::_CalcBaseMana(int class_id)
+int64 Client::_CalcBaseMana(uint8 class_id)
 {
-	int ConvertedWisInt = 0;
-	int MindLesserFactor, MindFactor;
-	int WisInt = 0;
-	int64 base_mana = 0;
-	int wisint_mana = 0;
-	int64 max_m = 0;
+	int   ConvertedWisInt = 0;
+	int   MindLesserFactor, MindFactor;
+	int   WisInt          = 0;
+	int64 base_mana       = 0;
+	int   wisint_mana     = 0;
+	int64 max_m           = 0;
 
-	switch (GetCasterClass(class_id)) {
-		case 'I':
-			WisInt = GetINT();
-			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-				ConvertedWisInt = WisInt;
-				int over200 = WisInt;
-				if (WisInt > 100) {
-					if (WisInt > 200) {
-						over200 = (WisInt - 200) / -2 + WisInt;
-					}
-					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
+	if (IsIntelligenceCasterClass(class_id)) {
+		WisInt = GetINT();
+
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			ConvertedWisInt = WisInt;
+
+			int over200 = WisInt;
+			if (WisInt > 100) {
+				if (WisInt > 200) {
+					over200 = (WisInt - 200) / -2 + WisInt;
 				}
-				auto base_data = zone->GetBaseData(GetLevel(), class_id);
-				if (base_data.level == GetLevel()) {
-					max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
-				}
+				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 			}
-			else {
-				if ((( WisInt - 199 ) / 2) > 0) {
-					MindLesserFactor = ( WisInt - 199 ) / 2;
-				}
-				else {
-					MindLesserFactor = 0;
-				}
-				MindFactor = WisInt - MindLesserFactor;
-				if (WisInt > 100) {
-					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-				}
-				else {
-					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-				}
+
+			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
+			if (base_data.level == GetLevel()) {
+				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
 			}
-			break;
-		case 'W':
-			WisInt = GetWIS();
-			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-				ConvertedWisInt = WisInt;
-				int over200 = WisInt;
-				if (WisInt > 100) {
-					if (WisInt > 200) {
-						over200 = (WisInt - 200) / -2 + WisInt;
-					}
-					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
-				}
-				auto base_data = zone->GetBaseData(GetLevel(), class_id);
-				if (base_data.level == GetLevel()) {
-					max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
-				}
+		} else {
+			if (((WisInt - 199) / 2) > 0) {
+				MindLesserFactor = (WisInt - 199) / 2;
+			} else {
+				MindLesserFactor = 0;
 			}
-			else {
-				if ((( WisInt - 199 ) / 2) > 0) {
-					MindLesserFactor = ( WisInt - 199 ) / 2;
-				}
-				else {
-					MindLesserFactor = 0;
-				}
-				MindFactor = WisInt - MindLesserFactor;
-				if (WisInt > 100) {
-					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-				}
-				else {
-					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-				}
+
+			MindFactor = WisInt - MindLesserFactor;
+
+			if (WisInt > 100) {
+				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+			} else {
+				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
 			}
-			break;
-		case 'N': {
-				max_m = 0;				
-				break;
+		}
+	} else if (IsWisdomCasterClass(class_id)) {
+		WisInt = GetWIS();
+
+		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			ConvertedWisInt = WisInt;
+
+			int over200 = WisInt;
+			if (WisInt > 100) {
+				if (WisInt > 200) {
+					over200 = (WisInt - 200) / -2 + WisInt;
+				}
+				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 			}
-		default: {
-				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass(class_id));
-				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass(class_id));
-				max_m = 0;
-				break;
+
+			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
+			if (base_data.level == GetLevel()) {
+				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
 			}
+		} else {
+			if (((WisInt - 199) / 2) > 0) {
+				MindLesserFactor = (WisInt - 199) / 2;
+			} else {
+				MindLesserFactor = 0;
+			}
+
+			MindFactor = WisInt - MindLesserFactor;
+
+			if (WisInt > 100) {
+				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+			} else {
+				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+			}
+		}
+	} else {
+		max_m = 0;
 	}
-	#if EQDEBUG >= 11
-	LogDebug("Client::CalcBaseMana() called for [{}] - returning [{}]", GetName(), max_m);
-	#endif
+
 	return max_m;
 }
 

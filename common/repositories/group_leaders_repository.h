@@ -44,7 +44,15 @@ public:
      */
 
 	// Custom extended repository methods here
-
+	static void ClearAllGroupLeaders(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}`",
+				TableName()
+			)
+		);
+	}
 };
 
 #endif //EQEMU_GROUP_LEADERS_REPOSITORY_H

@@ -67,6 +67,7 @@
 #include "../common/serverinfo.h"
 #include "../common/repositories/merc_stance_entries_repository.h"
 #include "../common/repositories/alternate_currency_repository.h"
+#include "../common/repositories/graveyard_repository.h"
 
 #include <time.h>
 
@@ -1023,9 +1024,16 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 	if (graveyard_id() > 0) {
 		LogDebug("Graveyard ID is [{}]", graveyard_id());
-		bool GraveYardLoaded = content_db.GetZoneGraveyard(graveyard_id(), &pgraveyard_zoneid, &m_graveyard.x, &m_graveyard.y, &m_graveyard.z, &m_graveyard.w);
+		const auto& e = GraveyardRepository::FindOne(content_db, graveyard_id());
 
-		if (GraveYardLoaded) {
+		if (e.id) {
+			pgraveyard_zoneid = e.zone_id;
+
+			m_graveyard.x = e.x;
+			m_graveyard.y = e.y;
+			m_graveyard.z = e.z;
+			m_graveyard.w = e.heading;
+
 			LogDebug("Loaded a graveyard for zone [{}]: graveyard zoneid is [{}] at [{}]", short_name, graveyard_zoneid(), to_string(m_graveyard).c_str());
 		}
 		else {

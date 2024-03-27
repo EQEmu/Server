@@ -758,12 +758,12 @@ void Perl_NPC_SetLDoNTrapDetected(NPC* self, bool is_detected)
 
 void Perl_NPC_ScaleNPC(NPC* self, uint8 npc_level)
 {
-	return self->ScaleNPC(npc_level);
+	self->ScaleNPC(npc_level, true);
 }
 
 void Perl_NPC_ScaleNPC(NPC* self, uint8 npc_level, bool override_special_abilities)
 {
-	return self->ScaleNPC(npc_level, override_special_abilities);
+	self->ScaleNPC(npc_level, true, override_special_abilities);
 }
 
 bool Perl_NPC_IsUnderwaterOnly(NPC* self) // @categories Script Utility
