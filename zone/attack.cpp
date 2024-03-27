@@ -2012,9 +2012,10 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 			}
 
 			entity_list.AddCorpse(new_corpse, GetID());
-			new_corpse->Spawn();
 			SetID(0);
 
+			//send the become corpse packet to everybody else in the zone.
+			entity_list.QueueClients(this, &app2, true);
 			ApplyIllusionToCorpse(illusion_spell_id, new_corpse);
 			leave_corpse = true;
 		}
@@ -2506,8 +2507,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	d->spell_id     = UINT32_MAX;
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage       = damage;
+	d->corpseid		= GetID();
 
-	app->priority = 6;
+	app->priority = 1;
 
 	entity_list.QueueClients(killer_mob, app, false);
 
@@ -2859,8 +2861,27 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 
 		entity_list.LimitRemoveNPC(this);
+		
+		// Rename corpse on client so %T works for those in zone already
+		std::string temp_name {};
+		temp_name = fmt::format("{}'s_corpse{}",
+			EntityList::RemoveNumbers((char *)corpse->GetName()), GetID());
+
 		entity_list.AddCorpse(corpse, GetID());
-		corpse->Spawn();
+
+		auto out2 = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
+        auto data = (MobRename_Struct *)out2->pBuffer;
+        out2->priority = 6;
+
+        strn0cpy(data->old_name, temp_name.c_str(), sizeof(data->old_name));
+        strn0cpy(data->old_name_again, data->old_name, sizeof(data->old_name_again));
+        strn0cpy(data->new_name, corpse->GetCleanName(), sizeof(data->new_name));
+        data->unknown192 = 0;
+        data->unknown196 = 1;
+
+        entity_list.QueueClients(killer_mob, out2, false);
+        safe_delete(out2);
+
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
 
