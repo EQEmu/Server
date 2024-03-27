@@ -3211,8 +3211,16 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 
 					if (sp2_value < blocked_below_value)
 					{
-						LogSpells("Blocking spell because sp2_Value < blocked_below_value");
-						return -1;		//blocked
+						if (IsDetrimentalSpell(spellid2))
+						{
+							//Live fixed this in 2018 to allow detrimental spells to bypass being blocked by SPA 148
+							LogSpells("Detrimental spell [{}] ([{}]) avoids being blocked.", sp2.name, spellid2);
+						}
+						else
+						{
+							LogSpells("Blocking spell because sp2_Value < blocked_below_value");
+							return -1;		//blocked
+						}
 					}
 				} else {
 					LogSpells("[{}] ([{}]) blocks effect [{}] on slot [{}] below [{}], but we do not have that effect on that slot. Ignored",
