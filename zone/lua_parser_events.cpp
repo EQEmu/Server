@@ -645,30 +645,18 @@ void handle_npc_spell_blocked(
 	lua_setfield(L, -2, "cast_spell_id");
 
 	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(blocking_spell_id)) {
-		Lua_Spell l_spell(&spells[blocking_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	}
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
 
 	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(cast_spell_id)) {
-		Lua_Spell l_spell(&spells[cast_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	}
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
 }
 
 // Player
@@ -1743,30 +1731,18 @@ void handle_player_spell_blocked(
 	lua_setfield(L, -2, "cast_spell_id");
 
 	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(blocking_spell_id)) {
-		Lua_Spell l_spell(&spells[blocking_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	}
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
 
 	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(cast_spell_id)) {
-		Lua_Spell l_spell(&spells[cast_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	}
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
 }
 
 // Item
@@ -2799,30 +2775,18 @@ void handle_bot_spell_blocked(
 	lua_setfield(L, -2, "cast_spell_id");
 
 	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(blocking_spell_id)) {
-		Lua_Spell l_spell(&spells[blocking_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "blocking_spell");
-	}
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
 
 	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
-	if (IsValidSpell(cast_spell_id)) {
-		Lua_Spell l_spell(&spells[cast_spell_id]);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	} else {
-		Lua_Spell l_spell(nullptr);
-		luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
-		l_spell_o.push(L);
-		lua_setfield(L, -2, "cast_spell");
-	}
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
 }
 
 #endif
