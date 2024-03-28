@@ -842,7 +842,7 @@ public:
 	bool IsPureMeleeClass() const;
 	bool IsWisdomCasterClass() const;
 	uint8 GetArchetype() const;
-	const std::string& GetArchetypeName();
+	const std::string GetArchetypeName();
 	void SetZone(uint32 zone_id, uint32 instance_id);
 	void SendStatsWindow(Client* c, bool use_window);
 	void ShowStats(Client* client);
