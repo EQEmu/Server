@@ -5474,6 +5474,18 @@ std::string lua_silent_say_link(std::string text, std::string link_name) {
 	return Saylink::Silent(text, link_name);
 }
 
+uint16 lua_get_class_bitmask(uint8 class_id) {
+	return GetPlayerClassBit(class_id);
+}
+
+uint32 lua_get_deity_bitmask(uint16 deity_id) {
+	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(deity_id)));
+}
+
+uint16 lua_get_race_bitmask(uint16 race_id) {
+	return GetPlayerRaceBit(race_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6270,6 +6282,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_bot_race_by_id", &lua_get_bot_race_by_id),
 		luabind::def("silent_say_link", (std::string(*)(std::string))&lua_silent_say_link),
 		luabind::def("silent_say_link", (std::string(*)(std::string,std::string))&lua_silent_say_link),
+		luabind::def("get_class_bitmask", &lua_get_class_bitmask),
+		luabind::def("get_deity_bitmask", &lua_get_deity_bitmask),
+		luabind::def("get_race_bitmask", &lua_get_race_bitmask),
 		/*
 			Cross Zone
 		*/
