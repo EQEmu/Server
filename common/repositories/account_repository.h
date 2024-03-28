@@ -92,7 +92,7 @@ public:
 
 	static std::string GetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id)
 	{
-		return AccountRepository::FindOne(db, account_id).charname;
+		return AccountRepository::FindOne(db, account_id).auto_login_charname;
 	}
 
 	static bool SetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id, const std::string& character_name)
