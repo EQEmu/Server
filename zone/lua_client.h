@@ -57,8 +57,9 @@ public:
 	void SetBaseClass(int v);
 	void SetBaseRace(int v);
 	void SetBaseGender(int v);
-	int GetClassBitmask();
-	int GetRaceBitmask();
+	uint16 GetClassBitmask();
+	uint32 GetDeityBitmask();
+	uint16 GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
 	int GetLDoNPointsTheme(int theme);

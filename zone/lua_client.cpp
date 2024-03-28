@@ -150,12 +150,17 @@ void Lua_Client::SetBaseGender(int v) {
 	self->SetBaseGender(v);
 }
 
-int Lua_Client::GetClassBitmask() {
+uint16 Lua_Client::GetClassBitmask() {
 	Lua_Safe_Call_Int();
 	return GetPlayerClassBit(self->GetClass());
 }
 
-int Lua_Client::GetRaceBitmask() {
+uint32 Lua_Client::GetDeityBitmask() {
+	Lua_Safe_Call_Int();
+	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(GetDeity())));
+}
+
+uint16 Lua_Client::GetRaceBitmask() {
 	Lua_Safe_Call_Int();
 	return GetPlayerRaceBit(self->GetBaseRace());
 }
@@ -3507,13 +3512,14 @@ luabind::scope lua_register_client() {
 	.def("GetCarriedPlatinum", (uint32(Lua_Client::*)(void))&Lua_Client::GetCarriedPlatinum)
 	.def("GetCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetCharacterFactionLevel)
 	.def("GetClassAbbreviation", (std::string(Lua_Client::*)(void))&Lua_Client::GetClassAbbreviation)
-	.def("GetClassBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetClassBitmask)
+	.def("GetClassBitmask", (uint16(Lua_Client::*)(void))&Lua_Client::GetClassBitmask)
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
 	.def("GetClientVersion", (int(Lua_Client::*)(void))&Lua_Client::GetClientVersion)
 	.def("GetClientVersionBit", (uint32(Lua_Client::*)(void))&Lua_Client::GetClientVersionBit)
 	.def("GetCorpseCount", (int64(Lua_Client::*)(void))&Lua_Client::GetCorpseCount)
 	.def("GetCorpseID", (int(Lua_Client::*)(int))&Lua_Client::GetCorpseID)
 	.def("GetCorpseItemAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetCorpseItemAt)
+	.def("GetDeityBitmask", (uint32(Lua_Client::*)(void))&Lua_Client::GetDeityBitmask)
 	.def("GetDiscSlotBySpellID", (int(Lua_Client::*)(int32))&Lua_Client::GetDiscSlotBySpellID)
 	.def("GetDisciplineTimer", (uint32(Lua_Client::*)(uint32))&Lua_Client::GetDisciplineTimer)
 	.def("GetDuelTarget", (int(Lua_Client::*)(void))&Lua_Client::GetDuelTarget)
@@ -3571,7 +3577,7 @@ luabind::scope lua_register_client() {
 	.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 	.def("GetPVP", (bool(Lua_Client::*)(void))&Lua_Client::GetPVP)
 	.def("GetPVPPoints", (uint32(Lua_Client::*)(void))&Lua_Client::GetPVPPoints)
-	.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
+	.def("GetRaceBitmask", (uint16(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 	.def("GetRadiantCrystals", (uint32(Lua_Client::*)(void))&Lua_Client::GetRadiantCrystals)
 	.def("GetRaid", (Lua_Raid(Lua_Client::*)(void))&Lua_Client::GetRaid)
 	.def("GetRaidOrGroupOrSelf", (luabind::object(Lua_Client::*)(lua_State*))&Lua_Client::GetRaidOrGroupOrSelf)
