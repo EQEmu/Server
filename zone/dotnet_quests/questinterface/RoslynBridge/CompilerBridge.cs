@@ -51,6 +51,32 @@ public static class DotNetQuest
 
     private static FileSystemWatcher? watcher;
 
+    private static DateTime lastCheck = DateTime.MinValue;
+    private static bool reloading = false;
+
+    private static void PollForChanges(string path)
+    {
+        var timer = new System.Timers.Timer(500);
+        timer.Elapsed += (sender, args) =>
+        {
+            if (reloading) {
+                return;
+            }
+            var lastWriteTime = Directory.GetFiles(path, "*.csx", SearchOption.AllDirectories)
+                .Max(file => (File.GetLastWriteTimeUtc(file)));
+
+            if (lastWriteTime > lastCheck)
+            {
+                reloading = true;
+                logSys?.QuestDebug("Detected change in .csx file - Reloading dotnet quests");
+                Console.WriteLine("Detected change in .csx file - Reloading dotnet quests");
+                Reload();
+                reloading = false;
+                lastCheck = lastWriteTime;
+            }
+        };
+        timer.Start();
+    }
     public static void Initialize(InitArgs initArgs)
     {
         zone = EqFactory.CreateZone(initArgs.Zone, false);
@@ -64,18 +90,19 @@ public static class DotNetQuest
         var zoneDir = Path.Combine(workingDirectory, "dotnet", "dotnet_quests", zone.GetShortName());
         logSys?.QuestDebug($"Watching for *.csx file changes in {zoneDir}");
         Console.WriteLine($"Watching for *.csx file changes in {zoneDir}");
+        PollForChanges(zoneDir);
+        // Issues with inotify in docker filesystem with mounted drives--investigate later but use polling for now
+        // watcher = new FileSystemWatcher(zoneDir, "*.csx")
+        // {
+        //     IncludeSubdirectories = true,
+        //     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
+        // };
+        // watcher.Changed += OnChanged;
+        // watcher.Created += OnChanged;
+        // watcher.Deleted += OnChanged;
+        // watcher.Renamed += OnChanged;
 
-        watcher = new FileSystemWatcher(zoneDir, "*.csx")
-        {
-            IncludeSubdirectories = true,
-            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
-        };
-        watcher.Changed += OnChanged;
-        watcher.Created += OnChanged;
-        watcher.Deleted += OnChanged;
-        watcher.Renamed += OnChanged;
-
-        watcher.EnableRaisingEvents = true;
+        // watcher.EnableRaisingEvents = true;
     }
 
     private static void OnChanged(object sender, FileSystemEventArgs e)
