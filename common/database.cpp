@@ -1120,7 +1120,6 @@ void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
 	}
 
 	e.gid            = group_id;
-	e.leadername     = name;
 	e.marknpc        = std::string();
 	e.leadershipaa   = std::string();
 	e.maintank       = std::string();
