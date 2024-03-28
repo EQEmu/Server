@@ -1586,6 +1586,13 @@ int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 b
 	return retval;
 }
 
+void LuaParser::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.RegisterBug(self, bug, ignoreDefault);
+	}
+}
+
 int LuaParser::EventBot(
 	QuestEventID evt,
 	Bot *bot,
