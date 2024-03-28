@@ -1199,7 +1199,7 @@ uint8 Mob::GetArchetype() const
 	return Archetype::Hybrid;
 }
 
-const std::string& Mob::GetArchetypeName()
+const std::string Mob::GetArchetypeName()
 {
 	switch (GetArchetype()) {
 		case Archetype::Hybrid:

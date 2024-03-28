@@ -638,7 +638,7 @@ uint32 Database::GetAccountIDByName(const std::string& account_name, const std::
 	return e.id;
 }
 
-const std::string& Database::GetAccountName(uint32 account_id, uint32* lsaccount_id)
+const std::string Database::GetAccountName(uint32 account_id, uint32* lsaccount_id)
 {
 	const auto& e = AccountRepository::FindOne(*this, account_id);
 
@@ -653,28 +653,28 @@ const std::string& Database::GetAccountName(uint32 account_id, uint32* lsaccount
 	return e.name;
 }
 
-const std::string& Database::GetCharName(uint32 character_id)
+const std::string Database::GetCharName(uint32 character_id)
 {
 	const auto& e = CharacterDataRepository::FindOne(*this, character_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetCharNameByID(uint32 character_id)
+const std::string Database::GetCharNameByID(uint32 character_id)
 {
 	const auto& e = CharacterDataRepository::FindOne(*this, character_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetNPCNameByID(uint32 npc_id)
+const std::string Database::GetNPCNameByID(uint32 npc_id)
 {
 	const auto& e = NpcTypesRepository::FindOne(*this, npc_id);
 
 	return e.id ? e.name : std::string();
 }
 
-const std::string& Database::GetCleanNPCNameByID(uint32 npc_id)
+const std::string Database::GetCleanNPCNameByID(uint32 npc_id)
 {
 	const auto& e = NpcTypesRepository::FindOne(*this, npc_id);
 
