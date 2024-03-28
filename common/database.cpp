@@ -1333,7 +1333,7 @@ uint32 Database::GetRaidID(const std::string& name)
 	return e.raidid;
 }
 
-const std::string& Database::GetRaidLeaderName(uint32 raid_id)
+const std::string Database::GetRaidLeaderName(uint32 raid_id)
 {
 	const auto& l = RaidMembersRepository::GetWhere(
 		*this,
@@ -1348,7 +1348,7 @@ const std::string& Database::GetRaidLeaderName(uint32 raid_id)
 		return "UNKNOWN";
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	return e.name;
 }
