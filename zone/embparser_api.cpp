@@ -5855,6 +5855,16 @@ uint16 Perl__get_race_bitmask(uint16 race_id)
 	return GetPlayerRaceBit(race_id);
 }
 
+std::string Perl__GetAutoLoginCharacterNameByAccountID(uint32 account_id)
+{
+	return quest_manager.GetAutoLoginCharacterNameByAccountID(account_id);
+}
+
+bool Perl__SetAutoLoginCharacterNameByAccountID(uint32 account_id, std::string character_name)
+{
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(account_id, character_name);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -5885,6 +5895,7 @@ void perl_register_quest()
 	package.add("FlagInstanceByGroupLeader", &Perl__FlagInstanceByGroupLeader);
 	package.add("FlagInstanceByRaidLeader", &Perl__FlagInstanceByRaidLeader);
 	package.add("FlyMode", &Perl__FlyMode);
+	package.add("GetAutoLoginCharacterNameByAccountID", &Perl__GetAutoLoginCharacterNameByAccountID);
 	package.add("GetBotClassByID", &Perl__GetBotClassByID);
 	package.add("GetBotGenderByID", &Perl__GetBotGenderByID);
 	package.add("GetBotIDsByCharacterID", (perl::array(*)(uint32))&Perl__GetBotIDsByCharacterID);
@@ -6159,6 +6170,7 @@ void perl_register_quest()
 	package.add("RemoveFromInstanceByCharID", &Perl__RemoveFromInstanceByCharID);
 	package.add("CheckInstanceByCharID", &Perl__CheckInstanceByCharID);
 	package.add("SendMail", &Perl__SendMail);
+	package.add("SetAutoLoginCharacterNameByAccountID", &Perl__SetAutoLoginCharacterNameByAccountID);
 	package.add("SetRunning", &Perl__SetRunning);
 	package.add("activespeakactivity", &Perl__activespeakactivity);
 	package.add("activespeaktask", &Perl__activespeaktask);
