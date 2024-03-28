@@ -193,8 +193,9 @@ bool Client::CanTradeFVNoDropItem()
 
 void Client::SendEnterWorld(std::string name)
 {
-	const std::string live_name = database.GetLiveChar(GetAccountID());
+	std::string live_name {};
 	if (is_player_zoning) {
+		live_name = database.GetLiveChar(GetAccountID());
 		if(database.GetAccountIDByChar(live_name) != GetAccountID()) {
 			eqs->Close();
 			return;
