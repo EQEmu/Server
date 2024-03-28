@@ -1858,6 +1858,19 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ShopRequest)
+	{
+		ENCODE_LENGTH_EXACT(MerchantClick_Struct);
+		SETUP_DIRECT_ENCODE(MerchantClick_Struct, structs::MerchantClick_Struct);
+
+		OUT(npc_id);
+		OUT(player_id);
+		OUT(command);
+		OUT(rate);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_SpecialMesg)
 	{
 		EQApplicationPacket *in = *p;
@@ -2871,6 +2884,21 @@ namespace Titanium
 		emu->itemslot = TitaniumToServerSlot(eq->itemslot);
 		IN(quantity);
 		IN(price);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_ShopRequest)
+	{
+		DECODE_LENGTH_EXACT(structs::MerchantClick_Struct);
+		SETUP_DIRECT_DECODE(MerchantClick_Struct, structs::MerchantClick_Struct);
+
+		IN(npc_id);
+		IN(player_id);
+		IN(command);
+		IN(rate);
+		emu->tab_display = 0;
+		emu->unknown020 = 0;
 
 		FINISH_DIRECT_DECODE();
 	}

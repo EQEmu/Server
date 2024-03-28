@@ -264,6 +264,8 @@ SET(repositories
     repositories/base/base_npc_types_tint_repository.h
     repositories/base/base_object_repository.h
     repositories/base/base_object_contents_repository.h
+    repositories/base/base_parcels_repository.h
+    repositories/base/base_parcel_merchants_repository.h
     repositories/base/base_perl_event_export_settings_repository.h
     repositories/base/base_petitions_repository.h
     repositories/base/base_pets_repository.h
@@ -444,6 +446,8 @@ SET(repositories
     repositories/npc_types_tint_repository.h
     repositories/object_repository.h
     repositories/object_contents_repository.h
+    repositories/parcels_repository.h
+    repositories/parcel_merchants_repository.h    
     repositories/perl_event_export_settings_repository.h
     repositories/petitions_repository.h
     repositories/pets_repository.h

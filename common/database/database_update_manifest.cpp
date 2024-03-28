@@ -5468,7 +5468,61 @@ DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE,
 ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
 )"
-	}
+	},
+	ManifestEntry {
+	.version = 9269,
+	.description = "2024_03_10_parcel_implementation.sql",
+	.check = "SHOW TABLES LIKE 'parcels'",
+	.condition = "empty",
+	.match = "",
+	.sql = R"(CREATE TABLE `parcels` (
+				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`to_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`from_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`note` VARCHAR(1024) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`sent_date` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`) USING BTREE,
+				UNIQUE INDEX `data_constraint` (`slot_id`, `to_name`) USING BTREE,
+				FULLTEXT INDEX `to_name_search` (`to_name`)
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+				CREATE TABLE `parcel_merchants` (
+					`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+					`merchant_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+					`last_name` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+					PRIMARY KEY (`id`) USING BTREE
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+				REPLACE INTO `parcel_merchants` (`merchant_id`, `last_name`) VALUES 
+				(202129, 'Parcels and General Supplies'),
+				(3036, 'Parcels and General Supplies'),
+				(394025, 'Parcels and General Supplies'),
+				(75113, 'Parcels and General Supplies'),
+				(49073, 'Parcels and General Supplies'),
+				(41021, 'Parcels and General Supplies'),
+				(40070, 'Parcels and General Supplies'),
+				(106115, 'Parcels and General Supplies'),
+				(55150, 'Parcels and General Supplies'),
+				(9053, 'Parcels and General Supplies'),
+				(382156, 'Parcels and General Supplies'),
+				(1032, 'Parcels and General Supplies'),
+				(155088, 'Parcels and General Supplies'),
+				(23017, 'Parcels and General Supplies'),
+				(61065, 'Parcels and General Supplies'),
+				(29008, 'Parcels and General Supplies'),
+				(67058, 'Parcels and General Supplies'),
+				(54067, 'Parcels and General Supplies'),
+				(19031, 'Parcels and General Supplies'),
+				(50140, 'Parcels and General Supplies');
+		)"
+}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,

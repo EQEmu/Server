@@ -113,6 +113,9 @@
 #define ServerOP_GuildSendGuildList				  0x007E
 #define ServerOP_GuildMembersList                 0x007F
 
+#define ServerOP_ParcelDelivery                   0x0090
+#define ServerOP_ParcelPrune                      0x0091
+
 #define ServerOP_RaidAdd			0x0100 //in use
 #define ServerOP_RaidRemove			0x0101 //in use
 #define	ServerOP_RaidDisband		0x0102 //in use
