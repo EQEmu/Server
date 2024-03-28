@@ -166,7 +166,7 @@ public:
 	bool GetAdventureStats(uint32 character_id, AdventureStats_Struct* as);
 
 	/* Account Related */
-	const std::string& GetLiveChar(uint32 account_id);
+	const std::string GetLiveChar(uint32 account_id);
 	bool SetAccountStatus(const std::string& account_name, int16 status);
 	bool SetLocalPassword(uint32 account_id, const std::string& password);
 	bool UpdateLiveChar(const std::string& name, uint32 account_id);

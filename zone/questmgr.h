@@ -353,6 +353,8 @@ public:
 	void SendChannelMessage(uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 	void SendChannelMessage(Client* from, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
 	void SendChannelMessage(Client* from, const char* to, uint8 channel_number, uint32 guild_id, uint8 language_id, uint8 language_skill, const char* message);
+	std::string GetAutoLoginCharacterNameByAccountID(uint32 account_id);
+	bool SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name);
 
 	Bot *GetBot() const;
 	Client *GetInitiator() const;
