@@ -216,7 +216,7 @@ public:
 	void SetGroupLeaderName(uint32 group_id, const std::string& name);
 
 	/* Raids */
-	const std::string& GetRaidLeaderName(uint32 raid_id);
+	const std::string GetRaidLeaderName(uint32 raid_id);
 	uint32 GetRaidID(const std::string& name);
 	void ClearRaid(uint32 raid_id = 0);
 	void ClearRaidDetails(uint32 raid_id = 0);
