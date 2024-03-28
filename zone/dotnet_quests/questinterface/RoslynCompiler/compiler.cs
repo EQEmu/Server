@@ -93,8 +93,9 @@ public class {fileName} {{
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         EmitOptions emitOptions = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
-        var outputDllPath = $"{rootPath}/{zone}.dll";
-        var pdbPath = $"{rootPath}/{zone}.pdb";
+        var outputZone = $"{zone}-{Guid.NewGuid().ToString()[..8]}";
+        var outputDllPath = $"{rootPath}/{outputZone}.dll";
+        var pdbPath = $"{rootPath}/{outputZone}.pdb";
         using (var assemblyStream = new MemoryStream())
         using (var pdbStream = new MemoryStream())
         {
@@ -127,7 +128,7 @@ public class {fileName} {{
             // string base64String = Convert.ToBase64String(assemblyStream.ToArray());
 
             // // Write the Base64 string to stdout
-            // Console.WriteLine(base64String);
+            Console.WriteLine(outputZone);
         }
     }
 }

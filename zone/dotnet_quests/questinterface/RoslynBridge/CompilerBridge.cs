@@ -1,4 +1,7 @@
 ﻿using System.Diagnostics;
+using System.IO;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
@@ -44,6 +47,10 @@ public static class DotNetQuest
     public delegate void NpcEventDelegate(EventArgs npcEventArgs);
     public delegate void PlayerEventDelegate(EventArgs npcEventArgs);
 
+    private static Dictionary<string, object> npcMap = new Dictionary<string, object>();
+
+    private static FileSystemWatcher? watcher;
+
     public static void Initialize(InitArgs initArgs)
     {
         zone = EqFactory.CreateZone(initArgs.Zone, false);
@@ -52,6 +59,30 @@ public static class DotNetQuest
         worldServer = EqFactory.CreateWorldServer(initArgs.WorldServer, false);
         questManager = EqFactory.CreateQuestManager(initArgs.QuestManager, false);
         DotNetQuest.initArgs = initArgs;
+
+        var workingDirectory = Directory.GetCurrentDirectory();
+        var zoneDir = Path.Combine(workingDirectory, "dotnet", "dotnet_quests", zone.GetShortName());
+        logSys?.QuestDebug($"Watching for *.csx file changes in {zoneDir}");
+        Console.WriteLine($"Watching for *.csx file changes in {zoneDir}");
+
+        watcher = new FileSystemWatcher(zoneDir, "*.csx")
+        {
+            IncludeSubdirectories = true,
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
+        };
+        watcher.Changed += OnChanged;
+        watcher.Created += OnChanged;
+        watcher.Deleted += OnChanged;
+        watcher.Renamed += OnChanged;
+
+        watcher.EnableRaisingEvents = true;
+    }
+
+    private static void OnChanged(object sender, FileSystemEventArgs e)
+    {
+        logSys?.QuestDebug($"Detected change in {e.FullPath} - Reloading dotnet quests");
+        Console.WriteLine($"Detected change in {e.FullPath} - Reloading dotnet quests");
+        Reload();
     }
 
     private static CollectibleAssemblyLoadContext? assemblyContext_ = null;
@@ -67,13 +98,32 @@ public static class DotNetQuest
             GC.WaitForPendingFinalizers();
 
         }
+        npcMap.Clear();
+        var workingDirectory = Directory.GetCurrentDirectory();
+        var directoryPath = $"{workingDirectory}/dotnet/dotnet_quests/{zone?.GetShortName()}";
+        // Clean up existing dll and pdb
+        string[] filesToDelete = Directory.GetFiles(directoryPath, "*.pdb")
+                .Concat(Directory.GetFiles(directoryPath, "*.dll"))
+                .ToArray();
+
+        // Delete each file
+        foreach (string file in filesToDelete)
+        {
+            try
+            {
+                File.Delete(file);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"An error occurred while deleting file {file}: {ex.Message}");
+            }
+        }
         assemblyContext_ = new CollectibleAssemblyLoadContext();
 
         string assemblyLocation = Assembly.GetExecutingAssembly().Location;
 
         // Get the directory path from the full assembly path
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-        var workingDirectory = Directory.GetCurrentDirectory();
         string executableName = "RoslynCompiler"; // The base name of your executable
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
@@ -100,7 +150,7 @@ public static class DotNetQuest
             }
             try
             {
-                string output = process.StandardOutput.ReadToEnd();
+                string output = process.StandardOutput.ReadToEnd().Trim();
                 process.WaitForExit();
                 string errorOutput = process.StandardError.ReadToEnd();
                 if (errorOutput.Length > 0)
@@ -110,7 +160,9 @@ public static class DotNetQuest
                 }
                 else
                 {
-                    questAssembly_ = assemblyContext_.LoadFromAssemblyPath($"{workingDirectory}/dotnet/dotnet_quests/{zone?.GetShortName()}/{zone?.GetShortName()}.dll");
+                    var questAssemblyPath = $"{directoryPath}/{output}.dll";
+                    Console.WriteLine($"Loading quest assembly from: {questAssemblyPath}");
+                    questAssembly_ = assemblyContext_.LoadFromAssemblyPath(questAssemblyPath);
                     logSys?.QuestDebug($"Successfully compiled .NET quests with {questAssembly_.GetTypes().Count()} exported types.");
                 }
             }
@@ -143,10 +195,31 @@ public static class DotNetQuest
         {
             var npc = EqFactory.CreateNPC(npcEventArgs.Npc, false);
             var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
-            var npcName = npc.GetOrigName();
+            var npcName = npc?.GetOrigName() ?? "";
+            var uniqueName = npc?.GetName() ?? "";
             if (questAssembly_.GetType(npcName)?.GetMethod(MethodMap[id]) != null)
             {
-                questAssembly_.GetType(npcName).GetMethod(MethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType(npcName)), [new NpcEvent() {
+                object? npcObject;
+                var npcType = questAssembly_.GetType(npcName);
+                if (npcType == null)
+                {
+                    return;
+                }
+                if (npcMap.ContainsKey(uniqueName))
+                {
+                    npcObject = npcMap[uniqueName];
+                }
+                else
+                {
+                    npcObject = Activator.CreateInstance(npcType);
+                    if (npcObject == null)
+                    {
+                        return;
+                    }
+                    npcMap[uniqueName] = npcObject;
+                }
+                var npcMethod = npcType.GetMethod(MethodMap[id]);
+                npcMethod?.Invoke(npcObject, [new NpcEvent() {
                         npc = npc,
                         mob = mob,
                         zone = zone,
