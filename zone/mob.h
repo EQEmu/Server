@@ -995,6 +995,7 @@ public:
 	inline void SetDualWieldingSameDelayWeapons(int32 val) { dw_same_delay = val; }
 	bool IsTargetedFocusEffect(int focus_type);
 	bool HasPersistDeathIllusion(int32 spell_id);
+	void DoShieldDamageOnShielderSpellEffect(Mob* shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse);
 
 
 	bool TryDoubleMeleeRoundEffect();

@@ -3298,6 +3298,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Shield_Target:
+			{
+				if (new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] < effect_value) {
+					new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] = effect_value;
+					new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_BUFFSLOT] = buffslot;
+				}
+				break;
+			}
+
 			case SE_TriggerMeleeThreshold:
 				new_bonus->TriggerMeleeThreshold = true;
 				break;
@@ -5916,6 +5925,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 						if (negate_itembonus) { itembonuses.SkillProcSuccess[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProcSuccess[e] = effect_value; }
 					}
+					break;
 				}
 
 				case SE_SkillProcAttempt: {
@@ -5925,6 +5935,15 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 						if (negate_itembonus) { itembonuses.SkillProc[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProc[e] = effect_value; }
 					}
+					break;
+				}
+
+				case SE_Shield_Target:	{
+					if (negate_spellbonus) {
+						spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] = effect_value;
+						spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_BUFFSLOT] = effect_value;
+					}
+					break;
 				}
 			}
 		}
