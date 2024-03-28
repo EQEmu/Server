@@ -5038,7 +5038,7 @@ void Client::SummonItemIntoInventory(
 		is_arrow
 	);
 
-	SummonItem(
+	SummonApocItem(
 		item_id,
 		charges,
 		aug1,
