@@ -21325,20 +21325,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_GetNPCList__SWIG_0(void * jarg1, v
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_GetMercList__SWIG_0(void * jarg1, void * jarg2) {
-  EntityList *arg1 = (EntityList *) 0 ;
-  std::list< Merc * > *arg2 = 0 ;
-  
-  arg1 = (EntityList *)jarg1; 
-  arg2 = (std::list< Merc * > *)jarg2;
-  if (!arg2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::list< Merc * > & is null", 0);
-    return ;
-  } 
-  (arg1)->GetMercList(*arg2);
-}
-
-
 SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_GetClientList__SWIG_0(void * jarg1, void * jarg2) {
   EntityList *arg1 = (EntityList *) 0 ;
   std::list< Client * > *arg2 = 0 ;

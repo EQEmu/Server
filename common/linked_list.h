@@ -79,7 +79,9 @@ public:
 	LinkedList();
 	~LinkedList();
 	bool dont_delete;
-	LinkedList<TYPE>&			operator= (const LinkedList<TYPE>&);
+	LinkedList<TYPE>&			operator= (const LinkedList<TYPE>&) {
+		return *this;
+	};
 
 	void Append (const TYPE&);
 	void Insert (const TYPE&);
