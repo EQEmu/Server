@@ -1114,14 +1114,12 @@ void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
 
 	e.leadername = name;
 
-	const int updated_leader = GroupLeadersRepository::UpdateOne(*this, e);
-
-	if (!updated_leader) {
+	if (e.gid) {
+		GroupLeadersRepository::UpdateOne(*this, e);
 		return;
 	}
 
 	e.gid            = group_id;
-	e.leadername     = name;
 	e.marknpc        = std::string();
 	e.leadershipaa   = std::string();
 	e.maintank       = std::string();
@@ -1130,7 +1128,7 @@ void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
 	e.mentoree       = std::string();
 	e.mentor_percent = 0;
 
-	GroupLeadersRepository::UpdateOne(*this, e);
+	GroupLeadersRepository::InsertOne(*this, e);
 }
 
 std::string Database::GetGroupLeaderName(uint32 group_id)
