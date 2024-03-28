@@ -2883,9 +2883,6 @@ uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint16 class_id)
 		skill_id = EQ::skills::Skill2HPiercing;
 	}
 
-	unsigned int classes_bits = GetClassesBits();
-	uint8 earliestTrainLevel = std::numeric_limits<uint8>::max();
-
 	return skill_caps.GetTrainLevel(class_id, skill_id, RuleI(Character, MaxLevel));
 }
 
