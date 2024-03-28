@@ -3153,6 +3153,11 @@ std::string Perl_Client_GetAutoLoginCharacterName(Client* self)
 	return quest_manager.GetAutoLoginCharacterNameByAccountID(self->AccountID());
 }
 
+bool Perl_Client_SetAutoLoginCharacterName(Client* self)
+{
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), self->GetCleanName());
+}
+
 bool Perl_Client_SetAutoLoginCharacterName(Client* self, std::string character_name)
 {
 	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), character_name);
@@ -3583,7 +3588,8 @@ void perl_register_client()
 	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
 	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
 	package.add("SetAnon", &Perl_Client_SetAnon);
-	package.add("SetAutoLoginCharacterName", &Perl_Client_SetAutoLoginCharacterName);
+	package.add("SetAutoLoginCharacterName", (bool(*)(Client*))&Perl_Client_SetAutoLoginCharacterName);
+	package.add("SetAutoLoginCharacterName", (bool(*)(Client*, std;:string))&Perl_Client_SetAutoLoginCharacterName);
 	package.add("SetBaseClass", &Perl_Client_SetBaseClass);
 	package.add("SetBaseGender", &Perl_Client_SetBaseGender);
 	package.add("SetBaseRace", &Perl_Client_SetBaseRace);

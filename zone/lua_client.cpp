@@ -3351,6 +3351,12 @@ std::string Lua_Client::GetAutoLoginCharacterName()
 	return quest_manager.GetAutoLoginCharacterNameByAccountID(self->AccountID());
 }
 
+bool Lua_Client::SetAutoLoginCharacterName()
+{
+	Lua_Safe_Call_Bool();
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), self->GetCleanName());
+}
+
 bool Lua_Client::SetAutoLoginCharacterName(std::string character_name)
 {
 	Lua_Safe_Call_Bool();
@@ -3787,6 +3793,7 @@ luabind::scope lua_register_client() {
 	.def("SetAccountFlag", (void(Lua_Client::*)(const std::string&,const std::string&))&Lua_Client::SetAccountFlag)
 	.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::SetAlternateCurrencyValue)
 	.def("SetAnon", (void(Lua_Client::*)(uint8))&Lua_Client::SetAnon)
+	.def("SetAutoLoginCharacterName", (bool(Lua_Client::*)(void))&Lua_Client::SetAutoLoginCharacterName)
 	.def("SetAutoLoginCharacterName", (bool(Lua_Client::*)(std::string))&Lua_Client::SetAutoLoginCharacterName)
 	.def("SetBaseClass", (void(Lua_Client::*)(int))&Lua_Client::SetBaseClass)
 	.def("SetBaseGender", (void(Lua_Client::*)(int))&Lua_Client::SetBaseGender)
