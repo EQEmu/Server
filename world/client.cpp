@@ -194,13 +194,18 @@ bool Client::CanTradeFVNoDropItem()
 void Client::SendEnterWorld(std::string name)
 {
 	std::string live_name {};
+
 	if (is_player_zoning) {
 		live_name = database.GetLiveChar(GetAccountID());
-		if(database.GetAccountIDByChar(live_name) != GetAccountID()) {
+		if (database.GetAccountIDByChar(live_name) != GetAccountID()) {
 			eqs->Close();
 			return;
 		} else {
 			LogInfo("Telling client to continue session");
+		}
+	} else {
+		if (RuleB(World, EnableAutoLogin)) {
+			live_name = AccountRepository::GetAutoLoginCharacterNameByAccountID(database, GetAccountID());
 		}
 	}
 

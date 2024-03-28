@@ -4897,24 +4897,10 @@ void QuestManager::SendPlayerHandinEvent() {
 
 std::string QuestManager::GetAutoLoginCharacterNameByAccountID(uint32 account_id)
 {
-	const auto& e = AccountRepository::FindOne(database, account_id);
-
-	if (!e.id) {
-		return std::string();
-	}
-
-	return e.auto_login_charname;
+	return AccountRepository::GetAutoLoginCharacterNameByAccountID(database, account_id);
 }
 
 bool QuestManager::SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name)
 {
-	auto e = AccountRepository::FindOne(database, account_id);
-
-	if (!e.id) {
-		return false;
-	}
-
-	e.auto_login_charname = character_name;
-
-	return AccountRepository::UpdateOne(database, e);
+	return AccountRepository::SetAutoLoginCharacterNameByAccountID(database, account_id, character_name);
 }
