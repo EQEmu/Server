@@ -3074,10 +3074,6 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return 0;
 	}
 
-	if (IsUnblockableSpell(spellid2)) {
-		return 1;
-	}
-
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
 		Message(0, "You must wait before you can be affected by this spell again.");
 		return -1;

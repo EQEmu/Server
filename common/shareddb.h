@@ -167,7 +167,6 @@ public:
 	bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
 	void LoadSpells(void *data, int max_spells);
 	void LoadDamageShieldTypes(SPDat_Spell_Struct *sp, int32 iMaxSpellID);
-	void LoadUnblockableSpells(SPDat_Spell_Struct *sp, int32 max_spell_id);
 	uint32 GetSharedSpellsCount() { return m_shared_spells_count; }
 	uint32 GetSpellsCount();
 

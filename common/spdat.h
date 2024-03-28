@@ -1494,7 +1494,6 @@ struct SPDat_Spell_Struct
 /* 235 */	//bool is_beta_only; // -- IS_BETA_ONLY
 /* 236 */	//int spell_subgroup; // -- SPELL_SUBGROUP
 			uint8 damage_shield_type; // This field does not exist in spells_us.txt
-			bool is_unblockable; // This field does not exist in spells_us.txt, keeps any spells, beneficial or detrimental, from blocking this spell
 };
 
 extern const SPDat_Spell_Struct* spells;
@@ -1625,6 +1624,5 @@ bool IsSpellUsableInThisZoneType(uint16 spell_id, uint8 zone_type);
 const char *GetSpellName(uint16 spell_id);
 int GetSpellStatValue(uint16 spell_id, const char* stat_identifier, uint8 slot = 0);
 bool IsCastRestrictedSpell(uint16 spell_id);
-inline bool IsUnblockableSpell(uint16 spell_id) { return IsValidSpell(spell_id) ? spells[spell_id].is_unblockable : false; };
 
 #endif
