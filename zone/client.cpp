@@ -11649,9 +11649,9 @@ void Client::RegisterBug(BugReport_Struct* r) {
 	b.system_info         = r->system_info;
 
 #ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	LuaParser::Instance()->RegisterBug(this, b, ignoreDefault);
-	if (ignoreDefault) {
+	bool ignore_default = false;
+	LuaParser::Instance()->RegisterBug(this, b, ignore_default);
+	if (ignore_default) {
 		return;
 	}
 #endif
