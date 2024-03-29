@@ -70,7 +70,7 @@ public:
 			{.parent_command = "set", .sub_command = "alternate_currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setaltcurrency"},
 			{.parent_command = "set", .sub_command = "animation", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanim"},
 			{.parent_command = "set", .sub_command = "anon", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setanon"},
-			{.parent_command = "set", .sub_command = "auto_login", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setautologin"}
+			{.parent_command = "set", .sub_command = "auto_login", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "setautologin"},
 			{.parent_command = "set", .sub_command = "bind", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "bind"},
 			{.parent_command = "set", .sub_command = "checksum", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "updatechecksum"},
 			{.parent_command = "set", .sub_command = "class_permanent", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "permaclass"},
