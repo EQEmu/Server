@@ -680,7 +680,7 @@ void LuaMod::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_
 }
 
 
-void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignoreDefault)
+void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default)
 {
 	int start = lua_gettop(L);
 
@@ -733,9 +733,9 @@ void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug,
 
 		if (lua_type(L, -1) == LUA_TTABLE) {
 			luabind::adl::object ret(luabind::from_stack(L, -1));
-			auto IgnoreDefaultObj = ret["IgnoreDefault"];
-			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
-				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
 			}
 		}
 	}
