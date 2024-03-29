@@ -124,7 +124,7 @@ bool IsPlayerRace(uint16 race_id);
 const std::string GetPlayerRaceAbbreviation(uint16 race_id);
 
 uint32 GetPlayerRaceValue(uint16 race_id);
-uint32 GetPlayerRaceBit(uint16 race_id);
+uint16 GetPlayerRaceBit(uint16 race_id);
 
 uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
 uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);

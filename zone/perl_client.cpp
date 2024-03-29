@@ -2052,7 +2052,7 @@ bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)
 	return self->HasDisciplineLearned(spell_id);
 }
 
-uint32_t Perl_Client_GetClassBitmask(Client* self)
+uint16_t Perl_Client_GetClassBitmask(Client* self)
 {
 	return GetPlayerClassBit(self->GetClass());
 }
@@ -2067,7 +2067,12 @@ bool Perl_Client_AddExtraClass(Client* self, int class_id)
 	return self->AddExtraClass(class_id);
 }
 
-uint32_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
+uint32_t Perl_Client_GetDeityBitmask(Client* self)
+{
+	return static_cast<uint32_t>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(self->GetDeity())));
+}
+
+uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
 {
 	return GetPlayerRaceBit(self->GetBaseRace());
 }
@@ -3369,6 +3374,7 @@ void perl_register_client()
 	package.add("GetCorpseID", &Perl_Client_GetCorpseID);
 	package.add("GetCorpseItemAt", &Perl_Client_GetCorpseItemAt);
 	package.add("GetCustomItemData", &Perl_Client_GetCustomItemData);
+	package.add("GetDeityBitmask", &Perl_Client_GetDeityBitmask);
 	package.add("GetDiscSlotBySpellID", &Perl_Client_GetDiscSlotBySpellID);
 	package.add("GetDisciplineTimer", &Perl_Client_GetDisciplineTimer);
 	package.add("GetDuelTarget", &Perl_Client_GetDuelTarget);

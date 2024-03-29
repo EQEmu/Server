@@ -41,6 +41,8 @@ struct MessageTypes { };
 struct Rule { };
 struct Journal_SpeakMode { };
 struct Journal_Mode { };
+struct ZoneIDs { };
+struct LanguageIDs { };
 
 struct lua_registered_event {
 	std::string encounter_name;
@@ -5474,6 +5476,18 @@ std::string lua_silent_say_link(std::string text, std::string link_name) {
 	return Saylink::Silent(text, link_name);
 }
 
+uint16 lua_get_class_bitmask(uint8 class_id) {
+	return GetPlayerClassBit(class_id);
+}
+
+uint32 lua_get_deity_bitmask(uint16 deity_id) {
+	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(deity_id)));
+}
+
+uint16 lua_get_race_bitmask(uint16 race_id) {
+	return GetPlayerRaceBit(race_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6270,6 +6284,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_bot_race_by_id", &lua_get_bot_race_by_id),
 		luabind::def("silent_say_link", (std::string(*)(std::string))&lua_silent_say_link),
 		luabind::def("silent_say_link", (std::string(*)(std::string,std::string))&lua_silent_say_link),
+		luabind::def("get_class_bitmask", &lua_get_class_bitmask),
+		luabind::def("get_deity_bitmask", &lua_get_deity_bitmask),
+		luabind::def("get_race_bitmask", &lua_get_race_bitmask),
 		/*
 			Cross Zone
 		*/
@@ -7234,7 +7251,7 @@ luabind::scope lua_register_message_types() {
 }
 
 luabind::scope lua_register_zone_types() {
-	return luabind::class_<MessageTypes>("Zone")
+	return luabind::class_<ZoneIDs>("Zone")
 		.enum_("constants")
 		[(
 			luabind::value("qeynos", Zones::QEYNOS),
@@ -7722,7 +7739,7 @@ luabind::scope lua_register_zone_types() {
 }
 
 luabind::scope lua_register_languages() {
-	return luabind::class_<MessageTypes>("Language")
+	return luabind::class_<LanguageIDs>("Language")
 		.enum_("constants")
 		[(
 			luabind::value("CommonTongue", Language::CommonTongue),
