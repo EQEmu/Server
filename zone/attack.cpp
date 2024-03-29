@@ -1535,7 +1535,7 @@ bool Mob::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		LogCombatDetail("Attacking without a weapon");
 	}
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	// calculate attack_skill and skillinuse depending on hand and weapon
 	// also send Packet to near clients
 	my_hit.skill = AttackAnimation(Hand, weapon);
@@ -2132,7 +2132,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	FaceTarget(GetTarget());
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.skill = EQ::skills::SkillHandtoHand;
 	my_hit.hand = Hand;
 	my_hit.damage_done = 1;

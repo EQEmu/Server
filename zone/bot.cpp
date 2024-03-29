@@ -2251,7 +2251,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 			auto xhaters = bot_owner->GetXTargetAutoMgr();
 
 			if (xhaters && !xhaters->empty()) {
-				for (auto hater_iter : xhaters->get_list()) {
+				for (auto& hater_iter : xhaters->get_list()) {
 					if (!hater_iter.spawn_id) {
 						continue;
 					}
@@ -3817,7 +3817,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 		linker.SetItemInst(trade_instance);
 
-		auto item_link = linker.GenerateLink();
+		std::string item_link = linker.GenerateLink();
 
 		if (trade_index != invslot::slotCursor && !trade_instance->IsDroppable()) {
 			LogError("trade hack detected by [{}] with [{}].", client->GetCleanName(), GetCleanName());
@@ -4087,7 +4087,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 		linker.SetItemInst(return_instance);
 
-		auto item_link = linker.GenerateLink();
+		auto& item_link = linker.GenerateLink();
 
 		// non-failing checks above are causing this to trigger (i.e., !ItemClassCommon and !IsEquipable{race, class, min_level})
 		// this process is hindered by not having bots use the inventory trade method (TODO: implement bot inventory use)
@@ -4209,7 +4209,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 				linker.SetItemInst(return_instance);
-				auto item_link = linker.GenerateLink();
+				auto& item_link = linker.GenerateLink();
 
 				OwnerMessage(
 					fmt::format(
@@ -4246,7 +4246,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 		EQ::SayLinkEngine linker;
 		linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 		linker.SetItemInst(trade_iterator.trade_item_instance);
-		auto item_link = linker.GenerateLink();
+		auto& item_link = linker.GenerateLink();
 
 		OwnerMessage(
 			fmt::format(
@@ -4662,7 +4662,7 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max
 		}
 	}
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.base_damage = max_damage;
 	my_hit.min_damage = min_damage;
 	my_hit.damage_done = 1;
@@ -8618,7 +8618,7 @@ void Bot::SetSpellRecastTimer(uint16 spell_id, int32 recast_delay) {
 	}
 
 	if (CheckSpellRecastTimer(spell_id)) {
-		BotTimer_Struct t;
+		BotTimer_Struct t = {};
 
 		t.timer_id    = spells[ spell_id ].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + recast_delay);
@@ -8724,7 +8724,7 @@ void Bot::SetDisciplineReuseTimer(uint16 spell_id, int32 reuse_timer)
 	}
 
 	if (CheckDisciplineReuseTimer(spell_id)) {
-		BotTimer_Struct t;
+		BotTimer_Struct t = {};
 
 		t.timer_id    = spells[ spell_id ].timer_id;
 		t.timer_value = (Timer::GetCurrentTime() + reuse_timer);
@@ -8821,7 +8821,7 @@ void Bot::SetItemReuseTimer(uint32 item_id, uint32 reuse_timer)
 	}
 
 	if (CheckItemReuseTimer(item_id)) {
-		BotTimer_Struct t;
+		BotTimer_Struct t = {};
 
 		t.timer_id    = (item->RecastType == NegativeItemReuse ? item->ID : item->RecastType);
 		t.timer_value = (

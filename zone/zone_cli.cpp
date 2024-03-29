@@ -21,7 +21,7 @@ void ZoneCLI::CommandHandler(int argc, char **argv)
 	EQEmuCommand::DisplayDebug(cmd);
 
 	// Declare command mapping
-	auto function_map = EQEmuCommand::function_map;
+	auto& function_map = EQEmuCommand::function_map;
 
 	// Register commands
 	function_map["sidecar:serve-http"] = &ZoneCLI::SidecarServeHttp;

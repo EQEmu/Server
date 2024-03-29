@@ -89,7 +89,7 @@ void Perl__echo(int emote_color_id, const char* message)
 
 void Perl__say(const char* message)
 {
-	Journal::Options opts;
+	Journal::Options opts = {};
 	// we currently default to these
 	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
@@ -101,7 +101,7 @@ void Perl__say(const char* message)
 
 void Perl__say(const char* message, uint8 language_id)
 {
-	Journal::Options opts;
+	Journal::Options opts = {};
 	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
 	opts.language     = language_id;
@@ -112,7 +112,7 @@ void Perl__say(const char* message, uint8 language_id)
 
 void Perl__say(const char* message, uint8 language_id, int message_type)
 {
-	Journal::Options opts;
+	Journal::Options opts = {};
 	opts.speak_mode   = Journal::SpeakMode::Say;
 	opts.journal_mode = Journal::Mode::Log2;
 	opts.language     = language_id;
@@ -123,7 +123,7 @@ void Perl__say(const char* message, uint8 language_id, int message_type)
 
 void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode)
 {
-	Journal::Options opts;
+	Journal::Options opts = {};
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
 	opts.journal_mode = Journal::Mode::Log2;
 	opts.language     = language_id;
@@ -134,7 +134,7 @@ void Perl__say(const char* message, uint8 language_id, int message_type, int spe
 
 void Perl__say(const char* message, uint8 language_id, int message_type, int speak_mode, int journal_mode)
 {
-	Journal::Options opts;
+	Journal::Options opts = {};
 	opts.speak_mode   = static_cast<Journal::SpeakMode>(speak_mode);
 	opts.journal_mode = static_cast<Journal::Mode>(journal_mode);
 	opts.language     = language_id;
@@ -1190,7 +1190,7 @@ void Perl__task_setselector(int task_set_id, bool ignore_cooldown)
 void Perl__enabletask(perl::array task_ids)
 {
 	int count = 0;
-	int tasks[MAXCHOOSERENTRIES];
+	int tasks[MAXCHOOSERENTRIES] = {};
 	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
 	{
 		tasks[i] = task_ids[i];
@@ -1203,7 +1203,7 @@ void Perl__enabletask(perl::array task_ids)
 void Perl__disabletask(perl::array task_ids)
 {
 	int count = 0;
-	int tasks[MAXCHOOSERENTRIES];
+	int tasks[MAXCHOOSERENTRIES] = {};
 	for (int i = 0; i < task_ids.size() && i < MAXCHOOSERENTRIES; ++i)
 	{
 		tasks[i] = task_ids[i];

@@ -560,7 +560,7 @@ void EntityList::MobProcess()
 				entity_list.RemoveNPC(id);
 			} else {
 #ifdef _WINDOWS
-				struct in_addr in;
+				struct in_addr in = {};
 				in.s_addr = mob->CastToClient()->GetIP();
 				LogInfo("Dropping client: Process=false, ip=[{}] port=[{}]", inet_ntoa(in), mob->CastToClient()->GetPort());
 #endif
@@ -968,7 +968,7 @@ bool EntityList::MakeDoorSpawnPacket(EQApplicationPacket *app, Client *client)
 			memset(&new_door, 0, sizeof(new_door));
 			memcpy(new_door.name, door->GetDoorName(), 32);
 
-			auto position = door->GetPosition();
+			auto& position = door->GetPosition();
 
 			new_door.xPos = position.x;
 			new_door.yPos = position.y;
@@ -1223,7 +1223,7 @@ uint32 EntityList::CountSpawnedNPCs(std::vector<uint32> npc_ids)
 		return npc_count;
 	}
 
-	for (auto current_npc : npc_list) {
+	for (auto& current_npc : npc_list) {
 		if (
 			std::find(
 				npc_ids.begin(),
@@ -3936,7 +3936,7 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 		}
 
 		if (old_in && !new_in) {
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id = EVENT_EXIT;
 			evt.client = c;
 			evt.npc = d;
@@ -3944,7 +3944,7 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 			evt.area_type = 0;
 			events.push_back(evt);
 		} else if (new_in && !old_in) {
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id = EVENT_ENTER;
 			evt.client = c;
 			evt.npc = d;
@@ -3972,7 +3972,7 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 
 		if (old_in && !new_in) {
 			//were in but are no longer.
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id = EVENT_LEAVE_AREA;
 			evt.client = c;
 			evt.npc = nullptr;
@@ -3981,7 +3981,7 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 			events.push_back(evt);
 		} else if (!old_in && new_in) {
 			//were not in but now are
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id = EVENT_ENTER_AREA;
 			evt.client = c;
 			evt.npc = nullptr;
@@ -4064,7 +4064,7 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 
 		if (old_in && !new_in) {
 			//were in but are no longer.
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id  = EVENT_LEAVE_AREA;
 			evt.client    = nullptr;
 			evt.npc       = n;
@@ -4074,7 +4074,7 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 		}
 		else if (!old_in && new_in) {
 			//were not in but now are
-			quest_proximity_event evt;
+			quest_proximity_event evt = {};
 			evt.event_id  = EVENT_ENTER_AREA;
 			evt.client    = nullptr;
 			evt.npc       = n;
@@ -4111,7 +4111,7 @@ void EntityList::AddArea(int id, int type, float min_x, float max_x, float min_y
 		float max_y, float min_z, float max_z)
 {
 	RemoveArea(id);
-	Area a;
+	Area a = {};
 	a.id = id;
 	a.type = type;
 	if (min_x > max_x) {
@@ -4259,7 +4259,7 @@ void EntityList::LimitAddNPC(NPC *npc)
 	if (!npc)
 		return;
 
-	SpawnLimitRecord r;
+	SpawnLimitRecord r = {};
 
 	uint16 eid = npc->GetID();
 	r.spawngroup_id = npc->GetSpawnGroupId();
@@ -5803,7 +5803,7 @@ int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
 }
 
 void EntityList::DespawnGridNodes(int32 grid_id) {
-	for (auto m : mob_list) {
+	for (auto& m : mob_list) {
 		Mob *mob = m.second;
 		if (
 			mob->IsNPC() &&
@@ -5847,7 +5847,7 @@ std::vector<Mob*> EntityList::GetFilteredEntityList(Mob* sender, uint32 distance
 	}
 
 	const auto squared_distance = (distance * distance);
-	const auto position = sender->GetPosition();
+	const auto& position = sender->GetPosition();
 	for (auto &m: mob_list) {
 		if (!m.second) {
 			continue;

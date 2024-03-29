@@ -529,7 +529,7 @@ std::string DialogueWindow::CenterMessage(std::string message)
 		return std::string();
 	}
 
-	auto cleaned_message = message;
+	auto& cleaned_message = message;
 
 	std::regex tags("<[^>]*>");
 

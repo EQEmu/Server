@@ -201,7 +201,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_group = std::make_unique<SpawnGroup>(
 			Strings::ToInt(row[0]),
 			row[1],
@@ -256,7 +256,7 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_entry = std::make_unique<SpawnEntry>(
 			Strings::ToInt(row[1]),
 			Strings::ToInt(row[2]),
@@ -317,7 +317,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		LogSpawnsDetail(
 			"Loading spawn_group spawn_group_id [{}] name [{}] spawn_limit [{}] dist [{}]",
 			row[0],
@@ -370,7 +370,7 @@ bool ZoneDatabase::LoadSpawnGroupsByID(int spawn_group_id, SpawnGroupList *spawn
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		auto new_spawn_entry = std::make_unique<SpawnEntry>(
 			Strings::ToInt(row[1]),
 			Strings::ToInt(row[2]),

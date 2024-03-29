@@ -50,7 +50,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_CONTENT_FLAG_CHANGE) {
-					auto flag_name = e.event_data;
+					auto& flag_name = e.event_data;
 					if (!flag_name.empty()) {
 						LogScheduler("Deactivating event [{}] resetting content flags", e.description);
 						content_service->ReloadContentFlags();
@@ -93,8 +93,8 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_RULE_CHANGE) {
 					auto params     = Strings::Split(e.event_data, '=');
-					auto rule_key   = params[0];
-					auto rule_value = params[1];
+					auto& rule_key   = params[0];
+					auto& rule_value = params[1];
 					if (!rule_key.empty() && !rule_value.empty()) {
 						LogScheduler(
 							"Activating Event [{}] scheduled rule change, setting rule [{}] to [{}]",
@@ -108,7 +108,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_CONTENT_FLAG_CHANGE) {
-					auto flag_name = e.event_data;
+					auto& flag_name = e.event_data;
 					if (!flag_name.empty()) {
 						LogScheduler(
 							"Activating Event [{}] scheduled content flag change, setting flag [{}] to enabled",

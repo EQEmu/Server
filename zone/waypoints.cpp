@@ -523,7 +523,7 @@ void NPC::GetClosestWaypoints(std::list<wplist> &wp_list, int count, const glm::
 		float cur_z = (Waypoints[i].z - location.z);
 		cur_z *= cur_z;
 		float cur_dist = cur_x + cur_y + cur_z;
-		wp_distance w_dist;
+		wp_distance w_dist = {};
 		w_dist.dist = cur_dist;
 		w_dist.index = i;
 		distances.push_back(w_dist);
@@ -1240,7 +1240,7 @@ int ZoneDatabase::GetRandomWaypointFromGrid(glm::vec4 &loc, uint32 zone_id, uint
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	loc.x = e.x;
 	loc.y = e.y;

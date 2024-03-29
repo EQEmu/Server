@@ -284,7 +284,7 @@ int command_init(void)
 		}
 	}
 
-	auto working_cl = commandlist;
+	auto& working_cl = commandlist;
 	for (const auto& w : working_cl) {
 		auto cs = command_settings.find(w.first);
 		if (cs == command_settings.end()) {

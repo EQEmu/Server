@@ -823,7 +823,7 @@ int64 Mob::TuneNPCAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_
 		return false;
 	}
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.skill = EQ::skills::SkillHandtoHand;
 	my_hit.hand = EQ::invslot::slotPrimary;
 	my_hit.damage_done = 1;
@@ -889,7 +889,7 @@ int64 Mob::TuneClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int h
 		}
 	}
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.skill = TuneAttackAnimation(Hand, weapon);
 
 	// Now figure out damage

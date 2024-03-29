@@ -101,7 +101,7 @@ void Raid::HandleBotGroupDisband(uint32 owner, uint32 gid)
 			g->AddToGroup(b);
 			database.SetGroupLeaderName(g->GetID(), b->GetName());
 
-			for (auto m: r_group_members) {
+			for (auto& m: r_group_members) {
 				if (m.member->IsBot()) {
 					auto b_member = m.member->CastToBot();
 					if (strcmp(b_member->GetName(), b->GetName()) == 0) {

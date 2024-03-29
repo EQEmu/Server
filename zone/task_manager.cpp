@@ -1549,7 +1549,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *cts)
 
 	auto results = database.QueryDatabase(query);
 	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
+		for (auto& row = results.begin(); row != results.end(); ++row) {
 			int task_id = Strings::ToInt(row[0]);
 			cts->m_enabled_tasks.push_back(task_id);
 			LogTasksDetail("Adding task_id [{}] to enabled tasks", task_id);

@@ -1668,7 +1668,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 							LogSpells("Spell [{}]: Canceled. Missing required reagent [{}] ([{}])", spell_id, item->Name, component);
 						}
 						else {
-							char TempItemName[64];
+							char TempItemName[64] = {};
 							strcpy((char*)&TempItemName, "UNKNOWN");
 							LogSpells("Spell [{}]: Canceled. Missing required reagent [{}] ([{}])", spell_id, TempItemName, component);
 						}
@@ -5990,7 +5990,7 @@ bool Client::SpellGlobalCheck(uint16 spell_id, uint32 character_id) {
 		return true; // Spell ID isn't listed in the spell_globals table, allow scribing,
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	std::string spell_global_name = row[0];
 	std::string spell_global_value = row[1];
 
@@ -6067,7 +6067,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 character_id) {
 		return true; // Spell ID isn't listed in the spell_buckets table, allow scribing.
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	std::string spell_bucket_name = row[0];
 	std::string spell_bucket_value = row[1];
 

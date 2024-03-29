@@ -19,7 +19,7 @@
  */
 
 #define DONT_SHARED_OPCODES
-#define PLATFORM_ZONE 1
+constexpr auto PLATFORM_ZONE = 1;
 
 #include "../common/global_define.h"
 #include "../common/timer.h"
@@ -495,7 +495,7 @@ int main(int argc, char **argv)
 	Timer quest_timers(100);
 	UpdateWindowTitle(nullptr);
 	std::shared_ptr<EQStreamInterface>                 eqss;
-	EQStreamInterface                                  *eqsi;
+	EQStreamInterface*                                 eqsi = {};
 	std::unique_ptr<EQ::Net::EQStreamManager>          eqsm;
 	std::chrono::time_point<std::chrono::system_clock> frame_prev = std::chrono::system_clock::now();
 	std::unique_ptr<EQ::Net::WebsocketServer>          ws_server;
@@ -554,7 +554,7 @@ int main(int argc, char **argv)
 		//check the stream identifier for any now-identified streams
 		while ((eqsi = stream_identifier.PopIdentified())) {
 			//now that we know what patch they are running, start up their client object
-			struct in_addr in;
+			struct in_addr in = {};
 			in.s_addr = eqsi->GetRemoteIP();
 			LogInfo("New client from [{}]:[{}]", inet_ntoa(in), ntohs(eqsi->GetRemotePort()));
 			auto client = new Client(eqsi);

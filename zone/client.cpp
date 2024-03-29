@@ -1111,7 +1111,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				}
 			}
 
-			char target_name[64];
+			char target_name[64] = {};
 
 			if(targetname)
 			{
@@ -3589,7 +3589,7 @@ void Client::Tell_StringID(uint32 string_id, const char *who, const char *messag
 }
 
 void Client::SetTint(int16 in_slot, uint32 color) {
-	EQ::textures::Tint_Struct new_color;
+	EQ::textures::Tint_Struct new_color = {};
 	new_color.Color = color;
 	SetTint(in_slot, new_color);
 	database.SaveCharacterMaterialColor(CharacterID(), in_slot, color);
@@ -4334,7 +4334,7 @@ void Client::UpdateLFP() {
 		return;
 	}
 
-	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
+	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS] = {};
 
 	for(unsigned int i=0; i<MAX_GROUP_MEMBERS; i++) {
 		LFPMembers[i].Name[0] = '\0';
@@ -5223,7 +5223,7 @@ void Client::SummonAndRezzAllCorpses()
 
 void Client::SummonAllCorpses(const glm::vec4& position)
 {
-	auto summonLocation = position;
+	glm::vec4 summonLocation = position;
 	if(IsOrigin(position) && position.w == 0.0f)
 		summonLocation = GetPosition();
 
@@ -5348,7 +5348,7 @@ void Client::ShowSkillsWindow()
 
 	for (const auto& skill : skills_map) {
 		auto skill_id = skill.first;
-		auto skill_name = skill.second;
+		auto& skill_name = skill.second;
 		auto can_have_skill = CanHaveSkill(skill_id);
 		auto current_skill = GetSkill(skill_id);
 		auto max_skill = MaxSkill(skill_id);
@@ -5432,8 +5432,8 @@ void Client::SendRewards()
 		return;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		ClientReward cr;
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		ClientReward cr = {};
 		cr.id = Strings::ToInt(row[0]);
 		cr.amount = Strings::ToInt(row[1]);
 		rewards.push_back(cr);
@@ -5501,7 +5501,7 @@ bool Client::TryReward(uint32 claim_id)
 	if (results.RowCount() == 0)
 		return false;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	uint32 amt = Strings::ToInt(row[0]);
 	if (amt == 0)
@@ -6479,7 +6479,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 		return;
 	}
 
-	SwarmPet_Struct pet;
+	SwarmPet_Struct pet = {};
 	pet.count = pet_count;
 	pet.duration = pet_duration;
 	pet.npc_id = record.npc_type;
@@ -7894,7 +7894,7 @@ void Client::TryItemTimer(int slot)
 		return;
 	}
 
-	auto item_timers = inst->GetTimers();
+	auto& item_timers = inst->GetTimers();
 	auto it_iter = item_timers.begin();
 	while(it_iter != item_timers.end()) {
 		if(it_iter->second.Check()) {
@@ -8191,7 +8191,7 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 		return;
 	}
 
-	for(auto row = results.begin(); row != results.end(); ++row) {
+	for(auto& row = results.begin(); row != results.end(); ++row) {
 		const char* charName = row[0];
 		if(strcmp(charName, GetCleanName()) != 0) {
 			worldserver.SendEmoteMessage(
@@ -8982,7 +8982,7 @@ void Client::SetPrimaryWeaponOrnamentation(uint32 model_id)
 			return;
 		}
 
-		auto e = l.front();
+		auto& e = l.front();
 
 		e.ornamentidfile = model_id;
 
@@ -9015,7 +9015,7 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
 			return;
 		}
 
-		auto e = l.front();
+		auto& e = l.front();
 
 		e.ornamentidfile = model_id;
 
@@ -9730,7 +9730,7 @@ void Client::SendExpeditionLockoutTimers()
 		}
 		else
 		{
-			ExpeditionLockoutTimerEntry_Struct lockout;
+			ExpeditionLockoutTimerEntry_Struct lockout = {};
 			strn0cpy(lockout.expedition_name, it->GetExpeditionName().c_str(), sizeof(lockout.expedition_name));
 			lockout.seconds_remaining = seconds_remaining + rounding_seconds;
 			lockout.event_type = it->IsReplayTimer() ? Expedition::REPLAY_TIMER_ID : Expedition::EVENT_TIMER_ID;
@@ -9900,7 +9900,7 @@ void Client::GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone)
 {
 	if (dynamic_zone)
 	{
-		auto safereturn = dynamic_zone->GetSafeReturnLocation();
+		auto& safereturn = dynamic_zone->GetSafeReturnLocation();
 		if (safereturn.zone_id != 0)
 		{
 			LogDynamicZonesDetail("Sending [{}] to safereturn zone [{}]", CharacterID(), safereturn.zone_id);
@@ -11845,8 +11845,8 @@ void Client::SendPath(Mob* target)
 
 	if (!RuleB(Pathing, Find) || !zone->pathing) {
 		points.clear();
-		FindPerson_Point a;
-		FindPerson_Point b;
+		FindPerson_Point a = {};
+		FindPerson_Point b = {};
 
 		a.x = GetX();
 		a.y = GetY();
@@ -11885,13 +11885,13 @@ void Client::SendPath(Mob* target)
 		// Final destination.
 		// Current Position.
 		// rest of the points.
-		FindPerson_Point p;
+		FindPerson_Point p = {};
 
 		int point_number = 0;
 
 		bool leads_to_teleporter = false;
 
-		auto v = path_list.back();
+		auto& v = path_list.back();
 
 		p.x = v.pos.x;
 		p.y = v.pos.y;

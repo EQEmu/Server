@@ -96,7 +96,7 @@ const NPCType *Horse::BuildHorseType(uint16 spell_id)
 
 	strn0cpy(n->special_abilities, "19,1^20,1^24,1", sizeof(n->special_abilities));
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	n->current_hp   = 1;
 	n->max_hp       = 1;

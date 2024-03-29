@@ -499,7 +499,7 @@ bool Map::LoadV2(FILE *f) {
 			uint8 vis = *(uint8*)buf;
 			buf += sizeof(uint8);
 
-			ModelEntry::Poly p;
+			ModelEntry::Poly p = {};
 			p.v1 = v1;
 			p.v2 = v2;
 			p.v3 = v3;
@@ -545,9 +545,9 @@ bool Map::LoadV2(FILE *f) {
 			auto &current_poly = mod_polys[j];
 			if (current_poly.vis == 0)
 				continue;
-			auto v1 = mod_verts[current_poly.v1];
-			auto v2 = mod_verts[current_poly.v2];
-			auto v3 = mod_verts[current_poly.v3];
+			auto& v1 = mod_verts[current_poly.v1];
+			auto& v2 = mod_verts[current_poly.v2];
+			auto& v3 = mod_verts[current_poly.v3];
 
 			RotateVertex(v1, x_rot, y_rot, z_rot);
 			RotateVertex(v2, x_rot, y_rot, z_rot);

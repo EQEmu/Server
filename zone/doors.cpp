@@ -34,10 +34,10 @@
 
 #include <string.h>
 
-#define OPEN_DOOR 0x02
-#define CLOSE_DOOR 0x03
-#define OPEN_INVDOOR 0x03
-#define CLOSE_INVDOOR 0x02
+constexpr auto OPEN_DOOR = 0x02;
+constexpr auto CLOSE_DOOR = 0x03;
+constexpr auto OPEN_INVDOOR = 0x03;
+constexpr auto CLOSE_INVDOOR = 0x02;
 
 extern EntityList  entity_list;
 extern WorldServer worldserver;
@@ -730,7 +730,7 @@ int ZoneDatabase::GetDoorsDBCountPlusOne(std::string zone_short_name, int16 vers
 		return -1;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	if (!row[0]) {
 		return 0;
@@ -812,7 +812,7 @@ void Doors::CreateDatabaseEntry()
 		return;
 	}
 
-	const auto& l = DoorsRepository::GetWhere(
+	auto l = DoorsRepository::GetWhere(
 		content_db,
 		fmt::format(
 			"zone = '{}' AND doorid = {}",
@@ -821,7 +821,7 @@ void Doors::CreateDatabaseEntry()
 		)
 	);
 	if (!l.empty()) {
-		auto e = l[0];
+		auto& e = l[0];
 
 		e.name         = GetDoorName();
 		e.pos_x        = GetX();

@@ -340,7 +340,7 @@ bool ZoneDatabase::LoadTributes() {
 		return false;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         uint32 id = Strings::ToUnsignedInt(row[0]);
 		tributeData.name = row[1];
 		tributeData.description = row[2];
@@ -358,7 +358,7 @@ bool ZoneDatabase::LoadTributes() {
 		return false;
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		uint32 id = Strings::ToUnsignedInt(row[0]);
 
 		if (tribute_list.count(id) != 1) {

@@ -539,7 +539,7 @@ public:
 	}
 
 	static void Unload() {
-		for (auto map_iter : bot_command_spells) {
+		for (auto& map_iter : bot_command_spells) {
 			if (map_iter.second.empty())
 				continue;
 			for (auto list_iter: map_iter.second) {
@@ -1052,7 +1052,7 @@ private:
 		}
 
 		std::map<std::string, std::string> zone_names;
-		for (auto row = results.begin(); row != results.end(); ++row)
+		for (auto& row = results.begin(); row != results.end(); ++row)
 			zone_names[row[0]] = row[1];
 
 		for (auto list_iter = depart_list->begin(); list_iter != depart_list->end();) {
@@ -1372,7 +1372,7 @@ int bot_command_init(void)
 	std::vector<std::pair<std::string, uint8>> injected_bot_command_settings;
 	std::vector<std::string> orphaned_bot_command_settings;
 
-	for (auto bcs_iter : bot_command_settings) {
+	for (auto& bcs_iter : bot_command_settings) {
 
 		auto bcl_iter = bot_command_list.find(bcs_iter.first);
 		if (bcl_iter == bot_command_list.end()) {
@@ -1391,8 +1391,8 @@ int bot_command_init(void)
 		}
 	}
 
-	auto working_bcl = bot_command_list;
-	for (auto working_bcl_iter : working_bcl) {
+	auto& working_bcl = bot_command_list;
+	for (auto& working_bcl_iter : working_bcl) {
 
 		auto bcs_iter = bot_command_settings.find(working_bcl_iter.first);
 		if (bcs_iter == bot_command_settings.end()) {
@@ -1425,7 +1425,7 @@ int bot_command_init(void)
 			continue;
 		}
 
-		for (auto alias_iter : bcs_iter->second.second) {
+		for (auto& alias_iter : bcs_iter->second.second) {
 			if (alias_iter.empty()) {
 				continue;
 			}
@@ -1488,7 +1488,7 @@ int bot_command_add(std::string bot_command_name, const char *desc, int access, 
 		LogError("bot_command_add() - Bot command [{}] is a duplicate bot command name - check bot_command.cpp", bot_command_name.c_str());
 		return -1;
 	}
-	for (auto iter : bot_command_list) {
+	for (auto& iter : bot_command_list) {
 		if (iter.second->function != function)
 			continue;
 		LogError("bot_command_add() - Bot command [{}] equates to an alias of [{}] - check bot_command.cpp", bot_command_name.c_str(), iter.first.c_str());
@@ -1887,7 +1887,7 @@ int helper_bot_follow_option_chain(Client* bot_owner)
 		}
 	}
 
-	for (auto bot_group_iter : bot_group_map) {
+	for (auto& bot_group_iter : bot_group_map) {
 
 		if (!bot_group_iter.second) {
 			continue;

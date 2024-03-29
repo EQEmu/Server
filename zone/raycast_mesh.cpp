@@ -70,8 +70,7 @@ typedef std::vector< RmUint32 > TriVector;
 bool intersectRayAABB(const RmReal MinB[3],const RmReal MaxB[3],const RmReal origin[3],const RmReal dir[3],RmReal coord[3])
 {
 	bool Inside = true;
-	RmReal MaxT[3];
-	MaxT[0]=MaxT[1]=MaxT[2]=-1.0f;
+	RmReal MaxT[3] = { -1.0f };
 
 	// Find candidate planes.
 	for(RmUint32 i=0;i<3;i++)
@@ -174,7 +173,7 @@ bool intersectLineSegmentAABB(const RmReal bmin[3],const RmReal bmax[3],const Rm
 
 static inline bool rayIntersectsTriangle(const RmReal *p,const RmReal *d,const RmReal *v0,const RmReal *v1,const RmReal *v2,RmReal &t)
 {
-	RmReal e1[3],e2[3],h[3],s[3],q[3];
+	RmReal e1[3] = {}, e2[3] = {}, h[3] = {}, s[3] = {}, q[3] = {};
 	RmReal a,f,u,v;
 
 	vector(e1,v1,v0);
@@ -327,7 +326,7 @@ public:
 
 	bool containsTriangle(const RmReal *p1,const RmReal *p2,const RmReal *p3) const
 	{
-		BoundsAABB b;
+		BoundsAABB b = {};
 		b.setMin(p1);
 		b.setMax(p1);
 		b.include(p2);
@@ -532,7 +531,7 @@ public:
 
 				// Compute two bounding boxes based upon the split of the longest axis
 
-				BoundsAABB leftBounds,rightBounds;
+				BoundsAABB leftBounds = {}, rightBounds = {};
 
 				TriVector leftTriangles;
 				TriVector rightTriangles;
@@ -782,7 +781,7 @@ public:
 	{
 		bool ret = false;
 
-		RmReal dir[3];
+		RmReal dir[3] = {};
 		dir[0] = to[0] - from[0];
 		dir[1] = to[1] - from[1];
 		dir[2] = to[2] - from[2];
@@ -847,7 +846,7 @@ public:
 	{
 		bool ret = false;
 
-		RmReal dir[3];
+		RmReal dir[3] = {};
 
 		dir[0] = to[0] - from[0];
 		dir[1] = to[1] - from[1];

@@ -118,7 +118,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 
 	std::string tmp;
 	if (database.GetVariable("loglevel", tmp)) {
-		int log_levels[4];
+		int log_levels[4] = {};
 		int tmp_i = Strings::ToInt(tmp);
 		if (tmp_i>9){ //Server is using the new code
 			for(int i=0;i<4;i++){
@@ -525,7 +525,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 
 		database.SaveMerchantTemp(npcid, first_empty_slot, GetZoneID(), GetInstanceID(), item, charges);
 		tmp_merlist = tmpmerchanttable[npcid];
-		TempMerchantList ml2;
+		TempMerchantList ml2 = {};
 		ml2.charges = charges;
 		LogInventory("Adding slot [{}] with [{}] charges.", first_empty_mslot, charges);
 		ml2.item = item;
@@ -577,7 +577,7 @@ void Zone::LoadTempMerchantData()
 	}
 
 	std::vector<std::string> npc_ids;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		npc_ids.push_back(row[0]);
 	}
 
@@ -604,8 +604,8 @@ void Zone::LoadTempMerchantData()
 	std::map<uint32, std::list<TempMerchantList> >::iterator temp_merchant_table_entry;
 
 	uint32 npc_id = 0;
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		TempMerchantList temp_merchant_list;
+	for (auto& row = results.begin(); row != results.end(); ++row) {
+		TempMerchantList temp_merchant_list = {};
 		temp_merchant_list.npcid = Strings::ToUnsignedInt(row[0]);
 		if (npc_id != temp_merchant_list.npcid) {
 			temp_merchant_table_entry = tmpmerchanttable.find(temp_merchant_list.npcid);
@@ -2181,7 +2181,7 @@ bool ZoneDatabase::GetDecayTimes(npcDecayTimes_Struct *npcCorpseDecayTimes)
 		return false;
 
 	int index = 0;
-	for (auto row = results.begin(); row != results.end(); ++row, ++index) {
+	for (auto& row = results.begin(); row != results.end(); ++row, ++index) {
 		Seperator sep(row[0]);
 		npcCorpseDecayTimes[index].minlvl = Strings::ToInt(sep.arg[1]);
 		npcCorpseDecayTimes[index].maxlvl = Strings::ToInt(sep.arg[2]);
@@ -2396,7 +2396,7 @@ void Zone::LoadVeteranRewards()
 {
 	VeteranRewards.clear();
 
-	InternalVeteranReward current_reward;
+	InternalVeteranReward current_reward = {};
 	current_reward.claim_id = 0;
 
     const std::string query = "SELECT claim_id, name, item_id, charges "
@@ -2411,7 +2411,7 @@ void Zone::LoadVeteranRewards()
 	LogInfo("Loaded [{}] veteran reward(s)", Strings::Commify(results.RowCount()));
 
 	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index)
+    for (auto& row = results.begin(); row != results.end(); ++row, ++index)
     {
         uint32 claim = Strings::ToInt(row[0]);
 
@@ -2453,7 +2453,7 @@ void Zone::LoadAlternateCurrencies()
 		return;
 	}
 
-	AltCurrencyDefinition_Struct c;
+	AltCurrencyDefinition_Struct c = {};
 
 	for (const auto &e : l) {
 		c.id      = e.id;
@@ -2506,7 +2506,7 @@ void Zone::LoadAdventureFlavor()
 		return;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         uint32 id = Strings::ToInt(row[0]);
         adventure_entry_list_flavor[id] = row[1];
     }

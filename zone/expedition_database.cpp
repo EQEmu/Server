@@ -64,7 +64,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
 	{
-		for (auto row = results.begin(); row != results.end(); ++row)
+		for (auto& row = results.begin(); row != results.end(); ++row)
 		{
 			lockouts.emplace_back(
 				row[0],                                             // expedition_uuid
@@ -102,7 +102,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
 	{
-		for (auto row = results.begin(); row != results.end(); ++row)
+		for (auto& row = results.begin(); row != results.end(); ++row)
 		{
 			lockouts.emplace_back(
 				row[0],                                             // expedition_uuid

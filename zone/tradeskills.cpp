@@ -664,7 +664,7 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	std::list<int> MissingItems;
 
     uint8 needItemIndex = 0;
-	for (auto row = results.begin(); row != results.end(); ++row, ++needItemIndex) {
+	for (auto& row = results.begin(); row != results.end(); ++row, ++needItemIndex) {
 		uint32 item = (uint32)Strings::ToInt(row[0]);
 		uint8 num = (uint8) Strings::ToInt(row[1]);
 
@@ -794,7 +794,7 @@ void Client::SendTradeskillSearchResults(
 		fmt::format("char_id = {}", CharacterID())
 	);
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (row == nullptr || row[0] == nullptr || row[1] == nullptr || row[2] == nullptr || row[3] == nullptr ||
 			row[4] == nullptr || row[5] == nullptr) {
 			continue;
@@ -895,7 +895,7 @@ void Client::SendTradeskillDetails(uint32 recipe_id) {
 	uint32 datalen = 0;
 	uint8 count = 0;
 
-	for(auto row = results.begin(); row != results.end(); ++row) {
+	for(auto& row = results.begin(); row != results.end(); ++row) {
 
 		//watch for references to items which are not in the
 		//items table, which the left join will make nullptr...
@@ -1422,7 +1422,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		}
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	const uint32 recipe_id = Strings::ToUnsignedInt(row[0]);
 
 	//Right here we verify that we actually have ALL of the tradeskill components..
@@ -1532,7 +1532,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		return false;
 	}
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	spec->tradeskill        = static_cast<EQ::skills::SkillType>(Strings::ToUnsignedInt(row[1]));
 	spec->skill_needed      = Strings::ToInt(row[2]);
@@ -1671,7 +1671,7 @@ void Client::LearnRecipe(uint32 recipe_id)
 		results.RowCount()
 	);
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	if (results.RowCount() > 0) {
 		return;
 	}
@@ -1882,7 +1882,7 @@ bool Client::CheckTradeskillLoreConflict(int32 recipe_id)
 					EQ::SayLinkEngine linker;
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
 					linker.SetItemData(tre_inst);
-					auto item_link = linker.GenerateLink();
+					auto& item_link = linker.GenerateLink();
 					MessageString(Chat::Red, TRADESKILL_COMBINE_LORE, item_link.c_str());
 					return true;
 				}

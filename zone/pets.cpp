@@ -233,7 +233,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		}
 
 		if (results.RowCount() != 0) {
-			auto row = results.begin();
+			auto& row = results.begin();
 			monsterid = Strings::ToInt(row[0]);
 		}
 
@@ -395,7 +395,7 @@ bool ZoneDatabase::GetPoweredPetEntry(const std::string& pet_type, int16 pet_pow
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	r->npc_type     = e.npcID;
 	r->temporary    = e.temp;
@@ -625,7 +625,7 @@ bool ZoneDatabase::GetBasePetItems(int32 equipmentset, uint32 *items) {
 			return false;
 		}
 
-		auto row = results.begin();
+		auto& row = results.begin();
 		nextset = Strings::ToInt(row[0]);
 
 		query = StringFormat("SELECT slot, item_id FROM pets_equipmentset_entries WHERE set_id='%d'", curset);

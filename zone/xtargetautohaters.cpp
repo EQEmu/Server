@@ -18,7 +18,7 @@ void XTargetAutoHaters::increment_count(Mob *in)
 		return;
 	}
 	// We are not on the list
-	HatersCount c;
+	HatersCount c = {};
 	c.spawn_id = in->GetID();
 	c.count = 1;
 

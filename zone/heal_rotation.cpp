@@ -18,15 +18,15 @@
 
 #include "bot.h"
 
-#define SAFE_HP_RATIO_CLOTH 95.0f
-#define SAFE_HP_RATIO_LEATHER 90.0f
-#define SAFE_HP_RATIO_CHAIN 80.0f
-#define SAFE_HP_RATIO_PLATE 75.0f
+constexpr float SAFE_HP_RATIO_CLOTH = 95.0f;
+constexpr float SAFE_HP_RATIO_LEATHER = 90.0f;
+constexpr float SAFE_HP_RATIO_CHAIN = 80.0f;
+constexpr float SAFE_HP_RATIO_PLATE = 75.0f;
 
-#define CRITICAL_HP_RATIO_CLOTH 45.0f
-#define CRITICAL_HP_RATIO_LEATHER 40.0f
-#define CRITICAL_HP_RATIO_CHAIN 35.0f
-#define CRITICAL_HP_RATIO_PLATE 30.0f
+constexpr float CRITICAL_HP_RATIO_CLOTH = 45.0f;
+constexpr float CRITICAL_HP_RATIO_LEATHER = 40.0f;
+constexpr float CRITICAL_HP_RATIO_CHAIN = 35.0f;
+constexpr float CRITICAL_HP_RATIO_PLATE = 30.0f;
 
 HealRotation::HealRotation(Bot* hr_creator, uint32 interval_ms, bool fast_heals, bool adaptive_targeting, bool casting_override)
 {

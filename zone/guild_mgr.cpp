@@ -395,7 +395,7 @@ void ZoneGuildManager::ProcessWorldPacket(ServerPacket *pack)
 
 				LogGuilds("Received guild delete from world for guild [{}]", s->guild_id);
 
-				auto      clients = entity_list.GetClientList();
+				auto& clients = entity_list.GetClientList();
 				for (auto &c: clients) {
 					if (c.second->GuildID() == s->guild_id) {
 						c.second->SetGuildID(GUILD_NONE);
@@ -716,7 +716,7 @@ bool GuildBankManager::Load(uint32 guildID)
 
 	char donator[64], whoFor[64];
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		int area = Strings::ToInt(row[0]);
 		int slot = Strings::ToInt(row[1]);
 		int itemID = Strings::ToInt(row[2]);
@@ -1015,7 +1015,7 @@ bool GuildBankManager::AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 
 
 	const EQ::ItemData *Item = database.GetItem(ItemID);
 
-	GuildBankItemUpdate_Struct gbius;
+	GuildBankItemUpdate_Struct gbius = {};
 
 	if(!Item->Stackable)
 		gbius.Init(GuildBankItemUpdate, 1, Slot, Area, 1, ItemID, Item->Icon, Item->Stackable ? QtyOrCharges : 1, Permissions, 0, 0);
@@ -1081,7 +1081,7 @@ int GuildBankManager::Promote(uint32 guildID, int slotID)
 
 	const EQ::ItemData *Item = database.GetItem((*iter)->Items.MainArea[mainSlot].ItemID);
 
-	GuildBankItemUpdate_Struct gbius;
+	GuildBankItemUpdate_Struct gbius = {};
 
 	if(!Item->Stackable)
 		gbius.Init(GuildBankItemUpdate, 1, mainSlot, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, 0, 0, 0);
@@ -1137,7 +1137,7 @@ void GuildBankManager::SetPermissions(uint32 guildID, uint16 slotID, uint32 perm
 
 	const EQ::ItemData *Item = database.GetItem((*iter)->Items.MainArea[slotID].ItemID);
 
-	GuildBankItemUpdate_Struct gbius;
+	GuildBankItemUpdate_Struct gbius = {};
 
 	if(!Item->Stackable)
 		gbius.Init(GuildBankItemUpdate, 1, slotID, GuildBankMainArea, 1, Item->ID, Item->Icon, 1, (*iter)->Items.MainArea[slotID].Permissions, 0, 0);
@@ -1293,7 +1293,7 @@ bool GuildBankManager::DeleteItem(uint32 guildID, uint16 area, uint16 slotID, ui
 		deleted = false;
 	}
 
-	GuildBankItemUpdate_Struct gbius;
+	GuildBankItemUpdate_Struct gbius = {};
 
 	if(!deleted)
 	{
@@ -1385,7 +1385,7 @@ bool GuildBankManager::MergeStacks(uint32 GuildID, uint16 SlotID)
 		{
 			UpdateItemQuantity(GuildID, GuildBankMainArea, i, BankArea[i].Quantity);
 
-			GuildBankItemUpdate_Struct gbius;
+			GuildBankItemUpdate_Struct gbius = {};
 
 			if(BankArea[i].Quantity == Item->StackSize)
 				gbius.Init(GuildBankItemUpdate, 1, i, GuildBankMainArea, 1, ItemID, Item->Icon, BankArea[i].Quantity, BankArea[i].Permissions, 1, 0);

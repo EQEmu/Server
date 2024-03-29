@@ -99,7 +99,7 @@ ZoneDatabase::~ZoneDatabase() {
 
 bool ZoneDatabase::SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_Struct* zd)
 {
-	const auto& l = ZoneRepository::GetWhere(
+	auto l = ZoneRepository::GetWhere(
 		*this,
 		fmt::format(
 			"`zoneidnumber` = {} AND `version` = {}",
@@ -112,7 +112,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zone_id, uint16 instance_version, NewZone_
 		return false;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	e.underworld          = zd->underworld;
 	e.minclip             = zd->minclip;
@@ -182,7 +182,7 @@ void ZoneDatabase::UpdateSpawn2Status(uint32 id, uint8 new_status, uint32 instan
 		fmt::format("spawn2_id = {} and instance_id = {}", id, instance_id)
 	);
 	if (!spawns.empty()) {
-		auto spawn = spawns[0];
+		auto& spawn = spawns[0];
 		// 1 = enabled 0 = disabled
 		spawn.disabled    = new_status ? 0 : 1;
 		spawn.instance_id = instance_id;
@@ -2086,7 +2086,7 @@ const NPCType* ZoneDatabase::GetMercenaryType(uint32 merc_npc_type_id, uint16 ra
 
 	const NPCType* n = nullptr;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 
 	NPCType* t = new NPCType;
 

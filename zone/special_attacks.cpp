@@ -216,7 +216,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	     (!IsAttackAllowed(who))))
 		return;
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.damage_done = 1; // min 1 dmg
 	my_hit.base_damage = base_damage;
 	my_hit.min_damage = min_damage;
@@ -1401,7 +1401,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	if (!damage_mod)
 		 damage_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3);//Damage modifier
 
-	DamageHitInfo my_hit;
+	DamageHitInfo my_hit = {};
 	my_hit.base_damage = MaxDmg;
 	my_hit.min_damage = MinDmg;
 	my_hit.damage_done = 1;

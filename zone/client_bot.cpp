@@ -97,7 +97,7 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 			return bot_spawn_limit;
 		}
 
-		auto row = results.begin();
+		auto& row = results.begin();
 		bot_spawn_limit = Strings::ToInt(row[0]);
 	}
 

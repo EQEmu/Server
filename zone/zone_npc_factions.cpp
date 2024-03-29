@@ -132,7 +132,7 @@ std::vector<NpcFactionEntriesRepository::NpcFactionEntries> Zone::GetNPCFactionE
 
 	std::vector<uint32> faction_ids;
 
-	for (auto e : m_npc_faction_entries) {
+	for (auto& e : m_npc_faction_entries) {
 		if (
 			e.npc_faction_id == npc_faction_id &&
 			std::find(

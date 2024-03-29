@@ -67,8 +67,8 @@ void SidecarApi::BootWebserver(int port, const std::string &key)
 	api.set_pre_routing_handler(
 		[](const auto &req, auto &res) {
 			for (const auto &header: req.headers) {
-				auto header_key   = header.first;
-				auto header_value = header.second;
+				auto& header_key   = header.first;
+				auto& header_value = header.second;
 
 				LogHTTPDetail("[API] header_key [{}] header_value [{}]", header_key, header_value);
 

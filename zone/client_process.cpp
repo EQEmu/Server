@@ -844,7 +844,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 
 	const EQ::ItemData *item = nullptr;
-	auto merchant_list = zone->merchanttable[merchant_id];
+	auto& merchant_list = zone->merchanttable[merchant_id];
 	auto npc = entity_list.GetMobByNpcTypeID(npcid);
 	if (merchant_list.empty()) {
 		zone->LoadNewMerchantData(merchant_id);
@@ -854,7 +854,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 	}
 
-	auto temporary_merchant_list = zone->tmpmerchanttable[npcid];
+	auto& temporary_merchant_list = zone->tmpmerchanttable[npcid];
 	uint32 slot_id = 1;
 	uint8 handy_chance = 0;
 	for (const auto& ml : merchant_list) {
@@ -862,7 +862,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			break;
 		}
 
-		auto bucket_name = ml.bucket_name;
+		auto& bucket_name = ml.bucket_name;
 		auto const& bucket_value = ml.bucket_value;
 		if (!bucket_name.empty() && !bucket_value.empty()) {
 
@@ -947,9 +947,9 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 	}
 
-	auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
+	auto& temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
 	temporary_merchant_list.clear();
-	for (auto ml : temporary_merchant_list_two) {
+	for (auto& ml : temporary_merchant_list_two) {
 		if (slot_id > merchant_slots) {
 			break;
 		}

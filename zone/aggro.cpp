@@ -284,7 +284,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 		} else {
 			auto faction_name = content_db.GetFactionName(mob_faction_id);
 			bool has_entry = false;
-			for (auto faction : faction_list) {
+			for (auto& faction : faction_list) {
 				if (static_cast<int>(faction.faction_id) == mob_faction_id) {
 					to_who->Message(
 						Chat::White,
@@ -1152,7 +1152,7 @@ bool Mob::CheckLosFN(float posX, float posY, float posZ, float mobSize) {
 	glm::vec3 myloc;
 	glm::vec3 oloc;
 
-#define LOS_DEFAULT_HEIGHT 6.0f
+constexpr auto LOS_DEFAULT_HEIGHT = 6.0f;
 
 	myloc.x = GetX();
 	myloc.y = GetY();

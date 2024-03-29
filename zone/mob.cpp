@@ -4823,7 +4823,7 @@ bool Mob::HateSummon() {
 
 			float summoner_zoff = GetZOffset();
 			float summoned_zoff = target->GetZOffset();
-			auto new_pos = m_Position;
+			auto& new_pos = m_Position;
 			new_pos.z -= (summoner_zoff - summoned_zoff);
 			float angle = new_pos.w - target->GetHeading();
 			new_pos.w = target->GetHeading();
@@ -8491,7 +8491,7 @@ uint32 Mob::GetMobTypeIdentifier()
 
 void Mob::HandleDoorOpen()
 {
-	for (auto e : entity_list.GetDoorsList()) {
+	for (auto& e : entity_list.GetDoorsList()) {
 		Doors *d = e.second;
 		if (d->GetKeyItem()) {
 			continue;

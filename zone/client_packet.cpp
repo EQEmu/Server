@@ -1232,7 +1232,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	strcpy(name, cze->char_name);
 	/* Check for Client Spoofing */
 	if (client != 0) {
-		struct in_addr ghost_addr;
+		struct in_addr ghost_addr = {};
 		ghost_addr.s_addr = eqs->GetRemoteIP();
 
 		LogError("Ghosting client: Account ID:[{}] Name:[{}] Character:[{}] IP:[{}]",
@@ -1973,7 +1973,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	const EQ::ItemData* item = nullptr;
 	bool found = false;
 	std::list<MerchantList> merchantlists = zone->merchanttable[merchantid];
-	for (auto merchantlist : merchantlists) {
+	for (auto& merchantlist : merchantlists) {
 		if (GetLevel() < merchantlist.level_required) {
 			continue;
 		}
@@ -7098,7 +7098,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 
 	int16  min_status = AccountStatus::Player;
 	uint8  min_level  = 0;
-	char   target_zone[32];
+	char target_zone[32] = {};
 	uint16 zone_id    = gmzr->zone_id;
 	if (gmzr->zone_id == 0) {
 		zone_id = zonesummon_id;
@@ -9048,7 +9048,7 @@ void Client::Handle_OP_InspectAnswer(const EQApplicationPacket *app)
 	}
 
 	auto message         = (InspectMessage_Struct *) insr->text;
-	auto inspect_message = GetInspectMessage();
+	auto& inspect_message = GetInspectMessage();
 
 	memcpy(&inspect_message, message, sizeof(InspectMessage_Struct));
 	database.SaveCharacterInspectMessage(CharacterID(), &inspect_message);
@@ -9150,7 +9150,7 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 				return;
 			}
 
-			auto row = results.begin();
+			auto& row = results.begin();
 			response = row[0];
 		}
 
@@ -10170,7 +10170,7 @@ void Client::Handle_OP_LFPCommand(const EQApplicationPacket *app)
 		return;
 	}
 
-	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
+	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS] = {};
 
 	for (unsigned int i = 0; i<MAX_GROUP_MEMBERS; i++) {
 		LFPMembers[i].Name[0] = '\0';
@@ -13720,7 +13720,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	}
 
 	bool valid_city = false;
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (Strings::ToInt(row[1]) != 0)
 			zone_id = Strings::ToInt(row[1]);
 		else
@@ -13765,7 +13765,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 	Message(Chat::Yellow, "Use \"/setstartcity #\" to choose a home city from the following list:");
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		if (Strings::ToInt(row[1]) != 0)
 			zone_id = Strings::ToInt(row[1]);
 		else

@@ -76,7 +76,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		return;
 	}
 
-	SwarmPet_Struct pet;
+	SwarmPet_Struct pet = {};
 	pet.count = 1;
 	pet.duration = 1;
 
@@ -196,7 +196,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {
 
-	SwarmPet_Struct pet;
+	SwarmPet_Struct pet = {};
 	pet.count = 1;
 	pet.duration = 1;
 
@@ -304,7 +304,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 		return;
 	}
 
-	SwarmPet_Struct pet;
+	SwarmPet_Struct pet = {};
 	pet.count = 1;
 	pet.duration = 1;
 
@@ -1887,7 +1887,7 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(
 	}
 
 	for (const auto &e : aa_rank_effects) {
-		AA::RankEffect f;
+		AA::RankEffect f = {};
 
 		f.slot        = e.slot;
 		f.effect_id   = e.effect_id;

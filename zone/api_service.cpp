@@ -260,7 +260,7 @@ Json::Value ApiGetDoorListDetail(EQ::Net::WebsocketServerConnection *connection,
 	Json::Value response;
 	auto        &door_list = entity_list.GetDoorsList();
 
-	for (auto itr : door_list) {
+	for (auto& itr : door_list) {
 		Doors *door = itr.second;
 
 		Json::Value row;
@@ -304,7 +304,7 @@ Json::Value ApiGetCorpseListDetail(EQ::Net::WebsocketServerConnection *connectio
 	Json::Value response;
 	auto        &corpse_list = entity_list.GetCorpseList();
 
-	for (auto itr : corpse_list) {
+	for (auto& itr : corpse_list) {
 		auto corpse = itr.second;
 
 		Json::Value row;

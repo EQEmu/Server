@@ -316,9 +316,9 @@ void Client::GoFish(bool guarantee, bool use_bait)
 					if (zone->CanDoCombat()) {
 						const NPCType *tmp = content_db.LoadNPCTypesData(npc_id);
 						if (tmp != nullptr) {
-							auto positionNPC = GetPosition();
-							positionNPC.x = positionNPC.x + 3;
-							auto npc = new NPC(tmp, nullptr, positionNPC, GravityBehavior::Water);
+							glm::vec4 offset_position = GetPosition();
+							offset_position.x += 3;
+							auto npc = new NPC(tmp, nullptr, offset_position, GravityBehavior::Water);
 							npc->AddLootTable();
 							if (npc->DropsGlobalLoot())
 								npc->CheckGlobalLootTables();

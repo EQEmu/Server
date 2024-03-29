@@ -56,13 +56,13 @@ bool BotDatabase::LoadBotCommandSettings(std::map<std::string, std::pair<uint8, 
 	if (!results.Success())
 		return false;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		bot_command_settings[row[0]].first = Strings::ToInt(row[1]);
 		if (row[2][0] == 0)
 			continue;
 
 		auto aliases = Strings::Split(row[2], '|');
-		for (auto iter : aliases) {
+		for (auto& iter : aliases) {
 			if (!iter.empty())
 				bot_command_settings[row[0]].second.push_back(iter);
 		}
@@ -252,7 +252,7 @@ bool BotDatabase::LoadBotsList(const uint32 owner_id, std::list<BotsAvailableLis
 		return false;
 	}
 
-	BotsAvailableList ble;
+	BotsAvailableList ble = {};
 
 	if (by_account) {
 		const std::string& owner_name = database.GetCharNameByID(owner_id);
@@ -350,7 +350,7 @@ bool BotDatabase::LoadBotID(const std::string& bot_name, uint32& bot_id, uint8& 
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	bot_id       = e.bot_id;
 	bot_class_id = e.class_;
@@ -756,7 +756,7 @@ bool BotDatabase::LoadStance(const uint32 bot_id, int& bot_stance)
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	bot_stance = e.stance_id;
 
@@ -783,7 +783,7 @@ bool BotDatabase::LoadStance(Bot* b, bool& stance_flag)
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	b->SetBotStance(static_cast<EQ::constants::StanceType>(e.stance_id));
 
@@ -1090,7 +1090,7 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	item_id = e.item_id;
 
@@ -1244,7 +1244,7 @@ bool BotDatabase::LoadPetIndex(const uint32 bot_id, uint32& pet_index)
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	pet_index = e.pets_index;
 
@@ -1269,7 +1269,7 @@ bool BotDatabase::LoadPetSpellID(const uint32 bot_id, uint32& pet_spell_id)
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	pet_spell_id = e.spell_id;
 
@@ -1304,7 +1304,7 @@ bool BotDatabase::LoadPetStats(const uint32 bot_id, std::string& pet_name, uint3
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	pet_spell_id = e.spell_id;
 	pet_name     = e.name;
@@ -1953,7 +1953,7 @@ bool BotDatabase::LoadHealRotationIDByBotID(const uint32 bot_id, uint32& hr_inde
 		return true;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	hr_index = e.heal_rotation_index;
 
@@ -1986,7 +1986,7 @@ bool BotDatabase::LoadHealRotation(Bot* hr_member, std::list<uint32>& member_lis
 		return false;
 	}
 
-	auto m = (*hr_member->MemberOfHealRotation());
+	auto& m = (*hr_member->MemberOfHealRotation());
 
 	m->SetIntervalS(e.interval_);
 	m->SetFastHeals(e.fast_heals);
@@ -2078,7 +2078,7 @@ bool BotDatabase::SaveHealRotation(Bot* hr_member, bool& member_fail, bool& targ
 		return false;
 	}
 
-	auto m = (*hr_member->MemberOfHealRotation());
+	auto& m = (*hr_member->MemberOfHealRotation());
 
 	auto e = BotHealRotationsRepository::NewEntity();
 

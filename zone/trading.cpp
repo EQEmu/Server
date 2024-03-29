@@ -38,7 +38,7 @@ extern QueryServ* QServ;
 
 // The maximum amount of a single bazaar/barter transaction expressed in copper.
 // Equivalent to 2 Million plat
-#define MAX_TRANSACTION_VALUE 2000000000
+constexpr auto MAX_TRANSACTION_VALUE = 2000000000;
 // ##########################################
 // Trade implementation
 // ##########################################
@@ -1704,7 +1704,7 @@ void Client::SendBazaarWelcome()
 	const std::string query = "SELECT COUNT(DISTINCT char_id), count(char_id) FROM trader";
 	auto results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() == 1){
-		auto row = results.begin();
+		auto& row = results.begin();
 
 		EQApplicationPacket* outapp = nullptr;
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -1740,7 +1740,7 @@ void Client::SendBazaarWelcome()
 	if (!results.Success() || results.RowCount() != 1)
 		return;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	Message(Chat::NPCQuestSay, "There are %i Buyers waiting to purchase your loot. Type /barter to search for them, "
 				"or use /buyer to set up your own Buy Lines.", Strings::ToInt(row[0]));
 }
@@ -1984,7 +1984,7 @@ void Client::SendBazaarResults(
 	int    Count           = 0;
 	uint32 StatValue       = 0;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Action);
 		Count = Strings::ToInt(row[0]);
 		VARSTRUCT_ENCODE_TYPE(uint32, bufptr, Count);
@@ -2415,7 +2415,7 @@ void Client::SendBuyerResults(char* searchString, uint32 searchID) {
     uint32 lastCharID = 0;
 	Client *buyer = nullptr;
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto& row = results.begin(); row != results.end(); ++row) {
         char itemName[64];
 
         uint32 charID = Strings::ToInt(row[0]);
@@ -2518,7 +2518,7 @@ void Client::ShowBuyLines(const EQApplicationPacket *app) {
     if (!results.Success() || results.RowCount() == 0)
         return;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         char ItemName[64];
         uint32 BuySlot = Strings::ToInt(row[1]);
         uint32 ItemID = Strings::ToInt(row[2]);

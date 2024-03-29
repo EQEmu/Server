@@ -692,11 +692,11 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				LogInventory("depth: 0, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 					(invalid_drop->GetItem() ? invalid_drop->GetItem()->Name : "null data"), invalid_drop->GetID(), (invalid_drop->IsDroppable(false) ? "true" : "false"));
 
-				for (auto iter1 : *invalid_drop->GetContents()) { // depth 1
+				for (auto& iter1 : *invalid_drop->GetContents()) { // depth 1
 					LogInventory("-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 						(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"), iter1.second->GetID(), (iter1.second->IsDroppable(false) ? "true" : "false"));
 
-					for (auto iter2 : *iter1.second->GetContents()) { // depth 2
+					for (auto& iter2 : *iter1.second->GetContents()) { // depth 2
 						LogInventory("--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 							(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"), iter2.second->GetID(), (iter2.second->IsDroppable(false) ? "true" : "false"));
 					}
@@ -732,7 +732,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 				LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
 			}
 
-			for (auto iter1 : *inst->GetContents()) { // depth 1
+			for (auto& iter1 : *inst->GetContents()) { // depth 1
 				LogInventory(
 					"-depth: 1, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 					(iter1.second->GetItem() ? iter1.second->GetItem()->Name : "null data"),
@@ -744,7 +744,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 					LogError("Non-droppable item being processed for drop by [{}]", GetCleanName());
 				}
 
-				for (auto iter2 : *iter1.second->GetContents()) { // depth 2
+				for (auto& iter2 : *iter1.second->GetContents()) { // depth 2
 					LogInventory(
 						"--depth: 2, Item: [{}] (id: [{}]), IsDroppable: [{}]",
 						(iter2.second->GetItem() ? iter2.second->GetItem()->Name : "null data"),
@@ -3274,7 +3274,7 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 	LogInventory("Char: [{}] activating set [{}]", GetName(), bss->Number);
 	int16 slot = 0;
 	int16 WeaponSlot = 0;
-	EQ::ItemInstance *BandolierItems[4]; // Temporary holding area for the weapons we pull out of their inventory
+	EQ::ItemInstance* BandolierItems[4] = {}; // Temporary holding area for the weapons we pull out of their inventory
 
 	// First we pull the items for this bandolier set out of their inventory, this makes space to put the
 	// currently equipped items back.

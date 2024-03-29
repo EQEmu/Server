@@ -7557,12 +7557,12 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_BIXIE:
 		case IS_BIXIE2:
-			if ((GetRace() == Race::Bixie) ||(GetRace() == Race::Bixie2))
+			if ((GetRace() == Race::Bixie) || (GetRace() == Race::Bixie2))
 				return true;
 			break;
 
 		case IS_HARPY:
-			if ((GetRace() == Race::Harpy) ||(GetRace() == Race::Harpy2))
+			if ((GetRace() == Race::Harpy) || (GetRace() == Race::Harpy2))
 				return true;
 			break;
 

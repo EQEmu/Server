@@ -813,7 +813,7 @@ void QuestManager::stopalltimers()
 
 	if (questitem) {
 		if (parse->ItemHasQuestSub(questitem, EVENT_TIMER_STOP)) {
-			auto item_timers = questitem->GetTimers();
+			auto& item_timers = questitem->GetTimers();
 
 			if (item_timers.empty()) {
 				return;
@@ -867,7 +867,7 @@ void QuestManager::stopalltimers(EQ::ItemInstance* inst)
 {
 	if (inst) {
 		if (parse->ItemHasQuestSub(inst, EVENT_TIMER_STOP)) {
-			auto item_timers = inst->GetTimers();
+			auto& item_timers = inst->GetTimers();
 
 			if (item_timers.empty()) {
 				return;
@@ -1029,7 +1029,7 @@ void QuestManager::resumetimer(const std::string& timer_name, Mob* m)
 	);
 
 	if (!QTimerList.empty()) {
-		for (auto e : QTimerList) {
+		for (auto& e : QTimerList) {
 			if (e.mob && e.mob == mob && e.name == timer_name) {
 				e.Timer_.Enable();
 				e.Timer_.Start(milliseconds, false);
@@ -4317,7 +4317,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {
 
-	for (auto color : html_colors) {
+	for (auto& color : html_colors) {
 		if (!strcasecmp(color.first.c_str(), color_name.c_str())) {
 			return color.second;
 		}

@@ -268,7 +268,7 @@ void ZoneDatabase::RefreshPetitionsFromDB()
 		return;
 	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
+    for (auto& row = results.begin(); row != results.end(); ++row) {
         newpet = new Petition(Strings::ToInt(row[0]));
         newpet->SetCName(row[1]);
         newpet->SetAName(row[2]);

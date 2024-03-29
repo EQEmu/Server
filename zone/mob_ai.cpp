@@ -2651,7 +2651,7 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32
 		return;
 
 	HasAISpellEffects = true;
-	AISpellsEffects_Struct t;
+	AISpellsEffects_Struct t = {};
 
 	t.spelleffectid = iSpellEffectID;
 	t.base_value = base_value;
@@ -2718,7 +2718,7 @@ void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType,
 		return;
 
 	HasAISpell = true;
-	AISpells_Struct t;
+	AISpells_Struct t = {};
 
 	t.priority = iPriority;
 	t.spellid = iSpellID;
@@ -2871,7 +2871,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 		if (results.RowCount() != 1)
 			return nullptr;
 
-		auto row = results.begin();
+		auto& row = results.begin();
 		DBnpcspells_Struct spell_set;
 
 		spell_set.parent_list = Strings::ToInt(row[1]);
@@ -2909,7 +2909,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 
 		int entryIndex = 0;
 		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
-			DBnpcspells_entries_Struct entry;
+			DBnpcspells_entries_Struct entry = {};
 			int spell_id = Strings::ToInt(row[0]);
 			entry.spellid = spell_id;
 			entry.type = Strings::ToUnsignedInt(row[1]);
@@ -2952,7 +2952,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsID() {
     if (results.RowCount() != 1)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
 
     if (!row[0])
         return 0;
@@ -2996,7 +2996,7 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 	if (results.RowCount() != 1)
 		return nullptr;
 
-	auto row = results.begin();
+	auto& row = results.begin();
 	uint32 tmpparent_list = Strings::ToInt(row[1]);
 
 	query = StringFormat("SELECT spell_effect_id, minlevel, "
@@ -3040,7 +3040,7 @@ uint32 ZoneDatabase::GetMaxNPCSpellsEffectsID() {
     if (results.RowCount() != 1)
         return 0;
 
-    auto row = results.begin();
+    auto& row = results.begin();
     if (!row[0])
         return 0;
 

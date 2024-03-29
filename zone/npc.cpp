@@ -1376,7 +1376,7 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Cli
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
@@ -1414,7 +1414,7 @@ uint32 ZoneDatabase::DeleteSpawnRemoveFromNPCTypeTable(
 		return 0;
 	}
 
-	auto e = l.front();
+	auto& e = l.front();
 
 	if (!Spawn2Repository::DeleteOne(*this, e.id)) {
 		return 0;
