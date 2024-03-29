@@ -7545,7 +7545,7 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 
 			LogFactionDetail("Checking for presence of Class_ID [{}]", class_id);
             if ((GetClassesBits() & class_bit) != 0) {
-				BestFactionValue = std::min_element(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), BestFactionValue);
+				BestFactionValue = std::min(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), BestFactionValue);
 				LogFactionDetail("Best Faction value so far is from Class_ID [{}], value [{}]", class_id, BestFactionValue);
 			}
         }
