@@ -7537,7 +7537,7 @@ bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
 FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
 {
 	if (RuleB(Custom, MulticlassingEnabled)) {		
-		FACTION_VALUE BestFactionValue = FACTION_SCOWLS;	
+		FACTION_VALUE faction_val = FACTION_SCOWLS;	
 		
 		for (const auto& class_bitmask : player_class_bitmasks) {
             uint8 class_id = class_bitmask.first;
@@ -7545,10 +7545,12 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 
 			LogFactionDetail("Checking for presence of Class_ID [{}]", class_id);
             if ((GetClassesBits() & class_bit) != 0) {
-				BestFactionValue = std::min(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), BestFactionValue);
-				LogFactionDetail("Best Faction value so far is from Class_ID [{}], value [{}]", class_id, BestFactionValue);
+				faction_val = std::min(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), faction_val);
+				LogFactionDetail("Best Faction value so far is from Class_ID [{}], value [{}]", class_id, faction_val);
 			}
         }
+
+		return faction_val;
 	}
 
 	return _GetFactionLevel(char_id, npc_id, p_race, p_class, p_deity, pFaction, tnpc);
