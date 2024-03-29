@@ -7534,13 +7534,31 @@ bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
 		return false;
 }
 
+FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
+{
+	if (RuleB(Custom, MulticlassingEnabled)) {		
+		FACTION_VALUE BestFactionValue = FACTION_SCOWLS;	
+		
+		for (const auto& class_bitmask : player_class_bitmasks) {
+            uint8 class_id = class_bitmask.first;
+            uint16 class_bit = class_bitmask.second;
+            if ((GetClassesBits() & class_bit) != 0) {
+				BestFactionValue = std::max(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), BestFactionValue);
+				
+			}
+        }
+	}
+
+	return _GetFactionLevel(char_id, npc_id, p_race, p_class, p_deity, pFaction, tnpc);
+}
+
 //o--------------------------------------------------------------
 //| Name: GetFactionLevel; Dec. 16, 2001
 //o--------------------------------------------------------------
 //| Notes: Gets the characters faction standing with the specified NPC.
 //|			Will return Indifferent on failure.
 //o--------------------------------------------------------------
-FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
+FACTION_VALUE Client::_GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
 {
 	if (pFaction < 0)
 		return GetSpecialFactionCon(tnpc);
