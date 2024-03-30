@@ -144,6 +144,11 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 		}
 	}
 
+	if (!is_static && RuleB(Zone, QuestsReloadOnBootup)) {
+		LogInfo("Reloading quests");
+		parse->ReloadQuests(RuleB(HotReload, QuestsResetTimersWithReload));
+	}
+
 	is_zone_loaded = true;
 
 	worldserver.SetZoneData(iZoneID, iInstanceID);
