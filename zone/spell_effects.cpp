@@ -6807,24 +6807,24 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 	if (RuleB(Spells, UseAdditiveFocusFromWornSlotWithLimits)) {
 		//Check if item focus effect exists for the mob.
 		if (itembonuses.FocusEffectsWornWithLimits[type]) {
-			const EQ::ItemData* TempItem = nullptr;
-			const EQ::ItemData* UsedItem = nullptr;
+			const EQ::ItemData* temporary_item = nullptr;
+			const EQ::ItemData* used_item      = nullptr;
 
 			//item focus
 			for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
-				TempItem = nullptr;
+				temporary_item = nullptr;
 				EQ::ItemInstance* ins = GetInv().GetItem(x);
 				if (!ins) {
 					continue;
 				}
 
-				TempItem = ins->GetItem();
-				if (TempItem && IsValidSpell(TempItem->Worn.Effect)) {
+				temporary_item = ins->GetItem();
+				if (temporary_item && IsValidSpell(temporary_item->Worn.Effect)) {
 					if (rand_effectiveness) {
-						worneffect_bonus += CalcFocusEffect(type, TempItem->Worn.Effect, spell_id, true);
+						worneffect_bonus += CalcFocusEffect(type, temporary_item->Worn.Effect, spell_id, true);
 					}
 					else {
-						worneffect_bonus += CalcFocusEffect(type, TempItem->Worn.Effect, spell_id);
+						worneffect_bonus += CalcFocusEffect(type, temporary_item->Worn.Effect, spell_id);
 					}
 				}
 
@@ -6832,13 +6832,13 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 					EQ::ItemInstance* aug = nullptr;
 					aug = ins->GetAugment(y);
 					if (aug) {
-						const EQ::ItemData* TempItemAug = aug->GetItem();
-						if (TempItemAug && IsValidSpell(TempItemAug->Worn.Effect)) {
+						const EQ::ItemData* temporary_item_augment = aug->GetItem();
+						if (temporary_item_augment && IsValidSpell(temporary_item_augment->Worn.Effect)) {
 							if (rand_effectiveness) {
-								worneffect_bonus += CalcFocusEffect(type, TempItemAug->Worn.Effect, spell_id, true);
+								worneffect_bonus += CalcFocusEffect(type, temporary_item_augment->Worn.Effect, spell_id, true);
 							}
 							else {
-								worneffect_bonus += CalcFocusEffect(type, TempItemAug->Worn.Effect, spell_id);
+								worneffect_bonus += CalcFocusEffect(type, temporary_item_augment->Worn.Effect, spell_id);
 						    }
 						}
 					}
