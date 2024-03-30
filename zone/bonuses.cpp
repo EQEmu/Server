@@ -2090,7 +2090,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			if (focus)
 			{
 				if (WornType){
-					if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
+					if (RuleB(Spells, UseAdditiveFocusFromWornSlotWithLimits)) {
+						new_bonus->FocusEffectsWornWithLimits[focus] = spells[spell_id].effect_id[i];
+					}
+					else if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
 						new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base_value[i];
 					}
 				}
