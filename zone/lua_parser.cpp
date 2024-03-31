@@ -1568,6 +1568,25 @@ uint32 LuaParser::GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault
 	return retval;
 }
 
+
+int64 LuaParser::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default)
+{
+	int64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.CommonDamage(self, attacker, value, spell_id, skill_used, avoidable, buff_slot, buff_tic, special, retval, ignore_default);
+	}
+	return retval;
+}
+
+uint64 LuaParser::HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default)
+{
+	uint64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.HealDamage(self, caster, value, spell_id, retval, ignore_default);
+	}
+	return retval;
+}
+
 uint64 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault)
 {
 	uint64 retval = 0;

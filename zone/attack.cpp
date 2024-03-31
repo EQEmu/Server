@@ -3964,6 +3964,19 @@ bool Mob::CheckDoubleAttack()
 }
 
 void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, const EQ::skills::SkillType skill_used, bool &avoidable, const int8 buffslot, const bool iBuffTic, eSpecialAttacks special) {
+#ifdef LUA_EQEMU
+	int64 lua_ret = 0;
+	bool ignore_default = false;
+	lua_ret = LuaParser::Instance()->CommonDamage(this, attacker, damage, spell_id, static_cast<int>(skill_used), avoidable, buffslot, iBuffTic, static_cast<int>(special), ignore_default);
+	if (lua_ret != 0) {
+		damage = lua_ret;
+	}
+
+	if (ignore_default) {
+		//return lua_ret;
+	}
+#endif
+
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
 	bool FromDamageShield = (skill_used == EQ::skills::SkillAbjuration);
 	bool ignore_invul = false;
@@ -4691,6 +4704,19 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 {
+#ifdef LUA_EQEMU
+	uint64 lua_ret = 0;
+	bool ignore_default = false;
+
+	lua_ret = LuaParser::Instance()->HealDamage(this, caster, amount, spell_id, ignore_default);
+	if (lua_ret != 0) {
+		amount = lua_ret;
+	}
+
+	if (ignore_default) {
+		//return lua_ret;
+	}
+#endif
 	int64 maxhp = GetMaxHP();
 	int64 curhp = GetHP();
 	uint64 acthealed = 0;
