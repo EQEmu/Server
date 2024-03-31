@@ -215,7 +215,6 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 		if (drops < min_drop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float           roll = (float) zone->random.Real(0.0, roll_t);
 			for (const auto &e: le) {
-				// content flagging
 				if (!content_service.DoesPassContentFiltering(
 					ContentFlags{
 						.min_expansion = e.min_expansion,
