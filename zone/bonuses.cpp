@@ -2789,6 +2789,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_ReduceSkill: {
+				// Bad data or unsupported new skill
+				if (effect_value > EQ::skills::HIGHEST_SKILL) {
+					break;
+				}
+				if (effect_value <= EQ::skills::HIGHEST_SKILL) {
+					if (new_bonus->ReduceSkill[effect_value] < spells[spell_id].formula[i]) {
+						new_bonus->ReduceSkill[effect_value] = spells[spell_id].formula[i];
+					}
+				}
+				break;
+			}
+
 			case SE_StunResist:
 			{
 				if(new_bonus->StunResist < effect_value)

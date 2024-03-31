@@ -916,7 +916,7 @@ typedef enum {
 #define SE_AttackSpeed3					119	// implemented
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented
-//#define SE_ReduceSkill				122	// not implemented    TODO: Now used on live, decreases skills by percent
+#define SE_ReduceSkill					122	// implemented -   TODO: Now used on live, decreases skills by percent
 #define SE_Screech						123	// implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
 #define SE_ImprovedDamage				124 // implemented
 #define SE_ImprovedHeal					125 // implemented
@@ -1321,6 +1321,7 @@ typedef enum {
 #define SE_Duration_HP_Pct				524 // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
 #define SE_Duration_Mana_Pct			525 // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
 #define SE_Duration_Endurance_Pct		526 // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
+#define SE_SpellDamageConversion		527 // implemented - Add to a damage spell to return a % of damage done as a resource. base: % = value/10, limit: 0=HP,1=Mana,2=Endur, max: max resource returned
 
 
 // LAST

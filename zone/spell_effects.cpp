@@ -3387,6 +3387,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_ImprovedInvisAnimals:
 			case SE_InvisVsUndead:
 			case SE_InvisVsUndead2:
+			case SE_Shield_Target:
+			case SE_ReduceSkill:
 			{
 				break;
 			}
