@@ -3968,12 +3968,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 	int64 lua_ret = 0;
 	bool ignore_default = false;
 	lua_ret = LuaParser::Instance()->CommonDamage(this, attacker, damage, spell_id, static_cast<int>(skill_used), avoidable, buffslot, iBuffTic, static_cast<int>(special), ignore_default);
-	if (lua_ret != 0) {
-		damage = lua_ret;
-	}
-
 	if (ignore_default) {
-		//return lua_ret;
+		damage = lua_ret;
 	}
 #endif
 	// This method is called with skill_used=ABJURE for Damage Shield damage.
@@ -4708,12 +4704,8 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 	bool ignore_default = false;
 
 	lua_ret = LuaParser::Instance()->HealDamage(this, caster, amount, spell_id, ignore_default);
-	if (lua_ret != 0) {
-		amount = lua_ret;
-	}
-
 	if (ignore_default) {
-		//return lua_ret;
+		amount = lua_ret;
 	}
 #endif
 	int64 maxhp = GetMaxHP();
