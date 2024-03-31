@@ -17,12 +17,12 @@ Please delete options that are not relevant.
 
 Attach images and describe testing done to validate functionality.
 
-* Clients tested: 
+Clients tested: 
 
 # Checklist:
 
 - [ ] I have performed a self-review of my code. Ensuring variables, functions and methods are named in a human-readable way, comments are added only where naming of variables, functions and methods can't give enough context.
 - [ ] I have tested my changes
 - [ ] I have made corresponding changes to the documentation
-- [ ] I own the changes of my code take responsibilities for the potential issues that occur
+- [ ] I own the changes of my code and take responsibility for the potential issues that occur
 
