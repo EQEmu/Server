@@ -49,5 +49,4 @@ private:
 	bool m_has_register_bug;
 	bool m_has_common_damage;
 	bool m_has_heal_damage;
-}
 };
