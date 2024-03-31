@@ -199,6 +199,8 @@ public:
 	uint64 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 	int64 CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault);
 	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default);
+	int64 CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default);
+	uint64 HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default);
 	
 private:
 	LuaParser();
