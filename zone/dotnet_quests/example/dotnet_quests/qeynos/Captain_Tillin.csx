@@ -1,4 +1,4 @@
-#r "../../DotNetTypes.dll"
+#r "../../dotnet/DotNetTypes.dll"
 
 using System;
 using System.Collections;
@@ -6,15 +6,35 @@ using System.Runtime;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
+private int counter = 0;
+public void Timer(NpcEvent e) {
+   e.logSys.QuestDebug($"Timer hit 21 {counter++}");
+   // e.npc.Say("Something");
+}
+
+public void TimerStart(NpcEvent e) {
+    e.logSys.QuestDebug($"Timer start: e {e.data}");
+    Console.WriteLine($"Timer start: e {e.data}");
+
+}
+
 public void Say(NpcEvent e)
 {
-    e.npc.Say($"Hail, {e.mob.GetCleanName()}! Spend your time wisely in the city of Qeynos. Do not let your mind wander to thoughts of bravado or crime. My guards can easily put to rest any outbreaks. Good day to you, citizen!");
-    e.questManager.signal(1068);
+    e.npc.Say($"Hi there 123, {e.mob.GetCleanName()}! Spend your time wisely in the city of Qeynos. Do not let your mind wander to thoughts of bravado or crime. My guards can easily put to rest any outbreaks. Good day to you, citizen!");
+    //e.questManager.signal(1068);
+    e.npc.AddToHateList(e.entityList.GetNPCByName("Ebon_Strongbear").CastToMob());
+    e.npc.Attack(e.entityList.GetNPCByName("Ebon_Strongbear"));
+    for (struct_HateList h in e.npc.GetHateList()) {
+        e.logSys.QuestDebug($"On hate list: {h.entity_on_hatelist.GetName()}");
+    }
+    //e.npc.AddToHateList(e.mob);
+   // e.npc.GetHateList().PrintHateListToClient(e.mob);
 }
 
 public void Spawn(NpcEvent e)
 {
     Console.WriteLine("Zone bootup - spawn");
+    e.questManager.settimerMS("tillin", 5000);
 
 }
 
