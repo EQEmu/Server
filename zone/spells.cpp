@@ -4645,7 +4645,7 @@ bool Mob::SpellOnTarget(
 		However due to server thinking your healed, you are unable to correct it by healing.
 		Solution: You need to resend the HP update after buff completed and action packet resent.
 	*/
-	if (IsEffectInSpell(spell_id, SE_TotalHP) && (IsEffectInSpell(spell_id, SE_CurrentHPOnce) || IsEffectInSpell(spell_id, SE_CurrentHP))) {
+	if ((IsEffectInSpell(spell_id, SE_TotalHP) || IsEffectInSpell(spell_id, SE_MaxHPChange)) && (IsEffectInSpell(spell_id, SE_CurrentHPOnce) || IsEffectInSpell(spell_id, SE_CurrentHP))) {
 		SendHPUpdate(true);
 	}
 
