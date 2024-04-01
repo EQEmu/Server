@@ -4641,7 +4641,7 @@ bool Mob::SpellOnTarget(
 
 	/*
 		Bug: When an HP buff with a heal effect is applied for first time, the heal portion of the effect heals the client and
-		updates HPs currently server side, but client side the HP bar does not register it as a heal thus you display as less than full HP.
+		updates HPs correctly server side, but client side the HP bar does not register it as a heal thus you display as less than full HP.
 		However due to server thinking your healed, you are unable to correct it by healing.
 		Solution: You need to resend the HP update after buff completed and action packet resent.
 	*/
