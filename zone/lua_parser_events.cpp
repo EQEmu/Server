@@ -626,6 +626,39 @@ void handle_npc_entity_variable(
 	}
 }
 
+void handle_npc_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "blocking_spell_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "cast_spell_id");
+
+	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
+
+	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1674,9 +1707,42 @@ void handle_player_aa_loss(
 	std::string data,
 	uint32 extra_data,
 	std::vector<std::any> *extra_pointers
-) {
+)
+{
 	lua_pushinteger(L, Strings::ToInt(data));
 	lua_setfield(L, -2, "aa_lost");
+}
+
+void handle_player_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "blocking_spell_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "cast_spell_id");
+
+	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
+
+	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
 }
 
 // Item
@@ -2688,6 +2754,39 @@ void handle_bot_entity_variable(
 			lua_setfield(L, -2, "new_value");
 		}
 	}
+}
+
+void handle_bot_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	Bot* bot,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[0]));
+	lua_setfield(L, -2, "blocking_spell_id");
+
+	lua_pushinteger(L, Strings::ToUnsignedInt(sep.arg[1]));
+	lua_setfield(L, -2, "cast_spell_id");
+
+	const uint32 blocking_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_one(IsValidSpell(blocking_spell_id) ? &spells[blocking_spell_id] : nullptr);
+	luabind::adl::object l_spell_one_o = luabind::adl::object(L, l_spell_one);
+	l_spell_one_o.push(L);
+	lua_setfield(L, -2, "blocking_spell");
+
+	const uint32 cast_spell_id = Strings::ToUnsignedInt(sep.arg[0]);
+
+	Lua_Spell l_spell_two(IsValidSpell(cast_spell_id) ? &spells[cast_spell_id] : nullptr);
+	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
+	l_spell_two_o.push(L);
+	lua_setfield(L, -2, "cast_spell");
 }
 
 #endif

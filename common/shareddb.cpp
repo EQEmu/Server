@@ -1884,9 +1884,9 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].min_range = Strings::ToFloat(row[231]);
 		sp[tempid].no_remove = Strings::ToBool(row[232]);
 		sp[tempid].damage_shield_type = 0;
-    }
+	}
 
-    LoadDamageShieldTypes(sp, max_spells);
+	LoadDamageShieldTypes(sp, max_spells);
 }
 
 void SharedDatabase::LoadCharacterInspectMessage(uint32 character_id, InspectMessage_Struct* message) {
