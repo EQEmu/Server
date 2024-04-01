@@ -1257,7 +1257,7 @@ typedef enum {
 #define SE_Ff_Override_NotFocusable		460 // implemented, @Fc, Allow spell to be focused event if flagged with 'not_focusable' in spell table, base: 1
 #define SE_ImprovedDamage2				461 // implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct
 #define SE_FcDamageAmt2					462 // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
-//#define SE_Shield_Target				463 //
+#define SE_Shield_Target				463 // implemented, Base1 % damage shielded on target
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 #define SE_PC_Pet_AE_Rampage			465 // implemented - Base1 % chance to do AE rampage for base2 % of damage each melee round
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.

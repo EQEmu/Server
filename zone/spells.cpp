@@ -903,6 +903,14 @@ bool Mob::DoCastingChecksOnTarget(bool check_on_casting, int32 spell_id, Mob *sp
 		}
 	}
 	/*
+		Cannot cast shield target on self
+	*/
+	if (this == spell_target && IsEffectInSpell(spell_id, SE_Shield_Target)) {
+		LogSpells("You cannot shield yourself");
+		Message(Chat::SpellFailure, "You cannot shield yourself.");
+		return false;
+	}
+	/*
 		Cannot cast life tap on self
 	*/
 	if (this == spell_target && IsLifetapSpell(spell_id)) {

@@ -2094,7 +2094,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			if (focus)
 			{
 				if (WornType){
-					if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
+					if (RuleB(Spells, UseAdditiveFocusFromWornSlotWithLimits)) {
+						new_bonus->FocusEffectsWornWithLimits[focus] = spells[spell_id].effect_id[i];
+					}
+					else if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
 						new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base_value[i];
 					}
 				}
@@ -3298,6 +3301,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION] < effect_value) {
 					new_bonus->EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_MITIGIATION]  = effect_value;
 					new_bonus->EnduranceAbsorbPercentDamage[SBIndex::ENDURANCE_ABSORD_DRAIN_PER_HP] = limit_value;
+				}
+				break;
+			}
+
+			case SE_Shield_Target:
+			{
+				if (new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] < effect_value) {
+					new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] = effect_value;
+					new_bonus->ShieldTargetSpa[SBIndex::SHIELD_TARGET_BUFFSLOT] = buffslot;
 				}
 				break;
 			}
@@ -5920,6 +5932,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 						if (negate_itembonus) { itembonuses.SkillProcSuccess[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProcSuccess[e] = effect_value; }
 					}
+					break;
 				}
 
 				case SE_SkillProcAttempt: {
@@ -5929,6 +5942,15 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 						if (negate_itembonus) { itembonuses.SkillProc[e] = effect_value; }
 						if (negate_aabonus) { aabonuses.SkillProc[e] = effect_value; }
 					}
+					break;
+				}
+
+				case SE_Shield_Target:	{
+					if (negate_spellbonus) {
+						spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] = effect_value;
+						spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_BUFFSLOT] = effect_value;
+					}
+					break;
 				}
 			}
 		}

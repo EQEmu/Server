@@ -445,7 +445,8 @@ struct StatBonuses {
 	int32	SongRange;							// increases range of beneficial bard songs
 	uint32	HPToManaConvert;					// Uses HP to cast spells at specific conversion
 	int32	FocusEffects[HIGHEST_FOCUS+1];		// Stores the focus effectid for each focustype you have.
-	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot
+	int16	FocusEffectsWorn[HIGHEST_FOCUS+1];	// Optional to allow focus effects to be applied additively from worn slot, limits do not apply
+	int32	FocusEffectsWornWithLimits[HIGHEST_FOCUS + 1];// Optional to allow focus effects to be applied additively from worn slot, limits apply
 	bool	NegateEffects;						// Check if you contain a buff with negate effect. (only spellbonuses)
 	int32	SkillDamageAmount2[EQ::skills::HIGHEST_SKILL + 2];	// Adds skill specific damage
 	uint32	NegateAttacks[3];					// 0 = bool HasEffect 1 = Buff Slot 2 = Max damage absorbed per hit
@@ -511,6 +512,7 @@ struct StatBonuses {
 	uint8	invisibility;						// invisibility level
 	uint8	invisibility_verse_undead;			// IVU level
 	uint8	invisibility_verse_animal;			// IVA level
+	int32	ShieldTargetSpa[2];                 // [0] base = % mitigation amount, [1] buff slot
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.
@@ -656,6 +658,8 @@ namespace SBIndex {
 	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA
 	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA
 	constexpr uint16 COMBAT_PROC_REUSE_TIMER                = 3; // SPA
+	constexpr uint16 SHIELD_TARGET_MITIGATION_PERCENT       = 0; // SPA 463
+	constexpr uint16 SHIELD_TARGET_BUFFSLOT                 = 1; // SPA 463
 };
 
 
