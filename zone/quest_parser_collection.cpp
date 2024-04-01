@@ -871,7 +871,7 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 
 QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 {
-	if (!zone) {
+	if (!zone || !zone->IsLoaded()) {
 		return nullptr;
 	}
 
@@ -1125,7 +1125,7 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 
 QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 {
-	if (!zone) {
+	if (!zone || !zone->IsLoaded()) {
 		return nullptr;
 	}
 
