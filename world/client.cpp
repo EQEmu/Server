@@ -723,7 +723,7 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 			if (account_progression < 3 && character_create_race_class_combos[i].Class == 15) {
 				entry_enabled = false;
 			}
-			if (account_progression < 5 && character_create_race_class_combos[i].Class == 16) {
+			if (account_progression < 4 && character_create_race_class_combos[i].Class == 16) {
 				entry_enabled = false;
 			}
 		}
