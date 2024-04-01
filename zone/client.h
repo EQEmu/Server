@@ -68,7 +68,7 @@ namespace EQ
 #include "cheat_manager.h"
 #include "../common/events/player_events.h"
 #include "../common/data_verification.h"
-#include "../common/repositories/parcels_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -349,10 +349,10 @@ public:
 	void SetEngagedWithParcelMerchant(bool status) { m_parcel_merchant_engaged = status; }
 	Timer *GetParcelTimer() { return &parcel_timer; }
 	bool DeleteParcel(uint32 parcel_id);
-	void AddParcel(ParcelsRepository::Parcels parcel);
+	void AddParcel(CharacterParcelsRepository::CharacterParcels parcel);
 	void LoadParcels();
-	std::map<uint32, BaseParcelsRepository::Parcels> GetParcels() { return m_parcels; }
-	int32 FindNextFreeParcelSlot(std::string &character_name);
+	std::map<uint32, CharacterParcelsRepository::CharacterParcels> GetParcels() { return m_parcels; }
+	int32 FindNextFreeParcelSlot(uint32 char_id);
 	void SendParcelIconStatus();
 
 	void SendBuyerResults(char *SearchQuery, uint32 SearchID);
@@ -1886,14 +1886,14 @@ private:
 	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
-	int32                                            m_parcel_platinum;
-	int32                                            m_parcel_gold;
-	int32                                            m_parcel_silver;
-	int32                                            m_parcel_copper;
-	int32                                            m_parcel_count;
-	bool                                             m_parcel_enabled;
-	bool                                             m_parcel_merchant_engaged;
-	std::map<uint32, BaseParcelsRepository::Parcels> m_parcels{};
+	int32                                                          m_parcel_platinum;
+	int32                                                          m_parcel_gold;
+	int32                                                          m_parcel_silver;
+	int32                                                          m_parcel_copper;
+	int32                                                          m_parcel_count;
+	bool                                                           m_parcel_enabled;
+	bool                                                           m_parcel_merchant_engaged;
+	std::map<uint32, CharacterParcelsRepository::CharacterParcels> m_parcels{};
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 

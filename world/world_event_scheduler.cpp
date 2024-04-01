@@ -2,7 +2,7 @@
 #include "../common/servertalk.h"
 #include <ctime>
 #include "../common/rulesys.h"
-#include "../common/repositories/parcels_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 #include "../common/events/player_events.h"
 #include "../common/events/player_event_logs.h"
 
@@ -74,8 +74,8 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 					zs_list->SendPacketToBootedZones(out);
 					safe_delete(out);
 
-					auto results = ParcelsRepository::GetWhere(*m_database, filter);
-					auto prune   = ParcelsRepository::DeleteWhere(*m_database, filter);
+					auto results = CharacterParcelsRepository::GetWhere(*m_database, filter);
+					auto prune   = CharacterParcelsRepository::DeleteWhere(*m_database, filter);
 
 					PlayerEvent::ParcelDelete                  pd{};
 					PlayerEventLogsRepository::PlayerEventLogs pel{};
@@ -83,12 +83,12 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 					pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
 					std::stringstream ss;
 					for (auto const   &r: results) {
-						pd.from_name = r.from_name;
-						pd.item_id   = r.item_id;
-						pd.note      = r.note;
-						pd.quantity  = r.quantity;
+						pd.from_name  = r.from_name;
+						pd.item_id    = r.item_id;
+						pd.note       = r.note;
+						pd.quantity   = r.quantity;
 						pd.sent_date = r.sent_date;
-						pd.to_name   = r.to_name;
+						pd.char_id   = r.char_id;
 						{
 							cereal::JSONOutputArchiveSingleLine ar(ss);
 							pd.serialize(ar);

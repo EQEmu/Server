@@ -146,6 +146,7 @@ public:
 		int32_t     heroic_strikethrough;
 		int32_t     faction_amount;
 		uint8_t     keeps_sold_items;
+		uint8_t     is_parcel_merchant;
 	};
 
 	static std::string PrimaryKey()
@@ -283,6 +284,7 @@ public:
 			"heroic_strikethrough",
 			"faction_amount",
 			"keeps_sold_items",
+			"is_parcel_merchant",
 		};
 	}
 
@@ -416,6 +418,7 @@ public:
 			"heroic_strikethrough",
 			"faction_amount",
 			"keeps_sold_items",
+			"is_parcel_merchant",
 		};
 	}
 
@@ -583,6 +586,7 @@ public:
 		e.heroic_strikethrough   = 0;
 		e.faction_amount         = 0;
 		e.keeps_sold_items       = 1;
+		e.is_parcel_merchant     = 0;
 
 		return e;
 	}
@@ -746,6 +750,7 @@ public:
 			e.heroic_strikethrough   = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
 			e.faction_amount         = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
 			e.keeps_sold_items       = row[126] ? static_cast<uint8_t>(strtoul(row[126], nullptr, 10)) : 1;
+			e.is_parcel_merchant     = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 0;
 
 			return e;
 		}
@@ -905,6 +910,7 @@ public:
 		v.push_back(columns[124] + " = " + std::to_string(e.heroic_strikethrough));
 		v.push_back(columns[125] + " = " + std::to_string(e.faction_amount));
 		v.push_back(columns[126] + " = " + std::to_string(e.keeps_sold_items));
+		v.push_back(columns[127] + " = " + std::to_string(e.is_parcel_merchant));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1053,6 +1059,7 @@ public:
 		v.push_back(std::to_string(e.heroic_strikethrough));
 		v.push_back(std::to_string(e.faction_amount));
 		v.push_back(std::to_string(e.keeps_sold_items));
+		v.push_back(std::to_string(e.is_parcel_merchant));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1209,6 +1216,7 @@ public:
 			v.push_back(std::to_string(e.heroic_strikethrough));
 			v.push_back(std::to_string(e.faction_amount));
 			v.push_back(std::to_string(e.keeps_sold_items));
+			v.push_back(std::to_string(e.is_parcel_merchant));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -1369,6 +1377,7 @@ public:
 			e.heroic_strikethrough   = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
 			e.faction_amount         = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
 			e.keeps_sold_items       = row[126] ? static_cast<uint8_t>(strtoul(row[126], nullptr, 10)) : 1;
+			e.is_parcel_merchant     = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1520,6 +1529,7 @@ public:
 			e.heroic_strikethrough   = row[124] ? static_cast<int32_t>(atoi(row[124])) : 0;
 			e.faction_amount         = row[125] ? static_cast<int32_t>(atoi(row[125])) : 0;
 			e.keeps_sold_items       = row[126] ? static_cast<uint8_t>(strtoul(row[126], nullptr, 10)) : 1;
+			e.is_parcel_merchant     = row[127] ? static_cast<uint8_t>(strtoul(row[127], nullptr, 10)) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -1721,6 +1731,7 @@ public:
 		v.push_back(std::to_string(e.heroic_strikethrough));
 		v.push_back(std::to_string(e.faction_amount));
 		v.push_back(std::to_string(e.keeps_sold_items));
+		v.push_back(std::to_string(e.is_parcel_merchant));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -1870,6 +1881,7 @@ public:
 			v.push_back(std::to_string(e.heroic_strikethrough));
 			v.push_back(std::to_string(e.faction_amount));
 			v.push_back(std::to_string(e.keeps_sold_items));
+			v.push_back(std::to_string(e.is_parcel_merchant));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

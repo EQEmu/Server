@@ -19,6 +19,7 @@
 #include "../common/global_define.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/trader_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 #include "worldserver.h"
 #include "string_ids.h"
 #include "parcels.h"
@@ -99,11 +100,11 @@ void Client::SendBulkParcels()
 
 void Client::SendParcel(Parcel_Struct parcel_in)
 {
-	auto results = ParcelsRepository::GetWhere(
+	auto results = CharacterParcelsRepository::GetWhere(
 		database,
 		fmt::format(
-			"`to_name` = '{}' AND `slot_id` = '{}' LIMIT 1",
-			Strings::Escape(parcel_in.send_to),
+			"`char_id` = '{}' AND `slot_id` = '{}' LIMIT 1",
+			CharacterID(),
 			parcel_in.item_slot
 		)
 	);
@@ -118,7 +119,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
 
-	BaseParcelsRepository::Parcels parcel{};
+	CharacterParcelsRepository::CharacterParcels parcel{};
 	parcel.from_name = results[0].from_name;
 	parcel.id        = results[0].id;
 	parcel.note      = results[0].note;
@@ -126,7 +127,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 	parcel.sent_date = results[0].sent_date;
 	parcel.item_id   = results[0].item_id;
 	parcel.slot_id   = results[0].slot_id;
-	parcel.to_name   = results[0].to_name;
+	parcel.char_id   = results[0].char_id;
 
 	auto item = database.GetItem(parcel.item_id);
 	if (item) {
@@ -243,7 +244,7 @@ void Client::SendParcelStatus()
 
 void Client::DoParcelSend(Parcel_Struct *parcel_in)
 {
-	auto send_to_client = ParcelsRepository::GetParcelCountAndCharacterName(database, parcel_in->send_to);
+	auto send_to_client = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, parcel_in->send_to);
 	auto merchant       = entity_list.GetMob(parcel_in->npc_id);
 	if (!merchant) {
 		SendParcelAck();
@@ -292,7 +293,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 	}
 	auto next_slot = INVALID_INDEX;
 	if (!send_to_client.at(0).character_name.empty()) {
-		next_slot = FindNextFreeParcelSlot(send_to_client.at(0).character_name);
+		next_slot = FindNextFreeParcelSlot(send_to_client.at(0).char_id);
 		if (next_slot == INVALID_INDEX) {
 			Message(
 				Chat::Yellow,
@@ -343,22 +344,22 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 				quantity = inst->GetCharges() > 0 ? inst->GetCharges() : parcel_in->quantity;
 			}
 
-			ParcelsRepository::Parcels parcel_out;
+			CharacterParcelsRepository::CharacterParcels parcel_out;
 			parcel_out.from_name = GetName();
 			parcel_out.note      = parcel_in->note;
 			parcel_out.sent_date = time(nullptr);
 			parcel_out.quantity  = quantity;
 			parcel_out.item_id   = inst->GetID();
-			parcel_out.to_name   = parcel_in->send_to;
+			parcel_out.char_id   = send_to_client.at(0).char_id;
 			parcel_out.slot_id   = next_slot;
 			parcel_out.id        = 0;
 
-			auto result = ParcelsRepository::InsertOne(database, parcel_out);
+			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
 				LogError(
 					"Failed to add parcel to database.  From {} to {} item {} quantity {}",
 					parcel_out.from_name,
-					parcel_out.to_name,
+					parcel_out.char_id,
 					parcel_out.item_id,
 					parcel_out.quantity
 				);
@@ -386,7 +387,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
-				e.to_player_name   = parcel_out.to_name;
+				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
@@ -396,7 +397,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
+			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
 			SendParcelDeliveryToWorld(ps);
 
@@ -432,22 +433,22 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 				return;
 			}
 
-			ParcelsRepository::Parcels parcel_out;
+			CharacterParcelsRepository::CharacterParcels parcel_out;
 			parcel_out.from_name = GetName();
 			parcel_out.note      = parcel_in->note;
 			parcel_out.sent_date = time(nullptr);
 			parcel_out.quantity  = parcel_in->quantity;
 			parcel_out.item_id   = PARCEL_MONEY_ITEM_ID;
-			parcel_out.to_name   = parcel_in->send_to;
+			parcel_out.char_id   = send_to_client.at(0).char_id;
 			parcel_out.slot_id   = next_slot;
 			parcel_out.id        = 0;
 
-			auto result = ParcelsRepository::InsertOne(database, parcel_out);
+			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
 				LogError(
 					"Failed to add parcel to database.  From {} to {} item {} quantity {}",
 					parcel_out.from_name,
-					parcel_out.to_name,
+					send_to_client.at(0).character_name,
 					parcel_out.item_id,
 					parcel_out.quantity
 				);
@@ -469,7 +470,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
-				e.to_player_name   = parcel_out.to_name;
+				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
@@ -486,7 +487,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
+			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
 			SendParcelDeliveryToWorld(ps);
 
@@ -656,7 +657,7 @@ void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
 
 bool Client::DeleteParcel(uint32 parcel_id)
 {
-	auto result = BaseParcelsRepository::DeleteOne(database, parcel_id);
+	auto result = CharacterParcelsRepository::DeleteOne(database, parcel_id);
 	if (!result) {
 		LogError("Error deleting parcel id {} from the database.", parcel_id);
 		return false;
@@ -671,7 +672,7 @@ bool Client::DeleteParcel(uint32 parcel_id)
 void Client::LoadParcels()
 {
 	m_parcels.clear();
-	auto results = ParcelsRepository::GetWhere(database, fmt::format("to_name = '{}'", GetCleanName()));
+	auto results = CharacterParcelsRepository::GetWhere(database, fmt::format("char_id = '{}'", CharacterID()));
 
 	for (auto const &p: results) {
 		m_parcels.emplace(p.slot_id, p);
@@ -694,11 +695,11 @@ void Client::SendParcelDelete(const ParcelRetrieve_Struct parcel_in)
 }
 
 
-int32 Client::FindNextFreeParcelSlot(std::string &character_name)
+int32 Client::FindNextFreeParcelSlot(uint32 char_id)
 {
-	auto results = ParcelsRepository::GetWhere(
+	auto results = CharacterParcelsRepository::GetWhere(
 			database,
-			fmt::format("to_name = '{}' ORDER BY slot_id ASC", character_name)
+			fmt::format("char_id = '{}' ORDER BY slot_id ASC", char_id)
 	);
 
 	if (results.empty()) {
@@ -733,14 +734,14 @@ void Client::SendParcelIconStatus()
 	QueuePacket(outapp.get());
 }
 
-void Client::AddParcel(ParcelsRepository::Parcels parcel)
+void Client::AddParcel(CharacterParcelsRepository::CharacterParcels parcel)
 {
-	auto result = ParcelsRepository::InsertOne(database, parcel);
+	auto result = CharacterParcelsRepository::InsertOne(database, parcel);
 	if (!result.id) {
 		LogError(
-			"Failed to add parcel to database.  From {} to {} item {} quantity {}",
+			"Failed to add parcel to database.  From {} to id {} item {} quantity {}",
 			parcel.from_name,
-			parcel.to_name,
+			parcel.char_id,
 			parcel.item_id,
 			parcel.quantity
 		);

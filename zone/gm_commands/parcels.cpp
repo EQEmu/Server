@@ -25,7 +25,6 @@ void command_parcels(Client *c, const Seperator *sep)
 
 	if (is_listdb) {
 		auto player_name = std::string(sep->arg[2]);
-
 		if (arguments < 2) {
 			c->Message(Chat::White, "Usage: #parcels listdb [Character Name]");
 		}
@@ -37,9 +36,15 @@ void command_parcels(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto results = ParcelsRepository::GetWhere(
+		auto player_id = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, player_name);
+		if (!player_id.at(0).char_id) {
+			c->MessageString(Chat::Yellow, CANT_FIND_PLAYER, player_name.c_str());
+			return;
+		}
+
+		auto results   = CharacterParcelsRepository::GetWhere(
 			database,
-			fmt::format("to_name = '{}' ORDER BY slot_id ASC", player_name.c_str())
+			fmt::format("char_id = '{}' ORDER BY slot_id ASC", player_id.at(0).char_id)
 		);
 
 		if (results.empty()) {
@@ -66,7 +71,7 @@ void command_parcels(Client *c, const Seperator *sep)
 		auto player      = entity_list.GetClientByName(player_name.c_str());
 
 		if (arguments < 2) {
-			c->Message(Chat::White, "Usage: #parcels listmemory [Character Name]");
+			c->Message(Chat::White, "Usage: #parcels listmemory [Character Name] (Must be in the same zone)");
 		}
 
 		if (!player) {
@@ -100,17 +105,17 @@ void command_parcels(Client *c, const Seperator *sep)
 		}
 	}
 	if (is_add) {
+		if (arguments < 4) {
+			SendParcelsSubCommands(c);
+			return;
+		}
+
 		auto to_name  = std::string(sep->arg[2]);
 		auto item_id  = Strings::ToUnsignedInt(sep->arg[3]);
 		auto quantity = Strings::ToUnsignedInt(sep->arg[4]);
 		auto note     = std::string(sep->argplus[5]);
 
-		if (arguments < 2) {
-			SendParcelsSubCommands(c);
-			return;
-		}
-
-		auto send_to_client = ParcelsRepository::GetParcelCountAndCharacterName(
+		auto send_to_client = CharacterParcelsRepository::GetParcelCountAndCharacterName(
 				database,
 				to_name
 		);
@@ -119,7 +124,7 @@ void command_parcels(Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto next_slot = c->FindNextFreeParcelSlot(send_to_client.at(0).character_name);
+		auto next_slot = c->FindNextFreeParcelSlot(send_to_client.at(0).char_id);
 		if (next_slot == INVALID_INDEX) {
 			c->Message(
 				Chat::Yellow,
@@ -156,22 +161,22 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			auto money = inst->DetermineMoneyStringForParcels(quantity == 0 ? 1 : quantity);
 
-			ParcelsRepository::Parcels parcel_out;
-			parcel_out.from_name = c->GetName();
-			parcel_out.note      = note;
-			parcel_out.sent_date = time(nullptr);
-			parcel_out.quantity  = quantity == 0 ? 1 : quantity;
-			parcel_out.item_id   = PARCEL_MONEY_ITEM_ID;
-			parcel_out.to_name   = to_name;
-			parcel_out.slot_id   = next_slot;
-			parcel_out.id        = 0;
+			CharacterParcelsRepository::CharacterParcels parcel_out;
+			parcel_out.from_name  = c->GetName();
+			parcel_out.note       = note;
+			parcel_out.sent_date  = time(nullptr);
+			parcel_out.quantity   = quantity == 0 ? 1 : quantity;
+			parcel_out.item_id    = PARCEL_MONEY_ITEM_ID;
+			parcel_out.char_id    = send_to_client.at(0).char_id;
+			parcel_out.slot_id    = next_slot;
+			parcel_out.id         = 0;
 
-			auto result = ParcelsRepository::InsertOne(database, parcel_out);
+			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
 				LogError(
 					"Failed to add parcel to database.  From {} to {} item {} quantity {}",
 					parcel_out.from_name,
-					parcel_out.to_name,
+					send_to_client.at(0).character_name,
 					parcel_out.item_id,
 					parcel_out.quantity
 				);
@@ -193,7 +198,7 @@ void command_parcels(Client *c, const Seperator *sep)
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
-				e.to_player_name   = parcel_out.to_name;
+				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
@@ -203,7 +208,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
+			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
 			c->SendParcelDeliveryToWorld(ps);
 		}
@@ -225,7 +230,6 @@ void command_parcels(Client *c, const Seperator *sep)
 				return;
 			}
 
-			quantity = 1;
 			if (inst->IsStackable()) {
 				quantity = quantity > inst->GetItem()->StackSize
 					? inst->GetItem()->StackSize : (int16) quantity;
@@ -235,22 +239,22 @@ void command_parcels(Client *c, const Seperator *sep)
 					? inst->GetItem()->MaxCharges : (int16) quantity;
 			}
 
-			ParcelsRepository::Parcels parcel_out;
-			parcel_out.from_name = c->GetName();
-			parcel_out.note      = note.empty() ? "" : note;
-			parcel_out.sent_date = time(nullptr);
-			parcel_out.quantity  = quantity;
-			parcel_out.item_id   = item_id;
-			parcel_out.to_name   = to_name;
-			parcel_out.slot_id   = next_slot;
-			parcel_out.id        = 0;
+			CharacterParcelsRepository::CharacterParcels parcel_out;
+			parcel_out.from_name  = c->GetName();
+			parcel_out.note       = note.empty() ? "" : note;
+			parcel_out.sent_date  = time(nullptr);
+			parcel_out.quantity   = quantity;
+			parcel_out.item_id    = item_id;
+			parcel_out.char_id    = send_to_client.at(0).char_id;
+			parcel_out.slot_id    = next_slot;
+			parcel_out.id         = 0;
 
-			auto result = ParcelsRepository::InsertOne(database, parcel_out);
+			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
 				LogError(
 					"Failed to add parcel to database.  From {} to {} item {} quantity {}",
 					parcel_out.from_name,
-					parcel_out.to_name,
+					send_to_client.at(0).character_name,
 					parcel_out.item_id,
 					parcel_out.quantity
 				);
@@ -272,7 +276,7 @@ void command_parcels(Client *c, const Seperator *sep)
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
-				e.to_player_name   = parcel_out.to_name;
+				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
@@ -282,7 +286,7 @@ void command_parcels(Client *c, const Seperator *sep)
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to, parcel_out.to_name.c_str(), sizeof(ps.send_to));
+			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
 			c->SendParcelDeliveryToWorld(ps);
 		}
@@ -292,7 +296,7 @@ void command_parcels(Client *c, const Seperator *sep)
 void SendParcelsSubCommands(Client *c)
 {
 	c->Message(Chat::White, "#parcels listdb [Character Name]");
-	c->Message(Chat::White, "#parcels listmemory [Character Name]");
+	c->Message(Chat::White, "#parcels listmemory [Character Name] (Must be in the same zone)");
 	c->Message(
 			Chat::White,
 			"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 22292. Quantity is valid for stackable items, charges on an item, or amount of copper."

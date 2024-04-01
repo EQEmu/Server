@@ -1026,7 +1026,7 @@ namespace PlayerEvent {
 	struct ParcelDelete {
 		uint32      item_id;
 		uint32      quantity;
-		std::string to_name;
+		uint32      char_id;
 		std::string from_name;
 		std::string note;
 		uint32      sent_date;
@@ -1038,7 +1038,7 @@ namespace PlayerEvent {
 			ar(
 				CEREAL_NVP(item_id),
 				CEREAL_NVP(quantity),
-				CEREAL_NVP(to_name),
+				CEREAL_NVP(char_id),
 				CEREAL_NVP(from_name),
 				CEREAL_NVP(note),
 				CEREAL_NVP(sent_date));

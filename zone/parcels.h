@@ -18,8 +18,7 @@
 #ifndef PARCELS_H
 #define PARCELS_H
 
-#include "../common/repositories/parcels_repository.h"
-#include "../common/repositories/parcel_merchants_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 
 #define PARCEL_SEND_ITEMS    0
 #define PARCEL_SEND_MONEY    1

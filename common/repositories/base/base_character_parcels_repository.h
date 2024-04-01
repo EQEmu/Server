@@ -9,19 +9,24 @@
  * @docs https://docs.eqemu.io/developer/repositories
  */
 
-#ifndef EQEMU_BASE_PARCEL_MERCHANTS_REPOSITORY_H
-#define EQEMU_BASE_PARCEL_MERCHANTS_REPOSITORY_H
+#ifndef EQEMU_BASE_CHARACTER_PARCELS_REPOSITORY_H
+#define EQEMU_BASE_CHARACTER_PARCELS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../strings.h"
 #include <ctime>
 
-class BaseParcelMerchantsRepository {
+class BaseCharacterParcelsRepository {
 public:
-	struct ParcelMerchants {
+	struct CharacterParcels {
 		uint32_t    id;
-		uint32_t    merchant_id;
-		std::string last_name;
+		uint32_t    char_id;
+		uint32_t    item_id;
+		uint32_t    slot_id;
+		uint32_t    quantity;
+		std::string from_name;
+		std::string note;
+		time_t      sent_date;
 	};
 
 	static std::string PrimaryKey()
@@ -33,8 +38,13 @@ public:
 	{
 		return {
 			"id",
-			"merchant_id",
-			"last_name",
+			"char_id",
+			"item_id",
+			"slot_id",
+			"quantity",
+			"from_name",
+			"note",
+			"sent_date",
 		};
 	}
 
@@ -42,8 +52,13 @@ public:
 	{
 		return {
 			"id",
-			"merchant_id",
-			"last_name",
+			"char_id",
+			"item_id",
+			"slot_id",
+			"quantity",
+			"from_name",
+			"note",
+			"UNIX_TIMESTAMP(sent_date)",
 		};
 	}
 
@@ -59,7 +74,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("parcel_merchants");
+		return std::string("character_parcels");
 	}
 
 	static std::string BaseSelect()
@@ -80,34 +95,39 @@ public:
 		);
 	}
 
-	static ParcelMerchants NewEntity()
+	static CharacterParcels NewEntity()
 	{
-		ParcelMerchants e{};
+		CharacterParcels e{};
 
-		e.id          = 0;
-		e.merchant_id = 0;
-		e.last_name   = "";
+		e.id        = 0;
+		e.char_id   = 0;
+		e.item_id   = 0;
+		e.slot_id   = 0;
+		e.quantity  = 0;
+		e.from_name = "";
+		e.note      = "";
+		e.sent_date = 0;
 
 		return e;
 	}
 
-	static ParcelMerchants GetParcelMerchants(
-		const std::vector<ParcelMerchants> &parcel_merchantss,
-		int parcel_merchants_id
+	static CharacterParcels GetCharacterParcels(
+		const std::vector<CharacterParcels> &character_parcelss,
+		int character_parcels_id
 	)
 	{
-		for (auto &parcel_merchants : parcel_merchantss) {
-			if (parcel_merchants.id == parcel_merchants_id) {
-				return parcel_merchants;
+		for (auto &character_parcels : character_parcelss) {
+			if (character_parcels.id == character_parcels_id) {
+				return character_parcels;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static ParcelMerchants FindOne(
+	static CharacterParcels FindOne(
 		Database& db,
-		int parcel_merchants_id
+		int character_parcels_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -115,17 +135,22 @@ public:
 				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
 				PrimaryKey(),
-				parcel_merchants_id
+				character_parcels_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ParcelMerchants e{};
+			CharacterParcels e{};
 
-			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.merchant_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.last_name   = row[2] ? row[2] : "";
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot_id   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.quantity  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_name = row[5] ? row[5] : "";
+			e.note      = row[6] ? row[6] : "";
+			e.sent_date = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -135,7 +160,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int parcel_merchants_id
+		int character_parcels_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -143,7 +168,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				parcel_merchants_id
+				character_parcels_id
 			)
 		);
 
@@ -152,15 +177,20 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		const ParcelMerchants &e
+		const CharacterParcels &e
 	)
 	{
 		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		v.push_back(columns[1] + " = " + std::to_string(e.merchant_id));
-		v.push_back(columns[2] + " = '" + Strings::Escape(e.last_name) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[4] + " = " + std::to_string(e.quantity));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.from_name) + "'");
+		v.push_back(columns[6] + " = '" + Strings::Escape(e.note) + "'");
+		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -175,16 +205,21 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static ParcelMerchants InsertOne(
+	static CharacterParcels InsertOne(
 		Database& db,
-		ParcelMerchants e
+		CharacterParcels e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.merchant_id));
-		v.push_back("'" + Strings::Escape(e.last_name) + "'");
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.quantity));
+		v.push_back("'" + Strings::Escape(e.from_name) + "'");
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -206,7 +241,7 @@ public:
 
 	static int InsertMany(
 		Database& db,
-		const std::vector<ParcelMerchants> &entries
+		const std::vector<CharacterParcels> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -215,8 +250,13 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.merchant_id));
-			v.push_back("'" + Strings::Escape(e.last_name) + "'");
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.quantity));
+			v.push_back("'" + Strings::Escape(e.from_name) + "'");
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -234,9 +274,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<ParcelMerchants> All(Database& db)
+	static std::vector<CharacterParcels> All(Database& db)
 	{
-		std::vector<ParcelMerchants> all_entries;
+		std::vector<CharacterParcels> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -248,11 +288,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ParcelMerchants e{};
+			CharacterParcels e{};
 
-			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.merchant_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.last_name   = row[2] ? row[2] : "";
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot_id   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.quantity  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_name = row[5] ? row[5] : "";
+			e.note      = row[6] ? row[6] : "";
+			e.sent_date = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -260,9 +305,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<ParcelMerchants> GetWhere(Database& db, const std::string &where_filter)
+	static std::vector<CharacterParcels> GetWhere(Database& db, const std::string &where_filter)
 	{
-		std::vector<ParcelMerchants> all_entries;
+		std::vector<CharacterParcels> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -275,11 +320,16 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ParcelMerchants e{};
+			CharacterParcels e{};
 
-			e.id          = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
-			e.merchant_id = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.last_name   = row[2] ? row[2] : "";
+			e.id        = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.char_id   = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id   = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.slot_id   = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.quantity  = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.from_name = row[5] ? row[5] : "";
+			e.note      = row[6] ? row[6] : "";
+			e.sent_date = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -349,14 +399,19 @@ public:
 
 	static int ReplaceOne(
 		Database& db,
-		const ParcelMerchants &e
+		const CharacterParcels &e
 	)
 	{
 		std::vector<std::string> v;
 
 		v.push_back(std::to_string(e.id));
-		v.push_back(std::to_string(e.merchant_id));
-		v.push_back("'" + Strings::Escape(e.last_name) + "'");
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.quantity));
+		v.push_back("'" + Strings::Escape(e.from_name) + "'");
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -371,7 +426,7 @@ public:
 
 	static int ReplaceMany(
 		Database& db,
-		const std::vector<ParcelMerchants> &entries
+		const std::vector<CharacterParcels> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
@@ -380,8 +435,13 @@ public:
 			std::vector<std::string> v;
 
 			v.push_back(std::to_string(e.id));
-			v.push_back(std::to_string(e.merchant_id));
-			v.push_back("'" + Strings::Escape(e.last_name) + "'");
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.quantity));
+			v.push_back("'" + Strings::Escape(e.from_name) + "'");
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -400,4 +460,4 @@ public:
 	}
 };
 
-#endif //EQEMU_BASE_PARCEL_MERCHANTS_REPOSITORY_H
+#endif //EQEMU_BASE_CHARACTER_PARCELS_REPOSITORY_H
