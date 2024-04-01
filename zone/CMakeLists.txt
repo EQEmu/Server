@@ -329,6 +329,7 @@ else()
 endif()
 
 MESSAGE(STATUS "Looking for ${NETHOST_LIBRARY_NAME}")
+add_library(questinterface SHARED dotnet_quests/questinterface/questinterface_wrap.cxx)
 
 file(GLOB_RECURSE DOTNET_QUESTS_SOURCES 
      "dotnet_quests/questinterface/DotNetTypes/**/*")
@@ -336,7 +337,7 @@ file(GLOB_RECURSE DOTNET_QUESTS_SOURCES
 add_custom_target(dotnet_types_build
   COMMAND dotnet restore
   COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes" -c Release --output "${BUILD_DIR}/dotnet"
- # DEPENDS ${DOTNET_QUESTS_SOURCES}
+  DEPENDS questinterface ${DOTNET_QUESTS_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes"
   COMMENT "Building DotNetTypes .NET project..."
 )
@@ -358,7 +359,7 @@ file(GLOB_RECURSE DOTNET_BRIDGE_SOURCES
 add_custom_target(dotnet_build
   COMMAND dotnet restore
   COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Release --output "${BUILD_DIR}/dotnet"
- # DEPENDS ${DOTNET_BRIDGE_SOURCES}
+  DEPENDS ${DOTNET_BRIDGE_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge"
   COMMENT "Building .NET project..."
 )
@@ -370,7 +371,7 @@ include_directories(
 # Create symlinks to shared lib and dotnet folder
 if(UNIX AND NOT APPLE)
   if(IS_DIRECTORY "/home/eqemu")
-    set(CUSTOM_COMMAND "ln -s /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet /home/eqemu/server/dotnet")
+    set(CUSTOM_COMMAND "ln -s -f /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet /home/eqemu/server/bin/dotnet")
     execute_process(COMMAND bash -c ${CUSTOM_COMMAND})
   endif()
 endif()
@@ -387,7 +388,6 @@ if (MSVC)
     string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO})
 endif()
 
-add_library(questinterface SHARED dotnet_quests/questinterface/questinterface_wrap.cxx)
 add_library(dotnet_quests SHARED ${zone_sources} ${zone_headers} ${dotnet_sources})
 
 set_target_properties(dotnet_quests PROPERTIES PREFIX "")

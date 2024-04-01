@@ -159,7 +159,7 @@ public static class DotNetQuest
 
         var startInfo = new ProcessStartInfo
         {
-            FileName = Path.Combine(workingDirectory + "/dotnet", executableName),
+            FileName = Path.Combine(workingDirectory + "/bin/dotnet", executableName),
             Arguments = zone?.GetShortName(),
             UseShellExecute = false,
             RedirectStandardOutput = true,

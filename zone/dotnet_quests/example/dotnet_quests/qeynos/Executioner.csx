@@ -1,4 +1,4 @@
-#r "../../dotnet/DotNetTypes.dll"
+#r "../../bin/dotnet/DotNetTypes.dll"
 
 using System;
 using System.Collections;

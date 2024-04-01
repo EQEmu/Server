@@ -13,7 +13,7 @@ public class EqFactory
     {
         return new EntityList(Cptr, own);
     }
-    public static QuestManager CreateQuestManager(nint Cptr, bool own)
+    public static QuestManager CreateQuestManager(nint Cptr, bool own) 
     {
         return new QuestManager(Cptr, own);
     }
