@@ -347,7 +347,7 @@ file(GLOB_RECURSE DOTNET_COMPILER_SOURCES
 add_custom_target(dotnet_compiler
   COMMAND dotnet restore
   COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler" -c Release --output "${BUILD_DIR}/dotnet"
- # DEPENDS ${DOTNET_COMPILER_SOURCES}
+  DEPENDS ${DOTNET_COMPILER_SOURCES}
   WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler"
   COMMENT "Building RoslynCompiler .NET project..."
 )
@@ -366,6 +366,15 @@ add_custom_target(dotnet_build
 include_directories(
     ${CMAKE_SOURCE_DIR}/zone
 )
+
+# Create symlinks to shared lib and dotnet folder
+if(UNIX AND NOT APPLE)
+  if(IS_DIRECTORY "/home/eqemu")
+    set(CUSTOM_COMMAND "ln -s /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet /home/eqemu/server/dotnet")
+    execute_process(COMMAND bash -c ${CUSTOM_COMMAND})
+  endif()
+endif()
+
 
 
 if (MSVC)

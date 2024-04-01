@@ -3,16 +3,19 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using System.Reflection;
 using System;
+using System.IO;
+
 class Program
 {
     static void Main(string[] args)
     {
         var zone = args[0];
+        var workingDirectory = Environment.CurrentDirectory;
+        var rootPath = $"{workingDirectory}/dotnet_quests/{zone}";
 
         string assemblyLocation = Assembly.GetExecutingAssembly().Location;
         var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-
-        string rootPath = $"{assemblyDirectory}/dotnet_quests/{zone}";
+       
         string searchPattern = "*.csx";
 
         var directories = Directory.GetDirectories(rootPath, "*", SearchOption.AllDirectories);
@@ -31,10 +34,7 @@ class Program
         {
             var fileName = Path.GetFileNameWithoutExtension(file);
             var text = File.ReadAllText(file);
-            text = text.Replace("#r \"../../DotNetTypes.dll\"", "");
-            text = text.Replace("#r \"../../RoslynBridge.dll\"", "");
-
-            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Where(t => t.Trim() != string.Empty);
+            var lines = text.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None).Where(t => t.Trim() != string.Empty && !t.StartsWith("#r"));
             var usingLines = lines.Where(line => line.StartsWith("using ")).OrderBy(line => line).ToList();
             foreach(var usingLine in usingLines) {
                 if (!allUsings.Contains(usingLine.Trim())) {
@@ -64,7 +64,7 @@ public class {fileName} {{
         var references = new List<MetadataReference>
         {
             MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-            MetadataReference.CreateFromFile("DotNetTypes.dll"),
+            MetadataReference.CreateFromFile(Path.Combine(assemblyDirectory, "DotNetTypes.dll")),
             MetadataReference.CreateFromFile(systemRuntimePath)
         };
 
@@ -83,17 +83,17 @@ public class {fileName} {{
         references.Add(MetadataReference.CreateFromFile(Path.Combine(coreDir, "System.Console.dll")));
 
         string sourceCodeFilePath = $"{rootPath}/{zone}.cs";
+        var outputZone = $"{zone}-{Guid.NewGuid().ToString()[..8]}";
         File.WriteAllText(sourceCodeFilePath, totalCode, encoding: System.Text.Encoding.UTF8);
         var syntaxTree = CSharpSyntaxTree.ParseText(totalCode, path: sourceCodeFilePath, encoding: System.Text.Encoding.UTF8);
 
         var compilation = CSharpCompilation.Create(
-            assemblyName: zone,
+            assemblyName: outputZone,
             syntaxTrees: new[] { syntaxTree },
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
         EmitOptions emitOptions = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
-        var outputZone = $"{zone}-{Guid.NewGuid().ToString()[..8]}";
         var outputDllPath = $"{rootPath}/{outputZone}.dll";
         var pdbPath = $"{rootPath}/{outputZone}.pdb";
         using (var assemblyStream = new MemoryStream())

@@ -831,12 +831,12 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 	);
 
 	const std::string& dotnet_path = fmt::format(
-		"dotnet/dotnet_quests/{}",
+		"dotnet_quests/{}",
 		zone->GetShortName()
 	);
 
 	const std::string& dotnet_path_global = fmt::format(
-		"dotnet/dotnet_quests/{}",
+		"dotnet_quests/{}",
 		QUEST_GLOBAL_DIRECTORY
 	);
 
@@ -894,12 +894,12 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 	);
 
 	const std::string& dotnet_path = fmt::format(
-		"dotnet/dotnet_quests/{}",
+		"dotnet_quests/{}",
 		zone->GetShortName()
 	);
 
 	const std::string& dotnet_path_global = fmt::format(
-		"dotnet/dotnet_quests/{}",
+		"dotnet_quests/{}",
 		QUEST_GLOBAL_DIRECTORY
 	);
 

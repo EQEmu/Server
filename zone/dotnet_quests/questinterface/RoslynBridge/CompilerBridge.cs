@@ -87,7 +87,7 @@ public static class DotNetQuest
         DotNetQuest.initArgs = initArgs;
 
         var workingDirectory = Directory.GetCurrentDirectory();
-        var zoneDir = Path.Combine(workingDirectory, "dotnet", "dotnet_quests", zone.GetShortName());
+        var zoneDir = Path.Combine(workingDirectory, "dotnet_quests", zone.GetShortName());
         logSys?.QuestDebug($"Watching for *.csx file changes in {zoneDir}");
         Console.WriteLine($"Watching for *.csx file changes in {zoneDir}");
         PollForChanges(zoneDir);
@@ -127,7 +127,7 @@ public static class DotNetQuest
         }
         npcMap.Clear();
         var workingDirectory = Directory.GetCurrentDirectory();
-        var directoryPath = $"{workingDirectory}/dotnet/dotnet_quests/{zone?.GetShortName()}";
+        var directoryPath = $"{workingDirectory}/dotnet_quests/{zone?.GetShortName()}";
         // Clean up existing dll and pdb
         string[] filesToDelete = Directory.GetFiles(directoryPath, "*.pdb")
                 .Concat(Directory.GetFiles(directoryPath, "*.dll"))
@@ -165,7 +165,7 @@ public static class DotNetQuest
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
-            WorkingDirectory = workingDirectory + "/dotnet",
+            WorkingDirectory = workingDirectory,
         };
 
         using (var process = Process.Start(startInfo))

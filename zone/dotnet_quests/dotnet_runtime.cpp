@@ -59,6 +59,8 @@
 using string_t = std::basic_string<char_t>;
 using namespace EQ;
 
+namespace fs = std::filesystem;
+
 namespace
 {
     // Globals to hold hostfxr exports
@@ -116,7 +118,6 @@ npc_event_fn npc_event_callback = nullptr;
 typedef void(CORECLR_DELEGATE_CALLTYPE *player_event_fn)(event_payload args);
 player_event_fn player_event_callback = nullptr;
 
-const string_t dotnetlib_path = STR("RoslynBridge.dll");
 const char_t *dotnet_type = STR("DotNetQuest, RoslynBridge");
 
 bool initialized = false;
@@ -337,7 +338,20 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
     }
 
     std::filesystem::path currentPath = std::filesystem::current_path();
-    std::filesystem::path dotnetPath = currentPath / "dotnet" / STR("RoslynBridge.dll");
+    std::filesystem::path dotnetPath;
+    const std::string roslyn_dll("RoslynBridge.dll");
+    for (const auto& entry : fs::recursive_directory_iterator(currentPath, fs::directory_options::follow_directory_symlink)) {
+        if (entry.is_regular_file() && entry.path().filename() == roslyn_dll) {
+            dotnetPath = entry.path();
+            break;
+        }
+    }
+    if (dotnetPath.empty()) {
+        printf("Could not locate RoslynBridge.dll from working directory %s\n", currentPath.c_str());
+        return 1;
+    } else {
+        printf("Loading .NET lib at %s\n", dotnetPath.c_str());
+    }
     //
     // STEP 1: Load HostFxr and get exported hosting functions
     //

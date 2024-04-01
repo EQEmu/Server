@@ -114,6 +114,7 @@
 #include "../../common.h"
 #include "../../entity.h"
 #include "../../mob.h"
+#include "../../hate_list.h"
 #include "../../merc.h"
 #include "../../event_codes.h"
 #include "../../npc.h"
@@ -221,6 +222,7 @@ namespace glm {
 %include "../../common.h"
 %include "../../entity.h"
 %include "../../mob.h"
+%include "../../hate_list.h"
 %include "../../merc.h"
 %include "../../event_codes.h"
 %include "../../npc.h"
@@ -303,3 +305,4 @@ typedef int64_t int64;
 %template(GroupList) std::list<Group *>;
 %template(RaidList) std::list<Raid *>;
 %template(AreaList) std::list<Area>;
+%template(ArrayHateList) std::list<struct_HateList*>;
