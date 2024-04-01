@@ -19,10 +19,10 @@ Attach images and describe testing done to validate functionality.
 
 Clients tested: 
 
-# Checklist:
+# Checklist
 
-- [ ] I have performed a self-review of my code. Ensuring variables, functions and methods are named in a human-readable way, comments are added only where naming of variables, functions and methods can't give enough context.
 - [ ] I have tested my changes
-- [ ] I have made corresponding changes to the documentation
+- [ ] I have performed a self-review of my code. Ensuring variables, functions and methods are named in a human-readable way, comments are added only where naming of variables, functions and methods can't give enough context.
+- [ ] I have made corresponding changes to the documentation (if applicable, if not delete this line)
 - [ ] I own the changes of my code and take responsibility for the potential issues that occur
-
+- [ ] If my changes make database schema changes, I have tested the changes on a local database (attach image). Updated version.h CURRENT_BINARY_DATABASE_VERSION to the new version. (Delete this if not applicable)
