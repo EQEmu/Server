@@ -45,7 +45,7 @@ void Client::SendBulkParcels()
 	for (auto &p: m_parcels) {
 		auto item = database.GetItem(p.second.item_id);
 		if (item) {
-			auto inst = database.CreateItem(item, p.second.quantity);
+			std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, p.second.quantity));
 			if (inst) {
 				inst->SetCharges(p.second.quantity > 0 ? p.second.quantity : 1);
 				inst->SetMerchantCount(1);
@@ -67,7 +67,7 @@ void Client::SendBulkParcels()
 				ar(pms);
 
 				uint32 packet_size = ss.str().length();
-				auto   out         = new EQApplicationPacket(OP_ItemPacket, packet_size);
+				std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_ItemPacket, packet_size));
 				if (out->size != packet_size) {
 					LogError(
 						"Attempted to send a parcel packet of mismatched size {} with a buffer size of {}.",
@@ -77,7 +77,7 @@ void Client::SendBulkParcels()
 					return;
 				}
 				memcpy(out->pBuffer, ss.str().data(), out->size);
-				FastQueuePacket(&out);
+				QueuePacket(out.get());
 
 				ss.str("");
 				ss.clear();
@@ -130,7 +130,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 
 	auto item = database.GetItem(parcel.item_id);
 	if (item) {
-		auto inst = database.CreateItem(item, parcel.quantity);
+		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, parcel.quantity));
 		if (inst) {
 			inst->SetCharges(parcel.quantity > 0 ? parcel.quantity : 1);
 			inst->SetMerchantCount(1);
@@ -152,7 +152,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 			ar(pms);
 
 			uint32 packet_size = ss.str().length();
-			auto   out         = new EQApplicationPacket(OP_ItemPacket, packet_size);
+			std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_ItemPacket, packet_size));
 			if (out->size != packet_size) {
 				LogError(
 					"Attempted to send a parcel packet of mismatched size {} with a buffer size of {}.",
@@ -163,7 +163,7 @@ void Client::SendParcel(Parcel_Struct parcel_in)
 			}
 
 			memcpy(out->pBuffer, ss.str().data(), out->size);
-			FastQueuePacket(&out);
+			QueuePacket(out.get());
 
 			ss.str("");
 			ss.clear();
@@ -367,8 +367,8 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 			}
 
 			RemoveItem(parcel_out.item_id, parcel_out.quantity);
-			auto outapp = new EQApplicationPacket(OP_ShopSendParcel);
-			FastQueuePacket(&outapp);
+			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopSendParcel));
+			QueuePacket(outapp.get());
 
 			if (inst->IsStackable() && (quantity - parcel_in->quantity > 0)) {
 				inst->SetCharges(quantity - parcel_in->quantity);
@@ -410,7 +410,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 				return;
 			}
 
-			auto inst = database.CreateItem(item, 1);
+			std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, 1));
 			if (!inst) {
 				DoParcelCancel();
 				SendParcelAck();
@@ -481,8 +481,8 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 			m_parcel_gold     = 0;
 			m_parcel_silver   = 0;
 			m_parcel_copper   = 0;
-			auto outapp = new EQApplicationPacket(OP_FinishTrade);
-			FastQueuePacket(&outapp);
+			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_FinishTrade));
+			QueuePacket(outapp.get());
 
 			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
@@ -502,31 +502,31 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 
 void Client::SendParcelAck()
 {
-	auto outapp = new EQApplicationPacket(OP_FinishTrade);
-	FastQueuePacket(&outapp);
+	std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_FinishTrade));
+	QueuePacket(outapp.get());
 
-	outapp = new EQApplicationPacket(OP_ShopSendParcel, sizeof(Parcel_Struct));
-	auto data = (Parcel_Struct *) outapp->pBuffer;
+	std::unique_ptr<EQApplicationPacket> outapp2(new EQApplicationPacket(OP_ShopSendParcel, sizeof(Parcel_Struct)));
+	auto data = (Parcel_Struct *) outapp2->pBuffer;
 	data->item_slot = 0xffffffff;
 	data->quantity  = 0xffffffff;
-	FastQueuePacket(&outapp);
+	QueuePacket(outapp2.get());
 }
 
 void Client::SendParcelRetrieveAck()
 {
-	auto outapp = new EQApplicationPacket(OP_ShopRetrieveParcel);
-	FastQueuePacket(&outapp);
+	std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopRetrieveParcel));
+	QueuePacket(outapp.get());
 }
 
 void Client::SendParcelDeliveryToWorld(Parcel_Struct parcel)
 {
-	auto out  = new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct));
-	auto data = (Parcel_Struct *) out->pBuffer;
+	std::unique_ptr<ServerPacket> out(new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct)));
+	auto                          data = (Parcel_Struct *) out->pBuffer;
 
 	data->item_slot = parcel.item_slot;
 	strn0cpy(data->send_to, parcel.send_to, sizeof(data->send_to));
 
-	worldserver.SendPacket(out);
+	worldserver.SendPacket(out.get());
 }
 
 void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
@@ -550,7 +550,7 @@ void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
 			return;
 		}
 
-		auto inst = database.CreateItem(item_id, item_quantity);
+		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, item_quantity));
 		if (!inst) {
 			SendParcelRetrieveAck();
 			return;
@@ -582,7 +582,7 @@ void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
 				}
 				else if (inst->IsStackable()) {
 					inst->SetCharges(item_quantity);
-					if (TryStacking(inst, ItemPacketTrade, true, false)) {
+					if (TryStacking(inst.get(), ItemPacketTrade, true, false)) {
 						MessageString(
 							Chat::Yellow,
 							PARCEL_DELIVERED_2,
@@ -613,7 +613,7 @@ void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
 				}
 				else if (free_id != INVALID_INDEX) {
 					inst->SetCharges(item_quantity > 0 ? item_quantity : 1);
-					if (PutItemInInventory(free_id, *inst, true)) {
+					if (PutItemInInventory(free_id, *inst.get(), true)) {
 						MessageString(
 							Chat::Yellow,
 							PARCEL_DELIVERED,
@@ -682,7 +682,7 @@ void Client::LoadParcels()
 
 void Client::SendParcelDelete(const ParcelRetrieve_Struct parcel_in)
 {
-	auto outapp = new EQApplicationPacket(OP_ShopDeleteParcel, sizeof(ParcelRetrieve_Struct));
+	std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopDeleteParcel, sizeof(ParcelRetrieve_Struct)));
 	auto data   = (ParcelRetrieve_Struct *) outapp->pBuffer;
 
 	data->merchant_entity_id = parcel_in.merchant_entity_id;
@@ -690,7 +690,7 @@ void Client::SendParcelDelete(const ParcelRetrieve_Struct parcel_in)
 	data->parcel_slot_id     = parcel_in.parcel_slot_id;
 	data->parcel_item_id     = parcel_in.parcel_item_id;
 
-	FastQueuePacket(&outapp);
+	QueuePacket(outapp.get());
 }
 
 
@@ -717,7 +717,7 @@ int32 Client::FindNextFreeParcelSlot(std::string &character_name)
 
 void Client::SendParcelIconStatus()
 {
-	auto outapp = new EQApplicationPacket(OP_ShopParcelIcon, sizeof(ParcelIcon_Struct));
+	std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopParcelIcon, sizeof(ParcelIcon_Struct)));
 	auto data   = (ParcelIcon_Struct *) outapp->pBuffer;
 
 	auto const num_of_parcels = GetParcelCount();
@@ -730,8 +730,7 @@ void Client::SendParcelIconStatus()
 		data->status = Overlimit;
 	}
 
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	QueuePacket(outapp.get());
 }
 
 void Client::AddParcel(ParcelsRepository::Parcels parcel)

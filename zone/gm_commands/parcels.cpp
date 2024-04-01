@@ -148,7 +148,7 @@ void command_parcels(Client *c, const Seperator *sep)
 				return;
 			}
 
-			auto inst = database.CreateItem(item, 1);
+			std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, 1));
 			if (!inst) {
 				c->Message(Chat::Yellow, "Could not find item with id {}", item_id);
 				return;
@@ -214,9 +214,11 @@ void command_parcels(Client *c, const Seperator *sep)
 				return;
 			}
 
-			auto inst = database.CreateItem(
+			std::unique_ptr<EQ::ItemInstance> inst(
+				database.CreateItem(
 					item,
 					quantity > INT16_MAX ? INT16_MAX : (int16) quantity
+				)
 			);
 			if (!inst) {
 				c->Message(Chat::Yellow, "Could not find an item with id {}", item_id);

@@ -1580,9 +1580,8 @@ namespace RoF2
 		*p = nullptr;
 
 		//store away the emu struct
-		uchar* __emu_buffer = in->pBuffer;
-
-		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
+		uchar             *__emu_buffer = in->pBuffer;
+		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
 
 		switch(old_item_pkt->PacketType) 			
 		{
@@ -1592,18 +1591,8 @@ namespace RoF2
 				cereal::BinaryInputArchive   ar(ss);
 				ar(pms);
 
-				uint32 serial_length      = pms.serialized_item.length();
-				uint32 packet_type        = pms.packet_type;
-				uint32 date_sent          = pms.sent_time;
 				uint32 player_name_length = pms.player_name.length();
 				uint32 note_length        = pms.note.length();
-				char   *serial            = new char[serial_length];
-				char   *player_name       = new char[player_name_length];
-				char   *note              = new char[note_length];
-
-				strncpy(player_name, pms.player_name.c_str(), player_name_length);
-				strncpy(note, pms.note.c_str(), note_length);
-				strncpy(serial, pms.serialized_item.c_str(), serial_length);
 
 				auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
 
@@ -1615,24 +1604,21 @@ namespace RoF2
 
 				if (ob.tellp() == last_pos) {
 					LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
-
+					safe_delete_array(__emu_buffer);
 					safe_delete(in);
 					return;
 				}
 
-				ob.write((const char *) &date_sent, 4);
+				ob.write((const char *) &pms.sent_time, 4);
 				ob.write((const char *) &player_name_length, 4);
-				ob.write(player_name, player_name_length);
+				ob.write(pms.player_name.c_str(), pms.player_name.length());
 				ob.write((const char *) &note_length, 4);
-				ob.write(note, note_length);
+				ob.write(pms.note.c_str(), pms.note.length());
 
 				in->size    = ob.size();
 				in->pBuffer = ob.detach();
-				safe_delete_array(note);
-				safe_delete_array(player_name);
-				safe_delete_array(serial);
-				safe_delete_array(__emu_buffer);
 
+				safe_delete_array(__emu_buffer);
 				dest->FastQueuePacket(&in, ack_req);
 
 				break;
@@ -1650,15 +1636,15 @@ namespace RoF2
                 if (ob.tellp() == last_pos) {
                     LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
                                int_struct->slot_id);
-                    delete in;
+					safe_delete_array(__emu_buffer);
+					safe_delete(in);
                     return;
                 }
 
                 in->size    = ob.size();
                 in->pBuffer = ob.detach();
 
-                delete[] __emu_buffer;
-
+                safe_delete_array(__emu_buffer);
                 dest->FastQueuePacket(&in, ack_req);
             }
         }
