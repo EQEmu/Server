@@ -115,7 +115,7 @@ public:
 	bool CheckBannedIPs(const std::string& login_ip); //Check incoming connection against banned IP table.
 	bool CheckGMIPs(const std::string& login_ip, uint32 account_id);
 	bool CheckNameFilter(const std::string& name, bool surname = false);
-	bool CheckUsedName(const std::string& name);
+	bool IsNameUsed(const std::string& name);
 
 	uint32 GetAccountIDByChar(const std::string& name, uint32* character_id = 0);
 	uint32 GetAccountIDByChar(uint32 character_id);

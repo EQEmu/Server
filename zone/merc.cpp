@@ -4203,7 +4203,7 @@ const char* Merc::GetRandomName(){
 			//name must begin with an upper-case letter.
 			valid = false;
 		}
-		else if (database.CheckUsedName(rndname)) {
+		else if (!database.IsNameUsed(rndname)) {
 			valid = true;
 		}
 		else {
