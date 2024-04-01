@@ -2791,12 +2791,18 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ReduceSkill: {
 				// Bad data or unsupported new skill
-				if (effect_value > EQ::skills::HIGHEST_SKILL) {
+				if (spells[spell_id].base_value[i] > EQ::skills::HIGHEST_SKILL) {
 					break;
 				}
-				if (effect_value <= EQ::skills::HIGHEST_SKILL) {
-					if (new_bonus->ReduceSkill[effect_value] < spells[spell_id].formula[i]) {
-						new_bonus->ReduceSkill[effect_value] = spells[spell_id].formula[i];
+				//cap skill reducation at 100%
+				uint32 skill_reducation_percent = spells[spell_id].formula[i];
+				if (spells[spell_id].formula[i] > 100) {
+					skill_reducation_percent = 100;
+				}
+
+				if (spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+					if (new_bonus->ReduceSkill[spells[spell_id].base_value[i]] < skill_reducation_percent) {
+						new_bonus->ReduceSkill[spells[spell_id].base_value[i]] = skill_reducation_percent;
 					}
 				}
 				break;
