@@ -200,13 +200,14 @@ void Client::SendEnterWorld(std::string name)
 		if (database.GetAccountIDByChar(live_name) != GetAccountID()) {
 			eqs->Close();
 			return;
-		} else {
-			LogInfo("Telling client to continue session");
 		}
-	} else {
-		if (RuleB(World, EnableAutoLogin)) {
-			live_name = AccountRepository::GetAutoLoginCharacterNameByAccountID(database, GetAccountID());
-		}
+
+		LogInfo("Zoning with live_name [{}] account_id [{}]", live_name, GetAccountID());
+	}
+
+	if (RuleB(World, EnableAutoLogin)) {
+		live_name = AccountRepository::GetAutoLoginCharacterNameByAccountID(database, GetAccountID());
+		LogInfo("Attempting to auto login with live_name [{}] account_id [{}]", live_name, GetAccountID());
 	}
 
 	auto outapp = new EQApplicationPacket(OP_EnterWorld, live_name.length() + 1);
