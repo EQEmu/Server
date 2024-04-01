@@ -1321,7 +1321,6 @@ typedef enum {
 #define SE_Duration_HP_Pct				524 // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
 #define SE_Duration_Mana_Pct			525 // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
 #define SE_Duration_Endurance_Pct		526 // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
-#define SE_SpellDamageConversion		527 // implemented - Add to a damage spell to return a % of damage done as a resource. base: % = value/10, limit: 0=HP,1=Mana,2=Endur, max: max resource returned
 
 
 // LAST
