@@ -177,7 +177,7 @@ public static class DotNetQuest
                 string output = process.StandardOutput.ReadToEnd().Trim();
                 process.WaitForExit();
                 string errorOutput = process.StandardError.ReadToEnd();
-                if (errorOutput.Length > 0)
+                if (errorOutput.Length > 0 || output.Contains("FAILED"))
                 {
                     logSys?.QuestError($"Error compiling quests:");
                     logSys?.QuestError(errorOutput);
