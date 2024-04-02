@@ -150,6 +150,25 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 				e.chance,
 				e.multiplier
 			);
+
+			if (!content_service.DoesPassContentFiltering(
+				ContentFlags{
+					.min_expansion = e.min_expansion,
+					.max_expansion = e.max_expansion,
+					.content_flags = e.content_flags,
+					.content_flags_disabled = e.content_flags_disabled
+				}
+			)) {
+				LogLoot(
+					"-- NPC [{}] Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
+					GetCleanName(),
+					lootdrop_id,
+					e.item_id,
+					database.GetItem(e.item_id)->Name
+				);
+				continue;
+			}
+
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
 					const EQ::ItemData *database_item = database.GetItem(e.item_id);
