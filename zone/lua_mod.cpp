@@ -928,7 +928,7 @@ void LuaMod::SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, ui
 		}
 
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
-		lua_getfield(L, -1, "SetAAExp");
+		lua_getfield(L, -1, "SetAAEXP");
 
 		Lua_Mob l_self(self);
 		luabind::adl::object e = luabind::newtable(L);
