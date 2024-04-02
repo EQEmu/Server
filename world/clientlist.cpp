@@ -110,7 +110,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 			if (it != zones.end()) {
 				iterator.Advance();
 				continue;
-			}
+			} else { return; }
 		}
 
 		if (
