@@ -201,7 +201,7 @@ public:
 	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default);
 	int64 CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default);
 	uint64 HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default);
-	
+	int ResistSpellRoll(Mob *self, Mob* caster, int roll, int roll_max, int resist_chance, uint8 resist_type, uint16 spell_id, bool use_resist_override, int resist_override, bool is_charisma_check, bool is_charm_tick, bool is_root, int level_override, int resist_modifier, bool &ignore_default);
 private:
 	LuaParser();
 	LuaParser(const LuaParser&);

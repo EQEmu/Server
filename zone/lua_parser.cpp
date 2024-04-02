@@ -1796,3 +1796,13 @@ void LuaParser::LoadBotScript(std::string filename) {
 void LuaParser::LoadGlobalBotScript(std::string filename) {
 	LoadScript(filename, "global_bot");
 }
+
+
+int LuaParser::ResistSpellRoll(Mob *self, Mob* caster, int roll, int roll_max, int resist_chance, uint8 resist_type, uint16 spell_id, bool use_resist_override, int resist_override, bool is_charisma_check, bool is_charm_tick, bool is_root, int level_override, int resist_modifier, bool &ignore_default)
+{
+	int retval = 0;
+	for (auto &mod : mods_) {
+		mod.ResistSpellRoll(self, caster, roll, roll_max, resist_chance, resist_type, spell_id, use_resist_override, resist_override, is_charisma_check, is_charm_tick, is_root, level_override, resist_modifier, retval, ignore_default);
+	}
+	return retval;
+}

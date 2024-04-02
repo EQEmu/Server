@@ -84,6 +84,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "string_ids.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "lua_parser.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -5445,6 +5446,15 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Finally our roll
 	int roll = zone->random.Int(0, RuleB(Spells, EnableResistSoftCap) ? RuleI(Spells, SpellResistSoftCap) : 200);
+#ifdef LUA_EQEMU
+	int lua_ret = 0;
+	bool ignore_default = false;
+	lua_ret = LuaParser::Instance()->ResistSpellRoll(this, caster, roll, (RuleB(Spells, EnableResistSoftCap) ? RuleI(Spells, SpellResistSoftCap) : 200), resist_chance, resist_type, spell_id, use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, resist_modifier, ignore_default);
+
+	if (ignore_default) {
+		roll = lua_ret;
+	}
+#endif
 
 	if(roll > resist_chance) {
 		return 100;

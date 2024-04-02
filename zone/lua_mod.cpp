@@ -38,6 +38,7 @@ void LuaMod::Init()
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
 	m_has_calc_spell_effect_value_formula = parser_->HasFunction("CalcSpellEffectValue_formula", package_name_);
 	m_has_register_bug = parser_->HasFunction("RegisterBug", package_name_);
+	m_has_resist_spell_roll = parser_->HasFunction("ResistSpellRoll", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -862,4 +863,68 @@ void LuaMod::HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, u
 		lua_pop(L, n);
 	}
 }
+
+void LuaMod::ResistSpellRoll(Mob *self, Mob* caster, int roll, int roll_max, int resist_chance, uint8 resist_type, uint16 spell_id, bool use_resist_override, int resist_override, bool is_charisma_check, bool is_charm_tick, bool is_root, int level_override, int resist_modifier, int &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_resist_spell_roll) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "ResistSpellRoll");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(caster);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["caster"] = l_other;
+		e["roll"] = roll;
+		e["roll_max"] = roll_max;
+		e["resist_chance"] = resist_chance;
+		e["resist_type"] = resist_type;
+		e["spell_id"] = spell_id;
+		e["use_resist_override"] = use_resist_override;
+		e["resist_override"] = resist_override;
+		e["is_charisma_check"] = is_charisma_check;
+		e["is_charm_tick"] = is_charm_tick;
+		e["is_root"] = is_root;
+		e["level_override"] = level_override;
+		e["resist_modifier"] = resist_modifier;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
 #endif
