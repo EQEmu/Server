@@ -62,14 +62,14 @@ public static class DotNetQuest
             if (reloading) {
                 return;
             }
-            var lastWriteTime = Directory.GetFiles(path, "*.csx", SearchOption.AllDirectories)
+            var lastWriteTime = Directory.GetFiles(path, "*.cs", SearchOption.TopDirectoryOnly)
                 .Max(file => (File.GetLastWriteTimeUtc(file)));
 
             if (lastWriteTime > lastCheck)
             {
                 reloading = true;
-                logSys?.QuestDebug("Detected change in .csx file - Reloading dotnet quests");
-                Console.WriteLine("Detected change in .csx file - Reloading dotnet quests");
+                logSys?.QuestDebug("Detected change in .cs file - Reloading dotnet quests");
+                Console.WriteLine("Detected change in .cs file - Reloading dotnet quests");
                 Reload();
                 reloading = false;
                 lastCheck = lastWriteTime;
@@ -88,11 +88,11 @@ public static class DotNetQuest
 
         var workingDirectory = Directory.GetCurrentDirectory();
         var zoneDir = Path.Combine(workingDirectory, "dotnet_quests", zone.GetShortName());
-        logSys?.QuestDebug($"Watching for *.csx file changes in {zoneDir}");
-        Console.WriteLine($"Watching for *.csx file changes in {zoneDir}");
+        logSys?.QuestDebug($"Watching for *.cs file changes in {zoneDir}");
+        Console.WriteLine($"Watching for *.cs file changes in {zoneDir}");
         PollForChanges(zoneDir);
         // Issues with inotify in docker filesystem with mounted drives--investigate later but use polling for now
-        // watcher = new FileSystemWatcher(zoneDir, "*.csx")
+        // watcher = new FileSystemWatcher(zoneDir, "*.cs")
         // {
         //     IncludeSubdirectories = true,
         //     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
@@ -123,14 +123,20 @@ public static class DotNetQuest
             questAssembly_ = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
-
         }
+        var zoneName = zone?.GetShortName();
         npcMap.Clear();
         var workingDirectory = Directory.GetCurrentDirectory();
-        var directoryPath = $"{workingDirectory}/dotnet_quests/{zone?.GetShortName()}";
+        var directoryPath = $"{workingDirectory}/dotnet_quests/{zoneName}";
+        var outPath = $"{workingDirectory}/dotnet_quests/out";
+
+        var projPath = $"{directoryPath}/{zoneName}.csproj";
+        if (!File.Exists(projPath)) {
+            Console.WriteLine($"Project path does not exist for zone at {projPath}");
+            return;
+        }
         // Clean up existing dll and pdb
-        string[] filesToDelete = Directory.GetFiles(directoryPath, "*.pdb")
-                .Concat(Directory.GetFiles(directoryPath, "*.dll"))
+        string[] filesToDelete = Directory.GetFiles(outPath, $"{zoneName}*.*")
                 .ToArray();
 
         // Delete each file
@@ -146,33 +152,24 @@ public static class DotNetQuest
             }
         }
         assemblyContext_ = new CollectibleAssemblyLoadContext();
-
-        string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-
-        // Get the directory path from the full assembly path
-        var assemblyDirectory = Path.GetDirectoryName(assemblyLocation);
-        string executableName = "RoslynCompiler"; // The base name of your executable
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            executableName += ".exe";
-        }
-
+        
+        var zoneGuid = $"{zoneName}-{Guid.NewGuid().ToString().Substring(0, 8)}";
         var startInfo = new ProcessStartInfo
         {
-            FileName = Path.Combine(workingDirectory + "/bin/dotnet", executableName),
-            Arguments = zone?.GetShortName(),
+            FileName = "dotnet",
+            Arguments = $"build --output {outPath} -r 'p:Configuration=Debug;AssemblyName={zoneGuid} {directoryPath}/{zoneName}.csproj",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             CreateNoWindow = true,
-            WorkingDirectory = workingDirectory,
+            WorkingDirectory = directoryPath,
         };
 
         using (var process = Process.Start(startInfo))
         {
             if (process == null)
             {
-                logSys?.QuestError($"Process was null when loading zone quests: {zone?.GetShortName()}");
+                logSys?.QuestError($"Process was null when loading zone quests: {zoneName}");
                 return;
             }
             try
@@ -184,10 +181,12 @@ public static class DotNetQuest
                 {
                     logSys?.QuestError($"Error compiling quests:");
                     logSys?.QuestError(errorOutput);
+                    logSys?.QuestError(output);
                 }
                 else
                 {
-                    var questAssemblyPath = $"{directoryPath}/{output}.dll";
+                    Console.WriteLine(output);
+                    var questAssemblyPath = $"{outPath}/{zoneGuid}.dll";
                     Console.WriteLine($"Loading quest assembly from: {questAssemblyPath}");
                     questAssembly_ = assemblyContext_.LoadFromAssemblyPath(questAssemblyPath);
                     logSys?.QuestDebug($"Successfully compiled .NET quests with {questAssembly_.GetTypes().Count()} exported types.");

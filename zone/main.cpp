@@ -440,7 +440,7 @@ int main(int argc, char **argv)
 
 	parse = new QuestParserCollection();
 
-	parse->RegisterQuestInterface(new DotnetParser(), "csx");
+	parse->RegisterQuestInterface(new DotnetParser(), "cs");
 #ifdef LUA_EQEMU
 	parse->RegisterQuestInterface(LuaParser::Instance(), "lua");
 #endif

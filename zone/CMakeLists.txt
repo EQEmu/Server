@@ -334,34 +334,14 @@ add_library(questinterface SHARED dotnet_quests/questinterface/questinterface_wr
 file(GLOB_RECURSE DOTNET_QUESTS_SOURCES 
      "dotnet_quests/questinterface/DotNetTypes/**/*")
 
-add_custom_target(dotnet_types_build
-  COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes" -c Release --output "${BUILD_DIR}/dotnet"
-  DEPENDS questinterface ${DOTNET_QUESTS_SOURCES}
-  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/DotNetTypes"
-  COMMENT "Building DotNetTypes .NET project..."
-)
-
-file(GLOB_RECURSE DOTNET_COMPILER_SOURCES 
-     "dotnet_quests/questinterface/RoslynCompiler/**/*")
-
-add_custom_target(dotnet_compiler
-  COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler" -c Release --output "${BUILD_DIR}/dotnet"
-  DEPENDS ${DOTNET_COMPILER_SOURCES}
-  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynCompiler"
-  COMMENT "Building RoslynCompiler .NET project..."
-)
-
 file(GLOB_RECURSE DOTNET_BRIDGE_SOURCES 
-     "dotnet_quests/questinterface/RoslynBridge/**/*")
-
-add_custom_target(dotnet_build
+    "dotnet_quests/questinterface/DotNetBridge/**/*")
+add_custom_target(dotnet_questinterface
   COMMAND dotnet restore
-  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge" -c Release --output "${BUILD_DIR}/dotnet"
-  DEPENDS ${DOTNET_BRIDGE_SOURCES}
-  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/RoslynBridge"
-  COMMENT "Building .NET project..."
+  COMMAND dotnet publish "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface/questinterface.sln" -c Release --output "${BUILD_DIR}/dotnet"
+  DEPENDS questinterface ${DOTNET_QUESTS_SOURCES} ${DOTNET_BRIDGE_SOURCES}
+  WORKING_DIRECTORY  "${CMAKE_SOURCE_DIR}/zone/dotnet_quests/questinterface"
+  COMMENT "Building DotNet questinterface .NET solution..."
 )
 
 include_directories(
@@ -371,12 +351,10 @@ include_directories(
 # Create symlinks to shared lib and dotnet folder
 if(UNIX AND NOT APPLE)
   if(IS_DIRECTORY "/home/eqemu")
-    set(CUSTOM_COMMAND "ln -s -f /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet /home/eqemu/server/bin/dotnet")
+    set(CUSTOM_COMMAND "ln -s -f /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet -f /home/eqemu/server/bin/dotnet")
     execute_process(COMMAND bash -c ${CUSTOM_COMMAND})
   endif()
 endif()
-
-
 
 if (MSVC)
     # We ship libnethost.lib as a static library for external consumption, so
@@ -422,7 +400,7 @@ set_target_properties(questinterface PROPERTIES
 )
 
 ADD_EXECUTABLE(zone zone.cpp)
-add_dependencies(zone dotnet_compiler dotnet_types_build dotnet_build)
+add_dependencies(zone dotnet_questinterface)
 TARGET_LINK_LIBRARIES(zone dotnet_quests)
 
 

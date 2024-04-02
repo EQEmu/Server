@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qeynos", "qeynos\qeynos.csproj", "{09EFF571-8901-41D0-A2CF-6C6454417741}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FCA3F76-D5AD-4713-9EC9-786D33F6B58A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FCA3F76-D5AD-4713-9EC9-786D33F6B58A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FCA3F76-D5AD-4713-9EC9-786D33F6B58A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FCA3F76-D5AD-4713-9EC9-786D33F6B58A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D116892A-7985-4426-A7E2-C8122F96591B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D116892A-7985-4426-A7E2-C8122F96591B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D116892A-7985-4426-A7E2-C8122F96591B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D116892A-7985-4426-A7E2-C8122F96591B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A873B50F-8489-4299-9D4A-EB8E61D3F713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A873B50F-8489-4299-9D4A-EB8E61D3F713}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A873B50F-8489-4299-9D4A-EB8E61D3F713}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A873B50F-8489-4299-9D4A-EB8E61D3F713}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09EFF571-8901-41D0-A2CF-6C6454417741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09EFF571-8901-41D0-A2CF-6C6454417741}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09EFF571-8901-41D0-A2CF-6C6454417741}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09EFF571-8901-41D0-A2CF-6C6454417741}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -118,7 +118,7 @@ npc_event_fn npc_event_callback = nullptr;
 typedef void(CORECLR_DELEGATE_CALLTYPE *player_event_fn)(event_payload args);
 player_event_fn player_event_callback = nullptr;
 
-const char_t *dotnet_type = STR("DotNetQuest, RoslynBridge");
+const char_t *dotnet_type = STR("DotNetQuest, DotNetBridge");
 
 bool initialized = false;
 
@@ -258,7 +258,7 @@ int event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extr
         auto rc = runtime_function(
             dotnet_type,
             STR("NpcEvent") /*method_name*/,
-            STR("DotNetQuest+PlayerEventDelegate, RoslynBridge") /*delegate_type_name*/,
+            STR("DotNetQuest+PlayerEventDelegate, DotNetBridge") /*delegate_type_name*/,
             nullptr,
             nullptr,
             (void **)&player_event_callback);
@@ -279,7 +279,7 @@ int event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extr
         auto rc = runtime_function(
             dotnet_type,
             STR("NpcEvent") /*method_name*/,
-            STR("DotNetQuest+NpcEventDelegate, RoslynBridge") /*delegate_type_name*/,
+            STR("DotNetQuest+NpcEventDelegate, DotNetBridge") /*delegate_type_name*/,
             nullptr,
             nullptr,
             (void **)&npc_event_callback);
@@ -312,7 +312,7 @@ int reload_quests()
     auto rc = runtime_function(
         dotnet_type,
         STR("Reload") /*method_name*/,
-        STR("DotNetQuest+ReloadDelegate, RoslynBridge") /*delegate_type_name*/,
+        STR("DotNetQuest+ReloadDelegate, DotNetBridge") /*delegate_type_name*/,
         nullptr,
         nullptr,
         (void **)&reload_callback);
@@ -339,7 +339,7 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
 
     std::filesystem::path currentPath = std::filesystem::current_path();
     std::filesystem::path dotnetPath;
-    const std::string roslyn_dll("RoslynBridge.dll");
+    const std::string roslyn_dll("DotNetBridge.dll");
     for (const auto& entry : fs::recursive_directory_iterator(currentPath, fs::directory_options::follow_directory_symlink)) {
         if (entry.is_regular_file() && entry.path().filename() == roslyn_dll) {
             dotnetPath = entry.path();
@@ -347,7 +347,7 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
         }
     }
     if (dotnetPath.empty()) {
-        printf("Could not locate RoslynBridge.dll from working directory %s\n", currentPath.c_str());
+        printf("Could not locate DotNetBridge.dll from working directory %s\n", currentPath.c_str());
         return 1;
     } else {
         printf("Loading .NET lib at %s\n", dotnetPath.c_str());
@@ -374,7 +374,7 @@ int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQ
     auto rc = runtime_function(
         dotnet_type,
         STR("Initialize") /*method_name*/,
-        STR("DotNetQuest+InitializeDelegate, RoslynBridge") /*delegate_type_name*/,
+        STR("DotNetQuest+InitializeDelegate, DotNetBridge") /*delegate_type_name*/,
         nullptr,
         nullptr,
         (void **)&init);

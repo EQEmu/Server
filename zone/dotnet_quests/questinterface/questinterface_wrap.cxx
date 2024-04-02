@@ -99535,7 +99535,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_database_get() {
 SWIGEXPORT void SWIGSTDCALL CSharp_content_db_set(void * jarg1) {
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   
-  arg1 = (ZoneDatabase *)jarg1; 
+  arg1 = (ZoneDatabase *)jarg1;
   content_db = *arg1;
 }
 

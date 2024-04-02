@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+  </PropertyGroup>
+  
+ <ItemGroup>
+    <Reference Include="DotNetTypes">
+      <HintPath>../../bin/dotnet/DotNetTypes.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
