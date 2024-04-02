@@ -23,6 +23,7 @@ luabind::scope lua_register_ruler();
 luabind::scope lua_register_ruleb();
 luabind::scope lua_register_journal_speakmode();
 luabind::scope lua_register_journal_mode();
+luabind::scope lua_register_exp_source();
 
 #endif
 #endif

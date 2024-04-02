@@ -252,27 +252,27 @@ void Lua_Client::SetDeity(int v) {
 
 void Lua_Client::AddEXP(uint32 add_exp) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp);
+	self->AddEXP(add_exp, 0xFF, false, ExpSource::Quest);
 }
 
 void Lua_Client::AddEXP(uint32 add_exp, int conlevel) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp, conlevel);
+	self->AddEXP(add_exp, conlevel, false, ExpSource::Quest);
 }
 
 void Lua_Client::AddEXP(uint32 add_exp, int conlevel, bool resexp) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp, conlevel, resexp);
+	self->AddEXP(add_exp, conlevel, resexp, ExpSource::Quest);
 }
 
 void Lua_Client::SetEXP(uint64 set_exp, uint64 set_aaxp) {
 	Lua_Safe_Call_Void();
-	self->SetEXP(set_exp, set_aaxp);
+	self->SetEXP(set_exp, set_aaxp, false, ExpSource::Quest);
 }
 
 void Lua_Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool resexp) {
 	Lua_Safe_Call_Void();
-	self->SetEXP(set_exp, set_aaxp, resexp);
+	self->SetEXP(set_exp, set_aaxp, resexp, ExpSource::Quest);
 }
 
 void Lua_Client::SetBindPoint() {
@@ -1318,17 +1318,17 @@ uint32 Lua_Client::GetIP() {
 
 void Lua_Client::AddLevelBasedExp(int exp_pct) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct);
+	self->AddLevelBasedExp(exp_pct, 0, false, ExpSource::Quest);
 }
 
 void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct, max_level);
+	self->AddLevelBasedExp(exp_pct, max_level, false, ExpSource::Quest);
 }
 
 void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods);
+	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods, ExpSource::Quest);
 }
 
 void Lua_Client::IncrementAA(int aa) {

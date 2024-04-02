@@ -38,7 +38,8 @@ void SetAAEXP(Client *c, const Seperator *sep)
 		t->SetEXP(
 			t->GetEXP(),
 			aa_experience,
-			false
+			false,
+			ExpSource::GM
 		);
 	} else if (is_group) {
 		group_raid_string = "Group ";

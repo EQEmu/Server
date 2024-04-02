@@ -1385,7 +1385,7 @@ void QuestManager::changedeity(int deity_id) {
 void QuestManager::exp(int amt) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->AddEXP(amt);
+		initiator->AddEXP(amt, 0xFF, false, ExpSource::Quest);
 }
 
 void QuestManager::level(int newlevel) {

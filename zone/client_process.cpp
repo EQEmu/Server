@@ -1075,9 +1075,9 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 
 		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0) {
 				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
-						GetAAXP(),true);
+						GetAAXP(), true, ExpSource::Resurrection);
 		} else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
-			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
+			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true, ExpSource::Resurrection);
 		}
 
 		//Was sending the packet back to initiate client zone...

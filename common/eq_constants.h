@@ -1131,4 +1131,17 @@ namespace LeadershipAbilitySlot {
 	constexpr uint16 HealthOfTargetsTarget = 14;
 }
 
+enum ExpSource
+{
+	Unknown,
+	Quest,
+	GM,
+	Kill,
+	Death,
+	Resurrection,
+	LDoNChest,
+	Task,
+	Sacrifice
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

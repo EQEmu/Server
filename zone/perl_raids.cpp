@@ -45,7 +45,7 @@ uint32_t Perl_Raid_GetGroup(Raid* self, Client* client) // @categories Group, Ra
 
 void Perl_Raid_SplitExp(Raid* self, uint32 experience, Mob* other) // @categories Experience and Level, Raid
 {
-	self->SplitExp(experience, other);
+	self->SplitExp(experience, other, ExpSource::Quest);
 }
 
 uint32_t Perl_Raid_GetTotalRaidDamage(Raid* self, Mob* other) // @categories Raid

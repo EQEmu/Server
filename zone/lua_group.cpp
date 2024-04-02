@@ -34,7 +34,7 @@ void Lua_Group::CastGroupSpell(Lua_Mob caster, int spell_id) {
 
 void Lua_Group::SplitExp(uint64 exp, Lua_Mob other) {
 	Lua_Safe_Call_Void();
-	self->SplitExp(exp, other);
+	self->SplitExp(exp, other, ExpSource::Quest);
 }
 
 void Lua_Group::GroupMessage(Lua_Mob sender, const char* message) {
