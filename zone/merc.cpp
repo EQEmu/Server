@@ -461,14 +461,12 @@ int64 Merc::CalcMaxHP() {
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
 	//the aa description
-	nd += aabonuses.MaxHP;  //Natural Durability, Physical Enhancement, Planar Durability
+	nd += aabonuses.MaxHP + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;  //Natural Durability, Physical Enhancement, Planar Durability
 
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.HP + aabonuses.HP;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
-
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 
 	if (current_hp > max_hp)
 		current_hp = max_hp;
@@ -4203,7 +4201,7 @@ const char* Merc::GetRandomName(){
 			//name must begin with an upper-case letter.
 			valid = false;
 		}
-		else if (database.CheckUsedName(rndname)) {
+		else if (!database.IsNameUsed(rndname)) {
 			valid = true;
 		}
 		else {
