@@ -412,7 +412,7 @@ struct StatBonuses {
 	int32	MeleeLifetap;						//i
 	int32	Vampirism;							//i
 	int32	HealRate;							// Spell effect that influences effectiveness of heals
-	int64	PercentMaxHPChange;					// percent change in hit points (aabonuses use variable MaxHP)
+	int64	PercentMaxHPChange;					// base: Max HP change by percentage value from spell effect/item worn effect/aa
 	int16	SkillDmgTaken[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect
@@ -512,7 +512,7 @@ struct StatBonuses {
 	uint8	invisibility_verse_undead;			// IVU level
 	uint8	invisibility_verse_animal;			// IVA level
 	int32	ShieldTargetSpa[2];                 // [0] base = % mitigation amount, [1] buff slot
-	int64	FlatMaxHPChange;					// base: Max HP change flat value from spell effect
+	int64	FlatMaxHPChange;					// base: Max HP change by a flat amount value from spell effect/item worn effect/aa
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.

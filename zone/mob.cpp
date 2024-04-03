@@ -975,8 +975,7 @@ int64 Mob::GetItemHPBonuses() {
 
 int64 Mob::GetSpellHPBonuses() {
 	int64 spell_hp = 0;
-	spell_hp += spell_hp * spellbonuses.PercentMaxHPChange / 10000;
-	spell_hp = spellbonuses.FlatMaxHPChange;
+	spell_hp += spellbonuses.FlatMaxHPChange;
 	return spell_hp;
 }
 
