@@ -442,6 +442,7 @@ Mob::Mob(
 	weaponstance.aabonus_buff_spell_id    = 0;
 
 	pStandingPetOrder = SPO_Follow;
+	m_previous_pet_order = SPO_Follow;
 	pseudo_rooted     = false;
 
 	nobuff_invisible = 0;
@@ -635,6 +636,16 @@ void Mob::CalcInvisibleLevel()
 	}
 
 	BreakCharmPetIfConditionsMet();
+}
+
+void Mob::SetPetOrder(eStandingPetOrder i) {
+	if (i == SPO_Sit || i == SPO_FeignDeath) {
+		if (pStandingPetOrder == SPO_Follow || pStandingPetOrder == SPO_Guard) {
+			m_previous_pet_order = pStandingPetOrder;
+		}
+	}
+
+	pStandingPetOrder = i;
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {

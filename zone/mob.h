@@ -589,6 +589,7 @@ public:
 	inline const char* GetName() const { return name; }
 	inline const char* GetOrigName() const { return orig_name; }
 	inline const char* GetLastName() const { return lastname; }
+	inline const eStandingPetOrder GetPreviousPetOrder() const { return m_previous_pet_order; }
 	const char *GetCleanName();
 	virtual void SetName(const char *new_name = nullptr) { new_name ? strn0cpy(name, new_name, 64) :
 		strn0cpy(name, GetName(), 64); return; };
@@ -1178,7 +1179,7 @@ public:
 	inline const float GetAssistRange() const { return (spellbonuses.AssistRange == -1) ? pAssistRange : spellbonuses.AssistRange; }
 
 
-	inline void SetPetOrder(eStandingPetOrder i) { pStandingPetOrder = i; }
+	void SetPetOrder(eStandingPetOrder i);
 	inline const eStandingPetOrder GetPetOrder() const { return pStandingPetOrder; }
 	inline void SetHeld(bool nState) { held = nState; }
 	inline const bool IsHeld() const { return held; }
@@ -1774,6 +1775,7 @@ protected:
 
 	// MobAI stuff
 	eStandingPetOrder pStandingPetOrder;
+	eStandingPetOrder m_previous_pet_order;
 	uint32 minLastFightingDelayMoving;
 	uint32 maxLastFightingDelayMoving;
 	float pAggroRange = 0;
