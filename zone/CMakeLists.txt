@@ -356,16 +356,6 @@ if(UNIX AND NOT APPLE)
   endif()
 endif()
 
-if (MSVC)
-    # We ship libnethost.lib as a static library for external consumption, so
-    # LTCG must be disabled to ensure that non-MSVC toolchains can work with it.
-
-    set_target_properties(libnethost PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
-
-    string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELEASE ${CMAKE_STATIC_LINKER_FLAGS_RELEASE})
-    string(REPLACE "/LTCG" "" CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO ${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO})
-endif()
-
 add_library(dotnet_quests SHARED ${zone_sources} ${zone_headers} ${dotnet_sources})
 
 set_target_properties(dotnet_quests PROPERTIES PREFIX "")
@@ -375,17 +365,6 @@ target_include_directories(dotnet_quests PRIVATE ${NETHOST_PATH})
 
 target_link_libraries(dotnet_quests ${PERL_LIBRARY} ${ZONE_LIBS} "${NETHOST_PATH}/${NETHOST_LIBRARY_NAME}")
 target_link_libraries(questinterface dotnet_quests)
-
-
-# Compiler-specific logic
-if(MSVC)
-    # Set .dll extension for MSVC compiler
-    set_target_properties(dotnet_quests PROPERTIES SUFFIX ".dll")
-    set_target_properties(questinterface PROPERTIES SUFFIX ".dll")
-else()
-    # Set .so extension for Unix-like systems (default behavior)
-endif()
-
 
 set_target_properties(dotnet_quests PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${BUILD_DIR}

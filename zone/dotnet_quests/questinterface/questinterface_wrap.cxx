@@ -397,7 +397,8 @@ template <typename T> T SwigValueInit() {
 #include "../../worldserver.h"
 #include "../../questmgr.h"
 
-
+#include "../../../common/emu_constants.h"
+#include "../../../common/eq_constants.h"
 #include "../../../common/item_instance.h"
 #include "../../../common/item_data.h"
 
@@ -3874,6 +3875,8562 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_ExpeditionLockoutTimer(void * jarg1) {
   
   arg1 = (ExpeditionLockoutTimer *)jarg1; 
   delete arg1;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_GetInvTypeSize(short jarg1) {
+  short jresult ;
+  int16 arg1 ;
+  int16 result;
+  
+  arg1 = (int16)jarg1; 
+  result = (int16)EQ::invtype::GetInvTypeSize(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GM_ACCOUNT_STATUS_LEVEL_get() {
+  int jresult ;
+  int32 result;
+  
+  result = (int32)(int32)EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SERVER_INTERNAL_USE_BASE_get() {
+  int jresult ;
+  int32 result;
+  
+  result = (int32)(int32)EQ::popupresponse::SERVER_INTERNAL_USE_BASE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MOB_INFO_DISMISS_get() {
+  int jresult ;
+  int32 result;
+  
+  result = (int32)(int32)EQ::popupresponse::MOB_INFO_DISMISS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_SLOT_AUGMENT_GENERIC_RETURN_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_CORPSE_BEGIN_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invslot::CORPSE_BEGIN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_CORPSE_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invslot::CORPSE_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_GENERAL_BAGS_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::GENERAL_BAGS_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_GENERAL_BAGS_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::GENERAL_BAGS_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_GENERAL_BAGS_8_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::GENERAL_BAGS_8_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_GENERAL_BAGS_8_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::GENERAL_BAGS_8_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_CURSOR_BAG_BEGIN_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::CURSOR_BAG_BEGIN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_CURSOR_BAG_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::CURSOR_BAG_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_CURSOR_BAG_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::CURSOR_BAG_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_BANK_BAGS_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::BANK_BAGS_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_BANK_BAGS_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::BANK_BAGS_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_BANK_BAGS_16_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::BANK_BAGS_16_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_BANK_BAGS_16_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::BANK_BAGS_16_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_SHARED_BANK_BAGS_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::SHARED_BANK_BAGS_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_SHARED_BANK_BAGS_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::SHARED_BANK_BAGS_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_TRADE_BAGS_COUNT_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::TRADE_BAGS_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_TRADE_BAGS_END_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)(int16)EQ::invbag::TRADE_BAGS_END;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_CHARACTER_CREATION_CLIENT_get() {
+  void * jresult ;
+  EQ::versions::ClientVersion result;
+  
+  result = (EQ::versions::ClientVersion)EQ::constants::CHARACTER_CREATION_CLIENT;
+  jresult = new EQ::versions::ClientVersion(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SAY_LINK_OPENER_SIZE_get() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = (size_t)EQ::constants::SAY_LINK_OPENER_SIZE;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SAY_LINK_TEXT_SIZE_get() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = (size_t)EQ::constants::SAY_LINK_TEXT_SIZE;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SAY_LINK_CLOSER_SIZE_get() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = (size_t)EQ::constants::SAY_LINK_CLOSER_SIZE;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SAY_LINK_MAXIMUM_SIZE_get() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = (size_t)EQ::constants::SAY_LINK_MAXIMUM_SIZE;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_GetStanceName(int jarg1) {
+  char * jresult ;
+  EQ::constants::StanceType arg1 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::constants::StanceType)jarg1; 
+  result = (char *)EQ::constants::GetStanceName(arg1);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ConvertStanceTypeToIndex(int jarg1) {
+  int jresult ;
+  EQ::constants::StanceType arg1 ;
+  int result;
+  
+  arg1 = (EQ::constants::StanceType)jarg1; 
+  result = (int)EQ::constants::ConvertStanceTypeToIndex(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetLanguageMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetLanguageMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetLanguageName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetLanguageName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetLDoNThemeMap() {
+  void * jresult ;
+  std::map< uint32,std::string > *result = 0 ;
+  
+  result = (std::map< uint32,std::string > *) &EQ::constants::GetLDoNThemeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetLDoNThemeName(unsigned int jarg1) {
+  const char * jresult ;
+  uint32 arg1 ;
+  std::string result;
+  
+  arg1 = (uint32)jarg1; 
+  result = EQ::constants::GetLDoNThemeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetFlyModeMap() {
+  void * jresult ;
+  std::map< int8,std::string > *result = 0 ;
+  
+  result = (std::map< int8,std::string > *) &EQ::constants::GetFlyModeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetFlyModeName(signed char jarg1) {
+  const char * jresult ;
+  int8 arg1 ;
+  std::string result;
+  
+  arg1 = (int8)jarg1; 
+  result = EQ::constants::GetFlyModeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetBodyTypeMap() {
+  void * jresult ;
+  std::map< bodyType,std::string > *result = 0 ;
+  
+  result = (std::map< bodyType,std::string > *) &EQ::constants::GetBodyTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetBodyTypeName(void * jarg1) {
+  const char * jresult ;
+  bodyType arg1 ;
+  bodyType *argp1 ;
+  std::string result;
+  
+  argp1 = (bodyType *)jarg1; 
+  if (!argp1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null bodyType", 0);
+    return 0;
+  }
+  arg1 = *argp1; 
+  result = EQ::constants::GetBodyTypeName(SWIG_STD_MOVE(arg1));
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetAccountStatusMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetAccountStatusMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetAccountStatusName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetAccountStatusName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetConsiderLevelMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetConsiderLevelMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetConsiderLevelName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetConsiderLevelName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetEnvironmentalDamageMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetEnvironmentalDamageMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetEnvironmentalDamageName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetEnvironmentalDamageName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetStuckBehaviorMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetStuckBehaviorMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetStuckBehaviorName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetStuckBehaviorName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetSpawnAnimationMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetSpawnAnimationMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetSpawnAnimationName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetSpawnAnimationName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetObjectTypeMap() {
+  void * jresult ;
+  std::map< int,std::string > *result = 0 ;
+  
+  result = (std::map< int,std::string > *) &EQ::constants::GetObjectTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetObjectTypeName(int jarg1) {
+  const char * jresult ;
+  int arg1 ;
+  std::string result;
+  
+  arg1 = (int)jarg1; 
+  result = EQ::constants::GetObjectTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetWeatherTypeMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetWeatherTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetWeatherTypeName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetWeatherTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetEmoteEventTypeMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetEmoteEventTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetEmoteEventTypeName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetEmoteEventTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetEmoteTypeMap() {
+  void * jresult ;
+  std::map< uint8,std::string > *result = 0 ;
+  
+  result = (std::map< uint8,std::string > *) &EQ::constants::GetEmoteTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetEmoteTypeName(unsigned char jarg1) {
+  const char * jresult ;
+  uint8 arg1 ;
+  std::string result;
+  
+  arg1 = (uint8)jarg1; 
+  result = EQ::constants::GetEmoteTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetAppearanceTypeMap() {
+  void * jresult ;
+  std::map< uint32,std::string > *result = 0 ;
+  
+  result = (std::map< uint32,std::string > *) &EQ::constants::GetAppearanceTypeMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetAppearanceTypeName(unsigned int jarg1) {
+  const char * jresult ;
+  uint32 arg1 ;
+  std::string result;
+  
+  arg1 = (uint32)jarg1; 
+  result = EQ::constants::GetAppearanceTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetSpecialAbilityMap() {
+  void * jresult ;
+  std::map< uint32,std::string > *result = 0 ;
+  
+  result = (std::map< uint32,std::string > *) &EQ::constants::GetSpecialAbilityMap();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetSpecialAbilityName(unsigned int jarg1) {
+  const char * jresult ;
+  uint32 arg1 ;
+  std::string result;
+  
+  arg1 = (uint32)jarg1; 
+  result = EQ::constants::GetSpecialAbilityName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STANCE_TYPE_FIRST_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(int)EQ::constants::STANCE_TYPE_FIRST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STANCE_TYPE_LAST_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(int)EQ::constants::STANCE_TYPE_LAST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STANCE_TYPE_COUNT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(int)EQ::constants::STANCE_TYPE_COUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_CategoryIDToCategoryName(int jarg1) {
+  char * jresult ;
+  EQ::bug::CategoryID arg1 ;
+  char *result = 0 ;
+  
+  arg1 = (EQ::bug::CategoryID)jarg1; 
+  result = (char *)EQ::bug::CategoryIDToCategoryName(arg1);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CategoryNameToCategoryID(char * jarg1) {
+  int jresult ;
+  char *arg1 = (char *) 0 ;
+  EQ::bug::CategoryID result;
+  
+  arg1 = (char *)jarg1; 
+  result = (EQ::bug::CategoryID)EQ::bug::CategoryNameToCategoryID((char const *)arg1);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_SUMMON_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_SUMMON;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_ENRAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_ENRAGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_RAMPAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_RAMPAGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_AREA_RAMPAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_AREA_RAMPAGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_FLURRY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_FLURRY;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_TRIPLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_TRIPLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_QUAD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_QUAD;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_INNATE_DW_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_INNATE_DW;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_BANE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_BANE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_MAGICAL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_MAGICAL;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_SPECATK_RANGED_ATK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)SPECATK_RANGED_ATK;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNSLOWABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNSLOWABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNMEZABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNMEZABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNCHARMABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNCHARMABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNSTUNABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNSTUNABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNSNAREABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNSNAREABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNFEARABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNFEARABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_UNDISPELLABLE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)UNDISPELLABLE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_MELEE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_MELEE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_MAGIC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_MAGIC;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_FLEEING_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_FLEEING;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_MELEE_EXCEPT_BANE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_MELEE_EXCEPT_BANE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_MELEE_NONMAGICAL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_MELEE_NONMAGICAL;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_AGGRO_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_AGGRO;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_AGGRO_ON_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_AGGRO_ON;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_CASTING_FROM_RANGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_CASTING_FROM_RANGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_FEIGN_DEATH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_FEIGN_DEATH;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_TAUNT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_TAUNT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NPC_TUNNELVISION_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)NPC_TUNNELVISION;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NPC_NO_BUFFHEAL_FRIENDS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)NPC_NO_BUFFHEAL_FRIENDS;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_PACIFY_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_PACIFY;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_LEASH_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)LEASH;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_TETHER_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)TETHER;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DESTRUCTIBLE_OBJECT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)DESTRUCTIBLE_OBJECT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NO_HARM_FROM_CLIENT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)NO_HARM_FROM_CLIENT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ALWAYS_FLEE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)ALWAYS_FLEE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_FLEE_PERCENT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)FLEE_PERCENT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ALLOW_BENEFICIAL_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)ALLOW_BENEFICIAL;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DISABLE_MELEE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)DISABLE_MELEE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NPC_CHASE_DISTANCE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)NPC_CHASE_DISTANCE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ALLOW_TO_TANK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)ALLOW_TO_TANK;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IGNORE_ROOT_AGGRO_RULES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IGNORE_ROOT_AGGRO_RULES;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_CASTING_RESIST_DIFF_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)CASTING_RESIST_DIFF;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_COUNTER_AVOID_DAMAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)COUNTER_AVOID_DAMAGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_PROX_AGGRO_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)PROX_AGGRO;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_RANGED_ATTACKS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_RANGED_ATTACKS;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_DAMAGE_CLIENT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_DAMAGE_CLIENT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_DAMAGE_NPC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_DAMAGE_NPC;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_AGGRO_CLIENT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_AGGRO_CLIENT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_AGGRO_NPC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_AGGRO_NPC;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MODIFY_AVOID_DAMAGE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)MODIFY_AVOID_DAMAGE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_FADING_MEMORIES_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_FADING_MEMORIES;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_OPEN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_OPEN;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_ASSASSINATE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_ASSASSINATE;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_HEADSHOT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_HEADSHOT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_AGGRO_BOT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_AGGRO_BOT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_IMMUNE_DAMAGE_BOT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)IMMUNE_DAMAGE_BOT;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_MAX_SPECIAL_ATTACK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)MAX_SPECIAL_ATTACK;
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_WisMaxMana_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::WisMaxMana;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_WisManaRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::WisManaRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_WisHealAmt_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::WisHealAmt;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_IntMaxMana_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::IntMaxMana;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_IntManaRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::IntManaRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_IntSpellDmg_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::IntSpellDmg;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StrMeleeDamage_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StrMeleeDamage;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StrShieldAC_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StrShieldAC;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StrMaxEndurance_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StrMaxEndurance;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StrEnduranceRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StrEnduranceRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StaMaxHP_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StaMaxHP;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StaHPRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StaHPRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StaMaxEndurance_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StaMaxEndurance;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_StaEnduranceRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::StaEnduranceRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_AgiAvoidance_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::AgiAvoidance;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_AgiMaxEndurance_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::AgiMaxEndurance;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_AgiEnduranceRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::AgiEnduranceRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DexRangedDamage_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::DexRangedDamage;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DexMaxEndurance_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::DexMaxEndurance;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DexEnduranceRegen_get() {
+  const char * jresult ;
+  std::string *result = 0 ;
+  
+  result = (std::string *) &HeroicBonusBucket::DexEnduranceRegen;
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Die_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Die;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_WhoLevel_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::WhoLevel;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MaxHealth_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::MaxHealth;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Invisibility_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Invisibility;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_PVP_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::PVP;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Light_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Light;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Animation_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Animation;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Sneak_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Sneak;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SpawnID_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::SpawnID;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Health_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Health;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Linkdead_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Linkdead;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_FlyMode_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::FlyMode;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GM_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GM;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Anonymous_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Anonymous;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GuildID_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GuildID;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GuildRank_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GuildRank;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AFK_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AFK;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Pet_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Pet;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Summoned_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Summoned;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Split_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Split;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Size_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::Size;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_SetType_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::SetType;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_NPCName_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::NPCName;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AARank_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AARank;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_CancelSneakHide_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::CancelSneakHide;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AreaHealthRegen_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AreaHealthRegen;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AreaManaRegen_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AreaManaRegen;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AreaEnduranceRegen_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AreaEnduranceRegen;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_FreezeBeneficialBuffs_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::FreezeBeneficialBuffs;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_NPCTintIndex_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::NPCTintIndex;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GroupAutoConsent_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GroupAutoConsent;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RaidAutoConsent_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::RaidAutoConsent;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GuildAutoConsent_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GuildAutoConsent;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ShowHelm_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::ShowHelm;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DamageState_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::DamageState;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQPlayers_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::EQPlayers;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_FindBits_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::FindBits;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_TextureType_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::TextureType;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_FacePick_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::FacePick;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_AntiCheat_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::AntiCheat;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_GuildShow_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::GuildShow;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_OfflineMode_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AppearanceType::OfflineMode;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Standing_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Standing;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Freeze_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Freeze;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Looting_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Looting;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Sitting_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Sitting;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Crouching_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Crouching;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Lying_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)Animation::Lying;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_RECAST_TYPE_UNLINKED_ITEM_get() {
+  short jresult ;
+  int16 result;
+  
+  result = (int16)RECAST_TYPE_UNLINKED_ITEM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_White_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::White;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DimGray_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DimGray;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Default_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Default;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Green_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Green;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BrightBlue_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::BrightBlue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LightBlue_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::LightBlue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Magenta_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Magenta;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Gray_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Gray;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LightGray_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::LightGray;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NPCQuestSay_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::NPCQuestSay;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DarkGray_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DarkGray;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Red_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Red;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Lime_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Lime;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Yellow_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Yellow;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Blue_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Blue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LightNavy_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::LightNavy;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Cyan_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Cyan;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Black_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Black;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Say_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Say;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Tell_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Tell;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Group_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Group;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Guild_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Guild;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OOC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OOC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Auction_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Auction;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Shout_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Shout;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Emote_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Emote;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Spells_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Spells;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_YouHitOther_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::YouHitOther;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherHitYou_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherHitYou;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_YouMissOther_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::YouMissOther;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherMissYou_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherMissYou;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Broadcasts_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Broadcasts;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Skills_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Skills;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Disciplines_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Disciplines;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Unused1_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Unused1;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DefaultText_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DefaultText;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Unused2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Unused2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MerchantOffer_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::MerchantOffer;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MerchantExchange_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::MerchantExchange;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_YourDeath_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::YourDeath;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherDeath_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherDeath;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherHitOther_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherHitOther;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherMissOther_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherMissOther;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Who_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Who;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_YellForHelp_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::YellForHelp;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NonMelee_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::NonMelee;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SpellWornOff_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::SpellWornOff;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MoneySplit_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::MoneySplit;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Loot_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Loot;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DiceRoll_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DiceRoll;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OtherSpells_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::OtherSpells;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SpellFailure_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::SpellFailure;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ChatChannel_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::ChatChannel;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat1_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat1;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat3_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat3;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat4_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat4;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat5_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat5;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat6_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat6;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat7_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat7;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat8_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat8;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat9_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat9;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Chat10_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Chat10;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MeleeCrit_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::MeleeCrit;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SpellCrit_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::SpellCrit;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TooFarAway_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::TooFarAway;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NPCRampage_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::NPCRampage;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NPCFlurry_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::NPCFlurry;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NPCEnrage_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::NPCEnrage;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoSay_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoSay;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoTell_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoTell;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoGroup_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoGroup;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoGuild_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoGuild;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoOOC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoOOC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoAuction_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoAuction;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoShout_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoShout;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoEmote_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoEmote;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat1_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat1;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat3_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat3;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat4_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat4;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat5_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat5;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat6_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat6;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat7_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat7;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat8_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat8;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat9_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat9;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EchoChat10_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::EchoChat10;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DotDamage_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DotDamage;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ItemLink_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::ItemLink;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RaidSay_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::RaidSay;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MyPet_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::MyPet;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DamageShield_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::DamageShield;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LeaderShip_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::LeaderShip;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PetFlurry_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::PetFlurry;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PetCritical_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::PetCritical;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FocusEffect_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::FocusEffect;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Experience_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Experience;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_System_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::System;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PetSpell_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::PetSpell;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PetResponse_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::PetResponse;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ItemSpeech_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::ItemSpeech;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_StrikeThrough_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::StrikeThrough;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Stun_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)(uint16)Chat::Stun;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QEYNOS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QEYNOS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QEYNOS2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QEYNOS2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QRG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QRG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QEYTOQRG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QEYTOQRG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HIGHPASS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HIGHPASS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HIGHKEEP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HIGHKEEP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREPORTN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREPORTN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREPORTW_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREPORTW;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREPORTE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREPORTE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUNNYEYE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUNNYEYE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QEY2HH1_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QEY2HH1;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NORTHKARANA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NORTHKARANA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOUTHKARANA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOUTHKARANA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTKARANA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTKARANA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BEHOLDER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BEHOLDER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BLACKBURROW_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BLACKBURROW;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PAW_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PAW;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RIVERVALE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RIVERVALE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KITHICOR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KITHICOR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_COMMONS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::COMMONS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ECOMMONS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ECOMMONS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ERUDNINT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ERUDNINT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ERUDNEXT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ERUDNEXT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEKTULOS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEKTULOS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CSHOME_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CSHOME;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LAVASTORM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LAVASTORM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEKTROPOS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEKTROPOS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HALAS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HALAS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EVERFROST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EVERFROST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLDUNGA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLDUNGA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLDUNGB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLDUNGB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MISTY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MISTY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NRO_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NRO;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SRO_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SRO;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BEFALLEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BEFALLEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OASIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OASIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TOX_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TOX;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HOLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HOLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NERIAKA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NERIAKA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NERIAKB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NERIAKB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NERIAKC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NERIAKC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NERIAKD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NERIAKD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NAJENA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NAJENA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QCAT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QCAT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_INNOTHULE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::INNOTHULE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FEERROTT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FEERROTT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CAZICTHULE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CAZICTHULE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OGGOK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OGGOK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RATHEMTN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RATHEMTN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LAKERATHE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LAKERATHE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GROBB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GROBB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_AVIAK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::AVIAK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GFAYDARK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GFAYDARK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_AKANON_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::AKANON;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STEAMFONT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STEAMFONT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LFAYDARK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LFAYDARK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRUSHBONE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRUSHBONE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MISTMOORE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MISTMOORE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KALADIMA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KALADIMA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FELWITHEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FELWITHEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FELWITHEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FELWITHEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_UNREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::UNREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KEDGE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KEDGE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKTOP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKTOP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKBOTTOM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKBOTTOM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KALADIMB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KALADIMB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BUTCHER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BUTCHER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OOT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OOT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CAULDRON_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CAULDRON;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_AIRPLANE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::AIRPLANE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FEARPLANE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FEARPLANE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PERMAFROST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PERMAFROST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KERRARIDGE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KERRARIDGE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PAINEEL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PAINEEL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HATEPLANE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HATEPLANE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARENA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARENA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FIELDOFBONE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FIELDOFBONE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WARSLIKSWOOD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WARSLIKSWOOD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLTEMPLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLTEMPLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DROGA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DROGA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CABWEST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CABWEST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SWAMPOFNOHOPE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SWAMPOFNOHOPE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FIRIONA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FIRIONA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LAKEOFILLOMEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LAKEOFILLOMEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DREADLANDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DREADLANDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BURNINGWOOD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BURNINGWOOD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KAESORA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KAESORA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SEBILIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SEBILIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CITYMIST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CITYMIST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SKYFIRE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SKYFIRE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FRONTIERMTNS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FRONTIERMTNS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OVERTHERE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OVERTHERE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EMERALDJUNGLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EMERALDJUNGLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TRAKANON_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TRAKANON;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TIMOROUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TIMOROUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KURN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KURN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ERUDSXING_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ERUDSXING;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STONEBRUNT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STONEBRUNT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WARRENS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WARRENS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KARNOR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KARNOR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHARDOK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHARDOK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DALNIR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DALNIR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHARASIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHARASIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CABEAST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CABEAST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NURGA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NURGA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VEESHAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VEESHAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VEKSAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VEKSAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ICECLAD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ICECLAD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FROZENSHADOW_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FROZENSHADOW;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VELKETOR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VELKETOR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KAEL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KAEL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SKYSHRINE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SKYSHRINE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THURGADINA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THURGADINA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTWASTES_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTWASTES;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_COBALTSCAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::COBALTSCAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GREATDIVIDE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GREATDIVIDE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WAKENING_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WAKENING;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTWASTES_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTWASTES;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRYSTAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRYSTAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NECROPOLIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NECROPOLIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TEMPLEVEESHAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TEMPLEVEESHAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SIRENS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SIRENS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MISCHIEFPLANE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MISCHIEFPLANE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GROWTHPLANE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GROWTHPLANE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SLEEPER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SLEEPER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THURGADINB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THURGADINB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ERUDSXING2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ERUDSXING2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHADOWHAVEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHADOWHAVEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BAZAAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BAZAAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEXUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEXUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ECHO__get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ECHO_;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ACRYLIA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ACRYLIA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHARVAHL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHARVAHL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PALUDAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PALUDAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FUNGUSGROVE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FUNGUSGROVE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VEXTHAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VEXTHAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SSERU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SSERU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KATTA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KATTA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NETHERBIAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NETHERBIAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SSRATEMPLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SSRATEMPLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GRIEGSEND_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GRIEGSEND;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEDEEP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEDEEP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHADEWEAVER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHADEWEAVER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HOLLOWSHADE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HOLLOWSHADE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GRIMLING_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GRIMLING;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MSERU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MSERU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LETALIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LETALIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TWILIGHT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TWILIGHT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEGREY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEGREY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TENEBROUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TENEBROUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MAIDEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MAIDEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DAWNSHROUD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DAWNSHROUD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SCARLET_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SCARLET;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_UMBRAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::UMBRAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_AKHEVA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::AKHEVA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARENA2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARENA2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_JAGGEDPINE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::JAGGEDPINE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEDARIA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEDARIA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TUTORIAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TUTORIAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LOAD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LOAD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LOAD2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LOAD2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HATEPLANEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HATEPLANEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHADOWREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHADOWREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TUTORIALA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TUTORIALA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TUTORIALB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TUTORIALB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CLZ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CLZ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CODECAY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CODECAY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POJUSTICE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POJUSTICE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POKNOWLEDGE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POKNOWLEDGE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POTRANQUILITY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POTRANQUILITY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PONIGHTMARE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PONIGHTMARE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PODISEASE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PODISEASE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POINNOVATION_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POINNOVATION;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POTORMENT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POTORMENT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POVALOR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POVALOR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BOTHUNDER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BOTHUNDER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POSTORMS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POSTORMS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HOHONORA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HOHONORA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLROTOWER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLROTOWER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POWAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POWAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POTACTICS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POTACTICS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POAIR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POAIR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POWATER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POWATER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POFIRE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POFIRE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POEARTHA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POEARTHA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POTIMEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POTIMEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HOHONORB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HOHONORB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NIGHTMAREB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NIGHTMAREB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POEARTHB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POEARTHB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_POTIMEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::POTIMEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUNTHAK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUNTHAK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DULAK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DULAK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TORGIRAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TORGIRAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NADOX_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NADOX;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HATESFURY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HATESFURY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUKH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUKH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUJJ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUJJ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKJ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKJ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRJ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRJ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MMCJ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MMCJ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHARDOKB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHARDOKB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLDUNGC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLDUNGC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ABYSMAL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ABYSMAL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NATIMBI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NATIMBI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QINIMI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QINIMI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RIWWI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RIWWI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BARINDU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BARINDU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FERUBI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FERUBI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SNPOOL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SNPOOL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SNLAIR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SNLAIR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SNPLANT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SNPLANT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SNCREMATORY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SNCREMATORY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TIPT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TIPT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VXED_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VXED;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_YXTTA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::YXTTA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_UQUA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::UQUA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KODTAZ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KODTAZ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_IKKINZ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::IKKINZ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QVIC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QVIC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_INKTUTA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::INKTUTA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TXEVU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TXEVU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TACVI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TACVI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_QVICB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::QVICB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WALLOFSLAUGHTER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WALLOFSLAUGHTER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BLOODFIELDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BLOODFIELDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKSSCAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKSSCAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CAUSEWAY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CAUSEWAY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAMBERSF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAMBERSF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PROVINGGROUNDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PROVINGGROUNDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ANGUISH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ANGUISH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKHOLLOWSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKHOLLOWSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKHOLLOWSB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKHOLLOWSB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKHOLLOWSC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKHOLLOWSC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKCATACOMBSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKCATACOMBSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKCATACOMBSB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKCATACOMBSB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKCATACOMBSC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKCATACOMBSC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKSEWERSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKSEWERSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKSEWERSB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKSEWERSB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIKSEWERSC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIKSEWERSC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RIFTSEEKERS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RIFTSEEKERS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HARBINGERS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HARBINGERS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRANIK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRANIK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BROODLANDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BROODLANDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STILLMOONA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STILLMOONA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STILLMOONB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STILLMOONB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THUNDERCREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THUNDERCREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DELVEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DELVEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DELVEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DELVEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THENEST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THENEST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUILDLOBBY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUILDLOBBY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUILDHALL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUILDHALL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BARTER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BARTER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ILLSALIN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ILLSALIN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ILLSALINA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ILLSALINA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ILLSALINB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ILLSALINB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ILLSALINC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ILLSALINC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DREADSPIRE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DREADSPIRE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRACHNIDHIVE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRACHNIDHIVE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRACHNIDHIVEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRACHNIDHIVEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRACHNIDHIVEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRACHNIDHIVEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRACHNIDHIVEC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRACHNIDHIVEC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTKORLACH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTKORLACH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTKORLACHA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTKORLACHA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTKORLACHB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTKORLACHB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTKORLACHC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTKORLACHC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTKORLACH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTKORLACH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTKORLACHA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTKORLACHA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHADOWSPINE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHADOWSPINE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CORATHUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CORATHUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CORATHUSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CORATHUSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CORATHUSB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CORATHUSB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEKTULOSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEKTULOSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARCSTONE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARCSTONE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RELIC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RELIC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SKYLANCE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SKYLANCE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DEVASTATION_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DEVASTATION;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DEVASTATIONA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DEVASTATIONA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RAGE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RAGE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RAGEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RAGEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKISHRUINS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKISHRUINS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TAKISHRUINSA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TAKISHRUINSA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ELDDAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ELDDAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ELDDARA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ELDDARA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEATER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEATER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEATERA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEATERA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTEAST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTEAST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTWEST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTWEST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTSEWERS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTSEWERS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTACADEMY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTACADEMY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTTEMPLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTTEMPLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTMILITIA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTMILITIA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTARENA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTARENA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTCITYHALL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTCITYHALL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTTHEATER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTTHEATER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FREEPORTHALL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FREEPORTHALL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NORTHRO_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NORTHRO;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOUTHRO_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOUTHRO;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRESCENT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRESCENT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MOORS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MOORS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STONEHIVE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STONEHIVE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MESA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MESA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ROOST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ROOST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STEPPES_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STEPPES;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ICEFALL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ICEFALL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VALDEHOLM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VALDEHOLM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FROSTCRYPT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FROSTCRYPT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SUNDEROCK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SUNDEROCK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_VERGALID_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::VERGALID;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DIREWIND_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DIREWIND;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ASHENGATE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ASHENGATE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HIGHPASSHOLD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HIGHPASSHOLD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_COMMONLANDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::COMMONLANDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OCEANOFTEARS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OCEANOFTEARS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KITHFOREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KITHFOREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BEFALLENB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BEFALLENB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HIGHPASSKEEP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HIGHPASSKEEP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_INNOTHULEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::INNOTHULEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TOXXULIA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TOXXULIA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MISTYTHICKET_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MISTYTHICKET;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KATTACASTRUM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KATTACASTRUM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THALASSIUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THALASSIUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ATIIKI_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ATIIKI;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ZHISZA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ZHISZA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SILYSSAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SILYSSAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOLTERIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOLTERIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BARREN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BARREN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BURIEDSEA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BURIEDSEA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_JARDELSHOOK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::JARDELSHOOK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MONKEYROCK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MONKEYROCK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SUNCREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SUNCREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DEADBONE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DEADBONE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BLACKSAIL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BLACKSAIL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MAIDENSGRAVE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MAIDENSGRAVE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_REDFEATHER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::REDFEATHER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPMVP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPMVP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPMVU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPMVU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPPVU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPPVU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPUVU_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPUVU;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPMVM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPMVM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MECHANOTUS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MECHANOTUS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MANSION_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MANSION;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STEAMFACTORY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STEAMFACTORY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIPWORKSHOP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHIPWORKSHOP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GYROSPIREB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GYROSPIREB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GYROSPIREZ_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GYROSPIREZ;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRAGONSCALE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRAGONSCALE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LOPINGPLAINS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LOPINGPLAINS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HILLSOFSHADE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HILLSOFSHADE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BLOODMOON_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BLOODMOON;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRYSTALLOS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRYSTALLOS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GUARDIAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GUARDIAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STEAMFONTMTS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STEAMFONTMTS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRYPTOFSHADE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRYPTOFSHADE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRAGONSCALEB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRAGONSCALEB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDFIELDOFBONE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDFIELDOFBONE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDKAESORAA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDKAESORAA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDKAESORAB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDKAESORAB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDKURN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDKURN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDKITHICOR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDKITHICOR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDCOMMONS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDCOMMONS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDHIGHPASS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDHIGHPASS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDC_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDC;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDF_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDF;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THEVOIDG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THEVOIDG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OCEANGREENHILLS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OCEANGREENHILLS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OCEANGREENVILLAGE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OCEANGREENVILLAGE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDBLACKBURROW_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDBLACKBURROW;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BERTOXTEMPLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BERTOXTEMPLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DISCORD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DISCORD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DISCORDTOWER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DISCORDTOWER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDBLOODFIELD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDBLOODFIELD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PRECIPICEOFWAR_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PRECIPICEOFWAR;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_OLDDRANIK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::OLDDRANIK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_TOSKIRAKK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::TOSKIRAKK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KORASCIAN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KORASCIAN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RATHECHAMBER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RATHECHAMBER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BRELLSREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BRELLSREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FUNGALFOREST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FUNGALFOREST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_UNDERQUARRY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::UNDERQUARRY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_COOLINGCHAMBER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::COOLINGCHAMBER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHININGCITY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHININGCITY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARTHICREX_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARTHICREX;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FOUNDATION_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FOUNDATION;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_LICHENCREEP_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::LICHENCREEP;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PELLUCID_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PELLUCID;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_STONESNAKE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::STONESNAKE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BRELLSTEMPLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BRELLSTEMPLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CONVORTEUM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CONVORTEUM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BRELLSARENA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BRELLSARENA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WEDDINGCHAPEL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WEDDINGCHAPEL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WEDDINGCHAPELDARK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WEDDINGCHAPELDARK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DRAGONCRYPT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::DRAGONCRYPT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FEERROTT2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FEERROTT2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THULEHOUSE1_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THULEHOUSE1;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THULEHOUSE2_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THULEHOUSE2;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HOUSEGARDEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::HOUSEGARDEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THULELIBRARY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THULELIBRARY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WELL_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WELL;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FALLEN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FALLEN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MORELLCASTLE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MORELLCASTLE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SOMNIUM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SOMNIUM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ALKABORMARE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ALKABORMARE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_MIRAGULMARE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::MIRAGULMARE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_THULEDREAM_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::THULEDREAM;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_NEIGHBORHOOD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::NEIGHBORHOOD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARGATH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARGATH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARELIS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARELIS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SARITHCITY_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SARITHCITY;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RUBAK_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RUBAK;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BEASTDOMAIN_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BEASTDOMAIN;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_RESPLENDENT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::RESPLENDENT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_PILLARSALRA_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::PILLARSALRA;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WINDSONG_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WINDSONG;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CITYOFBRONZE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CITYOFBRONZE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SEPULCHER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SEPULCHER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTSEPULCHER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTSEPULCHER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_WESTSEPULCHER_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::WESTSEPULCHER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHARDSLANDING_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::SHARDSLANDING;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_XORBB_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::XORBB;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_KAELSHARD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::KAELSHARD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EASTWASTESSHARD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EASTWASTESSHARD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CRYSTALSHARD_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CRYSTALSHARD;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_BREEDINGGROUNDS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::BREEDINGGROUNDS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EVILTREE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::EVILTREE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_GRELLETH_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::GRELLETH;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_CHAPTERHOUSE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::CHAPTERHOUSE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_ARTTEST_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::ARTTEST;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_FHALLS_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::FHALLS;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_APPRENTICE_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)Zones::APPRENTICE;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_CommonTongue_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::CommonTongue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Barbarian_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Barbarian;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Erudian_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Erudian;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Elvish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Elvish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DarkElvish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::DarkElvish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Dwarvish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Dwarvish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Troll_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Troll;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Ogre_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Ogre;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Gnomish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Gnomish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Halfling_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Halfling;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ThievesCant_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::ThievesCant;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_OldErudian_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::OldErudian;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ElderElvish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::ElderElvish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Froglok_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Froglok;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Goblin_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Goblin;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Gnoll_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Gnoll;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_CombineTongue_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::CombineTongue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ElderTeirDal_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::ElderTeirDal;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Lizardman_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Lizardman;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Orcish_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Orcish;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Faerie_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Faerie;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Dragon_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Dragon;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ElderDragon_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::ElderDragon;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DarkSpeech_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::DarkSpeech;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_VahShir_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::VahShir;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Alaran_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Alaran;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Hadal_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Hadal;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Unknown27_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::Unknown27;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_MaxValue_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)Language::MaxValue;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Current_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)PetInfoType::Current;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Suspended_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)PetInfoType::Suspended;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_None_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)BuffEffectType::None;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Buff_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)BuffEffectType::Buff;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_InverseBuff_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)BuffEffectType::InverseBuff;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Update_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AlternateCurrencyMode::Update;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Populate_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)AlternateCurrencyMode::Populate;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_STR_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(0);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_STA_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_AGI_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_DEX_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_INT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_WIS_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_CHA_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_MAGIC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(7);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_COLD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(8);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_FIRE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(9);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_POISON_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(10);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_DISEASE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(11);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_MANA_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(12);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_HP_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(13);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_AC_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(14);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_ENDURANCE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(15);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_ATTACK_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(16);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_HP_REGEN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(17);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_MANA_REGEN_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(18);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_HASTE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(19);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_STAT_DAMAGE_SHIELD_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(20);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DamageTypeSomething_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)DamageTypeSomething;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DamageTypeFalling_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)DamageTypeFalling;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DamageTypeSpell_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)DamageTypeSpell;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DamageTypeUnknown_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)DamageTypeUnknown;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_SkillDamageTypes_get() {
+  void * jresult ;
+  uint8 *result = 0 ;
+  
+  result = (uint8 *)(uint8 *)SkillDamageTypes;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_INVALID_INDEX_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(-1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_MAX_SPELL_DB_ID_VAL_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)(uint32)MAX_SPELL_DB_ID_VAL;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DB_FACTION_GEM_CHOPPERS_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)(uint32)DB_FACTION_GEM_CHOPPERS;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DB_FACTION_HERETICS_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)(uint32)DB_FACTION_HERETICS;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DB_FACTION_KING_AKANON_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)(uint32)DB_FACTION_KING_AKANON;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_ZoneWide_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)ZoneBlockedSpellTypes::ZoneWide;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Region_get() {
+  unsigned char jresult ;
+  uint8 result;
+  
+  result = (uint8)(uint8)ZoneBlockedSpellTypes::Region;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ALT_CURRENCY_ID_RADIANT_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_ALT_CURRENCY_ID_EBON_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_LeaderOnly_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)RaidLootType::LeaderOnly;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_LeaderAndGroupLeadersOnly_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)RaidLootType::LeaderAndGroupLeadersOnly;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_LeaderSelected_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)RaidLootType::LeaderSelected;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EntireRaid_get() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)RaidLootType::EntireRaid;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HealthOfTargetsTarget_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)LeadershipAbilitySlot::HealthOfTargetsTarget;
+  jresult = result; 
+  return jresult;
 }
 
 
@@ -8838,6 +17395,32 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_StatBonuses_FocusEffectsWorn_get(void * jar
 }
 
 
+SWIGEXPORT void SWIGSTDCALL CSharp_StatBonuses_FocusEffectsWornWithLimits_set(void * jarg1, void * jarg2) {
+  StatBonuses *arg1 = (StatBonuses *) 0 ;
+  int32 *arg2 = (int32 *) (int32 *)0 ;
+  
+  arg1 = (StatBonuses *)jarg1; 
+  arg2 = (int32 *)jarg2; 
+  {
+    size_t ii;
+    int32 *b = (int32 *) arg1->FocusEffectsWornWithLimits;
+    for (ii = 0; ii < (size_t)focusFcHealAmtCrit+1; ii++) b[ii] = *((int32 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_StatBonuses_FocusEffectsWornWithLimits_get(void * jarg1) {
+  void * jresult ;
+  StatBonuses *arg1 = (StatBonuses *) 0 ;
+  int32 *result = 0 ;
+  
+  arg1 = (StatBonuses *)jarg1; 
+  result = (int32 *)(int32 *) ((arg1)->FocusEffectsWornWithLimits);
+  jresult = result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_StatBonuses_NegateEffects_set(void * jarg1, unsigned int jarg2) {
   StatBonuses *arg1 = (StatBonuses *) 0 ;
   bool arg2 ;
@@ -10379,6 +18962,32 @@ SWIGEXPORT unsigned char SWIGSTDCALL CSharp_StatBonuses_invisibility_verse_anima
   
   arg1 = (StatBonuses *)jarg1; 
   result = (uint8) ((arg1)->invisibility_verse_animal);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_StatBonuses_ShieldTargetSpa_set(void * jarg1, void * jarg2) {
+  StatBonuses *arg1 = (StatBonuses *) 0 ;
+  int32 *arg2 = (int32 *) (int32 *)0 ;
+  
+  arg1 = (StatBonuses *)jarg1; 
+  arg2 = (int32 *)jarg2; 
+  {
+    size_t ii;
+    int32 *b = (int32 *) arg1->ShieldTargetSpa;
+    for (ii = 0; ii < (size_t)2; ii++) b[ii] = *((int32 *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_StatBonuses_ShieldTargetSpa_get(void * jarg1) {
+  void * jresult ;
+  StatBonuses *arg1 = (StatBonuses *) 0 ;
+  int32 *result = 0 ;
+  
+  arg1 = (StatBonuses *)jarg1; 
+  result = (int32 *)(int32 *) ((arg1)->ShieldTargetSpa);
   jresult = result; 
   return jresult;
 }
@@ -12827,6 +21436,26 @@ SWIGEXPORT unsigned short SWIGSTDCALL CSharp_COMBAT_PROC_REUSE_TIMER_get() {
   uint16 result;
   
   result = (uint16)SBIndex::COMBAT_PROC_REUSE_TIMER;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIELD_TARGET_MITIGATION_PERCENT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)SBIndex::SHIELD_TARGET_MITIGATION_PERCENT;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_SHIELD_TARGET_BUFFSLOT_get() {
+  unsigned short jresult ;
+  uint16 result;
+  
+  result = (uint16)SBIndex::SHIELD_TARGET_BUFFSLOT;
   jresult = result; 
   return jresult;
 }
@@ -17838,25 +26467,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DescribeAggro(void * jarg1, void *
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4) {
   void * jresult ;
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
-  EntityFilterType *argp4 ;
   std::vector< Mob * > result;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (arg1)->GetFilteredEntityList(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EntityFilterType)jarg4; 
+  result = (arg1)->GetFilteredEntityList(arg2,arg3,arg4);
   jresult = new std::vector< Mob * >(result); 
   return jresult;
 }
@@ -17892,49 +26515,37 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_EntityList_GetFilteredEntityList__SWIG_2(vo
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DamageArea__SWIG_0(void * jarg1, void * jarg2, long long jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DamageArea__SWIG_0(void * jarg1, void * jarg2, long long jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   int64 arg3 ;
   uint32 arg4 ;
   EntityFilterType arg5 ;
   bool arg6 ;
-  EntityFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (int64)jarg3; 
   arg4 = (uint32)jarg4; 
-  argp5 = (EntityFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (EntityFilterType)jarg5; 
   arg6 = jarg6 ? true : false; 
-  (arg1)->DamageArea(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6);
+  (arg1)->DamageArea(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DamageArea__SWIG_1(void * jarg1, void * jarg2, long long jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_DamageArea__SWIG_1(void * jarg1, void * jarg2, long long jarg3, unsigned int jarg4, int jarg5) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   int64 arg3 ;
   uint32 arg4 ;
   EntityFilterType arg5 ;
-  EntityFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (int64)jarg3; 
   arg4 = (uint32)jarg4; 
-  argp5 = (EntityFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->DamageArea(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (EntityFilterType)jarg5; 
+  (arg1)->DamageArea(arg2,arg3,arg4,arg5);
 }
 
 
@@ -18073,7 +26684,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_MessageClose(void * jarg1, void * 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageClose(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, char * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageClose(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, char * jarg7) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18082,21 +26693,15 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageClose(void * jarg1,
   eqFilterType arg6 ;
   char *arg7 = (char *) 0 ;
   void *arg8 = 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (char *)jarg7; 
-  (arg1)->FilteredMessageClose(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),(char const *)arg7,arg8);
+  (arg1)->FilteredMessageClose(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,arg8);
 }
 
 
@@ -18350,7 +26955,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_MessageString__SWIG_9(void * jarg1
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18366,18 +26971,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_0(void
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
   char *arg15 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
@@ -18388,11 +26987,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_0(void
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
   arg15 = (char *)jarg15; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18407,18 +27006,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_1(void
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
@@ -18428,11 +27021,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_1(void
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18446,18 +27039,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_2(void
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
@@ -18466,11 +27053,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_2(void
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18483,18 +27070,12 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_3(void
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
@@ -18502,11 +27083,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_3(void
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18518,29 +27099,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_4(void
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18551,28 +27126,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_5(void
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8, char * jarg9) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18582,27 +27151,21 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_6(void
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7, char * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7, char * jarg8) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18611,26 +27174,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_7(void
   uint32 arg6 ;
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7,(char const *)arg8);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7,(char const *)arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6, char * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6, char * jarg7) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18638,45 +27195,33 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_8(void
   eqFilterType arg5 ;
   uint32 arg6 ;
   char *arg7 = (char *) 0 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (char *)jarg7; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,(char const *)arg7);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6,(char const *)arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, int jarg5, unsigned int jarg6) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
   uint32 arg4 ;
   eqFilterType arg5 ;
   uint32 arg6 ;
-  eqFilterType *argp5 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (uint32)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (eqFilterType)jarg5; 
   arg6 = (uint32)jarg6; 
-  (arg1)->FilteredMessageString(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,arg6);
 }
 
 
@@ -18950,7 +27495,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_MessageCloseString__SWIG_9(void * 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15, char * jarg16, char * jarg17) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15, char * jarg16, char * jarg17) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -18968,19 +27513,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_0
   char *arg15 = (char *) 0 ;
   char *arg16 = (char *) 0 ;
   char *arg17 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
@@ -18992,11 +27531,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_0
   arg15 = (char *)jarg15; 
   arg16 = (char *)jarg16; 
   arg17 = (char *)jarg17; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15,(char const *)arg16,(char const *)arg17);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15,(char const *)arg16,(char const *)arg17);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15, char * jarg16) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15, char * jarg16) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19013,19 +27552,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_1
   char *arg14 = (char *) 0 ;
   char *arg15 = (char *) 0 ;
   char *arg16 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
@@ -19036,11 +27569,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_1
   arg14 = (char *)jarg14; 
   arg15 = (char *)jarg15; 
   arg16 = (char *)jarg16; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15,(char const *)arg16);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15,(char const *)arg16);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14, char * jarg15) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19056,19 +27589,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_2
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
   char *arg15 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
@@ -19078,11 +27605,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_2
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
   arg15 = (char *)jarg15; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14,(char const *)arg15);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19097,19 +27624,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_3
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
@@ -19118,11 +27639,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_3
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19136,19 +27657,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_4
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
@@ -19156,11 +27671,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_4
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19173,30 +27688,24 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_5
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10, char * jarg11) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19208,29 +27717,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_6
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9, char * jarg10) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19241,28 +27744,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_7
   Mob *arg8 = (Mob *) 0 ;
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9,(char const *)arg10);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9,(char const *)arg10);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8, char * jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8, char * jarg9) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19272,27 +27769,21 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_8
   uint32 arg7 ;
   Mob *arg8 = (Mob *) 0 ;
   char *arg9 = (char *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
   arg9 = (char *)jarg9; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,(char const *)arg9);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8,(char const *)arg9);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7, void * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7, void * jarg8) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19301,26 +27792,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_9
   eqFilterType arg6 ;
   uint32 arg7 ;
   Mob *arg8 = (Mob *) 0 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (Mob *)jarg8; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_10(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, void * jarg6, unsigned int jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_10(void * jarg1, void * jarg2, unsigned int jarg3, float jarg4, unsigned int jarg5, int jarg6, unsigned int jarg7) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
@@ -19328,21 +27813,15 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_FilteredMessageCloseString__SWIG_1
   uint32 arg5 ;
   eqFilterType arg6 ;
   uint32 arg7 ;
-  eqFilterType *argp6 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (float)jarg4; 
   arg5 = (uint32)jarg5; 
-  argp6 = (eqFilterType *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (eqFilterType)jarg6; 
   arg7 = (uint32)jarg7; 
-  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7);
+  (arg1)->FilteredMessageCloseString(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
 
@@ -19682,7 +28161,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_ReplaceWithTarget(void * jarg1, vo
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_QueueCloseClients__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, float jarg5, void * jarg6, unsigned int jarg7, void * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_QueueCloseClients__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, float jarg5, void * jarg6, unsigned int jarg7, int jarg8) {
   EntityList *arg1 = (EntityList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   EQApplicationPacket *arg3 = (EQApplicationPacket *) 0 ;
@@ -19691,7 +28170,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_QueueCloseClients__SWIG_0(void * j
   Mob *arg6 = (Mob *) 0 ;
   bool arg7 ;
   eqFilterType arg8 ;
-  eqFilterType *argp8 ;
   
   arg1 = (EntityList *)jarg1; 
   arg2 = (Mob *)jarg2; 
@@ -19700,13 +28178,8 @@ SWIGEXPORT void SWIGSTDCALL CSharp_EntityList_QueueCloseClients__SWIG_0(void * j
   arg5 = (float)jarg5; 
   arg6 = (Mob *)jarg6; 
   arg7 = jarg7 ? true : false; 
-  argp8 = (eqFilterType *)jarg8; 
-  if (!argp8) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg8 = *argp8; 
-  (arg1)->QueueCloseClients(arg2,(EQApplicationPacket const *)arg3,arg4,arg5,arg6,arg7,SWIG_STD_MOVE(arg8));
+  arg8 = (eqFilterType)jarg8; 
+  (arg1)->QueueCloseClients(arg2,(EQApplicationPacket const *)arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
@@ -24998,25 +33471,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ChangeSize__SWIG_1(void * jarg1, float ja
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoAnim__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoAnim__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5) {
   Mob *arg1 = (Mob *) 0 ;
   int arg2 ;
   int arg3 ;
   bool arg4 ;
   eqFilterType arg5 ;
-  eqFilterType *argp5 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = jarg4 ? true : false; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->DoAnim(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (eqFilterType)jarg5; 
+  (arg1)->DoAnim(arg2,arg3,arg4,arg5);
 }
 
 
@@ -26544,7 +35011,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SpellProcess(void * jarg1) {
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_0(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, void * jarg11, unsigned int jarg12) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_0(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, void * jarg11, unsigned int jarg12) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26558,18 +35025,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_0(void * jarg1, u
   uint32 arg10 ;
   int16 *arg11 = (int16 *) 0 ;
   uint32 arg12 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
@@ -26578,13 +35039,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_0(void * jarg1, u
   arg10 = (uint32)jarg10; 
   arg11 = (int16 *)jarg11; 
   arg12 = (uint32)jarg12; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_1(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, void * jarg11) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_1(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, void * jarg11) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26597,18 +35058,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_1(void * jarg1, u
   uint32 arg9 ;
   uint32 arg10 ;
   int16 *arg11 = (int16 *) 0 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
@@ -26616,13 +35071,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_1(void * jarg1, u
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = (int16 *)jarg11; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_2(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_2(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26634,31 +35089,25 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_2(void * jarg1, u
   uint32 arg8 ;
   uint32 arg9 ;
   uint32 arg10 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_3(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_3(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26669,30 +35118,24 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_3(void * jarg1, u
   uint32 *arg7 = (uint32 *) 0 ;
   uint32 arg8 ;
   uint32 arg9 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
   arg9 = (uint32)jarg9; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_4(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_4(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26702,29 +35145,23 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_4(void * jarg1, u
   int32 arg6 ;
   uint32 *arg7 = (uint32 *) 0 ;
   uint32 arg8 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_5(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_5(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26733,28 +35170,22 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_5(void * jarg1, u
   int32 arg5 ;
   int32 arg6 ;
   uint32 *arg7 = (uint32 *) 0 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6,arg7);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_6(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_6(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26762,71 +35193,53 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_6(void * jarg1, u
   EQ::spells::CastingSlot arg4 ;
   int32 arg5 ;
   int32 arg6 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5,arg6);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_7(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_7(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint16 arg3 ;
   EQ::spells::CastingSlot arg4 ;
   int32 arg5 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_8(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_8(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint16 arg3 ;
   EQ::spells::CastingSlot arg4 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (bool)(arg1)->CastSpell(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
+  result = (bool)(arg1)->CastSpell(arg2,arg3,arg4);
   jresult = result; 
   return jresult;
 }
@@ -26848,7 +35261,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CastSpell__SWIG_9(void * jarg1, u
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_0(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, short jarg11, unsigned int jarg12) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_0(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, short jarg11, unsigned int jarg12) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26862,18 +35275,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_0(void * jarg1,
   uint32 arg10 ;
   int16 arg11 ;
   uint32 arg12 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
@@ -26882,13 +35289,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_0(void * jarg1,
   arg10 = (uint32)jarg10; 
   arg11 = (int16)jarg11; 
   arg12 = (uint32)jarg12; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_1(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, short jarg11) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_1(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, short jarg11) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26901,18 +35308,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_1(void * jarg1,
   uint32 arg9 ;
   uint32 arg10 ;
   int16 arg11 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
@@ -26920,13 +35321,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_1(void * jarg1,
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = (int16)jarg11; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_2(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_2(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26938,31 +35339,25 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_2(void * jarg1,
   uint32 arg8 ;
   uint32 arg9 ;
   uint32 arg10 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
   arg9 = (uint32)jarg9; 
   arg10 = (uint32)jarg10; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_3(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_3(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8, unsigned int jarg9) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -26973,30 +35368,24 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_3(void * jarg1,
   uint32 *arg7 = (uint32 *) 0 ;
   uint32 arg8 ;
   uint32 arg9 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
   arg9 = (uint32)jarg9; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_4(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_4(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7, unsigned int jarg8) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27006,29 +35395,23 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_4(void * jarg1,
   int32 arg6 ;
   uint32 *arg7 = (uint32 *) 0 ;
   uint32 arg8 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
   arg8 = (uint32)jarg8; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_5(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6, void * jarg7) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_5(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6, void * jarg7) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27037,28 +35420,22 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_5(void * jarg1,
   int32 arg5 ;
   int32 arg6 ;
   uint32 *arg7 = (uint32 *) 0 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
   arg7 = (uint32 *)jarg7; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6,arg7);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_6(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5, int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_6(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5, int jarg6) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27066,71 +35443,53 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_6(void * jarg1,
   EQ::spells::CastingSlot arg4 ;
   int32 arg5 ;
   int32 arg6 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
   arg6 = (int32)jarg6; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5,arg6);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_7(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4, int jarg5) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_7(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4, int jarg5) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint16 arg3 ;
   EQ::spells::CastingSlot arg4 ;
   int32 arg5 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int32)jarg5; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_8(void * jarg1, unsigned short jarg2, unsigned short jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_8(void * jarg1, unsigned short jarg2, unsigned short jarg3, int jarg4) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint16 arg3 ;
   EQ::spells::CastingSlot arg4 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint16)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (bool)(arg1)->DoCastSpell(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
+  result = (bool)(arg1)->DoCastSpell(arg2,arg3,arg4);
   jresult = result; 
   return jresult;
 }
@@ -27152,7 +35511,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastSpell__SWIG_9(void * jarg1,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_0(void * jarg1, unsigned short jarg2, unsigned int jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_0(void * jarg1, unsigned short jarg2, unsigned int jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7) {
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint32 arg3 ;
@@ -27160,71 +35519,53 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_0(void * jarg1,
   int arg5 ;
   uint32 arg6 ;
   int16 arg7 ;
-  EQ::spells::CastingSlot *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
-  (arg1)->CastedSpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7);
+  (arg1)->CastedSpellFinished(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_1(void * jarg1, unsigned short jarg2, unsigned int jarg3, void * jarg4, int jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_1(void * jarg1, unsigned short jarg2, unsigned int jarg3, int jarg4, int jarg5, unsigned int jarg6) {
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint32 arg3 ;
   EQ::spells::CastingSlot arg4 ;
   int arg5 ;
   uint32 arg6 ;
-  EQ::spells::CastingSlot *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
-  (arg1)->CastedSpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6);
+  (arg1)->CastedSpellFinished(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_2(void * jarg1, unsigned short jarg2, unsigned int jarg3, void * jarg4, int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_CastedSpellFinished__SWIG_2(void * jarg1, unsigned short jarg2, unsigned int jarg3, int jarg4, int jarg5) {
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   uint32 arg3 ;
   EQ::spells::CastingSlot arg4 ;
   int arg5 ;
-  EQ::spells::CastingSlot *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
-  (arg1)->CastedSpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->CastedSpellFinished(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12, unsigned int jarg13) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12, unsigned int jarg13) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27239,18 +35580,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_0(void * jarg
   uint32 arg11 ;
   bool arg12 ;
   uint32 arg13 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
@@ -27260,13 +35595,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_0(void * jarg
   arg11 = (uint32)jarg11; 
   arg12 = jarg12 ? true : false; 
   arg13 = (uint32)jarg13; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_1(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_1(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned int jarg12) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27280,18 +35615,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_1(void * jarg
   uint32 arg10 ;
   uint32 arg11 ;
   bool arg12 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
@@ -27300,13 +35629,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_1(void * jarg
   arg10 = (uint32)jarg10; 
   arg11 = (uint32)jarg11; 
   arg12 = jarg12 ? true : false; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_2(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_2(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10, unsigned int jarg11) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27319,18 +35648,12 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_2(void * jarg
   int arg9 ;
   uint32 arg10 ;
   uint32 arg11 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
@@ -27338,13 +35661,13 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_2(void * jarg
   arg9 = (int)jarg9; 
   arg10 = (uint32)jarg10; 
   arg11 = (uint32)jarg11; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10,arg11);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_3(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_3(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9, unsigned int jarg10) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27356,31 +35679,25 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_3(void * jarg
   bool arg8 ;
   int arg9 ;
   uint32 arg10 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
   arg8 = jarg8 ? true : false; 
   arg9 = (int)jarg9; 
   arg10 = (uint32)jarg10; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9,arg10);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_4(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_4(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8, int jarg9) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27391,30 +35708,24 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_4(void * jarg
   int16 arg7 ;
   bool arg8 ;
   int arg9 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
   arg8 = jarg8 ? true : false; 
   arg9 = (int)jarg9; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8,arg9);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_5(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_5(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7, unsigned int jarg8) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27424,29 +35735,23 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_5(void * jarg
   uint32 arg6 ;
   int16 arg7 ;
   bool arg8 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
   arg8 = jarg8 ? true : false; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7,arg8);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_6(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6, short jarg7) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_6(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6, short jarg7) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27455,28 +35760,22 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_6(void * jarg
   int arg5 ;
   uint32 arg6 ;
   int16 arg7 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
   arg7 = (int16)jarg7; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6,arg7);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6,arg7);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_7(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5, unsigned int jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_7(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5, unsigned int jarg6) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27484,71 +35783,53 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_7(void * jarg
   EQ::spells::CastingSlot arg4 ;
   int arg5 ;
   uint32 arg6 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
   arg6 = (uint32)jarg6; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,arg6);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5,arg6);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_8(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, int jarg5) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_8(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4, int jarg5) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   Mob *arg3 = (Mob *) 0 ;
   EQ::spells::CastingSlot arg4 ;
   int arg5 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
   arg5 = (int)jarg5; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4,arg5);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_9(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellFinished__SWIG_9(void * jarg1, unsigned short jarg2, void * jarg3, int jarg4) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
   Mob *arg3 = (Mob *) 0 ;
   EQ::spells::CastingSlot arg4 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (uint16)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (bool)(arg1)->SpellFinished(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
+  result = (bool)(arg1)->SpellFinished(arg2,arg3,arg4);
   jresult = result; 
   return jresult;
 }
@@ -27892,7 +36173,7 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_SpellEffect__SWIG_5(void * jarg1,
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, void * jarg5, void * jarg6, unsigned int jarg7) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_0(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, void * jarg5, int jarg6, unsigned int jarg7) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27901,7 +36182,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_0(voi
   CastAction_type *arg5 = 0 ;
   EQ::spells::CastingSlot arg6 ;
   bool arg7 ;
-  EQ::spells::CastingSlot *argp6 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
@@ -27921,20 +36201,15 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_0(voi
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "CastAction_type & is null", 0);
     return 0;
   } 
-  argp6 = (EQ::spells::CastingSlot *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg6 = *argp6; 
+  arg6 = (EQ::spells::CastingSlot)jarg6; 
   arg7 = jarg7 ? true : false; 
-  result = (bool)(arg1)->DetermineSpellTargets(arg2,*arg3,*arg4,*arg5,SWIG_STD_MOVE(arg6),arg7);
+  result = (bool)(arg1)->DetermineSpellTargets(arg2,*arg3,*arg4,*arg5,arg6,arg7);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_1(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, void * jarg5, void * jarg6) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_1(void * jarg1, unsigned short jarg2, void * jarg3, void * jarg4, void * jarg5, int jarg6) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   uint16 arg2 ;
@@ -27942,7 +36217,6 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_1(voi
   Mob **arg4 = 0 ;
   CastAction_type *arg5 = 0 ;
   EQ::spells::CastingSlot arg6 ;
-  EQ::spells::CastingSlot *argp6 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
@@ -27962,35 +36236,24 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DetermineSpellTargets__SWIG_1(voi
     SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "CastAction_type & is null", 0);
     return 0;
   } 
-  argp6 = (EQ::spells::CastingSlot *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg6 = *argp6; 
-  result = (bool)(arg1)->DetermineSpellTargets(arg2,*arg3,*arg4,*arg5,SWIG_STD_MOVE(arg6));
+  arg6 = (EQ::spells::CastingSlot)jarg6; 
+  result = (bool)(arg1)->DetermineSpellTargets(arg2,*arg3,*arg4,*arg5,arg6);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastingChecksOnCaster(void * jarg1, int jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_DoCastingChecksOnCaster(void * jarg1, int jarg2, int jarg3) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   int32 arg2 ;
   EQ::spells::CastingSlot arg3 ;
-  EQ::spells::CastingSlot *argp3 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int32)jarg2; 
-  argp3 = (EQ::spells::CastingSlot *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg3 = *argp3; 
-  result = (bool)(arg1)->DoCastingChecksOnCaster(arg2,SWIG_STD_MOVE(arg3));
+  arg3 = (EQ::spells::CastingSlot)jarg3; 
+  result = (bool)(arg1)->DoCastingChecksOnCaster(arg2,arg3);
   jresult = result; 
   return jresult;
 }
@@ -28402,67 +36665,49 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_CheckItemRaceClassDietyRestrictio
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsFromTriggeredSpell__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsFromTriggeredSpell__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   EQ::spells::CastingSlot arg2 ;
   uint32 arg3 ;
-  EQ::spells::CastingSlot *argp2 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EQ::spells::CastingSlot *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (EQ::spells::CastingSlot)jarg2; 
   arg3 = (uint32)jarg3; 
-  result = (bool)(arg1)->IsFromTriggeredSpell(SWIG_STD_MOVE(arg2),arg3);
+  result = (bool)(arg1)->IsFromTriggeredSpell(arg2,arg3);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsFromTriggeredSpell__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_IsFromTriggeredSpell__SWIG_1(void * jarg1, int jarg2) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   EQ::spells::CastingSlot arg2 ;
-  EQ::spells::CastingSlot *argp2 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EQ::spells::CastingSlot *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
-  result = (bool)(arg1)->IsFromTriggeredSpell(SWIG_STD_MOVE(arg2));
+  arg2 = (EQ::spells::CastingSlot)jarg2; 
+  result = (bool)(arg1)->IsFromTriggeredSpell(arg2);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_ApplyBardPulse(void * jarg1, int jarg2, void * jarg3, void * jarg4) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_ApplyBardPulse(void * jarg1, int jarg2, void * jarg3, int jarg4) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   int32 arg2 ;
   Mob *arg3 = (Mob *) 0 ;
   EQ::spells::CastingSlot arg4 ;
-  EQ::spells::CastingSlot *argp4 ;
   bool result;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int32)jarg2; 
   arg3 = (Mob *)jarg3; 
-  argp4 = (EQ::spells::CastingSlot *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (bool)(arg1)->ApplyBardPulse(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EQ::spells::CastingSlot)jarg4; 
+  result = (bool)(arg1)->ApplyBardPulse(arg2,arg3,arg4);
   jresult = result; 
   return jresult;
 }
@@ -28502,7 +36747,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_ZeroBardPulseVars(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoBardCastingFromItemClick(void * jarg1, unsigned int jarg2, unsigned int jarg3, int jarg4, unsigned short jarg5, void * jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoBardCastingFromItemClick(void * jarg1, unsigned int jarg2, unsigned int jarg3, int jarg4, unsigned short jarg5, int jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9) {
   Mob *arg1 = (Mob *) 0 ;
   bool arg2 ;
   uint32 arg3 ;
@@ -28512,23 +36757,17 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoBardCastingFromItemClick(void * jarg1, 
   uint32 arg7 ;
   uint32 arg8 ;
   uint32 arg9 ;
-  EQ::spells::CastingSlot *argp6 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = jarg2 ? true : false; 
   arg3 = (uint32)jarg3; 
   arg4 = (int32)jarg4; 
   arg5 = (uint16)jarg5; 
-  argp6 = (EQ::spells::CastingSlot *)jarg6; 
-  if (!argp6) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::spells::CastingSlot", 0);
-    return ;
-  }
-  arg6 = *argp6; 
+  arg6 = (EQ::spells::CastingSlot)jarg6; 
   arg7 = (uint32)jarg7; 
   arg8 = (uint32)jarg8; 
   arg9 = (uint32)jarg9; 
-  (arg1)->DoBardCastingFromItemClick(arg2,arg3,arg4,arg5,SWIG_STD_MOVE(arg6),arg7,arg8,arg9);
+  (arg1)->DoBardCastingFromItemClick(arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
 }
 
 
@@ -33506,43 +41745,31 @@ SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetMobDescription(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetFilteredHateList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetFilteredHateList__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
   void * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   EntityFilterType arg2 ;
   uint32 arg3 ;
-  EntityFilterType *argp2 ;
   std::list< struct_HateList * > result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EntityFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (EntityFilterType)jarg2; 
   arg3 = (uint32)jarg3; 
-  result = (arg1)->GetFilteredHateList(SWIG_STD_MOVE(arg2),arg3);
+  result = (arg1)->GetFilteredHateList(arg2,arg3);
   jresult = new std::list< struct_HateList * >(result); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetFilteredHateList__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetFilteredHateList__SWIG_1(void * jarg1, int jarg2) {
   void * jresult ;
   Mob *arg1 = (Mob *) 0 ;
   EntityFilterType arg2 ;
-  EntityFilterType *argp2 ;
   std::list< struct_HateList * > result;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EntityFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
-  result = (arg1)->GetFilteredHateList(SWIG_STD_MOVE(arg2));
+  arg2 = (EntityFilterType)jarg2; 
+  result = (arg1)->GetFilteredHateList(arg2);
   jresult = new std::list< struct_HateList * >(result); 
   return jresult;
 }
@@ -33560,45 +41787,33 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetFilteredHateList__SWIG_2(void * jarg
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageHateList__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageHateList__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5) {
   Mob *arg1 = (Mob *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
   bool arg5 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EntityFilterType)jarg4; 
   arg5 = jarg5 ? true : false; 
-  (arg1)->DamageHateList(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->DamageHateList(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageHateList__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageHateList__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4) {
   Mob *arg1 = (Mob *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
-  (arg1)->DamageHateList(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EntityFilterType)jarg4; 
+  (arg1)->DamageHateList(arg2,arg3,arg4);
 }
 
 
@@ -33624,45 +41839,33 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageHateList__SWIG_3(void * jarg1, long
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageArea__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageArea__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5) {
   Mob *arg1 = (Mob *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
   bool arg5 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EntityFilterType)jarg4; 
   arg5 = jarg5 ? true : false; 
-  (arg1)->DamageArea(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->DamageArea(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageArea__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DamageArea__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4) {
   Mob *arg1 = (Mob *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
-  (arg1)->DamageArea(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EntityFilterType)jarg4; 
+  (arg1)->DamageArea(arg2,arg3,arg4);
 }
 
 
@@ -34075,11 +42278,11 @@ SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Mob_GetArchetype(void * jarg1) {
 SWIGEXPORT const char * SWIGSTDCALL CSharp_Mob_GetArchetypeName(void * jarg1) {
   const char * jresult ;
   Mob *arg1 = (Mob *) 0 ;
-  std::string *result = 0 ;
+  std::string result;
   
   arg1 = (Mob *)jarg1; 
-  result = (std::string *) &(arg1)->GetArchetypeName();
-  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  result = (arg1)->GetArchetypeName();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
   return jresult;
 }
 
@@ -35221,29 +43424,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_MessageString__SWIG_11(void * jarg1, unsi
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   eqFilterType arg4 ;
   uint32 arg5 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35258,17 +43455,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_1(void * jarg
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -35279,11 +43470,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_1(void * jarg
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35297,17 +43488,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_2(void * jarg
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -35317,11 +43502,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_2(void * jarg
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35334,17 +43519,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_3(void * jarg
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -35353,11 +43532,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_3(void * jarg
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35369,17 +43548,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_4(void * jarg
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -35387,11 +43560,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_4(void * jarg
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35402,28 +43575,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_5(void * jarg
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35433,27 +43600,21 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_6(void * jarg
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35462,26 +43623,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_7(void * jarg
   char *arg6 = (char *) 0 ;
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -35489,45 +43644,33 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_8(void * jarg
   uint32 arg5 ;
   char *arg6 = (char *) 0 ;
   char *arg7 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6) {
   Mob *arg1 = (Mob *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   eqFilterType arg4 ;
   uint32 arg5 ;
   char *arg6 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Mob *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6);
 }
 
 
@@ -37726,6 +45869,26 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_HasPersistDeathIllusion(void * ja
 }
 
 
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_DoShieldDamageOnShielderSpellEffect(void * jarg1, void * jarg2, long long jarg3, void * jarg4) {
+  Mob *arg1 = (Mob *) 0 ;
+  Mob *arg2 = (Mob *) 0 ;
+  int64 arg3 ;
+  EQ::skills::SkillType arg4 ;
+  EQ::skills::SkillType *argp4 ;
+  
+  arg1 = (Mob *)jarg1; 
+  arg2 = (Mob *)jarg2; 
+  arg3 = (int64)jarg3; 
+  argp4 = (EQ::skills::SkillType *)jarg4; 
+  if (!argp4) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::skills::SkillType", 0);
+    return ;
+  }
+  arg4 = *argp4; 
+  (arg1)->DoShieldDamageOnShielderSpellEffect(arg2,arg3,SWIG_STD_MOVE(arg4));
+}
+
+
 SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_TryDoubleMeleeRoundEffect(void * jarg1) {
   unsigned int jresult ;
   Mob *arg1 = (Mob *) 0 ;
@@ -38004,19 +46167,13 @@ SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Mob_GetFlurryChance(void * jarg1) {
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_GetAppearanceValue(void * jarg1) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Mob_GetAppearanceValue(int jarg1) {
   unsigned int jresult ;
   EmuAppearance arg1 ;
-  EmuAppearance *argp1 ;
   uint32 result;
   
-  argp1 = (EmuAppearance *)jarg1; 
-  if (!argp1) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuAppearance", 0);
-    return 0;
-  }
-  arg1 = *argp1; 
-  result = (uint32)Mob::GetAppearanceValue(SWIG_STD_MOVE(arg1));
+  arg1 = (EmuAppearance)jarg1; 
+  result = (uint32)Mob::GetAppearanceValue(arg1);
   jresult = (unsigned int)result; 
   return jresult;
 }
@@ -38082,48 +46239,36 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SendAppearancePacket__SWIG_3(void * jarg1
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetAppearance__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetAppearance__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
   Mob *arg1 = (Mob *) 0 ;
   EmuAppearance arg2 ;
   bool arg3 ;
-  EmuAppearance *argp2 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EmuAppearance *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuAppearance", 0);
-    return ;
-  }
-  arg2 = *argp2; 
+  arg2 = (EmuAppearance)jarg2; 
   arg3 = jarg3 ? true : false; 
-  (arg1)->SetAppearance(SWIG_STD_MOVE(arg2),arg3);
+  (arg1)->SetAppearance(arg2,arg3);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetAppearance__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Mob_SetAppearance__SWIG_1(void * jarg1, int jarg2) {
   Mob *arg1 = (Mob *) 0 ;
   EmuAppearance arg2 ;
-  EmuAppearance *argp2 ;
   
   arg1 = (Mob *)jarg1; 
-  argp2 = (EmuAppearance *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuAppearance", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  (arg1)->SetAppearance(SWIG_STD_MOVE(arg2));
+  arg2 = (EmuAppearance)jarg2; 
+  (arg1)->SetAppearance(arg2);
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Mob_GetAppearance(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT int SWIGSTDCALL CSharp_Mob_GetAppearance(void * jarg1) {
+  int jresult ;
   Mob *arg1 = (Mob *) 0 ;
   EmuAppearance result;
   
   arg1 = (Mob *)jarg1; 
-  result = ((Mob const *)arg1)->GetAppearance();
-  jresult = new EmuAppearance(result); 
+  result = (EmuAppearance)((Mob const *)arg1)->GetAppearance();
+  jresult = (int)result; 
   return jresult;
 }
 
@@ -45976,25 +54121,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_HateList(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetClosestEntOnHateList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetClosestEntOnHateList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4) {
   void * jresult ;
   HateList *arg1 = (HateList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   bool arg3 ;
   EntityFilterType arg4 ;
-  EntityFilterType *argp4 ;
   Mob *result = 0 ;
   
   arg1 = (HateList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = jarg3 ? true : false; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg4 = *argp4; 
-  result = (Mob *)(arg1)->GetClosestEntOnHateList(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EntityFilterType)jarg4; 
+  result = (Mob *)(arg1)->GetClosestEntOnHateList(arg2,arg3,arg4);
   jresult = (void *)result; 
   return jresult;
 }
@@ -46044,27 +54183,21 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetDamageTopOnHateList(void * jarg
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetMobWithMostHateOnList__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetMobWithMostHateOnList__SWIG_0(void * jarg1, void * jarg2, void * jarg3, unsigned int jarg4, int jarg5) {
   void * jresult ;
   HateList *arg1 = (HateList *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   Mob *arg3 = (Mob *) 0 ;
   bool arg4 ;
   EntityFilterType arg5 ;
-  EntityFilterType *argp5 ;
   Mob *result = 0 ;
   
   arg1 = (HateList *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (Mob *)jarg3; 
   arg4 = jarg4 ? true : false; 
-  argp5 = (EntityFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg5 = *argp5; 
-  result = (Mob *)(arg1)->GetMobWithMostHateOnList(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (EntityFilterType)jarg5; 
+  result = (Mob *)(arg1)->GetMobWithMostHateOnList(arg2,arg3,arg4,arg5);
   jresult = (void *)result; 
   return jresult;
 }
@@ -46118,21 +54251,15 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetMobWithMostHateOnList__SWIG_3(v
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetRandomMobOnHateList__SWIG_0(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetRandomMobOnHateList__SWIG_0(void * jarg1, int jarg2) {
   void * jresult ;
   HateList *arg1 = (HateList *) 0 ;
   EntityFilterType arg2 ;
-  EntityFilterType *argp2 ;
   Mob *result = 0 ;
   
   arg1 = (HateList *)jarg1; 
-  argp2 = (EntityFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
-  result = (Mob *)(arg1)->GetRandomMobOnHateList(SWIG_STD_MOVE(arg2));
+  arg2 = (EntityFilterType)jarg2; 
+  result = (Mob *)(arg1)->GetRandomMobOnHateList(arg2);
   jresult = (void *)result; 
   return jresult;
 }
@@ -46380,43 +54507,31 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetHateList(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetFilteredHateList__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetFilteredHateList__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
   void * jresult ;
   HateList *arg1 = (HateList *) 0 ;
   EntityFilterType arg2 ;
   uint32 arg3 ;
-  EntityFilterType *argp2 ;
   std::list< struct_HateList * > result;
   
   arg1 = (HateList *)jarg1; 
-  argp2 = (EntityFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (EntityFilterType)jarg2; 
   arg3 = (uint32)jarg3; 
-  result = (arg1)->GetFilteredHateList(SWIG_STD_MOVE(arg2),arg3);
+  result = (arg1)->GetFilteredHateList(arg2,arg3);
   jresult = new std::list< struct_HateList * >(result); 
   return jresult;
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetFilteredHateList__SWIG_1(void * jarg1, void * jarg2) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetFilteredHateList__SWIG_1(void * jarg1, int jarg2) {
   void * jresult ;
   HateList *arg1 = (HateList *) 0 ;
   EntityFilterType arg2 ;
-  EntityFilterType *argp2 ;
   std::list< struct_HateList * > result;
   
   arg1 = (HateList *)jarg1; 
-  argp2 = (EntityFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
-  result = (arg1)->GetFilteredHateList(SWIG_STD_MOVE(arg2));
+  arg2 = (EntityFilterType)jarg2; 
+  result = (arg1)->GetFilteredHateList(arg2);
   jresult = new std::list< struct_HateList * >(result); 
   return jresult;
 }
@@ -46434,45 +54549,33 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_HateList_GetFilteredHateList__SWIG_2(void *
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_HateList_DamageHateList__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_HateList_DamageHateList__SWIG_0(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5) {
   HateList *arg1 = (HateList *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
   bool arg5 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (HateList *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (EntityFilterType)jarg4; 
   arg5 = jarg5 ? true : false; 
-  (arg1)->DamageHateList(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->DamageHateList(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_HateList_DamageHateList__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, void * jarg4) {
+SWIGEXPORT void SWIGSTDCALL CSharp_HateList_DamageHateList__SWIG_1(void * jarg1, long long jarg2, unsigned int jarg3, int jarg4) {
   HateList *arg1 = (HateList *) 0 ;
   int64 arg2 ;
   uint32 arg3 ;
   EntityFilterType arg4 ;
-  EntityFilterType *argp4 ;
   
   arg1 = (HateList *)jarg1; 
   arg2 = (int64)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (EntityFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EntityFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
-  (arg1)->DamageHateList(arg2,arg3,SWIG_STD_MOVE(arg4));
+  arg4 = (EntityFilterType)jarg4; 
+  (arg1)->DamageHateList(arg2,arg3,arg4);
 }
 
 
@@ -48581,14 +56684,14 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Merc_GetMercNameType(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Merc_GetStance(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT int SWIGSTDCALL CSharp_Merc_GetStance(void * jarg1) {
+  int jresult ;
   Merc *arg1 = (Merc *) 0 ;
   EQ::constants::StanceType result;
   
   arg1 = (Merc *)jarg1; 
-  result = (arg1)->GetStance();
-  jresult = new EQ::constants::StanceType(result); 
+  result = (EQ::constants::StanceType)(arg1)->GetStance();
+  jresult = (int)result; 
   return jresult;
 }
 
@@ -49515,19 +57618,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetSuspended(void * jarg1, unsigned int 
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetStance(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Merc_SetStance(void * jarg1, int jarg2) {
   Merc *arg1 = (Merc *) 0 ;
   EQ::constants::StanceType arg2 ;
-  EQ::constants::StanceType *argp2 ;
   
   arg1 = (Merc *)jarg1; 
-  argp2 = (EQ::constants::StanceType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::constants::StanceType", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  (arg1)->SetStance(SWIG_STD_MOVE(arg2));
+  arg2 = (EQ::constants::StanceType)jarg2; 
+  (arg1)->SetStance(arg2);
 }
 
 
@@ -52621,31 +60718,25 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_GetGuardPoint(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_NPC_GetGuardPointAnim(void * jarg1) {
-  void * jresult ;
+SWIGEXPORT int SWIGSTDCALL CSharp_NPC_GetGuardPointAnim(void * jarg1) {
+  int jresult ;
   NPC *arg1 = (NPC *) 0 ;
   EmuAppearance result;
   
   arg1 = (NPC *)jarg1; 
-  result = ((NPC const *)arg1)->GetGuardPointAnim();
-  jresult = new EmuAppearance(result); 
+  result = (EmuAppearance)((NPC const *)arg1)->GetGuardPointAnim();
+  jresult = (int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SaveGuardPointAnim(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_NPC_SaveGuardPointAnim(void * jarg1, int jarg2) {
   NPC *arg1 = (NPC *) 0 ;
   EmuAppearance arg2 ;
-  EmuAppearance *argp2 ;
   
   arg1 = (NPC *)jarg1; 
-  argp2 = (EmuAppearance *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuAppearance", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  (arg1)->SaveGuardPointAnim(SWIG_STD_MOVE(arg2));
+  arg2 = (EmuAppearance)jarg2; 
+  (arg1)->SaveGuardPointAnim(arg2);
 }
 
 
@@ -58122,51 +66213,39 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_MessageString__SWIG_12(void * jarg1, v
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_FilteredMessageCheck(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_FilteredMessageCheck(void * jarg1, void * jarg2, int jarg3) {
   unsigned int jresult ;
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   eqFilterType arg3 ;
-  eqFilterType *argp3 ;
   bool result;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
-  argp3 = (eqFilterType *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return 0;
-  }
-  arg3 = *argp3; 
-  result = (bool)(arg1)->FilteredMessageCheck(arg2,SWIG_STD_MOVE(arg3));
+  arg3 = (eqFilterType)jarg3; 
+  result = (bool)(arg1)->FilteredMessageCheck(arg2,arg3);
   jresult = result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   eqFilterType arg4 ;
   uint32 arg5 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_1(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13, char * jarg14) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58181,17 +66260,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_1(void * j
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
   char *arg14 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -58202,11 +66275,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_1(void * j
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
   arg14 = (char *)jarg14; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13,(char const *)arg14);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_2(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12, char * jarg13) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58220,17 +66293,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_2(void * j
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
   char *arg13 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -58240,11 +66307,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_2(void * j
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
   arg13 = (char *)jarg13; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12,(char const *)arg13);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_3(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11, char * jarg12) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58257,17 +66324,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_3(void * j
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
   char *arg12 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -58276,11 +66337,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_3(void * j
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
   arg12 = (char *)jarg12; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11,(char const *)arg12);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_4(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10, char * jarg11) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58292,17 +66353,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_4(void * j
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
   char *arg11 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
@@ -58310,11 +66365,11 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_4(void * j
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
   arg11 = (char *)jarg11; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10,(char const *)arg11);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_5(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9, char * jarg10) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58325,28 +66380,22 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_5(void * j
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
   char *arg10 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
   arg10 = (char *)jarg10; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9,(char const *)arg10);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_6(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8, char * jarg9) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58356,27 +66405,21 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_6(void * j
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
   char *arg9 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
   arg9 = (char *)jarg9; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8,(char const *)arg9);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_7(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7, char * jarg8) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58385,26 +66428,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_7(void * j
   char *arg6 = (char *) 0 ;
   char *arg7 = (char *) 0 ;
   char *arg8 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
   arg8 = (char *)jarg8; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7,(char const *)arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6, char * jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_8(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6, char * jarg7) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
@@ -58412,45 +66449,33 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_8(void * j
   uint32 arg5 ;
   char *arg6 = (char *) 0 ;
   char *arg7 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
   arg7 = (char *)jarg7; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6,(char const *)arg7);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6,(char const *)arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, unsigned int jarg5, char * jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessageString__SWIG_9(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, unsigned int jarg5, char * jarg6) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   eqFilterType arg4 ;
   uint32 arg5 ;
   char *arg6 = (char *) 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (uint32)jarg5; 
   arg6 = (char *)jarg6; 
-  (arg1)->FilteredMessageString(arg2,arg3,SWIG_STD_MOVE(arg4),arg5,(char const *)arg6);
+  (arg1)->FilteredMessageString(arg2,arg3,arg4,arg5,(char const *)arg6);
 }
 
 
@@ -58856,25 +66881,19 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_Process(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_QueuePacket__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_QueuePacket__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, int jarg5) {
   Client *arg1 = (Client *) 0 ;
   EQApplicationPacket *arg2 = (EQApplicationPacket *) 0 ;
   bool arg3 ;
   Mob::CLIENT_CONN_STATUS arg4 ;
   eqFilterType arg5 ;
-  eqFilterType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (EQApplicationPacket *)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = (Mob::CLIENT_CONN_STATUS)jarg4; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->QueuePacket((EQApplicationPacket const *)arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (eqFilterType)jarg5; 
+  (arg1)->QueuePacket((EQApplicationPacket const *)arg2,arg3,arg4,arg5);
 }
 
 
@@ -59038,26 +67057,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_Message(void * jarg1, unsigned int jar
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessage(void * jarg1, void * jarg2, unsigned int jarg3, void * jarg4, char * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_FilteredMessage(void * jarg1, void * jarg2, unsigned int jarg3, int jarg4, char * jarg5) {
   Client *arg1 = (Client *) 0 ;
   Mob *arg2 = (Mob *) 0 ;
   uint32 arg3 ;
   eqFilterType arg4 ;
   char *arg5 = (char *) 0 ;
   void *arg6 = 0 ;
-  eqFilterType *argp4 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (Mob *)jarg2; 
   arg3 = (uint32)jarg3; 
-  argp4 = (eqFilterType *)jarg4; 
-  if (!argp4) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg4 = *argp4; 
+  arg4 = (eqFilterType)jarg4; 
   arg5 = (char *)jarg5; 
-  (arg1)->FilteredMessage(arg2,arg3,SWIG_STD_MOVE(arg4),(char const *)arg5,arg6);
+  (arg1)->FilteredMessage(arg2,arg3,arg4,(char const *)arg5,arg6);
 }
 
 
@@ -66533,33 +74546,27 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_RegisterBug(void * jarg1, void * jarg2
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetApplySpellList(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetApplySpellList(void * jarg1, int jarg2, unsigned int jarg3, unsigned int jarg4, unsigned int jarg5) {
   void * jresult ;
   Client *arg1 = (Client *) 0 ;
   ApplySpellType arg2 ;
   bool arg3 ;
   bool arg4 ;
   bool arg5 ;
-  ApplySpellType *argp2 ;
   std::vector< Mob * > result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (ApplySpellType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (ApplySpellType)jarg2; 
   arg3 = jarg3 ? true : false; 
   arg4 = jarg4 ? true : false; 
   arg5 = jarg5 ? true : false; 
-  result = (arg1)->GetApplySpellList(SWIG_STD_MOVE(arg2),arg3,arg4,arg5);
+  result = (arg1)->GetApplySpellList(arg2,arg3,arg4,arg5);
   jresult = new std::vector< Mob * >(result); 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -66568,26 +74575,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_0(void * jarg1, int j
   bool arg6 ;
   bool arg7 ;
   bool arg8 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
   arg7 = jarg7 ? true : false; 
   arg8 = jarg8 ? true : false; 
-  (arg1)->ApplySpell(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,arg7,arg8);
+  (arg1)->ApplySpell(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_1(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_1(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned int jarg7) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -66595,67 +74596,49 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_1(void * jarg1, int j
   ApplySpellType arg5 ;
   bool arg6 ;
   bool arg7 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
   arg7 = jarg7 ? true : false; 
-  (arg1)->ApplySpell(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,arg7);
+  (arg1)->ApplySpell(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_2(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_2(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
   ApplySpellType arg5 ;
   bool arg6 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
-  (arg1)->ApplySpell(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6);
+  (arg1)->ApplySpell(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_3(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_3(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
   ApplySpellType arg5 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->ApplySpell(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (ApplySpellType)jarg5; 
+  (arg1)->ApplySpell(arg2,arg3,arg4,arg5);
 }
 
 
@@ -66695,7 +74678,7 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_ApplySpell__SWIG_6(void * jarg1, int j
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_0(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned int jarg7, unsigned int jarg8) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -66704,26 +74687,20 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_0(void * jarg1,
   bool arg6 ;
   bool arg7 ;
   bool arg8 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
   arg7 = jarg7 ? true : false; 
   arg8 = jarg8 ? true : false; 
-  (arg1)->SetSpellDuration(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,arg7,arg8);
+  (arg1)->SetSpellDuration(arg2,arg3,arg4,arg5,arg6,arg7,arg8);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_1(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6, unsigned int jarg7) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_1(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6, unsigned int jarg7) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
@@ -66731,67 +74708,49 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_1(void * jarg1,
   ApplySpellType arg5 ;
   bool arg6 ;
   bool arg7 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
   arg7 = jarg7 ? true : false; 
-  (arg1)->SetSpellDuration(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6,arg7);
+  (arg1)->SetSpellDuration(arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_2(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5, unsigned int jarg6) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_2(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, unsigned int jarg6) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
   ApplySpellType arg5 ;
   bool arg6 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
+  arg5 = (ApplySpellType)jarg5; 
   arg6 = jarg6 ? true : false; 
-  (arg1)->SetSpellDuration(arg2,arg3,arg4,SWIG_STD_MOVE(arg5),arg6);
+  (arg1)->SetSpellDuration(arg2,arg3,arg4,arg5,arg6);
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_3(void * jarg1, int jarg2, int jarg3, int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetSpellDuration__SWIG_3(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5) {
   Client *arg1 = (Client *) 0 ;
   int arg2 ;
   int arg3 ;
   int arg4 ;
   ApplySpellType arg5 ;
-  ApplySpellType *argp5 ;
   
   arg1 = (Client *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = (int)jarg4; 
-  argp5 = (ApplySpellType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ApplySpellType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->SetSpellDuration(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (ApplySpellType)jarg5; 
+  (arg1)->SetSpellDuration(arg2,arg3,arg4,arg5);
 }
 
 
@@ -68227,47 +76186,29 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Client_IsBuyer(void * jarg1) {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_Client_GetFilter(void * jarg1, void * jarg2) {
-  void * jresult ;
+SWIGEXPORT int SWIGSTDCALL CSharp_Client_GetFilter(void * jarg1, int jarg2) {
+  int jresult ;
   Client *arg1 = (Client *) 0 ;
   eqFilterType arg2 ;
-  eqFilterType *argp2 ;
   eqFilterMode result;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (eqFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
-  result = ((Client const *)arg1)->GetFilter(SWIG_STD_MOVE(arg2));
-  jresult = new eqFilterMode(result); 
+  arg2 = (eqFilterType)jarg2; 
+  result = (eqFilterMode)((Client const *)arg1)->GetFilter(arg2);
+  jresult = (int)result; 
   return jresult;
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetFilter(void * jarg1, void * jarg2, void * jarg3) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetFilter(void * jarg1, int jarg2, int jarg3) {
   Client *arg1 = (Client *) 0 ;
   eqFilterType arg2 ;
   eqFilterMode arg3 ;
-  eqFilterType *argp2 ;
-  eqFilterMode *argp3 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (eqFilterType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  argp3 = (eqFilterMode *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterMode", 0);
-    return ;
-  }
-  arg3 = *argp3; 
-  (arg1)->SetFilter(SWIG_STD_MOVE(arg2),SWIG_STD_MOVE(arg3));
+  arg2 = (eqFilterType)jarg2; 
+  arg3 = (eqFilterMode)jarg3; 
+  (arg1)->SetFilter(arg2,arg3);
 }
 
 
@@ -72254,19 +80195,13 @@ SWIGEXPORT void SWIGSTDCALL CSharp_Client_SendDynamicZoneUpdates(void * jarg1) {
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetDynamicZoneMemberStatus(void * jarg1, void * jarg2) {
+SWIGEXPORT void SWIGSTDCALL CSharp_Client_SetDynamicZoneMemberStatus(void * jarg1, int jarg2) {
   Client *arg1 = (Client *) 0 ;
   DynamicZoneMemberStatus arg2 ;
-  DynamicZoneMemberStatus *argp2 ;
   
   arg1 = (Client *)jarg1; 
-  argp2 = (DynamicZoneMemberStatus *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null DynamicZoneMemberStatus", 0);
-    return ;
-  }
-  arg2 = *argp2; 
-  (arg1)->SetDynamicZoneMemberStatus(SWIG_STD_MOVE(arg2));
+  arg2 = (DynamicZoneMemberStatus)jarg2; 
+  (arg1)->SetDynamicZoneMemberStatus(arg2);
 }
 
 
@@ -88715,7 +96650,7 @@ SWIGEXPORT int SWIGSTDCALL CSharp_SC_AlwaysEnabled_get() {
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_Spawn2__SWIG_0(unsigned int jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5, float jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned short jarg12, short jarg13, unsigned int jarg14, void * jarg15) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_Spawn2__SWIG_0(unsigned int jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5, float jarg6, unsigned int jarg7, unsigned int jarg8, unsigned int jarg9, unsigned int jarg10, unsigned int jarg11, unsigned short jarg12, short jarg13, unsigned int jarg14, int jarg15) {
   void * jresult ;
   uint32 arg1 ;
   uint32 arg2 ;
@@ -88732,7 +96667,6 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Spawn2__SWIG_0(unsigned int jarg1, unsi
   int16 arg13 ;
   bool arg14 ;
   EmuAppearance arg15 ;
-  EmuAppearance *argp15 ;
   Spawn2 *result = 0 ;
   
   arg1 = (uint32)jarg1; 
@@ -88749,13 +96683,8 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_new_Spawn2__SWIG_0(unsigned int jarg1, unsi
   arg12 = (uint16)jarg12; 
   arg13 = (int16)jarg13; 
   arg14 = jarg14 ? true : false; 
-  argp15 = (EmuAppearance *)jarg15; 
-  if (!argp15) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EmuAppearance", 0);
-    return 0;
-  }
-  arg15 = *argp15; 
-  result = (Spawn2 *)new Spawn2(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,SWIG_STD_MOVE(arg15));
+  arg15 = (EmuAppearance)jarg15; 
+  result = (Spawn2 *)new Spawn2(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
   jresult = (void *)result; 
   return jresult;
 }
@@ -99148,47 +107077,35 @@ SWIGEXPORT unsigned int SWIGSTDCALL CSharp_ZoneDatabase_DisableRecipe(void * jar
 }
 
 
-SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_GetRecipeComponentItemIDs(void * jarg1, void * jarg2, unsigned int jarg3) {
+SWIGEXPORT void * SWIGSTDCALL CSharp_ZoneDatabase_GetRecipeComponentItemIDs(void * jarg1, int jarg2, unsigned int jarg3) {
   void * jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   RecipeCountType arg2 ;
   uint32 arg3 ;
-  RecipeCountType *argp2 ;
   std::vector< uint32 > result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  argp2 = (RecipeCountType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null RecipeCountType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (RecipeCountType)jarg2; 
   arg3 = (uint32)jarg3; 
-  result = (arg1)->GetRecipeComponentItemIDs(SWIG_STD_MOVE(arg2),arg3);
+  result = (arg1)->GetRecipeComponentItemIDs(arg2,arg3);
   jresult = new std::vector< uint32 >(result); 
   return jresult;
 }
 
 
-SWIGEXPORT signed char SWIGSTDCALL CSharp_ZoneDatabase_GetRecipeComponentCount(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4) {
+SWIGEXPORT signed char SWIGSTDCALL CSharp_ZoneDatabase_GetRecipeComponentCount(void * jarg1, int jarg2, unsigned int jarg3, unsigned int jarg4) {
   signed char jresult ;
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   RecipeCountType arg2 ;
   uint32 arg3 ;
   uint32 arg4 ;
-  RecipeCountType *argp2 ;
   int8 result;
   
   arg1 = (ZoneDatabase *)jarg1; 
-  argp2 = (RecipeCountType *)jarg2; 
-  if (!argp2) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null RecipeCountType", 0);
-    return 0;
-  }
-  arg2 = *argp2; 
+  arg2 = (RecipeCountType)jarg2; 
   arg3 = (uint32)jarg3; 
   arg4 = (uint32)jarg4; 
-  result = (int8)(arg1)->GetRecipeComponentCount(SWIG_STD_MOVE(arg2),arg3,arg4);
+  result = (int8)(arg1)->GetRecipeComponentCount(arg2,arg3,arg4);
   jresult = result; 
   return jresult;
 }
@@ -99535,7 +107452,7 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_database_get() {
 SWIGEXPORT void SWIGSTDCALL CSharp_content_db_set(void * jarg1) {
   ZoneDatabase *arg1 = (ZoneDatabase *) 0 ;
   
-  arg1 = (ZoneDatabase *)jarg1;
+  arg1 = (ZoneDatabase *)jarg1; 
   content_db = *arg1;
 }
 
@@ -101699,25 +109616,19 @@ SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_movegrp(void * jarg1, int jarg2,
 }
 
 
-SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, void * jarg5) {
+SWIGEXPORT void SWIGSTDCALL CSharp_QuestManager_doanim__SWIG_0(void * jarg1, int jarg2, int jarg3, unsigned int jarg4, int jarg5) {
   QuestManager *arg1 = (QuestManager *) 0 ;
   int arg2 ;
   int arg3 ;
   bool arg4 ;
   eqFilterType arg5 ;
-  eqFilterType *argp5 ;
   
   arg1 = (QuestManager *)jarg1; 
   arg2 = (int)jarg2; 
   arg3 = (int)jarg3; 
   arg4 = jarg4 ? true : false; 
-  argp5 = (eqFilterType *)jarg5; 
-  if (!argp5) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null eqFilterType", 0);
-    return ;
-  }
-  arg5 = *argp5; 
-  (arg1)->doanim(arg2,arg3,arg4,SWIG_STD_MOVE(arg5));
+  arg5 = (eqFilterType)jarg5; 
+  (arg1)->doanim(arg2,arg3,arg4,arg5);
 }
 
 

@@ -134,7 +134,8 @@
 #include "../../worldserver.h"
 #include "../../questmgr.h"
 
-
+#include "../../../common/emu_constants.h"
+#include "../../../common/eq_constants.h"
 #include "../../../common/item_instance.h"
 #include "../../../common/item_data.h"
 
@@ -216,8 +217,8 @@ namespace glm {
 %ignore Timer;
 
 %include "../../../common/linked_list.h"
-
-//%include "../../../common/emu_constants.h"
+%include "../../../common/emu_constants.h"
+%include "../../../common/eq_constants.h"
 
 %include "../../common.h"
 %include "../../entity.h"

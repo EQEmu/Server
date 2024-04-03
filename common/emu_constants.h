@@ -34,7 +34,9 @@ namespace EQ
 	using RoF2::INULL;
 
 	namespace invtype {
+		#ifndef SWIG
 		using namespace RoF2::invtype::enum_;
+		#endif
 
 		using RoF2::invtype::POSSESSIONS_SIZE;
 		using RoF2::invtype::BANK_SIZE;
@@ -84,7 +86,10 @@ namespace EQ
 	}
 
 	namespace invslot {
+		#ifndef SWIG
 		using namespace RoF2::invslot::enum_;
+		#endif
+		
 
 		using RoF2::invslot::SLOT_INVALID;
 		using RoF2::invslot::SLOT_BEGIN;
@@ -235,8 +240,11 @@ namespace EQ
 			Beastlord,
 			Berserker
 		};
-
+		#ifdef SWIG_VERSION
+		enum EQGravityBehavior : int8 {
+		#else
 		enum GravityBehavior : int8 {
+		#endif
 			Ground,
 			Flying,
 			Levitating,
@@ -266,8 +274,11 @@ namespace EQ
 			Laying,
 			Looting
 		};
-
+		#ifdef SWIG_VERSION
+		enum EQObjectTypes : int {
+		#else
 		enum ObjectTypes : int {
+		#endif
 			SmallBag,
 			LargeBag,
 			Quiver,

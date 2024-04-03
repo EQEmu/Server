@@ -13,7 +13,7 @@ public class EqFactory
     {
         return new EntityList(Cptr, own);
     }
-    public static QuestManager CreateQuestManager(nint Cptr, bool own) 
+    public static QuestManager CreateQuestManager(nint Cptr, bool own)
     {
         return new QuestManager(Cptr, own);
     }
@@ -112,7 +112,7 @@ public class EqFactory
         // Get the calling method (skip 0 as it is the current method, 1 is the immediate caller)
         StackFrame callingFrame = stackTrace.GetFrame(2);
         MethodBase callingMethod = callingFrame.GetMethod();
-        return  callingMethod?.DeclaringType.Assembly;
+        return callingMethod?.DeclaringType.Assembly;
     }
 }
 
@@ -150,37 +150,23 @@ public static class EntityListExtensions
     }
 }
 
+public static class MobExtensions
+{
+    public static void QuestSay(this Mob mob, EntityList e, string message) {
+        Options journalOptions = new Options {
+            speak_mode = SpeakMode.Say,
+            journal_mode = Mode.None,
+            language = (sbyte)questinterface.CommonTongue,
+            message_type = questinterface.NPCQuestSay,
+            target_spawn_id = mob.GetID()
+        };
+        e.QuestJournalledSayClose(mob, 200, mob.GetCleanName(), message, journalOptions);
+    }
+}
+
 public static class NPCExtensions
 {
-    public static void Signal(this NPC npc, NpcEvent e, int signalCode = 0)
-    {
-        // Get the currently executing assembly
-        Assembly currentAssembly = EqFactory.GetCallerAssembly();
-
-        // Get all types defined in the assembly
-        Type[] types = currentAssembly.GetTypes();
-
-        // Iterate through the types
-        foreach (Type type in types)
-        {
-            if (type.FullName == npc.GetOrigName()) {
-                e.npc = npc;
-                e.data = signalCode.ToString();
-                if (type != null && type.GetMethod("Signal") != null) {
-                    var instance = Activator.CreateInstance(type);
-                    var newEvent = new NpcEvent{
-                        npc = npc,
-                        data = signalCode.ToString(),
-                        entityList = e.entityList,
-                        zone = e.zone,
-                        worldServer = e.worldServer,
-                        logSys = e.logSys
-                    };
-                    type.GetMethod("Signal")?.Invoke(instance, [newEvent]);
-                }
-            }
-        }
-    }
+   
 }
 
 
@@ -334,182 +320,127 @@ public interface INpcEvent
 // IPlayerEvent is accessible in player.csx located under a zone folder
 public interface IPlayerEvent
 {
-    void Say(PlayerEvent e) { }
-    void Trade(PlayerEvent e) { }
-    void Death(PlayerEvent e) { }
-    void Spawn(PlayerEvent e) { }
-    void Attack(PlayerEvent e) { }
-    void Combat(PlayerEvent e) { }
-    void Aggro(PlayerEvent e) { }
-    void Slay(PlayerEvent e) { }
-    void NpcSlay(PlayerEvent e) { }
-    void WaypointArrive(PlayerEvent e) { }
-    void WaypointDepart(PlayerEvent e) { }
-    void Timer(PlayerEvent e) { }
-    void Signal(PlayerEvent e) { }
-    void Hp(PlayerEvent e) { }
-    void Enter(PlayerEvent e) { }
-    void Exit(PlayerEvent e) { }
-    void EnterZone(PlayerEvent e) { }
-    void ClickDoor(PlayerEvent e) { }
-    void Loot(PlayerEvent e) { }
-    void Zone(PlayerEvent e) { }
-    void LevelUp(PlayerEvent e) { }
-    void KilledMerit(PlayerEvent e) { }
-    void CastOn(PlayerEvent e) { }
-    void TaskAccepted(PlayerEvent e) { }
-    void TaskStageComplete(PlayerEvent e) { }
-    void TaskUpdate(PlayerEvent e) { }
-    void TaskComplete(PlayerEvent e) { }
-    void TaskFail(PlayerEvent e) { }
-    void AggroSay(PlayerEvent e) { }
-    void PlayerPickup(PlayerEvent e) { }
-    void PopupResponse(PlayerEvent e) { }
-    void EnvironmentalDamage(PlayerEvent e) { }
-    void ProximitySay(PlayerEvent e) { }
-    void Cast(PlayerEvent e) { }
-    void CastBegin(PlayerEvent e) { }
-    void ScaleCalc(PlayerEvent e) { }
-    void ItemEnterZone(PlayerEvent e) { }
-    void TargetChange(PlayerEvent e) { }
-    void HateList(PlayerEvent e) { }
-    void SpellEffectClient(PlayerEvent e) { }
-    void SpellEffectNpc(PlayerEvent e) { }
-    void SpellEffectBuffTicClient(PlayerEvent e) { }
-    void SpellEffectBuffTicNpc(PlayerEvent e) { }
-    void SpellFade(PlayerEvent e) { }
-    void SpellEffectTranslocateComplete(PlayerEvent e) { }
-    void CombineSuccess(PlayerEvent e) { }
-    void CombineFailure(PlayerEvent e) { }
-    void ItemClick(PlayerEvent e) { }
-    void ItemClickCast(PlayerEvent e) { }
-    void GroupChange(PlayerEvent e) { }
-    void ForageSuccess(PlayerEvent e) { }
-    void ForageFailure(PlayerEvent e) { }
-    void FishStart(PlayerEvent e) { }
-    void FishSuccess(PlayerEvent e) { }
-    void FishFailure(PlayerEvent e) { }
-    void ClickObject(PlayerEvent e) { }
-    void DiscoverItem(PlayerEvent e) { }
-    void Disconnect(PlayerEvent e) { }
-    void Connect(PlayerEvent e) { }
-    void ItemTick(PlayerEvent e) { }
-    void DuelWin(PlayerEvent e) { }
-    void DuelLose(PlayerEvent e) { }
-    void EncounterLoad(PlayerEvent e) { }
-    void EncounterUnload(PlayerEvent e) { }
-    void Command(PlayerEvent e) { }
-    void DropItem(PlayerEvent e) { }
-    void DestroyItem(PlayerEvent e) { }
-    void FeignDeath(PlayerEvent e) { }
-    void WeaponProc(PlayerEvent e) { }
-    void EquipItem(PlayerEvent e) { }
-    void UnequipItem(PlayerEvent e) { }
-    void AugmentItem(PlayerEvent e) { }
-    void UnaugmentItem(PlayerEvent e) { }
-    void AugmentInsert(PlayerEvent e) { }
-    void AugmentRemove(PlayerEvent e) { }
-    void EnterArea(PlayerEvent e) { }
-    void LeaveArea(PlayerEvent e) { }
-    void Respawn(PlayerEvent e) { }
-    void DeathComplete(PlayerEvent e) { }
-    void UnhandledOpcode(PlayerEvent e) { }
-    void Tick(PlayerEvent e) { }
-    void SpawnZone(PlayerEvent e) { }
-    void DeathZone(PlayerEvent e) { }
-    void UseSkill(PlayerEvent e) { }
-    void CombineValidate(PlayerEvent e) { }
-    void BotCommand(PlayerEvent e) { }
-    void Warp(PlayerEvent e) { }
-    void TestBuff(PlayerEvent e) { }
-    void Combine(PlayerEvent e) { }
-    void Consider(PlayerEvent e) { }
-    void ConsiderCorpse(PlayerEvent e) { }
-    void LootZone(PlayerEvent e) { }
-    void EquipItemClient(PlayerEvent e) { }
-    void UnequipItemClient(PlayerEvent e) { }
-    void SkillUp(PlayerEvent e) { }
-    void LanguageSkillUp(PlayerEvent e) { }
-    void AltCurrencyMerchantBuy(PlayerEvent e) { }
-    void AltCurrencyMerchantSell(PlayerEvent e) { }
-    void MerchantBuy(PlayerEvent e) { }
-    void MerchantSell(PlayerEvent e) { }
-    void Inspect(PlayerEvent e) { }
-    void voidBeforeUpdate(PlayerEvent e) { }
-    void AaBuy(PlayerEvent e) { }
-    void AaGain(PlayerEvent e) { }
-    void AaExpGain(PlayerEvent e) { }
-    void ExpGain(PlayerEvent e) { }
-    void Payload(PlayerEvent e) { }
-    void LevelDown(PlayerEvent e) { }
-    void GmCommand(PlayerEvent e) { }
-    void Despawn(PlayerEvent e) { }
-    void DespawnZone(PlayerEvent e) { }
-    void BotCreate(PlayerEvent e) { }
-    void AugmentInsertClient(PlayerEvent e) { }
-    void AugmentRemoveClient(PlayerEvent e) { }
-    void EquipItemBot(PlayerEvent e) { }
-    void UnequipItemBot(PlayerEvent e) { }
-    void DamageGiven(PlayerEvent e) { }
-    void DamageTaken(PlayerEvent e) { }
-    void ItemClickClient(PlayerEvent e) { }
-    void ItemClickCastClient(PlayerEvent e) { }
-    void DestroyItemClient(PlayerEvent e) { }
-    void DropItemClient(PlayerEvent e) { }
-    void MemorizeSpell(PlayerEvent e) { }
-    void UnmemorizeSpell(PlayerEvent e) { }
-    void ScribeSpell(PlayerEvent e) { }
-    void UnscribeSpell(PlayerEvent e) { }
-    void LootAdded(PlayerEvent e) { }
-    void LdonPointsGain(PlayerEvent e) { }
-    void LdonPointsLoss(PlayerEvent e) { }
-    void AltCurrencyGain(PlayerEvent e) { }
-    void AltCurrencyLoss(PlayerEvent e) { }
-    void CrystalGain(PlayerEvent e) { }
-    void CrystalLoss(PlayerEvent e) { }
-    void TimerPause(PlayerEvent e) { }
-    void TimerResume(PlayerEvent e) { }
-    void TimerStart(PlayerEvent e) { }
-    void TimerStop(PlayerEvent e) { }
-    void EntityVariableDelete(PlayerEvent e) { }
-    void EntityVariableSet(PlayerEvent e) { }
-    void EntityVariableUpdate(PlayerEvent e) { }
-    void SpellEffectBot(PlayerEvent e) { }
-    void SpellEffectBuffTicBot(PlayerEvent e) { }
+    void Say(PlayerEvent e) {}
+    void EnvironmentalDamage(PlayerEvent e) {}
+    void Death(PlayerEvent e) {}
+    void DeathComplete(PlayerEvent e) {}
+    void Timer(PlayerEvent e) {}
+    void DiscoverItem(PlayerEvent e) {}
+    void FishSuccess(PlayerEvent e) {}
+    void ForageSuccess(PlayerEvent e) {}
+    void ClickObject(PlayerEvent e) {}
+    void ClickDoor(PlayerEvent e) {}
+    void Signal(PlayerEvent e) {}
+    void PopupResponse(PlayerEvent e) {}
+    void PlayerPickup(PlayerEvent e) {}
+    void Cast(PlayerEvent e) {}
+    void CastBegin(PlayerEvent e) {}
+    void CastOn(PlayerEvent e) {}
+    void TaskFail(PlayerEvent e) {}
+    void Zone(PlayerEvent e) {}
+    void DuelWin(PlayerEvent e) {}
+    void DuelLose(PlayerEvent e) {}
+    void Loot(PlayerEvent e) {}
+    void TaskStageComplete(PlayerEvent e) {}
+    void TaskAccepted(PlayerEvent e) {}
+    void TaskComplete(PlayerEvent e) {}
+    void TaskUpdate(PlayerEvent e) {}
+    void TaskBeforeUpdate(PlayerEvent e) {}
+    void Command(PlayerEvent e) {}
+    void CombineSuccess(PlayerEvent e) {}
+    void CombineFailure(PlayerEvent e) {}
+    void FeignDeath(PlayerEvent e) {}
+    void EnterArea(PlayerEvent e) {}
+    void LeaveArea(PlayerEvent e) {}
+    void Respawn(PlayerEvent e) {}
+    void UnhandledOpcode(PlayerEvent e) {}
+    void UseSkill(PlayerEvent e) {}
+    void TestBuff(PlayerEvent e) {}
+    void CombineValidate(PlayerEvent e) {}
+    void BotCommand(PlayerEvent e) {}
+    void Warp(PlayerEvent e) {}
+    void Combine(PlayerEvent e) {}
+    void Consider(PlayerEvent e) {}
+    void ConsiderCorpse(PlayerEvent e) {}
+    void EquipItemClient(PlayerEvent e) {}
+    void UnequipItemClient(PlayerEvent e) {}
+    void SkillUp(PlayerEvent e) {}
+    void LanguageSkillUp(PlayerEvent e) {}
+    void AltCurrencyMerchantBuy(PlayerEvent e) {}
+    void AltCurrencyMerchantSell(PlayerEvent e) {}
+    void MerchantBuy(PlayerEvent e) {}
+    void MerchantSell(PlayerEvent e) {}
+    void Inspect(PlayerEvent e) {}
+    void AaBuy(PlayerEvent e) {}
+    void AaGain(PlayerEvent e) {}
+    void AaExpGain(PlayerEvent e) {}
+    void ExpGain(PlayerEvent e) {}
+    void Payload(PlayerEvent e) {}
+    void LevelUp(PlayerEvent e) {}
+    void LevelDown(PlayerEvent e) {}
+    void GmCommand(PlayerEvent e) {}
+    void BotCreate(PlayerEvent e) {}
+    void AugmentInsertClient(PlayerEvent e) {}
+    void AugmentRemoveClient(PlayerEvent e) {}
+    void DamageGiven(PlayerEvent e) {}
+    void DamageTaken(PlayerEvent e) {}
+    void ItemClickCastClient(PlayerEvent e) {}
+    void ItemClickClient(PlayerEvent e) {}
+    void DestroyItemClient(PlayerEvent e) {}
+    void TargetChange(PlayerEvent e) {}
+    void DropItemClient(PlayerEvent e) {}
+    void MemorizeSpell(PlayerEvent e) {}
+    void UnmemorizeSpell(PlayerEvent e) {}
+    void ScribeSpell(PlayerEvent e) {}
+    void UnscribeSpell(PlayerEvent e) {}
+    void LdonPointsGain(PlayerEvent e) {}
+    void LdonPointsLoss(PlayerEvent e) {}
+    void AltCurrencyGain(PlayerEvent e) {}
+    void AltCurrencyLoss(PlayerEvent e) {}
+    void CrystalGain(PlayerEvent e) {}
+    void CrystalLoss(PlayerEvent e) {}
+    void TimerPause(PlayerEvent e) {}
+    void TimerResume(PlayerEvent e) {}
+    void TimerStart(PlayerEvent e) {}
+    void TimerStop(PlayerEvent e) {}
+    void EntityVariableDelete(PlayerEvent e) {}
+    void EntityVariableSet(PlayerEvent e) {}
+    void EntityVariableUpdate(PlayerEvent e) {}
+    void AaLoss(PlayerEvent e) {}
+    void SpellBlocked(PlayerEvent e) {}
 }
 
-public struct NpcEvent
-{
-    public Zone zone;
-    public EntityList entityList;
-    public NPC npc;
-    public Mob mob;
-    public WorldServer worldServer;
-    public EQEmuLogSys logSys;
-    public QuestManager questManager;
-    public string data;
-    public uint extra_data;
-    public List<string> stringList;
-    public List<Mob> mobList;
-    public List<ItemInstance> itemList;
-    public List<EQApplicationPacket> packetList;
+public class EQGlobals {
+    public Zone? zone;
+    public EntityList? entityList;
+    public EQEmuLogSys? logSys;
+    public QuestManager? questManager;
+    public WorldServer? worldServer;
 }
 
-public struct PlayerEvent
-{
-    public Zone zone;
-    public EntityList entityList;
-    public Client player;
-    public WorldServer worldServer;
-    public EQEmuLogSys logSys;
-    public QuestManager questManager;
+public class EQLists {
+    public List<string>? stringList;
+    public List<Mob>? mobList;
+    public List<ItemInstance>? itemList;
+    public List<EQApplicationPacket>? packetList;
+}
 
-    public string data;
+public class EQEvent {
+    public EQGlobals? globals;
+    public EQLists? lists;
+    public string? data;
     public uint extra_data;
-    public List<string> stringList;
-    public List<Mob> mobList;
-    public List<ItemInstance> itemList;
-    public List<EQApplicationPacket> packetList;
+}
+
+public class NpcEvent : EQEvent
+{
+    public NPC? npc;
+    public Mob? mob;
+}
+
+public class PlayerEvent : EQEvent
+{
+    public Client? player;
 
 }
 
@@ -539,4 +470,243 @@ public struct Vec4
         this.z = z;
         this.w = w;
     }
+}
+
+public class EventMap
+{
+    public static readonly Dictionary<QuestEventID, string> NpcMethodMap = new Dictionary<QuestEventID, string> {
+       {QuestEventID.EVENT_SAY, "Say"},
+       {QuestEventID.EVENT_TRADE, "Trade"},
+        {QuestEventID.EVENT_DEATH, "Death"},
+        {QuestEventID.EVENT_SPAWN, "Spawn"},
+        {QuestEventID.EVENT_ATTACK, "Attack"},
+        {QuestEventID.EVENT_COMBAT, "Combat"},
+        {QuestEventID.EVENT_AGGRO, "Aggro"},
+        {QuestEventID.EVENT_SLAY, "Slay"},
+        {QuestEventID.EVENT_NPC_SLAY, "NpcSlay"},
+        {QuestEventID.EVENT_WAYPOINT_ARRIVE, "WaypointArrive"},
+        {QuestEventID.EVENT_WAYPOINT_DEPART, "WaypointDepart"},
+        {QuestEventID.EVENT_TIMER, "Timer"},
+        {QuestEventID.EVENT_SIGNAL, "Signal"},
+        {QuestEventID.EVENT_HP, "Hp"},
+        {QuestEventID.EVENT_ENTER, "Enter"},
+        {QuestEventID.EVENT_EXIT, "Exit"},
+        {QuestEventID.EVENT_ENTER_ZONE, "EnterZone"},
+        {QuestEventID.EVENT_CLICK_DOOR, "ClickDoor"},
+        {QuestEventID.EVENT_LOOT, "Loot"},
+        {QuestEventID.EVENT_ZONE, "Zone"},
+        {QuestEventID.EVENT_LEVEL_UP, "LevelUp"},
+        {QuestEventID.EVENT_KILLED_MERIT, "KilledMerit"},
+        {QuestEventID.EVENT_CAST_ON, "CastOn"},
+        {QuestEventID.EVENT_TASK_ACCEPTED, "TaskAccepted"},
+        {QuestEventID.EVENT_TASK_STAGE_COMPLETE, "TaskStageComplete"},
+        {QuestEventID.EVENT_TASK_UPDATE, "TaskUpdate"},
+        {QuestEventID.EVENT_TASK_COMPLETE, "TaskComplete"},
+        {QuestEventID.EVENT_TASK_FAIL, "TaskFail"},
+        {QuestEventID.EVENT_AGGRO_SAY, "AggroSay"},
+        {QuestEventID.EVENT_PLAYER_PICKUP, "PlayerPickup"},
+        {QuestEventID.EVENT_POPUP_RESPONSE, "PopupResponse"},
+        {QuestEventID.EVENT_ENVIRONMENTAL_DAMAGE, "EnvironmentalDamage"},
+        {QuestEventID.EVENT_PROXIMITY_SAY, "ProximitySay"},
+        {QuestEventID.EVENT_CAST, "Cast"},
+        {QuestEventID.EVENT_CAST_BEGIN, "CastBegin"},
+        {QuestEventID.EVENT_SCALE_CALC, "ScaleCalc"},
+        {QuestEventID.EVENT_ITEM_ENTER_ZONE, "ItemEnterZone"},
+        {QuestEventID.EVENT_TARGET_CHANGE, "TargetChange"},
+        {QuestEventID.EVENT_HATE_LIST, "HateList"},
+        {QuestEventID.EVENT_SPELL_EFFECT_CLIENT, "SpellEffectClient"},
+        {QuestEventID.EVENT_SPELL_EFFECT_NPC, "SpellEffectNpc"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, "SpellEffectBuffTicClient"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_NPC, "SpellEffectBuffTicNpc"},
+        {QuestEventID.EVENT_SPELL_FADE, "SpellFade"},
+        {QuestEventID.EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, "SpellEffectTranslocateComplete"},
+        {QuestEventID.EVENT_COMBINE_SUCCESS, "CombineSuccess"},
+        {QuestEventID.EVENT_COMBINE_FAILURE, "CombineFailure"},
+        {QuestEventID.EVENT_ITEM_CLICK, "ItemClick"},
+        {QuestEventID.EVENT_ITEM_CLICK_CAST, "ItemClickCast"},
+        {QuestEventID.EVENT_GROUP_CHANGE, "GroupChange"},
+        {QuestEventID.EVENT_FORAGE_SUCCESS, "ForageSuccess"},
+        {QuestEventID.EVENT_FORAGE_FAILURE, "ForageFailure"},
+        {QuestEventID.EVENT_FISH_START, "FishStart"},
+        {QuestEventID.EVENT_FISH_SUCCESS, "FishSuccess"},
+        {QuestEventID.EVENT_FISH_FAILURE, "FishFailure"},
+        {QuestEventID.EVENT_CLICK_OBJECT, "ClickObject"},
+        {QuestEventID.EVENT_DISCOVER_ITEM, "DiscoverItem"},
+        {QuestEventID.EVENT_DISCONNECT, "Disconnect"},
+        {QuestEventID.EVENT_CONNECT, "Connect"},
+        {QuestEventID.EVENT_ITEM_TICK, "ItemTick"},
+        {QuestEventID.EVENT_DUEL_WIN, "DuelWin"},
+        {QuestEventID.EVENT_DUEL_LOSE, "DuelLose"},
+        {QuestEventID.EVENT_ENCOUNTER_LOAD, "EncounterLoad"},
+        {QuestEventID.EVENT_ENCOUNTER_UNLOAD, "EncounterUnload"},
+        {QuestEventID.EVENT_COMMAND, "Command"},
+        {QuestEventID.EVENT_DROP_ITEM, "DropItem"},
+        {QuestEventID.EVENT_DESTROY_ITEM, "DestroyItem"},
+        {QuestEventID.EVENT_FEIGN_DEATH, "FeignDeath"},
+        {QuestEventID.EVENT_WEAPON_PROC, "WeaponProc"},
+        {QuestEventID.EVENT_EQUIP_ITEM, "EquipItem"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM, "UnequipItem"},
+        {QuestEventID.EVENT_AUGMENT_ITEM, "AugmentItem"},
+        {QuestEventID.EVENT_UNAUGMENT_ITEM, "UnaugmentItem"},
+        {QuestEventID.EVENT_AUGMENT_INSERT, "AugmentInsert"},
+        {QuestEventID.EVENT_AUGMENT_REMOVE, "AugmentRemove"},
+        {QuestEventID.EVENT_ENTER_AREA, "EnterArea"},
+        {QuestEventID.EVENT_LEAVE_AREA, "LeaveArea"},
+        {QuestEventID.EVENT_RESPAWN, "Respawn"},
+        {QuestEventID.EVENT_DEATH_COMPLETE, "DeathComplete"},
+        {QuestEventID.EVENT_UNHANDLED_OPCODE, "UnhandledOpcode"},
+        {QuestEventID.EVENT_TICK, "Tick"},
+        {QuestEventID.EVENT_SPAWN_ZONE, "SpawnZone"},
+        {QuestEventID.EVENT_DEATH_ZONE, "DeathZone"},
+        {QuestEventID.EVENT_USE_SKILL, "UseSkill"},
+        {QuestEventID.EVENT_COMBINE_VALIDATE, "CombineValidate"},
+        {QuestEventID.EVENT_BOT_COMMAND, "BotCommand"},
+        {QuestEventID.EVENT_WARP, "Warp"},
+        {QuestEventID.EVENT_TEST_BUFF, "TestBuff"},
+        {QuestEventID.EVENT_COMBINE, "Combine"},
+        {QuestEventID.EVENT_CONSIDER, "Consider"},
+        {QuestEventID.EVENT_CONSIDER_CORPSE, "ConsiderCorpse"},
+        {QuestEventID.EVENT_LOOT_ZONE, "LootZone"},
+        {QuestEventID.EVENT_EQUIP_ITEM_CLIENT, "EquipItemClient"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM_CLIENT, "UnequipItemClient"},
+        {QuestEventID.EVENT_SKILL_UP, "SkillUp"},
+        {QuestEventID.EVENT_LANGUAGE_SKILL_UP, "LanguageSkillUp"},
+        {QuestEventID.EVENT_ALT_CURRENCY_MERCHANT_BUY, "AltCurrencyMerchantBuy"},
+        {QuestEventID.EVENT_ALT_CURRENCY_MERCHANT_SELL, "AltCurrencyMerchantSell"},
+        {QuestEventID.EVENT_MERCHANT_BUY, "MerchantBuy"},
+        {QuestEventID.EVENT_MERCHANT_SELL, "MerchantSell"},
+        {QuestEventID.EVENT_INSPECT, "Inspect"},
+        {QuestEventID.EVENT_TASK_BEFORE_UPDATE, "TaskBeforeUpdate"},
+        {QuestEventID.EVENT_AA_BUY, "AaBuy"},
+        {QuestEventID.EVENT_AA_GAIN, "AaGain"},
+        {QuestEventID.EVENT_AA_EXP_GAIN, "AaExpGain"},
+        {QuestEventID.EVENT_EXP_GAIN, "ExpGain"},
+        {QuestEventID.EVENT_PAYLOAD, "Payload"},
+        {QuestEventID.EVENT_LEVEL_DOWN, "LevelDown"},
+        {QuestEventID.EVENT_GM_COMMAND, "GmCommand"},
+        {QuestEventID.EVENT_DESPAWN, "Despawn"},
+        {QuestEventID.EVENT_DESPAWN_ZONE, "DespawnZone"},
+        {QuestEventID.EVENT_BOT_CREATE, "BotCreate"},
+        {QuestEventID.EVENT_AUGMENT_INSERT_CLIENT, "AugmentInsertClient"},
+        {QuestEventID.EVENT_AUGMENT_REMOVE_CLIENT, "AugmentRemoveClient"},
+        {QuestEventID.EVENT_EQUIP_ITEM_BOT, "EquipItemBot"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM_BOT, "UnequipItemBot"},
+        {QuestEventID.EVENT_DAMAGE_GIVEN, "DamageGiven"},
+        {QuestEventID.EVENT_DAMAGE_TAKEN, "DamageTaken"},
+        {QuestEventID.EVENT_ITEM_CLICK_CLIENT, "ItemClickClient"},
+        {QuestEventID.EVENT_ITEM_CLICK_CAST_CLIENT, "ItemClickCastClient"},
+        {QuestEventID.EVENT_DESTROY_ITEM_CLIENT, "DestroyItemClient"},
+        {QuestEventID.EVENT_DROP_ITEM_CLIENT, "DropItemClient"},
+        {QuestEventID.EVENT_MEMORIZE_SPELL, "MemorizeSpell"},
+        {QuestEventID.EVENT_UNMEMORIZE_SPELL, "UnmemorizeSpell"},
+        {QuestEventID.EVENT_SCRIBE_SPELL, "ScribeSpell"},
+        {QuestEventID.EVENT_UNSCRIBE_SPELL, "UnscribeSpell"},
+        {QuestEventID.EVENT_LOOT_ADDED, "LootAdded"},
+        {QuestEventID.EVENT_LDON_POINTS_GAIN, "LdonPointsGain"},
+        {QuestEventID.EVENT_LDON_POINTS_LOSS, "LdonPointsLoss"},
+        {QuestEventID.EVENT_ALT_CURRENCY_GAIN, "AltCurrencyGain"},
+        {QuestEventID.EVENT_ALT_CURRENCY_LOSS, "AltCurrencyLoss"},
+        {QuestEventID.EVENT_CRYSTAL_GAIN, "CrystalGain"},
+        {QuestEventID.EVENT_CRYSTAL_LOSS, "CrystalLoss"},
+        {QuestEventID.EVENT_TIMER_PAUSE, "TimerPause"},
+        {QuestEventID.EVENT_TIMER_RESUME, "TimerResume"},
+        {QuestEventID.EVENT_TIMER_START, "TimerStart"},
+        {QuestEventID.EVENT_TIMER_STOP, "TimerStop"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_DELETE, "EntityVariableDelete"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_SET, "EntityVariableSet"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_UPDATE, "EntityVariableUpdate"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BOT, "SpellEffectBot"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_BOT, "SpellEffectBuffTicBot"},
+    };
+
+    public static readonly Dictionary<QuestEventID, string> PlayerMethodMap = new Dictionary<QuestEventID, string>() {
+        {QuestEventID.EVENT_SAY, "Say"},
+        {QuestEventID.EVENT_ENVIRONMENTAL_DAMAGE, "EnvironmentalDamage"},
+        {QuestEventID.EVENT_DEATH, "Death"},
+        {QuestEventID.EVENT_DEATH_COMPLETE, "DeathComplete"},
+        {QuestEventID.EVENT_TIMER, "Timer"},
+        {QuestEventID.EVENT_DISCOVER_ITEM, "DiscoverItem"},
+        {QuestEventID.EVENT_FISH_SUCCESS, "FishSuccess"},
+        {QuestEventID.EVENT_FORAGE_SUCCESS, "ForageSuccess"},
+        {QuestEventID.EVENT_CLICK_OBJECT, "ClickObject"},
+        {QuestEventID.EVENT_CLICK_DOOR, "ClickDoor"},
+        {QuestEventID.EVENT_SIGNAL, "Signal"},
+        {QuestEventID.EVENT_POPUP_RESPONSE, "PopupResponse"},
+        {QuestEventID.EVENT_PLAYER_PICKUP, "PlayerPickup"},
+        {QuestEventID.EVENT_CAST, "Cast"},
+        {QuestEventID.EVENT_CAST_BEGIN, "CastBegin"},
+        {QuestEventID.EVENT_CAST_ON, "CastOn"},
+        {QuestEventID.EVENT_TASK_FAIL, "TaskFail"},
+        {QuestEventID.EVENT_ZONE, "Zone"},
+        {QuestEventID.EVENT_DUEL_WIN, "DuelWin"},
+        {QuestEventID.EVENT_DUEL_LOSE, "DuelLose"},
+        {QuestEventID.EVENT_LOOT, "Loot"},
+        {QuestEventID.EVENT_TASK_STAGE_COMPLETE, "TaskStageComplete"},
+        {QuestEventID.EVENT_TASK_ACCEPTED, "TaskAccepted"},
+        {QuestEventID.EVENT_TASK_COMPLETE, "TaskComplete"},
+        {QuestEventID.EVENT_TASK_UPDATE, "TaskUpdate"},
+        {QuestEventID.EVENT_TASK_BEFORE_UPDATE, "TaskBeforeUpdate"},
+        {QuestEventID.EVENT_COMMAND, "Command"},
+        {QuestEventID.EVENT_COMBINE_SUCCESS, "CombineSuccess"},
+        {QuestEventID.EVENT_COMBINE_FAILURE, "CombineFailure"},
+        {QuestEventID.EVENT_FEIGN_DEATH, "FeignDeath"},
+        {QuestEventID.EVENT_ENTER_AREA, "EnterArea"},
+        {QuestEventID.EVENT_LEAVE_AREA, "LeaveArea"},
+        {QuestEventID.EVENT_RESPAWN, "Respawn"},
+        {QuestEventID.EVENT_UNHANDLED_OPCODE, "UnhandledOpcode"},
+        {QuestEventID.EVENT_USE_SKILL, "UseSkill"},
+        {QuestEventID.EVENT_TEST_BUFF, "TestBuff"},
+        {QuestEventID.EVENT_COMBINE_VALIDATE, "CombineValidate"},
+        {QuestEventID.EVENT_BOT_COMMAND, "BotCommand"},
+        {QuestEventID.EVENT_WARP, "Warp"},
+        {QuestEventID.EVENT_COMBINE, "Combine"},
+        {QuestEventID.EVENT_CONSIDER, "Consider"},
+        {QuestEventID.EVENT_CONSIDER_CORPSE, "ConsiderCorpse"},
+        {QuestEventID.EVENT_EQUIP_ITEM_CLIENT, "EquipItemClient"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM_CLIENT, "UnequipItemClient"},
+        {QuestEventID.EVENT_SKILL_UP, "SkillUp"},
+        {QuestEventID.EVENT_LANGUAGE_SKILL_UP, "LanguageSkillUp"},
+        {QuestEventID.EVENT_ALT_CURRENCY_MERCHANT_BUY, "AltCurrencyMerchantBuy"},
+        {QuestEventID.EVENT_ALT_CURRENCY_MERCHANT_SELL, "AltCurrencyMerchantSell"},
+        {QuestEventID.EVENT_MERCHANT_BUY, "MerchantBuy"},
+        {QuestEventID.EVENT_MERCHANT_SELL, "MerchantSell"},
+        {QuestEventID.EVENT_INSPECT, "Inspect"},
+        {QuestEventID.EVENT_AA_BUY, "AaBuy"},
+        {QuestEventID.EVENT_AA_GAIN, "AaGain"},
+        {QuestEventID.EVENT_AA_EXP_GAIN, "AaExpGain"},
+        {QuestEventID.EVENT_EXP_GAIN, "ExpGain"},
+        {QuestEventID.EVENT_PAYLOAD, "Payload"},
+        {QuestEventID.EVENT_LEVEL_UP, "LevelUp"},
+        {QuestEventID.EVENT_LEVEL_DOWN, "LevelDown"},
+        {QuestEventID.EVENT_GM_COMMAND, "GmCommand"},
+        {QuestEventID.EVENT_BOT_CREATE, "BotCreate"},
+        {QuestEventID.EVENT_AUGMENT_INSERT_CLIENT, "AugmentInsertClient"},
+        {QuestEventID.EVENT_AUGMENT_REMOVE_CLIENT, "AugmentRemoveClient"},
+        {QuestEventID.EVENT_DAMAGE_GIVEN, "DamageGiven"},
+        {QuestEventID.EVENT_DAMAGE_TAKEN, "DamageTaken"},
+        {QuestEventID.EVENT_ITEM_CLICK_CAST_CLIENT, "ItemClickCastClient"},
+        {QuestEventID.EVENT_ITEM_CLICK_CLIENT, "ItemClickClient"},
+        {QuestEventID.EVENT_DESTROY_ITEM_CLIENT, "DestroyItemClient"},
+        {QuestEventID.EVENT_TARGET_CHANGE, "TargetChange"},
+        {QuestEventID.EVENT_DROP_ITEM_CLIENT, "DropItemClient"},
+        {QuestEventID.EVENT_MEMORIZE_SPELL, "MemorizeSpell"},
+        {QuestEventID.EVENT_UNMEMORIZE_SPELL, "UnmemorizeSpell"},
+        {QuestEventID.EVENT_SCRIBE_SPELL, "ScribeSpell"},
+        {QuestEventID.EVENT_UNSCRIBE_SPELL, "UnscribeSpell"},
+        {QuestEventID.EVENT_LDON_POINTS_GAIN, "LdonPointsGain"},
+        {QuestEventID.EVENT_LDON_POINTS_LOSS, "LdonPointsLoss"},
+        {QuestEventID.EVENT_ALT_CURRENCY_GAIN, "AltCurrencyGain"},
+        {QuestEventID.EVENT_ALT_CURRENCY_LOSS, "AltCurrencyLoss"},
+        {QuestEventID.EVENT_CRYSTAL_GAIN, "CrystalGain"},
+        {QuestEventID.EVENT_CRYSTAL_LOSS, "CrystalLoss"},
+        {QuestEventID.EVENT_TIMER_PAUSE, "TimerPause"},
+        {QuestEventID.EVENT_TIMER_RESUME, "TimerResume"},
+        {QuestEventID.EVENT_TIMER_START, "TimerStart"},
+        {QuestEventID.EVENT_TIMER_STOP, "TimerStop"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_DELETE, "EntityVariableDelete"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_SET, "EntityVariableSet"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_UPDATE, "EntityVariableUpdate"},
+        {QuestEventID.EVENT_AA_LOSS, "AaLoss"},
+        {QuestEventID.EVENT_SPELL_BLOCKED, "SpellBlocked"}
+    };
 }
