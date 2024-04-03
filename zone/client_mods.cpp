@@ -325,9 +325,7 @@ int64 Client::CalcMaxHP()
 	
 	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;	//Natural Durability, Physical Enhancement, Planar Durability
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
-	
 	max_hp += spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange;
-	Shout("Get item bonus %i [item Worn %i] spell bonus %i [ max %i]", itembonuses.HP, itembonuses.FlatMaxHPChange, spellbonuses.FlatMaxHPChange, max_hp);
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 	if (current_hp > max_hp) {

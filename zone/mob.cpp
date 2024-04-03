@@ -968,15 +968,15 @@ int64 Mob::CalcMaxHP() {
 int64 Mob::GetItemHPBonuses() {
 	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
-	item_hp = itembonuses.FlatMaxHPChange;
+	item_hp += itembonuses.FlatMaxHPChange;
 	item_hp += item_hp * itembonuses.PercentMaxHPChange / 10000;
 	return item_hp;
 }
 
 int64 Mob::GetSpellHPBonuses() {
 	int64 spell_hp = 0;
-	spell_hp = spellbonuses.FlatMaxHPChange;
 	spell_hp += spell_hp * spellbonuses.PercentMaxHPChange / 10000;
+	spell_hp = spellbonuses.FlatMaxHPChange;
 	return spell_hp;
 }
 

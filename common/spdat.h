@@ -1003,7 +1003,6 @@ typedef enum {
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
-//#define SE_PurgePoison				208	// not used
 #define SE_DispelBeneficial				209 // implemented, @Dispel, removes only beneficial effects on a target, base: pct chance (950=95%), limit: none, max: none
 #define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live)
 #define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
