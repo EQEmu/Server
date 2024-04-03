@@ -411,36 +411,78 @@ public interface IPlayerEvent
 }
 
 public class EQGlobals {
-    public Zone? zone;
-    public EntityList? entityList;
-    public EQEmuLogSys? logSys;
-    public QuestManager? questManager;
-    public WorldServer? worldServer;
+    public Zone zone;
+    public EntityList entityList;
+    public EQEmuLogSys logSys;
+    public QuestManager questManager;
+    public WorldServer worldServer;
 }
 
 public class EQLists {
-    public List<string>? stringList;
-    public List<Mob>? mobList;
-    public List<ItemInstance>? itemList;
-    public List<EQApplicationPacket>? packetList;
+    public List<string> stringList;
+    public List<Mob> mobList;
+    public List<ItemInstance> itemList;
+    public List<EQApplicationPacket> packetList;
 }
 
 public class EQEvent {
-    public EQGlobals? globals;
-    public EQLists? lists;
-    public string? data;
+    public EQGlobals globals;
+    public EQLists lists;
+    public string data;
     public uint extra_data;
 }
 
 public class NpcEvent : EQEvent
 {
-    public NPC? npc;
-    public Mob? mob;
+    public NPC npc;
+    public Mob mob;
+
+    uint originalStaleConnectionMs = 0;
+    uint originalResendTimeout = 0;
+    int originalClientLinkdeadMs = 0;
+
+    public void SetupDebug(int debugMinutes = 20) {
+        var debugMs = debugMinutes * 60 * 1000;
+        var opts = mob.CastToClient().Connection().GetManager().GetOptions();
+        originalStaleConnectionMs = opts.daybreak_options.stale_connection_ms;
+        originalResendTimeout = opts.daybreak_options.resend_timeout;
+        opts.daybreak_options.stale_connection_ms = (uint)debugMs;
+        opts.daybreak_options.resend_timeout = (uint)debugMs;
+        mob.CastToClient().Connection().GetManager().SetOptions(opts);
+
+        originalClientLinkdeadMs = int.Parse(questinterface.GetRuleValue("Zone:ClientLinkdeadMS"));
+        RuleManager.Instance().SetRule("Zone:ClientLinkdeadMS", debugMs.ToString());
+
+        globals.logSys.QuestDebug($"Set all timeout values to {debugMinutes} minutes. You will be disconnected if threads are paused longer than this or client hits 0%");
+    }
+
+    public void ResetDebug() {
+        if (originalClientLinkdeadMs == 0 || originalResendTimeout == 0 || originalClientLinkdeadMs == 0) {
+            globals.logSys.QuestDebug("SetupDebug was not called before ResetDebug and would have set all timeouts to 0.");
+            return;
+        }
+
+        Task.Run(() =>
+        {
+            // Give this a lot of leeway in case it needs time to catch up with pumping messages
+            // And evaluating timeout
+            Thread.Sleep(5000);
+            var opts = mob.CastToClient().Connection().GetManager().GetOptions();
+            opts.daybreak_options.stale_connection_ms = originalStaleConnectionMs;
+            opts.daybreak_options.resend_timeout = originalResendTimeout;
+            mob.CastToClient().Connection().GetManager().SetOptions(opts);
+
+            originalClientLinkdeadMs = int.Parse(questinterface.GetRuleValue("Zone:ClientLinkdeadMS"));
+            RuleManager.Instance().SetRule("Zone:ClientLinkdeadMS", originalClientLinkdeadMs.ToString());
+
+            globals.logSys.QuestDebug($"Reset all timeout values");
+        });
+    }
 }
 
 public class PlayerEvent : EQEvent
 {
-    public Client? player;
+    public Client player;
 
 }
 

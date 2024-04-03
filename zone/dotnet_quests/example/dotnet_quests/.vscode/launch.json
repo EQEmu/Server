@@ -4,8 +4,18 @@
             "name": ".NET Core Attach",
             "type": "coreclr",
             "request": "attach",
-            "processId": "${command:pickProcess}",
+            "processId": "${command:pickRemoteProcess}",
             "justMyCode": false,
+            "pipeTransport": {
+                "pipeProgram": "docker",
+                "pipeArgs": ["exec", "-i", "akk-stack-eqemu-server-1", "sh", "-c"],
+                "debuggerPath": "/vsdbg/vsdbg",
+                "pipeCwd": "${workspaceFolder}",
+                "quoteArgs": false
+              },
+              "sourceFileMap": {
+                "/home/eqemu/server/dotnet_quests": "${workspaceFolder}"
+              }
         }
     ]
 }

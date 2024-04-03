@@ -368,7 +368,12 @@ template <typename T> T SwigValueInit() {
 #include "glm/vec4.hpp"
 
 #include "../../../common/ruletypes.h"
+#include "../../../common/rulesys.h"
 #include "../../../common/eq_packet.h"
+#include "../../../common/net/packet.h"
+#include "../../../common/net/daybreak_structs.h"
+#include "../../../common/eq_stream_intf.h"
+#include "../../../common/net/daybreak_connection.h"
 #include "../../../common/expedition_lockout_timer.h"
 #include "../../../common/eqemu_logsys_log_aliases.h"
 #include "../../../common/linked_list.h"
@@ -412,6 +417,8 @@ void FreeVec3(glm::vec3* ptr) {
     delete ptr;
 }
 
+
+
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
@@ -442,10 +449,17 @@ using namespace glm;
 #include <stdint.h>		// Use the C99 official header
 
 
-#include <string.h>
+std::string GetRuleValue(const std::string& rule) {
+    std::string out("");
+    RuleManager::Instance()->GetRule(rule, out);
+    return out;
+}
 
 
 #include <memory>
+
+
+#include <string.h>
 
 SWIGINTERN NewSpawn_Struct *ListElement_Sl_NewSpawn_Struct_Sm__Sg__GetObject(ListElement< NewSpawn_Struct * > *self){
         return self->GetData();
@@ -2021,6 +2035,23 @@ SWIGEXPORT void SWIGSTDCALL CSharp_FreeVec3(void * jarg1) {
 }
 
 
+SWIGEXPORT const char * SWIGSTDCALL CSharp_GetRuleValue(const char * jarg1) {
+  const char * jresult ;
+  std::string *arg1 = 0 ;
+  std::string result;
+  
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  result = GetRuleValue((std::string const &)*arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_vec2_x_set(void * jarg1, float jarg2) {
   glm::vec2 *arg1 = (glm::vec2 *) 0 ;
   float arg2 ;
@@ -3421,6 +3452,3642 @@ SWIGEXPORT const char * SWIGSTDCALL CSharp_DumpPacketToString(void * jarg1) {
   arg1 = (EQApplicationPacket *)jarg1; 
   result = DumpPacketToString((EQApplicationPacket const *)arg1);
   jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_Packet(void * jarg1) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_Packet_Data__SWIG_0(void * jarg1) {
+  void * jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  void *result = 0 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  result = (void *)((EQ::Net::Packet const *)arg1)->Data();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Packet_Length__SWIG_0(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  result = ((EQ::Net::Packet const *)arg1)->Length();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Packet_Clear(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  result = (bool)(arg1)->Clear();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Packet_Resize(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  bool result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (bool)(arg1)->Resize(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_Reserve(void * jarg1, unsigned int jarg2) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  (arg1)->Reserve(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutInt8(void * jarg1, unsigned int jarg2, signed char jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int8_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (int8_t)jarg3; 
+  (arg1)->PutInt8(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutInt16(void * jarg1, unsigned int jarg2, short jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int16_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (int16_t)jarg3; 
+  (arg1)->PutInt16(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutInt32(void * jarg1, unsigned int jarg2, int jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int32_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (int32_t)jarg3; 
+  (arg1)->PutInt32(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutInt64(void * jarg1, unsigned int jarg2, long long jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int64_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (int64_t)jarg3; 
+  (arg1)->PutInt64(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutUInt8(void * jarg1, unsigned int jarg2, unsigned char jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint8_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (uint8_t)jarg3; 
+  (arg1)->PutUInt8(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutUInt16(void * jarg1, unsigned int jarg2, unsigned short jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint16_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (uint16_t)jarg3; 
+  (arg1)->PutUInt16(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutUInt32(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint32_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  (arg1)->PutUInt32(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutUInt64(void * jarg1, unsigned int jarg2, unsigned long long jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint64_t arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (uint64_t)jarg3; 
+  (arg1)->PutUInt64(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutFloat(void * jarg1, unsigned int jarg2, float jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  float arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (float)jarg3; 
+  (arg1)->PutFloat(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutDouble(void * jarg1, unsigned int jarg2, double jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  double arg3 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (double)jarg3; 
+  (arg1)->PutDouble(SWIG_STD_MOVE(arg2),arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutString(void * jarg1, unsigned int jarg2, const char * jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  std::string *arg3 = 0 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  (arg1)->PutString(SWIG_STD_MOVE(arg2),(std::string const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutCString(void * jarg1, unsigned int jarg2, char * jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  char *arg3 = (char *) 0 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (char *)jarg3; 
+  (arg1)->PutCString(SWIG_STD_MOVE(arg2),(char const *)arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutPacket(void * jarg1, unsigned int jarg2, void * jarg3) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  EQ::Net::Packet *arg3 = 0 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (EQ::Net::Packet *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::Packet const & is null", 0);
+    return ;
+  } 
+  (arg1)->PutPacket(SWIG_STD_MOVE(arg2),(EQ::Net::Packet const &)*arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_Packet_PutData(void * jarg1, unsigned int jarg2, void * jarg3, unsigned int jarg4) {
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  void *arg3 = (void *) 0 ;
+  size_t arg4 ;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (void *)jarg3; 
+  arg4 = (size_t)jarg4; 
+  (arg1)->PutData(SWIG_STD_MOVE(arg2),arg3,SWIG_STD_MOVE(arg4));
+}
+
+
+SWIGEXPORT signed char SWIGSTDCALL CSharp_Packet_GetInt8(void * jarg1, unsigned int jarg2) {
+  signed char jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int8_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (int8_t)((EQ::Net::Packet const *)arg1)->GetInt8(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_Packet_GetInt16(void * jarg1, unsigned int jarg2) {
+  short jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int16_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (int16_t)((EQ::Net::Packet const *)arg1)->GetInt16(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_Packet_GetInt32(void * jarg1, unsigned int jarg2) {
+  int jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int32_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (int32_t)((EQ::Net::Packet const *)arg1)->GetInt32(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT long long SWIGSTDCALL CSharp_Packet_GetInt64(void * jarg1, unsigned int jarg2) {
+  long long jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  int64_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (int64_t)((EQ::Net::Packet const *)arg1)->GetInt64(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_Packet_GetUInt8(void * jarg1, unsigned int jarg2) {
+  unsigned char jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (uint8_t)((EQ::Net::Packet const *)arg1)->GetUInt8(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_Packet_GetUInt16(void * jarg1, unsigned int jarg2) {
+  unsigned short jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint16_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (uint16_t)((EQ::Net::Packet const *)arg1)->GetUInt16(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Packet_GetUInt32(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (uint32_t)((EQ::Net::Packet const *)arg1)->GetUInt32(SWIG_STD_MOVE(arg2));
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_Packet_GetUInt64(void * jarg1, unsigned int jarg2) {
+  unsigned long long jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (uint64_t)((EQ::Net::Packet const *)arg1)->GetUInt64(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_Packet_GetFloat(void * jarg1, unsigned int jarg2) {
+  float jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  float result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (float)((EQ::Net::Packet const *)arg1)->GetFloat(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_Packet_GetDouble(void * jarg1, unsigned int jarg2) {
+  double jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  double result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (double)((EQ::Net::Packet const *)arg1)->GetDouble(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Packet_GetString(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  const char * jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  size_t arg3 ;
+  std::string result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  arg3 = (size_t)jarg3; 
+  result = ((EQ::Net::Packet const *)arg1)->GetString(SWIG_STD_MOVE(arg2),SWIG_STD_MOVE(arg3));
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Packet_GetCString(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  std::string result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = ((EQ::Net::Packet const *)arg1)->GetCString(SWIG_STD_MOVE(arg2));
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Packet_ToString__SWIG_0(void * jarg1) {
+  const char * jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  std::string result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  result = ((EQ::Net::Packet const *)arg1)->ToString();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_Packet_ToString__SWIG_1(void * jarg1, unsigned int jarg2) {
+  const char * jresult ;
+  EQ::Net::Packet *arg1 = (EQ::Net::Packet *) 0 ;
+  size_t arg2 ;
+  std::string result;
+  
+  arg1 = (EQ::Net::Packet *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = ((EQ::Net::Packet const *)arg1)->ToString(SWIG_STD_MOVE(arg2));
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_StaticPacket__SWIG_0(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  void *arg1 = (void *) 0 ;
+  size_t arg2 ;
+  EQ::Net::StaticPacket *result = 0 ;
+  
+  arg1 = (void *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (EQ::Net::StaticPacket *)new EQ::Net::StaticPacket(arg1,SWIG_STD_MOVE(arg2));
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_StaticPacket(void * jarg1) {
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_StaticPacket__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EQ::Net::StaticPacket *arg1 = 0 ;
+  EQ::Net::StaticPacket *result = 0 ;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::StaticPacket const & is null", 0);
+    return 0;
+  } 
+  result = (EQ::Net::StaticPacket *)new EQ::Net::StaticPacket((EQ::Net::StaticPacket const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_StaticPacket_Data__SWIG_0(void * jarg1) {
+  void * jresult ;
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  void *result = 0 ;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  result = (void *)((EQ::Net::StaticPacket const *)arg1)->Data();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StaticPacket_Length__SWIG_0(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  result = ((EQ::Net::StaticPacket const *)arg1)->Length();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StaticPacket_Clear(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  result = (bool)(arg1)->Clear();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_StaticPacket_Resize(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  size_t arg2 ;
+  bool result;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (bool)(arg1)->Resize(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_StaticPacket_Reserve(void * jarg1, unsigned int jarg2) {
+  EQ::Net::StaticPacket *arg1 = (EQ::Net::StaticPacket *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::StaticPacket *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  (arg1)->Reserve(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicPacket__SWIG_0() {
+  void * jresult ;
+  EQ::Net::DynamicPacket *result = 0 ;
+  
+  result = (EQ::Net::DynamicPacket *)new EQ::Net::DynamicPacket();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DynamicPacket(void * jarg1) {
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicPacket__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DynamicPacket *arg1 = 0 ;
+  std::unique_ptr< EQ::Net::DynamicPacket > rvrdeleter1 ;
+  EQ::Net::DynamicPacket *result = 0 ;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::DynamicPacket && is null", 0);
+    return 0;
+  }
+  rvrdeleter1.reset(arg1); 
+  result = (EQ::Net::DynamicPacket *)new EQ::Net::DynamicPacket((EQ::Net::DynamicPacket &&)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicPacket_Data__SWIG_0(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  void *result = 0 ;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  result = (void *)((EQ::Net::DynamicPacket const *)arg1)->Data();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicPacket_Length__SWIG_0(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  result = ((EQ::Net::DynamicPacket const *)arg1)->Length();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicPacket_Clear(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  bool result;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  result = (bool)(arg1)->Clear();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicPacket_Resize(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  size_t arg2 ;
+  bool result;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  result = (bool)(arg1)->Resize(SWIG_STD_MOVE(arg2));
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicPacket_Reserve(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DynamicPacket *arg1 = (EQ::Net::DynamicPacket *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DynamicPacket *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  (arg1)->Reserve(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakHeader_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakHeader::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakHeader_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakHeader *arg1 = (EQ::Net::DaybreakHeader *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakHeader *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakHeader_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakHeader *arg1 = (EQ::Net::DaybreakHeader *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakHeader *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakHeader_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakHeader *arg1 = (EQ::Net::DaybreakHeader *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakHeader *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakHeader_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakHeader *arg1 = (EQ::Net::DaybreakHeader *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakHeader *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakHeader() {
+  void * jresult ;
+  EQ::Net::DaybreakHeader *result = 0 ;
+  
+  result = (EQ::Net::DaybreakHeader *)new EQ::Net::DaybreakHeader();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakHeader(void * jarg1) {
+  EQ::Net::DaybreakHeader *arg1 = (EQ::Net::DaybreakHeader *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakHeader *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnect_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakConnect::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnect_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnect_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnect_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnect_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnect_protocol_version_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->protocol_version = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnect_protocol_version_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  result = (uint32_t) ((arg1)->protocol_version);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnect_connect_code_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->connect_code = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnect_connect_code_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  result = (uint32_t) ((arg1)->connect_code);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnect_max_packet_size_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->max_packet_size = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnect_max_packet_size_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  result = (uint32_t) ((arg1)->max_packet_size);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnect() {
+  void * jresult ;
+  EQ::Net::DaybreakConnect *result = 0 ;
+  
+  result = (EQ::Net::DaybreakConnect *)new EQ::Net::DaybreakConnect();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnect(void * jarg1) {
+  EQ::Net::DaybreakConnect *arg1 = (EQ::Net::DaybreakConnect *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnect *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectReply_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakConnectReply::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnectReply_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnectReply_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_connect_code_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->connect_code = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectReply_connect_code_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint32_t) ((arg1)->connect_code);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_encode_key_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->encode_key = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectReply_encode_key_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint32_t) ((arg1)->encode_key);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_crc_bytes_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->crc_bytes = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnectReply_crc_bytes_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint8_t) ((arg1)->crc_bytes);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_encode_pass1_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->encode_pass1 = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnectReply_encode_pass1_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint8_t) ((arg1)->encode_pass1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_encode_pass2_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->encode_pass2 = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakConnectReply_encode_pass2_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint8_t) ((arg1)->encode_pass2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectReply_max_packet_size_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->max_packet_size = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectReply_max_packet_size_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  result = (uint32_t) ((arg1)->max_packet_size);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnectReply() {
+  void * jresult ;
+  EQ::Net::DaybreakConnectReply *result = 0 ;
+  
+  result = (EQ::Net::DaybreakConnectReply *)new EQ::Net::DaybreakConnectReply();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnectReply(void * jarg1) {
+  EQ::Net::DaybreakConnectReply *arg1 = (EQ::Net::DaybreakConnectReply *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectReply *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakDisconnect_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakDisconnect::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakDisconnect_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakDisconnect_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakDisconnect_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakDisconnect_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakDisconnect_connect_code_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->connect_code = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakDisconnect_connect_code_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  result = (uint32_t) ((arg1)->connect_code);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakDisconnect() {
+  void * jresult ;
+  EQ::Net::DaybreakDisconnect *result = 0 ;
+  
+  result = (EQ::Net::DaybreakDisconnect *)new EQ::Net::DaybreakDisconnect();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakDisconnect(void * jarg1) {
+  EQ::Net::DaybreakDisconnect *arg1 = (EQ::Net::DaybreakDisconnect *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakDisconnect *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakReliableHeader_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakReliableHeader::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakReliableHeader_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakReliableHeader_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakReliableHeader_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakReliableHeader_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakReliableHeader_sequence_set(void * jarg1, unsigned short jarg2) {
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint16_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  arg2 = (uint16_t)jarg2; 
+  if (arg1) (arg1)->sequence = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DaybreakReliableHeader_sequence_get(void * jarg1) {
+  unsigned short jresult ;
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  uint16_t result;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  result = (uint16_t) ((arg1)->sequence);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakReliableHeader() {
+  void * jresult ;
+  EQ::Net::DaybreakReliableHeader *result = 0 ;
+  
+  result = (EQ::Net::DaybreakReliableHeader *)new EQ::Net::DaybreakReliableHeader();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakReliableHeader(void * jarg1) {
+  EQ::Net::DaybreakReliableHeader *arg1 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableHeader *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakReliableFragmentHeader_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakReliableFragmentHeader::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakReliableFragmentHeader_reliable_set(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakReliableFragmentHeader *arg1 = (EQ::Net::DaybreakReliableFragmentHeader *) 0 ;
+  EQ::Net::DaybreakReliableHeader *arg2 = (EQ::Net::DaybreakReliableHeader *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableFragmentHeader *)jarg1; 
+  arg2 = (EQ::Net::DaybreakReliableHeader *)jarg2; 
+  if (arg1) (arg1)->reliable = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakReliableFragmentHeader_reliable_get(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakReliableFragmentHeader *arg1 = (EQ::Net::DaybreakReliableFragmentHeader *) 0 ;
+  EQ::Net::DaybreakReliableHeader *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableFragmentHeader *)jarg1; 
+  result = (EQ::Net::DaybreakReliableHeader *)& ((arg1)->reliable);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakReliableFragmentHeader_total_size_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakReliableFragmentHeader *arg1 = (EQ::Net::DaybreakReliableFragmentHeader *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableFragmentHeader *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->total_size = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakReliableFragmentHeader_total_size_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakReliableFragmentHeader *arg1 = (EQ::Net::DaybreakReliableFragmentHeader *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakReliableFragmentHeader *)jarg1; 
+  result = (uint32_t) ((arg1)->total_size);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakReliableFragmentHeader() {
+  void * jresult ;
+  EQ::Net::DaybreakReliableFragmentHeader *result = 0 ;
+  
+  result = (EQ::Net::DaybreakReliableFragmentHeader *)new EQ::Net::DaybreakReliableFragmentHeader();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakReliableFragmentHeader(void * jarg1) {
+  EQ::Net::DaybreakReliableFragmentHeader *arg1 = (EQ::Net::DaybreakReliableFragmentHeader *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakReliableFragmentHeader *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakSessionStatRequest::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakSessionStatRequest_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakSessionStatRequest_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_timestamp_set(void * jarg1, unsigned short jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint16_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint16_t)jarg2; 
+  if (arg1) (arg1)->timestamp = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DaybreakSessionStatRequest_timestamp_get(void * jarg1) {
+  unsigned short jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint16_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint16_t) ((arg1)->timestamp);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_stat_ping_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->stat_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_stat_ping_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint32_t) ((arg1)->stat_ping);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_avg_ping_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->avg_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_avg_ping_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint32_t) ((arg1)->avg_ping);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_min_ping_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->min_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_min_ping_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint32_t) ((arg1)->min_ping);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_max_ping_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->max_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_max_ping_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint32_t) ((arg1)->max_ping);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_last_ping_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->last_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatRequest_last_ping_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint32_t) ((arg1)->last_ping);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_packets_sent_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->packets_sent = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatRequest_packets_sent_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint64_t) ((arg1)->packets_sent);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatRequest_packets_recv_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->packets_recv = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatRequest_packets_recv_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  result = (uint64_t) ((arg1)->packets_recv);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakSessionStatRequest() {
+  void * jresult ;
+  EQ::Net::DaybreakSessionStatRequest *result = 0 ;
+  
+  result = (EQ::Net::DaybreakSessionStatRequest *)new EQ::Net::DaybreakSessionStatRequest();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakSessionStatRequest(void * jarg1) {
+  EQ::Net::DaybreakSessionStatRequest *arg1 = (EQ::Net::DaybreakSessionStatRequest *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatRequest *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatResponse_size() {
+  unsigned int jresult ;
+  size_t result;
+  
+  result = EQ::Net::DaybreakSessionStatResponse::size();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_zero_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->zero = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakSessionStatResponse_zero_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint8_t) ((arg1)->zero);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_opcode_set(void * jarg1, unsigned char jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint8_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint8_t)jarg2; 
+  if (arg1) (arg1)->opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned char SWIGSTDCALL CSharp_DaybreakSessionStatResponse_opcode_get(void * jarg1) {
+  unsigned char jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint8_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint8_t) ((arg1)->opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_timestamp_set(void * jarg1, unsigned short jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint16_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint16_t)jarg2; 
+  if (arg1) (arg1)->timestamp = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DaybreakSessionStatResponse_timestamp_get(void * jarg1) {
+  unsigned short jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint16_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint16_t) ((arg1)->timestamp);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_our_timestamp_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->our_timestamp = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakSessionStatResponse_our_timestamp_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint32_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint32_t) ((arg1)->our_timestamp);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_client_sent_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->client_sent = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatResponse_client_sent_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint64_t) ((arg1)->client_sent);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_client_recv_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->client_recv = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatResponse_client_recv_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint64_t) ((arg1)->client_recv);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_server_sent_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->server_sent = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatResponse_server_sent_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint64_t) ((arg1)->server_sent);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakSessionStatResponse_server_recv_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->server_recv = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakSessionStatResponse_server_recv_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  result = (uint64_t) ((arg1)->server_recv);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakSessionStatResponse() {
+  void * jresult ;
+  EQ::Net::DaybreakSessionStatResponse *result = 0 ;
+  
+  result = (EQ::Net::DaybreakSessionStatResponse *)new EQ::Net::DaybreakSessionStatResponse();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakSessionStatResponse(void * jarg1) {
+  EQ::Net::DaybreakSessionStatResponse *arg1 = (EQ::Net::DaybreakSessionStatResponse *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakSessionStatResponse *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQStreamManagerInterfaceOptions__SWIG_0() {
+  void * jresult ;
+  EQStreamManagerInterfaceOptions *result = 0 ;
+  
+  result = (EQStreamManagerInterfaceOptions *)new EQStreamManagerInterfaceOptions();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQStreamManagerInterfaceOptions__SWIG_1(int jarg1, unsigned int jarg2, unsigned int jarg3) {
+  void * jresult ;
+  int arg1 ;
+  bool arg2 ;
+  bool arg3 ;
+  EQStreamManagerInterfaceOptions *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  arg3 = jarg3 ? true : false; 
+  result = (EQStreamManagerInterfaceOptions *)new EQStreamManagerInterfaceOptions(arg1,arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_opcode_size_set(void * jarg1, int jarg2) {
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->opcode_size = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_opcode_size_get(void * jarg1) {
+  int jresult ;
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  int result;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  result = (int) ((arg1)->opcode_size);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_track_opcode_stats_set(void * jarg1, unsigned int jarg2) {
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  if (arg1) (arg1)->track_opcode_stats = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_track_opcode_stats_get(void * jarg1) {
+  unsigned int jresult ;
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  bool result;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  result = (bool) ((arg1)->track_opcode_stats);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_daybreak_options_set(void * jarg1, void * jarg2) {
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg2 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  arg2 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg2; 
+  if (arg1) (arg1)->daybreak_options = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamManagerInterfaceOptions_daybreak_options_get(void * jarg1) {
+  void * jresult ;
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  EQ::Net::DaybreakConnectionManagerOptions *result = 0 ;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  result = (EQ::Net::DaybreakConnectionManagerOptions *)& ((arg1)->daybreak_options);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQStreamManagerInterfaceOptions(void * jarg1) {
+  EQStreamManagerInterfaceOptions *arg1 = (EQStreamManagerInterfaceOptions *) 0 ;
+  
+  arg1 = (EQStreamManagerInterfaceOptions *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQStreamManagerInterface(void * jarg1) {
+  EQStreamManagerInterface *arg1 = (EQStreamManagerInterface *) 0 ;
+  
+  arg1 = (EQStreamManagerInterface *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamManagerInterface_GetOptions__SWIG_0(void * jarg1) {
+  void * jresult ;
+  EQStreamManagerInterface *arg1 = (EQStreamManagerInterface *) 0 ;
+  EQStreamManagerInterfaceOptions result;
+  
+  arg1 = (EQStreamManagerInterface *)jarg1; 
+  result = (arg1)->GetOptions();
+  jresult = new EQStreamManagerInterfaceOptions(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamManagerInterface_SetOptions(void * jarg1, void * jarg2) {
+  EQStreamManagerInterface *arg1 = (EQStreamManagerInterface *) 0 ;
+  EQStreamManagerInterfaceOptions *arg2 = 0 ;
+  
+  arg1 = (EQStreamManagerInterface *)jarg1; 
+  arg2 = (EQStreamManagerInterfaceOptions *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQStreamManagerInterfaceOptions const & is null", 0);
+    return ;
+  } 
+  (arg1)->SetOptions((EQStreamManagerInterfaceOptions const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQStreamInterface(void * jarg1) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Signature_ignore_eq_opcode_set(void * jarg1, unsigned short jarg2) {
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->ignore_eq_opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQStreamInterface_Signature_ignore_eq_opcode_get(void * jarg1) {
+  unsigned short jresult ;
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  result = (uint16) ((arg1)->ignore_eq_opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Signature_first_eq_opcode_set(void * jarg1, unsigned short jarg2) {
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint16 arg2 ;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  arg2 = (uint16)jarg2; 
+  if (arg1) (arg1)->first_eq_opcode = arg2;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQStreamInterface_Signature_first_eq_opcode_get(void * jarg1) {
+  unsigned short jresult ;
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  result = (uint16) ((arg1)->first_eq_opcode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Signature_first_length_set(void * jarg1, unsigned int jarg2) {
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint32 arg2 ;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  arg2 = (uint32)jarg2; 
+  if (arg1) (arg1)->first_length = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQStreamInterface_Signature_first_length_get(void * jarg1) {
+  unsigned int jresult ;
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  result = (uint32) ((arg1)->first_length);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQStreamInterface_Signature() {
+  void * jresult ;
+  EQStreamInterface::Signature *result = 0 ;
+  
+  result = (EQStreamInterface::Signature *)new EQStreamInterface::Signature();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQStreamInterface_Signature(void * jarg1) {
+  EQStreamInterface::Signature *arg1 = (EQStreamInterface::Signature *) 0 ;
+  
+  arg1 = (EQStreamInterface::Signature *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Stats_DaybreakStats_set(void * jarg1, void * jarg2) {
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  EQ::Net::DaybreakConnectionStats *arg2 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  arg2 = (EQ::Net::DaybreakConnectionStats *)jarg2; 
+  if (arg1) (arg1)->DaybreakStats = *arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_Stats_DaybreakStats_get(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  EQ::Net::DaybreakConnectionStats *result = 0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  result = (EQ::Net::DaybreakConnectionStats *)& ((arg1)->DaybreakStats);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Stats_RecvCount_set(void * jarg1, void * jarg2) {
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  int *arg2 = (int *) (int *)0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  arg2 = (int *)jarg2; 
+  {
+    size_t ii;
+    int *b = (int *) arg1->RecvCount;
+    for (ii = 0; ii < (size_t)_maxEmuOpcode; ii++) b[ii] = *((int *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_Stats_RecvCount_get(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  int *result = 0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  result = (int *)(int *) ((arg1)->RecvCount);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Stats_SentCount_set(void * jarg1, void * jarg2) {
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  int *arg2 = (int *) (int *)0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  arg2 = (int *)jarg2; 
+  {
+    size_t ii;
+    int *b = (int *) arg1->SentCount;
+    for (ii = 0; ii < (size_t)_maxEmuOpcode; ii++) b[ii] = *((int *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_Stats_SentCount_get(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  int *result = 0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  result = (int *)(int *) ((arg1)->SentCount);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_EQStreamInterface_Stats() {
+  void * jresult ;
+  EQStreamInterface::Stats *result = 0 ;
+  
+  result = (EQStreamInterface::Stats *)new EQStreamInterface::Stats();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_EQStreamInterface_Stats(void * jarg1) {
+  EQStreamInterface::Stats *arg1 = (EQStreamInterface::Stats *) 0 ;
+  
+  arg1 = (EQStreamInterface::Stats *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_QueuePacket__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQApplicationPacket *arg2 = (EQApplicationPacket *) 0 ;
+  bool arg3 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQApplicationPacket *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->QueuePacket((EQApplicationPacket const *)arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_QueuePacket__SWIG_1(void * jarg1, void * jarg2) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQApplicationPacket *arg2 = (EQApplicationPacket *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQApplicationPacket *)jarg2; 
+  (arg1)->QueuePacket((EQApplicationPacket const *)arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_FastQueuePacket__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQApplicationPacket **arg2 = (EQApplicationPacket **) 0 ;
+  bool arg3 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQApplicationPacket **)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->FastQueuePacket(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_FastQueuePacket__SWIG_1(void * jarg1, void * jarg2) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQApplicationPacket **arg2 = (EQApplicationPacket **) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQApplicationPacket **)jarg2; 
+  (arg1)->FastQueuePacket(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_PopPacket(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQApplicationPacket *result = 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (EQApplicationPacket *)(arg1)->PopPacket();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_Close(void * jarg1) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  (arg1)->Close();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_ReleaseFromUse(void * jarg1) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  (arg1)->ReleaseFromUse();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_RemoveData(void * jarg1) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  (arg1)->RemoveData();
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQStreamInterface_GetRemoteAddr(void * jarg1) {
+  const char * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  std::string result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = ((EQStreamInterface const *)arg1)->GetRemoteAddr();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQStreamInterface_GetRemoteIP(void * jarg1) {
+  unsigned int jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  uint32 result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (uint32)((EQStreamInterface const *)arg1)->GetRemoteIP();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_EQStreamInterface_GetRemotePort(void * jarg1) {
+  unsigned short jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  uint16 result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (uint16)((EQStreamInterface const *)arg1)->GetRemotePort();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_EQStreamInterface_CheckState(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQStreamState arg2 ;
+  bool result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQStreamState)jarg2; 
+  result = (bool)(arg1)->CheckState(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_EQStreamInterface_Describe(void * jarg1) {
+  const char * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  std::string result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = ((EQStreamInterface const *)arg1)->Describe();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_SetActive(void * jarg1, unsigned int jarg2) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SetActive(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQStreamInterface_CheckSignature(void * jarg1, void * jarg2) {
+  int jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQStreamInterface::Signature *arg2 = (EQStreamInterface::Signature *) 0 ;
+  EQStreamInterface::MatchState result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (EQStreamInterface::Signature *)jarg2; 
+  result = (EQStreamInterface::MatchState)(arg1)->CheckSignature((EQStreamInterface::Signature const *)arg2);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_EQStreamInterface_GetState(void * jarg1) {
+  int jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQStreamState result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (EQStreamState)(arg1)->GetState();
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_SetOpcodeManager(void * jarg1, void * jarg2) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  OpcodeManager **arg2 = (OpcodeManager **) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  arg2 = (OpcodeManager **)jarg2; 
+  (arg1)->SetOpcodeManager(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_GetOpcodeManager(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  OpcodeManager *result = 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (OpcodeManager *)((EQStreamInterface const *)arg1)->GetOpcodeManager();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_ClientVersion(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQ::versions::ClientVersion result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = ((EQStreamInterface const *)arg1)->ClientVersion();
+  jresult = new EQ::versions::ClientVersion(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_GetStats(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQStreamInterface::Stats result;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = ((EQStreamInterface const *)arg1)->GetStats();
+  jresult = new EQStreamInterface::Stats(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_EQStreamInterface_ResetStats(void * jarg1) {
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  (arg1)->ResetStats();
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_EQStreamInterface_GetManager(void * jarg1) {
+  void * jresult ;
+  EQStreamInterface *arg1 = (EQStreamInterface *) 0 ;
+  EQStreamManagerInterface *result = 0 ;
+  
+  arg1 = (EQStreamInterface *)jarg1; 
+  result = (EQStreamManagerInterface *)((EQStreamInterface const *)arg1)->GetManager();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnectionStats() {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionStats *result = 0 ;
+  
+  result = (EQ::Net::DaybreakConnectionStats *)new EQ::Net::DaybreakConnectionStats();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_Reset(void * jarg1) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  (arg1)->Reset();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_recv_bytes_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->recv_bytes = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_recv_bytes_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->recv_bytes);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sent_bytes_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sent_bytes = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sent_bytes_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sent_bytes);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_recv_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->recv_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_recv_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->recv_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sent_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sent_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sent_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sent_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_recv_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sync_recv_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_recv_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sync_recv_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_sent_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sync_sent_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_sent_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sync_sent_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_remote_recv_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sync_remote_recv_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_remote_recv_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sync_remote_recv_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_remote_sent_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->sync_remote_sent_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_sync_remote_sent_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->sync_remote_sent_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_min_ping_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->min_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_min_ping_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->min_ping);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_max_ping_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->max_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_max_ping_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->max_ping);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_avg_ping_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->avg_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_avg_ping_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->avg_ping);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_last_ping_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->last_ping = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_last_ping_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->last_ping);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_created_set(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  EQ::Net::Timestamp arg2 ;
+  EQ::Net::Timestamp *argp2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  argp2 = (EQ::Net::Timestamp *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null EQ::Net::Timestamp", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  if (arg1) (arg1)->created = arg2;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnectionStats_created_get(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  EQ::Net::Timestamp result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result =  ((arg1)->created);
+  jresult = new EQ::Net::Timestamp(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_dropped_datarate_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->dropped_datarate_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_dropped_datarate_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->dropped_datarate_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_packets_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->resent_packets = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_packets_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->resent_packets);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_fragments_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->resent_fragments = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_fragments_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->resent_fragments);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_full_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->resent_full = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_resent_full_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->resent_full);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_datarate_remaining_set(void * jarg1, double jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  double arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->datarate_remaining = arg2;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_DaybreakConnectionStats_datarate_remaining_get(void * jarg1) {
+  double jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  double result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (double) ((arg1)->datarate_remaining);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_bytes_after_decode_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->bytes_after_decode = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_bytes_after_decode_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->bytes_after_decode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionStats_bytes_before_encode_set(void * jarg1, unsigned long long jarg2) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  arg2 = (uint64_t)jarg2; 
+  if (arg1) (arg1)->bytes_before_encode = arg2;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DaybreakConnectionStats_bytes_before_encode_get(void * jarg1) {
+  unsigned long long jresult ;
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  uint64_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  result = (uint64_t) ((arg1)->bytes_before_encode);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnectionStats(void * jarg1) {
+  EQ::Net::DaybreakConnectionStats *arg1 = (EQ::Net::DaybreakConnectionStats *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionStats *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnection__SWIG_0(void * jarg1, void * jarg2, const char * jarg3, int jarg4) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  EQ::Net::DaybreakConnect *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  int arg4 ;
+  EQ::Net::DaybreakConnection *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  arg2 = (EQ::Net::DaybreakConnect *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::DaybreakConnect const & is null", 0);
+    return 0;
+  } 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = (int)jarg4; 
+  result = (EQ::Net::DaybreakConnection *)new EQ::Net::DaybreakConnection(arg1,(EQ::Net::DaybreakConnect const &)*arg2,(std::string const &)*arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnection__SWIG_1(void * jarg1, const char * jarg2, int jarg3) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  std::string *arg2 = 0 ;
+  int arg3 ;
+  EQ::Net::DaybreakConnection *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (int)jarg3; 
+  result = (EQ::Net::DaybreakConnection *)new EQ::Net::DaybreakConnection(arg1,(std::string const &)*arg2,arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnection(void * jarg1) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DaybreakConnection_RemoteEndpoint(void * jarg1) {
+  const char * jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (std::string *) &((EQ::Net::DaybreakConnection const *)arg1)->RemoteEndpoint();
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DaybreakConnection_RemotePort(void * jarg1) {
+  int jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  int result;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (int)((EQ::Net::DaybreakConnection const *)arg1)->RemotePort();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnection_Close(void * jarg1) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  (arg1)->Close();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnection_QueuePacket__SWIG_0(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::Packet *arg2 = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  arg2 = (EQ::Net::Packet *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::Packet & is null", 0);
+    return ;
+  } 
+  (arg1)->QueuePacket(*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnection_QueuePacket__SWIG_1(void * jarg1, void * jarg2, int jarg3) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::Packet *arg2 = 0 ;
+  int arg3 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  arg2 = (EQ::Net::Packet *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::Packet & is null", 0);
+    return ;
+  } 
+  arg3 = (int)jarg3; 
+  (arg1)->QueuePacket(*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnection_QueuePacket__SWIG_2(void * jarg1, void * jarg2, int jarg3, unsigned int jarg4) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::Packet *arg2 = 0 ;
+  int arg3 ;
+  bool arg4 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  arg2 = (EQ::Net::Packet *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::Packet & is null", 0);
+    return ;
+  } 
+  arg3 = (int)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  (arg1)->QueuePacket(*arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnection_GetStats(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::DaybreakConnectionStats result;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (arg1)->GetStats();
+  jresult = new EQ::Net::DaybreakConnectionStats(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnection_ResetStats(void * jarg1) {
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  (arg1)->ResetStats();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnection_GetRollingPing(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = ((EQ::Net::DaybreakConnection const *)arg1)->GetRollingPing();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DaybreakConnection_GetStatus(void * jarg1) {
+  int jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::DbProtocolStatus result;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (EQ::Net::DbProtocolStatus)((EQ::Net::DaybreakConnection const *)arg1)->GetStatus();
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnection_GetEncodePasses(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::DaybreakEncodeType *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (EQ::Net::DaybreakEncodeType *)((EQ::Net::DaybreakConnection const *)arg1)->GetEncodePasses();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnection_GetManager__SWIG_0(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnection *arg1 = (EQ::Net::DaybreakConnection *) 0 ;
+  EQ::Net::DaybreakConnectionManager *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnection *)jarg1; 
+  result = (EQ::Net::DaybreakConnectionManager *)((EQ::Net::DaybreakConnection const *)arg1)->GetManager();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnectionManagerOptions() {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *result = 0 ;
+  
+  result = (EQ::Net::DaybreakConnectionManagerOptions *)new EQ::Net::DaybreakConnectionManagerOptions();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_max_packet_size_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->max_packet_size = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_max_packet_size_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->max_packet_size);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_max_connection_count_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->max_connection_count = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_max_connection_count_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->max_connection_count);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_keepalive_delay_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->keepalive_delay_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_keepalive_delay_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->keepalive_delay_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_factor_set(void * jarg1, double jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->resend_delay_factor = arg2;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_factor_get(void * jarg1) {
+  double jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result = (double) ((arg1)->resend_delay_factor);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->resend_delay_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->resend_delay_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_min_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->resend_delay_min = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_min_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->resend_delay_min);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_max_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->resend_delay_max = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_delay_max_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->resend_delay_max);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connect_delay_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->connect_delay_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connect_delay_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->connect_delay_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connect_stale_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->connect_stale_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connect_stale_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->connect_stale_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_stale_connection_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->stale_connection_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_stale_connection_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->stale_connection_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_crc_length_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->crc_length = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_crc_length_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->crc_length);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_hold_size_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->hold_size = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_hold_size_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->hold_size);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_hold_length_ms_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->hold_length_ms = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_hold_length_ms_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->hold_length_ms);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_simulated_in_packet_loss_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->simulated_in_packet_loss = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_simulated_in_packet_loss_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->simulated_in_packet_loss);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_simulated_out_packet_loss_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->simulated_out_packet_loss = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_simulated_out_packet_loss_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->simulated_out_packet_loss);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_tic_rate_hertz_set(void * jarg1, double jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->tic_rate_hertz = arg2;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_tic_rate_hertz_get(void * jarg1) {
+  double jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result = (double) ((arg1)->tic_rate_hertz);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_timeout_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->resend_timeout = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_resend_timeout_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->resend_timeout);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connection_close_time_set(void * jarg1, unsigned int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (size_t)jarg2; 
+  if (arg1) (arg1)->connection_close_time = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_connection_close_time_get(void * jarg1) {
+  unsigned int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  size_t result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result =  ((arg1)->connection_close_time);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_encode_passes_set(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  EQ::Net::DaybreakEncodeType *arg2 = (EQ::Net::DaybreakEncodeType *) (EQ::Net::DaybreakEncodeType *)0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (EQ::Net::DaybreakEncodeType *)jarg2; 
+  {
+    size_t ii;
+    EQ::Net::DaybreakEncodeType *b = (EQ::Net::DaybreakEncodeType *) arg1->encode_passes;
+    for (ii = 0; ii < (size_t)2; ii++) b[ii] = *((EQ::Net::DaybreakEncodeType *) arg2 + ii);
+  }
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_encode_passes_get(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  EQ::Net::DaybreakEncodeType *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result = (EQ::Net::DaybreakEncodeType *)(EQ::Net::DaybreakEncodeType *) ((arg1)->encode_passes);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_port_set(void * jarg1, int jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  int arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->port = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_port_get(void * jarg1) {
+  int jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  int result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result = (int) ((arg1)->port);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_outgoing_data_rate_set(void * jarg1, double jarg2) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double arg2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  arg2 = (double)jarg2; 
+  if (arg1) (arg1)->outgoing_data_rate = arg2;
+}
+
+
+SWIGEXPORT double SWIGSTDCALL CSharp_DaybreakConnectionManagerOptions_outgoing_data_rate_get(void * jarg1) {
+  double jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  double result;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  result = (double) ((arg1)->outgoing_data_rate);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnectionManagerOptions(void * jarg1) {
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = (EQ::Net::DaybreakConnectionManagerOptions *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnectionManager__SWIG_0() {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManager *result = 0 ;
+  
+  result = (EQ::Net::DaybreakConnectionManager *)new EQ::Net::DaybreakConnectionManager();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DaybreakConnectionManager__SWIG_1(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManagerOptions *arg1 = 0 ;
+  EQ::Net::DaybreakConnectionManager *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManagerOptions *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "EQ::Net::DaybreakConnectionManagerOptions const & is null", 0);
+    return 0;
+  } 
+  result = (EQ::Net::DaybreakConnectionManager *)new EQ::Net::DaybreakConnectionManager((EQ::Net::DaybreakConnectionManagerOptions const &)*arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DaybreakConnectionManager(void * jarg1) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_Connect(void * jarg1, const char * jarg2, int jarg3) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  std::string *arg2 = 0 ;
+  int arg3 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (int)jarg3; 
+  (arg1)->Connect((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_Process(void * jarg1) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  (arg1)->Process();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_UpdateDataBudget(void * jarg1) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  (arg1)->UpdateDataBudget();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_ProcessResend(void * jarg1) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  (arg1)->ProcessResend();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_OnNewConnection(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  SwigValueWrapper< std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >) > > arg2 ;
+  std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >) > *argp2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  argp2 = (std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->OnNewConnection(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_OnConnectionStateChange(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::DbProtocolStatus,EQ::Net::DbProtocolStatus) > arg2 ;
+  std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::DbProtocolStatus,EQ::Net::DbProtocolStatus) > *argp2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  argp2 = (std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::DbProtocolStatus,EQ::Net::DbProtocolStatus) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::DbProtocolStatus,EQ::Net::DbProtocolStatus) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->OnConnectionStateChange(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_OnPacketRecv(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  SwigValueWrapper< std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::Packet const &) > > arg2 ;
+  std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::Packet const &) > *argp2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  argp2 = (std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::Packet const &) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (std::shared_ptr< EQ::Net::DaybreakConnection >,EQ::Net::Packet const &) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->OnPacketRecv(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DaybreakConnectionManager_OnErrorMessage(void * jarg1, void * jarg2) {
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  SwigValueWrapper< std::function< void (std::string const &) > > arg2 ;
+  std::function< void (std::string const &) > *argp2 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  argp2 = (std::function< void (std::string const &) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (std::string const &) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->OnErrorMessage(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DaybreakConnectionManager_GetOptions(void * jarg1) {
+  void * jresult ;
+  EQ::Net::DaybreakConnectionManager *arg1 = (EQ::Net::DaybreakConnectionManager *) 0 ;
+  EQ::Net::DaybreakConnectionManagerOptions *result = 0 ;
+  
+  arg1 = (EQ::Net::DaybreakConnectionManager *)jarg1; 
+  result = (EQ::Net::DaybreakConnectionManagerOptions *) &(arg1)->GetOptions();
+  jresult = (void *)result; 
   return jresult;
 }
 
@@ -121917,6 +125584,646 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_LogSys_get() {
 }
 
 
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_IntRuleCount_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)RuleManager::IntRuleCount;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_RealRuleCount_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)RuleManager::RealRuleCount;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_BoolRuleCount_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)RuleManager::BoolRuleCount;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_StringRuleCount_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)RuleManager::StringRuleCount;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_RuleManager_Instance() {
+  void * jresult ;
+  RuleManager *result = 0 ;
+  
+  result = (RuleManager *)RuleManager::Instance();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_RulesCount_get() {
+  unsigned int jresult ;
+  unsigned int result;
+  
+  result = (unsigned int)RuleManager::RulesCount;
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_GetIntRule(void * jarg1, int jarg2) {
+  int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  RuleManager::IntType arg2 ;
+  int result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (RuleManager::IntType)jarg2; 
+  result = (int)((RuleManager const *)arg1)->GetIntRule(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_RuleManager_GetRealRule(void * jarg1, int jarg2) {
+  float jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  RuleManager::RealType arg2 ;
+  float result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (RuleManager::RealType)jarg2; 
+  result = (float)((RuleManager const *)arg1)->GetRealRule(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_GetBoolRule(void * jarg1, int jarg2) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  RuleManager::BoolType arg2 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (RuleManager::BoolType)jarg2; 
+  result = (bool)((RuleManager const *)arg1)->GetBoolRule(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetStringRule(void * jarg1, int jarg2) {
+  const char * jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  RuleManager::StringType arg2 ;
+  std::string result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (RuleManager::StringType)jarg2; 
+  result = ((RuleManager const *)arg1)->GetStringRule(arg2);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleName__SWIG_0(int jarg1) {
+  const char * jresult ;
+  RuleManager::IntType arg1 ;
+  std::string result;
+  
+  arg1 = (RuleManager::IntType)jarg1; 
+  result = RuleManager::GetRuleName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleName__SWIG_1(int jarg1) {
+  const char * jresult ;
+  RuleManager::RealType arg1 ;
+  std::string result;
+  
+  arg1 = (RuleManager::RealType)jarg1; 
+  result = RuleManager::GetRuleName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleName__SWIG_2(int jarg1) {
+  const char * jresult ;
+  RuleManager::BoolType arg1 ;
+  std::string result;
+  
+  arg1 = (RuleManager::BoolType)jarg1; 
+  result = RuleManager::GetRuleName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleName__SWIG_3(int jarg1) {
+  const char * jresult ;
+  RuleManager::StringType arg1 ;
+  std::string result;
+  
+  arg1 = (RuleManager::StringType)jarg1; 
+  result = RuleManager::GetRuleName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleNotes__SWIG_0(int jarg1) {
+  const char * jresult ;
+  RuleManager::IntType arg1 ;
+  std::string *result = 0 ;
+  
+  arg1 = (RuleManager::IntType)jarg1; 
+  result = (std::string *) &RuleManager::GetRuleNotes(arg1);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleNotes__SWIG_1(int jarg1) {
+  const char * jresult ;
+  RuleManager::RealType arg1 ;
+  std::string *result = 0 ;
+  
+  arg1 = (RuleManager::RealType)jarg1; 
+  result = (std::string *) &RuleManager::GetRuleNotes(arg1);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleNotes__SWIG_2(int jarg1) {
+  const char * jresult ;
+  RuleManager::BoolType arg1 ;
+  std::string *result = 0 ;
+  
+  arg1 = (RuleManager::BoolType)jarg1; 
+  result = (std::string *) &RuleManager::GetRuleNotes(arg1);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetRuleNotes__SWIG_3(int jarg1) {
+  const char * jresult ;
+  RuleManager::StringType arg1 ;
+  std::string *result = 0 ;
+  
+  arg1 = (RuleManager::StringType)jarg1; 
+  result = (std::string *) &RuleManager::GetRuleNotes(arg1);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_CountRules() {
+  unsigned int jresult ;
+  uint32 result;
+  
+  result = (uint32)RuleManager::CountRules();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_FindCategory(const char * jarg1) {
+  int jresult ;
+  std::string *arg1 = 0 ;
+  RuleManager::CategoryType result;
+  
+  if (!jarg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg1_str(jarg1);
+  arg1 = &arg1_str; 
+  result = (RuleManager::CategoryType)RuleManager::FindCategory((std::string const &)*arg1);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_ListRules(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::vector< std::string > *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (std::vector< std::string > *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->ListRules((std::string const &)*arg2,*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_ListCategories(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::vector< std::string > *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (std::vector< std::string > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< std::string > & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->ListCategories(*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_GetRule(void * jarg1, const char * jarg2, void * jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (std::string *)jarg3;
+  if (!arg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::string & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->GetRule((std::string const &)*arg2,*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_SetRule__SWIG_0(void * jarg1, const char * jarg2, const char * jarg3, void * jarg4, unsigned int jarg5, unsigned int jarg6) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  Database *arg4 = (Database *) 0 ;
+  bool arg5 ;
+  bool arg6 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = (Database *)jarg4; 
+  arg5 = jarg5 ? true : false; 
+  arg6 = jarg6 ? true : false; 
+  result = (bool)(arg1)->SetRule((std::string const &)*arg2,(std::string const &)*arg3,arg4,arg5,arg6);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_SetRule__SWIG_1(void * jarg1, const char * jarg2, const char * jarg3, void * jarg4, unsigned int jarg5) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  Database *arg4 = (Database *) 0 ;
+  bool arg5 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = (Database *)jarg4; 
+  arg5 = jarg5 ? true : false; 
+  result = (bool)(arg1)->SetRule((std::string const &)*arg2,(std::string const &)*arg3,arg4,arg5);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_SetRule__SWIG_2(void * jarg1, const char * jarg2, const char * jarg3, void * jarg4) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  Database *arg4 = (Database *) 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = (Database *)jarg4; 
+  result = (bool)(arg1)->SetRule((std::string const &)*arg2,(std::string const &)*arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_SetRule__SWIG_3(void * jarg1, const char * jarg2, const char * jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  result = (bool)(arg1)->SetRule((std::string const &)*arg2,(std::string const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_RuleManager_GetActiveRulesetID(void * jarg1) {
+  int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  int result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  result = (int)((RuleManager const *)arg1)->GetActiveRulesetID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_RuleManager_GetActiveRuleset(void * jarg1) {
+  const char * jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  std::string result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  result = ((RuleManager const *)arg1)->GetActiveRuleset();
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_ListRulesets(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  Database *arg1 = (Database *) 0 ;
+  std::map< int,std::string > *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (Database *)jarg1; 
+  arg2 = (std::map< int,std::string > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::map< int,std::string > & is null", 0);
+    return 0;
+  } 
+  result = (bool)RuleManager::ListRulesets(arg1,*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_RuleManager_ResetRules__SWIG_0(void * jarg1, unsigned int jarg2) {
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->ResetRules(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_RuleManager_ResetRules__SWIG_1(void * jarg1) {
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  
+  arg1 = (RuleManager *)jarg1; 
+  (arg1)->ResetRules();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_LoadRules__SWIG_0(void * jarg1, void * jarg2, const char * jarg3, unsigned int jarg4) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  std::string *arg3 = 0 ;
+  bool arg4 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = jarg4 ? true : false; 
+  result = (bool)(arg1)->LoadRules(arg2,(std::string const &)*arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_LoadRules__SWIG_1(void * jarg1, void * jarg2, const char * jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  std::string *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  result = (bool)(arg1)->LoadRules(arg2,(std::string const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_RuleManager_SaveRules(void * jarg1, void * jarg2, const char * jarg3) {
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  std::string *arg3 = 0 ;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  (arg1)->SaveRules(arg2,(std::string const &)*arg3);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_UpdateInjectedRules__SWIG_0(void * jarg1, void * jarg2, const char * jarg3, unsigned int jarg4) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  std::string *arg3 = 0 ;
+  bool arg4 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  arg4 = jarg4 ? true : false; 
+  result = (bool)(arg1)->UpdateInjectedRules(arg2,(std::string const &)*arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_UpdateInjectedRules__SWIG_1(void * jarg1, void * jarg2, const char * jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  std::string *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  result = (bool)(arg1)->UpdateInjectedRules(arg2,(std::string const &)*arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_UpdateOrphanedRules__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  bool arg3 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  result = (bool)(arg1)->UpdateOrphanedRules(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_UpdateOrphanedRules__SWIG_1(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  result = (bool)(arg1)->UpdateOrphanedRules(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_RuleManager_RestoreRuleNotes(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  Database *arg2 = (Database *) 0 ;
+  bool result;
+  
+  arg1 = (RuleManager *)jarg1; 
+  arg2 = (Database *)jarg2; 
+  result = (bool)(arg1)->RestoreRuleNotes(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_RuleManager(void * jarg1) {
+  RuleManager *arg1 = (RuleManager *) 0 ;
+  
+  arg1 = (RuleManager *)jarg1; 
+  delete arg1;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_new_LinkedListNewSpawn() {
   void * jresult ;
   LinkedList< NewSpawn_Struct * > *result = 0 ;
@@ -129198,6 +133505,14 @@ SWIGEXPORT EQPacket * SWIGSTDCALL CSharp_EQApplicationPacket_SWIGUpcast(EQApplic
 
 SWIGEXPORT EQApplicationPacket * SWIGSTDCALL CSharp_EQRawApplicationPacket_SWIGUpcast(EQRawApplicationPacket *jarg1) {
     return (EQApplicationPacket *)jarg1;
+}
+
+SWIGEXPORT EQ::Net::Packet * SWIGSTDCALL CSharp_StaticPacket_SWIGUpcast(EQ::Net::StaticPacket *jarg1) {
+    return (EQ::Net::Packet *)jarg1;
+}
+
+SWIGEXPORT EQ::Net::Packet * SWIGSTDCALL CSharp_DynamicPacket_SWIGUpcast(EQ::Net::DynamicPacket *jarg1) {
+    return (EQ::Net::Packet *)jarg1;
 }
 
 SWIGEXPORT Entity * SWIGSTDCALL CSharp_Mob_SWIGUpcast(Mob *jarg1) {

@@ -75,6 +75,12 @@
 %ignore QuestEventSubroutines;
 %ignore QuestManager::ClearTimers;
 
+%ignore RuleManager::InvalidBool;
+%ignore RuleManager::InvalidReal;
+%ignore RuleManager::InvalidInt;
+%ignore RuleManager::InvalidString;
+%ignore RuleManager::InvalidCategory;
+
 %ignore ListElement::ListElement();
 
 %ignore ListElement::ListElement(const NewSpawn_Struct*&);
@@ -105,7 +111,12 @@
 #include "glm/vec4.hpp"
 
 #include "../../../common/ruletypes.h"
+#include "../../../common/rulesys.h"
 #include "../../../common/eq_packet.h"
+#include "../../../common/net/packet.h"
+#include "../../../common/net/daybreak_structs.h"
+#include "../../../common/eq_stream_intf.h"
+#include "../../../common/net/daybreak_connection.h"
 #include "../../../common/expedition_lockout_timer.h"
 #include "../../../common/eqemu_logsys_log_aliases.h"
 #include "../../../common/linked_list.h"
@@ -149,10 +160,13 @@ void FreeVec3(glm::vec3* ptr) {
     delete ptr;
 }
 
+
+
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
 %}
+
 
 // Assuming glm::vec4 is the type you're working with
 void FreeVec4(glm::vec4* ptr);
@@ -162,9 +176,18 @@ void FreeVec3(glm::vec3* ptr);
 %include <std_except.i>
 %include <std_vector.i>
 %include <std_string.i>
+%include <csharp/std_string.i>
 %include <std_unordered_map.i>
 %include <std_shared_ptr.i>
 %include <stdint.i>
+
+%inline %{
+std::string GetRuleValue(const std::string& rule) {
+    std::string out("");
+    RuleManager::Instance()->GetRule(rule, out);
+    return out;
+}
+%}
 
 namespace glm {
     %typedef int length_t;
@@ -211,6 +234,11 @@ namespace glm {
 
 %include "../../../common/ruletypes.h"
 %include "../../../common/eq_packet.h"
+%include "../../../common/net/packet.h"
+%include "../../../common/net/daybreak_structs.h"
+%include "../../../common/eq_stream_intf.h"
+%include "../../../common/net/daybreak_connection.h"
+
 %include "../../../common/expedition_lockout_timer.h"
 %include "../../../common/eqemu_logsys_log_aliases.h"
 
@@ -246,6 +274,8 @@ namespace glm {
 %include "../../../common/item_instance.h"
 %include "../../../common/item_data.h"
 %include "../../../common/eqemu_logsys.h"
+%include "../../../common/rulesys.h"
+
 
 
 // Typedefs

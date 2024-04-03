@@ -351,8 +351,17 @@ include_directories(
 # Create symlinks to shared lib and dotnet folder
 if(UNIX AND NOT APPLE)
   if(IS_DIRECTORY "/home/eqemu")
-    set(CUSTOM_COMMAND "ln -s -f /home/eqemu/code/build/bin/dotnet_quests.so /home/eqemu/server/bin/dotnet_quests.so && ln -s /home/eqemu/code/build/bin/dotnet -f /home/eqemu/server/bin/dotnet")
-    execute_process(COMMAND bash -c ${CUSTOM_COMMAND})
+  execute_process(COMMAND sudo bash ${CMAKE_CURRENT_SOURCE_DIR}/dotnet_quests/setup.sh
+    RESULT_VARIABLE script_result
+    OUTPUT_VARIABLE script_output)
+
+    # Check the result
+    if(NOT script_result EQUAL "0")
+        message(FATAL_ERROR "Script failed: ${script_output}")
+    else()
+        message(STATUS "Setup script succeeded: ${script_output}")
+    endif()
+
   endif()
 endif()
 
