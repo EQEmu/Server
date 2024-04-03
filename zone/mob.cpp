@@ -958,8 +958,9 @@ int64 Mob::CalcMaxMana()
 }
 
 int64 Mob::CalcMaxHP() {
-	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
-	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp = (base_hp + itembonuses.HP);
+	max_hp += max_hp * ((aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange) / 10000.0f);
+	max_hp += spellbonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange;
 
 	return max_hp;
 }
@@ -967,14 +968,15 @@ int64 Mob::CalcMaxHP() {
 int64 Mob::GetItemHPBonuses() {
 	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
-	item_hp += item_hp * itembonuses.MaxHPChange / 10000;
+	item_hp = itembonuses.FlatMaxHPChange;
+	item_hp += item_hp * itembonuses.PercentMaxHPChange / 10000;
 	return item_hp;
 }
 
 int64 Mob::GetSpellHPBonuses() {
 	int64 spell_hp = 0;
-	spell_hp = spellbonuses.HP;
-	spell_hp += spell_hp * spellbonuses.MaxHPChange / 10000;
+	spell_hp = spellbonuses.FlatMaxHPChange;
+	spell_hp += spell_hp * spellbonuses.PercentMaxHPChange / 10000;
 	return spell_hp;
 }
 
