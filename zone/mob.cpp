@@ -969,7 +969,6 @@ int64 Mob::GetItemHPBonuses() {
 	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
 	item_hp += item_hp * ((itembonuses.PercentMaxHPChange + spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange) / 10000.0f);
-	item_hp += itembonuses.FlatMaxHPChange;
 	return item_hp;
 }
 
