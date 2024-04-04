@@ -2868,7 +2868,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		// name`s_corpse so that %T works on corpses (client workaround)
 		// Rename the new corpse on client side.
 		std::string old_name = Strings::Replace(corpse->GetName(), "`s_corpse", "'s_corpse");
-		SendRename(killer_mob, old_name.c_str(), corpse->GetCleanName());
+		SendRename(killer_mob, old_name.c_str(), corpse->GetName());
 
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());
