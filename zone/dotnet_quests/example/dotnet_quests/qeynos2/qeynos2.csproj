@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <OutputPath>../out</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+  </PropertyGroup>
+  
+ <ItemGroup>
+    <Reference Include="common">
+          <HintPath>../out/common.dll</HintPath>
+    </Reference>
+    <Reference Include="DotNetTypes">
+          <HintPath>../../../code/build/bin/dotnet/DotNetTypes.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

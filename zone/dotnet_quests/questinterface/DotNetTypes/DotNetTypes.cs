@@ -3,6 +3,26 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+[StructLayout(LayoutKind.Sequential)]
+public struct EventArgs
+{
+    public int EventType;
+    public int QuestEventId;
+    public IntPtr Npc;
+    public IntPtr Mob;
+    public IntPtr Client;
+    public IntPtr Bot;
+    public IntPtr Item;
+    public IntPtr Data;
+    public IntPtr EncounterName;
+    public uint ExtraData;
+    public uint SpellID;
+    public IntPtr ItemVector;
+    public IntPtr MobVector;
+    public IntPtr PacketVector;
+    public IntPtr StringVector;
+}
+
 public class EqFactory
 {
     public static Zone CreateZone(nint Cptr, bool own)
@@ -25,6 +45,16 @@ public class EqFactory
     public static Mob CreateMob(nint Cptr, bool own)
     {
         return new Mob(Cptr, own);
+    }
+
+    public static Client CreateClient(nint Cptr, bool own)
+    {
+        return new Client(Cptr, own);
+    }
+
+    public static Bot CreateBot(nint Cptr, bool own)
+    {
+        return new Bot(Cptr, own);
     }
 
     public static EQEmuLogSys CreateLogSys(nint Cptr, bool own)
@@ -105,6 +135,17 @@ public class EqFactory
         return list;
     }
 
+    public static EQLists CreateEQLists(EventArgs eventArgs)
+    {
+        return new EQLists()
+        {
+            stringList = CreateStringVector(eventArgs.StringVector, false),
+            mobList = CreateMobVector(eventArgs.MobVector, false),
+            itemList = CreateItemVector(eventArgs.ItemVector, false),
+            packetList = CreatePacketVector(eventArgs.PacketVector, false),
+        };
+    }
+
     public static Assembly GetCallerAssembly()
     {
         // Create a new StackTrace that captures filename, line number, and column information.
@@ -152,8 +193,10 @@ public static class EntityListExtensions
 
 public static class MobExtensions
 {
-    public static void QuestSay(this Mob mob, EntityList e, string message) {
-        Options journalOptions = new Options {
+    public static void QuestSay(this Mob mob, EntityList e, string message)
+    {
+        Options journalOptions = new Options
+        {
             speak_mode = SpeakMode.Say,
             journal_mode = Mode.None,
             language = (sbyte)questinterface.CommonTongue,
@@ -166,11 +209,9 @@ public static class MobExtensions
 
 public static class NPCExtensions
 {
-   
+
 }
 
-
-// INPCEvent is accessible from an npc script e.g. Guard_Gehnus.csx located under a zone directory
 public interface INpcEvent
 {
     void Say(NpcEvent e) { }
@@ -317,100 +358,170 @@ public interface INpcEvent
     void SpellEffectBuffTicBot(NpcEvent e) { }
 }
 
-// IPlayerEvent is accessible in player.csx located under a zone folder
 public interface IPlayerEvent
 {
-    void Say(PlayerEvent e) {}
-    void EnvironmentalDamage(PlayerEvent e) {}
-    void Death(PlayerEvent e) {}
-    void DeathComplete(PlayerEvent e) {}
-    void Timer(PlayerEvent e) {}
-    void DiscoverItem(PlayerEvent e) {}
-    void FishSuccess(PlayerEvent e) {}
-    void ForageSuccess(PlayerEvent e) {}
-    void ClickObject(PlayerEvent e) {}
-    void ClickDoor(PlayerEvent e) {}
-    void Signal(PlayerEvent e) {}
-    void PopupResponse(PlayerEvent e) {}
-    void PlayerPickup(PlayerEvent e) {}
-    void Cast(PlayerEvent e) {}
-    void CastBegin(PlayerEvent e) {}
-    void CastOn(PlayerEvent e) {}
-    void TaskFail(PlayerEvent e) {}
-    void Zone(PlayerEvent e) {}
-    void DuelWin(PlayerEvent e) {}
-    void DuelLose(PlayerEvent e) {}
-    void Loot(PlayerEvent e) {}
-    void TaskStageComplete(PlayerEvent e) {}
-    void TaskAccepted(PlayerEvent e) {}
-    void TaskComplete(PlayerEvent e) {}
-    void TaskUpdate(PlayerEvent e) {}
-    void TaskBeforeUpdate(PlayerEvent e) {}
-    void Command(PlayerEvent e) {}
-    void CombineSuccess(PlayerEvent e) {}
-    void CombineFailure(PlayerEvent e) {}
-    void FeignDeath(PlayerEvent e) {}
-    void EnterArea(PlayerEvent e) {}
-    void LeaveArea(PlayerEvent e) {}
-    void Respawn(PlayerEvent e) {}
-    void UnhandledOpcode(PlayerEvent e) {}
-    void UseSkill(PlayerEvent e) {}
-    void TestBuff(PlayerEvent e) {}
-    void CombineValidate(PlayerEvent e) {}
-    void BotCommand(PlayerEvent e) {}
-    void Warp(PlayerEvent e) {}
-    void Combine(PlayerEvent e) {}
-    void Consider(PlayerEvent e) {}
-    void ConsiderCorpse(PlayerEvent e) {}
-    void EquipItemClient(PlayerEvent e) {}
-    void UnequipItemClient(PlayerEvent e) {}
-    void SkillUp(PlayerEvent e) {}
-    void LanguageSkillUp(PlayerEvent e) {}
-    void AltCurrencyMerchantBuy(PlayerEvent e) {}
-    void AltCurrencyMerchantSell(PlayerEvent e) {}
-    void MerchantBuy(PlayerEvent e) {}
-    void MerchantSell(PlayerEvent e) {}
-    void Inspect(PlayerEvent e) {}
-    void AaBuy(PlayerEvent e) {}
-    void AaGain(PlayerEvent e) {}
-    void AaExpGain(PlayerEvent e) {}
-    void ExpGain(PlayerEvent e) {}
-    void Payload(PlayerEvent e) {}
-    void LevelUp(PlayerEvent e) {}
-    void LevelDown(PlayerEvent e) {}
-    void GmCommand(PlayerEvent e) {}
-    void BotCreate(PlayerEvent e) {}
-    void AugmentInsertClient(PlayerEvent e) {}
-    void AugmentRemoveClient(PlayerEvent e) {}
-    void DamageGiven(PlayerEvent e) {}
-    void DamageTaken(PlayerEvent e) {}
-    void ItemClickCastClient(PlayerEvent e) {}
-    void ItemClickClient(PlayerEvent e) {}
-    void DestroyItemClient(PlayerEvent e) {}
-    void TargetChange(PlayerEvent e) {}
-    void DropItemClient(PlayerEvent e) {}
-    void MemorizeSpell(PlayerEvent e) {}
-    void UnmemorizeSpell(PlayerEvent e) {}
-    void ScribeSpell(PlayerEvent e) {}
-    void UnscribeSpell(PlayerEvent e) {}
-    void LdonPointsGain(PlayerEvent e) {}
-    void LdonPointsLoss(PlayerEvent e) {}
-    void AltCurrencyGain(PlayerEvent e) {}
-    void AltCurrencyLoss(PlayerEvent e) {}
-    void CrystalGain(PlayerEvent e) {}
-    void CrystalLoss(PlayerEvent e) {}
-    void TimerPause(PlayerEvent e) {}
-    void TimerResume(PlayerEvent e) {}
-    void TimerStart(PlayerEvent e) {}
-    void TimerStop(PlayerEvent e) {}
-    void EntityVariableDelete(PlayerEvent e) {}
-    void EntityVariableSet(PlayerEvent e) {}
-    void EntityVariableUpdate(PlayerEvent e) {}
-    void AaLoss(PlayerEvent e) {}
-    void SpellBlocked(PlayerEvent e) {}
+    void Say(PlayerEvent e) { }
+    void EnterZone(PlayerEvent e) { }
+    void EventConnect(PlayerEvent e) { }
+    void EventDisconnect(PlayerEvent e) { }
+    void EnvironmentalDamage(PlayerEvent e) { }
+    void Death(PlayerEvent e) { }
+    void DeathComplete(PlayerEvent e) { }
+    void Timer(PlayerEvent e) { }
+    void DiscoverItem(PlayerEvent e) { }
+    void FishSuccess(PlayerEvent e) { }
+    void ForageSuccess(PlayerEvent e) { }
+    void ClickObject(PlayerEvent e) { }
+    void ClickDoor(PlayerEvent e) { }
+    void Signal(PlayerEvent e) { }
+    void PopupResponse(PlayerEvent e) { }
+    void PlayerPickup(PlayerEvent e) { }
+    void Cast(PlayerEvent e) { }
+    void CastBegin(PlayerEvent e) { }
+    void CastOn(PlayerEvent e) { }
+    void TaskFail(PlayerEvent e) { }
+    void Zone(PlayerEvent e) { }
+    void DuelWin(PlayerEvent e) { }
+    void DuelLose(PlayerEvent e) { }
+    void Loot(PlayerEvent e) { }
+    void TaskStageComplete(PlayerEvent e) { }
+    void TaskAccepted(PlayerEvent e) { }
+    void TaskComplete(PlayerEvent e) { }
+    void TaskUpdate(PlayerEvent e) { }
+    void TaskBeforeUpdate(PlayerEvent e) { }
+    void Command(PlayerEvent e) { }
+    void CombineSuccess(PlayerEvent e) { }
+    void CombineFailure(PlayerEvent e) { }
+    void FeignDeath(PlayerEvent e) { }
+    void EnterArea(PlayerEvent e) { }
+    void LeaveArea(PlayerEvent e) { }
+    void Respawn(PlayerEvent e) { }
+    void UnhandledOpcode(PlayerEvent e) { }
+    void UseSkill(PlayerEvent e) { }
+    void TestBuff(PlayerEvent e) { }
+    void CombineValidate(PlayerEvent e) { }
+    void BotCommand(PlayerEvent e) { }
+    void Warp(PlayerEvent e) { }
+    void Combine(PlayerEvent e) { }
+    void Consider(PlayerEvent e) { }
+    void ConsiderCorpse(PlayerEvent e) { }
+    void EquipItemClient(PlayerEvent e) { }
+    void UnequipItemClient(PlayerEvent e) { }
+    void SkillUp(PlayerEvent e) { }
+    void LanguageSkillUp(PlayerEvent e) { }
+    void AltCurrencyMerchantBuy(PlayerEvent e) { }
+    void AltCurrencyMerchantSell(PlayerEvent e) { }
+    void MerchantBuy(PlayerEvent e) { }
+    void MerchantSell(PlayerEvent e) { }
+    void Inspect(PlayerEvent e) { }
+    void AaBuy(PlayerEvent e) { }
+    void AaGain(PlayerEvent e) { }
+    void AaExpGain(PlayerEvent e) { }
+    void ExpGain(PlayerEvent e) { }
+    void Payload(PlayerEvent e) { }
+    void LevelUp(PlayerEvent e) { }
+    void LevelDown(PlayerEvent e) { }
+    void GmCommand(PlayerEvent e) { }
+    void BotCreate(PlayerEvent e) { }
+    void AugmentInsertClient(PlayerEvent e) { }
+    void AugmentRemoveClient(PlayerEvent e) { }
+    void DamageGiven(PlayerEvent e) { }
+    void DamageTaken(PlayerEvent e) { }
+    void ItemClickCastClient(PlayerEvent e) { }
+    void ItemClickClient(PlayerEvent e) { }
+    void DestroyItemClient(PlayerEvent e) { }
+    void TargetChange(PlayerEvent e) { }
+    void DropItemClient(PlayerEvent e) { }
+    void MemorizeSpell(PlayerEvent e) { }
+    void UnmemorizeSpell(PlayerEvent e) { }
+    void ScribeSpell(PlayerEvent e) { }
+    void UnscribeSpell(PlayerEvent e) { }
+    void LdonPointsGain(PlayerEvent e) { }
+    void LdonPointsLoss(PlayerEvent e) { }
+    void AltCurrencyGain(PlayerEvent e) { }
+    void AltCurrencyLoss(PlayerEvent e) { }
+    void CrystalGain(PlayerEvent e) { }
+    void CrystalLoss(PlayerEvent e) { }
+    void TimerPause(PlayerEvent e) { }
+    void TimerResume(PlayerEvent e) { }
+    void TimerStart(PlayerEvent e) { }
+    void TimerStop(PlayerEvent e) { }
+    void EntityVariableDelete(PlayerEvent e) { }
+    void EntityVariableSet(PlayerEvent e) { }
+    void EntityVariableUpdate(PlayerEvent e) { }
+    void AaLoss(PlayerEvent e) { }
+    void SpellBlocked(PlayerEvent e) { }
 }
 
-public class EQGlobals {
+public interface IItemEvent
+{
+    void ItemClick(ItemEvent e) { }
+    void ItemClickCast(ItemEvent e) { }
+    void ItemEnterZone (ItemEvent e) { }
+    void Timer(ItemEvent e) { }
+    void WeaponProc(ItemEvent e) { }
+    void Loot(ItemEvent e) { }
+    void EquipItem(ItemEvent e) { }
+    void UnequipItem(ItemEvent e) { }
+    void AugmentItem(ItemEvent e) { }
+    void UnaugmentItem(ItemEvent e) { }
+    void AugmentInsert(ItemEvent e) { }
+    void AugmentRemove(ItemEvent e) { }
+    void TimerPause(ItemEvent e) { }
+    void TimerResume(ItemEvent e) { }
+    void TimerStart(ItemEvent e) { }
+    void TimerStop(ItemEvent e) { }
+}
+
+public interface ISpellEvent {
+    void SpellEffectClient(SpellEvent e) {}
+    void SpellEffectBuffTicClient(SpellEvent e) {}
+    void SpellEffectNpc(SpellEvent e) {}
+    void SpellEffectBuffTicNpc(SpellEvent e) {}
+    void SpellFade(SpellEvent e) {}
+    void SpellEffectTranslocateComplete(SpellEvent e) {}
+}
+
+public interface IEncounterEvent {
+    void Timer (EncounterEvent e) {}
+    void EncounterLoad (EncounterEvent e) {}
+    void EncounterUnload (EncounterEvent e) {}
+}
+
+public interface IBotEvent {
+    void Cast(BotEvent e) {}
+    void CastBegin(BotEvent e) {}
+    void CastOn(BotEvent e) {}
+    void Combat(BotEvent e) {}
+    void Death(BotEvent e) {}
+    void DeathComplete(BotEvent e) {}
+    void PopupResponse(BotEvent e) {}
+    void Say(BotEvent e) {}
+    void Signal(BotEvent e) {}
+    void Slay(BotEvent e) {}
+    void TargetChange(BotEvent e) {}
+    void Timer(BotEvent e) {}
+    void Trade(BotEvent e) {}
+    void UseSkill(BotEvent e) {}
+    void Payload(BotEvent e) {}
+    void EquipItemBot(BotEvent e) {}
+    void UnequipItemBot(BotEvent e) {}
+    void DamageGiven(BotEvent e) {}
+    void DamageTaken(BotEvent e) {}
+    void LevelUp(BotEvent e) {}
+    void LevelDown(BotEvent e) {}
+    void TimerPause(BotEvent e) {}
+    void TimerResume(BotEvent e) {}
+    void TimerStart(BotEvent e) {}
+    void TimerStop(BotEvent e) {}
+    void EntityVariableDelete(BotEvent e) {}
+    void EntityVariableSet(BotEvent e) {}
+    void EntityVariableUpdate(BotEvent e) {}
+    void SpellBlocked(BotEvent e) {}
+
+}
+public class EQGlobals
+{
     public Zone zone;
     public EntityList entityList;
     public EQEmuLogSys logSys;
@@ -418,22 +529,42 @@ public class EQGlobals {
     public WorldServer worldServer;
 }
 
-public class EQLists {
+public class EQLists
+{
     public List<string> stringList;
     public List<Mob> mobList;
     public List<ItemInstance> itemList;
     public List<EQApplicationPacket> packetList;
 }
 
-public class EQEvent {
+public class EQEvent
+{
+    public EQEvent(EQGlobals g, EventArgs e) {
+        globals = g;
+        lists = EqFactory.CreateEQLists(e);
+        string? message = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? Marshal.PtrToStringUni(e.Data)
+            : Marshal.PtrToStringUTF8(e.Data);
+        data = message ?? "";
+        extraData = e.ExtraData;
+    }
+
+    public void QuestDebug(string message) {
+        globals.logSys?.QuestDebug(message);
+    }
+
+    public void QuestError(string message) {
+        globals.logSys?.QuestError(message);
+    }
     public EQGlobals globals;
     public EQLists lists;
     public string data;
-    public uint extra_data;
+    public uint extraData;
 }
 
 public class NpcEvent : EQEvent
 {
+    public NpcEvent(EQGlobals g, EventArgs e) : base(g, e) {}
     public NPC npc;
     public Mob mob;
 
@@ -441,7 +572,8 @@ public class NpcEvent : EQEvent
     uint originalResendTimeout = 0;
     int originalClientLinkdeadMs = 0;
 
-    public void SetupDebug(int debugMinutes = 20) {
+    public void SetupDebug(int debugMinutes = 20)
+    {
         var debugMs = debugMinutes * 60 * 1000;
         var opts = mob.CastToClient().Connection().GetManager().GetOptions();
         originalStaleConnectionMs = opts.daybreak_options.stale_connection_ms;
@@ -456,8 +588,10 @@ public class NpcEvent : EQEvent
         globals.logSys.QuestDebug($"Set all timeout values to {debugMinutes} minutes. You will be disconnected if threads are paused longer than this or client hits 0%");
     }
 
-    public void ResetDebug() {
-        if (originalClientLinkdeadMs == 0 || originalResendTimeout == 0 || originalClientLinkdeadMs == 0) {
+    public void ResetDebug()
+    {
+        if (originalClientLinkdeadMs == 0 || originalResendTimeout == 0 || originalClientLinkdeadMs == 0)
+        {
             globals.logSys.QuestDebug("SetupDebug was not called before ResetDebug and would have set all timeouts to 0.");
             return;
         }
@@ -482,8 +616,41 @@ public class NpcEvent : EQEvent
 
 public class PlayerEvent : EQEvent
 {
+    public PlayerEvent(EQGlobals g, EventArgs e) : base(g, e) {}
     public Client player;
+}
 
+public class ItemEvent : EQEvent
+{
+    public ItemEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    
+    public Mob mob;
+    public Client client;
+    public ItemInstance item;
+}
+
+public class SpellEvent : EQEvent
+{
+    public SpellEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    
+    public Mob mob;
+    public Client client;
+    public uint spellID = 0;
+}
+
+public class EncounterEvent : EQEvent
+{
+    public EncounterEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    
+    public string encounterName = "";
+}
+
+public class BotEvent : EQEvent
+{
+    public BotEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    
+    public Bot bot;
+    public Client client;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -663,6 +830,9 @@ public class EventMap
 
     public static readonly Dictionary<QuestEventID, string> PlayerMethodMap = new Dictionary<QuestEventID, string>() {
         {QuestEventID.EVENT_SAY, "Say"},
+        {QuestEventID.EVENT_ENTER_ZONE, "EnterZone"},
+        {QuestEventID.EVENT_CONNECT, "Connect"},
+        {QuestEventID.EVENT_DISCONNECT, "Disconnect"},
         {QuestEventID.EVENT_ENVIRONMENTAL_DAMAGE, "EnvironmentalDamage"},
         {QuestEventID.EVENT_DEATH, "Death"},
         {QuestEventID.EVENT_DEATH_COMPLETE, "DeathComplete"},
@@ -751,4 +921,92 @@ public class EventMap
         {QuestEventID.EVENT_AA_LOSS, "AaLoss"},
         {QuestEventID.EVENT_SPELL_BLOCKED, "SpellBlocked"}
     };
+
+    public static readonly Dictionary<QuestEventID, string> ItemMethodMap = new Dictionary<QuestEventID, string>() {
+        {QuestEventID.EVENT_ITEM_CLICK, "ItemClick"},
+        {QuestEventID.EVENT_ITEM_CLICK_CAST, "ItemClickCast"},
+        {QuestEventID.EVENT_ITEM_ENTER_ZONE, "ItemEnterZone"},
+        {QuestEventID.EVENT_TIMER, "Timer"},
+        {QuestEventID.EVENT_WEAPON_PROC, "WeaponProc"},
+        {QuestEventID.EVENT_LOOT, "Loot"},
+        {QuestEventID.EVENT_EQUIP_ITEM, "EquipItem"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM, "UnequipItem"},
+        {QuestEventID.EVENT_AUGMENT_ITEM, "AugmentItem"},
+        {QuestEventID.EVENT_UNAUGMENT_ITEM, "UnaugmentItem"},
+        {QuestEventID.EVENT_AUGMENT_INSERT, "AugmentInsert"},
+        {QuestEventID.EVENT_AUGMENT_REMOVE, "AugmentRemove"},
+        {QuestEventID.EVENT_TIMER_PAUSE, "TimerPause"},
+        {QuestEventID.EVENT_TIMER_RESUME, "TimerResume"},
+        {QuestEventID.EVENT_TIMER_START, "TimerStart"},
+        {QuestEventID.EVENT_TIMER_STOP, "TimerStop"}
+    };
+
+    public static readonly Dictionary<QuestEventID, string> SpellMethodMap = new Dictionary<QuestEventID, string>() {
+        {QuestEventID.EVENT_SPELL_EFFECT_CLIENT, "SpellEffectClient"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, "SpellEffectBuffTicClient"},
+        {QuestEventID.EVENT_SPELL_EFFECT_BUFF_TIC_NPC, "SpellEffectBuffTicNpc"},
+        {QuestEventID.EVENT_SPELL_EFFECT_NPC, "SpellEffectNpc"},
+        {QuestEventID.EVENT_SPELL_FADE, "SpellFade"},
+        {QuestEventID.EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, "SpellEffectTranslocateComplete"},
+    };
+
+    public static readonly Dictionary<QuestEventID, string> EncounterMethodMap = new Dictionary<QuestEventID, string>() {
+        {QuestEventID.EVENT_TIMER, "Timer"},
+        {QuestEventID.EVENT_ENCOUNTER_LOAD, "EncounterLoad"},
+        {QuestEventID.EVENT_ENCOUNTER_UNLOAD, "EncounterUnload"},
+    };
+
+    public static readonly Dictionary<QuestEventID, string> BotMethodMap = new Dictionary<QuestEventID, string>() {
+        {QuestEventID.EVENT_CAST, "Cast"},
+        {QuestEventID.EVENT_CAST_BEGIN, "CastBegin"},
+        {QuestEventID.EVENT_CAST_ON, "CastOn"},
+        {QuestEventID.EVENT_COMBAT, "Combat"},
+        {QuestEventID.EVENT_DEATH, "Death"},
+        {QuestEventID.EVENT_DEATH_COMPLETE, "DeathComplete"},
+        {QuestEventID.EVENT_POPUP_RESPONSE, "PopupResponse"},
+        {QuestEventID.EVENT_SAY, "Say"},
+        {QuestEventID.EVENT_SIGNAL, "Signal"},
+        {QuestEventID.EVENT_SLAY, "Slay"},
+        {QuestEventID.EVENT_TARGET_CHANGE, "TargetChange"},
+        {QuestEventID.EVENT_TIMER, "Timer"},
+        {QuestEventID.EVENT_TRADE, "Trade"},
+        {QuestEventID.EVENT_USE_SKILL, "UseSkill"},
+        {QuestEventID.EVENT_PAYLOAD, "Payload"},
+        {QuestEventID.EVENT_EQUIP_ITEM_BOT, "EquipItemBot"},
+        {QuestEventID.EVENT_UNEQUIP_ITEM_BOT, "UnequipItemBot"},
+        {QuestEventID.EVENT_DAMAGE_GIVEN, "DamageGiven"},
+        {QuestEventID.EVENT_DAMAGE_TAKEN, "DamageTaken"},
+        {QuestEventID.EVENT_LEVEL_UP, "LevelUp"},
+        {QuestEventID.EVENT_LEVEL_DOWN, "LevelDown"},
+        {QuestEventID.EVENT_TIMER_PAUSE, "TimerPause"},
+        {QuestEventID.EVENT_TIMER_RESUME, "TimerResume"},
+        {QuestEventID.EVENT_TIMER_START, "TimerStart"},
+        {QuestEventID.EVENT_TIMER_STOP, "TimerStop"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_DELETE, "EntityVariableDelete"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_SET, "EntityVariableSet"},
+        {QuestEventID.EVENT_ENTITY_VARIABLE_UPDATE, "EntityVariableUpdate"},
+        {QuestEventID.EVENT_SPELL_BLOCKED, "SpellBlocked"}
+
+    };
 }
+
+public enum CastingSlot { // hybrid declaration
+    Gem1 = 0,
+    Gem2 = 1,
+    Gem3 = 2,
+    Gem4 = 3,
+    Gem5 = 4,
+    Gem6 = 5,
+    Gem7 = 6,
+    Gem8 = 7,
+    Gem9 = 8,
+    Gem10 = 9,
+    Gem11 = 10,
+    Gem12 = 11,
+    MaxGems = 12,
+    Ability = 20, // HT/LoH for Tit
+    PotionBelt = 21, // Tit uses a different slot for PB
+    Item = 22,
+    Discipline = 23,
+    AltAbility = 0xFF
+};

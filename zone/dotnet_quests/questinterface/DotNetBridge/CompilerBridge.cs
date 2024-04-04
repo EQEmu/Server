@@ -1,12 +1,7 @@
 ﻿using System.Diagnostics;
-using System.IO;
-using System;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
-using System.Runtime.CompilerServices;
-
 
 public static class DotNetQuest
 {
@@ -27,32 +22,17 @@ public static class DotNetQuest
         public IntPtr LogSys;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct EventArgs
-    {
-        public int QuestEventId;
-        public IntPtr Npc;
-        public IntPtr Mob;
-        public IntPtr Data;
-        public uint ExtraData;
-        public IntPtr ItemVector;
-        public IntPtr MobVector;
-        public IntPtr PacketVector;
-        public IntPtr StringVector;
-    }
-
 
     public delegate void InitializeDelegate(InitArgs initArgs);
     public delegate void ReloadDelegate();
-    public delegate void NpcEventDelegate(EventArgs npcEventArgs);
-    public delegate void PlayerEventDelegate(EventArgs npcEventArgs);
+    public delegate void QuestEventDelegate(EventArgs npcEventArgs);
 
     private static Dictionary<string, object> npcMap = new Dictionary<string, object>();
-
-    private static FileSystemWatcher? watcher;
+    private static Dictionary<string, object> playerMap = new Dictionary<string, object>();
 
     private static DateTime lastCheck = DateTime.MinValue;
     private static bool reloading = false;
+    private static EQGlobals globals;
 
     private static void PollForChanges(string path)
     {
@@ -64,7 +44,7 @@ public static class DotNetQuest
                 return;
             }
             var lastWriteTime = Directory.GetFiles(path, "*.cs", SearchOption.TopDirectoryOnly)
-                .Max(file => (File.GetLastWriteTimeUtc(file)));
+                .Max(file => File.GetLastWriteTimeUtc(file));
 
             if (lastWriteTime > lastCheck)
             {
@@ -86,24 +66,20 @@ public static class DotNetQuest
         worldServer = EqFactory.CreateWorldServer(initArgs.WorldServer, false);
         questManager = EqFactory.CreateQuestManager(initArgs.QuestManager, false);
         DotNetQuest.initArgs = initArgs;
+        globals = new EQGlobals()
+        {
+            zone = zone,
+            entityList = entityList,
+            logSys = logSys,
+            worldServer = worldServer,
+            questManager = questManager
+        };
 
         var workingDirectory = Directory.GetCurrentDirectory();
         var zoneDir = Path.Combine(workingDirectory, "dotnet_quests", zone.GetShortName());
         logSys?.QuestDebug($"Watching for *.cs file changes in {zoneDir}");
         Console.WriteLine($"Watching for *.cs file changes in {zoneDir}");
         PollForChanges(zoneDir);
-        // Issues with inotify in docker filesystem with mounted drives--investigate later but use polling for now
-        // watcher = new FileSystemWatcher(zoneDir, "*.cs")
-        // {
-        //     IncludeSubdirectories = true,
-        //     NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
-        // };
-        // watcher.Changed += OnChanged;
-        // watcher.Created += OnChanged;
-        // watcher.Deleted += OnChanged;
-        // watcher.Renamed += OnChanged;
-
-        // watcher.EnableRaisingEvents = true;
     }
 
     private static void OnChanged(object sender, FileSystemEventArgs e)
@@ -114,7 +90,7 @@ public static class DotNetQuest
     }
 
     private static CollectibleAssemblyLoadContext? assemblyContext_ = null;
-    private static Assembly? questAssembly_ = null;
+    private static Assembly? questAssembly_;
     public static void Reload()
     {
         if (assemblyContext_ != null)
@@ -127,6 +103,7 @@ public static class DotNetQuest
         }
         var zoneName = zone?.GetShortName();
         npcMap.Clear();
+        playerMap.Clear();
         var workingDirectory = Directory.GetCurrentDirectory();
         var directoryPath = $"{workingDirectory}/dotnet_quests/{zoneName}";
         var outPath = $"{workingDirectory}/dotnet_quests/out";
@@ -137,8 +114,9 @@ public static class DotNetQuest
             Console.WriteLine($"Project path does not exist for zone at {projPath}");
             return;
         }
-        if (File.Exists(outPath)) {
-             // Clean up existing dll and pdb
+        if (File.Exists(outPath))
+        {
+            // Clean up existing dll and pdb
             string[] filesToDelete = Directory.GetFiles(outPath, $"{zoneName}*.*")
                     .ToArray();
 
@@ -155,8 +133,8 @@ public static class DotNetQuest
                 }
             }
         }
-       
-        assemblyContext_ = new CollectibleAssemblyLoadContext();
+
+        assemblyContext_ = new CollectibleAssemblyLoadContext(outPath);
 
         var zoneGuid = $"{zoneName}-{Guid.NewGuid().ToString().Substring(0, 8)}";
         var startInfo = new ProcessStartInfo
@@ -204,144 +182,208 @@ public static class DotNetQuest
         }
     }
 
-    public static void NpcEvent(EventArgs npcEventArgs)
+    public static void QuestEvent(EventArgs questEventArgs)
     {
         if (zone == null || entityList == null || logSys == null || worldServer == null || questAssembly_ == null || questManager == null)
         {
             return;
         }
-
-        QuestEventID id = (QuestEventID)npcEventArgs.QuestEventId;
-
-        var stringList = EqFactory.CreateStringVector(npcEventArgs.StringVector, false);
-        var mobList = EqFactory.CreateMobVector(npcEventArgs.MobVector, false);
-        var itemList = EqFactory.CreateItemVector(npcEventArgs.ItemVector, false);
-        var packetList = EqFactory.CreatePacketVector(npcEventArgs.PacketVector, false);
-
-        string? message = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? Marshal.PtrToStringUni(npcEventArgs.Data)
-            : Marshal.PtrToStringUTF8(npcEventArgs.Data);
-
         try
         {
-            var npc = EqFactory.CreateNPC(npcEventArgs.Npc, false);
-            var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
-            var npcName = npc?.GetOrigName() ?? "";
-            var uniqueName = npc?.GetName() ?? "";
-            if (questAssembly_.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+            switch ((EventSubtype)questEventArgs.EventType)
             {
-                object? npcObject;
-                var npcType = questAssembly_.GetType(npcName);
-                if (npcType == null)
+                case EventSubtype.Event_Npc:
+                    NpcEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_GlobalNpc:
+                    NpcEvent(questEventArgs, true);
+                    break;
+                case EventSubtype.Event_Player:
+                    PlayerEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_GlobalPlayer:
+                    PlayerEvent(questEventArgs, true);
+                    break;
+                case EventSubtype.Event_Item:
+                    ItemEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_Spell:
+                    SpellEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_Encounter:
+                    EncounterEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_Bot:
+                    BotEvent(questEventArgs);
+                    break;
+                case EventSubtype.Event_GlobalBot:
+                    BotEvent(questEventArgs, true);
+                    break;
+            }
+        }
+        catch (Exception e)
+        {
+            logSys?.QuestError($"Error running quest subtype {questEventArgs.EventType} quest event ID {questEventArgs.QuestEventId} :: {e.Message}");
+            var inner = e.InnerException;
+            while (inner != null)
+            {
+                logSys?.QuestError($"Error running quest. Inner Exception: {inner.Message}");
+                inner = inner.InnerException;
+            }
+        }
+    }
+
+    private static void NpcEvent(EventArgs npcEventArgs, bool global = false)
+    {
+        QuestEventID id = (QuestEventID)npcEventArgs.QuestEventId;
+        var npc = EqFactory.CreateNPC(npcEventArgs.Npc, false);
+        var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
+        var npcName = npc?.GetOrigName() ?? "";
+        var uniqueName = npc?.GetName() ?? "";
+        if (questAssembly_.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+        {
+            object? npcObject;
+            var npcType = questAssembly_.GetType(npcName);
+            if (npcType == null)
+            {
+                return;
+            }
+            if (npcMap.ContainsKey(uniqueName))
+            {
+                npcObject = npcMap[uniqueName];
+            }
+            else
+            {
+                npcObject = Activator.CreateInstance(npcType);
+                if (npcObject == null)
                 {
                     return;
                 }
-                if (npcMap.ContainsKey(uniqueName))
-                {
-                    npcObject = npcMap[uniqueName];
-                }
-                else
-                {
-                    npcObject = Activator.CreateInstance(npcType);
-                    if (npcObject == null)
-                    {
-                        return;
-                    }
-                    npcMap[uniqueName] = npcObject;
-                }
-                var npcMethod = npcType.GetMethod(EventMap.NpcMethodMap[id]);
-                npcMethod?.Invoke(npcObject, [new NpcEvent() {
-                        globals = new EQGlobals() {
-                            zone = zone,
-                            logSys = logSys,
-                            worldServer = worldServer,
-                            questManager = questManager,
-                            entityList = entityList,
-                        },
-                        lists = new EQLists() {
-                            stringList = stringList,
-                            mobList = mobList,
-                            itemList = itemList,
-                            packetList = packetList
-                        },
-                        npc = npc,
-                        mob = mob,
-                        extra_data = npcEventArgs.ExtraData,
-                        data = message ?? "",
-                    }]);
+                npcMap[uniqueName] = npcObject;
             }
-        }
-        catch (Exception e)
-        {
-            logSys?.QuestError($"Error running quest {EqFactory.CreateMob(npcEventArgs.Mob, false).GetOrigName()}::{EventMap.NpcMethodMap[id]} {e.Message}");
-            var inner = e.InnerException;
-            while (inner != null)
-            {
-                logSys?.QuestError($"Error running quest. Inner Exception: {inner.Message}");
-                inner = inner.InnerException;
-            }
+            var npcMethod = npcType.GetMethod(EventMap.NpcMethodMap[id]);
+            npcMethod?.Invoke(npcObject, [new NpcEvent(globals, npcEventArgs) {
+                npc = npc,
+                mob = mob,
+            }]);
         }
     }
 
-    public static void PlayerEvent(EventArgs npcEventArgs)
+    private static void PlayerEvent(EventArgs playerEventArgs, bool global = false)
     {
-        if (zone == null || entityList == null || logSys == null || worldServer == null || questAssembly_ == null || questManager == null)
+        QuestEventID id = (QuestEventID)playerEventArgs.QuestEventId;
+        if (questAssembly_.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null)
         {
-            return;
-        }
-
-        QuestEventID id = (QuestEventID)npcEventArgs.QuestEventId;
-
-        var stringList = EqFactory.CreateStringVector(npcEventArgs.StringVector, false);
-        var mobList = EqFactory.CreateMobVector(npcEventArgs.MobVector, false);
-        var itemList = EqFactory.CreateItemVector(npcEventArgs.ItemVector, false);
-        var packetList = EqFactory.CreatePacketVector(npcEventArgs.PacketVector, false);
-
-        string? message = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-            ? Marshal.PtrToStringUni(npcEventArgs.Data)
-            : Marshal.PtrToStringUTF8(npcEventArgs.Data);
-
-        try
-        {
-            if (questAssembly_.GetType("player")?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+            var player = EqFactory.CreateClient(playerEventArgs.Client, false);
+            object? playerObject;
+            var playerType = questAssembly_.GetType("Player");
+            var playerName = player.GetName();
+            if (playerType == null)
             {
-                questAssembly_.GetType("player").GetMethod(EventMap.NpcMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("player")), [new PlayerEvent() {
-                        globals = new EQGlobals() {
-                            zone = zone,
-                            logSys = logSys,
-                            worldServer = worldServer,
-                            questManager = questManager,
-                            entityList = entityList,
-                        },
-                        lists = new EQLists() {
-                            stringList = stringList,
-                            mobList = mobList,
-                            itemList = itemList,
-                            packetList = packetList
-                        },
-                        extra_data = npcEventArgs.ExtraData,
-                        data = message ?? "",
-                        player = EqFactory.CreateMob(npcEventArgs.Mob, false).CastToClient(),
-                    }]);
+                return;
             }
-        }
-        catch (Exception e)
-        {
-            logSys?.QuestError($"Error running quest {EqFactory.CreateMob(npcEventArgs.Mob, false).GetOrigName()}::{EventMap.NpcMethodMap[id]} {e.Message}");
-            var inner = e.InnerException;
-            while (inner != null)
+            if (playerMap.ContainsKey(playerName))
             {
-                logSys?.QuestError($"Error running quest. Inner Exception: {inner.Message}");
-                inner = inner.InnerException;
+                playerObject = playerMap[playerName];
             }
+            else
+            {
+                playerObject = Activator.CreateInstance(playerType);
+                if (playerObject == null)
+                {
+                    return;
+                }
+                playerMap[playerName] = playerObject;
+            }
+            var playerMethod = playerType.GetMethod(EventMap.PlayerMethodMap[id]);
+            playerMethod?.Invoke(playerObject, [new PlayerEvent(globals, playerEventArgs) {
+                    player = player
+            }]);
         }
     }
 
+    private static void ItemEvent(EventArgs itemEventArgs)
+    {
+        QuestEventID id = (QuestEventID)itemEventArgs.QuestEventId;
+        if (questAssembly_.GetType("Item")?.GetMethod(EventMap.ItemMethodMap[id]) != null)
+        {
+            questAssembly_.GetType("Item").GetMethod(EventMap.ItemMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Item")), [new ItemEvent(globals, itemEventArgs) {
+                client = EqFactory.CreateClient(itemEventArgs.Client, false),
+                mob = EqFactory.CreateMob(itemEventArgs.Mob, false),
+                item = EqFactory.CreateItemInstance(itemEventArgs.Item, false),
+            }]);
+        }
+    }
+
+    private static void SpellEvent(EventArgs spellEventArgs)
+    {
+        QuestEventID id = (QuestEventID)spellEventArgs.QuestEventId;
+        if (questAssembly_.GetType("Spell")?.GetMethod(EventMap.SpellMethodMap[id]) != null)
+        {
+            questAssembly_.GetType("Spell").GetMethod(EventMap.SpellMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Spell")), [new SpellEvent(globals, spellEventArgs) {
+                client = EqFactory.CreateClient(spellEventArgs.Client, false),
+                mob = EqFactory.CreateMob(spellEventArgs.Mob, false),
+                spellID = spellEventArgs.SpellID,
+            }]);
+        }
+    }
+
+    private static void EncounterEvent(EventArgs encounterEventArgs)
+    {
+        QuestEventID id = (QuestEventID)encounterEventArgs.QuestEventId;
+        string? encounter = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? Marshal.PtrToStringUni(encounterEventArgs.EncounterName)
+            : Marshal.PtrToStringUTF8(encounterEventArgs.EncounterName);
+        string encounterType = $"Encounter_{encounter}";
+        if (questAssembly_.GetType(encounterType)?.GetMethod(EventMap.EncounterMethodMap[id]) != null)
+        {
+            questAssembly_.GetType(encounterType).GetMethod(EventMap.EncounterMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType(encounterType)), [new EncounterEvent(globals, encounterEventArgs) {
+
+                encounterName = encounter ?? ""
+            }]);
+        }
+    }
+
+    private static void BotEvent(EventArgs botEventArgs, bool global = false)
+    {
+        QuestEventID id = (QuestEventID)botEventArgs.QuestEventId;
+        var bot = EqFactory.CreateBot(botEventArgs.Bot, false);
+        var client = EqFactory.CreateClient(botEventArgs.Client, false);
+        if (questAssembly_.GetType("Bot")?.GetMethod(EventMap.BotMethodMap[id]) != null)
+        {
+            questAssembly_.GetType("Bot").GetMethod(EventMap.BotMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Bot")), [new BotEvent(globals, botEventArgs) {
+                bot = bot,
+                client = client,
+            }]);
+        }
+    }
 
 }
 
 public class CollectibleAssemblyLoadContext : AssemblyLoadContext
 {
-    public CollectibleAssemblyLoadContext() : base(isCollectible: true) { }
+    private readonly string _dependencyPath;
+
+    public CollectibleAssemblyLoadContext(string dependencyPath)  : base(isCollectible: true)
+    {
+        _dependencyPath = dependencyPath;
+    }
+   
+
+    protected override Assembly Load(AssemblyName assemblyName)
+    {
+        if (assemblyName.Name == "DotNetTypes") {
+            return null;
+        }
+        
+        // Attempt to load the assembly from the specified dependency path
+        string assemblyPath = Path.Combine(_dependencyPath, $"{assemblyName.Name}.dll");
+        if (File.Exists(assemblyPath))
+        {
+            return LoadFromAssemblyPath(assemblyPath);
+        }
+        // Fallback to default context
+        return null;
+    }
 
 }

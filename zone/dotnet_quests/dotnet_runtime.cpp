@@ -93,67 +93,18 @@ struct init_payload
     EQEmuLogSys *logsys;
 };
 
-struct event_payload
-{
-    int quest_event_id;
-    NPC *npc;
-    Mob *mob;
-    const char_t *data;
-    uint32 extra_data;
-    std::vector<ItemInstance *> *item_array;
-    std::vector<Mob *> *mob_array;
-    std::vector<EQApplicationPacket *> *packet_array;
-    std::vector<std::string> *string_array;
-};
-
 typedef void(CORECLR_DELEGATE_CALLTYPE *init_fn)(init_payload args);
 init_fn init = nullptr;
 
 typedef void(CORECLR_DELEGATE_CALLTYPE *reload_fn)();
 reload_fn reload_callback = nullptr;
 
-typedef void(CORECLR_DELEGATE_CALLTYPE *npc_event_fn)(event_payload args);
-npc_event_fn npc_event_callback = nullptr;
-
-typedef void(CORECLR_DELEGATE_CALLTYPE *player_event_fn)(event_payload args);
-player_event_fn player_event_callback = nullptr;
+typedef void(CORECLR_DELEGATE_CALLTYPE *quest_event_fn)(event_payload args);
+quest_event_fn quest_event_callback = nullptr;
 
 const char_t *dotnet_type = STR("DotNetQuest, DotNetBridge");
 
 bool initialized = false;
-
-namespace
-{
-    std::string getExecutablePath()
-    {
-        char path[PATH_MAX];
-#if defined(_WIN32)
-        GetModuleFileNameA(NULL, path, MAX_PATH);
-#elif defined(__linux__)
-        ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
-        if (count == -1)
-            return "";
-        path[count] = '\0';
-#elif defined(__APPLE__)
-        uint32_t size = sizeof(path);
-        if (_NSGetExecutablePath(path, &size) == 0)
-        {
-            // Resolve any symlinks and get the absolute path
-            char realPath[PATH_MAX];
-            realpath(path, realPath);
-            strncpy(path, realPath, sizeof(path));
-        }
-        else
-        {
-            // Buffer size was too small
-            return "";
-        }
-#endif
-        std::string p(path);
-        return p.substr(0, p.length() - 4);
-    }
-
-}
 
 std::tuple<std::vector<ItemInstance *>, std::vector<Mob *>, std::vector<EQApplicationPacket *>, std::vector<std::string>> to_vectors(std::vector<std::any> *anyVec)
 {
@@ -225,79 +176,43 @@ std::tuple<std::vector<ItemInstance *>, std::vector<Mob *>, std::vector<EQApplic
     return std::tie(itemVec, mobVec, packetVec, stringVec);
 }
 
-#if defined(WINDOWS)
-int __cdecl event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers, bool player_event)
-#else
-int event(QuestEventID event, NPC *npc, Mob *init, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers, bool player_event)
-#endif
+
+int event(event_payload p, std::vector<std::any> *extra_pointers)
 {
     if (!initialized)
     {
-        return 1;
+        return 0;
     }
     auto [item_array, mob_array, packet_array, string_array] = to_vectors(extra_pointers);
-    event_payload p{
-        (int)event,
-        npc,
-        init,
-        data.c_str(),
-        extra_data,
-        &item_array,
-        &mob_array,
-        &packet_array,
-        &string_array};
 
-    if (player_event)
+    p.item_array = &item_array;
+    p.mob_array = &mob_array;
+    p.packet_array = &packet_array;
+    p.string_array = &string_array;
+
+    if (quest_event_callback != nullptr)
     {
-        if (player_event_callback != nullptr)
-        {
-            player_event_callback(p);
-            return 1;
-        }
-
-        auto rc = runtime_function(
-            dotnet_type,
-            STR("NpcEvent") /*method_name*/,
-            STR("DotNetQuest+PlayerEventDelegate, DotNetBridge") /*delegate_type_name*/,
-            nullptr,
-            nullptr,
-            (void **)&player_event_callback);
-        if (rc != 0)
-        {
-            std::cerr << "Get delegate failed for npc event delegate: " << std::hex << std::showbase << rc << std::endl;
-        }
-        player_event_callback(p);
-    }
-    else
-    {
-        if (npc_event_callback != nullptr)
-        {
-            npc_event_callback(p);
-            return 1;
-        }
-
-        auto rc = runtime_function(
-            dotnet_type,
-            STR("NpcEvent") /*method_name*/,
-            STR("DotNetQuest+NpcEventDelegate, DotNetBridge") /*delegate_type_name*/,
-            nullptr,
-            nullptr,
-            (void **)&npc_event_callback);
-        if (rc != 0)
-        {
-            std::cerr << "Get delegate failed for npc event delegate: " << std::hex << std::showbase << rc << std::endl;
-        }
-        npc_event_callback(p);
+        quest_event_callback(p);
+        return 0;
     }
 
-    return 1;
+    auto rc = runtime_function(
+        dotnet_type,
+        STR("QuestEvent") /*method_name*/,
+        STR("DotNetQuest+QuestEventDelegate, DotNetBridge") /*delegate_type_name*/,
+        nullptr,
+        nullptr,
+        (void **)&quest_event_callback);
+    if (rc != 0)
+    {
+        std::cerr << "Get delegate failed for quest event delegate: " << std::hex << std::showbase << rc << std::endl;
+    }
+    quest_event_callback(p);
+
+    return 0;
 }
 
-#if defined(WINDOWS)
-int __cdecl reload_quests()
-#else
 int reload_quests()
-#endif
 {
     if (!initialized)
     {
@@ -326,11 +241,7 @@ int reload_quests()
     return 1;
 }
 
-#if defined(WINDOWS)
-int __cdecl initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQEmuLogSys *logsys)
-#else
 int initialize(Zone *zone, EntityList *entity_list, WorldServer *worldserver, EQEmuLogSys *logsys)
-#endif
 {
     if (initialized)
     {

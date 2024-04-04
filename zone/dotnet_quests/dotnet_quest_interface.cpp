@@ -39,7 +39,20 @@ int DotnetParser::EventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string da
 
     Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(npc, c);
-    event(evt, npc, init, data, extra_data, extra_pointers, false);
+    event_payload p {
+        (int) EventSubtype::Event_Npc,
+        (int) evt,
+        npc,     // Npc*
+        init,    // Mob*
+        nullptr, // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0,       // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -50,7 +63,20 @@ int DotnetParser::EventGlobalNPC(QuestEventID evt, NPC *npc, Mob *init, std::str
 {
     Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(npc, c);
-    event(evt, npc, init, data, extra_data, extra_pointers, false);
+    event_payload p {
+        (int) EventSubtype::Event_GlobalNpc,
+        (int) evt,
+        npc,     // Npc*
+        init,    // Mob*
+        nullptr, // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0,       // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
     return 0;
 }
@@ -59,7 +85,20 @@ int DotnetParser::EventPlayer(QuestEventID evt, Client *client, std::string data
                               std::vector<std::any> *extra_pointers)
 {
     quest_manager.StartQuest(client, client);
-    event(evt, nullptr, client, data, extra_data, extra_pointers, true);
+    event_payload p {
+        (int) EventSubtype::Event_Player,
+        (int) evt,
+        nullptr, // Npc*
+        nullptr, // Mob*
+        client,  // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0,       // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -69,7 +108,20 @@ int DotnetParser::EventGlobalPlayer(QuestEventID evt, Client *client, std::strin
                                     std::vector<std::any> *extra_pointers)
 {
     quest_manager.StartQuest(client, client);
-    event(evt, nullptr, client, data, extra_data, extra_pointers, true);
+    event_payload p {
+        (int) EventSubtype::Event_GlobalPlayer,
+        (int) evt,
+        nullptr, // Npc*
+        nullptr, // Mob*
+        client,  // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0,       // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -79,6 +131,20 @@ int DotnetParser::EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *
                             std::vector<std::any> *extra_pointers)
 {
     quest_manager.StartQuest(client, client, item);
+    event_payload p {
+        (int) EventSubtype::Event_Item,
+        (int) evt,
+        nullptr, // Npc*
+        mob,     // Mob*
+        client,  // Client*
+        nullptr, // Bot*
+        item,    // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0,       // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -89,16 +155,50 @@ int DotnetParser::EventSpell(QuestEventID evt, Mob *mob, Client *client, uint32 
 {
 
     quest_manager.StartQuest(mob, client, nullptr, const_cast<SPDat_Spell_Struct *>(&spells[spell_id]));
+    event_payload p {
+        (int) EventSubtype::Event_Spell,
+        (int) evt,
+        nullptr, // Npc*
+        mob,     // Mob*
+        client,  // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        spell_id, // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
     return 0;
 }
 
 int DotnetParser::EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data, std::vector<std::any> *extra_pointers)
 {
-    // quest_manager.StartQuest(enc, nullptr, nullptr, nullptr, encounter_name);
-
-    // quest_manager.EndQuest();
-
+    
+    auto exists = encounters_.find(encounter_name) != encounters_.end();
+    auto enc = exists ? encounters_.at(encounter_name) : new Encounter(encounter_name.c_str());
+    if (!exists) {
+        encounters_[encounter_name] = enc;
+        entity_list.AddEncounter(enc);
+    }
+    
+    quest_manager.StartQuest(enc, nullptr, nullptr, nullptr, encounter_name);
+    event_payload p {
+        (int) EventSubtype::Event_Encounter,
+        (int) evt,
+        nullptr, // Npc*
+        nullptr, // Mob*
+        nullptr, // Client*
+        nullptr, // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        encounter_name.c_str(),
+        extra_data,
+        0, // SpellId
+    };
+    event(p, extra_pointers);
+    quest_manager.EndQuest();
     return 0;
 }
 
@@ -207,6 +307,11 @@ void DotnetParser::Init()
 void DotnetParser::ReloadQuests()
 {
     this->DotnetLoad();
+    entity_list.EncounterProcess();
+    for (auto& pair : encounters_) {
+        delete pair.second;
+    }
+    encounters_.clear();
 }
 
 void DotnetParser::RemoveEncounter(const std::string &name)
@@ -233,7 +338,7 @@ bool DotnetParser::HasFunction(std::string subname, std::string package_name)
 bool DotnetParser::HasEncounterSub(const std::string &package_name, QuestEventID evt)
 {
 
-    return false;
+    return true;
 }
 
 int DotnetParser::DispatchEventNPC(QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
@@ -296,13 +401,22 @@ int DotnetParser::EventBot(
         return 0;
     }
 
-    if (!BotHasQuestSub(evt))
-    {
-        return 0;
-    }
-
     auto *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(bot, c);
+    event_payload p {
+        (int) EventSubtype::Event_Bot,
+        (int) evt,
+        nullptr, // Npc*
+        nullptr, // Mob*
+        c,  // Client*
+        bot,     // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0, // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -322,13 +436,22 @@ int DotnetParser::EventGlobalBot(
         return 0;
     }
 
-    if (!GlobalBotHasQuestSub(evt))
-    {
-        return 0;
-    }
-
-        auto *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
+    auto *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
     quest_manager.StartQuest(bot, c);
+    event_payload p {
+        (int) EventSubtype::Event_GlobalBot,
+        (int) evt,
+        nullptr, // Npc*
+        nullptr, // Mob*
+        c,  // Client*
+        bot,     // Bot*
+        nullptr, // ItemInstance*
+        data.c_str(),
+        "",
+        extra_data,
+        0, // SpellId
+    };
+    event(p, extra_pointers);
     quest_manager.EndQuest();
 
     return 0;
@@ -349,12 +472,12 @@ int DotnetParser::DispatchEventBot(
 bool DotnetParser::BotHasQuestSub(QuestEventID evt)
 {
 
-    return false;
+    return true;
 }
 
 bool DotnetParser::GlobalBotHasQuestSub(QuestEventID evt)
 {
-    return false;
+    return true;
 }
 
 void DotnetParser::LoadBotScript(std::string filename)

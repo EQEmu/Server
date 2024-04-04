@@ -27,6 +27,8 @@
 %ignore ZoneSpellsBlocked::m_Location;
 %ignore ZoneSpellsBlocked::m_Difference;
 %ignore Trap::m_Position;
+%ignore worldserver;
+%ignore spells;
 
 %ignore Merc::GetRawACNoShield;
 %ignore Raid::RemoveGroupLeader;
@@ -112,7 +114,9 @@
 
 #include "../../../common/ruletypes.h"
 #include "../../../common/rulesys.h"
+#include "../../../common/spdat.h"
 #include "../../../common/eq_packet.h"
+#include "../../../common/faction.h"
 #include "../../../common/net/packet.h"
 #include "../../../common/net/daybreak_structs.h"
 #include "../../../common/eq_stream_intf.h"
@@ -124,6 +128,7 @@
 
 #include "../../common.h"
 #include "../../entity.h"
+#include "../../bot.h"
 #include "../../mob.h"
 #include "../../hate_list.h"
 #include "../../merc.h"
@@ -144,6 +149,7 @@
 #include "../../zonedb.h"
 #include "../../worldserver.h"
 #include "../../questmgr.h"
+#include "../../dotnet_quests/dotnet_runtime.h"
 
 #include "../../../common/emu_constants.h"
 #include "../../../common/eq_constants.h"
@@ -160,11 +166,6 @@ void FreeVec3(glm::vec3* ptr) {
     delete ptr;
 }
 
-
-
-using namespace EQ;
-using namespace Logs;
-using namespace glm;
 %}
 
 
@@ -187,6 +188,16 @@ std::string GetRuleValue(const std::string& rule) {
     RuleManager::Instance()->GetRule(rule, out);
     return out;
 }
+SPDat_Spell_Struct GetSpellById(int spell_id) {
+    return spells[spell_id];
+}
+
+%}
+
+%{
+using namespace EQ;
+using namespace Logs;
+using namespace glm;
 %}
 
 namespace glm {
@@ -234,6 +245,7 @@ namespace glm {
 
 %include "../../../common/ruletypes.h"
 %include "../../../common/eq_packet.h"
+%include "../../../common/spdat.h"
 %include "../../../common/net/packet.h"
 %include "../../../common/net/daybreak_structs.h"
 %include "../../../common/eq_stream_intf.h"
@@ -246,10 +258,12 @@ namespace glm {
 
 %include "../../../common/linked_list.h"
 %include "../../../common/emu_constants.h"
+%include "../../../common/faction.h"
 %include "../../../common/eq_constants.h"
 
 %include "../../common.h"
 %include "../../entity.h"
+%include "../../bot.h"
 %include "../../mob.h"
 %include "../../hate_list.h"
 %include "../../merc.h"
@@ -270,6 +284,7 @@ namespace glm {
 %include "../../zonedb.h"
 %include "../../worldserver.h"
 %include "../../questmgr.h"
+%include "../../dotnet_quests/dotnet_runtime.h"
 
 %include "../../../common/item_instance.h"
 %include "../../../common/item_data.h"

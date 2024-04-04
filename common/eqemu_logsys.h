@@ -142,7 +142,11 @@ namespace Logs {
 		CombatRecord,
 		Hate,
 		Discord,
-		Faction,
+		#ifdef SWIG_VERSION
+		EQFaction,
+		#else
+		Faction, // deprecated
+		#endif
 		PacketServerClient,
 		PacketClientServer,
 		PacketServerToServer,

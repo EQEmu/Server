@@ -172,7 +172,7 @@ public:
 
     std::map<std::string, std::string> vars_;
     std::map<std::string, bool> loaded_;
-
+    std::map<std::string, Encounter*> encounters_;
     std::thread runtime_thread;
 };
 

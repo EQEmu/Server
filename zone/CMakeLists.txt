@@ -348,7 +348,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/zone
 )
 
-# Create symlinks to shared lib and dotnet folder
+# Create symlinks to shared lib and dotnet folder 
 if(UNIX AND NOT APPLE)
   if(IS_DIRECTORY "/home/eqemu")
   execute_process(COMMAND sudo bash ${CMAKE_CURRENT_SOURCE_DIR}/dotnet_quests/setup.sh
