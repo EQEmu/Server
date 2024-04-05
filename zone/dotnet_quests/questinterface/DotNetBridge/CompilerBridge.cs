@@ -139,8 +139,8 @@ public static class DotNetQuest
         var zoneGuid = $"{zoneName}-{Guid.NewGuid().ToString().Substring(0, 8)}";
         var startInfo = new ProcessStartInfo
         {
-            FileName = "dotnet",
-            Arguments = $"build --output {outPath} -r 'p:Configuration=Debug;AssemblyName={zoneGuid} {directoryPath}/{zoneName}.csproj",
+            FileName = Path.Combine(workingDirectory + "/bin/dotnet/DotNetCompiler"),
+            Arguments = $"{zoneName} {zoneGuid} {outPath} {directoryPath}",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

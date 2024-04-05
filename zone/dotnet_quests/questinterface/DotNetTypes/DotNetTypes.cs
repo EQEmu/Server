@@ -135,16 +135,6 @@ public class EqFactory
         return list;
     }
 
-    public static EQLists CreateEQLists(EventArgs eventArgs)
-    {
-        return new EQLists()
-        {
-            stringList = CreateStringVector(eventArgs.StringVector, false),
-            mobList = CreateMobVector(eventArgs.MobVector, false),
-            itemList = CreateItemVector(eventArgs.ItemVector, false),
-            packetList = CreatePacketVector(eventArgs.PacketVector, false),
-        };
-    }
 
     public static Assembly GetCallerAssembly()
     {
@@ -540,8 +530,15 @@ public class EQLists
 public class EQEvent
 {
     public EQEvent(EQGlobals g, EventArgs e) {
-        globals = g;
-        lists = EqFactory.CreateEQLists(e);
+        zone = g.zone;
+        entityList = g.entityList;
+        questManager = g.questManager;
+        worldServer = g.worldServer;
+        logSys = g.logSys;
+        stringList = EqFactory.CreateStringVector(e.StringVector, false);
+        mobList = EqFactory.CreateMobVector(e.MobVector, false);
+        itemList = EqFactory.CreateItemVector(e.ItemVector, false);
+        packetList = EqFactory.CreatePacketVector(e.PacketVector, false);
         string? message = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
             ? Marshal.PtrToStringUni(e.Data)
             : Marshal.PtrToStringUTF8(e.Data);
@@ -550,16 +547,25 @@ public class EQEvent
     }
 
     public void QuestDebug(string message) {
-        globals.logSys?.QuestDebug(message);
+        logSys?.QuestDebug(message);
     }
 
     public void QuestError(string message) {
-        globals.logSys?.QuestError(message);
+        logSys?.QuestError(message);
     }
-    public EQGlobals globals;
-    public EQLists lists;
     public string data;
     public uint extraData;
+
+    public Zone zone;
+    public EntityList entityList;
+    public EQEmuLogSys logSys;
+    public QuestManager questManager;
+    public WorldServer worldServer;
+
+    public List<string> stringList;
+    public List<Mob> mobList;
+    public List<ItemInstance> itemList;
+    public List<EQApplicationPacket> packetList;
 }
 
 public class NpcEvent : EQEvent
@@ -585,14 +591,14 @@ public class NpcEvent : EQEvent
         originalClientLinkdeadMs = int.Parse(questinterface.GetRuleValue("Zone:ClientLinkdeadMS"));
         RuleManager.Instance().SetRule("Zone:ClientLinkdeadMS", debugMs.ToString());
 
-        globals.logSys.QuestDebug($"Set all timeout values to {debugMinutes} minutes. You will be disconnected if threads are paused longer than this or client hits 0%");
+        logSys.QuestDebug($"Set all timeout values to {debugMinutes} minutes. You will be disconnected if threads are paused longer than this or client hits 0%");
     }
 
     public void ResetDebug()
     {
         if (originalClientLinkdeadMs == 0 || originalResendTimeout == 0 || originalClientLinkdeadMs == 0)
         {
-            globals.logSys.QuestDebug("SetupDebug was not called before ResetDebug and would have set all timeouts to 0.");
+            logSys.QuestDebug("SetupDebug was not called before ResetDebug and would have set all timeouts to 0.");
             return;
         }
 
@@ -609,7 +615,7 @@ public class NpcEvent : EQEvent
             originalClientLinkdeadMs = int.Parse(questinterface.GetRuleValue("Zone:ClientLinkdeadMS"));
             RuleManager.Instance().SetRule("Zone:ClientLinkdeadMS", originalClientLinkdeadMs.ToString());
 
-            globals.logSys.QuestDebug($"Reset all timeout values");
+            logSys.QuestDebug($"Reset all timeout values");
         });
     }
 }

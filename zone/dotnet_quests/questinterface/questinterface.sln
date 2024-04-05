@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetTypes", "DotNetTypes\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetBridge", "DotNetBridge\DotNetBridge.csproj", "{36D371C6-5C2F-4536-93A8-362663DBA692}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCompiler", "DotNetCompiler\DotNetCompiler.csproj", "{F7DEA76F-1B5A-480A-B76D-11A776CC59CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,5 +30,9 @@ Global
 		{36D371C6-5C2F-4536-93A8-362663DBA692}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36D371C6-5C2F-4536-93A8-362663DBA692}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36D371C6-5C2F-4536-93A8-362663DBA692}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7DEA76F-1B5A-480A-B76D-11A776CC59CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7DEA76F-1B5A-480A-B76D-11A776CC59CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7DEA76F-1B5A-480A-B76D-11A776CC59CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7DEA76F-1B5A-480A-B76D-11A776CC59CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

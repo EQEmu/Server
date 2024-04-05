@@ -1388,7 +1388,7 @@ void Mob::AI_Process() {
 				StopNavigation();
 			}
 		}
-		else if (zone->CanDoCombat() && CastToNPC()->GetNPCAggro() && AI_scan_area_timer->Check()) {
+		else if (zone->CanDoCombat() && CastToNPC()->GetNPCAggro() && AI_scan_area_timer && AI_scan_area_timer->Check()) {
 
 			/**
 			 * NPC to NPC aggro (npc_aggro flag set)
