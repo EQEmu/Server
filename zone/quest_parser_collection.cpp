@@ -964,6 +964,12 @@ QuestInterface* QuestParserCollection::GetQIByGlobalNPCQuest(std::string& filena
 			filename = file_name;
 			return e;
 		}
+
+		file_name = std::string("dotnet_quests/global/npc.cs");
+		if (File::Exists(file_name)) {
+			filename = file_name;
+			return e;
+		}
 	}
 
 	return nullptr;
@@ -984,6 +990,12 @@ QuestInterface* QuestParserCollection::GetQIByGlobalPlayerQuest(std::string& fil
 			_extensions.find(e->GetIdentifier())->second
 		);
 
+		if (File::Exists(file_name)) {
+			filename = file_name;
+			return e;
+		}
+		
+		file_name = std::string("dotnet_quests/global/player.cs");
 		if (File::Exists(file_name)) {
 			filename = file_name;
 			return e;

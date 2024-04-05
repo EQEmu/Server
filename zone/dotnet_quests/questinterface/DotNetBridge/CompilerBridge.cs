@@ -51,7 +51,7 @@ public static class DotNetQuest
                 reloading = true;
                 logSys?.QuestDebug("Detected change in .cs file - Reloading dotnet quests");
                 Console.WriteLine("Detected change in .cs file - Reloading dotnet quests");
-                Reload();
+                ReloadZone();
                 reloading = false;
                 lastCheck = lastWriteTime;
             }
@@ -79,19 +79,20 @@ public static class DotNetQuest
         var zoneDir = Path.Combine(workingDirectory, "dotnet_quests", zone.GetShortName());
         logSys?.QuestDebug($"Watching for *.cs file changes in {zoneDir}");
         Console.WriteLine($"Watching for *.cs file changes in {zoneDir}");
+        // This can't be hot-reloaded since it's shared across multiple modules and not versioned with a guid.
+        LoadGlobal();
         PollForChanges(zoneDir);
-    }
-
-    private static void OnChanged(object sender, FileSystemEventArgs e)
-    {
-        logSys?.QuestDebug($"Detected change in {e.FullPath} - Reloading dotnet quests");
-        Console.WriteLine($"Detected change in {e.FullPath} - Reloading dotnet quests");
-        Reload();
+        
     }
 
     private static CollectibleAssemblyLoadContext? assemblyContext_ = null;
+    private static CollectibleAssemblyLoadContext? globalAssemblyContext = null;
     private static Assembly? questAssembly_;
-    public static void Reload()
+    private static Assembly? globalAssembly_;
+    public static void Reload() {
+        ReloadZone();
+    }
+    public static void ReloadZone()
     {
         if (assemblyContext_ != null)
         {
@@ -182,6 +183,93 @@ public static class DotNetQuest
         }
     }
 
+    public static void LoadGlobal()
+    {
+        if (globalAssemblyContext != null)
+        {
+            globalAssemblyContext.Unload();
+            globalAssemblyContext = null;
+            globalAssembly_ = null;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        var workingDirectory = Directory.GetCurrentDirectory();
+        var directoryPath = $"{workingDirectory}/dotnet_quests/global";
+        var outPath = $"{workingDirectory}/dotnet_quests/out";
+        var projPath = $"{directoryPath}/global.csproj";
+        if (!File.Exists(projPath))
+        {
+            Console.WriteLine($"Project path does not exist for global at {projPath}");
+            return;
+        }
+        if (File.Exists(outPath))
+        {
+            // Clean up existing dll and pdb
+            string[] filesToDelete = Directory.GetFiles(outPath, $"global*.*")
+                    .ToArray();
+
+            // Delete each file
+            foreach (string file in filesToDelete)
+            {
+                try
+                {
+                    File.Delete(file);
+                }
+                catch (IOException ex)
+                {
+                    Console.WriteLine($"An error occurred while deleting file {file}: {ex.Message}");
+                }
+            }
+        }
+
+        globalAssemblyContext = new CollectibleAssemblyLoadContext(outPath);
+
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = Path.Combine(workingDirectory + "/bin/dotnet/DotNetCompiler"),
+            Arguments = $"global global {outPath} {directoryPath}",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            CreateNoWindow = true,
+            WorkingDirectory = directoryPath,
+        };
+
+        using (var process = Process.Start(startInfo))
+        {
+            if (process == null)
+            {
+                logSys?.QuestError($"Process was null when loading global quests");
+                return;
+            }
+            try
+            {
+                string output = process.StandardOutput.ReadToEnd().Trim();
+                process.WaitForExit();
+                string errorOutput = process.StandardError.ReadToEnd();
+                if (errorOutput.Length > 0 || output.Contains("FAILED"))
+                {
+                    logSys?.QuestError($"Error compiling global quests:");
+                    logSys?.QuestError(errorOutput);
+                    logSys?.QuestError(output);
+                }
+                else
+                {
+                    Console.WriteLine(output);
+                    var questAssemblyPath = $"{outPath}/global.dll";
+                    Console.WriteLine($"Loading global assembly from: {questAssemblyPath}");
+                    globalAssembly_ = globalAssemblyContext.LoadFromAssemblyPath(questAssemblyPath);
+                    logSys?.QuestDebug($"Successfully compiled global .NET quests with {globalAssembly_.GetTypes().Count()} exported types.");
+                }
+            }
+            catch (Exception e)
+            {
+                logSys?.QuestError($"Exception in loading global quests {e.Message}");
+            }
+        }
+    }
+
     public static void QuestEvent(EventArgs questEventArgs)
     {
         if (zone == null || entityList == null || logSys == null || worldServer == null || questAssembly_ == null || questManager == null)
@@ -240,10 +328,15 @@ public static class DotNetQuest
         var mob = EqFactory.CreateMob(npcEventArgs.Mob, false);
         var npcName = npc?.GetOrigName() ?? "";
         var uniqueName = npc?.GetName() ?? "";
-        if (questAssembly_.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+        // If we have this case covered for local zone and being invoked through global don't honor global invoke
+        if (global && questAssembly_?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null) {
+            return;
+        }
+        var assembly = global ? globalAssembly_ : questAssembly_;
+        if (assembly?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
         {
             object? npcObject;
-            var npcType = questAssembly_.GetType(npcName);
+            var npcType = assembly.GetType(npcName);
             if (npcType == null)
             {
                 return;
@@ -272,11 +365,16 @@ public static class DotNetQuest
     private static void PlayerEvent(EventArgs playerEventArgs, bool global = false)
     {
         QuestEventID id = (QuestEventID)playerEventArgs.QuestEventId;
-        if (questAssembly_.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null)
+        // If we have this case covered for local zone and being invoked through global don't honor global invoke
+        if (global && questAssembly_?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null) {
+            return;
+        }
+        var assembly = global ? globalAssembly_ : questAssembly_;
+        if (assembly?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null)
         {
             var player = EqFactory.CreateClient(playerEventArgs.Client, false);
             object? playerObject;
-            var playerType = questAssembly_.GetType("Player");
+            var playerType = assembly.GetType("Player");
             var playerName = player.GetName();
             if (playerType == null)
             {

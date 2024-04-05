@@ -5,6 +5,14 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qeynos", "qeynos\qeynos.csproj", "{09EFF571-8901-41D0-A2CF-6C6454417741}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qeynos2", "qeynos2\qeynos2.csproj", "{291D4723-53F5-434B-845B-CABECE350FCE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "common", "common\common.csproj", "{A4DBA7E1-4B37-4FFF-A795-05FC56B0D76B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "global", "global\global.csproj", "{373F2BBA-DCAB-43CF-9B2C-8232A7ED00EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "qeytoqrg", "qeytoqrg\qeytoqrg.csproj", "{838AA20D-5EA4-48A4-8309-E901ECFA7F0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +38,21 @@ Global
 		{09EFF571-8901-41D0-A2CF-6C6454417741}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09EFF571-8901-41D0-A2CF-6C6454417741}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09EFF571-8901-41D0-A2CF-6C6454417741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{291D4723-53F5-434B-845B-CABECE350FCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{291D4723-53F5-434B-845B-CABECE350FCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{291D4723-53F5-434B-845B-CABECE350FCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{291D4723-53F5-434B-845B-CABECE350FCE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4DBA7E1-4B37-4FFF-A795-05FC56B0D76B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4DBA7E1-4B37-4FFF-A795-05FC56B0D76B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4DBA7E1-4B37-4FFF-A795-05FC56B0D76B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4DBA7E1-4B37-4FFF-A795-05FC56B0D76B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{373F2BBA-DCAB-43CF-9B2C-8232A7ED00EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{373F2BBA-DCAB-43CF-9B2C-8232A7ED00EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{373F2BBA-DCAB-43CF-9B2C-8232A7ED00EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{373F2BBA-DCAB-43CF-9B2C-8232A7ED00EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{838AA20D-5EA4-48A4-8309-E901ECFA7F0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{838AA20D-5EA4-48A4-8309-E901ECFA7F0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{838AA20D-5EA4-48A4-8309-E901ECFA7F0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{838AA20D-5EA4-48A4-8309-E901ECFA7F0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
