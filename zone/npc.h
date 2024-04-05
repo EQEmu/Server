@@ -197,11 +197,12 @@ public:
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
 
 	// loot
-	void AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item = true);
+	void AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item = true, bool quest = false);
 	void AddItem(
 		uint32 item_id,
 		uint16 charges,
 		bool equip_item = true,
+		bool quest = false,
 		uint32 augment_one = 0,
 		uint32 augment_two = 0,
 		uint32 augment_three = 0,
@@ -214,10 +215,12 @@ public:
 	void AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop);
 	void CheckGlobalLootTables();
 	void RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
+	void RemoveItem(LootItem *item_data, uint8 quantity = 0);
 	void CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void ClearLootItems();
 	inline const LootItems &GetLootItems() { return m_loot_items; }
 	LootItem *GetItem(int slot_id);
+	LootItem *GetItemByItemID(int16 itemid);
 	void AddLootCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum);
 	void RemoveLootCash();
 	void QueryLoot(Client *to, bool is_pet_query = false);
@@ -237,6 +240,22 @@ public:
 	inline void SetSilver(uint32 amt) { m_loot_silver = amt; }
 	inline void SetGold(uint32 amt) { m_loot_gold = amt; }
 	inline void SetPlatinum(uint32 amt) { m_loot_platinum = amt; }
+
+	// MultiQuest
+	bool	HasQuestLootItem(int16 itemid);
+	bool	HasQuestLoot();
+	bool	RemoveQuestLootItems(int16 itemid);
+	bool	HasRequiredQuestLoot(int16 itemid1, int16 itemid2, int16 itemid3, int16 itemid4);
+	void	CleanQuestLootItems();
+	uint8	CountQuestItem(uint16 itemid);
+	uint8	CountQuestItems();
+	bool	AddQuestLoot(int16 itemid, int8 charges = 1);
+	void	DeleteQuestLoot(int16 itemid1, int16 itemid2 = 0, int16 itemid3 = 0, int16 itemid4 = 0);
+	void	DeleteInvalidQuestLoot();
+
+	bool	AddPetLoot(int16 itemid, int8 charges = 1, bool fromquest = false);
+	bool	HasPetLootItem(int16 itemid);
+	bool	RemovePetLootItems(int16 itemid);
 
 	void DescribeAggro(Client *to_who, Mob *mob, bool verbose);
 	virtual void UpdateEquipmentLight();
@@ -326,6 +345,8 @@ public:
 		const EQ::ItemData *item2,
 		LootdropEntriesRepository::LootdropEntries loot_drop,
 		bool wear_change = false,
+		bool quest = false,
+		bool pet = false,
 		uint32 augment_one = 0,
 		uint32 augment_two = 0,
 		uint32 augment_three = 0,

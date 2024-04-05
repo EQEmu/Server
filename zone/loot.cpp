@@ -285,6 +285,8 @@ void NPC::AddLootDrop(
 	const EQ::ItemData *item2,
 	LootdropEntriesRepository::LootdropEntries loot_drop,
 	bool wear_change,
+	bool quest,
+	bool pet,
 	uint32 augment_one,
 	uint32 augment_two,
 	uint32 augment_three,
@@ -294,6 +296,10 @@ void NPC::AddLootDrop(
 )
 {
 	if (!item2) {
+		return;
+	}
+
+	if (CountQuestItems() >= MAX_NPC_QUEST_INVENTORY) {
 		return;
 	}
 
@@ -318,6 +324,10 @@ void NPC::AddLootDrop(
 		);
 	}
 
+	if (quest || pet) {
+		LogLoot("Adding {} to npc: {}. Wearchange: {} Multiquest: {} Pet: {}", item2->Name, GetName(), wear_change, quest, pet);
+	}
+
 	EQApplicationPacket *outapp               = nullptr;
 	WearChange_Struct   *p_wear_change_struct = nullptr;
 	if (wear_change) {
@@ -339,6 +349,8 @@ void NPC::AddLootDrop(
 	item->trivial_min_level = loot_drop.trivial_min_level;
 	item->trivial_max_level = loot_drop.trivial_max_level;
 	item->equip_slot        = EQ::invslot::SLOT_INVALID;
+	item->quest             = quest;
+	item->pet               = pet;
 
 	// unsure if required to equip, YOLO for now
 	if (item2->ItemType == EQ::item::ItemTypeBow) {
@@ -347,6 +359,11 @@ void NPC::AddLootDrop(
 
 	if (item2->ItemType == EQ::item::ItemTypeArrow) {
 		SetArrowEquipped(true);
+	}
+
+	if (pet && quest) {
+		LogLoot("Error: Item {} is being added to {} as both a pet and a quest.", item2->Name, GetName());
+		item->pet = 0;
 	}
 
 	bool found = false; // track if we found an empty slot we fit into
@@ -541,20 +558,21 @@ void NPC::AddLootDrop(
 	safe_delete(inst);
 }
 
-void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item)
+void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equip_item, bool quest)
 {
 	auto l = LootdropEntriesRepository::NewNpcEntity();
 
 	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
 	l.item_charges = charges;
 
-	AddLootDrop(item, l, true);
+	AddLootDrop(item, l, equip_item, quest);
 }
 
 void NPC::AddItem(
 	uint32 item_id,
 	uint16 charges,
 	bool equip_item,
+	bool quest,
 	uint32 augment_one,
 	uint32 augment_two,
 	uint32 augment_three,
@@ -576,7 +594,8 @@ void NPC::AddItem(
 	AddLootDrop(
 		item,
 		l,
-		true,
+		equip_item,
+		quest,
 		augment_one,
 		augment_two,
 		augment_three,
@@ -693,6 +712,50 @@ LootItem *NPC::GetItem(int slot_id)
 		}
 	}
 	return (nullptr);
+}
+
+LootItem *NPC::GetItemByItemID(int16 item_id)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		if (item->item_id == item_id) {
+			return item;
+		}
+	}
+	return(nullptr);
+}
+
+void NPC::RemoveItem(LootItem *item_data, uint8 quantity) {
+	if (!item_data) {
+		return;
+	}
+
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *item = *cur;
+		if (item != item_data) { continue; }
+
+		if (!item) {
+			return;
+		}
+			
+		if (item->charges <= quantity) {
+			m_loot_items.erase(cur);
+			UpdateEquipmentLight();
+			if (UpdateActiveLight()) { SendAppearancePacket(AppearanceType::Light, GetActiveLightType()); }
+		}
+		else {
+			item->charges -= quantity;
+		}
+		return;
+		
+	}
+
 }
 
 void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot)
@@ -940,4 +1003,316 @@ void NPC::RemoveLootCash()
 	m_loot_silver   = 0;
 	m_loot_gold     = 0;
 	m_loot_platinum = 0;
+}
+
+bool NPC::HasQuestLootItem(int16 itemid)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->quest == 1 && quest_item->item_id == itemid) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool NPC::HasQuestLoot()
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *quest_loot = *cur;
+		if (quest_loot && quest_loot->quest == 1) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool NPC::RemoveQuestLootItems(int16 itemid)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->quest == 1) {
+			if (itemid == 0 || itemid == quest_item->item_id) {
+				RemoveItem(quest_item);
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool NPC::HasRequiredQuestLoot(int16 itemid1, int16 itemid2, int16 itemid3, int16 itemid4)
+{
+	if (itemid2 == 0 && itemid3 == 0 && itemid4 == 0) {
+		return true;
+	}
+
+	uint8 item2count = 0, item3count = 0, item4count = 0, item1npc = 0, item2npc = 0, item3npc = 0, item4npc = 0;
+	uint8 item1count = 1;
+	if (itemid2 > 0) {
+		item2count = 1;
+	}
+	if (itemid3 > 0) {
+		item3count = 1;
+	}
+	if (itemid4 > 0) {
+		item4count = 1;
+	}
+
+	if (itemid1 == itemid2 && itemid2 > 0) {
+		item2count = item1count;
+		++item1count;
+		++item2count;
+	}
+	if (itemid1 == itemid3 && itemid3 > 0) {
+		item3count = item1count;
+		++item1count;
+		++item3count;
+	}
+	if (itemid1 == itemid4 && itemid4 > 0) {
+		item4count = item1count;
+		++item1count;
+		++item4count;
+	}
+	if (itemid2 == itemid3 && itemid2 > 0 && itemid3 > 0) {
+		item3count = item2count;
+		++item2count;
+		++item3count;
+	}
+	if (itemid2 == itemid4 && itemid2 > 0 && itemid4 > 0) {
+		item4count = item2count;
+		++item2count;
+		++item4count;
+	}
+	if (itemid3 == itemid4 && itemid3 > 0 && itemid4 > 0) {
+		item4count = item3count;
+		++item3count;
+		++item4count;
+	}
+
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *sitem = *cur;
+		if (sitem && sitem->quest == 1) {
+			if (sitem->item_id == itemid1) {
+				++item1npc;
+			}
+
+			if (sitem->item_id == itemid2 && itemid2 > 0) {
+				++item2npc;
+			}
+
+			if (sitem->item_id == itemid3 && itemid3 > 0) {
+				++item3npc;
+			}
+
+			if (sitem->item_id == itemid4 && itemid4 > 0) {
+				++item4npc;
+			}
+		}
+	}
+
+	if (item1npc < item1count) {
+		return false;
+	}
+
+	if (itemid2 > 0 && item2npc < item2count) {
+		return false;
+	}
+
+	if (itemid3 > 0 && item3npc < item3count) {
+		return false;
+	}
+
+	if (itemid4 > 0 && item4npc < item4count) {
+		return false;
+	}
+
+	return true;
+}
+
+void NPC::CleanQuestLootItems()
+{
+	//Removes nodrop or multiple quest loot items from a NPC before sending the corpse items to the client.
+
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	uint8 count = 0;
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && (quest_item->quest == 1 || quest_item->pet == 1)) {
+			uint8 count = CountQuestItem(quest_item->item_id);
+			if (count > 1 && quest_item->pet != 1) {
+				RemoveItem(quest_item);
+				return;
+			}
+			else {
+				const EQ::ItemData *item = database.GetItem(quest_item->item_id);
+				if (item && item->NoDrop == 0) {
+					RemoveItem(quest_item);
+					return;
+				}
+			}
+		}
+	}
+}
+
+uint8 NPC::CountQuestItem(uint16 itemid)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	uint8 count = 0;
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->item_id == itemid) {
+			++count;
+		}
+	}
+
+	return count;
+}
+
+uint8 NPC::CountQuestItems()
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	uint8 count = 0;
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->quest == 1) {
+			++count;
+		}
+	}
+
+	return count;
+}
+
+bool NPC::AddQuestLoot(int16 itemid, int8 charges) {
+	auto l = LootdropEntriesRepository::NewNpcEntity();
+
+	const EQ::ItemData *item = database.GetItem(itemid);
+	if (item) {
+		l.item_charges = charges;
+		l.equip_item = 0;
+		AddLootDrop(item, l, false, false, true);
+		LogLoot("Adding item {} to the NPC's loot marked as quest.", itemid);
+		if (itemid > 0 && HasPetLootItem(itemid)) {
+			LogLoot("Deleting quest item {} from NPC's pet loot.", itemid);
+			RemovePetLootItems(itemid);
+		}
+	}
+	else
+		return false;
+
+	return true;
+}
+
+void NPC::DeleteQuestLoot(int16 itemid1, int16 itemid2, int16 itemid3, int16 itemid4)
+{
+	int16 items = m_loot_items.size();
+	for (int i = 0; i < items; ++i) {
+		if (itemid1 == 0) {
+			if (!RemoveQuestLootItems(itemid1))
+				break;
+		}
+		else {
+			if (itemid1 != 0) {
+				RemoveQuestLootItems(itemid1);
+			}
+			if (itemid2 != 0) {
+				RemoveQuestLootItems(itemid2);
+			}
+			if (itemid3 != 0) {
+				RemoveQuestLootItems(itemid3);
+			}
+			if (itemid4 != 0) {
+				RemoveQuestLootItems(itemid4);
+			}
+		}
+	}
+}
+
+void NPC::DeleteInvalidQuestLoot()
+{
+	int16 items = m_loot_items.size();
+	for (int i = 0; i < items; ++i) {
+		CleanQuestLootItems();
+	}
+}
+
+bool NPC::AddPetLoot(int16 itemid, int8 charges, bool fromquest) {
+	auto l = LootdropEntriesRepository::NewNpcEntity();
+
+	const EQ::ItemData *item = database.GetItem(itemid);
+	bool IsCharmedPet = IsPet() && IsCharmed();
+
+	if (!item) {
+		return false;
+	}
+
+	bool valid = (item->NoDrop != 0 && (  !IsCharmedPet || (IsCharmedPet && CountQuestItem(item->ID) == 0)));
+	if (!fromquest || valid) {
+		if (item) {
+			l.item_charges = charges;
+			AddLootDrop(item, l, true, true, false, true);
+			LogLoot("Adding item {} to the NPC's loot marked as pet.", itemid);
+			return true;
+		}
+	}
+	else {
+		LogLoot("Item {} is a duplicate or no drop. Deleting...", itemid);
+		return false;
+	}
+
+	return false;
+}
+
+bool NPC::HasPetLootItem(int16 itemid)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->pet == 1 && quest_item->item_id == itemid) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool NPC::RemovePetLootItems(int16 itemid)
+{
+	LootItems::iterator cur, end;
+	cur = m_loot_items.begin();
+	end = m_loot_items.end();
+	for (; cur != end; ++cur) {
+		LootItem *quest_item = *cur;
+		if (quest_item && quest_item->pet == 1) {
+			if (itemid == 0 || itemid == quest_item->item_id) {
+				RemoveItem(quest_item);
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

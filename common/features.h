@@ -82,6 +82,10 @@ Zone extensions and features
 #define QUEST_GLOBAL_DIRECTORY "global"
 #endif
 
+// Number of quest items a Quest NPC can hold
+#define MAX_NPC_QUEST_INVENTORY 24
+
+
 //the min ratio at which a mob's speed is reduced
 #define FLEE_HP_MINSPEED 22
 //number of tics to try to run straight away before looking again
@@ -110,6 +114,7 @@ Zone extensions and features
 #define HIGHEST_CAN_SET_SKILL 400
 
 #define SKILL_MAX_LEVEL 75
+
 
 /*
 

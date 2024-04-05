@@ -25,6 +25,8 @@ struct LootItem {
 	uint16      trivial_max_level;
 	uint16      npc_min_level;
 	uint16      npc_max_level;
+	uint8       quest;
+	uint8       pet;
 };
 
 typedef std::list<LootItem*> LootItems;
