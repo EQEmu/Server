@@ -2500,8 +2500,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	d->spell_id     = UINT32_MAX;
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage       = damage;
+	d->corpseid		= GetID();
 
-	app->priority = 6;
+	app->priority = 1;
 
 	entity_list.QueueClients(killer_mob, app, false);
 
@@ -2833,7 +2834,14 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		}
 
 		entity_list.LimitRemoveNPC(this);
+
 		entity_list.AddCorpse(corpse, GetID());
+
+		// The client sees NPC corpses as name's_corpse.  The server uses
+		// name`s_corpse so that %T works on corpses (client workaround)
+		// Rename the new corpse on client side.
+		std::string old_name = Strings::Replace(corpse->GetName(), "`s_corpse", "'s_corpse");
+		SendRename(killer_mob, old_name.c_str(), corpse->GetName());
 
 		entity_list.UnMarkNPC(GetID());
 		entity_list.RemoveNPC(GetID());

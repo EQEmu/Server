@@ -1647,6 +1647,22 @@ void Mob::SendHPUpdate(bool force_update_all)
 	}
 }
 
+void Mob::SendRename(Mob *sender, const char* old_name, const char* new_name)
+{
+	auto out2 = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
+	auto data = (MobRename_Struct *)out2->pBuffer;
+	out2->priority = 6;
+
+	strn0cpy(data->old_name, old_name, sizeof(data->old_name));
+	strn0cpy(data->old_name_again, old_name, sizeof(data->old_name_again));
+	strn0cpy(data->new_name, new_name, sizeof(data->new_name));
+	data->unknown192 = 0;
+	data->unknown196 = 1;
+
+	entity_list.QueueClients(sender, out2);
+	safe_delete(out2);
+}
+
 void Mob::StopMoving()
 {
 	StopNavigation();
@@ -4374,15 +4390,7 @@ void Mob::TempName(const char *newname)
 	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
-	auto outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-	MobRename_Struct* mr = (MobRename_Struct*) outapp->pBuffer;
-	strn0cpy(mr->old_name, old_name, 64);
-	strn0cpy(mr->old_name_again, old_name, 64);
-	strn0cpy(mr->new_name, temp_name, 64);
-	mr->unknown192 = 0;
-	mr->unknown196 = 1;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
+	SendRename(this, old_name, temp_name);
 
 	SetName(temp_name);
 }
