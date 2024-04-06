@@ -837,6 +837,15 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									tradingWith->SayString(TRADE_BACK, GetCleanName());
 									PushItemOnCursor(*baginst, true);
 								}
+								else if (bagitem->NoDrop != 0 && tradingWith->CastToNPC()->CountQuestItem(bagitem->ID) == 0) {
+									tradingWith->CastToNPC()->AddQuestLoot(bagitem->ID, baginst->GetCharges());
+									LogTrading("Adding loot item {} (bag) to non-Quest NPC {}", bagitem->Name, tradingWith->CastToNPC()->GetName());
+								}
+								// Destroy duplicate and nodrop items on charmed pets.
+								else if (bagitem->NoDrop != 0 && ((tradingWith->CastToNPC()->IsPet() && tradingWith->CastToNPC()->IsCharmed()) || (tradingWith->CastToNPC()->IsPet() && tradingWith->CastToNPC()->IsCharmed() && tradingWith->CastToNPC()->CountQuestItem(bagitem->ID) == 0))) {
+									tradingWith->CastToNPC()->AddPetLoot(bagitem->ID, baginst->GetCharges());
+								}
+
 							}
 						}
 					}
@@ -867,6 +876,10 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
 					tradingWith->SayString(TRADE_BACK, GetCleanName());
 					PushItemOnCursor(*inst, true);
+				}
+				// Add items to loottable without equipping and mark as quest.
+				else if (GetGM() || (item->NoDrop != 0 && tradingWith->CastToNPC()->CountQuestItem(item->ID) == 0)) {
+					tradingWith->CastToNPC()->AddQuestLoot(item->ID, inst->GetCharges());
 				}
 			}
 		}

@@ -955,14 +955,19 @@ void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug
 	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5);
 }
 
-void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned) {
+void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
 	Lua_Safe_Call_Void();
-	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attuned);
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6);
 }
 
-void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, int to_slot) {
+void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned) {
 	Lua_Safe_Call_Void();
-	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, 0, attuned, to_slot);
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, 0, attuned);
+}
+
+void Lua_Client::SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, int to_slot) {
+	Lua_Safe_Call_Void();
+	self->SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, 0, attuned, to_slot);
 }
 
 void Lua_Client::SetStats(int type, int value) {
@@ -3863,8 +3868,9 @@ luabind::scope lua_register_client() {
 	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32))&Lua_Client::SummonItem)
 	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32))&Lua_Client::SummonItem)
 	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32))&Lua_Client::SummonItem)
-	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool))&Lua_Client::SummonItem)
-	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::SummonItem)
+	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,uint32))&Lua_Client::SummonItem)
+	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,uint32,bool))&Lua_Client::SummonItem)
+	.def("SummonItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::SummonItem)
 	.def("SummonItemIntoInventory", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::SummonItemIntoInventory)
 	.def("TGB", (bool(Lua_Client::*)(void))&Lua_Client::TGB)
 	.def("TakeMoneyFromPP", (bool(Lua_Client::*)(uint64))&Lua_Client::TakeMoneyFromPP)

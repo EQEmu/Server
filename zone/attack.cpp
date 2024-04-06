@@ -2816,6 +2816,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		entity_list.RemoveFromAutoXTargets(this);
 
+		// Here we create the corpse.
+		DeleteInvalidQuestLoot();
+
 		corpse = new Corpse(
 			this,
 			&m_loot_items,

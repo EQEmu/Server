@@ -920,6 +920,12 @@ int Lua_NPC::QuestLootCount(int itemid)
 	return self->CountQuestItem(itemid);
 }
 
+bool Lua_NPC::CanTalk()
+{
+	Lua_Safe_Call_Bool();
+	return self->CanTalk();
+}
+
 luabind::scope lua_register_npc() {
 	return luabind::class_<Lua_NPC, Lua_Mob>("NPC")
 	.def(luabind::constructor<>())
@@ -946,6 +952,7 @@ luabind::scope lua_register_npc() {
 	.def("AddPetLoot", (void(Lua_NPC:: *)(int, int)) & Lua_NPC::AddPetLoot)
 	.def("AssignWaypoints", (void(Lua_NPC::*)(int))&Lua_NPC::AssignWaypoints)
 	.def("CalculateNewWaypoint", (void(Lua_NPC::*)(void))&Lua_NPC::CalculateNewWaypoint)
+	.def("CanTalk", (bool(Lua_NPC:: *)(void)) & Lua_NPC::CanTalk)
 	.def("ChangeLastName", (void(Lua_NPC::*)(std::string))&Lua_NPC::ChangeLastName)
 	.def("CheckNPCFactionAlly", (int(Lua_NPC::*)(int))&Lua_NPC::CheckNPCFactionAlly)
 	.def("ClearItemList", (void(Lua_NPC::*)(void))&Lua_NPC::ClearLootItems)

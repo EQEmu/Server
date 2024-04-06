@@ -601,7 +601,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
-	if (enforce_usable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
+	if (enforce_usable && to_slot != EQ::invslot::SLOT_QUEST && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
 		uint32 slottest = to_slot;
 		if(!(slots & ((uint32)1 << slottest))) {
 			Message(
@@ -648,6 +648,34 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
 	}
+	//We're coming from a quest method.
+	if (to_slot == EQ::invslot::SLOT_QUEST) {
+		bool stacking = TryStacking(inst);
+		if (stacking) {
+			safe_delete(inst);
+			return true;
+		}
+		else {
+			bool bag = false;
+			if (inst->IsClassBag()) {
+				bag = true;
+			}
+			to_slot = m_inv.FindFreeSlot(bag, true, item->Size);
+
+			//make sure we are not completely full...
+			if (to_slot == EQ::invslot::slotCursor || to_slot == INVALID_INDEX) {
+				if (inst->GetItem()->NoDrop == 0) {
+					//If it's no drop, force it to the cursor. This carries the risk of deletion if the player already has this item on their cursor
+					// or if the cursor queue is full. But in this situation, we have little other recourse.
+					PushItemOnCursor(*inst);
+					LogInventory("{} has a full inventory and {} is a no drop item.  Forcing to cursor", GetName(), inst->GetItem()->Name);
+					safe_delete(inst);
+				}
+			}
+
+		}
+	}
+
 
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {

@@ -152,6 +152,8 @@ namespace UF
 
 		const int16 SLOT_TRADESKILL_EXPERIMENT_COMBINE = 1000;
 
+		const int16 SLOT_QUEST = 9999;
+
 		const int16 POSSESSIONS_BEGIN = slotCharm;
 		const int16 POSSESSIONS_END = slotCursor;
 		const int16 POSSESSIONS_COUNT = (POSSESSIONS_END - POSSESSIONS_BEGIN) + 1;

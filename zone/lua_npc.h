@@ -200,6 +200,7 @@ public:
 	void DeleteQuestLoot(int itemid1, int itemid2, int itemid3, int itemid4);
 	bool HasRequiredQuestLoot(int itemid1, int itemid2, int itemid3, int itemid4);
 	int QuestLootCount(int itemid);
+	bool CanTalk();
 };
 
 #endif

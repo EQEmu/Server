@@ -162,6 +162,8 @@ namespace RoF
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
 
+		const int16 SLOT_QUEST = 9999;
+
 		const int16 POSSESSIONS_BEGIN = slotCharm;
 		const int16 POSSESSIONS_END = slotCursor;
 		const int16 POSSESSIONS_COUNT = (POSSESSIONS_END - POSSESSIONS_BEGIN) + 1;
