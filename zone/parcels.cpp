@@ -22,7 +22,6 @@
 #include "../common/repositories/character_parcels_repository.h"
 #include "worldserver.h"
 #include "string_ids.h"
-#include "parcels.h"
 #include "client.h"
 #include "../common/ruletypes.h"
 
@@ -98,7 +97,7 @@ void Client::SendBulkParcels()
 	}
 }
 
-void Client::SendParcel(Parcel_Struct parcel_in)
+void Client::SendParcel(const Parcel_Struct &parcel_in)
 {
 	auto results = CharacterParcelsRepository::GetWhere(
 		database,
@@ -242,7 +241,7 @@ void Client::SendParcelStatus()
 }
 
 
-void Client::DoParcelSend(Parcel_Struct *parcel_in)
+void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 {
 	auto send_to_client = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, parcel_in->send_to);
 	auto merchant       = entity_list.GetMob(parcel_in->npc_id);
@@ -418,15 +417,13 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 				return;
 			}
 
-			auto money = inst->DetermineMoneyStringForParcels(parcel_in->quantity);
-
 			if (send_to_client.at(0).character_name.empty()) {
 				MessageString(
 					Chat::Yellow,
 					PARCEL_UNKNOWN_NAME,
 					merchant->GetCleanName(),
 					parcel_in->send_to,
-					money.c_str()
+					"Money"
 				);
 				DoParcelCancel();
 				SendParcelAck();
@@ -463,7 +460,7 @@ void Client::DoParcelSend(Parcel_Struct *parcel_in)
 				Chat::Yellow,
 				PARCEL_DELIVERY,
 				merchant->GetCleanName(),
-				money.c_str(),
+				"Money",
 				send_to_client.at(0).character_name.c_str()
 			);
 
@@ -519,7 +516,7 @@ void Client::SendParcelRetrieveAck()
 	QueuePacket(outapp.get());
 }
 
-void Client::SendParcelDeliveryToWorld(Parcel_Struct parcel)
+void Client::SendParcelDeliveryToWorld(const Parcel_Struct &parcel)
 {
 	std::unique_ptr<ServerPacket> out(new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct)));
 	auto                          data = (Parcel_Struct *) out->pBuffer;
@@ -530,7 +527,7 @@ void Client::SendParcelDeliveryToWorld(Parcel_Struct parcel)
 	worldserver.SendPacket(out.get());
 }
 
-void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
+void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 {
 	auto merchant = entity_list.GetNPCByID(parcel_in.merchant_entity_id);
 	if (!merchant) {
@@ -564,7 +561,7 @@ void Client::DoParcelRetrieve(ParcelRetrieve_Struct parcel_in)
 					Chat::Yellow,
 					PARCEL_DELIVERED,
 					merchant->GetCleanName(),
-					inst->DetermineMoneyStringForParcels(p->second.quantity).c_str(),
+					"Money", //inst->DetermineMoneyStringForParcels(p->second.quantity).c_str(),
 					p->second.from_name.c_str()
 				);
 				break;
@@ -681,7 +678,7 @@ void Client::LoadParcels()
 	SetParcelCount(m_parcels.size());
 }
 
-void Client::SendParcelDelete(const ParcelRetrieve_Struct parcel_in)
+void Client::SendParcelDelete(const ParcelRetrieve_Struct &parcel_in)
 {
 	std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopDeleteParcel, sizeof(ParcelRetrieve_Struct)));
 	auto data   = (ParcelRetrieve_Struct *) outapp->pBuffer;
@@ -734,7 +731,7 @@ void Client::SendParcelIconStatus()
 	QueuePacket(outapp.get());
 }
 
-void Client::AddParcel(CharacterParcelsRepository::CharacterParcels parcel)
+void Client::AddParcel(CharacterParcelsRepository::CharacterParcels &parcel)
 {
 	auto result = CharacterParcelsRepository::InsertOne(database, parcel);
 	if (!result.id) {

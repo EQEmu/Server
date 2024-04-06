@@ -36,7 +36,6 @@
 #include "../classes.h"
 #include "../races.h"
 #include "../raid.h"
-#include "../../zone/parcels.h"
 
 #include <iostream>
 #include <sstream>
@@ -5579,7 +5578,9 @@ namespace RoF2
 			);
 		}
 
-		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		hdr.stacksize =
+			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
+				? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
 		structs::InventorySlot_Struct slot_id{};
@@ -5592,22 +5593,24 @@ namespace RoF2
 			break;
 		}
 
-		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
-		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
-		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
-		hdr.aug_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
-		hdr.price = inst->GetPrice();
-		hdr.merchant_slot = (inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1);
-		hdr.scaled_value = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
-		hdr.instance_id = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
+		hdr.slot_type      = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
+		hdr.main_slot      = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
+		hdr.sub_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
+		hdr.aug_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
+		hdr.price          = inst->GetPrice();
+		hdr.merchant_slot  = ((inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1));
+		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
+		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
 		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
 		hdr.last_cast_time = inst->GetRecastTimestamp();
-		hdr.charges = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254) ? 0xFFFFFFFF : inst->GetCharges()));
-		hdr.inst_nodrop = (inst->IsAttuned() ? 1 : 0);
-		hdr.unknown044 = 0;
-		hdr.unknown048 = 0;
-		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingItem;
+		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
+			? 0xFFFFFFFF
+			: inst->GetCharges()));
+		hdr.inst_nodrop    = (inst->IsAttuned() ? 1 : 0);
+		hdr.unknown044     = 0;
+		hdr.unknown048     = 0;
+		hdr.unknown052     = 0;
+		hdr.isEvolving     = item->EvolvingItem;
 
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
@@ -5666,13 +5669,7 @@ namespace RoF2
 		ob.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
 
 		if (strlen(item->Name) > 0) {
-			if (item->ID == PARCEL_MONEY_ITEM_ID) {
-				auto money = inst->DetermineMoneyStringForParcels(inst->GetPrice());
-				ob.write(money.c_str(), money.length());
-			}
-			else {
-				ob.write(item->Name, strlen(item->Name));
-			}
+			ob.write(item->Name, strlen(item->Name));
 			ob.write("\0", 1);
 		}
 
@@ -5690,10 +5687,6 @@ namespace RoF2
 		memset(&ibs, 0, sizeof(RoF2::structs::ItemBodyStruct));
 
 		ibs.id = item->ID;
-		if (item->ID == PARCEL_MONEY_ITEM_ID) {
-			ibs.id = inst->GetSerialNumber();
-		}
-
 		ibs.weight = item->Weight;
 		ibs.norent = item->NoRent;
 		ibs.nodrop = item->NoDrop;
@@ -5839,10 +5832,11 @@ namespace RoF2
 		itbs.unknown5 = 0;
 
 		itbs.potion_belt_enabled = item->PotionBelt;
-		itbs.potion_belt_slots = item->PotionBeltSlots;
-		itbs.stacksize = (inst->IsStackable() ? item->StackSize : 0);
-		itbs.no_transfer = item->NoTransfer;
-		itbs.expendablearrow = item->ExpendableArrow;
+		itbs.potion_belt_slots   = item->PotionBeltSlots;
+		itbs.stacksize           =
+			item->ID == PARCEL_MONEY_ITEM_ID ? 0x7FFFFFFF : ((inst->IsStackable() ? item->StackSize : 0));
+		itbs.no_transfer         = item->NoTransfer;
+		itbs.expendablearrow     = item->ExpendableArrow;
 
 		// Done to hack older clients to label expendable fishing poles as such
 		// July 28th, 2018 patch

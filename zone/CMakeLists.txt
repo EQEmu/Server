@@ -245,7 +245,6 @@ SET(zone_headers
     npc_scale_manager.h
     object.h
     oriented_bounding_box.h
-    parcels.h
     pathfinder_interface.h
     pathfinder_nav_mesh.h
     pathfinder_null.h

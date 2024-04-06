@@ -333,14 +333,14 @@ public:
 	void SendZonePoints();
 	void SendBulkParcels();
 	void DoParcelCancel();
-	void DoParcelSend(Parcel_Struct *parcel_in);
-	void DoParcelRetrieve(ParcelRetrieve_Struct parcel_in);
-	void SendParcel(Parcel_Struct parcel);
+	void DoParcelSend(const Parcel_Struct *parcel_in);
+	void DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in);
+	void SendParcel(const Parcel_Struct &parcel);
 	void SendParcelStatus();
 	void SendParcelAck();
 	void SendParcelRetrieveAck();
-	void SendParcelDelete(const ParcelRetrieve_Struct parcel_in);
-	void SendParcelDeliveryToWorld(Parcel_Struct parcel);
+	void SendParcelDelete(const ParcelRetrieve_Struct &parcel_in);
+	void SendParcelDeliveryToWorld(const Parcel_Struct &parcel);
 	void SetParcelEnabled(bool status) { m_parcel_enabled = status; }
 	bool GetParcelEnabled() { return m_parcel_enabled; }
 	void SetParcelCount(uint32 count) { m_parcel_count = count; }
@@ -349,7 +349,7 @@ public:
 	void SetEngagedWithParcelMerchant(bool status) { m_parcel_merchant_engaged = status; }
 	Timer *GetParcelTimer() { return &parcel_timer; }
 	bool DeleteParcel(uint32 parcel_id);
-	void AddParcel(CharacterParcelsRepository::CharacterParcels parcel);
+	void AddParcel(CharacterParcelsRepository::CharacterParcels &parcel);
 	void LoadParcels();
 	std::map<uint32, CharacterParcelsRepository::CharacterParcels> GetParcels() { return m_parcels; }
 	int32 FindNextFreeParcelSlot(uint32 char_id);

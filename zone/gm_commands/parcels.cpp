@@ -1,6 +1,5 @@
 #include "../client.h"
 #include "../worldserver.h"
-#include "../parcels.h"
 #include "../../common/events/player_events.h"
 
 extern WorldServer worldserver;
@@ -110,6 +109,11 @@ void command_parcels(Client *c, const Seperator *sep)
 			return;
 		}
 
+		if (!Strings::IsNumber(sep->arg[3]) || !Strings::IsNumber(sep->arg[4])) {
+			SendParcelsSubCommands(c);
+			return;
+		}
+
 		auto to_name  = std::string(sep->arg[2]);
 		auto item_id  = Strings::ToUnsignedInt(sep->arg[3]);
 		auto quantity = Strings::ToUnsignedInt(sep->arg[4]);
@@ -159,8 +163,6 @@ void command_parcels(Client *c, const Seperator *sep)
 				return;
 			}
 
-			auto money = inst->DetermineMoneyStringForParcels(quantity == 0 ? 1 : quantity);
-
 			CharacterParcelsRepository::CharacterParcels parcel_out;
 			parcel_out.from_name  = c->GetName();
 			parcel_out.note       = note;
@@ -191,7 +193,7 @@ void command_parcels(Client *c, const Seperator *sep)
 				Chat::Yellow,
 				PARCEL_DELIVERY,
 				c->GetCleanName(),
-				money.c_str(),
+				"Money",
 				send_to_client.at(0).character_name.c_str()
 			);
 
@@ -299,7 +301,7 @@ void SendParcelsSubCommands(Client *c)
 	c->Message(Chat::White, "#parcels listmemory [Character Name] (Must be in the same zone)");
 	c->Message(
 			Chat::White,
-			"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 22292. Quantity is valid for stackable items, charges on an item, or amount of copper."
+			"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 99990. Quantity is valid for stackable items, charges on an item, or amount of copper."
 	);
 	c->Message(Chat::White, "#parcels details [Character Name]");
 }

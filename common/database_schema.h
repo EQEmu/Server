@@ -59,7 +59,7 @@ namespace DatabaseSchema {
 			{"character_leadership_abilities", "id"},
 			{"character_material",             "id"},
 			{"character_memmed_spells",        "id"},
-			{"character_parcels",              "id"},
+			{"character_parcels",              "char_id"},
 			{"character_pet_buffs",            "char_id"},
 			{"character_pet_info",             "char_id"},
 			{"character_pet_inventory",        "char_id"},
