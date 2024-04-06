@@ -757,7 +757,6 @@ void Client::CompleteConnect()
 
 	entity_list.SendTraders(this);
 
-	Mob *pet = GetPet();
 	SendWearChangeAndLighting(EQ::textures::LastTexture);
 	Mob* pet = GetPet();
 	if (pet) {
