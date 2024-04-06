@@ -149,9 +149,11 @@
 #include "../../zonedb.h"
 #include "../../worldserver.h"
 #include "../../questmgr.h"
+#include "../../dynamic_zone.h"
 #include "../../dotnet_quests/dotnet_runtime.h"
 
 #include "../../../common/emu_constants.h"
+#include "../../../common/dynamic_zone_base.h"
 #include "../../../common/eq_constants.h"
 #include "../../../common/item_instance.h"
 #include "../../../common/item_data.h"
@@ -260,6 +262,7 @@ namespace glm {
 %include "../../../common/emu_constants.h"
 %include "../../../common/faction.h"
 %include "../../../common/eq_constants.h"
+%include "../../../common/dynamic_zone_base.h"
 
 %include "../../common.h"
 %include "../../entity.h"
@@ -284,6 +287,7 @@ namespace glm {
 %include "../../zonedb.h"
 %include "../../worldserver.h"
 %include "../../questmgr.h"
+%include "../../dynamic_zone.h"
 %include "../../dotnet_quests/dotnet_runtime.h"
 
 %include "../../../common/item_instance.h"

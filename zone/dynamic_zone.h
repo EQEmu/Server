@@ -35,8 +35,9 @@ class ServerPacket;
 class DynamicZone : public DynamicZoneBase
 {
 public:
+	#ifndef SWIG_VERSION
 	using DynamicZoneBase::DynamicZoneBase; // inherit base constructors
-
+	#endif
 	DynamicZone() = default;
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
 

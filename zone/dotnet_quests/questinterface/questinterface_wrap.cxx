@@ -404,9 +404,11 @@ template <typename T> T SwigValueInit() {
 #include "../../zonedb.h"
 #include "../../worldserver.h"
 #include "../../questmgr.h"
+#include "../../dynamic_zone.h"
 #include "../../dotnet_quests/dotnet_runtime.h"
 
 #include "../../../common/emu_constants.h"
+#include "../../../common/dynamic_zone_base.h"
 #include "../../../common/eq_constants.h"
 #include "../../../common/item_instance.h"
 #include "../../../common/item_data.h"
@@ -28041,6 +28043,1280 @@ SWIGEXPORT unsigned short SWIGSTDCALL CSharp_HealthOfTargetsTarget_get() {
   uint16 result;
   
   result = (uint16)LeadershipAbilitySlot::HealthOfTargetsTarget;
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneMember_id_set(void * jarg1, unsigned int jarg2) {
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->id = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneMember_id_get(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  result = (uint32_t) ((arg1)->id);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneMember_name_set(void * jarg1, const char * jarg2) {
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  if (arg1) (arg1)->name = *arg2;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DynamicZoneMember_name_get(void * jarg1) {
+  const char * jresult ;
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  result = (std::string *) & ((arg1)->name);
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneMember_status_set(void * jarg1, int jarg2) {
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  DynamicZoneMemberStatus arg2 ;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  arg2 = (DynamicZoneMemberStatus)jarg2; 
+  if (arg1) (arg1)->status = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DynamicZoneMember_status_get(void * jarg1) {
+  int jresult ;
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  DynamicZoneMemberStatus result;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  result = (DynamicZoneMemberStatus) ((arg1)->status);
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZoneMember__SWIG_0() {
+  void * jresult ;
+  DynamicZoneMember *result = 0 ;
+  
+  result = (DynamicZoneMember *)new DynamicZoneMember();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZoneMember__SWIG_1(unsigned int jarg1, const char * jarg2) {
+  void * jresult ;
+  uint32_t arg1 ;
+  std::string arg2 ;
+  DynamicZoneMember *result = 0 ;
+  
+  arg1 = (uint32_t)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg2)->assign(jarg2); 
+  result = (DynamicZoneMember *)new DynamicZoneMember(arg1,SWIG_STD_MOVE(arg2));
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZoneMember__SWIG_2(unsigned int jarg1, const char * jarg2, int jarg3) {
+  void * jresult ;
+  uint32_t arg1 ;
+  std::string arg2 ;
+  DynamicZoneMemberStatus arg3 ;
+  DynamicZoneMember *result = 0 ;
+  
+  arg1 = (uint32_t)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  (&arg2)->assign(jarg2); 
+  arg3 = (DynamicZoneMemberStatus)jarg3; 
+  result = (DynamicZoneMember *)new DynamicZoneMember(arg1,SWIG_STD_MOVE(arg2),arg3);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneMember_IsOnline(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  result = (bool)((DynamicZoneMember const *)arg1)->IsOnline();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneMember_IsValid(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  result = (bool)((DynamicZoneMember const *)arg1)->IsValid();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DynamicZoneMember(void * jarg1) {
+  DynamicZoneMember *arg1 = (DynamicZoneMember *) 0 ;
+  
+  arg1 = (DynamicZoneMember *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneLocation_zone_id_set(void * jarg1, unsigned int jarg2) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  if (arg1) (arg1)->zone_id = arg2;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneLocation_zone_id_get(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  result = (uint32_t) ((arg1)->zone_id);
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneLocation_x_set(void * jarg1, float jarg2) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float arg2 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->x = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_DynamicZoneLocation_x_get(void * jarg1) {
+  float jresult ;
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float result;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  result = (float) ((arg1)->x);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneLocation_y_set(void * jarg1, float jarg2) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float arg2 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->y = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_DynamicZoneLocation_y_get(void * jarg1) {
+  float jresult ;
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float result;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  result = (float) ((arg1)->y);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneLocation_z_set(void * jarg1, float jarg2) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float arg2 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->z = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_DynamicZoneLocation_z_get(void * jarg1) {
+  float jresult ;
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float result;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  result = (float) ((arg1)->z);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneLocation_heading_set(void * jarg1, float jarg2) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float arg2 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  arg2 = (float)jarg2; 
+  if (arg1) (arg1)->heading = arg2;
+}
+
+
+SWIGEXPORT float SWIGSTDCALL CSharp_DynamicZoneLocation_heading_get(void * jarg1) {
+  float jresult ;
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  float result;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  result = (float) ((arg1)->heading);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZoneLocation__SWIG_0() {
+  void * jresult ;
+  DynamicZoneLocation *result = 0 ;
+  
+  result = (DynamicZoneLocation *)new DynamicZoneLocation();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZoneLocation__SWIG_1(unsigned int jarg1, float jarg2, float jarg3, float jarg4, float jarg5) {
+  void * jresult ;
+  uint32_t arg1 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  DynamicZoneLocation *result = 0 ;
+  
+  arg1 = (uint32_t)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  result = (DynamicZoneLocation *)new DynamicZoneLocation(arg1,arg2,arg3,arg4,arg5);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DynamicZoneLocation(void * jarg1) {
+  DynamicZoneLocation *arg1 = (DynamicZoneLocation *) 0 ;
+  
+  arg1 = (DynamicZoneLocation *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DynamicZoneBase(void * jarg1) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DynamicZoneBase_GetDynamicZoneTypeName(int jarg1) {
+  const char * jresult ;
+  DynamicZoneType arg1 ;
+  std::string result;
+  
+  arg1 = (DynamicZoneType)jarg1; 
+  result = DynamicZoneBase::GetDynamicZoneTypeName(arg1);
+  jresult = SWIG_csharp_string_callback((&result)->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSecondsRemaining(void * jarg1, unsigned int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  (arg1)->SetSecondsRemaining(arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DynamicZoneBase_GetDuration(void * jarg1) {
+  int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  int result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (int)((DynamicZoneBase const *)arg1)->GetDuration();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned long long SWIGSTDCALL CSharp_DynamicZoneBase_GetExpireTime(void * jarg1) {
+  unsigned long long jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint64_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint64_t)((DynamicZoneBase const *)arg1)->GetExpireTime();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetID(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DynamicZoneBase_GetInstanceID(void * jarg1) {
+  unsigned short jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint16_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint16_t)((DynamicZoneBase const *)arg1)->GetInstanceID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetLeaderID(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetLeaderID();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetMaxPlayers(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetMaxPlayers();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetMemberCount(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetMemberCount();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetMinPlayers(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetMinPlayers();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetSecondsRemaining(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetSecondsRemaining();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned short SWIGSTDCALL CSharp_DynamicZoneBase_GetZoneID(void * jarg1) {
+  unsigned short jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint16_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint16_t)((DynamicZoneBase const *)arg1)->GetZoneID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetZoneIndex(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetZoneIndex();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetZoneVersion(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)((DynamicZoneBase const *)arg1)->GetZoneVersion();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DynamicZoneBase_GetSwitchID(void * jarg1) {
+  int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  int result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (int)((DynamicZoneBase const *)arg1)->GetSwitchID();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_DynamicZoneBase_GetType(void * jarg1) {
+  int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneType result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (DynamicZoneType)((DynamicZoneBase const *)arg1)->GetType();
+  jresult = (int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DynamicZoneBase_GetLeaderName(void * jarg1) {
+  const char * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (std::string *) &((DynamicZoneBase const *)arg1)->GetLeaderName();
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DynamicZoneBase_GetName(void * jarg1) {
+  const char * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (std::string *) &((DynamicZoneBase const *)arg1)->GetName();
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT const char * SWIGSTDCALL CSharp_DynamicZoneBase_GetUUID(void * jarg1) {
+  const char * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (std::string *) &((DynamicZoneBase const *)arg1)->GetUUID();
+  jresult = SWIG_csharp_string_callback(result->c_str()); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetLeader(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (DynamicZoneMember *) &((DynamicZoneBase const *)arg1)->GetLeader();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetMembers(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::vector< DynamicZoneMember > *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (std::vector< DynamicZoneMember > *) &((DynamicZoneBase const *)arg1)->GetMembers();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetCompassLocation(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (DynamicZoneLocation *) &((DynamicZoneBase const *)arg1)->GetCompassLocation();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetSafeReturnLocation(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (DynamicZoneLocation *) &((DynamicZoneBase const *)arg1)->GetSafeReturnLocation();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetZoneInLocation(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *result = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (DynamicZoneLocation *) &((DynamicZoneBase const *)arg1)->GetZoneInLocation();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetDurationRemaining(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::chrono::system_clock::duration result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = ((DynamicZoneBase const *)arg1)->GetDurationRemaining();
+  jresult = new std::chrono::system_clock::duration(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_AddMember(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->AddMember((DynamicZoneMember const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_AddMemberFromRepositoryResult(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMembersRepository::MemberWithName *arg2 = 0 ;
+  std::unique_ptr< DynamicZoneMembersRepository::MemberWithName > rvrdeleter2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMembersRepository::MemberWithName *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMembersRepository::MemberWithName && is null", 0);
+    return ;
+  }
+  rvrdeleter2.reset(arg2); 
+  (arg1)->AddMemberFromRepositoryResult((DynamicZoneMembersRepository::MemberWithName &&)*arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_GetDatabaseMemberCount(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (uint32_t)(arg1)->GetDatabaseMemberCount();
+  jresult = (unsigned int)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetMemberData__SWIG_0(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  DynamicZoneMember result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (arg1)->GetMemberData(arg2);
+  jresult = new DynamicZoneMember(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetMemberData__SWIG_1(void * jarg1, const char * jarg2) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *arg2 = 0 ;
+  DynamicZoneMember result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (arg1)->GetMemberData((std::string const &)*arg2);
+  jresult = new DynamicZoneMember(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZoneBase_GetSerializedDzPacket(void * jarg1) {
+  void * jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  EQ::Net::DynamicPacket result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (arg1)->GetSerializedDzPacket();
+  jresult = new EQ::Net::DynamicPacket(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_HasDatabaseMember(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (bool)(arg1)->HasDatabaseMember(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_HasMember__SWIG_0(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (bool)(arg1)->HasMember(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_HasMember__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)(arg1)->HasMember((std::string const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_HasMembers(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (bool)((DynamicZoneBase const *)arg1)->HasMembers();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_HasZoneInLocation(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (bool)((DynamicZoneBase const *)arg1)->HasZoneInLocation();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_IsExpired(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (bool)((DynamicZoneBase const *)arg1)->IsExpired();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_IsInstanceID(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (bool)((DynamicZoneBase const *)arg1)->IsInstanceID(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_IsValid(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  result = (bool)((DynamicZoneBase const *)arg1)->IsValid();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_IsSameDz(void * jarg1, unsigned int jarg2, unsigned int jarg3) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  uint32_t arg3 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  result = (bool)((DynamicZoneBase const *)arg1)->IsSameDz(arg2,arg3);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_LoadSerializedDzPacket(void * jarg1, char * jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  char *arg2 = (char *) 0 ;
+  uint32_t arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (char *)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  (arg1)->LoadSerializedDzPacket(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_LoadTemplate(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneTemplatesRepository::DynamicZoneTemplates *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneTemplatesRepository::DynamicZoneTemplates *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneTemplatesRepository::DynamicZoneTemplates const & is null", 0);
+    return ;
+  } 
+  (arg1)->LoadTemplate((DynamicZoneTemplatesRepository::DynamicZoneTemplates const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_RemoveAllMembers(void * jarg1) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  (arg1)->RemoveAllMembers();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_RemoveMember__SWIG_0(void * jarg1, unsigned int jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (bool)(arg1)->RemoveMember(arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_RemoveMember__SWIG_1(void * jarg1, const char * jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  result = (bool)(arg1)->RemoveMember((std::string const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_RemoveMember__SWIG_2(void * jarg1, void * jarg2) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return 0;
+  } 
+  result = (bool)(arg1)->RemoveMember((DynamicZoneMember const &)*arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SaveMembers(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::vector< DynamicZoneMember > *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (std::vector< DynamicZoneMember > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< DynamicZoneMember > const & is null", 0);
+    return ;
+  } 
+  (arg1)->SaveMembers((std::vector< DynamicZoneMember > const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetCompass__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetCompass((DynamicZoneLocation const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetCompass__SWIG_1(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  (arg1)->SetCompass((DynamicZoneLocation const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetCompass__SWIG_2(void * jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5, unsigned int jarg6) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  bool arg6 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = jarg6 ? true : false; 
+  (arg1)->SetCompass(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetCompass__SWIG_3(void * jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  (arg1)->SetCompass(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetDuration(void * jarg1, unsigned int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  (arg1)->SetDuration(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetLeader__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetLeader((DynamicZoneMember const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetLeader__SWIG_1(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return ;
+  } 
+  (arg1)->SetLeader((DynamicZoneMember const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetMaxPlayers(void * jarg1, unsigned int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  (arg1)->SetMaxPlayers(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetMemberStatus(void * jarg1, unsigned int jarg2, int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  DynamicZoneMemberStatus arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (DynamicZoneMemberStatus)jarg3; 
+  (arg1)->SetMemberStatus(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetMinPlayers(void * jarg1, unsigned int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  (arg1)->SetMinPlayers(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetName(void * jarg1, const char * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  (arg1)->SetName((std::string const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSafeReturn__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetSafeReturn((DynamicZoneLocation const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSafeReturn__SWIG_1(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  (arg1)->SetSafeReturn((DynamicZoneLocation const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSafeReturn__SWIG_2(void * jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5, float jarg6, unsigned int jarg7) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  bool arg7 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  arg7 = jarg7 ? true : false; 
+  (arg1)->SetSafeReturn(arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSafeReturn__SWIG_3(void * jarg1, unsigned int jarg2, float jarg3, float jarg4, float jarg5, float jarg6) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  uint32_t arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  float arg6 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = (float)jarg6; 
+  (arg1)->SetSafeReturn(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSwitchID__SWIG_0(void * jarg1, int jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  int arg2 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetSwitchID(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetSwitchID__SWIG_1(void * jarg1, int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  int arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (int)jarg2; 
+  (arg1)->SetSwitchID(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetType(void * jarg1, int jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneType arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneType)jarg2; 
+  (arg1)->SetType(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetUUID(void * jarg1, const char * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  std::string arg2 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  (&arg2)->assign(jarg2); 
+  (arg1)->SetUUID(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetZoneInLocation__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SetZoneInLocation((DynamicZoneLocation const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetZoneInLocation__SWIG_1(void * jarg1, void * jarg2) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneLocation *arg2 = 0 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneLocation *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneLocation const & is null", 0);
+    return ;
+  } 
+  (arg1)->SetZoneInLocation((DynamicZoneLocation const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetZoneInLocation__SWIG_2(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5, unsigned int jarg6) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  bool arg6 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  arg6 = jarg6 ? true : false; 
+  (arg1)->SetZoneInLocation(arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZoneBase_SetZoneInLocation__SWIG_3(void * jarg1, float jarg2, float jarg3, float jarg4, float jarg5) {
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  float arg2 ;
+  float arg3 ;
+  float arg4 ;
+  float arg5 ;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (float)jarg2; 
+  arg3 = (float)jarg3; 
+  arg4 = (float)jarg4; 
+  arg5 = (float)jarg5; 
+  (arg1)->SetZoneInLocation(arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZoneBase_SwapMember(void * jarg1, void * jarg2, const char * jarg3) {
+  unsigned int jresult ;
+  DynamicZoneBase *arg1 = (DynamicZoneBase *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  std::string *arg3 = 0 ;
+  bool result;
+  
+  arg1 = (DynamicZoneBase *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return 0;
+  } 
+  if (!jarg3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg3_str(jarg3);
+  arg3 = &arg3_str; 
+  result = (bool)(arg1)->SwapMember((DynamicZoneMember const &)*arg2,(std::string const &)*arg3);
   jresult = result; 
   return jresult;
 }
@@ -138070,6 +139346,370 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_quest_manager_get() {
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZone__SWIG_0() {
+  void * jresult ;
+  DynamicZone *result = 0 ;
+  
+  result = (DynamicZone *)new DynamicZone();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_DynamicZone__SWIG_1(unsigned int jarg1, unsigned int jarg2, unsigned int jarg3, int jarg4) {
+  void * jresult ;
+  uint32_t arg1 ;
+  uint32_t arg2 ;
+  uint32_t arg3 ;
+  DynamicZoneType arg4 ;
+  DynamicZone *result = 0 ;
+  
+  arg1 = (uint32_t)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  arg4 = (DynamicZoneType)jarg4; 
+  result = (DynamicZone *)new DynamicZone(arg1,arg2,arg3,arg4);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_CacheAllFromDatabase() {
+  DynamicZone::CacheAllFromDatabase();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_CacheNewDynamicZone(void * jarg1) {
+  ServerPacket *arg1 = (ServerPacket *) 0 ;
+  
+  arg1 = (ServerPacket *)jarg1; 
+  DynamicZone::CacheNewDynamicZone(arg1);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateNew(void * jarg1, void * jarg2) {
+  void * jresult ;
+  DynamicZone *arg1 = 0 ;
+  std::vector< DynamicZoneMember > *arg2 = 0 ;
+  DynamicZone *result = 0 ;
+  
+  arg1 = (DynamicZone *)jarg1;
+  if (!arg1) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZone & is null", 0);
+    return 0;
+  } 
+  arg2 = (std::vector< DynamicZoneMember > *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "std::vector< DynamicZoneMember > const & is null", 0);
+    return 0;
+  } 
+  result = (DynamicZone *)DynamicZone::CreateNew(*arg1,(std::vector< DynamicZoneMember > const &)*arg2);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_FindDynamicZoneByID(unsigned int jarg1) {
+  void * jresult ;
+  uint32_t arg1 ;
+  DynamicZone *result = 0 ;
+  
+  arg1 = (uint32_t)jarg1; 
+  result = (DynamicZone *)DynamicZone::FindDynamicZoneByID(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_HandleWorldMessage(void * jarg1) {
+  ServerPacket *arg1 = (ServerPacket *) 0 ;
+  
+  arg1 = (ServerPacket *)jarg1; 
+  DynamicZone::HandleWorldMessage(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SetSecondsRemaining(void * jarg1, unsigned int jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  uint32_t arg2 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  (arg1)->SetSecondsRemaining(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_DoAsyncZoneMemberUpdates(void * jarg1) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  (arg1)->DoAsyncZoneMemberUpdates();
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZone_CanClientLootCorpse(void * jarg1, void * jarg2, unsigned int jarg3, unsigned int jarg4) {
+  unsigned int jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  uint32_t arg3 ;
+  uint32_t arg4 ;
+  bool result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = (uint32_t)jarg3; 
+  arg4 = (uint32_t)jarg4; 
+  result = (bool)(arg1)->CanClientLootCorpse(arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DynamicZone_IsCurrentZoneDzInstance(void * jarg1) {
+  unsigned int jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  bool result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  result = (bool)((DynamicZone const *)arg1)->IsCurrentZoneDzInstance();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_MovePCInto__SWIG_0(void * jarg1, void * jarg2, unsigned int jarg3) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  arg3 = jarg3 ? true : false; 
+  ((DynamicZone const *)arg1)->MovePCInto(arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_MovePCInto__SWIG_1(void * jarg1, void * jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  ((DynamicZone const *)arg1)->MovePCInto(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_RegisterOnClientAddRemove(void * jarg1, void * jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  std::function< void (Client *,bool,bool) > arg2 ;
+  std::function< void (Client *,bool,bool) > *argp2 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  argp2 = (std::function< void (Client *,bool,bool) > *)jarg2; 
+  if (!argp2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null std::function< void (Client *,bool,bool) >", 0);
+    return ;
+  }
+  arg2 = *argp2; 
+  (arg1)->RegisterOnClientAddRemove(SWIG_STD_MOVE(arg2));
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendClientWindowUpdate(void * jarg1, void * jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  Client *arg2 = (Client *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (Client *)jarg2; 
+  (arg1)->SendClientWindowUpdate(arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendLeaderNameToZoneMembers(void * jarg1) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  (arg1)->SendLeaderNameToZoneMembers();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendMemberListToZoneMembers(void * jarg1) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  (arg1)->SendMemberListToZoneMembers();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendMemberListNameToZoneMembers(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  std::string *arg2 = 0 ;
+  bool arg3 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return ;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = jarg3 ? true : false; 
+  (arg1)->SendMemberListNameToZoneMembers((std::string const &)*arg2,arg3);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendMemberListStatusToZoneMembers(void * jarg1, void * jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  DynamicZoneMember *arg2 = 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (DynamicZoneMember *)jarg2;
+  if (!arg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "DynamicZoneMember const & is null", 0);
+    return ;
+  } 
+  (arg1)->SendMemberListStatusToZoneMembers((DynamicZoneMember const &)*arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_DynamicZone_SendRemoveAllMembersToZoneMembers(void * jarg1, unsigned int jarg2) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  bool arg2 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  (arg1)->SendRemoveAllMembersToZoneMembers(arg2);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateExpireWarningPacket(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  uint32_t arg2 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = (uint32_t)jarg2; 
+  result = (arg1)->CreateExpireWarningPacket(arg2);
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateInfoPacket__SWIG_0(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  bool arg2 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (arg1)->CreateInfoPacket(arg2);
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateInfoPacket__SWIG_1(void * jarg1) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  result = (arg1)->CreateInfoPacket();
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateLeaderNamePacket(void * jarg1) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  result = (arg1)->CreateLeaderNamePacket();
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateMemberListPacket__SWIG_0(void * jarg1, unsigned int jarg2) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  bool arg2 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  result = (arg1)->CreateMemberListPacket(arg2);
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateMemberListPacket__SWIG_1(void * jarg1) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  result = (arg1)->CreateMemberListPacket();
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateMemberListNamePacket(void * jarg1, const char * jarg2, unsigned int jarg3) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  std::string *arg2 = 0 ;
+  bool arg3 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = jarg3 ? true : false; 
+  result = (arg1)->CreateMemberListNamePacket((std::string const &)*arg2,arg3);
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_DynamicZone_CreateMemberListStatusPacket(void * jarg1, const char * jarg2, int jarg3) {
+  void * jresult ;
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  std::string *arg2 = 0 ;
+  DynamicZoneMemberStatus arg3 ;
+  SwigValueWrapper< std::unique_ptr< EQApplicationPacket > > result;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  if (!jarg2) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "null string", 0);
+    return 0;
+  }
+  std::string arg2_str(jarg2);
+  arg2 = &arg2_str; 
+  arg3 = (DynamicZoneMemberStatus)jarg3; 
+  result = (arg1)->CreateMemberListStatusPacket((std::string const &)*arg2,arg3);
+  jresult = new std::unique_ptr< EQApplicationPacket >(result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_DynamicZone(void * jarg1) {
+  DynamicZone *arg1 = (DynamicZone *) 0 ;
+  
+  arg1 = (DynamicZone *)jarg1; 
+  delete arg1;
+}
+
+
 SWIGEXPORT void SWIGSTDCALL CSharp_event_payload_event_type_set(void * jarg1, int jarg2) {
   event_payload *arg1 = (event_payload *) 0 ;
   int arg2 ;
@@ -154390,6 +156030,10 @@ SWIGEXPORT GroupIDConsumer * SWIGSTDCALL CSharp_Raid_SWIGUpcast(Raid *jarg1) {
 
 SWIGEXPORT Entity * SWIGSTDCALL CSharp_Trap_SWIGUpcast(Trap *jarg1) {
     return (Entity *)jarg1;
+}
+
+SWIGEXPORT DynamicZoneBase * SWIGSTDCALL CSharp_DynamicZone_SWIGUpcast(DynamicZone *jarg1) {
+    return (DynamicZoneBase *)jarg1;
 }
 
 #ifdef __cplusplus

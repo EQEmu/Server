@@ -67,9 +67,11 @@ public:
 	DynamicZoneBase& operator=(const DynamicZoneBase&) = default;
 	DynamicZoneBase& operator=(DynamicZoneBase&&) = default;
 	DynamicZoneBase() = default;
+	#ifndef SWIG_VERSION
 	DynamicZoneBase(uint32_t dz_id) : m_id(dz_id) {}
 	DynamicZoneBase(DynamicZoneType type) : m_type(type) {}
 	DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry);
+	#endif
 
 	static std::string GetDynamicZoneTypeName(DynamicZoneType dz_type);
 
