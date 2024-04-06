@@ -758,7 +758,10 @@ void Client::CompleteConnect()
 	entity_list.SendTraders(this);
 
 	Mob *pet = GetPet();
+	SendWearChangeAndLighting(EQ::textures::LastTexture);
+	Mob* pet = GetPet();
 	if (pet) {
+		pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
 		pet->SendPetBuffsToClient();
 	}
 
@@ -950,8 +953,6 @@ void Client::CompleteConnect()
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
-
-	heroforge_wearchange_timer.Start(250);
 
 	RecordStats();
 	AutoGrantAAPoints();
@@ -16014,6 +16015,7 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 	if (wc->wear_slot_id >= 0 && wc->wear_slot_id < EQ::textures::weaponPrimary)
 		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
 
+	// we could maybe ignore this and just send our own from moveitem
 	entity_list.QueueClients(this, app, false);
 }
 
