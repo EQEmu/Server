@@ -55,6 +55,7 @@ class DotNetCompiler
                     try
                     {
                         dotnetProcess.Kill();
+                        dotnetProcess.WaitForExit();
                     }
                     catch (Exception ex)
                     {
