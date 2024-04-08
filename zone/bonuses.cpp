@@ -4401,8 +4401,9 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 
 void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 {
-	if (!IsValidSpell(spell_id))
+	if (!IsValidSpell(spell_id)) {
 		return;
+	}
 
 	int effect_value = 0;
 
@@ -4450,6 +4451,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					negate_itembonus = true;
 					break;
 			}
+
 
 			//Negate focus effects
 			for (int e = 0; e < HIGHEST_FOCUS + 1; e++)
@@ -4763,6 +4765,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 						if (negate_aabonus) { aabonuses.CriticalHitChance[e] = effect_value; }
 						if (negate_itembonus) { itembonuses.CriticalHitChance[e] = effect_value; }
 					}
+					break;
 				}
 
 				case SE_CrippBlowChance:
@@ -5231,7 +5234,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					if (negate_spellbonus) {
 						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
 						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = -1;
-						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = effect_value;
+						spellbonuses.MeleeThresholdGuard[SBIndex::THRESHOLDGUARD_MIN_DMG_TO_TRIGGER] = effect_value;
 					}
 
 					break;
@@ -5240,7 +5243,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					if (negate_spellbonus) {
 						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
 						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = -1;
-						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT]           = effect_value;
+						spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MIN_DMG_TO_TRIGGER] = effect_value;
 					}
 
 					break;
@@ -5277,6 +5280,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					if (negate_spellbonus) { spellbonuses.ShieldBlock = effect_value; }
 					if (negate_aabonus) { aabonuses.ShieldBlock = effect_value; }
 					if (negate_itembonus) { itembonuses.ShieldBlock = effect_value; }
+					break;
 
 				case SE_BlockBehind:
 					if (negate_spellbonus) { spellbonuses.BlockBehind = effect_value; }
