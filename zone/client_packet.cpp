@@ -6893,7 +6893,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	Client *c = entity_list.GetClientByName(gmn->oldname);
 	LogInfo("GM([{}]) changeing players name. Old:[{}] New:[{}]", GetName(), gmn->oldname, gmn->newname);
 
-	const bool used_name = database.CheckUsedName(gmn->newname);
+	const bool used_name = database.IsNameUsed(gmn->newname);
 	if (!c) {
 		Message(Chat::Red, fmt::format("{} not found for name change. Operation failed!", gmn->oldname).c_str());
 		return;
@@ -6904,7 +6904,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (!used_name) {
+	if (used_name) {
 		Message(Chat::Red, fmt::format("{} is already in use. Operation failed!", gmn->newname).c_str());
 		return;
 	}

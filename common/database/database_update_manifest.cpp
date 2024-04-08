@@ -5467,7 +5467,8 @@ ADD COLUMN `id` int(3) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE,
 ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
-)"
+)",
+		.content_schema_update = true,
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

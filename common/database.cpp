@@ -74,6 +74,7 @@
 #include "repositories/zone_repository.h"
 #include "zone_store.h"
 #include "repositories/merchantlist_temp_repository.h"
+#include "repositories/bot_data_repository.h"
 
 extern Client client;
 
@@ -921,15 +922,31 @@ bool Database::UpdateName(const std::string& old_name, const std::string& new_na
 	return CharacterDataRepository::UpdateOne(*this, e);
 }
 
-bool Database::CheckUsedName(const std::string& name)
+bool Database::IsNameUsed(const std::string& name)
 {
-	return !CharacterDataRepository::GetWhere(
+	if (RuleB(Bots, Enabled)) {
+		const auto& bot_data = BotDataRepository::GetWhere(
+			*this,
+			fmt::format(
+				"`name` = '{}'",
+				Strings::Escape(name)
+			)
+		);
+
+		if (!bot_data.empty()) {
+			return true;
+		}
+	}
+
+	const auto& character_data = CharacterDataRepository::GetWhere(
 		*this,
 		fmt::format(
 			"`name` = '{}'",
 			Strings::Escape(name)
 		)
-	).empty();
+	);
+
+	return !character_data.empty();
 }
 
 uint32 Database::GetServerType()

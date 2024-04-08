@@ -835,6 +835,7 @@ public:
 	void SendHPUpdate(bool force_update_all = false);
 	virtual void ResetHPUpdateTimer() {}; // does nothing
 	static void SetSpawnLastNameByClass(NewSpawn_Struct* ns);
+	void SendRename(Mob* sender, const char* old_name, const char* new_name);
 
 	//Util
 	static uint32 RandomTimer(int min, int max);

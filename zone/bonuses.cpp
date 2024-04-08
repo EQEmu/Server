@@ -5005,6 +5005,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				case SE_MaxHPChange:
 					if (negate_spellbonus) { spellbonuses.MaxHPChange = effect_value; }
 					if (negate_aabonus) { aabonuses.MaxHPChange = effect_value; }
+					if (negate_aabonus) { aabonuses.MaxHP = effect_value; }
 					if (negate_itembonus) { itembonuses.MaxHPChange = effect_value; }
 					break;
 

@@ -6235,11 +6235,10 @@ int64 Bot::CalcMaxHP() {
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
 	bot_hp += itembonuses.heroic_max_hp;
-	nd += aabonuses.MaxHP;
+	nd += aabonuses.MaxHP + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
 	bot_hp += GroupLeadershipAAHealthEnhancement();
-	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
 	max_hp = bot_hp;
 	if (current_hp > max_hp)
 		current_hp = max_hp;

@@ -287,7 +287,7 @@ struct StatBonuses {
 	int32	AC;
 	int64	HP;
 	int64	HPRegen;
-	int64	MaxHP;
+	int64	MaxHP; //same bonus as MaxHPChange when applied to spells and item bonuses
 	int64	ManaRegen;
 	int64	EnduranceRegen;
 	int64	Mana;
@@ -413,7 +413,7 @@ struct StatBonuses {
 	int32	MeleeLifetap;						//i
 	int32	Vampirism;							//i
 	int32	HealRate;							// Spell effect that influences effectiveness of heals
-	int32	MaxHPChange;						// Spell Effect
+	int32	MaxHPChange;						// percent change in hit points (aabonuses use variable MaxHP)
 	int16	SkillDmgTaken[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect

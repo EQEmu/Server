@@ -184,32 +184,8 @@ bool BotDatabase::QueryNameAvailablity(const std::string& bot_name, bool& availa
 	if (
 		bot_name.empty() ||
 		bot_name.size() > 60 ||
-		!database.CheckUsedName(bot_name)
+		database.IsNameUsed(bot_name)
 	) {
-		return false;
-	}
-
-	const auto& bot_data = BotDataRepository::GetWhere(
-		database,
-		fmt::format(
-			"`name` LIKE '{}' LIMIT 1",
-			bot_name
-		)
-	);
-
-	if (!bot_data.empty()) {
-		return false;
-	}
-
-	const auto& character_data = CharacterDataRepository::GetWhere(
-		database,
-		fmt::format(
-			"`name` LIKE '{}' LIMIT 1",
-			bot_name
-		)
-	);
-
-	if (!character_data.empty()) {
 		return false;
 	}
 

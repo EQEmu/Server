@@ -2234,8 +2234,8 @@ void Client::ChangeLastName(std::string last_name) {
 bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 {
 	// check duplicate name
-	bool usedname = database.CheckUsedName((const char*) in_firstname);
-	if (!usedname) {
+	bool used_name = database.IsNameUsed((const char*) in_firstname);
+	if (used_name) {
 		return false;
 	}
 
