@@ -3126,7 +3126,7 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
-	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other))
+	if (other->IsClient() && !on_hatelist && !IsOnFeignMemory(other) && !IsPetOwnerClient())
 		other->CastToClient()->AddAutoXTarget(this);
 
 	// if other is a bot, add the bots client to the hate list
