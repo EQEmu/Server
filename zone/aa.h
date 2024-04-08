@@ -1526,7 +1526,11 @@ enum {	//values of AA_Action.action
 };
 
 namespace AACategory {
+	#if defined(SWIG) || defined(SWIG_VERSION)
+	constexpr int AANone          = -1;
+	#else
 	constexpr int None          = -1;
+	#endif
 	constexpr int Passive       = 1;
 	constexpr int Progression   = 2;
 	constexpr int ShroudPassive = 3;

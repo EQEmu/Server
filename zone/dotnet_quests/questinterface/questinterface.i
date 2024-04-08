@@ -34,6 +34,8 @@
 %ignore Raid::RemoveGroupLeader;
 %ignore EQApplicationPacket::combine;
 
+%ignore ZoneGuildManager::ListGuilds;
+%ignore SwarmPet::duration;
 %ignore Trap::SpellOnTarget;
 %ignore Trap::respawn_timer;
 %ignore Trap::chkarea_timer;
@@ -124,7 +126,13 @@
 #include "../../../common/expedition_lockout_timer.h"
 #include "../../../common/eqemu_logsys_log_aliases.h"
 #include "../../../common/linked_list.h"
-
+#include "../../../common/emu_constants.h"
+#include "../../../common/dynamic_zone_base.h"
+#include "../../../common/eq_constants.h"
+#include "../../../common/item_instance.h"
+#include "../../../common/item_data.h"
+#include "../../../common/eqemu_logsys.h"
+#include "../../../common/zone_store.h"
 
 #include "../../common.h"
 #include "../../entity.h"
@@ -144,6 +152,26 @@
 #include "../../object.h"
 #include "../../raids.h"
 #include "../../trap.h"
+
+#include "../../aa.h"
+#include "../../aa_ability.h"
+#include "../../aa_rank.h"
+#include "../../command.h"
+#include "../../data_bucket.h"
+#include "../../expedition.h"
+#include "../../expedition_database.h"
+#include "../../expedition_request.h"
+#include "../../forage.h"
+#include "../../global_loot_manager.h"
+#include "../../guild_mgr.h"
+#include "../../horse.h"
+#include "../../pets.h"
+#include "../../position.h"
+#include "../../titles.h"
+#include "../../tasks.h"
+#include "../../task_manager.h"
+#include "../../task_client_state.h"
+
 #include "../../spawn2.h"
 #include "../../spawngroup.h"
 #include "../../zonedb.h"
@@ -152,13 +180,7 @@
 #include "../../dynamic_zone.h"
 #include "../../dotnet_quests/dotnet_runtime.h"
 
-#include "../../../common/emu_constants.h"
-#include "../../../common/dynamic_zone_base.h"
-#include "../../../common/eq_constants.h"
-#include "../../../common/item_instance.h"
-#include "../../../common/item_data.h"
 
-#include "../../../common/eqemu_logsys.h"
 
 void FreeVec4(glm::vec4* ptr) {
     delete ptr;
@@ -200,6 +222,7 @@ SPDat_Spell_Struct GetSpellById(int spell_id) {
 using namespace EQ;
 using namespace Logs;
 using namespace glm;
+using namespace AA;
 %}
 
 namespace glm {
@@ -263,6 +286,8 @@ namespace glm {
 %include "../../../common/faction.h"
 %include "../../../common/eq_constants.h"
 %include "../../../common/dynamic_zone_base.h"
+%include "../../../common/zone_store.h"
+
 
 %include "../../common.h"
 %include "../../entity.h"
@@ -289,6 +314,25 @@ namespace glm {
 %include "../../questmgr.h"
 %include "../../dynamic_zone.h"
 %include "../../dotnet_quests/dotnet_runtime.h"
+
+%include "../../aa.h"
+%include "../../aa_ability.h"
+%include "../../aa_rank.h"
+%include "../../command.h"
+%include "../../data_bucket.h"
+%include "../../expedition.h"
+%include "../../expedition_database.h"
+%include "../../expedition_request.h"
+%include "../../forage.h"
+%include "../../global_loot_manager.h"
+%include "../../guild_mgr.h"
+%include "../../horse.h"
+%include "../../pets.h"
+%include "../../position.h"
+%include "../../titles.h"
+%include "../../tasks.h"
+%include "../../task_manager.h"
+%include "../../task_client_state.h"
 
 %include "../../../common/item_instance.h"
 %include "../../../common/item_data.h"
