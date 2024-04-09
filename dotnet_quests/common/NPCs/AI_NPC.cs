@@ -9,9 +9,9 @@ public class AI_NPC : INpcEvent
 
     private Conversation GetOrInitializeConversation(NpcEvent e)
     {
-        if (api == null)
+        if (api == null) 
         {
-            api = new OpenAIAPI("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");
+            api = new OpenAIAPI("{put the key here}");
         }
         if (conversations.ContainsKey(e.mob.GetName()))
         {
