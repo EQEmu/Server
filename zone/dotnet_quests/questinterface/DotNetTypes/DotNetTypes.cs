@@ -164,44 +164,6 @@ public static class EQEmuLogSysExtensions
     }
 }
 
-
-
-public static class EntityListExtensions
-{
-    public static NPC? GetNPCByName(this EntityList entityList, string name)
-    {
-        foreach (var npc in entityList.GetNPCList())
-        {
-            if (npc.Value.GetOrigName() == name)
-            {
-                return npc.Value;
-            }
-        }
-        return null;
-    }
-}
-
-public static class MobExtensions
-{
-    public static void QuestSay(this Mob mob, EntityList e, string message)
-    {
-        Options journalOptions = new Options
-        {
-            speak_mode = SpeakMode.Say,
-            journal_mode = Mode.None,
-            language = (sbyte)questinterface.CommonTongue,
-            message_type = questinterface.NPCQuestSay,
-            target_spawn_id = mob.GetID()
-        };
-        e.QuestJournalledSayClose(mob, 200, mob.GetCleanName(), message, journalOptions);
-    }
-}
-
-public static class NPCExtensions
-{
-
-}
-
 public interface INpcEvent
 {
     void Say(NpcEvent e) { }
@@ -447,7 +409,7 @@ public interface IItemEvent
 {
     void ItemClick(ItemEvent e) { }
     void ItemClickCast(ItemEvent e) { }
-    void ItemEnterZone (ItemEvent e) { }
+    void ItemEnterZone(ItemEvent e) { }
     void Timer(ItemEvent e) { }
     void WeaponProc(ItemEvent e) { }
     void Loot(ItemEvent e) { }
@@ -463,51 +425,54 @@ public interface IItemEvent
     void TimerStop(ItemEvent e) { }
 }
 
-public interface ISpellEvent {
-    void SpellEffectClient(SpellEvent e) {}
-    void SpellEffectBuffTicClient(SpellEvent e) {}
-    void SpellEffectNpc(SpellEvent e) {}
-    void SpellEffectBuffTicNpc(SpellEvent e) {}
-    void SpellFade(SpellEvent e) {}
-    void SpellEffectTranslocateComplete(SpellEvent e) {}
+public interface ISpellEvent
+{
+    void SpellEffectClient(SpellEvent e) { }
+    void SpellEffectBuffTicClient(SpellEvent e) { }
+    void SpellEffectNpc(SpellEvent e) { }
+    void SpellEffectBuffTicNpc(SpellEvent e) { }
+    void SpellFade(SpellEvent e) { }
+    void SpellEffectTranslocateComplete(SpellEvent e) { }
 }
 
-public interface IEncounterEvent {
-    void Timer (EncounterEvent e) {}
-    void EncounterLoad (EncounterEvent e) {}
-    void EncounterUnload (EncounterEvent e) {}
+public interface IEncounterEvent
+{
+    void Timer(EncounterEvent e) { }
+    void EncounterLoad(EncounterEvent e) { }
+    void EncounterUnload(EncounterEvent e) { }
 }
 
-public interface IBotEvent {
-    void Cast(BotEvent e) {}
-    void CastBegin(BotEvent e) {}
-    void CastOn(BotEvent e) {}
-    void Combat(BotEvent e) {}
-    void Death(BotEvent e) {}
-    void DeathComplete(BotEvent e) {}
-    void PopupResponse(BotEvent e) {}
-    void Say(BotEvent e) {}
-    void Signal(BotEvent e) {}
-    void Slay(BotEvent e) {}
-    void TargetChange(BotEvent e) {}
-    void Timer(BotEvent e) {}
-    void Trade(BotEvent e) {}
-    void UseSkill(BotEvent e) {}
-    void Payload(BotEvent e) {}
-    void EquipItemBot(BotEvent e) {}
-    void UnequipItemBot(BotEvent e) {}
-    void DamageGiven(BotEvent e) {}
-    void DamageTaken(BotEvent e) {}
-    void LevelUp(BotEvent e) {}
-    void LevelDown(BotEvent e) {}
-    void TimerPause(BotEvent e) {}
-    void TimerResume(BotEvent e) {}
-    void TimerStart(BotEvent e) {}
-    void TimerStop(BotEvent e) {}
-    void EntityVariableDelete(BotEvent e) {}
-    void EntityVariableSet(BotEvent e) {}
-    void EntityVariableUpdate(BotEvent e) {}
-    void SpellBlocked(BotEvent e) {}
+public interface IBotEvent
+{
+    void Cast(BotEvent e) { }
+    void CastBegin(BotEvent e) { }
+    void CastOn(BotEvent e) { }
+    void Combat(BotEvent e) { }
+    void Death(BotEvent e) { }
+    void DeathComplete(BotEvent e) { }
+    void PopupResponse(BotEvent e) { }
+    void Say(BotEvent e) { }
+    void Signal(BotEvent e) { }
+    void Slay(BotEvent e) { }
+    void TargetChange(BotEvent e) { }
+    void Timer(BotEvent e) { }
+    void Trade(BotEvent e) { }
+    void UseSkill(BotEvent e) { }
+    void Payload(BotEvent e) { }
+    void EquipItemBot(BotEvent e) { }
+    void UnequipItemBot(BotEvent e) { }
+    void DamageGiven(BotEvent e) { }
+    void DamageTaken(BotEvent e) { }
+    void LevelUp(BotEvent e) { }
+    void LevelDown(BotEvent e) { }
+    void TimerPause(BotEvent e) { }
+    void TimerResume(BotEvent e) { }
+    void TimerStart(BotEvent e) { }
+    void TimerStop(BotEvent e) { }
+    void EntityVariableDelete(BotEvent e) { }
+    void EntityVariableSet(BotEvent e) { }
+    void EntityVariableUpdate(BotEvent e) { }
+    void SpellBlocked(BotEvent e) { }
 
 }
 public class EQGlobals
@@ -529,7 +494,8 @@ public class EQLists
 
 public class EQEvent
 {
-    public EQEvent(EQGlobals g, EventArgs e) {
+    public EQEvent(EQGlobals g, EventArgs e)
+    {
         zone = g.zone;
         entityList = g.entityList;
         questManager = g.questManager;
@@ -546,11 +512,13 @@ public class EQEvent
         extraData = e.ExtraData;
     }
 
-    public void QuestDebug(string message) {
+    public void QuestDebug(string message)
+    {
         logSys?.QuestDebug(message);
     }
 
-    public void QuestError(string message) {
+    public void QuestError(string message)
+    {
         logSys?.QuestError(message);
     }
     public string data;
@@ -570,7 +538,7 @@ public class EQEvent
 
 public class NpcEvent : EQEvent
 {
-    public NpcEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    public NpcEvent(EQGlobals g, EventArgs e) : base(g, e) { }
     public NPC npc;
     public Mob mob;
 
@@ -622,14 +590,14 @@ public class NpcEvent : EQEvent
 
 public class PlayerEvent : EQEvent
 {
-    public PlayerEvent(EQGlobals g, EventArgs e) : base(g, e) {}
+    public PlayerEvent(EQGlobals g, EventArgs e) : base(g, e) { }
     public Client player;
 }
 
 public class ItemEvent : EQEvent
 {
-    public ItemEvent(EQGlobals g, EventArgs e) : base(g, e) {}
-    
+    public ItemEvent(EQGlobals g, EventArgs e) : base(g, e) { }
+
     public Mob mob;
     public Client client;
     public ItemInstance item;
@@ -637,8 +605,8 @@ public class ItemEvent : EQEvent
 
 public class SpellEvent : EQEvent
 {
-    public SpellEvent(EQGlobals g, EventArgs e) : base(g, e) {}
-    
+    public SpellEvent(EQGlobals g, EventArgs e) : base(g, e) { }
+
     public Mob mob;
     public Client client;
     public uint spellID = 0;
@@ -646,15 +614,15 @@ public class SpellEvent : EQEvent
 
 public class EncounterEvent : EQEvent
 {
-    public EncounterEvent(EQGlobals g, EventArgs e) : base(g, e) {}
-    
+    public EncounterEvent(EQGlobals g, EventArgs e) : base(g, e) { }
+
     public string encounterName = "";
 }
 
 public class BotEvent : EQEvent
 {
-    public BotEvent(EQGlobals g, EventArgs e) : base(g, e) {}
-    
+    public BotEvent(EQGlobals g, EventArgs e) : base(g, e) { }
+
     public Bot bot;
     public Client client;
 }
@@ -996,7 +964,8 @@ public class EventMap
     };
 }
 
-public enum CastingSlot { // hybrid declaration
+public enum CastingSlot
+{ // hybrid declaration
     Gem1 = 0,
     Gem2 = 1,
     Gem3 = 2,
