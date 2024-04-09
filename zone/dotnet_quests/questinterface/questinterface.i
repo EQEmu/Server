@@ -133,6 +133,7 @@
 #include "../../../common/item_data.h"
 #include "../../../common/eqemu_logsys.h"
 #include "../../../common/zone_store.h"
+#include "../../../common/servertalk.h"
 
 #include "../../common.h"
 #include "../../entity.h"
@@ -287,6 +288,7 @@ namespace glm {
 %include "../../../common/eq_constants.h"
 %include "../../../common/dynamic_zone_base.h"
 %include "../../../common/zone_store.h"
+%include "../../../common/servertalk.h"
 
 
 %include "../../common.h"

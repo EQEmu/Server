@@ -578,6 +578,8 @@ public class NpcEvent : EQEvent
     uint originalResendTimeout = 0;
     int originalClientLinkdeadMs = 0;
 
+    public Client? client { get { return mob?.CastToClient(); } }
+
     public void SetupDebug(int debugMinutes = 20)
     {
         var debugMs = debugMinutes * 60 * 1000;
