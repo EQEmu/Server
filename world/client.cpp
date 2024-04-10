@@ -712,18 +712,19 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 		bool entry_enabled = true;
 
 		if (RuleB(Custom, BlockRaceOnAccountProgression)) {
-			if (account_progression < 1 && character_create_race_class_combos[i].Race == 128) {
+			if (account_progression < 1 && character_create_race_class_combos[i].Race == Race::Iksar) {
 				entry_enabled = false;
 			}
-			if (account_progression < 3 && character_create_race_class_combos[i].Race == 130) {
+			if (account_progression < 3 && character_create_race_class_combos[i].Race == Race::VahShir) {
 				entry_enabled = false;
 			}
 		}
+		
 		if (RuleB(Custom, BlockClassOnAccountProgression)) {
-			if (account_progression < 3 && character_create_race_class_combos[i].Class == 15) {
+			if (account_progression < 3 && character_create_race_class_combos[i].Class == Class::Beastlord) {
 				entry_enabled = false;
 			}
-			if (account_progression < 4 && character_create_race_class_combos[i].Class == 16) {
+			if (account_progression < 4 && character_create_race_class_combos[i].Class == Class::Berserker) {
 				entry_enabled = false;
 			}
 		}
