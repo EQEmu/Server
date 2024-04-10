@@ -53,8 +53,8 @@ public static class DotNetQuest
             if (lastWriteTime > lastCheck)
             {
                 reloading = true;
-                logSys?.QuestDebug("Detected change in .cs file - Reloading dotnet quests");
-                Console.WriteLine("Detected change in .cs file - Reloading dotnet quests");
+                logSys?.QuestDebug($"Detected change in .cs file in {path}- Reloading dotnet quests");
+                Console.WriteLine($"Detected change in .cs file in {path}- Reloading dotnet quests");
                 callback();
                 reloading = false;
                 lastCheck = lastWriteTime;
@@ -113,6 +113,8 @@ public static class DotNetQuest
         var globalDir = Path.Combine(workingDirectory, "dotnet_quests", "global");
         logSys?.QuestDebug($"Watching for *.cs file changes in {zoneDir}");
         Console.WriteLine($"Watching for *.cs file changes in {zoneDir}");
+        logSys?.QuestDebug($"Watching for *.cs file changes in {globalDir}");
+        Console.WriteLine($"Watching for *.cs file changes in {globalDir}");
         foreach(var timer in timers) {
             timer.Stop();
         }

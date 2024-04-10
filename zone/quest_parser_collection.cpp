@@ -848,14 +848,15 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 	);
 
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", dotnet_path, npc_name), // Local DotNet by NPC Name
 		fmt::format("{}/{}", zone_versioned_path, npc_id), // Local versioned by NPC ID ./quests/zone/v0/10.ext
 		fmt::format("{}/{}", zone_versioned_path, npc_name), // Local versioned by NPC Name ./quests/zone/v0/npc.ext
 		fmt::format("{}/{}", zone_path, npc_id), // Local by NPC ID
 		fmt::format("{}/{}", zone_path, npc_name), // Local by NPC Name
-		fmt::format("{}/{}", dotnet_path, npc_name), // Local by NPC Name
-		fmt::format("{}/{}", dotnet_path_global, npc_name), // Global by NPC Name
 		fmt::format("{}/{}", global_path, npc_id), // Global by NPC ID
 		fmt::format("{}/{}", global_path, npc_name), // Global by NPC ID
+		fmt::format("{}/{}", dotnet_path_global, npc_name), // Global DotNet by NPC Name
+
 		fmt::format("{}/default", zone_versioned_path), // Zone Default ./quests/zone/v0/default.ext
 		fmt::format("{}/default", zone_path), // Zone Default
 		fmt::format("{}/default", global_path), // Global Default
@@ -917,12 +918,12 @@ QuestInterface* QuestParserCollection::GetQIByPlayerQuest(std::string& filename)
 	);
 
 	std::vector<std::string> file_names = {
+		fmt::format("{}/player", dotnet_path), // Local
+		fmt::format("{}/player", dotnet_path_global), // Global
 		fmt::format("{}/player", zone_versioned_path), // Local by Instance Version ./quests/zone/v0/player.ext
 		fmt::format("{}/player_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/player", zone_path), // Local
 		fmt::format("{}/player", global_path), // Global
-		fmt::format("{}/player", dotnet_path), // Local
-		fmt::format("{}/player", dotnet_path_global) // Global
 	};
 
 	std::string file_name;
@@ -1153,9 +1154,9 @@ QuestInterface* QuestParserCollection::GetQIByEncounterQuest(std::string encount
 	);
 
 	std::vector<std::string> file_names = {
+		fmt::format("{}/{}", dotnet_path, encounter_name), // Dotnet
 		fmt::format("{}/{}", zone_versioned_path, encounter_name), // Local versioned ./quests/zone/v0/encounters/name.ext
 		fmt::format("{}/{}", zone_path, encounter_name), // Local
-		fmt::format("{}/{}", dotnet_path, encounter_name), // Dotnet
 		fmt::format("{}/{}", global_path, encounter_name) // Global
 	};
 
@@ -1209,10 +1210,10 @@ QuestInterface* QuestParserCollection::GetQIByBotQuest(std::string& filename)
 	);
 
 	std::vector<std::string> file_names = {
+		fmt::format("{}/bot", dotnet_path), // Dotnet
 		fmt::format("{}/bot", zone_versioned_path), // Local versioned by Instance Version ./quests/zone/v0/bot.ext
 		fmt::format("{}/bot_v{}", zone_path, zone->GetInstanceVersion()), // Local by Instance Version
 		fmt::format("{}/bot", zone_path), // Local
-		fmt::format("{}/bot", dotnet_path), // Dotnet
 		fmt::format("{}/bot", global_path) // Global
 	};
 
