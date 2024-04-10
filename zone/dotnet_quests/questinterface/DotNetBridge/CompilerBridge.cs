@@ -356,7 +356,7 @@ public static class DotNetQuest
 
     public static void QuestEvent(EventArgs questEventArgs)
     {
-        if (zone == null || entityList == null || logSys == null || worldServer == null || questAssembly_ == null || questManager == null)
+        if (zone == null || entityList == null || logSys == null || worldServer == null || questManager == null)
         {
             return;
         }

@@ -835,10 +835,6 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		zone->GetShortName()
 	);
 
-	const std::string& dotnet_path_global = fmt::format(
-		"dotnet_quests/{}",
-		QUEST_GLOBAL_DIRECTORY
-	);
 
 	const std::string& zone_versioned_path = fmt::format(
 		"{}/{}/v{}",
@@ -855,8 +851,6 @@ QuestInterface* QuestParserCollection::GetQIByNPCQuest(uint32 npc_id, std::strin
 		fmt::format("{}/{}", zone_path, npc_name), // Local by NPC Name
 		fmt::format("{}/{}", global_path, npc_id), // Global by NPC ID
 		fmt::format("{}/{}", global_path, npc_name), // Global by NPC ID
-		fmt::format("{}/{}", dotnet_path_global, npc_name), // Global DotNet by NPC Name
-
 		fmt::format("{}/default", zone_versioned_path), // Zone Default ./quests/zone/v0/default.ext
 		fmt::format("{}/default", zone_path), // Zone Default
 		fmt::format("{}/default", global_path), // Global Default
