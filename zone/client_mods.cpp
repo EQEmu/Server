@@ -608,74 +608,43 @@ int64 Client::_CalcBaseMana(uint8 class_id)
 
 	if (IsIntelligenceCasterClass(class_id)) {
 		WisInt = GetINT();
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-			ConvertedWisInt = WisInt;
-
-			int over200 = WisInt;
-			if (WisInt > 100) {
-				if (WisInt > 200) {
-					over200 = (WisInt - 200) / -2 + WisInt;
-				}
-				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
-			}
-
-			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-			if (base_data.level == GetLevel()) {
-				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
-			}
-		} else {
-			if (((WisInt - 199) / 2) > 0) {
-				MindLesserFactor = (WisInt - 199) / 2;
-			} else {
-				MindLesserFactor = 0;
-			}
-
-			MindFactor = WisInt - MindLesserFactor;
-
-			if (WisInt > 100) {
-				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-			} else {
-				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-			}
-		}
 	} else if (IsWisdomCasterClass(class_id)) {
 		WisInt = GetWIS();
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-			ConvertedWisInt = WisInt;
-
-			int over200 = WisInt;
-			if (WisInt > 100) {
-				if (WisInt > 200) {
-					over200 = (WisInt - 200) / -2 + WisInt;
-				}
-				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
-			}
-
-			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-			if (base_data.level == GetLevel()) {
-				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
-			}
-		} else {
-			if (((WisInt - 199) / 2) > 0) {
-				MindLesserFactor = (WisInt - 199) / 2;
-			} else {
-				MindLesserFactor = 0;
-			}
-
-			MindFactor = WisInt - MindLesserFactor;
-
-			if (WisInt > 100) {
-				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-			} else {
-				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-			}
-		}
 	} else {
-		max_m = 0;
+		return 0;
 	}
 
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+		ConvertedWisInt = WisInt;
+
+		int over200 = WisInt;
+		if (WisInt > 100) {
+			if (WisInt > 200) {
+				over200 = (WisInt - 200) / -2 + WisInt;
+			}
+			ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
+		}
+
+		auto base_data = zone->GetBaseData(GetLevel(), GetClass());
+		if (base_data.level == GetLevel()) {
+			max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
+		}
+	} else {
+		if (((WisInt - 199) / 2) > 0) {
+			MindLesserFactor = (WisInt - 199) / 2;
+		} else {
+			MindLesserFactor = 0;
+		}
+
+		MindFactor = WisInt - MindLesserFactor;
+
+		if (WisInt > 100) {
+			max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+		} else {
+			max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+		}
+	}
+	
 	return max_m;
 }
 
