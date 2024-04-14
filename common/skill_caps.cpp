@@ -40,7 +40,7 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 
 	for (const auto &e: m_skill_caps) {
 		for (uint8 current_level = 1; current_level <= max_level; current_level++) {
-			auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, level, skill_id));
+			auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, current_level, skill_id));
 			if (pos != m_skill_caps.end()) {
 				return current_level;
 			}
