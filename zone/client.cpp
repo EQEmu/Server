@@ -6952,6 +6952,11 @@ void Client::AddAutoXTarget(Mob *m, bool send)
 		return;
 	}
 
+	// Breaks pvp support
+	if (m->IsCorpse() || m->IsPetOwnerClient() || m->IsClient()) {
+		return ;
+	}
+
 	m_activeautohatermgr->increment_count(m);
 
 	if (!XTargettingAvailable() || !XTargetAutoAddHaters || IsXTarget(m)) {
@@ -7237,7 +7242,7 @@ void Client::ProcessXTargetAutoHaters()
 		auto &haters = GetXTargetAutoMgr()->get_list();
 		for (auto &e : haters) {
 			auto *mob = entity_list.GetMob(e.spawn_id);
-			if (mob && !IsXTarget(mob)) {
+			if (mob && !IsXTarget(mob) && !mob->IsClient() && !mob->IsPetOwnerClient() && !mob->IsCorpse()) {
 				auto slot = empty_slots.front();
 				empty_slots.pop();
 				XTargets[slot].dirty = true;
