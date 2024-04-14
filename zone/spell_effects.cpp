@@ -274,6 +274,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				// for offensive spells check if we have a spell rune on
 				int64 dmg = effect_value;
+				if (RuleB(Custom,CustomSpellProcHandling) && caster->EntityVariableExists(std::to_string(spell_id) + "_damage_override")) {
+					try {
+						dmg = std::stoll(caster->GetEntityVariable(std::to_string(spell_id) + "_damage_override"));
+					} catch (const std::exception& e) {
+						LogError("Error reading damage_override");
+					}
+					caster->DeleteEntityVariable(std::to_string(spell_id) + "_damage_override");
+				}
+
 				if(dmg < 0)
 				{
 
@@ -3456,7 +3465,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 		&& IsInstrumentModifierAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
-			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+			LogSpells("Effect ID [{}] with base value [{}] altered with bard modifier of [{}] to yeild [{}]", spells[spell_id].effect_id[effect_id],
 				oval, instrument_mod, effect_value);
 	}
 	/*
@@ -3486,18 +3495,20 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 		LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 	}
+	/* I think this is legacy code that is no longer relevant
 	//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
 	else if (caster_id && instrument_mod > 10) {
 
 		Mob* buff_caster = entity_list.GetMob(caster_id);//If targeted bard song needed to confirm caster is not bard.
-		if (buff_caster && buff_caster->GetClassesBits() != GetPlayerClassBit(Class::Bard)) {
+		if (buff_caster && (buff_caster->GetClassesBits() & GetPlayerClassBit(Class::Bard) == 0)) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
-			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
-				oval, instrument_mod, effect_value);
+			LogSpells("Effect ID [{}] with base value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+				spells[spell_id].effect_id[effect_id], oval, instrument_mod, effect_value);
 		}
 	}
+	*/
 
 	return effect_value;
 }
@@ -3861,7 +3872,10 @@ void Mob::BuffProcess()
 											suspended = true;
 										} else if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
 											if (buffs[buffs_i].ticsremaining == 1 && caster == this && caster->IsLinkedSpellReuseTimerReady(spells[spellid].timer_id)) {
-												caster->ApplyBardPulse(spellid, this, (EQ::spells::CastingSlot)caster->FindMemmedSpellBySpellID(spellid));
+												auto tt = spells[spellid].target_type;
+												if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
+													caster->ApplyBardPulse(spellid, this, (EQ::spells::CastingSlot)caster->FindMemmedSpellBySpellID(spellid));
+												}
 											}
 										}
 									}
@@ -4831,7 +4845,7 @@ int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				break;
 
 			case SE_LimitMaxLevel:
-				spell_level = spell.classes[(GetClass() % 17) - 1];
+				spell_level = GetSpellLevelForCaster(spell_id);
 				lvldiff     = spell_level - base_value;
 				// every level over cap reduces the effect by base2 percent unless from a clicky when
 				// ItemCastsUseFocus is true
@@ -4849,7 +4863,7 @@ int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				break;
 
 			case SE_LimitMinLevel:
-				if ((spell.classes[(GetClass() % 17) - 1]) < base_value) {
+				if (GetSpellLevelForCaster(spell_id) < base_value) {
 					LimitFailure = true;
 				}
 				break;
@@ -5469,6 +5483,21 @@ int64 Mob::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	return (value * lvlModifier / 100);
 }
 
+uint8 Mob::GetSpellLevelForCaster(uint16 spell_id) const {
+	uint8 spell_level = 255; // max spell level (invalid)
+	const SPDat_Spell_Struct &spell       = spells[spell_id];
+
+	for (const auto& class_bitmask : player_class_bitmasks) {
+		uint8 class_id = class_bitmask.first;
+		uint16 class_bit = class_bitmask.second;
+		if ((GetClassesBits() & class_bit) != 0) {
+			spell_level = std::min(spell.classes[class_id - 1], (uint8)spell_level);
+		}
+	}
+
+	return spell_level;
+}
+
 //given an item/spell's focus ID and the spell being cast, determine the focus ammount, if any
 //assumes that spell_id is not a bard spell and that both ids are valid spell ids
 int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid, Mob *caster)
@@ -5523,7 +5552,6 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	*/
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
-
 		switch (focus_spell.effect_id[i]) {
 
 			case SE_Blank:
@@ -5556,8 +5584,10 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			case SE_LimitMaxLevel:
 				if (IsNPC()) {
 					break;
-				}
-				spell_level = spell.classes[(GetClass() % 17) - 1];
+				}				
+
+				spell_level = GetSpellLevelForCaster(spell_id);
+
 				lvldiff     = spell_level - focus_spell.base_value[i];
 				// every level over cap reduces the effect by focus_spell.base2[i] percent unless from a clicky
 				// when ItemCastsUseFocus is true
@@ -5579,7 +5609,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				if (IsNPC()) {
 					break;
 				}
-				if (spell.classes[(GetClass() % 17) - 1] < focus_spell.base_value[i]) {
+				if (GetSpellLevelForCaster(spell_id) < focus_spell.base_value[i]) {
 					return (0);
 				}
 				break;
@@ -6393,17 +6423,71 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	// We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
 		Mob* proc_target = GetTarget();
-		if (proc_target) {
+		int64 damage_override = 0;
+		
+		if (RuleB(Custom, CustomSpellProcHandling) && strncmp(spells[focusspellid].name, "Sympathetic", 11) == 0) {
+			auto romanToInt = [](const std::string& name) -> int {
+				std::map<char, int> romanValues = {{'I', 1}, {'V', 5}, {'X', 10}, {'L', 50},
+												{'C', 100}, {'D', 500}, {'M', 1000}};
+				int result = 0;
+				int prevValue = 0;
+				for (int i = name.size() - 1; i >= 0; --i) {
+					if (romanValues.count(name[i]) == 0) break;
+					int currentValue = romanValues[name[i]];
+					if (currentValue < prevValue)
+						result -= currentValue;
+					else
+						result += currentValue;
+					prevValue = currentValue;
+				}
+				return result;
+			};
 
+			uint32 cast_time_factor = spells[spell_id].cast_time / 1000;
+			uint32 mana_cost_factor = spells[spell_id].mana / 10;
+			uint32 rank_factor 		= romanToInt(spells[focusspellid].name);
+			double scaling_factor 	= RuleR(Custom, CustomSpellProcScalingFactor);
+			
+			LogDebug("rank_factor: [{}], cost_factor: [{}], time_factor: [{}], scaling_factor: [{}]", rank_factor, mana_cost_factor, cast_time_factor, scaling_factor);
+			damage_override = rank_factor * mana_cost_factor * cast_time_factor * scaling_factor;
+
+			if (IsBeneficialSpell(proc_spellid)) {
+				damage_override = std::llabs(damage_override);
+			} else {
+				damage_override = -std::llabs(damage_override);
+			}
+
+			LogDebug("Setting damage_override to [{}]", damage_override);
+
+			// I hate myself
+			SetEntityVariable(std::to_string(proc_spellid) + "_damage_override", std::to_string(damage_override));
+		}
+		
+		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		if (!IsTargetRequiredForSpell(proc_spellid)) {
+			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
+			return true;
+		}
+
+		if (proc_target) {
 			proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, proc_target->GetID()));
+			
+			if ((proc_target->IsClient() || proc_target->IsPetOwnerClient()) && IsDetrimentalSpell(proc_spellid)) {
+				return false; // Cancel this if, after implied targeting, we are still trying to proc a detrimental ability on a client or client pet
+			}
+
+			if ((proc_target->IsNPC() && !proc_target->IsPetOwnerClient()) && IsBeneficialSpell(proc_spellid)) {
+				proc_target = this;
+				return true;
+			}
 
 			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
 			return true;
 		}
-		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
-		else if (!IsTargetRequiredForSpell(proc_spellid)) {
-			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
-			return true;
+
+		if (EntityVariableExists(std::to_string(spell_id) + "_damage_override"))
+		{
+			DeleteEntityVariable(std::to_string(spell_id) + "_damage_override");
 		}
 	}
 	return false;
@@ -6535,11 +6619,14 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
 {
+	/*
 	if (!RuleB(Custom, MulticlassingEnabled)) {
 		if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
 			return 0;
 		}
-	}
+	}*/
+
+
 	int64 realTotal = 0;
 	int64 realTotal2 = 0;
 	int64 realTotal3 = 0;
@@ -6718,6 +6805,8 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 		if (UsedItem && rand_effectiveness && focus_max_real != 0) {
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 		}
+
+		LogDebug("GetFocusEffect 2? [{}], [{}], [{}]", rand_effectiveness, UsedItem ? UsedItem->ID : 0, realTotal);
 
 		if ((rand_effectiveness && UsedItem) || (realTotal != 0 && UsedItem)) {
 			// there are a crap ton more of these, I was able to verify these ones though

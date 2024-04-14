@@ -925,6 +925,7 @@ public:
 	void QuestJournalledSay(Client *QuestInitiator, const char *str, Journal::Options &opts);
 	const int GetItemStat(uint32 item_id, std::string identifier);
 
+	uint8 GetSpellLevelForCaster(uint16 spell_id) const;
 	int64 CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus=false, uint16 casterid = 0, Mob *caster = nullptr);
 	uint8 IsFocusEffect(uint16 spellid, int effect_index, bool AA=false,uint32 aa_effect=0);
 	void SendIllusionPacket(const AppearanceStruct& a);
