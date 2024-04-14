@@ -13,16 +13,10 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 		return SkillCapsRepository::NewEntity();
 	}
 
-	for (const auto &e: m_skill_caps) {
-		if (
-			e.class_id == class_id &&
-			e.level == level &&
-			static_cast<EQ::skills::SkillType>(e.skill_id) == skill_id
-			) {
-			return e;
-		}
+	auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, level, skill_id));
+	if (pos != m_skill_caps.end()) {
+		return pos->second;
 	}
-
 	return SkillCapsRepository::NewEntity();
 }
 
@@ -46,11 +40,8 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 
 	for (const auto &e: m_skill_caps) {
 		for (uint8 current_level = 1; current_level <= max_level; current_level++) {
-			if (
-				e.class_id == class_id &&
-				static_cast<EQ::skills::SkillType>(e.skill_id) == skill_id &&
-				e.level == current_level
-				) {
+			auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, level, skill_id));
+			if (pos != m_skill_caps.end()) {
 				return current_level;
 			}
 		}
@@ -63,7 +54,7 @@ void SkillCaps::LoadSkillCaps()
 {
 	const auto &l = SkillCapsRepository::All(*m_content_database);
 
-	m_skill_caps.reserve(l.size());
+	m_skill_caps.clear();
 
 	for (const auto &e: l) {
 		if (
@@ -74,7 +65,7 @@ void SkillCaps::LoadSkillCaps()
 			continue;
 		}
 
-		m_skill_caps.emplace_back(e);
+		m_skill_caps[fmt::format("{}-{}-{}", e.class_id, e.level, e.skill_id)] = e;
 	}
 
 	LogInfo(
