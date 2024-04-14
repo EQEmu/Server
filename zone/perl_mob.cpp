@@ -3468,6 +3468,16 @@ bool Perl_Mob_IsWisdomCasterClass(Mob* self)
 	return self->IsWisdomCasterClass();
 }
 
+std::string Perl_Mob_GetConsiderColor(Mob* self, Mob* other)
+{
+	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other->GetLevel()));
+}
+
+std::string Perl_Mob_GetConsiderColor(Mob* self, uint8 other_level)
+{
+	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other_level));
+}
+
 void perl_register_mob()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3670,6 +3680,8 @@ void perl_register_mob()
 	package.add("GetCloseMobList", (perl::array(*)(Mob*))&Perl_Mob_GetCloseMobList);
 	package.add("GetCloseMobList", (perl::array(*)(Mob*, float))&Perl_Mob_GetCloseMobList);
 	package.add("GetCloseMobList", (perl::array(*)(Mob*, float, bool))&Perl_Mob_GetCloseMobList);
+	package.add("GetConsiderColor", (std::string(*)(Mob*, Mob*))&Perl_Mob_GetConsiderColor);
+	package.add("GetConsiderColor", (std::string(*)(Mob*, uint8))&Perl_Mob_GetConsiderColor);
 	package.add("GetCorruption", &Perl_Mob_GetCorruption);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*))&Perl_Mob_GetDefaultRaceSize);
 	package.add("GetDefaultRaceSize", (float(*)(Mob*, int))&Perl_Mob_GetDefaultRaceSize);

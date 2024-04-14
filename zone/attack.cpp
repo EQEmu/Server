@@ -2720,7 +2720,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			if (!is_ldon_treasure && !MerchantType) {
 				const uint32 con_level = give_exp->GetLevelCon(GetLevel());
 
-				if (con_level != CON_GRAY) {
+				if (con_level != ConsiderColor::Gray) {
 					if (!GetOwner() || (GetOwner() && !GetOwner()->IsClient())) {
 						give_exp_client->AddEXP(final_exp, con_level);
 
@@ -6322,10 +6322,10 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		bool use_shield_ability = true;
 		//If defender is being shielded by an ability AND has a shield spell effect buff use highest mitigation value.
 		if ((defender->GetShieldTargetMitigation() && defender->spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT]) &&
-			 (defender->spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] >= defender->GetShieldTargetMitigation())){ 
+			 (defender->spellbonuses.ShieldTargetSpa[SBIndex::SHIELD_TARGET_MITIGATION_PERCENT] >= defender->GetShieldTargetMitigation())){
 				bool use_shield_ability = false;
 		}
-	
+
 		//use targeted /shield ability values
 		if (defender->GetShielderID() && use_shield_ability) {
 			DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
@@ -6387,14 +6387,14 @@ void Mob::DoShieldDamageOnShielderSpellEffect(Mob* shield_target, int64 hit_dama
 	}
 	/*
 		SPA 463 SE_SHIELD_TARGET
-		
-		Live description: "Shields your target, taking a percentage of their damage". 
+
+		Live description: "Shields your target, taking a percentage of their damage".
 		Only example spell on live is an NPC who uses it during a raid event "Laurion's Song" expansion. SPA 54492 'Guardian Stance' Described as 100% Melee Shielding
-		
+
 		Example of mechanic. Base value = 70. Caster puts buff on target. Each melee hit Buff Target takes 70% less damage, Buff Caster receives 30% of the melee damage.
 		Added mechanic to cause buff to fade if target or caster are seperated by a distance greater than the casting range of the spell. This allows similiar mechanics
 		to the /shield ability, without a range removal mechanic it would be too easy to abuse if put on a player spell. *can not confirm live does this currently
-		
+
 		Can not be cast on self.
 	*/
 

@@ -5189,10 +5189,10 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	con->level = GetLevelCon(t->GetLevel());
 
 	if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
-		if (con->level == CON_GRAY) {
-			con->level = CON_GREEN;
-		} else if (con->level == CON_WHITE) {
-			con->level = CON_WHITE_TITANIUM;
+		if (con->level == ConsiderColor::Gray) {
+			con->level = ConsiderColor::Green;
+		} else if (con->level == ConsiderColor::White) {
+			con->level = ConsiderColor::WhiteTitanium;
 		}
 	}
 
@@ -5233,26 +5233,26 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (t->IsRaidTarget()) {
 		uint32 color = 0;
 		switch (con->level) {
-			case CON_GREEN:
+			case ConsiderColor::Green:
 				color = 2;
 				break;
-			case CON_LIGHTBLUE:
+			case ConsiderColor::LightBlue:
 				color = 10;
 				break;
-			case CON_BLUE:
+			case ConsiderColor::DarkBlue:
 				color = 4;
 				break;
-			case CON_WHITE_TITANIUM:
-			case CON_WHITE:
+			case ConsiderColor::WhiteTitanium:
+			case ConsiderColor::White:
 				color = 10;
 				break;
-			case CON_YELLOW:
+			case ConsiderColor::Yellow:
 				color = 15;
 				break;
-			case CON_RED:
+			case ConsiderColor::Red:
 				color = 13;
 				break;
-			case CON_GRAY:
+			case ConsiderColor::Gray:
 				color = 6;
 				break;
 		}

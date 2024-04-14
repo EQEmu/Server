@@ -146,25 +146,25 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 	if (RuleB(Character,UseXPConScaling)) {
 		if (consider_level != 0xFF) {
 			switch (consider_level) {
-				case CON_GRAY:
+				case ConsiderColor::Gray:
 					in_add_exp = 0;
 					return 0;
-				case CON_GREEN:
+				case ConsiderColor::Green:
 					in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
 					break;
-				case CON_LIGHTBLUE:
+				case ConsiderColor::LightBlue:
 					in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier) / 100;
 					break;
-				case CON_BLUE:
+				case ConsiderColor::DarkBlue:
 					in_add_exp = in_add_exp * RuleI(Character, BlueModifier) / 100;
 					break;
-				case CON_WHITE:
+				case ConsiderColor::White:
 					in_add_exp = in_add_exp * RuleI(Character, WhiteModifier) / 100;
 					break;
-				case CON_YELLOW:
+				case ConsiderColor::Yellow:
 					in_add_exp = in_add_exp * RuleI(Character, YellowModifier) / 100;
 					break;
-				case CON_RED:
+				case ConsiderColor::Red:
 					in_add_exp = in_add_exp * RuleI(Character, RedModifier) / 100;
 					break;
 			}
@@ -222,22 +222,22 @@ float static GetConLevelModifierPercent(uint8 conlevel)
 {
 	switch (conlevel)
 	{
-	case CON_GREEN:
+	case ConsiderColor::Green:
 		return (float)RuleI(Character, GreenModifier) / 100;
 		break;
-	case CON_LIGHTBLUE:
+	case ConsiderColor::LightBlue:
 		return (float)RuleI(Character, LightBlueModifier) / 100;
 		break;
-	case CON_BLUE:
+	case ConsiderColor::DarkBlue:
 		return (float)RuleI(Character, BlueModifier) / 100;
 		break;
-	case CON_WHITE:
+	case ConsiderColor::White:
 		return (float)RuleI(Character, WhiteModifier) / 100;
 		break;
-	case CON_YELLOW:
+	case ConsiderColor::Yellow:
 		return (float)RuleI(Character, YellowModifier) / 100;
 		break;
-	case CON_RED:
+	case ConsiderColor::Red:
 		return (float)RuleI(Character, RedModifier) / 100;
 		break;
 	default:
@@ -249,7 +249,7 @@ void Client::CalculateNormalizedAAExp(uint64 &add_aaxp, uint8 conlevel, bool res
 {
 	// Functionally this is the same as having the case in the switch, but this is
 	// cleaner to read.
-	if (CON_GRAY == conlevel || resexp)
+	if (ConsiderColor::Gray == conlevel || resexp)
 	{
 		add_aaxp = 0;
 		return;
@@ -325,7 +325,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 
 void Client::CalculateLeadershipExp(uint64 &add_exp, uint8 conlevel)
 {
-	if (IsLeadershipEXPOn() && (conlevel == CON_BLUE || conlevel == CON_WHITE || conlevel == CON_YELLOW || conlevel == CON_RED))
+	if (IsLeadershipEXPOn() && (conlevel == ConsiderColor::DarkBlue || conlevel == ConsiderColor::White || conlevel == ConsiderColor::Yellow || conlevel == ConsiderColor::Red))
 	{
 		add_exp = static_cast<uint64>(static_cast<float>(add_exp) * 0.8f);
 
@@ -627,7 +627,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			if (membercount > 1) {
 				if (RuleI(Character, ShowExpValues) > 0) {
 					Message(Chat::Experience, "You have gained %s party experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				} else if (zone->IsHotzone()) { 
+				} else if (zone->IsHotzone()) {
 					Message(Chat::Experience, "You gain party experience (with a bonus)!");
 				} else {
 					MessageString(Chat::Experience, GAIN_GROUPXP);
@@ -635,7 +635,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			} else if (IsRaidGrouped()) {
 				if (RuleI(Character, ShowExpValues) > 0) {
 					Message(Chat::Experience, "You have gained %s raid experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				} else if (zone->IsHotzone()) { 
+				} else if (zone->IsHotzone()) {
 					Message(Chat::Experience, "You gained raid experience (with a bonus)!");
 				} else {
 					MessageString(Chat::Experience, GAIN_RAIDEXP);
@@ -643,7 +643,7 @@ void Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool isrezzexp) {
 			} else {
 				if (RuleI(Character, ShowExpValues) > 0) {
 					Message(Chat::Experience, "You have gained %s experience! %s", exp_amount_message.c_str(), exp_percent_message.c_str());
-				} else if (zone->IsHotzone()) { 
+				} else if (zone->IsHotzone()) {
 					Message(Chat::Experience, "You gain experience (with a bonus)!");
 				} else {
 					MessageString(Chat::Experience, GAIN_XP);
@@ -1158,7 +1158,7 @@ void Group::SplitExp(const uint64 exp, Mob* other) {
 	}
 
 	const uint8 consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
-	if (consider_level == CON_GRAY) {
+	if (consider_level == ConsiderColor::Gray) {
 		return;
 	}
 
@@ -1204,7 +1204,7 @@ void Raid::SplitExp(const uint64 exp, Mob* other) {
 	raid_experience = static_cast<uint64>(static_cast<float>(raid_experience) * RuleR(Character, FinalRaidExpMultiplier));
 
 	const auto consider_level = Mob::GetLevelCon(highest_level, other->GetLevel());
-	if (consider_level == CON_GRAY) {
+	if (consider_level == ConsiderColor::Gray) {
 		return;
 	}
 

@@ -3794,37 +3794,37 @@ bool Merc::CheckConfidence() {
 		switch(CurrentCon) {
 
 
-					case CON_GRAY: {
+					case ConsiderColor::Gray: {
 						ConRating = 0;
 						break;
 					}
 
-					case CON_GREEN: {
+					case ConsiderColor::Green: {
 						ConRating = 0.1;
 						break;
 									}
 
-					case CON_LIGHTBLUE: {
+					case ConsiderColor::LightBlue: {
 						ConRating = 0.2;
 						break;
 										}
 
-					case CON_BLUE: {
+					case ConsiderColor::DarkBlue: {
 						ConRating = 0.6;
 						break;
 								   }
 
-					case CON_WHITE: {
+					case ConsiderColor::White: {
 						ConRating = 1.0;
 						break;
 									}
 
-					case CON_YELLOW: {
+					case ConsiderColor::Yellow: {
 						ConRating = 1.2;
 						break;
 									 }
 
-					case CON_RED: {
+					case ConsiderColor::Red: {
 						ConRating = 1.5;
 						break;
 								  }

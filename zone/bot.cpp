@@ -7366,23 +7366,23 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 					LastCon = CurrentCon;
 					switch(CurrentCon) {
-						case CON_GREEN: {
+						case ConsiderColor::Green: {
 							WindowText += "<c \"#00FF00\">";
 							break;
 						}
-						case CON_LIGHTBLUE: {
+						case ConsiderColor::LightBlue: {
 							WindowText += "<c \"#8080FF\">";
 							break;
 						}
-						case CON_BLUE: {
+						case ConsiderColor::DarkBlue: {
 							WindowText += "<c \"#2020FF\">";
 							break;
 						}
-						case CON_YELLOW: {
+						case ConsiderColor::Yellow: {
 							WindowText += "<c \"#FFFF00\">";
 							break;
 						}
-						case CON_RED: {
+						case ConsiderColor::Red: {
 							WindowText += "<c \"#FF0000\">";
 							break;
 						}

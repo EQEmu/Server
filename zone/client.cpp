@@ -2660,7 +2660,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
 			against_who->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) ||
 			against_who->IsClient() ||
-			GetLevelCon(against_who->GetLevel()) == CON_GRAY
+			GetLevelCon(against_who->GetLevel()) == ConsiderColor::Gray
 		) {
 			return false;
 		}

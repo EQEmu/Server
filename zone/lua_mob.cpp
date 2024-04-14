@@ -3357,6 +3357,18 @@ bool Lua_Mob::IsWisdomCasterClass()
 	return self->IsWisdomCasterClass();
 }
 
+std::string Lua_Mob::GetConsiderColor(Lua_Mob other)
+{
+	Lua_Safe_Call_String();
+	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other.GetLevel()));
+}
+
+std::string Lua_Mob::GetConsiderColor(uint8 other_level)
+{
+	Lua_Safe_Call_String();
+	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other_level));
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3576,6 +3588,8 @@ luabind::scope lua_register_mob() {
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(void))&Lua_Mob::GetCloseMobList)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float))&Lua_Mob::GetCloseMobList)
 	.def("GetCloseMobList", (Lua_Mob_List(Lua_Mob::*)(float,bool))&Lua_Mob::GetCloseMobList)
+	.def("GetConsiderColor", (std::string(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetConsiderColor)
+	.def("GetConsiderColor", (std::string(Lua_Mob::*)(uint8))&Lua_Mob::GetConsiderColor)
 	.def("GetCorruption", &Lua_Mob::GetCorruption)
 	.def("GetDEX", &Lua_Mob::GetDEX)
 	.def("GetDR", &Lua_Mob::GetDR)
