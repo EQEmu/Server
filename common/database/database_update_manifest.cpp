@@ -5469,6 +5469,17 @@ ADD PRIMARY KEY (`id`) USING BTREE,
 ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
 )",
 		.content_schema_update = true,
+	},
+	ManifestEntry{
+		.version = 9269,
+		.description = "2024_03_27_account_auto_login_charname.sql",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'auto_login_charname'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `account`
+ADD COLUMN `auto_login_charname` varchar(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `charname`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

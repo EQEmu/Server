@@ -194,14 +194,20 @@ bool Client::CanTradeFVNoDropItem()
 void Client::SendEnterWorld(std::string name)
 {
 	std::string live_name {};
+
 	if (is_player_zoning) {
 		live_name = database.GetLiveChar(GetAccountID());
-		if(database.GetAccountIDByChar(live_name) != GetAccountID()) {
+		if (database.GetAccountIDByChar(live_name) != GetAccountID()) {
 			eqs->Close();
 			return;
-		} else {
-			LogInfo("Telling client to continue session");
 		}
+
+		LogInfo("Zoning with live_name [{}] account_id [{}]", live_name, GetAccountID());
+	}
+
+	if (RuleB(World, EnableAutoLogin)) {
+		live_name = AccountRepository::GetAutoLoginCharacterNameByAccountID(database, GetAccountID());
+		LogInfo("Attempting to auto login with live_name [{}] account_id [{}]", live_name, GetAccountID());
 	}
 
 	auto outapp = new EQApplicationPacket(OP_EnterWorld, live_name.length() + 1);
