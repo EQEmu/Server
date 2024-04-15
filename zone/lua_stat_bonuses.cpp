@@ -16,6 +16,11 @@ int64 Lua_StatBonuses::GetHP() const {
 	return self->HP;
 }
 
+int64 Lua_StatBonuses::GetFlatMaxHPChange() const {
+	Lua_Safe_Call_Int();
+	return self->FlatMaxHPChange;
+}
+
 int64 Lua_StatBonuses::GetHPRegen() const {
 	Lua_Safe_Call_Int();
 	return self->HPRegen;
@@ -23,7 +28,7 @@ int64 Lua_StatBonuses::GetHPRegen() const {
 
 int64 Lua_StatBonuses::GetMaxHP() const {
 	Lua_Safe_Call_Int();
-	return self->MaxHP;
+	return self->PercentMaxHPChange;
 }
 
 int64 Lua_StatBonuses::GetManaRegen() const {
@@ -608,7 +613,7 @@ int32 Lua_StatBonuses::GetHealRate() const {
 
 int32 Lua_StatBonuses::GetMaxHPChange() const {
 	Lua_Safe_Call_Int();
-	return self->MaxHPChange;
+	return self->PercentMaxHPChange;
 }
 
 int32 Lua_StatBonuses::GetHealAmt() const {
@@ -1381,6 +1386,7 @@ luabind::scope lua_register_stat_bonuses() {
 	.def("FeignedCastOnChance", &Lua_StatBonuses::GetFeignedCastOnChance)
 	.def("FinishingBlow", &Lua_StatBonuses::GetFinishingBlow)
 	.def("FinishingBlowLvl", &Lua_StatBonuses::GetFinishingBlowLvl)
+	.def("FlatMaxHPChange", &Lua_StatBonuses::GetFlatMaxHPChange)
 	.def("FlurryChance", &Lua_StatBonuses::GetFlurryChance)
 	.def("FocusEffects", &Lua_StatBonuses::GetFocusEffects)
 	.def("FocusEffectsWorn", &Lua_StatBonuses::GetFocusEffectsWorn)

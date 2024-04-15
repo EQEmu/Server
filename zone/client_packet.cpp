@@ -16780,7 +16780,7 @@ void Client::RecordStats()
 	r.level                    = GetLevel();
 	r.class_                   = GetBaseClass();
 	r.race                     = GetBaseRace();
-	r.hp                       = GetMaxHP() - GetSpellBonuses().HP;
+	r.hp                       = GetMaxHP() - GetSpellBonuses().FlatMaxHPChange;
 	r.mana                     = GetMaxMana() - GetSpellBonuses().Mana;
 	r.endurance                = GetMaxEndurance() - GetSpellBonuses().Endurance;
 	r.ac                       = GetDisplayAC() - GetSpellBonuses().AC;

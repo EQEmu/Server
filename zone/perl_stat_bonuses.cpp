@@ -16,6 +16,11 @@ int64 Perl_StatBonuses_GetHP(StatBonuses* self)
 	return self->HP;
 }
 
+int64 Perl_StatBonuses_GetFlatMaxHPChange(StatBonuses* self)
+{
+	return self->FlatMaxHPChange;
+}
+
 int64 Perl_StatBonuses_GetHPRegen(StatBonuses* self)
 {
 	return self->HPRegen;
@@ -23,7 +28,7 @@ int64 Perl_StatBonuses_GetHPRegen(StatBonuses* self)
 
 int64 Perl_StatBonuses_GetMaxHP(StatBonuses* self)
 {
-	return self->MaxHP;
+	return self->PercentMaxHPChange;
 }
 
 int64 Perl_StatBonuses_GetManaRegen(StatBonuses* self)
@@ -608,7 +613,7 @@ int32 Perl_StatBonuses_GetHealRate(StatBonuses* self)
 
 int32 Perl_StatBonuses_GetMaxHPChange(StatBonuses* self)
 {
-	return self->MaxHPChange;
+	return self->PercentMaxHPChange;
 }
 
 int32 Perl_StatBonuses_GetHealAmt(StatBonuses* self)
@@ -1532,6 +1537,7 @@ void perl_register_stat_bonuses()
 	package.add("GetStringedModifier", &Perl_StatBonuses_GetStringedModifier);
 	package.add("GetStunBashChance", &Perl_StatBonuses_GetStunBashChance);
 	package.add("GetStunResist", &Perl_StatBonuses_GetStunResist);
+	package.add("GetFlatMaxHPChange", &Perl_StatBonuses_GetFlatMaxHPChange);
 	package.add("GetTradeSkillMastery", &Perl_StatBonuses_GetTradeSkillMastery);
 	package.add("GetTriggerMeleeThreshold", &Perl_StatBonuses_GetTriggerMeleeThreshold);
 	package.add("GetTriggerOnValueAmount", &Perl_StatBonuses_GetTriggerOnValueAmount);
