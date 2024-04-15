@@ -5482,7 +5482,7 @@ ADD COLUMN `auto_login_charname` varchar(64) CHARACTER SET latin1 COLLATE latin1
 )"
 	},
 	ManifestEntry{
-		.version = 9269,
+		.version = 9270,
 		.description = "2024_04_31_content_flagging_lootdrop_entries.sql",
 		.check = "SHOW COLUMNS FROM `lootdrop_entries` LIKE 'content_flags'",
 		.condition = "empty",
