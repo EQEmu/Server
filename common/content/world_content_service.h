@@ -178,6 +178,8 @@ public:
 	};
 
 	FindZoneResult FindZone(uint32 zone_id, uint32 instance_id);
+	bool IsInPublicStaticInstance(uint32 instance_id);
+
 private:
 	int current_expansion{};
 	std::vector<ContentFlagsRepository::ContentFlags> content_flags;

@@ -357,3 +357,13 @@ WorldContentService::FindZoneResult WorldContentService::FindZone(uint32 zone_id
 	return WorldContentService::FindZoneResult{.zone_id = 0};
 }
 
+bool WorldContentService::IsInPublicStaticInstance(uint32 instance_id)
+{
+	for (auto &i: m_zone_instances) {
+		if (i.id == instance_id) {
+			return true;
+		}
+	}
+
+	return false;
+}

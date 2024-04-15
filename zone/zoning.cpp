@@ -773,7 +773,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		);
 
 		// If we are zoning to the same zone, we need to use the current instance ID if it is not specified.
-		if (zoneID == zone->GetZoneID() && instance_id == 0) {
+		if (content_service.IsInPublicStaticInstance(instance_id) && zoneID == zone->GetZoneID() && instance_id == 0) {
 			instance_id = zone->GetInstanceID();
 		}
 	}
