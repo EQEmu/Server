@@ -17,7 +17,7 @@ public:
 	SkillCaps *SetContentDatabase(Database *db);
 private:
 	Database                                    *m_content_database{};
-	std::map<std::string, SkillCapsRepository::SkillCaps> m_skill_caps = {};
+	std::map<uint64, SkillCapsRepository::SkillCaps> m_skill_caps = {};
 };
 
 extern SkillCaps skill_caps;

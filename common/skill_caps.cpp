@@ -13,7 +13,8 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 		return SkillCapsRepository::NewEntity();
 	}
 
-	auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, level, skill_id));
+	uint64_t key = class_id * 1000000 + level * 1000 + static_cast<uint32>(skill_id);
+	auto pos = m_skill_caps.find(key);
 	if (pos != m_skill_caps.end()) {
 		return pos->second;
 	}
@@ -40,7 +41,8 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 
 	for (const auto &e: m_skill_caps) {
 		for (uint8 current_level = 1; current_level <= max_level; current_level++) {
-			auto pos = m_skill_caps.find(fmt::format("{}-{}-{}", class_id, current_level, skill_id));
+			uint64_t key = class_id * 1000000 + level * 1000 + static_cast<uint32>(skill_id);
+			auto pos = m_skill_caps.find(key);
 			if (pos != m_skill_caps.end()) {
 				return current_level;
 			}
@@ -65,7 +67,8 @@ void SkillCaps::LoadSkillCaps()
 			continue;
 		}
 
-		m_skill_caps[fmt::format("{}-{}-{}", e.class_id, e.level, e.skill_id)] = e;
+		uint64_t key = e.class_id * 1000000 + e.level * 1000 + e.skill_id;
+		m_skill_caps[key] = e;
 	}
 
 	LogInfo(
