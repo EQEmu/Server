@@ -10915,15 +10915,18 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {		
 		if (!CharacterID()) {
+			LinkDead();
 			return;
 		}
 
 		if (app->size < sizeof(MultiMoveItem_Struct)) {
+			LinkDead();
 			return; // Not enough data to be a valid packet
 		}
 
 		const MultiMoveItem_Struct* multi_move = reinterpret_cast<const MultiMoveItem_Struct*>(app->pBuffer);
 		if (app->size != sizeof(MultiMoveItem_Struct) + sizeof(MultiMoveItemSub_Struct) * multi_move->count) {
+			LinkDead();
 			return; // Packet size does not match expected size
 		}
 			
@@ -10956,6 +10959,7 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 		
 	} else {
 		LinkDead(); // This packet should not be sent by an older client
+		return;
 	}
 }
 
