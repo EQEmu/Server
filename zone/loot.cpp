@@ -145,7 +145,7 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 				"-- NPC [{}] Lootdrop [{}] Item [{}] ({}_ Chance [{}] Multiplier [{}]",
 				GetCleanName(),
 				lootdrop_id,
-				database.GetItem(e.item_id)->Name,
+				database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown",
 				e.item_id,
 				e.chance,
 				e.multiplier
@@ -164,7 +164,7 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 					GetCleanName(),
 					lootdrop_id,
 					e.item_id,
-					database.GetItem(e.item_id)->Name
+					database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
 				);
 				continue;
 			}
@@ -247,7 +247,7 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 						GetCleanName(),
 						lootdrop_id,
 						e.item_id,
-						database.GetItem(e.item_id)->Name
+						database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
 					);
 					continue;
 				}

@@ -5492,7 +5492,8 @@ ALTER TABLE `lootdrop_entries` ADD `min_expansion` tinyint(4) NOT NULL DEFAULT -
 ALTER TABLE `lootdrop_entries` ADD `max_expansion` tinyint(4) NOT NULL DEFAULT -1;
 ALTER TABLE `lootdrop_entries` ADD `content_flags` varchar(100) NULL;
 ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
-)"
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
