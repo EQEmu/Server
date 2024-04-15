@@ -3403,7 +3403,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 			 * if they are in range, make sure we are not green...
 			 * then jump in if they are our friend
 			 */
-			if (mob->GetLevel() >= 50 || mob->AlwaysAggro() || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY) {
+			if (mob->GetLevel() >= 50 || mob->AlwaysAggro() || attacker->GetLevelCon(mob->GetLevel()) != ConsiderColor::Gray) {
 				if (mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction()) {
 					const auto f = zone->GetNPCFaction(mob->CastToNPC()->GetNPCFactionID());
 					if (f) {
