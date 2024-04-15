@@ -4677,9 +4677,9 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 	else {
 		//else, it is a buff tic...
 		// So we can see our dot dmg like live shows it.
-		if (IsValidSpell(spell_id) && damage > 0 && attacker && attacker != this && !attacker->IsCorpse()) {
+		if (IsValidSpell(spell_id) && damage > 0 && attacker && attacker != this) {
 			//might filter on (attack_skill>200 && attack_skill<250), but I dont think we need it
-			if (attacker->IsClient()) {
+			if (!attacker->IsCorpse() && attacker->IsClient()) {
 				attacker->FilteredMessageString(attacker, Chat::DotDamage,
 					FilterDOT, YOUR_HIT_DOT, GetCleanName(), itoa(damage),
 					spells[spell_id].name);
