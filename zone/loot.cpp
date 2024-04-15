@@ -22,7 +22,7 @@ void NPC::AddLootTable(uint32 loottable_id, bool is_global)
 	if (!npctype_id) {
 		return;
 	}
-	
+
 	if (!is_global) {
 		m_loot_copper   = 0;
 		m_loot_silver   = 0;
@@ -145,11 +145,30 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 				"-- NPC [{}] Lootdrop [{}] Item [{}] ({}_ Chance [{}] Multiplier [{}]",
 				GetCleanName(),
 				lootdrop_id,
-				database.GetItem(e.item_id)->Name,
+				database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown",
 				e.item_id,
 				e.chance,
 				e.multiplier
 			);
+
+			if (!content_service.DoesPassContentFiltering(
+				ContentFlags{
+					.min_expansion = e.min_expansion,
+					.max_expansion = e.max_expansion,
+					.content_flags = e.content_flags,
+					.content_flags_disabled = e.content_flags_disabled
+				}
+			)) {
+				LogLoot(
+					"-- NPC [{}] Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
+					GetCleanName(),
+					lootdrop_id,
+					e.item_id,
+					database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
+				);
+				continue;
+			}
+
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
 					const EQ::ItemData *database_item = database.GetItem(e.item_id);
@@ -215,6 +234,24 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 		if (drops < min_drop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float           roll = (float) zone->random.Real(0.0, roll_t);
 			for (const auto &e: le) {
+				if (!content_service.DoesPassContentFiltering(
+					ContentFlags{
+						.min_expansion = e.min_expansion,
+						.max_expansion = e.max_expansion,
+						.content_flags = e.content_flags,
+						.content_flags_disabled = e.content_flags_disabled
+					}
+				)) {
+					LogLoot(
+						"-- NPC [{}] Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
+						GetCleanName(),
+						lootdrop_id,
+						e.item_id,
+						database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
+					);
+					continue;
+				}
+
 				const auto *db_item = database.GetItem(e.item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
