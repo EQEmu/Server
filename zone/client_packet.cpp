@@ -10913,7 +10913,50 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
-	Kick("Unimplemented move multiple items"); // TODO: lets not desync though
+	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {		
+		if (!CharacterID()) {
+			return;
+		}
+
+		if (app->size < sizeof(MultiMoveItem_Struct)) {
+			return; // Not enough data to be a valid packet
+		}
+
+		const MultiMoveItem_Struct* multi_move = reinterpret_cast<const MultiMoveItem_Struct*>(app->pBuffer);
+		if (app->size != sizeof(MultiMoveItem_Struct) + sizeof(MultiMoveItemSub_Struct) * multi_move->count) {
+			return; // Packet size does not match expected size
+		}
+			
+		const auto from_bag = multi_move->moves[0].from_slot.Slot;
+		const auto to_bag   = multi_move->moves[0].to_slot.Slot;		
+
+		// This is checked by the client, but can't hurt to check here too.
+		if (m_inv.GetItem(from_bag)->IsClassBag() && m_inv.GetItem(to_bag)->IsClassBag()) {
+			for (int i = 0; i < multi_move->count; i++) {
+				MoveItem_Struct* move_struct = new MoveItem_Struct();
+				move_struct->from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				move_struct->to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+
+				if (move_struct->from_slot == EQ::invslot::slotCursor || move_struct->to_slot == EQ::invslot::slotCursor) {
+					LogInventory("ERROR: Cursor slot cannot be moved in this way");
+					continue;
+				}
+
+				move_struct->number_in_stack = multi_move->moves[i].number_in_stack;
+
+				if (m_inv.GetItem(move_struct->from_slot) || m_inv.GetItem(move_struct->to_slot)) {
+					SwapItem(move_struct);
+				}
+
+				safe_delete(move_struct);
+			}
+		} else {
+			LogDebug("ERROR: At least one of the items being swapped was not a bag.");
+		}	
+		
+	} else {
+		LinkDead(); // This packet should not be sent by an older client
+	}
 }
 
 void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
