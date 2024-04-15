@@ -1,3 +1,9 @@
+## [22.49.1] 4/15/2024
+
+### Zoning
+
+* Fix zone routing edge case ([#4255](https://github.com/EQEmu/Server/pull/4255)) @Akkadius 2024-04-15
+
 ## [22.49.0] 4/15/2024
 
 ### Code
