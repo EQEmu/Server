@@ -278,8 +278,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
-	heroforge_wearchange_timer.Disable();
-
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
 	memset(&m_epp, 0, sizeof(m_epp));
@@ -343,7 +341,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	XTargetAutoAddHaters = true;
 	m_autohatermgr.SetOwner(this, nullptr, nullptr);
 	m_activeautohatermgr = &m_autohatermgr;
-	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
@@ -2705,7 +2702,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
 			against_who->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) ||
 			against_who->IsClient() ||
-			GetLevelCon(against_who->GetLevel()) == CON_GRAY
+			GetLevelCon(against_who->GetLevel()) == ConsiderColor::Gray
 		) {
 			return false;
 		}

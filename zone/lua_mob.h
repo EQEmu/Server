@@ -590,6 +590,8 @@ public:
 	bool IsIntelligenceCasterClass();
 	bool IsPureMeleeClass();
 	bool IsWisdomCasterClass();
+	std::string GetConsiderColor(Lua_Mob other);
+	std::string GetConsiderColor(uint8 other_level);
 };
 
 #endif

@@ -22,6 +22,7 @@ public:
 		int32_t     id;
 		std::string name;
 		std::string charname;
+		std::string auto_login_charname;
 		uint32_t    sharedplat;
 		std::string password;
 		int32_t     status;
@@ -56,6 +57,7 @@ public:
 			"id",
 			"name",
 			"charname",
+			"auto_login_charname",
 			"sharedplat",
 			"password",
 			"status",
@@ -86,6 +88,7 @@ public:
 			"id",
 			"name",
 			"charname",
+			"auto_login_charname",
 			"sharedplat",
 			"password",
 			"status",
@@ -147,30 +150,31 @@ public:
 	{
 		Account e{};
 
-		e.id             = 0;
-		e.name           = "";
-		e.charname       = "";
-		e.sharedplat     = 0;
-		e.password       = "";
-		e.status         = 0;
-		e.ls_id          = "eqemu";
-		e.lsaccount_id   = 0;
-		e.gmspeed        = 0;
-		e.invulnerable   = 0;
-		e.flymode        = 0;
-		e.ignore_tells   = 0;
-		e.revoked        = 0;
-		e.karma          = 0;
-		e.minilogin_ip   = "";
-		e.hideme         = 0;
-		e.rulesflag      = 0;
-		e.suspendeduntil = 0;
-		e.time_creation  = 0;
-		e.ban_reason     = "";
-		e.suspend_reason = "";
-		e.crc_eqgame     = "";
-		e.crc_skillcaps  = "";
-		e.crc_basedata   = "";
+		e.id                  = 0;
+		e.name                = "";
+		e.charname            = "";
+		e.auto_login_charname = "";
+		e.sharedplat          = 0;
+		e.password            = "";
+		e.status              = 0;
+		e.ls_id               = "eqemu";
+		e.lsaccount_id        = 0;
+		e.gmspeed             = 0;
+		e.invulnerable        = 0;
+		e.flymode             = 0;
+		e.ignore_tells        = 0;
+		e.revoked             = 0;
+		e.karma               = 0;
+		e.minilogin_ip        = "";
+		e.hideme              = 0;
+		e.rulesflag           = 0;
+		e.suspendeduntil      = 0;
+		e.time_creation       = 0;
+		e.ban_reason          = "";
+		e.suspend_reason      = "";
+		e.crc_eqgame          = "";
+		e.crc_skillcaps       = "";
+		e.crc_basedata        = "";
 
 		return e;
 	}
@@ -207,30 +211,31 @@ public:
 		if (results.RowCount() == 1) {
 			Account e{};
 
-			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name           = row[1] ? row[1] : "";
-			e.charname       = row[2] ? row[2] : "";
-			e.sharedplat     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.password       = row[4] ? row[4] : "";
-			e.status         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
-			e.ls_id          = row[6] ? row[6] : "eqemu";
-			e.lsaccount_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.gmspeed        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.invulnerable   = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
-			e.flymode        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
-			e.ignore_tells   = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
-			e.revoked        = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.karma          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.minilogin_ip   = row[14] ? row[14] : "";
-			e.hideme         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
-			e.rulesflag      = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.suspendeduntil = strtoll(row[17] ? row[17] : "-1", nullptr, 10);
-			e.time_creation  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.ban_reason     = row[19] ? row[19] : "";
-			e.suspend_reason = row[20] ? row[20] : "";
-			e.crc_eqgame     = row[21] ? row[21] : "";
-			e.crc_skillcaps  = row[22] ? row[22] : "";
-			e.crc_basedata   = row[23] ? row[23] : "";
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name                = row[1] ? row[1] : "";
+			e.charname            = row[2] ? row[2] : "";
+			e.auto_login_charname = row[3] ? row[3] : "";
+			e.sharedplat          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.password            = row[5] ? row[5] : "";
+			e.status              = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.ls_id               = row[7] ? row[7] : "eqemu";
+			e.lsaccount_id        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.gmspeed             = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.invulnerable        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.flymode             = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
+			e.ignore_tells        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.revoked             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.karma               = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.minilogin_ip        = row[15] ? row[15] : "";
+			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.ban_reason          = row[20] ? row[20] : "";
+			e.suspend_reason      = row[21] ? row[21] : "";
+			e.crc_eqgame          = row[22] ? row[22] : "";
+			e.crc_skillcaps       = row[23] ? row[23] : "";
+			e.crc_basedata        = row[24] ? row[24] : "";
 
 			return e;
 		}
@@ -266,27 +271,28 @@ public:
 
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.charname) + "'");
-		v.push_back(columns[3] + " = " + std::to_string(e.sharedplat));
-		v.push_back(columns[4] + " = '" + Strings::Escape(e.password) + "'");
-		v.push_back(columns[5] + " = " + std::to_string(e.status));
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.ls_id) + "'");
-		v.push_back(columns[7] + " = " + std::to_string(e.lsaccount_id));
-		v.push_back(columns[8] + " = " + std::to_string(e.gmspeed));
-		v.push_back(columns[9] + " = " + std::to_string(e.invulnerable));
-		v.push_back(columns[10] + " = " + std::to_string(e.flymode));
-		v.push_back(columns[11] + " = " + std::to_string(e.ignore_tells));
-		v.push_back(columns[12] + " = " + std::to_string(e.revoked));
-		v.push_back(columns[13] + " = " + std::to_string(e.karma));
-		v.push_back(columns[14] + " = '" + Strings::Escape(e.minilogin_ip) + "'");
-		v.push_back(columns[15] + " = " + std::to_string(e.hideme));
-		v.push_back(columns[16] + " = " + std::to_string(e.rulesflag));
-		v.push_back(columns[17] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
-		v.push_back(columns[18] + " = " + std::to_string(e.time_creation));
-		v.push_back(columns[19] + " = '" + Strings::Escape(e.ban_reason) + "'");
-		v.push_back(columns[20] + " = '" + Strings::Escape(e.suspend_reason) + "'");
-		v.push_back(columns[21] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
-		v.push_back(columns[22] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
-		v.push_back(columns[23] + " = '" + Strings::Escape(e.crc_basedata) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.auto_login_charname) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.sharedplat));
+		v.push_back(columns[5] + " = '" + Strings::Escape(e.password) + "'");
+		v.push_back(columns[6] + " = " + std::to_string(e.status));
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.ls_id) + "'");
+		v.push_back(columns[8] + " = " + std::to_string(e.lsaccount_id));
+		v.push_back(columns[9] + " = " + std::to_string(e.gmspeed));
+		v.push_back(columns[10] + " = " + std::to_string(e.invulnerable));
+		v.push_back(columns[11] + " = " + std::to_string(e.flymode));
+		v.push_back(columns[12] + " = " + std::to_string(e.ignore_tells));
+		v.push_back(columns[13] + " = " + std::to_string(e.revoked));
+		v.push_back(columns[14] + " = " + std::to_string(e.karma));
+		v.push_back(columns[15] + " = '" + Strings::Escape(e.minilogin_ip) + "'");
+		v.push_back(columns[16] + " = " + std::to_string(e.hideme));
+		v.push_back(columns[17] + " = " + std::to_string(e.rulesflag));
+		v.push_back(columns[18] + " = FROM_UNIXTIME(" + (e.suspendeduntil > 0 ? std::to_string(e.suspendeduntil) : "null") + ")");
+		v.push_back(columns[19] + " = " + std::to_string(e.time_creation));
+		v.push_back(columns[20] + " = '" + Strings::Escape(e.ban_reason) + "'");
+		v.push_back(columns[21] + " = '" + Strings::Escape(e.suspend_reason) + "'");
+		v.push_back(columns[22] + " = '" + Strings::Escape(e.crc_eqgame) + "'");
+		v.push_back(columns[23] + " = '" + Strings::Escape(e.crc_skillcaps) + "'");
+		v.push_back(columns[24] + " = '" + Strings::Escape(e.crc_basedata) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -311,6 +317,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back("'" + Strings::Escape(e.auto_login_charname) + "'");
 		v.push_back(std::to_string(e.sharedplat));
 		v.push_back("'" + Strings::Escape(e.password) + "'");
 		v.push_back(std::to_string(e.status));
@@ -364,6 +371,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back("'" + Strings::Escape(e.auto_login_charname) + "'");
 			v.push_back(std::to_string(e.sharedplat));
 			v.push_back("'" + Strings::Escape(e.password) + "'");
 			v.push_back(std::to_string(e.status));
@@ -418,30 +426,31 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Account e{};
 
-			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name           = row[1] ? row[1] : "";
-			e.charname       = row[2] ? row[2] : "";
-			e.sharedplat     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.password       = row[4] ? row[4] : "";
-			e.status         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
-			e.ls_id          = row[6] ? row[6] : "eqemu";
-			e.lsaccount_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.gmspeed        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.invulnerable   = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
-			e.flymode        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
-			e.ignore_tells   = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
-			e.revoked        = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.karma          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.minilogin_ip   = row[14] ? row[14] : "";
-			e.hideme         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
-			e.rulesflag      = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.suspendeduntil = strtoll(row[17] ? row[17] : "-1", nullptr, 10);
-			e.time_creation  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.ban_reason     = row[19] ? row[19] : "";
-			e.suspend_reason = row[20] ? row[20] : "";
-			e.crc_eqgame     = row[21] ? row[21] : "";
-			e.crc_skillcaps  = row[22] ? row[22] : "";
-			e.crc_basedata   = row[23] ? row[23] : "";
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name                = row[1] ? row[1] : "";
+			e.charname            = row[2] ? row[2] : "";
+			e.auto_login_charname = row[3] ? row[3] : "";
+			e.sharedplat          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.password            = row[5] ? row[5] : "";
+			e.status              = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.ls_id               = row[7] ? row[7] : "eqemu";
+			e.lsaccount_id        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.gmspeed             = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.invulnerable        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.flymode             = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
+			e.ignore_tells        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.revoked             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.karma               = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.minilogin_ip        = row[15] ? row[15] : "";
+			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.ban_reason          = row[20] ? row[20] : "";
+			e.suspend_reason      = row[21] ? row[21] : "";
+			e.crc_eqgame          = row[22] ? row[22] : "";
+			e.crc_skillcaps       = row[23] ? row[23] : "";
+			e.crc_basedata        = row[24] ? row[24] : "";
 
 			all_entries.push_back(e);
 		}
@@ -466,30 +475,31 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Account e{};
 
-			e.id             = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
-			e.name           = row[1] ? row[1] : "";
-			e.charname       = row[2] ? row[2] : "";
-			e.sharedplat     = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.password       = row[4] ? row[4] : "";
-			e.status         = row[5] ? static_cast<int32_t>(atoi(row[5])) : 0;
-			e.ls_id          = row[6] ? row[6] : "eqemu";
-			e.lsaccount_id   = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.gmspeed        = row[8] ? static_cast<uint8_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.invulnerable   = row[9] ? static_cast<int8_t>(atoi(row[9])) : 0;
-			e.flymode        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
-			e.ignore_tells   = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
-			e.revoked        = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.karma          = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.minilogin_ip   = row[14] ? row[14] : "";
-			e.hideme         = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
-			e.rulesflag      = row[16] ? static_cast<uint8_t>(strtoul(row[16], nullptr, 10)) : 0;
-			e.suspendeduntil = strtoll(row[17] ? row[17] : "-1", nullptr, 10);
-			e.time_creation  = row[18] ? static_cast<uint32_t>(strtoul(row[18], nullptr, 10)) : 0;
-			e.ban_reason     = row[19] ? row[19] : "";
-			e.suspend_reason = row[20] ? row[20] : "";
-			e.crc_eqgame     = row[21] ? row[21] : "";
-			e.crc_skillcaps  = row[22] ? row[22] : "";
-			e.crc_basedata   = row[23] ? row[23] : "";
+			e.id                  = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.name                = row[1] ? row[1] : "";
+			e.charname            = row[2] ? row[2] : "";
+			e.auto_login_charname = row[3] ? row[3] : "";
+			e.sharedplat          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.password            = row[5] ? row[5] : "";
+			e.status              = row[6] ? static_cast<int32_t>(atoi(row[6])) : 0;
+			e.ls_id               = row[7] ? row[7] : "eqemu";
+			e.lsaccount_id        = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.gmspeed             = row[9] ? static_cast<uint8_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.invulnerable        = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.flymode             = row[11] ? static_cast<int8_t>(atoi(row[11])) : 0;
+			e.ignore_tells        = row[12] ? static_cast<int8_t>(atoi(row[12])) : 0;
+			e.revoked             = row[13] ? static_cast<uint8_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.karma               = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.minilogin_ip        = row[15] ? row[15] : "";
+			e.hideme              = row[16] ? static_cast<int8_t>(atoi(row[16])) : 0;
+			e.rulesflag           = row[17] ? static_cast<uint8_t>(strtoul(row[17], nullptr, 10)) : 0;
+			e.suspendeduntil      = strtoll(row[18] ? row[18] : "-1", nullptr, 10);
+			e.time_creation       = row[19] ? static_cast<uint32_t>(strtoul(row[19], nullptr, 10)) : 0;
+			e.ban_reason          = row[20] ? row[20] : "";
+			e.suspend_reason      = row[21] ? row[21] : "";
+			e.crc_eqgame          = row[22] ? row[22] : "";
+			e.crc_skillcaps       = row[23] ? row[23] : "";
+			e.crc_basedata        = row[24] ? row[24] : "";
 
 			all_entries.push_back(e);
 		}
@@ -567,6 +577,7 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back("'" + Strings::Escape(e.name) + "'");
 		v.push_back("'" + Strings::Escape(e.charname) + "'");
+		v.push_back("'" + Strings::Escape(e.auto_login_charname) + "'");
 		v.push_back(std::to_string(e.sharedplat));
 		v.push_back("'" + Strings::Escape(e.password) + "'");
 		v.push_back(std::to_string(e.status));
@@ -613,6 +624,7 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back("'" + Strings::Escape(e.name) + "'");
 			v.push_back("'" + Strings::Escape(e.charname) + "'");
+			v.push_back("'" + Strings::Escape(e.auto_login_charname) + "'");
 			v.push_back(std::to_string(e.sharedplat));
 			v.push_back("'" + Strings::Escape(e.password) + "'");
 			v.push_back(std::to_string(e.status));

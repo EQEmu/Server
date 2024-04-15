@@ -793,7 +793,6 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	return true;
 }
 
-// does the caster + group
 void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 	uint32 z;
 	float range, distance;
@@ -806,8 +805,6 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 
 	float range2 = range*range;
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
-
-//	caster->SpellOnTarget(spell_id, caster);
 
 	for(z=0; z < MAX_GROUP_MEMBERS; z++)
 	{

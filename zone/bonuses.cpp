@@ -940,7 +940,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_IncreaseRange:
 			break;
 		case SE_MaxHPChange:
-			newbon->MaxHP += base_value;
+			newbon->PercentMaxHPChange += base_value;
 			break;
 		case SE_Packrat:
 			newbon->Packrat += base_value;
@@ -999,7 +999,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->BuffSlotIncrease += base_value;
 			break;
 		case SE_TotalHP:
-			newbon->HP += base_value;
+			newbon->FlatMaxHPChange += base_value;
 			break;
 		case SE_StunResist:
 			newbon->StunResist += base_value;
@@ -2241,7 +2241,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_TotalHP:
 			{
-				new_bonus->HP += effect_value;
+				new_bonus->FlatMaxHPChange += effect_value;
 				break;
 			}
 
@@ -2923,7 +2923,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_MaxHPChange:
-				new_bonus->MaxHPChange += effect_value;
+				new_bonus->PercentMaxHPChange += effect_value;
 				break;
 
 			case SE_EndurancePool:
@@ -4519,9 +4519,9 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_TotalHP:
-					if (negate_spellbonus) { spellbonuses.HP = effect_value; }
-					if (negate_aabonus) { aabonuses.HP = effect_value; }
-					if (negate_itembonus) { itembonuses.HP = effect_value; }
+					if (negate_spellbonus) { spellbonuses.FlatMaxHPChange = effect_value; }
+					if (negate_aabonus) { aabonuses.FlatMaxHPChange = effect_value; }
+					if (negate_itembonus) { itembonuses.FlatMaxHPChange = effect_value; }
 					break;
 
 				case SE_ManaRegen_v2:
@@ -5003,10 +5003,9 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 				}
 
 				case SE_MaxHPChange:
-					if (negate_spellbonus) { spellbonuses.MaxHPChange = effect_value; }
-					if (negate_aabonus) { aabonuses.MaxHPChange = effect_value; }
-					if (negate_aabonus) { aabonuses.MaxHP = effect_value; }
-					if (negate_itembonus) { itembonuses.MaxHPChange = effect_value; }
+					if (negate_spellbonus) { spellbonuses.PercentMaxHPChange = effect_value; }
+					if (negate_aabonus) { aabonuses.PercentMaxHPChange = effect_value; }
+					if (negate_itembonus) { itembonuses.PercentMaxHPChange = effect_value; }
 					break;
 
 				case SE_EndurancePool:

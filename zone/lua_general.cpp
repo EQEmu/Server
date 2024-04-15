@@ -5488,6 +5488,14 @@ uint16 lua_get_race_bitmask(uint16 race_id) {
 	return GetPlayerRaceBit(race_id);
 }
 
+std::string lua_get_auto_login_character_name_by_account_id(uint32 account_id) {
+	return quest_manager.GetAutoLoginCharacterNameByAccountID(account_id);
+}
+
+bool lua_set_auto_login_character_name_by_account_id(uint32 account_id, std::string character_name) {
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(account_id, character_name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6287,6 +6295,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_class_bitmask", &lua_get_class_bitmask),
 		luabind::def("get_deity_bitmask", &lua_get_deity_bitmask),
 		luabind::def("get_race_bitmask", &lua_get_race_bitmask),
+		luabind::def("get_auto_login_character_name_by_account_id", &lua_get_auto_login_character_name_by_account_id),
+		luabind::def("set_auto_login_character_name_by_account_id", &lua_set_auto_login_character_name_by_account_id),
 		/*
 			Cross Zone
 		*/

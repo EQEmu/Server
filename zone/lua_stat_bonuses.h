@@ -27,6 +27,7 @@ public:
 
 	int32 GetAC() const;
 	int64 GetHP() const;
+	int64 GetFlatMaxHPChange() const;
 	int64 GetHPRegen() const;
 	int64 GetMaxHP() const;
 	int64 GetManaRegen() const;

@@ -461,10 +461,10 @@ int64 Merc::CalcMaxHP() {
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
 	//the aa description
-	nd += aabonuses.MaxHP + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;  //Natural Durability, Physical Enhancement, Planar Durability
+	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;  //Natural Durability, Physical Enhancement, Planar Durability
 
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
-	max_hp += spellbonuses.HP + aabonuses.HP;
+	max_hp += spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange;
 
 	max_hp += GroupLeadershipAAHealthEnhancement();
 
@@ -3794,37 +3794,37 @@ bool Merc::CheckConfidence() {
 		switch(CurrentCon) {
 
 
-					case CON_GRAY: {
+					case ConsiderColor::Gray: {
 						ConRating = 0;
 						break;
 					}
 
-					case CON_GREEN: {
+					case ConsiderColor::Green: {
 						ConRating = 0.1;
 						break;
 									}
 
-					case CON_LIGHTBLUE: {
+					case ConsiderColor::LightBlue: {
 						ConRating = 0.2;
 						break;
 										}
 
-					case CON_BLUE: {
+					case ConsiderColor::DarkBlue: {
 						ConRating = 0.6;
 						break;
 								   }
 
-					case CON_WHITE: {
+					case ConsiderColor::White: {
 						ConRating = 1.0;
 						break;
 									}
 
-					case CON_YELLOW: {
+					case ConsiderColor::Yellow: {
 						ConRating = 1.2;
 						break;
 									 }
 
-					case CON_RED: {
+					case ConsiderColor::Red: {
 						ConRating = 1.5;
 						break;
 								  }

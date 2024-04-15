@@ -5,6 +5,7 @@
 #include "set/alternate_currency.cpp"
 #include "set/animation.cpp"
 #include "set/anon.cpp"
+#include "set/auto_login.cpp"
 #include "set/bind_point.cpp"
 #include "set/checksum.cpp"
 #include "set/class_permanent.cpp"
@@ -71,6 +72,7 @@ void command_set(Client *c, const Seperator *sep)
 		Cmd{.cmd = "alternate_currency", .u = "alternate_currency [Currency ID] [Amount]", .fn = SetAlternateCurrency, .a = {"#setaltcurrency"}},
 		Cmd{.cmd = "animation", .u = "animation [Animation ID]", .fn = SetAnimation, .a = {"#setanim"}},
 		Cmd{.cmd = "anon", .u = "anon [Character ID] [Anonymous Flag] or #set anon [Anonymous Flag]", .fn = SetAnon, .a = {"#setanon"}},
+		Cmd{.cmd = "auto_login", .u = "auto_login [0|1]", .fn = SetAutoLogin, .a = {"#setautologin"}},
 		Cmd{.cmd = "bind_point", .u = "bind_point", .fn = SetBindPoint, .a = {"#setbind"}},
 		Cmd{.cmd = "checksum", .u = "checksum", .fn = SetChecksum, .a = {"#updatechecksum"}},
 		Cmd{.cmd = "class_permanent", .u = "class_permanent [Class ID]", .fn = SetClassPermanent, .a = {"#permaclass"}},

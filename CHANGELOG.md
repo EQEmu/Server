@@ -1,3 +1,102 @@
+## [22.49.1] 4/15/2024
+
+### Zoning
+
+* Fix zone routing edge case ([#4255](https://github.com/EQEmu/Server/pull/4255)) @Akkadius 2024-04-15
+
+## [22.49.0] 4/15/2024
+
+### Code
+
+* Avoid unnecessary copies in database functions ([#4220](https://github.com/EQEmu/Server/pull/4220)) @joligario 2024-03-29
+* Reference type in `GetRaidLeaderName` ([#4218](https://github.com/EQEmu/Server/pull/4218)) @joligario 2024-03-28
+* Remove unnecessary reference types ([#4212](https://github.com/EQEmu/Server/pull/4212)) @joligario 2024-03-28
+
+### Crash
+
+* Check mob pointer before trying to remove it ([#4230](https://github.com/EQEmu/Server/pull/4230)) @Akkadius 2024-04-01
+
+### Feature
+
+* Add Character Auto Login ([#4216](https://github.com/EQEmu/Server/pull/4216)) @Kinglykrab 2024-04-15
+* Add LuaMod functions for CommonDamage and HealDamage ([#4227](https://github.com/EQEmu/Server/pull/4227)) @xackery 2024-03-31
+* Add RegisterBug LuaMod ([#4209](https://github.com/EQEmu/Server/pull/4209)) @xackery 2024-03-30
+* Additive Spell Focus from Worn slot with Limit Checks ([#4208](https://github.com/EQEmu/Server/pull/4208)) @KayenEQ 2024-03-30
+* Fix ignore_default on lua mod damage ([#4228](https://github.com/EQEmu/Server/pull/4228)) @xackery 2024-04-15
+
+### Fixes
+
+* Client not updating HP bar when an HP Buff with a Heal is applied. ([#4237](https://github.com/EQEmu/Server/pull/4237)) @KayenEQ 2024-04-02
+* Fix Account Flags Loading ([#4243](https://github.com/EQEmu/Server/pull/4243)) @Kinglykrab 2024-04-15
+* Fix Auto Login Issue ([#4213](https://github.com/EQEmu/Server/pull/4213)) @Kinglykrab 2024-03-28
+* Fix Bot Creation Issue ([#4235](https://github.com/EQEmu/Server/pull/4235)) @Kinglykrab 2024-04-02
+* Fix Bot/Character ID Overlap in Groups ([#4093](https://github.com/EQEmu/Server/pull/4093)) @Kinglykrab 2024-03-23
+* Fix Group Leadership ([#4214](https://github.com/EQEmu/Server/pull/4214)) @Kinglykrab 2024-03-28
+* Fix Issue With Bot Raid Aggro ([#4222](https://github.com/EQEmu/Server/pull/4222)) @Kinglykrab 2024-03-31
+* Fix Lua Crash with Spell Blocked Event ([#4236](https://github.com/EQEmu/Server/pull/4236)) @Kinglykrab 2024-04-01
+* Fix Luabind Double Class Register ([#4219](https://github.com/EQEmu/Server/pull/4219)) @Kinglykrab 2024-03-29
+* Fix crash in SendEnterWorld ([#4204](https://github.com/EQEmu/Server/pull/4204)) @Akkadius 2024-03-24
+* Fix event_consider any_cast error ([#4210](https://github.com/EQEmu/Server/pull/4210)) @xackery 2024-03-27
+* Fix fishing chances ([#4203](https://github.com/EQEmu/Server/pull/4203)) @joligario 2024-03-24
+* Fix manifest for skill caps schema type ([#4231](https://github.com/EQEmu/Server/pull/4231)) @Akkadius 2024-04-02
+* Hero forge armor bug on login and show helm toggle. ([#4246](https://github.com/EQEmu/Server/pull/4246)) @noudess 2024-04-15
+* Radiant/Ebon Crystals should only extract to 1000 ([#4195](https://github.com/EQEmu/Server/pull/4195)) @fryguy503 2024-03-23
+* SPA214 SE_MaxHPChange calculation errors corrected. ([#4238](https://github.com/EQEmu/Server/pull/4238)) @KayenEQ 2024-04-02
+* Shared Tasks - charid is now character_id ([#4233](https://github.com/EQEmu/Server/pull/4233)) @fryguy503 2024-04-01
+* Using %T in channel messages on fresh corpse yields mob, not corpse name. ([#4168](https://github.com/EQEmu/Server/pull/4168)) @noudess 2024-04-05
+
+### Hot Fix
+
+* Fix Group::AddToGroup ([#4201](https://github.com/EQEmu/Server/pull/4201)) @Kinglykrab 2024-03-23
+* Hot Fix for Group::AddToGroup Hot Fix ([#4202](https://github.com/EQEmu/Server/pull/4202)) @Kinglykrab 2024-03-23
+
+### Loot
+
+* Add content filtering to lootdrop_entries ([#4229](https://github.com/EQEmu/Server/pull/4229)) @Akkadius 2024-04-15
+
+### Lua
+
+* Add Zone and Language Constants ([#4211](https://github.com/EQEmu/Server/pull/4211)) @fryguy503 2024-03-28
+
+### Messages
+
+* Fix bug where DoT messages stop coming out when mob dies. ([#4249](https://github.com/EQEmu/Server/pull/4249)) @noudess 2024-04-15
+
+### Performance
+
+* Change skill_cap from vector to map ([#4252](https://github.com/EQEmu/Server/pull/4252)) @xackery 2024-04-15
+
+### Pets
+
+* Fix errors in sync with client of sit/stand ([#4245](https://github.com/EQEmu/Server/pull/4245)) @noudess 2024-04-15
+
+### Quest API
+
+* Add Archetype Methods to Perl/Lua ([#4181](https://github.com/EQEmu/Server/pull/4181)) @Kinglykrab 2024-03-23
+* Add Class/Deity/Race Methods to Perl/Lua ([#4215](https://github.com/EQEmu/Server/pull/4215)) @Kinglykrab 2024-03-28
+* Add GetConsiderColor() to Perl/Lua ([#4253](https://github.com/EQEmu/Server/pull/4253)) @Kinglykrab 2024-04-15
+* Add Spell Blocked Event to Perl/Lua ([#4217](https://github.com/EQEmu/Server/pull/4217)) @Kinglykrab 2024-04-01
+
+### Quests
+
+* Avoid Player and Bot quests in unloaded zone ([#4232](https://github.com/EQEmu/Server/pull/4232)) @hgtw 2024-04-01
+
+### Repositories
+
+* Convert database.cpp to Repositories ([#4054](https://github.com/EQEmu/Server/pull/4054)) @Kinglykrab 2024-03-24
+
+### Skill Caps
+
+* Further improvements ([#4205](https://github.com/EQEmu/Server/pull/4205)) @Akkadius 2024-03-24
+* Remove from shared memory and simplify ([#4069](https://github.com/EQEmu/Server/pull/4069)) @Kinglykrab 2024-03-23
+
+### Spells
+
+* Implemented SPA 463 SE_SHIELD_TARGET ([#4224](https://github.com/EQEmu/Server/pull/4224)) @KayenEQ 2024-03-30
+* Normal Group Spells (non-raid) landed twice on caster ([#4240](https://github.com/EQEmu/Server/pull/4240)) @noudess 2024-04-15
+* SPA148 Stacking Fix ([#4206](https://github.com/EQEmu/Server/pull/4206)) @KayenEQ 2024-03-27
+* SPA69 TotalHP can be used in Worn Slot, Fixes/Updates to Max HP related variables. ([#4244](https://github.com/EQEmu/Server/pull/4244)) @KayenEQ 2024-04-15
+
 ## [22.48.0] 3/23/2024
 
 ### Bots

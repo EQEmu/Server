@@ -1149,6 +1149,9 @@ public:
 	const bool GetGMInvul() const { return gminvul; }
 	bool CanUseReport;
 
+	const std::string GetAutoLoginCharacterName();
+	bool SetAutoLoginCharacterName(const std::string& character_name);
+
 	//This is used to later set the buff duration of the spell, in slot to duration.
 	//Doesn't appear to work directly after the client recieves an action packet.
 	void SendBuffDurationPacket(Buffs_Struct &buff, int slot);
@@ -1972,8 +1975,6 @@ private:
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
 	Timer pick_lock_timer;
-
-	Timer heroforge_wearchange_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
