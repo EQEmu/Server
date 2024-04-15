@@ -192,7 +192,7 @@ public:
 		v.push_back(columns[0] + " = " + std::to_string(e.gid));
 		v.push_back(columns[1] + " = '" + Strings::Escape(e.leadername) + "'");
 		v.push_back(columns[2] + " = '" + Strings::Escape(e.marknpc) + "'");
-		v.push_back(columns[3] + " = '" + Strings::Escape(e.leadershipaa) + "'");
+		v.push_back(columns[3] + " = '" + e.leadershipaa + "'");
 		v.push_back(columns[4] + " = '" + Strings::Escape(e.maintank) + "'");
 		v.push_back(columns[5] + " = '" + Strings::Escape(e.assist) + "'");
 		v.push_back(columns[6] + " = '" + Strings::Escape(e.puller) + "'");
@@ -222,7 +222,7 @@ public:
 		v.push_back(std::to_string(e.gid));
 		v.push_back("'" + Strings::Escape(e.leadername) + "'");
 		v.push_back("'" + Strings::Escape(e.marknpc) + "'");
-		v.push_back("'" + Strings::Escape(e.leadershipaa) + "'");
+		v.push_back("'" + e.leadershipaa + "'");
 		v.push_back("'" + Strings::Escape(e.maintank) + "'");
 		v.push_back("'" + Strings::Escape(e.assist) + "'");
 		v.push_back("'" + Strings::Escape(e.puller) + "'");
@@ -260,7 +260,7 @@ public:
 			v.push_back(std::to_string(e.gid));
 			v.push_back("'" + Strings::Escape(e.leadername) + "'");
 			v.push_back("'" + Strings::Escape(e.marknpc) + "'");
-			v.push_back("'" + Strings::Escape(e.leadershipaa) + "'");
+			v.push_back("'" + e.leadershipaa + "'");
 			v.push_back("'" + Strings::Escape(e.maintank) + "'");
 			v.push_back("'" + Strings::Escape(e.assist) + "'");
 			v.push_back("'" + Strings::Escape(e.puller) + "'");
@@ -418,7 +418,7 @@ public:
 		v.push_back(std::to_string(e.gid));
 		v.push_back("'" + Strings::Escape(e.leadername) + "'");
 		v.push_back("'" + Strings::Escape(e.marknpc) + "'");
-		v.push_back("'" + Strings::Escape(e.leadershipaa) + "'");
+		v.push_back("'" + e.leadershipaa + "'");
 		v.push_back("'" + Strings::Escape(e.maintank) + "'");
 		v.push_back("'" + Strings::Escape(e.assist) + "'");
 		v.push_back("'" + Strings::Escape(e.puller) + "'");
@@ -449,7 +449,7 @@ public:
 			v.push_back(std::to_string(e.gid));
 			v.push_back("'" + Strings::Escape(e.leadername) + "'");
 			v.push_back("'" + Strings::Escape(e.marknpc) + "'");
-			v.push_back("'" + Strings::Escape(e.leadershipaa) + "'");
+			v.push_back("'" + e.leadershipaa + "'");
 			v.push_back("'" + Strings::Escape(e.maintank) + "'");
 			v.push_back("'" + Strings::Escape(e.assist) + "'");
 			v.push_back("'" + Strings::Escape(e.puller) + "'");
