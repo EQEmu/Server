@@ -25,15 +25,6 @@ namespace Archetype {
 	constexpr uint8 Melee  = 3;
 };
 
-#define CON_GREEN		2
-#define CON_LIGHTBLUE	18
-#define CON_BLUE		4
-#define CON_WHITE		10
-#define CON_WHITE_TITANIUM		20
-#define CON_YELLOW		15
-#define CON_RED			13
-#define CON_GRAY		6
-
 #define DMG_BLOCKED		-1
 #define DMG_PARRIED		-2
 #define DMG_RIPOSTED		-3
@@ -287,7 +278,6 @@ struct StatBonuses {
 	int32	AC;
 	int64	HP;
 	int64	HPRegen;
-	int64	MaxHP; //same bonus as MaxHPChange when applied to spells and item bonuses
 	int64	ManaRegen;
 	int64	EnduranceRegen;
 	int64	Mana;
@@ -413,7 +403,7 @@ struct StatBonuses {
 	int32	MeleeLifetap;						//i
 	int32	Vampirism;							//i
 	int32	HealRate;							// Spell effect that influences effectiveness of heals
-	int32	MaxHPChange;						// percent change in hit points (aabonuses use variable MaxHP)
+	int64	PercentMaxHPChange;					// base: Max HP change by percentage value from spell effect/item worn effect/aa
 	int16	SkillDmgTaken[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
 	int32	HealAmt;							// Item Effect
 	int32	SpellDmg;							// Item Effect
@@ -513,6 +503,7 @@ struct StatBonuses {
 	uint8	invisibility_verse_undead;			// IVU level
 	uint8	invisibility_verse_animal;			// IVA level
 	int32	ShieldTargetSpa[2];                 // [0] base = % mitigation amount, [1] buff slot
+	int64	FlatMaxHPChange;					// base: Max HP change by a flat amount value from spell effect/item worn effect/aa
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.

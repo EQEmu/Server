@@ -38,6 +38,8 @@ void LuaMod::Init()
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
 	m_has_calc_spell_effect_value_formula = parser_->HasFunction("CalcSpellEffectValue_formula", package_name_);
 	m_has_register_bug = parser_->HasFunction("RegisterBug", package_name_);
+	m_has_common_damage = parser_->HasFunction("CommonDamage", package_name_);
+	m_has_heal_damage = parser_->HasFunction("HealDamage", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {

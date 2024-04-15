@@ -6235,9 +6235,9 @@ int64 Bot::CalcMaxHP() {
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
 	bot_hp += itembonuses.heroic_max_hp;
-	nd += aabonuses.MaxHP + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
+	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
-	bot_hp += (spellbonuses.HP + aabonuses.HP);
+	bot_hp += (spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange);
 	bot_hp += GroupLeadershipAAHealthEnhancement();
 	max_hp = bot_hp;
 	if (current_hp > max_hp)
@@ -7366,23 +7366,23 @@ void EntityList::ShowSpawnWindow(Client* client, int Distance, bool NamedOnly) {
 
 					LastCon = CurrentCon;
 					switch(CurrentCon) {
-						case CON_GREEN: {
+						case ConsiderColor::Green: {
 							WindowText += "<c \"#00FF00\">";
 							break;
 						}
-						case CON_LIGHTBLUE: {
+						case ConsiderColor::LightBlue: {
 							WindowText += "<c \"#8080FF\">";
 							break;
 						}
-						case CON_BLUE: {
+						case ConsiderColor::DarkBlue: {
 							WindowText += "<c \"#2020FF\">";
 							break;
 						}
-						case CON_YELLOW: {
+						case ConsiderColor::Yellow: {
 							WindowText += "<c \"#FFFF00\">";
 							break;
 						}
-						case CON_RED: {
+						case ConsiderColor::Red: {
 							WindowText += "<c \"#FF0000\">";
 							break;
 						}
