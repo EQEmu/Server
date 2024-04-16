@@ -1125,27 +1125,13 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 	return e.gid ? e.leadername : std::string();
 }
 
-void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
+void Database::SetGroupLeaderName(uint32 group_id, const std::string &name)
 {
-	auto e = GroupLeadersRepository::FindOne(*this, group_id);
+    GroupLeadersRepository::GroupLeaders e {};
+    e.gid        = group_id;
+    e.leadername = name;
 
-	e.leadername = name;
-
-	if (e.gid) {
-		GroupLeadersRepository::UpdateOne(*this, e);
-		return;
-	}
-
-	e.gid            = group_id;
-	e.marknpc        = std::string();
-	e.leadershipaa   = std::string();
-	e.maintank       = std::string();
-	e.assist         = std::string();
-	e.puller         = std::string();
-	e.mentoree       = std::string();
-	e.mentor_percent = 0;
-
-	GroupLeadersRepository::InsertOne(*this, e);
+    GroupLeadersRepository::ReplaceOne(*this, e);
 }
 
 std::string Database::GetGroupLeaderName(uint32 group_id)
