@@ -10936,23 +10936,25 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 		// This is checked by the client, but can't hurt to check here too.
 		if (m_inv.GetItem(from_bag)->IsClassBag() && m_inv.GetItem(to_bag)->IsClassBag()) {
 			for (int i = 0; i < multi_move->count; i++) {
-				MoveItem_Struct* move_struct = new MoveItem_Struct();
-				move_struct->from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
-				move_struct->to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				MoveItem_Struct* mi = new MoveItem_Struct();
+				mi->from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				mi->to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				mi->number_in_stack = 0; // This is always 0 in MoveItem_Struct unless we are combining stacks, which this never tries to do.
 
-				if (move_struct->from_slot == EQ::invslot::slotCursor || move_struct->to_slot == EQ::invslot::slotCursor) {
-					LogInventory("ERROR: Cursor slot cannot be moved in this way");
-					continue;
+				LogInventory("Swapping slot [{}] to slot [{}]",mi->from_slot,mi->to_slot);
+
+				if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
+					SwapItemResync(mi);
+
+					bool error = false;
+					InterrogateInventory(this, false, true, false, error, false);
+					if (error)
+						InterrogateInventory(this, true, false, true, error);
 				}
 
-				move_struct->number_in_stack = multi_move->moves[i].number_in_stack;
-
-				if (m_inv.GetItem(move_struct->from_slot) || m_inv.GetItem(move_struct->to_slot)) {
-					SwapItem(move_struct);
-				}
-
-				safe_delete(move_struct);
+				safe_delete(mi);
 			}
+			return;
 		} else {
 			LogDebug("ERROR: At least one of the items being swapped was not a bag.");
 		}	
