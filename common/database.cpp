@@ -1127,9 +1127,23 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 
 void Database::SetGroupLeaderName(uint32 group_id, const std::string &name)
 {
-    GroupLeadersRepository::GroupLeaders e {};
-    e.gid        = group_id;
+    auto e       = GroupLeadersRepository::FindOne(*this, group_id);
+
     e.leadername = name;
+
+    if (e.gid) {
+        GroupLeadersRepository::UpdateOne(*this, e);
+        return;
+    }
+
+    e.gid            = group_id;
+    e.marknpc        = std::string();
+    e.leadershipaa   = std::string();
+    e.maintank       = std::string();
+    e.assist         = std::string();
+    e.puller         = std::string();
+    e.mentoree       = std::string();
+    e.mentor_percent = 0;
 
     GroupLeadersRepository::ReplaceOne(*this, e);
 }
@@ -1164,7 +1178,7 @@ char* Database::GetGroupLeadershipInfo(
 	GroupLeadershipAA_Struct* GLAA
 )
 {
-	const auto& e = GroupLeadersRepository::FindOne(*this, group_id);
+	const auto& e = GroupLeadersRepository::GetGroupLeaderFix(*this, group_id);
 
 	if (!e.gid) {
 		if (leaderbuf) {
@@ -1226,9 +1240,7 @@ char* Database::GetGroupLeadershipInfo(
 		*mentor_percent = e.mentor_percent;
 	}
 
-	if (GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
-		memcpy(GLAA, e.leadershipaa.c_str(), sizeof(GroupLeadershipAA_Struct));
-	}
+	memcpy(GLAA, &e.leadershipaa, sizeof(GroupLeadershipAA_Struct));
 
 	return leaderbuf;
 }
