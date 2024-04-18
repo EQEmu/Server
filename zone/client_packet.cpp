@@ -368,6 +368,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
+	ConnectedOpcodes[OP_Checksum] = &Client::Handle_OP_Checksum;
 
 	// Use or Ignore sense heading based on rule.
 	bool train = RuleB(Skills, TrainSenseHeading);
@@ -529,6 +530,10 @@ int Client::HandlePacket(const EQApplicationPacket *app)
 // Finish client connecting state
 void Client::CompleteConnect()
 {
+
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		m_pp.classes = Strings::ToInt(GetBucket("GestaltClasses"), GetPlayerClassBit(m_pp.class_));
+	}
 
 	UpdateWho();
 	client_state = CLIENT_CONNECTED;
@@ -973,6 +978,12 @@ void Client::CompleteConnect()
 	RecordStats();
 	AutoGrantAAPoints();
 
+	if (RuleB(Custom, ServerAuthStats)) {
+		SendEdgeStatBulkUpdate();
+		database.LoadCharacterDisciplines(character_id, &m_pp); /* Load Character Disciplines */
+		SendDisciplineUpdate();
+	}
+
 	// enforce some rules..
 	if (!CanEnterZone()) {
 		LogInfo("Kicking character [{}] from zone, not allowed here (missing requirements)", GetCleanName());
@@ -1323,7 +1334,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterInspectMessage(cid, &m_inspect_message); /* Load Character Inspect Message */
 	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
-	database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
+	
+	if (!RuleB(Custom, ServerAuthStats)) {
+		database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
+	}
+	
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAbilities(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(this); /* Load CharacterTribute */
@@ -3029,8 +3044,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 	bool IsPoison = (poison && poison->ItemType == EQ::item::ItemTypePoison);
 
-	if (IsPoison && GetClass() == Class::Rogue) {
-
+	if (IsPoison && (GetClassesBits() & GetPlayerClassBit(Class::Rogue))) {
 		// Live always checks for skillup, even when poison is too high
 		CheckIncreaseSkill(EQ::skills::SkillApplyPoison, nullptr, 10);
 
@@ -4323,12 +4337,18 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
-
+	
 	if (GetGM())
 	{
 		OnDisconnect(true);
 		return;
 	}
+
+	if (zone->GetZoneID() == Zones::BAZAAR) {
+		camp_timer.Start(5000, true);
+		return;
+	}
+
 	camp_timer.Start(29000, true);
 	return;
 }
@@ -4563,7 +4583,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	else if (slot == CastingSlot::Ability) {
 		uint16 spell_to_cast = 0;
 
-		if (castspell->spell_id == SPELL_LAY_ON_HANDS && GetClass() == Class::Paladin) {
+		if (castspell->spell_id == SPELL_LAY_ON_HANDS && (GetClassesBits() & GetPlayerClassBit(Class::Paladin))) {
 			if (!p_timers.Expired(&database, pTimerLayHands)) {
 				Message(Chat::Red, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
@@ -4571,9 +4591,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
-		}
-		else if ((castspell->spell_id == SPELL_HARM_TOUCH
-			|| castspell->spell_id == SPELL_HARM_TOUCH2) && GetClass() == Class::ShadowKnight) {
+		} else if ((castspell->spell_id == SPELL_HARM_TOUCH || castspell->spell_id == SPELL_HARM_TOUCH2) && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
 			if (!p_timers.Expired(&database, pTimerHarmTouch)) {
 				Message(Chat::Red, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
@@ -8977,7 +8995,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 			hidden = true;
 		tmHidden = Timer::GetCurrentTime();
 	}
-	if (GetClass() == Class::Rogue) {
+	if (GetClassesBits() & GetPlayerClassBit(Class::Rogue)) {
 		auto outapp = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
 		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
@@ -9526,7 +9544,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
 				Can not click while casting other items.
 			*/
-			if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < CastingSlot::MaxGems)
+			if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && !RuleB(Custom, MulticlassingEnabled))
 			{
 				is_casting_bard_song = true;
 			}
@@ -9692,10 +9710,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						if (!IsCastWhileInvisibleSpell(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
-						if (GetClass() == Class::Bard){
+						
+						
+						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
-						else {
+
+						else {						
 							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 						}
 					} else {
@@ -9763,10 +9784,12 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (i == 0) {
 						if (!IsCastWhileInvisibleSpell(augitem->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
+						}						
+						
+						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
+							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
-						if (GetClass() == Class::Bard) {
-							DoBardCastingFromItemClick(is_casting_bard_song, augitem->CastTime, augitem->Click.Effect, target_id, CastingSlot::Item, slot_id, augitem->RecastType, augitem->RecastDelay);
-						}
+
 						else {
 							CastSpell(augitem->Click.Effect, target_id, CastingSlot::Item, augitem->CastTime, 0, 0, slot_id);
 						}
@@ -9784,7 +9807,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 			}
 			else
 			{
-				if (ClientVersion() >= EQ::versions::ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), GetClass()))
+				if (ClientVersion() >= EQ::versions::ClientVersion::SoD && !inst->IsEquipable(GetBaseRace(), CastToClient()->GetClassesBits()))
 				{
 					if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink && item->ItemType != EQ::item::ItemTypeAlcohol)
 					{
@@ -10381,7 +10404,10 @@ void Client::Handle_OP_ManaChange(const EQApplicationPacket *app)
 	if (app->size == 0) {
 		// i think thats the sign to stop the songs
 		if (IsBardSong(casting_spell_id) || HasActiveSong()) {
-			InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
+			auto tt = spells[bardsong].target_type;
+			if (tt == ST_AECaster || tt == ST_Target || tt == ST_AETarget || !HasActiveSong()) {
+				InterruptSpell(SONG_ENDS, 0x121); //Live doesn't send song end message anymore (~Kayen 1/26/22)
+			}
 		}
 		else {
 			InterruptSpell(INTERRUPT_SPELL, 0x121);
@@ -10855,8 +10881,10 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
+	
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
-	if (spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
+	/*
+	if (spellend_timer.Enabled() && casting_spell_id && !(GetClassesBits() & GetPlayerClassBit(Class::Bard)));
 	{
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
@@ -10873,6 +10901,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 			return;
 		}
 	}
+	*/
 
 	// Illegal bagslot usage checks. Currently, user only receives a message if this check is triggered.
 	bool mi_hack = false;
@@ -10914,8 +10943,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	// This packet is only sent from the client if we ctrl click items in inventory
-	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
-		LogDebug("OP_MoveMultipleItems Triggered");
+	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {		
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -10996,7 +11024,6 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				}
-
 
 				// Probably need some error checking here, but I wasn't able to produce any error states on purpose.				
 				MoveInfo move;
@@ -11346,16 +11373,19 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (mypet->CastToNPC()->IsTaunting())
-			{
-				MessageString(Chat::PetResponse, PET_NO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(false);
+			bool taunt_status = mypet->CastToNPC()->IsTaunting();			
+			if (RuleB(Custom, TauntTogglesPetTanking)) {
+				if (!taunt_status) {
+					mypet->SetSpecialAbility(25, 0);
+					mypet->SetSpecialAbility(41, 1);
+				} else {					
+					mypet->SetSpecialAbility(25, 1);
+					mypet->SetSpecialAbility(41, 0);
+					entity_list.RemoveFromTargets(mypet);
+				}
 			}
-			else
-			{
-				MessageString(Chat::PetResponse, PET_DO_TAUNT);
-				mypet->CastToNPC()->SetTaunting(true);
-			}
+			mypet->CastToNPC()->SetTaunting(!taunt_status);
+			MessageString(Chat::PetResponse, !taunt_status ? PET_DO_TAUNT : PET_NO_TAUNT);			
 		}
 		break;
 	}
@@ -14768,7 +14798,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	sa_out->parameter = sneaking;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	if (GetClass() == Class::Rogue) {
+	if (GetClassesBits() & GetPlayerClassBit(Class::Rogue)) {
 		outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
 		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
@@ -16144,6 +16174,18 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 		entity_list.ZoneWho(this, whoall);
 	else
 		WhoAll(whoall);
+	return;
+}
+
+void Client::Handle_OP_Checksum(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SimpleChecksum_Struct*)){
+		LogDebug("Recieved invalid checksum packet");
+	}
+
+	SimpleChecksum_Struct* checksum = (SimpleChecksum_Struct*)app->pBuffer;
+
+	LogDebug("Got Checksum Struct: %d", checksum->checksum);
 	return;
 }
 
