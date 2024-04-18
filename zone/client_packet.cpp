@@ -10888,7 +10888,9 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
-	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {		
+	// This packet is only sent from the client if we ctrl click items in inventory
+	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
+		LogDebug("OP_MoveMultipleItems Triggered");
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -10905,32 +10907,84 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 			return; // Packet size does not match expected size
 		}
 			
-		const auto from_bag = multi_move->moves[0].from_slot.Slot;
-		const auto to_bag   = multi_move->moves[0].to_slot.Slot;		
+		const auto from_parent = multi_move->moves[0].from_slot.Slot;
+		const auto to_parent   = multi_move->moves[0].to_slot.Slot;
 
-		// This is checked by the client, but can't hurt to check here too.
-		if (m_inv.GetItem(from_bag)->IsClassBag() && m_inv.GetItem(to_bag)->IsClassBag()) {
-			for (int i = 0; i < multi_move->count; i++) {
-				MoveItem_Struct* move_struct = new MoveItem_Struct();
-				move_struct->from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
-				move_struct->to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+		// CTRL + left click drops an item into a bag without opening it.
+		// This can be a bag, in which case it tries to fill the target bag with the contents of the bag on the cursor
+		// CTRL + right click swaps the contents of two bags if a bag is on your cursor and you ctrl-right click on another bag.
 
-				if (move_struct->from_slot == EQ::invslot::slotCursor || move_struct->to_slot == EQ::invslot::slotCursor) {
-					LogInventory("ERROR: Cursor slot cannot be moved in this way");
-					continue;
-				}
-
-				move_struct->number_in_stack = multi_move->moves[i].number_in_stack;
-
-				if (m_inv.GetItem(move_struct->from_slot) || m_inv.GetItem(move_struct->to_slot)) {
-					SwapItem(move_struct);
-				}
-
-				safe_delete(move_struct);
+		// We need to check if this is a swap or just an addition (left click or right click)
+		// Check if any component of this transaction is coming from anywhere other than the cursor
+		int left_click = true;
+		for (int i = 0; i < multi_move->count; i++) {
+			if (multi_move->moves[i].from_slot.Slot != EQ::invslot::slotCursor) {
+				left_click = false;
 			}
-		} else {
-			LogDebug("ERROR: At least one of the items being swapped was not a bag.");
-		}	
+		}
+
+		// This is a left click which is purely additive. This should always be cursor object or cursor bag contents into general\bank\whatever bag
+		if (left_click) {
+			for (int i = 0; i < multi_move->count; i++) {
+				MoveItem_Struct* mi = new MoveItem_Struct();
+				mi->from_slot 	= multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);									
+				mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				
+				if (multi_move->moves[i].to_slot.Type == 1) { // Target is bank inventory
+					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
+				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
+					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
+				}				
+
+				// This sends '1' as the stack count for unstackable items, which our titanium-era SwapItem blows up
+				if (m_inv.GetItem(mi->from_slot)->IsStackable()) {
+					mi->number_in_stack = multi_move->moves[i].number_in_stack;
+				} else {
+					mi->number_in_stack = 0;
+				}
+
+				if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
+					bool error = false;
+					SwapItemResync(mi);					
+					InterrogateInventory(this, false, true, false, error, false);
+					if (error)
+						InterrogateInventory(this, true, false, true, error);
+				}
+			}
+		// This is the swap.
+		// Client behavior is just to move stacks without combining them
+		} else {			
+			struct MoveInfo {
+				EQ::ItemInstance* item;
+				uint16 to_slot;
+			};
+
+			std::vector<MoveInfo> items;
+    		items.reserve(multi_move->count);
+
+			for (int i = 0; i < multi_move->count; i++) {
+				auto from_slot = multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+
+				if (multi_move->moves[i].to_slot.Type == 1) { // Target is bank inventory
+					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
+				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
+					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
+				}
+
+				// Probably need some error checking here, but I wasn't able to produce any error states on purpose.				
+				MoveInfo move;
+				move.item = m_inv.PopItem(from_slot); // Don't delete the instance here
+				move.to_slot = to_slot;
+				if (move.item) {				
+					items.push_back(move);
+				}
+			}
+
+			for (const MoveInfo& move : items) {
+				PutItemInInventory(move.to_slot, *move.item); // This saves inventory too
+			}
+		}
 		
 	} else {
 		LinkDead(); // This packet should not be sent by an older client
