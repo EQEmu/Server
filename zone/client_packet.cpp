@@ -10943,7 +10943,8 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	// This packet is only sent from the client if we ctrl click items in inventory
-	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {		
+	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
+		
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -11016,9 +11017,15 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
     		items.reserve(multi_move->count);
 
 			for (int i = 0; i < multi_move->count; i++) {
-				auto from_slot = multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
-				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				// These are always bags, so we don't need to worry about raw items in slotCursor
+				auto from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				if (multi_move->moves[i].from_slot.Type == 1) { // Target is bank inventory
+					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
+				} else if (multi_move->moves[i].from_slot.Type == 2) { // Target is shared bank inventory
+					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
+				}
 
+				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
 				if (multi_move->moves[i].to_slot.Type == 1) { // Target is bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
