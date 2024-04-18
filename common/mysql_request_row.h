@@ -36,7 +36,12 @@ public:
 	bool operator!=(const MySQLRequestRow& rhs);
 	MySQLRequestRow operator*();
 	char* operator[](int index);
-
+	uint32 GetFieldCount() {
+		if (m_Result != nullptr) {
+			return mysql_num_fields(m_Result);
+		}
+		return 0;
+	};
 };
 
 
