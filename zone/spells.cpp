@@ -689,7 +689,19 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 
 	if (IsClient() && CastToClient()->GetGM()) {
 		bypass_casting_restrictions = true;
-		Message(Chat::White, "Your GM Flag allows you to bypass zone casting restrictions.");
+		Message(
+			Chat::White,
+			fmt::format(
+				"Your GM Flag allows you to bypass zone casting restrictions and cast {} in this zone.",
+				Saylink::Silent(
+					fmt::format(
+						"#castspell {}",
+						spell_id
+					),
+					GetSpellName(spell_id)
+				)
+			).c_str()
+		);
 	}
 
 	/*
@@ -716,7 +728,13 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 						Chat::White,
 						fmt::format(
 							"Your GM Flag allows you to bypass zone blocked spells and cast {} in this zone.",
-							Saylink::Silent("", GetSpellName(spell_id))
+							Saylink::Silent(
+								fmt::format(
+									"#castspell {}",
+									spell_id
+								),
+								GetSpellName(spell_id)
+							)
 						).c_str()
 					);
 					LogSpells("GM Cast Blocked Spell: [{}] (ID [{}])", GetSpellName(spell_id), spell_id);
@@ -4078,7 +4096,13 @@ bool Mob::SpellOnTarget(
 				Chat::White,
 				fmt::format(
 					"Your spell {} has failed to land on {} because {} are invulnerable.",
-					Saylink::Silent("", spells[spell_id].name),
+					Saylink::Silent(
+						fmt::format(
+							"#castspell {}",
+							spell_id
+						),
+						spells[spell_id].name
+					),
 					GetTargetDescription(spelltar),
 					spelltar == this ? "you" : "they"
 				).c_str()
