@@ -57,7 +57,7 @@ void FindTask(Client *c, const Seperator *sep)
 				(
 					can_assign_tasks ?
 					fmt::format(
-						" | {}{}",
+						" | {} | {}",
 						Saylink::Silent(
 							fmt::format(
 								"#task assign {}",
