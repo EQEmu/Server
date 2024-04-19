@@ -4302,8 +4302,15 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
-				(attacker->GetLevel() > 55 || attacker->IsNPC()) && GetClass() == Class::Warrior) {
-				can_stun = true;
+					attacker->GetClass() == Class::Warrior) {
+				int stun_level;
+				if (attacker->IsClient()) {
+					stun_level = RuleI(Combat, PCKickStunLevel);
+				}
+				else {
+					stun_level = RuleI(Combat, NPCKickStunLevel);
+				}
+				can_stun = (attacker->GetLevel() >= stun_level);
 			}
 
 			bool is_immune_to_frontal_stun = false;
