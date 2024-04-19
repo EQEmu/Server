@@ -2105,14 +2105,15 @@ void Group::SaveGroupLeaderAA()
 {
 	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
 	// This is done so that group members not in the same zone as the Leader still have access to this information.
-	auto queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
-	database.DoEscapeString(queryBuffer, (char *)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
 
-	std::string query = "UPDATE group_leaders SET leadershipaa = '";
-	query += queryBuffer;
-	query +=  StringFormat("' WHERE gid = %i LIMIT 1", GetID());
-	safe_delete_array(queryBuffer);
-    auto results = database.QueryDatabase(query);
+	std::string aa((char *)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+	database.Encode(aa);
+	std::string query = fmt::format(
+		"UPDATE group_leaders SET leadershipaa = '{}' WHERE gid = '{}' LIMIT 1;",
+		aa,
+		GetID()
+	);
+	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 		LogError("Unable to store LeadershipAA: [{}]\n", results.ErrorMessage().c_str());
 

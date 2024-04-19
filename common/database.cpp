@@ -1178,7 +1178,7 @@ char* Database::GetGroupLeadershipInfo(
 	GroupLeadershipAA_Struct* GLAA
 )
 {
-	const auto& e = GroupLeadersRepository::GetGroupLeaderFix(*this, group_id);
+	auto e = GroupLeadersRepository::FindOne(*this, group_id);
 
 	if (!e.gid) {
 		if (leaderbuf) {
@@ -1239,8 +1239,10 @@ char* Database::GetGroupLeadershipInfo(
 	if (mentor_percent) {
 		*mentor_percent = e.mentor_percent;
 	}
-
-	memcpy(GLAA, &e.leadershipaa, sizeof(GroupLeadershipAA_Struct));
+	if(GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
+		Decode(e.leadershipaa);
+		memcpy(GLAA, e.leadershipaa.data(), sizeof(GroupLeadershipAA_Struct));
+	}
 
 	return leaderbuf;
 }
@@ -2026,3 +2028,17 @@ void Database::SourceSqlFromUrl(const std::string& url)
 		LogError("URI parser error [{}]", iae.what());
 	}
 }
+
+void Database::Encode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) += char('0');
+	}
+};
+
+void Database::Decode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) -= char('0');
+	}
+};
