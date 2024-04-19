@@ -3363,6 +3363,12 @@ bool Lua_Client::SetAutoLoginCharacterName(std::string character_name)
 	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), character_name);
 }
 
+void Lua_Client::DescribeSpecialAbilities(Lua_NPC n)
+{
+	Lua_Safe_Call_Void();
+	n.DescribeSpecialAbilities(self);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3446,6 +3452,7 @@ luabind::scope lua_register_client() {
 	.def("CreateExpeditionFromTemplate", &Lua_Client::CreateExpeditionFromTemplate)
 	.def("CreateTaskDynamicZone", &Lua_Client::CreateTaskDynamicZone)
 	.def("DecreaseByID", (bool(Lua_Client::*)(uint32,int))&Lua_Client::DecreaseByID)
+	.def("DescribeSpecialAbilities", (void(Lua_Client::*)(Lua_NPC))&Lua_Client::DescribeSpecialAbilities)
 	.def("DeleteBucket", (void(Lua_Client::*)(std::string))&Lua_Client::DeleteBucket)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int))&Lua_Client::DeleteItemInInventory)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int,bool))&Lua_Client::DeleteItemInInventory)
