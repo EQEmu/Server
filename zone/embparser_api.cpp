@@ -5865,6 +5865,16 @@ bool Perl__SetAutoLoginCharacterNameByAccountID(uint32 account_id, std::string c
 	return quest_manager.SetAutoLoginCharacterNameByAccountID(account_id, character_name);
 }
 
+uint32 Perl__GetZoneIDByLongName(std::string zone_long_name)
+{
+	return zone_store.GetZoneIDByLongName(zone_long_name);
+}
+
+std::string Perl__GetZoneShortNameByLongName(std::string zone_long_name)
+{
+	return zone_store.GetZoneShortNameByLongName(zone_long_name);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -5951,6 +5961,7 @@ void perl_register_quest()
 	package.add("GetZoneInstanceType", (uint8(*)(uint32))&Perl__GetZoneInstanceType);
 	package.add("GetZoneInstanceType", (uint8(*)(uint32, int))&Perl__GetZoneInstanceType);
 	package.add("GetZoneID", &Perl__GetZoneID);
+	package.add("GetZoneIDByLongName", (uint32(*)(std::string))&Perl__GetZoneIDByLongName);
 	package.add("GetZoneExpansion", (int8(*)(uint32))&Perl__GetZoneExpansion);
 	package.add("GetZoneExpansion", (int8(*)(uint32, int))&Perl__GetZoneExpansion);
 	package.add("GetZoneExperienceMultiplier", (float(*)(uint32))&Perl__GetZoneExperienceMultiplier);
@@ -6030,6 +6041,8 @@ void perl_register_quest()
 	package.add("GetZoneSafeZ", (float(*)(uint32, int))&Perl__GetZoneSafeZ);
 	package.add("GetZoneSecondsBeforeIdle", (uint32(*)(uint32))&Perl__GetZoneSecondsBeforeIdle);
 	package.add("GetZoneSecondsBeforeIdle", (uint32(*)(uint32, int))&Perl__GetZoneSecondsBeforeIdle);
+	package.add("GetZoneShortName", (std::string(*)(uint32))&Perl__GetZoneShortName);
+	package.add("GetZoneShortNameByLongName", (std::string(*)(std::string))&Perl__GetZoneShortNameByLongName);
 	package.add("GetZoneShutdownDelay", (uint64(*)(uint32))&Perl__GetZoneShutdownDelay);
 	package.add("GetZoneShutdownDelay", (uint64(*)(uint32, int))&Perl__GetZoneShutdownDelay);
 	package.add("GetZoneSky", (uint8(*)(uint32))&Perl__GetZoneSky);
@@ -6046,7 +6059,6 @@ void perl_register_quest()
 	package.add("GetZoneSuspendBuffs", (uint8(*)(uint32, int))&Perl__GetZoneSuspendBuffs);
 	package.add("GetZoneZType", (uint8(*)(uint32))&Perl__GetZoneZType);
 	package.add("GetZoneZType", (uint8(*)(uint32, int))&Perl__GetZoneZType);
-	package.add("GetZoneShortName", &Perl__GetZoneShortName);
 	package.add("GetZoneTimeType", (uint8(*)(uint32))&Perl__GetZoneTimeType);
 	package.add("GetZoneTimeType", (uint8(*)(uint32, int))&Perl__GetZoneTimeType);
 	package.add("GetZoneTimeZone", (int(*)(uint32))&Perl__GetZoneTimeZone);

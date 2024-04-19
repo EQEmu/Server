@@ -5496,6 +5496,14 @@ bool lua_set_auto_login_character_name_by_account_id(uint32 account_id, std::str
 	return quest_manager.SetAutoLoginCharacterNameByAccountID(account_id, character_name);
 }
 
+uint32 lua_get_zone_id_by_long_name(std::string zone_long_name) {
+	return zone_store.GetZoneIDByLongName(zone_long_name);
+}
+
+std::string lua_get_zone_short_name_by_long_name(std::string zone_long_name) {
+	return zone_store.GetZoneShortNameByLongName(zone_long_name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6297,6 +6305,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_race_bitmask", &lua_get_race_bitmask),
 		luabind::def("get_auto_login_character_name_by_account_id", &lua_get_auto_login_character_name_by_account_id),
 		luabind::def("set_auto_login_character_name_by_account_id", &lua_set_auto_login_character_name_by_account_id),
+		luabind::def("get_zone_id_by_long_name", &lua_get_zone_id_by_long_name),
+		luabind::def("get_zone_short_name_by_long_name", &lua_get_zone_short_name_by_long_name),
 		/*
 			Cross Zone
 		*/
