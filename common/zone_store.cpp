@@ -185,7 +185,7 @@ uint32 ZoneStore::GetZoneIDByLongName(const std::string& zone_long_name)
 
 	LogInfo("Failed to get zone ID by zone_long_name [{}]", zone_long_name);
 
-	return {};
+	return 0;
 }
 
 /**
