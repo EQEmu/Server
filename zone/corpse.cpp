@@ -1157,10 +1157,10 @@ void Corpse::MakeLootRequestPackets(Client *c, const EQApplicationPacket *app)
 	if (c->GetGM()) {
 		if (c->Admin() >= AccountStatus::GMAdmin) {
 			m_loot_request_type = LootRequestType::GMAllowed;
-
-		}
-		else {
+			c->Message(Chat::White, "Your GM Status allows you to loot any items on this corpse.");
+		} else {
 			m_loot_request_type = LootRequestType::GMPeek;
+			c->Message(Chat::White, "Your GM Flag allows you to look at the items on this corpse.");
 		}
 	}
 	else {
@@ -1613,14 +1613,21 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		// safe to ACK now
 		c->QueuePacket(app);
 
-		if (
-			!IsPlayerCorpse() &&
-			RuleB(Character, EnableDiscoveredItems) &&
-			c &&
-			!c->GetGM() &&
-			!c->IsDiscovered(inst->GetItem()->ID)
-			) {
-			c->DiscoverItem(inst->GetItem()->ID);
+		if (!IsPlayerCorpse()) {
+			if (RuleB(Character, EnableDiscoveredItems) && c && !c->IsDiscovered(inst->GetItem()->ID)) {
+				if (!c->GetGM()) {
+					c->DiscoverItem(inst->GetItem()->ID);
+				} else {
+					const std::string& item_link = database.CreateItemLink(inst->GetItem()->ID);
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"Your GM Flag prevents {} from being added to discovered items.",
+							item_link
+						).c_str()
+					);
+				}
+			}
 		}
 
 		if (zone->adv_data) {
@@ -2285,10 +2292,14 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 
 	// Rez timer has expired, only GMs can rez at this point. (uses rezzable)
 	if (!IsRezzable()) {
-		if (caster && caster->IsClient() && !caster->CastToClient()->GetGM()) {
-			caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
-			caster->MessageString(Chat::White, CORPSE_TOO_OLD);
-			return;
+		if (caster && caster->IsClient()) {
+			if (!caster->CastToClient()->GetGM()) {
+				caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
+				caster->MessageString(Chat::White, CORPSE_TOO_OLD);
+				return;
+			} else {
+				caster->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse.");
+			}
 		}
 	}
 
@@ -2300,6 +2311,8 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 			if (c->GetGM()) {
 				m_rezzed_experience    = m_gm_rezzed_experience;
 				m_gm_rezzed_experience = 0;
+
+				c->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse and return experience.");
 			}
 		}
 	}

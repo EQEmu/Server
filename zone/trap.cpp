@@ -92,10 +92,14 @@ bool Trap::Process()
 {
 	if (chkarea_timer.Enabled() && chkarea_timer.Check() && !reset_timer.Enabled())
 	{
-		Mob* trigger = entity_list.GetTrapTrigger(this);
-		if (trigger && !(trigger->IsClient() && trigger->CastToClient()->GetGM()))
-		{
-			Trigger(trigger);
+		Mob* m = entity_list.GetTrapTrigger(this);
+		const bool is_gm_client = m->IsClient() && m->CastToClient()->GetGM();
+		if (m && !is_gm_client) {
+			Trigger(m);
+		}
+
+		if (is_gm_client) {
+			m->Message(Chat::White, "Your GM Flag prevents you from triggering a trap.");
 		}
 	}
 	else if (reset_timer.Enabled() && reset_timer.Check())
@@ -314,6 +318,10 @@ Mob* EntityList::GetTrapTrigger(Trap* trap)
 			{
 				Log(Logs::General, Logs::Traps, "%s is about to trigger trap %d of chance %d. diff: %0.2f maxdist: %0.2f zdiff: %0.2f maxzdiff: %0.2f", cur->GetName(), trap->trap_id, trap->chance, (diff.x*diff.x + diff.y*diff.y), maxdist, diff.z, trap->maxzdiff);
 				return cur;
+			}
+
+			if (cur->GetGM()) {
+				cur->Message(Chat::White, "Your GM Flag prevents you from triggering a trap.");
 			}
 		}
 		else

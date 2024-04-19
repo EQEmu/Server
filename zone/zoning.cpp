@@ -371,8 +371,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
-		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
-		Message(Chat::Yellow, "Bypassing Expansion zone checks because GM status is set");
+		LogInfo("[{}] Bypassing zone expansion checks because GM Flag is set", GetCleanName());
+		Message(Chat::White, "Your GM Flag allows you to bypass zone expansion checks.");
 	}
 
 	if (zoning_message == ZoningMessage::ZoneSuccess) {
@@ -1353,6 +1353,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 	//the zone
 
 	if (Admin() >= RuleI(GM, MinStatusToZoneAnywhere)) {
+		Message(Chat::White, "Your GM Status allows you to bypass zone restrictions.");
 		return true;
 	}
 
@@ -1366,23 +1367,31 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 	}
 
 	if (GetLevel() < z->min_level) {
-		LogInfo(
-			"Character [{}] does not meet minimum level requirement ([{}] < [{}])!",
-			GetCleanName(),
-			GetLevel(),
-			z->min_level
-		);
-		return false;
+		if (!GetGM()) {
+			LogInfo(
+				"Character [{}] does not meet minimum level requirement ([{}] < [{}])!",
+				GetCleanName(),
+				GetLevel(),
+				z->min_level
+			);
+			return false;
+		} else {
+			Message(Chat::White, "Your GM Flag allows you to bypass zone minimum level requirements.");
+		}
 	}
 
 	if (GetLevel() > z->max_level) {
-		LogInfo(
-			"Character [{}] does not meet maximum level requirement ([{}] > [{}])!",
-			GetCleanName(),
-			GetLevel(),
-			z->max_level
-		);
-		return false;
+		if (!GetGM()) {
+			LogInfo(
+				"Character [{}] does not meet maximum level requirement ([{}] > [{}])!",
+				GetCleanName(),
+				GetLevel(),
+				z->max_level
+			);
+			return false;
+		} else {
+			Message(Chat::White, "Your GM Flag allows you to bypass zone minimum level requirements.");
+		}
 	}
 
 	if (Admin() < z->min_status) {
@@ -1403,6 +1412,10 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 				z->flag_needed
 			);
 			return false;
+		}
+
+		if (GetGM()) {
+			Message(Chat::White, "Your GM Flag allows you to bypass zone flag requirements.");
 		}
 	}
 
