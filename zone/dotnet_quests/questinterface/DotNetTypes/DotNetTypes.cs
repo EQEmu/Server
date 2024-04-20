@@ -164,317 +164,319 @@ public static class EQEmuLogSysExtensions
     }
 }
 
-public interface INpcEvent
+public abstract class INpcEvent
 {
-    void Say(NpcEvent e) { }
-    void Trade(NpcEvent e) { }
-    void Death(NpcEvent e) { }
-    void Spawn(NpcEvent e) { }
-    void Attack(NpcEvent e) { }
-    void Combat(NpcEvent e) { }
-    void Aggro(NpcEvent e) { }
-    void Slay(NpcEvent e) { }
-    void NpcSlay(NpcEvent e) { }
-    void WaypointArrive(NpcEvent e) { }
-    void WaypointDepart(NpcEvent e) { }
-    void Timer(NpcEvent e) { }
-    void Signal(NpcEvent e) { }
-    void Hp(NpcEvent e) { }
-    void Enter(NpcEvent e) { }
-    void Exit(NpcEvent e) { }
-    void EnterZone(NpcEvent e) { }
-    void ClickDoor(NpcEvent e) { }
-    void Loot(NpcEvent e) { }
-    void Zone(NpcEvent e) { }
-    void LevelUp(NpcEvent e) { }
-    void KilledMerit(NpcEvent e) { }
-    void CastOn(NpcEvent e) { }
-    void TaskAccepted(NpcEvent e) { }
-    void TaskStageComplete(NpcEvent e) { }
-    void TaskUpdate(NpcEvent e) { }
-    void TaskComplete(NpcEvent e) { }
-    void TaskFail(NpcEvent e) { }
-    void AggroSay(NpcEvent e) { }
-    void PlayerPickup(NpcEvent e) { }
-    void PopupResponse(NpcEvent e) { }
-    void EnvironmentalDamage(NpcEvent e) { }
-    void ProximitySay(NpcEvent e) { }
-    void Cast(NpcEvent e) { }
-    void CastBegin(NpcEvent e) { }
-    void ScaleCalc(NpcEvent e) { }
-    void ItemEnterZone(NpcEvent e) { }
-    void TargetChange(NpcEvent e) { }
-    void HateList(NpcEvent e) { }
-    void SpellEffectClient(NpcEvent e) { }
-    void SpellEffectNpc(NpcEvent e) { }
-    void SpellEffectBuffTicClient(NpcEvent e) { }
-    void SpellEffectBuffTicNpc(NpcEvent e) { }
-    void SpellFade(NpcEvent e) { }
-    void SpellEffectTranslocateComplete(NpcEvent e) { }
-    void CombineSuccess(NpcEvent e) { }
-    void CombineFailure(NpcEvent e) { }
-    void ItemClick(NpcEvent e) { }
-    void ItemClickCast(NpcEvent e) { }
-    void GroupChange(NpcEvent e) { }
-    void ForageSuccess(NpcEvent e) { }
-    void ForageFailure(NpcEvent e) { }
-    void FishStart(NpcEvent e) { }
-    void FishSuccess(NpcEvent e) { }
-    void FishFailure(NpcEvent e) { }
-    void ClickObject(NpcEvent e) { }
-    void DiscoverItem(NpcEvent e) { }
-    void Disconnect(NpcEvent e) { }
-    void Connect(NpcEvent e) { }
-    void ItemTick(NpcEvent e) { }
-    void DuelWin(NpcEvent e) { }
-    void DuelLose(NpcEvent e) { }
-    void EncounterLoad(NpcEvent e) { }
-    void EncounterUnload(NpcEvent e) { }
-    void Command(NpcEvent e) { }
-    void DropItem(NpcEvent e) { }
-    void DestroyItem(NpcEvent e) { }
-    void FeignDeath(NpcEvent e) { }
-    void WeaponProc(NpcEvent e) { }
-    void EquipItem(NpcEvent e) { }
-    void UnequipItem(NpcEvent e) { }
-    void AugmentItem(NpcEvent e) { }
-    void UnaugmentItem(NpcEvent e) { }
-    void AugmentInsert(NpcEvent e) { }
-    void AugmentRemove(NpcEvent e) { }
-    void EnterArea(NpcEvent e) { }
-    void LeaveArea(NpcEvent e) { }
-    void Respawn(NpcEvent e) { }
-    void DeathComplete(NpcEvent e) { }
-    void UnhandledOpcode(NpcEvent e) { }
-    void Tick(NpcEvent e) { }
-    void SpawnZone(NpcEvent e) { }
-    void DeathZone(NpcEvent e) { }
-    void UseSkill(NpcEvent e) { }
-    void CombineValidate(NpcEvent e) { }
-    void BotCommand(NpcEvent e) { }
-    void Warp(NpcEvent e) { }
-    void TestBuff(NpcEvent e) { }
-    void Combine(NpcEvent e) { }
-    void Consider(NpcEvent e) { }
-    void ConsiderCorpse(NpcEvent e) { }
-    void LootZone(NpcEvent e) { }
-    void EquipItemClient(NpcEvent e) { }
-    void UnequipItemClient(NpcEvent e) { }
-    void SkillUp(NpcEvent e) { }
-    void LanguageSkillUp(NpcEvent e) { }
-    void AltCurrencyMerchantBuy(NpcEvent e) { }
-    void AltCurrencyMerchantSell(NpcEvent e) { }
-    void MerchantBuy(NpcEvent e) { }
-    void MerchantSell(NpcEvent e) { }
-    void Inspect(NpcEvent e) { }
-    void voidBeforeUpdate(NpcEvent e) { }
-    void AaBuy(NpcEvent e) { }
-    void AaGain(NpcEvent e) { }
-    void AaExpGain(NpcEvent e) { }
-    void ExpGain(NpcEvent e) { }
-    void Payload(NpcEvent e) { }
-    void LevelDown(NpcEvent e) { }
-    void GmCommand(NpcEvent e) { }
-    void Despawn(NpcEvent e) { }
-    void DespawnZone(NpcEvent e) { }
-    void BotCreate(NpcEvent e) { }
-    void AugmentInsertClient(NpcEvent e) { }
-    void AugmentRemoveClient(NpcEvent e) { }
-    void EquipItemBot(NpcEvent e) { }
-    void UnequipItemBot(NpcEvent e) { }
-    void DamageGiven(NpcEvent e) { }
-    void DamageTaken(NpcEvent e) { }
-    void ItemClickClient(NpcEvent e) { }
-    void ItemClickCastClient(NpcEvent e) { }
-    void DestroyItemClient(NpcEvent e) { }
-    void DropItemClient(NpcEvent e) { }
-    void MemorizeSpell(NpcEvent e) { }
-    void UnmemorizeSpell(NpcEvent e) { }
-    void ScribeSpell(NpcEvent e) { }
-    void UnscribeSpell(NpcEvent e) { }
-    void LootAdded(NpcEvent e) { }
-    void LdonPointsGain(NpcEvent e) { }
-    void LdonPointsLoss(NpcEvent e) { }
-    void AltCurrencyGain(NpcEvent e) { }
-    void AltCurrencyLoss(NpcEvent e) { }
-    void CrystalGain(NpcEvent e) { }
-    void CrystalLoss(NpcEvent e) { }
-    void TimerPause(NpcEvent e) { }
-    void TimerResume(NpcEvent e) { }
-    void TimerStart(NpcEvent e) { }
-    void TimerStop(NpcEvent e) { }
-    void EntityVariableDelete(NpcEvent e) { }
-    void EntityVariableSet(NpcEvent e) { }
-    void EntityVariableUpdate(NpcEvent e) { }
-    void SpellEffectBot(NpcEvent e) { }
-    void SpellEffectBuffTicBot(NpcEvent e) { }
+    public virtual void Say(NpcEvent e) {}
+    public virtual void Trade(NpcEvent e) {}
+    public virtual void Death(NpcEvent e) {}
+    public virtual void Spawn(NpcEvent e) {}
+    public virtual void Attack(NpcEvent e) {}
+    public virtual void Combat(NpcEvent e) {}
+    public virtual void Aggro(NpcEvent e) {}
+    public virtual void Slay(NpcEvent e) {}
+    public virtual void NpcSlay(NpcEvent e) {}
+    public virtual void WaypointArrive(NpcEvent e) {}
+    public virtual void WaypointDepart(NpcEvent e) {}
+    public virtual void Timer(NpcEvent e) {}
+    public virtual void Signal(NpcEvent e) {}
+    public virtual void Hp(NpcEvent e) {}
+    public virtual void Enter(NpcEvent e) {}
+    public virtual void Exit(NpcEvent e) {}
+    public virtual void EnterZone(NpcEvent e) {}
+    public virtual void ClickDoor(NpcEvent e) {}
+    public virtual void Loot(NpcEvent e) {}
+    public virtual void Zone(NpcEvent e) {}
+    public virtual void LevelUp(NpcEvent e) {}
+    public virtual void KilledMerit(NpcEvent e) {}
+    public virtual void CastOn(NpcEvent e) {}
+    public virtual void TaskAccepted(NpcEvent e) {}
+    public virtual void TaskStageComplete(NpcEvent e) {}
+    public virtual void TaskUpdate(NpcEvent e) {}
+    public virtual void TaskComplete(NpcEvent e) {}
+    public virtual void TaskFail(NpcEvent e) {}
+    public virtual void AggroSay(NpcEvent e) {}
+    public virtual void PlayerPickup(NpcEvent e) {}
+    public virtual void PopupResponse(NpcEvent e) {}
+    public virtual void EnvironmentalDamage(NpcEvent e) {}
+    public virtual void ProximitySay(NpcEvent e) {}
+    public virtual void Cast(NpcEvent e) {}
+    public virtual void CastBegin(NpcEvent e) {}
+    public virtual void ScaleCalc(NpcEvent e) {}
+    public virtual void ItemEnterZone(NpcEvent e) {}
+    public virtual void TargetChange(NpcEvent e) {}
+    public virtual void HateList(NpcEvent e) {}
+    public virtual void SpellEffectClient(NpcEvent e) {}
+    public virtual void SpellEffectNpc(NpcEvent e) {}
+    public virtual void SpellEffectBuffTicClient(NpcEvent e) {}
+    public virtual void SpellEffectBuffTicNpc(NpcEvent e) {}
+    public virtual void SpellFade(NpcEvent e) {}
+    public virtual void SpellEffectTranslocateComplete(NpcEvent e) {}
+    public virtual void CombineSuccess(NpcEvent e) {}
+    public virtual void CombineFailure(NpcEvent e) {}
+    public virtual void ItemClick(NpcEvent e) {}
+    public virtual void ItemClickCast(NpcEvent e) {}
+    public virtual void GroupChange(NpcEvent e) {}
+    public virtual void ForageSuccess(NpcEvent e) {}
+    public virtual void ForageFailure(NpcEvent e) {}
+    public virtual void FishStart(NpcEvent e) {}
+    public virtual void FishSuccess(NpcEvent e) {}
+    public virtual void FishFailure(NpcEvent e) {}
+    public virtual void ClickObject(NpcEvent e) {}
+    public virtual void DiscoverItem(NpcEvent e) {}
+    public virtual void Disconnect(NpcEvent e) {}
+    public virtual void Connect(NpcEvent e) {}
+    public virtual void ItemTick(NpcEvent e) {}
+    public virtual void DuelWin(NpcEvent e) {}
+    public virtual void DuelLose(NpcEvent e) {}
+    public virtual void EncounterLoad(NpcEvent e) {}
+    public virtual void EncounterUnload(NpcEvent e) {}
+    public virtual void Command(NpcEvent e) {}
+    public virtual void DropItem(NpcEvent e) {}
+    public virtual void DestroyItem(NpcEvent e) {}
+    public virtual void FeignDeath(NpcEvent e) {}
+    public virtual void WeaponProc(NpcEvent e) {}
+    public virtual void EquipItem(NpcEvent e) {}
+    public virtual void UnequipItem(NpcEvent e) {}
+    public virtual void AugmentItem(NpcEvent e) {}
+    public virtual void UnaugmentItem(NpcEvent e) {}
+    public virtual void AugmentInsert(NpcEvent e) {}
+    public virtual void AugmentRemove(NpcEvent e) {}
+    public virtual void EnterArea(NpcEvent e) {}
+    public virtual void LeaveArea(NpcEvent e) {}
+    public virtual void Respawn(NpcEvent e) {}
+    public virtual void DeathComplete(NpcEvent e) {}
+    public virtual void UnhandledOpcode(NpcEvent e) {}
+    public virtual void Tick(NpcEvent e) {}
+    public virtual void SpawnZone(NpcEvent e) {}
+    public virtual void DeathZone(NpcEvent e) {}
+    public virtual void UseSkill(NpcEvent e) {}
+    public virtual void CombineValidate(NpcEvent e) {}
+    public virtual void BotCommand(NpcEvent e) {}
+    public virtual void Warp(NpcEvent e) {}
+    public virtual void TestBuff(NpcEvent e) {}
+    public virtual void Combine(NpcEvent e) {}
+    public virtual void Consider(NpcEvent e) {}
+    public virtual void ConsiderCorpse(NpcEvent e) {}
+    public virtual void LootZone(NpcEvent e) {}
+    public virtual void EquipItemClient(NpcEvent e) {}
+    public virtual void UnequipItemClient(NpcEvent e) {}
+    public virtual void SkillUp(NpcEvent e) {}
+    public virtual void LanguageSkillUp(NpcEvent e) {}
+    public virtual void AltCurrencyMerchantBuy(NpcEvent e) {}
+    public virtual void AltCurrencyMerchantSell(NpcEvent e) {}
+    public virtual void MerchantBuy(NpcEvent e) {}
+    public virtual void MerchantSell(NpcEvent e) {}
+    public virtual void Inspect(NpcEvent e) {}
+    public virtual void AaBuy(NpcEvent e) {}
+    public virtual void AaGain(NpcEvent e) {}
+    public virtual void AaExpGain(NpcEvent e) {}
+    public virtual void ExpGain(NpcEvent e) {}
+    public virtual void Payload(NpcEvent e) {}
+    public virtual void LevelDown(NpcEvent e) {}
+    public virtual void GmCommand(NpcEvent e) {}
+    public virtual void Despawn(NpcEvent e) {}
+    public virtual void DespawnZone(NpcEvent e) {}
+    public virtual void BotCreate(NpcEvent e) {}
+    public virtual void AugmentInsertClient(NpcEvent e) {}
+    public virtual void AugmentRemoveClient(NpcEvent e) {}
+    public virtual void EquipItemBot(NpcEvent e) {}
+    public virtual void UnequipItemBot(NpcEvent e) {}
+    public virtual void DamageGiven(NpcEvent e) {}
+    public virtual void DamageTaken(NpcEvent e) {}
+    public virtual void ItemClickClient(NpcEvent e) {}
+    public virtual void ItemClickCastClient(NpcEvent e) {}
+    public virtual void DestroyItemClient(NpcEvent e) {}
+    public virtual void DropItemClient(NpcEvent e) {}
+    public virtual void MemorizeSpell(NpcEvent e) {}
+    public virtual void UnmemorizeSpell(NpcEvent e) {}
+    public virtual void ScribeSpell(NpcEvent e) {}
+    public virtual void UnscribeSpell(NpcEvent e) {}
+    public virtual void LootAdded(NpcEvent e) {}
+    public virtual void LdonPointsGain(NpcEvent e) {}
+    public virtual void LdonPointsLoss(NpcEvent e) {}
+    public virtual void AltCurrencyGain(NpcEvent e) {}
+    public virtual void AltCurrencyLoss(NpcEvent e) {}
+    public virtual void CrystalGain(NpcEvent e) {}
+    public virtual void CrystalLoss(NpcEvent e) {}
+    public virtual void TimerPause(NpcEvent e) {}
+    public virtual void TimerResume(NpcEvent e) {}
+    public virtual void TimerStart(NpcEvent e) {}
+    public virtual void TimerStop(NpcEvent e) {}
+    public virtual void EntityVariableDelete(NpcEvent e) {}
+    public virtual void EntityVariableSet(NpcEvent e) {}
+    public virtual void EntityVariableUpdate(NpcEvent e) {}
+    public virtual void SpellEffectBot(NpcEvent e) {}
+    public virtual void SpellEffectBuffTicBot(NpcEvent e) {}
 }
 
-public interface IPlayerEvent
+
+public abstract class IPlayerEvent
 {
-    void Say(PlayerEvent e) { }
-    void EnterZone(PlayerEvent e) { }
-    void EventConnect(PlayerEvent e) { }
-    void EventDisconnect(PlayerEvent e) { }
-    void EnvironmentalDamage(PlayerEvent e) { }
-    void Death(PlayerEvent e) { }
-    void DeathComplete(PlayerEvent e) { }
-    void Timer(PlayerEvent e) { }
-    void DiscoverItem(PlayerEvent e) { }
-    void FishSuccess(PlayerEvent e) { }
-    void ForageSuccess(PlayerEvent e) { }
-    void ClickObject(PlayerEvent e) { }
-    void ClickDoor(PlayerEvent e) { }
-    void Signal(PlayerEvent e) { }
-    void PopupResponse(PlayerEvent e) { }
-    void PlayerPickup(PlayerEvent e) { }
-    void Cast(PlayerEvent e) { }
-    void CastBegin(PlayerEvent e) { }
-    void CastOn(PlayerEvent e) { }
-    void TaskFail(PlayerEvent e) { }
-    void Zone(PlayerEvent e) { }
-    void DuelWin(PlayerEvent e) { }
-    void DuelLose(PlayerEvent e) { }
-    void Loot(PlayerEvent e) { }
-    void TaskStageComplete(PlayerEvent e) { }
-    void TaskAccepted(PlayerEvent e) { }
-    void TaskComplete(PlayerEvent e) { }
-    void TaskUpdate(PlayerEvent e) { }
-    void TaskBeforeUpdate(PlayerEvent e) { }
-    void Command(PlayerEvent e) { }
-    void CombineSuccess(PlayerEvent e) { }
-    void CombineFailure(PlayerEvent e) { }
-    void FeignDeath(PlayerEvent e) { }
-    void EnterArea(PlayerEvent e) { }
-    void LeaveArea(PlayerEvent e) { }
-    void Respawn(PlayerEvent e) { }
-    void UnhandledOpcode(PlayerEvent e) { }
-    void UseSkill(PlayerEvent e) { }
-    void TestBuff(PlayerEvent e) { }
-    void CombineValidate(PlayerEvent e) { }
-    void BotCommand(PlayerEvent e) { }
-    void Warp(PlayerEvent e) { }
-    void Combine(PlayerEvent e) { }
-    void Consider(PlayerEvent e) { }
-    void ConsiderCorpse(PlayerEvent e) { }
-    void EquipItemClient(PlayerEvent e) { }
-    void UnequipItemClient(PlayerEvent e) { }
-    void SkillUp(PlayerEvent e) { }
-    void LanguageSkillUp(PlayerEvent e) { }
-    void AltCurrencyMerchantBuy(PlayerEvent e) { }
-    void AltCurrencyMerchantSell(PlayerEvent e) { }
-    void MerchantBuy(PlayerEvent e) { }
-    void MerchantSell(PlayerEvent e) { }
-    void Inspect(PlayerEvent e) { }
-    void AaBuy(PlayerEvent e) { }
-    void AaGain(PlayerEvent e) { }
-    void AaExpGain(PlayerEvent e) { }
-    void ExpGain(PlayerEvent e) { }
-    void Payload(PlayerEvent e) { }
-    void LevelUp(PlayerEvent e) { }
-    void LevelDown(PlayerEvent e) { }
-    void GmCommand(PlayerEvent e) { }
-    void BotCreate(PlayerEvent e) { }
-    void AugmentInsertClient(PlayerEvent e) { }
-    void AugmentRemoveClient(PlayerEvent e) { }
-    void DamageGiven(PlayerEvent e) { }
-    void DamageTaken(PlayerEvent e) { }
-    void ItemClickCastClient(PlayerEvent e) { }
-    void ItemClickClient(PlayerEvent e) { }
-    void DestroyItemClient(PlayerEvent e) { }
-    void TargetChange(PlayerEvent e) { }
-    void DropItemClient(PlayerEvent e) { }
-    void MemorizeSpell(PlayerEvent e) { }
-    void UnmemorizeSpell(PlayerEvent e) { }
-    void ScribeSpell(PlayerEvent e) { }
-    void UnscribeSpell(PlayerEvent e) { }
-    void LdonPointsGain(PlayerEvent e) { }
-    void LdonPointsLoss(PlayerEvent e) { }
-    void AltCurrencyGain(PlayerEvent e) { }
-    void AltCurrencyLoss(PlayerEvent e) { }
-    void CrystalGain(PlayerEvent e) { }
-    void CrystalLoss(PlayerEvent e) { }
-    void TimerPause(PlayerEvent e) { }
-    void TimerResume(PlayerEvent e) { }
-    void TimerStart(PlayerEvent e) { }
-    void TimerStop(PlayerEvent e) { }
-    void EntityVariableDelete(PlayerEvent e) { }
-    void EntityVariableSet(PlayerEvent e) { }
-    void EntityVariableUpdate(PlayerEvent e) { }
-    void AaLoss(PlayerEvent e) { }
-    void SpellBlocked(PlayerEvent e) { }
+    public virtual void Say(PlayerEvent e) {}
+    public virtual void EnterZone(PlayerEvent e) {}
+    public virtual void EventConnect(PlayerEvent e) {}
+    public virtual void EventDisconnect(PlayerEvent e) {}
+    public virtual void EnvironmentalDamage(PlayerEvent e) {}
+    public virtual void Death(PlayerEvent e) {}
+    public virtual void DeathComplete(PlayerEvent e) {}
+    public virtual void Timer(PlayerEvent e) {}
+    public virtual void DiscoverItem(PlayerEvent e) {}
+    public virtual void FishSuccess(PlayerEvent e) {}
+    public virtual void ForageSuccess(PlayerEvent e) {}
+    public virtual void ClickObject(PlayerEvent e) {}
+    public virtual void ClickDoor(PlayerEvent e) {}
+    public virtual void Signal(PlayerEvent e) {}
+    public virtual void PopupResponse(PlayerEvent e) {}
+    public virtual void PlayerPickup(PlayerEvent e) {}
+    public virtual void Cast(PlayerEvent e) {}
+    public virtual void CastBegin(PlayerEvent e) {}
+    public virtual void CastOn(PlayerEvent e) {}
+    public virtual void TaskFail(PlayerEvent e) {}
+    public virtual void Zone(PlayerEvent e) {}
+    public virtual void DuelWin(PlayerEvent e) {}
+    public virtual void DuelLose(PlayerEvent e) {}
+    public virtual void Loot(PlayerEvent e) {}
+    public virtual void TaskStageComplete(PlayerEvent e) {}
+    public virtual void TaskAccepted(PlayerEvent e) {}
+    public virtual void TaskComplete(PlayerEvent e) {}
+    public virtual void TaskUpdate(PlayerEvent e) {}
+    public virtual void TaskBeforeUpdate(PlayerEvent e) {}
+    public virtual void Command(PlayerEvent e) {}
+    public virtual void CombineSuccess(PlayerEvent e) {}
+    public virtual void CombineFailure(PlayerEvent e) {}
+    public virtual void FeignDeath(PlayerEvent e) {}
+    public virtual void EnterArea(PlayerEvent e) {}
+    public virtual void LeaveArea(PlayerEvent e) {}
+    public virtual void Respawn(PlayerEvent e) {}
+    public virtual void UnhandledOpcode(PlayerEvent e) {}
+    public virtual void UseSkill(PlayerEvent e) {}
+    public virtual void TestBuff(PlayerEvent e) {}
+    public virtual void CombineValidate(PlayerEvent e) {}
+    public virtual void BotCommand(PlayerEvent e) {}
+    public virtual void Warp(PlayerEvent e) {}
+    public virtual void Combine(PlayerEvent e) {}
+    public virtual void Consider(PlayerEvent e) {}
+    public virtual void ConsiderCorpse(PlayerEvent e) {}
+    public virtual void EquipItemClient(PlayerEvent e) {}
+    public virtual void UnequipItemClient(PlayerEvent e) {}
+    public virtual void SkillUp(PlayerEvent e) {}
+    public virtual void LanguageSkillUp(PlayerEvent e) {}
+    public virtual void AltCurrencyMerchantBuy(PlayerEvent e) {}
+    public virtual void AltCurrencyMerchantSell(PlayerEvent e) {}
+    public virtual void MerchantBuy(PlayerEvent e) {}
+    public virtual void MerchantSell(PlayerEvent e) {}
+    public virtual void Inspect(PlayerEvent e) {}
+    public virtual void AaBuy(PlayerEvent e) {}
+    public virtual void AaGain(PlayerEvent e) {}
+    public virtual void AaExpGain(PlayerEvent e) {}
+    public virtual void ExpGain(PlayerEvent e) {}
+    public virtual void Payload(PlayerEvent e) {}
+    public virtual void LevelUp(PlayerEvent e) {}
+    public virtual void LevelDown(PlayerEvent e) {}
+    public virtual void GmCommand(PlayerEvent e) {}
+    public virtual void BotCreate(PlayerEvent e) {}
+    public virtual void AugmentInsertClient(PlayerEvent e) {}
+    public virtual void AugmentRemoveClient(PlayerEvent e) {}
+    public virtual void DamageGiven(PlayerEvent e) {}
+    public virtual void DamageTaken(PlayerEvent e) {}
+    public virtual void ItemClickCastClient(PlayerEvent e) {}
+    public virtual void ItemClickClient(PlayerEvent e) {}
+    public virtual void DestroyItemClient(PlayerEvent e) {}
+    public virtual void TargetChange(PlayerEvent e) {}
+    public virtual void DropItemClient(PlayerEvent e) {}
+    public virtual void MemorizeSpell(PlayerEvent e) {}
+    public virtual void UnmemorizeSpell(PlayerEvent e) {}
+    public virtual void ScribeSpell(PlayerEvent e) {}
+    public virtual void UnscribeSpell(PlayerEvent e) {}
+    public virtual void LdonPointsGain(PlayerEvent e) {}
+    public virtual void LdonPointsLoss(PlayerEvent e) {}
+    public virtual void AltCurrencyGain(PlayerEvent e) {}
+    public virtual void AltCurrencyLoss(PlayerEvent e) {}
+    public virtual void CrystalGain(PlayerEvent e) {}
+    public virtual void CrystalLoss(PlayerEvent e) {}
+    public virtual void TimerPause(PlayerEvent e) {}
+    public virtual void TimerResume(PlayerEvent e) {}
+    public virtual void TimerStart(PlayerEvent e) {}
+    public virtual void TimerStop(PlayerEvent e) {}
+    public virtual void EntityVariableDelete(PlayerEvent e) {}
+    public virtual void EntityVariableSet(PlayerEvent e) {}
+    public virtual void EntityVariableUpdate(PlayerEvent e) {}
+    public virtual void AaLoss(PlayerEvent e) {}
+    public virtual void SpellBlocked(PlayerEvent e) {}
 }
 
-public interface IItemEvent
+
+public abstract class IItemEvent
 {
-    void ItemClick(ItemEvent e) { }
-    void ItemClickCast(ItemEvent e) { }
-    void ItemEnterZone(ItemEvent e) { }
-    void Timer(ItemEvent e) { }
-    void WeaponProc(ItemEvent e) { }
-    void Loot(ItemEvent e) { }
-    void EquipItem(ItemEvent e) { }
-    void UnequipItem(ItemEvent e) { }
-    void AugmentItem(ItemEvent e) { }
-    void UnaugmentItem(ItemEvent e) { }
-    void AugmentInsert(ItemEvent e) { }
-    void AugmentRemove(ItemEvent e) { }
-    void TimerPause(ItemEvent e) { }
-    void TimerResume(ItemEvent e) { }
-    void TimerStart(ItemEvent e) { }
-    void TimerStop(ItemEvent e) { }
+    public virtual void ItemClick(ItemEvent e) {}
+    public virtual void ItemClickCast(ItemEvent e) {}
+    public virtual void ItemEnterZone(ItemEvent e) {}
+    public virtual void Timer(ItemEvent e) {}
+    public virtual void WeaponProc(ItemEvent e) {}
+    public virtual void Loot(ItemEvent e) {}
+    public virtual void EquipItem(ItemEvent e) {}
+    public virtual void UnequipItem(ItemEvent e) {}
+    public virtual void AugmentItem(ItemEvent e) {}
+    public virtual void UnaugmentItem(ItemEvent e) {}
+    public virtual void AugmentInsert(ItemEvent e) {}
+    public virtual void AugmentRemove(ItemEvent e) {}
+    public virtual void TimerPause(ItemEvent e) {}
+    public virtual void TimerResume(ItemEvent e) {}
+    public virtual void TimerStart(ItemEvent e) {}
+    public virtual void TimerStop(ItemEvent e) {}
 }
 
-public interface ISpellEvent
+
+public abstract class ISpellEvent
 {
-    void SpellEffectClient(SpellEvent e) { }
-    void SpellEffectBuffTicClient(SpellEvent e) { }
-    void SpellEffectNpc(SpellEvent e) { }
-    void SpellEffectBuffTicNpc(SpellEvent e) { }
-    void SpellFade(SpellEvent e) { }
-    void SpellEffectTranslocateComplete(SpellEvent e) { }
+    public virtual void SpellEffectClient(SpellEvent e) {}
+    public virtual void SpellEffectBuffTicClient(SpellEvent e) {}
+    public virtual void SpellEffectNpc(SpellEvent e) {}
+    public virtual void SpellEffectBuffTicNpc(SpellEvent e) {}
+    public virtual void SpellFade(SpellEvent e) {}
+    public virtual void SpellEffectTranslocateComplete(SpellEvent e) {}
 }
 
-public interface IEncounterEvent
+
+public abstract class IEncounterEvent
 {
-    void Timer(EncounterEvent e) { }
-    void EncounterLoad(EncounterEvent e) { }
-    void EncounterUnload(EncounterEvent e) { }
+    public virtual void Timer(EncounterEvent e) {}
+    public virtual void EncounterLoad(EncounterEvent e) {}
+    public virtual void EncounterUnload(EncounterEvent e) {}
+}
+public abstract class IBotEvent
+{
+    public virtual void Cast(BotEvent e) {}
+    public virtual void CastBegin(BotEvent e) {}
+    public virtual void CastOn(BotEvent e) {}
+    public virtual void Combat(BotEvent e) {}
+    public virtual void Death(BotEvent e) {}
+    public virtual void DeathComplete(BotEvent e) {}
+    public virtual void PopupResponse(BotEvent e) {}
+    public virtual void Say(BotEvent e) {}
+    public virtual void Signal(BotEvent e) {}
+    public virtual void Slay(BotEvent e) {}
+    public virtual void TargetChange(BotEvent e) {}
+    public virtual void Timer(BotEvent e) {}
+    public virtual void Trade(BotEvent e) {}
+    public virtual void UseSkill(BotEvent e) {}
+    public virtual void Payload(BotEvent e) {}
+    public virtual void EquipItemBot(BotEvent e) {}
+    public virtual void UnequipItemBot(BotEvent e) {}
+    public virtual void DamageGiven(BotEvent e) {}
+    public virtual void DamageTaken(BotEvent e) {}
+    public virtual void LevelUp(BotEvent e) {}
+    public virtual void LevelDown(BotEvent e) {}
+    public virtual void TimerPause(BotEvent e) {}
+    public virtual void TimerResume(BotEvent e) {}
+    public virtual void TimerStart(BotEvent e) {}
+    public virtual void TimerStop(BotEvent e) {}
+    public virtual void EntityVariableDelete(BotEvent e) {}
+    public virtual void EntityVariableSet(BotEvent e) {}
+    public virtual void EntityVariableUpdate(BotEvent e) {}
+    public virtual void SpellBlocked(BotEvent e) {}
 }
 
-public interface IBotEvent
-{
-    void Cast(BotEvent e) { }
-    void CastBegin(BotEvent e) { }
-    void CastOn(BotEvent e) { }
-    void Combat(BotEvent e) { }
-    void Death(BotEvent e) { }
-    void DeathComplete(BotEvent e) { }
-    void PopupResponse(BotEvent e) { }
-    void Say(BotEvent e) { }
-    void Signal(BotEvent e) { }
-    void Slay(BotEvent e) { }
-    void TargetChange(BotEvent e) { }
-    void Timer(BotEvent e) { }
-    void Trade(BotEvent e) { }
-    void UseSkill(BotEvent e) { }
-    void Payload(BotEvent e) { }
-    void EquipItemBot(BotEvent e) { }
-    void UnequipItemBot(BotEvent e) { }
-    void DamageGiven(BotEvent e) { }
-    void DamageTaken(BotEvent e) { }
-    void LevelUp(BotEvent e) { }
-    void LevelDown(BotEvent e) { }
-    void TimerPause(BotEvent e) { }
-    void TimerResume(BotEvent e) { }
-    void TimerStart(BotEvent e) { }
-    void TimerStop(BotEvent e) { }
-    void EntityVariableDelete(BotEvent e) { }
-    void EntityVariableSet(BotEvent e) { }
-    void EntityVariableUpdate(BotEvent e) { }
-    void SpellBlocked(BotEvent e) { }
-
-}
 public class EQGlobals
 {
     public Zone zone;

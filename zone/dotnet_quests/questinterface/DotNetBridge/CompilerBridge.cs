@@ -5,6 +5,52 @@ using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Text;
 
+public class LockfileMutex : IDisposable
+{
+    private readonly string _fileName;
+
+    private FileStream? _stream;
+
+    public LockfileMutex(string name)
+    {
+        var assemblyDir = Path.GetDirectoryName(typeof(LockfileMutex).Assembly.Location) ?? throw new FileNotFoundException("cannot determine assembly location");
+        var file = Path.GetFullPath(Path.Combine(assemblyDir, name));
+        _fileName = file;
+    }
+
+    public bool Acquire()
+    {
+        try
+        {
+            _stream = new FileStream(_fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+            return true;
+        }
+        catch (IOException ex) when (ex.Message.Contains(_fileName))
+        {
+            return false;
+        }
+    }
+
+    public void Dispose()
+    {
+        if (_stream != null)
+        {
+            _stream.Dispose();
+
+            try
+            {
+                File.Delete(_fileName);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        GC.SuppressFinalize(this);
+    }
+}
+
 public static class DotNetQuest
 {
     public static Zone? zone = null;
@@ -34,6 +80,7 @@ public static class DotNetQuest
 
     private static DateTime lastCheck = DateTime.MinValue;
     private static bool reloading = false;
+    private static bool questReload = false;
     private static EQGlobals globals;
 
     private static List<System.Timers.Timer> timers = new List<System.Timers.Timer>();
@@ -80,7 +127,7 @@ public static class DotNetQuest
             questManager = questManager
         };
 
-        
+
     }
 
     private static string GetDirHash(string path)
@@ -91,7 +138,7 @@ public static class DotNetQuest
             {
                 // Hash based on file contents, we don't care about arbitrary resaves
                 byte[] contentBytes = File.ReadAllBytes(file);
-                
+
                 // Update MD5 with file content
                 md5.TransformBlock(contentBytes, 0, contentBytes.Length, null, 0);
             }
@@ -115,15 +162,17 @@ public static class DotNetQuest
         Console.WriteLine($"Watching for *.cs file changes in {zoneDir}");
         logSys?.QuestDebug($"Watching for *.cs file changes in {globalDir}");
         Console.WriteLine($"Watching for *.cs file changes in {globalDir}");
-        foreach(var timer in timers) {
+        foreach (var timer in timers)
+        {
             timer.Stop();
         }
         timers.Clear();
-        timers.Add(PollForChanges(zoneDir, ReloadZone));
-        timers.Add(PollForChanges(globalDir, ReloadGlobal));
+        timers.Add(PollForChanges(zoneDir, ReloadZoneAsync));
+        timers.Add(PollForChanges(globalDir, ReloadGlobalAsync));
     }
     public static void ReloadZone()
     {
+        questReload = true;
         var zoneName = zone?.GetShortName() ?? "";
         var workingDirectory = Directory.GetCurrentDirectory();
         var directoryPath = $"{workingDirectory}/dotnet_quests/{zoneName}";
@@ -143,6 +192,7 @@ public static class DotNetQuest
                     assemblyContext_ = new CollectibleAssemblyLoadContext(outPath);
                     questAssembly_ = assemblyContext_.LoadFromAssemblyPath(questAssemblyPath);
                     logSys?.QuestDebug($"Successfully loaded .NET quests with {questAssembly_.GetTypes().Count()} exported types.");
+                    questReload = false;
                     return;
 
                 }
@@ -237,17 +287,90 @@ public static class DotNetQuest
                 logSys?.QuestError($"Exception in loading zone quest {e.Message}");
             }
         }
+        questReload = false;
     }
 
-    public static void ReloadGlobal()
+    public static void ReloadGlobalAsync()
     {
+        Task.Run(() => ReloadGlobalWithLock());
+    }
+
+    public static void ReloadZoneAsync()
+    {
+        Task.Run(() => ReloadZone());
+    }
+
+    private static void ReloadGlobalWithLock()
+    {
+        using (var mutex = new LockfileMutex("lockGlobalQuestsReload.lock"))
+        {
+            var firstAcquire = mutex.Acquire();
+            Console.WriteLine($"Acquired first lock: {firstAcquire}");
+            var counter = 0;
+            if (!firstAcquire)
+            {
+                while (!mutex.Acquire())
+                {
+                    if (counter++ % 10 == 0) {
+                        Console.WriteLine("Waiting to acquire global lock...");
+                    }
+                    Thread.Sleep(100);
+                }
+            }
+
+            ReloadGlobal(firstAcquire);
+        }
+    }
+
+    public static void ReloadGlobal(bool firstAcquire)
+    {
+        questReload = true;
         var workingDirectory = Directory.GetCurrentDirectory();
         var directoryPath = $"{workingDirectory}/dotnet_quests/global";
         var outPath = $"{workingDirectory}/dotnet_quests/out";
         var projPath = $"{directoryPath}/global.csproj";
-          var hash = GetDirHash(directoryPath);
+        var hash = GetDirHash(directoryPath);
         var globalGuid = $"global-{hash}";
         var globalAssemblyPath = $"{outPath}/{globalGuid}.dll";
+
+        // If we were not the first acquire we expect this to be built by someone else eventually
+        if (!firstAcquire)
+        {
+            var counter = 0;
+            var continueBuild = false;
+            while (!File.Exists(globalAssemblyPath))
+            {
+                Console.WriteLine($"Waiting for another process to build {globalAssemblyPath} before continuing {counter} / 20");
+                Thread.Sleep(1000);
+                if (counter++ > 20)
+                {
+                    continueBuild = true;
+                    break;
+                }
+            }
+            if (!continueBuild)
+            {
+                logSys?.QuestDebug($"Zone dotnet lib built by another process");
+                if (globalAssemblyContext == null)
+                {
+                    try
+                    {
+                        globalAssemblyContext = new CollectibleAssemblyLoadContext(outPath);
+                        globalAssembly_ = globalAssemblyContext.LoadFromAssemblyPath(globalAssemblyPath);
+                        logSys?.QuestDebug($"Successfully loaded .NET global quests with {globalAssembly_.GetTypes().Count()} exported types.");
+                        questReload = false;
+                        return;
+
+                    }
+                    catch (Exception e)
+                    {
+                        logSys?.QuestError($"Error loading existing global lib, continuing to recompile. {e.Message}");
+
+                    }
+
+                }
+            }
+        }
 
         if (File.Exists(globalAssemblyPath))
         {
@@ -259,6 +382,7 @@ public static class DotNetQuest
                     globalAssemblyContext = new CollectibleAssemblyLoadContext(outPath);
                     globalAssembly_ = globalAssemblyContext.LoadFromAssemblyPath(globalAssemblyPath);
                     logSys?.QuestDebug($"Successfully loaded .NET global quests with {globalAssembly_.GetTypes().Count()} exported types.");
+                    questReload = false;
                     return;
 
                 }
@@ -271,6 +395,7 @@ public static class DotNetQuest
             }
         }
 
+
         if (globalAssemblyContext != null)
         {
             globalAssemblyContext.Unload();
@@ -280,7 +405,7 @@ public static class DotNetQuest
             GC.WaitForPendingFinalizers();
         }
 
-        
+
         if (!File.Exists(projPath))
         {
             Console.WriteLine($"Project path does not exist for global at {projPath}");
@@ -341,7 +466,7 @@ public static class DotNetQuest
                 else
                 {
                     Console.WriteLine(output);
-    
+
                     Console.WriteLine($"Loading global assembly from: {globalAssemblyPath}");
                     globalAssembly_ = globalAssemblyContext.LoadFromAssemblyPath(globalAssemblyPath);
                     logSys?.QuestDebug($"Successfully compiled global .NET quests with {globalAssembly_.GetTypes().Count()} exported types.");
@@ -352,11 +477,12 @@ public static class DotNetQuest
                 logSys?.QuestError($"Exception in loading global quests {e.Message}");
             }
         }
+        questReload = false;
     }
 
     public static void QuestEvent(EventArgs questEventArgs)
     {
-        if (zone == null || entityList == null || logSys == null || worldServer == null || questManager == null)
+        if (zone == null || entityList == null || logSys == null || worldServer == null || questManager == null || questReload)
         {
             return;
         }
@@ -395,6 +521,10 @@ public static class DotNetQuest
         }
         catch (Exception e)
         {
+            if (questReload)
+            {
+                return;
+            }
             logSys?.QuestError($"Error running quest subtype {questEventArgs.EventType} quest event ID {questEventArgs.QuestEventId} :: {e.Message}");
             var inner = e.InnerException;
             while (inner != null)
@@ -405,6 +535,11 @@ public static class DotNetQuest
         }
     }
 
+    private static bool MethodExistsAndIsConcrete(MethodInfo? methodInfo, System.Type parentType)
+    {
+        return methodInfo != null && methodInfo.DeclaringType != parentType;
+    }
+
     private static void NpcEvent(EventArgs npcEventArgs, bool global = false)
     {
         QuestEventID id = (QuestEventID)npcEventArgs.QuestEventId;
@@ -413,15 +548,15 @@ public static class DotNetQuest
         var npcName = npc?.GetOrigName() ?? "";
         var uniqueName = npc?.GetName() ?? "";
         // If we have this case covered for local zone and being invoked through global don't honor global invoke
-        if (global && questAssembly_?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+        if (global && MethodExistsAndIsConcrete(questAssembly_?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]), typeof(NpcEvent)))
         {
             return;
         }
         var assembly = global ? globalAssembly_ : questAssembly_;
-        if (assembly?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(assembly?.GetType(npcName)?.GetMethod(EventMap.NpcMethodMap[id]), typeof(NpcEvent)))
         {
             object? npcObject;
-            var npcType = assembly.GetType(npcName);
+            var npcType = assembly?.GetType(npcName);
             if (npcType == null)
             {
                 return;
@@ -451,16 +586,16 @@ public static class DotNetQuest
     {
         QuestEventID id = (QuestEventID)playerEventArgs.QuestEventId;
         // If we have this case covered for local zone and being invoked through global don't honor global invoke
-        if (global && questAssembly_?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null)
+        if (global && MethodExistsAndIsConcrete(questAssembly_?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]), typeof(PlayerEvent)))
         {
             return;
         }
         var assembly = global ? globalAssembly_ : questAssembly_;
-        if (assembly?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(assembly?.GetType("Player")?.GetMethod(EventMap.PlayerMethodMap[id]), typeof(PlayerEvent)))
         {
             var player = EqFactory.CreateClient(playerEventArgs.Client, false);
             object? playerObject;
-            var playerType = assembly.GetType("Player");
+            var playerType = assembly?.GetType("Player");
             var playerName = player.GetName();
             if (playerType == null)
             {
@@ -489,9 +624,9 @@ public static class DotNetQuest
     private static void ItemEvent(EventArgs itemEventArgs)
     {
         QuestEventID id = (QuestEventID)itemEventArgs.QuestEventId;
-        if (questAssembly_.GetType("Item")?.GetMethod(EventMap.ItemMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(questAssembly_?.GetType("Item")?.GetMethod(EventMap.ItemMethodMap[id]), typeof(ItemEvent)))
         {
-            questAssembly_.GetType("Item").GetMethod(EventMap.ItemMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Item")), [new ItemEvent(globals, itemEventArgs) {
+            questAssembly_?.GetType("Item")?.GetMethod(EventMap.ItemMethodMap[id])?.Invoke(Activator.CreateInstance(questAssembly_?.GetType("Item")), [new ItemEvent(globals, itemEventArgs) {
                 client = EqFactory.CreateClient(itemEventArgs.Client, false),
                 mob = EqFactory.CreateMob(itemEventArgs.Mob, false),
                 item = EqFactory.CreateItemInstance(itemEventArgs.Item, false),
@@ -502,9 +637,9 @@ public static class DotNetQuest
     private static void SpellEvent(EventArgs spellEventArgs)
     {
         QuestEventID id = (QuestEventID)spellEventArgs.QuestEventId;
-        if (questAssembly_.GetType("Spell")?.GetMethod(EventMap.SpellMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(questAssembly_?.GetType("Spell")?.GetMethod(EventMap.SpellMethodMap[id]), typeof(SpellEvent)))
         {
-            questAssembly_.GetType("Spell").GetMethod(EventMap.SpellMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Spell")), [new SpellEvent(globals, spellEventArgs) {
+            questAssembly_?.GetType("Spell")?.GetMethod(EventMap.SpellMethodMap[id])?.Invoke(Activator.CreateInstance(questAssembly_?.GetType("Spell")), [new SpellEvent(globals, spellEventArgs) {
                 client = EqFactory.CreateClient(spellEventArgs.Client, false),
                 mob = EqFactory.CreateMob(spellEventArgs.Mob, false),
                 spellID = spellEventArgs.SpellID,
@@ -519,9 +654,9 @@ public static class DotNetQuest
             ? Marshal.PtrToStringUni(encounterEventArgs.EncounterName)
             : Marshal.PtrToStringUTF8(encounterEventArgs.EncounterName);
         string encounterType = $"Encounter_{encounter}";
-        if (questAssembly_.GetType(encounterType)?.GetMethod(EventMap.EncounterMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(questAssembly_?.GetType(encounterType)?.GetMethod(EventMap.EncounterMethodMap[id]), typeof(EncounterEvent)))
         {
-            questAssembly_.GetType(encounterType).GetMethod(EventMap.EncounterMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType(encounterType)), [new EncounterEvent(globals, encounterEventArgs) {
+            questAssembly_?.GetType(encounterType)?.GetMethod(EventMap.EncounterMethodMap[id])?.Invoke(Activator.CreateInstance(questAssembly_.GetType(encounterType)), [new EncounterEvent(globals, encounterEventArgs) {
 
                 encounterName = encounter ?? ""
             }]);
@@ -533,9 +668,9 @@ public static class DotNetQuest
         QuestEventID id = (QuestEventID)botEventArgs.QuestEventId;
         var bot = EqFactory.CreateBot(botEventArgs.Bot, false);
         var client = EqFactory.CreateClient(botEventArgs.Client, false);
-        if (questAssembly_.GetType("Bot")?.GetMethod(EventMap.BotMethodMap[id]) != null)
+        if (MethodExistsAndIsConcrete(questAssembly_?.GetType("Bot")?.GetMethod(EventMap.BotMethodMap[id]), typeof(BotEvent)))
         {
-            questAssembly_.GetType("Bot").GetMethod(EventMap.BotMethodMap[id]).Invoke(Activator.CreateInstance(questAssembly_.GetType("Bot")), [new BotEvent(globals, botEventArgs) {
+            questAssembly_?.GetType("Bot")?.GetMethod(EventMap.BotMethodMap[id])?.Invoke(Activator.CreateInstance(questAssembly_.GetType("Bot")), [new BotEvent(globals, botEventArgs) {
                 bot = bot,
                 client = client,
             }]);

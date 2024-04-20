@@ -12,7 +12,7 @@ class DotNetCompiler
         var startInfo = new ProcessStartInfo
         {
             FileName = "dotnet",
-            Arguments = $"build --output {outPath} -p:Configuration=Debug -p:AssemblyName={zoneGuid} {directoryPath}/{zoneName}.csproj",
+            Arguments = $"build --output {outPath} -nowarn:CS0114 -p:Configuration=Debug -p:AssemblyName={zoneGuid} {directoryPath}/{zoneName}.csproj",
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
