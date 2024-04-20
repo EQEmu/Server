@@ -5494,7 +5494,6 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags` varchar(100) NULL;
 ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 )",
 		.content_schema_update = true
-	}
 	},
 	ManifestEntry {
 	.version = 9271,
