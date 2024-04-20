@@ -4958,6 +4958,16 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	LogSpells("Checking to see if we are immune to spell [{}] cast by [{}]", spell_id, caster->GetName());
 
+#ifdef LUA_EQEMU
+	bool is_immune = false;
+	bool ignore_default = false;
+	is_immune = LuaParser::Instance()->IsImmuneToSpell(this, caster, spell_id, ignore_default);
+
+	if (ignore_default) {
+		return is_immune;
+	}
+#endif
+
 	if(!IsValidSpell(spell_id))
 		return true;
 
