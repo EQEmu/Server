@@ -85,12 +85,12 @@ void Client::SendBulkParcels()
 		}
 
 	}
-	if (m_parcels.size() >= PARCEL_LIMIT) {
+	if (m_parcels.size() >= RuleI(Parcel, ParcelMaxItems) + PARCEL_LIMIT) {
 		LogError(
-			"Found {} parcels for Character {}.  List truncated to the PARCEL_MAX_ITEMS [{}] + 5.",
+			"Found {} parcels for Character {}.  List truncated to the ParcelMaxItems rule [{}] + PARCEL_LIMIT.",
 			m_parcels.size(),
 			GetCleanName(),
-			PARCEL_MAX_ITEMS
+			RuleI(Parcel, ParcelMaxItems)
 		);
 		SendParcelStatus();
 		return;
@@ -200,13 +200,13 @@ void Client::SendParcelStatus()
 
 	int32 num_of_parcels = GetParcelCount();
 	if (num_of_parcels > 0) {
-		int32 num_over_limit = (num_of_parcels - PARCEL_MAX_ITEMS) < 0 ? 0 : (num_of_parcels - PARCEL_MAX_ITEMS);
-		if (num_of_parcels == PARCEL_MAX_ITEMS) {
+		int32 num_over_limit = (num_of_parcels - RuleI(Parcel, ParcelMaxItems)) < 0 ? 0 : (num_of_parcels - RuleI(Parcel, ParcelMaxItems));
+		if (num_of_parcels == RuleI(Parcel, ParcelMaxItems)) {
 			Message(
 				Chat::Red,
 				fmt::format(
 					"You have reached the limit of {} parcels in your mailbox.  You will not be able to send parcels until you retrieve at least 1 parcel. ",
-					PARCEL_MAX_ITEMS
+					RuleI(Parcel, ParcelMaxItems)
 				).c_str()
 			);
 		}
@@ -215,7 +215,7 @@ void Client::SendParcelStatus()
 				Chat::Red,
 				PARCEL_STATUS_1,
 				std::to_string(num_of_parcels).c_str(),
-				std::to_string(PARCEL_MAX_ITEMS).c_str()
+				std::to_string(RuleI(Parcel, ParcelMaxItems)).c_str()
 			);
 		}
 		else if (num_over_limit > 1) {
@@ -224,7 +224,7 @@ void Client::SendParcelStatus()
 				PARCEL_STATUS_2,
 				std::to_string(num_of_parcels).c_str(),
 				std::to_string(num_over_limit).c_str(),
-				std::to_string(PARCEL_MAX_ITEMS).c_str()
+				std::to_string(RuleI(Parcel, ParcelMaxItems)).c_str()
 			);
 		}
 		else {
@@ -251,14 +251,14 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 	}
 
 	auto num_of_parcels = GetParcelCount();
-	if (num_of_parcels >= PARCEL_MAX_ITEMS) {
+	if (num_of_parcels >= RuleI(Parcel, ParcelMaxItems)) {
 		SendParcelIconStatus();
 		Message(
 			Chat::Yellow,
 			fmt::format(
 				"{} tells you, 'Unfortunately, I cannot send your parcel as you are at your parcel limit of {}. Please retrieve a parcel and try again.",
 				merchant->GetCleanName(),
-				PARCEL_MAX_ITEMS
+				RuleI(Parcel, ParcelMaxItems)
 			).c_str()
 		);
 		DoParcelCancel();
@@ -266,7 +266,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		return;
 	}
 
-	if (send_to_client.at(0).parcel_count >= PARCEL_MAX_ITEMS) {
+	if (send_to_client.at(0).parcel_count >= RuleI(Parcel, ParcelMaxItems)) {
 		Message(
 			Chat::Yellow,
 			fmt::format(
@@ -703,7 +703,7 @@ int32 Client::FindNextFreeParcelSlot(uint32 char_id)
 		return PARCEL_BEGIN_SLOT;
 	}
 
-	for (uint32 i = PARCEL_BEGIN_SLOT; i <= PARCEL_END_SLOT; i++) {
+	for (uint32 i = PARCEL_BEGIN_SLOT; i <= RuleI(Parcel, ParcelMaxItems); i++) {
 		auto it = std::find_if(results.cbegin(), results.cend(), [&](const auto &x) { return x.slot_id == i; });
 		if (it == results.end()) {
 			return i;
@@ -724,7 +724,7 @@ void Client::SendParcelIconStatus()
 	if (num_of_parcels == 0) {
 		data->status = IconOff;
 	}
-	else if (num_of_parcels > PARCEL_MAX_ITEMS) {
+	else if (num_of_parcels > RuleI(Parcel, ParcelMaxItems)) {
 		data->status = Overlimit;
 	}
 

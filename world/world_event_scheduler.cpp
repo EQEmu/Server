@@ -2,9 +2,6 @@
 #include "../common/servertalk.h"
 #include <ctime>
 #include "../common/rulesys.h"
-#include "../common/repositories/character_parcels_repository.h"
-#include "../common/events/player_events.h"
-#include "../common/events/player_event_logs.h"
 
 void WorldEventScheduler::Process(ZSList *zs_list)
 {
@@ -38,8 +35,7 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 			// discard uninteresting events as its less work to calculate time on events we don't care about
 			// different processes are interested in different events
 			if (e.event_type != ServerEvents::EVENT_TYPE_BROADCAST &&
-				e.event_type != ServerEvents::EVENT_TYPE_RELOAD_WORLD &&
-				e.event_type != ServerEvents::EVENT_TYPE_PARCEL_PRUNE) {
+				e.event_type != ServerEvents::EVENT_TYPE_RELOAD_WORLD) {
 				continue;
 			}
 
@@ -64,47 +60,6 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 					reload_world->global_repop = ReloadWorld::Repop;
 					zs_list->SendPacket(pack);
 					safe_delete(pack);
-				}
-				if (RuleB(Parcel, EnableParcelMerchants) && RuleB(Parcel, EnablePruning) && e.event_type == ServerEvents::EVENT_TYPE_PARCEL_PRUNE) {
-					LogScheduler("Parcel Prune Event Reached [{}]", e.event_data);
-
-					auto filter = fmt::format("sent_date < (NOW() - INTERVAL {} DAY)", RuleI(Parcel, ParcelPruneDelay));
-					auto out    = new ServerPacket(ServerOP_ParcelPrune);
-
-					zs_list->SendPacketToBootedZones(out);
-					safe_delete(out);
-
-					auto results = CharacterParcelsRepository::GetWhere(*m_database, filter);
-					auto prune   = CharacterParcelsRepository::DeleteWhere(*m_database, filter);
-
-					PlayerEvent::ParcelDelete                  pd{};
-					PlayerEventLogsRepository::PlayerEventLogs pel{};
-					pel.event_type_id   = PlayerEvent::PARCEL_DELETE;
-					pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
-					std::stringstream ss;
-					for (auto const   &r: results) {
-						pd.from_name  = r.from_name;
-						pd.item_id    = r.item_id;
-						pd.note       = r.note;
-						pd.quantity   = r.quantity;
-						pd.sent_date = r.sent_date;
-						pd.char_id   = r.char_id;
-						{
-							cereal::JSONOutputArchiveSingleLine ar(ss);
-							pd.serialize(ar);
-						}
-
-						pel.event_data = ss.str();
-						pel.created_at = std::time(nullptr);
-
-						player_event_logs.AddToQueue(pel);
-
-						ss.str("");
-						ss.clear();
-					}
-
-					LogInfo("Purged {} parcels that were over {} days old.", results.size(),
-							RuleI(Parcel, ParcelPruneDelay));
 				}
 			}
 		}

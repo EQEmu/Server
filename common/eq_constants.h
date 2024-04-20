@@ -1134,9 +1134,7 @@ namespace LeadershipAbilitySlot {
 #define PARCEL_SEND_ITEMS    0
 #define PARCEL_SEND_MONEY    1
 #define PARCEL_MONEY_ITEM_ID 99990 // item id of money
-#define PARCEL_MAX_ITEMS     RuleI(Parcel, ParcelMaxItems)
-#define PARCEL_LIMIT         PARCEL_MAX_ITEMS + 5
+#define PARCEL_LIMIT         5
 #define PARCEL_BEGIN_SLOT    1
-#define PARCEL_END_SLOT      PARCEL_MAX_ITEMS
 
 #endif /*COMMON_EQ_CONSTANTS_H*/
