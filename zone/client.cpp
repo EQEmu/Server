@@ -7562,6 +7562,16 @@ void Client::SetFactionLevel(
 		current_value = GetCharacterFactionLevel(e.faction_id);
 		faction_before = current_value;
 
+#ifdef LUA_EQEMU
+	int32 lua_ret = 0;
+	bool ignore_default = false;
+	lua_ret = LuaParser::Instance()->UpdatePersonalFaction(this, e.value, e.faction_id, current_value, e.temp, faction_minimum, faction_maximum, ignore_default);
+
+	if (ignore_default) {
+		e.value = lua_ret;
+	}
+#endif
+
 		UpdatePersonalFaction(
 			character_id,
 			e.value,
@@ -7616,6 +7626,16 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		//Get the faction modifiers
 		current_value = GetCharacterFactionLevel(faction_id);
 		faction_before_hit = current_value;
+
+#ifdef LUA_EQEMU
+	int32 lua_ret = 0;
+	bool ignore_default = false;
+	lua_ret = LuaParser::Instance()->UpdatePersonalFaction(this, e.value, e.faction_id, current_value, e.temp, faction_minimum, faction_maximum, ignore_default);
+
+	if (ignore_default) {
+		e.value = lua_ret;
+	}
+#endif
 
 		UpdatePersonalFaction(char_id, value, faction_id, &current_value, temp, this_faction_min, this_faction_max);
 
