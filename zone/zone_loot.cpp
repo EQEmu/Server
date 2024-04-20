@@ -284,7 +284,7 @@ std::vector<LootdropEntriesRepository::LootdropEntries> Zone::GetLootdropEntries
 					.content_flags_disabled = e.content_flags_disabled
 				}
 			)) {
-				LogLoot(
+				LogLootDetail(
 					"Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
 					lootdrop_id,
 					e.item_id,
