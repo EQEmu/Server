@@ -84,6 +84,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "string_ids.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "lua_parser.h"
 
 #include <assert.h>
 #include <algorithm>
