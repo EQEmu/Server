@@ -695,8 +695,8 @@ void Client::SendParcelDelete(const ParcelRetrieve_Struct &parcel_in)
 int32 Client::FindNextFreeParcelSlot(uint32 char_id)
 {
 	auto results = CharacterParcelsRepository::GetWhere(
-			database,
-			fmt::format("char_id = '{}' ORDER BY slot_id ASC", char_id)
+		database,
+		fmt::format("char_id = '{}' ORDER BY slot_id ASC", char_id)
 	);
 
 	if (results.empty()) {
