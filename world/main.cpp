@@ -425,18 +425,18 @@ int main(int argc, char **argv)
 		guild_mgr.Process();
 
 		if (parcel_prune_timer.Check()) {
-            if (RuleB(Parcel, EnableParcelMerchants) && RuleB(Parcel, EnablePruning)) {
-                LogTrading(
-                    "Parcel Prune process running for parcels over <red>[{}] days",
-                    RuleI(Parcel, ParcelPruneDelay)
-                );
+			if (RuleB(Parcel, EnableParcelMerchants) && RuleB(Parcel, EnablePruning)) {
+				LogTrading(
+					"Parcel Prune process running for parcels over <red>[{}] days",
+					RuleI(Parcel, ParcelPruneDelay)
+				);
 
-                auto out = std::make_unique<ServerPacket>(ServerOP_ParcelPrune);
-                zoneserver_list.SendPacketToBootedZones(out.get());
+				auto out = std::make_unique<ServerPacket>(ServerOP_ParcelPrune);
+				zoneserver_list.SendPacketToBootedZones(out.get());
 
-                database.PurgeCharacterParcels();
-            }
-        }
+				database.PurgeCharacterParcels();
+			}
+		}
 
 		if (player_event_process_timer.Check()) {
 			player_event_logs.Process();
