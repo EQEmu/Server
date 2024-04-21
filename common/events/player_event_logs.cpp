@@ -697,8 +697,11 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::KILLED_NAMED_NPC].event_enabled   = 1;
 	m_settings[PlayerEvent::KILLED_RAID_NPC].event_enabled    = 1;
 	m_settings[PlayerEvent::ITEM_CREATION].event_enabled      = 1;
-	m_settings[PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM].event_enabled      = 1;
-	m_settings[PlayerEvent::GUILD_TRIBUTE_DONATE_PLAT].event_enabled      = 1;
+	m_settings[PlayerEvent::GUILD_TRIBUTE_DONATE_ITEM].event_enabled = 1;
+	m_settings[PlayerEvent::GUILD_TRIBUTE_DONATE_PLAT].event_enabled = 1;
+	m_settings[PlayerEvent::PARCEL_SEND].event_enabled               = 1;
+	m_settings[PlayerEvent::PARCEL_RETRIEVE].event_enabled           = 1;
+	m_settings[PlayerEvent::PARCEL_DELETE].event_enabled             = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

@@ -35,6 +35,7 @@
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 #include "../common/repositories/character_skills_repository.h"
 #include "../common/repositories/data_buckets_repository.h"
 #include "../common/repositories/group_id_repository.h"
@@ -49,6 +50,7 @@
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/reports_repository.h"
 #include "../common/repositories/variables_repository.h"
+#include "../common/events/player_event_logs.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -2042,3 +2044,42 @@ void Database::Decode(std::string &in)
 		in.at(i) -= char('0');
 	}
 };
+
+void Database::PurgeCharacterParcels()
+{
+	auto filter  = fmt::format("sent_date < (NOW() - INTERVAL {} DAY)", RuleI(Parcel, ParcelPruneDelay));
+	auto results = CharacterParcelsRepository::GetWhere(*this, filter);
+	auto prune   = CharacterParcelsRepository::DeleteWhere(*this, filter);
+
+	PlayerEvent::ParcelDelete                  pd{};
+	PlayerEventLogsRepository::PlayerEventLogs pel{};
+	pel.event_type_id   = PlayerEvent::PARCEL_DELETE;
+	pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
+	std::stringstream ss;
+	for (auto const   &r: results) {
+		pd.from_name = r.from_name;
+		pd.item_id   = r.item_id;
+		pd.note      = r.note;
+		pd.quantity  = r.quantity;
+		pd.sent_date = r.sent_date;
+		pd.char_id   = r.char_id;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			pd.serialize(ar);
+		}
+
+		pel.event_data = ss.str();
+		pel.created_at = std::time(nullptr);
+
+		player_event_logs.AddToQueue(pel);
+
+		ss.str("");
+		ss.clear();
+	}
+
+	LogInfo(
+		"Purged <yellow>[{}] parcels that were over <yellow>[{}] days old.",
+		results.size(),
+		RuleI(Parcel, ParcelPruneDelay)
+	);
+}

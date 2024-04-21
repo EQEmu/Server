@@ -3859,6 +3859,51 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+		case ServerOP_ParcelDelivery: {
+			auto in = (Parcel_Struct *) pack->pBuffer;
+
+			if (strlen(in->send_to) == 0) {
+				LogError(
+					"ServerOP_ParcelDelivery pack received with incorrect character_name of {}.",
+					in->send_to
+				);
+				return;
+			}
+
+			for (auto const &c: entity_list.GetClientList()) {
+				if (strcasecmp(c.second->GetCleanName(), in->send_to) == 0) {
+					c.second->MessageString(
+						Chat::Yellow,
+						PARCEL_DELIVERY_ARRIVED
+					);
+					c.second->SendParcelStatus();
+					if (c.second->GetEngagedWithParcelMerchant()) {
+						c.second->SendParcel(*in);
+					}
+					return;
+				}
+			}
+
+			break;
+		}
+		case ServerOP_ParcelPrune: {
+			for (auto const &c: entity_list.GetClientList()) {
+				if (c.second->GetEngagedWithParcelMerchant()) {
+					c.second->Message(
+						Chat::Red,
+						"Parcel data has been updated.  Please re-open the Merchant Window."
+					);
+					c.second->SetEngagedWithParcelMerchant(false);
+					c.second->DoParcelCancel();
+
+					auto out = new EQApplicationPacket(OP_ShopEndConfirm);
+					c.second->QueuePacket(out);
+					safe_delete(out);
+					return;
+				}
+			}
+			break;
+		}
 	default: {
 		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
 		break;

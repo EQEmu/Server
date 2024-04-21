@@ -68,6 +68,7 @@ namespace EQ
 #include "cheat_manager.h"
 #include "../common/events/player_events.h"
 #include "../common/data_verification.h"
+#include "../common/repositories/character_parcels_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -323,8 +324,36 @@ public:
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
-	void FinishTrade(Mob* with, bool finalizer = false, void* event_entry = nullptr, std::list<void*>* event_details = nullptr);
+	void FinishTrade(
+		Mob *with,
+		bool finalizer = false,
+		void *event_entry = nullptr,
+		std::list<void *> *event_details = nullptr
+	);
 	void SendZonePoints();
+	void SendBulkParcels();
+	void DoParcelCancel();
+	void DoParcelSend(const Parcel_Struct *parcel_in);
+	void DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in);
+	void SendParcel(const Parcel_Struct &parcel);
+	void SendParcelStatus();
+	void SendParcelAck();
+	void SendParcelRetrieveAck();
+	void SendParcelDelete(const ParcelRetrieve_Struct &parcel_in);
+	void SendParcelDeliveryToWorld(const Parcel_Struct &parcel);
+	void SetParcelEnabled(bool status) { m_parcel_enabled = status; }
+	bool GetParcelEnabled() { return m_parcel_enabled; }
+	void SetParcelCount(uint32 count) { m_parcel_count = count; }
+	int32 GetParcelCount() { return m_parcel_count; }
+	bool GetEngagedWithParcelMerchant() { return m_parcel_merchant_engaged; }
+	void SetEngagedWithParcelMerchant(bool status) { m_parcel_merchant_engaged = status; }
+	Timer *GetParcelTimer() { return &parcel_timer; }
+	bool DeleteParcel(uint32 parcel_id);
+	void AddParcel(CharacterParcelsRepository::CharacterParcels &parcel);
+	void LoadParcels();
+	std::map<uint32, CharacterParcelsRepository::CharacterParcels> GetParcels() { return m_parcels; }
+	int32 FindNextFreeParcelSlot(uint32 char_id);
+	void SendParcelIconStatus();
 
 	void SendBuyerResults(char *SearchQuery, uint32 SearchID);
 	void ShowBuyLines(const EQApplicationPacket *app);
@@ -1857,6 +1886,14 @@ private:
 	bool Trader;
 	bool Buyer;
 	std::string BuyerWelcomeMessage;
+	int32                                                          m_parcel_platinum;
+	int32                                                          m_parcel_gold;
+	int32                                                          m_parcel_silver;
+	int32                                                          m_parcel_copper;
+	int32                                                          m_parcel_count;
+	bool                                                           m_parcel_enabled;
+	bool                                                           m_parcel_merchant_engaged;
+	std::map<uint32, CharacterParcelsRepository::CharacterParcels> m_parcels{};
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
@@ -1955,6 +1992,7 @@ private:
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
 	Timer pick_lock_timer;
+	Timer parcel_timer;	//Used to limit the number of parcels to one every 30 seconds (default).  Changable via rule.
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
