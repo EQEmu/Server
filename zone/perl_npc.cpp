@@ -791,6 +791,10 @@ uint32 Perl_NPC_GetNPCSpellsEffectsID(NPC* self)
 	return self->GetNPCSpellsEffectsID();
 }
 
+void Perl_NPC_DescribeSpecialAbilities(NPC* self, Client* c)
+{
+	self->DescribeSpecialAbilities(c);
+}
 
 void perl_register_npc()
 {
@@ -827,6 +831,7 @@ void perl_register_npc()
 	package.add("ClearLastName", &Perl_NPC_ClearLastName);
 	package.add("CountItem", &Perl_NPC_CountItem);
 	package.add("CountLoot", &Perl_NPC_CountLoot);
+	package.add("DescribeSpecialAbilities", &Perl_NPC_DescribeSpecialAbilities);
 	package.add("DisplayWaypointInfo", &Perl_NPC_DisplayWaypointInfo);
 	package.add("DoClassAttacks", &Perl_NPC_DoClassAttacks);
 	package.add("GetAccuracyRating", &Perl_NPC_GetAccuracyRating);
