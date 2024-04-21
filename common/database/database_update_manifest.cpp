@@ -5495,13 +5495,13 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 )",
 		.content_schema_update = true
 	},
-	ManifestEntry {
-	.version = 9271,
-	.description = "2024_03_10_parcel_implementation.sql",
-	.check = "SHOW TABLES LIKE 'character_parcels'",
-	.condition = "empty",
-	.match = "",
-	.sql = R"(CREATE TABLE `character_parcels` (
+	ManifestEntry{
+		.version = 9271,
+		.description = "2024_03_10_parcel_implementation.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `character_parcels` (
 				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 				`char_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
 				`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
@@ -5524,7 +5524,7 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 				WHERE id IN (202129, 3036, 394025, 75113, 49073, 41021, 40070, 106115, 55150, 9053, 382156, 1032,
 				155088, 23017, 61065, 29008, 67058, 54067, 19031, 50140);
 		)"
-}
+	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
