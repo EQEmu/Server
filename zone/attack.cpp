@@ -4303,8 +4303,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			}
 			else if (skill_used == EQ::skills::SkillKick &&
 					attacker->GetClass() == Class::Warrior) {
-				int stun_level;
-				stun_level = RuleI(Combat, NPCKickStunLevel);
+				int stun_level = RuleI(Combat, NPCKickStunLevel);
 				if (attacker->IsClient()) {
 					stun_level = RuleI(Combat, PCKickStunLevel);
 				}
