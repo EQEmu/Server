@@ -991,9 +991,11 @@ bool Corpse::Process()
 	}
 
 	if (m_corpse_graveyard_timer.Check()) {
-		MovePlayerCorpseToGraveyard();
-		m_corpse_graveyard_timer.Disable();
-		return false;
+		if (MovePlayerCorpseToGraveyard()) {
+			m_corpse_graveyard_timer.Disable();
+			return false;
+		}
+		return true; // If the corpse was not moved, continue the corpse in the process rather than put in limbo
 	}
 
 	// Player is offline. If rez timer is enabled, disable it and save corpse.
