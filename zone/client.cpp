@@ -7630,7 +7630,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 #ifdef LUA_EQEMU
 	int32 lua_ret = 0;
 	bool ignore_default = false;
-	lua_ret = LuaParser::Instance()->UpdatePersonalFaction(this, e.value, e.faction_id, current_value, e.temp, faction_minimum, faction_maximum, ignore_default);
+	lua_ret = LuaParser::Instance()->UpdatePersonalFaction(this, value, faction_id, current_value, temp, this_faction_min, this_faction_max, ignore_default);
 
 	if (ignore_default) {
 		e.value = lua_ret;
