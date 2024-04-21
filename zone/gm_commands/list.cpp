@@ -45,22 +45,22 @@ void command_list(Client *c, const Seperator *sep)
 	std::string unique_type;
 
 	if (is_bots) {
-		search_type = "bots";
+		search_type = "bot";
 		unique_type = "Bot ID";
 	} else if (is_corpses) {
-		search_type = "corpses";
+		search_type = "corpse";
 		unique_type = "Corpse ID";
 	} else if (is_doors) {
-		search_type = "doors";
+		search_type = "door";
 		unique_type = "Door ID";
 	} else if (is_npcs) {
-		search_type = "NPCs";
+		search_type = "NPC";
 		unique_type = "NPC ID";
 	} else if (is_objects) {
-		search_type = "objects";
+		search_type = "object";
 		unique_type = "Object ID";
 	} else if (is_players) {
-		search_type = "players";
+		search_type = "player";
 		unique_type = "Character ID";
 	}
 
