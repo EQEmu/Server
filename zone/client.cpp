@@ -12393,3 +12393,34 @@ std::vector<Mob*> Client::GetRaidOrGroupOrSelf(bool clients_only)
 
 	return v;
 }
+
+uint16 Client::GetSkill(EQ::skills::SkillType skill_id) const
+{
+	if (skill_id <= EQ::skills::HIGHEST_SKILL) {
+
+		if (spellbonuses.ReduceSkill[skill_id] > 0) {
+
+			if (itembonuses.skillmod[skill_id] > 0) {
+
+				if (itembonuses.skillmodmax[skill_id] > 0) {
+					return std::min(m_pp.skills[skill_id] + itembonuses.skillmodmax[skill_id], m_pp.skills[skill_id] + ((m_pp.skills[skill_id] * (itembonuses.skillmod[skill_id] - spellbonuses.ReduceSkill[skill_id])) / 100));
+				}
+				return m_pp.skills[skill_id] + ((m_pp.skills[skill_id] * (itembonuses.skillmod[skill_id] - spellbonuses.ReduceSkill[skill_id])) / 100);
+			}
+			return m_pp.skills[skill_id] - ((m_pp.skills[skill_id] * spellbonuses.ReduceSkill[skill_id]) / 100);
+		}
+
+		if (itembonuses.skillmod[skill_id] > 0) {
+
+			if (itembonuses.skillmodmax[skill_id] > 0){
+				
+				if (itembonuses.skillmodmax[skill_id] > 0) {
+					return std::min(m_pp.skills[skill_id] + itembonuses.skillmodmax[skill_id], m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100);
+				}
+				return m_pp.skills[skill_id] * (100 + itembonuses.skillmod[skill_id]) / 100;
+			}
+			return m_pp.skills[skill_id];
+		}
+		return 0;
+	}
+}
