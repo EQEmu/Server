@@ -126,49 +126,13 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 {
 	const auto l  = zone->GetLootdrop(lootdrop_id);
 	const auto le = zone->GetLootdropEntries(lootdrop_id);
-
-	auto content_flags = ContentFlags{
-		.min_expansion = l.min_expansion,
-		.max_expansion = l.max_expansion,
-		.content_flags = l.content_flags,
-		.content_flags_disabled = l.content_flags_disabled
-	};
-
-	if (l.id == 0 || le.empty() || !content_service.DoesPassContentFiltering(content_flags)) {
+	if (l.id == 0 || le.empty()) {
 		return;
 	}
 
 	// if this lootdrop is droplimit=0 and mindrop 0, scan list once and return
 	if (drop_limit == 0 && min_drop == 0) {
 		for (const auto &e: le) {
-			LogLootDetail(
-				"-- NPC [{}] Lootdrop [{}] Item [{}] ({}_ Chance [{}] Multiplier [{}]",
-				GetCleanName(),
-				lootdrop_id,
-				database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown",
-				e.item_id,
-				e.chance,
-				e.multiplier
-			);
-
-			if (!content_service.DoesPassContentFiltering(
-				ContentFlags{
-					.min_expansion = e.min_expansion,
-					.max_expansion = e.max_expansion,
-					.content_flags = e.content_flags,
-					.content_flags_disabled = e.content_flags_disabled
-				}
-			)) {
-				LogLoot(
-					"-- NPC [{}] Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
-					GetCleanName(),
-					lootdrop_id,
-					e.item_id,
-					database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
-				);
-				continue;
-			}
-
 			for (int j = 0; j < e.multiplier; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= e.chance && MeetsLootDropLevelRequirements(e, true)) {
 					const EQ::ItemData *database_item = database.GetItem(e.item_id);
@@ -234,24 +198,6 @@ void NPC::AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop)
 		if (drops < min_drop || roll_table_chance_bypass || (float) zone->random.Real(0.0, 1.0) >= no_loot_prob) {
 			float           roll = (float) zone->random.Real(0.0, roll_t);
 			for (const auto &e: le) {
-				if (!content_service.DoesPassContentFiltering(
-					ContentFlags{
-						.min_expansion = e.min_expansion,
-						.max_expansion = e.max_expansion,
-						.content_flags = e.content_flags,
-						.content_flags_disabled = e.content_flags_disabled
-					}
-				)) {
-					LogLoot(
-						"-- NPC [{}] Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
-						GetCleanName(),
-						lootdrop_id,
-						e.item_id,
-						database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
-					);
-					continue;
-				}
-
 				const auto *db_item = database.GetItem(e.item_id);
 				if (db_item) {
 					// if it doesn't meet the requirements do nothing
