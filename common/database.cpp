@@ -1125,27 +1125,27 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 	return e.gid ? e.leadername : std::string();
 }
 
-void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
+void Database::SetGroupLeaderName(uint32 group_id, const std::string &name)
 {
-	auto e = GroupLeadersRepository::FindOne(*this, group_id);
+    auto e       = GroupLeadersRepository::FindOne(*this, group_id);
 
-	e.leadername = name;
+    e.leadername = name;
 
-	if (e.gid) {
-		GroupLeadersRepository::UpdateOne(*this, e);
-		return;
-	}
+    if (e.gid) {
+        GroupLeadersRepository::UpdateOne(*this, e);
+        return;
+    }
 
-	e.gid            = group_id;
-	e.marknpc        = std::string();
-	e.leadershipaa   = std::string();
-	e.maintank       = std::string();
-	e.assist         = std::string();
-	e.puller         = std::string();
-	e.mentoree       = std::string();
-	e.mentor_percent = 0;
+    e.gid            = group_id;
+    e.marknpc        = std::string();
+    e.leadershipaa   = std::string();
+    e.maintank       = std::string();
+    e.assist         = std::string();
+    e.puller         = std::string();
+    e.mentoree       = std::string();
+    e.mentor_percent = 0;
 
-	GroupLeadersRepository::InsertOne(*this, e);
+    GroupLeadersRepository::ReplaceOne(*this, e);
 }
 
 std::string Database::GetGroupLeaderName(uint32 group_id)
@@ -1178,7 +1178,7 @@ char* Database::GetGroupLeadershipInfo(
 	GroupLeadershipAA_Struct* GLAA
 )
 {
-	const auto& e = GroupLeadersRepository::FindOne(*this, group_id);
+	auto e = GroupLeadersRepository::FindOne(*this, group_id);
 
 	if (!e.gid) {
 		if (leaderbuf) {
@@ -1239,9 +1239,9 @@ char* Database::GetGroupLeadershipInfo(
 	if (mentor_percent) {
 		*mentor_percent = e.mentor_percent;
 	}
-
-	if (GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
-		memcpy(GLAA, e.leadershipaa.c_str(), sizeof(GroupLeadershipAA_Struct));
+	if(GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
+		Decode(e.leadershipaa);
+		memcpy(GLAA, e.leadershipaa.data(), sizeof(GroupLeadershipAA_Struct));
 	}
 
 	return leaderbuf;
@@ -2028,3 +2028,17 @@ void Database::SourceSqlFromUrl(const std::string& url)
 		LogError("URI parser error [{}]", iae.what());
 	}
 }
+
+void Database::Encode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) += char('0');
+	}
+};
+
+void Database::Decode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) -= char('0');
+	}
+};
