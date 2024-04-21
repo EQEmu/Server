@@ -2297,9 +2297,9 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 				caster->MessageString(Chat::White, REZZ_ALREADY_PENDING);
 				caster->MessageString(Chat::White, CORPSE_TOO_OLD);
 				return;
-			} else {
-				caster->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse.");
 			}
+
+			caster->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse.");
 		}
 	}
 
