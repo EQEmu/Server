@@ -87,6 +87,7 @@
 #include "../common/path_manager.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/skill_caps.h"
+#include "../common/repositories/character_parcels_repository.h"
 
 SkillCaps           skill_caps;
 ZoneStore           zone_store;
@@ -176,6 +177,9 @@ int main(int argc, char **argv)
 	PurgeInstanceTimer.Start(450000);
 	Timer EQTimeTimer(600000);
 	EQTimeTimer.Start(600000);
+	Timer parcel_prune_timer(86400000);
+	parcel_prune_timer.Start(86400000);
+
 
 	// global loads
 	LogInfo("Loading launcher list");
@@ -419,6 +423,20 @@ int main(int argc, char **argv)
 
 		client_list.Process();
 		guild_mgr.Process();
+
+		if (parcel_prune_timer.Check()) {
+			if (RuleB(Parcel, EnableParcelMerchants) && RuleB(Parcel, EnablePruning)) {
+				LogTrading(
+					"Parcel Prune process running for parcels over <red>[{}] days",
+					RuleI(Parcel, ParcelPruneDelay)
+				);
+
+				auto out = std::make_unique<ServerPacket>(ServerOP_ParcelPrune);
+				zoneserver_list.SendPacketToBootedZones(out.get());
+
+				database.PurgeCharacterParcels();
+			}
+		}
 
 		if (player_event_process_timer.Check()) {
 			player_event_logs.Process();

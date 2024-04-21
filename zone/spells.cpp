@@ -2669,7 +2669,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 					Group *target_group = entity_list.GetGroupByMob(spell_target);
 					if (target_group) {
 						target_group->CastGroupSpell(this, spell_id);
-						if (GetClass() != Class::Bard) {
+						if (target_group != GetGroup() && GetClass() != Class::Bard) {
 							SpellOnTarget(spell_id, this);
 						}
 					}
@@ -3066,7 +3066,17 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	int blocked_effect, blocked_below_value, blocked_slot;
 	int overwrite_effect, overwrite_below_value, overwrite_slot;
 
-	LogSpells("Check Stacking on old [{}] ([{}]) @ lvl [{}] (by [{}]) vs. new [{}] ([{}]) @ lvl [{}] (by [{}])", sp1.name, spellid1, caster_level1, (caster1==nullptr)?"Nobody":caster1->GetName(), sp2.name, spellid2, caster_level2, (caster2==nullptr)?"Nobody":caster2->GetName());
+	LogSpells(
+		"Check Stacking on old [{}] ([{}]) @ lvl [{}] (by [{}]) vs. new [{}] ([{}]) @ lvl [{}] (by [{}])",
+		sp1.name,
+		spellid1,
+		caster_level1,
+		!caster1 ? "Nobody" : caster1->GetName(),
+		sp2.name,
+		spellid2,
+		caster_level2,
+		!caster2 ? "Nobody" : caster2->GetName()
+	);
 
 	if (IsResurrectionEffects(spellid1)) {
 		return 0;
@@ -3534,28 +3544,103 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 
 		if (IsValidSpell(curbuf.spellid)) {
 			// there's a buff in this slot
-			ret = CheckStackConflict(curbuf.spellid, curbuf.casterlevel, spell_id,
-					caster_level, entity_list.GetMobID(curbuf.casterid), caster, buffslot);
-			if (ret == -1) {	// stop the spell
-				LogSpells("Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
-						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
-				if (caster && caster->IsClient() && RuleB(Client, UseLiveBlockedMessage)) {
-					if (caster->GetClass() != Class::Bard) {
-						caster->Message(Chat::Red, "Your %s did not take hold on %s. (Blocked by %s.)", spells[spell_id].name, GetName(), spells[curbuf.spellid].name);
+			ret = CheckStackConflict(
+				curbuf.spellid,
+				curbuf.casterlevel,
+				spell_id,
+				caster_level,
+				entity_list.GetMobID(curbuf.casterid),
+				caster,
+				buffslot
+			);
+
+			if (ret == -1) { // stop the spell
+				LogSpells(
+					"Adding buff [{}] failed: stacking prevented by spell [{}] in slot [{}] with caster level [{}]",
+					spell_id,
+					curbuf.spellid,
+					buffslot,
+					curbuf.casterlevel
+				);
+
+				if (caster) {
+					if (caster->IsClient() && RuleB(Client, UseLiveBlockedMessage) && caster->GetClass() != Class::Bard) {
+						caster->Message(
+							Chat::Red,
+							fmt::format(
+								"Your {} did not take hold on {}. (Blocked by {}.)",
+								spells[spell_id].name,
+								GetName(),
+								spells[curbuf.spellid].name
+							).c_str()
+						);
+					}
+
+					const bool caster_has_block_event = (
+						(caster->IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(caster->IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(caster->IsNPC() && parse->HasQuestSub(caster->GetNPCTypeID(), EVENT_SPELL_BLOCKED))
+					);
+
+					const bool cast_on_has_block_event = (
+						(IsBot() && parse->BotHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(IsClient() && parse->PlayerHasQuestSub(EVENT_SPELL_BLOCKED)) ||
+						(IsNPC() && parse->HasQuestSub(GetNPCTypeID(), EVENT_SPELL_BLOCKED))
+					);
+
+					if (caster_has_block_event || cast_on_has_block_event) {
+						const std::string& export_string = fmt::format(
+							"{} {}",
+							curbuf.spellid,
+							spell_id
+						);
+
+						if (caster_has_block_event) {
+							if (caster->IsBot()) {
+								parse->EventBot(EVENT_SPELL_BLOCKED, caster->CastToBot(), this, export_string, 0);
+							} else if (caster->IsClient()) {
+								parse->EventPlayer(EVENT_SPELL_BLOCKED, caster->CastToClient(), export_string, 0);
+							} else if (caster->IsNPC()) {
+								parse->EventNPC(EVENT_SPELL_BLOCKED, caster->CastToNPC(), this, export_string, 0);
+							}
+						}
+
+						if (cast_on_has_block_event && caster != this) {
+							if (IsBot()) {
+								parse->EventBot(EVENT_SPELL_BLOCKED, CastToBot(), caster, export_string, 0);
+							} else if (IsClient()) {
+								parse->EventPlayer(EVENT_SPELL_BLOCKED, CastToClient(), export_string, 0);
+							} else if (IsNPC()) {
+								parse->EventNPC(EVENT_SPELL_BLOCKED, CastToNPC(), caster, export_string, 0);
+							}
+						}
 					}
 				}
+
 				return -1;
-			}
-			if (ret == 1) {	// set a flag to indicate that there will be overwriting
-				LogSpells("Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}]",
-						spell_id, curbuf.spellid, buffslot, curbuf.casterlevel);
+			} else if (ret == 1 && !will_overwrite) {
+				// set a flag to indicate that there will be overwriting
+				LogSpells(
+					"Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}]",
+					spell_id,
+					curbuf.spellid,
+					buffslot,
+					curbuf.casterlevel
+				);
+
 				// If this is the first buff it would override, use its slot
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
-			}
-			if (ret == 2) { //ResurrectionEffectBlock handling to move potential overwrites to a new buff slock while keeping Res Sickness
-				LogSpells("Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
-					spell_id, curbuf.spellid, buffslot, curbuf.casterlevel, spell_id);
+			} else if (ret == 2) {
+				//ResurrectionEffectBlock handling to move potential overwrites to a new buff slock while keeping Res Sickness
+				LogSpells(
+					"Adding buff [{}] will overwrite spell [{}] in slot [{}] with caster level [{}], but ResurrectionEffectBlock is set to 2. Attempting to move [{}] to an empty buff slot.",
+					spell_id,
+					curbuf.spellid,
+					buffslot,
+					curbuf.casterlevel,
+					spell_id
+				);
 			}
 		} else {
 			if (emptyslot == -1) {
@@ -4553,6 +4638,16 @@ bool Mob::SpellOnTarget(
 
 	safe_delete(action_packet);
 	safe_delete(message_packet);
+
+	/*
+		Bug: When an HP buff with a heal effect is applied for first time, the heal portion of the effect heals the client and
+		updates HPs currently server side, but client side the HP bar does not register it as a heal thus you display as less than full HP.
+		However due to server thinking your healed, you are unable to correct it by healing.
+		Solution: You need to resend the HP update after buff completed and action packet resent.
+	*/
+	if ((IsEffectInSpell(spell_id, SE_TotalHP) || IsEffectInSpell(spell_id, SE_MaxHPChange)) && (IsEffectInSpell(spell_id, SE_CurrentHPOnce) || IsEffectInSpell(spell_id, SE_CurrentHP))) {
+		SendHPUpdate(true);
+	}
 
 	LogSpells("Cast of [{}] by [{}] on [{}] complete successfully", spell_id, GetName(), spelltar->GetName());
 

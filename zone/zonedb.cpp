@@ -1792,6 +1792,7 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->min_dmg            = n.mindmg;
 		t->max_dmg            = n.maxdmg;
 		t->attack_count       = n.attack_count;
+		t->is_parcel_merchant = n.is_parcel_merchant ? true : false;
 
 		if (!n.special_abilities.empty()) {
 			strn0cpy(t->special_abilities, n.special_abilities.c_str(), 512);

@@ -893,7 +893,6 @@ private:
 	bool m_pulling_flag;
 	bool m_returning_flag;
 	bool is_using_item_click;
-	eStandingPetOrder m_previous_pet_order;
 	uint32 m_bot_caster_range;
 	BotCastingRoles m_CastingRoles;
 

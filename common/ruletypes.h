@@ -330,6 +330,7 @@ RULE_BOOL(World, UseOldShadowKnightClassExport, true, "Disable to have Shadowkni
 RULE_STRING(World, IPExemptionZones, "", "Comma-delimited list of zones to exclude from IP-limit checks. Empty string to disable.")
 RULE_STRING(World, MOTD, "", "Server MOTD sent on login, change from empty to have this be used instead of variables table 'motd' value")
 RULE_STRING(World, Rules, "", "Server Rules, change from empty to have this be used instead of variables table 'rules' value, lines are pipe (|) separated, example: A|B|C")
+RULE_BOOL(World, EnableAutoLogin, false, "Enables or disables auto login of characters, allowing people to log characters in directly from loginserver to ingame")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
@@ -956,6 +957,16 @@ RULE_BOOL(Items, DisableNoRent, false, "Enable this to disable No Rent Items")
 RULE_BOOL(Items, DisableNoTransfer, false, "Enable this to disable No Transfer Items")
 RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt Items")
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Parcel)
+RULE_BOOL(Parcel, EnableParcelMerchants, true, "Enable or Disable Parcel Merchants.  Requires RoF+ Clients.")
+RULE_BOOL(Parcel, EnableDirectToInventoryDelivery, false, "Enable or Disable RoF2 bazaar purchases to be delivered directly to the buyer's inventory.")
+RULE_BOOL(Parcel, DeleteOnDuplicate, false, "Delete retrieved item if it creates a lore conflict.")
+RULE_BOOL(Parcel, EnablePruning, false, "Enable the automatic pruning of sent parcels.  Uses rule ParcelPruneDelay for prune delay.")
+RULE_INT(Parcel, ParcelDeliveryDelay, 30000, "Sets the time that a player must wait between sending parcels.")
+RULE_INT(Parcel, ParcelMaxItems, 50, "The maximum number of parcels a player is allowed to have in their mailbox.")
+RULE_INT(Parcel, ParcelPruneDelay, 30, "The number of days after which a parcel is deleted. Items are lost!")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

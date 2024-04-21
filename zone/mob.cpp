@@ -442,6 +442,7 @@ Mob::Mob(
 	weaponstance.aabonus_buff_spell_id    = 0;
 
 	pStandingPetOrder = SPO_Follow;
+	m_previous_pet_order = SPO_Follow;
 	pseudo_rooted     = false;
 
 	nobuff_invisible = 0;
@@ -505,8 +506,6 @@ Mob::Mob(
 
 	use_double_melee_round_dmg_bonus = false;
 	dw_same_delay                    = 0;
-
-	queue_wearchange_slot = -1;
 
 	m_manual_follow = false;
 
@@ -635,6 +634,16 @@ void Mob::CalcInvisibleLevel()
 	}
 
 	BreakCharmPetIfConditionsMet();
+}
+
+void Mob::SetPetOrder(eStandingPetOrder i) {
+	if (i == SPO_Sit || i == SPO_FeignDeath) {
+		if (pStandingPetOrder == SPO_Follow || pStandingPetOrder == SPO_Guard) {
+			m_previous_pet_order = pStandingPetOrder;
+		}
+	}
+
+	pStandingPetOrder = i;
 }
 
 void Mob::SetInvisible(uint8 state, bool set_on_bonus_calc) {
@@ -958,8 +967,9 @@ int64 Mob::CalcMaxMana()
 }
 
 int64 Mob::CalcMaxHP() {
-	max_hp = (base_hp + itembonuses.HP + spellbonuses.HP);
-	max_hp += max_hp * ((aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp = (base_hp + itembonuses.HP);
+	max_hp += max_hp * ((aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange) / 10000.0f);
+	max_hp += spellbonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange;
 
 	return max_hp;
 }
@@ -967,14 +977,13 @@ int64 Mob::CalcMaxHP() {
 int64 Mob::GetItemHPBonuses() {
 	int64 item_hp = 0;
 	item_hp = itembonuses.HP;
-	item_hp += item_hp * itembonuses.MaxHPChange / 10000;
+	item_hp += item_hp * ((itembonuses.PercentMaxHPChange + spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange) / 10000.0f);
 	return item_hp;
 }
 
 int64 Mob::GetSpellHPBonuses() {
 	int64 spell_hp = 0;
-	spell_hp = spellbonuses.HP;
-	spell_hp += spell_hp * spellbonuses.MaxHPChange / 10000;
+	spell_hp += spellbonuses.FlatMaxHPChange;
 	return spell_hp;
 }
 
@@ -1645,6 +1654,22 @@ void Mob::SendHPUpdate(bool force_update_all)
 			_appearance = eaLooting;
 		}
 	}
+}
+
+void Mob::SendRename(Mob *sender, const char* old_name, const char* new_name)
+{
+	auto out2 = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
+	auto data = (MobRename_Struct *)out2->pBuffer;
+	out2->priority = 6;
+
+	strn0cpy(data->old_name, old_name, sizeof(data->old_name));
+	strn0cpy(data->old_name_again, old_name, sizeof(data->old_name_again));
+	strn0cpy(data->new_name, new_name, sizeof(data->new_name));
+	data->unknown192 = 0;
+	data->unknown196 = 1;
+
+	entity_list.QueueClients(sender, out2);
+	safe_delete(out2);
 }
 
 void Mob::StopMoving()
@@ -4374,15 +4399,7 @@ void Mob::TempName(const char *newname)
 	entity_list.MakeNameUnique(temp_name);
 
 	// Send the new name to all clients
-	auto outapp = new EQApplicationPacket(OP_MobRename, sizeof(MobRename_Struct));
-	MobRename_Struct* mr = (MobRename_Struct*) outapp->pBuffer;
-	strn0cpy(mr->old_name, old_name, 64);
-	strn0cpy(mr->old_name_again, old_name, 64);
-	strn0cpy(mr->new_name, temp_name, 64);
-	mr->unknown192 = 0;
-	mr->unknown196 = 1;
-	entity_list.QueueClients(this, outapp);
-	safe_delete(outapp);
+	SendRename(this, old_name, temp_name);
 
 	SetName(temp_name);
 }

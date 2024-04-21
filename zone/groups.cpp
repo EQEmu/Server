@@ -24,6 +24,8 @@
 #include "string_ids.h"
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/group_id_repository.h"
+#include "../common/repositories/group_leaders_repository.h"
+
 
 extern EntityList entity_list;
 extern WorldServer worldserver;
@@ -793,7 +795,6 @@ bool Group::DelMember(Mob* oldmember, bool ignoresender)
 	return true;
 }
 
-// does the caster + group
 void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 	uint32 z;
 	float range, distance;
@@ -806,8 +807,6 @@ void Group::CastGroupSpell(Mob* caster, uint16 spell_id) {
 
 	float range2 = range*range;
 	float min_range2 = spells[spell_id].min_range * spells[spell_id].min_range;
-
-//	caster->SpellOnTarget(spell_id, caster);
 
 	for(z=0; z < MAX_GROUP_MEMBERS; z++)
 	{
@@ -2106,19 +2105,15 @@ void Group::UnDelegateMarkNPC(const char *OldNPCMarkerName)
 
 void Group::SaveGroupLeaderAA()
 {
-	// Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
-	// This is done so that group members not in the same zone as the Leader still have access to this information.
-	auto queryBuffer = new char[sizeof(GroupLeadershipAA_Struct) * 2 + 1];
-	database.DoEscapeString(queryBuffer, (char *)&LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+    // Stores the Group Leaders Leadership AA data from the Player Profile as a blob in the group_leaders table.
+    // This is done so that group members not in the same zone as the Leader still have access to this information.
 
-	std::string query = "UPDATE group_leaders SET leadershipaa = '";
-	query += queryBuffer;
-	query +=  StringFormat("' WHERE gid = %i LIMIT 1", GetID());
-	safe_delete_array(queryBuffer);
-    auto results = database.QueryDatabase(query);
-	if (!results.Success())
-		LogError("Unable to store LeadershipAA: [{}]\n", results.ErrorMessage().c_str());
+    std::string aa((char *) &LeaderAbilities, sizeof(GroupLeadershipAA_Struct));
+    auto        results = GroupLeadersRepository::UpdateLeadershipAA(database, aa, GetID());
 
+	if (!results) {
+        LogError("Unable to store GroupLeadershipAA for group_id: [{}]", GetID());
+    }
 }
 
 void Group::UnMarkNPC(uint16 ID)

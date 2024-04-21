@@ -71,7 +71,7 @@ void Mob::CheckFlee()
 	}
 
 	// If no special flee_percent check for Gray or Other con rates
-	if (GetLevelCon(hate_top->GetLevel(), GetLevel()) == CON_GRAY && flee_ratio == 0 && RuleB(Combat, FleeGray) &&
+	if (GetLevelCon(hate_top->GetLevel(), GetLevel()) == ConsiderColor::Gray && flee_ratio == 0 && RuleB(Combat, FleeGray) &&
 		GetLevel() <= RuleI(Combat, FleeGrayMaxLevel)) {
 		flee_ratio = RuleI(Combat, FleeGrayHPRatio);
 		LogFlee("Mob [{}] using combat flee gray hp_ratio [{}] flee_ratio [{}]", GetCleanName(), hp_ratio, flee_ratio);
@@ -110,16 +110,16 @@ void Mob::CheckFlee()
 	int    flee_chance;
 	switch (con) {
 		//these values are not 100% researched
-		case CON_GRAY:
+		case ConsiderColor::Gray:
 			flee_chance = 100;
 			break;
-		case CON_GREEN:
+		case ConsiderColor::Green:
 			flee_chance = 90;
 			break;
-		case CON_LIGHTBLUE:
+		case ConsiderColor::LightBlue:
 			flee_chance = 90;
 			break;
-		case CON_BLUE:
+		case ConsiderColor::DarkBlue:
 			flee_chance = 80;
 			break;
 		default:
@@ -175,7 +175,7 @@ void Mob::ProcessFlee()
 	Mob *hate_top = GetHateTop();
 
 	// If no special flee_percent check for Gray or Other con rates
-	if(hate_top != nullptr && GetLevelCon(hate_top->GetLevel(), GetLevel()) == CON_GRAY && fleeratio == 0 && RuleB(Combat, FleeGray)) {
+	if(hate_top != nullptr && GetLevelCon(hate_top->GetLevel(), GetLevel()) == ConsiderColor::Gray && fleeratio == 0 && RuleB(Combat, FleeGray)) {
 		fleeratio = RuleI(Combat, FleeGrayHPRatio);
 	} else if(fleeratio == 0) {
 		fleeratio = RuleI(Combat, FleeHPRatio );

@@ -221,7 +221,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 	if (RuleB(Aggro, UseLevelAggro)) {
 		if (
 			GetLevel() < RuleI(Aggro, MinAggroLevel) &&
-			mob->GetLevelCon(GetLevel()) == CON_GRAY &&
+			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
 			GetBodyType() != BT_Undead &&
 			!AlwaysAggro()
 		) {
@@ -237,7 +237,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 	} else {
 		if (
 			GetINT() > RuleI(Aggro, IntAggroThreshold) &&
-			mob->GetLevelCon(GetLevel()) == CON_GRAY &&
+			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
 			!AlwaysAggro()
 		) {
 			to_who->Message(
@@ -502,7 +502,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 				mob->IsClient() &&
 				mob->CastToClient()->IsSitting()
 			) ||
-			mob->GetLevelCon(GetLevel()) != CON_GRAY
+			mob->GetLevelCon(GetLevel()) != ConsiderColor::Gray
 		) &&
 		(
 			faction_value == FACTION_SCOWLS ||
@@ -531,7 +531,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 					mob->IsClient() &&
 					mob->CastToClient()->IsSitting()
 				) ||
-				mob->GetLevelCon(GetLevel()) != CON_GRAY
+				mob->GetLevelCon(GetLevel()) != ConsiderColor::Gray
 			) &&
 			(
 				faction_value == FACTION_SCOWLS	||
@@ -586,7 +586,7 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 			continue;
 		}
 
-		if (!inc_gray_con && attacker->GetLevelCon(mob->GetLevel()) == CON_GRAY) {
+		if (!inc_gray_con && attacker->GetLevelCon(mob->GetLevel()) == ConsiderColor::Gray) {
 			continue;
 		}
 

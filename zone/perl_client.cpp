@@ -3148,6 +3148,26 @@ perl::array Perl_Client_GetRaidOrGroupOrSelf(Client* self, bool clients_only)
 	return result;
 }
 
+std::string Perl_Client_GetAutoLoginCharacterName(Client* self)
+{
+	return quest_manager.GetAutoLoginCharacterNameByAccountID(self->AccountID());
+}
+
+bool Perl_Client_SetAutoLoginCharacterName(Client* self)
+{
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), self->GetCleanName());
+}
+
+bool Perl_Client_SetAutoLoginCharacterName(Client* self, std::string character_name)
+{
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), character_name);
+}
+
+void Perl_Client_DescribeSpecialAbilities(Client* self, NPC* n)
+{
+	n->DescribeSpecialAbilities(self);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3234,6 +3254,7 @@ void perl_register_client()
 	package.add("CreateExpeditionFromTemplate", &Perl_Client_CreateExpeditionFromTemplate);
 	package.add("CreateTaskDynamicZone", &Perl_Client_CreateTaskDynamicZone);
 	package.add("DecreaseByID", &Perl_Client_DecreaseByID);
+	package.add("DescribeSpecialAbilities", &Perl_Client_DescribeSpecialAbilities);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);
@@ -3280,6 +3301,7 @@ void perl_register_client()
 	package.add("GetAugmentAt", &Perl_Client_GetAugmentAt);
 	package.add("GetAugmentIDAt", &Perl_Client_GetAugmentIDAt);
 	package.add("GetAugmentIDsBySlotID", &Perl_Client_GetAugmentIDsBySlotID);
+	package.add("GetAutoLoginCharacterName", &Perl_Client_GetAutoLoginCharacterName);
 	package.add("GetBaseAGI", &Perl_Client_GetBaseAGI);
 	package.add("GetBaseCHA", &Perl_Client_GetBaseCHA);
 	package.add("GetBaseDEX", &Perl_Client_GetBaseDEX);
@@ -3572,6 +3594,8 @@ void perl_register_client()
 	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
 	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
 	package.add("SetAnon", &Perl_Client_SetAnon);
+	package.add("SetAutoLoginCharacterName", (bool(*)(Client*))&Perl_Client_SetAutoLoginCharacterName);
+	package.add("SetAutoLoginCharacterName", (bool(*)(Client*, std::string))&Perl_Client_SetAutoLoginCharacterName);
 	package.add("SetBaseClass", &Perl_Client_SetBaseClass);
 	package.add("SetBaseGender", &Perl_Client_SetBaseGender);
 	package.add("SetBaseRace", &Perl_Client_SetBaseRace);

@@ -755,11 +755,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 		pZoneName = strcpy(new char[zd->long_name.length() + 1], zd->long_name.c_str());
 	}
 
-	// If we are zoning to the same zone, we need to use the current instance ID if it is not specified.
-	if (zoneID == zone->GetZoneID() && instance_id == 0) {
-		instance_id = zone->GetInstanceID();
-	}
-
 	auto r = content_service.FindZone(zoneID, instance_id);
 	if (r.zone_id) {
 		zoneID      = r.zone_id;
@@ -776,6 +771,11 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			ignorerestrictions,
 			static_cast<int>(zm)
 		);
+
+		// If we are zoning to the same zone, we need to use the current instance ID if it is not specified.
+		if (content_service.IsInPublicStaticInstance(instance_id) && zoneID == zone->GetZoneID() && instance_id == 0) {
+			instance_id = zone->GetInstanceID();
+		}
 	}
 
 	LogInfo(

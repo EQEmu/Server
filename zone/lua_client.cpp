@@ -3345,6 +3345,30 @@ luabind::object Lua_Client::GetRaidOrGroupOrSelf(lua_State* L, bool clients_only
 	return t;
 }
 
+std::string Lua_Client::GetAutoLoginCharacterName()
+{
+	Lua_Safe_Call_String();
+	return quest_manager.GetAutoLoginCharacterNameByAccountID(self->AccountID());
+}
+
+bool Lua_Client::SetAutoLoginCharacterName()
+{
+	Lua_Safe_Call_Bool();
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), self->GetCleanName());
+}
+
+bool Lua_Client::SetAutoLoginCharacterName(std::string character_name)
+{
+	Lua_Safe_Call_Bool();
+	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), character_name);
+}
+
+void Lua_Client::DescribeSpecialAbilities(Lua_NPC n)
+{
+	Lua_Safe_Call_Void();
+	n.DescribeSpecialAbilities(self);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3428,6 +3452,7 @@ luabind::scope lua_register_client() {
 	.def("CreateExpeditionFromTemplate", &Lua_Client::CreateExpeditionFromTemplate)
 	.def("CreateTaskDynamicZone", &Lua_Client::CreateTaskDynamicZone)
 	.def("DecreaseByID", (bool(Lua_Client::*)(uint32,int))&Lua_Client::DecreaseByID)
+	.def("DescribeSpecialAbilities", (void(Lua_Client::*)(Lua_NPC))&Lua_Client::DescribeSpecialAbilities)
 	.def("DeleteBucket", (void(Lua_Client::*)(std::string))&Lua_Client::DeleteBucket)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int))&Lua_Client::DeleteItemInInventory)
 	.def("DeleteItemInInventory", (void(Lua_Client::*)(int,int,bool))&Lua_Client::DeleteItemInInventory)
@@ -3481,6 +3506,7 @@ luabind::scope lua_register_client() {
 	.def("GetAnon", (int(Lua_Client::*)(void))&Lua_Client::GetAnon)
 	.def("GetAugmentIDAt", (int(Lua_Client::*)(int,int))&Lua_Client::GetAugmentIDAt)
 	.def("GetAugmentIDsBySlotID", (luabind::object(Lua_Client::*)(lua_State* L,int16))&Lua_Client::GetAugmentIDsBySlotID)
+	.def("GetAutoLoginCharacterName", (std::string(Lua_Client::*)(void))&Lua_Client::GetAutoLoginCharacterName)
 	.def("GetBaseAGI", (int(Lua_Client::*)(void))&Lua_Client::GetBaseAGI)
 	.def("GetBaseCHA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseCHA)
 	.def("GetBaseDEX", (int(Lua_Client::*)(void))&Lua_Client::GetBaseDEX)
@@ -3774,6 +3800,8 @@ luabind::scope lua_register_client() {
 	.def("SetAccountFlag", (void(Lua_Client::*)(const std::string&,const std::string&))&Lua_Client::SetAccountFlag)
 	.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::SetAlternateCurrencyValue)
 	.def("SetAnon", (void(Lua_Client::*)(uint8))&Lua_Client::SetAnon)
+	.def("SetAutoLoginCharacterName", (bool(Lua_Client::*)(void))&Lua_Client::SetAutoLoginCharacterName)
+	.def("SetAutoLoginCharacterName", (bool(Lua_Client::*)(std::string))&Lua_Client::SetAutoLoginCharacterName)
 	.def("SetBaseClass", (void(Lua_Client::*)(int))&Lua_Client::SetBaseClass)
 	.def("SetBaseGender", (void(Lua_Client::*)(int))&Lua_Client::SetBaseGender)
 	.def("SetBaseRace", (void(Lua_Client::*)(int))&Lua_Client::SetBaseRace)

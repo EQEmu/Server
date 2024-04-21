@@ -260,6 +260,9 @@ foreach my $table_to_generate (@tables) {
         elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar/i) {
             $default_value = '""';
         }
+        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /blob/i) {
+            $default_value = '""';
+        }
 
         # for datetime values that set default value all zeroed out
         if ($default_value =~ /0000-00-00 00:00:00/i) {
@@ -296,6 +299,9 @@ foreach my $table_to_generate (@tables) {
             elsif ($data_type =~ /datetime|timestamp/) {
                 $query_value = sprintf('FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")");', $column_name_formatted, $column_name_formatted);
             }
+            elsif ($data_type =~ /blob/) {
+                $query_value = sprintf('\'" + e.%s + "\'");', $column_name_formatted);
+            }
 
             $update_one_entries .= sprintf(
                 "\t\t" . 'v.push_back(columns[%s] + " = %s' . "\n",
@@ -311,6 +317,9 @@ foreach my $table_to_generate (@tables) {
         }
         elsif ($data_type =~ /datetime|timestamp/) {
             $value = sprintf('"FROM_UNIXTIME(" + (e.%s > 0 ? std::to_string(e.%s) : "null") + ")"', $column_name_formatted, $column_name_formatted);
+        }
+        elsif ($data_type =~ /blob/) {
+            $value = sprintf("\"'\" + e.%s + \"'\"", $column_name_formatted);
         }
 
         $insert_one_entries  .= sprintf("\t\tv.push_back(%s);\n", $value);

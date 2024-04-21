@@ -69,6 +69,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/character_stats_record_repository.h"
 #include "dialogue_window.h"
+#include "../common/rulesys.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -321,6 +322,8 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_OpenGuildTributeMaster] = &Client::Handle_OP_OpenGuildTributeMaster;
 	ConnectedOpcodes[OP_OpenInventory] = &Client::Handle_OP_OpenInventory;
 	ConnectedOpcodes[OP_OpenTributeMaster] = &Client::Handle_OP_OpenTributeMaster;
+	ConnectedOpcodes[OP_ShopSendParcel] = &Client::Handle_OP_ShopSendParcel;
+	ConnectedOpcodes[OP_ShopRetrieveParcel] = &Client::Handle_OP_ShopRetrieveParcel;
 	ConnectedOpcodes[OP_PDeletePetition] = &Client::Handle_OP_PDeletePetition;
 	ConnectedOpcodes[OP_PetCommands] = &Client::Handle_OP_PetCommands;
 	ConnectedOpcodes[OP_Petition] = &Client::Handle_OP_Petition;
@@ -538,6 +541,7 @@ void Client::CompleteConnect()
 	EnteringMessages(this);
 	LoadPEQZoneFlags();
 	LoadZoneFlags();
+	LoadAccountFlags();
 
 	/* Sets GM Flag if needed & Sends Petition Queue */
 	UpdateAdmin(false);
@@ -757,8 +761,10 @@ void Client::CompleteConnect()
 
 	entity_list.SendTraders(this);
 
-	Mob *pet = GetPet();
+	SendWearChangeAndLighting(EQ::textures::LastTexture);
+	Mob* pet = GetPet();
 	if (pet) {
+		pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
 		pet->SendPetBuffsToClient();
 	}
 
@@ -813,6 +819,10 @@ void Client::CompleteConnect()
 				CharacterID()
 			)
 		);
+	}
+
+	if(ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+		SendParcelStatus();
 	}
 
 	if (zone && zone->GetInstanceTimer()) {
@@ -950,8 +960,6 @@ void Client::CompleteConnect()
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
-
-	heroforge_wearchange_timer.Start(250);
 
 	RecordStats();
 	AutoGrantAAPoints();
@@ -4270,6 +4278,12 @@ void Client::Handle_OP_Bug(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 {
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants) && GetEngagedWithParcelMerchant()) {
+		Stand();
+		MessageString(Chat::Yellow, TRADER_BUSY_TWO);
+		return;
+	}
+
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
 
@@ -4323,6 +4337,12 @@ void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
 		FinishTrade(this);
 		trade->Reset();
 	}
+
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+		DoParcelCancel();
+		SetEngagedWithParcelMerchant(false);
+	}
+
 	EQApplicationPacket end_trade1(OP_FinishWindow, 0);
 	QueuePacket(&end_trade1);
 
@@ -5189,10 +5209,10 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	con->level = GetLevelCon(t->GetLevel());
 
 	if (ClientVersion() <= EQ::versions::ClientVersion::Titanium) {
-		if (con->level == CON_GRAY) {
-			con->level = CON_GREEN;
-		} else if (con->level == CON_WHITE) {
-			con->level = CON_WHITE_TITANIUM;
+		if (con->level == ConsiderColor::Gray) {
+			con->level = ConsiderColor::Green;
+		} else if (con->level == ConsiderColor::White) {
+			con->level = ConsiderColor::WhiteTitanium;
 		}
 	}
 
@@ -5233,26 +5253,26 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (t->IsRaidTarget()) {
 		uint32 color = 0;
 		switch (con->level) {
-			case CON_GREEN:
+			case ConsiderColor::Green:
 				color = 2;
 				break;
-			case CON_LIGHTBLUE:
+			case ConsiderColor::LightBlue:
 				color = 10;
 				break;
-			case CON_BLUE:
+			case ConsiderColor::DarkBlue:
 				color = 4;
 				break;
-			case CON_WHITE_TITANIUM:
-			case CON_WHITE:
+			case ConsiderColor::WhiteTitanium:
+			case ConsiderColor::White:
 				color = 10;
 				break;
-			case CON_YELLOW:
+			case ConsiderColor::Yellow:
 				color = 15;
 				break;
-			case CON_RED:
+			case ConsiderColor::Red:
 				color = 13;
 				break;
-			case CON_GRAY:
+			case ConsiderColor::Gray:
 				color = 6;
 				break;
 		}
@@ -6875,7 +6895,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 	Client *c = entity_list.GetClientByName(gmn->oldname);
 	LogInfo("GM([{}]) changeing players name. Old:[{}] New:[{}]", GetName(), gmn->oldname, gmn->newname);
 
-	const bool used_name = database.CheckUsedName(gmn->newname);
+	const bool used_name = database.IsNameUsed(gmn->newname);
 	if (!c) {
 		Message(Chat::Red, fmt::format("{} not found for name change. Operation failed!", gmn->oldname).c_str());
 		return;
@@ -6886,7 +6906,7 @@ void Client::Handle_OP_GMNameChange(const EQApplicationPacket *app)
 		return;
 	}
 
-	if (!used_name) {
+	if (used_name) {
 		Message(Chat::Red, fmt::format("{} is already in use. Operation failed!", gmn->newname).c_str());
 		return;
 	}
@@ -11034,7 +11054,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				// fix GUI sit button to be unpressed and stop sitting regen
 				SetPetCommandState(PET_BUTTON_SIT, 0);
-				mypet->SetAppearance(eaStanding);
+				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
+					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
+					mypet->SetAppearance(eaStanding);
+				}
 
 				zone->AddAggroMob();
 				// classic acts like qattack
@@ -11081,7 +11104,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				// fix GUI sit button to be unpressed and stop sitting regen
 				SetPetCommandState(PET_BUTTON_SIT, 0);
-				mypet->SetAppearance(eaStanding);
+				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
+					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
+					mypet->SetAppearance(eaStanding);
+				}
 
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
@@ -11147,7 +11173,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				// Set Sit button to unpressed - send stand anim/end hpregen
 				mypet->SetFeigned(false);
 				SetPetCommandState(PET_BUTTON_SIT, 0);
-				mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+				mypet->SetAppearance(eaStanding);
 
 				mypet->SayString(this, Chat::PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
@@ -11172,7 +11198,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			// fix GUI sit button to be unpressed - send stand anim/end hpregen
 			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+			mypet->SetAppearance(eaStanding);
 
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
@@ -11220,7 +11246,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 			// Set Sit button to unpressed - send stand anim/end hpregen
 			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+			mypet->SetAppearance(eaStanding);
 
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
@@ -11237,8 +11263,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			{
 				mypet->SetFeigned(false);
 				mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
-				mypet->SetPetOrder(SPO_Follow);
-				mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+				mypet->SetPetOrder(mypet->GetPreviousPetOrder());
+				mypet->SetAppearance(eaStanding);
 			}
 			else
 			{
@@ -11248,7 +11274,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetRunAnimSpeed(0);
 				if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
 					mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-				mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Sitting);
+				mypet->SetAppearance(eaSitting);
 			}
 		}
 		break;
@@ -11260,8 +11286,8 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->SetFeigned(false);
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
 			SetPetCommandState(PET_BUTTON_SIT, 0);
-			mypet->SetPetOrder(SPO_Follow);
-			mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+			mypet->SetPetOrder(mypet->GetPreviousPetOrder());
+			mypet->SetAppearance(eaStanding);
 		}
 		break;
 	}
@@ -11276,7 +11302,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			mypet->SetRunAnimSpeed(0);
 			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
 				mypet->InterruptSpell(); //No cast 4 u. //i guess the pet should start casting
-			mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Sitting);
+			mypet->SetAppearance(eaSitting);
 		}
 		break;
 	}
@@ -11481,7 +11507,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->SetPetOrder(SPO_FeignDeath);
 				mypet->SetRunAnimSpeed(0);
 				mypet->StopNavigation();
-				mypet->SendAppearancePacket(AppearanceType::Animation, Animation::Lying);
+				mypet->SetAppearance(eaDead);
 				mypet->SetFeigned(true);
 				mypet->SetTarget(nullptr);
 				if (!mypet->UseBardSpellLogic()) {
@@ -13870,6 +13896,11 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ShopEnd(const EQApplicationPacket *app)
 {
+    if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB(Parcel, EnableParcelMerchants)) {
+        DoParcelCancel();
+        SetEngagedWithParcelMerchant(false);
+    }
+
 	EQApplicationPacket empty(OP_ShopEndConfirm);
 	QueuePacket(&empty);
 	return;
@@ -14416,82 +14447,107 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Merchant_Click_Struct)) {
-		LogError("Wrong size: OP_ShopRequest, size=[{}], expected [{}]", app->size, sizeof(Merchant_Click_Struct));
+	if (app->size != sizeof(MerchantClick_Struct)) {
+		LogError("Wrong size: OP_ShopRequest, size=[{}], expected [{}]", app->size, sizeof(MerchantClick_Struct));
 		return;
 	}
 
-	Merchant_Click_Struct* mc = (Merchant_Click_Struct*)app->pBuffer;
+	MerchantClick_Struct *mc = (MerchantClick_Struct *) app->pBuffer;
 
 	// Send back opcode OP_ShopRequest - tells client to open merchant window.
-	//EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
-	//Merchant_Click_Struct* mco=(Merchant_Click_Struct*)outapp->pBuffer;
-	int merchantid = 0;
-	Mob* tmp = entity_list.GetMob(mc->npcid);
+	// EQApplicationPacket* outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
+	// Merchant_Click_Struct* mco=(Merchant_Click_Struct*)outapp->pBuffer;
+	int merchant_id     = 0;
+	int tabs_to_display = None;
+	Mob *tmp            = entity_list.GetMob(mc->npc_id);
 
-	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != Class::Merchant)
+	if (tmp == 0 || !tmp->IsNPC() || tmp->GetClass() != Class::Merchant) {
 		return;
+	}
 
-	//you have to be somewhat close to them to be properly using them
-	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2)
+	// you have to be somewhat close to them to be properly using them
+	if (DistanceSquared(m_Position, tmp->GetPosition()) > USE_NPC_RANGE2) {
 		return;
+	}
 
-	merchantid = tmp->CastToNPC()->MerchantType;
+	merchant_id = tmp->CastToNPC()->MerchantType;
 
-	int action = 1;
-	if (merchantid == 0) {
-		auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
-		Merchant_Click_Struct* mco = (Merchant_Click_Struct*)outapp->pBuffer;
-		mco->npcid = mc->npcid;
-		mco->playerid = 0;
-		mco->command = 1;		//open...
-		mco->rate = 1.0;
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && tmp->CastToNPC()->GetParcelMerchant()) {
+		tabs_to_display = SellBuyParcel;
+	}
+	else {
+		tabs_to_display = SellBuy;
+	}
+
+	int action = MerchantActions::Open;
+	if (merchant_id == 0) {
+		auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(MerchantClick_Struct));
+		auto mco    = (MerchantClick_Struct *) outapp->pBuffer;
+		mco->npc_id      = mc->npc_id;
+		mco->player_id   = 0;
+		mco->command     = MerchantActions::Open;
+		mco->rate        = 1.0;
+		mco->tab_display = tabs_to_display;
+
 		QueuePacket(outapp);
 		safe_delete(outapp);
 		return;
 	}
+
 	if (tmp->IsEngaged()) {
 		MessageString(Chat::White, MERCHANT_BUSY);
-		action = 0;
-	}
-	if (GetFeigned() || IsInvisible())
-	{
-		Message(Chat::White, "You cannot use a merchant right now.");
-		action = 0;
-	}
-	int primaryfaction = tmp->CastToNPC()->GetPrimaryFaction();
-	int factionlvl = GetFactionLevel(CharacterID(), tmp->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), primaryfaction, tmp);
-	if (factionlvl >= 7) {
-		MerchantRejectMessage(tmp, primaryfaction);
-		action = 0;
+		action = MerchantActions::Close;
 	}
 
-	if (tmp->Charmed())
-		action = 0;
+	if (GetFeigned() || IsInvisible()) {
+		Message(Chat::White, "You cannot use a merchant right now.");
+		action = MerchantActions::Close;
+	}
+
+	int primaryfaction = tmp->CastToNPC()->GetPrimaryFaction();
+	int factionlvl     = GetFactionLevel(
+		CharacterID(), tmp->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(),
+		primaryfaction, tmp
+	);
+	if (factionlvl >= 7) {
+		MerchantRejectMessage(tmp, primaryfaction);
+		action = MerchantActions::Close;
+	}
+
+	if (tmp->Charmed()) {
+		action = MerchantActions::Close;
+	}
 
 	if (!tmp->CastToNPC()->IsMerchantOpen()) {
 		tmp->SayString(zone->random.Int(MERCHANT_CLOSED_ONE, MERCHANT_CLOSED_THREE));
-		action = 0;
+		action = MerchantActions::Close;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(Merchant_Click_Struct));
-	Merchant_Click_Struct* mco = (Merchant_Click_Struct*)outapp->pBuffer;
+	auto outapp = new EQApplicationPacket(OP_ShopRequest, sizeof(MerchantClick_Struct));
+	auto mco    = (MerchantClick_Struct *) outapp->pBuffer;
 
-	mco->npcid = mc->npcid;
-	mco->playerid = 0;
-	mco->command = action; // Merchant command 0x01 = open
+	mco->npc_id      = mc->npc_id;
+	mco->player_id   = 0;
+	mco->command     = action; // Merchant command 0x01 = open
+	mco->tab_display = tabs_to_display;
+
 	if (RuleB(Merchant, UsePriceMod)) {
-		mco->rate = 1 / ((RuleR(Merchant, BuyCostMod))*Client::CalcPriceMod(tmp, true)); // works
+		mco->rate = 1 / ((RuleR(Merchant, BuyCostMod)) * Client::CalcPriceMod(tmp, true)); // works
 	}
-	else
+	else {
 		mco->rate = 1 / (RuleR(Merchant, BuyCostMod));
+	}
 
 	outapp->priority = 6;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
-	if (action == 1)
-		BulkSendMerchantInventory(merchantid, tmp->GetNPCTypeID());
+	if (action == MerchantActions::Open) {
+		BulkSendMerchantInventory(merchant_id, tmp->GetNPCTypeID());
+		if ((tabs_to_display & Parcel) == Parcel) {
+			SendBulkParcels();
+		}
+	}
 
 	return;
 }
@@ -16011,11 +16067,11 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 		return;
 
 	// Hero Forge ID needs to be fixed here as RoF2 appears to send an incorrect value.
-	if (wc->hero_forge_model != 0 && wc->wear_slot_id >= 0 && wc->wear_slot_id < EQ::textures::weaponPrimary)
+	if (wc->wear_slot_id >= 0 && wc->wear_slot_id < EQ::textures::weaponPrimary)
 		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
 
 	// we could maybe ignore this and just send our own from moveitem
-	entity_list.QueueClients(this, app, true);
+	entity_list.QueueClients(this, app, false);
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
@@ -16773,7 +16829,7 @@ void Client::RecordStats()
 	r.level                    = GetLevel();
 	r.class_                   = GetBaseClass();
 	r.race                     = GetBaseRace();
-	r.hp                       = GetMaxHP() - GetSpellBonuses().HP;
+	r.hp                       = GetMaxHP() - GetSpellBonuses().FlatMaxHPChange;
 	r.mana                     = GetMaxMana() - GetSpellBonuses().Mana;
 	r.endurance                = GetMaxEndurance() - GetSpellBonuses().Endurance;
 	r.ac                       = GetDisplayAC() - GetSpellBonuses().AC;
@@ -17155,3 +17211,26 @@ void Client::Handle_OP_GuildTributeDonatePlat(const EQApplicationPacket *app)
 	}
 }
 
+void Client::Handle_OP_ShopSendParcel(const EQApplicationPacket *app)
+{
+    if (app->size != sizeof(Parcel_Struct)) {
+        LogError("Received Handle_OP_ShopSendParcel packet. Expected size {}, received size {}.", sizeof(Parcel_Struct),
+                 app->size);
+        return;
+    }
+
+    auto parcel_in = (Parcel_Struct *)app->pBuffer;
+    DoParcelSend(parcel_in);
+}
+
+void Client::Handle_OP_ShopRetrieveParcel(const EQApplicationPacket *app)
+{
+    if (app->size != sizeof(ParcelRetrieve_Struct)) {
+        LogError("Received Handle_OP_ShopRetrieveParcel packet. Expected size {}, received size {}.",
+                 sizeof(ParcelRetrieve_Struct), app->size);
+        return;
+    }
+
+    auto parcel_in = (ParcelRetrieve_Struct *)app->pBuffer;
+    DoParcelRetrieve(*parcel_in);
+}

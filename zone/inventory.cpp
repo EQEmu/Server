@@ -2258,10 +2258,6 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	if (dst_slot_id <= EQ::invslot::EQUIPMENT_END) {// on Titanium and ROF2 /showhelm works even if sending helm slot
 		SendWearChange(matslot);
 	}
-	// This is part of a bug fix to ensure heroforge graphics display to other clients in zone.
-	if (queue_wearchange_slot >= 0) {
-		heroforge_wearchange_timer.Start(100);
-	}
 
 	// Step 7: Save change to the database
 	if (src_slot_id == EQ::invslot::slotCursor) {

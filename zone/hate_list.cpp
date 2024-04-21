@@ -108,46 +108,48 @@ void HateList::SetHateAmountOnEnt(Mob* other, int64 in_hate, uint64 in_damage)
 
 Mob* HateList::GetDamageTopOnHateList(Mob* hater)
 {
-	Mob* current = nullptr;
-	Group* grp = nullptr;
-	Raid* r = nullptr;
-	uint64 dmg_amt = 0;
+	Mob*   c = nullptr;
+	Mob*   m = nullptr;
+	Group* g = nullptr;
+	Raid*  r = nullptr;
 
-	auto iterator = list.begin();
-	while (iterator != list.end())
-	{
-		grp = nullptr;
+	uint64 damage = 0;
+
+	for (const auto& e : list) {
+		c = e->entity_on_hatelist;
+
+		if (!c) {
+			continue;
+		}
+
+		g = nullptr;
 		r = nullptr;
 
-		if ((*iterator)->entity_on_hatelist && (*iterator)->entity_on_hatelist->IsClient()){
-			r = entity_list.GetRaidByClient((*iterator)->entity_on_hatelist->CastToClient());
+		if (c->IsBot()) {
+			r = entity_list.GetRaidByBot(c->CastToBot());
+		} else if (c->IsClient()) {
+			r = entity_list.GetRaidByClient(c->CastToClient());
 		}
 
-		grp = entity_list.GetGroupByMob((*iterator)->entity_on_hatelist);
+		g = entity_list.GetGroupByMob(c);
 
-		if ((*iterator)->entity_on_hatelist && r){
-			if (r->GetTotalRaidDamage(hater) >= dmg_amt)
-			{
-				current = (*iterator)->entity_on_hatelist;
-				dmg_amt = r->GetTotalRaidDamage(hater);
+		if (r) {
+			if (r->GetTotalRaidDamage(hater) >= damage) {
+				m = c;
+				damage = r->GetTotalRaidDamage(hater);
 			}
-		}
-		else if ((*iterator)->entity_on_hatelist != nullptr && grp != nullptr)
-		{
-			if (grp->GetTotalGroupDamage(hater) >= dmg_amt)
-			{
-				current = (*iterator)->entity_on_hatelist;
-				dmg_amt = grp->GetTotalGroupDamage(hater);
+		} else if (g) {
+			if (g->GetTotalGroupDamage(hater) >= damage) {
+				m = c;
+				damage = g->GetTotalGroupDamage(hater);
 			}
+		} else if (static_cast<uint64>(e->hatelist_damage) >= damage) {
+			m = c;
+			damage = static_cast<uint64>(e->hatelist_damage);
 		}
-		else if ((*iterator)->entity_on_hatelist != nullptr && (uint64)(*iterator)->hatelist_damage >= dmg_amt)
-		{
-			current = (*iterator)->entity_on_hatelist;
-			dmg_amt = (*iterator)->hatelist_damage;
-		}
-		++iterator;
 	}
-	return current;
+
+	return m;
 }
 
 Mob* HateList::GetClosestEntOnHateList(Mob *hater, bool skip_mezzed, EntityFilterType filter_type) {

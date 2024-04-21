@@ -2282,8 +2282,6 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 		if (who->CanTalk()) {
 			who->SayString(SUCCESSFUL_TAUNT, GetCleanName());
 		}
-
-		MessageString(Chat::Skills, TAUNT_SUCCESS, who->GetCleanName());
 	} else {
 		MessageString(Chat::Skills, FAILED_TAUNT);
 	}

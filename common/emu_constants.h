@@ -404,6 +404,9 @@ namespace EQ
 		extern const std::map<uint32, std::string>& GetSpecialAbilityMap();
 		std::string GetSpecialAbilityName(uint32 ability_id);
 
+		extern const std::map<uint32, std::string>& GetConsiderColorMap();
+		std::string GetConsiderColorName(uint32 consider_color);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
@@ -557,6 +560,17 @@ enum ConsiderLevel : uint8 {
 	Dubiously,
 	Threateningly,
 	Scowls
+};
+
+namespace ConsiderColor {
+	constexpr uint32 Green         = 2;
+	constexpr uint32 DarkBlue      = 4;
+	constexpr uint32 Gray          = 6;
+	constexpr uint32 White         = 10;
+	constexpr uint32 Red           = 13;
+	constexpr uint32 Yellow        = 15;
+	constexpr uint32 LightBlue     = 18;
+	constexpr uint32 WhiteTitanium = 20;
 };
 
 enum TargetDescriptionType : uint8 {

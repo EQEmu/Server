@@ -5467,7 +5467,59 @@ ADD COLUMN `id` int(3) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
 DROP PRIMARY KEY,
 ADD PRIMARY KEY (`id`) USING BTREE,
 ADD INDEX `level_skill_cap`(`skill_id`, `class_id`, `level`, `cap`);
+)",
+		.content_schema_update = true,
+	},
+	ManifestEntry{
+		.version = 9269,
+		.description = "2024_03_27_account_auto_login_charname.sql",
+		.check = "SHOW COLUMNS FROM `account` LIKE 'auto_login_charname'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `account`
+ADD COLUMN `auto_login_charname` varchar(64) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `charname`;
 )"
+	},
+	ManifestEntry{
+		.version = 9270,
+		.description = "2024_04_31_content_flagging_lootdrop_entries.sql",
+		.check = "SHOW COLUMNS FROM `lootdrop_entries` LIKE 'content_flags'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `lootdrop_entries` ADD `min_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `lootdrop_entries` ADD `max_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `lootdrop_entries` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9271,
+		.description = "2024_03_10_parcel_implementation.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `character_parcels` (
+				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`char_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`from_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`note` VARCHAR(1024) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`sent_date` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`) USING BTREE,
+				UNIQUE INDEX `data_constraint` (`slot_id`, `char_id`) USING BTREE
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+
+				ALTER TABLE `npc_types`
+				ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
+		)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

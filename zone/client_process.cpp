@@ -213,25 +213,6 @@ bool Client::Process() {
 			instalog = true;
 		}
 
-		if (heroforge_wearchange_timer.Check()) {
-			/*
-				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
-				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue.
-				Unclear the underlying reason for this, if a better solution can be found then can move this back.
-			*/
-			if (queue_wearchange_slot >= 0) { //Resend slot from Client::SwapItem if heroforge item is swapped.
-				SendWearChange(static_cast<uint8>(queue_wearchange_slot));
-			}
-			else { //Send from Client::CompleteConnect()
-				SendWearChangeAndLighting(EQ::textures::LastTexture);
-				Mob *pet = GetPet();
-				if (pet) {
-					pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
-				}
-			}
-			heroforge_wearchange_timer.Disable();
-		}
-
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
@@ -574,6 +555,7 @@ bool Client::Process() {
 				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
 				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
 			}
+
 			return false;
 		}
 		else if (!linkdead_timer.Enabled()) {
@@ -1446,6 +1428,22 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 						to_bucket = (int32 *) &trade->sp; break;
 					case COINTYPE_CP:
 						to_bucket = (int32 *) &trade->cp; break;
+				}
+			}
+			else {
+				switch (mc->cointype2) {
+					case COINTYPE_PP:
+						m_parcel_platinum += mc->amount;
+						break;
+					case COINTYPE_GP:
+						m_parcel_gold += mc->amount;
+						break;
+					case COINTYPE_SP:
+						m_parcel_silver += mc->amount;
+						break;
+					case COINTYPE_CP:
+						m_parcel_copper += mc->amount;
+						break;
 				}
 			}
 			break;

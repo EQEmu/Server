@@ -499,6 +499,10 @@ public:
 	bool IsInAGuild();
 	luabind::object GetRaidOrGroupOrSelf(lua_State* L);
 	luabind::object GetRaidOrGroupOrSelf(lua_State* L, bool clients_only);
+	std::string GetAutoLoginCharacterName();
+	bool SetAutoLoginCharacterName();
+	bool SetAutoLoginCharacterName(std::string character_name);
+	void DescribeSpecialAbilities(Lua_NPC n);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

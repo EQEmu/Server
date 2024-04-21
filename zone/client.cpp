@@ -184,7 +184,8 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
   mob_close_scan_timer(6000),
   position_update_timer(10000),
   consent_throttle_timer(2000),
-  tmSitting(0)
+  tmSitting(0),
+  parcel_timer(RuleI(Parcel, ParcelDeliveryDelay))
 {
 	for (auto client_filter = FilterNone; client_filter < _FilterCount; client_filter = eqFilterType(client_filter + 1)) {
 		SetFilter(client_filter, FilterShow);
@@ -278,8 +279,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
-	heroforge_wearchange_timer.Disable();
-
 	//for good measure:
 	memset(&m_pp, 0, sizeof(m_pp));
 	memset(&m_epp, 0, sizeof(m_epp));
@@ -343,7 +342,6 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	XTargetAutoAddHaters = true;
 	m_autohatermgr.SetOwner(this, nullptr, nullptr);
 	m_activeautohatermgr = &m_autohatermgr;
-	LoadAccountFlags();
 
 	initial_respawn_selection = 0;
 	alternate_currency_loaded = false;
@@ -378,6 +376,15 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	bot_owner_options[booBuffCounter] = false;
 	bot_owner_options[booMonkWuMessage] = false;
 
+	m_parcel_platinum         = 0;
+	m_parcel_gold             = 0;
+	m_parcel_silver           = 0;
+	m_parcel_copper           = 0;
+	m_parcel_count            = 0;
+	m_parcel_enabled          = true;
+	m_parcel_merchant_engaged = false;
+	m_parcels.clear();
+
 	SetBotPulling(false);
 	SetBotPrecombat(false);
 
@@ -386,6 +393,10 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 }
 
 Client::~Client() {
+	if (ClientVersion() == EQ::versions::ClientVersion::RoF2 && RuleB (Parcel, EnableParcelMerchants)) {
+		DoParcelCancel();
+	}
+
 	mMovementManager->RemoveClient(this);
 
 	DataBucket::DeleteCachedBuckets(DataBucketLoadType::Client, CharacterID());
@@ -2228,8 +2239,8 @@ void Client::ChangeLastName(std::string last_name) {
 bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 {
 	// check duplicate name
-	bool usedname = database.CheckUsedName((const char*) in_firstname);
-	if (!usedname) {
+	bool used_name = database.IsNameUsed((const char*) in_firstname);
+	if (used_name) {
 		return false;
 	}
 
@@ -2660,7 +2671,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
 			against_who->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) ||
 			against_who->IsClient() ||
-			GetLevelCon(against_who->GetLevel()) == CON_GRAY
+			GetLevelCon(against_who->GetLevel()) == ConsiderColor::Gray
 		) {
 			return false;
 		}

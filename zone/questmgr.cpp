@@ -39,6 +39,7 @@
 #include "zonedb.h"
 #include "dialogue_window.h"
 
+#include "../common/repositories/account_repository.h"
 #include "../common/repositories/tradeskill_recipe_repository.h"
 #include "../common/repositories/instance_list_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
@@ -4892,4 +4893,14 @@ void QuestManager::SendPlayerHandinEvent() {
 
 		RecordPlayerEventLogWithClient(initiator, PlayerEvent::NPC_HANDIN, e);
 	}
+}
+
+std::string QuestManager::GetAutoLoginCharacterNameByAccountID(uint32 account_id)
+{
+	return AccountRepository::GetAutoLoginCharacterNameByAccountID(database, account_id);
+}
+
+bool QuestManager::SetAutoLoginCharacterNameByAccountID(uint32 account_id, const std::string& character_name)
+{
+	return AccountRepository::SetAutoLoginCharacterNameByAccountID(database, account_id, character_name);
 }
