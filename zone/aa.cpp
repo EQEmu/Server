@@ -1423,7 +1423,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	else {
 		//Bards can cast instant cast AAs while they are casting or channeling item cast.
 		
-		auto cast_time = RuleB(Custom, MulticlassingEnabled) ? 500 : spells[rank->spell].cast_time;
+		auto effective_cast_time = RuleB(Custom, MulticlassingEnabled) ? 0 : spells[rank->spell].cast_time;
 
 		if (!RuleB(Custom, MulticlassingEnabled) && GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
@@ -1436,7 +1436,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			}
 		} 
 		else { 
-			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, cast_time, 0, 0, -1, spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, effective_cast_time, 0, 0, -1, spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
 		}
