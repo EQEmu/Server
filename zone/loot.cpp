@@ -462,10 +462,11 @@ uint32 NPC::DoUpgradeLoot(uint32 itemID) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		auto roll = zone->random.Real(0.0, 100.0); // Roll a number between 0 and 100
 		auto newID = itemID;
+		auto dropRateBonus = Strings::ToInt(DataBucket::GetData("eom_EnhancedLoot"), 0);
 
-		if (roll <= RuleR(Custom, Tier2ItemDropRate)) {
+		if (roll <= RuleR(Custom, Tier2ItemDropRate) + dropRateBonus) {
 			newID += 2000000;
-		} else if (roll <= RuleR(Custom, Tier1ItemDropRate)) {
+		} else if (roll <= RuleR(Custom, Tier1ItemDropRate) + dropRateBonus) {
 			newID += 1000000;
 		}
 
