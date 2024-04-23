@@ -3223,6 +3223,14 @@ void Perl_Client_DescribeSpecialAbilities(Client* self, NPC* n)
 	n->DescribeSpecialAbilities(self);
 }
 
+bool Perl_Client_IsSeasonal(Client* self) {
+	return self->IsSeasonal();
+}
+
+bool Perl_Client_IsHardcore(Client* self) {
+	return self->IsHardcore();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3805,6 +3813,8 @@ void perl_register_client()
 	package.add("UseDiscipline", &Perl_Client_UseDiscipline);
 	package.add("UseAugmentContainer", &Perl_Client_UseAugmentContainer);
 	package.add("WorldKick", &Perl_Client_WorldKick);
+	package.add("IsSeasonal", (void(*)(Client*))&Perl_Client_IsSeasonal);
+	package.add("IsHardcore", (void(*)(Client*))&Perl_Client_IsHardcore);
 }
 
 #endif //EMBPERL_XS_CLASSES
