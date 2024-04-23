@@ -58,7 +58,7 @@ public:
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"SELECT c.name, COUNT(p.id), c.id FROM character_data c "
-				"JOIN character_parcels p ON p.char_id = c.id "
+				"LEFT JOIN character_parcels p ON p.char_id = c.id "
 				"WHERE c.name = '{}' "
 				"LIMIT 1",
 				character_name)
