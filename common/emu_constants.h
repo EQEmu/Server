@@ -142,6 +142,12 @@ namespace EQ
 		int16 GetInvTypeSize(int16 inv_type);
 		using RoF2::invtype::GetInvTypeName;
 
+		enum MoveMultiType: int16 {
+			inventoryPersonal = 0,
+			inventoryBank = 1,
+			inventorySharedBank = 2
+		}
+
 	} // namespace invtype
 
 	namespace DevTools {
