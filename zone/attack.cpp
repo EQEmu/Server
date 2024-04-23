@@ -2836,8 +2836,10 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 				Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
 				if (r) {				
 					for (const auto &m : r->members) {
-						seasonal_killer = seasonal_killer || m.member->CastToClient()->IsSeasonal();
-						hardcore_killer = hardcore_killer || m.member->CastToClient()->IsHardcore();
+						if (m.member) {
+							seasonal_killer = seasonal_killer || m.member->IsSeasonal();
+							hardcore_killer = hardcore_killer || m.member->IsHardcore();
+						}
 					}
 				}
 			}
