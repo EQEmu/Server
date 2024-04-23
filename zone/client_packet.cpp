@@ -15837,6 +15837,8 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 			Message(Chat::Red, "Seasonal Characters may not trade with other players who are not Seasonal.");
 			return;
 		}
+		
+		tradee->CastToClient()->QueuePacket(app);
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
         if (!tradee->IsEngaged()) {
