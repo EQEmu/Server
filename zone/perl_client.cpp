@@ -3218,6 +3218,11 @@ bool Perl_Client_SetAutoLoginCharacterName(Client* self, std::string character_n
 	return quest_manager.SetAutoLoginCharacterNameByAccountID(self->AccountID(), character_name);
 }
 
+void Perl_Client_DescribeSpecialAbilities(Client* self, NPC* n)
+{
+	n->DescribeSpecialAbilities(self);
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3304,6 +3309,7 @@ void perl_register_client()
 	package.add("CreateExpeditionFromTemplate", &Perl_Client_CreateExpeditionFromTemplate);
 	package.add("CreateTaskDynamicZone", &Perl_Client_CreateTaskDynamicZone);
 	package.add("DecreaseByID", &Perl_Client_DecreaseByID);
+	package.add("DescribeSpecialAbilities", &Perl_Client_DescribeSpecialAbilities);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);

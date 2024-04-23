@@ -7,7 +7,6 @@
 
 class GroupLeadersRepository: public BaseGroupLeadersRepository {
 public:
-
     /**
      * This file was auto generated and can be modified and extended upon
      *
@@ -52,6 +51,20 @@ public:
 				TableName()
 			)
 		);
+	}
+
+	static int UpdateLeadershipAA(Database &db, std::string &aa, uint32 group_id)
+	{
+		const auto group_leader = GetWhere(db, fmt::format("gid = '{}' LIMIT 1", group_id));
+		if(group_leader.empty()) {
+			return 0;
+		}
+
+		db.Encode(aa);
+		auto m = group_leader[0];
+		m.leadershipaa = aa;
+
+		return UpdateOne(db, m);
 	}
 };
 

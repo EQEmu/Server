@@ -205,7 +205,7 @@ void Client::SendEnterWorld(std::string name)
 		LogInfo("Zoning with live_name [{}] account_id [{}]", live_name, GetAccountID());
 	}
 
-	if (RuleB(World, EnableAutoLogin)) {
+	if (!is_player_zoning && RuleB(World, EnableAutoLogin)) {
 		live_name = AccountRepository::GetAutoLoginCharacterNameByAccountID(database, GetAccountID());
 		LogInfo("Attempting to auto login with live_name [{}] account_id [{}]", live_name, GetAccountID());
 	}

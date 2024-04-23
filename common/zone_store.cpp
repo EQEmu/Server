@@ -162,6 +162,32 @@ std::string ZoneStore::GetZoneLongName(uint32 zone_id)
 	return {};
 }
 
+std::string ZoneStore::GetZoneShortNameByLongName(const std::string& zone_long_name)
+{
+	for (const auto& z : m_zones) {
+		if (z.long_name == zone_long_name) {
+			return z.short_name;
+		}
+	}
+
+	LogInfo("Failed to get zone short name by zone_long_name [{}]", zone_long_name);
+
+	return {};
+}
+
+uint32 ZoneStore::GetZoneIDByLongName(const std::string& zone_long_name)
+{
+	for (const auto& z : m_zones) {
+		if (z.long_name == zone_long_name) {
+			return z.zoneidnumber;
+		}
+	}
+
+	LogInfo("Failed to get zone ID by zone_long_name [{}]", zone_long_name);
+
+	return 0;
+}
+
 /**
  * @param zone_id
  * @param version

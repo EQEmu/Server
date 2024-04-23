@@ -1579,30 +1579,75 @@ namespace RoF2
 		*p = nullptr;
 
 		//store away the emu struct
-		uchar* __emu_buffer = in->pBuffer;
+		uchar             *__emu_buffer = in->pBuffer;
+		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
 
-		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
-		EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+		switch(old_item_pkt->PacketType) 			
+		{
+			case ItemPacketParcel: {
+				ParcelMessaging_Struct       pms{};
+				EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+				cereal::BinaryInputArchive   ar(ss);
+				ar(pms);
 
-		EQ::OutBuffer ob;
-		EQ::OutBuffer::pos_type last_pos = ob.tellp();
+				uint32 player_name_length = pms.player_name.length();
+				uint32 note_length        = pms.note.length();
 
-		ob.write((const char*)__emu_buffer, 4);
+				auto *int_struct = (EQ::InternalSerializedItem_Struct *) pms.serialized_item.data();
 
-		SerializeItem(ob, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0, old_item_pkt->PacketType);
-		if (ob.tellp() == last_pos) {
-			LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
-			delete in;
-			return;
-		}
+				EQ::OutBuffer           ob;
+				EQ::OutBuffer::pos_type last_pos = ob.tellp();
+				ob.write(reinterpret_cast<const char *>(&pms.packet_type), 4);
 
-		in->size = ob.size();
-		in->pBuffer = ob.detach();
+				SerializeItem(ob, (const EQ::ItemInstance *) int_struct->inst, pms.slot_id, 0, ItemPacketParcel);
 
-		delete[] __emu_buffer;
+				if (ob.tellp() == last_pos) {
+					LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", pms.slot_id);
+					safe_delete_array(__emu_buffer);
+					safe_delete(in);
+					return;
+				}
 
-		dest->FastQueuePacket(&in, ack_req);
-	}
+				ob.write((const char *) &pms.sent_time, 4);
+				ob.write((const char *) &player_name_length, 4);
+				ob.write(pms.player_name.c_str(), pms.player_name.length());
+				ob.write((const char *) &note_length, 4);
+				ob.write(pms.note.c_str(), pms.note.length());
+
+				in->size    = ob.size();
+				in->pBuffer = ob.detach();
+
+				safe_delete_array(__emu_buffer);
+				dest->FastQueuePacket(&in, ack_req);
+
+				break;
+			}
+            default: {
+                EQ::InternalSerializedItem_Struct *int_struct = (EQ::InternalSerializedItem_Struct *)(&__emu_buffer[4]);
+
+                EQ::OutBuffer           ob;
+                EQ::OutBuffer::pos_type last_pos = ob.tellp();
+
+                ob.write((const char *)__emu_buffer, 4);
+
+                SerializeItem(ob, (const EQ::ItemInstance *)int_struct->inst, int_struct->slot_id, 0,
+                              old_item_pkt->PacketType);
+                if (ob.tellp() == last_pos) {
+                    LogNetcode("RoF2::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]",
+                               int_struct->slot_id);
+					safe_delete_array(__emu_buffer);
+					safe_delete(in);
+                    return;
+                }
+
+                in->size    = ob.size();
+                in->pBuffer = ob.detach();
+
+                safe_delete_array(__emu_buffer);
+                dest->FastQueuePacket(&in, ack_req);
+            }
+        }
+    }
 
 	ENCODE(OP_ItemVerifyReply)
 	{
@@ -3159,21 +3204,6 @@ namespace RoF2
 		//OUT(itemslot);
 		OUT(quantity);
 		OUT(price);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_ShopRequest)
-	{
-		ENCODE_LENGTH_EXACT(Merchant_Click_Struct);
-		SETUP_DIRECT_ENCODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
-
-		OUT(npcid);
-		OUT(playerid);
-		OUT(command);
-		OUT(rate);
-		eq->unknown01 = 3;	// Not sure what these values do yet, but list won't display without them
-		eq->unknown02 = 2592000;
 
 		FINISH_ENCODE();
 	}
@@ -5307,15 +5337,17 @@ namespace RoF2
 		FINISH_DIRECT_DECODE();
 	}
 
-	DECODE(OP_ShopRequest)
+	DECODE(OP_ShopSendParcel)
 	{
-		DECODE_LENGTH_EXACT(structs::Merchant_Click_Struct);
-		SETUP_DIRECT_DECODE(Merchant_Click_Struct, structs::Merchant_Click_Struct);
+		DECODE_LENGTH_EXACT(structs::Parcel_Struct);
+		SETUP_DIRECT_DECODE(Parcel_Struct, structs::Parcel_Struct);
 
-		IN(npcid);
-		IN(playerid);
-		IN(command);
-		IN(rate);
+		IN(npc_id);
+		IN(quantity);
+		IN(money_flag);
+		emu->item_slot = RoF2ToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		strn0cpy(emu->send_to, eq->send_to, sizeof(emu->send_to));
+		strn0cpy(emu->note, eq->note, sizeof(emu->note));
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -5534,11 +5566,24 @@ namespace RoF2
 		//sprintf(hdr.unknown000, "06e0002Y1W00");
 
 		snprintf(hdr.unknown000, sizeof(hdr.unknown000), "%016d", item->ID);
+		if (packet_type == ItemPacketParcel) {
+			strn0cpy(
+				hdr.unknown000,
+				fmt::format(
+					"{:03}PAR{:010}\0",
+					inst->GetMerchantSlot(),
+					item->ID
+				).c_str(),
+				sizeof(hdr.unknown000)
+			);
+		}
 
-		hdr.stacksize = (inst->IsStackable() ? ((inst->GetCharges() > 1000) ? 0xFFFFFFFF : inst->GetCharges()) : 1);
+		hdr.stacksize =
+			item->ID == PARCEL_MONEY_ITEM_ID ? inst->GetPrice() : (inst->IsStackable() ? ((inst->GetCharges() > 1000)
+				? 0xFFFFFFFF : inst->GetCharges()) : 1);
 		hdr.unknown004 = 0;
 
-		structs::InventorySlot_Struct slot_id;
+		structs::InventorySlot_Struct slot_id{};
 		switch (packet_type) {
 		case ItemPacketLoot:
 			slot_id = ServerToRoF2CorpseSlot(slot_id_in);
@@ -5548,22 +5593,24 @@ namespace RoF2
 			break;
 		}
 
-		hdr.slot_type = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
-		hdr.main_slot = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
-		hdr.sub_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
-		hdr.aug_slot = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
-		hdr.price = inst->GetPrice();
-		hdr.merchant_slot = (inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1);
-		hdr.scaled_value = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
-		hdr.instance_id = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
-		hdr.unknown028 = 0;
+		hdr.slot_type      = (inst->GetMerchantSlot() ? invtype::typeMerchant : slot_id.Type);
+		hdr.main_slot      = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : slot_id.Slot);
+		hdr.sub_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.SubIndex);
+		hdr.aug_slot       = (inst->GetMerchantSlot() ? 0xffff : slot_id.AugIndex);
+		hdr.price          = inst->GetPrice();
+		hdr.merchant_slot  = ((inst->GetMerchantSlot() ? inst->GetMerchantCount() : 1));
+		hdr.scaled_value   = (inst->IsScaling() ? (inst->GetExp() / 100) : 0);
+		hdr.instance_id    = (inst->GetMerchantSlot() ? inst->GetMerchantSlot() : inst->GetSerialNumber());
+		hdr.parcel_item_id = packet_type == ItemPacketParcel ? inst->GetID() : 0;
 		hdr.last_cast_time = inst->GetRecastTimestamp();
-		hdr.charges = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254) ? 0xFFFFFFFF : inst->GetCharges()));
-		hdr.inst_nodrop = (inst->IsAttuned() ? 1 : 0);
-		hdr.unknown044 = 0;
-		hdr.unknown048 = 0;
-		hdr.unknown052 = 0;
-		hdr.isEvolving = item->EvolvingItem;
+		hdr.charges        = (inst->IsStackable() ? (item->MaxCharges ? 1 : 0) : ((inst->GetCharges() > 254)
+			? 0xFFFFFFFF
+			: inst->GetCharges()));
+		hdr.inst_nodrop    = (inst->IsAttuned() ? 1 : 0);
+		hdr.unknown044     = 0;
+		hdr.unknown048     = 0;
+		hdr.unknown052     = 0;
+		hdr.isEvolving     = item->EvolvingItem;
 
 		ob.write((const char*)&hdr, sizeof(RoF2::structs::ItemSerializationHeader));
 
@@ -5621,9 +5668,10 @@ namespace RoF2
 
 		ob.write((const char*)&hdrf, sizeof(RoF2::structs::ItemSerializationHeaderFinish));
 
-		if (strlen(item->Name) > 0)
+		if (strlen(item->Name) > 0) {
 			ob.write(item->Name, strlen(item->Name));
-		ob.write("\0", 1);
+			ob.write("\0", 1);
+		}
 
 		if (strlen(item->Lore) > 0)
 			ob.write(item->Lore, strlen(item->Lore));
@@ -5784,10 +5832,11 @@ namespace RoF2
 		itbs.unknown5 = 0;
 
 		itbs.potion_belt_enabled = item->PotionBelt;
-		itbs.potion_belt_slots = item->PotionBeltSlots;
-		itbs.stacksize = (inst->IsStackable() ? item->StackSize : 0);
-		itbs.no_transfer = item->NoTransfer;
-		itbs.expendablearrow = item->ExpendableArrow;
+		itbs.potion_belt_slots   = item->PotionBeltSlots;
+		itbs.stacksize           =
+			item->ID == PARCEL_MONEY_ITEM_ID ? 0x7FFFFFFF : ((inst->IsStackable() ? item->StackSize : 0));
+		itbs.no_transfer         = item->NoTransfer;
+		itbs.expendablearrow     = item->ExpendableArrow;
 
 		// Done to hack older clients to label expendable fishing poles as such
 		// July 28th, 2018 patch

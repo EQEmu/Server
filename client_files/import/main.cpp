@@ -29,11 +29,13 @@
 #include "../../common/path_manager.h"
 #include "../../common/repositories/base_data_repository.h"
 #include "../../common/file.h"
+#include "../../common/events/player_event_logs.h"
 
-EQEmuLogSys LogSys;
+EQEmuLogSys         LogSys;
 WorldContentService content_service;
-ZoneStore zone_store;
-PathManager path;
+ZoneStore           zone_store;
+PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);

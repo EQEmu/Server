@@ -42,6 +42,8 @@ public:
 	uint32 GetZoneID(std::string zone_name);
 	std::string GetZoneName(uint32 zone_id);
 	std::string GetZoneLongName(uint32 zone_id);
+	std::string GetZoneShortNameByLongName(const std::string& zone_long_name);
+	uint32 GetZoneIDByLongName(const std::string& zone_long_name);
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
 	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
 	ZoneRepository::Zone *GetZoneWithFallback(uint32 zone_id, int version = 0);
