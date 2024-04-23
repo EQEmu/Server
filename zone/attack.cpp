@@ -5467,7 +5467,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 				// staggers message.
 				if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(UNSTUNABLE)) {
 					defender->Emote("staggers.");
-					defender->Stun(2000);
+					defender->Stun(RuleI(Combat, StunDuration));
 				}
 				return;
 			}
