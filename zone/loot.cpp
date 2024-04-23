@@ -330,7 +330,7 @@ uint32 NPC::DoUpgradeLoot(uint32 itemID) {
 			newID += 1000000;
 		}
 
-		if (database.GetItem(newID)) {
+		if (database.GetItem(newID) && newID > itemID) {
 			itemID = newID;
 		}
 	}
