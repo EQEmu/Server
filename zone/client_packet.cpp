@@ -10929,7 +10929,7 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	// This packet is only sent from the client if we ctrl click items in inventory
 	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
-		LogDebug("OP_MoveMultipleItems Triggered");
+		
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -10955,7 +10955,7 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 
 		// We need to check if this is a swap or just an addition (left click or right click)
 		// Check if any component of this transaction is coming from anywhere other than the cursor
-		int left_click = true;
+		bool left_click = true;
 		for (int i = 0; i < multi_move->count; i++) {
 			if (multi_move->moves[i].from_slot.Slot != EQ::invslot::slotCursor) {
 				left_click = false;
@@ -10969,9 +10969,9 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 				mi->from_slot 	= multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);									
 				mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
 				
-				if (multi_move->moves[i].to_slot.Type == 1) { // Target is bank inventory
+				if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
 					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
-				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
+				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
 					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				}				
 
@@ -11002,12 +11002,18 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
     		items.reserve(multi_move->count);
 
 			for (int i = 0; i < multi_move->count; i++) {
-				auto from_slot = multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
-				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				// These are always bags, so we don't need to worry about raw items in slotCursor
+				auto from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
+					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
+				} else if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
+					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
+				}
 
-				if (multi_move->moves[i].to_slot.Type == 1) { // Target is bank inventory
+				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
-				} else if (multi_move->moves[i].to_slot.Type == 2) { // Target is shared bank inventory
+				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				}
 
