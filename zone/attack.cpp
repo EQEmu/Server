@@ -2843,7 +2843,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 		}
 
-		if (killer->IsClient() && (seasonal_killer || hardcore_killer)) {
+		if (killer && killer->IsClient() && (seasonal_killer || hardcore_killer)) {
 			for (LootItem* item : m_loot_items) {
 				if (item != nullptr) {
 					item->item_id = DoUpgradeLoot(item->item_id);
