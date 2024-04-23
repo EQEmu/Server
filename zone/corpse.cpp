@@ -982,10 +982,13 @@ bool Corpse::Process()
 		CheckIsOwnerOnline();
 	}
 
-	if (m_corpse_delay_timer.Check()) {
-		for (int &allowed_looter: m_allowed_looters) {
-			allowed_looter = 0;
+	if (m_corpse_delay_timer.Check()) {		
+		if (!m_seasonal && !m_hardcore) {
+			for (int &allowed_looter: m_allowed_looters) {
+				allowed_looter = 0;
+			}
 		}
+
 		m_corpse_delay_timer.Disable();
 		return true;
 	}

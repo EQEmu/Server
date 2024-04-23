@@ -5400,6 +5400,14 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		} else {
 			MessageString(Chat::White, CORPSE_DECAY_NOW);
 		}
+
+		if (t->IsSeasonal()) {
+			Message(Chat::Red, "This is a Seasonal character's kill, and will not unlock to be looted by others.");
+		}
+
+		if (t->IsHardcore()) {
+			Message(Chat::Red, "This is a Discordant character's kill, and will not unlock to be looted by others.");
+		}
 	}
 }
 
