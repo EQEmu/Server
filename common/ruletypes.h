@@ -990,6 +990,7 @@ RULE_BOOL(Custom, CustomSpellProcHandling, true, "Override the effect of sympath
 RULE_REAL(Custom, CustomSpellProcScalingFactor, 1.0, "Scale overridden sympathetic procs by this amount")
 RULE_REAL(Custom, ItemExtraSpellAmtMaximumPercentage, 0.0, "Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
 RULE_BOOL(Custom, LessStrictSpellStacking, true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
+RULE_INT(Custom, EnableSeasonalCharacters, -1, "Set to Seasonal ID to track for current Seasonal characters.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

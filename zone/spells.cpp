@@ -2401,6 +2401,21 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	if(!IsValidSpell(spell_id))
 		return false;
 
+	if (spell_target && spell_target != this && IsClient() && spell_target->IsClient()) {
+		if (CastToClient()->IsSeasonal() != spell_target->CastToClient()->IsSeasonal()) {
+			return false;
+		}
+
+		if (CastToClient()->IsHardcore() || spell_target->CastToClient()->IsHardcore()) {
+			return false;
+		}
+	}
+
+	//if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
+	//	auto target_id = GetSpellImpliedTargetID(spell_id, spell_target->GetID());
+	//	spell_target = entity_list.GetMob(target_id);
+	//}
+
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && !spell_target->IsBot() && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
 		Mob* owner = spell_target->GetOwner();

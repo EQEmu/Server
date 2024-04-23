@@ -573,6 +573,16 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		bool duplicate_lore = false;
 
 		if (m_inst && sender) {
+			if (sender->IsSeasonal() && !m_ground_spawn) {				
+				sender->Message(Chat::Red, "Seasonal Characters may not pick up items left by players.");
+				return false;
+			}
+
+			if (sender->IsHardcore() && !m_ground_spawn) {				
+				sender->Message(Chat::Red, "A Discordant may not pick up items left by players.");
+				return false;
+			}
+
 			// if there is a lore conflict, delete the offending item from the server inventory
 			// the client updates itself and takes care of sending "duplicate lore item" messages
 			auto item = m_inst->GetItem();

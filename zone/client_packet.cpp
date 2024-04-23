@@ -7422,15 +7422,21 @@ void Client::Handle_OP_GroupFollow2(const EQApplicationPacket *app)
 		return;
 	}
 
+	GroupGeneric_Struct* gf = (GroupGeneric_Struct*)app->pBuffer;
+	Mob* inviter = entity_list.GetClientByName(gf->name1);
+
+	if (inviter && inviter->IsClient() && IsSeasonal() != inviter->CastToClient()->IsSeasonal()) {
+		Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
+		inviter->Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
+		return;
+	}
+
 	if (LFP) {
 		// If we were looking for players to start our own group, but we accept an invitation to another
 		// group, turn LFP off.
 		database.SetLFP(CharacterID(), false);
 		worldserver.StopLFP(CharacterID());
 	}
-
-	GroupGeneric_Struct* gf = (GroupGeneric_Struct*)app->pBuffer;
-	Mob* inviter = entity_list.GetClientByName(gf->name1);
 
 	// Inviter and Invitee are in the same zone
 	if (inviter != nullptr && inviter->IsClient())
@@ -7471,6 +7477,7 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 		return;
 	}
 
+
 	GroupInvite_Struct* gis = (GroupInvite_Struct*)app->pBuffer;
 
 	Mob* invitee = nullptr;
@@ -7484,6 +7491,11 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 
 	if (invitee == this) {
 		MessageString(Chat::LightGray, GROUP_INVITEE_SELF);
+		return;
+	}
+
+	if (invitee && invitee->IsClient() && IsSeasonal() != invitee->CastToClient()->IsSeasonal()) {
+		Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
 		return;
 	}
 
@@ -15520,6 +15532,15 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	// SoF sends 1 or more unhandled OP_Trader packets of size 96 when a trade has completed.
 	// I don't know what they are for (yet), but it doesn't seem to matter that we ignore them.
 
+	if (IsSeasonal()) {
+		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
+		return;		
+	}
+
+	if (IsHardcore()) {
+		Message(Chat::Red, "A Discordant may not trade with other players.");
+		return;	
+	}
 
 	uint32 max_items = EQ::invtype::BAZAAR_SIZE;
 
@@ -15695,6 +15716,13 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	//
 	// Client has elected to buy an item from a Trader
 	//
+
+	if (IsSeasonal()) {
+		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
+		return;		
+	}
+
+
 	if (app->size != sizeof(TraderBuy_Struct)) {
 		LogError("Wrong size: OP_TraderBuy, size=[{}], expected [{}]", app->size, sizeof(TraderBuy_Struct));
 		return;
@@ -15737,7 +15765,15 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 
 	// Pass trade request on to recipient
 	if (tradee && tradee->IsClient()) {
-		tradee->CastToClient()->QueuePacket(app);
+		if (IsHardcore() || tradee->CastToClient()->IsHardcore()) {
+			Message(Chat::Red, "A Discordant may not trade with other players.");
+			return;
+		}
+
+		if (IsSeasonal() != tradee->CastToClient()->IsSeasonal()) {
+			Message(Chat::Red, "Seasonal Characters may not trade with other players who are not Seasonal.");
+			return;
+		}
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
         if (!tradee->IsEngaged()) {
@@ -15774,8 +15810,18 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 {
-	// Bazaar Trader:
+	// Disable Trader Actions for Seasonal Characters 
+	if (IsSeasonal() && !app->size == 4) {
+		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
+		return;		
+	}
 
+	if (IsHardcore() && !app->size == 4) {
+		Message(Chat::Red, "A Discordant may not trade with other players.");
+		return;		
+	}
+
+	// Bazaar Trader:
 	if (app->size == sizeof(TraderClick_Struct))
 	{
 

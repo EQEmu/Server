@@ -936,43 +936,45 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		}
 	}
 
-	auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
-	temporary_merchant_list.clear();
-	for (auto ml : temporary_merchant_list_two) {
-		if (slot_id > merchant_slots) {
-			break;
-		}
-
-		item = database.GetItem(ml.item);
-		ml.slot = slot_id;
-		if (item) {
-			if (!handy_chance) {
-				handy_item = item;
-			} else {
-				handy_chance--;
+	if (!(IsSeasonal() || IsHardcore())) {
+		auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
+		temporary_merchant_list.clear();
+		for (auto ml : temporary_merchant_list_two) {
+			if (slot_id > merchant_slots) {
+				break;
 			}
 
-			auto charges = item->MaxCharges;
-			auto inst = database.CreateItem(item, charges);
-			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
-				auto item_charges = charges ? charges : 1;
-
-				if (RuleB(Merchant, UsePriceMod)) {
-					item_price *= Client::CalcPriceMod(npc);
+			item = database.GetItem(ml.item);
+			ml.slot = slot_id;
+			if (item) {
+				if (!handy_chance) {
+					handy_item = item;
+				} else {
+					handy_chance--;
 				}
 
-				inst->SetCharges(item_charges);
-				inst->SetMerchantCount(ml.charges);
-				inst->SetMerchantSlot(ml.slot);
-				inst->SetPrice(item_price);
+				auto charges = item->MaxCharges;
+				auto inst = database.CreateItem(item, charges);
+				if (inst) {
+					auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+					auto item_charges = charges ? charges : 1;
 
-				SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
-				safe_delete(inst);
+					if (RuleB(Merchant, UsePriceMod)) {
+						item_price *= Client::CalcPriceMod(npc);
+					}
+
+					inst->SetCharges(item_charges);
+					inst->SetMerchantCount(ml.charges);
+					inst->SetMerchantSlot(ml.slot);
+					inst->SetPrice(item_price);
+
+					SendItemPacket(ml.slot - 1, inst, ItemPacketMerchant);
+					safe_delete(inst);
+				}
 			}
+			temporary_merchant_list.push_back(ml);
+			slot_id++;
 		}
-		temporary_merchant_list.push_back(ml);
-		slot_id++;
 	}
 
 	//this resets the slot

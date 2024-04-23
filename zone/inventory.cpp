@@ -741,6 +741,12 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		slot_id
 	);
 
+	if (IsSeasonal()) {				
+		Message(Chat::Red, "Seasonal Characters may not drop items.");
+		SendCursorBuffer();
+		return;
+	}
+
 	if (GetInv().CheckNoDrop(slot_id, recurse) && !CanTradeFVNoDropItem()) {
 		auto invalid_drop = m_inv.GetItem(slot_id);
 		if (!invalid_drop) {
@@ -963,6 +969,11 @@ void Client::DropInst(const EQ::ItemInstance* inst)
 		return;
 	}
 
+	if (RuleI(Custom, EnableSeasonalCharacters) == Strings::ToInt(GetBucket("SeasonalCharacter"), 0)) {				
+		Message(Chat::Red, "Seasonal Characters may not drop items.");
+		SendCursorBuffer();
+		return;
+	}
 
 	if (inst->GetItem()->NoDrop == 0)
 	{
