@@ -4375,7 +4375,15 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					if (zone->random.Int(0, 100) >= stun_resist) {
 						// did stun
 						// nothing else to check!
-						Stun(2000); // straight 2 seconds every time
+						Stun(RuleI(Combat, StunDuration));
+						if (RuleB(Combat, ClientStunMessage) && attacker->IsClient()) {
+							if (attacker) {
+							entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned after being bashed by %s.", GetCleanName(), attacker->GetCleanName());
+							}
+							else {
+							entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned by a bash to the head.", GetCleanName());
+							}
+						}
 					}
 					else {
 						// stun resist passed!
