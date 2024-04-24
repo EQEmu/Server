@@ -118,6 +118,8 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	mana_regen = CalcManaRegen();
 	end_regen = CalcEnduranceRegen();
 
+	SetExtraHaste(database.botdb.GetBotExtraHasteByID(GetBotID()), false);
+
 	strcpy(name, GetCleanName());
 	memset(&_botInspectMessage, 0, sizeof(InspectMessage_Struct));
 }
@@ -445,6 +447,8 @@ Bot::Bot(
 	}
 
 	cur_end = max_end;
+
+	SetExtraHaste(database.botdb.GetBotExtraHasteByID(GetBotID()), false);
 }
 
 Bot::~Bot() {

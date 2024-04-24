@@ -2089,3 +2089,10 @@ void Database::PurgeCharacterParcels()
 		RuleI(Parcel, ParcelPruneDelay)
 	);
 }
+
+const int Database::GetExtraHasteByCharacterID(const uint32 character_id)
+{
+	const auto& e = CharacterDataRepository::FindOne(*this, character_id);
+
+	return e.id ? e.extra_haste : 0;
+}

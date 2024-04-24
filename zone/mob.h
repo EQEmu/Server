@@ -1104,7 +1104,8 @@ public:
 	virtual void SetAttackTimer();
 	inline void SetInvul(bool invul) { invulnerable=invul; }
 	inline bool GetInvul(void) { return invulnerable; }
-	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
+	void SetExtraHaste(int haste, bool need_to_save = true);
+	inline int GetExtraHaste() { return extra_haste; }
 	virtual int GetHaste();
 	int32 GetMeleeMitigation();
 
@@ -1722,7 +1723,7 @@ protected:
 
 	uint8 aa_title;
 
-	int ExtraHaste; // for the #haste command
+	int extra_haste; // for the #haste command
 	bool mezzed;
 	bool stunned;
 	bool charmed; //this isnt fully implemented yet

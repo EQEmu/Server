@@ -1284,7 +1284,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Load Character Data */
 	query = fmt::format(
-		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled`, `tribute_enable` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
+		"SELECT `lfp`, `lfg`, `xtargets`, `firstlogon`, `guild_id`, `rank`, `exp_enabled`, `tribute_enable`, `extra_haste` FROM `character_data` LEFT JOIN `guild_members` ON `id` = `char_id` WHERE `id` = {}",
 		cid
 	);
 	auto results = database.QueryDatabase(query);
@@ -1295,7 +1295,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			guild_tribute_opt_in = row[7] ? Strings::ToBool(row[7]) : 0;
 		}
 
-		SetEXPEnabled(atobool(row[6]));
+		SetEXPEnabled(Strings::ToBool(row[6]));
+		SetExtraHaste(Strings::ToInt(row[8]), false);
 
 		if (LFP) { LFP = Strings::ToInt(row[0]); }
 		if (LFG) { LFG = Strings::ToInt(row[1]); }

@@ -1154,6 +1154,16 @@ void Perl_Mob_SetExtraHaste(Mob* self, int haste) // @categories Script Utility,
 	self->SetExtraHaste(haste);
 }
 
+void Perl_Mob_SetExtraHaste(Mob* self, int haste, bool need_to_save) // @categories Script Utility, Stats and Attributes
+{
+	self->SetExtraHaste(haste, need_to_save);
+}
+
+int Perl_Mob_GetExtraHaste(Mob* self) // @categories Script Utility, Stats and Attributes
+{
+	return self->GetExtraHaste();
+}
+
 int Perl_Mob_GetHaste(Mob* self) // @categories Stats and Attributes
 {
 	return self->GetHaste();
@@ -3700,6 +3710,7 @@ void perl_register_mob()
 	package.add("GetEquipment", &Perl_Mob_GetEquipment);
 	package.add("GetEquipmentColor", &Perl_Mob_GetEquipmentColor);
 	package.add("GetEquipmentMaterial", &Perl_Mob_GetEquipmentMaterial);
+	package.add("GetExtraHaste", &Perl_Mob_GetExtraHaste);
 	package.add("GetEyeColor1", &Perl_Mob_GetEyeColor1);
 	package.add("GetEyeColor2", &Perl_Mob_GetEyeColor2);
 	package.add("GetFR", &Perl_Mob_GetFR);
@@ -4023,7 +4034,8 @@ void perl_register_mob()
 	package.add("SetDeltas", &Perl_Mob_SetDeltas);
 	package.add("SetDisableMelee", &Perl_Mob_SetDisableMelee);
 	package.add("SetEntityVariable", &Perl_Mob_SetEntityVariable);
-	package.add("SetExtraHaste", &Perl_Mob_SetExtraHaste);
+	package.add("SetExtraHaste", (void(*)(Mob*, int))&Perl_Mob_SetExtraHaste);
+	package.add("SetExtraHaste", (void(*)(Mob*, int, bool))&Perl_Mob_SetExtraHaste);
 	package.add("SetFlurryChance", &Perl_Mob_SetFlurryChance);
 	package.add("SetFlyMode", &Perl_Mob_SetFlyMode);
 	package.add("SetFollowID", &Perl_Mob_SetFollowID);
