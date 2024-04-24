@@ -5527,14 +5527,15 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 		.check       = "SHOW COLUMNS FROM `character_parcels` LIKE 'aug_slot_1'",
 		.condition   = "empty",
 		.match       = "",
-		.sql         = R"(ALTER TABLE `character_parcels`
-	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `sent_date`,
+		.sql         = R"(
+ALTER TABLE `character_parcels`
+	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
 	ADD COLUMN `aug_slot_2` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
 	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
 	ADD COLUMN `aug_slot_4` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
 	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
 	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`;
-	)"
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

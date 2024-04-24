@@ -22,17 +22,17 @@ public:
 		uint32_t    id;
 		uint32_t    char_id;
 		uint32_t    item_id;
-		uint32_t    slot_id;
-		uint32_t    quantity;
-		std::string from_name;
-		std::string note;
-		time_t      sent_date;
 		uint32_t    aug_slot_1;
 		uint32_t    aug_slot_2;
 		uint32_t    aug_slot_3;
 		uint32_t    aug_slot_4;
 		uint32_t    aug_slot_5;
 		uint32_t    aug_slot_6;
+		uint32_t    slot_id;
+		uint32_t    quantity;
+		std::string from_name;
+		std::string note;
+		time_t      sent_date;
 	};
 
 	static std::string PrimaryKey()
@@ -46,17 +46,17 @@ public:
 			"id",
 			"char_id",
 			"item_id",
-			"slot_id",
-			"quantity",
-			"from_name",
-			"note",
-			"sent_date",
 			"aug_slot_1",
 			"aug_slot_2",
 			"aug_slot_3",
 			"aug_slot_4",
 			"aug_slot_5",
 			"aug_slot_6",
+			"slot_id",
+			"quantity",
+			"from_name",
+			"note",
+			"sent_date",
 		};
 	}
 
@@ -66,17 +66,17 @@ public:
 			"id",
 			"char_id",
 			"item_id",
-			"slot_id",
-			"quantity",
-			"from_name",
-			"note",
-			"UNIX_TIMESTAMP(sent_date)",
 			"aug_slot_1",
 			"aug_slot_2",
 			"aug_slot_3",
 			"aug_slot_4",
 			"aug_slot_5",
 			"aug_slot_6",
+			"slot_id",
+			"quantity",
+			"from_name",
+			"note",
+			"UNIX_TIMESTAMP(sent_date)",
 		};
 	}
 
@@ -120,17 +120,17 @@ public:
 		e.id         = 0;
 		e.char_id    = 0;
 		e.item_id    = 0;
-		e.slot_id    = 0;
-		e.quantity   = 0;
-		e.from_name  = "";
-		e.note       = "";
-		e.sent_date  = 0;
 		e.aug_slot_1 = 0;
 		e.aug_slot_2 = 0;
 		e.aug_slot_3 = 0;
 		e.aug_slot_4 = 0;
 		e.aug_slot_5 = 0;
 		e.aug_slot_6 = 0;
+		e.slot_id    = 0;
+		e.quantity   = 0;
+		e.from_name  = "";
+		e.note       = "";
+		e.sent_date  = 0;
 
 		return e;
 	}
@@ -170,17 +170,17 @@ public:
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.slot_id    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.quantity   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.from_name  = row[5] ? row[5] : "";
-			e.note       = row[6] ? row[6] : "";
-			e.sent_date  = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
-			e.aug_slot_1 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_2 = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_3 = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_4 = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_5 = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_6 = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.aug_slot_1 = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2 = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3 = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4 = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5 = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.slot_id    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.quantity   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.from_name  = row[11] ? row[11] : "";
+			e.note       = row[12] ? row[12] : "";
+			e.sent_date  = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			return e;
 		}
@@ -216,17 +216,17 @@ public:
 
 		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
-		v.push_back(columns[3] + " = " + std::to_string(e.slot_id));
-		v.push_back(columns[4] + " = " + std::to_string(e.quantity));
-		v.push_back(columns[5] + " = '" + Strings::Escape(e.from_name) + "'");
-		v.push_back(columns[6] + " = '" + Strings::Escape(e.note) + "'");
-		v.push_back(columns[7] + " = FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
-		v.push_back(columns[8] + " = " + std::to_string(e.aug_slot_1));
-		v.push_back(columns[9] + " = " + std::to_string(e.aug_slot_2));
-		v.push_back(columns[10] + " = " + std::to_string(e.aug_slot_3));
-		v.push_back(columns[11] + " = " + std::to_string(e.aug_slot_4));
-		v.push_back(columns[12] + " = " + std::to_string(e.aug_slot_5));
-		v.push_back(columns[13] + " = " + std::to_string(e.aug_slot_6));
+		v.push_back(columns[3] + " = " + std::to_string(e.aug_slot_1));
+		v.push_back(columns[4] + " = " + std::to_string(e.aug_slot_2));
+		v.push_back(columns[5] + " = " + std::to_string(e.aug_slot_3));
+		v.push_back(columns[6] + " = " + std::to_string(e.aug_slot_4));
+		v.push_back(columns[7] + " = " + std::to_string(e.aug_slot_5));
+		v.push_back(columns[8] + " = " + std::to_string(e.aug_slot_6));
+		v.push_back(columns[9] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[10] + " = " + std::to_string(e.quantity));
+		v.push_back(columns[11] + " = '" + Strings::Escape(e.from_name) + "'");
+		v.push_back(columns[12] + " = '" + Strings::Escape(e.note) + "'");
+		v.push_back(columns[13] + " = FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -251,17 +251,17 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
-		v.push_back(std::to_string(e.slot_id));
-		v.push_back(std::to_string(e.quantity));
-		v.push_back("'" + Strings::Escape(e.from_name) + "'");
-		v.push_back("'" + Strings::Escape(e.note) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 		v.push_back(std::to_string(e.aug_slot_1));
 		v.push_back(std::to_string(e.aug_slot_2));
 		v.push_back(std::to_string(e.aug_slot_3));
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.quantity));
+		v.push_back("'" + Strings::Escape(e.from_name) + "'");
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -294,17 +294,17 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
-			v.push_back(std::to_string(e.slot_id));
-			v.push_back(std::to_string(e.quantity));
-			v.push_back("'" + Strings::Escape(e.from_name) + "'");
-			v.push_back("'" + Strings::Escape(e.note) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 			v.push_back(std::to_string(e.aug_slot_1));
 			v.push_back(std::to_string(e.aug_slot_2));
 			v.push_back(std::to_string(e.aug_slot_3));
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.quantity));
+			v.push_back("'" + Strings::Escape(e.from_name) + "'");
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -341,17 +341,17 @@ public:
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.slot_id    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.quantity   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.from_name  = row[5] ? row[5] : "";
-			e.note       = row[6] ? row[6] : "";
-			e.sent_date  = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
-			e.aug_slot_1 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_2 = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_3 = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_4 = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_5 = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_6 = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.aug_slot_1 = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2 = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3 = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4 = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5 = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.slot_id    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.quantity   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.from_name  = row[11] ? row[11] : "";
+			e.note       = row[12] ? row[12] : "";
+			e.sent_date  = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -379,17 +379,17 @@ public:
 			e.id         = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
 			e.char_id    = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
 			e.item_id    = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.slot_id    = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
-			e.quantity   = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
-			e.from_name  = row[5] ? row[5] : "";
-			e.note       = row[6] ? row[6] : "";
-			e.sent_date  = strtoll(row[7] ? row[7] : "-1", nullptr, 10);
-			e.aug_slot_1 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_2 = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_3 = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_4 = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_5 = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_6 = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.aug_slot_1 = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2 = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3 = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4 = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5 = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6 = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.slot_id    = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
+			e.quantity   = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
+			e.from_name  = row[11] ? row[11] : "";
+			e.note       = row[12] ? row[12] : "";
+			e.sent_date  = strtoll(row[13] ? row[13] : "-1", nullptr, 10);
 
 			all_entries.push_back(e);
 		}
@@ -467,17 +467,17 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
-		v.push_back(std::to_string(e.slot_id));
-		v.push_back(std::to_string(e.quantity));
-		v.push_back("'" + Strings::Escape(e.from_name) + "'");
-		v.push_back("'" + Strings::Escape(e.note) + "'");
-		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 		v.push_back(std::to_string(e.aug_slot_1));
 		v.push_back(std::to_string(e.aug_slot_2));
 		v.push_back(std::to_string(e.aug_slot_3));
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.quantity));
+		v.push_back("'" + Strings::Escape(e.from_name) + "'");
+		v.push_back("'" + Strings::Escape(e.note) + "'");
+		v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -503,17 +503,17 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
-			v.push_back(std::to_string(e.slot_id));
-			v.push_back(std::to_string(e.quantity));
-			v.push_back("'" + Strings::Escape(e.from_name) + "'");
-			v.push_back("'" + Strings::Escape(e.note) + "'");
-			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 			v.push_back(std::to_string(e.aug_slot_1));
 			v.push_back(std::to_string(e.aug_slot_2));
 			v.push_back(std::to_string(e.aug_slot_3));
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.quantity));
+			v.push_back("'" + Strings::Escape(e.from_name) + "'");
+			v.push_back("'" + Strings::Escape(e.note) + "'");
+			v.push_back("FROM_UNIXTIME(" + (e.sent_date > 0 ? std::to_string(e.sent_date) : "null") + ")");
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
