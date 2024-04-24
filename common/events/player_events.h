@@ -984,16 +984,16 @@ namespace PlayerEvent {
 	};
 
 	struct ParcelRetrieve {
-		uint32		item_id;
-		uint32		quantity;
+		uint32      item_id;
+		uint32      quantity;
 		std::string from_player_name;
-		uint32		sent_date;
-		uint32		aug_slot_1;
-		uint32		aug_slot_2;
-		uint32		aug_slot_3;
-		uint32		aug_slot_4;
-		uint32		aug_slot_5;
-		uint32		aug_slot_6;
+		uint32      sent_date;
+		uint32      aug_slot_1;
+		uint32      aug_slot_2;
+		uint32      aug_slot_3;
+		uint32      aug_slot_4;
+		uint32      aug_slot_5;
+		uint32      aug_slot_6;
 
 		// cereal
 		template<class Archive>
@@ -1020,12 +1020,12 @@ namespace PlayerEvent {
 		std::string from_player_name;
 		std::string to_player_name;
 		uint32      sent_date;
-		uint32		aug_slot_1;
-		uint32		aug_slot_2;
-		uint32		aug_slot_3;
-		uint32		aug_slot_4;
-		uint32		aug_slot_5;
-		uint32		aug_slot_6;
+		uint32      aug_slot_1;
+		uint32      aug_slot_2;
+		uint32      aug_slot_3;
+		uint32      aug_slot_4;
+		uint32      aug_slot_5;
+		uint32      aug_slot_6;
 
 		// cereal
 		template<class Archive>
@@ -1054,12 +1054,12 @@ namespace PlayerEvent {
 		std::string from_name;
 		std::string note;
 		uint32      sent_date;
-		uint32		aug_slot_1;
-		uint32		aug_slot_2;
-		uint32		aug_slot_3;
-		uint32		aug_slot_4;
-		uint32		aug_slot_5;
-		uint32		aug_slot_6;
+		uint32      aug_slot_1;
+		uint32      aug_slot_2;
+		uint32      aug_slot_3;
+		uint32      aug_slot_4;
+		uint32      aug_slot_5;
+		uint32      aug_slot_6;
 
 		// cereal
 		template<class Archive>

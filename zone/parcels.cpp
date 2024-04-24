@@ -129,13 +129,13 @@ void Client::SendParcel(const Parcel_Struct &parcel_in)
 
 	CharacterParcelsRepository::CharacterParcels parcel{};
 	parcel.from_name  = results[0].from_name;
-	parcel.id		  = results[0].id;
-	parcel.note		  = results[0].note;
-	parcel.quantity	  = results[0].quantity;
+	parcel.id         = results[0].id;
+	parcel.note       = results[0].note;
+	parcel.quantity   = results[0].quantity;
 	parcel.sent_date  = results[0].sent_date;
-	parcel.item_id	  = results[0].item_id;
-	parcel.slot_id	  = results[0].slot_id;
-	parcel.char_id	  = results[0].char_id;
+	parcel.item_id    = results[0].item_id;
+	parcel.slot_id    = results[0].slot_id;
+	parcel.char_id    = results[0].char_id;
 	parcel.aug_slot_1 = results[0].aug_slot_1;
 	parcel.aug_slot_2 = results[0].aug_slot_2;
 	parcel.aug_slot_3 = results[0].aug_slot_3;
@@ -421,15 +421,15 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
-				e.item_id		   = parcel_out.item_id;
-				e.quantity		   = parcel_out.quantity;
-				e.sent_date		   = parcel_out.sent_date;
-				e.aug_slot_1	   = parcel_out.aug_slot_1;
-				e.aug_slot_2	   = parcel_out.aug_slot_2;
-				e.aug_slot_3	   = parcel_out.aug_slot_3;
-				e.aug_slot_4	   = parcel_out.aug_slot_4;
-				e.aug_slot_5	   = parcel_out.aug_slot_5;
-				e.aug_slot_6	   = parcel_out.aug_slot_6;
+				e.item_id          = parcel_out.item_id;
+				e.quantity         = parcel_out.quantity;
+				e.sent_date        = parcel_out.sent_date;
+				e.aug_slot_1       = parcel_out.aug_slot_1;
+				e.aug_slot_2       = parcel_out.aug_slot_2;
+				e.aug_slot_3       = parcel_out.aug_slot_3;
+				e.aug_slot_4       = parcel_out.aug_slot_4;
+				e.aug_slot_5       = parcel_out.aug_slot_5;
+				e.aug_slot_6       = parcel_out.aug_slot_6;
 
 				RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
 			}
@@ -687,15 +687,15 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 		if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
 			PlayerEvent::ParcelRetrieve e{};
 			e.from_player_name = p->second.from_name;
-			e.item_id		   = p->second.item_id;
-			e.quantity		   = p->second.quantity;
-			e.sent_date		   = p->second.sent_date;
-			e.aug_slot_1	   = p->second.aug_slot_1;
-			e.aug_slot_2	   = p->second.aug_slot_2;
-			e.aug_slot_3	   = p->second.aug_slot_3;
-			e.aug_slot_4	   = p->second.aug_slot_4;
-			e.aug_slot_5	   = p->second.aug_slot_5;
-			e.aug_slot_6	   = p->second.aug_slot_6;
+			e.item_id          = p->second.item_id;
+			e.quantity         = p->second.quantity;
+			e.sent_date        = p->second.sent_date;
+			e.aug_slot_1       = p->second.aug_slot_1;
+			e.aug_slot_2       = p->second.aug_slot_2;
+			e.aug_slot_3       = p->second.aug_slot_3;
+			e.aug_slot_4       = p->second.aug_slot_4;
+			e.aug_slot_5       = p->second.aug_slot_5;
+			e.aug_slot_6       = p->second.aug_slot_6;
 
 			RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
 		}

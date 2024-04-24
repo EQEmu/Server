@@ -5522,12 +5522,12 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 		)"
 	},
 	ManifestEntry{
-		.version	 = 9272,
+		.version     = 9272,
 		.description = "2024_04_23_add_parcel_support_for_augmented_items.sql",
-		.check		 = "SHOW COLUMNS FROM `character_parcels` LIKE 'aug_slot_1'",
-		.condition	 = "empty",
-		.match		 = "",
-		.sql		 = R"(ALTER TABLE `character_parcels` 
+		.check       = "SHOW COLUMNS FROM `character_parcels` LIKE 'aug_slot_1'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(ALTER TABLE `character_parcels`
 	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `sent_date`,
 	ADD COLUMN `aug_slot_2` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
 	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
