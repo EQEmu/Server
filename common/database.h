@@ -195,8 +195,6 @@ public:
 
 	int GetInstanceID(uint32 character_id, uint32 zone_id);
 
-	const int GetExtraHasteByCharacterID(const uint32 character_id);
-
 	/* Groups */
 	std::string GetGroupLeaderForLogin(const std::string& character_name);
 	char* GetGroupLeadershipInfo(
