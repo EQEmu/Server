@@ -4378,10 +4378,10 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						Stun(RuleI(Combat, StunDuration));
 						if (RuleB(Combat, ClientStunMessage) && attacker->IsClient()) {
 							if (attacker) {
-							entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned after being bashed by %s.", GetCleanName(), attacker->GetCleanName());
+								entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned after being bashed by %s.", GetCleanName(), attacker->GetCleanName());
 							}
 							else {
-							entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned by a bash to the head.", GetCleanName());
+								entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned by a bash to the head.", GetCleanName());
 							}
 						}
 					}
