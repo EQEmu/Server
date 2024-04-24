@@ -263,7 +263,7 @@ Mob::Mob(
 	WIS                  = in_wis;
 	CHA                  = in_cha;
 	MR                   = CR = FR = DR = PR = Corrup = PhR = 0;
-	extra_haste           = 0;
+	extra_haste          = 0;
 	bEnraged             = false;
 	current_mana         = 0;
 	max_mana             = 0;
