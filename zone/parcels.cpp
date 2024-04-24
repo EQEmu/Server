@@ -45,7 +45,16 @@ void Client::SendBulkParcels()
 	for (auto &p: m_parcels) {
 		auto item = database.GetItem(p.second.item_id);
 		if (item) {
-			std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, p.second.quantity));
+			std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(
+				item,
+				p.second.quantity,
+				p.second.aug_slot_1,
+				p.second.aug_slot_2,
+				p.second.aug_slot_3,
+				p.second.aug_slot_4,
+				p.second.aug_slot_5,
+				p.second.aug_slot_6
+			));
 			if (inst) {
 				inst->SetCharges(p.second.quantity > 0 ? p.second.quantity : 1);
 				inst->SetMerchantCount(1);
@@ -112,43 +121,61 @@ void Client::SendParcel(const Parcel_Struct &parcel_in)
 		return;
 	}
 
+	const auto& r = results.front();
+
 	ParcelMessaging_Struct pms{};
 	pms.packet_type = ItemPacketParcel;
 
 	std::stringstream           ss;
 	cereal::BinaryOutputArchive ar(ss);
 
-	CharacterParcelsRepository::CharacterParcels parcel{};
-	parcel.from_name = results[0].from_name;
-	parcel.id        = results[0].id;
-	parcel.note      = results[0].note;
-	parcel.quantity  = results[0].quantity;
-	parcel.sent_date = results[0].sent_date;
-	parcel.item_id   = results[0].item_id;
-	parcel.slot_id   = results[0].slot_id;
-	parcel.char_id   = results[0].char_id;
+	CharacterParcelsRepository::CharacterParcels p{};
 
-	auto item = database.GetItem(parcel.item_id);
+	p.from_name  = r.from_name;
+	p.id         = r.id;
+	p.note       = r.note;
+	p.quantity   = r.quantity;
+	p.sent_date  = r.sent_date;
+	p.item_id    = r.item_id;
+	p.aug_slot_1 = r.aug_slot_1;
+	p.aug_slot_2 = r.aug_slot_2;
+	p.aug_slot_3 = r.aug_slot_3;
+	p.aug_slot_4 = r.aug_slot_4;
+	p.aug_slot_5 = r.aug_slot_5;
+	p.aug_slot_6 = r.aug_slot_6;
+	p.slot_id    = r.slot_id;
+	p.char_id    = r.char_id;
+
+	auto item = database.GetItem(p.item_id);
 	if (item) {
-		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item, parcel.quantity));
+		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(
+			item,
+			p.quantity,
+			p.aug_slot_1,
+			p.aug_slot_2,
+			p.aug_slot_3,
+			p.aug_slot_4,
+			p.aug_slot_5,
+			p.aug_slot_6
+		));
 		if (inst) {
-			inst->SetCharges(parcel.quantity > 0 ? parcel.quantity : 1);
+			inst->SetCharges(p.quantity > 0 ? p.quantity : 1);
 			inst->SetMerchantCount(1);
-			inst->SetMerchantSlot(parcel.slot_id);
+			inst->SetMerchantSlot(p.slot_id);
 			if (inst->IsStackable()) {
-				inst->SetCharges(parcel.quantity);
+				inst->SetCharges(p.quantity);
 			}
 
 			if (item->ID == PARCEL_MONEY_ITEM_ID) {
-				inst->SetPrice(parcel.quantity);
+				inst->SetPrice(p.quantity);
 				inst->SetCharges(1);
 			}
 
-			pms.player_name     = parcel.from_name;
-			pms.sent_time       = parcel.sent_date;
-			pms.note            = parcel.note;
-			pms.serialized_item = inst->Serialize(parcel.slot_id);
-			pms.slot_id         = parcel.slot_id;
+			pms.player_name     = p.from_name;
+			pms.sent_time       = p.sent_date;
+			pms.note            = p.note;
+			pms.serialized_item = inst->Serialize(p.slot_id);
+			pms.slot_id         = p.slot_id;
 			ar(pms);
 
 			uint32 packet_size = ss.str().length();
@@ -168,7 +195,7 @@ void Client::SendParcel(const Parcel_Struct &parcel_in)
 			ss.str("");
 			ss.clear();
 
-			m_parcels.emplace(parcel.slot_id, parcel);
+			m_parcels.emplace(p.slot_id, p);
 		}
 	}
 }
@@ -343,7 +370,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				quantity = inst->GetCharges() > 0 ? inst->GetCharges() : parcel_in->quantity;
 			}
 
-			CharacterParcelsRepository::CharacterParcels parcel_out;
+			CharacterParcelsRepository::CharacterParcels parcel_out{};
 			parcel_out.from_name = GetName();
 			parcel_out.note      = parcel_in->note;
 			parcel_out.sent_date = time(nullptr);
@@ -352,6 +379,16 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			parcel_out.char_id   = send_to_client.at(0).char_id;
 			parcel_out.slot_id   = next_slot;
 			parcel_out.id        = 0;
+
+			if (inst->IsAugmented()) {
+				auto augs			  = inst->GetAugmentIDs();
+				parcel_out.aug_slot_1 = augs.at(0);
+				parcel_out.aug_slot_2 = augs.at(1);
+				parcel_out.aug_slot_3 = augs.at(2);
+				parcel_out.aug_slot_4 = augs.at(3);
+				parcel_out.aug_slot_5 = augs.at(4);
+				parcel_out.aug_slot_6 = augs.at(5);
+			}
 
 			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
@@ -388,6 +425,12 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
+				e.aug_slot_1       = parcel_out.aug_slot_1;
+				e.aug_slot_2       = parcel_out.aug_slot_2;
+				e.aug_slot_3       = parcel_out.aug_slot_3;
+				e.aug_slot_4       = parcel_out.aug_slot_4;
+				e.aug_slot_5       = parcel_out.aug_slot_5;
+				e.aug_slot_6       = parcel_out.aug_slot_6;
 				e.quantity         = parcel_out.quantity;
 				e.sent_date        = parcel_out.sent_date;
 
@@ -430,7 +473,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				return;
 			}
 
-			CharacterParcelsRepository::CharacterParcels parcel_out;
+			CharacterParcelsRepository::CharacterParcels parcel_out{};
 			parcel_out.from_name = GetName();
 			parcel_out.note      = parcel_in->note;
 			parcel_out.sent_date = time(nullptr);
@@ -548,7 +591,17 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 			return;
 		}
 
-		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(item_id, item_quantity));
+		std::unique_ptr<EQ::ItemInstance> inst(database.CreateItem(
+			item_id,
+			item_quantity,
+			p->second.aug_slot_1,
+			p->second.aug_slot_2,
+			p->second.aug_slot_3,
+			p->second.aug_slot_4,
+			p->second.aug_slot_5,
+			p->second.aug_slot_6
+		)
+		);
 		if (!inst) {
 			SendParcelRetrieveAck();
 			return;
@@ -561,7 +614,7 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					Chat::Yellow,
 					PARCEL_DELIVERED,
 					merchant->GetCleanName(),
-					"Money", //inst->DetermineMoneyStringForParcels(p->second.quantity).c_str(),
+					"Money",
 					p->second.from_name.c_str()
 				);
 				break;
@@ -638,6 +691,12 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 			PlayerEvent::ParcelRetrieve e{};
 			e.from_player_name = p->second.from_name;
 			e.item_id          = p->second.item_id;
+			e.aug_slot_1       = p->second.aug_slot_1;
+			e.aug_slot_2       = p->second.aug_slot_2;
+			e.aug_slot_3       = p->second.aug_slot_3;
+			e.aug_slot_4       = p->second.aug_slot_4;
+			e.aug_slot_5       = p->second.aug_slot_5;
+			e.aug_slot_6       = p->second.aug_slot_6;
 			e.quantity         = p->second.quantity;
 			e.sent_date        = p->second.sent_date;
 
