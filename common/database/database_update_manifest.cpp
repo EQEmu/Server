@@ -5536,6 +5536,18 @@ ALTER TABLE `character_parcels`
 	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
 	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`;
 )"
+	},
+	ManifestEntry{
+		.version = 9273,
+		.description = "2024_04_24_door_close_timer.sql",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'close_timer'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `doors`
+ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is_ldon_door`;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
