@@ -5545,7 +5545,7 @@ ALTER TABLE `character_parcels`
 		.match = "",
 		.sql = R"(
 ALTER TABLE `doors`
-ADD COLUMN `close_timer_ms` smallint(8) DEFAULT 5000 AFTER `is_ldon_door`;
+ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is_ldon_door`;
 )",
 		.content_schema_update = true
 	}
