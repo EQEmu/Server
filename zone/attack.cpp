@@ -1724,7 +1724,7 @@ void Client::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::Skill
 	}
 }
 
-bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool iBuffTic)
+bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool is_buff_tic)
 {
 	if (!ClientFinishedLoading() || dead) {
 		return false;
@@ -1792,9 +1792,9 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	if (IsValidSpell(spell) &&
 		(attack_skill == EQ::skills::SkillTigerClaw ||
         (IsDamageSpell(spell) && IsDiscipline(spell)) ||
-		!iBuffTic)) {
+		!is_buff_tic)) {
 			d->attack_skill = DamageTypeSpell;
-			d->spell_id = (iBuffTic) ? UINT32_MAX : spell;
+			d->spell_id = (is_buff_tic) ? UINT32_MAX : spell;
 	}
 	else {
 		d->attack_skill = SkillDamageTypes[attack_skill];
@@ -2393,7 +2393,7 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 	}
 }
 
-bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool iBuffTic)
+bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool is_buff_tic)
 {
 	LogCombat(
 		"Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]",
@@ -2512,9 +2512,9 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 	if (IsValidSpell(spell) &&
 		(attack_skill == EQ::skills::SkillTigerClaw ||
         (IsDamageSpell(spell) && IsDiscipline(spell)) ||
-		!iBuffTic)) {
+		!is_buff_tic)) {
 			d->attack_skill = DamageTypeSpell;
-			d->spell_id = (iBuffTic) ? UINT32_MAX : spell;
+			d->spell_id = (is_buff_tic) ? UINT32_MAX : spell;
 	}
 	else {
 		d->attack_skill = SkillDamageTypes[attack_skill];
