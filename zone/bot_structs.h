@@ -92,4 +92,9 @@ struct BotTimer_Struct {
 	uint32		item_id;
 };
 
+struct BotSpellTypeOrder {
+	uint16		spellType;
+	uint16		priority;
+};
+
 #endif // BOT_STRUCTS

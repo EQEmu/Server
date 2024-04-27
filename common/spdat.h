@@ -213,6 +213,10 @@
 #define SPELL_BLOODTHIRST 8476
 #define SPELL_AMPLIFICATION 2603
 #define SPELL_DIVINE_REZ 2738
+#define SPELL_NATURES_RECOVERY 2520
+#define SPELL_ADRENALINE_SWELL 14445
+#define SPELL_ADRENALINE_SWELL_RK2 14446
+#define SPELL_ADRENALINE_SWELL_RK3 14447
 
 // discipline IDs.
 #define DISC_UNHOLY_AURA 4520
@@ -647,13 +651,83 @@ enum SpellTypes : uint32
 	SpellType_PreCombatBuffSong = (1 << 21)
 };
 
-const uint32 SPELL_TYPE_MIN = (SpellType_Nuke << 1) - 1;
-const uint32 SPELL_TYPE_MAX = (SpellType_PreCombatBuffSong << 1) - 1;
-const uint32 SPELL_TYPE_ANY = 0xFFFFFFFF;
+namespace BotSpellTypes 
+{ 
+	constexpr uint16	Nuke						= 0;
+	constexpr uint16	RegularHeal					= 1;
+	constexpr uint16	Root						= 2;
+	constexpr uint16	Buff						= 3;
+	constexpr uint16	Escape						= 4;
+	constexpr uint16	Pet							= 5;
+	constexpr uint16	Lifetap						= 6;
+	constexpr uint16	Snare						= 7;
+	constexpr uint16	DOT							= 8;
+	constexpr uint16	Dispel						= 9;
+	constexpr uint16	InCombatBuff				= 10;
+	constexpr uint16	Mez							= 11;
+	constexpr uint16	Charm						= 12;
+	constexpr uint16	Slow						= 13;
+	constexpr uint16	Debuff						= 14;
+	constexpr uint16	Cure						= 15;
+	constexpr uint16	Resurrect					= 16;
+	constexpr uint16	HateRedux					= 17;
+	constexpr uint16	InCombatBuffSong			= 18;
+	constexpr uint16	OutOfCombatBuffSong			= 19;
+	constexpr uint16	PreCombatBuff				= 20;
+	constexpr uint16	PreCombatBuffSong			= 21;
+	constexpr uint16	Fear						= 22;
+	constexpr uint16	Stun						= 23;
+	constexpr uint16	GroupCures					= 24;
+	constexpr uint16	CompleteHeal				= 25;
+	constexpr uint16	FastHeals					= 26;
+	constexpr uint16	VeryFastHeals				= 27;
+	constexpr uint16	GroupHeals					= 28;
+	constexpr uint16	GroupCompleteHeals			= 29;
+	constexpr uint16	GroupHoTHeals				= 30;
+	constexpr uint16	HoTHeals					= 31;
+	constexpr uint16	AENukes						= 32;
+	constexpr uint16	AERains						= 33;
+	constexpr uint16	AEMez						= 34;
+	constexpr uint16	AEStun						= 35;
+	constexpr uint16	AEDebuff					= 36;
+	constexpr uint16	AESlow						= 37;
+	constexpr uint16	AESnare						= 38;
+	constexpr uint16	AEFear						= 39;
+	constexpr uint16	AEDispel					= 40;
+	constexpr uint16	AERoot						= 41;
+	constexpr uint16	AEDoT						= 42;
+	constexpr uint16	AELifetap					= 43;
+	constexpr uint16	PBAENuke					= 44;
+	constexpr uint16	PetBuffs					= 45;
+	constexpr uint16	PetRegularHeals				= 46;
+	constexpr uint16	PetCompleteHeals			= 47;
+	constexpr uint16	PetFastHeals				= 48;
+	constexpr uint16	PetVeryFastHeals			= 49;
+	constexpr uint16	PetHoTHeals					= 50;
+	constexpr uint16	DamageShields				= 51;
+	constexpr uint16	ResistBuffs					= 52;	
+				  
+	constexpr uint16	START = BotSpellTypes::Nuke;							// Do not remove or change this
+	constexpr uint16	END = BotSpellTypes::ResistBuffs;						// Do not remove this, increment as needed
+}
 
 const uint32 SPELL_TYPES_DETRIMENTAL = (SpellType_Nuke | SpellType_Root | SpellType_Lifetap | SpellType_Snare | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Charm | SpellType_Debuff | SpellType_Slow);
 const uint32 SPELL_TYPES_BENEFICIAL = (SpellType_Heal | SpellType_Buff | SpellType_Escape | SpellType_Pet | SpellType_InCombatBuff | SpellType_Cure | SpellType_HateRedux | SpellType_InCombatBuffSong | SpellType_OutOfCombatBuffSong | SpellType_PreCombatBuff | SpellType_PreCombatBuffSong);
 const uint32 SPELL_TYPES_INNATE = (SpellType_Nuke | SpellType_Lifetap | SpellType_DOT | SpellType_Dispel | SpellType_Mez | SpellType_Slow | SpellType_Debuff | SpellType_Charm | SpellType_Root);
+
+bool BOT_SPELL_TYPES_DETRIMENTAL (uint16 spellType, uint8 cls = 0);
+bool BOT_SPELL_TYPES_BENEFICIAL (uint16 spellType, uint8 cls = 0);
+bool BOT_SPELL_TYPES_OTHER_BENEFICIAL(uint16 spellType);
+bool BOT_SPELL_TYPES_INNATE (uint16 spellType);
+bool IsBotSpellType (uint16 spellType);
+bool IsAEBotSpellType(uint16 spellType);
+bool IsGroupBotSpellType(uint16 spellType);
+bool IsGroupTargetOnlyBotSpellType(uint16 spellType);
+bool IsPetBotSpellType(uint16 spellType);
+bool IsClientBotSpellType(uint16 spellType);
+bool IsHealBotSpellType(uint16 spellType);
+bool SpellTypeRequiresLoS(uint16 spellType, uint16 cls = 0);
+bool SpellTypeRequiresTarget(uint16 spellType, uint16 cls = 0);
 
 // These should not be used to determine spell category..
 // They are a graphical affects (effects?) index only
@@ -1503,6 +1577,7 @@ bool IsTargetableAESpell(uint16 spell_id);
 bool IsSacrificeSpell(uint16 spell_id);
 bool IsLifetapSpell(uint16 spell_id);
 bool IsMesmerizeSpell(uint16 spell_id);
+bool SpellBreaksMez(uint16 spell_id);
 bool IsStunSpell(uint16 spell_id);
 bool IsSlowSpell(uint16 spell_id);
 bool IsHasteSpell(uint16 spell_id);
@@ -1536,6 +1611,11 @@ bool IsPureNukeSpell(uint16 spell_id);
 bool IsAENukeSpell(uint16 spell_id);
 bool IsPBAENukeSpell(uint16 spell_id);
 bool IsAERainNukeSpell(uint16 spell_id);
+bool IsAnyNukeOrStunSpell(uint16 spell_id);
+bool IsAnyAESpell(uint16 spell_id);
+bool IsAESpell(uint16 spell_id);
+bool IsPBAESpell(uint16 spell_id);
+bool IsAERainSpell(uint16 spell_id);
 bool IsPartialResistableSpell(uint16 spell_id);
 bool IsResistableSpell(uint16 spell_id);
 bool IsGroupSpell(uint16 spell_id);
@@ -1545,8 +1625,11 @@ bool IsEffectInSpell(uint16 spell_id, int effect_id);
 uint16 GetSpellTriggerSpellID(uint16 spell_id, int effect_id);
 bool IsBlankSpellEffect(uint16 spell_id, int effect_index);
 bool IsValidSpell(uint32 spell_id);
+bool IsValidSpellAndLoS(uint32 spell_id, bool hasLoS = true);
 bool IsSummonSpell(uint16 spell_id);
 bool IsDamageSpell(uint16 spell_id);
+bool IsAnyDamageSpell(uint16 spell_id);
+bool IsDamageOverTimeSpell(uint16 spell_i);
 bool IsFearSpell(uint16 spell_id);
 bool IsCureSpell(uint16 spell_id);
 bool IsHarmTouchSpell(uint16 spell_id);
@@ -1585,10 +1668,16 @@ bool IsCompleteHealSpell(uint16 spell_id);
 bool IsFastHealSpell(uint16 spell_id);
 bool IsVeryFastHealSpell(uint16 spell_id);
 bool IsRegularSingleTargetHealSpell(uint16 spell_id);
+bool IsRegularPetHealSpell(uint16 spell_id);
 bool IsRegularGroupHealSpell(uint16 spell_id);
 bool IsGroupCompleteHealSpell(uint16 spell_id);
 bool IsGroupHealOverTimeSpell(uint16 spell_id);
+bool IsAnyHealSpell(uint16 spell_id);
+bool IsAnyBuffSpell(uint16 spell_id);
+bool IsDispelSpell(uint16 spell_id);
+bool IsEscapeSpell(uint16 spell_id);
 bool IsDebuffSpell(uint16 spell_id);
+bool IsHateReduxSpell(uint16 spell_id);
 bool IsResistDebuffSpell(uint16 spell_id);
 bool IsSelfConversionSpell(uint16 spell_id);
 bool IsBuffSpell(uint16 spell_id);
@@ -1628,5 +1717,10 @@ bool IsCastRestrictedSpell(uint16 spell_id);
 bool IsAegolismSpell(uint16 spell_id);
 bool AegolismStackingIsSymbolSpell(uint16 spell_id);
 bool AegolismStackingIsArmorClassSpell(uint16 spell_id);
+int8 SpellEffectsCount(uint16 spell_id);
+bool IsLichSpell(uint16 spell_id);
+bool IsInstantHealSpell(uint32 spell_id);
+bool IsResurrectSpell(uint16 spell_id);
+bool RequiresStackCheck(uint16 spellType);
 
 #endif

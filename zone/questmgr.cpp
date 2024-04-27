@@ -2896,7 +2896,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 			initiator->Message(
 				Chat::White,
 				fmt::format(
-					"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name.",
+					"{} has invalid characters. You can use only the A-Z, a-z and _ characters in a bot name and it must be between 4 and 15 characters long.",
 					new_bot->GetCleanName()
 				).c_str()
 			);

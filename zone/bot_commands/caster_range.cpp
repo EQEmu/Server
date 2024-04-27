@@ -7,7 +7,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [current | value: 0 - 300] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [current | value: 0 - 300] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "note: Can only be used for Casters or Hybrids.");
 		c->Message(Chat::White, "note: Use [current] to check the current setting.");
 		c->Message(Chat::White, "note: Set the value to the minimum distance you want your bot to try to remain from its target.");
@@ -15,6 +15,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "note: This is set to (90) units by default.");
 		return;
 	}
+
 	const int ab_mask = ActionableBots::ABM_Type1;
 
 	std::string arg1 = sep->arg[1];
@@ -23,7 +24,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 	uint32 crange = 0;
 
 	if (sep->IsNumber(1)) {
-		ab_arg = 2;
+		++ab_arg;
 		crange = atoi(sep->arg[1]);
 		if (crange < 0 || crange > 300) {
 			c->Message(Chat::White, "You must enter a value within the range of 0 - 300.");
@@ -31,7 +32,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 		}
 	}
 	else if (!arg1.compare("current")) {
-		ab_arg = 2;
+		++ab_arg;
 		current_check = true;
 	}
 	else {
@@ -78,8 +79,6 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 		else {
 			my_bot->SetBotCasterRange(crange);
 			++success_count;
-
-			database.botdb.SaveBotCasterRange(my_bot->GetBotID(), crange);
 		}
 	}
 	if (!current_check) {

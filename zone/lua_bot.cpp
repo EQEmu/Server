@@ -105,11 +105,6 @@ void Lua_Bot::SetExpansionBitmask(int expansion_bitmask) {
 	self->SetExpansionBitmask(expansion_bitmask);
 }
 
-void Lua_Bot::SetExpansionBitmask(int expansion_bitmask, bool save) {
-	Lua_Safe_Call_Void();
-	self->SetExpansionBitmask(expansion_bitmask, save);
-}
-
 bool Lua_Bot::ReloadBotDataBuckets() {
 	Lua_Safe_Call_Bool();
 	return DataBucket::GetDataBuckets(self);
@@ -762,7 +757,6 @@ luabind::scope lua_register_bot() {
 	.def("SetBucket", (void(Lua_Bot::*)(std::string,std::string))&Lua_Bot::SetBucket)
 	.def("SetBucket", (void(Lua_Bot::*)(std::string,std::string,std::string))&Lua_Bot::SetBucket)
 	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int))&Lua_Bot::SetExpansionBitmask)
-	.def("SetExpansionBitmask", (void(Lua_Bot::*)(int,bool))&Lua_Bot::SetExpansionBitmask)
 	.def("SetDisciplineReuseTimer", (void(Lua_Bot::*)(uint16))&Lua_Bot::SetDisciplineReuseTimer)
 	.def("SetDisciplineReuseTimer", (void(Lua_Bot::*)(uint16, uint32))&Lua_Bot::SetDisciplineReuseTimer)
 	.def("SetItemReuseTimer", (void(Lua_Bot::*)(uint32))&Lua_Bot::SetItemReuseTimer)

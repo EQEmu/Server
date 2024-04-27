@@ -844,6 +844,76 @@
         OutF(LogSys, Logs::Detail, Logs::XTargets, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogBotSettings(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSettings))\
+        OutF(LogSys, Logs::General, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSettingsDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSettings))\
+        OutF(LogSys, Logs::Detail, Logs::BotSettings, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotPreChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotPreChecks))\
+        OutF(LogSys, Logs::General, Logs::BotPreChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotPreChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotPreChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotPreChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotHoldChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotHoldChecks))\
+        OutF(LogSys, Logs::General, Logs::BotHoldChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotHoldChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotHoldChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotHoldChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotDelayChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotDelayChecks))\
+        OutF(LogSys, Logs::General, Logs::BotDelayChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotDelayChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotDelayChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotDelayChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotThresholdChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotThresholdChecks))\
+        OutF(LogSys, Logs::General, Logs::BotThresholdChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotThresholdChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotThresholdChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotThresholdChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellTypeChecks(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::BotSpellTypeChecks))\
+        OutF(LogSys, Logs::General, Logs::BotSpellTypeChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogBotSpellTypeChecksDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::BotSpellTypeChecks))\
+        OutF(LogSys, Logs::Detail, Logs::BotSpellTypeChecks, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogTestDebug(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::General, Logs::TestDebug))\
+        OutF(LogSys, Logs::General, Logs::TestDebug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogTestDebugDetail(message, ...) do {\
+    if (LogSys.IsLogEnabled(Logs::Detail, Logs::TestDebug))\
+        OutF(LogSys, Logs::Detail, Logs::TestDebug, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.IsLogEnabled(debug_level, log_category))\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

@@ -44,46 +44,6 @@ public:
      */
 
 	// Custom extended repository methods here
-	static bool SaveAllHelmAppearances(Database& db, const uint32 owner_id, const bool show_flag)
-	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE `{}` SET `show_helm` = {} WHERE `owner_id` = {}",
-				TableName(),
-				show_flag ? 1 : 0,
-				owner_id
-			)
-		);
-
-		return results.Success();
-	}
-
-	static bool ToggleAllHelmAppearances(Database& db, const uint32 owner_id)
-	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE `{}` SET `show_helm` = (`show_helm` XOR '1') WHERE `owner_id` = {}",
-				TableName(),
-				owner_id
-			)
-		);
-
-		return results.Success();
-	}
-
-	static bool SaveAllFollowDistances(Database& db, const uint32 owner_id, const uint32 follow_distance)
-	{
-		auto results = db.QueryDatabase(
-			fmt::format(
-				"UPDATE `{}` SET `follow_distance` = {} WHERE `owner_id` = {}",
-				TableName(),
-				follow_distance,
-				owner_id
-			)
-		);
-
-		return results.Success();
-	}
 };
 
 #endif //EQEMU_BOT_DATA_REPOSITORY_H

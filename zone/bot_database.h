@@ -88,10 +88,6 @@ public:
 
 	bool SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, const uint32 color);
 
-	bool SaveExpansionBitmask(const uint32 bot_id, const int expansion_bitmask);
-	bool SaveEnforceSpellSetting(const uint32 bot_id, const bool enforce_spell_setting);
-
-
 	/* Bot pet functions   */
 	bool LoadPetIndex(const uint32 bot_id, uint32& pet_index);
 	bool LoadPetSpellID(const uint32 bot_id, uint32& pet_spell_id);
@@ -120,26 +116,16 @@ public:
 	bool SaveAllArmorColorBySlot(const uint32 owner_id, const int16 slot_id, const uint32 rgb_value);
 	bool SaveAllArmorColors(const uint32 owner_id, const uint32 rgb_value);
 
-	bool SaveHelmAppearance(const uint32 bot_id, const bool show_flag = true);
-	bool SaveAllHelmAppearances(const uint32 owner_id, const bool show_flag = true);
-
-	bool ToggleAllHelmAppearances(const uint32 owner_id);
-
-	bool SaveFollowDistance(const uint32 bot_id, const uint32 follow_distance);
-	bool SaveAllFollowDistances(const uint32 owner_id, const uint32 follow_distance);
-
 	bool CreateCloneBot(const uint32 bot_id, const std::string& clone_name, uint32& clone_id);
 	bool CreateCloneBotInventory(const uint32 bot_id, const uint32 clone_id);
-
-	bool SaveStopMeleeLevel(const uint32 bot_id, const uint8 sml_value);
-
-	bool SaveBotArcherSetting(const uint32 bot_id, const bool bot_archer_setting);
 
 	bool LoadOwnerOptions(Client *owner);
 	bool SaveOwnerOption(const uint32 owner_id, size_t type, const bool flag);
 	bool SaveOwnerOption(const uint32 owner_id, const std::pair<size_t, size_t> type, const std::pair<bool, bool> flag);
 
-	bool SaveBotCasterRange(const uint32 bot_id, const uint32 bot_caster_range_value);
+	bool LoadBotSettings(Mob* m);
+	bool SaveBotSettings(Mob* m);
+	bool DeleteBotSettings(const uint32 bot_id);
 
 	/* Bot group functions   */
 	bool LoadGroupedBotsByGroupID(const uint32 owner_id, const uint32 group_id, std::list<uint32>& group_list);
@@ -210,12 +196,6 @@ public:
 		static const char* SaveAllInspectMessages();
 		static const char* SaveAllArmorColorBySlot();
 		static const char* SaveAllArmorColors();
-		static const char* SaveAllHelmAppearances();
-		static const char* ToggleAllHelmAppearances();
-		static const char* SaveFollowDistance();
-		static const char* SaveAllFollowDistances();
-		static const char* SaveStopMeleeLevel();
-		static const char* SaveBotCasterRange();
 
 		/* fail::Bot heal rotation functions   */
 		static const char* LoadHealRotation();

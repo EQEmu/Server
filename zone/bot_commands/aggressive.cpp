@@ -7,32 +7,26 @@ void bot_command_aggressive(Client* c, const Seperator* sep)
 		helper_command_alias_fail(c, "bot_command_aggressive", sep->arg[0], "aggressive")) {
 		return;
 	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(
-			Chat::White,
-			"usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | byclass | byrace | spawned] ([actionable_name]))",
-			sep->arg[0]
-		);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "note: Orders a bot to use a aggressive discipline");
 		helper_send_usage_required_bots(c, BCEnum::SpT_Stance);
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_Type1;
 
-	std::string class_race_arg   = sep->arg[1];
-	bool        class_race_check = false;
+	const int ab_mask = ActionableBots::ABM_Type1;
+	int ab_arg = 1;
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(
-		c,
-		sep->arg[1],
-		sbl,
-		ab_mask,
-		!class_race_check ? sep->arg[2] : nullptr,
-		class_race_check ? atoi(sep->arg[2]) : 0
-	) == ActionableBots::ABT_None) {
+
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 

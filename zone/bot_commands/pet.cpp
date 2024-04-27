@@ -19,7 +19,7 @@ void bot_command_pet_get_lost(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_pet_get_lost", sep->arg[0], "petgetlost"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	int ab_mask = ActionableBots::ABM_NoFilter;
@@ -98,7 +98,8 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_pet_set_type", sep->arg[0], "petsettype"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [type: water | fire | air | earth | monster] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [type: auto | water | fire | air | earth | monster | epic] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "if set to 'auto', bots will choose their own pet type");
 		c->Message(Chat::White, "requires one of the following bot classes:");
 		c->Message(Chat::White, "Magician(1)");
 		return;
@@ -109,29 +110,41 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 
 	uint8 pet_type = 255;
 	uint8 level_req = 255;
-	if (!pet_arg.compare("water")) {
+	if (!pet_arg.compare("auto")) {
 		pet_type = 0;
 		level_req = 1;
 	}
-	else if (!pet_arg.compare("fire")) {
+	else if (!pet_arg.compare("water")) {
 		pet_type = 1;
+		level_req = 1;
+	}
+	else if (!pet_arg.compare("fire")) {
+		pet_type = 2;
 		level_req = 3;
 	}
 	else if (!pet_arg.compare("air")) {
-		pet_type = 2;
+		pet_type = 3;
 		level_req = 4;
 	}
 	else if (!pet_arg.compare("earth")) {
-		pet_type = 3;
+		pet_type = 4;
 		level_req = 5;
 	}
 	else if (!pet_arg.compare("monster")) {
-		pet_type = 4;
+		pet_type = 5;
 		level_req = 30;
+	}
+	else if (!pet_arg.compare("epic")) {
+		pet_type = 6;
+		if (!RuleB(Bots, AllowMagicianEpicPet)) {
+			c->Message(Chat::Yellow, "Epic pets are currently disabled for bots.");
+			return;
+		}
+		level_req = RuleI(Bots,AllowMagicianEpicPetLevel);
 	}
 
 	if (pet_type == 255) {
-		c->Message(Chat::White, "You must specify a pet [type: water | fire | air | earth | monster]");
+		c->Message(Chat::White, "You must specify a pet [type: auto | water | fire | air | earth | monster | epic]");
 		return;
 	}
 
@@ -157,7 +170,23 @@ void bot_command_pet_set_type(Client *c, const Seperator *sep)
 		if (!bot_iter)
 			continue;
 
-		bot_iter->SetPetChooser(true);
+		if (RuleI(Bots, RequiredMagicianEpicPetItemID) > 0) {
+			bool has_item = bot_iter->HasBotItem(RuleI(Bots, RequiredMagicianEpicPetItemID)) != INVALID_INDEX;
+			
+			if (!has_item) {
+				c->Message(
+					Chat::Say,
+					fmt::format(
+						"{} says, 'I require {} to cast an epic pet which I do not currently possess.'",
+						bot_iter->GetCleanName(),
+						(database.GetItem(RuleI(Bots, RequiredMagicianEpicPetItemID)) ? database.CreateItemLink(RuleI(Bots, RequiredMagicianEpicPetItemID)) : "an item")
+					).c_str()
+				);
+
+				continue;
+			}	
+		}
+
 		bot_iter->SetPetChooserID(pet_type);
 		if (bot_iter->GetPet()) {
 			auto pet_id = bot_iter->GetPetID();

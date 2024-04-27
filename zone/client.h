@@ -1250,6 +1250,20 @@ public:
 	PendingTranslocate_Struct PendingTranslocateData;
 	void SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID);
 
+	// Help Window
+	std::string SendCommandHelpWindow(
+		Client* c,
+		std::vector<std::string> description,
+		std::vector<std::string> notes,
+		std::vector<std::string> example_format,
+		std::vector<std::string> examples_one, std::vector<std::string> examples_two, std::vector<std::string> examples_three,
+		std::vector<std::string> actionables,
+		std::vector<std::string> options,
+		std::vector<std::string> options_one, std::vector<std::string> options_two, std::vector<std::string> options_three
+	);
+	std::string GetCommandHelpHeader(std::string color, std::string header);
+	std::string SplitCommandHelpText(std::vector<std::string> msg, std::string color, uint16 maxLength, bool secondColor = false, std::string secondaryColor = "");
+
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
@@ -2219,10 +2233,28 @@ public:
 	void CampAllBots(uint8 class_id = Class::None);
 	void SpawnRaidBotsOnConnect(Raid* raid);
 
+	void LoadDefaultBotSettings();
+	int GetDefaultBotSettings(uint8 settingType, uint16 botSetting);
+	int GetBotSetting(uint8 settingType, uint16 botSetting);
+	void SetBotSetting(uint8 settingType, uint16 botSetting, uint32 settingValue);	
+
 private:
 	bool bot_owner_options[_booCount];
 	bool m_bot_pulling;
 	bool m_bot_precombat;
+
+	uint8 fast_heal_threshold;
+	uint8 heal_threshold;
+	uint8 complete_heal_threshold;
+	uint8 hot_heal_threshold;
+	uint32 fast_heal_delay;
+	uint32 heal_delay;
+	uint32 complete_heal_delay;
+	uint32 hot_heal_delay;
+	uint32 cure_delay;
+	uint8 cure_min_threshold;
+	uint8 cure_threshold;
+	bool illusion_block;
 
 	bool CanTradeFVNoDropItem();
 	void SendMobPositions();

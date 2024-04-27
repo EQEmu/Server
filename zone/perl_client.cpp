@@ -1144,7 +1144,7 @@ void Perl_Client_SetStartZone(Client* self, uint32 zone_id, float x, float y, fl
 
 void Perl_Client_KeyRingAdd(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
 {
-	self->KeyRingAdd(item_id);;
+	self->KeyRingAdd(item_id);
 }
 
 bool Perl_Client_KeyRingCheck(Client* self, uint32 item_id) // @categories Account and Character, Inventory and Items
@@ -1154,7 +1154,7 @@ bool Perl_Client_KeyRingCheck(Client* self, uint32 item_id) // @categories Accou
 
 void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Currency and Points
 {
-	self->AddPVPPoints(points);;
+	self->AddPVPPoints(points);
 }
 
 void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_count) // @categories Currency and Points

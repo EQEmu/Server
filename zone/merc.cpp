@@ -1500,7 +1500,7 @@ bool Merc::AI_IdleCastCheck() {
 
 bool EntityList::Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {
 
-	if((iSpellTypes & SPELL_TYPES_DETRIMENTAL) != 0) {
+	if (BOT_SPELL_TYPES_DETRIMENTAL(iSpellTypes)) {
 		//according to live, you can buff and heal through walls...
 		//now with PCs, this only applies if you can TARGET the target, but
 		// according to Rogean, Live NPCs will just cast through walls/floors, no problem..
@@ -1569,7 +1569,7 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 
 	float dist2 = 0;
 
-	if (mercSpell.type & SpellType_Escape) {
+	if (mercSpell.type == SpellType_Escape) {
 		dist2 = 0;
 	} else
 		dist2 = DistanceSquared(m_Position, tar->GetPosition());

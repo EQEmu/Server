@@ -8,7 +8,7 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: <slot id> %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s <slot id> ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "This will cause the selected bots to click the item in the given slot ID.");
 		c->Message(Chat::White, "Use ^invlist to see their items along with slot IDs.");
 		return;
@@ -25,7 +25,7 @@ void bot_command_click_item(Client* c, const Seperator* sep)
 	uint32 slot_id = 0;
 
 	if (sep->IsNumber(1)) {
-		ab_arg = 2;
+		++ab_arg;
 		slot_id = atoi(sep->arg[1]);
 		if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END) {
 			c->Message(Chat::Yellow, "You must specify a valid inventory slot from 0 to 22. Use %s help for more information", sep->arg[0]);

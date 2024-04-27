@@ -415,6 +415,7 @@ namespace DatabaseSchema {
 			"bot_pet_buffs",
 			"bot_pet_inventories",
 			"bot_pets",
+			"bot_settings",
 			"bot_spell_casting_chances",
 			"bot_spell_settings",
 			"bot_spells_entries",
