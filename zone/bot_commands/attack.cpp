@@ -5,14 +5,17 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_attack", sep->arg[0], "attack")) {
 		return;
 	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
 
-		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | ownerraid | namesgroup | healrotation | byclass | byrace | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "usage: <enemy_target> %s [actionable: byname | ownergroup | ownerraid | namesgroup | healrotation | mmr | byclass | byrace | default: spawned] ([actionable_name])", sep->arg[0]);
+		c->Message(Chat::White, "note: Orders bots to attack a designated target");
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_Type2;
 
+	const int ab_mask = ActionableBots::ABM_Type2;
 	Mob* target_mob = ActionableTarget::AsSingle_ByAttackable(c);
+
 	if (!target_mob) {
 
 		c->Message(Chat::White, "You must <target> an enemy to use this command");
@@ -26,11 +29,13 @@ void bot_command_attack(Client *c, const Seperator *sep)
 
 	std::string class_race_arg(sep->arg[1]);
 	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
+
 	if (ActionableBots::PopulateSBL(c, ab_arg.c_str(), sbl, ab_mask, !class_race_check ? sep->arg[2] : nullptr, class_race_check ? atoi(sep->arg[2]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}

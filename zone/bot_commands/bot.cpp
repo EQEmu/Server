@@ -18,7 +18,7 @@ void bot_command_bot(Client *c, const Seperator *sep)
 	subcommand_list.push_back("botstance");
 	subcommand_list.push_back("botstopmeleelevel");
 	subcommand_list.push_back("botsummon");
-	subcommand_list.push_back("bottogglearcher");
+	subcommand_list.push_back("bottoggleranged");
 	subcommand_list.push_back("bottogglehelm");
 	subcommand_list.push_back("botupdate");
 
@@ -33,7 +33,7 @@ void bot_command_camp(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_camp", sep->arg[0], "botcamp"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_Type1;
@@ -452,8 +452,8 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_follow_distance", sep->arg[0], "botfollowdistance"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [set] [distance] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
-		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [set [1 to %i]] [distance] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0], BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
+		c->Message(Chat::White, "usage: %s [clear] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -464,7 +464,7 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 
 	if (!strcasecmp(sep->arg[1], "set")) {
 		if (!sep->IsNumber(2)) {
-			c->Message(Chat::White, "A numeric [distance] is required to use this command");
+			c->Message(Chat::White, "A numeric [distance] is required to use this command. [1 to %i]", BOT_FOLLOW_DISTANCE_DEFAULT_MAX);
 			return;
 		}
 
@@ -492,22 +492,15 @@ void bot_command_follow_distance(Client *c, const Seperator *sep)
 			continue;
 
 		bot_iter->SetFollowDistance(bfd);
-		if (ab_type != ActionableBots::ABT_All && !database.botdb.SaveFollowDistance(bot_iter->GetBotID(), bfd)) {
-			return;
-		}
 
 		++bot_count;
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		if (!database.botdb.SaveAllFollowDistances(c->CharacterID(), bfd)) {
-			return;
-		}
-
-		c->Message(Chat::White, "%s all of your bot follow distances", set_flag ? "Set" : "Cleared");
+		c->Message(Chat::White, "%s all of your bot follow distances to %i", set_flag ? "Set" : "Cleared", bfd);
 	}
 	else {
-		c->Message(Chat::White, "%s %i of your spawned bot follow distances", (set_flag ? "Set" : "Cleared"), bot_count);
+		c->Message(Chat::White, "%s %i of your spawned bot follow distances to %i", (set_flag ? "Set" : "Cleared"), bot_count, bfd);
 	}
 }
 
@@ -516,7 +509,7 @@ void bot_command_inspect_message(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_inspect_message", sep->arg[0], "botinspectmessage"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "Notes:");
 		if (c->ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 			c->Message(Chat::White, "- Self-inspect and type your bot's inspect message");
@@ -764,75 +757,31 @@ void bot_command_list_bots(Client *c, const Seperator *sep)
 	}
 }
 
-void bot_command_out_of_combat(Client *c, const Seperator *sep)
-{
-	if (helper_command_alias_fail(c, "bot_command_out_of_combat", sep->arg[0], "botoutofcombat"))
-		return;
-	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
-		return;
-	}
-	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
-
-	std::string arg1 = sep->arg[1];
-
-	bool behavior_state = false;
-	bool toggle_behavior = true;
-	int ab_arg = 1;
-	if (!arg1.compare("on")) {
-		behavior_state = true;
-		toggle_behavior = false;
-		ab_arg = 2;
-	}
-	else if (!arg1.compare("off")) {
-		toggle_behavior = false;
-		ab_arg = 2;
-	}
-
-	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]) == ActionableBots::ABT_None)
-		return;
-
-	for (auto bot_iter : sbl) {
-		if (!bot_iter)
-			continue;
-
-		if (toggle_behavior)
-			bot_iter->SetAltOutOfCombatBehavior(!bot_iter->GetAltOutOfCombatBehavior());
-		else
-			bot_iter->SetAltOutOfCombatBehavior(behavior_state);
-
-		helper_bot_out_of_combat(c, bot_iter);
-	}
-}
-
 void bot_command_report(Client *c, const Seperator *sep)
 {
 	if (helper_command_alias_fail(c, "bot_command_report", sep->arg[0], "botreport"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
-	const int ab_mask = ActionableBots::ABM_NoFilter;
+	
+	const int ab_mask = ActionableBots::ABM_Type1;
 
-	std::string ab_type_arg = sep->arg[1];
-	if (ab_type_arg.empty()) {
-		auto t = c->GetTarget();
-		if (t && t->IsClient()) {
-			if (t->CastToClient() == c) {
-				ab_type_arg = "ownergroup";
-			} else {
-				ab_type_arg = "targetgroup";
-			}
-		} else {
-			ab_type_arg = "spawned";
-		}
+	std::string arg1 = sep->arg[1];
+	int ab_arg = 1;
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, ab_type_arg, sbl, ab_mask, sep->arg[2]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
+	}
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter)
@@ -1062,65 +1011,74 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 
 void bot_command_stance(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_stance", sep->arg[0], "botstance"))
+	if (helper_command_alias_fail(c, "bot_command_stance", sep->arg[0], "botstance")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [current | value: 1-9] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Value: {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({})",
+				"Value: {} ({}), {} ({}), {} ({})",
 				Stance::Passive,
 				Stance::GetName(Stance::Passive),
 				Stance::Balanced,
 				Stance::GetName(Stance::Balanced),
-				Stance::Efficient,
-				Stance::GetName(Stance::Efficient),
-				Stance::Reactive,
-				Stance::GetName(Stance::Reactive),
 				Stance::Aggressive,
-				Stance::GetName(Stance::Aggressive),
-				Stance::Assist,
-				Stance::GetName(Stance::Assist),
-				Stance::Burn,
-				Stance::GetName(Stance::Burn),
-				Stance::Efficient2,
-				Stance::GetName(Stance::Efficient2),
-				Stance::AEBurn,
-				Stance::GetName(Stance::AEBurn)
+				Stance::GetName(Stance::Aggressive)
 			).c_str()
 		);
 		return;
 	}
-	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
-	bool current_flag = false;
-	uint8 bst = Stance::Unknown;
+	const int ab_mask = ActionableBots::ABM_Type1;
 
-	if (!strcasecmp(sep->arg[1], "current"))
-		current_flag = true;
-	else if (sep->IsNumber(1)) {
-		bst = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
-		if (!Stance::IsValid(bst)) {
-			bst = Stance::Unknown;
+	std::string arg1 = sep->arg[1];
+	int ab_arg = 1;
+	bool current_check = false;
+	uint32 value = 0;
+
+	if (sep->IsNumber(1)) {
+		++ab_arg;
+		value = atoi(sep->arg[1]);
+		if (value < 0 || value > 300) {
+			c->Message(Chat::White, "You must enter a value within the range of 0 - 300.");
+			return;
 		}
 	}
-
-	if (!current_flag && bst == Stance::Unknown) {
-		c->Message(Chat::White, "A [current] argument or valid numeric [value] is required to use this command");
+	else if (!arg1.compare("current")) {
+		++ab_arg;
+		current_check = true;
+	}
+	else {
+		c->Message(Chat::White, "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
 		return;
+	}
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[2], sbl, ab_mask, sep->arg[3]) == ActionableBots::ABT_None)
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
+	}
+
+	if (!current_check && (value == Stance::Unknown || (value != Stance::Passive && value != Stance::Balanced && value != Stance::Aggressive))) {
+		c->Message(Chat::White, "A [current] argument or valid numeric [value] is required to use this command");
+		return;
+	}
 
 	for (auto bot_iter : sbl) {
 		if (!bot_iter)
 			continue;
 
-		if (!current_flag) {
-			bot_iter->SetBotStance(bst);
+		if (!current_check) {
+			bot_iter->SetBotStance(value);
 			bot_iter->Save();
 		}
 
@@ -1135,50 +1093,138 @@ void bot_command_stance(Client *c, const Seperator *sep)
 	}
 }
 
-void bot_command_stop_melee_level(Client *c, const Seperator *sep)
+void bot_command_stop_melee_level(Client* c, const Seperator* sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_stop_melee_level", sep->arg[0], "botstopmeleelevel"))
+	if (helper_command_alias_fail(c, "bot_command_stop_melee_level", sep->arg[0], "botstopmeleelevel")) {
 		return;
+	}
+
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: <target_bot> %s [current | reset | sync | value: 0-255]", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s [current | reset | sync | value: 0-255] ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(Chat::White, "note: Only caster or hybrid class bots may be modified");
 		c->Message(Chat::White, "note: Use [reset] to set stop melee level to server rule");
 		c->Message(Chat::White, "note: Use [sync] to set stop melee level to current bot level");
 		return;
 	}
 
-	auto my_bot = ActionableBots::AsTarget_ByBot(c);
-	if (!my_bot) {
-		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
-		return;
-	}
-	if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
-		c->Message(Chat::White, "You must <target> a caster or hybrid class bot to use this command");
-		return;
-	}
+	const int ab_mask = ActionableBots::ABM_Type1;
 
+	std::string arg1 = sep->arg[1];
+	int ab_arg = 1;
 	uint8 sml = RuleI(Bots, CasterStopMeleeLevel);
+	bool sync_sml = false;
+	bool reset_sml = false;
+	bool current_check = false;
 
 	if (sep->IsNumber(1)) {
+		ab_arg = 2;
 		sml = Strings::ToInt(sep->arg[1]);
+		if (sml <= 0 || sml > 255) {
+			c->Message(Chat::White, "You must provide a value between 0-255.");
+			return;
+		}
 	}
 	else if (!strcasecmp(sep->arg[1], "sync")) {
-		sml = my_bot->GetLevel();
+		ab_arg = 2;
+		sync_sml = true;
 	}
-	else if (!strcasecmp(sep->arg[1], "current")) {
-		c->Message(Chat::White, "My current melee stop level is %u", my_bot->GetStopMeleeLevel());
+	else if (!arg1.compare("current")) {
+		ab_arg = 2;
+		current_check = true;
+	}
+	else if (!strcasecmp(sep->arg[1], "reset")) {
+		ab_arg = 2;
+		reset_sml = true;
+	}
+	else {
+		c->Message(Chat::White, "Incorrect argument, use %s help for a list of options.", sep->arg[0]);
 		return;
 	}
-	else if (strcasecmp(sep->arg[1], "reset")) {
-		c->Message(Chat::White, "A [current] or [reset] argument, or numeric [value] is required to use this command");
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
+	}
+
+	std::list<Bot*> sbl;
+
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
-	// [reset] falls through with initialization value
 
-	my_bot->SetStopMeleeLevel(sml);
-	database.botdb.SaveStopMeleeLevel(my_bot->GetBotID(), sml);
+	sbl.remove(nullptr);
 
-	c->Message(Chat::White, "Successfully set stop melee level for %s to %u", my_bot->GetCleanName(), sml);
+	Bot* first_found = nullptr;
+	int success_count = 0;
+
+	for (auto my_bot : sbl) {
+		if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} says, 'This command only works on caster or hybrid classes.'",
+					my_bot->GetCleanName()
+				).c_str()
+			);
+			continue;
+		}
+
+		if (!first_found) {
+			first_found = my_bot;
+		}
+
+		if (sync_sml) {
+			sml = my_bot->GetLevel();
+		}
+
+		if (reset_sml) {
+			sml = my_bot->GetDefaultBotBaseSetting(BotBaseSettings::StopMeleeLevel);
+		}
+
+		if (current_check) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} says, 'My current stop melee level is {}.'",
+					my_bot->GetCleanName(),
+					my_bot->GetStopMeleeLevel()
+				).c_str()
+			);
+			continue;
+		}
+		else {
+			my_bot->SetStopMeleeLevel(sml);
+			++success_count;
+		}
+	}
+
+	if (!current_check) {
+		if (success_count == 1 && first_found) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} says, 'My stop melee level was {} to {}.'",
+					first_found->GetCleanName(),
+					reset_sml ? "reset" : "set",
+					sml
+				).c_str()
+			);
+		}
+		else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} of your bots {} their stop melee{}'", // level to {}.
+					success_count,
+					reset_sml ? "reset" : "set",
+					fmt::format("{}", reset_sml ? "." : fmt::format(" level to {}.", sml).c_str()).c_str(),
+					sml
+				).c_str()
+			);
+		}
+	}
 }
 
 void bot_command_summon(Client *c, const Seperator *sep)
@@ -1188,19 +1234,24 @@ void bot_command_summon(Client *c, const Seperator *sep)
 	}
 
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
+	
 	const int ab_mask = ActionableBots::ABM_Type1;
 
-	std::string class_race_arg = sep->arg[1];
+	std::string arg1 = sep->arg[1];
+	int ab_arg = 1;
+
+	std::string class_race_arg = sep->arg[ab_arg];
 	bool class_race_check = false;
+
 	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
 		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[1], sbl, ab_mask, !class_race_check ? sep->arg[2] : nullptr, class_race_check ? atoi(sep->arg[2]) : 0) == ActionableBots::ABT_None) {
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
@@ -1245,34 +1296,44 @@ void bot_command_summon(Client *c, const Seperator *sep)
 	}
 }
 
-void bot_command_toggle_archer(Client *c, const Seperator *sep)
+void bot_command_toggle_ranged(Client *c, const Seperator *sep)
 {
-	if (helper_command_alias_fail(c, "bot_command_toggle_archer", sep->arg[0], "bottogglearcher")) {
+	if (helper_command_alias_fail(c, "bot_command_toggle_ranged", sep->arg[0], "bottoggleranged")) {
 		return;
 	}
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "note: Toggles a ranged bot between melee and ranged weapon use"); 
 		return;
 	}
-	const int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
+	
+	const int ab_mask = ActionableBots::ABM_Type1;
 
 	std::string arg1 = sep->arg[1];
 
-	bool archer_state = false;
-	bool toggle_archer = true;
+	bool ranged_state = false;
+	bool toggle_ranged = true;
 	int ab_arg = 1;
 	if (!arg1.compare("on")) {
-		archer_state = true;
-		toggle_archer = false;
-		ab_arg = 2;
+		ranged_state = true;
+		toggle_ranged = false;
+		++ab_arg;
 	}
 	else if (!arg1.compare("off")) {
-		toggle_archer = false;
-		ab_arg = 2;
+		toggle_ranged = false;
+		++ab_arg;
+	}
+
+	std::string class_race_arg = sep->arg[ab_arg];
+	bool class_race_check = false;
+
+	if (!class_race_arg.compare("byclass") || !class_race_arg.compare("byrace")) {
+		class_race_check = true;
 	}
 
 	std::list<Bot*> sbl;
-	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, sep->arg[(ab_arg + 1)]) == ActionableBots::ABT_None) {
+
+	if (ActionableBots::PopulateSBL(c, sep->arg[ab_arg], sbl, ab_mask, !class_race_check ? sep->arg[ab_arg + 1] : nullptr, class_race_check ? atoi(sep->arg[ab_arg + 1]) : 0) == ActionableBots::ABT_None) {
 		return;
 	}
 
@@ -1281,17 +1342,18 @@ void bot_command_toggle_archer(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		if (toggle_archer) {
-			bot_iter->SetBotArcherySetting(!bot_iter->IsBotArcher(), true);
+		if (bot_iter->GetBotRangedValue() < RuleI(Combat, MinRangedAttackDist)) {
+			c->Message(Chat::Yellow, "%s does not have proper weapons or ammo to be at range.", bot_iter->GetCleanName());
+			continue;
+		}
+
+		if (toggle_ranged) {
+			bot_iter->SetBotRangedSetting(!bot_iter->IsBotRanged());
 		}
 		else {
-			bot_iter->SetBotArcherySetting(archer_state, true);
+			bot_iter->SetBotRangedSetting(ranged_state);
 		}
-		bot_iter->ChangeBotArcherWeapons(bot_iter->IsBotArcher());
-
-		if (bot_iter->GetClass() == Class::Ranger && bot_iter->GetLevel() >= 61) {
-			bot_iter->SetRangerAutoWeaponSelect(bot_iter->IsBotArcher());
-		}
+		bot_iter->ChangeBotRangedWeapons(bot_iter->IsBotRanged());
 	}
 }
 
@@ -1300,7 +1362,7 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 	if (helper_command_alias_fail(c, "bot_command_toggle_helm", sep->arg[0], "bottogglehelm"))
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
-		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
+		c->Message(Chat::White, "usage: %s ([option: on | off]) ([actionable: target | byname | ownergroup | ownerraid | targetgroup | namesgroup | healrotationmembers | healrotationtargets | mmr | byclass | byrace | spawned] ([actionable_name]))", sep->arg[0]);
 		return;
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
@@ -1313,11 +1375,11 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 	if (!arg1.compare("on")) {
 		helm_state = true;
 		toggle_helm = false;
-		ab_arg = 2;
+		++ab_arg;
 	}
 	else if (!arg1.compare("off")) {
 		toggle_helm = false;
-		ab_arg = 2;
+		++ab_arg;
 	}
 
 	std::list<Bot*> sbl;
@@ -1336,9 +1398,6 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 			bot_iter->SetShowHelm(helm_state);
 
 		if (ab_type != ActionableBots::ABT_All) {
-			if (!database.botdb.SaveHelmAppearance(bot_iter->GetBotID(), bot_iter->GetShowHelm())) {
-				return;
-			}
 
 			EQApplicationPacket* outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
 			SpawnAppearance_Struct* saptr = (SpawnAppearance_Struct*)outapp->pBuffer;
@@ -1355,13 +1414,6 @@ void bot_command_toggle_helm(Client *c, const Seperator *sep)
 	}
 
 	if (ab_type == ActionableBots::ABT_All) {
-		if (toggle_helm) {
-			database.botdb.ToggleAllHelmAppearances(c->CharacterID());
-		}
-		else {
-			database.botdb.SaveAllHelmAppearances(c->CharacterID(), helm_state);
-		}
-
 		c->Message(Chat::White, "%s all of your bot show helm flags", toggle_helm ? "Toggled" : (helm_state ? "Set" : "Cleared"));
 	}
 	else {
@@ -1439,7 +1491,6 @@ void bot_command_update(Client *c, const Seperator *sep)
 		if (!bot_iter || bot_iter->IsEngaged() || bot_iter->GetLevel() == c->GetLevel())
 			continue;
 
-		bot_iter->SetPetChooser(false);
 		bot_iter->CalcBotStats(c->GetBotOption(Client::booStatsUpdate));
 		bot_iter->SendAppearancePacket(AppearanceType::WhoLevel, bot_iter->GetLevel(), true, true);
 		++bot_count;

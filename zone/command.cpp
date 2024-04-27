@@ -147,6 +147,7 @@ int command_init(void)
 		command_add("help", "[Search Criteria] - List available commands and their description, specify partial command as argument to search", AccountStatus::Player, command_help) ||
 		command_add("hotfix", "[hotfix_name] - Reloads shared memory into a hotfix, equiv to load_shared_memory followed by apply_shared_memory", AccountStatus::GMImpossible, command_hotfix) ||
 		command_add("hp", "Refresh your HP bar from the server.", AccountStatus::Player, command_hp) ||
+		command_add("illusionblock", "Controls whether or not illusion effects will land on you when cast by other players or bots", AccountStatus::Player, command_illusion_block) ||
 		command_add("instance", "Modify Instances", AccountStatus::GMMgmt, command_instance) ||
 		command_add("interrogateinv", "use [help] argument for available options", AccountStatus::Player, command_interrogateinv) ||
 		command_add("interrupt", "[Message ID] [Color] - Interrupt your casting. Arguments are optional.", AccountStatus::Guide, command_interrupt) ||
@@ -217,6 +218,10 @@ int command_init(void)
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", AccountStatus::Steward, command_spawn) ||
 		command_add("spawneditmass", "[Search Criteria] [Edit Option] [Edit Value] [Apply] Mass editing spawn command (Apply is optional, 0 = False, 1 = True, default is False)", AccountStatus::GMLeadAdmin, command_spawneditmass) ||
 		command_add("spawnfix", "Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", AccountStatus::GMAreas, command_spawnfix) ||
+		command_add("spelldelays", "Controls the delay between casts for a specific spell type", AccountStatus::Player, command_spell_delays) ||
+		command_add("spellholds", "Controls whether a bot holds the specified spell type or not", AccountStatus::Player, command_spell_holds) ||
+		command_add("spellmaxthresholds", "Controls the minimum target HP threshold for a spell to be cast for a specific type", AccountStatus::Player, command_spell_max_thresholds) ||
+		command_add("spellminthresholds", "Controls the maximum target HP threshold for a spell to be cast for a specific type", AccountStatus::Player, command_spell_min_thresholds) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", AccountStatus::GMAdmin, command_stun) ||
 		command_add("summon", "[Character Name] - Summons your corpse, NPC, or player target, or by character name if specified", AccountStatus::QuestTroupe, command_summon) ||
 		command_add("summonburiedplayercorpse", "Summons the target's oldest buried corpse, if any exist.", AccountStatus::GMAdmin, command_summonburiedplayercorpse) ||
@@ -841,6 +846,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/grid.cpp"
 #include "gm_commands/guild.cpp"
 #include "gm_commands/hp.cpp"
+#include "gm_commands/illusion_block.cpp"
 #include "gm_commands/instance.cpp"
 #include "gm_commands/interrogateinv.cpp"
 #include "gm_commands/interrupt.cpp"
@@ -909,6 +915,10 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/spawn.cpp"
 #include "gm_commands/spawneditmass.cpp"
 #include "gm_commands/spawnfix.cpp"
+#include "gm_commands/spell_delays.cpp"
+#include "gm_commands/spell_holds.cpp"
+#include "gm_commands/spell_max_thresholds.cpp"
+#include "gm_commands/spell_min_thresholds.cpp"
 #include "gm_commands/faction_association.cpp"
 #include "gm_commands/stun.cpp"
 #include "gm_commands/summon.cpp"

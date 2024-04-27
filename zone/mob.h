@@ -93,6 +93,28 @@ struct AppearanceStruct {
 	uint8  texture          = UINT8_MAX;
 };
 
+struct BotSpellSettings_Struct
+{
+	uint16					spellType;							// type ID of bot category
+	std::string 			shortName;							// type short name of bot category
+	std::string 			name;								// type name of bot category
+	bool					hold;								// 0 = allow spell type, 1 = hold spell type
+	uint16					delay;								// delay between casts of spell type, 1ms-60,000ms
+	uint8					minThreshold;						// minimum target health threshold to allow casting of spell type
+	uint8					maxThreshold;						// maximum target health threshold to allow casting of spell type
+	uint16					resistLimit;						// resist limit to skip spell type
+	bool					aggroCheck;							// whether or not to check for possible aggro before casting
+	uint8					minManaPct;							// lower mana percentage limit to allow spell cast
+	uint8					maxManaPct;							// upper mana percentage limit to allow spell cast
+	uint8					minHPPct;							// lower HP percentage limit to allow spell cast
+	uint8					maxHPPct;							// upper HP percentage limit to allow spell cast
+	uint16					idlePriority;						// idle priority of the spell type
+	uint16					engagedPriority;					// engaged priority of the spell type
+	uint16					pursuePriority;						// pursue priority of the spell type
+	uint16					AEOrGroupTargetCount;				// require target count to cast an AE or Group spell type
+	Timer					recastTimer;						// recast timer based off delay
+};
+
 class DataBucketKey;
 class Mob : public Entity {
 public:
@@ -207,6 +229,8 @@ public:
 
 	// Bot attack flag
 	Timer bot_attack_flag_timer;
+
+	std::vector<BotSpellSettings_Struct> _spellSettings;
 
 	//Somewhat sorted: needs documenting!
 
@@ -403,6 +427,51 @@ public:
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(Mob *caster, uint16 spell_id);
 	virtual bool IsImmuneToSpell(uint16 spell_id, Mob *caster);
+
+	virtual bool IsImmuneToBotSpell(uint16 spell_id, Mob* caster);
+
+	inline bool SpellTypeRecastCheck(uint16 spellType) { return (IsClient() ? true : _spellSettings[spellType].recastTimer.GetRemainingTime() > 0 ? false : true); }
+
+	uint16 GetSpellTypeIDByShortName(std::string spellTypeString);
+
+	std::string GetSpellTypeNameByID(uint16 spellType);
+	std::string GetSpellTypeShortNameByID(uint16 spellType);		
+
+	bool GetDefaultSpellHold(uint16 spellType);
+	uint16 GetDefaultSpellDelay(uint16 spellType);
+	uint8 GetDefaultSpellMinThreshold(uint16 spellType);
+	uint8 GetDefaultSpellMaxThreshold(uint16 spellType);
+
+	inline bool GetSpellHold(uint16 spellType) const { return _spellSettings[spellType].hold; }
+	void SetSpellHold(uint16 spellType, bool holdStatus);
+	inline uint16 GetSpellDelay(uint16 spellType) const { return _spellSettings[spellType].delay; }
+	void SetSpellDelay(uint16 spellType, uint16 delayValue);
+	inline uint8 GetSpellMinThreshold(uint16 spellType) const { return _spellSettings[spellType].minThreshold; }
+	void SetSpellMinThreshold(uint16 spellType, uint8 thresholdValue);
+	inline uint8 GetSpellMaxThreshold(uint16 spellType) const { return _spellSettings[spellType].maxThreshold; }				
+	void SetSpellMaxThreshold(uint16 spellType, uint8 thresholdValue);
+
+	inline uint16 GetSpellTypeRecastTimer(uint16 spellType) { return _spellSettings[spellType].recastTimer.GetRemainingTime(); }
+	void SetSpellTypeRecastTimer(uint16 spellType, uint32 recastTime);
+
+	uint8 GetHPRatioForSpellType(uint16 spellType, Mob* tar);
+	bool GetUltimateSpellHold(uint16 spellType, Mob* tar);
+	uint16 GetUltimateSpellDelay(uint16 spellType, Mob* tar);
+	bool GetUltimateSpellDelayCheck(uint16 spellType, Mob* tar);
+	uint8 GetUltimateSpellMinThreshold(uint16 spellType, Mob* tar);
+	uint8 GetUltimateSpellMaxThreshold(uint16 spellType, Mob* tar);
+
+	uint16 GetPetSpellType(uint16 spellType);
+
+	void DisableBotSpellTimers();
+	void StartBotSpellTimers();	
+
+	void SetBotSetting(uint8 settingType, uint16 botSetting, int settingValue);
+	void SetBaseSetting(uint16 baseSetting, int settingValue);
+
+	void SetIllusionBlock(bool value) { _illusionBlock = value; }
+	bool GetIllusionBlock() const { return _illusionBlock; }
+
 	virtual float GetAOERange(uint16 spell_id);
 	void InterruptSpell(uint16 spellid = SPELL_UNKNOWN);
 	void InterruptSpell(uint16, uint16, uint16 spellid = SPELL_UNKNOWN);
@@ -791,6 +860,11 @@ public:
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);
 	virtual bool CheckWaterLoS(Mob* m);
+	bool CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ);
+	bool CheckLosCheat(Mob* who, Mob* other);
+	bool CheckLosCheatExempt(Mob* who, Mob* other);
+	bool DoLosChecks(Mob* who, Mob* other);
+	bool TargetValidation(Mob* other);
 	inline void SetLastLosState(bool value) { last_los_check = value; }
 	inline bool CheckLastLosState() const { return last_los_check; }
 	std::string GetMobDescription();
@@ -854,6 +928,7 @@ public:
 	void ShowStats(Client* client);
 	void ShowBuffs(Client* c);
 	bool PlotPositionAroundTarget(Mob* target, float &x_dest, float &y_dest, float &z_dest, bool lookForAftArc = true);
+	bool PlotBotPositionAroundTarget(Mob* target, float& x_dest, float& y_dest, float& z_dest, float min_distance, float max_distance, bool behindOnly = false, bool frontOnly = false, bool bypassLoS = false);
 	virtual int GetKillExpMod() const { return 100; }
 
 	// aura functions
@@ -1252,13 +1327,30 @@ public:
 
 	void				NPCSpecialAttacks(const char* parse, int permtag, bool reset = true, bool remove = false);
 	inline uint32		DontHealMeBefore() const { return pDontHealMeBefore; }
+	inline uint32		DontGroupHealMeBefore() const { return pDontGroupHealMeBefore; }
+	inline uint32		DontGroupHoTHealMeBefore() const { return pDontGroupHoTHealMeBefore; }
+	inline uint32		DontRegularHealMeBefore() const { return pDontRegularHealMeBefore; }
+	inline uint32		DontVeryFastHealMeBefore() const { return pDontVeryFastHealMeBefore; }
+	inline uint32		DontFastHealMeBefore() const { return pDontFastHealMeBefore; }
+	inline uint32		DontCompleteHealMeBefore() const { return pDontCompleteHealMeBefore; }
+	inline uint32		DontGroupCompleteHealMeBefore() const { return pDontGroupCompleteHealMeBefore; }
+	inline uint32		DontHotHealMeBefore() const { return pDontHotHealMeBefore; }
 	inline uint32		DontBuffMeBefore() const { return pDontBuffMeBefore; }
 	inline uint32		DontDotMeBefore() const { return pDontDotMeBefore; }
 	inline uint32		DontRootMeBefore() const { return pDontRootMeBefore; }
 	inline uint32		DontSnareMeBefore() const { return pDontSnareMeBefore; }
 	inline uint32		DontCureMeBefore() const { return pDontCureMeBefore; }
+	
 	void				SetDontRootMeBefore(uint32 time) { pDontRootMeBefore = time; }
 	void				SetDontHealMeBefore(uint32 time) { pDontHealMeBefore = time; }
+	void				SetDontGroupHealMeBefore(uint32 time) { pDontGroupHealMeBefore = time; }
+	void				SetDontGroupHoTHealMeBefore(uint32 time) { pDontGroupHoTHealMeBefore = time; }
+	void				SetDontRegularHealMeBefore(uint32 time) { pDontRegularHealMeBefore = time; }
+	void				SetDontVeryFastHealMeBefore(uint32 time) { pDontVeryFastHealMeBefore = time; }
+	void				SetDontFastHealMeBefore(uint32 time) { pDontFastHealMeBefore = time; }
+	void				SetDontCompleteHealMeBefore(uint32 time) { pDontCompleteHealMeBefore = time; }
+	void				SetDontGroupCompleteHealMeBefore(uint32 time) { pDontGroupCompleteHealMeBefore = time; }
+	void				SetDontHotHealMeBefore(uint32 time) { pDontHotHealMeBefore = time; }
 	void				SetDontBuffMeBefore(uint32 time) { pDontBuffMeBefore = time; }
 	void				SetDontDotMeBefore(uint32 time) { pDontDotMeBefore = time; }
 	void				SetDontSnareMeBefore(uint32 time) { pDontSnareMeBefore = time; }
@@ -1858,6 +1950,14 @@ protected:
 	bool pause_timer_complete;
 	bool DistractedFromGrid;
 	uint32 pDontHealMeBefore;
+	uint32 pDontGroupHealMeBefore;
+	uint32 pDontGroupHoTHealMeBefore;
+	uint32 pDontRegularHealMeBefore;
+	uint32 pDontVeryFastHealMeBefore;
+	uint32 pDontFastHealMeBefore;
+	uint32 pDontCompleteHealMeBefore;
+	uint32 pDontGroupCompleteHealMeBefore;
+	uint32 pDontHotHealMeBefore;
 	uint32 pDontBuffMeBefore;
 	uint32 pDontDotMeBefore;
 	uint32 pDontRootMeBefore;
@@ -1879,6 +1979,9 @@ protected:
 
 	//bot attack flags
 	std::vector<uint32> bot_attack_flags;
+
+	//bot related settings
+	bool _illusionBlock;
 
 	glm::vec3 m_TargetRing;
 

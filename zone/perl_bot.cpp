@@ -425,11 +425,6 @@ void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask)
 	self->SetExpansionBitmask(expansion_bitmask);
 }
 
-void Perl_Bot_SetExpansionBitmask(Bot* self, int expansion_bitmask, bool save)
-{
-	self->SetExpansionBitmask(expansion_bitmask, save);
-}
-
 void Perl_Bot_SetSpellDuration(Bot* self, int spell_id)
 {
 	self->SetSpellDuration(spell_id);
@@ -716,7 +711,6 @@ void perl_register_bot()
 	package.add("SendPayload", (void(*)(Bot*, int, std::string))&Perl_Bot_SendPayload);
 	package.add("SendSpellAnim", &Perl_Bot_SendSpellAnim);
 	package.add("SetExpansionBitmask", (void(*)(Bot*, int))&Perl_Bot_SetExpansionBitmask);
-	package.add("SetExpansionBitmask", (void(*)(Bot*, int, bool))&Perl_Bot_SetExpansionBitmask);
 	package.add("SetDisciplineReuseTimer", (void(*)(Bot*, uint16))&Perl_Bot_SetDisciplineReuseTimer);
 	package.add("SetDisciplineReuseTimer", (void(*)(Bot*, uint16, uint32))&Perl_Bot_SetDisciplineReuseTimer);
 	package.add("SetItemReuseTimer", (void(*)(Bot*, uint32))&Perl_Bot_SetItemReuseTimer);

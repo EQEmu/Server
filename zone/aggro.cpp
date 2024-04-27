@@ -1278,6 +1278,39 @@ bool Mob::CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarge
 	return zone->zonemap->CheckLoS(posWatcher, posTarget);
 }
 
+bool Mob::CheckPositioningLosFN(Mob* other, float posX, float posY, float posZ) {
+	if (zone->zonemap == nullptr) {
+		//not sure what the best return is on error
+		//should make this a database variable, but im lazy today
+#ifdef LOS_DEFAULT_CAN_SEE
+		return(true);
+#else
+		return(false);
+#endif
+	}
+
+	if (!other) {
+		return(true);
+	}
+	glm::vec3 myloc;
+	glm::vec3 oloc;
+
+#define LOS_DEFAULT_HEIGHT 6.0f
+
+	oloc.x = other->GetX();
+	oloc.y = other->GetY();
+	oloc.z = other->GetZ() + (other->GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : other->GetSize()) / 2 * SEE_POSITION;
+
+	myloc.x = posX;
+	myloc.y = posY;
+	myloc.z = posZ + (GetSize() == 0.0 ? LOS_DEFAULT_HEIGHT : GetSize()) / 2 * HEAD_POSITION;
+
+#if LOSDEBUG>=5
+	LogDebug("LOS from ([{}], [{}], [{}]) to ([{}], [{}], [{}]) sizes: ([{}], [{}])", myloc.x, myloc.y, myloc.z, oloc.x, oloc.y, oloc.z, GetSize(), mobSize);
+#endif
+	return zone->zonemap->CheckLoS(myloc, oloc);
+}
+
 //offensive spell aggro
 int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool is_proc)
 {
@@ -1659,3 +1692,89 @@ void Mob::RogueEvade(Mob *other)
 	return;
 }
 
+bool Mob::DoLosChecks(Mob* who, Mob* other) {
+	if (!who->CheckLosFN(other) || !who->CheckWaterLoS(other)) {
+		if (who->CheckLosCheatExempt(who, other)) {
+			return true;
+		}
+
+		if (CheckLosCheat(who, other)) {
+			return true;
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+bool Mob::CheckLosCheat(Mob* who, Mob* other) {
+	if (RuleB(Map, CheckForLoSCheat)) {
+		auto& door_list = entity_list.GetDoorsList();
+		for (auto itr : door_list) {
+			Doors* door = itr.second;
+			if (door && !door->IsDoorOpen() && (door->GetTriggerType() == 255 || door->GetLockpick() != 0 || door->GetKeyItem() != 0 || door->GetNoKeyring() != 0)) {
+				if (DistanceNoZ(who->GetPosition(), door->GetPosition()) <= 50) {
+					auto who_to_door = DistanceNoZ(who->GetPosition(), door->GetPosition());
+					auto other_to_door = DistanceNoZ(other->GetPosition(), door->GetPosition());
+					auto who_to_other = DistanceNoZ(who->GetPosition(), other->GetPosition());
+					auto distance_difference = who_to_other - (who_to_door + other_to_door);
+					if (distance_difference >= (-1 * RuleR(Maps, RangeCheckForLoSCheat)) && distance_difference <= RuleR(Maps, RangeCheckForLoSCheat)) {
+						LogTestDebug("CheckLosCheat failed at Door [{}], TriggerType [{}], GetLockpick [{}], GetKeyItem [{}], GetNoKeyring [{}]", door->GetDoorID(), door->GetTriggerType(), door->GetLockpick(), door->GetKeyItem(), door->GetNoKeyring()); //deleteme
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	//if (RuleB(Map, CheckForLoSCheat)) {
+	//	uint8 zone_id = zone->GetZoneID();
+	//	// ZoneID, target XYZ, my range from target
+	//	//float zone_basic_checks[] = { 6, 36 };
+	//	//float zone_basic_x_coord[] = { -295, -179.908 };
+	//	//float zone_basic_y_coord[] = { -18, -630.708 };
+	//	//float zone_basic_y_coord[] = { 50.97, -69.971 };
+	//	//float zone_basic_range_check[] = { 21, 10 };
+	//	//if door and target infront, fail
+	//	//if door and target behind, fail
+	//
+	//	if (zone_id == 103) {
+	//		Doors* door_to_check = entity_list.FindDoor(8);
+	//		TestDebug("Entered LoSCheat for ZoneID: [{}]", zone_id); //deleteme
+	//		glm::vec4 who_check; who_check.x = 1202; who_check.y = 559; who_check.z = -158.94;
+	//		glm::vec4 other_check; other_check.x = 1291; other_check.y = 559; other_check.z = -158.19;
+	//		float my_distance = DistanceNoZ(who->GetPosition(), who_check);
+	//		float tar_distance = DistanceNoZ(other->GetPosition(), other_check);
+	//		float my_range = 16;
+	//		float tar_range = 75;
+	//		if (my_distance <= my_range && tar_distance <= tar_range && !quest_manager.isdooropen(8)) {
+	//			TestDebug("Door is NOT open"); //deleteme
+	//			TestDebug("LoSCheat failed"); //deleteme
+	//			return false;
+	//		}
+	//		TestDebug("LoS Check for ZoneID: [{}] was [{}] units for [{}], [{}] units for [{}]", zone_id, my_distance, who->GetCleanName(), tar_distance, other->GetCleanName()); //deleteme
+	//	}
+	//}
+	return true;
+}
+
+bool Mob::CheckLosCheatExempt(Mob* who, Mob* other) {
+	if (RuleB(Map, EnableLoSCheatExemptions)) {
+		glm::vec4 exempt_check_who;
+		glm::vec4 exempt_check_other;
+		/* This is an exmaple of how to configure exemptions for LoS checks.
+		if (zone->GetZoneID() == 222) { //PoEarthB
+			exempt_check_who.x = 2051; exempt_check_who.y = 407; exempt_check_who.z = -219; //Middle of councilman spawns
+			//check to be sure the player and the target are in the pit to PoEarthB
+			//if the player is inside the cove they cannot be higher than the ceiling (no exploiting from uptop)
+			//otherwise they can pass LoS checks even if they don't have true LoS
+			if (who->GetZ() <= -171 && other->GetZ() <= -171 && DistanceNoZ(other->GetPosition(), exempt_check_who) <= 800 && DistanceNoZ(who->GetPosition(), exempt_check_who) <= 800) {
+				return true;
+			}
+		}
+		*/
+	}
+
+	return false;
+}

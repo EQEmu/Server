@@ -7,6 +7,7 @@ void bot_command_bind_affinity(Client *c, const Seperator *sep)
 		return;
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(Chat::White, "usage: (<friendly_target>) %s", sep->arg[0]);
+		c->Message(Chat::White, "note: Orders a bot to attempt an affinity binding", sep->arg[0]); 
 		helper_send_usage_required_bots(c, BCEnum::SpT_BindAffinity);
 		return;
 	}
