@@ -4341,7 +4341,7 @@ void Bot::PerformTradeWithClient(int16 begin_slot_id, int16 end_slot_id, Client*
 	}
 }
 
-bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by)
+bool Bot::Death(Mob *killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool is_buff_tic)
 {
 	if (!NPC::Death(killer_mob, damage, spell_id, attack_skill)) {
 		return false;

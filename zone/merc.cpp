@@ -4070,7 +4070,7 @@ Mob* Merc::GetOwnerOrSelf() {
 	return Result;
 }
 
-bool Merc::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killed_by)
+bool Merc::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, uint8 killed_by, bool is_buff_tic)
 {
 	if (!NPC::Death(killer_mob, damage, spell, attack_skill)) {
 		return false;
