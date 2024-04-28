@@ -40,6 +40,7 @@ void LuaMod::Init()
 	m_has_register_bug = parser_->HasFunction("RegisterBug", package_name_);
 	m_has_common_damage = parser_->HasFunction("CommonDamage", package_name_);
 	m_has_heal_damage = parser_->HasFunction("HealDamage", package_name_);
+	m_has_is_immune_to_spell = parser_->HasFunction("IsImmuneToSpell", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -612,6 +613,58 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValu
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
 				returnValue = luabind::object_cast<uint64>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+void LuaMod::IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_is_immune_to_spell) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "IsImmuneToSpell");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(caster);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["caster"] = l_other;
+		e["spell_id"] = spell_id;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TBOOLEAN) {
+				return_value = luabind::object_cast<bool>(return_value_obj);
 			}
 		}
 	}

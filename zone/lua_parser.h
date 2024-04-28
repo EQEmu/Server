@@ -201,6 +201,7 @@ public:
 	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default);
 	int64 CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default);
 	uint64 HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default);
+	bool IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &ignore_default);
 	
 private:
 	LuaParser();

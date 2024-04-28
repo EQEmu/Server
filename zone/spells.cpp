@@ -84,6 +84,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "string_ids.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "lua_parser.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -4957,6 +4958,16 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	//into one loop through with a switch statement.
 
 	LogSpells("Checking to see if we are immune to spell [{}] cast by [{}]", spell_id, caster->GetName());
+
+#ifdef LUA_EQEMU
+	bool is_immune = false;
+	bool ignore_default = false;
+	is_immune = LuaParser::Instance()->IsImmuneToSpell(this, caster, spell_id, ignore_default);
+
+	if (ignore_default) {
+		return is_immune;
+	}
+#endif
 
 	if(!IsValidSpell(spell_id))
 		return true;
