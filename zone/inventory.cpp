@@ -1027,7 +1027,7 @@ int32 Client::GetItemIDAt(int16 slot_id) {
 
 	const EQ::ItemInstance* inst = m_inv[slot_id];
 	if (inst)
-		return inst->GetItem()->ID;
+		return inst->GetItem()->OriginalID;
 
 	// None found
 	return INVALID_ID;
