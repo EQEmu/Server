@@ -852,6 +852,8 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->SkillModMax      += Strings::ToInt(inst->GetCustomData("SkillModMax"), 0);
 			inst->GetMutableItem()->SkillModValue    += Strings::ToInt(inst->GetCustomData("SkillModValue"), 0);
 
+			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
+
 			// Delay is weird, we want to set a hard floor on how low we can go.
 			inst->GetMutableItem()->Delay = std::max((uint8)(inst->GetMutableItem()->Delay + Strings::ToInt(inst->GetCustomData("Delay"), 0)), std::min((uint8)15, GetItem(inst->GetItem()->OriginalID)->Delay));			
 

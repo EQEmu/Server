@@ -4574,6 +4574,8 @@ bool Client::DiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
 			inst->SetCustomData("Click.Level",      static_cast<int32>(std::ceil(inst->GetItem()->Click.Level * -1)));
 			inst->SetCustomData("Click.Level2",     static_cast<int32>(std::ceil(inst->GetItem()->Click.Level2 * -1)));
 
+			inst->SetCustomData("BagSlots", 10);
+
 			if (inst->IsCharged()) {
 				inst->SetCustomData("force_unlimited_charges", static_cast<int>(spells[inst->GetItem()->Click.Effect].cast_time));
 			}
