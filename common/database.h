@@ -267,6 +267,9 @@ public:
 
 	void SourceDatabaseTableFromUrl(const std::string& table_name, const std::string& url);
 	void SourceSqlFromUrl(const std::string& url);
+	void PurgeCharacterParcels();
+	void Encode(std::string &in);
+	void Decode(std::string &in);
 
 private:
 	Mutex           Mvarcache;

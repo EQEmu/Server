@@ -203,7 +203,7 @@ public:
 	uint64 HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default);
 	uint64 SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, bool &ignore_default);
 	uint64 SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, bool &ignore_default);
-
+	bool IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &ignore_default);
 private:
 	LuaParser();
 	LuaParser(const LuaParser&);

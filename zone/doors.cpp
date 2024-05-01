@@ -43,7 +43,7 @@ extern EntityList  entity_list;
 extern WorldServer worldserver;
 
 Doors::Doors(const DoorsRepository::Doors &door) :
-	m_close_timer(5000),
+	m_close_timer(door.close_timer_ms),
 	m_position(door.pos_x, door.pos_y, door.pos_z, door.heading),
 	m_destination(door.dest_x, door.dest_y, door.dest_z, door.dest_heading)
 {

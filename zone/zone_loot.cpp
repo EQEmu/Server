@@ -211,6 +211,21 @@ LoottableRepository::Loottable *Zone::GetLootTable(const uint32 loottable_id)
 {
 	for (auto &e: m_loottables) {
 		if (e.id == loottable_id) {
+			if (!content_service.DoesPassContentFiltering(
+				ContentFlags{
+					.min_expansion = e.min_expansion,
+					.max_expansion = e.max_expansion,
+					.content_flags = e.content_flags,
+					.content_flags_disabled = e.content_flags_disabled
+				}
+			)) {
+				LogLootDetail(
+					"Loot table [{}] does not pass content filtering",
+					loottable_id
+				);
+				continue;
+			}
+
 			return &e;
 		}
 	}
@@ -234,6 +249,21 @@ LootdropRepository::Lootdrop Zone::GetLootdrop(const uint32 lootdrop_id) const
 {
 	for (const auto &e: m_lootdrops) {
 		if (e.id == lootdrop_id) {
+			if (!content_service.DoesPassContentFiltering(
+				ContentFlags{
+					.min_expansion = e.min_expansion,
+					.max_expansion = e.max_expansion,
+					.content_flags = e.content_flags,
+					.content_flags_disabled = e.content_flags_disabled
+				}
+			)) {
+				LogLootDetail(
+					"Lootdrop table [{}] does not pass content filtering",
+					lootdrop_id
+				);
+				continue;
+			}
+
 			return e;
 		}
 	}
@@ -246,6 +276,23 @@ std::vector<LootdropEntriesRepository::LootdropEntries> Zone::GetLootdropEntries
 	std::vector<LootdropEntriesRepository::LootdropEntries> entries = {};
 	for (const auto &e: m_lootdrop_entries) {
 		if (e.lootdrop_id == lootdrop_id) {
+			if (!content_service.DoesPassContentFiltering(
+				ContentFlags{
+					.min_expansion = e.min_expansion,
+					.max_expansion = e.max_expansion,
+					.content_flags = e.content_flags,
+					.content_flags_disabled = e.content_flags_disabled
+				}
+			)) {
+				LogLootDetail(
+					"Lootdrop [{}] Item [{}] ({}) does not pass content filtering",
+					lootdrop_id,
+					e.item_id,
+					database.GetItem(e.item_id) ? database.GetItem(e.item_id)->Name : "Unknown"
+				);
+				continue;
+			}
+
 			entries.emplace_back(e);
 		}
 	}

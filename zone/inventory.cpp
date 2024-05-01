@@ -4820,6 +4820,11 @@ bool Client::HasItemOnCorpse(uint32 item_id)
 		if (item.item_id == item_id) {
 			return true;
 		}
+		if (item.aug_1 == item_id || item.aug_2 == item_id ||
+			item.aug_3 == item_id || item.aug_4 == item_id ||
+			item.aug_5 == item_id || item.aug_6 == item_id) {
+			return true;
+		}
 	}
 
 	return false;

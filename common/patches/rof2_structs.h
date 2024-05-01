@@ -2247,15 +2247,17 @@ struct TimeOfDay_Struct {
 };
 
 // Darvik: shopkeeper structs
-struct Merchant_Click_Struct {
-/*000*/ uint32	npcid;			// Merchant NPC's entity id
-/*004*/ uint32	playerid;
-/*008*/ uint32	command;		// 1=open, 0=cancel/close
-/*012*/ float	rate;			// cost multiplier, dosent work anymore
-/*016*/ int32	unknown01;		// Seen 3 from Server or -1 from Client
-/*020*/ int32	unknown02;		// Seen 2592000 from Server or -1 from Client
-/*024*/
+struct MerchantClick_Struct
+{
+    /*000*/ uint32 npc_id;      // Merchant NPC's entity id
+    /*004*/ uint32 player_id;
+    /*008*/ uint32 command;     // 1=open, 0=cancel/close
+    /*012*/ float  rate;        // cost multiplier, dosent work anymore
+    /*016*/ int32  tab_display; // bitmask b000 none, b001 Purchase/Sell, b010 Recover, b100 Parcels
+    /*020*/ int32  unknown02;   // Seen 2592000 from Server or -1 from Client
+    /*024*/
 };
+
 /*
 Unknowns:
 0 is e7 from 01 to // MAYBE SLOT IN PURCHASE
@@ -4572,25 +4574,25 @@ struct RoF2SlotStruct
 
 struct ItemSerializationHeader
 {
-/*000*/	char unknown000[17];	// New for HoT. Looks like a string.
-/*017*/	uint32 stacksize;
-/*021*/	uint32 unknown004;
-/*025*/	uint8  slot_type;	// 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
-/*026*/	uint16 main_slot;
-/*028*/ uint16 sub_slot;
-/*030*/ uint16 aug_slot;	// 0xffff
-/*032*/	uint32 price;
-/*036*/	uint32 merchant_slot; //1 if not a merchant item
-/*040*/	uint32 scaled_value; //0
-/*044*/	uint32 instance_id; //unique instance id if not merchant item, else is merchant slot
-/*048*/	uint32 unknown028; //0
-/*052*/	uint32 last_cast_time;	// Unix Time from PP of last cast for this recast type if recast delay > 0
-/*056*/	uint32 charges; //Total Charges an item has (-1 for unlimited)
-/*060*/	uint32 inst_nodrop;	// 1 if the item is no drop (attuned items)
-/*064*/	uint32 unknown044;	// 0
-/*068*/	uint32 unknown048;	// 0
-/*072*/	uint32 unknown052;	// 0
-		uint8 isEvolving;
+    /*000*/ char   unknown000[17]; // New for HoT. Looks like a string.
+    /*017*/ uint32 stacksize;
+    /*021*/ uint32 unknown004;
+    /*025*/ uint8  slot_type;      // 0 = normal, 1 = bank, 2 = shared bank, 9 = merchant, 20 = ?
+    /*026*/ uint16 main_slot;
+    /*028*/ uint16 sub_slot;
+    /*030*/ uint16 aug_slot;       // 0xffff
+    /*032*/ uint32 price;
+    /*036*/ uint32 merchant_slot;  // 1 if not a merchant item
+    /*040*/ uint32 scaled_value;   // 0
+    /*044*/ uint32 instance_id;    // unique instance id if not merchant item, else is merchant slot
+    /*048*/ uint32 parcel_item_id; 
+    /*052*/ uint32 last_cast_time; // Unix Time from PP of last cast for this recast type if recast delay > 0
+    /*056*/ uint32 charges;        // Total Charges an item has (-1 for unlimited)
+    /*060*/ uint32 inst_nodrop;    // 1 if the item is no drop (attuned items)
+    /*064*/ uint32 unknown044;     // 0
+    /*068*/ uint32 unknown048;     // 0
+    /*072*/ uint32 unknown052;     // 0
+    uint8          isEvolving;
 };
 
 struct EvolvingItem {
@@ -5261,6 +5263,18 @@ struct Checksum_Struct {
     uint8_t  data[2048];
 };
 
+struct Parcel_Struct
+{
+    /*000*/ uint32                       npc_id;
+    /*004*/ TypelessInventorySlot_Struct inventory_slot;
+    /*012*/ uint32                       quantity;
+    /*016*/ uint32                       money_flag;
+    /*020*/ char                         send_to[64];
+    /*084*/ char                         note[128];
+    /*212*/ uint32                       unknown_212;
+    /*216*/ uint32                       unknown_216;
+    /*220*/ uint32                       unknown_220;
+};
 	}; /*structs*/
 
 }; /*RoF2*/

@@ -32,11 +32,13 @@
 #include "../common/content/world_content_service.h"
 #include "../common/zone_store.h"
 #include "../common/path_manager.h"
+#include "../common/events/player_event_logs.h"
 
-EQEmuLogSys LogSys;
+EQEmuLogSys         LogSys;
 WorldContentService content_service;
-ZoneStore zone_store;
-PathManager path;
+ZoneStore           zone_store;
+PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 #ifdef _WINDOWS
 #include <direct.h>

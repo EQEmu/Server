@@ -5494,6 +5494,60 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags` varchar(100) NULL;
 ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9271,
+		.description = "2024_03_10_parcel_implementation.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(CREATE TABLE `character_parcels` (
+				`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+				`char_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+				`from_name` VARCHAR(64) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`note` VARCHAR(1024) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+				`sent_date` DATETIME NULL DEFAULT NULL,
+				PRIMARY KEY (`id`) USING BTREE,
+				UNIQUE INDEX `data_constraint` (`slot_id`, `char_id`) USING BTREE
+				)
+				COLLATE='latin1_swedish_ci'
+				ENGINE=InnoDB
+				AUTO_INCREMENT=1;
+
+				ALTER TABLE `npc_types`
+				ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
+		)"
+	},
+	ManifestEntry{
+		.version     = 9272,
+		.description = "2024_04_23_add_parcel_support_for_augmented_items.sql",
+		.check       = "SHOW COLUMNS FROM `character_parcels` LIKE 'aug_slot_1'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `character_parcels`
+	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
+	ADD COLUMN `aug_slot_2` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
+	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
+	ADD COLUMN `aug_slot_4` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
+	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
+	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`;
+)"
+	},
+	ManifestEntry{
+		.version = 9273,
+		.description = "2024_04_24_door_close_timer.sql",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'close_timer_ms'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `doors`
+ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is_ldon_door`;
+)",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

@@ -35,6 +35,7 @@
 #include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_languages_repository.h"
 #include "../common/repositories/character_leadership_abilities_repository.h"
+#include "../common/repositories/character_parcels_repository.h"
 #include "../common/repositories/character_skills_repository.h"
 #include "../common/repositories/data_buckets_repository.h"
 #include "../common/repositories/group_id_repository.h"
@@ -49,6 +50,7 @@
 #include "../common/repositories/raid_members_repository.h"
 #include "../common/repositories/reports_repository.h"
 #include "../common/repositories/variables_repository.h"
+#include "../common/events/player_event_logs.h"
 
 // Disgrace: for windows compile
 #ifdef _WINDOWS
@@ -1125,27 +1127,27 @@ std::string Database::GetGroupLeaderForLogin(const std::string& character_name)
 	return e.gid ? e.leadername : std::string();
 }
 
-void Database::SetGroupLeaderName(uint32 group_id, const std::string& name)
+void Database::SetGroupLeaderName(uint32 group_id, const std::string &name)
 {
-	auto e = GroupLeadersRepository::FindOne(*this, group_id);
+    auto e       = GroupLeadersRepository::FindOne(*this, group_id);
 
-	e.leadername = name;
+    e.leadername = name;
 
-	if (e.gid) {
-		GroupLeadersRepository::UpdateOne(*this, e);
-		return;
-	}
+    if (e.gid) {
+        GroupLeadersRepository::UpdateOne(*this, e);
+        return;
+    }
 
-	e.gid            = group_id;
-	e.marknpc        = std::string();
-	e.leadershipaa   = std::string();
-	e.maintank       = std::string();
-	e.assist         = std::string();
-	e.puller         = std::string();
-	e.mentoree       = std::string();
-	e.mentor_percent = 0;
+    e.gid            = group_id;
+    e.marknpc        = std::string();
+    e.leadershipaa   = std::string();
+    e.maintank       = std::string();
+    e.assist         = std::string();
+    e.puller         = std::string();
+    e.mentoree       = std::string();
+    e.mentor_percent = 0;
 
-	GroupLeadersRepository::InsertOne(*this, e);
+    GroupLeadersRepository::ReplaceOne(*this, e);
 }
 
 std::string Database::GetGroupLeaderName(uint32 group_id)
@@ -1178,7 +1180,7 @@ char* Database::GetGroupLeadershipInfo(
 	GroupLeadershipAA_Struct* GLAA
 )
 {
-	const auto& e = GroupLeadersRepository::FindOne(*this, group_id);
+	auto e = GroupLeadersRepository::FindOne(*this, group_id);
 
 	if (!e.gid) {
 		if (leaderbuf) {
@@ -1239,9 +1241,9 @@ char* Database::GetGroupLeadershipInfo(
 	if (mentor_percent) {
 		*mentor_percent = e.mentor_percent;
 	}
-
-	if (GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
-		memcpy(GLAA, e.leadershipaa.c_str(), sizeof(GroupLeadershipAA_Struct));
+	if(GLAA && e.leadershipaa.length() == sizeof(GroupLeadershipAA_Struct)) {
+		Decode(e.leadershipaa);
+		memcpy(GLAA, e.leadershipaa.data(), sizeof(GroupLeadershipAA_Struct));
 	}
 
 	return leaderbuf;
@@ -2027,4 +2029,63 @@ void Database::SourceSqlFromUrl(const std::string& url)
 	} catch (std::invalid_argument iae) {
 		LogError("URI parser error [{}]", iae.what());
 	}
+}
+
+void Database::Encode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) += char('0');
+	}
+};
+
+void Database::Decode(std::string &in)
+{
+	for(int i = 0; i < in.length(); i++) {
+		in.at(i) -= char('0');
+	}
+};
+
+void Database::PurgeCharacterParcels()
+{
+	auto filter  = fmt::format("sent_date < (NOW() - INTERVAL {} DAY)", RuleI(Parcel, ParcelPruneDelay));
+	auto results = CharacterParcelsRepository::GetWhere(*this, filter);
+	auto prune   = CharacterParcelsRepository::DeleteWhere(*this, filter);
+
+	PlayerEvent::ParcelDelete                  pd{};
+	PlayerEventLogsRepository::PlayerEventLogs pel{};
+	pel.event_type_id   = PlayerEvent::PARCEL_DELETE;
+	pel.event_type_name = PlayerEvent::EventName[pel.event_type_id];
+	std::stringstream ss;
+	for (auto const   &r: results) {
+		pd.from_name  = r.from_name;
+		pd.item_id    = r.item_id;
+		pd.aug_slot_1 = r.aug_slot_1;
+		pd.aug_slot_2 = r.aug_slot_2;
+		pd.aug_slot_3 = r.aug_slot_3;
+		pd.aug_slot_4 = r.aug_slot_4;
+		pd.aug_slot_5 = r.aug_slot_5;
+		pd.aug_slot_6 = r.aug_slot_6;
+		pd.note       = r.note;
+		pd.quantity   = r.quantity;
+		pd.sent_date  = r.sent_date;
+		pd.char_id    = r.char_id;
+		{
+			cereal::JSONOutputArchiveSingleLine ar(ss);
+			pd.serialize(ar);
+		}
+
+		pel.event_data = ss.str();
+		pel.created_at = std::time(nullptr);
+
+		player_event_logs.AddToQueue(pel);
+
+		ss.str("");
+		ss.clear();
+	}
+
+	LogInfo(
+		"Purged <yellow>[{}] parcels that were over <yellow>[{}] days old.",
+		results.size(),
+		RuleI(Parcel, ParcelPruneDelay)
+	);
 }
