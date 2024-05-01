@@ -7862,4 +7862,20 @@ luabind::scope lua_register_journal_mode() {
 		)];
 }
 
+
+luabind::scope lua_register_exp_source() {
+	return luabind::class_<ExpSource>("ExpSource")
+		.enum_("constants")
+		[(
+			luabind::value("Quest", static_cast<int>(ExpSource::Quest)),
+			luabind::value("GM", static_cast<int>(ExpSource::GM)),
+			luabind::value("Kill", static_cast<int>(ExpSource::Kill)),
+			luabind::value("Death", static_cast<int>(ExpSource::Death)),
+			luabind::value("Resurrection", static_cast<int>(ExpSource::Resurrection)),
+			luabind::value("LDoNChest", static_cast<int>(ExpSource::LDoNChest)),
+			luabind::value("Task", static_cast<int>(ExpSource::Task)),
+			luabind::value("Sacrifice", static_cast<int>(ExpSource::Sacrifice))
+		)];
+}
+
 #endif

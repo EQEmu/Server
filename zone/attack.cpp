@@ -1946,7 +1946,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 			} else {
 				newexp -= exploss;
 			}
-			SetEXP(newexp, GetAAXP());
+			SetEXP(ExpSource::Death, newexp, GetAAXP());
 			//m_epp.perAA = 0;	//reset to no AA exp on death.
 		}
 
@@ -2592,7 +2592,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 		if (killer_raid) {
 			if (!is_ldon_treasure && MerchantType == 0) {
-				killer_raid->SplitExp(final_exp, this);
+				killer_raid->SplitExp(ExpSource::Kill, final_exp, this);
 
 				if (
 					killer_mob &&
@@ -2658,7 +2658,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 			}
 		} else if (give_exp_client->IsGrouped() && killer_group) {
 			if (!is_ldon_treasure && MerchantType == 0) {
-				killer_group->SplitExp(final_exp, this);
+					killer_group->SplitExp(ExpSource::Kill, final_exp, this);
 
 				if (
 					killer_mob &&
@@ -2722,7 +2722,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 
 				if (con_level != ConsiderColor::Gray) {
 					if (!GetOwner() || (GetOwner() && !GetOwner()->IsClient())) {
-						give_exp_client->AddEXP(final_exp, con_level);
+						give_exp_client->AddEXP(ExpSource::Kill, final_exp, con_level);
 
 						if (
 							killer_mob &&

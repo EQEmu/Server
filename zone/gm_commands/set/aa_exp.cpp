@@ -36,6 +36,7 @@ void SetAAEXP(Client *c, const Seperator *sep)
 
 	if (is_aa) {
 		t->SetEXP(
+			ExpSource::GM,
 			t->GetEXP(),
 			aa_experience,
 			false

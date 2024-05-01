@@ -29,7 +29,7 @@ void Perl_Group_CastGroupSpell(Group* self, Mob* caster, uint16 spell_id) // @ca
 
 void Perl_Group_SplitExp(Group* self, uint32_t exp, Mob* other) // @categories Account and Character, Script Utility, Group
 {
-	self->SplitExp(exp, other);
+	self->SplitExp(ExpSource::Quest, exp, other);
 }
 
 void Perl_Group_GroupMessage(Group* self, Mob* sender, const char* message) // @categories Script Utility, Group
