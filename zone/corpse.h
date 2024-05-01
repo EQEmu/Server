@@ -68,7 +68,8 @@ public:
 		int64 damage,
 		uint16 spell_id,
 		EQ::skills::SkillType attack_skill,
-		KilledByTypes killed_by = KilledByTypes::Killed_NPC
+		KilledByTypes killed_by = KilledByTypes::Killed_NPC,
+		bool is_buff_tic = false
 	) { return true; }
 
 	virtual void Damage(

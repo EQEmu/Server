@@ -26,6 +26,7 @@ public:
 	void TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault);
 	void GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ignoreDefault);
 	void GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, bool &ignoreDefault);
+	void IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &return_value, bool &ignore_default);
 	void GetExperienceForKill(Client *self, Mob *against, uint64 &returnValue, bool &ignoreDefault);
 	void CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault);
 	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default);
@@ -49,4 +50,5 @@ private:
 	bool m_has_register_bug;
 	bool m_has_common_damage;
 	bool m_has_heal_damage;
+	bool m_has_is_immune_to_spell;
 };

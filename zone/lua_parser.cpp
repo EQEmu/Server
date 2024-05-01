@@ -1602,6 +1602,15 @@ uint64 LuaParser::HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_
 	return retval;
 }
 
+bool LuaParser::IsImmuneToSpell(Mob *self, Mob *caster, uint16 spell_id, bool &ignore_default)
+{
+	bool retval = false;
+	for (auto &mod : mods_) {
+		mod.IsImmuneToSpell(self, caster, spell_id, retval, ignore_default);
+	}
+	return retval;
+}
+
 int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault)
 {
 	int64 retval = 0;
