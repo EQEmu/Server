@@ -36,7 +36,7 @@ class EvolveInfo;			// Stores information about an evolving item family
 #include "../common/memory_buffer.h"
 
 #include <map>
-
+#include <cstring>
 
 // Specifies usage type for item inside EQ::ItemInstance
 enum ItemInstTypes
@@ -147,14 +147,30 @@ namespace EQ
 		bool UpdateOrnamentationInfo();
 		static bool CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll = false);
 
+		// Dynamic Item Stuff
+		ItemData* GetMutableItem();		
+		const bool IsItemDynamic() const;
+		const int  GetItemTier() const;
+		const int  GetBaseID() const;
+		const int  GetOriginalID() const;
+
+		ItemInstance* GetUpgrade(SharedDatabase &database);
+
 		// Has attack/delay?
 		bool IsWeapon() const;
 		bool IsAmmo() const;
-
+		const void SetID(uint32 id) {  if (m_item) { const_cast<ItemData*>(m_item)->ID = id; } }
+		const void SetComment(const std::string& comment) {  
+			if (m_item) { 
+				auto mutable_item = const_cast<ItemData*>(m_item);
+				std::strncpy(mutable_item->Comment, comment.c_str(), sizeof(mutable_item->Comment) - 1);
+    			mutable_item->Comment[sizeof(mutable_item->Comment) - 1] = '\0';
+			}
+		}
 		// Accessors
 		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }
 		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }
-		const ItemData* GetItem() const;
+		ItemData* GetItem() const;		
 		const ItemData* GetUnscaledItem() const;
 
 		const uint8 GetItemType() const { return m_item ? m_item->ItemType : 255; } // Return 255 so you know there's no valid item
@@ -182,7 +198,7 @@ namespace EQ
 		void SetAttuned(bool flag)				{ m_attuned = flag; }
 
 		std::string GetCustomDataString() const;
-		std::string GetCustomData(const std::string &identifier);
+		std::string GetCustomData(const std::string &identifier) const;
 		void SetCustomDataString(const std::string& str);
 		void SetCustomData(const std::string &identifier, const std::string& value);
 		void SetCustomData(const std::string &identifier, int value);
@@ -314,7 +330,7 @@ namespace EQ
 		void _PutItem(uint8 index, ItemInstance* inst) { m_contents[index] = inst; }
 
 		ItemInstTypes		m_use_type {ItemInstNormal};	// Usage type for item
-		const ItemData*		m_item {nullptr};		// Ptr to item data
+		ItemData*		    m_item {nullptr};		// Ptr to item data
 		int16				m_charges {0};	// # of charges for chargeable items
 		uint32				m_price {0};	// Bazaar /trader price
 		uint32				m_color {0};

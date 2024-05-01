@@ -49,6 +49,7 @@ void command_appearanceeffects(Client *c, const Seperator *sep);
 void command_apply_shared_memory(Client *c, const Seperator *sep);
 void command_attack(Client *c, const Seperator *sep);
 void command_augmentitem(Client *c, const Seperator *sep);
+void command_award(Client *c, const Seperator *sep);
 void command_ban(Client *c, const Seperator *sep);
 void command_bugs(Client *c, const Seperator *sep);
 void command_camerashake(Client *c, const Seperator *sep);

@@ -500,8 +500,68 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 	if (!IsEXPEnabled()) {
 		return;
-	}
+	}	
+	
+	LogDebug("Raw in_add_exp: [{}]", in_add_exp);
 
+	if (RuleB(Custom, PowerSourceItemUpgrade)) {		
+		EQ::ItemInstance* old_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
+
+		if (old_item) {
+			EQ::ItemInstance* new_item = old_item->GetUpgrade(database);
+			EQ::SayLinkEngine linker;
+			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));
+			uint64 tar_item_exp   = old_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
+
+			float percentage = std::min(100.0f, (cur_item_exp / tar_item_exp) * 100.0f);
+
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);	
+			
+			if (!new_item) {
+				linker.SetItemInst(old_item);
+				Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
+				return;
+			}
+
+			linker.SetItemInst(old_item);
+			Message(Chat::Experience, "Your [%s] has gained experience! (%.2f%%)", linker.GenerateLink().c_str(), percentage);
+
+			if (cur_item_exp <= tar_item_exp) {			
+				old_item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
+				database.UpdateInventorySlot(CharacterID(), old_item, EQ::invslot::slotPowerSource);
+			} else if (new_item) {
+				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
+				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {	
+					m_inv.GetItem(EQ::invslot::slotPowerSource)->SetAttuned(true);
+
+					if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
+						DiscoverItem(new_item->GetItem()->ID);
+					}
+
+					if (GetGM()) {
+						DiscoverArtifact(new_item);
+					}
+
+					linker.SetItemInst(old_item);
+					auto upgrade_item_lnk = linker.GenerateLink().c_str();
+
+					linker.SetItemInst(new_item);
+					auto  new_item_lnk = linker.GenerateLink().c_str();
+
+					Message(Chat::Experience, "Your [%s] has upgraded into [%s]!", upgrade_item_lnk, new_item_lnk);
+					SendSound();		
+				} else {
+					if (old_item) {
+						PutItemInInventory(EQ::invslot::slotPowerSource, *old_item, true);
+						Message(Chat::Red, "ERROR: Unable to upgrade item from power source, attempting to recover old item.");
+					}
+				}
+
+				safe_delete(old_item);
+			}			
+			return;
+		}
+	}	
 
 	EVENT_ITEM_ScriptStopReturn();
 

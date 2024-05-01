@@ -315,7 +315,7 @@ public:
 	void Tell_StringID(uint32 string_id, const char *who, const char *message);
 	void SendColoredText(uint32 color, std::string message);
 	void SendBazaarResults(uint32 trader_id, uint32 in_class, uint32 in_race, uint32 item_stat, uint32 item_slot, uint32 item_type, char item_name[64], uint32 min_price, uint32 max_price);
-	void SendTraderItem(uint32 item_id,uint16 quantity);
+	void SendTraderItem(uint32 item_id,uint16 quantity, Client* Trader);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	EQ::ItemInstance* FindTraderItemBySerialNumber(int32 SerialNumber);
@@ -828,6 +828,9 @@ public:
 	void DiscoverItem(uint32 itemid);
 	std::string GetDiscoverer(uint32 itemid);
 
+	bool DiscoverArtifact(EQ::ItemInstance* inst, bool bypass = false);
+	bool CanDiscoverArtifact(EQ::ItemInstance* inst, bool bypass = false);
+
 	bool TGB() const { return tgb; }
 
 	void OnDisconnect(bool hard_disconnect);
@@ -1035,7 +1038,21 @@ public:
 	int GetEXPPercentage();
 
 	// Seasonal Helper Methods
-	bool IsSeasonal() { return (Strings::ToBool(GetBucket("SeasonalCharacter")) == RuleI(Custom, EnableSeasonalCharacters)); }
+	bool IsSeasonal() {
+		if (RuleI(Custom, EnableSeasonalCharacters) <= 0) {
+			return false;
+		} else {
+			return (Strings::ToInt(GetBucket("SeasonalCharacter")) == RuleI(Custom, EnableSeasonalCharacters));
+		}
+	}
+
+	int  GetSeason() { 
+		if (IsSeasonal()) {
+			return Strings::ToInt(GetBucket("SeasonalCharacter"), 0);
+		} else {
+			return 0;
+		}
+	}
 
 	// Hardcore Helper Methods
 	bool IsHardcore() { return Strings::ToBool(GetBucket("DiscordantCharacter")); }
@@ -1065,8 +1082,9 @@ public:
 	void QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
 	void PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, LootItem** bag_item_data = 0);
 	bool AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn = false, bool try_cursor = true, LootItem** bag_item_data = 0);
-	bool SummonApocItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
-	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
+	bool SummonApocItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0, bool artifact_disco = true);
+	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0, bool artifact_disco = true);
+	bool ReturnItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
 	void SummonItemIntoInventory(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool is_attuned = false);
 	void SummonBaggedItems(uint32 bag_item_id, const std::vector<LootItem>& bag_items);
 	void SetStats(uint8 type,int16 set_val);

@@ -450,7 +450,13 @@ int main(int argc, char **argv)
 	parse->LoadPerlEventExportSettings(parse->perl_event_export_settings);
 
 #endif
-
+	database.SetItemInstanceGenerateCallback([](EQ::ItemInstance* inst) {
+		if (parse->ItemHasQuestSub(inst, EVENT_ITEM_GENERATE)) {
+			std::vector<std::any> args = {};
+			parse->EventItem(EVENT_ITEM_GENERATE, nullptr, inst, nullptr, std::string{}, 0, &args);
+		}
+	});
+	
 	//now we have our parser, load the quests
 	LogInfo("Loading quests");
 	parse->ReloadQuests();

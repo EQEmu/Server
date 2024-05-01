@@ -253,10 +253,8 @@ public:
 	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3);
 	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4);
 	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5);
-	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
-		bool attuned);
-	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
-		bool attuned, int to_slot);
+	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned);
+	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, int to_slot);
 	void SummonFixedItem(uint32 item_id);
 	void SummonFixedItem(uint32 item_id, int charges);
 	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1);
@@ -264,10 +262,17 @@ public:
 	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3);
 	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4);
 	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5);
-	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
-		bool attuned);
-	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
-		bool attuned, int to_slot);
+	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned);
+	void SummonFixedItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, int to_slot);
+	void ReturnItem(uint32 item_id);
+	void ReturnItem(uint32 item_id, int charges);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned);
+	void ReturnItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, bool attuned, int to_slot);
 	void SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table);
 	void SetStats(int type, int value);
 	void IncStats(int type, int value);

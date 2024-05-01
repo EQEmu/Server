@@ -31,10 +31,12 @@ void LoadItems(SharedDatabase *database, const std::string &prefix) {
 	int32 items = -1;
 	uint32 max_item = 0;
 	database->GetItemsCount(items, max_item);
+	
 	if(items == -1) {
 		EQ_EXCEPT("Shared Memory", "Unable to get any items from the database.");
 	}
-
+	items = 0xFFFFFFF; // Max for client link IDs, 2^20
+	max_item = 0xFFFFFFF;
 	uint32 size = static_cast<uint32>(EQ::FixedMemoryHashSet<EQ::ItemData>::estimated_size(items, max_item));
 
 	auto Config = EQEmuConfig::get();
@@ -44,5 +46,6 @@ void LoadItems(SharedDatabase *database, const std::string &prefix) {
 
 	void *ptr = mmf.Get();
 	database->LoadItems(ptr, size, items, max_item);
+
 	mutex.Unlock();
 }

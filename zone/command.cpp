@@ -94,6 +94,7 @@ int command_init(void)
 		command_add("apply_shared_memory", "[shared_memory_name] - Tells every zone and world to apply a specific shared memory segment by name.", AccountStatus::GMImpossible, command_apply_shared_memory) ||
 		command_add("attack", "[Entity Name] - Make your NPC target attack an entity by name", AccountStatus::GMLeadAdmin, command_attack) ||
 		command_add("augmentitem", "Force augments an item. Must have the augment item window open.", AccountStatus::GMImpossible, command_augmentitem) ||
+		command_add("award", "EoM", AccountStatus::GMAdmin, command_award) ||
 		command_add("ban", "[Character Name] [Reason] - Ban by character name", AccountStatus::GMLeadAdmin, command_ban) ||
 		command_add("bugs", "[Close|Delete|Review|Search|View] - Handles player bug reports", AccountStatus::QuestTroupe, command_bugs) ||
 		command_add("bot", "Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
@@ -243,7 +244,7 @@ int command_init(void)
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
 		command_add("zoneinstance", "[Instance ID] [X] [Y] [Z] - Teleport to specified Instance by ID (coordinates are optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
-		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave)
+		command_add("zsave", " Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave)		
 	) {
 		command_deinit();
 		return -1;
@@ -790,6 +791,7 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/appearance.cpp"
 #include "gm_commands/appearanceeffects.cpp"
 #include "gm_commands/attack.cpp"
+#include "gm_commands/award.cpp"
 #include "gm_commands/augmentitem.cpp"
 #include "gm_commands/ban.cpp"
 #include "gm_commands/bugs.cpp"

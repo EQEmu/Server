@@ -1618,13 +1618,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		// safe to ACK now
 		c->QueuePacket(app);
 
-		if (
-			!IsPlayerCorpse() &&
-			RuleB(Character, EnableDiscoveredItems) &&
-			c &&
-			!c->GetGM() &&
-			!c->IsDiscovered(inst->GetItem()->ID)
-			) {
+		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems) &&	c && !c->GetGM() && !c->IsDiscovered(inst->GetItem()->ID)) {
 			c->DiscoverItem(inst->GetItem()->ID);
 		}
 
@@ -1649,6 +1643,14 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 			else {
 				inst->SetRecastTimestamp(timestamps.count(d->ID) ? timestamps.at(d->ID) : 0);
 			}
+		}
+
+		if (RuleB(Character, EnableDiscoveredItems) && c && !c->GetGM() && !c->IsDiscovered(inst->GetItem()->ID)) {
+			c->DiscoverItem(inst->GetItem()->ID);
+		}
+
+		if (!c->GetGM()) {
+			c->DiscoverArtifact(inst);
 		}
 
 		/* First add it to the looter - this will do the bag contents too */

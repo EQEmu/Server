@@ -3472,7 +3472,7 @@ This is a first release using the new build system. Changelog entry representati
 * Add EVENT_AA_BUY and EVENT_AA_GAIN to Perl/Lua. ([#2504](https://github.com/EQEmu/Server/pull/2504)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-11-05
 * Add EVENT_BOT_CREATE to Perl/Lua ([#2713](https://github.com/EQEmu/Server/pull/2713)) ([Kinglykrab](https://github.com/Kinglykrab)) 2023-01-09
 * Add EVENT_CAST_ON exports to EVENT_CAST and EVENT_CAST_BEGIN. ([#2051](https://github.com/EQEmu/Server/pull/2051)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-03-12
-* Add EVENT_EQUIP_ITEM_CLIENT and EVENT_UNEQUIP_ITEM_CLIENT to Perl/Lua. ([#2015](https://github.com/EQEmu/Server/pull/2015)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-02-23
+* Add _ITEM_CLIENT and EVENT_UNEQUIP_ITEM_CLIENT to Perl/Lua. ([#2015](https://github.com/EQEmu/Server/pull/2015)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-02-23
 * Add EVENT_GM_COMMAND to Perl/Lua. ([#2634](https://github.com/EQEmu/Server/pull/2634)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-12-11
 * Add EVENT_LEVEL_DOWN to Perl/Lua. ([#2620](https://github.com/EQEmu/Server/pull/2620)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-12-11
 * Add EVENT_PAYLOAD to Perl/Lua. ([#2611](https://github.com/EQEmu/Server/pull/2611)) ([Kinglykrab](https://github.com/Kinglykrab)) 2022-12-04

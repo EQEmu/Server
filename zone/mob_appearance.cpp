@@ -206,7 +206,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 				const auto inst = CastToClient()->m_inv[inventory_slot];
 
 				if (inst) {
-					const auto augment = inst->GetOrnamentationAugment();
+					auto augment = inst->GetOrnamentationAugment();
 
 					if (augment) {
 						item = augment->GetItem();
@@ -281,8 +281,7 @@ uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 			if (IsClient()) {
 				const auto inst = CastToClient()->m_inv[slot];
 				if (inst) {
-					const auto augment = inst->GetOrnamentationAugment();
-
+					auto augment = inst->GetOrnamentationAugment();
 					if (augment) {
 						item              = augment->GetItem();
 						heros_forge_model = item->HerosForgeModel;

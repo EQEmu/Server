@@ -343,6 +343,52 @@ namespace EQ
 			//ProcRate
 		};
 
+		enum Stat {
+			AC,
+			HP, 
+			Mana,
+			Endur,
+			AStr, 
+			ASta, 
+			ADex, 
+			AAgi, 
+			AInt, 
+			AWis, 
+			ACha,
+			MR, 
+			FR, 
+			CR, 
+			DR, 
+			PR, 
+			Attack, 
+			SpellDmg, 
+			HealAmt,			
+			Regen, 
+			ManaRegen, 
+			EnduranceRegen,
+			Shielding, 
+			SpellShield, 
+			Avoidance, 
+			CombatEffects,
+			Accuracy, 
+			StunResist, 
+			StrikeThrough, 
+			DotShielding,
+			DSMitigation,
+			HeroicStr, 
+			HeroicSta, 
+			HeroicDex, 
+			HeroicAgi, 
+			HeroicInt, 
+			HeroicWis, 
+			HeroicCha,
+			HeroicMR, 
+			HeroicFR, 
+			HeroicCR, 
+			HeroicDR, 
+			HeroicPR
+		};
+
 		uint32 ConvertAugTypeToAugTypeBit(uint8 aug_type);
 		uint8 ConvertAugTypeBitToAugType(uint32 aug_type_bit);
 
@@ -357,6 +403,8 @@ namespace EQ
 		// Non packet based fields
 		uint8	MinStatus {};
 		char	Comment[255] {};
+		uint32  OriginalID {};
+		uint16  Season {};
 
 		// Packet based fields
 		uint8	ItemClass {};		// Item Type: 0=common, 1=container, 2=book
@@ -551,7 +599,9 @@ namespace EQ
 
 		const char* GetActualCharmFile() const;
 
-		static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
+        const uint64 CalculateGearScore() const;
+
+        static bool CheckLoreConflict(const ItemData* l_item, const ItemData* r_item);
 		bool CheckLoreConflict(const ItemData* item) const { return CheckLoreConflict(this, item); }
 	};
 

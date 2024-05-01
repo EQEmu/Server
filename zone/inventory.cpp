@@ -219,12 +219,15 @@ uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 }
 
 
-bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
+bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
 	item_id = GetApocItemUpgrade(item_id);
 
-	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model);
+	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model, artifact_disco);
 }
 
+bool Client::ReturnItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
+	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model, false);
+}
 
 bool Client::CheckLoreConflict(const EQ::ItemData* item)
 {
@@ -239,7 +242,7 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
 }
 
-bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
+bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
 	EVENT_ITEM_ScriptStopReturn();
 
 	// TODO: update calling methods and script apis to handle a failure return
@@ -708,6 +711,24 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
 	}
+	
+	if (
+		RuleB(Character, EnableDiscoveredItems) &&
+		!GetGM() &&
+		!IsDiscovered(item_id)
+	) {
+		DiscoverItem(item_id);
+	}
+	
+	if (!GetGM()) {
+		if (RuleB(Character, EnableDiscoveredItems)) {
+			DiscoverItem(inst->GetItem()->ID);
+		}
+
+		if (artifact_disco) {
+			DiscoverArtifact(inst);
+		}
+	}
 
 	// put item into inventory
 	if (to_slot == EQ::invslot::slotCursor) {
@@ -718,16 +739,6 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	}
 
 	safe_delete(inst);
-
-	// discover item and any augments
-	if (
-		RuleB(Character, EnableDiscoveredItems) &&
-		!GetGM() &&
-		!IsDiscovered(item_id)
-	) {
-		DiscoverItem(item_id);
-	}
-
 	return true;
 }
 
@@ -743,6 +754,12 @@ void Client::DropItem(int16 slot_id, bool recurse)
 
 	if (IsSeasonal()) {				
 		Message(Chat::Red, "Seasonal Characters may not drop items.");
+		SendCursorBuffer();
+		return;
+	}
+
+	if (!m_inv.GetItem(slot_id)->GetCustomDataString().empty()) {
+		Message(Chat::Red, "You may not drop an item of this type.");
 		SendCursorBuffer();
 		return;
 	}
@@ -1778,6 +1795,17 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	uint32 dst_slot_check = move_in->to_slot;
 	uint32 stack_count_check = move_in->number_in_stack;
 
+	if (IsSeasonal()) {
+		if ((src_slot_check >= EQ::invslot::SHARED_BANK_BEGIN && src_slot_check <= EQ::invslot::SHARED_BANK_END) ||
+			(src_slot_check >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && src_slot_check <= EQ::invbag::SHARED_BANK_BAGS_END) ||
+			(dst_slot_check >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_check <= EQ::invslot::SHARED_BANK_END) ||
+			(dst_slot_check >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_check <= EQ::invbag::SHARED_BANK_BAGS_END))
+		{			
+			Message(Chat::Red, "Seasonal characters may not access the shared bank.");
+			return false;
+		}
+	}
+
 	if(!IsValidSlot(src_slot_check)){
 		// SoF+ sends a Unix timestamp (should be int32) for src and dst slots every 10 minutes for some reason.
 		if(src_slot_check < 2147483647)
@@ -2275,9 +2303,15 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
 						src_slot_id
 					);
-
 					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID);
 				}
+
+				if (RuleB(Custom, PowerSourceItemUpgrade) && src_slot_id == EQ::invslot::slotPowerSource) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+					linker.SetItemInst(src_inst);
+					Message(Chat::Experience, "You stop focusing your experience on improving your [%s].", linker.GenerateLink().c_str());
+				}	
 			}
 
 			if (dst_inst) {
@@ -2291,8 +2325,17 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
 						src_slot_id
 					);
-
 					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID);
+				}
+
+				if (RuleB(Custom, PowerSourceItemUpgrade) && src_slot_id == EQ::invslot::slotPowerSource) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+					linker.SetItemInst(dst_inst);
+					Message(Chat::Experience, "You begin to focus your experience on improving your [%s].", linker.GenerateLink().c_str());
+
+					uint64 tar_item_exp   = dst_inst->GetItem()->CalculateGearScore();
+					LogDebug("GEAR SCORE: [{}]", tar_item_exp);
 				}
 			}
 		}
@@ -2309,29 +2352,42 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						dst_inst->IsStackable() ? dst_inst->GetCharges() : 1,
 						dst_slot_id
 					);
-
 					std::vector<std::any> args = { dst_inst };
-
 					parse->EventPlayer(EVENT_UNEQUIP_ITEM_CLIENT, this, export_string, dst_inst->GetItem()->ID, &args);
 				}
+
+				if (RuleB(Custom, PowerSourceItemUpgrade) && dst_slot_id == EQ::invslot::slotPowerSource) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+					linker.SetItemInst(dst_inst);
+					Message(Chat::Experience, "You stop focusing your experience on improving your [%s].", linker.GenerateLink().c_str());
+				}				
 			}
 
 			if (src_inst) {
 				if (parse->ItemHasQuestSub(src_inst, EVENT_EQUIP_ITEM)) {
 					parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
 				}
-
+								
 				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
 					const auto& export_string = fmt::format(
 						"{} {}",
 						src_inst->IsStackable() ? src_inst->GetCharges() : 1,
 						dst_slot_id
 					);
-
 					std::vector<std::any> args = { src_inst };
-
-					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);				
 				}
+
+				if (RuleB(Custom, PowerSourceItemUpgrade) && dst_slot_id == EQ::invslot::slotPowerSource) {
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+					linker.SetItemInst(src_inst);
+					Message(Chat::Experience, "You begin to focus your experience on improving your [%s].", linker.GenerateLink().c_str());
+
+					uint64 tar_item_exp   = src_inst->GetItem()->CalculateGearScore();
+					LogDebug("GEAR SCORE: [{}]", tar_item_exp);
+				}				
 			}
 		}
 	}
@@ -2406,7 +2462,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+			if (GetGM()) {
+				Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+			}
 		}
 		else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 	}
@@ -2421,7 +2479,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+				if (GetGM()) {
+					Message(Chat::Lime, "Source slot %i resyncronized.", move_slots->from_slot);
+				}
 			}
 			else { Message(Chat::Red, "Could not resyncronize source slot %i.", move_slots->from_slot); }
 		}
@@ -2448,7 +2508,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				safe_delete(outapp);
 			}
 			safe_delete(token_inst);
-			Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+			if (GetGM()) {
+				Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+			}
 		}
 		else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 	}
@@ -2463,7 +2525,9 @@ void Client::SwapItemResync(MoveItem_Struct* move_slots) {
 				SendItemPacket(resync_slot, m_inv[resync_slot], ItemPacketTrade);
 
 				safe_delete(token_inst);
-				Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+				if (GetGM()) {
+					Message(Chat::Lime, "Destination slot %i resyncronized.", move_slots->to_slot);
+				}
 			}
 			else { Message(Chat::Red, "Could not resyncronize destination slot %i.", move_slots->to_slot); }
 		}

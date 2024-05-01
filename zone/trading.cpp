@@ -744,6 +744,20 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 			database.SaveInventory(CharacterID(), nullptr, i);
 		}
 
+		// We are going to abort the trade if any of them are dynamic
+		for (int i = EQ::invslot::TRADE_BEGIN; i <= EQ::invslot::TRADE_NPC_END; ++i) {
+			if (insts[i - EQ::invslot::TRADE_BEGIN] && insts[i - EQ::invslot::TRADE_BEGIN]->GetItem()->ID != insts[i - EQ::invslot::TRADE_BEGIN]->GetItem()->OriginalID) {
+				PushItemOnCursor(*insts[i - EQ::invslot::TRADE_BEGIN], true);
+
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+				linker.SetItemInst(insts[i - EQ::invslot::TRADE_BEGIN]);				
+				
+				Message(Chat::Red, "[%s] is not eligible to be traded to an NPC.", linker.GenerateLink().c_str());
+				insts[i - EQ::invslot::TRADE_BEGIN] = nullptr;
+			}
+		}
+
 		// copy to be filtered by task updates, null trade slots preserved for quest event arg
 		std::vector<EQ::ItemInstance*> items(insts, insts + std::size(insts));
 
@@ -824,12 +838,18 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										auto loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
 										loot_drop_entry.equip_item = 1;
 										loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
+										if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+											tradingWith->CastToNPC()->AddLootDropFixed(
+												bagitem,
+												loot_drop_entry,
+												true
+											);
 
-										tradingWith->CastToNPC()->AddLootDropFixed(
-											bagitem,
-											loot_drop_entry,
-											true
-										);
+											if (tradingWith->IsCharmed()) {
+												PushItemOnCursor(*baginst, true);
+												Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+											}
+										}
 										// Return quest items being traded to non-quest NPC when the rule is true
 									} else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && bagitem->IsQuestItem())) {
 										tradingWith->SayString(TRADE_BACK, GetCleanName());
@@ -848,15 +868,23 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							}
 						}
 
-						auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
-						new_loot_drop_entry.equip_item = 1;
-						new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
+						if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
+							auto new_loot_drop_entry = LootdropEntriesRepository::NewNpcEntity();
+							new_loot_drop_entry.equip_item = 1;
+							new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 
-						tradingWith->CastToNPC()->AddLootDropFixed(
-							item,
-							new_loot_drop_entry,
-							true
-						);
+							tradingWith->CastToNPC()->AddLootDropFixed(
+								item,
+								new_loot_drop_entry,
+								true
+							);
+
+							
+							if (tradingWith->IsCharmed()) {
+								PushItemOnCursor(*inst, true);
+								Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+							}
+						}
 					}
 				
 					// Return quest items being traded to non-quest NPC when the rule is true
@@ -1031,7 +1059,6 @@ void Client::Trader_CustomerBrowsing(Client *Customer) {
 	safe_delete(outapp);
 }
 
-
 void Client::Trader_StartTrader() {
 
 	Trader=true;
@@ -1142,7 +1169,7 @@ void Client::Trader_EndTrader() {
 	Trader = false;
 }
 
-void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
+void Client::SendTraderItem(uint32 ItemID, uint16 Quantity, Client* Trader) {
 
 	std::string Packet;
 	int16 FreeSlotID=0;
@@ -1154,7 +1181,19 @@ void Client::SendTraderItem(uint32 ItemID, uint16 Quantity) {
 		return;
 	}
 
-	EQ::ItemInstance* inst = database.CreateItem(item, Quantity);
+	EQ::ItemInstance* inst = nullptr;
+
+	if (ItemID != item->OriginalID) {			
+		EQ::ItemInstance* source_inst = Trader->GetInv().GetItem(Trader->FindTraderItem(Trader->FindTraderItemSerialNumber(ItemID), Quantity));			
+		if (source_inst) {
+			inst = database.CreateItem(item->OriginalID, Quantity);
+			inst->GetMutableItem()->ID = source_inst->GetItem()->OriginalID;
+			inst->SetCustomDataString(source_inst->GetCustomDataString());			
+			database.RunGenerateCallback(inst);
+		}
+	} else {
+		inst = database.CreateItem(item, Quantity);
+	}
 
 	if (inst)
 	{
@@ -1260,7 +1299,6 @@ EQ::ItemInstance* Client::FindTraderItemBySerialNumber(int32 SerialNumber){
 
 	return nullptr;
 }
-
 
 GetItems_Struct* Client::GetTraderItems(){
 
@@ -1520,7 +1558,6 @@ void Client::TradeRequestFailed(const EQApplicationPacket* app) {
 	safe_delete(outapp);
 }
 
-
 static void BazaarAuditTrail(const char *seller, const char *buyer, const char *itemName, int quantity, int totalCost, int tranType) {
 
 	const std::string& query = fmt::format(
@@ -1687,9 +1724,9 @@ void Client::BuyTraderItem(TraderBuy_Struct* tbs, Client* Trader, const EQApplic
 	int TraderSlot = 0;
 
 	if(BuyItem->IsStackable())
-		SendTraderItem(BuyItem->GetItem()->ID, outtbs->Quantity);
+		SendTraderItem(BuyItem->GetItem()->ID, outtbs->Quantity, Trader);
 	else
-		SendTraderItem(BuyItem->GetItem()->ID, BuyItem->GetCharges());
+		SendTraderItem(BuyItem->GetItem()->ID, BuyItem->GetCharges(), Trader);
 
 	TraderSlot = Trader->FindTraderItem(tbs->ItemID, outtbs->Quantity);
 

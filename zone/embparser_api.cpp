@@ -1483,6 +1483,11 @@ std::string Perl__getitemname(uint32 item_id)
 	return quest_manager.getitemname(item_id);
 }
 
+bool Perl__IsItemDynamic(uint32 item_id)
+{
+	return quest_manager.IsItemDynamic(item_id);
+}
+
 std::string Perl__getnpcnamebyid(uint32 npc_id)
 {
 	return quest_manager.getnpcnamebyid(npc_id);
@@ -6555,6 +6560,7 @@ void perl_register_quest()
 	package.add("getitemcomment", &Perl__getitemcomment);
 	package.add("getitemlore", &Perl__getitemlore);
 	package.add("getitemname", &Perl__getitemname);
+	package.add("IsItemDynamic", &Perl__IsItemDynamic);
 	package.add("getitemstat", &Perl__getitemstat);
 	package.add("getlanguagename", &Perl__getlanguagename);
 	package.add("getldonthemename", &Perl__getldonthemename);

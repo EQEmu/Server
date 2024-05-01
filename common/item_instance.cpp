@@ -800,7 +800,7 @@ bool EQ::ItemInstance::IsAmmo() const
 
 }
 
-const EQ::ItemData* EQ::ItemInstance::GetItem() const
+EQ::ItemData* EQ::ItemInstance::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -809,6 +809,64 @@ const EQ::ItemData* EQ::ItemInstance::GetItem() const
 		return m_scaledItem;
 
 	return m_item;
+}
+
+EQ::ItemData* EQ::ItemInstance::GetMutableItem()
+{
+	if (!m_item)
+		return nullptr;
+
+	if (m_scaledItem)
+		return m_scaledItem;
+
+	return m_item;
+}
+
+const bool EQ::ItemInstance::IsItemDynamic() const
+{
+	if (!m_item)
+		return false;
+
+	return !GetCustomData("original_id").empty();	
+}
+
+// Returns the original ID of a dynamic item
+const int EQ::ItemInstance::GetOriginalID() const
+{
+	if (!m_item)
+		return 0;
+				
+	return m_item->OriginalID;		
+}
+
+// Returns the base ID of an item.
+const int EQ::ItemInstance::GetBaseID() const
+{
+	if (!m_item)
+		return 0;
+
+	return GetOriginalID() % 1000000;		
+}
+
+
+const int EQ::ItemInstance::GetItemTier() const
+{
+	if (!m_item)
+		return 0;
+
+	return static_cast<int64>(m_item->ID / 1000000);
+}
+
+EQ::ItemInstance* EQ::ItemInstance::GetUpgrade(SharedDatabase &database) {
+	// TODO - expand for Affixes, perhaps for newly created Artifacts.
+	
+	auto new_item = database.CreateItem(GetOriginalID() + 1000000);
+	
+	if (new_item) {
+		return new_item;
+	} else {
+		return nullptr;
+	}
 }
 
 const EQ::ItemData* EQ::ItemInstance::GetUnscaledItem() const
@@ -828,10 +886,6 @@ std::string EQ::ItemInstance::GetCustomDataString() const {
 		ret_val += "^";
 		ret_val += iter->second;
 		++iter;
-
-		if (ret_val.length() > 0) {
-			ret_val += "^";
-		}
 	}
 	return ret_val;
 }
@@ -849,7 +903,7 @@ void EQ::ItemInstance::SetCustomDataString(const std::string& str)
 	}
 }
 
-std::string EQ::ItemInstance::GetCustomData(const std::string& identifier) {
+std::string EQ::ItemInstance::GetCustomData(const std::string& identifier) const {
 	std::map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		return iter->second;

@@ -32,6 +32,11 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <functional>
+#include <string>
+#include <array>
+#include <unordered_map>
+#include <vector>
 
 class EvolveInfo;
 struct InspectMessage_Struct;
@@ -39,7 +44,6 @@ struct PlayerProfile_Struct;
 struct SPDat_Spell_Struct;
 struct NPCFactionList;
 struct FactionAssociations;
-
 
 namespace EQ
 {
@@ -50,18 +54,42 @@ namespace EQ
 	class MemoryMappedFile;
 }
 
+using ItemInstanceGenerateCallback = std::function<void(EQ::ItemInstance*)>;
+
+
 /*
     This object is inherited by world and zone's DB object,
     and is mainly here to facilitate shared memory, and other
     things which only world and zone need.
 */
 
+ class md5
+{
+	public:
+		static std::string digest(std::string str);
+	protected:
+		md5() = delete;
+		~md5() = delete;
+	private:
+		constexpr static std::array<uint32_t, 64> make_k_array();
+		static std::vector<char> padder(std::string str);
+		static void init();
+	private:
+		static const std::array<uint32_t, 64> k_array;
+		static const std::array<uint32_t, 64> s_array;
+		inline static std::array<uint64_t, 16> m_array;
+		inline static uint32_t a0 = 0x67452301;
+		inline static uint32_t b0 = 0xefcdab89;
+		inline static uint32_t c0 = 0x98badcfe;
+		inline static uint32_t d0 = 0x10325476;
+};
+
 class SharedDatabase : public Database {
 public:
 	SharedDatabase();
 	SharedDatabase(const char *host, const char *user, const char *passwd, const char *database, uint32 port);
 	virtual ~SharedDatabase();
-
+	
 	/**
 	 * Character
 	 */
@@ -150,12 +178,17 @@ public:
 		uint32 ornament_hero_model = 0
 	);
 	EQ::ItemInstance *CreateBaseItem(const EQ::ItemData *item, int16 charges = 0);
+	ItemInstanceGenerateCallback generate_cb;
+	void SetItemInstanceGenerateCallback(ItemInstanceGenerateCallback cb) {
+		generate_cb = cb;
+	};
+	void RunGenerateCallback(EQ::ItemInstance* inst);
 
 	void GetItemsCount(int32 &item_count, uint32 &max_id);
 	void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 	bool LoadItems(const std::string &prefix);
 	const EQ::ItemData *IterateItems(uint32 *id) const;
-	const EQ::ItemData *GetItem(uint32 id) const;
+	EQ::ItemData *GetItem(uint32 id) const;
 	const EvolveInfo *GetEvolveInfo(uint32 loregroup);
 	uint32 GetSharedItemsCount() { return m_shared_items_count; }
 	uint32 GetItemsCount();
@@ -180,7 +213,6 @@ public:
 	}
 
 protected:
-
 	std::unique_ptr<EQ::MemoryMappedFile>                        skill_caps_mmf;
 	std::unique_ptr<EQ::MemoryMappedFile>                        items_mmf;
 	std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>        items_hash;
@@ -189,7 +221,8 @@ protected:
 	std::unique_ptr<EQ::MemoryMappedFile>                        faction_associations_mmf;
 	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>> faction_associations_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                        spells_mmf;
-
+private:
+	std::unordered_map<std::string, int> generated_item_cache;
 public:
 	void SetSharedItemsCount(uint32 shared_items_count);
 	void SetSharedSpellsCount(uint32 shared_spells_count);

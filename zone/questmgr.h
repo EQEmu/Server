@@ -254,6 +254,12 @@ public:
 	std::string getitemcomment(uint32 item_id);
 	std::string getitemlore(uint32 item_id);
 	std::string getitemname(uint32 item_id);
+
+	bool IsItemDynamic(uint32 item_id);
+	//int  GetItemTier(uint32 item_id item_idt32);
+	//int  GetAbsoluteBaseID(uint32 item_id);
+	//int  GetOriginalID(uint32 item_id);
+
 	void enabletitle(int titleset);
 	bool checktitle(int titlecheck);
 	void removetitle(int titlecheck);

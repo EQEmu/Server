@@ -18,7 +18,12 @@
 
 #include <iostream>
 #include <cstring>
+#include <array>
+#include <string>
+#include <cmath>
+#include <vector>
 #include <fmt/format.h>
+#include <regex>
 
 #if defined(_MSC_VER) && _MSC_VER >= 1800
 	#include <algorithm>
@@ -35,6 +40,7 @@
 #include "rulesys.h"
 #include "shareddb.h"
 #include "strings.h"
+#include "spdat.h"
 #include "eqemu_config.h"
 #include "data_verification.h"
 #include "repositories/criteria/content_filter_criteria.h"
@@ -58,6 +64,120 @@ namespace ItemField
 		minstatus,
 		comment,
 	};
+}
+
+const std::array<uint32_t, 64> md5::s_array = {
+    7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
+    5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
+    4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
+    6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
+};
+
+constexpr std::array<uint32_t, 64> md5::make_k_array()
+{
+    std::array<uint32_t, 64> output;
+    for (int i = 0; i < output.max_size(); i++)
+        output[i] = std::floor(0x100000000 * std::abs(std::sin(i + 1)));
+    return output;
+}
+
+const std::array<uint32_t, 64> md5::k_array = md5::make_k_array();
+
+std::vector<char> md5::padder(std::string str)
+{
+    std::vector<char> padded(str.begin(), str.end());
+    union length_pad
+    {
+        uint64_t whole;
+        uint8_t parts[8];
+    } length;
+    length.whole = padded.size() * 8;
+    padded.emplace_back(0x80);
+    int extra_over_chunks = (padded.size() % 64);
+    int zero_pad = extra_over_chunks < 56 ? 56 - extra_over_chunks : 56 - extra_over_chunks + 64;
+    for (int i = 0; i < zero_pad; i++)
+        padded.emplace_back(0x00);
+    for (auto& length_byte : length.parts)
+        padded.emplace_back(length_byte);
+    return padded;
+}
+
+void md5::init()
+{
+    a0 = 0x67452301;
+    b0 = 0xefcdab89;
+    c0 = 0x98badcfe;
+    d0 = 0x10325476;
+}
+
+// Based on RFC 1321
+// https://www.ietf.org/rfc/rfc1321.txt
+// 1992
+std::string md5::digest(std::string str)
+{
+    init();
+    std::vector<char> padded_message = padder(str);
+    uint32_t num_chunks = padded_message.size() / 64;
+    for (int i = 0; i < num_chunks; i++)
+    {
+        uint32_t A = a0;
+        uint32_t B = b0;
+        uint32_t C = c0;
+        uint32_t D = d0;
+        union chunk
+        {
+            char in_chars[64];
+            uint32_t in_ints[16];
+        } current_chunk;
+
+        for (int k = 0; k < 64; k++)
+            current_chunk.in_chars[k] = padded_message[k + i * 64];
+    
+        for (int k = 0; k < 16; k++)
+            m_array[k] = current_chunk.in_ints[k];
+
+        for (int j = 0; j < 64; j++)
+        {
+            uint32_t F, g;
+            if (j < 16)
+            {   
+                F = (B & C) | ((~B) & D);
+                g = j;
+            }
+            else if (j < 32)
+            {
+                F = (B & D) | (C & (~D));
+                g = (5 * j + 1) % 16;
+            }
+            else if (j < 48)
+            {
+                F = B ^ C ^ D;
+                g = (3 * j + 5) % 16;
+            }
+            else if (j < 64)
+            {
+                F = C ^ (B | (~D));
+                g = (7 * j) % 16;
+            }
+            F = F + A + m_array[g] + k_array[j];
+            A = D;
+            D = C;
+            C = B;
+            B = B + std::rotl(F, s_array[j]);
+        }
+        a0 += A;
+        b0 += B;
+        c0 += C;
+        d0 += D;
+    }
+    std::string output;
+    for (auto var : { &a0, &b0, &c0, &d0 })
+    {
+        *var = (((*var) >> 24) | (((*var) & 0x00FF0000) >> 8) | (((*var) & 0x0000FF00) << 8) | ((*var) << 24));
+        output += fmt::format("{:08x}", *var);
+    }
+    return output;
+
 }
 
 SharedDatabase::SharedDatabase()
@@ -296,15 +416,25 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	else
 		charges = 0x7FFF;
 
+	// Allow continuity with an original ID.
+	auto item_id = inst->GetItem()->ID;
+	std::string original_id = inst->GetCustomData("original_id");
+	if (!original_id.empty()) {
+		try {
+			item_id = std::stoi(original_id);
+		} catch(...) {}
+	}
+
 	// Update/Insert item
+	std::string customData = std::regex_replace(inst->GetCustomDataString(), std::regex("\'"), "''");
 	const std::string query = StringFormat("REPLACE INTO inventory "
 	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
 	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
-	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
+	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(item_id),
 	                                       static_cast<unsigned long>(charges), static_cast<unsigned long>(inst->IsAttuned() ? 1 : 0),
-	                                       inst->GetCustomDataString().c_str(), static_cast<unsigned long>(inst->GetColor()),
+	                                       customData.c_str(), static_cast<unsigned long>(inst->GetColor()),
 	                                       static_cast<unsigned long>(augslot[0]), static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]),
 	                                       static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]), static_cast<unsigned long>(augslot[5]), static_cast<unsigned long>(inst->GetOrnamentationIcon()),
 	                                       static_cast<unsigned long>(inst->GetOrnamentationIDFile()), static_cast<unsigned long>(inst->GetOrnamentHeroModel()));
@@ -345,13 +475,14 @@ bool SharedDatabase::UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance
     else
         charges = 0x7FFF;
 
+	std::string customData = std::regex_replace(inst->GetCustomDataString(), std::regex("\'"), "''");
 	const std::string query = StringFormat("REPLACE INTO sharedbank "
 	                                       "(acctid, slotid, itemid, charges, custom_data, "
 	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6) "
 	                                       "VALUES( %lu, %lu, %lu, %lu, '%s', "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu)",
 	                                       static_cast<unsigned long>(account_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
-	                                       static_cast<unsigned long>(charges), inst->GetCustomDataString().c_str(), static_cast<unsigned long>(augslot[0]),
+	                                       static_cast<unsigned long>(charges), customData.c_str(), static_cast<unsigned long>(augslot[0]),
 	                                       static_cast<unsigned long>(augslot[1]), static_cast<unsigned long>(augslot[2]), static_cast<unsigned long>(augslot[3]), static_cast<unsigned long>(augslot[4]),
 	                                       static_cast<unsigned long>(augslot[5]));
 	const auto results = QueryDatabase(query);
@@ -618,6 +749,8 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 			inst->SetCustomDataString(data_str);
 		}
 
+		RunGenerateCallback(inst);
+
 		// theoretically inst can be nullptr ... this would be very bad ...
 		const int16 put_slot_id = inv->PutItem(slot_id, *inst);
 		safe_delete(inst);
@@ -641,6 +774,146 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 	}
 
 	return true;
+}
+
+void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
+    if (!inst->GetCustomData("Customized").empty()) {
+        std::string key = md5::digest(inst->GetCustomDataString());
+        if (key != inst->GetItem()->Comment) {			
+			// This data is important to preserve to properly track the item in inventories.
+			if (inst->GetCustomData("original_id").empty()) {
+				inst->SetCustomData("original_id", std::to_string(inst->GetID()));
+			}
+
+			char* disco_tag = inst->GetItem()->CharmFile;
+
+			if (!inst->GetCustomData("Name").empty()) {
+				strn0cpy(inst->GetMutableItem()->Name, inst->GetCustomData("Name").c_str(), sizeof(inst->GetMutableItem()->Name));
+			}
+			
+			inst->GetMutableItem()->ArtifactFlag = Strings::ToInt(inst->GetCustomData("ArtifactFlag"), inst->GetItem()->ArtifactFlag);
+			inst->GetMutableItem()->Attuneable   = Strings::ToInt(inst->GetCustomData("Attuneable"), inst->GetItem()->Attuneable);
+			inst->GetMutableItem()->Season       = Strings::ToInt(inst->GetCustomData("Season"), 0);
+
+			inst->GetMutableItem()->BaneDmgRaceAmt   += Strings::ToInt(inst->GetCustomData("BaneDmgRaceAmt"), 0);
+			inst->GetMutableItem()->ElemDmgAmt       += Strings::ToInt(inst->GetCustomData("ElemDmgAmt"), 0);
+			inst->GetMutableItem()->Damage           += Strings::ToInt(inst->GetCustomData("Damage"), 0);
+			inst->GetMutableItem()->ProcRate         += Strings::ToInt(inst->GetCustomData("ProcRate"), 0);
+			inst->GetMutableItem()->CombatEffects    += Strings::ToInt(inst->GetCustomData("CombatEffects"), 0);
+			inst->GetMutableItem()->Shielding        += Strings::ToInt(inst->GetCustomData("Shielding"), 0);
+			inst->GetMutableItem()->StunResist       += Strings::ToInt(inst->GetCustomData("StunResist"), 0);
+			inst->GetMutableItem()->StrikeThrough    += Strings::ToInt(inst->GetCustomData("StrikeThrough"), 0);
+			inst->GetMutableItem()->ExtraDmgAmt      += Strings::ToInt(inst->GetCustomData("ExtraDmgAmt"), 0);
+			inst->GetMutableItem()->SpellShield      += Strings::ToInt(inst->GetCustomData("SpellShield"), 0);
+			inst->GetMutableItem()->Avoidance        += Strings::ToInt(inst->GetCustomData("Avoidance"), 0);
+			inst->GetMutableItem()->Accuracy         += Strings::ToInt(inst->GetCustomData("Accuracy"), 0);
+			inst->GetMutableItem()->DotShielding     += Strings::ToInt(inst->GetCustomData("DotShielding"), 0);
+			inst->GetMutableItem()->Attack           += Strings::ToInt(inst->GetCustomData("Attack"), 0);
+			inst->GetMutableItem()->Regen            += Strings::ToInt(inst->GetCustomData("Regen"), 0);
+			inst->GetMutableItem()->ManaRegen        += Strings::ToInt(inst->GetCustomData("ManaRegen"), 0);
+			inst->GetMutableItem()->EnduranceRegen   += Strings::ToInt(inst->GetCustomData("EnduranceRegen"), 0);
+			inst->GetMutableItem()->Haste            += Strings::ToInt(inst->GetCustomData("Haste"), 0);
+			inst->GetMutableItem()->DamageShield     += Strings::ToInt(inst->GetCustomData("DamageShield"), 0);
+			inst->GetMutableItem()->DSMitigation     += Strings::ToInt(inst->GetCustomData("DSMitigation"), 0);
+			inst->GetMutableItem()->HeroicAgi        += Strings::ToInt(inst->GetCustomData("HeroicAgi"), 0);
+			inst->GetMutableItem()->HeroicCha        += Strings::ToInt(inst->GetCustomData("HeroicCha"), 0);
+			inst->GetMutableItem()->HeroicCR         += Strings::ToInt(inst->GetCustomData("HeroicCR"), 0);
+			inst->GetMutableItem()->HeroicDex        += Strings::ToInt(inst->GetCustomData("HeroicDex"), 0);
+			inst->GetMutableItem()->HeroicDR         += Strings::ToInt(inst->GetCustomData("HeroicDR"), 0);
+			inst->GetMutableItem()->HeroicFR         += Strings::ToInt(inst->GetCustomData("HeroicFR"), 0);
+			inst->GetMutableItem()->HeroicInt        += Strings::ToInt(inst->GetCustomData("HeroicInt"), 0);
+			inst->GetMutableItem()->HeroicMR         += Strings::ToInt(inst->GetCustomData("HeroicMR"), 0);
+			inst->GetMutableItem()->HeroicPR         += Strings::ToInt(inst->GetCustomData("HeroicPR"), 0);
+			inst->GetMutableItem()->HeroicSta        += Strings::ToInt(inst->GetCustomData("HeroicSta"), 0);
+			inst->GetMutableItem()->HeroicStr        += Strings::ToInt(inst->GetCustomData("HeroicStr"), 0);
+			inst->GetMutableItem()->HealAmt          += Strings::ToInt(inst->GetCustomData("HealAmt"), 0);
+			inst->GetMutableItem()->SpellDmg         += Strings::ToInt(inst->GetCustomData("SpellDmg"), 0);
+			inst->GetMutableItem()->Clairvoyance     += Strings::ToInt(inst->GetCustomData("Clairvoyance"), 0);
+			inst->GetMutableItem()->AC               += Strings::ToInt(inst->GetCustomData("AC"), 0);
+			inst->GetMutableItem()->HP               += Strings::ToInt(inst->GetCustomData("HP"), 0);
+			inst->GetMutableItem()->Mana             += Strings::ToInt(inst->GetCustomData("Mana"), 0);
+			inst->GetMutableItem()->Endur            += Strings::ToInt(inst->GetCustomData("Endur"), 0);
+			inst->GetMutableItem()->MR               += Strings::ToInt(inst->GetCustomData("MR"), 0);
+			inst->GetMutableItem()->FR               += Strings::ToInt(inst->GetCustomData("FR"), 0);
+			inst->GetMutableItem()->CR               += Strings::ToInt(inst->GetCustomData("CR"), 0);
+			inst->GetMutableItem()->DR               += Strings::ToInt(inst->GetCustomData("DR"), 0);
+			inst->GetMutableItem()->PR               += Strings::ToInt(inst->GetCustomData("PR"), 0);
+			inst->GetMutableItem()->AStr             += Strings::ToInt(inst->GetCustomData("AStr"), 0);
+			inst->GetMutableItem()->ASta             += Strings::ToInt(inst->GetCustomData("ASta"), 0);
+			inst->GetMutableItem()->AAgi             += Strings::ToInt(inst->GetCustomData("AAgi"), 0);
+			inst->GetMutableItem()->ADex             += Strings::ToInt(inst->GetCustomData("ADex"), 0);
+			inst->GetMutableItem()->ACha             += Strings::ToInt(inst->GetCustomData("ACha"), 0);
+			inst->GetMutableItem()->AInt             += Strings::ToInt(inst->GetCustomData("AInt"), 0);
+			inst->GetMutableItem()->AWis             += Strings::ToInt(inst->GetCustomData("AWis"), 0);			
+			inst->GetMutableItem()->Proc.Level       += Strings::ToInt(inst->GetCustomData("Proc.Level"), 0);
+			inst->GetMutableItem()->Proc.Level2      += Strings::ToInt(inst->GetCustomData("Proc.Level2"), 0);
+			inst->GetMutableItem()->Click.Level      += Strings::ToInt(inst->GetCustomData("Click.Level"), 0);
+			inst->GetMutableItem()->Click.Level2     += Strings::ToInt(inst->GetCustomData("Click.Level2"), 0);
+			inst->GetMutableItem()->SkillModMax      += Strings::ToInt(inst->GetCustomData("SkillModMax"), 0);
+			inst->GetMutableItem()->SkillModValue    += Strings::ToInt(inst->GetCustomData("SkillModValue"), 0);
+
+			// Delay is weird, we want to set a hard floor on how low we can go.
+			inst->GetMutableItem()->Delay = std::max((uint8)(inst->GetMutableItem()->Delay + Strings::ToInt(inst->GetCustomData("Delay"), 0)), std::min((uint8)15, GetItem(inst->GetItem()->OriginalID)->Delay));			
+
+			if (!inst->GetCustomData("force_unlimited_charges").empty() && inst->IsCharged()) {
+				uint32 new_cast_time = Strings::ToUnsignedInt(inst->GetCustomData("force_unlimited_charges"));
+
+				inst->SetCharges(-1);
+				inst->GetMutableItem()->MaxCharges = -1;
+				inst->GetMutableItem()->CastTime	= std::max(new_cast_time, inst->GetItem()->CastTime);
+				inst->GetMutableItem()->CastTime_	= std::max(new_cast_time, static_cast<uint32>(inst->GetItem()->CastTime_));
+				if (inst->GetItem()->Classes && inst->GetItem()->Races) {
+					inst->GetMutableItem()->Click.Type = 4; // Must Equip
+				}				
+			}
+
+			// Prevent items of this type from being sold to vendors.
+			inst->GetMutableItem()->Price = 0;
+			inst->GetMutableItem()->SellRate = 0;
+            inst->SetComment(key);
+        }
+        auto it = generated_item_cache.find(key);
+        if (it != generated_item_cache.end()) {
+            inst->SetID((uint32)it->second);
+            return;
+        }
+		// If we don't have a local cached copy let's check where it's at in the items_hash or insert it for the first time
+		// And assign to our local cache. This should only happen once per zone per item that hasn't synced
+		EQ::ItemData* data = nullptr;
+		
+		uint32 next_id = 0xFFFFFFF;
+		// Strategy here is to assign free item ID from the upper bound with decrementing ID.
+		// This makes lookup faster for reassigning to cache.
+		// Eventually this will start overwriting *real* items but not likely unless the number of dynamic
+		// Items is over 800k. These are all ephemeral values anyway that are purged when shared_memory is run.
+		// It would be essential to run that on high volume servers.
+		for (;;) {
+			if (items_hash->exists(next_id)) {
+				if (items_hash->at(next_id).Comment == key) {
+					data = &items_hash->at(next_id);
+					break;
+				}
+				next_id--;
+			} else if (next_id == 0) {
+				return;
+			} else {
+				break;
+			}
+		}
+		if (data != nullptr) {
+			inst->SetID(data->ID);
+			generated_item_cache[key] = data->ID;
+		} else {
+			inst->SetID((uint32)next_id);
+			items_hash->insert(next_id, *inst->GetItem());
+			generated_item_cache[key] = next_id;
+		}
+
+		if (!inst->GetCustomData("Discovery").empty()) {
+			strn0cpy(inst->GetMutableItem()->CharmFile, std::to_string(inst->GetID()).c_str(), sizeof(inst->GetMutableItem()->CharmFile));
+			inst->SetCustomData("Discovery", std::to_string(inst->GetID()));
+		}
+	}
 }
 
 // Overloaded: Retrieve character inventory based on character id (zone entry)
@@ -719,7 +992,6 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		uint32 ornament_hero_model = Strings::ToUnsignedInt(row[14]);
 
 		const EQ::ItemData *item = GetItem(item_id);
-
 		if (!item) {
 			LogError("Warning: charid [{}] has an invalid item_id [{}] in inventory slot [{}]", char_id, item_id,
 				slot_id);
@@ -770,8 +1042,9 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 					inst->PutAugment(this, i, aug[i]);
 			}
 		}
-		
-	
+
+		RunGenerateCallback(inst);
+
 		int16 put_slot_id;
 		if (slot_id >= EQ::invbag::CURSOR_BAG_BEGIN && slot_id <= EQ::invbag::CURSOR_BAG_END) {
 			put_slot_id = inv->PushCursor(*inst);
@@ -881,11 +1154,10 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 			}
 		}
 
-		int16 put_slot_id;
-		if (slot_id >= 8000 && slot_id <= 8999)
-			put_slot_id = inv->PushCursor(*inst);
-		else
-			put_slot_id = inv->PutItem(slot_id, *inst);
+		RunGenerateCallback(inst);
+		
+		int16 put_slot_id;		
+		put_slot_id = inv->PutItem(slot_id, *inst);
 
 		safe_delete(inst);
 
@@ -1050,6 +1322,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		// Unique Identifier
 		item.ID = Strings::ToUnsignedInt(row[ItemField::id]);
+		item.OriginalID = item.ID;
+		item.Season = 0;
 
 		// Minimum Status
 		item.MinStatus = static_cast<uint8>(Strings::ToUnsignedInt(row[ItemField::minstatus]));
@@ -1326,10 +1600,10 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			strn0cpy(modifiedName, item.Name, sizeof(modifiedName));
 
 			if (strncmp(row[ItemField::name], "Rose Colored ", 13) == 0) {
-				snprintf(modifiedName, sizeof(modifiedName), "%s (Latent)", row[ItemField::name] + 13);
+				snprintf(modifiedName, sizeof(modifiedName), "%s (Enchanted)", row[ItemField::name] + 13);
 			}
 			else if (strncmp(row[ItemField::name], "Apocryphal ", 11) == 0) {
-				snprintf(modifiedName, sizeof(modifiedName), "%s (Awakened)", row[ItemField::name] + 11);
+				snprintf(modifiedName, sizeof(modifiedName), "%s (Legendary)", row[ItemField::name] + 11);
 			}
 
 			if (modifiedName[0] != '\0') {
@@ -1342,6 +1616,12 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			}
 		}
 
+		if (RuleB(Custom, PowerSourceItemUpgrade)) {
+			if (item.Slots > 0 && item.Classes > 0) {
+				item.Slots |= 2097152;
+			}
+		}
+
 		try {
 			hash.insert(item.ID, item);
 		} catch (std::exception &ex) {
@@ -1351,7 +1631,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 	}
 }
 
-const EQ::ItemData *SharedDatabase::GetItem(uint32 id) const
+EQ::ItemData *SharedDatabase::GetItem(uint32 id) const
 {
 	if (id == 0) {
 		return nullptr;
@@ -1359,7 +1639,7 @@ const EQ::ItemData *SharedDatabase::GetItem(uint32 id) const
 
 	if (!items_hash || id > items_hash->max_key()) {
 		return nullptr;
-	}
+	}	
 
 	if (items_hash->exists(id)) {
 		return &(items_hash->at(id));
@@ -1454,6 +1734,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->SetOrnamentIcon(ornamenticon);
 		inst->SetOrnamentationIDFile(ornamentidfile);
 		inst->SetOrnamentHeroModel(ornament_hero_model);
+		RunGenerateCallback(inst);
 	}
 
 	return inst;
@@ -1497,6 +1778,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->SetOrnamentIcon(ornamenticon);
 		inst->SetOrnamentationIDFile(ornamentidfile);
 		inst->SetOrnamentHeroModel(ornament_hero_model);
+		RunGenerateCallback(inst);
 	}
 
 	return inst;

@@ -148,6 +148,7 @@ typedef enum {
 	// Add new events before these or Lua crashes
 	EVENT_SPELL_EFFECT_BOT,
 	EVENT_SPELL_EFFECT_BUFF_TIC_BOT,
+	EVENT_ITEM_GENERATE,
 	_LargestEventID
 } QuestEventID;
 

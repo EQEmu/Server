@@ -2327,7 +2327,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		booktxt2 = content_db.GetBook(bookString.c_str(), &book_language);
 	}
 
-	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2 && itemID > 0) {
+	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2) {		
 		if (itemID > 999999) {			
 			auto discover_charname = GetDiscoverer(itemID);
 
@@ -2343,7 +2343,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 					booktxt2 += "<br>Discovered by: Enchanted Loom";
 				}
 			}
-		}
+		}		
 	}
 
 	if (booktxt2[0] != '\0') {
@@ -4380,8 +4380,9 @@ bool Client::IsDiscovered(uint32 item_id) {
 	const auto& l = DiscoveredItemsRepository::GetWhere(
 		database,
 		fmt::format(
-			"item_id = {}",
-			item_id
+			"item_id = {} AND account_status = {}", 
+			item_id,
+			GetSeason()
 		)
 	);
 	if (l.empty()) {
@@ -4392,38 +4393,51 @@ bool Client::IsDiscovered(uint32 item_id) {
 }
 
 std::string Client::GetDiscoverer(uint32 item_id) {
-	const auto& l = DiscoveredItemsRepository::GetWhere(
-		database,
-		fmt::format(
-			"item_id = {}",
-			item_id
-		)
-	);
-	
-	if (l.empty()) { return ""; }
+	LogDebug("GetDiscoverer [{}]", item_id);
+	if (item_id > 3000000) {	
+		auto item_data  = database.GetItem(item_id);
 
-	return l[0].char_name;
+		// Try to find this as an artifact
+		auto query_str  = "artifact-" + std::to_string(item_data->OriginalID) + "-season-" + std::to_string(item_data->Season);
+		auto discoverer = DataBucket::GetData(query_str);
+
+		return discoverer;
+	} else {
+		const auto& l = DiscoveredItemsRepository::GetWhere(
+			database,
+			fmt::format(
+				"item_id = {} AND account_status = {}",
+				item_id,
+				GetSeason()
+			)
+		);
+		
+		if (l.empty()) { return ""; }
+
+		return l[0].char_name;
+	}
 }
 
 void Client::DiscoverItem(uint32 item_id) {
-	auto e = DiscoveredItemsRepository::NewEntity();
+	if (item_id < 3000000) {
+		auto e = DiscoveredItemsRepository::NewEntity();
 
-	e.account_status = Admin();
-	e.char_name = GetCleanName();
-	e.discovered_date = std::time(nullptr);
-	e.item_id = item_id;
+		e.account_status = GetSeason();
+		e.char_name = GetCleanName();
+		e.discovered_date = std::time(nullptr);
+		e.item_id = item_id;	
+		auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
-	auto d = DiscoveredItemsRepository::InsertOne(database, e);
+		if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
+			const auto* item = database.GetItem(item_id);
 
-	if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
-		const auto* item = database.GetItem(item_id);
+			auto e = PlayerEvent::DiscoverItemEvent{
+				.item_id = item_id,
+				.item_name = item->Name,
+			};
+			RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
 
-		auto e = PlayerEvent::DiscoverItemEvent{
-			.item_id = item_id,
-			.item_name = item->Name,
-		};
-		RecordPlayerEventLog(PlayerEvent::DISCOVER_ITEM, e);
-
+		}
 	}
 
 	if (parse->PlayerHasQuestSub(EVENT_DISCOVER_ITEM)) {
@@ -4432,6 +4446,154 @@ void Client::DiscoverItem(uint32 item_id) {
 
 		parse->EventPlayer(EVENT_DISCOVER_ITEM, this, "", item_id, &args);
 	}
+}
+
+bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
+	if (!(inst->GetItem()->Classes & GetClassesBits() && inst->GetItem()->Races & GetPlayerRaceBit(GetRace()))) {			
+		return false;
+	}
+
+	if (inst->IsScaling()) {
+		return false;
+	}
+
+	if (inst->GetItem()->ID < 2000000 || inst->GetItem()->ID > 3000000) {
+		return false;
+	}
+
+	std::string global_string    = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
+	std::string character_string = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
+
+	if (bypass) {
+		return GetBucket(character_string).empty();
+	} else {
+		return DataBucket::GetData(global_string).empty();
+	}
+	
+	return false;
+}
+
+bool Client::DiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
+	if (inst) {
+		LogDebug("Checking if we can discover an artifact here...");
+		if (CanDiscoverArtifact(inst, bypass) && zone->random.Roll(RuleI(Custom, ArtifactDiscoveryChance))) {
+			SendSound();
+			Message(Chat::Yellow, "You have discovered an Artifact!");
+
+			// Process the name change to 'Soandso's ItemName' or 'Soandso's ItemName (Artifact)'
+			std::string base_name(database.GetItem(inst->GetBaseID())->Name);
+
+			// Detect and remove the initial possessive form if it exists at the beginning of the base_name
+			size_t pos = base_name.find("'s ");
+			if (pos != std::string::npos) {
+				// Check if 's is part of the initial name segment before any spaces or other characters
+				if (pos < base_name.find(' ') || pos < base_name.find('-') || pos < base_name.find(',')) {
+					// Remove everything up to and including the "'s "
+					base_name = base_name.substr(pos + 3);
+				}
+			}
+
+			std::string new_name = std::string(GetCleanName()) + "'s " + base_name;		
+
+			if (RuleB(Custom, UseTHJItemMutations)) {
+				if (new_name.length() > 52) {
+					new_name = new_name.substr(0, 52);
+				}
+
+				new_name += " (Artifact)";
+			} else {
+				if (new_name.length() > 63) {
+					new_name = new_name.substr(0, 63);
+				}
+			}
+
+			inst->SetCustomData("Name", new_name);
+			inst->SetCustomData("ArtifactFlag", 1);
+			inst->SetCustomData("Attuneable", 0);
+			inst->SetCustomData("Season", GetSeason());
+			inst->SetCustomData("Discovery", "Artifact");
+			inst->SetCustomData("Customized", "true");
+
+			const float scaling_factor = 0.20;
+			inst->SetCustomData("BaneDmgAmt",     	static_cast<int32>(std::ceil(inst->GetItem()->BaneDmgAmt * (scaling_factor/2))));
+			inst->SetCustomData("BaneDmgRaceAmt", 	static_cast<int32>(std::ceil(inst->GetItem()->BaneDmgRaceAmt * (scaling_factor/2))));
+			inst->SetCustomData("ElemDmgAmt",     	static_cast<int32>(std::ceil(inst->GetItem()->ElemDmgAmt * (scaling_factor/2))));
+			inst->SetCustomData("Damage",         	static_cast<int32>(std::ceil(inst->GetItem()->Damage * (scaling_factor/2))));
+			inst->SetCustomData("ProcRate",       	static_cast<int32>(std::ceil(inst->GetItem()->ProcRate * scaling_factor)));
+			inst->SetCustomData("CombatEffects",  	static_cast<int32>(std::ceil(inst->GetItem()->CombatEffects * scaling_factor)));
+			inst->SetCustomData("Shielding",      	static_cast<int32>(std::ceil(inst->GetItem()->Shielding * scaling_factor)));
+			inst->SetCustomData("StunResist",     	static_cast<int32>(std::ceil(inst->GetItem()->StunResist * scaling_factor)));
+			inst->SetCustomData("StrikeThrough",  	static_cast<int32>(std::ceil(inst->GetItem()->StrikeThrough * scaling_factor)));
+			inst->SetCustomData("ExtraDmgAmt",  	static_cast<int32>(std::ceil(inst->GetItem()->ExtraDmgAmt * scaling_factor)));
+			inst->SetCustomData("SpellShield",  	static_cast<int32>(std::ceil(inst->GetItem()->SpellShield * scaling_factor)));
+			inst->SetCustomData("Avoidance",  		static_cast<int32>(std::ceil(inst->GetItem()->Avoidance * scaling_factor)));
+			inst->SetCustomData("Accuracy",  		static_cast<int32>(std::ceil(inst->GetItem()->Accuracy * scaling_factor)));
+			inst->SetCustomData("DotShielding",  	static_cast<int32>(std::ceil(inst->GetItem()->DotShielding * scaling_factor)));
+			inst->SetCustomData("Attack",  			static_cast<int32>(std::ceil(inst->GetItem()->Attack * scaling_factor)));
+			inst->SetCustomData("Regen",  			static_cast<int32>(std::ceil(inst->GetItem()->Regen * scaling_factor)));
+			inst->SetCustomData("ManaRegen",  		static_cast<int32>(std::ceil(inst->GetItem()->ManaRegen * scaling_factor)));
+			inst->SetCustomData("EnduranceRegen",  	static_cast<int32>(std::ceil(inst->GetItem()->EnduranceRegen * scaling_factor)));
+			inst->SetCustomData("Haste", 			static_cast<int32>(std::ceil(inst->GetItem()->Haste * scaling_factor)));
+			inst->SetCustomData("DamageShield",  	static_cast<int32>(std::ceil(inst->GetItem()->DamageShield * scaling_factor)));
+			inst->SetCustomData("DSMitigation",  	static_cast<int32>(std::ceil(inst->GetItem()->DSMitigation * scaling_factor)));
+			inst->SetCustomData("HeroicAgi",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicAgi * scaling_factor)));
+			inst->SetCustomData("HeroicCha",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicCha * scaling_factor)));
+			inst->SetCustomData("HeroicCR",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicCR * scaling_factor)));
+			inst->SetCustomData("HeroicDex",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicDex * scaling_factor)));
+			inst->SetCustomData("HeroicDR",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicDR * scaling_factor)));
+			inst->SetCustomData("HeroicFR",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicFR * scaling_factor)));
+			inst->SetCustomData("HeroicInt",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicInt * scaling_factor)));
+			inst->SetCustomData("HeroicInt",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicInt * scaling_factor)));
+			inst->SetCustomData("HeroicMR",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicMR * scaling_factor)));
+			inst->SetCustomData("HeroicPR",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicPR * scaling_factor)));
+			inst->SetCustomData("HeroicSta",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicSta * scaling_factor)));
+			inst->SetCustomData("HeroicStr",  		static_cast<int32>(std::ceil(inst->GetItem()->HeroicStr * scaling_factor)));
+			inst->SetCustomData("HealAmt",  		static_cast<int32>(std::ceil(inst->GetItem()->HealAmt * scaling_factor)));
+			inst->SetCustomData("SpellDmg",  		static_cast<int32>(std::ceil(inst->GetItem()->SpellDmg * scaling_factor)));
+			inst->SetCustomData("Clairvoyance",  	static_cast<int32>(std::ceil(inst->GetItem()->Clairvoyance * scaling_factor)));
+			inst->SetCustomData("AC",    			static_cast<int32>(std::ceil(inst->GetItem()->AC * scaling_factor)));
+			inst->SetCustomData("HP",    			static_cast<int32>(std::ceil(inst->GetItem()->HP * scaling_factor)));
+			inst->SetCustomData("Mana",  			static_cast<int32>(std::ceil(inst->GetItem()->Mana * scaling_factor)));
+			inst->SetCustomData("Endur", 			static_cast<int32>(std::ceil(inst->GetItem()->Endur * scaling_factor)));
+			inst->SetCustomData("MR",   			static_cast<int32>(std::ceil(inst->GetItem()->MR * scaling_factor)));
+			inst->SetCustomData("FR",   			static_cast<int32>(std::ceil(inst->GetItem()->FR * scaling_factor)));
+			inst->SetCustomData("CR",   			static_cast<int32>(std::ceil(inst->GetItem()->CR * scaling_factor)));
+			inst->SetCustomData("DR",   			static_cast<int32>(std::ceil(inst->GetItem()->DR * scaling_factor)));
+			inst->SetCustomData("PR",   			static_cast<int32>(std::ceil(inst->GetItem()->PR * scaling_factor)));
+			inst->SetCustomData("AStr", 			static_cast<int32>(std::ceil(inst->GetItem()->AStr * scaling_factor)));
+			inst->SetCustomData("ASta", 			static_cast<int32>(std::ceil(inst->GetItem()->ASta * scaling_factor)));
+			inst->SetCustomData("AAgi", 			static_cast<int32>(std::ceil(inst->GetItem()->AAgi * scaling_factor)));
+			inst->SetCustomData("ADex", 			static_cast<int32>(std::ceil(inst->GetItem()->ADex * scaling_factor)));
+			inst->SetCustomData("ACha", 			static_cast<int32>(std::ceil(inst->GetItem()->ACha * scaling_factor)));
+			inst->SetCustomData("AInt", 			static_cast<int32>(std::ceil(inst->GetItem()->AInt * scaling_factor)));
+			inst->SetCustomData("AWis", 			static_cast<int32>(std::ceil(inst->GetItem()->AWis * scaling_factor)));
+			inst->SetCustomData("SkillModValue",  	static_cast<int32>(std::ceil(inst->GetItem()->SkillModValue * scaling_factor)));
+			inst->SetCustomData("SkillModMax",  	static_cast<int32>(std::ceil(inst->GetItem()->SkillModMax * scaling_factor)));
+			inst->SetCustomData("Proc.Level",       static_cast<int32>(std::ceil(inst->GetItem()->Proc.Level * -1)));
+			inst->SetCustomData("Proc.Level2",      static_cast<int32>(std::ceil(inst->GetItem()->Proc.Level * -1)));
+			inst->SetCustomData("Click.Level",      static_cast<int32>(std::ceil(inst->GetItem()->Click.Level * -1)));
+			inst->SetCustomData("Click.Level2",     static_cast<int32>(std::ceil(inst->GetItem()->Click.Level2 * -1)));
+
+			if (inst->IsCharged()) {
+				inst->SetCustomData("force_unlimited_charges", static_cast<int>(spells[inst->GetItem()->Click.Effect].cast_time));
+			}
+
+			std::string global_string    = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
+			std::string character_string = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
+
+			if (GetSeason() > 0) {
+				DataBucket::SetData(global_string, std::string(GetCleanName()) + " in Season " + std::to_string(GetSeason()));
+				SetBucket(character_string, std::string(GetCleanName()) + " in Season " + std::to_string(GetSeason()));
+			} else {
+				DataBucket::SetData(global_string, std::string(GetCleanName()));
+				SetBucket(character_string, std::string(GetCleanName()));
+			}
+			
+			database.RunGenerateCallback(inst);
+			return true;
+		}	
+	}
+	return false;
 }
 
 void Client::UpdateLFP() {
