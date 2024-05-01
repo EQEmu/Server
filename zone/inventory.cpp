@@ -1393,6 +1393,10 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 			if ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0)
 				continue;
 
+			if (i == EQ::invslot::slotPowerSource) {
+				continue;
+			}
+
 			if (!m_inv[i]) {
 				if (i == EQ::invslot::slotPrimary && inst.IsWeapon()) { // If item is primary slot weapon
 					if (inst.GetItem()->IsType2HWeapon()) { // and uses 2hs \ 2hb \ 2hp
