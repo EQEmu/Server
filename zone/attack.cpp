@@ -2834,7 +2834,41 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		if (!DataBucket::GetData("eom_17779").empty()) {
 			for (LootItem* item : m_loot_items) {
 				if (item != nullptr) {
+					auto old_id = item->item_id;
 					item->item_id = DoUpgradeLoot(item->item_id);
+
+					if (killer && killer->IsClient() && item->item_id != old_id) {
+						EQ::SayLinkEngine linker;
+						linker.SetLinkType(EQ::saylink::SayLinkItemData);
+
+						linker.SetItemData(database.GetItem(old_id));
+						auto old_item_lnk = linker.GenerateLink();
+
+						linker.SetItemData(database.GetItem(item->item_id));
+						auto new_item_lnk = linker.GenerateLink();
+
+						killer->Message(Chat::Yellow, "The tides of fate have shifted, [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+
+						if (killer->IsGrouped()) {
+							Group* g = entity_list.GetGroupByClient(killer->CastToClient());
+							if (g) {
+								for (const auto &m : g->members) {
+									if (m && m->GetID() != killer->GetID()) {
+										m->Message(Chat::Yellow, "The tides of fate have shifted, [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+									}
+								}
+							}
+						} else if (killer->IsRaidGrouped()) {
+							Raid* r = entity_list.GetRaidByClient(killer->CastToClient());
+							if (r) {
+								for (const auto &m : r->members) {
+									if (m.member && m.member->GetID() != killer->GetID()) {
+										m.member->Message(Chat::Yellow, "The tides of fate have shifted, [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
