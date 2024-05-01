@@ -4449,8 +4449,10 @@ void Client::DiscoverItem(uint32 item_id) {
 }
 
 bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
-	if (!(inst->GetItem()->Classes & GetClassesBits() && inst->GetItem()->Races & GetPlayerRaceBit(GetRace()))) {			
-		return false;
+	if (!(inst->GetItem()->Classes & GetClassesBits() && inst->GetItem()->Races & GetPlayerRaceBit(GetRace()))) {
+		if (!inst->IsClassBag()) {
+			return false;
+		}
 	}
 
 	if (inst->IsScaling()) {
