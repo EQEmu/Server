@@ -2435,13 +2435,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				switch(spells[spell_id].skill) {
-				case EQ::skills::SkillThrowing:
+				case EQ::skills::SkillThrowing:					
 					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime, 0, 0, 4.0f, true);
 					break;
-				case EQ::skills::SkillArchery:
+				case EQ::skills::SkillArchery:					
 					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime, 0, 0, nullptr, 0, 4.0f, true);
 					break;
-				default:
+				default:					
 					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, ReuseTime);
 					break;
 				}

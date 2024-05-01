@@ -796,6 +796,10 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		return;
 	else if (other == this)
 		return;
+	if (!CheckLosFN(other)) {
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		return;
+	}
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if(!CanDoubleAttack && ((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check()))) {
@@ -940,7 +944,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 {
 	if ((other == nullptr ||
 			((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || !CheckLosFN(other) || other->GetSpecialAbility(IMMUNE_MELEE)))) {
 		return;
 	}
 
@@ -998,12 +1002,19 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	} else {
 		WDmg = weapon_damage;
 	}
-
+	
 	if (LaunchProjectile) { // 1: Shoot the Projectile once we calculate weapon damage.
-		TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-							Ammo, AmmoSlot, speed, DisableProcs);
+		if (!RuleB(Custom, MulticlassingEnabled)) {
+			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
+				Ammo, AmmoSlot, speed, DisableProcs);
+		}
+		else {
+			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
+				Ammo, AmmoSlot, speed);
+		}
 		return;
 	}
+
 
 	if (focus) {
 		WDmg += WDmg * focus / 100;
@@ -1101,7 +1112,10 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 {
 	if (!other)
 		return false;
-
+	if (!CheckLosFN(other)) {
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		return;
+	}
 	int slot = -1;
 
 	// Make sure there is an avialable slot.
@@ -1547,7 +1561,10 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
 		return;
 	}
-
+	if (!CheckLosFN(other)) {
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		return;
+	}
 	const EQ::ItemInstance *m_RangeWeapon = nullptr;//throwing weapon
 	const EQ::ItemData *last_ammo_used = nullptr;
 
@@ -2460,7 +2477,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 void Mob::DoMeleeSkillAttackDmg(Mob *other, int32 weapon_damage, EQ::skills::SkillType skillinuse, int16 chance_mod,
 				int16 focus, bool can_riposte, int ReuseTime)
 {
-	if (!CanDoSpecialAttack(other)) {
+	if (!CanDoSpecialAttack(other) || !CheckLosFN(other)) {
 		return;
 	}
 

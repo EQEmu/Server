@@ -1418,9 +1418,13 @@ void EntityList::AEAttack(
 
 			for (int i = 0; i < attack_rounds; i++) {
 				if (!attacker->IsClient() || (attacker->GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Ranger)))) {
-					attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+					if (attacker->CheckLosFN(current_mob)) {
+						attacker->Attack(current_mob, Hand, false, false, is_from_spell);
+					}
 				} else {
-					attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+					if (attacker->CheckLosFN(current_mob)) {
+						attacker->CastToClient()->DoAttackRounds(current_mob, Hand, is_from_spell);
+					}
 				}
 			}
 
