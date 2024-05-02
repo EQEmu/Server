@@ -26,9 +26,9 @@
 			"port": "9081"
 		},
 		"world": {
-			"longname": "Jamfest Devbox",
-			"address": "10.0.0.10",
-			"localaddress": "10.0.0.10",
+			"longname": "New Devbox",
+			"address": "192.168.1.100",
+			"localaddress": "192.168.1.100",
 			"loginserver1": {
 				"account": "",
 				"password": "",
@@ -45,13 +45,13 @@
 				"port": "9000",
 				"enabled": "true"
 			},
-			"key": "aosjdoiasjdioasj",
+			"key": "random-generate-here",
 			"http": {
 				"port": "9080",
 				"enabled": "true",
 				"mimefile": "mime.types"
 			},
-			"shortname": "jf"
+			"shortname": "dev"
 		},
 		"database": {
 			"db": "peq",
