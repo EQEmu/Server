@@ -538,7 +538,15 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 				if (!GetGM() && DiscoverArtifact(new_item)) {
 					DiscoverItem(new_item->GetItem()->ID);
 				}
-				
+
+				for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+					const EQ::ItemInstance *aug_i = old_item->GetAugment(r);
+					if (!aug_i) // no aug, try next slot!
+							continue;
+									
+					new_item->PutAugment(r, *old_item->RemoveAugment(r));		
+				}
+
 				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
 				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {	
 					m_inv.GetItem(EQ::invslot::slotPowerSource)->SetAttuned(true);
