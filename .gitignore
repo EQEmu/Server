@@ -61,13 +61,17 @@ bin/
 compile_flags.txt
 .cache/
 
-# vscode generated settings
-.vscode/
-
 # Build pipeline
 !utils/scripts/build/
 !utils/scripts/build/should-release/should-release
 !utils/scripts/build/should-release/should-release.exe
+
+# base patterns
+base/*.sql
+base/*.zip
+base/db/
+base/maps/
+!base/expansion/Makefile
 
 # CMake Files
 cmake-build-relwithdebinfo/*

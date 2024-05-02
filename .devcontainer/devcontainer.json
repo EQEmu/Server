@@ -1,0 +1,49 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "eqemu",
+	"build": {
+		"dockerfile": "Dockerfile.debian.dev"
+	},
+	"appPort": [
+		"5998:5998/udp",
+		"7000:7000/udp",
+		"7001:7001/udp",
+		"7002:7002/udp",
+		"7003:7003/udp",
+		"7004:7004/udp",
+		"7005:7005/udp",
+		"9000:9000/udp",
+		"9001:9001/udp"
+	],
+	"forwardPorts": [
+		3306
+	],
+	"remoteEnv": {
+		"LOCALWSF": "${localWorkspaceFolder}",
+		"CONTAINERWSF": "${containerWorkspaceFolder}"
+	},
+	"containerUser": "vscode",
+	// add ptrace
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined"
+	],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cpptools-extension-pack",
+				"vilicvane.sensitive-replace",
+				"maattdd.gitless",
+				"bibhasdn.unique-lines",
+				"GitHub.copilot",
+				"xackery.make-magic",
+				"Gruntfuggly.todo-tree",
+				"ms-vscode.cmake-tools"
+			]
+		}
+	},
+	"workspaceFolder": "/src",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/src,type=bind,consistency=cached"
+}
