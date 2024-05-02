@@ -167,6 +167,9 @@ namespace EQ
     			mutable_item->Comment[sizeof(mutable_item->Comment) - 1] = '\0';
 			}
 		}
+
+		bool HasProc() const;
+		
 		// Accessors
 		const uint32 GetID() const { return ((m_item) ? m_item->ID : 0); }
 		const uint32 GetItemScriptID() const { return ((m_item) ? m_item->ScriptFileID : 0); }

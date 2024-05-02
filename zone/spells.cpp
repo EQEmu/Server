@@ -1729,36 +1729,39 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		return;
 	}   
 
-	if (slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1) {
+	if (target && slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1 && !target->IsMezzed()) {
 		if(IsOfClientBotMerc()) {
 			TrySympatheticProc(target, spell_id);
 		}
 
 		if (RuleB(Custom, CombatProcsOnSpellCast) && IsClient()) {
-			std::vector<EQ::ItemInstance*> weapon_selector;
-			Client* c = CastToClient();
+			if (!IsCharmSpell(spell_id) && !IsMesmerizeSpell(spell_id) && !IsAllianceSpell(spell_id) && !IsPetSpell(spell_id)) {
+				std::vector<EQ::ItemInstance*> weapon_selector;
+				Client* c = CastToClient();			
 
-			if (c->GetInv().GetItem(EQ::invslot::slotPrimary)) {
-				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotPrimary));
-			}
+				if (c->GetInv().GetItem(EQ::invslot::slotPrimary) && c->GetInv().GetItem(EQ::invslot::slotPrimary)->HasProc()) {
+					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotPrimary));
+				}
 
-			if (c->GetInv().GetItem(EQ::invslot::slotSecondary)) {
-				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotSecondary));
-			}
-			
-			if (c->GetInv().GetItem(EQ::invslot::slotRange)) {
-				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotRange));
-			}
+				if (c->GetInv().GetItem(EQ::invslot::slotSecondary) && c->GetInv().GetItem(EQ::invslot::slotSecondary)->HasProc()) {
+					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotSecondary));
+				}
+				
+				if (c->GetInv().GetItem(EQ::invslot::slotRange) && c->GetInv().GetItem(EQ::invslot::slotRange)->HasProc()) {
+					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotRange));
+				}
 
-			if (!weapon_selector.empty()) {
-				EQ::ItemInstance* selected_weapon = weapon_selector[zone->random.Roll0(weapon_selector.size() - 1)];
-				TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, spells[spell_id].cast_time * RuleI(Custom, CombatProcsOnSpellCastProbability));
+				if (!weapon_selector.empty()) {
+					EQ::ItemInstance* selected_weapon = weapon_selector[zone->random.Roll0(weapon_selector.size() - 1)];
+					uint16 probability = spells[spell_id].cast_time * RuleI(Custom, CombatProcsOnSpellCastProbability);
+					TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, IsBardSong(spell_id) ? (probability / 4) : probability);
+				}
 			}
 		} 
 
 		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 		TryTwincast(this, target, spell_id);
-	}
+	}	
 
 	if (IsClient() && DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);

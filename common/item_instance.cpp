@@ -784,6 +784,30 @@ bool EQ::ItemInstance::IsWeapon() const
 		return ((m_item->Damage != 0) && (m_item->Delay != 0));
 }
 
+bool EQ::ItemInstance::HasProc() const
+{
+	EQ::ItemData* weapon = GetItem();
+
+	if (weapon && weapon->Proc.Type == EQ::item::ItemEffectCombatProc) {
+		return true;
+	}
+
+	for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
+		const EQ::ItemInstance *aug_i = GetAugment(r);
+		if (!aug_i) // no aug, try next slot!
+				continue;
+		const EQ::ItemData *aug = aug_i->GetItem();
+		if (!aug)
+			continue;
+
+		if (aug->Proc.Type == EQ::item::ItemEffectCombatProc) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool EQ::ItemInstance::IsAmmo() const
 {
 	if (!m_item)
