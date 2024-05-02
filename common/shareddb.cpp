@@ -851,6 +851,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->Click.Level2     += Strings::ToInt(inst->GetCustomData("Click.Level2"), 0);
 			inst->GetMutableItem()->SkillModMax      += Strings::ToInt(inst->GetCustomData("SkillModMax"), 0);
 			inst->GetMutableItem()->SkillModValue    += Strings::ToInt(inst->GetCustomData("SkillModValue"), 0);
+			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
 
 			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
 

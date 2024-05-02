@@ -17,6 +17,7 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include <cmath>
 #include "item_data.h"
 #include "classes.h"
 #include "races.h"
@@ -278,10 +279,10 @@ const uint64 EQ::ItemData::CalculateGearScore() const {
 	// Mod2 Stats
 	gear_score += 100 * (Shielding + SpellShield + Avoidance + CombatEffects);
 	gear_score += 50  * (Accuracy + StunResist + StrikeThrough + DotShielding);
-	gear_score += 25  * (Regen + ManaRegen + EnduranceRegen + DSMitigation);
+	gear_score += 25  * (Regen + ManaRegen + EnduranceRegen + DSMitigation + Clairvoyance + DamageShield);
 
 	// Tier Modifier
 	gear_score *= ((int)(OriginalID / 1000000) + 1) * 4;
 
-	return 10000 * gear_score;
+	return static_cast<uint64>(std::pow(gear_score, 2));
 }

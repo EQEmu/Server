@@ -6368,6 +6368,28 @@ void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 		target = new_target;
 	}
 
+	if (RuleB(Custom, CombatProcsOnSpellCast)) {
+		std::vector<EQ::ItemInstance*> weapon_selector;
+
+		if (m_inv.GetItem(EQ::invslot::slotPrimary) != nullptr) {
+			weapon_selector.push_back(m_inv.GetItem(EQ::invslot::slotPrimary));
+		}
+
+		if (m_inv.GetItem(EQ::invslot::slotSecondary) != nullptr) {
+			weapon_selector.push_back(m_inv.GetItem(EQ::invslot::slotSecondary));
+		}
+		
+		if (m_inv.GetItem(EQ::invslot::slotRange) != nullptr) {
+			weapon_selector.push_back(m_inv.GetItem(EQ::invslot::slotRange));
+		}
+
+		if (!weapon_selector.empty()) {
+			EQ::ItemInstance* selected_weapon = weapon_selector[zone->random.Roll0(weapon_selector.size() - 1)];
+
+			TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, spells[spell_id].cast_time);
+		}
+	} 
+
 	const uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
 
 	if (!IsValidSpell(focus_trigger)) {
@@ -7389,6 +7411,8 @@ uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 		case 11:
 			weapon_speed = ranged_timer.GetDuration();
 			break;
+		default:
+			weapon_speed = hand; // Pass in spell cast speed here as hand for spells-proc-weapons
 	}
 
 	if (weapon_speed < RuleI(Combat, MinHastedDelay))

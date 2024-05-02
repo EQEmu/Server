@@ -712,21 +712,14 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
 	}
 	
-	if (
-		RuleB(Character, EnableDiscoveredItems) &&
-		!GetGM() &&
-		!IsDiscovered(item_id)
-	) {
-		DiscoverItem(item_id);
-	}
-	
 	if (!GetGM()) {
-		if (RuleB(Character, EnableDiscoveredItems)) {
+
+		if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(inst->GetItem()->ID)) {
 			DiscoverItem(inst->GetItem()->ID);
 		}
 
-		if (artifact_disco) {
-			DiscoverArtifact(inst);
+		if (artifact_disco && DiscoverArtifact(inst)) {
+			DiscoverItem(inst->GetItem()->ID);
 		}
 	}
 

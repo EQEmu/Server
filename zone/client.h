@@ -1046,6 +1046,20 @@ public:
 		}
 	}
 
+	void DisableSeasonal() {
+		if (RuleI(Custom, EnableSeasonalCharacters) > 0) {
+			SetBucket("SeasonalCharacter", "0");
+			Message(Chat::Yellow, "You are no longer participating in this Seasonal Event.");
+		}
+	}
+
+	void EnableSeasonal() {
+		if (RuleI(Custom, EnableSeasonalCharacters) > 0) {
+			SetBucket("SeasonalCharacter", fmt::to_string(RuleI(Custom, EnableSeasonalCharacters)));
+			Message(Chat::Yellow, "You are participating in this Seasonal Event. You may use the #seasoninfo command to get more information.");
+		}
+	}
+
 	int  GetSeason() { 
 		if (IsSeasonal()) {
 			return Strings::ToInt(GetBucket("SeasonalCharacter"), 0);

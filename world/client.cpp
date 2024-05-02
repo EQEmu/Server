@@ -2420,7 +2420,7 @@ bool Client::StoreCharacter(
 	if (!v.empty()) {
 		InventoryRepository::InsertMany(database, v);
 	}
-
+	
 	return true;
 }
 

@@ -1727,12 +1727,34 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		// if there are issues I guess we can do something else, but this should work
 		StopCasting();
 		return;
-	}
+	}   
 
 	if (slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1) {
 		if(IsOfClientBotMerc()) {
 			TrySympatheticProc(target, spell_id);
 		}
+
+		if (RuleB(Custom, CombatProcsOnSpellCast) && IsClient()) {
+			std::vector<EQ::ItemInstance*> weapon_selector;
+			Client* c = CastToClient();
+
+			if (c->GetInv().GetItem(EQ::invslot::slotPrimary)) {
+				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotPrimary));
+			}
+
+			if (c->GetInv().GetItem(EQ::invslot::slotSecondary)) {
+				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotSecondary));
+			}
+			
+			if (c->GetInv().GetItem(EQ::invslot::slotRange)) {
+				weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotRange));
+			}
+
+			if (!weapon_selector.empty()) {
+				EQ::ItemInstance* selected_weapon = weapon_selector[zone->random.Roll0(weapon_selector.size() - 1)];
+				TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, spells[spell_id].cast_time * RuleI(Custom, CombatProcsOnSpellCastProbability));
+			}
+		} 
 
 		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 		TryTwincast(this, target, spell_id);
@@ -4554,7 +4576,7 @@ bool Mob::SpellOnTarget(
 		}
 		safe_delete(action_packet);
 		return false;
-	}
+	}	
 
 	//Check SE_Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
 	if (spelltar) {

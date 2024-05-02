@@ -224,6 +224,14 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	min_status   = zone_data->min_status;
 	min_level    = zone_data->min_level;
 
+	// We need to set this here before any of the scripts run.
+	if (RuleI(Custom, EnableSeasonalCharacters)) {
+		if (GetBucket("SeasonalCharacter").empty()) {
+			SetBucket("SeasonalCharacter", fmt::to_string(RuleI(Custom, EnableSeasonalCharacters)));
+		}
+		DataBucket::GetDataBuckets(this);
+	}	
+
 	if (parse->PlayerHasQuestSub(EVENT_ZONE)) {
 		const auto& export_string = fmt::format(
 			"{} {} {} {} {} {}",

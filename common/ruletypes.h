@@ -998,6 +998,8 @@ RULE_INT(Custom, EnableSeasonalCharacters, 0, "Set to Seasonal ID to track for c
 RULE_INT(Custom, ArtifactDiscoveryChance, 0, "Percentage chance that a looted Tier 2 item will be discovered as an Artifact, 0 to disable.")
 RULE_BOOL(Custom, PowerSourceItemUpgrade, false, "Enable to add Power Source to all items which can be equipped by some race and class.")
 RULE_REAL(Custom, PowerSourceItemUpgradeRateScale, 1.0, "Scale XP rate of items using this value.")
+RULE_BOOL(Custom, CombatProcsOnSpellCast, false, "Allow combat procs to happen on spell cast. Only one weapon with procs will be chosen from primary, secondary, ranged")
+RULE_INT(Custom, CombatProcsOnSpellCastProbability, 1, "Adjust the proc rate of weapons based on spell cast time")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Parcel)

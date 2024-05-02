@@ -510,10 +510,11 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 		if (old_item) {
 			EQ::ItemInstance* new_item = old_item->GetUpgrade(database);
 			EQ::SayLinkEngine linker;
-			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));
-			uint64 tar_item_exp   = old_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
 
-			float percentage = std::min(100.0f, (cur_item_exp / tar_item_exp) * 100.0f);
+			uint64 tar_item_exp   = old_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
+			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));			
+
+			double percentage = (static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100;
 
 			linker.SetLinkType(EQ::saylink::SayLinkItemInst);	
 			
@@ -524,7 +525,7 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 			}
 
 			linker.SetItemInst(old_item);
-			Message(Chat::Experience, "Your [%s] has gained experience! (%.2f%%)", linker.GenerateLink().c_str(), percentage);
+			Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), percentage);
 
 			if (cur_item_exp <= tar_item_exp) {			
 				old_item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
@@ -538,8 +539,8 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 						DiscoverItem(new_item->GetItem()->ID);
 					}
 
-					if (GetGM()) {
-						DiscoverArtifact(new_item);
+					if (!GetGM() && DiscoverArtifact(new_item)) {
+						DiscoverItem(new_item->GetItem()->ID);
 					}
 
 					linker.SetItemInst(old_item);

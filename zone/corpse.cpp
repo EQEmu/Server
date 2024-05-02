@@ -1618,10 +1618,6 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 		// safe to ACK now
 		c->QueuePacket(app);
 
-		if (!IsPlayerCorpse() && RuleB(Character, EnableDiscoveredItems) &&	c && !c->GetGM() && !c->IsDiscovered(inst->GetItem()->ID)) {
-			c->DiscoverItem(inst->GetItem()->ID);
-		}
-
 		if (zone->adv_data) {
 			auto *ad = (ServerZoneAdventureDataReply_Struct *) zone->adv_data;
 			if (ad->type == Adventure_Collect && !IsPlayerCorpse()) {
@@ -1649,8 +1645,8 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 			c->DiscoverItem(inst->GetItem()->ID);
 		}
 
-		if (!c->GetGM()) {
-			c->DiscoverArtifact(inst);
+		if (!c->GetGM() && c->DiscoverArtifact(inst)) {
+			c->DiscoverItem(inst->GetItem()->ID);
 		}
 
 		/* First add it to the looter - this will do the bag contents too */
