@@ -4512,6 +4512,7 @@ bool Client::DiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
 			inst->SetCustomData("Name", new_name);
 			inst->SetCustomData("ArtifactFlag", 1);
 			inst->SetCustomData("Attuneable", 0);
+			inst->SetCustomData("NoDrop", 1);
 			inst->SetCustomData("Season", GetSeason());
 			inst->SetCustomData("Discovery", "Artifact");
 			inst->SetCustomData("Customized", "true");

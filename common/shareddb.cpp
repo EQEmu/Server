@@ -794,6 +794,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->ArtifactFlag = Strings::ToInt(inst->GetCustomData("ArtifactFlag"), inst->GetItem()->ArtifactFlag);
 			inst->GetMutableItem()->Attuneable   = Strings::ToInt(inst->GetCustomData("Attuneable"), inst->GetItem()->Attuneable);
 			inst->GetMutableItem()->Season       = Strings::ToInt(inst->GetCustomData("Season"), 0);
+			inst->GetMutableItem()->NoDrop		 = Strings::ToInt(inst->GetCustomData("NoDrop"), 1);
 
 			inst->GetMutableItem()->BaneDmgRaceAmt   += Strings::ToInt(inst->GetCustomData("BaneDmgRaceAmt"), 0);
 			inst->GetMutableItem()->ElemDmgAmt       += Strings::ToInt(inst->GetCustomData("ElemDmgAmt"), 0);
@@ -851,8 +852,6 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->Click.Level2     += Strings::ToInt(inst->GetCustomData("Click.Level2"), 0);
 			inst->GetMutableItem()->SkillModMax      += Strings::ToInt(inst->GetCustomData("SkillModMax"), 0);
 			inst->GetMutableItem()->SkillModValue    += Strings::ToInt(inst->GetCustomData("SkillModValue"), 0);
-			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
-
 			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
 
 			// Delay is weird, we want to set a hard floor on how low we can go.
