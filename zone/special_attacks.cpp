@@ -1010,7 +1010,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		}
 		else {
 			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-				Ammo, AmmoSlot, speed);
+				Ammo, AmmoSlot, speed, !DisableProcs);
 		}
 		return;
 	}
