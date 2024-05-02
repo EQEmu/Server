@@ -531,17 +531,17 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 				old_item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
 				database.UpdateInventorySlot(CharacterID(), old_item, EQ::invslot::slotPowerSource);
 			} else if (new_item) {
+				if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
+					DiscoverItem(new_item->GetItem()->ID);
+				}
+
+				if (!GetGM() && DiscoverArtifact(new_item)) {
+					DiscoverItem(new_item->GetItem()->ID);
+				}
+				
 				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
 				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {	
 					m_inv.GetItem(EQ::invslot::slotPowerSource)->SetAttuned(true);
-
-					if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(new_item->GetItem()->ID)) {
-						DiscoverItem(new_item->GetItem()->ID);
-					}
-
-					if (!GetGM() && DiscoverArtifact(new_item)) {
-						DiscoverItem(new_item->GetItem()->ID);
-					}
 
 					linker.SetItemInst(old_item);
 					auto upgrade_item_lnk = linker.GenerateLink().c_str();
