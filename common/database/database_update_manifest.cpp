@@ -5516,9 +5516,6 @@ ALTER TABLE `lootdrop_entries` ADD `content_flags_disabled` varchar(100) NULL;
 				COLLATE='latin1_swedish_ci'
 				ENGINE=InnoDB
 				AUTO_INCREMENT=1;
-
-				ALTER TABLE `npc_types`
-				ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
 		)"
 	},
 	ManifestEntry{
@@ -5546,6 +5543,19 @@ ALTER TABLE `character_parcels`
 		.sql = R"(
 ALTER TABLE `doors`
 ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is_ldon_door`;
+)",
+		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9274,
+		.description = "2024_05_02_parcel_npc_content.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'is_parcel_merchant'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+
+ALTER TABLE `npc_types`
+ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
 )",
 		.content_schema_update = true
 	}
