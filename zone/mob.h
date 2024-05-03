@@ -368,7 +368,7 @@ public:
 	void SendSpellBarDisable();
 	void SendSpellBarEnable(uint16 spellid);
 	void ZeroCastingVars();
-	int GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id);
+	uint16 GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id);
 	virtual void SpellProcess();
 	virtual bool CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot = EQ::spells::CastingSlot::Item, int32 casttime = -1,
 		int32 mana_cost = -1, uint32* oSpellWillFinish = 0, uint32 item_slot = 0xFFFFFFFF,

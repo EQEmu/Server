@@ -139,46 +139,86 @@ void NPC::SpellProcess()
 	Mob::SpellProcess();
 }
 
-int Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
-	if (RuleB(Spells, UseSpellImpliedTargeting) && IsClient()) {
-		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
+uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {	
+	if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
+		// Shortcut Pet-Only spells, these only have one potential valid target
+		if (spells[spell_id].target_type == ST_Pet) {
 			if (GetPet()) {
-				return GetPetID();
+				return GetPet()->GetID();
+			} else {
+				Message(Chat::SpellFailure, "You must have a pet in order to cast this spell or ability (%s).", spells[spell_id].name);
+				InterruptSpell(spell_id);
+				return 0;
 			}
 		}
 
-		if (spells[spell_id].target_type == ST_Self || IsPBAENukeSpell(spell_id)) {
+		// Shortcut PBAoE, we don't care what the target is here
+		if (spells[spell_id].target_type == ST_AECaster) {
 			return target_id;
 		}
 
-		if (IsBeneficialSpell(spell_id) && !target_id > 0) {
+		// Shortcut Self, these have only one potential valid target
+		if (spells[spell_id].target_type == ST_Self) {
 			return GetID();
-		}
-
-		if (spells[spell_id].target_type == ST_Group && target) {
-
-		}
-
-		//Goal of Spells:UseSpellImpliedTargeting is to replicate the EQ2 feature where spells will 'pass through' invalid targets to target's target to try to find a valid target.
-		if (RuleB(Spells,UseSpellImpliedTargeting) && IsClient()) {
-			Mob* spell_target = entity_list.GetMobID(target_id);
-			if (spell_target) {
-				Mob* targets_target = spell_target->GetTarget();
-				if (targets_target) {
-					// If either this is beneficial and the target is not a player or player's pet or vis versa
-					if ((IsBeneficialSpell(spell_id) && (!(spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient()))))
-						|| (IsDetrimentalSpell(spell_id) && (spell_target->IsClient() || (spell_target->HasOwner() && spell_target->GetOwner()->IsClient())))) {
-						//Check if the target's target is a valid target; we can use DoCastingChecksOnTarget() here because we can let it handle the failure as vanilla would
-						if (DoCastingChecksOnTarget(true, spell_id, targets_target)) {
-							target_id = targets_target->GetID();
-						}
-						else {							
-							return target_id;
-						}
-					}
-				}
+		}	
+		
+		// Targeting ourselves, hit ourselves with beneficials, otherwise traverse as pet target
+		if (target_id == GetID()) {
+			if (IsBeneficialSpell(spell_id)) {
+				return GetID();
+			} else if (GetPet() && GetPet()->GetTarget()) {								
+				target_id = GetPet()->GetTarget()->GetID();
+			} else {
+				Message(Chat::SpellFailure, "You may not cast this type of spell or ability on yourself (%s).", spells[spell_id].name);
+				InterruptSpell();
+				return 0;
 			}
 		}
+
+		Mob* target_mob = entity_list.GetMob(target_id);
+		if (!target_mob || target_id == 0) {
+			if (IsBeneficialSpell(spell_id)) {
+				return GetID();
+			} else {
+				return 0;
+			}			
+		}
+
+		Mob* target_target = target_mob->GetTarget();
+
+		// Check if we already have a valid target
+		if (IsBeneficialSpell(spell_id)) {
+			if (target_mob->IsOfClientBotMerc() || (target_mob->IsPet() && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBotMerc())) {
+				return target_id;
+			}
+
+			if (target_target) {
+				if (target_target->IsOfClientBotMerc() || (target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBotMerc())) {
+					return target_target->GetID();
+				}
+			}
+
+			return GetID();
+		} else {
+			if (target_mob->IsNPC() && !(target_mob->IsPet() && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBot())) {
+				return target_id;
+			}
+
+			if (target_target) {
+				if (target_target->IsNPC() && !(target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
+					return target_target->GetID();
+				}
+
+				if (GetPet() && GetPet()->GetTarget()) {
+					target_target = GetPet()->GetTarget();
+					if (target_target->IsNPC() && !(target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
+						return target_target->GetID();
+					}
+				} else {
+					Message(Chat::SpellFailure, "No valid target was found for this spell or ability (%s).", spells[spell_id].name);
+				}
+			}
+		}		
 	}
 
 	return target_id;
@@ -1735,7 +1775,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		}
 
 		if (RuleB(Custom, CombatProcsOnSpellCast) && IsClient()) {
-			if (!IsCharmSpell(spell_id) && !IsMesmerizeSpell(spell_id) && !IsAllianceSpell(spell_id) && !IsPetSpell(spell_id)) {
+			if (IsHealthSpell(spell_id) || IsDamageSpell(spell_id)) {
 				std::vector<EQ::ItemInstance*> weapon_selector;
 				Client* c = CastToClient();			
 
@@ -2437,11 +2477,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		}
 	}
 
-	//if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
-	//	auto target_id = GetSpellImpliedTargetID(spell_id, spell_target->GetID());
-	//	spell_target = entity_list.GetMob(target_id);
-	//}
-
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && !spell_target->IsBot() && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
 		Mob* owner = spell_target->GetOwner();
@@ -2909,17 +2944,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	}
 
 	if (RuleB(Custom, ExpandedPetAffinity)) {
-		if (spell_target && IsClient() && 
+		if (spell_target && 
+			spell_target->IsClient() && 
+			spell_target->HasPetAffinity() &&
+			spell_target->GetPet() &&
+			!spell_target->GetPet()->IsCharmed() &&
 			IsValidSpell(spell_id) &&
+			IsBuffSpell(spell_id) &&
 			IsBeneficialSpell(spell_id) &&
 			!IsSummonPetSpell(spell_id) &&
-			!spells[spell_id].is_discipline &&
-			!spells[spell_id].short_buff_box &&	
-			spell_target->IsClient() && 		
-			spell_target->HasPet() &&						 
-			spell_target->GetPet() && 
-			!spell_target->GetPet()->IsCharmed() &&
-			spell_target->HasPetAffinity()) {
+			!IsDiscipline(spell_id) &&
+			!IsShortDurationBuff(spell_id)) 
+			{
 				SpellOnTarget(spell_id, spell_target->GetPet());
 			}
 	}
