@@ -5553,7 +5553,6 @@ ADD COLUMN `close_timer_ms` smallint(8) UNSIGNED NOT NULL DEFAULT 5000 AFTER `is
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
-
 ALTER TABLE `npc_types`
 ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
 )",
