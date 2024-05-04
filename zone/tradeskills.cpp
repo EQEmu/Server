@@ -1096,7 +1096,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 		zone->random.Roll(aa_chance)
 	) {
 		if (GetGM()) {
-			Message(Chat::White, "Your GM Flag gives you a 100% chance to succeed.");
+			Message(Chat::White, "Your GM Flag gives you a 100% chance to succeed in combining this tradeskill.");
 		}
 
 		success_modifier = 1;
