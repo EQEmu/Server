@@ -140,6 +140,17 @@ ADD COLUMN `augment_four` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_thr
 ADD COLUMN `augment_five` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_four`,
 ADD COLUMN `augment_six` int(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `augment_five`;
 )"
+	},
+	ManifestEntry{
+		.version = 9044,
+		.description = "2024_04_23_bot_extra_haste.sql",
+		.check = "SHOW COLUMNS FROM `bot_data` LIKE 'extra_haste'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `bot_data`
+ADD COLUMN `extra_haste` mediumint(8) NOT NULL DEFAULT 0 AFTER `wis`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

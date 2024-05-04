@@ -21,6 +21,9 @@
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
 
+#include "../common/repositories/bot_data_repository.h"
+#include "../common/repositories/character_data_repository.h"
+
 #include "data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -260,7 +263,7 @@ Mob::Mob(
 	WIS                  = in_wis;
 	CHA                  = in_cha;
 	MR                   = CR = FR = DR = PR = Corrup = PhR = 0;
-	ExtraHaste           = 0;
+	extra_haste          = 0;
 	bEnraged             = false;
 	current_mana         = 0;
 	max_mana             = 0;
@@ -2408,7 +2411,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			DialogueWindow::TableRow(
 				DialogueWindow::TableCell(Strings::Commify(itembonuses.haste)) +
 				DialogueWindow::TableCell(Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2)) +
-				DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)) +
+				DialogueWindow::TableCell(Strings::Commify(spellbonuses.hastetype3 + extra_haste)) +
 				DialogueWindow::TableCell(
 					fmt::format(
 						"{} ({})",
@@ -2688,7 +2691,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				Strings::Commify(RuleI(Character, HasteCap)),
 				Strings::Commify(itembonuses.haste),
 				Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2),
-				Strings::Commify(spellbonuses.hastetype3 + ExtraHaste)
+				Strings::Commify(spellbonuses.hastetype3 + extra_haste)
 			).c_str()
 		);
 	}
@@ -5460,7 +5463,7 @@ int Mob::GetHaste()
 	} else { // 1-50
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 	}
-	h += ExtraHaste;	//GM granted haste.
+	h += extra_haste;	//GM granted haste.
 
 	return 100 + h;
 }
@@ -8547,6 +8550,33 @@ void Mob::HandleDoorOpen()
 			}
 
 			d->ForceOpen(this);
+		}
+	}
+}
+
+void Mob::SetExtraHaste(int haste, bool need_to_save)
+{
+	extra_haste = haste;
+
+	if (need_to_save) {
+		if (IsBot()) {
+			auto e = BotDataRepository::FindOne(database, CastToBot()->GetBotID());
+			if (!e.bot_id) {
+				return;
+			}
+
+			e.extra_haste = haste;
+
+			BotDataRepository::UpdateOne(database, e);
+		} else if (IsClient()) {
+			auto e = CharacterDataRepository::FindOne(database, CastToClient()->CharacterID());
+			if (!e.id) {
+				return;
+			}
+
+			e.extra_haste = haste;
+
+			CharacterDataRepository::UpdateOne(database, e);
 		}
 	}
 }

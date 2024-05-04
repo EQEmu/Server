@@ -5557,6 +5557,17 @@ ALTER TABLE `npc_types`
 ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `keeps_sold_items`;
 )",
 		.content_schema_update = true
+	},
+	ManifestEntry{
+		.version = 9275,
+		.description = "2024_04_28_character_extra_haste.sql",
+		.check = "SHOW COLUMNS FROM `character_data` LIKE 'extra_haste'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `character_data`
+ADD COLUMN `extra_haste` int(11) NOT NULL DEFAULT 0 AFTER `wis`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

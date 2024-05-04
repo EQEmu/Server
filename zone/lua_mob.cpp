@@ -1186,6 +1186,11 @@ void Lua_Mob::SetExtraHaste(int haste) {
 	self->SetExtraHaste(haste);
 }
 
+void Lua_Mob::SetExtraHaste(int haste, bool need_to_save) {
+	Lua_Safe_Call_Void();
+	self->SetExtraHaste(haste, need_to_save);
+}
+
 int Lua_Mob::GetHaste() {
 	Lua_Safe_Call_Int();
 	return self->GetHaste();
@@ -3369,6 +3374,12 @@ std::string Lua_Mob::GetConsiderColor(uint8 other_level)
 	return EQ::constants::GetConsiderColorName(self->GetLevelCon(other_level));
 }
 
+int Lua_Mob::GetExtraHaste()
+{
+	Lua_Safe_Call_Int();
+	return self->GetExtraHaste();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3605,6 +3616,7 @@ luabind::scope lua_register_mob() {
 	.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
 	.def("GetEntityVariable", &Lua_Mob::GetEntityVariable)
 	.def("GetEntityVariables",&Lua_Mob::GetEntityVariables)
+	.def("GetExtraHaste",&Lua_Mob::GetExtraHaste)
 	.def("GetEyeColor1", &Lua_Mob::GetEyeColor1)
 	.def("GetEyeColor2", &Lua_Mob::GetEyeColor2)
 	.def("GetFR", &Lua_Mob::GetFR)
@@ -3868,6 +3880,7 @@ luabind::scope lua_register_mob() {
 	.def("SetDisableMelee", (void(Lua_Mob::*)(bool))&Lua_Mob::SetDisableMelee)
 	.def("SetEntityVariable", &Lua_Mob::SetEntityVariable)
 	.def("SetExtraHaste", (void(Lua_Mob::*)(int))&Lua_Mob::SetExtraHaste)
+	.def("SetExtraHaste", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetExtraHaste)
 	.def("SetFlurryChance", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlurryChance)
 	.def("SetFlyMode", (void(Lua_Mob::*)(int))&Lua_Mob::SetFlyMode)
 	.def("SetGender", (void(Lua_Mob::*)(uint8))&Lua_Mob::SetGender)

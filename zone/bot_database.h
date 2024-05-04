@@ -166,6 +166,7 @@ public:
 	const uint8 GetBotLevelByID(const uint32 bot_id);
 	const std::string GetBotNameByID(const uint32 bot_id);
 	const uint16 GetBotRaceByID(const uint32 bot_id);
+	const int GetBotExtraHasteByID(const uint32 bot_id);
 
 	class fail {
 	public:
