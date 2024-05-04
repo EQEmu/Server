@@ -1087,7 +1087,17 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 
 	const EQ::ItemData* item = nullptr;
 
-	if (((spec->tradeskill==75) || GetGM() || (chance > res)) || zone->random.Roll(aa_chance)) {
+	if (
+		(
+			spec->tradeskill == EQ::skills::SkillRemoveTraps ||
+			GetGM() ||
+			(chance > res)
+		) ||
+		zone->random.Roll(aa_chance)
+	) {
+		if (GetGM()) {
+			Message(Chat::White, "Your GM Flag gives you a 100% chance to succeed in combining this tradeskill.");
+		}
 
 		success_modifier = 1;
 

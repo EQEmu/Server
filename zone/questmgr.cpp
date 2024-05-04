@@ -2961,50 +2961,50 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 		auto spawned_bot_count = Bot::SpawnedBotCount(initiator->CharacterID());
 
-		if (
-			bot_spawn_limit >= 0 &&
-			spawned_bot_count >= bot_spawn_limit &&
-			!initiator->GetGM()
-		) {
-			std::string message;
-			if (bot_spawn_limit) {
-				message = fmt::format(
-					"You cannot have more than {} spawned bot{}.",
-					bot_spawn_limit,
-					bot_spawn_limit != 1 ? "s" : ""
-				);
-			} else {
-				message = "You are not currently allowed to spawn any bots.";
-			}
+		if (bot_spawn_limit >= 0 && spawned_bot_count >= bot_spawn_limit) {
+			if (!initiator->GetGM()) {
+				std::string message;
+				if (bot_spawn_limit) {
+					message = fmt::format(
+						"You cannot have more than {} spawned bot{}.",
+						bot_spawn_limit,
+						bot_spawn_limit != 1 ? "s" : ""
+					);
+				} else {
+					message = "You are not currently allowed to spawn any bots.";
+				}
 
-			initiator->Message(Chat::White, message.c_str());
-			return false;
+				initiator->Message(Chat::White, message.c_str());
+				return false;
+			} else {
+				initiator->Message(Chat::White, "Your GM Flag allows you to bypass bot spawn limits.");
+			}
 		}
 
 		auto spawned_bot_count_class = Bot::SpawnedBotCount(initiator->CharacterID(), botclass);
 
-		if (
-			bot_spawn_limit_class >= 0 &&
-			spawned_bot_count_class >= bot_spawn_limit_class &&
-			!initiator->GetGM()
-		) {
-			std::string message;
-			if (bot_spawn_limit_class) {
-				message = fmt::format(
-					"You cannot have more than {} spawned {} bot{}.",
-					bot_spawn_limit_class,
-					GetClassIDName(botclass),
-					bot_spawn_limit_class != 1 ? "s" : ""
-				);
-			} else {
-				message = fmt::format(
-					"You are not currently allowed to spawn any {} bots.",
-					GetClassIDName(botclass)
-				);
-			}
+		if (bot_spawn_limit_class >= 0 && spawned_bot_count_class >= bot_spawn_limit_class) {
+			if (!initiator->GetGM()) {
+				std::string message;
+				if (bot_spawn_limit_class) {
+					message = fmt::format(
+						"You cannot have more than {} spawned {} bot{}.",
+						bot_spawn_limit_class,
+						GetClassIDName(botclass),
+						bot_spawn_limit_class != 1 ? "s" : ""
+					);
+				} else {
+					message = fmt::format(
+						"You are not currently allowed to spawn any {} bots.",
+						GetClassIDName(botclass)
+					);
+				}
 
-			initiator->Message(Chat::White, message.c_str());
-			return false;
+				initiator->Message(Chat::White, message.c_str());
+				return false;
+			} else {
+				initiator->Message(Chat::White, "Your GM Flag allows you to bypass bot class-based spawn limits.");
+			}
 		}
 
 		std::string test_name = name;

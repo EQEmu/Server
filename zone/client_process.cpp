@@ -1895,31 +1895,45 @@ void Client::DoManaRegen() {
 void Client::DoStaminaHungerUpdate()
 {
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
+	auto sta    = (Stamina_Struct*) outapp->pBuffer;
 
 	LogFood("hunger_level: [{}] thirst_level: [{}] before loss", m_pp.hunger_level, m_pp.thirst_level);
 
-	if (zone->GetZoneID() != 151 && !GetGM()) {
-		int loss = RuleI(Character, FoodLossPerUpdate);
-		if (GetHorseId() != 0)
-			loss *= 3;
+	if (zone->GetZoneID() != Zones::BAZAAR) {
+		if (!GetGM()) {
+			int loss = RuleI(Character, FoodLossPerUpdate);
+			if (GetHorseId() != 0) {
+				loss *= 3;
+			}
 
-		m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
-		m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
-		if (spellbonuses.hunger) {
-			m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
-			m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
+			m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
+			m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
+
+			if (spellbonuses.hunger) {
+				m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
+				m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
+			}
+
+			sta->food  = m_pp.hunger_level;
+			sta->water = m_pp.thirst_level;
+		} else {
+			sta->food  = 6000;
+			sta->water = 6000;
+
+			Message(Chat::White, "Your GM Flag prevents you from consuming food or water.");
 		}
-		sta->food = m_pp.hunger_level;
-		sta->water = m_pp.thirst_level;
-	} else {
-		// No auto food/drink consumption in the Bazaar
-		sta->food = 6000;
+	} else { // No auto food/drink consumption in the Bazaar
+		sta->food  = 6000;
 		sta->water = 6000;
 	}
 
-	LogFood("Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
-	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
+	LogFood(
+		"Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
+		m_pp.hunger_level,
+		m_pp.hunger_level,
+		m_pp.thirst_level,
+		m_pp.thirst_level
+	);
 
 	FastQueuePacket(&outapp);
 }

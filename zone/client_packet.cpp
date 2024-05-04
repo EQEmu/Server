@@ -709,23 +709,28 @@ void Client::CompleteConnect()
 			}
 			case SE_Levitate:
 			{
-				if (!zone->CanLevitate())
-				{
-					if (!GetGM())
-					{
+				if (!zone->CanLevitate()) {
+					if (!GetGM()) {
 						SendAppearancePacket(AppearanceType::FlyMode, 0);
 						BuffFadeByEffect(SE_Levitate);
 						Message(Chat::Red, "You can't levitate in this zone.");
+						break;
 					}
+
+					Message(Chat::White, "Your GM Flag allows you to levitate in this zone.");
 				}
-				else {
-					if (spell.limit_value[x1] == 1) {
-						SendAppearancePacket(AppearanceType::FlyMode, EQ::constants::GravityBehavior::LevitateWhileRunning, true, true);
-					}
-					else {
-						SendAppearancePacket(AppearanceType::FlyMode, EQ::constants::GravityBehavior::Levitating, true, true);
-					}
-				}
+
+				SendAppearancePacket(
+					AppearanceType::FlyMode,
+					(
+						spell.limit_value[x1] == 1 ?
+							EQ::constants::GravityBehavior::LevitateWhileRunning :
+							EQ::constants::GravityBehavior::Levitating
+					),
+					true,
+					true
+				);
+
 				break;
 			}
 			case SE_AddMeleeProc:
@@ -2127,8 +2132,19 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (item->MaxCharges != 0)
 		charges = item->MaxCharges;
 
-	if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
-		DiscoverItem(item->ID);
+	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item->ID)) {
+		if (!GetGM()) {
+			DiscoverItem(item->ID);
+		} else {
+			const std::string& item_link = database.CreateItemLink(item->ID);
+			Message(
+				Chat::White,
+				fmt::format(
+					"Your GM Flag prevents {} from being added to discovered items.",
+					item_link
+				).c_str()
+			);
+		}
 	}
 
 	EQ::ItemInstance *inst = database.CreateItem(item, charges);
@@ -2682,8 +2698,19 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 			RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
 		}
 
-		if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item->ID)) {
-			DiscoverItem(item->ID);
+		if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item->ID)) {
+			if (!GetGM()) {
+				DiscoverItem(item->ID);
+			} else {
+				const std::string& item_link = database.CreateItemLink(item->ID);
+				Message(
+					Chat::White,
+					fmt::format(
+						"Your GM Flag prevents {} from being added to discovered items.",
+						item_link
+					).c_str()
+				);
+			}
 		}
 
 		EQ::ItemInstance *inst = database.CreateItem(item, charges);
@@ -14214,8 +14241,20 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		RecordPlayerEventLog(PlayerEvent::MERCHANT_PURCHASE, e);
 	}
 
-	if (RuleB(Character, EnableDiscoveredItems) && !GetGM() && !IsDiscovered(item_id)) {
-		DiscoverItem(item_id);
+
+	if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(item_id)) {
+		if (!GetGM()) {
+			DiscoverItem(item_id);
+		} else {
+			const std::string& item_link = database.CreateItemLink(item_id);
+			Message(
+				Chat::White,
+				fmt::format(
+					"Your GM Flag prevents {} from being added to discovered items.",
+					item_link
+				).c_str()
+			);
+		}
 	}
 
 	t1.stop();
