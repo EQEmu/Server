@@ -240,6 +240,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	runmode = false;
 	linkdead_timer.Disable();
 	zonesummon_id = 0;
+	zonesummon_instance_id = 0;
 	zonesummon_ignorerestrictions = 0;
 	bZoning              = false;
 	m_lock_save_position = false;
