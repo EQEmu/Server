@@ -3912,7 +3912,7 @@ void Client::Sacrifice(Client *caster)
 	if (GetLevel() >= RuleI(Spells, SacrificeMinLevel) && GetLevel() <= RuleI(Spells, SacrificeMaxLevel)) {
 		int exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
 		if (exploss < GetEXP()) {
-			SetEXP(GetEXP() - exploss, GetAAXP());
+			SetEXP(ExpSource::Sacrifice, GetEXP() - exploss, GetAAXP(), false);
 			SendLogoutPackets();
 
 			// make our become corpse packet, and queue to ourself before OP_Death.
@@ -5019,15 +5019,15 @@ void Client::HandleLDoNOpen(NPC *target)
 			{
 				if(GetRaid())
 				{
-					GetRaid()->SplitExp(target->GetLevel()*target->GetLevel()*2625/10, target);
+					GetRaid()->SplitExp(ExpSource::LDoNChest, target->GetLevel()*target->GetLevel()*2625/10, target);
 				}
 				else if(GetGroup())
 				{
-					GetGroup()->SplitExp(target->GetLevel()*target->GetLevel()*2625/10, target);
+					GetGroup()->SplitExp(ExpSource::LDoNChest, target->GetLevel()*target->GetLevel()*2625/10, target);
 				}
 				else
 				{
-					AddEXP(target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
+					AddEXP(ExpSource::LDoNChest, target->GetLevel()*target->GetLevel()*2625/10, GetLevelCon(target->GetLevel()));
 				}
 			}
 			target->Death(this, 0, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand);
@@ -5229,7 +5229,7 @@ void Client::SummonAndRezzAllCorpses()
 	int RezzExp = entity_list.RezzAllCorpsesByCharID(CharacterID());
 
 	if(RezzExp > 0)
-		SetEXP(GetEXP() + RezzExp, GetAAXP(), true);
+		SetEXP(ExpSource::Resurrection, GetEXP() + RezzExp, GetAAXP(), true);
 
 	Message(Chat::Yellow, "All your corpses have been summoned to your feet and have received a 100% resurrection.");
 }
@@ -8308,7 +8308,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 	}
 
 	if (exp > 0) {
-		AddEXP(exp);
+		AddEXP(ExpSource::Quest, exp);
 	}
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
@@ -8353,7 +8353,7 @@ void Client::QuestReward(Mob* target, const QuestReward_Struct &reward, bool fac
 	}
 
 	if (reward.exp_reward > 0) {
-		AddEXP(reward.exp_reward);
+		AddEXP(ExpSource::Quest, reward.exp_reward);
 	}
 
 	QueuePacket(outapp, true, Client::CLIENT_CONNECTED);

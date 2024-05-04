@@ -216,27 +216,27 @@ void Perl_Client_SetDeity(Client* self, uint32 deity_id) // @categories Account 
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp) // @categories Experience and Level
 {
-	self->AddEXP(add_exp);
+	self->AddEXP(ExpSource::Quest, add_exp);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel) // @categories Experience and Level
 {
-	self->AddEXP(add_exp, conlevel);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel, bool resexp) // @categories Experience and Level
 {
-	self->AddEXP(add_exp, conlevel, resexp);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel, resexp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp) // @categories Experience and Level
 {
-	self->SetEXP(set_exp, set_aaxp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp, bool resexp) // @categories Experience and Level
 {
-	self->SetEXP(set_exp, set_aaxp, resexp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp, resexp);
 }
 
 void Perl_Client_SetBindPoint(Client* self) // @categories Account and Character, Stats and Attributes
@@ -1280,17 +1280,17 @@ uint32_t Perl_Client_GetIP(Client* self) // @categories Script Utility
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage, max_level);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level, bool ignore_mods) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level, ignore_mods);
 }
 
 void Perl_Client_IncrementAA(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement
