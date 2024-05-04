@@ -503,7 +503,9 @@ struct StatBonuses {
 	uint8	invisibility_verse_undead;			// IVU level
 	uint8	invisibility_verse_animal;			// IVA level
 	int32	ShieldTargetSpa[2];                 // [0] base = % mitigation amount, [1] buff slot
+	uint32  ReduceSkill[EQ::skills::HIGHEST_SKILL + 2]; //reduce value of a skill by percentage
 	int64	FlatMaxHPChange;					// base: Max HP change by a flat amount value from spell effect/item worn effect/aa
+
 
 	// AAs
 	int32	TrapCircumvention;					// reduce chance to trigger a trap.

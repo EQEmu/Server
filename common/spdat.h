@@ -916,7 +916,7 @@ typedef enum {
 #define SE_AttackSpeed3					119	// implemented
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented
-//#define SE_ReduceSkill				122	// not implemented    TODO: Now used on live, decreases skills by percent
+#define SE_ReduceSkill					122	// implemented - base: skill id, limit: none, max: none, formula: % skill is reduced (positive)
 #define SE_Screech						123	// implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
 #define SE_ImprovedDamage				124 // implemented
 #define SE_ImprovedHeal					125 // implemented
