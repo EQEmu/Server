@@ -5537,7 +5537,7 @@ ALTER TABLE `character_parcels`
 	ManifestEntry{
 		.version = 9273,
 		.description = "2024_04_24_door_close_timer.sql",
-		.check = "SHOW COLUMNS FROM `doors` LIKE 'close_timer'",
+		.check = "SHOW COLUMNS FROM `doors` LIKE 'close_timer_ms'",
 		.condition = "empty",
 		.match = "",
 		.sql = R"(
