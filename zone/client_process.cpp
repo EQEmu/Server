@@ -1919,7 +1919,7 @@ void Client::DoStaminaHungerUpdate()
 			sta->food  = 6000;
 			sta->water = 6000;
 
-			Message(Chat::White, "Your GM Flag prevents you from consuming food or water.");
+			Message(Chat::White, "Your GM flag prevents you from consuming food or water.");
 		}
 	} else { // No auto food/drink consumption in the Bazaar
 		sta->food  = 6000;

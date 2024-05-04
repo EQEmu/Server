@@ -543,7 +543,7 @@ void Client::CompleteConnect()
 	LoadZoneFlags();
 	LoadAccountFlags();
 
-	/* Sets GM Flag if needed & Sends Petition Queue */
+	/* Sets GM flag if needed & Sends Petition Queue */
 	UpdateAdmin(false);
 
 	// Task Packets
@@ -717,7 +717,7 @@ void Client::CompleteConnect()
 						break;
 					}
 
-					Message(Chat::White, "Your GM Flag allows you to levitate in this zone.");
+					Message(Chat::White, "Your GM flag allows you to levitate in this zone.");
 				}
 
 				SendAppearancePacket(
@@ -2141,7 +2141,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 			Message(
 				Chat::White,
 				fmt::format(
-					"Your GM Flag prevents {} from being added to discovered items.",
+					"Your GM flag prevents {} from being added to discovered items.",
 					item_link
 				).c_str()
 			);
@@ -2707,7 +2707,7 @@ void Client::Handle_OP_AltCurrencyPurchase(const EQApplicationPacket *app)
 				Message(
 					Chat::White,
 					fmt::format(
-						"Your GM Flag prevents {} from being added to discovered items.",
+						"Your GM flag prevents {} from being added to discovered items.",
 						item_link
 					).c_str()
 				);
@@ -14251,7 +14251,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 			Message(
 				Chat::White,
 				fmt::format(
-					"Your GM Flag prevents {} from being added to discovered items.",
+					"Your GM flag prevents {} from being added to discovered items.",
 					item_link
 				).c_str()
 			);

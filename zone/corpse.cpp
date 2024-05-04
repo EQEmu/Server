@@ -1162,7 +1162,7 @@ void Corpse::MakeLootRequestPackets(Client *c, const EQApplicationPacket *app)
 			c->Message(Chat::White, "Your GM Status allows you to loot any items on this corpse.");
 		} else {
 			m_loot_request_type = LootRequestType::GMPeek;
-			c->Message(Chat::White, "Your GM Flag allows you to look at the items on this corpse.");
+			c->Message(Chat::White, "Your GM flag allows you to look at the items on this corpse.");
 		}
 	}
 	else {
@@ -1624,7 +1624,7 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 					c->Message(
 						Chat::White,
 						fmt::format(
-							"Your GM Flag prevents {} from being added to discovered items.",
+							"Your GM flag prevents {} from being added to discovered items.",
 							item_link
 						).c_str()
 					);
@@ -2301,7 +2301,7 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 				return;
 			}
 
-			caster->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse.");
+			caster->Message(Chat::White, "Your GM flag allows you to resurrect this corpse.");
 		}
 	}
 
@@ -2314,7 +2314,7 @@ void Corpse::CastRezz(uint16 spell_id, Mob *caster)
 				m_rezzed_experience    = m_gm_rezzed_experience;
 				m_gm_rezzed_experience = 0;
 
-				c->Message(Chat::White, "Your GM Flag allows you to resurrect this corpse and return experience.");
+				c->Message(Chat::White, "Your GM flag allows you to resurrect this corpse and return experience.");
 			}
 		}
 	}

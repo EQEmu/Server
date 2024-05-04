@@ -43,7 +43,7 @@
 #define ServerOP_OnlineGuildMembersResponse	0x0016
 #define ServerOP_LFGuildUpdate		0x0017
 
-#define ServerOP_FlagUpdate			0x0018	// GM Flag updated for character, refresh the memory cache
+#define ServerOP_FlagUpdate			0x0018	// GM flag updated for character, refresh the memory cache
 #define ServerOP_GMGoto				0x0019
 #define ServerOP_MultiLineMsg		0x001A
 #define ServerOP_Lock				0x001B	// For #lock/#unlock inside server

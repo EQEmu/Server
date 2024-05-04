@@ -295,7 +295,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 				);
 				sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
 			} else {
-				sender->Message(Chat::White, "Your GM Flag allows you to use this door.");
+				sender->Message(Chat::White, "Your GM flag allows you to use this door.");
 			}
 		}
 	}
@@ -344,7 +344,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 				sender->Message(
 					Chat::White,
 					fmt::format(
-						"Your GM Flag allows you to use this door{}.",
+						"Your GM flag allows you to use this door{}.",
 						(
 							has_guild_name ?
 							fmt::format(
@@ -544,7 +544,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 
 		if (sender->GetGM() && has_key_required) {
 			has_key_required = false;
-			sender->Message(Chat::White, "Your GM Flag allows you to open this door without a key.");
+			sender->Message(Chat::White, "Your GM flag allows you to open this door without a key.");
 		}
 
 		if (IsDestinationZoneSame() && (!required_key_item)) {

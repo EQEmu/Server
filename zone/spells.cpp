@@ -693,7 +693,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 		Message(
 			Chat::White,
 			fmt::format(
-				"Your GM Flag allows you to bypass zone casting restrictions and cast {} in this zone.",
+				"Your GM flag allows you to bypass zone casting restrictions and cast {} in this zone.",
 				Saylink::Silent(
 					fmt::format(
 						"#castspell {}",
@@ -728,7 +728,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 					Message(
 						Chat::White,
 						fmt::format(
-							"Your GM Flag allows you to bypass zone blocked spells and cast {} in this zone.",
+							"Your GM flag allows you to bypass zone blocked spells and cast {} in this zone.",
 							Saylink::Silent(
 								fmt::format(
 									"#castspell {}",
@@ -783,7 +783,7 @@ bool Mob::DoCastingChecksZoneRestrictions(bool check_on_casting, int32 spell_id)
 					LogSpells("Spell casting canceled [{}] : can not cast outdoors.", spell_id);
 					return false;
 				} else {
-					Message(Chat::White, "Your GM Flag allows you to cast outdoor spells when indoors.");
+					Message(Chat::White, "Your GM flag allows you to cast outdoor spells when indoors.");
 				}
 			}
 		}
@@ -1101,7 +1101,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 {
 	// GMs don't fizzle
 	if (GetGM()) {
-		Message(Chat::White, "Your GM Flag prevents you from fizzling.");
+		Message(Chat::White, "Your GM flag prevents you from fizzling.");
 		return true;
 	}
 
@@ -1687,7 +1687,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 						if (c->GetGM()) {
 							c->Message(
 								Chat::White,
-								"Your GM Flag allows you to finish casting even though you're missing a required instrument."
+								"Your GM flag allows you to finish casting even though you're missing a required instrument."
 							);
 						} else {
 							InterruptSpell();
@@ -1728,7 +1728,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				if (c->GetGM()) {
 					c->Message(
 						Chat::White,
-						"Your GM Flag allows you to finish casting even though you're missing required components."
+						"Your GM flag allows you to finish casting even though you're missing required components."
 					);
 				} else {
 					InterruptSpell();

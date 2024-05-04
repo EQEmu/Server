@@ -2977,7 +2977,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 				initiator->Message(Chat::White, message.c_str());
 				return false;
 			} else {
-				initiator->Message(Chat::White, "Your GM Flag allows you to bypass bot spawn limits.");
+				initiator->Message(Chat::White, "Your GM flag allows you to bypass bot spawn limits.");
 			}
 		}
 
@@ -3003,7 +3003,7 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 				initiator->Message(Chat::White, message.c_str());
 				return false;
 			} else {
-				initiator->Message(Chat::White, "Your GM Flag allows you to bypass bot class-based spawn limits.");
+				initiator->Message(Chat::White, "Your GM flag allows you to bypass bot class-based spawn limits.");
 			}
 		}
 

@@ -1655,7 +1655,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 					Send = clear_target_window;
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
 						if (c->GetGM()) {
-							c->Message(Chat::White, "Your GM Flag allows you to always see your targets' buffs.");
+							c->Message(Chat::White, "Your GM flag allows you to always see your targets' buffs.");
 						}
 
 						Send = !clear_target_window;

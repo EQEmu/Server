@@ -99,7 +99,7 @@ bool Trap::Process()
 		}
 
 		if (is_gm_client) {
-			m->Message(Chat::White, "Your GM Flag prevents you from triggering a trap.");
+			m->Message(Chat::White, "Your GM flag prevents you from triggering a trap.");
 		}
 	}
 	else if (reset_timer.Enabled() && reset_timer.Check())
@@ -321,7 +321,7 @@ Mob* EntityList::GetTrapTrigger(Trap* trap)
 			}
 
 			if (cur->GetGM()) {
-				cur->Message(Chat::White, "Your GM Flag prevents you from triggering a trap.");
+				cur->Message(Chat::White, "Your GM flag prevents you from triggering a trap.");
 			}
 		}
 		else

@@ -947,7 +947,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsClient()) {
 					if (CastToClient()->GetGM() || RuleB(Character, BindAnywhere)) {
 						if (CastToClient()->GetGM()) {
-							Message(Chat::White, "Your GM Flag allows you to bind anywhere.");
+							Message(Chat::White, "Your GM flag allows you to bind anywhere.");
 						}
 
 						auto action_packet =

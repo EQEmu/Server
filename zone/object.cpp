@@ -650,7 +650,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 					sender->Message(
 						Chat::White,
 						fmt::format(
-							"Your GM Flag prevents {} from being added to discovered items.",
+							"Your GM flag prevents {} from being added to discovered items.",
 							item_link
 						).c_str()
 					);

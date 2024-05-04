@@ -819,7 +819,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										Message(
 											Chat::White,
 											fmt::format(
-												"Your GM Flag allows you to give {} to {}.",
+												"Your GM flag allows you to give {} to {}.",
 												item_link,
 												GetTargetDescription(tradingWith)
 											).c_str()

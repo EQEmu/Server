@@ -1356,7 +1356,7 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 	}
 
 	if (is_gm) {
-		client_list.SendCharacterMessage(requester->CharID(), Chat::White, "Your GM Flag allows you to bypass shared task minimum player requirements.");
+		client_list.SendCharacterMessage(requester->CharID(), Chat::White, "Your GM flag allows you to bypass shared task minimum player requirements.");
 	}
 
 	// check if party member count is above the maximum

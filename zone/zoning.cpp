@@ -373,8 +373,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
-		LogInfo("[{}] Bypassing zone expansion checks because GM Flag is set", GetCleanName());
-		Message(Chat::White, "Your GM Flag allows you to bypass zone expansion checks.");
+		LogInfo("[{}] Bypassing zone expansion checks because GM flag is set", GetCleanName());
+		Message(Chat::White, "Your GM flag allows you to bypass zone expansion checks.");
 	}
 
 	if (zoning_message == ZoningMessage::ZoneSuccess) {
