@@ -66,12 +66,5 @@ compile_flags.txt
 !utils/scripts/build/should-release/should-release
 !utils/scripts/build/should-release/should-release.exe
 
-# base patterns
-base/*.sql
-base/*.zip
-base/db/
-base/maps/
-!base/expansion/Makefile
-
 # CMake Files
 cmake-build-relwithdebinfo/*
