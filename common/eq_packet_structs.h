@@ -29,6 +29,7 @@
 #include "textures.h"
 #include "../cereal/include/cereal/archives/binary.hpp"
 #include "../cereal/include/cereal/types/string.hpp"
+#include "../cereal/include/cereal/types/vector.hpp"
 
 
 static const uint32 BUFF_COUNT = 42;
@@ -1690,6 +1691,38 @@ static const uint32 MAX_NUMBER_GUILDS = 1500;
 struct GuildsList_Struct {
 	uint8 head[64]; // First on guild list seems to be empty...
 	GuildsListEntry_Struct Guilds[MAX_NUMBER_GUILDS];
+};
+
+struct GuildsListMessagingEntry_Struct {
+	/*000*/	uint32		guild_id;
+	/*004*/	std::string guild_name;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(guild_id),
+			CEREAL_NVP(guild_name)
+		);
+	}
+};
+
+struct GuildsListMessaging_Struct {
+	/*000*/    char                                         header[64];
+	/*064*/    uint32                                       no_of_guilds;
+	/*068*/    uint32                                       string_length;
+	/*072*/    std::vector<GuildsListMessagingEntry_Struct> guild_detail;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			CEREAL_NVP(header),
+			CEREAL_NVP(no_of_guilds),
+			CEREAL_NVP(string_length),
+			CEREAL_NVP(guild_detail)
+		);
+	}
 };
 
 struct GuildUpdate_Struct {
