@@ -109,6 +109,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
 	parse->Init();
+	parse->ReloadQuests(true);
 
 	//init the zone, loads all the data, etc
 	if (!zone->Init(is_static)) {
