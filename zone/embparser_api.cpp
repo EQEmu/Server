@@ -5886,7 +5886,7 @@ bool Perl__send_parcel(perl::reference table_ref)
 		return false;
 	}
 
-	std::string name         = table.exists("name") ? table["name"] : "";
+	std::string name         = table.exists("name") ? table["name"] : std::string();
 	uint32      character_id = table.exists("character_id") ? table["character_id"] : 0;
 
 	if (character_id) {
