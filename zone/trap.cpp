@@ -93,7 +93,7 @@ bool Trap::Process()
 	if (chkarea_timer.Enabled() && chkarea_timer.Check() && !reset_timer.Enabled())
 	{
 		Mob* m = entity_list.GetTrapTrigger(this);
-		const bool is_gm_client = m->IsClient() && m->CastToClient()->GetGM();
+		const bool is_gm_client = m && m->IsClient() && m->CastToClient()->GetGM();
 		if (m && !is_gm_client) {
 			Trigger(m);
 		}
