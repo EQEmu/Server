@@ -120,18 +120,24 @@ bool BaseGuildManager::LoadGuilds()
 
 		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
 			auto key = fmt::format("{}-{}", g.id, i);
-			m_guilds[g.id]->rank_names[i] = guilds_ranks.find(key)->second;
+
+			if (guilds_ranks.contains(key)) {
+				m_guilds[g.id]->rank_names[i] = guilds_ranks.find(key)->second;
+			}
 		}
-		
+
 		auto count = 0;
 
 		for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
-			auto key                                        = fmt::format("{}-{}", g.id, i);
-			auto p                                          = guilds_permissions.find(key)->second;
-			m_guilds[g.id]->functions[p.perm_id].id         = p.id;
-			m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
-			m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
-			m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
+			auto key = fmt::format("{}-{}", g.id, i);
+			if (guilds_permissions.contains(key)) {
+				auto p = guilds_permissions.find(key)->second;
+				m_guilds[g.id]->functions[p.perm_id].id         = p.id;
+				m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
+				m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
+				m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
+			}
+
 			count++;
 		}
 
