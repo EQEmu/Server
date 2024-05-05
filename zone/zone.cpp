@@ -108,6 +108,9 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
+	parse->Init();
+	parse->ReloadQuests(true);
+
 	//init the zone, loads all the data, etc
 	if (!zone->Init(is_static)) {
 		safe_delete(zone);
@@ -158,7 +161,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	LogInfo("Zone server [{}] listening on port [{}]", zonename, ZoneConfig::get()->ZonePort);
 	LogInfo("Zone bootup type [{}] short_name [{}] zone_id [{}] instance_id [{}]",
 		(is_static) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
-	parse->Init();
 	UpdateWindowTitle(nullptr);
 
 	// Dynamic zones need to Sync here.

@@ -138,6 +138,7 @@ public:
 
 	virtual void AddVar(std::string name, std::string val);
 	virtual std::string GetVar(std::string name);
+	virtual void Init() override;
 	virtual void ReloadQuests();
 	virtual uint32 GetIdentifier() { return 0xf8b05c11; }
 
