@@ -5608,6 +5608,18 @@ ENGINE=InnoDB
 AUTO_INCREMENT=1
 ;
 )"
+	},
+	ManifestEntry{
+		.version = 9278,
+		.description = "2024_05_06_npc_greed.sql",
+		.check = "SHOW COLUMNS FROM `npc_types` LIKE 'greed'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_types`
+ADD COLUMN `greed` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `merchant_id`;
+ )",
+		.content_schema_update = true
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{

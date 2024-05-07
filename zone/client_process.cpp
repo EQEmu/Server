@@ -902,8 +902,13 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 			auto inst = database.CreateItem(item, charges);
 			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
 				auto item_charges = charges ? charges : 1;
+
+				// Don't use SellCostMod if using UseClassicPriceMod
+				if (!RuleB(Merchant, UseClassicPriceMod)) {
+					item_price *= RuleR(Merchant, SellCostMod);
+				}
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(npc);
@@ -932,7 +937,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
 	temporary_merchant_list.clear();
 	for (auto ml : temporary_merchant_list_two) {
-		if (slot_id > merchant_slots) {
+		if (merchant_slots_limited && slot_id > merchant_slots) {
 			break;
 		}
 
@@ -948,8 +953,13 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			auto charges = item->MaxCharges;
 			auto inst = database.CreateItem(item, charges);
 			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
 				auto item_charges = charges ? charges : 1;
+
+				// Don't use SellCostMod if using UseClassicPriceMod
+				if (!RuleB(Merchant, UseClassicPriceMod)) {
+					item_price *= RuleR(Merchant, SellCostMod);
+				}
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(npc);
