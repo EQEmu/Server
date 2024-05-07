@@ -937,7 +937,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	auto temporary_merchant_list_two = zone->tmpmerchanttable[npcid];
 	temporary_merchant_list.clear();
 	for (auto ml : temporary_merchant_list_two) {
-		if (merchant_slots_limited && slot_id > merchant_slots) {
+		if (slot_id > merchant_slots) {
 			break;
 		}
 
