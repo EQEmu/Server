@@ -5617,7 +5617,7 @@ AUTO_INCREMENT=1
 		.match = "",
 		.sql = R"(
 ALTER TABLE `npc_types`
-ADD COLUMN `greed` tinyint(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `merchant_id`;
+ADD COLUMN `greed` tinyint(8) UNSIGNED NOT NULL DEFAULT 0 AFTER `merchant_id`;
  )",
 		.content_schema_update = true
 	}
