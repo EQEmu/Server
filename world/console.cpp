@@ -918,7 +918,7 @@ void ConsoleReloadWorld(
 	safe_delete(pack);
 }
 
-auto debounceReload = std::chrono::system_clock::now();
+auto debounce_reload = std::chrono::system_clock::now();
 
 /**
  * @param connection
@@ -937,12 +937,12 @@ void ConsoleReloadZoneQuests(
 	}
 
 	// if now is within 1 second, return
-	if (std::chrono::system_clock::now() - debounceReload < std::chrono::seconds(1)) {
-		debounceReload = std::chrono::system_clock::now();
+	if (std::chrono::system_clock::now() - debounce_reload < std::chrono::seconds(1)) {
+		debounce_reload = std::chrono::system_clock::now();
 		return;
 	}
 
-	debounceReload = std::chrono::system_clock::now();
+	debounce_reload = std::chrono::system_clock::now();
 
 	std::string zone_short_name = args[0];
 
