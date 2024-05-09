@@ -34,10 +34,6 @@
 
 * Add SetExp/SetAAExp lua mods ([#4292](https://github.com/EQEmu/Server/pull/4292)) @xackery 2024-05-04
 
-### FIX
-
-* Fix for world crash with over 1500 guilds ([#4299](https://github.com/EQEmu/Server/pull/4299)) @neckkola 2024-05-09
-
 ### Feature
 
 * Add Augmentation Support for Parcels ([#4285](https://github.com/EQEmu/Server/pull/4285)) @neckkola 2024-04-24
@@ -62,6 +58,7 @@
 * Perl__send_parcel GCC compile error  @Akkadius 2024-05-05
 * Remove food or water GM message  @Akkadius 2024-05-05
 * Revert GetSkill from #4234  @Akkadius 2024-05-05
+* Fix for world crash with over 1500 guilds ([#4299](https://github.com/EQEmu/Server/pull/4299)) @neckkola 2024-05-09
 
 ### Hot Fix
 
