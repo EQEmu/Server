@@ -1577,19 +1577,20 @@ void Client::QueuePacket(const EQApplicationPacket* app, bool ack_req) {
 	eqs->QueuePacket(app, ack_req);
 }
 
-void Client::SendGuildList() {
-	EQApplicationPacket *outapp;
-	outapp = new EQApplicationPacket(OP_GuildsList);
+void Client::SendGuildList()
+{
+	auto guilds_list = guild_mgr.MakeGuildList();
 
-	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.MakeGuildList("", outapp->size);
-	if(outapp->pBuffer == nullptr) {
-		safe_delete(outapp);
-		return;
-	}
+	std::stringstream           ss;
+	cereal::BinaryOutputArchive ar(ss);
+	ar(guilds_list);
 
+	uint32 packet_size = ss.str().length();
 
-	eqs->FastQueuePacket((EQApplicationPacket **)&outapp);
+	std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_GuildsList, packet_size));
+	memcpy(out->pBuffer, ss.str().data(), out->size);
+
+	QueuePacket(out.get());
 }
 
 // @merth: I have no idea what this struct is for, so it's hardcoded for now

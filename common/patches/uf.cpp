@@ -1182,53 +1182,37 @@ namespace UF
 
 	ENCODE(OP_GuildsList)
 	{
-		EQApplicationPacket *in = *p;
+		EQApplicationPacket* in = *p;
 		*p = nullptr;
 
-		uint32 NumberOfGuilds = in->size / 64;
-		uint32 PacketSize = 68;	// 64 x 0x00 + a uint32 that I am guessing is the highest guild ID in use.
+		GuildsListMessaging_Struct   glms{};
+		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+		cereal::BinaryInputArchive   ar(ss);
+		ar(glms);
 
-		unsigned char *__emu_buffer = in->pBuffer;
-		char *InBuffer = (char *)__emu_buffer;
-		uint32 actual_no_guilds = 0;
+		auto packet_size = 64 + 4 + glms.guild_detail.size() * 4 + glms.string_length;
+		auto buffer      = new uchar[packet_size];
+		auto buf_pos     = buffer;
 
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				PacketSize += (5 + strlen(InBuffer));
-                actual_no_guilds++;
+		memset(buf_pos, 0, 64);
+		buf_pos += 64;
+
+		VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, glms.no_of_guilds);
+
+		for (auto const& g : glms.guild_detail) {
+			if (g.guild_id < UF::constants::MAX_GUILD_ID) {
+				VARSTRUCT_ENCODE_TYPE(uint32, buf_pos, g.guild_id);
+				strn0cpy((char *) buf_pos, g.guild_name.c_str(), g.guild_name.length() + 1);
+				buf_pos += g.guild_name.length() + 1;
 			}
-			InBuffer += 64;
 		}
 
-		PacketSize++;	// Appears to be an extra 0x00 at the very end.
-		in->size = PacketSize;
-		in->pBuffer = new unsigned char[in->size];
-		InBuffer = (char *)__emu_buffer;
-		char *OutBuffer = (char *)in->pBuffer;
+		auto outapp = new EQApplicationPacket(OP_GuildsList);
 
-		// Init the first 64 bytes to zero, as per live.
-		//
-		memset(OutBuffer, 0, 64);
-		OutBuffer += 64;
+		outapp->size    = packet_size;
+		outapp->pBuffer = buffer;
 
-		VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, actual_no_guilds);
-
-		for (unsigned int i = 0; i < NumberOfGuilds; ++i)
-		{
-			if (InBuffer[0])
-			{
-				VARSTRUCT_ENCODE_TYPE(uint32, OutBuffer, i - 1);
-				VARSTRUCT_ENCODE_STRING(OutBuffer, InBuffer);
-			}
-			InBuffer += 64;
-		}
-
-		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0x00);
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
+		dest->FastQueuePacket(&outapp);
 	}
 
 	ENCODE(OP_GuildMemberAdd)
