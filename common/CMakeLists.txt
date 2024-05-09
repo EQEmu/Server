@@ -178,6 +178,7 @@ SET(repositories
     repositories/base/base_character_material_repository.h
     repositories/base/base_character_memmed_spells_repository.h
     repositories/base/base_character_parcels_repository.h
+    repositories/base/base_character_parcels_containers_repository.h
     repositories/base/base_character_peqzone_flags_repository.h
     repositories/base/base_character_pet_buffs_repository.h
     repositories/base/base_character_pet_info_repository.h
@@ -359,6 +360,7 @@ SET(repositories
     repositories/character_material_repository.h
     repositories/character_memmed_spells_repository.h
     repositories/character_parcels_repository.h
+    repositories/character_parcels_containers_repository.h
     repositories/character_peqzone_flags_repository.h
     repositories/character_pet_buffs_repository.h
     repositories/character_pet_info_repository.h
