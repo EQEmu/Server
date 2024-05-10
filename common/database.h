@@ -243,6 +243,7 @@ public:
 	void SetRaidGroupLeaderInfo(uint32 group_id, uint32 raid_id);
 
 	void PurgeAllDeletedDataBuckets();
+	void ClearGuildOnlineStatus();
 
 
 	/* Database Variables */
