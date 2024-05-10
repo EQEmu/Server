@@ -1209,6 +1209,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.race            = n->GetRace();
 	e.class_          = n->GetClass();
 	e.hp              = n->GetMaxHP();
+	e.mana            = n->GetMaxMana();
 	e.gender          = n->GetGender();
 	e.texture         = n->GetTexture();
 	e.helmtexture     = n->GetHelmTexture();
@@ -1216,8 +1217,47 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.loottable_id    = n->GetLoottableID();
 	e.merchant_id     = n->MerchantType;
 	e.runspeed        = n->GetRunspeed();
-	e.prim_melee_type = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
-	e.sec_melee_type  = static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	e.walkspeed       = n->GetWalkspeed();
+	e.prim_melee_type = n->GetPrimSkill(); //static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	e.sec_melee_type  = n->GetSecSkill(); //static_cast<uint8_t>(EQ::skills::SkillHandtoHand);
+	
+	e.bodytype        = n->GetBodyType();
+	e.npc_faction_id  = n->GetNPCFactionID();
+	e.aggroradius     = n->GetAggroRange();
+	e.assistradius    = n->GetAssistRange();
+
+	// TODO: These Getters take into account itembonuses and spellbonuses and probably shouldn't for this use case (make GetBaseStat getters instead?)
+	e.AC              = n->GetAC();
+	e.ATK             = n->GetATK();
+	e.STR             = n->GetSTR();
+	e.STA             = n->GetSTA();
+	e.AGI             = n->GetAGI();
+	e.DEX             = n->GetDEX();
+	e.WIS             = n->GetWIS();
+	e._INT            = n->GetINT();
+	e.CHA             = n->GetCHA();
+	
+	e.PR              = n->GetPR();
+	e.MR              = n->GetMR();
+	e.DR              = n->GetDR();
+	e.FR              = n->GetFR();
+	e.CR              = n->GetCR();
+	e.Corrup          = n->GetCorrup();
+	e.PhR             = n->GetPhR();
+
+	e.Accuracy        = n->GetAccuracyRating();
+	e.slow_mitigation = n->GetSlowMitigation();
+	e.mindmg          = n->GetMinDMG();
+	e.maxdmg          = n->GetMaxDMG();
+	e.hp_regen_rate   = n->GetHPRegen();
+	e.hp_regen_per_second = n->GetHPRegenPerSecond();
+	//e.attack_delay    = n->GetAttackDelay(); // This one bugs out, 3000 becomes 18,400?
+	e.spellscale      = n->GetSpellScale();
+	e.healscale       = n->GetHealScale();
+	e.Avoidance       = n->GetAvoidanceRating();
+	e.heroic_strikethrough = n->GetHeroicStrikethrough();
+	
+	//todo: e.see_hide; e.see_improved_hide; e.see_invis; e.see_invis_undead;
 
 	e = NpcTypesRepository::InsertOne(*this, e);
 
