@@ -1257,7 +1257,11 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.Avoidance       = n->GetAvoidanceRating();
 	e.heroic_strikethrough = n->GetHeroicStrikethrough();
 	
-	//todo: e.see_hide; e.see_improved_hide; e.see_invis; e.see_invis_undead;
+	e.see_hide        = n->SeeHide();
+	e.see_improved_hide = n->SeeImprovedHide();
+	e.see_invis       = n->SeeInvisible();
+	e.see_invis_undead = n->SeeInvisibleUndead();
+
 
 	e = NpcTypesRepository::InsertOne(*this, e);
 
