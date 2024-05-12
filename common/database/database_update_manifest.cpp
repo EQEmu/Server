@@ -5568,6 +5568,17 @@ ADD COLUMN `is_parcel_merchant` TINYINT(1) UNSIGNED NOT NULL DEFAULT '0' AFTER `
 ALTER TABLE `character_data`
 ADD COLUMN `extra_haste` int(11) NOT NULL DEFAULT 0 AFTER `wis`;
 )"
+	},
+	ManifestEntry{
+		.version = 9276,
+		.description = "2024_05_12_fix_guild_bank_dup_issue.sql",
+		.check = "SHOW COLUMNS FROM `guild_bank` WHERE FIELD = 'qty' AND Type LIKE '%unsigned';",
+		.condition = "not_empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `guild_bank`
+	CHANGE COLUMN `qty` `qty` INT(10) NOT NULL DEFAULT '0' AFTER `itemid`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
