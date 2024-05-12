@@ -3494,14 +3494,13 @@ namespace RoF
 			ENCODE_LENGTH_EXACT(ClickTrader_Struct);
 			SETUP_DIRECT_ENCODE(ClickTrader_Struct, structs::ClickTrader_Struct);
 
-			eq->Code = emu->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 200; i++)
+			eq->Code = emu->action;
+			for (uint32 i = 0; i < RoF::invtype::BAZAAR_SIZE; i++)
 			{
 				strncpy(eq->items[i].SerialNumber, "0000000000000000", sizeof(eq->items[i].SerialNumber));
 				eq->items[i].Unknown18 = 0;
 				if (i < 80) {
-					eq->ItemCost[i] = emu->ItemCost[i];
+					eq->ItemCost[i] = emu->item_cost[i];
 				}
 				else {
 					eq->ItemCost[i] = 0;
@@ -5041,12 +5040,11 @@ namespace RoF
 			SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::ClickTrader_Struct);
 			MEMSET_IN(ClickTrader_Struct);
 
-			emu->Code = eq->Code;
-			// Live actually has 200 items now, but 80 is the most our internal struct supports
-			for (uint32 i = 0; i < 80; i++)
+			emu->action = eq->Code;
+			for (uint32 i = 0; i < RoF::invtype::BAZAAR_SIZE; i++)
 			{
-				emu->SerialNumber[i] = 0;	// eq->SerialNumber[i];
-				emu->ItemCost[i] = eq->ItemCost[i];
+				emu->serial_number[i] = 0;    // eq->SerialNumber[i];
+				emu->item_cost[i]     = eq->ItemCost[i];
 			}
 
 			FINISH_DIRECT_DECODE();

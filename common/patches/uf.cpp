@@ -4322,10 +4322,10 @@ namespace UF
 					action
 				);
 
-				emu->Code       = TraderOn;
-				emu->Unknown004 = 0;
-				std::copy_n(eq->serial_number, UF::invtype::BAZAAR_SIZE, emu->SerialNumber);
-				std::copy_n(eq->cost, UF::invtype::BAZAAR_SIZE, emu->ItemCost);
+				emu->action      = TraderOn;
+				emu->unknown_004 = 0;
+				std::copy_n(eq->serial_number, UF::invtype::BAZAAR_SIZE, emu->serial_number);
+				std::copy_n(eq->cost, UF::invtype::BAZAAR_SIZE, emu->item_cost);
 
 				FINISH_DIRECT_DECODE();
 				break;

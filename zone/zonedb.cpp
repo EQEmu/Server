@@ -356,7 +356,7 @@ TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
 	return loadti;
 }
 
-EQ::ItemInstance *ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_number)
+std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_number)
 {
 	auto results = TraderRepository::GetWhere(
 		database,
@@ -385,7 +385,18 @@ EQ::ItemInstance *ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_
 		return nullptr;
 	}
 
-	EQ::ItemInstance *inst = database.CreateItem(item);
+	std::unique_ptr<EQ::ItemInstance> inst(
+		database.CreateItem(
+			item_id,
+			charges,
+			results.at(0).aug_slot_1,
+			results.at(0).aug_slot_2,
+			results.at(0).aug_slot_3,
+			results.at(0).aug_slot_4,
+			results.at(0).aug_slot_5,
+			results.at(0).aug_slot_6
+		)
+	);
 	if (!inst) {
 		LogTrading("Unable to create item instance.");
 		return nullptr;
@@ -400,7 +411,7 @@ EQ::ItemInstance *ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_
 		inst->SetMerchantCount(charges);
 	}
 
-	return inst;
+	return std::move(inst);
 }
 
 void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNumber, int32 Charges, uint32 ItemCost, uint8 Slot){

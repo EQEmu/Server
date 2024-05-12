@@ -69,6 +69,7 @@ namespace EQ
 #include "../common/events/player_events.h"
 #include "../common/data_verification.h"
 #include "../common/repositories/character_parcels_repository.h"
+#include "../common/repositories/trader_repository.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -284,14 +285,14 @@ public:
 	void Trader_CustomerBrowsing(Client *Customer);
 
 	void TraderEndTrader();
-	void TraderPriceUpdate2(const EQApplicationPacket *app);
+	void TraderPriceUpdate(const EQApplicationPacket *app);
 	void SendBazaarDone(uint32 trader_id);
 	void SendBulkBazaarTraders();
 	void DoBazaarInspect(const BazaarInspect_Struct &in);
 
 	void SendTraderMode(BazaarTraderBarterActions status);
 	void TraderStartTrader(const EQApplicationPacket *app);
-	void TraderPriceUpdate(const EQApplicationPacket *app);
+//	void TraderPriceUpdate(const EQApplicationPacket *app);
 	uint8 WithCustomer(uint16 NewCustomer);
 	void KeyRingLoad();
 	void KeyRingAdd(uint32 item_id);
@@ -323,7 +324,7 @@ public:
 	void Tell_StringID(uint32 string_id, const char *who, const char *message);
 	void SendColoredText(uint32 color, std::string message);
 	void SendBazaarResults(uint32 trader_id, uint32 in_class, uint32 in_race, uint32 item_stat, uint32 item_slot, uint32 item_type, char item_name[64], uint32 min_price, uint32 max_price);
-	void SendTraderItem(uint32 item_id,uint16 quantity);
+	void SendTraderItem(uint32 item_id,uint16 quantity, TraderRepository::Trader &trader);
 	void DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria);
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);

@@ -3002,26 +3002,26 @@ struct EnvDamage2_Struct {
 //
 
 enum {
-	BazaarTrader_StartTraderMode = 1,
-	BazaarTrader_EndTraderMode = 2,
-	BazaarTrader_UpdatePrice = 3,
-	BazaarTrader_EndTransaction = 4,
-	BazaarSearchResults = 7,
-	BazaarWelcome = 9,
-	BazaarBuyItem = 10,
-	BazaarTrader_ShowItems = 11,
-	BazaarSearchDone = 12,
+	BazaarTrader_StartTraderMode  = 1,
+	BazaarTrader_EndTraderMode    = 2,
+	BazaarTrader_UpdatePrice      = 3,
+	BazaarTrader_EndTransaction   = 4,
+	BazaarSearchResults           = 7,
+	BazaarWelcome                 = 9,
+	BazaarBuyItem                 = 10,
+	BazaarTrader_ShowItems        = 11,
+	BazaarSearchDone              = 12,
 	BazaarTrader_CustomerBrowsing = 13,
-	BazaarInspectItem = 18,
-	BazaarSearchDone2 = 19,
+	BazaarInspectItem             = 18,
+	BazaarSearchDone2             = 19,
 	BazaarTrader_StartTraderMode2 = 22
 };
 
 enum {
-	BazaarPriceChange_Fail = 0,
+	BazaarPriceChange_Fail        = 0,
 	BazaarPriceChange_UpdatePrice = 1,
-	BazaarPriceChange_RemoveItem = 2,
-	BazaarPriceChange_AddItem = 3
+	BazaarPriceChange_RemoveItem  = 2,
+	BazaarPriceChange_AddItem     = 3
 };
 
 struct BazaarWindowStart_Struct {
@@ -3037,21 +3037,6 @@ struct BazaarWelcome_Struct {
 	uint32 items;
 	uint32 unknown_012;
 	uint32 unknown_016;
-};
-
-struct OLDBazaarSearch_Struct {
-	BazaarWindowStart_Struct Beginning;
-	uint32	TraderID;
-	uint32	Class_;
-	uint32	Race;
-	uint32	ItemStat;
-	uint32	Slot;
-	uint32	Type;
-	char	Name[64];
-	uint32	MinPrice;
-	uint32	MaxPrice;
-	uint32	Minlevel;
-	uint32	MaxLlevel;
 };
 
 struct BazaarSearchCriteria_Struct {
@@ -3076,11 +3061,6 @@ struct BazaarSearchCriteria_Struct {
 	/*132*/ uint32 trader_entity_id{0};
 };
 
-//struct BazaarInspect_Struct{
-//	uint32 ItemID;
-//	uint32 Unknown004;
-//	char Name[64];
-//};
 struct BazaarInspect_Struct {
 	uint32 action;
 	char   player_name[64];
@@ -3423,21 +3403,21 @@ struct WhoAllReturnStruct {
 struct Trader_Struct {
 /*000*/	uint32	action;
 /*004*/	uint32	unknown_004;
-/*008*/	uint64	items[200];
-/*648*/	uint32	item_cost[200];
+/*008*/	uint64	items[EQ::invtype::BAZAAR_SIZE];
+/*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct ClickTrader_Struct {
-/*000*/	uint32	Code;
-/*004*/	uint32	Unknown004;
-/*008*/	int64	SerialNumber[200] {};
-/*648*/	uint32	ItemCost[200] {};
+/*000*/	uint32	action;
+/*004*/	uint32	unknown_004;
+/*008*/	int64	serial_number[EQ::invtype::BAZAAR_SIZE] {};
+/*648*/	uint32	item_cost[EQ::invtype::BAZAAR_SIZE] {};
 };
 
 struct GetItems_Struct{
-	uint32	Items[EQ::invtype::BAZAAR_SIZE];
-	int32	SerialNumber[EQ::invtype::BAZAAR_SIZE];
-	int32	Charges[EQ::invtype::BAZAAR_SIZE];
+	uint32	items[EQ::invtype::BAZAAR_SIZE];
+	int32	serial_number[EQ::invtype::BAZAAR_SIZE];
+	int32	charges[EQ::invtype::BAZAAR_SIZE];
 };
 
 struct BecomeTrader_Struct {

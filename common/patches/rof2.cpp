@@ -5557,12 +5557,12 @@ namespace RoF2
 				SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::BeginTrader_Struct);
 				LogTrading("(RoF2) BeginTraderMode action <green>[{}]", action);
 
-				emu->Code = TraderOn;
-				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->ItemCost);
+				emu->action = TraderOn;
+				std::copy_n(eq->item_cost, RoF2::invtype::BAZAAR_SIZE, emu->item_cost);
 				std::transform(
 					std::begin(eq->items),
 					std::end(eq->items),
-					std::begin(emu->SerialNumber),
+					std::begin(emu->serial_number),
 					[&](const structs::TraderItemSerial_Struct x) {
 						return Strings::ToUnsignedBigInt(x.serial_number,0);
 					}

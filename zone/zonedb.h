@@ -393,7 +393,7 @@ public:
 	void	DeleteTraderItem(uint32 char_id);
 	void	DeleteTraderItem(uint32 char_id,uint16 slot_id);
 
-	EQ::ItemInstance* LoadSingleTraderItem(uint32 char_id, int serial_number);
+	std::unique_ptr<EQ::ItemInstance> LoadSingleTraderItem(uint32 char_id, int serial_number);
 	Trader_Struct* LoadTraderItem(uint32 char_id);
 	TraderCharges_Struct* LoadTraderItemWithCharges(uint32 char_id);
 

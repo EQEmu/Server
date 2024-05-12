@@ -15524,7 +15524,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 		case PriceUpdate:
 		case ItemMove: {
 			LogTrading("Trader Price Update");
-			TraderPriceUpdate2(app);
+			TraderPriceUpdate(app);
 			break;
 		}
 		case EndTransaction: {
