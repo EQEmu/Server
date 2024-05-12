@@ -777,12 +777,18 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 }
 
 void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
-    if (!inst->GetCustomData("Customized").empty()) {
+	// Only allow creation of dynamic items which aren't already dynamic items
+    if (!inst->GetCustomData("Customized").empty() && inst->GetOriginalID() == inst->GetID()) {
         std::string key = md5::digest(inst->GetCustomDataString());
         if (key != inst->GetItem()->Comment) {			
 			// This data is important to preserve to properly track the item in inventories.
 			if (inst->GetCustomData("original_id").empty()) {
 				inst->SetCustomData("original_id", std::to_string(inst->GetID()));
+			}
+
+			if (inst->GetItemType() == EQ::item::ItemTypeAugmentation) {
+				LogError("Attempted to create illegal Dynamic Item: Augment");
+				return;
 			}
 
 			char* disco_tag = inst->GetItem()->CharmFile;
@@ -858,7 +864,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->Delay = std::max((uint8)(inst->GetMutableItem()->Delay + Strings::ToInt(inst->GetCustomData("Delay"), 0)), std::min((uint8)15, GetItem(inst->GetItem()->OriginalID)->Delay));			
 
 			if (!inst->GetCustomData("force_unlimited_charges").empty() && inst->IsCharged()) {
-				uint32 new_cast_time = Strings::ToUnsignedInt(inst->GetCustomData("force_unlimited_charges"));
+				uint32 new_cast_time = std::max(static_cast<uint32>(5000), Strings::ToUnsignedInt(inst->GetCustomData("force_unlimited_charges")));
 
 				inst->SetCharges(-1);
 				inst->GetMutableItem()->MaxCharges = -1;
