@@ -4437,7 +4437,7 @@ void Client::DiscoverItem(uint32 item_id) {
 	}
 }
 
-bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
+bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst) {
 	if (!(inst->GetItem()->Classes & GetClassesBits() && inst->GetItem()->Races & GetPlayerRaceBit(GetRace()))) {
 		if (!inst->IsClassBag()) {
 			return false;
@@ -4450,24 +4450,21 @@ bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
 
 	if (inst->GetItem()->ID < 2000000 || inst->GetItem()->ID > 3000000) {
 		return false;
-	}
+	}	
+	
+	std::string bucket_key = "artifact-" + std::to_string(inst->GetOriginalID()) + "-discovered-" + std::to_string(GetSeason());
 
-	std::string global_string    = std::to_string(AccountID()) + "-artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
-	std::string character_string = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
-
-	if (bypass) {
-		return GetBucket(character_string).empty();
-	} else {
-		return DataBucket::GetData(global_string).empty();
+	if (!DataBucket::GetData(bucket_key).empty()) {
+		return false;
 	}
 	
-	return false;
+	return true;
 }
 
-bool Client::DiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
+bool Client::DiscoverArtifact(EQ::ItemInstance* inst) {
 	if (inst && inst->GetItemType() != EQ::item::ItemTypeAugmentation) {
 		LogDebug("Checking if we can discover an artifact here...");
-		if (CanDiscoverArtifact(inst, bypass) && zone->random.Roll(RuleI(Custom, ArtifactDiscoveryChance))) {
+		if (CanDiscoverArtifact(inst) && zone->random.Roll(RuleI(Custom, ArtifactDiscoveryChance))) {
 			SendSound();
 			Message(Chat::Yellow, "You have discovered an Artifact!");
 
@@ -4572,16 +4569,8 @@ bool Client::DiscoverArtifact(EQ::ItemInstance* inst, bool bypass) {
 				inst->SetCustomData("force_unlimited_charges", static_cast<int>(spells[inst->GetItem()->Click.Effect].cast_time));
 			}
 
-			std::string global_string    = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
-			std::string character_string = "artifact-" + std::to_string(inst->GetItem()->ID) + "-season-" + std::to_string(GetSeason());
-
-			if (GetSeason() > 0) {
-				DataBucket::SetData(global_string, std::string(GetCleanName()) + " in Season " + std::to_string(GetSeason()));
-				SetBucket(character_string, std::string(GetCleanName()) + " in Season " + std::to_string(GetSeason()));
-			} else {
-				DataBucket::SetData(global_string, std::string(GetCleanName()));
-				SetBucket(character_string, std::string(GetCleanName()));
-			}
+			std::string bucket_key = "artifact-" + std::to_string(inst->GetOriginalID()) + "-discovered-" + std::to_string(GetSeason());
+			DataBucket::SetData(bucket_key, "true");
 			
 			database.RunGenerateCallback(inst);
 			return true;
