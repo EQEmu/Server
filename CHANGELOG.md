@@ -1,3 +1,9 @@
+## [22.50.1] 5/12/2024
+
+### Fixes
+
+* Clear GuildOnlineStatus on world boot ([#4306](https://github.com/EQEmu/Server/pull/4306)) @neckkola 2024-05-12
+
 ## [22.50.0] 5/9/2024
 
 ### Code
