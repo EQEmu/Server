@@ -779,6 +779,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 	// Only allow creation of dynamic items which aren't already dynamic items
     if (!inst->GetCustomData("Customized").empty() && inst->GetOriginalID() == inst->GetID()) {
+		
         std::string key = md5::digest(inst->GetCustomDataString());
         if (key != inst->GetItem()->Comment) {			
 			// This data is important to preserve to properly track the item in inventories.
@@ -801,6 +802,10 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->Attuneable   = Strings::ToInt(inst->GetCustomData("Attuneable"), inst->GetItem()->Attuneable);
 			inst->GetMutableItem()->Season       = Strings::ToInt(inst->GetCustomData("Season"), 0);
 			inst->GetMutableItem()->NoDrop		 = Strings::ToInt(inst->GetCustomData("NoDrop"), 1);
+
+			if (inst->IsAttuned() && !inst->GetItem()->Attuneable) {
+				inst->SetAttuned(false);
+			}
 
 			inst->GetMutableItem()->BaneDmgRaceAmt   += Strings::ToInt(inst->GetCustomData("BaneDmgRaceAmt"), 0);
 			inst->GetMutableItem()->ElemDmgAmt       += Strings::ToInt(inst->GetCustomData("ElemDmgAmt"), 0);
