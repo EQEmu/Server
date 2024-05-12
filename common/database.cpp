@@ -2089,3 +2089,8 @@ void Database::PurgeCharacterParcels()
 		RuleI(Parcel, ParcelPruneDelay)
 	);
 }
+
+void Database::ClearGuildOnlineStatus()
+{
+	GuildMembersRepository::ClearOnlineStatus(*this);
+}
