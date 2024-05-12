@@ -1269,7 +1269,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 		return false;
 	}
 
-	auto sg = SpawngroupRepository::NewEntity();
+	/*auto sg = SpawngroupRepository::NewEntity();
 
 	sg.name = fmt::format(
 		"{}-{}",
@@ -1283,7 +1283,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 		return false;
 	}
 
-	n->SetSpawnGroupId(sg.id);
+	n->SetSpawnGroupId(sg.id);*/
 	n->SetNPCTypeID(e.id);
 
 	auto s2 = Spawn2Repository::NewEntity();
@@ -1295,7 +1295,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	s2.z            = n->GetZ();
 	s2.respawntime  = 1200;
 	s2.heading      = n->GetHeading();
-	s2.spawngroupID = sg.id;
+	s2.spawngroupID = n->GetSpawnGroupId(); //sg.id; //this isn't right... I want to optionally create a new spawngroup - initially yes, subsequently no
 
 	s2 = Spawn2Repository::InsertOne(*this, s2);
 
@@ -1305,7 +1305,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 
 	auto se = SpawnentryRepository::NewEntity();
 
-	se.spawngroupID = sg.id;
+	se.spawngroupID = n->GetSpawnGroupId(); //sg.id;
 	se.npcID        = e.id;
 	se.chance       = 100;
 
