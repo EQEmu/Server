@@ -189,22 +189,20 @@ void Client::SendGuildSpawnAppearance() {
 	UpdateWho();
 }
 
-void Client::SendGuildList() {
-	EQApplicationPacket *outapp;
-//	outapp = new EQApplicationPacket(OP_ZoneGuildList);
-	outapp = new EQApplicationPacket(OP_GuildsList);
+void Client::SendGuildList()
+{
+	auto guilds_list = guild_mgr.MakeGuildList();
 
-	//ask the guild manager to build us a nice guild list packet
-	outapp->pBuffer = guild_mgr.MakeGuildList(/*GetName()*/"", outapp->size);
-	if(outapp->pBuffer == nullptr) {
-		LogGuilds("Unable to make guild list!");
-		safe_delete(outapp);
-		return;
-	}
+	std::stringstream           ss;
+	cereal::BinaryOutputArchive ar(ss);
+	ar(guilds_list);
 
-	LogGuilds("Sending OP_ZoneGuildList of length [{}]", outapp->size);
+	uint32 packet_size = ss.str().length();
 
-	FastQueuePacket(&outapp);
+	std::unique_ptr<EQApplicationPacket> out(new EQApplicationPacket(OP_GuildsList, packet_size));
+	memcpy(out->pBuffer, ss.str().data(), out->size);
+
+	QueuePacket(out.get());
 }
 
 

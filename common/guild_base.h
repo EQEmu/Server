@@ -134,7 +134,7 @@ class BaseGuildManager
         bool	CheckGMStatus(uint32 guild_id, uint8 status) const;
         bool	CheckPermission(uint32 guild_id, uint8 rank, GuildAction act) const;
         bool	UpdateDbBankerFlag(uint32 charid, bool is_banker);
-        uint8*  MakeGuildList(const char* head_name, uint32& length) const;	//make a guild list packet, returns ownership of the buffer.
+        GuildsListMessaging_Struct MakeGuildList();
         uint8	GetDisplayedRank(uint32 guild_id, uint8 rank, uint32 char_id) const;
         uint32	GetGuildIDByName(const char *GuildName);
 		uint32  GetGuildIDByCharacterID(uint32 character_id);

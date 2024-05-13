@@ -1,3 +1,121 @@
+## [22.50.1] 5/12/2024
+
+### Fixes
+
+* Clear GuildOnlineStatus on world boot ([#4306](https://github.com/EQEmu/Server/pull/4306)) @neckkola 2024-05-12
+
+## [22.50.0] 5/9/2024
+
+### Code
+
+* Fix Message in #find task ([#4270](https://github.com/EQEmu/Server/pull/4270)) @Kinglykrab 2024-04-19
+
+### Combat
+
+* Add rule to set stun duration.  Add rule to add stun messages. ([#4284](https://github.com/EQEmu/Server/pull/4284)) @noudess 2024-04-25
+
+### Commands
+
+* Adjust #kill and #list Commands ([#4271](https://github.com/EQEmu/Server/pull/4271)) @Kinglykrab 2024-05-04
+
+### Compiling
+
+* Add profiler flag ([#4293](https://github.com/EQEmu/Server/pull/4293)) @xackery 2024-05-04
+
+### Corpses
+
+* Corpse searches for items did not search augs ([#4289](https://github.com/EQEmu/Server/pull/4289)) @noudess 2024-04-27
+
+### Database
+
+* Add Extra Haste to Bots/Character Tables ([#4286](https://github.com/EQEmu/Server/pull/4286)) @Kinglykrab 2024-05-04
+* Break out changes to `npc_types` from parcels ([#4295](https://github.com/EQEmu/Server/pull/4295)) @joligario 2024-05-03
+* Move pets query to content database ([#4296](https://github.com/EQEmu/Server/pull/4296)) @joligario 2024-05-04
+
+### Doors
+
+* Replace magic # in code with a field in doors table for when door closes. ([#4288](https://github.com/EQEmu/Server/pull/4288)) @noudess 2024-04-25
+
+### Experience
+
+* Add SetExp/SetAAExp lua mods ([#4292](https://github.com/EQEmu/Server/pull/4292)) @xackery 2024-05-04
+
+### Feature
+
+* Add Augmentation Support for Parcels ([#4285](https://github.com/EQEmu/Server/pull/4285)) @neckkola 2024-04-24
+* Add Character Auto Login ([#4216](https://github.com/EQEmu/Server/pull/4216)) @Kinglykrab 2024-04-15
+* Add Parcel Feature for RoF2 Clients ([#4198](https://github.com/EQEmu/Server/pull/4198)) @neckkola 2024-04-21
+* Add `is_parcel_merchant` to #npcedit ([#4290](https://github.com/EQEmu/Server/pull/4290)) @Kinglykrab 2024-05-04
+* Add devcontainer support ([#4294](https://github.com/EQEmu/Server/pull/4294)) @xackery 2024-05-09
+* Fix ignore_default on lua mod damage ([#4228](https://github.com/EQEmu/Server/pull/4228)) @xackery 2024-04-15
+
+### Fixes
+
+* "GM flag" vs "GM Flag"  @Akkadius 2024-05-04
+* All NPC classes could stun with kick/only warriors could be stunned ([#4273](https://github.com/EQEmu/Server/pull/4273)) @noudess 2024-04-24
+* Fix Account Flags Loading ([#4243](https://github.com/EQEmu/Server/pull/4243)) @Kinglykrab 2024-04-15
+* Fix Corpses "Disappearing" ([#4275](https://github.com/EQEmu/Server/pull/4275)) @joligario 2024-04-21
+* Fix Issue With Auto Login ([#4267](https://github.com/EQEmu/Server/pull/4267)) @Kinglykrab 2024-04-21
+* Fix crash from #4266  @Akkadius 2024-05-05
+* Fixes Issue 4257 - Double Taunt Message ([#4258](https://github.com/EQEmu/Server/pull/4258)) @fryguy503 2024-04-18
+* GLAA fix after database.cpp updates ([#4277](https://github.com/EQEmu/Server/pull/4277)) @neckkola 2024-04-21
+* GetSkill default return 0  @Akkadius 2024-05-05
+* Hero forge armor bug on login and show helm toggle. ([#4246](https://github.com/EQEmu/Server/pull/4246)) @noudess 2024-04-15
+* Perl__send_parcel GCC compile error  @Akkadius 2024-05-05
+* Remove food or water GM message  @Akkadius 2024-05-05
+* Revert GetSkill from #4234  @Akkadius 2024-05-05
+* Fix for world crash with over 1500 guilds ([#4299](https://github.com/EQEmu/Server/pull/4299)) @neckkola 2024-05-09
+
+### Hot Fix
+
+* Update database_update_manifest.cpp ([#4291](https://github.com/EQEmu/Server/pull/4291)) @noudess 2024-04-29
+
+### Loot
+
+* Add content filtering to lootdrop_entries ([#4229](https://github.com/EQEmu/Server/pull/4229)) @Akkadius 2024-04-15
+* Consolidate filtering logic ([#4280](https://github.com/EQEmu/Server/pull/4280)) @Akkadius 2024-04-21
+
+### Lua
+
+* Add IsImmuneToSpell Lua Mod ([#4278](https://github.com/EQEmu/Server/pull/4278)) @xackery 2024-04-28
+* Add UpdatePersonalFaction Lua Mod ([#4279](https://github.com/EQEmu/Server/pull/4279)) @xackery 2024-05-04
+
+### Messages
+
+* Add GM Status and Invulnerability Messages ([#4266](https://github.com/EQEmu/Server/pull/4266)) @Kinglykrab 2024-05-04
+* Fix bug where DoT messages stop coming out when mob dies. ([#4249](https://github.com/EQEmu/Server/pull/4249)) @noudess 2024-04-15
+* Fix multiple errors in spell damage at death. ([#4264](https://github.com/EQEmu/Server/pull/4264)) @noudess 2024-04-28
+
+### Performance
+
+* Change skill_cap from vector to map ([#4252](https://github.com/EQEmu/Server/pull/4252)) @xackery 2024-04-15
+
+### Pets
+
+* Fix errors in sync with client of sit/stand ([#4245](https://github.com/EQEmu/Server/pull/4245)) @noudess 2024-04-15
+
+### Quest API
+
+* Add DescribeSpecialAbilities() to Perl/Lua ([#4269](https://github.com/EQEmu/Server/pull/4269)) @Kinglykrab 2024-04-21
+* Add GetConsiderColor() to Perl/Lua ([#4253](https://github.com/EQEmu/Server/pull/4253)) @Kinglykrab 2024-04-15
+* Add Parcel Sending to Perl/Lua ([#4287](https://github.com/EQEmu/Server/pull/4287)) @Kinglykrab 2024-05-04
+* Add Zone Methods to Perl/Lua ([#4268](https://github.com/EQEmu/Server/pull/4268)) @Kinglykrab 2024-04-21
+
+### Quests
+
+* Hot Reload Changes ([#4302](https://github.com/EQEmu/Server/pull/4302)) @Akkadius 2024-05-09
+* Reload Quests on Bootup, Init earlier ([#4298](https://github.com/EQEmu/Server/pull/4298)) @Akkadius 2024-05-05
+
+### Spells
+
+* Implemented SPA 122 SE_ReduceSkill ([#4234](https://github.com/EQEmu/Server/pull/4234)) @KayenEQ 2024-05-04
+* Normal Group Spells (non-raid) landed twice on caster ([#4240](https://github.com/EQEmu/Server/pull/4240)) @noudess 2024-04-15
+* SPA69 TotalHP can be used in Worn Slot, Fixes/Updates to Max HP related variables. ([#4244](https://github.com/EQEmu/Server/pull/4244)) @KayenEQ 2024-04-15
+
+### Zone Instances
+
+* Handle routing to instances when using evac/succor ([#4297](https://github.com/EQEmu/Server/pull/4297)) @joligario 2024-05-04
+
 ## [22.49.1] 4/15/2024
 
 ### Zoning
