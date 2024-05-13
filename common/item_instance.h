@@ -323,7 +323,6 @@ namespace EQ
 		bool				m_attuned {false};
 		int32				m_merchantcount {1}; //number avaliable on the merchant, -1=unlimited
 		int32				m_SerialNumber {0};	// Unique identifier for this instance of an item. Needed for Bazaar.
-		std::string 		m_guid {};			// unique identifier for RoF2 bazaar, parcels, barter, buyer functionality.
 		uint32				m_exp {0};
 		int8				m_evolveLvl {0};
 		bool				m_activated {false};

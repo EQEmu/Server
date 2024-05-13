@@ -138,7 +138,7 @@
 #define ServerOP_RaidMOTD			0x0113
 #define ServerOP_RaidNote           0x0114
 
-#define ServerOP_TraderMessaging	0x0120
+#define ServerOP_TraderMessaging    0x0120
 
 #define ServerOP_InstanceUpdateTime			0x014F
 #define ServerOP_AdventureRequest			0x0150

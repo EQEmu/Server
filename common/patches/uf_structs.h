@@ -2640,23 +2640,23 @@ struct EnvDamage2_Struct {
 //Bazaar Stuff
 
 enum {
-	BazaarTrader_StartTraderMode = 1,
-	BazaarTrader_EndTraderMode = 2,
-	BazaarTrader_UpdatePrice = 3,
-	BazaarTrader_EndTransaction = 4,
-	BazaarSearchResults = 7,
-	BazaarWelcome = 9,
-	BazaarBuyItem = 10,
-	BazaarTrader_ShowItems = 11,
-	BazaarSearchDone = 12,
+	BazaarTrader_StartTraderMode  = 1,
+	BazaarTrader_EndTraderMode    = 2,
+	BazaarTrader_UpdatePrice      = 3,
+	BazaarTrader_EndTransaction   = 4,
+	BazaarSearchResults           = 7,
+	BazaarWelcome                 = 9,
+	BazaarBuyItem                 = 10,
+	BazaarTrader_ShowItems        = 11,
+	BazaarSearchDone              = 12,
 	BazaarTrader_CustomerBrowsing = 13
 };
 
 enum {
-	BazaarPriceChange_Fail = 0,
+	BazaarPriceChange_Fail        = 0,
 	BazaarPriceChange_UpdatePrice = 1,
-	BazaarPriceChange_RemoveItem = 2,
-	BazaarPriceChange_AddItem = 3
+	BazaarPriceChange_RemoveItem  = 2,
+	BazaarPriceChange_AddItem     = 3
 };
 
 struct BazaarWindowStart_Struct {
@@ -4686,29 +4686,29 @@ struct SayLinkBodyFrame_Struct {
 /*050*/
 };
 
-		struct TraderPriceUpdate_Struct {
+struct TraderPriceUpdate_Struct {
 /*000*/    uint32 action;
 /*004*/    uint32 sub_action;
 /*008*/    int32  serial_number;
 /*012*/    uint32 unknown_012;
 /*016*/    uint32 new_price;
 /*020*/    uint32 unknown_016;
-		};
+};
 
-		enum UFBazaarTraderBuyerActions {
-			Zero            = 0,
-			BeginTraderMode = 1,
-			EndTraderMode   = 2,
-			PriceUpdate     = 3,
-			EndTransaction  = 4,
-			BazaarSearch    = 7,
-			WelcomeMessage  = 9,
-			BuyTraderItem   = 10,
-			ListTraderItems = 11,
-			BazaarInspect   = 18,
-			ItemMove        = 19,
-			ReconcileItems  = 20
-		};
+enum UFBazaarTraderBuyerActions {
+	Zero            = 0,
+	BeginTraderMode = 1,
+	EndTraderMode   = 2,
+	PriceUpdate     = 3,
+	EndTransaction  = 4,
+	BazaarSearch    = 7,
+	WelcomeMessage  = 9,
+	BuyTraderItem   = 10,
+	ListTraderItems = 11,
+	BazaarInspect   = 18,
+	ItemMove        = 19,
+	ReconcileItems  = 20
+};
 
 	}; /*structs*/
 

@@ -126,7 +126,7 @@ namespace EQ
 			/*----*/ ItemTypeCount,
 			/*----*/ ItemTypeCollectible,
 			/*----*/ ItemTypeContainer,
-			/*----*/ ItemTypeAll     = 0xFFFFFFFF
+			/*----*/ ItemTypeAll     = 0xFF
 
 /*
 			Unknowns:

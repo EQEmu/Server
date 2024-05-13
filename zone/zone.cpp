@@ -68,6 +68,7 @@
 #include "../common/repositories/merc_stance_entries_repository.h"
 #include "../common/repositories/alternate_currency_repository.h"
 #include "../common/repositories/graveyard_repository.h"
+#include "../common/repositories/trader_repository.h"
 
 #include <time.h>
 
@@ -1197,7 +1198,7 @@ bool Zone::Init(bool is_static) {
 
 	//clear trader items if we are loading the bazaar
 	if (strncasecmp(short_name, "bazaar", 6) == 0) {
-		database.DeleteTraderItem(0);
+		TraderRepository::Truncate(database);
 		database.DeleteBuyLines(0);
 	}
 

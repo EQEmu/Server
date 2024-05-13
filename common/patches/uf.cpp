@@ -2909,7 +2909,8 @@ namespace UF
 			}
 			default: {
 				EQApplicationPacket *in = *p;
-				*p = nullptr;
+				*p                      = nullptr;
+
 				dest->FastQueuePacket(&in, ack_req);
 				LogError("Unknown Encode OP_Trader action <red>{} received.  Unhandled.", action);
 			}
@@ -2985,6 +2986,7 @@ namespace UF
 			default: {
 				EQApplicationPacket *in = *p;
 				*p = nullptr;
+
 				dest->FastQueuePacket(&in, ack_req);
 				LogError("Unknown Encode OP_TraderShop action <red>[{}] received.  Unhandled.", action);
 			}
@@ -4313,6 +4315,7 @@ namespace UF
 	DECODE(OP_Trader)
 	{
 		auto action = (uint32) __packet->pBuffer[0];
+
 		switch (action) {
 			case structs::UFBazaarTraderBuyerActions::BeginTraderMode: {
 				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
@@ -4338,7 +4341,7 @@ namespace UF
 					action
 				);
 
-				emu->action    = TraderOff;
+				emu->action = TraderOff;
 				IN(entity_id);
 
 				FINISH_DIRECT_DECODE();
@@ -4355,7 +4358,6 @@ namespace UF
 				break;
 			}
 			case structs::UFBazaarTraderBuyerActions::ReconcileItems: {
-				//eat packet as it is not used atm
 				break;
 			}
 			default: {

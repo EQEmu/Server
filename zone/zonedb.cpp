@@ -305,57 +305,6 @@ void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 	);
 }
 
-Trader_Struct* ZoneDatabase::LoadTraderItem(uint32 char_id)
-{
-	auto loadti = new Trader_Struct;
-	memset(loadti,0,sizeof(Trader_Struct));
-
-	std::string query = StringFormat("SELECT * FROM trader WHERE char_id = %i ORDER BY slot_id LIMIT 80", char_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogTrading("Failed to load trader information!\n");
-		return loadti;
-	}
-
-	loadti->action = BazaarTrader_ShowItems;
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (Strings::ToInt(row[5]) >= 200 || Strings::ToInt(row[4]) < 0) {
-			LogTrading("Bad Slot number when trying to load trader information!\n");
-			continue;
-		}
-
-		loadti->items[Strings::ToInt(row[5])] = Strings::ToInt(row[1]);
-		loadti->item_cost[Strings::ToInt(row[5])] = Strings::ToInt(row[4]);
-	}
-	return loadti;
-}
-
-TraderCharges_Struct* ZoneDatabase::LoadTraderItemWithCharges(uint32 char_id)
-{
-	auto loadti = new TraderCharges_Struct;
-	memset(loadti,0,sizeof(TraderCharges_Struct));
-
-	std::string query = StringFormat("SELECT * FROM trader WHERE char_id=%i ORDER BY slot_id LIMIT 200", char_id);
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogTrading("Failed to load trader information!\n");
-		return loadti;
-	}
-
-	for (auto& row = results.begin(); row != results.end(); ++row) {
-		if (Strings::ToInt(row[5]) >= 200 || Strings::ToInt(row[5]) < 0) {
-			LogTrading("Bad Slot number when trying to load trader information!\n");
-			continue;
-		}
-
-		loadti->ItemID[Strings::ToInt(row[5])] = Strings::ToInt(row[1]);
-		loadti->SerialNumber[Strings::ToInt(row[5])] = Strings::ToInt(row[2]);
-		loadti->Charges[Strings::ToInt(row[5])] = Strings::ToInt(row[3]);
-		loadti->ItemCost[Strings::ToInt(row[5])] = Strings::ToInt(row[4]);
-	}
-	return loadti;
-}
-
 std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char_id, int serial_number)
 {
 	auto results = TraderRepository::GetWhere(
@@ -364,12 +313,12 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 			"`char_id` = '{}' AND `item_sn` = '{}' ORDER BY slot_id",
 			char_id,
 			serial_number
-		));
+		)
+	);
 
 	if (results.empty()) {
 		LogTrading("Could not find item serial number {} for character id {}", serial_number, char_id);
 	}
-
 
 	int item_id = results.at(0).item_id;
 	int charges = results.at(0).item_charges;
@@ -414,27 +363,6 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 	return std::move(inst);
 }
 
-void ZoneDatabase::SaveTraderItem(uint32 CharID, uint32 ItemID, uint32 SerialNumber, int32 Charges, uint32 ItemCost, uint8 Slot){
-
-	std::string query = StringFormat("REPLACE INTO trader VALUES(%i, %i, %i, %i, %i, %i)",
-                                    CharID, ItemID, SerialNumber, Charges, ItemCost, Slot);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-        LogDebug("[CLIENT] Failed to save trader item: [{}] for char_id: [{}], the error was: [{}]\n", ItemID, CharID, results.ErrorMessage().c_str());
-
-}
-
-void ZoneDatabase::UpdateTraderItemCharges(int CharID, uint32 SerialNumber, int32 Charges) {
-	LogTrading("ZoneDatabase::UpdateTraderItemCharges([{}], [{}], [{}])", CharID, SerialNumber, Charges);
-
-	std::string query = StringFormat("UPDATE trader SET charges = %i WHERE char_id = %i AND serialnumber = %i",
-                                    Charges, CharID, SerialNumber);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-		LogDebug("[CLIENT] Failed to update charges for trader item: [{}] for char_id: [{}], the error was: [{}]\n", SerialNumber, CharID, results.ErrorMessage().c_str());
-
-}
-
 void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 charges, uint32 new_price) {
 
 	LogTrading("ZoneDatabase::UpdateTraderPrice([{}], [{}], [{}], [{}])", char_id, item_id, charges, new_price);
@@ -467,10 +395,6 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 
     if(!item->Stackable) {
 		auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, charges);
-//		std::string query = StringFormat("UPDATE trader SET item_cost = %i "
-//                                        "WHERE char_id = %i AND item_id = %i AND item_charges=%i",
-//										 new_price, char_id, item_id, charges);
-////        auto results = QueryDatabase(query);
         if (!results) {
 			LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
 					 item_id,
@@ -481,42 +405,12 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
     }
 
 	auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, 0);
-
-//	std::string query = StringFormat("UPDATE trader SET item_cost = %i "
-//                                    "WHERE char_id = %i AND item_id = %i",
-//									 new_price, char_id, item_id);
-//    auto results = QueryDatabase(query);
     if (!results) {
 		LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
 				 item_id,
 				 char_id
 				 );
 	}
-}
-
-void ZoneDatabase::DeleteTraderItem(uint32 char_id){
-
-	if(char_id==0) {
-        const std::string query = "DELETE FROM trader";
-        auto results = QueryDatabase(query);
-		if (!results.Success())
-			LogDebug("[CLIENT] Failed to delete all trader items data, the error was: [{}]\n", results.ErrorMessage().c_str());
-
-        return;
-	}
-
-	std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i", char_id);
-	auto results = QueryDatabase(query);
-    if (!results.Success())
-        LogDebug("[CLIENT] Failed to delete trader item data for char_id: [{}], the error was: [{}]\n", char_id, results.ErrorMessage().c_str());
-
-}
-void ZoneDatabase::DeleteTraderItem(uint32 CharID,uint16 SlotID) {
-
-	std::string query = StringFormat("DELETE FROM trader WHERE char_id = %i And slot_id = %i", CharID, SlotID);
-	auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogDebug("[CLIENT] Failed to delete trader item data for char_id: [{}], the error was: [{}]\n",CharID, results.ErrorMessage().c_str());
 }
 
 void ZoneDatabase::DeleteBuyLines(uint32 CharID) {

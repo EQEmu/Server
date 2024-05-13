@@ -2763,11 +2763,8 @@ struct GetItems_Struct{
 };
 
 struct BecomeTrader_Struct {
-	uint32 action;
-	uint32 zone_id;
-	uint32 trader_id;
-	uint32 entity_id;
-	char   trader_name[64];
+	int32 ID;
+	int32 Code;
 };
 
 struct Trader_ShowItems_Struct{

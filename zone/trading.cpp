@@ -1467,7 +1467,6 @@ void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *
 							i
 						)
 					);
-					//database.DeleteTraderItem(CharacterID(),i);
 					NukeTraderItem(
 						slot_id,
 						charges,
