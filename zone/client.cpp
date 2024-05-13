@@ -4437,6 +4437,15 @@ void Client::DiscoverItem(uint32 item_id) {
 	}
 }
 
+void Client::ReloadDynamicItem(uint16 slot_id) {
+	EQ::ItemInstance* inst = GetInv().GetItem(slot_id);
+
+	if (inst) {
+		database.RunGenerateCallback(inst);
+		PutItemInInventory(slot_id, *inst, true);
+	}	
+}
+
 bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst) {
 	if (!(inst->GetItem()->Classes & GetClassesBits() && inst->GetItem()->Races & GetPlayerRaceBit(GetRace()))) {
 		if (!inst->IsClassBag()) {
@@ -4462,14 +4471,20 @@ bool Client::CanDiscoverArtifact(EQ::ItemInstance* inst) {
 }
 
 bool Client::DiscoverArtifact(EQ::ItemInstance* inst) {
-	if (inst && inst->GetItemType() != EQ::item::ItemTypeAugmentation) {
+	if (inst && inst->GetItemType() != EQ::item::ItemTypeAugmentation && !inst->IsStackable()) {
 		LogDebug("Checking if we can discover an artifact here...");
 		if (CanDiscoverArtifact(inst) && zone->random.Roll(RuleI(Custom, ArtifactDiscoveryChance))) {
 			SendSound();
 			Message(Chat::Yellow, "You have discovered an Artifact!");
 
 			// Process the name change to 'Soandso's ItemName' or 'Soandso's ItemName (Artifact)'
-			std::string base_name(database.GetItem(inst->GetBaseID())->Name);
+			auto base_item = database.GetItem(inst->GetBaseID());
+
+			if (!base_item) {
+				base_item = inst->GetItem();
+			}
+
+			std::string base_name(base_item->Name);
 
 			// Detect and remove the initial possessive form if it exists at the beginning of the base_name
 			size_t pos = base_name.find("'s ");

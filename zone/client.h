@@ -830,6 +830,7 @@ public:
 
 	bool DiscoverArtifact(EQ::ItemInstance* inst);
 	bool CanDiscoverArtifact(EQ::ItemInstance* inst);
+	void ReloadDynamicItem(uint16 slot_id);
 
 	bool TGB() const { return tgb; }
 

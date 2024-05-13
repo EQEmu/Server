@@ -153,6 +153,7 @@ namespace EQ
 		const int  GetItemTier() const;
 		const int  GetBaseID() const;
 		const int  GetOriginalID() const;
+		void ReplaceItemData(EQ::ItemData* new_data);
 
 		ItemInstance* GetUpgrade(SharedDatabase &database);
 

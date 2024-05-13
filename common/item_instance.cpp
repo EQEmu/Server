@@ -846,6 +846,11 @@ EQ::ItemData* EQ::ItemInstance::GetMutableItem()
 	return m_item;
 }
 
+void EQ::ItemInstance::ReplaceItemData(EQ::ItemData* new_data)
+{
+	m_item = new ItemData(*new_data);
+}
+
 const bool EQ::ItemInstance::IsItemDynamic() const
 {
 	if (!m_item)

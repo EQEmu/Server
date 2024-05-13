@@ -1568,6 +1568,11 @@ std::string Perl_Client_GetCustomItemData(Client* self, int16 slot_id, std::stri
 	return self->GetInv().GetCustomItemData(slot_id, identifier);
 }
 
+void Perl_Client_ReloadDynamicItem(Client* self, int16 slot_id)
+{
+	self->ReloadDynamicItem(slot_id);
+}
+
 void Perl_Client_OpenLFGuildWindow(Client* self) // @categories Script Utility, Guild
 {
 	self->OpenLFGuildWindow();
@@ -3449,6 +3454,7 @@ void perl_register_client()
 	package.add("GetCorpseID", &Perl_Client_GetCorpseID);
 	package.add("GetCorpseItemAt", &Perl_Client_GetCorpseItemAt);
 	package.add("GetCustomItemData", &Perl_Client_GetCustomItemData);
+	package.add("ReloadDynamicItem", &Perl_Client_ReloadDynamicItem);
 	package.add("GetDeityBitmask", &Perl_Client_GetDeityBitmask);
 	package.add("GetDiscSlotBySpellID", &Perl_Client_GetDiscSlotBySpellID);
 	package.add("GetDisciplineTimer", &Perl_Client_GetDisciplineTimer);
