@@ -6372,9 +6372,9 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 	bool is_delete = spawn_type.find("delete") != std::string::npos;
 	bool is_remove = spawn_type.find("remove") != std::string::npos;
 	bool is_update = spawn_type.find("update") != std::string::npos;
+	bool is_clone = spawn_type.find("clone") != std::string::npos;
 	if (is_add || is_create) {
-		// Add: extra tries to create the NPC ID within the range for the current Zone (Zone ID * 1000)
-		// Create: extra sets the Respawn Timer for add
+		// extra sets the Respawn Timer for add/create
 		content_db.NPCSpawnDB(
 			is_add ? NPCSpawnTypes::AddNewSpawngroup : NPCSpawnTypes::CreateNewSpawn,
 			zone->GetShortName(),
@@ -6399,6 +6399,15 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 			zone->GetInstanceVersion(),
 			this,
 			target_npc->CastToNPC()
+		);
+	} else if (is_clone) {
+		content_db.NPCSpawnDB(
+			NPCSpawnTypes::AddSpawnFromSpawngroup,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			this,
+			target_npc->CastToNPC(),
+			extra
 		);
 	}
 }
