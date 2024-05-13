@@ -1674,7 +1674,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 					Strings::Commify(std::to_string(t->GetSpawnGroupId()))
 				);
 				auto query = fmt::format(
-					"UPDATE spawn2 SET pathgrid = {} WHERE spawngroupID = {} AND version = {} AND zone = {}", // actually is this dangerous? since spawngroupID isn't unique? should also check zone?
+					"UPDATE spawn2 SET pathgrid = {} WHERE spawngroupID = {} AND version = {} AND zone = '{}'",
 					grid_id,
 					t->GetSpawnGroupId(),
 					zone->GetInstanceVersion(),
