@@ -2899,6 +2899,8 @@ std::string Zone::GetZoneDescription()
 
 void Zone::SendReloadMessage(std::string reload_type)
 {
+	LogInfo("Reloaded [{}]", reload_type);
+
 	worldserver.SendEmoteMessage(
 		0,
 		0,

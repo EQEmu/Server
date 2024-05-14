@@ -2851,7 +2851,6 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 	}
 
 	auto it = npc_spells_cache.find(npc_spells_id);
-
 	if (it != npc_spells_cache.end()) { // it's in the cache, easy =)
 		return &it->second;
 	}
@@ -2859,7 +2858,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 	if (!npc_spells_loadtried.count(npc_spells_id)) { // no reason to ask the DB again if we have failed once already
 		npc_spells_loadtried.insert(npc_spells_id);
 
-		auto ns = NpcSpellsRepository::FindOne(database, npc_spells_id);
+		auto ns = NpcSpellsRepository::FindOne(*this, npc_spells_id);
 		if (!ns.id) {
 			return nullptr;
 		}
@@ -2884,10 +2883,10 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 		ss.pursue_detrimental_chance       = ns.pursue_d_chance;
 		ss.idle_no_sp_recast_min           = ns.idle_no_sp_recast_min;
 		ss.idle_no_sp_recast_max           = ns.idle_no_sp_recast_max;
-		ss.idle_beneficial_chance = ns.idle_b_chance;
+		ss.idle_beneficial_chance          = ns.idle_b_chance;
 
 		auto entries = NpcSpellsEntriesRepository::GetWhere(
-			database,
+			*this,
 			fmt::format(
 				"npc_spells_id = {} {} ORDER BY minlevel",
 				npc_spells_id,

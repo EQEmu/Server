@@ -9367,6 +9367,7 @@ void Client::ShowDevToolsMenu()
 
 	menu_reload_five += Saylink::Silent("#reload merchants", "Merchants");
 	menu_reload_five += " | " + Saylink::Silent("#reload npc_emotes", "NPC Emotes");
+	menu_reload_five += " | " + Saylink::Silent("#reload npc_spells", "NPC Spells");
 	menu_reload_five += " | " + Saylink::Silent("#reload objects", "Objects");
 	menu_reload_five += " | " + Saylink::Silent("#reload opcodes", "Opcodes");
 
@@ -11445,6 +11446,15 @@ void Client::SendReloadCommandMessages() {
 		fmt::format(
 			"Usage: {} - Reloads NPC Emotes globally",
 			npc_emotes_link
+		).c_str()
+	);
+
+	auto npc_spells_link = Saylink::Silent("#reload npc_spells");
+	Message(
+		Chat::White,
+		fmt::format(
+			"Usage: {} - Reloads NPC Spells globally",
+			npc_spells_link
 		).c_str()
 	);
 
