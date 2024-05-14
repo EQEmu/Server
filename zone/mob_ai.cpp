@@ -2890,8 +2890,8 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 			database,
 			fmt::format(
 				"npc_spells_id = {} {} ORDER BY minlevel",
-				ContentFilterCriteria::apply(),
-				npc_spells_id
+				npc_spells_id,
+				ContentFilterCriteria::apply()
 			)
 		);
 
