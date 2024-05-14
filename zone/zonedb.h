@@ -569,7 +569,7 @@ public:
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
 	void LoadGlobalLoot();
 
-	DBnpcspells_Struct*				GetNPCSpells(uint32 iDBSpellsID);
+	DBnpcspells_Struct*				GetNPCSpells(uint32 npc_spells_id);
 	DBnpcspellseffects_Struct*		GetNPCSpellsEffects(uint32 iDBSpellsEffectsID);
 	void ClearNPCSpells() { npc_spells_cache.clear(); npc_spells_loadtried.clear(); }
 	const NPCType* LoadNPCTypesData(uint32 id, bool bulk_load = false);

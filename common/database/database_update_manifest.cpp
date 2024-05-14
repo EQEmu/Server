@@ -5620,7 +5620,21 @@ ALTER TABLE `npc_types`
 ADD COLUMN `greed` tinyint(8) UNSIGNED NOT NULL DEFAULT 0 AFTER `merchant_id`;
  )",
 		.content_schema_update = true
-	}
+	},
+	ManifestEntry{
+		.version = 9279,
+		.description = "2024_05_13_content_flagging_npc_spells_entries.sql",
+		.check = "SHOW COLUMNS FROM `npc_spells_entries` LIKE 'content_flags'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `npc_spells_entries` ADD `min_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `npc_spells_entries` ADD `max_expansion` tinyint(4) NOT NULL DEFAULT -1;
+ALTER TABLE `npc_spells_entries` ADD `content_flags` varchar(100) NULL;
+ALTER TABLE `npc_spells_entries` ADD `content_flags_disabled` varchar(100) NULL;
+)",
+		.content_schema_update = true
+	},
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
