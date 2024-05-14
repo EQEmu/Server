@@ -18,7 +18,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Add: Using the same targeted NPC ID, creates new spawn2 and spawngroup entries [3rd parameter: respawntime]");
 		c->Message(Chat::White, "Create: Creates new NPC type copying the data from the targeted NPC, with new spawn2 and spawngroup entries [3rd parameter: respawntime]");
 		c->Message(Chat::White, "Delete: Deletes the spawn2, spawngroup, spawnentry and npc_types rows for targeted NPC");
-		c->Message(Chat::White, "Remove: Deletes the spawn2, spawngroup and spawnentry rows for targeted NPC");
+		c->Message(Chat::White, "Remove: Deletes the spawn2 row for targeted NPC [3rd parameter: also delete spawngroup and spawnentry rows if > 0]");
 		c->Message(Chat::White, "Update: Updates NPC appearance in database");
 		c->Message(Chat::White, "Clone: Copies targeted NPC and spawngroup, creating only a spawn2 entry [3rd parameter: respawntime]");
 		return;
@@ -45,7 +45,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 	}
 
 	if (is_add || is_create || is_clone) {
-		extra = sep->IsNumber(2) ? Strings::ToInt(sep->arg[2]) : 1200; // Currently extra is only used for respawn time in Add/Create/Clone, default to 1200 if not set
+		extra = sep->IsNumber(2) ? Strings::ToInt(sep->arg[2]) : 1200; // Extra param is only used for respawn time in Add/Create/Clone, default to 1200 if not set
 
 		content_db.NPCSpawnDB(
 			is_add ? NPCSpawnTypes::AddNewSpawngroup : (is_create ? NPCSpawnTypes::CreateNewSpawn : NPCSpawnTypes::AddSpawnFromSpawngroup),
@@ -92,12 +92,15 @@ void command_npcspawn(Client *c, const Seperator *sep)
 			)
 		);
 
+		extra = sep->IsNumber(2) ? Strings::ToInt(sep->arg[2]) : 0; // Extra param is used in Remove as a flag to optionally remove spawngroup/spawnentry if 1 (always remove spawn2 entry)
+
 		content_db.NPCSpawnDB(
 			spawn_update_type,
 			zone->GetShortName(),
 			zone->GetInstanceVersion(),
 			c,
-			target
+			target,
+			extra
 		);
 
 		c->Message(

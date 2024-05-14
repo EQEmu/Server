@@ -6398,7 +6398,8 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 			zone->GetShortName(),
 			zone->GetInstanceVersion(),
 			this,
-			target_npc->CastToNPC()
+			target_npc->CastToNPC(),
+			extra
 		);
 	} else if (is_clone) {
 		content_db.NPCSpawnDB(

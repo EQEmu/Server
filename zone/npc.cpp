@@ -1289,11 +1289,11 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 
 	s2.zone         = zone;
 	s2.version      = instance_version;
-	s2.x            = n->GetX();
-	s2.y            = n->GetY();
-	s2.z            = n->GetZ();
+	s2.x            = c->GetX();
+	s2.y            = c->GetY();
+	s2.z            = c->GetZ();
 	s2.respawntime  = extra > 0 ? extra : 1200;
-	s2.heading      = n->GetHeading();
+	s2.heading      = c->GetHeading();
 	s2.spawngroupID = sg.id;
 
 	s2 = Spawn2Repository::InsertOne(*this, s2);
@@ -1354,10 +1354,10 @@ uint32 ZoneDatabase::AddNewNPCSpawnGroupCommand(
 
 	s2.zone         = zone;
 	s2.version      = instance_version;
-	s2.x            = n->GetX();
-	s2.y            = n->GetY();
-	s2.z            = n->GetZ();
-	s2.heading      = n->GetHeading();
+	s2.x            = c->GetX();
+	s2.y            = c->GetY();
+	s2.z            = c->GetZ();
+	s2.heading      = c->GetHeading();
 	s2.respawntime  = respawn_time;
 	s2.spawngroupID = sg.id;
 
@@ -1404,17 +1404,22 @@ uint32 ZoneDatabase::UpdateNPCTypeAppearance(Client* c, NPC* n)
 	return updated;
 }
 
-uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n)
+uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n, uint32 remove_spawngroup_flag)
 {
+	if (!n->respawn2) {
+		return 0;
+	}
+
 	const auto& l = Spawn2Repository::GetWhere(
 		*this,
 		fmt::format(
-			"`zone` = '{}' AND `spawngroupID` = {}",
+			"`id` = {} AND `zone` = '{}' AND `spawngroupID` = {}",
+			n->respawn2->GetID(),
 			zone,
 			n->GetSpawnGroupId()
 		)
 	);
-
+	
 	if (l.empty()) {
 		return 0;
 	}
@@ -1425,12 +1430,14 @@ uint32 ZoneDatabase::DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Cli
 		return 0;
 	}
 
-	if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
-		return 0;
-	}
+	if (remove_spawngroup_flag > 0) {
+		if (!SpawngroupRepository::DeleteOne(*this, e.spawngroupID)) {
+			return 0;
+		}
 
-	if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
-		return 0;
+		if (!SpawnentryRepository::DeleteOne(*this, e.spawngroupID)) {
+			return 0;
+		}
 	}
 
 	return 1;
@@ -1572,7 +1579,7 @@ uint32 ZoneDatabase::NPCSpawnDB(
 			return UpdateNPCTypeAppearance(c, n);
 		}
 		case NPCSpawnTypes::RemoveSpawn: {
-			return DeleteSpawnLeaveInNPCTypeTable(zone, c, n);
+			return DeleteSpawnLeaveInNPCTypeTable(zone, c, n, extra);
 		}
 		case NPCSpawnTypes::DeleteSpawn: {
 			return DeleteSpawnRemoveFromNPCTypeTable(zone, instance_version, c, n);
