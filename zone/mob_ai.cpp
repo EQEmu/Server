@@ -2901,7 +2901,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 		for (auto &e: entries) {
 			DBnpcspells_entries_Struct se{};
 
-			se.spellid      = e.id;
+			se.spellid      = e.spellid;
 			se.type         = e.type;
 			se.minlevel     = e.minlevel;
 			se.maxlevel     = e.maxlevel;
