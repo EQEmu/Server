@@ -1009,8 +1009,8 @@ public:
 
 	//old AA methods that we still use
 	void ResetAA();
+	void ResetLeadershipAA();
 	void RefundAA();
-	void SendClearAA();
 	void SendClearLeadershipAA();
 	void SendClearPlayerAA();
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
