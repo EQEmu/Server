@@ -1271,9 +1271,10 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	auto sg = SpawngroupRepository::NewEntity();
 
 	sg.name = fmt::format(
-		"{}-{}",
+		"{}_{}_{}",
 		zone,
-		n->GetName()
+		Strings::Escape(n->GetName()),
+		Timer::GetCurrentTime()
 	);
 
 	sg = SpawngroupRepository::InsertOne(*this, sg);
