@@ -3762,66 +3762,66 @@ void Client::Escape()
 }
 
 float Client::CalcClassicPriceMod(Mob* other, bool reverse) {
-	float priceMult = 0.8f;
+	float price_multiplier = 0.8f;
 
 	if (other && other->IsNPC()) {
-		int factionlvl = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
+		FACTION_VALUE faction_level = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
 		int32 cha = GetCHA();
 
-		if (factionlvl <= FACTION_AMIABLY) {
+		if (faction_level <= FACTION_AMIABLY) {
 			cha += 11;		// amiable faction grants a defacto 11 charisma bonus
 		}
 
 		uint8 greed = other->CastToNPC()->GetGreedPercent();
 
 		// Sony's precise algorithm is unknown, but this produces output that is virtually identical
-		if (factionlvl <= FACTION_INDIFFERENTLY) {
+		if (faction_level <= FACTION_INDIFFERENTLY) {
 			if (cha > 75) {
 				if (greed) {
 					// this is derived from curve fitting to a lot of price data
-					priceMult = -0.2487768 + (1.599635 - -0.2487768) / (1 + pow((cha / 135.1495), 1.001983));
-					priceMult += (greed + 25u) / 100.0f;  // default vendor markup is 25%; anything above that is 'greedy'
-					priceMult = 1.0f / priceMult;
+					price_multiplier = -0.2487768 + (1.599635 - -0.2487768) / (1 + pow((cha / 135.1495), 1.001983));
+					price_multiplier += (greed + 25u) / 100.0f;  // default vendor markup is 25%; anything above that is 'greedy'
+					price_multiplier = 1.0f / price_multiplier;
 				}
 				else {
 					// non-greedy merchants use a linear scale
-					priceMult = 1.0f - ((115.0f - cha) * 0.004f);
+					price_multiplier = 1.0f - ((115.0f - cha) * 0.004f);
 				}
 			}
 			else if (cha > 60) {
-				priceMult = 1.0f / (1.25f + (greed / 100.0f));
+				price_multiplier = 1.0f / (1.25f + (greed / 100.0f));
 			}
 			else {
-				priceMult = 1.0f / ((1.0f - (cha - 120.0f) / 220.0f) + (greed / 100.0f));
+				price_multiplier = 1.0f / ((1.0f - (cha - 120.0f) / 220.0f) + (greed / 100.0f));
 			}
 		}
 		else { // apprehensive
 			if (cha > 75) {
 				if (greed) {
 					// this is derived from curve fitting to a lot of price data
-					priceMult = -0.25f + (1.823662 - -0.25f) / (1 + (cha / 135.0f));
-					priceMult += (greed + 25u) / 100.0f;  // default vendor markup is 25%; anything above that is 'greedy'
-					priceMult = 1.0f / priceMult;
+					price_multiplier = -0.25f + (1.823662 - -0.25f) / (1 + (cha / 135.0f));
+					price_multiplier += (greed + 25u) / 100.0f;  // default vendor markup is 25%; anything above that is 'greedy'
+					price_multiplier = 1.0f / price_multiplier;
 				}
 				else {
-					priceMult = (100.0f - (145.0f - cha) / 2.8f) / 100.0f;
+					price_multiplier = (100.0f - (145.0f - cha) / 2.8f) / 100.0f;
 				}
 			}
 			else if (cha > 60) {
-				priceMult = 1.0f / (1.4f + greed / 100.0f);
+				price_multiplier = 1.0f / (1.4f + greed / 100.0f);
 			}
 			else {
-				priceMult = 1.0f / ((1.0f + (143.574 - cha) / 196.434) + (greed / 100.0f));
+				price_multiplier = 1.0f / ((1.0f + (143.574 - cha) / 196.434) + (greed / 100.0f));
 			}
 		}
 
 		float maxResult = 1.0f / 1.05;		// price reduction caps at this amount
-		if (priceMult > maxResult) {
-			priceMult = maxResult;
+		if (price_multiplier > maxResult) {
+			price_multiplier = maxResult;
 		}
 
 		if (!reverse) {
-			priceMult = 1.0f / priceMult;
+			price_multiplier = 1.0f / price_multiplier;
 		}
 	}
 
@@ -3832,8 +3832,10 @@ float Client::CalcClassicPriceMod(Mob* other, bool reverse) {
 		type = "buys";
 		type2 = "from";
 		}
-
-	return priceMult;
+	
+	LogMerchants("[{}] [{}] items at [{}] the cost [{}] [{}]", other->GetName(), type.c_str(), priceMult, type2.c_str(), GetName());
+	
+	return price_multiplier;
 }
 
 float Client::CalcNewPriceMod(Mob* other, bool reverse)
