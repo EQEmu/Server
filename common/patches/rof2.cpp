@@ -2712,7 +2712,7 @@ namespace RoF2
 			outapp->WriteUInt8(0);				// Unknown
 		}
 
-		outapp->WriteUInt32(0);				// Unknown
+		outapp->WriteUInt32(emu->char_id);		// character_id
 
 		outapp->WriteUInt8(emu->leadAAActive);
 

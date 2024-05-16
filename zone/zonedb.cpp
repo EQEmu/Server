@@ -558,6 +558,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 	pp->raidAutoconsent          = e.raid_auto_consent;
 	pp->guildAutoconsent         = e.guild_auto_consent;
 	pp->RestTimer                = e.RestTimer;
+	pp->char_id                  = e.id;
 	m_epp->aa_effects            = e.e_aa_effects;
 	m_epp->perAA                 = e.e_percent_to_aa;
 	m_epp->expended_aa           = e.e_expended_aa_spent;
