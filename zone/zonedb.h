@@ -552,7 +552,7 @@ public:
 	uint32		NPCSpawnDB(uint8 command, const std::string& zone, uint32 instance_version, Client *c, NPC* n = 0, uint32 extra = 0); // 0 = Create 1 = Add; 2 = Update; 3 = Remove; 4 = Delete
 	uint32		CreateNewNPCCommand(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 extra);
 	uint32		AddNewNPCSpawnGroupCommand(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 in_respawn_time);
-	uint32		DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n);
+	uint32		DeleteSpawnLeaveInNPCTypeTable(const std::string& zone, Client* c, NPC* n, uint32 remove_spawngroup_id);
 	uint32		DeleteSpawnRemoveFromNPCTypeTable(const std::string& zone, uint32 instance_version, Client* c, NPC* n);
 	uint32		AddSpawnFromSpawnGroup(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 spawngroup_id);
 	uint32		AddNPCTypes(const std::string& zone, uint32 instance_version, Client* c, NPC* n, uint32 spawngroup_id);

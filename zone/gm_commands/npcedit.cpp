@@ -1666,7 +1666,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "set_grid")) {
 		if (sep->IsNumber(2)) {
 			const uint32 grid_id = Strings::ToUnsignedInt(sep->arg[2]);
-			if (grid_id) {
+			if (grid_id >= 0) {
 				d = fmt::format(
 					"{} now has a Grid ID of {} on Spawn Group ID {}.",
 					npc_id_string,
@@ -1674,14 +1674,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 					Strings::Commify(std::to_string(t->GetSpawnGroupId()))
 				);
 				auto query = fmt::format(
-					"UPDATE spawn2 SET pathgrid = {} WHERE spawngroupID = {} AND version = {}",
+					"UPDATE spawn2 SET pathgrid = {} WHERE spawngroupID = {} AND version = {} AND zone = '{}'",
 					grid_id,
 					t->GetSpawnGroupId(),
-					zone->GetInstanceVersion()
+					zone->GetInstanceVersion(),
+					zone->GetShortName()
 				);
 				content_db.QueryDatabase(query);
 			} else {
-				c->Message(Chat::White, "Grid ID must be greater than 0.");
+				c->Message(Chat::White, "Grid ID must be greater than or equal to 0.");
 				return;
 			}
 		} else {
