@@ -14041,21 +14041,21 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
 
-	int SinglePrice = (item->Price * item->SellRate);
+	int single_price = (item->Price * item->SellRate);
 
 	// Don't use SellCostMod if using UseClassicPriceMod
 	if (!RuleB(Merchant, UseClassicPriceMod)) {
-		SinglePrice *= RuleR(Merchant, SellCostMod);
+		single_price *= RuleR(Merchant, SellCostMod);
 	}
 
 	if (RuleB(Merchant, UsePriceMod)) {
-		SinglePrice *= Client::CalcPriceMod(tmp, false);
+		single_price *= Client::CalcPriceMod(tmp, false);
 	}
 
 	if (item->MaxCharges > 1)
-		mpo->price = SinglePrice;
+		mpo->price = single_price;
 	else
-		mpo->price = SinglePrice * mp->quantity;
+		mpo->price = single_price * mp->quantity;
 
 	if (mpo->price < 0)
 	{
@@ -14136,7 +14136,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 		else {
 			// Update the charges/quantity in the merchant window
 			inst->SetCharges(new_charges);
-			inst->SetPrice(SinglePrice);
+			inst->SetPrice(single_price);
 			inst->SetMerchantSlot(mp->itemslot);
 			inst->SetMerchantCount(new_charges);
 
