@@ -14315,7 +14315,7 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 
 	if (RuleB(Merchant, UsePriceMod)) {
 		for (i = 1; i <= cost_quantity; i++) {
-			price = (uint32)(item->Price * i)*Client::CalcPriceMod(vendor, true);
+			price = (uint32)(item->Price * i) * Client::CalcPriceMod(vendor, true);
 
 			// Don't use SellCostMod if using UseClassicPriceMod
 			if (!RuleB(Merchant, UseClassicPriceMod)) {
