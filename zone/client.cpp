@@ -3833,7 +3833,7 @@ float Client::CalcClassicPriceMod(Mob* other, bool reverse) {
 		type2 = "from";
 		}
 	
-	LogMerchants("[{}] [{}] items at [{}] the cost [{}] [{}]", other->GetName(), type.c_str(), priceMult, type2.c_str(), GetName());
+	LogMerchants("[{}] [{}] items at [{}] the cost [{}] [{}]", other->GetName(), type.c_str(), price_multiplier, type2.c_str(), GetName());
 	
 	return price_multiplier;
 }
