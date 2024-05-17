@@ -419,7 +419,7 @@ void ClientTaskState::RecordCompletedTask(uint32_t character_id, const TaskInfor
 			[&](const CompletedTaskInformation& completed) { return completed.task_id == client_task.task_id; }
 		), m_completed_tasks.end());
 
-		size_t erased = m_completed_tasks.size() - before;
+		size_t erased = before - m_completed_tasks.size();
 
 		LogTasksDetail("KeepOneRecord erased [{}] elements", erased);
 
