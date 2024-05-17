@@ -141,7 +141,7 @@ void command_reload(Client *c, const Seperator *sep)
 		pack = new ServerPacket(ServerOP_ReloadNPCEmotes, 0);
 	} else if (is_npc_spells) {
 		c->Message(Chat::White, "Attempting to reload NPC Spells globally.");
-		pack = new ServerPacket(ServerOP_ReloadNpcSpells, 0);
+		pack = new ServerPacket(ServerOP_ReloadNPCSpells, 0);
 	} else if (is_objects) {
 		c->Message(Chat::White, "Attempting to reload Objects globally.");
 		pack = new ServerPacket(ServerOP_ReloadObjects, 0);

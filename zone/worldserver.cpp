@@ -2086,7 +2086,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_ReloadNpcSpells:
+	case ServerOP_ReloadNPCSpells:
 	{
 		if (zone && zone->IsLoaded()) {
 			zone->SendReloadMessage("NPC Spells");
