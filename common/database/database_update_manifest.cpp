@@ -5579,6 +5579,35 @@ ADD COLUMN `extra_haste` int(11) NOT NULL DEFAULT 0 AFTER `wis`;
 ALTER TABLE `guild_bank`
 	CHANGE COLUMN `qty` `qty` INT(10) NOT NULL DEFAULT '0' AFTER `itemid`;
 )"
+	},
+	ManifestEntry{
+		.version = 9277,
+		.description = "2024_05_09_parcel_enable_containers.sql",
+		.check = "SHOW TABLES LIKE 'character_parcels_containers'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+CREATE TABLE `character_parcels_containers` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`parcels_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`slot_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`item_id` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_1` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_2` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_3` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_4` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_5` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`aug_slot_6` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	`quantity` INT(10) UNSIGNED NOT NULL DEFAULT '0',
+	PRIMARY KEY (`id`) USING BTREE,
+	INDEX `fk_character_parcels_id` (`parcels_id`) USING BTREE,
+	CONSTRAINT `fk_character_parcels_id` FOREIGN KEY (`parcels_id`) REFERENCES `character_parcels` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=1
+;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
