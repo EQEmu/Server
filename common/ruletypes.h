@@ -754,6 +754,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)
 RULE_BOOL(Merchant, UsePriceMod, true, "Use faction/charisma price modifiers")
+RULE_BOOL(Merchant, UseClassicPriceMod, false, "Must also set UsePriceMod. Negates other rules for vendor price mods.")
 RULE_REAL(Merchant, SellCostMod, 1.05, "Modifier for NPC sell price")
 RULE_REAL(Merchant, BuyCostMod, 0.95, "Modifier for NPC buy price")
 RULE_INT(Merchant, PriceBonusPct, 4, "Determines maximum price bonus from having good faction/CHA. Value is a percent")

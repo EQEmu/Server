@@ -155,6 +155,7 @@ struct NPCType
 	int             heroic_strikethrough;
 	bool            keeps_sold_items;
 	bool            is_parcel_merchant;
+	uint8			greed;
 };
 
 #pragma pack()
