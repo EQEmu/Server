@@ -2086,6 +2086,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadNPCSpells:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("NPC Spells");
+			content_db.ClearNPCSpells();
+			for (auto& e : entity_list.GetNPCList()) {
+				e.second->ReloadSpells();
+			}
+		}
+		break;
+	}
 	case ServerOP_ReloadPerlExportSettings:
 	{
 		zone->SendReloadMessage("Perl Event Export Settings");

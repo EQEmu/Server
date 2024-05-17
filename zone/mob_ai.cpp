@@ -33,6 +33,9 @@
 #include "../common/data_verification.h"
 
 #include "bot.h"
+#include "../common/repositories/npc_spells_repository.h"
+#include "../common/repositories/npc_spells_entries_repository.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
@@ -2841,102 +2844,92 @@ void NPC::AISpellsList(Client *c)
 	return;
 }
 
-DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
+DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 {
-	if (iDBSpellsID == 0)
+	if (npc_spells_id == 0) {
 		return nullptr;
+	}
 
-	auto it = npc_spells_cache.find(iDBSpellsID);
-
+	auto it = npc_spells_cache.find(npc_spells_id);
 	if (it != npc_spells_cache.end()) { // it's in the cache, easy =)
 		return &it->second;
 	}
 
-	if (!npc_spells_loadtried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
-		npc_spells_loadtried.insert(iDBSpellsID);
+	if (!npc_spells_loadtried.count(npc_spells_id)) { // no reason to ask the DB again if we have failed once already
+		npc_spells_loadtried.insert(npc_spells_id);
 
-		std::string query = StringFormat("SELECT id, parent_list, attack_proc, proc_chance, "
-						 "range_proc, rproc_chance, defensive_proc, dproc_chance, "
-						 "fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
-						 "engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
-						 "pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
-						 "pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
-						 "idle_b_chance FROM npc_spells WHERE id=%d",
-						 iDBSpellsID);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
+		auto ns = NpcSpellsRepository::FindOne(*this, npc_spells_id);
+		if (!ns.id) {
 			return nullptr;
 		}
 
-		if (results.RowCount() != 1)
-			return nullptr;
+		DBnpcspells_Struct ss;
 
-		auto row = results.begin();
-		DBnpcspells_Struct spell_set;
+		ss.parent_list                     = ns.parent_list;
+		ss.attack_proc                     = ns.attack_proc;
+		ss.proc_chance                     = ns.proc_chance;
+		ss.range_proc                      = ns.range_proc;
+		ss.rproc_chance                    = ns.rproc_chance;
+		ss.defensive_proc                  = ns.defensive_proc;
+		ss.dproc_chance                    = ns.dproc_chance;
+		ss.fail_recast                     = ns.fail_recast;
+		ss.engaged_no_sp_recast_min        = ns.engaged_no_sp_recast_min;
+		ss.engaged_no_sp_recast_max        = ns.engaged_no_sp_recast_max;
+		ss.engaged_beneficial_self_chance  = ns.engaged_b_self_chance;
+		ss.engaged_beneficial_other_chance = ns.engaged_b_other_chance;
+		ss.engaged_detrimental_chance      = ns.engaged_d_chance;
+		ss.pursue_no_sp_recast_min         = ns.pursue_no_sp_recast_min;
+		ss.pursue_no_sp_recast_max         = ns.pursue_no_sp_recast_max;
+		ss.pursue_detrimental_chance       = ns.pursue_d_chance;
+		ss.idle_no_sp_recast_min           = ns.idle_no_sp_recast_min;
+		ss.idle_no_sp_recast_max           = ns.idle_no_sp_recast_max;
+		ss.idle_beneficial_chance          = ns.idle_b_chance;
 
-		spell_set.parent_list = Strings::ToInt(row[1]);
-		spell_set.attack_proc = Strings::ToInt(row[2]);
-		spell_set.proc_chance = Strings::ToInt(row[3]);
-		spell_set.range_proc = Strings::ToInt(row[4]);
-		spell_set.rproc_chance = Strings::ToInt(row[5]);
-		spell_set.defensive_proc = Strings::ToInt(row[6]);
-		spell_set.dproc_chance = Strings::ToInt(row[7]);
-		spell_set.fail_recast = Strings::ToInt(row[8]);
-		spell_set.engaged_no_sp_recast_min = Strings::ToInt(row[9]);
-		spell_set.engaged_no_sp_recast_max = Strings::ToInt(row[10]);
-		spell_set.engaged_beneficial_self_chance = Strings::ToInt(row[11]);
-		spell_set.engaged_beneficial_other_chance = Strings::ToInt(row[12]);
-		spell_set.engaged_detrimental_chance = Strings::ToInt(row[13]);
-		spell_set.pursue_no_sp_recast_min = Strings::ToInt(row[14]);
-		spell_set.pursue_no_sp_recast_max = Strings::ToInt(row[15]);
-		spell_set.pursue_detrimental_chance = Strings::ToInt(row[16]);
-		spell_set.idle_no_sp_recast_min = Strings::ToInt(row[17]);
-		spell_set.idle_no_sp_recast_max = Strings::ToInt(row[18]);
-		spell_set.idle_beneficial_chance = Strings::ToInt(row[19]);
+		auto entries = NpcSpellsEntriesRepository::GetWhere(
+			*this,
+			fmt::format(
+				"npc_spells_id = {} {} ORDER BY minlevel",
+				npc_spells_id,
+				ContentFilterCriteria::apply()
+			)
+		);
 
-		// pulling fixed values from an auto-increment field is dangerous...
-		query = StringFormat(
-		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-		    "FROM npc_spells_entries "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    iDBSpellsID);
-		results = QueryDatabase(query);
-
-		if (!results.Success()) {
+		if (entries.empty()) {
 			return nullptr;
 		}
 
-		int entryIndex = 0;
-		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
-			DBnpcspells_entries_Struct entry;
-			int spell_id = Strings::ToInt(row[0]);
-			entry.spellid = spell_id;
-			entry.type = Strings::ToUnsignedInt(row[1]);
-			entry.minlevel = Strings::ToInt(row[2]);
-			entry.maxlevel = Strings::ToInt(row[3]);
-			entry.manacost = Strings::ToInt(row[4]);
-			entry.recast_delay = Strings::ToInt(row[5]);
-			entry.priority = Strings::ToInt(row[6]);
-			entry.min_hp = Strings::ToInt(row[7]);
-			entry.max_hp = Strings::ToInt(row[8]);
+		for (auto &e: entries) {
+			DBnpcspells_entries_Struct se{};
+
+			se.spellid      = e.spellid;
+			se.type         = e.type;
+			se.minlevel     = e.minlevel;
+			se.maxlevel     = e.maxlevel;
+			se.manacost     = e.manacost;
+			se.recast_delay = e.recast_delay;
+			se.priority     = e.priority;
+			se.min_hp       = e.min_hp;
+			se.max_hp       = e.max_hp;
 
 			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
-				entry.priority = 1;
+			if (!(se.type & SPELL_TYPES_INNATE) && se.priority == 0) {
+				se.priority = 1;
+			}
 
-			if (row[9])
-				entry.resist_adjust = Strings::ToInt(row[9]);
-			else if (IsValidSpell(spell_id))
-				entry.resist_adjust = spells[spell_id].resist_difficulty;
+			if (e.resist_adjust) {
+				se.resist_adjust = e.resist_adjust;
+			}
+			else if (IsValidSpell(e.id)) {
+				se.resist_adjust = spells[e.id].resist_difficulty;
+			}
 
-			spell_set.entries.push_back(entry);
+			ss.entries.push_back(se);
 		}
 
-		npc_spells_cache.emplace(std::make_pair(iDBSpellsID, spell_set));
+		npc_spells_cache.emplace(std::make_pair(npc_spells_id, ss));
 
-		return &npc_spells_cache[iDBSpellsID];
-    }
+		return &npc_spells_cache[npc_spells_id];
+	}
 
 	return nullptr;
 }
