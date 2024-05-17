@@ -3825,16 +3825,15 @@ float Client::CalcClassicPriceMod(Mob* other, bool reverse) {
 		}
 	}
 
-	std::string type = "sells";
-	std::string type2 = "to";
-	if (reverse)
-		{
-		type = "buys";
-		type2 = "from";
-		}
-	
-	LogMerchants("[{}] [{}] items at [{}] the cost [{}] [{}]", other->GetName(), type.c_str(), price_multiplier, type2.c_str(), GetName());
-	
+	LogMerchants(
+		"[{}] [{}] items at [{}] price multiplier [{}] [{}]",
+		other->GetName(),
+		reverse ? "buys" : "sells",
+		price_multiplier,
+		reverse ? "from" : "to",
+		GetName()
+	);
+
 	return price_multiplier;
 }
 
@@ -3886,13 +3885,10 @@ float Client::CalcNewPriceMod(Mob* other, bool reverse)
 
 float Client::CalcPriceMod(Mob* other, bool reverse)
 {
-	float price_mod;
+	float price_mod = CalcNewPriceMod(other, reverse);
 
 	if (RuleB(Merchant, UseClassicPriceMod)) {
 		price_mod = CalcClassicPriceMod(other, reverse);
-	}
-	else {
-		price_mod = CalcNewPriceMod(other, reverse);
 	}
 
 	return price_mod;
