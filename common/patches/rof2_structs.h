@@ -3151,6 +3151,12 @@ struct BazaarWindowStart_Struct {
 	uint16  Unknown002;
 };
 
+struct BazaarDeliveryCost_Struct {
+	uint32 action;
+	uint32 voucher_delivery_cost;
+	float  parcel_deliver_cost; //percentage of item cost
+	uint32 unknown_010;
+};
 
 struct BazaarWelcome_Struct {
 	uint32 action;

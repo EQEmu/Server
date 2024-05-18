@@ -1792,6 +1792,9 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 			ps.item_slot = parcel_out.slot_id;
 			strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
 
+			auto fee = static_cast<uint64>(std::round((uint64)total_transaction_value * RuleR(Bazaar, ParcelDeliveryCostMod)));
+			Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
+			TakeMoneyFromPP(fee, true);
 			SendParcelDeliveryToWorld(ps);
 		} break;
 	}
@@ -1826,12 +1829,6 @@ void Client::SendBazaarWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	//uint32 status = AllTraders;
-	//if(ClientVersion() <= EQ::versions::ClientVersion::UF) {
-	//	if(search_criteria.trader_entity_id > 0) {
-	//		status = LocalTraders;
-	//	}
-	//}
 	auto results = TraderRepository::GetBazaarSearchResults(database, search_criteria, GetZoneID());
 
 	if (results.empty()) {
@@ -1852,6 +1849,7 @@ void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 	FastQueuePacket(&out);
 
 	SendBazaarDone(GetID());
+	SendBazaarDeliveryCosts();
 }
 
 void Client::SendBazaarResults(
@@ -3353,7 +3351,6 @@ void Client::SendBulkBazaarTraders()
 void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 {
 	auto item = TraderRepository::GetWhere(database, fmt::format("item_sn = {}", in.serial_number));
-	//auto inst = database.CreateItem(item.at(0).item_id, item.at(0).item_charges);
 	std::unique_ptr<EQ::ItemInstance> inst(
 		database.CreateItem(
 			item.at(0).item_id,
@@ -3369,6 +3366,45 @@ void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 
 	if (inst) {
 		SendItemPacket(0, inst.get(), ItemPacketViewLink);
-//		safe_delete(inst);
 	}
+}
+
+void Client::SendBazaarDeliveryCosts()
+{
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_BazaarSearch, sizeof(BazaarDeliveryCost_Struct));
+	auto data   = (BazaarDeliveryCost_Struct *) outapp->pBuffer;
+
+	data->action                = DeliveryCostUpdate;
+	data->voucher_delivery_cost = RuleI(Bazaar, VoucherDeliveryCost);
+	data->parcel_deliver_cost   = RuleR(Bazaar, ParcelDeliveryCostMod);
+
+	QueuePacket(outapp.get());
+}
+
+std::string Client::DetermineMoneyString(uint64 cp)
+{
+	uint32 plat   = cp / 1000;
+	uint32 gold   = (cp - plat * 1000) / 100;
+	uint32 silver = (cp - plat * 1000 - gold * 100) / 10;
+	uint32 copper = (cp - plat * 1000 - gold * 100 - silver * 10);
+
+	if (!plat && !gold && !silver && !copper) {
+		return std::string("No Money");
+	}
+
+	std::string money {};
+	if (plat) {
+		money += fmt::format("{}p ", plat);
+	}
+	if (gold) {
+		money += fmt::format("{}g ", gold);
+	}
+	if (silver) {
+		money += fmt::format("{}s ", silver);
+	}
+	if (copper) {
+		money += fmt::format("{}c", copper);
+	}
+
+	return fmt::format("{}", money);
 }

@@ -3086,6 +3086,14 @@ struct BazaarReturnDone_Struct{
 	uint32 Unknown012;
 	uint32 Unknown016;
 };
+
+struct BazaarDeliveryCost_Struct {
+	uint32 action;
+	uint16 voucher_delivery_cost;
+	float  parcel_deliver_cost; //percentage of item cost
+	uint32 unknown_010;
+};
+
 struct BazaarSearchResults_Struct {
 /*000*/	BazaarWindowStart_Struct Beginning;
 /*004*/	uint32	NumItems;
@@ -6037,6 +6045,7 @@ enum BazaarTraderBarterActions {
 	AddTraderToBazaarWindow      = 24,
 	RemoveTraderFromBazaarWindow = 25,
 	ClickTrader                  = 28,
+	DeliveryCostUpdate           = 29
 };
 
 enum BazaarPurchaseActions {

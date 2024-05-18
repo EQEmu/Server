@@ -468,6 +468,16 @@ namespace RoF2
 
 				break;
 			}
+			case DeliveryCostUpdate: {
+				auto data = (BazaarDeliveryCost_Struct *) in->pBuffer;
+				LogTrading("(RoF2) Delivery costs updated: vouchers <green>[{}] parcel percentage <green>[{}]",
+						   data->voucher_delivery_cost,
+						   data->parcel_deliver_cost
+				);
+				data->action = 0;
+				dest->FastQueuePacket(&in);
+				break;
+			}
 			default: {
 				LogTrading("(RoF2) Unhandled action <red>[{}]", action);
 				dest->FastQueuePacket(&in, ack_req);

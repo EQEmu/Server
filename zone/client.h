@@ -289,6 +289,8 @@ public:
 	void SendBazaarDone(uint32 trader_id);
 	void SendBulkBazaarTraders();
 	void DoBazaarInspect(const BazaarInspect_Struct &in);
+	void SendBazaarDeliveryCosts();
+	static std::string DetermineMoneyString(uint64 copper);
 
 	void SendTraderMode(BazaarTraderBarterActions status);
 	void TraderStartTrader(const EQApplicationPacket *app);
