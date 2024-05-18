@@ -272,6 +272,8 @@ public:
 	void Encode(std::string &in);
 	void Decode(std::string &in);
 
+	void ClearExpiredSuspensions();
+
 private:
 	Mutex           Mvarcache;
 	VarCache_Struct varcache;

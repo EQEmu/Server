@@ -2094,3 +2094,28 @@ void Database::ClearGuildOnlineStatus()
 {
 	GuildMembersRepository::ClearOnlineStatus(*this);
 }
+
+void Database::ClearExpiredSuspensions()
+{
+	auto l = AccountRepository::GetWhere(*this, "`suspendeduntil` IS NOT NULL AND `suspendeduntil` < NOW()");
+
+	if (l.empty()) {
+		return;
+	}
+
+	for (auto& e : l) {
+		e.status         = 0;
+		e.suspendeduntil = 0;
+		e.suspend_reason = "";
+	}
+
+	const int replaced = AccountRepository::ReplaceMany(*this, l);
+
+	if (!replaced) {
+		LogError(
+			"Failed to clear expired suspensions for [{}] account{}",
+			l.size(),
+			l.size() != 1 ? "s" : ""
+		);
+	}
+}
