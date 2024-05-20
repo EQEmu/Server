@@ -444,6 +444,39 @@ public:
 
 		return UpdateOne(db, m);
 	}
+
+	static Trader GetItemBySerialNumber(Database &db, uint32 serial_number)
+	{
+		Trader e{};
+		const auto trader_item = GetWhere(
+			db,
+			fmt::format("`item_sn` = '{}' LIMIT 1", serial_number)
+		);
+
+		if (trader_item.empty()) {
+			return e;
+		}
+		else {
+			return trader_item.at(0);
+		}
+	}
+
+	static Trader GetItemBySerialNumber(Database &db, std::string serial_number)
+	{
+		Trader e{};
+		auto sn = Strings::ToUnsignedBigInt(serial_number);
+		const auto trader_item = GetWhere(
+			db,
+			fmt::format("`item_sn` = '{}' LIMIT 1", sn)
+		);
+
+		if (trader_item.empty()) {
+			return e;
+		}
+		else {
+			return trader_item.at(0);
+		}
+	}
 };
 
 #endif //EQEMU_TRADER_REPOSITORY_H

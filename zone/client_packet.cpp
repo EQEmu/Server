@@ -15592,8 +15592,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 					   in->quantity,
 					   in->serial_number
 			);
-			trader = entity_list.GetClientByCharID(in->trader_id);
-			BuyTraderItem(in, trader, app);
+			BuyTraderItemOutsideBazaar(in, app);
 			break;
 		}
 		case ByDirectToInventory: {

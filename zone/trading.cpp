@@ -3408,3 +3408,204 @@ std::string Client::DetermineMoneyString(uint64 cp)
 
 	return fmt::format("{}", money);
 }
+
+void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicationPacket *app)
+{
+	auto in          = (TraderBuy_Struct *) app->pBuffer;
+	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number);
+	if (!trader_item.id) {
+		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number <red>[{}]",
+				   tbs->trader_id,
+				   tbs->serial_number
+		);
+		in->method     = ByParcel;
+		in->sub_action = Failed;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	std::unique_ptr<EQ::ItemInstance> buy_item(
+		database.CreateItem(
+			trader_item.item_id,
+			trader_item.item_charges,
+			trader_item.aug_slot_1,
+			trader_item.aug_slot_2,
+			trader_item.aug_slot_3,
+			trader_item.aug_slot_4,
+			trader_item.aug_slot_5,
+			trader_item.aug_slot_6
+		)
+	);
+
+	if (!buy_item) {
+		LogTrading("Unable to find item id <red>[{}] item_sn <red>[{}] on trader",
+				   trader_item.item_id,
+				   trader_item.item_sn
+		);
+		in->method     = ByParcel;
+		in->sub_action = Failed;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	LogTrading(
+		"Name: <green>[{}] IsStackable: <green>[{}] Requested Quantity: <green>[{}] Charges on Item <green>[{}]",
+		buy_item->GetItem()->Name,
+		buy_item->IsStackable(),
+		tbs->quantity,
+		buy_item->GetCharges()
+	);
+
+	// Determine the actual quantity for the purchase
+	if (!buy_item->IsStackable()) {
+		tbs->quantity = 1;
+	}
+	else {
+		int32 item_charges = buy_item->GetCharges();
+		if (item_charges <= 0) {
+			tbs->quantity = 1;
+		}
+		else if (static_cast<uint32>(item_charges) < tbs->quantity) {
+			tbs->quantity = item_charges;
+		}
+	}
+
+	LogTrading("Actual quantity that will be traded is <green>[{}]", tbs->quantity);
+
+	uint64 total_transaction_value = static_cast<uint64>(tbs->price) * static_cast<uint64>(tbs->quantity);
+	if (total_transaction_value > MAX_TRANSACTION_VALUE) {
+		Message(
+			Chat::Red,
+			"That would exceed the single transaction limit of %u platinum.",
+			MAX_TRANSACTION_VALUE / 1000
+		);
+		TradeRequestFailed(app);
+		return;
+	}
+
+	uint32 total_cost = tbs->price * tbs->quantity;
+	uint32 fee        = static_cast<uint32>(std::round((uint32) total_cost * RuleR(Bazaar, ParcelDeliveryCostMod)));
+	if (!TakeMoneyFromPP(total_cost + fee)) {
+		RecordPlayerEventLog(
+			PlayerEvent::POSSIBLE_HACK,
+			PlayerEvent::PossibleHackEvent{
+				.message = fmt::format(
+					"{} attempted to buy {} in bazaar but did not have enough money.",
+					GetCleanName(),
+					buy_item->GetItem()->Name
+				)
+			}
+		);
+		in->method     = ByParcel;
+		in->sub_action = InsufficientFunds;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
+	LogTrading("Customer <green>[{}] Paid: <green>[{}] in Copper", CharacterID(), total_cost);
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_PURCHASE)) {
+		auto e = PlayerEvent::TraderPurchaseEvent{
+			.item_id              = buy_item->GetID(),
+			.item_name            = buy_item->GetItem()->Name,
+			.trader_id            = tbs->trader_id,
+			.trader_name          = tbs->seller_name,
+			.price                = tbs->price,
+			.charges              = tbs->quantity,
+			.total_cost           = total_cost,
+			.player_money_balance = GetCarriedMoney(),
+		};
+
+		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
+	}
+
+	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
+
+	CharacterParcelsRepository::CharacterParcels parcel_out{};
+	auto next_slot = FindNextFreeParcelSlot(CharacterID());
+	if (next_slot == INVALID_INDEX) {
+		LogTrading(
+			"{} attempted to purchase {} from the bazaar with parcel delivery.  Unfortunately their parcel limit was reached.  "
+			"Purchase unsuccessful.",
+			GetCleanName(),
+			buy_item->GetItem()->Name
+		);
+		in->method     = ByParcel;
+		in->sub_action = TooManyParcels;
+		TradeRequestFailed(app);
+		return;
+	}
+	parcel_out.from_name  = tbs->seller_name;
+	parcel_out.note       = "Delivered from a Bazaar Purchase";
+	parcel_out.sent_date  = time(nullptr);
+	parcel_out.quantity   = buy_item->IsStackable() ? tbs->quantity : buy_item->GetCharges();
+	parcel_out.item_id    = buy_item->GetItem()->ID;
+	parcel_out.aug_slot_1 = buy_item->GetAugmentItemID(0);
+	parcel_out.aug_slot_2 = buy_item->GetAugmentItemID(1);
+	parcel_out.aug_slot_3 = buy_item->GetAugmentItemID(2);
+	parcel_out.aug_slot_4 = buy_item->GetAugmentItemID(3);
+	parcel_out.aug_slot_5 = buy_item->GetAugmentItemID(4);
+	parcel_out.aug_slot_6 = buy_item->GetAugmentItemID(5);
+	parcel_out.char_id    = CharacterID();
+	parcel_out.slot_id    = next_slot;
+	parcel_out.id         = 0;
+
+	auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
+	if (!result.id) {
+		LogError("Failed to add parcel to database.  From {} to {} item {} quantity {}",
+				 parcel_out.from_name,
+				 GetCleanName(),
+				 parcel_out.item_id,
+				 parcel_out.quantity
+		);
+		Message(Chat::Yellow, "Unable to save parcel to the database. Please contact an administrator.");
+		in->method     = ByParcel;
+		in->sub_action = Failed;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+		PlayerEvent::ParcelSend e{};
+		e.from_player_name = parcel_out.from_name;
+		e.to_player_name   = GetCleanName();
+		e.item_id          = parcel_out.item_id;
+		e.aug_slot_1       = parcel_out.aug_slot_1;
+		e.aug_slot_2       = parcel_out.aug_slot_2;
+		e.aug_slot_3       = parcel_out.aug_slot_3;
+		e.aug_slot_4       = parcel_out.aug_slot_4;
+		e.aug_slot_5       = parcel_out.aug_slot_5;
+		e.aug_slot_6       = parcel_out.aug_slot_6;
+		e.quantity         = parcel_out.quantity;
+		e.sent_date        = parcel_out.sent_date;
+
+		RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
+	}
+
+	Parcel_Struct ps{};
+	ps.item_slot = parcel_out.slot_id;
+	strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
+
+	SendParcelDeliveryToWorld(ps);
+
+	if (RuleB(Bazaar, AuditTrail)) {
+		BazaarAuditTrail(tbs->seller_name, GetName(), buy_item->GetItem()->Name, tbs->quantity, tbs->price, 0);
+	}
+
+	auto out_server = std::make_unique<ServerPacket>(ServerOP_BazaarPurchase, sizeof(BazaarPurchaseMessaging_Struct));
+	auto out_data   = (BazaarPurchaseMessaging_Struct *) out_server->pBuffer;
+
+	out_data->trader_buy_struct       = *tbs;
+	out_data->buyer_id                = CharacterID();
+	out_data->item_aug_1              = buy_item->GetAugmentItemID(0);
+	out_data->item_aug_2              = buy_item->GetAugmentItemID(1);
+	out_data->item_aug_3              = buy_item->GetAugmentItemID(2);
+	out_data->item_aug_4              = buy_item->GetAugmentItemID(3);
+	out_data->item_aug_5              = buy_item->GetAugmentItemID(4);
+	out_data->item_aug_6              = buy_item->GetAugmentItemID(5);
+	out_data->item_quantity_available = trader_item.item_charges;
+	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
+
+	worldserver.SendPacket(out_server.release());
+}

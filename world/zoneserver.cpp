@@ -1745,6 +1745,17 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			break;
 		}
+		case ServerOP_BazaarPurchase: {
+			auto in = (BazaarPurchaseMessaging_Struct *)pack->pBuffer;
+			if (in->trader_buy_struct.trader_id <= 0) {
+				LogTrading("World Message <red>[{}] received with invalid trader_id <red>[{}]",
+						   "ServerOP_BazaarPurchase",
+						   in->trader_buy_struct.trader_id
+				);
+			}
+
+			zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+		}
 		default: {
 			LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);
 			DumpPacket(pack->pBuffer, pack->size);

@@ -3953,6 +3953,54 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 			break;
 		}
+		case ServerOP_BazaarPurchase: {
+			auto in        = (BazaarPurchaseMessaging_Struct *) pack->pBuffer;
+			auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
+			if (!trader_pc) {
+				LogTrading("Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
+						   in->trader_buy_struct.trader_id,
+						   zone->GetZoneID()
+				);
+				return;
+			}
+
+			auto item_sn = Strings::ToUnsignedBigInt(in->trader_buy_struct.serial_number);
+			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, sizeof(TraderBuy_Struct));
+			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
+
+			memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+
+			if (trader_pc->ClientVersion() < EQ::versions::ClientVersion::RoF) {
+				data->price = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
+			}
+
+			TraderRepository::UpdateQuantity(
+				database,
+				trader_pc->CharacterID(),
+				item_sn,
+				in->item_quantity_available - in->trader_buy_struct.quantity
+			);
+			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
+			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
+			trader_pc->QueuePacket(outapp.get());
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+				auto e = PlayerEvent::TraderSellEvent{
+					.item_id              = in->trader_buy_struct.item_id,
+					.item_name            = in->trader_buy_struct.item_name,
+					.buyer_id             = in->buyer_id,
+					.buyer_name           = in->trader_buy_struct.buyer_name,
+					.price                = in->trader_buy_struct.price,
+					.charges              = in->trader_buy_struct.quantity,
+					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
+					.player_money_balance = trader_pc->GetCarriedMoney(),
+				};
+
+				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+			}
+
+			break;
+		}
 	default: {
 		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
 		break;

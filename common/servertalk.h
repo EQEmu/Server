@@ -139,6 +139,7 @@
 #define ServerOP_RaidNote           0x0114
 
 #define ServerOP_TraderMessaging    0x0120
+#define ServerOP_BazaarPurchase     0x0121
 
 #define ServerOP_InstanceUpdateTime			0x014F
 #define ServerOP_AdventureRequest			0x0150
@@ -1946,6 +1947,18 @@ struct TraderMessaging_Struct {
 	uint32 trader_id;
 	uint32 entity_id;
 	char   trader_name[64];
+};
+
+struct BazaarPurchaseMessaging_Struct {
+	TraderBuy_Struct trader_buy_struct;
+	uint32           item_aug_1;
+	uint32           item_aug_2;
+	uint32           item_aug_3;
+	uint32           item_aug_4;
+	uint32           item_aug_5;
+	uint32           item_aug_6;
+	uint32           buyer_id;
+	uint32           item_quantity_available;
 };
 
 #pragma pack()

@@ -6055,8 +6055,10 @@ enum BazaarPurchaseActions {
 };
 
 enum BazaarPurchaseSubActions {
-	Success = 0,
-	Failed  = 1
+	Success           = 0,
+	Failed            = 1,
+	TooManyParcels    = 5,
+	InsufficientFunds = 7
 };
 
 enum BazaarSearchScopes {
