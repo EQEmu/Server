@@ -280,7 +280,7 @@ public:
 			"trader.slot_id, items.name, SUM(trader.item_charges), items.stackable, items.icon, trader.char_zone_id, "
 			"trader.char_entity_id, character_data.name {} "
 			"FROM trader, items, character_data {} AND trader.char_id = character_data.id "
-			"GROUP BY items.id, trader.item_charges, trader.char_id LIMIT {}",
+			"GROUP BY trader.item_sn, trader.item_charges, trader.char_id LIMIT {}",
 			search_values.c_str(),
 			search_criteria.c_str(),
 			search.max_results
@@ -476,6 +476,18 @@ public:
 		else {
 			return trader_item.at(0);
 		}
+	}
+
+	static int UpdateActiveTransaction(Database &db, uint32 id, bool status)
+	{
+		auto e = FindOne(db, id);
+		if (!e.id) {
+			return 0;
+		}
+
+		e.active_transaction = status == true ? 1 : 0;
+
+		return UpdateOne(db, e);
 	}
 };
 

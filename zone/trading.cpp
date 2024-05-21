@@ -1044,7 +1044,6 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	auto                                  in                = (ClickTrader_Struct *) app->pBuffer;
 	auto                                  inv               = GetTraderItems();
 	bool                                  trade_items_valid = true;
-	TraderRepository::Trader              trader_item{};
 	std::vector<TraderRepository::Trader> trader_items{};
 
 	//Check inventory for no-trade items
@@ -1071,6 +1070,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 		auto it   = std::find(std::begin(in->serial_number), std::end(in->serial_number), inv->serial_number[i]);
 		if (it != std::end(in->serial_number)) {
 			inst->SetPrice(in->item_cost[i]);
+			TraderRepository::Trader trader_item{};
 
 			trader_item.id             = 0;
 			trader_item.char_entity_id = GetID();
@@ -1724,85 +1724,28 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		fmt::format("{:016}", buy_item->GetSerialNumber()).c_str(),
 		sizeof(outtbs->serial_number)
 	);
-	
-	switch (in->method) {
-		case ByVendor: {
-			TraderRepository::Trader t{};
-			t.item_charges = buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges();
-			t.item_id    = buy_item->GetItem()->ID;
-			t.aug_slot_1 = buy_item->GetAugmentItemID(0);
-			t.aug_slot_2 = buy_item->GetAugmentItemID(1);
-			t.aug_slot_3 = buy_item->GetAugmentItemID(2);
-			t.aug_slot_4 = buy_item->GetAugmentItemID(3);
-			t.aug_slot_5 = buy_item->GetAugmentItemID(4);
-			t.aug_slot_6 = buy_item->GetAugmentItemID(5);
-			t.char_id    = CharacterID();
-			t.slot_id    = FindNextFreeParcelSlot(CharacterID());
 
-			SendTraderItem(
-				buy_item->GetItem()->ID,
-				buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges(),
-				t
-			);
-			break;
-		}
-		case ByParcel: {
-			CharacterParcelsRepository::CharacterParcels parcel_out{};
-			parcel_out.from_name  = in->seller_name;
-			parcel_out.note       = "Delivered from a Bazaar Purchase";
-			parcel_out.sent_date  = time(nullptr);
-			parcel_out.quantity   = buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges();
-			parcel_out.item_id    = buy_item->GetItem()->ID;
-			parcel_out.aug_slot_1 = buy_item->GetAugmentItemID(0);
-			parcel_out.aug_slot_2 = buy_item->GetAugmentItemID(1);
-			parcel_out.aug_slot_3 = buy_item->GetAugmentItemID(2);
-			parcel_out.aug_slot_4 = buy_item->GetAugmentItemID(3);
-			parcel_out.aug_slot_5 = buy_item->GetAugmentItemID(4);
-			parcel_out.aug_slot_6 = buy_item->GetAugmentItemID(5);
-			parcel_out.char_id    = CharacterID();
-			parcel_out.slot_id    = FindNextFreeParcelSlot(CharacterID());
-			parcel_out.id         = 0;
+	TraderRepository::Trader t{};
+	t.item_charges = buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges();
+	t.item_id      = buy_item->GetItem()->ID;
+	t.aug_slot_1   = buy_item->GetAugmentItemID(0);
+	t.aug_slot_2   = buy_item->GetAugmentItemID(1);
+	t.aug_slot_3   = buy_item->GetAugmentItemID(2);
+	t.aug_slot_4   = buy_item->GetAugmentItemID(3);
+	t.aug_slot_5   = buy_item->GetAugmentItemID(4);
+	t.aug_slot_6   = buy_item->GetAugmentItemID(5);
+	t.char_id      = CharacterID();
+	t.slot_id      = FindNextFreeParcelSlot(CharacterID());
 
-			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
-			if (!result.id) {
-				LogError("Failed to add parcel to database.  From {} to {} item {} quantity {}", parcel_out.from_name,
-						 GetCleanName(), parcel_out.item_id, parcel_out.quantity);
-				Message(Chat::Yellow, "Unable to save parcel to the database. Please contact an administrator.");
-				return;
-			}
+	SendTraderItem(
+		buy_item->GetItem()->ID,
+		buy_item->IsStackable() ? outtbs->quantity : buy_item->GetCharges(),
+		t
+	);
 
-			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
-				PlayerEvent::ParcelSend e{};
-				e.from_player_name = parcel_out.from_name;
-				e.to_player_name   = GetCleanName();
-				e.item_id          = parcel_out.item_id;
-				e.aug_slot_1       = parcel_out.aug_slot_1;
-				e.aug_slot_2       = parcel_out.aug_slot_2;
-				e.aug_slot_3       = parcel_out.aug_slot_3;
-				e.aug_slot_4       = parcel_out.aug_slot_4;
-				e.aug_slot_5       = parcel_out.aug_slot_5;
-				e.aug_slot_6       = parcel_out.aug_slot_6;
-				e.quantity         = parcel_out.quantity;
-				e.sent_date        = parcel_out.sent_date;
-
-				RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
-			}
-
-			Parcel_Struct ps{};
-			ps.item_slot = parcel_out.slot_id;
-			strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
-
-			auto fee = static_cast<uint64>(std::round((uint64)total_transaction_value * RuleR(Bazaar, ParcelDeliveryCostMod)));
-			Message(Chat::Red, fmt::format("You paid {} for the parcel delivery.", DetermineMoneyString(fee)).c_str());
-			TakeMoneyFromPP(fee, true);
-			SendParcelDeliveryToWorld(ps);
-		} break;
+	if (RuleB(Bazaar, AuditTrail)) {
+		BazaarAuditTrail(Trader->GetName(), GetName(), buy_item->GetItem()->Name, outtbs->quantity, outtbs->price, 0);
 	}
-	
-
-    if (RuleB(Bazaar, AuditTrail)) {
-        BazaarAuditTrail(Trader->GetName(), GetName(), buy_item->GetItem()->Name, outtbs->quantity, outtbs->price, 0);
-    }
 
     Trader->FindAndNukeTraderItem(tbs->item_id, outtbs->quantity, this, 0);
 
@@ -3414,15 +3357,30 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	auto in          = (TraderBuy_Struct *) app->pBuffer;
 	auto trader_item = TraderRepository::GetItemBySerialNumber(database, tbs->serial_number);
 	if (!trader_item.id) {
-		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number <red>[{}]",
+		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
+				   "<red>[{}] The Traders data was outdated.",
 				   tbs->trader_id,
 				   tbs->serial_number
 		);
 		in->method     = ByParcel;
-		in->sub_action = Failed;
+		in->sub_action = DataOutDated;
 		TradeRequestFailed(app);
 		return;
 	}
+
+	if (trader_item.active_transaction) {
+		LogTrading("Attempt to purchase an item outside of the Bazaar trader_id <red>[{}] item serial_number "
+				   "<red>[{}] The item is already within an active transaction.",
+				   tbs->trader_id,
+				   tbs->serial_number
+		);
+		in->method     = ByParcel;
+		in->sub_action = DataOutDated;
+		TradeRequestFailed(app);
+		return;
+	}
+
+	TraderRepository::UpdateActiveTransaction(database, trader_item.id, true);
 
 	std::unique_ptr<EQ::ItemInstance> buy_item(
 		database.CreateItem(
@@ -3444,6 +3402,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		);
 		in->method     = ByParcel;
 		in->sub_action = Failed;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
 	}
@@ -3479,6 +3438,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 			"That would exceed the single transaction limit of %u platinum.",
 			MAX_TRANSACTION_VALUE / 1000
 		);
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
 	}
@@ -3498,6 +3458,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		);
 		in->method     = ByParcel;
 		in->sub_action = InsufficientFunds;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
 	}
@@ -3520,8 +3481,6 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		RecordPlayerEventLog(PlayerEvent::TRADER_PURCHASE, e);
 	}
 
-	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
-
 	CharacterParcelsRepository::CharacterParcels parcel_out{};
 	auto next_slot = FindNextFreeParcelSlot(CharacterID());
 	if (next_slot == INVALID_INDEX) {
@@ -3533,6 +3492,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		);
 		in->method     = ByParcel;
 		in->sub_action = TooManyParcels;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
 	}
@@ -3562,10 +3522,12 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 		Message(Chat::Yellow, "Unable to save parcel to the database. Please contact an administrator.");
 		in->method     = ByParcel;
 		in->sub_action = Failed;
+		TraderRepository::UpdateActiveTransaction(database, trader_item.id, false);
 		TradeRequestFailed(app);
 		return;
 	}
 
+	ReturnTraderReq(app, tbs->quantity, buy_item->GetID());
 	if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
 		PlayerEvent::ParcelSend e{};
 		e.from_player_name = parcel_out.from_name;
@@ -3605,6 +3567,7 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	out_data->item_aug_5              = buy_item->GetAugmentItemID(4);
 	out_data->item_aug_6              = buy_item->GetAugmentItemID(5);
 	out_data->item_quantity_available = trader_item.item_charges;
+	out_data->id                      = trader_item.id;
 	strn0cpy(out_data->trader_buy_struct.buyer_name, GetCleanName(), sizeof(out_data->trader_buy_struct.buyer_name));
 
 	worldserver.SendPacket(out_server.release());

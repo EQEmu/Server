@@ -22,18 +22,19 @@ public:
 		uint64_t id;
 		uint32_t char_id;
 		uint32_t item_id;
-		int32_t  item_sn;
-		int32_t  item_charges;
-		uint64_t item_cost;
-		uint8_t  slot_id;
-		uint32_t char_entity_id;
-		uint32_t char_zone_id;
 		uint32_t aug_slot_1;
 		uint32_t aug_slot_2;
 		uint32_t aug_slot_3;
 		uint32_t aug_slot_4;
 		uint32_t aug_slot_5;
 		uint32_t aug_slot_6;
+		int32_t  item_sn;
+		int32_t  item_charges;
+		uint64_t item_cost;
+		uint8_t  slot_id;
+		uint32_t char_entity_id;
+		uint32_t char_zone_id;
+		int8_t   active_transaction;
 	};
 
 	static std::string PrimaryKey()
@@ -47,18 +48,19 @@ public:
 			"id",
 			"char_id",
 			"item_id",
-			"item_sn",
-			"item_charges",
-			"item_cost",
-			"slot_id",
-			"char_entity_id",
-			"char_zone_id",
 			"aug_slot_1",
 			"aug_slot_2",
 			"aug_slot_3",
 			"aug_slot_4",
 			"aug_slot_5",
 			"aug_slot_6",
+			"item_sn",
+			"item_charges",
+			"item_cost",
+			"slot_id",
+			"char_entity_id",
+			"char_zone_id",
+			"active_transaction",
 		};
 	}
 
@@ -68,18 +70,19 @@ public:
 			"id",
 			"char_id",
 			"item_id",
-			"item_sn",
-			"item_charges",
-			"item_cost",
-			"slot_id",
-			"char_entity_id",
-			"char_zone_id",
 			"aug_slot_1",
 			"aug_slot_2",
 			"aug_slot_3",
 			"aug_slot_4",
 			"aug_slot_5",
 			"aug_slot_6",
+			"item_sn",
+			"item_charges",
+			"item_cost",
+			"slot_id",
+			"char_entity_id",
+			"char_zone_id",
+			"active_transaction",
 		};
 	}
 
@@ -120,21 +123,22 @@ public:
 	{
 		Trader e{};
 
-		e.id             = 0;
-		e.char_id        = 0;
-		e.item_id        = 0;
-		e.item_sn        = 0;
-		e.item_charges   = 0;
-		e.item_cost      = 0;
-		e.slot_id        = 0;
-		e.char_entity_id = 0;
-		e.char_zone_id   = 0;
-		e.aug_slot_1     = 0;
-		e.aug_slot_2     = 0;
-		e.aug_slot_3     = 0;
-		e.aug_slot_4     = 0;
-		e.aug_slot_5     = 0;
-		e.aug_slot_6     = 0;
+		e.id                 = 0;
+		e.char_id            = 0;
+		e.item_id            = 0;
+		e.aug_slot_1         = 0;
+		e.aug_slot_2         = 0;
+		e.aug_slot_3         = 0;
+		e.aug_slot_4         = 0;
+		e.aug_slot_5         = 0;
+		e.aug_slot_6         = 0;
+		e.item_sn            = 0;
+		e.item_charges       = 0;
+		e.item_cost          = 0;
+		e.slot_id            = 0;
+		e.char_entity_id     = 0;
+		e.char_zone_id       = 0;
+		e.active_transaction = 0;
 
 		return e;
 	}
@@ -171,21 +175,22 @@ public:
 		if (results.RowCount() == 1) {
 			Trader e{};
 
-			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_sn        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.item_charges   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.item_cost      = row[5] ? strtoull(row[5], nullptr, 10) : 0;
-			e.slot_id        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.char_entity_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.char_zone_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_1     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_2     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_3     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_4     = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_5     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.aug_slot_6     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
 			return e;
 		}
@@ -221,18 +226,19 @@ public:
 
 		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
 		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
-		v.push_back(columns[3] + " = " + std::to_string(e.item_sn));
-		v.push_back(columns[4] + " = " + std::to_string(e.item_charges));
-		v.push_back(columns[5] + " = " + std::to_string(e.item_cost));
-		v.push_back(columns[6] + " = " + std::to_string(e.slot_id));
-		v.push_back(columns[7] + " = " + std::to_string(e.char_entity_id));
-		v.push_back(columns[8] + " = " + std::to_string(e.char_zone_id));
-		v.push_back(columns[9] + " = " + std::to_string(e.aug_slot_1));
-		v.push_back(columns[10] + " = " + std::to_string(e.aug_slot_2));
-		v.push_back(columns[11] + " = " + std::to_string(e.aug_slot_3));
-		v.push_back(columns[12] + " = " + std::to_string(e.aug_slot_4));
-		v.push_back(columns[13] + " = " + std::to_string(e.aug_slot_5));
-		v.push_back(columns[14] + " = " + std::to_string(e.aug_slot_6));
+		v.push_back(columns[3] + " = " + std::to_string(e.aug_slot_1));
+		v.push_back(columns[4] + " = " + std::to_string(e.aug_slot_2));
+		v.push_back(columns[5] + " = " + std::to_string(e.aug_slot_3));
+		v.push_back(columns[6] + " = " + std::to_string(e.aug_slot_4));
+		v.push_back(columns[7] + " = " + std::to_string(e.aug_slot_5));
+		v.push_back(columns[8] + " = " + std::to_string(e.aug_slot_6));
+		v.push_back(columns[9] + " = " + std::to_string(e.item_sn));
+		v.push_back(columns[10] + " = " + std::to_string(e.item_charges));
+		v.push_back(columns[11] + " = " + std::to_string(e.item_cost));
+		v.push_back(columns[12] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[13] + " = " + std::to_string(e.char_entity_id));
+		v.push_back(columns[14] + " = " + std::to_string(e.char_zone_id));
+		v.push_back(columns[15] + " = " + std::to_string(e.active_transaction));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,18 +263,19 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
-		v.push_back(std::to_string(e.item_sn));
-		v.push_back(std::to_string(e.item_charges));
-		v.push_back(std::to_string(e.item_cost));
-		v.push_back(std::to_string(e.slot_id));
-		v.push_back(std::to_string(e.char_entity_id));
-		v.push_back(std::to_string(e.char_zone_id));
 		v.push_back(std::to_string(e.aug_slot_1));
 		v.push_back(std::to_string(e.aug_slot_2));
 		v.push_back(std::to_string(e.aug_slot_3));
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.item_sn));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.item_cost));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.active_transaction));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -301,18 +308,19 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
-			v.push_back(std::to_string(e.item_sn));
-			v.push_back(std::to_string(e.item_charges));
-			v.push_back(std::to_string(e.item_cost));
-			v.push_back(std::to_string(e.slot_id));
-			v.push_back(std::to_string(e.char_entity_id));
-			v.push_back(std::to_string(e.char_zone_id));
 			v.push_back(std::to_string(e.aug_slot_1));
 			v.push_back(std::to_string(e.aug_slot_2));
 			v.push_back(std::to_string(e.aug_slot_3));
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.item_sn));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.item_cost));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.active_transaction));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
@@ -346,21 +354,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Trader e{};
 
-			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_sn        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.item_charges   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.item_cost      = row[5] ? strtoull(row[5], nullptr, 10) : 0;
-			e.slot_id        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.char_entity_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.char_zone_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_1     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_2     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_3     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_4     = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_5     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.aug_slot_6     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -385,21 +394,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Trader e{};
 
-			e.id             = row[0] ? strtoull(row[0], nullptr, 10) : 0;
-			e.char_id        = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
-			e.item_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
-			e.item_sn        = row[3] ? static_cast<int32_t>(atoi(row[3])) : 0;
-			e.item_charges   = row[4] ? static_cast<int32_t>(atoi(row[4])) : 0;
-			e.item_cost      = row[5] ? strtoull(row[5], nullptr, 10) : 0;
-			e.slot_id        = row[6] ? static_cast<uint8_t>(strtoul(row[6], nullptr, 10)) : 0;
-			e.char_entity_id = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
-			e.char_zone_id   = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
-			e.aug_slot_1     = row[9] ? static_cast<uint32_t>(strtoul(row[9], nullptr, 10)) : 0;
-			e.aug_slot_2     = row[10] ? static_cast<uint32_t>(strtoul(row[10], nullptr, 10)) : 0;
-			e.aug_slot_3     = row[11] ? static_cast<uint32_t>(strtoul(row[11], nullptr, 10)) : 0;
-			e.aug_slot_4     = row[12] ? static_cast<uint32_t>(strtoul(row[12], nullptr, 10)) : 0;
-			e.aug_slot_5     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
-			e.aug_slot_6     = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
 			all_entries.push_back(e);
 		}
@@ -477,18 +487,19 @@ public:
 		v.push_back(std::to_string(e.id));
 		v.push_back(std::to_string(e.char_id));
 		v.push_back(std::to_string(e.item_id));
-		v.push_back(std::to_string(e.item_sn));
-		v.push_back(std::to_string(e.item_charges));
-		v.push_back(std::to_string(e.item_cost));
-		v.push_back(std::to_string(e.slot_id));
-		v.push_back(std::to_string(e.char_entity_id));
-		v.push_back(std::to_string(e.char_zone_id));
 		v.push_back(std::to_string(e.aug_slot_1));
 		v.push_back(std::to_string(e.aug_slot_2));
 		v.push_back(std::to_string(e.aug_slot_3));
 		v.push_back(std::to_string(e.aug_slot_4));
 		v.push_back(std::to_string(e.aug_slot_5));
 		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.item_sn));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.item_cost));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.active_transaction));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -514,18 +525,19 @@ public:
 			v.push_back(std::to_string(e.id));
 			v.push_back(std::to_string(e.char_id));
 			v.push_back(std::to_string(e.item_id));
-			v.push_back(std::to_string(e.item_sn));
-			v.push_back(std::to_string(e.item_charges));
-			v.push_back(std::to_string(e.item_cost));
-			v.push_back(std::to_string(e.slot_id));
-			v.push_back(std::to_string(e.char_entity_id));
-			v.push_back(std::to_string(e.char_zone_id));
 			v.push_back(std::to_string(e.aug_slot_1));
 			v.push_back(std::to_string(e.aug_slot_2));
 			v.push_back(std::to_string(e.aug_slot_3));
 			v.push_back(std::to_string(e.aug_slot_4));
 			v.push_back(std::to_string(e.aug_slot_5));
 			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.item_sn));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.item_cost));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.active_transaction));
 
 			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}

@@ -1959,6 +1959,7 @@ struct BazaarPurchaseMessaging_Struct {
 	uint32           item_aug_6;
 	uint32           buyer_id;
 	uint32           item_quantity_available;
+	uint32           id;
 };
 
 #pragma pack()
