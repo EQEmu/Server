@@ -4,23 +4,21 @@
 
 extern WorldServer worldserver;
 
-void command_parcels (Client *c, const Seperator *sep)
+void command_parcels(Client *c, const Seperator *sep)
 {
 	const auto arguments = sep->argnum;
-	if (!arguments)
-	{
-		SendParcelsSubCommands (c);
+	if (!arguments) {
+		SendParcelsSubCommands(c);
 		return;
 	}
 
 	bool is_listdb     = !strcasecmp(sep->arg[1], "listdb");
-    bool is_listmemory = !strcasecmp(sep->arg[1], "listmemory");
+	bool is_listmemory = !strcasecmp(sep->arg[1], "listmemory");
 	bool is_details    = !strcasecmp(sep->arg[1], "details");
 	bool is_add        = !strcasecmp(sep->arg[1], "add");
 
-	if (!is_listdb && !is_listmemory && !is_details && !is_add)
-	{
-		SendParcelsSubCommands (c);
+	if (!is_listdb && !is_listmemory && !is_details && !is_add) {
+		SendParcelsSubCommands(c);
 		return;
 	}
 
@@ -30,12 +28,12 @@ void command_parcels (Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Usage: #parcels listdb [Character Name]");
 		}
 
-			if (player_name.empty()) {
+		if (player_name.empty()) {
 			c->Message(
 				Chat::White,
 				fmt::format("You must provide a player name.").c_str());
-				return;
-			}
+			return;
+		}
 
 		auto player_id = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, player_name);
 		if (!player_id.at(0).char_id) {
@@ -43,68 +41,68 @@ void command_parcels (Client *c, const Seperator *sep)
 			return;
 		}
 
-		auto results   = CharacterParcelsRepository::GetWhere(
+		auto results = CharacterParcelsRepository::GetWhere(
 			database,
 			fmt::format("char_id = '{}' ORDER BY slot_id ASC", player_id.at(0).char_id)
 		);
 
-				if (results.empty()) {
-					c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
+		if (results.empty()) {
+			c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
 			return;
-				}
+		}
 
 		c->Message(Chat::Yellow, fmt::format("Found {} parcels for {}.", results.size(), player_name).c_str());
 
-					for (auto const &p: results) {
-						c->Message(
+		for (auto const &p: results) {
+			c->Message(
 				Chat::Yellow,
 				fmt::format(
-								"Slot [{:02}] has item id [{:10}] with quantity [{}].",
+					"Slot [{:02}] has item id [{:10}] with quantity [{}].",
 					p.slot_id,
 					p.item_id,
 					p.quantity
 				).c_str()
 			);
-					}
-				}
+		}
+	}
 	if (is_listmemory) {
-        auto player_name = std::string(sep->arg[2]);
+		auto player_name = std::string(sep->arg[2]);
 		auto player      = entity_list.GetClientByName(player_name.c_str());
 
 		if (arguments < 2) {
 			c->Message(Chat::White, "Usage: #parcels listmemory [Character Name] (Must be in the same zone)");
 		}
 
-			if (!player) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Player {} could not be found in this zone.  Ensure you are in the same zone as the player.",
-						player_name
+		if (!player) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Player {} could not be found in this zone.  Ensure you are in the same zone as the player.",
+					player_name
 				).c_str()
 			);
-				return;
-			}
-
-				auto parcels = player->GetParcels();
-				if (parcels.empty()) {
-					c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
 			return;
-				}
+		}
 
-				c->Message(Chat::Yellow, fmt::format("Found {} parcels for {}.", parcels.size(), player_name).c_str());
-				for (auto const &p: parcels) {
-					c->Message(
+		auto parcels = player->GetParcels();
+		if (parcels.empty()) {
+			c->Message(Chat::White, fmt::format("No parcels could be found for {}", player_name).c_str());
+			return;
+		}
+
+		c->Message(Chat::Yellow, fmt::format("Found {} parcels for {}.", parcels.size(), player_name).c_str());
+		for (auto const &p: parcels) {
+			c->Message(
 				Chat::Yellow,
 				fmt::format(
-							"Slot [{:02}] has item id [{:10}] with quantity [{}].",
+					"Slot [{:02}] has item id [{:10}] with quantity [{}].",
 					p.second.slot_id,
 					p.second.item_id,
 					p.second.quantity
 				).c_str()
 			);
-				}
-			}
+		}
+	}
 	if (is_add) {
 		if (arguments < 4) {
 			SendParcelsSubCommands(c);
@@ -114,7 +112,7 @@ void command_parcels (Client *c, const Seperator *sep)
 		if (!Strings::IsNumber(sep->arg[3]) || !Strings::IsNumber(sep->arg[4])) {
 			SendParcelsSubCommands(c);
 			return;
-	}
+		}
 
 		auto to_name  = std::string(sep->arg[2]);
 		auto item_id  = Strings::ToUnsignedInt(sep->arg[3]);
@@ -122,8 +120,8 @@ void command_parcels (Client *c, const Seperator *sep)
 		auto note     = std::string(sep->argplus[5]);
 
 		auto send_to_client = CharacterParcelsRepository::GetParcelCountAndCharacterName(
-				database,
-				to_name
+			database,
+			to_name
 		);
 		if (send_to_client.at(0).character_name.empty()) {
 			c->MessageString(Chat::Yellow, CANT_FIND_PLAYER, to_name.c_str());
@@ -166,14 +164,14 @@ void command_parcels (Client *c, const Seperator *sep)
 			}
 
 			CharacterParcelsRepository::CharacterParcels parcel_out;
-			parcel_out.from_name  = c->GetName();
-			parcel_out.note       = note;
-			parcel_out.sent_date  = time(nullptr);
-			parcel_out.quantity   = quantity == 0 ? 1 : quantity;
-			parcel_out.item_id    = PARCEL_MONEY_ITEM_ID;
-			parcel_out.char_id    = send_to_client.at(0).char_id;
-			parcel_out.slot_id    = next_slot;
-			parcel_out.id         = 0;
+			parcel_out.from_name = c->GetName();
+			parcel_out.note      = note;
+			parcel_out.sent_date = time(nullptr);
+			parcel_out.quantity  = quantity == 0 ? 1 : quantity;
+			parcel_out.item_id   = PARCEL_MONEY_ITEM_ID;
+			parcel_out.char_id   = send_to_client.at(0).char_id;
+			parcel_out.slot_id   = next_slot;
+			parcel_out.id        = 0;
 
 			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
@@ -199,9 +197,8 @@ void command_parcels (Client *c, const Seperator *sep)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (player_event_logs.IsEventEnabled (PlayerEvent::PARCEL_SEND))
-			{
-				PlayerEvent::ParcelSend e {};
+			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
@@ -211,17 +208,16 @@ void command_parcels (Client *c, const Seperator *sep)
 				RecordPlayerEventLogWithClient (c, PlayerEvent::PARCEL_SEND, e);
 			}
 
-			Parcel_Struct ps {};
+			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
 			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
-			c->SendParcelDeliveryToWorld (ps);
-		} else
-		{
-			auto item = database.GetItem (item_id);
-			if (!item)
-			{
-				c->Message (Chat::Yellow, "Could not find an item with id {}", item_id);
+			c->SendParcelDeliveryToWorld(ps);
+		}
+		else {
+			auto item = database.GetItem(item_id);
+			if (!item) {
+				c->Message(Chat::Yellow, "Could not find an item with id {}", item_id);
 				return;
 			}
 
@@ -246,14 +242,14 @@ void command_parcels (Client *c, const Seperator *sep)
 			}
 
 			CharacterParcelsRepository::CharacterParcels parcel_out;
-			parcel_out.from_name  = c->GetName();
-			parcel_out.note       = note.empty() ? "" : note;
-			parcel_out.sent_date  = time(nullptr);
-			parcel_out.quantity   = quantity;
-			parcel_out.item_id    = item_id;
-			parcel_out.char_id    = send_to_client.at(0).char_id;
-			parcel_out.slot_id    = next_slot;
-			parcel_out.id         = 0;
+			parcel_out.from_name = c->GetName();
+			parcel_out.note      = note.empty() ? "" : note;
+			parcel_out.sent_date = time(nullptr);
+			parcel_out.quantity  = quantity;
+			parcel_out.item_id   = item_id;
+			parcel_out.char_id   = send_to_client.at(0).char_id;
+			parcel_out.slot_id   = next_slot;
+			parcel_out.id        = 0;
 
 			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
 			if (!result.id) {
@@ -279,9 +275,8 @@ void command_parcels (Client *c, const Seperator *sep)
 				send_to_client.at(0).character_name.c_str()
 			);
 
-			if (player_event_logs.IsEventEnabled (PlayerEvent::PARCEL_SEND))
-			{
-				PlayerEvent::ParcelSend e {};
+			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
+				PlayerEvent::ParcelSend e{};
 				e.from_player_name = parcel_out.from_name;
 				e.to_player_name   = send_to_client.at(0).character_name;
 				e.item_id          = parcel_out.item_id;
@@ -291,22 +286,22 @@ void command_parcels (Client *c, const Seperator *sep)
 				RecordPlayerEventLogWithClient (c, PlayerEvent::PARCEL_SEND, e);
 			}
 
-			Parcel_Struct ps {};
+			Parcel_Struct ps{};
 			ps.item_slot = parcel_out.slot_id;
 			strn0cpy(ps.send_to, send_to_client.at(0).character_name.c_str(), sizeof(ps.send_to));
 
-			c->SendParcelDeliveryToWorld (ps);
+			c->SendParcelDeliveryToWorld(ps);
 		}
 	}
 }
 
-void SendParcelsSubCommands (Client *c)
+void SendParcelsSubCommands(Client *c)
 {
 	c->Message(Chat::White, "#parcels listdb [Character Name]");
 	c->Message(Chat::White, "#parcels listmemory [Character Name] (Must be in the same zone)");
 	c->Message(
 		Chat::White,
-			"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 99990. Quantity is valid for stackable items, charges on an item, or amount of copper."
+		"#parcels add [Character Name] [item id] [quantity] [note].  To send money use item id of 99990. Quantity is valid for stackable items, charges on an item, or amount of copper."
 	);
-	c->Message (Chat::White, "#parcels details [Character Name]");
+	c->Message(Chat::White, "#parcels details [Character Name]");
 }

@@ -372,7 +372,7 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 		return;
 	}
 
-	if(new_price == 0) {
+	if (new_price == 0) {
 		LogTrading("Removing Trader items from the DB for char_id [{}], item_id [{}]", char_id, item_id);
 
 		auto results = TraderRepository::DeleteWhere(
@@ -393,23 +393,23 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 		return;
 	}
 
-    if(!item->Stackable) {
+	if (!item->Stackable) {
 		auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, charges);
-        if (!results) {
+		if (!results) {
 			LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
 					 item_id,
 					 char_id
 			);
 		}
-        return;
-    }
+		return;
+	}
 
 	auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, 0);
-    if (!results) {
+	if (!results) {
 		LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
 				 item_id,
 				 char_id
-				 );
+		);
 	}
 }
 

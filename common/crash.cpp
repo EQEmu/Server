@@ -23,7 +23,7 @@ void SendCrashReport(const std::string &crash_report)
 {
 	// can configure multiple endpoints if need be
 	std::vector<std::string> endpoints = {
-//		"https://spire.akkadius.com/api/v1/analytics/server-crash-report",
+		"https://spire.akkadius.com/api/v1/analytics/server-crash-report",
 //		"http://localhost:3010/api/v1/analytics/server-crash-report", // development
 	};
 

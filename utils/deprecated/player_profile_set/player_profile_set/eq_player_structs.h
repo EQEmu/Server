@@ -2762,7 +2762,7 @@ struct GetItems_Struct{
 	sint32	Charges[80];
 };
 
-struct BecomeTrader_Struct {
+struct BecomeTrader_Struct{
 	int32 ID;
 	int32 Code;
 };

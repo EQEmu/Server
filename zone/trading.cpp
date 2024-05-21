@@ -1458,15 +1458,10 @@ void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *
 			uint8  count        = 0;
 			bool   test_slot    = true;
 
+			std::vector<TraderRepository::Trader> delete_queue{};
 			for (int i = 0; i < item_limit; i++) {
 				if (test_slot && trader_items.at(i).item_sn == serial_number) {
-					TraderRepository::DeleteWhere(
-						database, fmt::format(
-							"`char_id` = {} AND `slot_id` = {} ",
-							CharacterID(),
-							i
-						)
-					);
+					delete_queue.push_back(trader_items.at(i));
 					NukeTraderItem(
 						slot_id,
 						charges,
@@ -1482,6 +1477,8 @@ void Client::FindAndNukeTraderItem(int32 serial_number, int16 quantity, Client *
 					count++;
 				}
 			}
+
+			TraderRepository::DeleteMany(database, delete_queue);
 			if (count == 0) {
 				TraderEndTrader();
 			}
@@ -1671,13 +1668,13 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 
 	LogTrading("Customer Paid: <green>[{}] in Copper", total_cost);
 
-	uint32 platinum  = total_cost / 1000;
-    total_cost      -= (platinum * 1000);
-    uint32 gold      = total_cost / 100;
-    total_cost      -= (gold * 100);
-    uint32 silver    = total_cost / 10;
-    total_cost      -= (silver * 10);
-    uint32 copper    = total_cost;
+	uint32 platinum = total_cost / 1000;
+	total_cost     -= (platinum * 1000);
+	uint32 gold     = total_cost / 100;
+	total_cost     -= (gold * 100);
+	uint32 silver   = total_cost / 10;
+	total_cost     -= (silver * 10);
+	uint32 copper   = total_cost;
 
 	Trader->AddMoneyToPP(copper, silver, gold, platinum, true);
 
@@ -1747,14 +1744,14 @@ void Client::BuyTraderItem(TraderBuy_Struct *tbs, Client *Trader, const EQApplic
 		BazaarAuditTrail(Trader->GetName(), GetName(), buy_item->GetItem()->Name, outtbs->quantity, outtbs->price, 0);
 	}
 
-    Trader->FindAndNukeTraderItem(tbs->item_id, outtbs->quantity, this, 0);
+	Trader->FindAndNukeTraderItem(tbs->item_id, outtbs->quantity, this, 0);
 
-    if (item_id > 0 && Trader->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-        // Convert Serial Number back to ItemID for RoF+
-        outtbs->item_id = item_id;
-    }
+	if (item_id > 0 && Trader->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
+		// Convert Serial Number back to ItemID for RoF+
+		outtbs->item_id = item_id;
+	}
 
-    Trader->QueuePacket(outapp.get());
+	Trader->QueuePacket(outapp.get());
 }
 
 void Client::SendBazaarWelcome()
@@ -2215,7 +2212,7 @@ static void UpdateTraderCustomerPriceChanged(
 	}
 
 	LogTrading("Sending price updates to customer [{}]", customer->GetName());
-	//EQ::ItemInstance *inst = database.CreateItem(item);
+
 	auto it = std::find_if(trader_items.begin(), trader_items.end(), [&](TraderRepository::Trader x){ return x.item_id == item->ID;});
 	std::unique_ptr<EQ::ItemInstance> inst(
 		database.CreateItem(
@@ -2968,17 +2965,17 @@ const std::string &Client::GetMailKey() const
 
 void Client::SendBecomeTraderToWorld(Client *trader, BazaarTraderBarterActions action)
 {
-    auto outapp     = new ServerPacket(ServerOP_TraderMessaging, sizeof(TraderMessaging_Struct));
-    auto data       = (TraderMessaging_Struct *) outapp->pBuffer;
+	auto outapp = new ServerPacket(ServerOP_TraderMessaging, sizeof(TraderMessaging_Struct));
+	auto data   = (TraderMessaging_Struct *) outapp->pBuffer;
 
-    data->action    = action;
-    data->entity_id = trader->GetID();
-    data->trader_id = trader->CharacterID();
-    data->zone_id   = trader->GetZoneID();
-    strn0cpy(data->trader_name, trader->GetName(), sizeof(data->trader_name));
+	data->action    = action;
+	data->entity_id = trader->GetID();
+	data->trader_id = trader->CharacterID();
+	data->zone_id   = trader->GetZoneID();
+	strn0cpy(data->trader_name, trader->GetName(), sizeof(data->trader_name));
 
-    worldserver.SendPacket(outapp);
-    safe_delete(outapp);
+	worldserver.SendPacket(outapp);
+	safe_delete(outapp);
 }
 
 void Client::SendBecomeTrader(BazaarTraderBarterActions action, uint32 entity_id)

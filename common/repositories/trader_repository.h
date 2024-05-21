@@ -489,6 +489,17 @@ public:
 
 		return UpdateOne(db, e);
 	}
+
+	static int DeleteMany(Database &db, const std::vector<Trader> &entries)
+	{
+		std::vector<std::string> delete_ids;
+
+		for (auto const &e: entries) {
+			delete_ids.push_back(std::to_string(e.id));
+		}
+
+		return DeleteWhere(db, fmt::format("`id` IN({})", Strings::Implode(",", delete_ids)));
+	}
 };
 
 #endif //EQEMU_TRADER_REPOSITORY_H

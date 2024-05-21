@@ -5637,7 +5637,7 @@ ALTER TABLE `npc_spells_entries` ADD `content_flags_disabled` varchar(100) NULL;
 	},
 	ManifestEntry{
 		.version     = 9280,
-		.description = "2024_05_11_add_trader_support_for_augmented_items.sql",
+		.description = "2024_05_11_update_trader_support.sql",
 		.check       = "SHOW COLUMNS FROM `trader` LIKE 'aug_slot_1'",
 		.condition   = "empty",
 		.match       = "",
@@ -5648,21 +5648,10 @@ ALTER TABLE `trader`
 	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
 	ADD COLUMN `aug_slot_4` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
 	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
-	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`;
-)"
-	},
-	ManifestEntry{
-		.version     = 9281,
-		.description = "2024_05_20_add_trader_in_progress_transaction.sql",
-		.check       = "SHOW COLUMNS FROM `trader` LIKE 'active_transaction'",
-		.condition   = "empty",
-		.match       = "",
-		.sql         = R"(
-ALTER TABLE `trader`
+	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`,
 	ADD COLUMN `active_transaction` TINYINT(3) NOT NULL DEFAULT '0' AFTER `char_zone_id`;
 )"
 	}
-
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
 //		.version = 9228,
