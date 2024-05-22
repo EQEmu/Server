@@ -741,7 +741,7 @@ bool Database::SetVariable(const std::string& name, const std::string& value)
 	auto l = VariablesRepository::GetWhere(
 		*this,
 		fmt::format(
-			"`name` = '{}'",
+			"`varname` = '{}'",
 			Strings::Escape(name)
 		)
 	);
