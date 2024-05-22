@@ -396,9 +396,10 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 	if (!item->Stackable) {
 		auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, charges);
 		if (!results) {
-			LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
-					 item_id,
-					 char_id
+			LogTrading(
+				"Failed to update price for trader item [{}] for char_id: [{}]",
+				item_id,
+				char_id
 			);
 		}
 		return;
@@ -406,9 +407,10 @@ void ZoneDatabase::UpdateTraderItemPrice(int char_id, uint32 item_id, uint32 cha
 
 	auto results = TraderRepository::UpdateItem(database, char_id, new_price, item_id, 0);
 	if (!results) {
-		LogDebug("[CLIENT] Failed to update price for trader item: [{}] for char_id: [{}]",
-				 item_id,
-				 char_id
+		LogTrading(
+			"Failed to update price for trader item [{}] for char_id: [{}]",
+			item_id,
+			char_id
 		);
 	}
 }
@@ -454,10 +456,22 @@ void ZoneDatabase::UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity)
 		return;
 	}
 
-	std::string query = StringFormat("UPDATE buyer SET quantity = %i WHERE charid = %i AND buyslot = %i", Quantity, CharID, BuySlot);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
-		LogDebug("[CLIENT] Failed to update quantity in buyslot [{}] for charid: [{}], the error was: [{}]\n", BuySlot, CharID, results.ErrorMessage().c_str());
+	std::string query = StringFormat(
+		"UPDATE buyer SET quantity = %i WHERE charid = %i AND buyslot = %i",
+		Quantity,
+		CharID,
+		BuySlot
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		LogTrading(
+			"Failed to update quantity in buyslot [{}] for charid [{}], the error was [{}]\n",
+			BuySlot,
+			CharID,
+			results.ErrorMessage().c_str()
+		);
+	}
 
 }
 

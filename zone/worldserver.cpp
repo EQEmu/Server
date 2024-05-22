@@ -3907,14 +3907,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					c.second->SetEngagedWithParcelMerchant(false);
 					c.second->DoParcelCancel();
 
-                auto out = new EQApplicationPacket(OP_ShopEndConfirm);
-                c.second->QueuePacket(out);
-                safe_delete(out);
-                return;
-            }
-        }
-        break;
-	}
+					auto out = new EQApplicationPacket(OP_ShopEndConfirm);
+					c.second->QueuePacket(out);
+					safe_delete(out);
+					return;
+				}
+			}
+			break;
+		}
 		case ServerOP_TraderMessaging: {
 			auto            in = (TraderMessaging_Struct *) pack->pBuffer;
 			for (auto const &c: entity_list.GetClientList()) {
@@ -4003,10 +4003,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 			break;
 		}
-	default: {
-		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
-		break;
-	}
+		default: {
+			LogInfo("Unknown ZS Opcode [{}] size [{}]", (int) pack->opcode, pack->size);
+			break;
+		}
 	}
 }
 
