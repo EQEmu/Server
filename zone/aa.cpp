@@ -518,7 +518,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 
 void Client::ResetAA()
 {
-	SendClearAA();
+	SendClearPlayerAA();
 	RefundAA();
 
 	memset(&m_pp.aa_array[0], 0, sizeof(AA_Array) * MAX_PP_AA_ARRAY);
@@ -540,6 +540,13 @@ void Client::ResetAA()
 		++slot_id;
 	}
 
+	database.DeleteCharacterAAs(CharacterID());
+}
+
+void Client::ResetLeadershipAA()
+{
+	SendClearLeadershipAA();
+
 	for (int slot_id = 0; slot_id < _maxLeaderAA; ++slot_id) {
 		m_pp.leader_abilities.ranks[slot_id] = 0;
 	}
@@ -549,14 +556,7 @@ void Client::ResetAA()
 	m_pp.group_leadership_exp    = 0;
 	m_pp.raid_leadership_exp     = 0;
 
-	database.DeleteCharacterAAs(CharacterID());
 	database.DeleteCharacterLeadershipAbilities(CharacterID());
-}
-
-void Client::SendClearAA()
-{
-	SendClearLeadershipAA();
-	SendClearPlayerAA();
 }
 
 void Client::SendClearPlayerAA()
@@ -2178,7 +2178,8 @@ void Client::AutoGrantAAPoints() {
 		}
 	}
 
-	SendClearAA();
+	SendClearLeadershipAA();
+	SendClearPlayerAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();
@@ -2211,7 +2212,8 @@ void Client::GrantAllAAPoints(uint8 unlock_level)
 	}
 
 	SaveAA();
-	SendClearAA();
+	SendClearLeadershipAA();
+	SendClearPlayerAA();
 	SendAlternateAdvancementTable();
 	SendAlternateAdvancementPoints();
 	SendAlternateAdvancementStats();

@@ -503,6 +503,7 @@ public:
 	bool SetAutoLoginCharacterName();
 	bool SetAutoLoginCharacterName(std::string character_name);
 	void DescribeSpecialAbilities(Lua_NPC n);
+	void ResetLeadershipAA();
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);

@@ -3369,6 +3369,12 @@ void Lua_Client::DescribeSpecialAbilities(Lua_NPC n)
 	n.DescribeSpecialAbilities(self);
 }
 
+void Lua_Client::ResetLeadershipAA()
+{
+	Lua_Safe_Call_Void();
+	self->ResetLeadershipAA();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3751,11 +3757,13 @@ luabind::scope lua_register_client() {
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAlternateCurrencyValue", (bool(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveAlternateCurrencyValue)
+	.def("RemoveEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveEbonCrystals)
 	.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
 	.def("RemoveLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNLoss)
 	.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
+	.def("RemoveRadiantCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveRadiantCrystals)
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
 	.def("ResetAllCastbarCooldowns", (void(Lua_Client::*)(void))&Lua_Client::ResetAllCastbarCooldowns)
@@ -3763,9 +3771,8 @@ luabind::scope lua_register_client() {
 	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
 	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
-	.def("RemoveEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveEbonCrystals)
 	.def("ResetItemCooldown", (void(Lua_Client::*)(uint32))&Lua_Client::ResetItemCooldown)
-	.def("RemoveRadiantCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveRadiantCrystals)
+	.def("ResetLeadershipAA", (void(Lua_Client::*)(void))&Lua_Client::ResetLeadershipAA)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)

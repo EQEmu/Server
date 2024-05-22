@@ -3168,6 +3168,11 @@ void Perl_Client_DescribeSpecialAbilities(Client* self, NPC* n)
 	n->DescribeSpecialAbilities(self);
 }
 
+void Perl_Client_ResetLeadershipAA(Client* self)
+{
+	self->ResetLeadershipAA();
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3561,6 +3566,7 @@ void perl_register_client()
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
+	package.add("ResetLeadershipAA", &Perl_Client_ResetLeadershipAA);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
