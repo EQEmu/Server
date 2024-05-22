@@ -5643,13 +5643,23 @@ ALTER TABLE `npc_spells_entries` ADD `content_flags_disabled` varchar(100) NULL;
 		.match       = "",
 		.sql         = R"(
 ALTER TABLE `trader`
-	ADD COLUMN `aug_slot_1` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
-	ADD COLUMN `aug_slot_2` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
-	ADD COLUMN `aug_slot_3` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
-	ADD COLUMN `aug_slot_4` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
-	ADD COLUMN `aug_slot_5` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
-	ADD COLUMN `aug_slot_6` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`,
-	ADD COLUMN `active_transaction` TINYINT(3) NOT NULL DEFAULT '0' AFTER `char_zone_id`;
+	ADD COLUMN `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT FIRST,
+	CHANGE COLUMN `char_id` `char_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `id`,
+	CHANGE COLUMN `item_id` `item_id` INT(11) UNSIGNED NOT NULL DEFAULT '0' AFTER `char_id`,
+	ADD COLUMN `aug_slot_1` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `item_id`,
+	ADD COLUMN `aug_slot_2` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_1`,
+	ADD COLUMN `aug_slot_3` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_2`,
+	ADD COLUMN `aug_slot_4` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_3`,
+	ADD COLUMN `aug_slot_5` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_4`,
+	ADD COLUMN `aug_slot_6` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_5`,
+	CHANGE COLUMN `serialnumber` `item_sn` INT(10) UNSIGNED NOT NULL DEFAULT '0' AFTER `aug_slot_6`,
+	CHANGE COLUMN `charges` `item_charges` INT(11) NOT NULL DEFAULT '0' AFTER `item_sn`,
+	ADD COLUMN `char_entity_id` INT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `slot_id`,
+	ADD COLUMN `char_zone_id` INT(11) UNSIGNED NOT NULL DEFAULT 0 AFTER `char_entity_id`,
+	ADD COLUMN `active_transaction` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `char_zone_id`,
+	DROP PRIMARY KEY,
+	ADD PRIMARY KEY (`id`),
+	ADD INDEX `Index 2` (`char_id`, `slot_id`);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
