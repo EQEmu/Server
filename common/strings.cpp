@@ -745,6 +745,15 @@ bool Strings::Contains(const std::string& subject, const std::string& search)
 	return subject.find(search) != std::string::npos;
 }
 
+bool Strings::ContainsLower(const std::string& subject, const std::string& search)
+{
+	if (subject.length() < search.length()) {
+		return false;
+	}
+
+	return ToLower(subject).find(ToLower(search)) != std::string::npos;
+}
+
 uint32 Strings::TimeToSeconds(std::string time_string)
 {
 	if (time_string.empty()) {

@@ -1,18 +1,19 @@
 #ifndef EQEMU_TRADER_REPOSITORY_H
 #define EQEMU_TRADER_REPOSITORY_H
 
-#include "../database.h"
+#include "../../common/shareddb.h"
 #include "../strings.h"
 #include "base/base_trader_repository.h"
 #include "items_repository.h"
 
 //#include "../../common/eq_constants.h"
 #include "../../common/item_data.h"
+#include "../../common/races.h"
 //#include "../eq_packet_structs.h"
 #include "../cereal/include/cereal/archives/binary.hpp"
 #include "../cereal/include/cereal/types/string.hpp"
 
-class TraderRepository: public BaseTraderRepository {
+class TraderRepository : public BaseTraderRepository {
 public:
 
 	struct DistinctTraders_Struct {
@@ -23,9 +24,9 @@ public:
 	};
 
 	struct BulkTraders_Struct {
-		uint32                              count {0};
-		uint32                              name_length {0};
-		std::vector<DistinctTraders_Struct> traders {};
+		uint32                              count{0};
+		uint32                              name_length{0};
+		std::vector<DistinctTraders_Struct> traders{};
 	};
 
 	struct WelcomeData_Struct {
@@ -33,93 +34,36 @@ public:
 		uint32 count_of_items;
 	};
 
-	/**
-	 * This file was auto generated and can be modified and extended upon
-	 *
-	 * Base repository methods are automatically
-	 * generated in the "base" version of this repository. The base repository
-	 * is immutable and to be left untouched, while methods in this class
-	 * are used as extension methods for more specific persistence-layer
-	 * accessors or mutators.
-	 *
-	 * Base Methods (Subject to be expanded upon in time)
-	 *
-	 * Note: Not all tables are designed appropriately to fit functionality with all base methods
-	 *
-	 * InsertOne
-	 * UpdateOne
-	 * DeleteOne
-	 * FindOne
-	 * GetWhere(std::string where_filter)
-	 * DeleteWhere(std::string where_filter)
-	 * InsertMany
-	 * All
-	 *
-	 * Example custom methods in a repository
-	 *
-	 * TraderRepository::GetByZoneAndVersion(int zone_id, int zone_version)
-	 * TraderRepository::GetWhereNeverExpires()
-	 * TraderRepository::GetWhereXAndY()
-	 * TraderRepository::DeleteWhereXAndY()
-	 *
-	 * Most of the above could be covered by base methods, but if you as a developer
-	 * find yourself re-using logic for other parts of the code, its best to just make a
-	 * method that can be re-used easily elsewhere especially if it can use a base repository
-	 * method and encapsulate filters there
-	 */
-
-	// Custom extended repository methods here
-
 	static std::vector<BazaarSearchResultsFromDB_Struct>
-    GetBazaarSearchResults(Database &db, BazaarSearchCriteria_Struct search, uint32 char_zone_id)
+	GetBazaarSearchResults(
+		SharedDatabase &db,
+		SharedDatabase &in_content_db,
+		BazaarSearchCriteria_Struct search,
+		uint32 char_zone_id
+	)
 	{
-		std::string search_values {};
 		std::string search_criteria_trader("TRUE ");
-		std::string search_criteria_items {};
 
-		if(search.search_scope == UFBazaarSearchScope) {
-			search_criteria_trader.append(fmt::format(
-				" AND trader.char_entity_id = {} AND trader.char_zone_id = {}",
-				search.trader_entity_id,
-				Zones::BAZAAR)
+		if (search.search_scope == UFBazaarSearchScope) {
+			search_criteria_trader.append(
+				fmt::format(
+					" AND trader.char_entity_id = {} AND trader.char_zone_id = {}",
+					search.trader_entity_id,
+					Zones::BAZAAR
+				)
 			);
-		} else if(search.search_scope == Local_Scope) {
+		}
+		else if (search.search_scope == Local_Scope) {
 			search_criteria_trader.append(fmt::format(" AND trader.char_zone_id = {}", char_zone_id));
 		}
-		else if(search.trader_id > 0) {
+		else if (search.trader_id > 0) {
 			search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
 		}
-
 		if (search.min_cost != 0) {
 			search_criteria_trader.append(fmt::format(" AND trader.item_cost >= {}", search.min_cost));
 		}
-
 		if (search.max_cost != 0) {
-			search_criteria_trader.append(fmt::format(" AND trader.item_cost <= {}", (uint64)search.max_cost * 1000));
-		}
-
-		if (search.min_level != 1) {
-			search_criteria_items.append(fmt::format(" AND items.reclevel >= {}", search.min_level));
-		}
-
-		if (search.max_level != 1) {
-			search_criteria_items.append(fmt::format(" AND items.reclevel <= {}", search.max_level));
-		}
-
-		if (!std::string(search.item_name).empty()) {
-			search_criteria_items.append(fmt::format(" AND items.name LIKE \"\%{}\%\" ", search.item_name));
-		}
-
-		if (search._class != 0xFFFFFFFF) {
-			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.classes)), {}, 1) = 1", search._class));
-		}
-
-		if (search.race != 0xFFFFFFFF) {
-			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.races)), {}, 1) = 1", search.race));
-		}
-
-		if (search.slot != 0xFFFFFFFF) {
-			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.slots)), {}, 1) = 1", search.slot + 1));
+			search_criteria_trader.append(fmt::format(" AND trader.item_cost <= {}", (uint64) search.max_cost * 1000));
 		}
 
 		// not yet implemented
@@ -127,155 +71,6 @@ public:
 		// 	   0xffffffff prestige only, 0xfffffffe non-prestige, 0 all
 		//		search_criteria.append(fmt::format(" AND items.type = {} ", search.prestige));
 		//	}
-
-		if (search.augment != 0) {
-			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.augtype)), {}, 1) = 1", search.augment));
-		}
-
-		switch (search.type) {
-			case EQ::item::ItemType::ItemTypeAll: {
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeBook: {
-				search_criteria_items.append(" AND items.itemclass = 2");
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeContainer: {
-				search_criteria_items.append(" AND items.itemclass = 1");
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeAllEffects: {
-				search_criteria_items.append(" AND items.scrolleffect > 0 AND items.scrolleffect < 65000");
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeUnknown9: {
-				search_criteria_items.append(" AND items.worneffect = 998");
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeUnknown10: {
-				search_criteria_items.append(" AND items.worneffect >= 1298 AND items.worneffect <= 1307");
-				break;
-			}
-			case EQ::item::ItemType::ItemTypeFocusEffect: {
-				search_criteria_items.append(" AND items.focuseffect > 0");
-				break;
-			}
-			default: {
-				search_criteria_items.append(fmt::format(" AND items.itemtype = {}", search.type));
-			}
-		}
-
-		switch (search.item_stat) {
-			case STAT_AC: {
-				search_criteria_items.append(" AND items.ac > 0");
-				search_values.append(", items.ac");
-				break;
-			}
-			case STAT_AGI: {
-				search_criteria_items.append(" AND items.aagi > 0");
-				search_values.append(", items.aagi");
-				break;
-			}
-			case STAT_CHA: {
-				search_criteria_items.append(" AND items.acha > 0");
-				search_values.append(", items.acha");
-				break;
-			}
-			case STAT_DEX: {
-				search_criteria_items.append(" AND items.adex > 0");
-				search_values.append(", items.adex");
-				break;
-			}
-			case STAT_INT: {
-				search_criteria_items.append(" AND items.aint > 0");
-				search_values.append(", items.aint");
-				break;
-			}
-			case STAT_STA: {
-				search_criteria_items.append(" AND items.asta > 0");
-				search_values.append(", items.asta");
-				break;
-			}
-			case STAT_STR: {
-				search_criteria_items.append(" AND items.astr > 0");
-				search_values.append(", items.astr");
-				break;
-			}
-			case STAT_WIS: {
-				search_criteria_items.append(" AND items.awis > 0");
-				search_values.append(", items.awis");
-				break;
-			}
-			case STAT_COLD: {
-				search_criteria_items.append(" AND items.cr > 0");
-				search_values.append(", items.cr");
-				break;
-			}
-			case STAT_DISEASE: {
-				search_criteria_items.append(" AND items.dr > 0");
-				search_values.append(", items.dr");
-				break;
-			}
-			case STAT_FIRE: {
-				search_criteria_items.append(" AND items.fr > 0");
-				search_values.append(", items.fr");
-				break;
-			}
-			case STAT_MAGIC: {
-				search_criteria_items.append(" AND items.mr > 0");
-				search_values.append(", items.mr");
-				break;
-			}
-			case STAT_POISON: {
-				search_criteria_items.append(" AND items.pr > 0");
-				search_values.append(", items.pr");
-				break;
-			}
-			case STAT_HP: {
-				search_criteria_items.append(" AND items.hp > 0");
-				search_values.append(", items.hp");
-				break;
-			}
-			case STAT_MANA: {
-				search_criteria_items.append(" AND items.mana > 0");
-				search_values.append(", items.mana");
-				break;
-			}
-			case STAT_ENDURANCE: {
-				search_criteria_items.append(" AND items.endur > 0");
-				search_values.append(", items.endur");
-				break;
-			}
-			case STAT_ATTACK: {
-				search_criteria_items.append(" AND items.attack > 0");
-				search_values.append(", items.attack");
-				break;
-			}
-			case STAT_HP_REGEN: {
-				search_criteria_items.append(" AND items.regen > 0");
-				search_values.append(", items.regen");
-				break;
-			}
-			case STAT_MANA_REGEN: {
-				search_criteria_items.append(" AND items.manaregen > 0");
-				search_values.append(", items.manaregen");
-				break;
-			}
-			case STAT_HASTE: {
-				search_criteria_items.append(" AND items.haste > 0");
-				search_values.append(", items.haste");
-				break;
-			}
-			case STAT_DAMAGE_SHIELD: {
-				search_criteria_items.append(" AND items.damageshield > 0");
-				search_values.append(", items.damageshield");
-				break;
-			}
-			default: {
-				search_values.append(", 0");
-				break;
-			}
-		}
 
 		std::string query = fmt::format(
 			"SELECT COUNT(item_id), trader.char_id, trader.item_id, trader.item_sn, trader.item_charges, trader.item_cost, "
@@ -288,50 +83,160 @@ public:
 		);
 
 		std::vector<BazaarSearchResultsFromDB_Struct> all_entries;
-		auto results = db.QueryDatabase(query);
+		auto                                          results = db.QueryDatabase(query);
 
 		if (!results.Success()) {
 			return all_entries;
 		}
 
-		auto trader_item_details = ItemsRepository::GetTraderItemDetails(
-			content_db,
-			results,
-			search_values,
-			search_criteria_items
-		);
+		struct ItemStatSearch {
+			uint32 stat;
+			uint32 value;
+		};
+
+		struct ItemSearchType {
+			EQ::item::ItemType type;
+			bool               condition;
+		};
+
+		struct AddititiveSearchCriteria {
+			bool should_check;
+			bool condition;
+		};
 
 		results = db.QueryDatabase(query);
-		for (auto row : results) {
-			BazaarSearchResultsFromDB_Struct data{};
+		for (auto row: results) {
+			BazaarSearchResultsFromDB_Struct r{};
 
-			data.item_id = Strings::ToInt(row[2]);
-			auto it = std::find_if(
-				trader_item_details.cbegin(),
-				trader_item_details.cend(),
-				[&](ItemsRepository::TraderItemDetails const x) { return x.item_id == data.item_id; }
-			);
+			r.item_id = Strings::ToInt(row[2]);
 
-			if (it == std::end(trader_item_details)) {
+			auto item = in_content_db.GetItem(r.item_id);
+			if (!item) {
 				continue;
 			}
 
-			data.count             = Strings::ToInt(row[0]);
-			data.trader_id         = Strings::ToInt(row[1]);
-			data.serial_number     = Strings::ToInt(row[3]);
-			data.charges           = Strings::ToInt(row[4]);
-			data.cost              = Strings::ToInt(row[5]);
-			data.slot_id           = Strings::ToInt(row[6]);
-			data.sum_charges       = Strings::ToInt(row[7]);
-			data.stackable         = it != std::end(trader_item_details) ? it->stackable : 0;
-			data.icon_id           = it != std::end(trader_item_details) ? it->icon : 0;
-			data.trader_zone_id    = Strings::ToInt(row[8]);
-			data.trader_entity_id  = Strings::ToInt(row[9]);
-			data.item_stat         = it != std::end(trader_item_details) ? it->item_stat : 0;
-			data.serial_number_RoF = fmt::format("{:016}\0", Strings::ToInt(row[3]));
-			data.item_name         = fmt::format("{:.63}\0", it != std::end(trader_item_details) ? it->name : std::string());
-			data.trader_name       = fmt::format("{:.63}\0", std::string(row[10]).c_str());
-			all_entries.push_back(data);
+			r.count             = Strings::ToInt(row[0]);
+			r.trader_id         = Strings::ToInt(row[1]);
+			r.serial_number     = Strings::ToInt(row[3]);
+			r.charges           = Strings::ToInt(row[4]);
+			r.cost              = Strings::ToInt(row[5]);
+			r.slot_id           = Strings::ToInt(row[6]);
+			r.sum_charges       = Strings::ToInt(row[7]);
+			r.stackable         = item->Stackable;
+			r.icon_id           = item->Icon;
+			r.trader_zone_id    = Strings::ToInt(row[8]);
+			r.trader_entity_id  = Strings::ToInt(row[9]);
+			r.serial_number_RoF = fmt::format("{:016}\0", Strings::ToInt(row[3]));
+			r.item_name         = fmt::format("{:.63}\0", item->Name);
+			r.trader_name       = fmt::format("{:.63}\0", std::string(row[10]).c_str());
+
+			LogTradingDetail(
+				"Searching against item [{}] for trader [{}]",
+				item->Name,
+				r.trader_name
+			);
+
+			// item stat searches
+			std::vector<ItemStatSearch> item_stat_searches = {
+				{STAT_AC,            static_cast<uint32>(item->AC)},
+				{STAT_AGI,           static_cast<uint32>(item->AAgi)},
+				{STAT_CHA,           static_cast<uint32>(item->ACha)},
+				{STAT_DEX,           static_cast<uint32>(item->ADex)},
+				{STAT_INT,           static_cast<uint32>(item->AInt)},
+				{STAT_STA,           static_cast<uint32>(item->ASta)},
+				{STAT_STR,           static_cast<uint32>(item->AStr)},
+				{STAT_WIS,           static_cast<uint32>(item->AWis)},
+				{STAT_COLD,          static_cast<uint32>(item->CR)},
+				{STAT_DISEASE,       static_cast<uint32>(item->DR)},
+				{STAT_FIRE,          static_cast<uint32>(item->FR)},
+				{STAT_MAGIC,         static_cast<uint32>(item->MR)},
+				{STAT_POISON,        static_cast<uint32>(item->PR)},
+				{STAT_HP,            static_cast<uint32>(item->HP)},
+				{STAT_MANA,          static_cast<uint32>(item->Mana)},
+				{STAT_ENDURANCE,     static_cast<uint32>(item->Endur)},
+				{STAT_ATTACK,        static_cast<uint32>(item->Attack)},
+				{STAT_HP_REGEN,      static_cast<uint32>(item->Regen)},
+				{STAT_MANA_REGEN,    static_cast<uint32>(item->ManaRegen)},
+				{STAT_HASTE,         static_cast<uint32>(item->Haste)},
+				{STAT_DAMAGE_SHIELD, static_cast<uint32>(item->DamageShield)}
+			};
+
+			r.item_stat = 0;
+			for (auto &i: item_stat_searches) {
+				if (i.stat == search.item_stat) {
+					r.item_stat = i.value;
+				}
+			}
+
+			// item type searches
+			std::vector<ItemSearchType> item_search_types = {
+				{EQ::item::ItemType::ItemTypeAll,         true},
+				{EQ::item::ItemType::ItemTypeBook,        item->ItemClass == EQ::item::ItemType::ItemTypeBook},
+				{EQ::item::ItemType::ItemTypeContainer,   item->ItemClass == EQ::item::ItemType::ItemTypeContainer},
+				{EQ::item::ItemType::ItemTypeAllEffects,  item->Scroll.Effect > 0 && item->Scroll.Effect < 65000},
+				{EQ::item::ItemType::ItemTypeUnknown9,    item->Worn.Effect == 998},
+				{EQ::item::ItemType::ItemTypeUnknown10,   item->Worn.Effect >= 1298 && item->Worn.Effect <= 1307},
+				{EQ::item::ItemType::ItemTypeFocusEffect, item->Focus.Effect > 0},
+			};
+
+			bool found = false;
+
+			for (auto &i: item_search_types) {
+				if (i.type == search.type && !i.condition) {
+					continue;
+				}
+				if (i.type == search.type && i.condition) {
+					found = true;
+					break;
+				}
+			}
+
+			if (!found) {
+				if (search.type && search.type != item->ItemType) {
+					continue;
+				}
+			}
+
+			// item additive searches
+			std::vector<AddititiveSearchCriteria> item_additive_searches = {
+				{
+					.should_check = search.min_level != 1,
+					.condition = item->RecLevel <= search.min_level
+				},
+				{
+					.should_check = search.max_level != 1,
+					.condition = item->RecLevel >= search.max_level
+				},
+				{
+					.should_check = !std::string(search.item_name).empty(),
+					.condition = Strings::ContainsLower(item->Name, search.item_name)
+				},
+				{
+					.should_check = search._class != 0xFFFFFFFF,
+					.condition = !(item->Classes & GetPlayerClassBit(search._class))
+				},
+				{
+					.should_check = search.race != 0xFFFFFFFF,
+					.condition = !(item->Races & GetPlayerRaceBit(search.race))
+				},
+//				{
+//					.should_check = search.augment != 0,
+//					.condition = !(item->AugType & GetAugTypeBit(search.augment))
+//				},
+//				{
+//					.should_check = search.slot != 0xFFFFFFFF,
+//					.condition = item->Slots & GetEquipmentSlotBit(search.slot)
+//				},
+			};
+
+			for (auto &i: item_additive_searches) {
+				if (i.should_check && !i.condition) {
+					continue;
+				}
+			}
+
+
+			all_entries.push_back(r);
 		}
 
 		return all_entries;
@@ -339,19 +244,19 @@ public:
 
 	static BulkTraders_Struct GetDistinctTraders(Database &db)
 	{
-		BulkTraders_Struct                  all_entries {};
+		BulkTraders_Struct                  all_entries{};
 		std::vector<DistinctTraders_Struct> distinct_traders;
 
-		auto results = db.QueryDatabase("SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_entity_id, c.name "
-										"FROM trader AS t "
-										"JOIN character_data AS c ON t.char_id = c.id;"
-										);
+		auto results = db.QueryDatabase(
+			"SELECT DISTINCT(t.char_id), t.char_zone_id, t.char_entity_id, c.name "
+			"FROM trader AS t "
+			"JOIN character_data AS c ON t.char_id = c.id;"
+		);
 
 		distinct_traders.reserve(results.RowCount());
 
-		for (auto row : results)
-		{
-			DistinctTraders_Struct e {};
+		for (auto row: results) {
+			DistinctTraders_Struct e{};
 
 			e.trader_id   = Strings::ToInt(row[0]);
 			e.zone_id     = Strings::ToInt(row[1]);
@@ -410,23 +315,24 @@ public:
 			return 0;
 		}
 
-		for (auto &i : items) {
+		for (auto &i: items) {
 			i.item_cost = new_price;
 		}
 
 		return ReplaceMany(db, items);
 	}
 
-	static Trader GetTraderItem(Database& db, uint32 trader_id, uint32 item_id, uint32 item_cost)
+	static Trader GetTraderItem(Database &db, uint32 trader_id, uint32 item_id, uint32 item_cost)
 	{
 		Trader item{};
 
-		auto query = fmt::format("SELECT t.char_id, t.item_id, t.serialnumber, t.charges, t.item_cost, t.slot_id, t.entity_id FROM trader AS t "
-								 "WHERE t.entity_id = {} AND t.item_id = {} AND t.item_cost = {} "
-								 "LIMIT 1;",
-								 trader_id,
-								 item_id,
-								 item_cost
+		auto query   = fmt::format(
+			"SELECT t.char_id, t.item_id, t.serialnumber, t.charges, t.item_cost, t.slot_id, t.entity_id FROM trader AS t "
+			"WHERE t.entity_id = {} AND t.item_id = {} AND t.item_cost = {} "
+			"LIMIT 1;",
+			trader_id,
+			item_id,
+			item_cost
 		);
 		auto results = db.QueryDatabase(query);
 
@@ -434,7 +340,7 @@ public:
 			return item;
 		}
 
-		auto row          = results.begin();
+		auto row = results.begin();
 		item.char_id      = Strings::ToInt(row[0]);
 		item.item_id      = Strings::ToInt(row[1]);
 		item.item_sn      = Strings::ToInt(row[2]);
@@ -464,7 +370,7 @@ public:
 
 	static Trader GetItemBySerialNumber(Database &db, uint32 serial_number)
 	{
-		Trader e{};
+		Trader     e{};
 		const auto trader_item = GetWhere(
 			db,
 			fmt::format("`item_sn` = '{}' LIMIT 1", serial_number)
@@ -480,8 +386,8 @@ public:
 
 	static Trader GetItemBySerialNumber(Database &db, std::string serial_number)
 	{
-		Trader e{};
-		auto sn = Strings::ToUnsignedBigInt(serial_number);
+		Trader     e{};
+		auto       sn          = Strings::ToUnsignedBigInt(serial_number);
 		const auto trader_item = GetWhere(
 			db,
 			fmt::format("`item_sn` = '{}' LIMIT 1", sn)
