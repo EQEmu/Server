@@ -6787,6 +6787,8 @@ bool Client::RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount)
 
 	alternate_currency[currency_id] = new_amount;
 
+	SendAlternateCurrencyValue(currency_id);
+
 	if (parse->PlayerHasQuestSub(EVENT_ALT_CURRENCY_LOSS)) {
 		const std::string &export_string = fmt::format(
 			"{} {} {}",
