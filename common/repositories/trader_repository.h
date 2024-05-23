@@ -37,11 +37,27 @@ public:
 	static std::vector<BazaarSearchResultsFromDB_Struct>
 	GetBazaarSearchResults(
 		SharedDatabase &db,
-		SharedDatabase &in_content_db,
 		BazaarSearchCriteria_Struct search,
 		uint32 char_zone_id
 	)
 	{
+
+		LogTrading(
+			"Searching for items with search criteria - item_name [{}] min_cost [{}] max_cost [{}] min_level [{}] max_level [{}] max_results [{}] prestige [{}] augment [{}] trader_entity_id [{}] trader_id [{}] search_scope [{}] char_zone_id [{}]",
+			search.item_name,
+			search.min_cost,
+			search.max_cost,
+			search.min_level,
+			search.max_level,
+			search.max_results,
+			search.prestige,
+			search.augment,
+			search.trader_entity_id,
+			search.trader_id,
+			search.search_scope,
+			char_zone_id
+		);
+
 		std::string search_criteria_trader("TRUE ");
 
 		if (search.search_scope == UFBazaarSearchScope) {
@@ -83,7 +99,8 @@ public:
 		);
 
 		std::vector<BazaarSearchResultsFromDB_Struct> all_entries;
-		auto                                          results = db.QueryDatabase(query);
+
+		auto results = db.QueryDatabase(query);
 
 		if (!results.Success()) {
 			return all_entries;
@@ -104,13 +121,12 @@ public:
 			bool condition;
 		};
 
-		results = db.QueryDatabase(query);
 		for (auto row: results) {
 			BazaarSearchResultsFromDB_Struct r{};
 
 			r.item_id = Strings::ToInt(row[2]);
 
-			auto item = in_content_db.GetItem(r.item_id);
+			auto item = db.GetItem(r.item_id);
 			if (!item) {
 				continue;
 			}
@@ -131,8 +147,9 @@ public:
 			r.trader_name       = fmt::format("{:.63}\0", std::string(row[10]).c_str());
 
 			LogTradingDetail(
-				"Searching against item [{}] for trader [{}]",
+				"Searching against item [{}] ({}) for trader [{}]",
 				item->Name,
+				item->ID,
 				r.trader_name
 			);
 
@@ -179,23 +196,22 @@ public:
 				{EQ::item::ItemType::ItemTypeFocusEffect, item->Focus.Effect > 0},
 			};
 
-			bool found = false;
-
+			bool met_filter = false;
+			bool has_filter = false;
 			for (auto &i: item_search_types) {
-				if (i.type == search.type && !i.condition) {
-					continue;
+				if (i.type == search.type) {
+					has_filter = true;
+					if (i.condition) {
+						met_filter = true;
+						break;
+					}
 				}
-				if (i.type == search.type && i.condition) {
-					found = true;
-					break;
-				}
+			}
+			if (has_filter && !met_filter) {
+				continue;
 			}
 
-			if (!found) {
-				if (search.type && search.type != item->ItemType) {
-					continue;
-				}
-			}
+			// TODO: Add catch-all item type filter for specific item types
 
 			// item additive searches
 			std::vector<AddititiveSearchCriteria> item_additive_searches = {
@@ -229,12 +245,17 @@ public:
 //				},
 			};
 
+			bool should_add = false;
 			for (auto &i: item_additive_searches) {
-				if (i.should_check && !i.condition) {
+				if (i.should_check && i.condition) {
+					should_add = true;
 					continue;
 				}
 			}
 
+			if (!should_add) {
+				continue;
+			}
 
 			all_entries.push_back(r);
 		}

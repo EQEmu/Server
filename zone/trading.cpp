@@ -1297,7 +1297,9 @@ EQ::ItemInstance *Client::FindTraderItemBySerialNumber(int32 SerialNumber)
 			}
 		}
 	}
-	LogTrading("Client::FindTraderItemBySerialNumber Couldn't find item! Serial No. was [{}]", SerialNumber);
+
+	LogTrading("Couldn't find item! Serial No. was [{}]", SerialNumber);
+
 	return nullptr;
 }
 
@@ -1769,7 +1771,7 @@ void Client::SendBazaarWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	auto results = TraderRepository::GetBazaarSearchResults(database, content_db, search_criteria, GetZoneID());
+	auto results = TraderRepository::GetBazaarSearchResults(database, search_criteria, GetZoneID());
 
 	if (results.empty()) {
 		SendBazaarDone(GetID());
