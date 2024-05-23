@@ -202,6 +202,7 @@ public:
 				if (i.type == search.type) {
 					has_filter = true;
 					if (i.condition) {
+						LogTradingDetail("Item [{}] met search criteria for type [{}]", item->Name, uint8(i.type));
 						met_filter = true;
 						break;
 					}
@@ -216,12 +217,12 @@ public:
 			// item additive searches
 			std::vector<AddititiveSearchCriteria> item_additive_searches = {
 				{
-					.should_check = search.min_level != 1,
-					.condition = item->RecLevel <= search.min_level
+					.should_check = search.min_level != 1 && item->RecLevel > 0,
+					.condition = item->RecLevel >= search.min_level
 				},
 				{
-					.should_check = search.max_level != 1,
-					.condition = item->RecLevel >= search.max_level
+					.should_check = search.max_level != 1 && item->RecLevel > 0,
+					.condition = item->RecLevel <= search.max_level
 				},
 				{
 					.should_check = !std::string(search.item_name).empty(),
@@ -247,6 +248,12 @@ public:
 
 			bool should_add = false;
 			for (auto &i: item_additive_searches) {
+				LogTradingDetail(
+					"Checking item [{}] for search criteria - should_check [{}] condition [{}]",
+					item->Name,
+					i.should_check,
+					i.condition
+				);
 				if (i.should_check && i.condition) {
 					should_add = true;
 					continue;
@@ -259,6 +266,8 @@ public:
 
 			all_entries.push_back(r);
 		}
+
+		LogTrading("Returning [{}] items from search results", all_entries.size());
 
 		return all_entries;
 	}
