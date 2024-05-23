@@ -179,8 +179,6 @@ int main(int argc, char **argv)
 	EQTimeTimer.Start(600000);
 	Timer parcel_prune_timer(86400000);
 	parcel_prune_timer.Start(86400000);
-	Timer expired_suspensions_prune_timer(60000);
-	expired_suspensions_prune_timer.Start(60000);
 
 
 	// global loads
@@ -438,10 +436,6 @@ int main(int argc, char **argv)
 
 				database.PurgeCharacterParcels();
 			}
-		}
-
-		if (expired_suspensions_prune_timer.Check()) {
-			database.ClearExpiredSuspensions();
 		}
 
 		if (player_event_process_timer.Check()) {
