@@ -43,7 +43,9 @@ public:
 	{
 
 		LogTrading(
-			"Searching for items with search criteria - item_name [{}] min_cost [{}] max_cost [{}] min_level [{}] max_level [{}] max_results [{}] prestige [{}] augment [{}] trader_entity_id [{}] trader_id [{}] search_scope [{}] char_zone_id [{}]",
+			"Searching for items with search criteria - item_name [{}] min_cost [{}] max_cost [{}] min_level [{}] "
+			"max_level [{}] max_results [{}] prestige [{}] augment [{}] trader_entity_id [{}] trader_id [{}] "
+			"search_scope [{}] char_zone_id [{}]",
 			search.item_name,
 			search.min_cost,
 			search.max_cost,
@@ -198,6 +200,7 @@ public:
 
 			bool met_filter = false;
 			bool has_filter = false;
+
 			for (auto &i: item_search_types) {
 				if (i.type == search.type) {
 					has_filter = true;
@@ -247,6 +250,7 @@ public:
 			};
 
 			bool should_add = true;
+
 			for (auto &i: item_additive_searches) {
 				LogTradingDetail(
 					"Checking item [{}] for search criteria - should_check [{}] condition [{}]",
