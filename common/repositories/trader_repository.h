@@ -246,7 +246,7 @@ public:
 //				},
 			};
 
-			bool should_add = false;
+			bool should_add = true;
 			for (auto &i: item_additive_searches) {
 				LogTradingDetail(
 					"Checking item [{}] for search criteria - should_check [{}] condition [{}]",
@@ -254,8 +254,8 @@ public:
 					i.should_check,
 					i.condition
 				);
-				if (i.should_check && i.condition) {
-					should_add = true;
+				if (i.should_check && !i.condition) {
+					should_add = false;
 					continue;
 				}
 			}
