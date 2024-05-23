@@ -4,6 +4,7 @@
 #include "../database.h"
 #include "../strings.h"
 #include "base/base_trader_repository.h"
+#include "items_repository.h"
 
 //#include "../../common/eq_constants.h"
 #include "../../common/item_data.h"
@@ -73,51 +74,52 @@ public:
     GetBazaarSearchResults(Database &db, BazaarSearchCriteria_Struct search, uint32 char_zone_id)
 	{
 		std::string search_values {};
-		std::string search_criteria = " WHERE trader.item_id = items.id ";
+		std::string search_criteria_trader("TRUE ");
+		std::string search_criteria_items {};
 
 		if(search.search_scope == UFBazaarSearchScope) {
-			search_criteria.append(fmt::format(
+			search_criteria_trader.append(fmt::format(
 				" AND trader.char_entity_id = {} AND trader.char_zone_id = {}",
 				search.trader_entity_id,
 				Zones::BAZAAR)
 			);
 		} else if(search.search_scope == Local_Scope) {
-			search_criteria.append(fmt::format(" AND trader.char_zone_id = {}", char_zone_id));
+			search_criteria_trader.append(fmt::format(" AND trader.char_zone_id = {}", char_zone_id));
 		}
 		else if(search.trader_id > 0) {
-			search_criteria.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
-		}
-
-		if (search.min_level != 1) {
-			search_criteria.append(fmt::format(" AND items.reclevel >= {}", search.min_level));
-		}
-
-		if (search.max_level != 1) {
-			search_criteria.append(fmt::format(" AND items.reclevel <= {}", search.max_level));
+			search_criteria_trader.append(fmt::format(" AND trader.char_id = {}", search.trader_id));
 		}
 
 		if (search.min_cost != 0) {
-			search_criteria.append(fmt::format(" AND trader.item_cost >= {}", search.min_cost));
+			search_criteria_trader.append(fmt::format(" AND trader.item_cost >= {}", search.min_cost));
 		}
 
 		if (search.max_cost != 0) {
-			search_criteria.append(fmt::format(" AND trader.item_cost <= {}", (uint64)search.max_cost * 1000));
+			search_criteria_trader.append(fmt::format(" AND trader.item_cost <= {}", (uint64)search.max_cost * 1000));
+		}
+
+		if (search.min_level != 1) {
+			search_criteria_items.append(fmt::format(" AND items.reclevel >= {}", search.min_level));
+		}
+
+		if (search.max_level != 1) {
+			search_criteria_items.append(fmt::format(" AND items.reclevel <= {}", search.max_level));
 		}
 
 		if (!std::string(search.item_name).empty()) {
-			search_criteria.append(fmt::format(" AND items.name LIKE \"\%{}\%\" ", search.item_name));
+			search_criteria_items.append(fmt::format(" AND items.name LIKE \"\%{}\%\" ", search.item_name));
 		}
 
 		if (search._class != 0xFFFFFFFF) {
-			search_criteria.append(fmt::format(" AND MID(REVERSE(BIN(items.classes)), {}, 1) = 1", search._class));
+			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.classes)), {}, 1) = 1", search._class));
 		}
 
 		if (search.race != 0xFFFFFFFF) {
-			search_criteria.append(fmt::format(" AND MID(REVERSE(BIN(items.races)), {}, 1) = 1", search.race));
+			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.races)), {}, 1) = 1", search.race));
 		}
 
 		if (search.slot != 0xFFFFFFFF) {
-			search_criteria.append(fmt::format(" AND MID(REVERSE(BIN(items.slots)), {}, 1) = 1", search.slot + 1));
+			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.slots)), {}, 1) = 1", search.slot + 1));
 		}
 
 		// not yet implemented
@@ -127,7 +129,7 @@ public:
 		//	}
 
 		if (search.augment != 0) {
-			search_criteria.append(fmt::format(" AND MID(REVERSE(BIN(items.augtype)), {}, 1) = 1", search.augment));
+			search_criteria_items.append(fmt::format(" AND MID(REVERSE(BIN(items.augtype)), {}, 1) = 1", search.augment));
 		}
 
 		switch (search.type) {
@@ -135,137 +137,137 @@ public:
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeBook: {
-				search_criteria.append(" AND items.itemclass = 2");
+				search_criteria_items.append(" AND items.itemclass = 2");
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeContainer: {
-				search_criteria.append(" AND items.itemclass = 1");
+				search_criteria_items.append(" AND items.itemclass = 1");
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeAllEffects: {
-				search_criteria.append(" AND items.scrolleffect > 0 AND items.scrolleffect < 65000");
+				search_criteria_items.append(" AND items.scrolleffect > 0 AND items.scrolleffect < 65000");
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeUnknown9: {
-				search_criteria.append(" AND items.worneffect = 998");
+				search_criteria_items.append(" AND items.worneffect = 998");
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeUnknown10: {
-				search_criteria.append(" AND items.worneffect >= 1298 AND items.worneffect <= 1307");
+				search_criteria_items.append(" AND items.worneffect >= 1298 AND items.worneffect <= 1307");
 				break;
 			}
 			case EQ::item::ItemType::ItemTypeFocusEffect: {
-				search_criteria.append(" AND items.focuseffect > 0");
+				search_criteria_items.append(" AND items.focuseffect > 0");
 				break;
 			}
 			default: {
-				search_criteria.append(fmt::format(" AND items.itemtype = {}", search.type));
+				search_criteria_items.append(fmt::format(" AND items.itemtype = {}", search.type));
 			}
 		}
 
 		switch (search.item_stat) {
 			case STAT_AC: {
-				search_criteria.append(" AND items.ac > 0");
+				search_criteria_items.append(" AND items.ac > 0");
 				search_values.append(", items.ac");
 				break;
 			}
 			case STAT_AGI: {
-				search_criteria.append(" AND items.aagi > 0");
+				search_criteria_items.append(" AND items.aagi > 0");
 				search_values.append(", items.aagi");
 				break;
 			}
 			case STAT_CHA: {
-				search_criteria.append(" AND items.acha > 0");
+				search_criteria_items.append(" AND items.acha > 0");
 				search_values.append(", items.acha");
 				break;
 			}
 			case STAT_DEX: {
-				search_criteria.append(" AND items.adex > 0");
+				search_criteria_items.append(" AND items.adex > 0");
 				search_values.append(", items.adex");
 				break;
 			}
 			case STAT_INT: {
-				search_criteria.append(" AND items.aint > 0");
+				search_criteria_items.append(" AND items.aint > 0");
 				search_values.append(", items.aint");
 				break;
 			}
 			case STAT_STA: {
-				search_criteria.append(" AND items.asta > 0");
+				search_criteria_items.append(" AND items.asta > 0");
 				search_values.append(", items.asta");
 				break;
 			}
 			case STAT_STR: {
-				search_criteria.append(" AND items.astr > 0");
+				search_criteria_items.append(" AND items.astr > 0");
 				search_values.append(", items.astr");
 				break;
 			}
 			case STAT_WIS: {
-				search_criteria.append(" AND items.awis > 0");
+				search_criteria_items.append(" AND items.awis > 0");
 				search_values.append(", items.awis");
 				break;
 			}
 			case STAT_COLD: {
-				search_criteria.append(" AND items.cr > 0");
+				search_criteria_items.append(" AND items.cr > 0");
 				search_values.append(", items.cr");
 				break;
 			}
 			case STAT_DISEASE: {
-				search_criteria.append(" AND items.dr > 0");
+				search_criteria_items.append(" AND items.dr > 0");
 				search_values.append(", items.dr");
 				break;
 			}
 			case STAT_FIRE: {
-				search_criteria.append(" AND items.fr > 0");
+				search_criteria_items.append(" AND items.fr > 0");
 				search_values.append(", items.fr");
 				break;
 			}
 			case STAT_MAGIC: {
-				search_criteria.append(" AND items.mr > 0");
+				search_criteria_items.append(" AND items.mr > 0");
 				search_values.append(", items.mr");
 				break;
 			}
 			case STAT_POISON: {
-				search_criteria.append(" AND items.pr > 0");
+				search_criteria_items.append(" AND items.pr > 0");
 				search_values.append(", items.pr");
 				break;
 			}
 			case STAT_HP: {
-				search_criteria.append(" AND items.hp > 0");
+				search_criteria_items.append(" AND items.hp > 0");
 				search_values.append(", items.hp");
 				break;
 			}
 			case STAT_MANA: {
-				search_criteria.append(" AND items.mana > 0");
+				search_criteria_items.append(" AND items.mana > 0");
 				search_values.append(", items.mana");
 				break;
 			}
 			case STAT_ENDURANCE: {
-				search_criteria.append(" AND items.endur > 0");
+				search_criteria_items.append(" AND items.endur > 0");
 				search_values.append(", items.endur");
 				break;
 			}
 			case STAT_ATTACK: {
-				search_criteria.append(" AND items.attack > 0");
+				search_criteria_items.append(" AND items.attack > 0");
 				search_values.append(", items.attack");
 				break;
 			}
 			case STAT_HP_REGEN: {
-				search_criteria.append(" AND items.regen > 0");
+				search_criteria_items.append(" AND items.regen > 0");
 				search_values.append(", items.regen");
 				break;
 			}
 			case STAT_MANA_REGEN: {
-				search_criteria.append(" AND items.manaregen > 0");
+				search_criteria_items.append(" AND items.manaregen > 0");
 				search_values.append(", items.manaregen");
 				break;
 			}
 			case STAT_HASTE: {
-				search_criteria.append(" AND items.haste > 0");
+				search_criteria_items.append(" AND items.haste > 0");
 				search_values.append(", items.haste");
 				break;
 			}
 			case STAT_DAMAGE_SHIELD: {
-				search_criteria.append(" AND items.damageshield > 0");
+				search_criteria_items.append(" AND items.damageshield > 0");
 				search_values.append(", items.damageshield");
 				break;
 			}
@@ -277,12 +279,11 @@ public:
 
 		std::string query = fmt::format(
 			"SELECT COUNT(item_id), trader.char_id, trader.item_id, trader.item_sn, trader.item_charges, trader.item_cost, "
-			"trader.slot_id, items.name, SUM(trader.item_charges), items.stackable, items.icon, trader.char_zone_id, "
-			"trader.char_entity_id, character_data.name {} "
-			"FROM trader, items, character_data {} AND trader.char_id = character_data.id "
+			"trader.slot_id, SUM(trader.item_charges), trader.char_zone_id, trader.char_entity_id, character_data.name "
+			"FROM trader, character_data "
+			"WHERE {} AND trader.char_id = character_data.id "
 			"GROUP BY trader.item_sn, trader.item_charges, trader.char_id LIMIT {}",
-			search_values.c_str(),
-			search_criteria.c_str(),
+			search_criteria_trader.c_str(),
 			search.max_results
 		);
 
@@ -293,27 +294,43 @@ public:
 			return all_entries;
 		}
 
-		all_entries.reserve(results.RowCount());
+		auto trader_item_details = ItemsRepository::GetTraderItemDetails(
+			content_db,
+			results,
+			search_values,
+			search_criteria_items
+		);
 
+		results = db.QueryDatabase(query);
 		for (auto row : results) {
 			BazaarSearchResultsFromDB_Struct data{};
 
+			data.item_id = Strings::ToInt(row[2]);
+			auto it = std::find_if(
+				trader_item_details.cbegin(),
+				trader_item_details.cend(),
+				[&](ItemsRepository::TraderItemDetails const x) { return x.item_id == data.item_id; }
+			);
+
+			if (it == std::end(trader_item_details)) {
+				continue;
+			}
+
 			data.count             = Strings::ToInt(row[0]);
 			data.trader_id         = Strings::ToInt(row[1]);
-			data.item_id           = Strings::ToInt(row[2]);
 			data.serial_number     = Strings::ToInt(row[3]);
 			data.charges           = Strings::ToInt(row[4]);
 			data.cost              = Strings::ToInt(row[5]);
 			data.slot_id           = Strings::ToInt(row[6]);
-			data.sum_charges       = Strings::ToInt(row[8]);
-			data.stackable         = Strings::ToBool(row[9]);
-			data.icon_id           = Strings::ToInt(row[10]);
-			data.trader_zone_id    = Strings::ToInt(row[11]);
-			data.trader_entity_id  = Strings::ToInt(row[12]);
-			data.item_stat         = Strings::ToInt(row[14]);
+			data.sum_charges       = Strings::ToInt(row[7]);
+			data.stackable         = it != std::end(trader_item_details) ? it->stackable : 0;
+			data.icon_id           = it != std::end(trader_item_details) ? it->icon : 0;
+			data.trader_zone_id    = Strings::ToInt(row[8]);
+			data.trader_entity_id  = Strings::ToInt(row[9]);
+			data.item_stat         = it != std::end(trader_item_details) ? it->item_stat : 0;
 			data.serial_number_RoF = fmt::format("{:016}\0", Strings::ToInt(row[3]));
-			data.item_name         = fmt::format("{:.63}\0", std::string(row[7]).c_str());
-			data.trader_name       = fmt::format("{:.63}\0", std::string(row[13]).c_str());
+			data.item_name         = fmt::format("{:.63}\0", it != std::end(trader_item_details) ? it->name : std::string());
+			data.trader_name       = fmt::format("{:.63}\0", std::string(row[10]).c_str());
 			all_entries.push_back(data);
 		}
 

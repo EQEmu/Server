@@ -7,6 +7,13 @@
 
 class ItemsRepository: public BaseItemsRepository {
 public:
+	struct TraderItemDetails{
+		std::string name;
+		uint32      item_id;
+		int32       stackable;
+		int32       icon;
+		int32       item_stat;
+	};
 
     /**
      * This file was auto generated and can be modified and extended upon
@@ -72,6 +79,45 @@ public:
 		}
 
 		return item_id_list;
+	}
+
+	static std::vector<TraderItemDetails> GetTraderItemDetails(
+		Database &db,
+		MySQLRequestResult &trader_result,
+		std::string &search_values,
+		std::string &search_criteria_items
+	)
+	{
+		std::vector<std::string> ids{};
+
+		for (auto row: trader_result) {
+			ids.push_back(row[2]);
+		}
+
+		auto query         = fmt::format(
+			"SELECT name, id, stackable, icon {} FROM items WHERE id IN({}) {}",
+			search_values,
+			Strings::Implode(",", ids),
+			search_criteria_items
+		);
+		auto results_items = content_db.QueryDatabase(query);
+
+		std::vector<TraderItemDetails> all_entries{};
+		if (!results_items.Success()) {
+			return all_entries;
+		}
+
+		for (auto r: results_items) {
+			TraderItemDetails e{};
+			e.name      = r[0];
+			e.item_id   = r[1] ? static_cast<uint32_t>(atoi(r[1])) : 0;
+			e.stackable = r[2] ? static_cast<int32_t>(atoi(r[2])) : 0;
+			e.icon      = r[3] ? static_cast<int32_t>(atoi(r[3])) : 0;
+			e.item_stat = r[4] ? static_cast<int32_t>(atoi(r[4])) : 0;
+			all_entries.push_back(e);
+		}
+
+		return all_entries;
 	}
 };
 
