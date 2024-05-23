@@ -1068,7 +1068,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	for (uint32 i = 0; i < max_items; i++) {
 		auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
 		auto it   = std::find(std::begin(in->serial_number), std::end(in->serial_number), inv->serial_number[i]);
-		if (it != std::end(in->serial_number)) {
+		if (inst && it != std::end(in->serial_number)) {
 			inst->SetPrice(in->item_cost[i]);
 			TraderRepository::Trader trader_item{};
 
@@ -2129,7 +2129,7 @@ static void UpdateTraderCustomerItemsAdded(
 			std::unique_ptr<EQ::ItemInstance> inst(
 				database.CreateItem(
 					i.item_id,
-					i.item_charges, 
+					i.item_charges,
 					i.aug_slot_1,
 					i.aug_slot_2,
 					i.aug_slot_3,
