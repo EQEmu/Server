@@ -233,11 +233,11 @@ public:
 				},
 				{
 					.should_check = search._class != 0xFFFFFFFF,
-					.condition = !(item->Classes & GetPlayerClassBit(search._class))
+					.condition = static_cast<bool>(item->Classes & GetPlayerClassBit(search._class))
 				},
 				{
 					.should_check = search.race != 0xFFFFFFFF,
-					.condition = !(item->Races & GetPlayerRaceBit(search.race))
+					.condition = static_cast<bool>(item->Races & GetPlayerRaceBit(search.race))
 				},
 //				{
 //					.should_check = search.augment != 0,
