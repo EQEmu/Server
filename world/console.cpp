@@ -60,7 +60,7 @@ struct EQ::Net::ConsoleLoginStatus CheckLogin(const std::string &username, const
 	const std::string& account_name = database.GetAccountName(ret.account_id);
 
 	ret.account_name = account_name;
-	ret.status       = database.CheckStatus(ret.account_id);
+	ret.status       = database.GetAccountStatus(ret.account_id);
 	return ret;
 }
 
