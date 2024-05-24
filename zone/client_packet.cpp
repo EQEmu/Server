@@ -15572,13 +15572,14 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 			break;
 		}
 		case ByParcel: {
-			if (!RuleB(Parcel, EnableParcelMerchants)) {
+			if (!RuleB(Parcel, EnableParcelMerchants) || !RuleB(Bazaar, EnableParcelDelivery)) {
 				LogTrading(
-					"Bazaar purchase attempt by parcel delivery though 'Parcel:EnableParcelMerchants' not enabled."
+					"Bazaar purchase attempt by parcel delivery though 'Parcel:EnableParcelMerchants' or "
+					"'Bazaar::EnableParcelDelivery' not enabled."
 				);
 				Message(
 					Chat::Yellow,
-					"The parcel delivey system is not enabled on this server.  Please visit the vendor directly."
+					"The bazaar parcel delivey system is not enabled on this server.  Please visit the vendor directly in the Bazaar."
 				);
 				in->method     = ByParcel;
 				in->sub_action = Failed;
