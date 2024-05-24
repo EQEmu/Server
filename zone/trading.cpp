@@ -3292,17 +3292,24 @@ void Client::SendBulkBazaarTraders()
 
 void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 {
-	auto item = TraderRepository::GetWhere(database, fmt::format("item_sn = {}", in.serial_number));
+	auto items = TraderRepository::GetWhere(database, fmt::format("item_sn = {}", in.serial_number));
+	if (items.empty()) {
+		LogInfo("Failed to find item with serial number [{}]", in.serial_number);
+		return;
+	}
+
+	auto item = items.front();
+	
 	std::unique_ptr<EQ::ItemInstance> inst(
 		database.CreateItem(
-			item.at(0).item_id,
-			item.at(0).item_charges,
-			item.at(0).aug_slot_1,
-			item.at(0).aug_slot_2,
-			item.at(0).aug_slot_3,
-			item.at(0).aug_slot_4,
-			item.at(0).aug_slot_5,
-			item.at(0).aug_slot_6
+			item.item_id,
+			item.item_charges,
+			item.aug_slot_1,
+			item.aug_slot_2,
+			item.aug_slot_3,
+			item.aug_slot_4,
+			item.aug_slot_5,
+			item.aug_slot_6
 		)
 	);
 
