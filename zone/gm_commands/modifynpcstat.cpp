@@ -26,6 +26,12 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 
 	const std::string& value = sep->arg[2] ? sep->arg[2] : "";
 
+	if (value.empty()) {
+		c->Message(Chat::White, "Usage: #modifynpcstat [Stat] [Value]");
+		ListModifyNPCStatMap(c);
+		return;
+	}
+
 	auto stat_description = GetModifyNPCStatDescription(stat);
 	if (!stat_description.length()) {
 		c->Message(
