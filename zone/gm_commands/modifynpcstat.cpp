@@ -16,8 +16,15 @@ void command_modifynpcstat(Client *c, const Seperator *sep)
 
 	auto target = c->GetTarget()->CastToNPC();
 
-	std::string stat = sep->arg[1];
-	std::string value = sep->arg[2] ? sep->arg[2] : "";
+	const std::string& stat = sep->arg[1] ? sep->arg[1] : "";
+
+	if (stat.empty()) {
+		c->Message(Chat::White, "Usage: #modifynpcstat [Stat] [Value]");
+		ListModifyNPCStatMap(c);
+		return;
+	}
+
+	const std::string& value = sep->arg[2] ? sep->arg[2] : "";
 
 	auto stat_description = GetModifyNPCStatDescription(stat);
 	if (!stat_description.length()) {
