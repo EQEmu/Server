@@ -1366,9 +1366,9 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	newzone_data.maxclip                   = z->maxclip;
 	newzone_data.time_type                 = z->time_type;
 	newzone_data.gravity                   = z->gravity;
-	newzone_data.fast_regen_hp             = z->fast_regen_hp;
-	newzone_data.fast_regen_mana           = z->fast_regen_mana;
-	newzone_data.fast_regen_endurance      = z->fast_regen_endurance;
+	newzone_data.fast_regen_hp             = z->fast_regen_hp > 0 ? z->fast_regen_hp : 180;
+	newzone_data.fast_regen_mana           = z->fast_regen_mana > 0 ? z->fast_regen_mana : 180;
+	newzone_data.fast_regen_endurance      = z->fast_regen_endurance > 0 ? z->fast_regen_endurance : 180;
 	newzone_data.npc_aggro_max_dist        = z->npc_max_aggro_dist;
 	newzone_data.underworld_teleport_index = z->underworld_teleport_index;
 	newzone_data.lava_damage               = z->lava_damage;
