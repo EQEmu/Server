@@ -5787,21 +5787,19 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 
 		SetIntoxication(GetIntoxication()+IntoxicationIncrease);
 
+		if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY) && inst->GetItem()) {
+			auto e = PlayerEvent::DestroyItemEvent{
+				.item_id = inst->GetItem()->ID,
+				.item_name = inst->GetItem()->Name,
+				.charges = inst->GetCharges(),
+				.reason = "Client deleted",
+			};
+
+			RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
+		}
 	}
+	
 	DeleteItemInInventory(alc->from_slot, 1);
-
-	if (player_event_logs.IsEventEnabled(PlayerEvent::ITEM_DESTROY)) {
-		auto e = PlayerEvent::DestroyItemEvent{
-			.item_id = inst->GetItem()->ID,
-			.item_name = inst->GetItem()->Name,
-			.charges = inst->GetCharges(),
-			.reason = "Client deleted",
-		};
-
-		RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
-	}
-
-	return;
 }
 
 void Client::Handle_OP_DeleteSpawn(const EQApplicationPacket *app)
