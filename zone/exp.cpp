@@ -531,10 +531,8 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	}
 
 	// Check for AA XP Cap
-	uint64 aaxp_cap = RuleI(AA, MaxAAExpPerKill);
-
-	if (aaxp_cap >= 0 && aaexp > aaxp_cap) {
-		aaexp = aaxp_cap;
+	if (RuleI(AA, MaxAAEXPPerKill) >= 0 && aaexp > RuleI(AA, MaxAAEXPPerKill)) {
+		aaexp = RuleI(AA, MaxAAEXPPerKill);
 	}
 
 	// Get current AA XP total
