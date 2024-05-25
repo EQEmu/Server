@@ -302,6 +302,11 @@ namespace EQ
 		int GetItemHaste(bool augments = false) const;
 		int GetItemRegen(bool augments = false) const;
 		int GetItemDamageShield(bool augments = false) const;
+		int GetItemDSMitigation(bool augments = false) const;
+		int GetItemHealAmt(bool augments = false) const;
+		int GetItemSpellDamage(bool augments = false) const;
+		int GetItemClairvoyance(bool augments = false) const;
+		int GetItemSkillsStat(EQ::skills::SkillType skill, bool augments = false) const;
 		uint32 GetItemGuildFavor() const;
 		std::vector<uint32> GetAugmentIDs() const;
 
