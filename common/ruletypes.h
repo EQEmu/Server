@@ -817,6 +817,7 @@ RULE_INT(AA, ModernAAScalingAAMinimum, 0, "The minimum number of earned AA befor
 RULE_INT(AA, ModernAAScalingAALimit, 4000, "The number of earned AA when AA experience scaling ends")
 RULE_BOOL(AA, SoundForAAEarned, false, "Play sound when AA point earned")
 RULE_INT(AA, UnusedAAPointCap, -1, "Cap for Unused AA Points.  Default: -1.  NOTE: DO NOT LOWER THIS WITHOUT KNOWING WHAT YOU ARE DOING. MAY RESULT IN PLAYERS LOSING AAs.")
+RULE_INT(AA, MaxAAEXPPerKill, -1, "Maximum AA EXP per Kill (3425214 is about 7%) - Default: -1 will disable the check")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)
