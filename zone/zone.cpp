@@ -1140,6 +1140,11 @@ bool Zone::Init(bool is_static) {
 		}
 	}
 
+	if (!map_name) {
+		LogError("No map name found for zone [{}]", GetShortName());
+		return false;
+	}
+
 	zonemap  = Map::LoadMapFile(map_name);
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
