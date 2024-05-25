@@ -642,6 +642,10 @@ void PlayerEventLogs::ProcessRetentionTruncation()
 void PlayerEventLogs::ReloadSettings()
 {
 	for (auto &e: PlayerEventLogSettingsRepository::All(*m_database)) {
+		if (e.id >= PlayerEvent::MAX || e.id < 0) {
+			continue;
+		}
+
 		m_settings[e.id] = e;
 	}
 }
