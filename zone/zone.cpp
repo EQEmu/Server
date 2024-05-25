@@ -1098,20 +1098,21 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 Zone::~Zone() {
 	spawn2_list.Clear();
-	safe_delete(zonemap);
-	safe_delete(watermap);
-	safe_delete(pathing);
 	if (worldserver.Connected()) {
 		worldserver.SetZoneData(0);
 	}
-	safe_delete_array(short_name);
-	safe_delete_array(long_name);
-	safe_delete(Weather_Timer);
 	npc_emote_list.clear();
 	zone_point_list.Clear();
 	entity_list.Clear();
+	parse->ReloadQuests();
 	ClearBlockedSpells();
 
+	safe_delete_array(short_name);
+	safe_delete_array(long_name);
+	safe_delete(Weather_Timer);
+	safe_delete(zonemap);
+	safe_delete(watermap);
+	safe_delete(pathing);
 	safe_delete(Instance_Timer);
 	safe_delete(Instance_Shutdown_Timer);
 	safe_delete(Instance_Warning_timer);
