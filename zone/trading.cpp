@@ -32,6 +32,7 @@
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
+#include "../common/bazaar.h"
 
 class QueryServ;
 
@@ -1771,8 +1772,7 @@ void Client::SendBazaarWelcome()
 
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
-	auto results = TraderRepository::GetBazaarSearchResults(database, search_criteria, GetZoneID());
-
+	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID());
 	if (results.empty()) {
 		SendBazaarDone(GetID());
 		return;
@@ -3299,7 +3299,7 @@ void Client::DoBazaarInspect(const BazaarInspect_Struct &in)
 	}
 
 	auto item = items.front();
-	
+
 	std::unique_ptr<EQ::ItemInstance> inst(
 		database.CreateItem(
 			item.item_id,
