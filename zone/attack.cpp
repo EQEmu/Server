@@ -157,15 +157,18 @@ int Mob::compute_tohit(EQ::skills::SkillType skillinuse)
 {
 	int tohit = GetSkill(EQ::skills::SkillOffense) + 7;
 	tohit += GetSkill(skillinuse);
-	if (IsNPC())
+
+	if (IsNPC()) {
+		if (RuleB(Combat, UseMobStaticOffenseSkill)) {
+			tohit = GetMobFixedWeaponSkill() + GetMobFixedOffenseSkill() + 7;
+		}
 		tohit += CastToNPC()->GetAccuracyRating();
-	if (IsClient()) {
+	} else if (IsClient()) {
 		double reduction = CastToClient()->GetIntoxication() / 2.0;
 		if (reduction > 20.0) {
 			reduction = std::min((110 - reduction) / 100.0, 1.0);
 			tohit = reduction * static_cast<double>(tohit);
-		}
-		else if (IsBerserk()) {
+		} else if (IsBerserk()) {
 			tohit += (GetLevel() * 2) / 5;
 		}
 	}
@@ -5807,6 +5810,252 @@ const DamageTable &Mob::GetDamageTable() const
 
 	auto &which = monk ? mnk_table : dmg_table;
 	return which[level - 50];
+}
+
+int Mob::GetMobFixedOffenseSkill()
+{
+	// Due to new code using a combination of Offense and Weapon skill to determine hit, depending on the class
+	// and weapon wielded by a mob, the hit rate of an equal level mob could vary between 15% and 60%, which made
+	// many mobs far too easy.  This particular call replaces the class based Offense Skill with a fixed value
+	// equal to that of a Warrior of appropriate Level if UseMobFixedOffenseSkill flag is TRUE.
+
+	int level = std::max(1,static_cast<int>(GetLevel()));
+
+	// Current tables are flat above Level 60
+	if (level > 60) {
+		level = 60;
+	}
+
+	int FixedOffenseSkillTable[] = {
+			10, // 1
+			15,
+			20,
+			25,
+			30, // 5
+			35,
+			40,
+			45,
+			50,
+			55, // 10
+			60,
+			65,
+			70,
+			75,
+			80, // 15
+			85,
+			90,
+			95,
+			100,
+			105, // 20
+			110,
+			115,
+			120,
+			125,
+			130, // 25
+			135,
+			140,
+			145,
+			150,
+			155, // 30
+			160,
+			165,
+			170,
+			175,
+			180, // 35
+			185,
+			190,
+			195,
+			200,
+			205, // 40
+			210,
+			210,
+			210,
+			210,
+			210, // 45
+			210,
+			210,
+			210,
+			210,
+			210, // 50
+			215,
+			220,
+			225,
+			230,
+			235, // 55
+			240,
+			245,
+			250,
+			252,
+			252, // 60
+	};
+
+	return FixedOffenseSkillTable[level - 1];
+}
+
+int Mob::GetMobFixedWeaponSkill()
+{
+	// Due to new code using a combination of Offense and Weapon skill to determine hit, depending on the class
+	// and weapon wielded by a mob, the hit rate of an equal level mob could vary between 15% and 60%, which made
+	// many mobs far too easy.  This particular call replaces the weapon/class based Weapon Skill with a fixed value.
+	// Two tables exist, one equal to a Warrior of appropriate level, and one modified to make hit rate equal to the old code
+	// assuming the UseMobFixedOffenseSkill flag is set TRUE or the mob class is a Warrior (all the the bonus is in Weapon Skill).
+
+	int level = std::max(1,static_cast<int>(GetLevel()));
+
+	// Current tables are flat above Level 70
+	if (level > 70) {
+		level = 70;
+	}
+
+	int FixedWeaponSkillTable[] = {
+			10, // 1
+			15,
+			20,
+			25,
+			30, // 5
+			35,
+			40,
+			45,
+			50,
+			55, // 10
+			60,
+			65,
+			70,
+			75,
+			80, // 15
+			85,
+			90,
+			95,
+			100,
+			105, // 20
+			110,
+			115,
+			120,
+			125,
+			130, // 25
+			135,
+			140,
+			145,
+			150,
+			155, // 30
+			160,
+			165,
+			170,
+			175,
+			180, // 35
+			185,
+			190,
+			195,
+			200,
+			200, // 40
+			200,
+			200,
+			200,
+			200,
+			200, // 45
+			200,
+			200,
+			200,
+			200,
+			200, // 50
+			205,
+			210,
+			215,
+			220,
+			225, // 55
+			230,
+			235,
+			240,
+			245,
+			250, // 60
+			250,
+			250,
+			250,
+			250,
+			250, // 65
+			255,
+			260,
+			265,
+			270,
+			275, // 70
+	};
+
+	int EnhancedFixedWeaponSkillTable[] = {
+			5, // 1
+			11,
+			18,
+			24,
+			30, // 5
+			37,
+			44,
+			49,
+			55,
+			62, // 10
+			68,
+			74,
+			80,
+			87,
+			94, // 15
+			99,
+			106,
+			112,
+			117,
+			124, // 20
+			131,
+			137,
+			143,
+			150,
+			156, // 25
+			163,
+			167,
+			174,
+			181,
+			188, // 30
+			193,
+			200,
+			206,
+			212,
+			219, // 35
+			224,
+			231,
+			237,
+			243,
+			250, // 40
+			257,
+			257,
+			258,
+			259,
+			260, // 45
+			260,
+			261,
+			263,
+			264,
+			264, // 50
+			270,
+			277,
+			283,
+			288,
+			295, // 55
+			302,
+			307,
+			314,
+			318,
+			319, // 60
+			326,
+			327,
+			328,
+			328,
+			329, // 65
+			330,
+			331,
+			332,
+			333,
+			334, // 70
+	};
+
+	auto &UsedTable = (RuleB(Combat, UseEnhancedMobStaticWeaponSkill)) ? EnhancedFixedWeaponSkillTable : FixedWeaponSkillTable;
+
+	return UsedTable[level - 1];
 }
 
 void Mob::ApplyDamageTable(DamageHitInfo &hit)

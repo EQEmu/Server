@@ -603,6 +603,8 @@ RULE_INT(Combat, StunDuration, 2000, "Duration of stuns in ms. DEFAULT: 2000")
 RULE_BOOL(Combat, ClientStunMessage, false, "Client stunning NPC produces message. DEFAULT false")
 RULE_BOOL(Combat, BashTwoHanderUseShoulderAC, false, "Enable to use shoulder AC for bash calculations when two hander is equipped. Unproven if accurate DEFAULT: false")
 RULE_REAL(Combat, BashACBonusDivisor, 25.0, "this divides the AC value contribution to bash damage, lower to increase damage")
+RULE_BOOL(Combat, UseMobStaticOffenseSkill, false, "Toggle to enabled the use of a static offense skill for Mobs.  DEFAULT: false")
+RULE_BOOL(Combat, UseEnhancedMobStaticWeaponSkill, false, "Toggle to enabled the use of an enhanced (slightly higher hit rate) static weapon skill for Mobs.  DEFAULT: false")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
