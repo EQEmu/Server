@@ -5842,155 +5842,33 @@ int Mob::GetMobFixedWeaponSkill()
 
 	int level = EQ::ClampUpper(std::max(1, static_cast<int>(GetLevel())), 70);
 
-	int FixedWeaponSkillTable[] = {
-			10, // 1
-			15,
-			20,
-			25,
-			30, // 5
-			35,
-			40,
-			45,
-			50,
-			55, // 10
-			60,
-			65,
-			70,
-			75,
-			80, // 15
-			85,
-			90,
-			95,
-			100,
-			105, // 20
-			110,
-			115,
-			120,
-			125,
-			130, // 25
-			135,
-			140,
-			145,
-			150,
-			155, // 30
-			160,
-			165,
-			170,
-			175,
-			180, // 35
-			185,
-			190,
-			195,
-			200,
-			200, // 40
-			200,
-			200,
-			200,
-			200,
-			200, // 45
-			200,
-			200,
-			200,
-			200,
-			200, // 50
-			205,
-			210,
-			215,
-			220,
-			225, // 55
-			230,
-			235,
-			240,
-			245,
-			250, // 60
-			250,
-			250,
-			250,
-			250,
-			250, // 65
-			255,
-			260,
-			265,
-			270,
-			275, // 70
-	};
+	if (!RuleB(Combat, UseEnhancedMobStaticWeaponSkill)) {
+		if (level <= 39) {
+			return (level * 5) + 5;
+		} else if (EQ::ValueWithin(level, 40, 50)) {
+			return 200;
+		} else if (EQ::ValueWithin(level, 51, 60)) {
+			return 200 + ((level - 50) * 5);
+		} else if (EQ::ValueWithin(level, 61, 65)) {
+			return 250;
+		}
 
-	int EnhancedFixedWeaponSkillTable[] = {
-			5, // 1
-			11,
-			18,
-			24,
-			30, // 5
-			37,
-			44,
-			49,
-			55,
-			62, // 10
-			68,
-			74,
-			80,
-			87,
-			94, // 15
-			99,
-			106,
-			112,
-			117,
-			124, // 20
-			131,
-			137,
-			143,
-			150,
-			156, // 25
-			163,
-			167,
-			174,
-			181,
-			188, // 30
-			193,
-			200,
-			206,
-			212,
-			219, // 35
-			224,
-			231,
-			237,
-			243,
-			250, // 40
-			257,
-			257,
-			258,
-			259,
-			260, // 45
-			260,
-			261,
-			263,
-			264,
-			264, // 50
-			270,
-			277,
-			283,
-			288,
-			295, // 55
-			302,
-			307,
-			314,
-			318,
-			319, // 60
-			326,
-			327,
-			328,
-			328,
-			329, // 65
-			330,
-			331,
-			332,
-			333,
-			334, // 70
-	};
+		return 250 + ((level - 65) * 5);
+	}
 
-	auto &UsedTable = (RuleB(Combat, UseEnhancedMobStaticWeaponSkill)) ? EnhancedFixedWeaponSkillTable : FixedWeaponSkillTable;
+	if (level <= 39) {
+		return (level * 6) - 1;
+	} else if (EQ::ValueWithin(level, 45, 49)) {
+		return 260;
+	} else if (EQ::ValueWithin(level, 50, 54)) {
+		return (level * 6) + 1;
+	} else if (EQ::ValueWithin(level, 55, 59)) {
+		return (level * 7) + 5;
+	} else if (EQ::ValueWithin(level, 60, 65)) {
+		return (level * 5) + 59;
+	}
 
-	return UsedTable[level - 1];
+	return 330 + (level - 66);
 }
 
 void Mob::ApplyDamageTable(DamageHitInfo &hit)
