@@ -4762,7 +4762,7 @@ void Mob::HealDamage(uint64 amount, Mob* caster, uint16 spell_id)
 	else
 		acthealed = amount;
 
-	if (acthealed > 100) {
+	if (acthealed > RuleI(Spells, HealAmountMessageFilterThreshold)) {
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
 				// message to caster
