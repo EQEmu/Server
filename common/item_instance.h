@@ -270,6 +270,7 @@ namespace EQ
 		int GetItemMagical(bool augments = false) const;
 		int GetItemHP(bool augments = false) const;
 		int GetItemMana(bool augments = false) const;
+		int GetItemManaRegen(bool augments = false) const;
 		int GetItemEndur(bool augments = false) const;
 		int GetItemAttack(bool augments = false) const;
 		int GetItemStr(bool augments = false) const;
@@ -299,6 +300,8 @@ namespace EQ
 		int GetItemHeroicDR(bool augments = false) const;
 		int GetItemHeroicCorrup(bool augments = false) const;
 		int GetItemHaste(bool augments = false) const;
+		int GetItemRegen(bool augments = false) const;
+		int GetItemDamageShield(bool augments = false) const;
 		uint32 GetItemGuildFavor() const;
 		std::vector<uint32> GetAugmentIDs() const;
 

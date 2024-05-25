@@ -1812,6 +1812,48 @@ std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
 	return augments;
 }
 
+int EQ::ItemInstance::GetItemRegen(bool augments) const
+{
+	int stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Regen;
+		if (augments)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
+				if (GetAugment(i))
+					stat += GetAugment(i)->GetItemRegen();
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemManaRegen(bool augments) const
+{
+	int stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ManaRegen;
+		if (augments)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
+				if (GetAugment(i))
+					stat += GetAugment(i)->GetItemManaRegen();
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDamageShield(bool augments) const
+{
+	int stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DamageShield;
+		if (augments)
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i)
+				if (GetAugment(i))
+					stat += GetAugment(i)->GetItemDamageShield();
+	}
+	return stat;
+}
+
 //
 // class EvolveInfo
 //

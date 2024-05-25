@@ -772,27 +772,27 @@ typedef enum {
 	FilterShowSelfOnly
 } eqFilterMode;
 
-#define	STAT_STR		0
-#define	STAT_STA		1
-#define	STAT_AGI		2
-#define	STAT_DEX		3
-#define	STAT_INT		4
-#define	STAT_WIS		5
-#define	STAT_CHA		6
-#define	STAT_MAGIC		7
-#define	STAT_COLD		8
-#define	STAT_FIRE		9
-#define	STAT_POISON		10
-#define	STAT_DISEASE		11
-#define	STAT_MANA		12
-#define	STAT_HP			13
-#define	STAT_AC			14
-#define STAT_ENDURANCE		15
-#define STAT_ATTACK		16
-#define STAT_HP_REGEN		17
-#define STAT_MANA_REGEN		18
-#define STAT_HASTE		19
-#define STAT_DAMAGE_SHIELD	20
+#define STAT_STR           0
+#define STAT_STA           1
+#define STAT_AGI           2
+#define STAT_DEX           3
+#define STAT_INT           4
+#define STAT_WIS           5
+#define STAT_CHA           6
+#define STAT_MAGIC         7
+#define STAT_COLD          8
+#define STAT_FIRE          9
+#define STAT_POISON        10
+#define STAT_DISEASE       11
+#define STAT_MANA          12
+#define STAT_HP            13
+#define STAT_AC            14
+#define STAT_ENDURANCE     15
+#define STAT_ATTACK        16
+#define STAT_HP_REGEN      17
+#define STAT_MANA_REGEN    18
+#define STAT_HASTE         19
+#define STAT_DAMAGE_SHIELD 20
 
 /*
 **	Recast timer types. Used as an off set to charProfileStruct timers.

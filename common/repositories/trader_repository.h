@@ -92,12 +92,12 @@ public:
 
 		std::string query = fmt::format(
 			"SELECT COUNT(item_id), trader.char_id, trader.item_id, trader.item_sn, trader.item_charges, trader.item_cost, "
-			"trader.slot_id, SUM(trader.item_charges), trader.char_zone_id, trader.char_entity_id, character_data.name "
+			"trader.slot_id, SUM(trader.item_charges), trader.char_zone_id, trader.char_entity_id, character_data.name, "
+			"aug_slot_1, aug_slot_2, aug_slot_3, aug_slot_4, aug_slot_5, aug_slot_6 "
 			"FROM trader, character_data "
 			"WHERE {} AND trader.char_id = character_data.id "
-			"GROUP BY trader.item_sn, trader.item_charges, trader.char_id LIMIT {}",
-			search_criteria_trader.c_str(),
-			search.max_results
+			"GROUP BY trader.item_sn, trader.item_charges, trader.char_id",
+			search_criteria_trader.c_str()
 		);
 
 		std::vector<BazaarSearchResultsFromDB_Struct> all_entries;
@@ -127,16 +127,36 @@ public:
 			BazaarSearchResultsFromDB_Struct r{};
 
 			r.item_id = Strings::ToInt(row[2]);
-
+			r.charges = Strings::ToInt(row[4]);
+	
 			auto item = db.GetItem(r.item_id);
 			if (!item) {
 				continue;
 			}
 
+			auto inst = std::make_unique<EQ::ItemInstance>(nullptr);
+			uint32 aug_slot_1 = Strings::ToUnsignedInt(row[11]);
+			uint32 aug_slot_2 = Strings::ToUnsignedInt(row[12]);
+			uint32 aug_slot_3 = Strings::ToUnsignedInt(row[13]);
+			uint32 aug_slot_4 = Strings::ToUnsignedInt(row[14]);
+			uint32 aug_slot_5 = Strings::ToUnsignedInt(row[15]);
+			uint32 aug_slot_6 = Strings::ToUnsignedInt(row[16]);
+			if (aug_slot_1 + aug_slot_2 + aug_slot_3 + aug_slot_4 + aug_slot_5 + aug_slot_6 > 0) {
+				inst.reset(db.CreateItem(
+					item,
+					r.charges,
+					aug_slot_1,
+					aug_slot_2,
+					aug_slot_3,
+					aug_slot_4,
+					aug_slot_5,
+					aug_slot_6
+				));
+			}
+
 			r.count             = Strings::ToInt(row[0]);
 			r.trader_id         = Strings::ToInt(row[1]);
 			r.serial_number     = Strings::ToInt(row[3]);
-			r.charges           = Strings::ToInt(row[4]);
 			r.cost              = Strings::ToInt(row[5]);
 			r.slot_id           = Strings::ToInt(row[6]);
 			r.sum_charges       = Strings::ToInt(row[7]);
@@ -156,36 +176,126 @@ public:
 			);
 
 			// item stat searches
-			std::vector<ItemStatSearch> item_stat_searches = {
-				{STAT_AC,            static_cast<uint32>(item->AC)},
-				{STAT_AGI,           static_cast<uint32>(item->AAgi)},
-				{STAT_CHA,           static_cast<uint32>(item->ACha)},
-				{STAT_DEX,           static_cast<uint32>(item->ADex)},
-				{STAT_INT,           static_cast<uint32>(item->AInt)},
-				{STAT_STA,           static_cast<uint32>(item->ASta)},
-				{STAT_STR,           static_cast<uint32>(item->AStr)},
-				{STAT_WIS,           static_cast<uint32>(item->AWis)},
-				{STAT_COLD,          static_cast<uint32>(item->CR)},
-				{STAT_DISEASE,       static_cast<uint32>(item->DR)},
-				{STAT_FIRE,          static_cast<uint32>(item->FR)},
-				{STAT_MAGIC,         static_cast<uint32>(item->MR)},
-				{STAT_POISON,        static_cast<uint32>(item->PR)},
-				{STAT_HP,            static_cast<uint32>(item->HP)},
-				{STAT_MANA,          static_cast<uint32>(item->Mana)},
-				{STAT_ENDURANCE,     static_cast<uint32>(item->Endur)},
-				{STAT_ATTACK,        static_cast<uint32>(item->Attack)},
-				{STAT_HP_REGEN,      static_cast<uint32>(item->Regen)},
-				{STAT_MANA_REGEN,    static_cast<uint32>(item->ManaRegen)},
-				{STAT_HASTE,         static_cast<uint32>(item->Haste)},
-				{STAT_DAMAGE_SHIELD, static_cast<uint32>(item->DamageShield)}
+			std::map<uint32, uint32> item_stat_searches = {
+				{
+					STAT_AC,            inst->GetItem() ? static_cast<uint32>(inst->GetItemArmorClass(true))
+											: static_cast<uint32>(item->AC)
+				},
+				{
+					STAT_AGI,           inst->GetItem() ? static_cast<uint32>(inst->GetItemAgi(true))
+											: static_cast<uint32>(item->AAgi)
+				},
+				{
+					STAT_CHA,           inst->GetItem() ? static_cast<uint32>(inst->GetItemCha(true))
+											: static_cast<uint32>(item->ACha)
+				},
+				{
+					STAT_DEX,           inst->GetItem() ? static_cast<uint32>(inst->GetItemDex(true))
+											: static_cast<uint32>(item->ADex)
+				},
+				{
+					STAT_INT,           inst->GetItem() ? static_cast<uint32>(inst->GetItemInt(true))
+											: static_cast<uint32>(item->AInt)
+				},
+				{
+					STAT_STA,           inst->GetItem() ? static_cast<uint32>(inst->GetItemSta(true))
+											: static_cast<uint32>(item->ASta)
+				},
+				{
+					STAT_STR,           inst->GetItem() ? static_cast<uint32>(inst->GetItemStr(true))
+											: static_cast<uint32>(item->AStr)
+				},
+				{
+					STAT_WIS,           inst->GetItem() ? static_cast<uint32>(inst->GetItemWis(true))
+											: static_cast<uint32>(item->AWis)
+				},
+				{
+					STAT_COLD,          inst->GetItem() ? static_cast<uint32>(inst->GetItemCR(true))
+											: static_cast<uint32>(item->CR)
+				},
+				{
+					STAT_DISEASE,       inst->GetItem() ? static_cast<uint32>(inst->GetItemDR(true))
+											: static_cast<uint32>(item->DR)
+				},
+				{
+					STAT_FIRE,          inst->GetItem() ? static_cast<uint32>(inst->GetItemFR(true))
+											: static_cast<uint32>(item->FR)
+				},
+				{
+					STAT_MAGIC,         inst->GetItem() ? static_cast<uint32>(inst->GetItemMR(true))
+											: static_cast<uint32>(item->MR)
+				},
+				{
+					STAT_POISON,        inst->GetItem() ? static_cast<uint32>(inst->GetItemPR(true))
+											: static_cast<uint32>(item->PR)
+				},
+				{
+					STAT_HP,            inst->GetItem() ? static_cast<uint32>(inst->GetItemHP(true))
+											: static_cast<uint32>(item->HP)
+				},
+				{
+					STAT_MANA,          inst->GetItem() ? static_cast<uint32>(inst->GetItemMana(true))
+											: static_cast<uint32>(item->Mana)
+				},
+				{
+					STAT_ENDURANCE,     inst->GetItem() ? static_cast<uint32>(inst->GetItemEndur(true))
+											: static_cast<uint32>(item->Endur)
+				},
+				{
+					STAT_ATTACK,        inst->GetItem() ? static_cast<uint32>(inst->GetItemAttack(true))
+											: static_cast<uint32>(item->Attack)
+				},
+				{
+					STAT_HP_REGEN,      inst->GetItem() ? static_cast<uint32>(inst->GetItemRegen(true))
+											: static_cast<uint32>(item->Regen)
+				},
+				{
+					STAT_MANA_REGEN,    inst->GetItem() ? static_cast<uint32>(inst->GetItemManaRegen(true))
+											: static_cast<uint32>(item->ManaRegen)
+				},
+				{
+					STAT_HASTE,         inst->GetItem() ? static_cast<uint32>(inst->GetItemHaste(true))
+											: static_cast<uint32>(item->Haste)
+				},
+				{
+					STAT_DAMAGE_SHIELD, inst->GetItem() ? static_cast<uint32>(inst->GetItemDamageShield(true))
+											: static_cast<uint32>(item->DamageShield)
+				}
 			};
 
-			r.item_stat = 0;
-			for (auto &i: item_stat_searches) {
-				if (i.stat == search.item_stat) {
-					r.item_stat = i.value;
-				}
+			r.item_stat = item_stat_searches.contains(search.item_stat) ? item_stat_searches[search.item_stat] : 0;
+			if (item_stat_searches.contains(search.item_stat) && item_stat_searches[search.item_stat] <= 0) {
+				continue;
 			}
+
+			static std::map<uint8, uint32> item_slot_searches = {
+				{EQ::invslot::slotCharm,       1},
+				{EQ::invslot::slotEar1,        2},
+				{EQ::invslot::slotHead,        4},
+				{EQ::invslot::slotFace,        8},
+				{EQ::invslot::slotEar2,        16},
+				{EQ::invslot::slotNeck,        32},
+				{EQ::invslot::slotShoulders,   64},
+				{EQ::invslot::slotArms,        128},
+				{EQ::invslot::slotBack,        256},
+				{EQ::invslot::slotWrist1,      512},
+				{EQ::invslot::slotWrist2,      1024},
+				{EQ::invslot::slotRange,       2048},
+				{EQ::invslot::slotHands,       4096},
+				{EQ::invslot::slotPrimary,     8192},
+				{EQ::invslot::slotSecondary,   16384},
+				{EQ::invslot::slotFinger1,     32768},
+				{EQ::invslot::slotFinger2,     65536},
+				{EQ::invslot::slotChest,       131072},
+				{EQ::invslot::slotLegs,        262144},
+				{EQ::invslot::slotFeet,        524288},
+				{EQ::invslot::slotWaist,       1048576},
+				{EQ::invslot::slotPowerSource, 2097152},
+				{EQ::invslot::slotAmmo,        4194304},
+			};
+			auto GetEquipmentSlotBit = [&](uint32 slot) -> uint32 {
+				return item_slot_searches.contains(slot) ? item_slot_searches[slot] : 0;
+			};
 
 			// item type searches
 			std::vector<ItemSearchType> item_search_types = {
@@ -220,12 +330,12 @@ public:
 			// item additive searches
 			std::vector<AddititiveSearchCriteria> item_additive_searches = {
 				{
-					.should_check = search.min_level != 1 && item->RecLevel > 0,
-					.condition = item->RecLevel >= search.min_level
+					.should_check = search.min_level != 1 && (inst->GetItem() ? inst->GetItemRequiredLevel(true) > 0 : item->ReqLevel > 0),
+					.condition = inst->GetItem() ? inst->GetItemRequiredLevel(true) >= search.min_level : item->ReqLevel >= search.min_level
 				},
 				{
-					.should_check = search.max_level != 1 && item->RecLevel > 0,
-					.condition = item->RecLevel <= search.max_level
+					.should_check = search.max_level != 1 && (inst->GetItem() ? inst->GetItemRequiredLevel(true) > 0 : item->ReqLevel > 0),
+					.condition = inst->GetItem() ? inst->GetItemRequiredLevel(true) <= search.max_level : item->ReqLevel <= search.max_level
 				},
 				{
 					.should_check = !std::string(search.item_name).empty(),
@@ -243,10 +353,10 @@ public:
 //					.should_check = search.augment != 0,
 //					.condition = !(item->AugType & GetAugTypeBit(search.augment))
 //				},
-//				{
-//					.should_check = search.slot != 0xFFFFFFFF,
-//					.condition = item->Slots & GetEquipmentSlotBit(search.slot)
-//				},
+				{
+					.should_check = search.slot != 0xFFFFFFFF,
+					.condition = static_cast<bool>(item->Slots & GetEquipmentSlotBit(search.slot))
+				},
 			};
 
 			bool should_add = true;
@@ -268,7 +378,12 @@ public:
 				continue;
 			}
 
+			LogTradingDetail("Found item [{}] meeting search criteria.", r.item_name);
 			all_entries.push_back(r);
+		}
+
+		if (all_entries.size() > search.max_results) {
+			all_entries.resize(search.max_results);
 		}
 
 		LogTrading("Returning [{}] items from search results", all_entries.size());
