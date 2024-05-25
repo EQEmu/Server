@@ -679,7 +679,7 @@ void Client::CompleteConnect()
 				break;
 			}
 			case SE_SummonHorse: {
-				if (RuleB(Character, PreventMountsFromZoning)) {
+				if (RuleB(Character, PreventMountsFromZoning) || !zone->CanCastOutdoor()) {
 					BuffFadeByEffect(SE_SummonHorse);
 				} else {
 					SummonHorse(buffs[j1].spellid);
