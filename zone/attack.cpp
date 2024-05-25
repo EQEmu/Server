@@ -5819,77 +5819,17 @@ int Mob::GetMobFixedOffenseSkill()
 	// many mobs far too easy.  This particular call replaces the class based Offense Skill with a fixed value
 	// equal to that of a Warrior of appropriate Level if UseMobFixedOffenseSkill flag is TRUE.
 
-	int level = std::max(1,static_cast<int>(GetLevel()));
+	int level = EQ::ClampUpper(std::max(1, static_cast<int>(GetLevel())), 60);
 
-	// Current tables are flat above Level 60
-	if (level > 60) {
-		level = 60;
+	if (level <= 40) {
+		return (level * 5) + 5;
+	} else if (EQ::ValueWithin(level, 41, 50)) {
+		return 210;
+	} else if (EQ::ValueWithin(level, 51, 58)) {
+		return 210 + ((level - 50) * 5);
 	}
 
-	int FixedOffenseSkillTable[] = {
-			10, // 1
-			15,
-			20,
-			25,
-			30, // 5
-			35,
-			40,
-			45,
-			50,
-			55, // 10
-			60,
-			65,
-			70,
-			75,
-			80, // 15
-			85,
-			90,
-			95,
-			100,
-			105, // 20
-			110,
-			115,
-			120,
-			125,
-			130, // 25
-			135,
-			140,
-			145,
-			150,
-			155, // 30
-			160,
-			165,
-			170,
-			175,
-			180, // 35
-			185,
-			190,
-			195,
-			200,
-			205, // 40
-			210,
-			210,
-			210,
-			210,
-			210, // 45
-			210,
-			210,
-			210,
-			210,
-			210, // 50
-			215,
-			220,
-			225,
-			230,
-			235, // 55
-			240,
-			245,
-			250,
-			252,
-			252, // 60
-	};
-
-	return FixedOffenseSkillTable[level - 1];
+	return 252;
 }
 
 int Mob::GetMobFixedWeaponSkill()
@@ -5900,12 +5840,7 @@ int Mob::GetMobFixedWeaponSkill()
 	// Two tables exist, one equal to a Warrior of appropriate level, and one modified to make hit rate equal to the old code
 	// assuming the UseMobFixedOffenseSkill flag is set TRUE or the mob class is a Warrior (all the the bonus is in Weapon Skill).
 
-	int level = std::max(1,static_cast<int>(GetLevel()));
-
-	// Current tables are flat above Level 70
-	if (level > 70) {
-		level = 70;
-	}
+	int level = EQ::ClampUpper(std::max(1, static_cast<int>(GetLevel())), 70);
 
 	int FixedWeaponSkillTable[] = {
 			10, // 1
