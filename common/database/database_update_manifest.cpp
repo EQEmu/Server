@@ -5659,7 +5659,7 @@ ALTER TABLE `trader`
 	ADD COLUMN `active_transaction` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0 AFTER `char_zone_id`,
 	DROP PRIMARY KEY,
 	ADD PRIMARY KEY (`id`),
-	ADD INDEX `Index 2` (`char_id`, `slot_id`);
+	ADD INDEX `charid_slotid` (`char_id`, `slot_id`);
 )"
 	}
 // -- template; copy/paste this when you need to create a new entry
