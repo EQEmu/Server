@@ -157,15 +157,18 @@ int Mob::compute_tohit(EQ::skills::SkillType skillinuse)
 {
 	int tohit = GetSkill(EQ::skills::SkillOffense) + 7;
 	tohit += GetSkill(skillinuse);
-	if (IsNPC())
+
+	if (IsNPC()) {
+		if (RuleB(Combat, UseMobStaticOffenseSkill)) {
+			tohit = GetMobFixedWeaponSkill() + GetMobFixedOffenseSkill() + 7;
+		}
 		tohit += CastToNPC()->GetAccuracyRating();
-	if (IsClient()) {
+	} else if (IsClient()) {
 		double reduction = CastToClient()->GetIntoxication() / 2.0;
 		if (reduction > 20.0) {
 			reduction = std::min((110 - reduction) / 100.0, 1.0);
 			tohit = reduction * static_cast<double>(tohit);
-		}
-		else if (IsBerserk()) {
+		} else if (IsBerserk()) {
 			tohit += (GetLevel() * 2) / 5;
 		}
 	}
@@ -5807,6 +5810,65 @@ const DamageTable &Mob::GetDamageTable() const
 
 	auto &which = monk ? mnk_table : dmg_table;
 	return which[level - 50];
+}
+
+int Mob::GetMobFixedOffenseSkill()
+{
+	// Due to new code using a combination of Offense and Weapon skill to determine hit, depending on the class
+	// and weapon wielded by a mob, the hit rate of an equal level mob could vary between 15% and 60%, which made
+	// many mobs far too easy.  This particular call replaces the class based Offense Skill with a fixed value
+	// equal to that of a Warrior of appropriate Level if UseMobFixedOffenseSkill flag is TRUE.
+
+	int level = EQ::ClampUpper(std::max(1, static_cast<int>(GetLevel())), 60);
+
+	if (level <= 40) {
+		return (level * 5) + 5;
+	} else if (EQ::ValueWithin(level, 41, 50)) {
+		return 210;
+	} else if (EQ::ValueWithin(level, 51, 58)) {
+		return 210 + ((level - 50) * 5);
+	}
+
+	return 252;
+}
+
+int Mob::GetMobFixedWeaponSkill()
+{
+	// Due to new code using a combination of Offense and Weapon skill to determine hit, depending on the class
+	// and weapon wielded by a mob, the hit rate of an equal level mob could vary between 15% and 60%, which made
+	// many mobs far too easy.  This particular call replaces the weapon/class based Weapon Skill with a fixed value.
+	// Two tables exist, one equal to a Warrior of appropriate level, and one modified to make hit rate equal to the old code
+	// assuming the UseMobFixedOffenseSkill flag is set TRUE or the mob class is a Warrior (all the the bonus is in Weapon Skill).
+
+	int level = EQ::ClampUpper(std::max(1, static_cast<int>(GetLevel())), 70);
+
+	if (!RuleB(Combat, UseEnhancedMobStaticWeaponSkill)) {
+		if (level <= 39) {
+			return (level * 5) + 5;
+		} else if (EQ::ValueWithin(level, 40, 50)) {
+			return 200;
+		} else if (EQ::ValueWithin(level, 51, 60)) {
+			return 200 + ((level - 50) * 5);
+		} else if (EQ::ValueWithin(level, 61, 65)) {
+			return 250;
+		}
+
+		return 250 + ((level - 65) * 5);
+	}
+
+	if (level <= 39) {
+		return (level * 6) - 1;
+	} else if (EQ::ValueWithin(level, 45, 49)) {
+		return 260;
+	} else if (EQ::ValueWithin(level, 50, 54)) {
+		return (level * 6) + 1;
+	} else if (EQ::ValueWithin(level, 55, 59)) {
+		return (level * 7) + 5;
+	} else if (EQ::ValueWithin(level, 60, 65)) {
+		return (level * 5) + 59;
+	}
+
+	return 330 + (level - 66);
 }
 
 void Mob::ApplyDamageTable(DamageHitInfo &hit)
