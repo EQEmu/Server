@@ -108,9 +108,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
-	parse->Init();
-	parse->ReloadQuests(true);
-
 	//init the zone, loads all the data, etc
 	if (!zone->Init(is_static)) {
 		safe_delete(zone);
@@ -1150,6 +1147,13 @@ bool Zone::Init(bool is_static) {
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
 
+	LoadDynamicZoneTemplates();
+	DynamicZone::CacheAllFromDatabase();
+	Expedition::CacheAllFromDatabase();
+
+	parse->Init();
+	parse->ReloadQuests(true);
+
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
 	content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion());
@@ -1211,11 +1215,6 @@ bool Zone::Init(bool is_static) {
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
-
-	LoadDynamicZoneTemplates();
-
-	DynamicZone::CacheAllFromDatabase();
-	Expedition::CacheAllFromDatabase();
 
 	guild_mgr.LoadGuilds();
 
