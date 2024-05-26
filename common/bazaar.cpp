@@ -31,7 +31,7 @@ Bazaar::GetSearchResults(
 
 	std::string search_criteria_trader("TRUE ");
 
-	if (search.search_scope == UFBazaarSearchScope) {
+	if (search.search_scope == NonRoFBazaarSearchScope) {
 		search_criteria_trader.append(
 			fmt::format(
 				" AND trader.char_entity_id = {} AND trader.char_zone_id = {}",
@@ -240,6 +240,7 @@ Bazaar::GetSearchResults(
 			{EQ::item::ItemType::ItemTypeUnknown9,             item->Worn.Effect == 998},
 			{EQ::item::ItemType::ItemTypeUnknown10,            item->Worn.Effect >= 1298 && item->Worn.Effect <= 1307},
 			{EQ::item::ItemType::ItemTypeFocusEffect,          item->Focus.Effect > 0},
+			{EQ::item::ItemType::ItemTypeArmor,                item->ItemType == EQ::item::ItemType::ItemTypeArmor},
 			{EQ::item::ItemType::ItemType1HBlunt,              item->ItemType == EQ::item::ItemType::ItemType1HBlunt},
 			{EQ::item::ItemType::ItemType1HPiercing,           item->ItemType == EQ::item::ItemType::ItemType1HPiercing},
 			{EQ::item::ItemType::ItemType1HSlash,              item->ItemType == EQ::item::ItemType::ItemType1HSlash},

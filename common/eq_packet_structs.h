@@ -6055,9 +6055,9 @@ enum BazaarPurchaseSubActions {
 };
 
 enum BazaarSearchScopes {
-	Local_Scope         = 0,
-	AllTraders_Scope    = 1,
-	UFBazaarSearchScope = 99
+	Local_Scope             = 0,
+	AllTraders_Scope        = 1,
+	NonRoFBazaarSearchScope = 99
 };
 
 struct BazaarSearchResultsFromDB_Struct {

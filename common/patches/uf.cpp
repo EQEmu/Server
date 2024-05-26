@@ -3606,7 +3606,7 @@ namespace UF
                 emu->trader_entity_id = eq->TraderID;
                 emu->trader_id        = 0;
                 emu->_class           = eq->Class_;
-                emu->search_scope     = eq->TraderID > 0 ? UFBazaarSearchScope : Local_Scope;
+                emu->search_scope     = eq->TraderID > 0 ? NonRoFBazaarSearchScope : Local_Scope;
                 emu->max_results      = RuleI(Bazaar, MaxSearchResults);
                 strn0cpy(emu->item_name, eq->Name, sizeof(emu->item_name));
 
