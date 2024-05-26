@@ -1,3 +1,82 @@
+## [22.51.0] 5/26/2024
+
+### Commands
+
+* #npcspawn Changes ([#4311](https://github.com/EQEmu/Server/pull/4311)) @twincannon 2024-05-16
+* Cleanup #resetaa Command ([#4310](https://github.com/EQEmu/Server/pull/4310)) @Kinglykrab 2024-05-22
+
+### Crash
+
+* Add validation to RemoveXTarget ([#4324](https://github.com/EQEmu/Server/pull/4324)) @Akkadius 2024-05-25
+* Fix Zone deconstructor crashes ([#4325](https://github.com/EQEmu/Server/pull/4325)) @Akkadius 2024-05-25
+* Fix crash issue when dividing by zero in CalcHPRegen ([#4320](https://github.com/EQEmu/Server/pull/4320)) @Akkadius 2024-05-25
+* Fix crash when map name is null ([#4322](https://github.com/EQEmu/Server/pull/4322)) @Akkadius 2024-05-25
+* Fix player event crash in ITEM_DESTROY ([#4326](https://github.com/EQEmu/Server/pull/4326)) @Akkadius 2024-05-25
+* Fix player events reload when out of bounds ([#4321](https://github.com/EQEmu/Server/pull/4321)) @Akkadius 2024-05-25
+* Fix rarer crash in EntityList::MobProcess ([#4319](https://github.com/EQEmu/Server/pull/4319)) @Akkadius 2024-05-25
+
+### Feature
+
+* Add RoF2 Bazaar Support ([#4315](https://github.com/EQEmu/Server/pull/4315)) @neckkola 2024-05-26
+* Add SE_IncreaseArchery and rules to tune archery ([#4335](https://github.com/EQEmu/Server/pull/4335)) @fryguy503 2024-05-26
+* Add parcel container support ([#4305](https://github.com/EQEmu/Server/pull/4305)) @neckkola 2024-05-17
+
+### Fixes
+
+* Accuracy, Avoidance and Atk adjustments ([#4336](https://github.com/EQEmu/Server/pull/4336)) @fryguy503 2024-05-26
+* Fix Crash with null Argument in #modifynpcstat ([#4318](https://github.com/EQEmu/Server/pull/4318)) @Kinglykrab 2024-05-24
+* Fix RemoveAlternateCurrencyValue not updating Client ([#4317](https://github.com/EQEmu/Server/pull/4317)) @Kinglykrab 2024-05-23
+* Fix Using Bind Wound Above 70% Health ([#4340](https://github.com/EQEmu/Server/pull/4340)) @Kinglykrab 2024-05-26
+* Fix issue with #hotfix ([#4316](https://github.com/EQEmu/Server/pull/4316)) @Kinglykrab 2024-05-22
+* Fix issue with #suspend ([#4314](https://github.com/EQEmu/Server/pull/4314)) @Kinglykrab 2024-05-23
+* Fix issue with KeepOneRecordPerCompletedTask ([#4313](https://github.com/EQEmu/Server/pull/4313)) @Kinglykrab 2024-05-23
+* Fix mistaken removed RULE_CATEGORY_END() ([#4341](https://github.com/EQEmu/Server/pull/4341)) @fryguy503 2024-05-26
+* Missed a mob offense section for PR #4328 ([#4331](https://github.com/EQEmu/Server/pull/4331)) @fryguy503 2024-05-26
+* Raid Targets should not be Blindable as this will break all spell casting AI. ([#4334](https://github.com/EQEmu/Server/pull/4334)) @fryguy503 2024-05-26
+* When Mounts are allowed to zone, block them from zoning to disallowed zones. ([#4330](https://github.com/EQEmu/Server/pull/4330)) @fryguy503 2024-05-25
+* When refreshing buffs, attempt to use the same buffslot if the buff still exists. ([#4338](https://github.com/EQEmu/Server/pull/4338)) @fryguy503 2024-05-26
+
+### Lua Mod
+
+* Fix issue with SetAAEXP and SetEXP firing when uninitialized ([#4345](https://github.com/EQEmu/Server/pull/4345)) @Akkadius 2024-05-26
+
+### Merchants
+
+* Add New Classic Greed/Faction/Charisma Prices Rule ([#4301](https://github.com/EQEmu/Server/pull/4301)) @noudess 2024-05-17
+
+### Mobs
+
+* Remove entity type checks from ScanCloseMobs ([#4323](https://github.com/EQEmu/Server/pull/4323)) @Akkadius 2024-05-25
+
+### NPC Spells
+
+* Fix an issue where procs wouldn't fire if no spell entries in list ([#4344](https://github.com/EQEmu/Server/pull/4344)) @Akkadius 2024-05-26
+
+### Perl
+
+* Linux /opt/eqemu-perl checks when using release binaries ([#4346](https://github.com/EQEmu/Server/pull/4346)) @Akkadius 2024-05-26
+
+### Quest API
+
+* Add Zone Uptime Exports to Perl/Lua ([#4339](https://github.com/EQEmu/Server/pull/4339)) @Kinglykrab 2024-05-26
+
+### Rules
+
+* Added MeleeMitigation Level Difference Roll Adjusted for level diffs ([#4332](https://github.com/EQEmu/Server/pull/4332)) @fryguy503 2024-05-26
+* Allow maximum per kill AA amount ([#4329](https://github.com/EQEmu/Server/pull/4329)) @fryguy503 2024-05-25
+* Allow servers to adjust the filtering threshold for heals from damage (e.g. Mark of Kings). ([#4327](https://github.com/EQEmu/Server/pull/4327)) @fryguy503 2024-05-25
+* Backstab Haste Correction ([#4337](https://github.com/EQEmu/Server/pull/4337)) @fryguy503 2024-05-26
+* Mob Offensive and Weapon Skill static tables ([#4328](https://github.com/EQEmu/Server/pull/4328)) @fryguy503 2024-05-25
+* Remove hard coded initial aggro in favor or an adjustable Rule ([#4333](https://github.com/EQEmu/Server/pull/4333)) @fryguy503 2024-05-26
+
+### Scripts
+
+* Fix zone data load ordering issue ([#4343](https://github.com/EQEmu/Server/pull/4343)) @Akkadius 2024-05-26
+
+### Spells
+
+* Add content filtering to NPC spells ([#4309](https://github.com/EQEmu/Server/pull/4309)) @Akkadius 2024-05-17
+
 ## [22.50.1] 5/12/2024
 
 ### Fixes
