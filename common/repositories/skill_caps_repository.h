@@ -59,8 +59,7 @@ public:
 
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT CONCAT_WS('^', {}) FROM {}{} ORDER BY `class_id`, `skill_id`, `level` ASC",
-				ColumnsRaw(),
+				"SELECT CONCAT_WS('^', `skill_id`, `class_id`, `level`, `cap`, `class_`) FROM {}{} ORDER BY `class_id`, `skill_id`, `level` ASC",
 				TableName(),
 				level_string
 			)
