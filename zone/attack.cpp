@@ -1042,6 +1042,20 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 
 	auto roll = RollD20(hit.offense, mitigation);
 
+	// Add bonus to roll if level difference is sufficient
+	signed lvldiff = attacker->GetLevel() - this->GetLevel();
+	if (RuleI(Combat, LevelDifferenceRollCheck) >= 0 && lvldiff > RuleI(Combat, LevelDifferenceRollCheck)) {
+		roll += RuleR(Combat, LevelDifferenceRollBonus);
+		if (roll > 2.0) {
+			roll = 2.0;
+		}
+	} else if (RuleI(Combat, LevelDifferenceRollCheck) >= 0 && lvldiff < (-RuleI(Combat, LevelDifferenceRollCheck))) {
+		roll -= RuleR(Combat, LevelDifferenceRollBonus);
+		if (roll < 0.1) {
+			roll = 0.1;
+		}
+	}
+
 	// +0.5 for rounding, min to 1 dmg
 	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
 
