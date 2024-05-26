@@ -5576,6 +5576,11 @@ bool lua_send_parcel(luabind::object lua_table)
 	return CharacterParcelsRepository::InsertOne(database, e).id;
 }
 
+uint32 lua_get_zone_uptime()
+{
+	return Timer::GetCurrentTime() / 1000;
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6380,6 +6385,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_id_by_long_name", &lua_get_zone_id_by_long_name),
 		luabind::def("get_zone_short_name_by_long_name", &lua_get_zone_short_name_by_long_name),
 		luabind::def("send_parcel", &lua_send_parcel),
+		luabind::def("get_zone_uptime", &lua_get_zone_uptime),
 		/*
 			Cross Zone
 		*/
