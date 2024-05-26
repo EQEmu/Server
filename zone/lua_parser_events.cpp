@@ -1770,30 +1770,6 @@ void handle_player_spell_blocked(
 	lua_setfield(L, -2, "cast_spell");
 }
 
-void handle_player_pet_command(
-	QuestInterface *parse,
-	lua_State* L,
-	Client* client,
-	std::string data,
-	uint32 extra_data,
-	std::vector<std::any> *extra_pointers
-)
-{
-	lua_pushinteger(L, extra_data);
-	lua_setfield(L, -2, "command_id");
-
-	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
-	lua_setfield(L, -2, "command_name");
-
-	const uint8 pet_type = static_cast<uint8>(Strings::ToUnsignedInt(data));
-
-	lua_pushinteger(L, pet_type);
-	lua_setfield(L, -2, "pet_type");
-
-	lua_pushstring(L, EQ::constants::GetPetTypeName(pet_type).c_str());
-	lua_setfield(L, -2, "pet_type_name");
-}
-
 // Item
 void handle_item_click(
 	QuestInterface *parse,
