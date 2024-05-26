@@ -3375,6 +3375,12 @@ void Lua_Client::ResetLeadershipAA()
 	self->ResetLeadershipAA();
 }
 
+uint8 Lua_Client::GetSkillTrainLevel(int skill_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3624,6 +3630,7 @@ luabind::scope lua_register_client() {
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetScribeableSpells)
 	.def("GetScribedSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribedSpells)
 	.def("GetSkillPoints", (int(Lua_Client::*)(void))&Lua_Client::GetSkillPoints)
+	.def("GetSkillTrainLevel", (uint8(Lua_Client::*)(int))&Lua_Client::GetSkillTrainLevel)
 	.def("GetSpellDamage", (int(Lua_Client::*)(void))&Lua_Client::GetSpellDamage)
 	.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))&Lua_Client::GetSpellIDByBookSlot)
 	.def("GetSpentAA", (int(Lua_Client::*)(void))&Lua_Client::GetSpentAA)

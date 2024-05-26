@@ -2803,7 +2803,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint8 class_id, uint8 le
 	return skill_caps.GetSkillCap(class_id, skill_id, level).cap;
 }
 
-uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint8 class_id)
+uint8 Client::GetSkillTrainLevel(EQ::skills::SkillType skill_id, uint8 class_id)
 {
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
@@ -2813,7 +2813,7 @@ uint8 Client::SkillTrainLevel(EQ::skills::SkillType skill_id, uint8 class_id)
 		skill_id = EQ::skills::Skill2HPiercing;
 	}
 
-	return skill_caps.GetTrainLevel(class_id, skill_id, RuleI(Character, MaxLevel));
+	return skill_caps.GetSkillTrainLevel(class_id, skill_id, RuleI(Character, MaxLevel));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill)

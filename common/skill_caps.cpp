@@ -1,4 +1,5 @@
 #include "skill_caps.h"
+#include "timer.h"
 
 SkillCaps *SkillCaps::SetContentDatabase(Database *db)
 {
@@ -13,7 +14,8 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 		return SkillCapsRepository::NewEntity();
 	}
 
-	uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
+	const uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
+
 	auto pos = m_skill_caps.find(key);
 	if (pos != m_skill_caps.end()) {
 		return pos->second;
@@ -22,7 +24,7 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 	return SkillCapsRepository::NewEntity();
 }
 
-uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
+uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
 {
 	if (
 		!IsPlayerClass(class_id) ||
@@ -38,10 +40,10 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 		RuleI(Character, MaxLevel)
 	);
 
-	const uint8 max_level = level > skill_cap_max_level ? level : skill_cap_max_level;
+	const uint8    max_level = level > skill_cap_max_level ? level : skill_cap_max_level;
+	const uint64_t key       = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
 
 	for (uint8 current_level = 1; current_level <= max_level; current_level++) {
-		uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
 		auto pos = m_skill_caps.find(key);
 		if (pos != m_skill_caps.end()) {
 			return current_level;
@@ -53,11 +55,11 @@ uint8 SkillCaps::GetTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, u
 
 void SkillCaps::LoadSkillCaps()
 {
-	const auto &l = SkillCapsRepository::All(*m_content_database);
+	const auto& l = SkillCapsRepository::All(*m_content_database);
 
 	m_skill_caps.clear();
 
-	for (const auto &e: l) {
+	for (const auto& e: l) {
 		if (
 			e.level < 1 ||
 			!IsPlayerClass(e.class_id) ||
@@ -66,7 +68,7 @@ void SkillCaps::LoadSkillCaps()
 			continue;
 		}
 
-		uint64_t key = (e.class_id * 1000000) + (e.level * 1000) + e.skill_id;
+		const uint64_t key = (e.class_id * 1000000) + (e.level * 1000) + e.skill_id;
 		m_skill_caps[key] = e;
 	}
 

@@ -3173,6 +3173,11 @@ void Perl_Client_ResetLeadershipAA(Client* self)
 	self->ResetLeadershipAA();
 }
 
+uint8 Perl_Client_GetSkillTrainLevel(Client* self, int skill_id)
+{
+	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3431,6 +3436,7 @@ void perl_register_client()
 	package.add("GetTaskActivityDoneCount", &Perl_Client_GetTaskActivityDoneCount);
 	package.add("GetThirst", &Perl_Client_GetThirst);
 	package.add("GetTotalSecondsPlayed", &Perl_Client_GetTotalSecondsPlayed);
+	package.add("GetSkillTrainLevel", &Perl_Client_GetSkillTrainLevel);
 	package.add("GetWeight", &Perl_Client_GetWeight);
 	package.add("GetPEQZoneFlags", &Perl_Client_GetPEQZoneFlags);
 	package.add("GetZoneFlags", &Perl_Client_GetZoneFlags);
