@@ -62,8 +62,7 @@ public:
 				"SELECT CONCAT_WS('^', {}) FROM {}{} ORDER BY `class_id`, `skill_id`, `level` ASC",
 				ColumnsRaw(),
 				TableName(),
-				level_string,
-				PrimaryKey()
+				level_string
 			)
 		);
 
