@@ -815,7 +815,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					cpet->SetPetCommandState(PetButton::Stop, 0);
 				}
 
-				SetPetType(petCharmed);
+				SetPetType(PetType::Charmed);
 
 				// This was done in AddBuff, but we were not a pet yet, so
 				// the target windows didn't get updated.
@@ -1600,7 +1600,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					GetOwnerID() &&		// I'm a pet
 					caster &&					// there's a caster
 					caster->GetID() == GetOwnerID()	&& // and it's my master
-					GetPetType() != petCharmed
+					GetPetType() != PetType::Charmed
 				)
 				{
 				uint16 pet_spellid =  CastToNPC()->GetPetSpellID();
@@ -4398,7 +4398,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				Mob* owner = GetOwner();
 				SetOwnerID(0);
-				SetPetType(petNone);
+				SetPetType(PetType::None);
 				SetHeld(false);
 				SetGHeld(false);
 				SetNoCast(false);

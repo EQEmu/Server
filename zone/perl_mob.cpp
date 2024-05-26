@@ -1114,9 +1114,14 @@ uint16 Perl_Mob_GetOwnerID(Mob* self) // @categories Script Utility, Pet
 	return self->GetOwnerID();
 }
 
-int Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
+uint8 Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
 {
 	return self->GetPetType();
+}
+
+std::string Perl_Mob_GetPetTypeName(Mob* self) // @categories Script Utility, Pet
+{
+	return EQ::constants::GetPetTypeName(self->GetPetType());
 }
 
 int Perl_Mob_GetBodyType(Mob* self) // @categories Stats and Attributes
@@ -3802,6 +3807,7 @@ void perl_register_mob()
 	package.add("GetPetID", &Perl_Mob_GetPetID);
 	package.add("GetPetOrder", &Perl_Mob_GetPetOrder);
 	package.add("GetPetType", &Perl_Mob_GetPetType);
+	package.add("GetPetTypeName", &Perl_Mob_GetPetTypeName);
 	package.add("GetPhR", &Perl_Mob_GetPhR);
 	package.add("GetRace", &Perl_Mob_GetRace);
 	package.add("GetRaceName", &Perl_Mob_GetRaceName);

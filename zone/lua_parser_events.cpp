@@ -674,6 +674,14 @@ void handle_npc_pet_command(
 
 	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
 	lua_setfield(L, -2, "command_name");
+
+	const uint8 pet_type = static_cast<uint8>(Strings::ToUnsignedInt(data));
+
+	lua_pushinteger(L, pet_type);
+	lua_setfield(L, -2, "pet_type");
+
+	lua_pushstring(L, EQ::constants::GetPetTypeName(pet_type).c_str());
+	lua_setfield(L, -2, "pet_type_name");
 }
 
 // Player
@@ -1776,6 +1784,14 @@ void handle_player_pet_command(
 
 	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
 	lua_setfield(L, -2, "command_name");
+
+	const uint8 pet_type = static_cast<uint8>(Strings::ToUnsignedInt(data));
+
+	lua_pushinteger(L, pet_type);
+	lua_setfield(L, -2, "pet_type");
+
+	lua_pushstring(L, EQ::constants::GetPetTypeName(pet_type).c_str());
+	lua_setfield(L, -2, "pet_type_name");
 }
 
 // Item

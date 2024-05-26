@@ -6305,9 +6305,9 @@ void Client::CheckLDoNHail(NPC* n)
 
 	auto pet = GetPet();
 	if (pet) {
-		if (pet->GetPetType() == petCharmed) {
+		if (pet->GetPetType() == PetType::Charmed) {
 			pet->BuffFadeByEffect(SE_Charm);
-		} else if (pet->GetPetType() == petNPCFollow) {
+		} else if (pet->GetPetType() == PetType::NPCFollow) {
 			pet->SetOwnerID(0);
 		} else {
 			pet->Depop();
@@ -12576,6 +12576,27 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 					}
 				}
 			}
+		}
+	}
+}
+
+void Client::SendPetCommandEvent(QuestEventID event_id, uint32 command_id, uint8 pet_type)
+{
+	const bool has_player_event = IsClient() && parse->PlayerHasQuestSub(event_id);
+
+	Mob* p = GetPet();
+
+	const bool has_npc_event = p && p->IsNPC() && parse->HasQuestSub(p->GetNPCTypeID(), event_id);
+
+	if (has_player_event || has_npc_event) {
+		const std::string& export_string = std::to_string(pet_type);
+
+		if (has_player_event) {
+			parse->EventPlayer(event_id, CastToClient(), export_string, command_id);
+		}
+
+		if (has_npc_event) {
+			parse->EventNPC(event_id, p->CastToNPC(), this, export_string, command_id);
 		}
 	}
 }

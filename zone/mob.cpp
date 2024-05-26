@@ -386,7 +386,7 @@ Mob::Mob(
 	spellbonuses.AssistRange = -1;
 	SetPetID(0);
 	SetOwnerID(0);
-	SetPetType(petNone); // default to not a pet
+	SetPetType(PetType::None); // default to not a pet
 	SetPetPower(0);
 	held              = false;
 	gheld             = false;
@@ -607,7 +607,7 @@ bool Mob::HasAnInvisibilityEffect() {
 
 void Mob::BreakCharmPetIfConditionsMet() {
 	auto pet = GetPet();
-	if (pet && pet->GetPetType() == petCharmed && HasAnInvisibilityEffect()) {
+	if (pet && pet->GetPetType() == PetType::Charmed && HasAnInvisibilityEffect()) {
 		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(pet)) {
 			pet->BuffFadeByEffect(SE_Charm);
 		}
@@ -4544,8 +4544,8 @@ void Mob::SetOwnerID(uint16 new_owner_id) {
 	if (
 		!ownerid &&
 		IsNPC() &&
-		GetPetType() != petCharmed &&
-		GetPetType() != petNone
+		GetPetType() != PetType::Charmed &&
+		GetPetType() != PetType::None
 	) {
 		Depop();
 	}

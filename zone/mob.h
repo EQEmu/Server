@@ -1065,14 +1065,14 @@ public:
 	Mob* GetUltimateOwner();
 	void SetPetID(uint16 NewPetID);
 	inline uint16 GetPetID() const { return petid; }
-	inline PetType GetPetType() const { return type_of_pet; }
-	void SetPetType(PetType p) { type_of_pet = p; }
+	inline uint8_t GetPetType() const { return type_of_pet; }
+	void SetPetType(uint8_t p) { type_of_pet = p; }
 	inline int16 GetPetPower() const { return (petpower < 0) ? 0 : petpower; }
 	void SetPetPower(int16 p) { if (p < 0) petpower = 0; else petpower = p; }
-	bool IsFamiliar() const { return type_of_pet == petFamiliar; }
-	bool IsAnimation() const { return type_of_pet == petAnimation; }
-	bool IsCharmed() const { return type_of_pet == petCharmed; }
-	bool IsTargetLockPet() const { return type_of_pet == petTargetLock; }
+	bool IsFamiliar() const { return type_of_pet == PetType::Familiar; }
+	bool IsAnimation() const { return type_of_pet == PetType::Animation; }
+	bool IsCharmed() const { return type_of_pet == PetType::Charmed; }
+	bool IsTargetLockPet() const { return type_of_pet == PetType::TargetLock; }
 	inline uint32 GetPetTargetLockID() { return pet_targetlock_id; };
 	inline void SetPetTargetLockID(uint32 value) { pet_targetlock_id = value; };
 	void SetOwnerID(uint16 new_owner_id);
@@ -1269,7 +1269,7 @@ public:
 	bool CheckWillAggro(Mob *mob);
 
 	void InstillDoubt(Mob *who);
-	bool Charmed() const { return type_of_pet == petCharmed; }
+	bool Charmed() const { return type_of_pet == PetType::Charmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
 	uint32 GetZoneID() const; //for perl
 	uint16 GetInstanceVersion() const; //for perl
@@ -1552,7 +1552,7 @@ protected:
 	StatBonuses aabonuses;
 	uint16 petid;
 	uint16 ownerid;
-	PetType type_of_pet;
+	uint8 type_of_pet;
 	int16 petpower;
 	uint32 follow_id;
 	uint32 follow_dist;

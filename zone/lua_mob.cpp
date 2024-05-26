@@ -3380,6 +3380,18 @@ int Lua_Mob::GetExtraHaste()
 	return self->GetExtraHaste();
 }
 
+uint8 Lua_Mob::GetPetType()
+{
+	Lua_Safe_Call_Int();
+	return self->GetPetType();
+}
+
+std::string Lua_Mob::GetPetTypeName()
+{
+	Lua_Safe_Call_String();
+	return EQ::constants::GetPetTypeName(self->GetPetType());
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 	.def(luabind::constructor<>())
@@ -3708,6 +3720,8 @@ luabind::scope lua_register_mob() {
 	.def("GetPR", &Lua_Mob::GetPR)
 	.def("GetPet", &Lua_Mob::GetPet)
 	.def("GetPetOrder", (int(Lua_Mob::*)(void))&Lua_Mob::GetPetOrder)
+	.def("GetPetType", &Lua_Mob::GetPetType)
+	.def("GetPetTypeName", &Lua_Mob::GetPetTypeName)
 	.def("GetPhR", &Lua_Mob::GetPhR)
 	.def("GetRace", &Lua_Mob::GetRace)
 	.def("GetRaceName", &Lua_Mob::GetRaceName)

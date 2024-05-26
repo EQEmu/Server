@@ -1859,7 +1859,7 @@ void Bot::SetGuardMode() {
 	m_GuardPoint = GetPosition();
 	SetGuardFlag();
 
-	if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+	if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 2)) {
 		GetPet()->StopMoving();
 	}
 }
@@ -2019,7 +2019,7 @@ void Bot::AI_Process()
 		}
 
 		// This causes conflicts with default pet handler (bounces between targets)
-		if (NOT_PULLING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+		if (NOT_PULLING_BOT && HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 2)) {
 
 			// We don't add to hate list here because it's assumed to already be on the list
 			GetPet()->SetTarget(tar);
@@ -2136,7 +2136,7 @@ void Bot::AI_Process()
 
 		SetTarget(nullptr);
 
-		if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+		if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
@@ -2271,7 +2271,7 @@ bool Bot::TryAutoDefend(Client* bot_owner, float leash_distance) {
 						SetTarget(hater);
 						SetAttackingFlag();
 
-						if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+						if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 2)) {
 							GetPet()->AddToHateList(hater, 1);
 							GetPet()->SetTarget(hater);
 						}
@@ -2318,7 +2318,7 @@ bool Bot::TryPursueTarget(float leash_distance, glm::vec3& Goal) {
 				WipeHateList();
 				SetTarget(nullptr);
 
-				if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+				if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 2)) {
 					GetPet()->WipeHateList();
 					GetPet()->SetTarget(nullptr);
 				}
@@ -2815,7 +2815,7 @@ bool Bot::PullingFlagChecks(Client* bot_owner) {
 		SetReturningFlag();
 
 		if (HasPet() &&
-			(GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+			(GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 			GetPet()->WipeHateList();
 			GetPet()->SetTarget(nullptr);
@@ -2985,7 +2985,7 @@ void Bot::SetOwnerTarget(Client* bot_owner) {
 			AddToHateList(attack_target, 1);
 			SetTarget(attack_target);
 			SetAttackingFlag();
-			if (GetPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 2)) {
+			if (GetPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 2)) {
 				GetPet()->WipeHateList();
 				GetPet()->AddToHateList(attack_target, 1);
 				GetPet()->SetTarget(attack_target);
@@ -3024,7 +3024,7 @@ void Bot::BotPullerProcess(Client* bot_owner, Raid* raid) {
 			SetTarget(pull_target);
 			SetPullingFlag();
 			bot_owner->SetBotPulling();
-			if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != petAnimation || GetAA(aaAnimationEmpathy) >= 1)) {
+			if (HasPet() && (GetClass() != Class::Enchanter || GetPet()->GetPetType() != PetType::Animation || GetAA(aaAnimationEmpathy) >= 1)) {
 
 				GetPet()->WipeHateList();
 				GetPet()->SetTarget(nullptr);

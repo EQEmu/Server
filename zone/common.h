@@ -692,16 +692,6 @@ enum {
 };
 
 typedef enum {
-	petFamiliar,		//only listens to /pet get lost
-	petAnimation,		//does not listen to any commands
-	petOther,
-	petCharmed,
-	petNPCFollow,
-	petTargetLock,			//remain active as long something is on the hatelist. Don't listen to any commands
-	petNone = 0xFF // not a pet
-} PetType;
-
-typedef enum {
 	SingleTarget,	// causes effect to spell_target
 	AETarget,			// causes effect in aerange of target + target
 	AECaster,			// causes effect in aerange of 'this'

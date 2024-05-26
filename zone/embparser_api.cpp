@@ -5954,6 +5954,11 @@ std::string Perl__getpetcommandname(uint32_t pet_command)
 	return EQ::constants::GetPetCommandName(pet_command);
 }
 
+std::string Perl__getpettypename(uint8_t pet_type)
+{
+	return EQ::constants::GetPetTypeName(pet_type);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6641,6 +6646,7 @@ void perl_register_quest()
 	package.add("getgroupidbycharid", &Perl__getgroupidbycharid);
 	package.add("getinventoryslotname", &Perl__getinventoryslotname);
 	package.add("getpetcommandname", &Perl__getpetcommandname);
+	package.add("getpettypename", &Perl__getpettypename);
 	package.add("getraididbycharid", &Perl__getraididbycharid);
 	package.add("get_race_bitmask", &Perl__get_race_bitmask);
 	package.add("get_recipe_component_item_ids", &Perl__GetRecipeComponentItemIDs);

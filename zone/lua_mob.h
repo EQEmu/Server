@@ -594,6 +594,8 @@ public:
 	int GetExtraHaste();
 	void SetExtraHaste(int haste);
 	void SetExtraHaste(int haste, bool need_to_save);
+	uint8 GetPetType();
+	std::string GetPetTypeName();
 };
 
 #endif

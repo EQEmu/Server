@@ -1636,6 +1636,8 @@ public:
 	bool GroupFollow(Client* inviter);
 	inline bool  GetRunMode() const { return runmode; }
 
+	void SendPetCommandEvent(QuestEventID event_id, uint32 command_id, uint8 pet_type);
+
 	virtual bool CheckWaterAutoFireLoS(Mob* m);
 
 	void SendReloadCommandMessages();
