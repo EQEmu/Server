@@ -107,7 +107,7 @@ void Client::SendBulkParcels()
 	}
 }
 
-void Client::SendParcel(const Parcel_Struct &parcel_in)
+void Client::SendParcel(Parcel_Struct &parcel_in)
 {
 	auto results = CharacterParcelsRepository::GetWhere(
 		database,

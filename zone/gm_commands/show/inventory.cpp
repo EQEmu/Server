@@ -164,10 +164,11 @@ void ShowInventory(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"Slot {} | {} ({}){}",
+						"Slot {} | {} ({}/{}){}",
 						((scope_bit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + index_main) : index_main),
 						linker.GenerateLink(),
 						item_data->ID,
+						c->GetInv().GetItem(((scope_bit &peekWorld) ? (EQ::invslot::WORLD_BEGIN + index_main) : index_main))->GetSerialNumber(),
 						(
 							inst_main->IsStackable() && inst_main->GetCharges() > 0 ?
 							fmt::format(
@@ -228,7 +229,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 				c->Message(
 					Chat::White,
 					fmt::format(
-						"Slot {} Bag Slot {} | {} ({}){}",
+						"Slot {} Bag Slot {}/{} | {} ({}/{}){}",
 						(
 							(scope_bit & peekWorld) ?
 							INVALID_INDEX :
@@ -238,6 +239,7 @@ void ShowInventory(Client *c, const Seperator *sep)
 						sub_index,
 						linker.GenerateLink(),
 						item_data->ID,
+						c->GetInv().GetItem(EQ::InventoryProfile::CalcSlotId(index_main, sub_index))->GetSerialNumber(),
 						(
 							inst_sub->IsStackable() && inst_sub->GetCharges() > 0 ?
 							fmt::format(

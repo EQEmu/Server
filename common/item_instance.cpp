@@ -1812,6 +1812,142 @@ std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
 	return augments;
 }
 
+int EQ::ItemInstance::GetItemRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Regen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemManaRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ManaRegen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemManaRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDamageShield(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DamageShield;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDamageShield();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDSMitigation(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DSMitigation;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDSMitigation();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemHealAmt(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->HealAmt;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemHealAmt();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSpellDamage(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->SpellDmg;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSpellDamage();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemClairvoyance(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Clairvoyance;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemClairvoyance();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ExtraDmgSkill == skill ? item->ExtraDmgAmt : 0;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSkillsStat(skill);
+				}
+			}
+		}
+	}
+	return stat;
+}
+
 //
 // class EvolveInfo
 //

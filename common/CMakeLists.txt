@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 SET(common_sources
     base_packet.cpp
+    bazaar.cpp
     classes.cpp
     cli/eqemu_command_handler.cpp
     compression.cpp
@@ -501,6 +502,7 @@ SET(repositories
 
 SET(common_headers
     additive_lagged_fibonacci_engine.h
+    bazaar.h
     base_packet.h
     bodytypes.h
     classes.h

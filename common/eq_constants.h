@@ -772,27 +772,47 @@ typedef enum {
 	FilterShowSelfOnly
 } eqFilterMode;
 
-#define	STAT_STR		0
-#define	STAT_STA		1
-#define	STAT_AGI		2
-#define	STAT_DEX		3
-#define	STAT_INT		4
-#define	STAT_WIS		5
-#define	STAT_CHA		6
-#define	STAT_MAGIC		7
-#define	STAT_COLD		8
-#define	STAT_FIRE		9
-#define	STAT_POISON		10
-#define	STAT_DISEASE		11
-#define	STAT_MANA		12
-#define	STAT_HP			13
-#define	STAT_AC			14
-#define STAT_ENDURANCE		15
-#define STAT_ATTACK		16
-#define STAT_HP_REGEN		17
-#define STAT_MANA_REGEN		18
-#define STAT_HASTE		19
-#define STAT_DAMAGE_SHIELD	20
+#define STAT_STR                 0
+#define STAT_STA                 1
+#define STAT_AGI                 2
+#define STAT_DEX                 3
+#define STAT_INT                 4
+#define STAT_WIS                 5
+#define STAT_CHA                 6
+#define STAT_MAGIC               7
+#define STAT_COLD                8
+#define STAT_FIRE                9
+#define STAT_POISON              10
+#define STAT_DISEASE             11
+#define STAT_MANA                12
+#define STAT_HP                  13
+#define STAT_AC                  14
+#define STAT_ENDURANCE           15
+#define STAT_ATTACK              16
+#define STAT_HP_REGEN            17
+#define STAT_MANA_REGEN          18
+#define STAT_HASTE               19
+#define STAT_DAMAGE_SHIELD       20
+#define STAT_DS_MITIGATION       22
+#define	STAT_HEAL_AMOUNT         23
+#define	STAT_SPELL_DAMAGE        24
+#define	STAT_CLAIRVOYANCE        25
+#define	STAT_HEROIC_AGILITY      26
+#define	STAT_HEROIC_CHARISMA     27
+#define	STAT_HEROIC_DEXTERITY    28
+#define	STAT_HEROIC_INTELLIGENCE 29
+#define	STAT_HEROIC_STAMINA      30
+#define	STAT_HEROIC_STRENGTH     31
+#define	STAT_HEROIC_WISDOM       32
+#define	STAT_BASH                33
+#define	STAT_BACKSTAB            34
+#define	STAT_DRAGON_PUNCH        35
+#define	STAT_EAGLE_STRIKE        36
+#define	STAT_FLYING_KICK         37
+#define STAT_KICK                38
+#define	STAT_ROUND_KICK          39
+#define STAT_TIGER_CLAW          40
+#define STAT_FRENZY              41
 
 /*
 **	Recast timer types. Used as an off set to charProfileStruct timers.

@@ -3376,17 +3376,17 @@ struct TraderStatus_Struct {
 };
 
 struct TraderBuy_Struct {
-/*000*/ uint32   Action;
-/*004*/	uint32	Unknown004;
-/*008*/ uint32   Price;
-/*012*/	uint32	Unknown008;	// Probably high order bits of a 64 bit price.
-/*016*/ uint32   TraderID;
-/*020*/ char    ItemName[64];
-/*084*/ uint32   Unknown076;
-/*088*/ uint32   ItemID;
-/*092*/ uint32   AlreadySold;
-/*096*/ uint32   Quantity;
-/*100*/ uint32   Unknown092;
+/*000*/ uint32  action;
+/*004*/	uint32	unknown_004;
+/*008*/ uint32  price;
+/*012*/	uint32	unknown_008;	// Probably high order bits of a 64 bit price.
+/*016*/ uint32  trader_id;
+/*020*/ char    item_name[64];
+/*084*/ uint32  unknown_076;
+/*088*/ uint32  item_id;
+/*092*/ uint32  already_sold;
+/*096*/ uint32  quantity;
+/*100*/ uint32  unknown_092;
 /*104*/
 };
 

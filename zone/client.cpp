@@ -202,11 +202,11 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	ip = eqs->GetRemoteIP();
 	port = ntohs(eqs->GetRemotePort());
 	client_state = CLIENT_CONNECTING;
-	Trader=false;
+	SetTrader(false);
 	Buyer = false;
 	Haste = 0;
-	CustomerID = 0;
-	TraderID = 0;
+	SetCustomerID(0);
+	SetTraderID(0);
 	TrackingID = 0;
 	WID = 0;
 	account_id = 0;
@@ -421,8 +421,9 @@ Client::~Client() {
 	if (merc)
 		merc->Depop();
 
-	if(Trader)
-		database.DeleteTraderItem(CharacterID());
+	if(IsTrader()) {
+		TraderEndTrader();
+	}
 
 	if(Buyer)
 		ToggleBuyerMode(false);
@@ -2163,6 +2164,7 @@ void Client::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	ns->spawn.anon		= m_pp.anon;
 	ns->spawn.gm		= GetGM() ? 1 : 0;
 	ns->spawn.guildID	= GuildID();
+	ns->spawn.trader	= IsTrader();
 //	ns->spawn.linkdead	= IsLD() ? 1 : 0;
 //	ns->spawn.pvp		= GetPVP(false) ? 1 : 0;
 	ns->spawn.show_name = true;
@@ -11969,7 +11971,7 @@ void Client::SendPath(Mob* target)
 		RuleB(Bazaar, EnableWarpToTrader) &&
 		target->IsClient() &&
 		(
-			target->CastToClient()->Trader ||
+			target->CastToClient()->IsTrader() ||
 			target->CastToClient()->Buyer
 		)
 		) {
