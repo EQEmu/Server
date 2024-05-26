@@ -108,9 +108,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	numclients = 0;
 	zone = new Zone(iZoneID, iInstanceID, zonename);
 
-	parse->Init();
-	parse->ReloadQuests(true);
-
 	//init the zone, loads all the data, etc
 	if (!zone->Init(is_static)) {
 		safe_delete(zone);
@@ -1150,6 +1147,33 @@ bool Zone::Init(bool is_static) {
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
 
+	LogInfo("Loading timezone data");
+	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
+
+	LoadLDoNTraps();
+	LoadLDoNTrapEntries();
+
+	LoadDynamicZoneTemplates();
+	DynamicZone::CacheAllFromDatabase();
+	Expedition::CacheAllFromDatabase();
+
+	content_db.LoadGlobalLoot();
+
+	npc_scale_manager->LoadScaleData();
+
+	LoadGrids();
+
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		LoadLevelEXPMods();
+	}
+
+	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
+
+	// make sure that anything that needs to be loaded prior to scripts is loaded before here
+	// this is to ensure that the scripts have access to the data they need
+	parse->Init();
+	parse->ReloadQuests(true);
+
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
 	content_db.LoadStaticZonePoints(&zone_point_list, short_name, GetInstanceVersion());
@@ -1166,12 +1190,8 @@ bool Zone::Init(bool is_static) {
 
 	LogInfo("Loading adventure flavor text");
 	LoadAdventureFlavor();
-
 	LoadGroundSpawns();
 	LoadZoneObjects();
-
-	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
-
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
 
@@ -1181,22 +1201,12 @@ bool Zone::Init(bool is_static) {
 		database.DeleteBuyLines(0);
 	}
 
-	LoadLDoNTraps();
-	LoadLDoNTrapEntries();
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
 	LoadNPCEmotes(&npc_emote_list);
-
 	LoadAlternateAdvancement();
-
-	content_db.LoadGlobalLoot();
-
 	LoadBaseData();
-
-	//Load merchant data
 	LoadMerchants();
-
-	//Load temporary merchant data
 	LoadTempMerchantData();
 
 	// Merc data
@@ -1205,28 +1215,12 @@ bool Zone::Init(bool is_static) {
 		LoadMercenarySpells();
 	}
 
-	if (RuleB(Zone, LevelBasedEXPMods)) {
-		LoadLevelEXPMods();
-	}
-
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
-	LoadDynamicZoneTemplates();
-
-	DynamicZone::CacheAllFromDatabase();
-	Expedition::CacheAllFromDatabase();
-
 	guild_mgr.LoadGuilds();
 
-	LogInfo("Loading timezone data");
-	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
-
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
-
-	LoadGrids();
-
-	npc_scale_manager->LoadScaleData();
 
 	// logging origination information
 	LogSys.origination_info.zone_short_name = zone->short_name;
