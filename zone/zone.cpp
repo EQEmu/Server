@@ -1157,9 +1157,17 @@ bool Zone::Init(bool is_static) {
 	DynamicZone::CacheAllFromDatabase();
 	Expedition::CacheAllFromDatabase();
 
+	content_db.LoadGlobalLoot();
+
 	npc_scale_manager->LoadScaleData();
 
 	LoadGrids();
+
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		LoadLevelEXPMods();
+	}
+
+	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
 
 	// make sure that anything that needs to be loaded prior to scripts is loaded before here
 	// this is to ensure that the scripts have access to the data they need
@@ -1182,12 +1190,8 @@ bool Zone::Init(bool is_static) {
 
 	LogInfo("Loading adventure flavor text");
 	LoadAdventureFlavor();
-
 	LoadGroundSpawns();
 	LoadZoneObjects();
-
-	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
-
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
 
@@ -1200,27 +1204,15 @@ bool Zone::Init(bool is_static) {
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
 	LoadNPCEmotes(&npc_emote_list);
-
 	LoadAlternateAdvancement();
-
-	content_db.LoadGlobalLoot();
-
 	LoadBaseData();
-
-	//Load merchant data
 	LoadMerchants();
-
-	//Load temporary merchant data
 	LoadTempMerchantData();
 
 	// Merc data
 	if (RuleB(Mercs, AllowMercs)) {
 		LoadMercenaryTemplates();
 		LoadMercenarySpells();
-	}
-
-	if (RuleB(Zone, LevelBasedEXPMods)) {
-		LoadLevelEXPMods();
 	}
 
 	petition_list.ClearPetitions();
