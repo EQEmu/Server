@@ -2894,10 +2894,6 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 			)
 		);
 
-		if (entries.empty()) {
-			return nullptr;
-		}
-
 		for (auto &e: entries) {
 			DBnpcspells_entries_Struct se{};
 
