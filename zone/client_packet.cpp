@@ -11029,7 +11029,9 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SayString(PET_LEADERIS, GetName());
 			}
 
-			SendPetCommandEvent(EVENT_PET_COMMAND_SUCCESS, c->command, p->GetPetType());
+			if (parse->HasQuestSub(p->GetNPCTypeID(), EVENT_PET_COMMAND_SUCCESS)) {
+				parse->EventNPC(EVENT_PET_COMMAND_SUCCESS, p, this, "", c->command);
+			}
 		}
 
 		return;
@@ -11045,11 +11047,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	);
 
 	if (is_familiar_restricted || is_target_lock_restricted) {
-		SendPetCommandEvent(EVENT_PET_COMMAND_FAIL, c->command, p->GetPetType());
+		if (parse->HasQuestSub(p->GetNPCTypeID(), EVENT_PET_COMMAND_FAIL)) {
+			parse->EventNPC(EVENT_PET_COMMAND_FAIL, p, this, "", c->command);
+		}
+
 		return;
 	}
 
-	bool success = false;
+	QuestEventID event_id = EVENT_PET_COMMAND_FAIL;
 
 	const bool is_animation          = p->GetPetType() == PetType::Animation;
 	const bool has_command           = aabonuses.PetCommands[c->command];
@@ -11132,7 +11137,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetTarget(m);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11189,7 +11194,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					MessageString(Chat::PetResponse, PET_ATTACKING, p->GetCleanName(), GetTarget()->GetCleanName());
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11209,7 +11214,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetPetCommandState(PetButton::Stop, 0);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11219,7 +11224,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				MessageString(Chat::PetResponse, PET_REPORT_HP, std::to_string(p->GetHPRatio()).c_str());
 				p->ShowBuffs(this);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11236,10 +11241,12 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				SetPet(nullptr);
 			}
 
+			if (parse->HasQuestSub(p->GetNPCTypeID(), event_id)) {
+				parse->EventNPC(event_id, p, this, "", c->command);
+			}
+
 			p->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
 			p->CastToNPC()->Depop();
-
-			success = true;
 			break;
 		}
 		case PetCommand::Guard: {
@@ -11268,7 +11275,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					}
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11292,7 +11299,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetPetCommandState(PetButton::Stop, 0);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11306,7 +11313,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				MessageString(Chat::PetResponse, p->CastToNPC()->IsTaunting() ? PET_NO_TAUNT : PET_DO_TAUNT);
 				p->CastToNPC()->SetTaunting(!p->CastToNPC()->IsTaunting());
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11320,7 +11327,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				MessageString(Chat::PetResponse, PET_DO_TAUNT);
 				p->CastToNPC()->SetTaunting(true);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11330,7 +11337,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				MessageString(Chat::PetResponse, PET_NO_TAUNT);
 				p->CastToNPC()->SetTaunting(false);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11354,7 +11361,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetPetCommandState(PetButton::Stop, 0);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11378,7 +11385,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					}
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11395,7 +11402,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetPetOrder(p->GetPreviousPetOrder());
 				p->SetAppearance(eaStanding);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11418,7 +11425,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SetAppearance(eaSitting);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11446,7 +11453,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetGHeld(false);
 				SetPetCommandState(PetButton::GreaterHold, 0);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11471,7 +11478,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetGHeld(false);
 				SetPetCommandState(PetButton::GreaterHold, 0);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11488,7 +11495,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SetHeld(false);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11515,7 +11522,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetHeld(false);
 				SetPetCommandState(PetButton::Hold, 0);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11535,7 +11542,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetHeld(false);
 				SetPetCommandState(PetButton::Hold, 0);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11552,7 +11559,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SetGHeld(false);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11571,7 +11578,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SetNoCast(!p->IsNoCast());\
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11592,7 +11599,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					p->SetNoCast(true);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11613,7 +11620,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					p->SetNoCast(false);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11632,7 +11639,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SetFocused(!p->IsFocused());
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11692,7 +11699,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					p->SetFocused(false);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11727,7 +11734,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					}
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 
 			break;
@@ -11753,7 +11760,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				p->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11773,7 +11780,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetPetCommandState(PetButton::Regroup, 0);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11786,7 +11793,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetPetStop(false);
 				p->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11808,7 +11815,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					}
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11827,7 +11834,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					SetPetCommandState(PetButton::Stop, 0);
 				}
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11840,7 +11847,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				p->SetPetRegroup(false);
 				p->SayString(this, Chat::PetResponse, PET_OFF_REGROUPING);
 
-				success = true;
+				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
 			break;
 		}
@@ -11848,7 +11855,9 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 	}
 
-	SendPetCommandEvent(success ? EVENT_PET_COMMAND_SUCCESS : EVENT_PET_COMMAND_FAIL, c->command, p->GetPetType());
+	if (c->command != PetCommand::GetLost && parse->HasQuestSub(p->GetNPCTypeID(), event_id)) {
+		parse->EventNPC(event_id, p, this, "", c->command);
+	}
 }
 
 void Client::Handle_OP_Petition(const EQApplicationPacket *app)
