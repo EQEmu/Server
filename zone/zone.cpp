@@ -1147,10 +1147,22 @@ bool Zone::Init(bool is_static) {
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
 
+	LogInfo("Loading timezone data");
+	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
+
+	LoadLDoNTraps();
+	LoadLDoNTrapEntries();
+
 	LoadDynamicZoneTemplates();
 	DynamicZone::CacheAllFromDatabase();
 	Expedition::CacheAllFromDatabase();
 
+	npc_scale_manager->LoadScaleData();
+
+	LoadGrids();
+
+	// make sure that anything that needs to be loaded prior to scripts is loaded before here
+	// this is to ensure that the scripts have access to the data they need
 	parse->Init();
 	parse->ReloadQuests(true);
 
@@ -1185,8 +1197,6 @@ bool Zone::Init(bool is_static) {
 		database.DeleteBuyLines(0);
 	}
 
-	LoadLDoNTraps();
-	LoadLDoNTrapEntries();
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
 	LoadNPCEmotes(&npc_emote_list);
@@ -1218,14 +1228,7 @@ bool Zone::Init(bool is_static) {
 
 	guild_mgr.LoadGuilds();
 
-	LogInfo("Loading timezone data");
-	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
-
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
-
-	LoadGrids();
-
-	npc_scale_manager->LoadScaleData();
 
 	// logging origination information
 	LogSys.origination_info.zone_short_name = zone->short_name;
