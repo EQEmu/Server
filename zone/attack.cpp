@@ -963,6 +963,10 @@ int Mob::GetBestMeleeSkill()
 int Mob::offense(EQ::skills::SkillType skill)
 {
 	int offense = GetSkill(skill);
+	if (RuleB(Combat, UseMobStaticOffenseSkill) && IsNPC() && !IsPet() && !IsTempPet()) {
+		offense = GetMobFixedWeaponSkill();
+	}
+
 	int stat_bonus = GetSTR();
 
 	switch (skill) {
