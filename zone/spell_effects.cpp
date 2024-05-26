@@ -3341,6 +3341,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_SkillProcAttempt:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
+			case SE_IncreaseArchery:
 			case SE_Duration_HP_Pct:
 			case SE_Duration_Mana_Pct:
 			case SE_Duration_Endurance_Pct:

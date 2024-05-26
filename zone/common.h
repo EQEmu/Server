@@ -336,6 +336,7 @@ struct StatBonuses {
 	int32	hastetype2;
 	int32	hastetype3;
 	int32	inhibitmelee;
+	int32	increase_archery;
 	float	AggroRange;							// when calculate just replace original value with this
 	float	AssistRange;
 	int32	skillmod[EQ::skills::HIGHEST_SKILL + 1];

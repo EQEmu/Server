@@ -590,6 +590,8 @@ RULE_BOOL(Combat, BackstabIgnoresElemental, false, "Enable or disable Elemental 
 RULE_BOOL(Combat, BackstabIgnoresBane, false, "Enable or disable Bane weapon damage affecting backstab damage, false by default.")
 RULE_INT(Combat, DoubleBackstabLevelRequirement, 55, "Level requirement to enable double backstab attempts. The default is 55.")
 RULE_BOOL(Combat, SummonMeleeRange, true, "Enable or disable summoning of a player when already in melee range of the summoner.")
+RULE_REAL(Combat, ArcheryHitPenalty, 0, "Archery has a hit penalty to try to help balance it with the plethora of long term +hit modifiers for it - Default: 0")
+RULE_REAL(Combat, ArcheryBaseDamageBonus, 1, "Percentage modifier to base archery Damage 0.5=50% base damage, 1=100%,2=200% - Default: 1")
 RULE_BOOL(Combat, WaterMatchRequiredForAutoFireLoS, true, "Enable/Disable the requirement of both the attacker/victim being both in or out of water for AutoFire LoS to pass.")
 RULE_INT(Combat, ExtraAllowedKickClassesBitmask, 0, "Bitmask for allowing extra classes beyond Warrior, Ranger, Beastlord, and Berserker to kick, No Extra Classes (0) by default")
 RULE_INT(Combat, MaxProcs, 4, "Adjustable maximum number of procs per round, the hard cap is MAX_PROCS (11). Requires mob repop or client zone when changed")
