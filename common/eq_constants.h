@@ -797,11 +797,11 @@ typedef enum {
 #define	STAT_HEAL_AMOUNT         23
 #define	STAT_SPELL_DAMAGE        24
 #define	STAT_CLAIRVOYANCE        25
-#define	STAT_HEROIC_AGILITY	     26
+#define	STAT_HEROIC_AGILITY      26
 #define	STAT_HEROIC_CHARISMA     27
 #define	STAT_HEROIC_DEXTERITY    28
 #define	STAT_HEROIC_INTELLIGENCE 29
-#define	STAT_HEROIC_STAMINA	     30
+#define	STAT_HEROIC_STAMINA      30
 #define	STAT_HEROIC_STRENGTH     31
 #define	STAT_HEROIC_WISDOM       32
 #define	STAT_BASH                33
