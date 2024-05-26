@@ -456,8 +456,8 @@ int main(int argc, char **argv)
 			LogError("Instructions can be referenced at https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L92-L106");
 			LogError("Press any key to continue");
 			getchar();
+			return 0;
 		}
-		return 0;
 	}
 #endif
 
