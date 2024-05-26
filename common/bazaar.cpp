@@ -224,6 +224,13 @@ Bazaar::GetSearchResults(
 			return item_slot_searches.contains(slot) ? item_slot_searches[slot] : 0;
 		};
 
+		auto FindItemAugSlot = [&]() -> bool {
+			for (auto const &s: inst->GetItem()->AugSlotType) {
+				return s == search.augment;
+			}
+			return false;
+		};
+
 		// item type searches
 		std::vector<ItemSearchType> item_search_types = {
 			{EQ::item::ItemType::ItemTypeAll,                  true},
@@ -308,10 +315,10 @@ Bazaar::GetSearchResults(
 				.should_check = search.race != 0xFFFFFFFF,
 				.condition = static_cast<bool>(item->Races & GetPlayerRaceBit(search.race))
 			},
-//				{
-//					.should_check = search.augment != 0,
-//					.condition = !(item->AugType & GetAugTypeBit(search.augment))
-//				},
+			{
+				.should_check = search.augment != 0,
+				.condition = FindItemAugSlot()
+			},
 			{
 				.should_check = search.slot != 0xFFFFFFFF,
 				.condition = static_cast<bool>(item->Slots & GetEquipmentSlotBit(search.slot))
