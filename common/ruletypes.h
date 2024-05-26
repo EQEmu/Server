@@ -612,7 +612,7 @@ RULE_BOOL(Combat, UseMobStaticOffenseSkill, false, "Toggle to enabled the use of
 RULE_BOOL(Combat, UseEnhancedMobStaticWeaponSkill, false, "Toggle to enabled the use of an enhanced (slightly higher hit rate) static weapon skill for Mobs.  DEFAULT: false")
 RULE_INT(Combat, PCAttackPowerScaling, 100, "Applies scaling to PC Attack Power (75 = 75%).  DEFAULT: 100 to not adjust existing Servers")
 RULE_INT(Combat, PCAccuracyAvoidanceMod2Scale, 100, "Scale Factor for PC Accuracy and Avoidance (Mod2, found on items).  Found a value of 100 to make both too strong (75 = x0.75).  DEFAULT: 100 to not adjust existing Servers")
-RULE_CATEGORY_END()
+RULE_BOOL(Combat, AllowRaidTargetBlind, false, "Toggle to allow raid targets to be blinded, default is false (Live-like)")
 
 RULE_CATEGORY(NPC)
 RULE_INT(NPC, MinorNPCCorpseDecayTime, 450000, "NPC corpse decay time, if NPC below level 55 (milliseconds)")
@@ -736,7 +736,7 @@ RULE_BOOL(Bots, BotHealOnLevel, false, "Setting whether a bot should heal comple
 RULE_INT(Bots, AutosaveIntervalSeconds, 300, "Number of seconds after which a timer is triggered which stores the bot data. The value 0 means no periodic automatic saving.")
 RULE_BOOL(Bots, CazicTouchBotsOwner, true, "Default True. Cazic Touch/DT will hit bot owner rather than bot.")
 RULE_INT(Bots, BotsClickItemsMinLvl, 1, "Minimum level for bots to be able to use ^clickitem. Default 1.")
-RULE_BOOL(Bots, BotsCanClickItems, true, "Enabled the ability for bots to click items they have equipped. Default TRUE")
+RULE_BOOL(Bots, BotsCanClickItems, true, "Enables the ability for bots to click items they have equipped. Default TRUE")
 RULE_BOOL(Bots, CanClickMageEpicV1, true, "Whether or not bots are allowed to click Mage Epic 1.0. Default TRUE")
 RULE_CATEGORY_END()
 
