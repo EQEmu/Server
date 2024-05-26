@@ -52,8 +52,7 @@ public:
 			fmt::format(
 				"SELECT CONCAT_WS('^', {}) FROM {} ORDER BY `level`, `class` ASC",
 				ColumnsRaw(),
-				TableName(),
-				PrimaryKey()
+				TableName()
 			)
 		);
 
