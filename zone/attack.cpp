@@ -225,9 +225,9 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 		aabonuses.HitChanceEffect[skill] +
 		spellbonuses.HitChanceEffect[skill];
 
-	if(skill == EQ::skills::SkillArchery) 	{
-		hit_bonus += spellbonuses.increasearchery + aabonuses.increasearchery + itembonuses.increasearchery;
-		hit_bonus -= hit_bonus*RuleR(Combat, ArcheryHitPenalty);
+	if (skill == EQ::skills::SkillArchery) {
+		hit_bonus += spellbonuses.increase_archery + aabonuses.increase_archery + itembonuses.increase_archery;
+		hit_bonus -= hit_bonus * RuleR(Combat, ArcheryHitPenalty);
 	}
 
 	accuracy = (accuracy * (100 + hit_bonus)) / 100;
