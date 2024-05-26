@@ -257,10 +257,40 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
 
+	// Rogue Backstab Haste Correction
+	// Haste should only provide a max of a 2 s reduction to Backstab cooldown, but it seems that while BackstabReuseTimer can be reduced, there is another timer (repop on the button)
+	// that is controlling the actual cooldown.  I'm not sure how this is implemented, but it is impacted by spell haste (including bard v2 and v3), but not worn haste.
+	// This code applies an adjustment to backstab accuracy to compensate for this so that Rogue DPS doesn't significantly outclass other classes.
+
+	if (
+		RuleB(Combat, RogueBackstabHasteCorrection) &&
+		skill == EQ::skills::SkillBackstab &&
+		GetHaste() > 100
+	) {
+		int haste_spell = spellbonuses.haste - spellbonuses.inhibitmelee + spellbonuses.hastetype2 + spellbonuses.hastetype3;
+		int haste_worn = itembonuses.haste;
+
+		// Compute Intended Cooldown.  100% Spell = 1 s reduction (max), 40% Worn = 1 s reduction (max).
+		int reduction_intended_spell = haste_spell > 100 ? 100 : haste_spell;
+		int reduction_intended_worn = 2.5 * (haste_worn > 40 ? 40 : haste_worn);
+		int16 intended_cooldown = 1000 - reduction_intended_spell - reduction_intended_worn;
+
+		// Compute Actual Cooldown.  Actual only impacted by spell haste ( + v2 + v3), and is 10 s / (100 + haste)
+		int actual_cooldown = 100000 / (100 + haste_spell);
+
+		// Compute Accuracy Adjustment
+		int backstab_accuracy_adjust = actual_cooldown * 1000 / intended_cooldown;
+
+		// orig_accuracy = my_hit.tohit;
+		int adjusted_accuracy = my_hit.tohit * backstab_accuracy_adjust / 1000;
+		my_hit.tohit = adjusted_accuracy;
+	}
+
 	my_hit.hand = EQ::invslot::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should
 						  // work for most
-	if (skill == EQ::skills::SkillThrowing || skill == EQ::skills::SkillArchery)
+	if (skill == EQ::skills::SkillThrowing || skill == EQ::skills::SkillArchery) {
 		my_hit.hand = EQ::invslot::slotRange;
+	}
 
 	DoAttack(who, my_hit);
 
@@ -268,16 +298,20 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
 
 	// Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
-	if (!GetTarget())
+	if (!GetTarget()) {
 		return;
-	if (HasDied())
+	}
+
+	if (HasDied()) {
 		return;
+	}
 
 	TryCastOnSkillUse(who, skill);
 
 	if (HasSkillProcs()) {
 		TrySkillProc(who, skill, ReuseTime * 1000);
 	}
+
 	if (my_hit.damage_done > 0 && HasSkillProcSuccess()) {
 		TrySkillProc(who, skill, ReuseTime * 1000, true);
 	}
