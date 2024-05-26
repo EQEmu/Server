@@ -50,7 +50,7 @@ public:
 
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT CONCAT_WS('^', {}) FROM {} ORDER BY {} ASC",
+				"SELECT CONCAT_WS('^', {}) FROM {} ORDER BY `level`, `class` ASC",
 				ColumnsRaw(),
 				TableName(),
 				PrimaryKey()
