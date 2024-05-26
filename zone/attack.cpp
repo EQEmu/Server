@@ -3090,12 +3090,10 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		}
 		hate = ((hate * (hatemod)) / 100);
 	} else {
-		if (this->IsCharmed()){
+		if (IsCharmed()){
 			hate += RuleI(Aggro, InitialPetAggroBonus);
-			LogCombat("InitialPetAggroBonus: [{}]", RuleI(Aggro, InitialPetAggroBonus));
 		} else {
 			hate += RuleI(Aggro, InitialAggroBonus);
-			LogCombat("InitialAggroBonus: [{}]", RuleI(Aggro, InitialAggroBonus));
 		}
 	}
 
