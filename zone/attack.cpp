@@ -261,13 +261,13 @@ int Mob::compute_defense()
 	// A scale factor is implemented for PCs to reduce the effect of AGI at low levels.  This isn't applied to NPCs since they can be
 	// easily controlled via the Database.
 	if (RuleB(Combat, LegacyComputeDefense)) {
-		int AgiScaleFactor = 1000;
+		int agi_scale_factor = 1000;
 
 		if (IsOfClientBot()) {
-			AgiScaleFactor = std::min(1000, static_cast<int>(GetLevel()) * 1000 / 70); // Scales Agi Contribution for PC's Level, max Contribution at Level 70
+			agi_scale_factor = std::min(1000, static_cast<int>(GetLevel()) * 1000 / 70); // Scales Agi Contribution for PC's Level, max Contribution at Level 70
 		}
 
-		defense += AgiScaleFactor * (800 * (GetAGI() - 40)) / 3600 / 1000;
+		defense += agi_scale_factor * (800 * (GetAGI() - 40)) / 3600 / 1000;
 
 		if (IsOfClientBot()) {
 			defense += GetHeroicAGI() / 10;
