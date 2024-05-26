@@ -11674,6 +11674,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 
@@ -11735,6 +11736,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		case PetCommand::StopOn: {
@@ -11755,6 +11757,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		case PetCommand::StopOff: {
@@ -11768,6 +11771,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		case PetCommand::Regroup: {
@@ -11790,6 +11794,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		case PetCommand::RegroupOn: {
@@ -11809,6 +11814,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		case PetCommand::RegroupOff: {
@@ -11822,6 +11828,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
+
 			break;
 		}
 		default:
