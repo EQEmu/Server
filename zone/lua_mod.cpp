@@ -42,6 +42,8 @@ void LuaMod::Init()
 	m_has_common_damage = parser_->HasFunction("CommonDamage", package_name_);
 	m_has_heal_damage = parser_->HasFunction("HealDamage", package_name_);
 	m_has_is_immune_to_spell = parser_->HasFunction("IsImmuneToSpell", package_name_);
+	m_has_set_aa_exp = parser_->HasFunction("SetAAEXP", package_name_);
+	m_has_set_exp = parser_->HasFunction("SetEXP", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
