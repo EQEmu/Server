@@ -3356,10 +3356,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_Blind:
-				if (IsRaidTarget()) {
-					// do not blind raid targtets
+				if (RuleB(Combat, AllowRaidTargetBlind) && IsRaidTarget()) { // do not blind raid targets
 					break;
 				}
+
 				new_bonus->IsBlind = true;
 				break;
 
