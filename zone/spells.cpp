@@ -3672,6 +3672,10 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				);
 
 				// If this is the first buff it would override, use its slot
+				if (!will_overwrite && !IsDisciplineBuff(spell_id)) {
+					emptyslot = buffslot;
+				}
+				
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
 			} else if (ret == 2) {
