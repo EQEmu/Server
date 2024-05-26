@@ -12579,13 +12579,3 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 		}
 	}
 }
-
-void Client::SendPetCommandEvent(QuestEventID event_id, uint32 command_id, uint8 pet_type)
-{
-	Mob* p = GetPet();
-
-	if (p && p->IsNPC() && parse->HasQuestSub(p->GetNPCTypeID(), event_id)) {
-		const std::string& export_string = std::to_string(pet_type);
-		parse->EventNPC(event_id, p->CastToNPC(), this, export_string, command_id);
-	}
-}
