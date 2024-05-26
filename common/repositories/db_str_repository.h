@@ -50,10 +50,9 @@ public:
 
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT CONCAT(CONCAT_WS('^', {}), '^0') FROM {} ORDER BY {} ASC",
+				"SELECT CONCAT(CONCAT_WS('^', {}), '^0') FROM {} ORDER BY `id`, `type` ASC",
 				ColumnsRaw(),
-				TableName(),
-				PrimaryKey()
+				TableName()
 			)
 		);
 
