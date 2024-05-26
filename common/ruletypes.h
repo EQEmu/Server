@@ -664,6 +664,8 @@ RULE_BOOL(Aggro, NPCAggroMaxDistanceEnabled, true, "If enabled, NPC's will drop 
 RULE_BOOL(Aggro, AggroPlayerPets, false, "If enabled, NPCs will aggro player pets")
 RULE_BOOL(Aggro, UndeadAlwaysAggro, true, "should undead always aggro?")
 RULE_INT(Aggro, BardAggroCap, 40, "per song bard aggro cap.")
+RULE_INT(Aggro, InitialAggroBonus, 100, "Initial Aggro Bonus, Default: 100")
+RULE_INT(Aggro, InitialPetAggroBonus, 100, "Initial Pet Aggro Bonus, Default 100")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)

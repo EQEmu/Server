@@ -3089,12 +3089,16 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		// Spell Casting Subtlety etc
 		int64 hatemod = 100 + other->spellbonuses.hatemod + other->itembonuses.hatemod + other->aabonuses.hatemod;
 
-		if (hatemod < 1)
+		if (hatemod < 1) {
 			hatemod = 1;
+		}
 		hate = ((hate * (hatemod)) / 100);
-	}
-	else {
-		hate += 100; // 100 bonus initial aggro
+	} else {
+		if (IsCharmed()){
+			hate += RuleI(Aggro, InitialPetAggroBonus);
+		} else {
+			hate += RuleI(Aggro, InitialAggroBonus);
+		}
 	}
 
 	// Pet that is /pet hold on will not add to their hate list if they're not engaged
