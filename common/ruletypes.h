@@ -606,6 +606,8 @@ RULE_BOOL(Combat, BashTwoHanderUseShoulderAC, false, "Enable to use shoulder AC 
 RULE_REAL(Combat, BashACBonusDivisor, 25.0, "this divides the AC value contribution to bash damage, lower to increase damage")
 RULE_BOOL(Combat, UseMobStaticOffenseSkill, false, "Toggle to enabled the use of a static offense skill for Mobs.  DEFAULT: false")
 RULE_BOOL(Combat, UseEnhancedMobStaticWeaponSkill, false, "Toggle to enabled the use of an enhanced (slightly higher hit rate) static weapon skill for Mobs.  DEFAULT: false")
+RULE_INT(Combat, PCAttackPowerScaling, 100, "Applies scaling to PC Attack Power (75 = 75%).  DEFAULT: 100 to not adjust existing Servers")
+RULE_INT(Combat, PCAccuracyAvoidanceMod2Scale, 100, "Scale Factor for PC Accuracy and Avoidance (Mod2, found on items).  Found a value of 100 to make both too strong (75 = x0.75).  DEFAULT: 100 to not adjust existing Servers")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)

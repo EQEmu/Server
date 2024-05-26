@@ -194,8 +194,15 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 	// unsure on the stacking order of these effects, rather hard to parse
 	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
 	// mod2 accuracy -- flat bonus
-	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing)
+	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing) {
 		accuracy += itembonuses.HitChance;
+	} else {
+		// Applying a scale factor as sources suggest Accuracy should reduce number of missing by 0.1% per point, so 150 = 15% reduction in misses.
+		// Based on my calculator 150 Accuracy was reducing misses by too much (closer to 20%)
+		// NOTE: This doesn't mean if you have a 30% miss chance you now miss 15%.  It means if you have a 30% miss chance you now have a 30% * (100% - 15%) = 30% * 85% = 25.5% miss chance
+		// Using same scale factor for Avoidance and Accuracy since they impact the formula about the same.
+		accuracy += itembonuses.HitChance * RuleI(Combat, PCAccuracyAvoidanceMod2Scale) / 100;
+	}
 
 	//518 Increase ATK accuracy by percentage, stackable
 	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
@@ -983,10 +990,20 @@ int Mob::offense(EQ::skills::SkillType skill)
 			break;
 	}
 
-	if (stat_bonus >= 75)
+	if (stat_bonus >= 75) {
 		offense += (2 * stat_bonus - 150) / 3;
+	}
 
-	offense += GetATK() + GetPetATKBonusFromOwner();
+	// GetATK() = ATK + itembonuses.ATK + spellbonuses.ATK.  However, ATK appears to already be itembonuses.ATK + spellbonuses.ATK for PCs, so as is, it is double counting attack
+	// This causes attack to be significantly more important than it should be based on era rule of thumbs.  I do not want to change the GetATK() function in case doing so breaks something,
+	// so instead I am just adding a /2 to remedy the double counting.  NPCs do not have this issue, so they are broken up.
+	// PCAttackPowerScaling is used to help bring attack power further in line with era estimates.
+	if (IsOfClientBotMerc()) {
+		offense += (GetATK() / 2 + GetPetATKBonusFromOwner()) * RuleI(Combat, PCAttackPowerScaling) / 100;
+	} else {
+		offense += GetATK();
+	}
+
 	return offense;
 }
 
