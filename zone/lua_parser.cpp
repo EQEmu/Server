@@ -352,8 +352,6 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
 	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
-	PlayerArgumentDispatch[EVENT_PET_COMMAND_FAIL]           = handle_player_pet_command;
-	PlayerArgumentDispatch[EVENT_PET_COMMAND_SUCCESS]        = handle_player_pet_command;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
