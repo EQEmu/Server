@@ -5585,6 +5585,16 @@ uint32 lua_get_zone_uptime()
 	return Timer::GetCurrentTime() / 1000;
 }
 
+std::string lua_get_pet_command_name(uint32 pet_command)
+{
+	return EQ::constants::GetPetCommandName(pet_command);
+}
+
+std::string lua_get_pet_type_name(uint8 pet_type)
+{
+	return EQ::constants::GetPetTypeName(pet_type);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -6391,6 +6401,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_zone_short_name_by_long_name", &lua_get_zone_short_name_by_long_name),
 		luabind::def("send_parcel", &lua_send_parcel),
 		luabind::def("get_zone_uptime", &lua_get_zone_uptime),
+		luabind::def("get_pet_command_name", &lua_get_pet_command_name),
+		luabind::def("get_pet_type_name", &lua_get_pet_type_name),
 		/*
 			Cross Zone
 		*/

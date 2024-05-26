@@ -203,6 +203,8 @@ const char* QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_ENTITY_VARIABLE_UPDATE",
 	"EVENT_AA_LOSS",
 	"EVENT_SPELL_BLOCKED",
+	"EVENT_PET_COMMAND_FAIL",
+	"EVENT_PET_COMMAND_SUCCESS",
 
 	// Add new events before these or Lua crashes
 	"EVENT_SPELL_EFFECT_BOT",
@@ -2484,6 +2486,13 @@ void PerlembParser::ExportEventVariables(
 				ExportVar(package_name.c_str(), "new_value", std::any_cast<std::string>(extra_pointers->at(2)).c_str());
 			}
 
+			break;
+		}
+
+		case EVENT_PET_COMMAND_FAIL:
+		case EVENT_PET_COMMAND_SUCCESS: {
+			ExportVar(package_name.c_str(), "command_id", extra_data);
+			ExportVar(package_name.c_str(), "command_name", EQ::constants::GetPetCommandName(extra_data).c_str());
 			break;
 		}
 

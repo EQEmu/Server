@@ -659,6 +659,23 @@ void handle_npc_spell_blocked(
 	lua_setfield(L, -2, "cast_spell");
 }
 
+void handle_npc_pet_command(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "command_id");
+
+	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
+	lua_setfield(L, -2, "command_name");
+}
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -1743,6 +1760,22 @@ void handle_player_spell_blocked(
 	luabind::adl::object l_spell_two_o = luabind::adl::object(L, l_spell_two);
 	l_spell_two_o.push(L);
 	lua_setfield(L, -2, "cast_spell");
+}
+
+void handle_player_pet_command(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+)
+{
+	lua_pushinteger(L, extra_data);
+	lua_setfield(L, -2, "command_id");
+
+	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
+	lua_setfield(L, -2, "command_name");
 }
 
 // Item

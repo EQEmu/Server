@@ -184,7 +184,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_entity_variable_set",
 	"event_entity_variable_update",
 	"event_aa_loss",
-	"event_spell_blocked"
+	"event_spell_blocked",
+	"event_pet_command_fail",
+	"event_pet_command_success"
 };
 
 extern Zone *zone;
@@ -259,6 +261,8 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_npc_entity_variable;
 	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_npc_entity_variable;
 	NPCArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_npc_spell_blocked;
+	NPCArgumentDispatch[EVENT_PET_COMMAND_FAIL]       = handle_npc_pet_command;
+	NPCArgumentDispatch[EVENT_PET_COMMAND_SUCCESS]    = handle_npc_pet_command;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
@@ -348,6 +352,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
 	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
 	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
+	PlayerArgumentDispatch[EVENT_PET_COMMAND_FAIL]           = handle_player_pet_command;
+	PlayerArgumentDispatch[EVENT_PET_COMMAND_SUCCESS]        = handle_player_pet_command;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;

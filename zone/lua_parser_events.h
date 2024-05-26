@@ -260,6 +260,16 @@ void handle_npc_spell_blocked(
 	std::vector<std::any> *extra_pointers
 );
 
+void handle_npc_pet_command(
+	QuestInterface *parse,
+	lua_State* L,
+	NPC* npc,
+	Mob *init,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
 // Player
 void handle_player_say(
 	QuestInterface *parse,
@@ -847,6 +857,15 @@ void handle_player_aa_loss(
 );
 
 void handle_player_spell_blocked(
+	QuestInterface *parse,
+	lua_State* L,
+	Client* client,
+	std::string data,
+	uint32 extra_data,
+	std::vector<std::any> *extra_pointers
+);
+
+void handle_player_pet_command(
 	QuestInterface *parse,
 	lua_State* L,
 	Client* client,

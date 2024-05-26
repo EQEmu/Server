@@ -4160,7 +4160,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						SetPetOrder(GetPreviousPetOrder());
 					}
 					// fix GUI sit button to be unpressed and stop sitting regen
-					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					owner->CastToClient()->SetPetCommandState(PetButton::Sit, 0);
 					SetAppearance(eaStanding);
 				}
 			}
@@ -4195,7 +4195,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				}
 
 				// fix GUI sit button to be unpressed and stop sitting regen
-				CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+				CastToClient()->SetPetCommandState(PetButton::Sit, 0);
 				pet->SetAppearance(eaStanding);
 			}
 

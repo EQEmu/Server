@@ -430,6 +430,9 @@ namespace EQ
 		extern const std::map<uint32, std::string>& GetConsiderColorMap();
 		std::string GetConsiderColorName(uint32 consider_color);
 
+		extern const std::map<uint32_t, std::string>& GetPetCommandMap();
+		std::string GetPetCommandName(uint32_t pet_command);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;

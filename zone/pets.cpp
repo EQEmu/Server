@@ -365,7 +365,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
 			if (
 				(GetPetType() != petFamiliar && GetPetType() != petAnimation) ||
-				aabonuses.PetCommands[PET_TAUNT]
+				aabonuses.PetCommands[PetCommand::Taunt]
 			) {
 				SetTaunting(true);
 			}

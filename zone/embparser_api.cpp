@@ -5949,6 +5949,11 @@ bool Perl__send_parcel(perl::reference table_ref)
 	return CharacterParcelsRepository::InsertOne(database, e).id;
 }
 
+std::string Perl__getpetcommandname(uint32_t pet_command)
+{
+	return EQ::constants::GetPetCommandName(pet_command);
+}
+
 void perl_register_quest()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -6635,6 +6640,7 @@ void perl_register_quest()
 	package.add("getguildidbycharid", &Perl__getguildidbycharid);
 	package.add("getgroupidbycharid", &Perl__getgroupidbycharid);
 	package.add("getinventoryslotname", &Perl__getinventoryslotname);
+	package.add("getpetcommandname", &Perl__getpetcommandname);
 	package.add("getraididbycharid", &Perl__getraididbycharid);
 	package.add("get_race_bitmask", &Perl__get_race_bitmask);
 	package.add("get_recipe_component_item_ids", &Perl__GetRecipeComponentItemIDs);
