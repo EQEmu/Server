@@ -504,6 +504,7 @@ public:
 	bool SetAutoLoginCharacterName(std::string character_name);
 	void DescribeSpecialAbilities(Lua_NPC n);
 	void ResetLeadershipAA();
+	uint8 GetSkillTrainLevel(int skill_id);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
