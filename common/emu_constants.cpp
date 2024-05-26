@@ -582,24 +582,3 @@ bool ComparisonType::IsValid(uint8 type)
 {
 	return comparison_types.find(type) != comparison_types.end();
 }
-
-const std::map<uint8, std::string>& EQ::constants::GetPetTypeMap()
-{
-	static const std::map<uint8, std::string> pet_type_map = {
-		{ PetType::Familiar,   "Familiar" },
-		{ PetType::Animation,  "Animation" },
-		{ PetType::Normal,     "Normal" },
-		{ PetType::Charmed,    "Charmed" },
-		{ PetType::NPCFollow,  "NPCFollow" },
-		{ PetType::TargetLock, "TargetLock" },
-		{ PetType::None,       "None" },
-	};
-
-	return pet_type_map;
-}
-
-std::string EQ::constants::GetPetTypeName(uint8 pet_type)
-{
-	const auto& c = EQ::constants::GetPetTypeMap().find(pet_type);
-	return c != EQ::constants::GetPetTypeMap().end() ? c->second : std::string();
-}
