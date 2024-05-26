@@ -226,14 +226,46 @@ Bazaar::GetSearchResults(
 
 		// item type searches
 		std::vector<ItemSearchType> item_search_types = {
-			{EQ::item::ItemType::ItemTypeAll,         true},
-			{EQ::item::ItemType::ItemTypeBook,        item->ItemClass == EQ::item::ItemType::ItemTypeBook},
-			{EQ::item::ItemType::ItemTypeContainer,   item->ItemClass == EQ::item::ItemType::ItemTypeContainer},
-			{EQ::item::ItemType::ItemTypeAllEffects,  item->Scroll.Effect > 0 && item->Scroll.Effect < 65000},
-			{EQ::item::ItemType::ItemTypeUnknown9,    item->Worn.Effect == 998},
-			{EQ::item::ItemType::ItemTypeUnknown10,   item->Worn.Effect >= 1298 && item->Worn.Effect <= 1307},
-			{EQ::item::ItemType::ItemTypeFocusEffect, item->Focus.Effect > 0},
-		};
+			{EQ::item::ItemType::ItemTypeAll,                  true},
+			{EQ::item::ItemType::ItemTypeBook,                 item->ItemClass == EQ::item::ItemType::ItemTypeBook},
+			{EQ::item::ItemType::ItemTypeContainer,            item->ItemClass == EQ::item::ItemType::ItemTypeContainer},
+			{EQ::item::ItemType::ItemTypeAllEffects,           item->Scroll.Effect > 0 && item->Scroll.Effect < 65000},
+			{EQ::item::ItemType::ItemTypeUnknown9,             item->Worn.Effect == 998},
+			{EQ::item::ItemType::ItemTypeUnknown10,            item->Worn.Effect >= 1298 && item->Worn.Effect <= 1307},
+			{EQ::item::ItemType::ItemTypeFocusEffect,          item->Focus.Effect > 0},
+			{EQ::item::ItemType::ItemType1HBlunt,              item->ItemType == EQ::item::ItemType::ItemType1HBlunt},
+			{EQ::item::ItemType::ItemType1HPiercing,           item->ItemType == EQ::item::ItemType::ItemType1HPiercing},
+			{EQ::item::ItemType::ItemType1HSlash,              item->ItemType == EQ::item::ItemType::ItemType1HSlash},
+			{EQ::item::ItemType::ItemType2HBlunt,              item->ItemType == EQ::item::ItemType::ItemType2HBlunt},
+			{EQ::item::ItemType::ItemType2HSlash,              item->ItemType == EQ::item::ItemType::ItemType2HSlash},
+			{EQ::item::ItemType::ItemTypeBow,                  item->ItemType == EQ::item::ItemType::ItemTypeBow},
+			{EQ::item::ItemType::ItemTypeShield,               item->ItemType == EQ::item::ItemType::ItemTypeShield},
+			{EQ::item::ItemType::ItemTypeMisc,                 item->ItemType == EQ::item::ItemType::ItemTypeMisc},
+			{EQ::item::ItemType::ItemTypeFood,                 item->ItemType == EQ::item::ItemType::ItemTypeFood},
+			{EQ::item::ItemType::ItemTypeDrink,                item->ItemType == EQ::item::ItemType::ItemTypeDrink},
+			{EQ::item::ItemType::ItemTypeLight,                item->ItemType == EQ::item::ItemType::ItemTypeLight},
+			{EQ::item::ItemType::ItemTypeCombinable,           item->ItemType == EQ::item::ItemType::ItemTypeCombinable},
+			{EQ::item::ItemType::ItemTypeBandage,              item->ItemType == EQ::item::ItemType::ItemTypeBandage},
+			{EQ::item::ItemType::ItemTypeSmallThrowing,        item->ItemType == EQ::item::ItemType::ItemTypeSmallThrowing ||
+			                                                   item->ItemType == EQ::item::ItemType::ItemTypeLargeThrowing},
+			{EQ::item::ItemType::ItemTypeSpell,                item->ItemType == EQ::item::ItemType::ItemTypeSpell},
+			{EQ::item::ItemType::ItemTypePotion,               item->ItemType == EQ::item::ItemType::ItemTypePotion},
+			{EQ::item::ItemType::ItemTypeBrassInstrument,      item->ItemType == EQ::item::ItemType::ItemTypeBrassInstrument},
+			{EQ::item::ItemType::ItemTypeWindInstrument,       item->ItemType == EQ::item::ItemType::ItemTypeWindInstrument},
+			{EQ::item::ItemType::ItemTypeStringedInstrument,   item->ItemType == EQ::item::ItemType::ItemTypeStringedInstrument},
+			{EQ::item::ItemType::ItemTypePercussionInstrument, item->ItemType == EQ::item::ItemType::ItemTypePercussionInstrument},
+			{EQ::item::ItemType::ItemTypeArrow,                item->ItemType == EQ::item::ItemType::ItemTypeArrow},
+			{EQ::item::ItemType::ItemTypeJewelry,              item->ItemType == EQ::item::ItemType::ItemTypeJewelry},
+			{EQ::item::ItemType::ItemTypeNote,                 item->ItemType == EQ::item::ItemType::ItemTypeNote},
+			{EQ::item::ItemType::ItemTypeKey,                  item->ItemType == EQ::item::ItemType::ItemTypeKey},
+			{EQ::item::ItemType::ItemType2HPiercing,           item->ItemType == EQ::item::ItemType::ItemType2HPiercing},
+			{EQ::item::ItemType::ItemTypeAlcohol,              item->ItemType == EQ::item::ItemType::ItemTypeAlcohol},
+			{EQ::item::ItemType::ItemTypeMartial,              item->ItemType == EQ::item::ItemType::ItemTypeMartial},
+			{EQ::item::ItemType::ItemTypeAugmentation,         item->ItemType == EQ::item::ItemType::ItemTypeAugmentation},
+			{EQ::item::ItemType::ItemTypeAlternateAbility,     item->ItemType == EQ::item::ItemType::ItemTypeAlternateAbility},
+			{EQ::item::ItemType::ItemTypeCount,                item->ItemType == EQ::item::ItemType::ItemTypeCount},
+			{EQ::item::ItemType::ItemTypeCollectible,          item->ItemType == EQ::item::ItemType::ItemTypeCollectible}
+			};
 
 		bool met_filter = false;
 		bool has_filter = false;
@@ -257,20 +289,12 @@ Bazaar::GetSearchResults(
 		// item additive searches
 		std::vector<AddititiveSearchCriteria> item_additive_searches = {
 			{
-				.should_check = search.min_level != 1 &&
-								(inst->GetItem() ? inst->GetItemRequiredLevel(true) > 0 : item->ReqLevel > 0),
-				.condition = inst->GetItem() ? inst->GetItemRequiredLevel(true) >= search.min_level :
-					item->ReqLevel >= search.min_level
+				.should_check = search.min_level != 1 && inst->GetItemRequiredLevel(true) > 0,
+				.condition = inst->GetItemRequiredLevel(true) >= search.min_level
 			},
 			{
-				.should_check = search.max_level != 1 &&
-								(inst->GetItem() ?
-									inst->GetItemRequiredLevel(true) > 0 :
-									item->ReqLevel > 0
-								),
-				.condition = inst->GetItem() ?
-					inst->GetItemRequiredLevel(true) <= search.max_level :
-					item->ReqLevel <= search.max_level
+				.should_check = search.max_level != 1 && inst->GetItemRequiredLevel(true) > 0,
+				.condition = inst->GetItemRequiredLevel(true) <= search.max_level
 			},
 			{
 				.should_check = !std::string(search.item_name).empty(),
