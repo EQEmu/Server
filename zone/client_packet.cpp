@@ -11567,7 +11567,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					MessageString(Chat::PetResponse, p->IsNoCast() ? PET_SPELLHOLD_SET_OFF : PET_SPELLHOLD_SET_ON);
 				}
 
-				p->SetNoCast(!p->IsNoCast());\
+				p->SetNoCast(!p->IsNoCast());
 
 				event_id = EVENT_PET_COMMAND_SUCCESS;
 			}
