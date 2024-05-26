@@ -3233,9 +3233,9 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 							bindmob->SendHPUpdate();
 						}
 						else {
-							Message(Chat::Yellow, "You cannot bind wounds above %d%% hitpoints", max_percent);
+							Message(Chat::Yellow, "You cannot bind wounds above %d%% hitpoints.", max_percent);
 							if (bindmob != this && bindmob->IsClient())
-								bindmob->CastToClient()->Message(Chat::Yellow, "You cannot have your wounds bound above %d%% hitpoints", max_percent);
+								bindmob->CastToClient()->Message(Chat::Yellow, "You cannot have your wounds bound above %d%% hitpoints.", max_percent);
 						}
 					}
 				}
