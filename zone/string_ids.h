@@ -204,6 +204,7 @@
 #define FINISHING_BLOW				1009	//%1 scores a Finishing Blow!!
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
 #define CRIPPLING_BLOW				1021	//%1 lands a Crippling Blow!(%2)
+#define STAGGERS					1022	//%1 staggers.
 #define CRITICAL_HIT				1023	//%1 scores a critical hit! (%2)
 #define DEADLY_STRIKE				1024	//%1 scores a Deadly Strike!(%2)
 #define RESISTS_URGE				1025	//%1 resists their urge to flee.
