@@ -3555,6 +3555,17 @@ void Client::BuyTraderItemOutsideBazaar(TraderBuy_Struct *tbs, const EQApplicati
 	ps.item_slot = parcel_out.slot_id;
 	strn0cpy(ps.send_to, GetCleanName(), sizeof(ps.send_to));
 
+	if (trader_item.item_charges == tbs->quantity) {
+		TraderRepository::DeleteOne(database, trader_item.id);
+	} else {
+		TraderRepository::UpdateQuantity(
+			database,
+			trader_item.char_id,
+			trader_item.item_sn,
+			trader_item.item_charges - tbs->quantity
+		);
+	}
+
 	SendParcelDeliveryToWorld(ps);
 
 	if (RuleB(Bazaar, AuditTrail)) {

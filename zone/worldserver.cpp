@@ -3974,12 +3974,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				data->price = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
 			}
 
-			TraderRepository::UpdateQuantity(
-				database,
-				trader_pc->CharacterID(),
-				item_sn,
-				in->item_quantity_available - in->trader_buy_struct.quantity
-			);
 			TraderRepository::UpdateActiveTransaction(database, in->id, false);
 
 			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
