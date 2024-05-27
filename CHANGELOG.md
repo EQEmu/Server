@@ -1,3 +1,18 @@
+## [22.51.1] 5/27/2024
+
+### Fixes
+
+* Adjust return for perl release check  @Akkadius 2024-05-26
+* Corrected issue with bazaar purchase via parcels where an incorrect quantity would be calculated. ([#4352](https://github.com/EQEmu/Server/pull/4352)) @neckkola 2024-05-27
+
+### Performance
+
+* Improve SkillCaps::GetTrainLevel() Efficiency ([#4350](https://github.com/EQEmu/Server/pull/4350)) @Kinglykrab 2024-05-26
+
+### Rules
+
+* Legacy Compute Defense against modern agi based defense. ([#4349](https://github.com/EQEmu/Server/pull/4349)) @fryguy503 2024-05-27
+
 ## [22.51.0] 5/26/2024
 
 ### Commands
@@ -1368,7 +1383,7 @@
 
 ### EQTime
 
-Hotfix for world not spamming save messages by setting to detail level logging @Akkadius 2023-11-20 
+Hotfix for world not spamming save messages by setting to detail level logging @Akkadius 2023-11-20
 
 ## [22.34.0] - 11/19/2023
 
@@ -2450,7 +2465,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Telnet encoding fix ([#3269](https://github.com/EQEmu/Server/pull/3269)) @Akkadius 2023-04-05
 
-## [22.9.1] - 04/03/2023 
+## [22.9.1] - 04/03/2023
 
 ### Code
 
@@ -2495,7 +2510,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Change to use Pass by reference where valid. ([#3163](https://github.com/EQEmu/Server/pull/3163)) @Aeadoin 2023-04-02
 
-## [22.9.0] - 04/01/2023 
+## [22.9.0] - 04/01/2023
 
 ### Bots
 
@@ -2519,7 +2534,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Add missing Luabind definitions to lua_general.cpp ([#3167](https://github.com/EQEmu/Server/pull/3167)) @Kinglykrab 2023-04-01
 
-## [22.8.2] - 03/30/2023 
+## [22.8.2] - 03/30/2023
 
 ### Code
 
@@ -2543,13 +2558,13 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Remove Guild Bank Zone ID Rule ([#3156](https://github.com/EQEmu/Server/pull/3156)) @Kinglykrab 2023-03-29
 
-## [22.8.1] - 03/27/2023 
+## [22.8.1] - 03/27/2023
 
 ### Fixes
 
 * Fix for NPCs having spells interrupted. ([#3150](https://github.com/EQEmu/Server/pull/3150)) @Aeadoin 2023-03-27
 
-## [22.8.0] - 03/25/2023 
+## [22.8.0] - 03/25/2023
 
 ### Code
 
@@ -2569,7 +2584,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 * Fix for Items looted from corpses. ([#3147](https://github.com/EQEmu/Server/pull/3147)) @Aeadoin 2023-03-26
 * Fix for SQL Query in npc_scale_global_base ([#3144](https://github.com/EQEmu/Server/pull/3144)) @Aeadoin 2023-03-26
 
-## [22.7.0] - 03/24/2023 
+## [22.7.0] - 03/24/2023
 
 ### Bots
 
@@ -2726,7 +2741,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 * Add exception handling to converters themselves ([#3029](https://github.com/EQEmu/Server/pull/3029)) @Akkadius 2023-03-05
 * Add more number formatters ([#2873](https://github.com/EQEmu/Server/pull/2873)) @Kinglykrab 2023-03-04
 
-## [22.4.5] - 03/03/2023 
+## [22.4.5] - 03/03/2023
 
 ### Bots
 
@@ -2768,7 +2783,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 * Add IsFindable() and IsTrackable() to Perl/Lua ([#2996](https://github.com/EQEmu/Server/pull/2996)) @Kinglykrab 2023-03-01
 * Add IsUnderwaterOnly() to Perl/Lua ([#2995](https://github.com/EQEmu/Server/pull/2995)) @Kinglykrab 2023-03-01
 
-## [22.4.4] - 02/24/2023 
+## [22.4.4] - 02/24/2023
 
 ### Bots
 
@@ -2815,7 +2830,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Fix for Lore Conflict ([#2977](https://github.com/EQEmu/Server/pull/2977)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-24
 
-## [22.4.3] - 02/21/2023 
+## [22.4.3] - 02/21/2023
 
 ### Bots
 
@@ -2862,7 +2877,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Add date to optional Drakkin Guktan Faction Update ([#2965](https://github.com/EQEmu/Server/pull/2965)) ([joligario](https://github.com/joligario)) 2023-02-19
 
-## [22.4.2] - 02/18/2023 
+## [22.4.2] - 02/18/2023
 
 ### Content
 
@@ -2884,7 +2899,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 
 * Fix regression caused by #2932 ([#2956](https://github.com/EQEmu/Server/pull/2956)) ([Aeadoin](https://github.com/Aeadoin)) 2023-02-18
 
-## [22.4.1] - 02/17/2023 
+## [22.4.1] - 02/17/2023
 
 ### Bots
 
@@ -2905,7 +2920,7 @@ Revert Perl regression in #3648 causing scripts to not reliably initialize on zo
 * Fix rare out of bound issue when loading event types ([#2946](https://github.com/EQEmu/Server/pull/2946)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
 * Turn off KILLED_NPC (trash) off by default ([#2948](https://github.com/EQEmu/Server/pull/2948)) ([Akkadius](https://github.com/Akkadius)) 2023-02-17
 
-## [22.4.0] - 02/17/2023 
+## [22.4.0] - 02/17/2023
 
 ### Bots
 
