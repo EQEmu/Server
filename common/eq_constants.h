@@ -1129,4 +1129,7 @@ enum ExpSource
 #define PARCEL_LIMIT         5
 #define PARCEL_BEGIN_SLOT    1
 
+namespace DoorType {
+	constexpr uint32 BuyerStall = 155;
+}
 #endif /*COMMON_EQ_CONSTANTS_H*/

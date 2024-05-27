@@ -291,6 +291,8 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	LogInfo("Loading items");
 	LogInfo("Clearing trader table details");
 	database.ClearTraderDetails();
+	database.ClearBuyerDetails();
+	LogInfo("Clearing buyer table details");
 
 	if (!content_db.LoadItems(hotfix_name)) {
 		LogError("Error: Could not load item data. But ignoring");

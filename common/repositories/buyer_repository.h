@@ -45,6 +45,51 @@ public:
 
 	// Custom extended repository methods here
 
+	static bool UpdateWelcomeMessage(Database& db, uint32 char_id, const char *message) {
+
+		auto const b = GetWhere(db, fmt::format("`char_id` = '{}';", char_id));
+
+		if (b.empty()) {
+			return false;
+		}
+
+		auto buyer = b.front();
+		buyer.welcome_message = message;
+		return UpdateOne(db, buyer);
+	}
+
+	static std::string GetWelcomeMessage(Database& db, uint32 char_id) {
+
+		auto const b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return std::string();
+		}
+
+		return b.front().welcome_message;
+	}
+
+	static int UpdateTransactionDate(Database& db, uint32 char_id, time_t transaction_date) {
+		auto b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return 0;
+		}
+
+		auto e = b.front();
+		e.transaction_date = transaction_date;
+
+		return UpdateOne(db, e);
+	}
+
+	static time_t GetTransactionDate(Database& db, uint32 char_id) {
+		auto b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return 0;
+		}
+
+		auto e = b.front();
+
+		return e.transaction_date;
+	}
 };
 
 #endif //EQEMU_BUYER_REPOSITORY_H

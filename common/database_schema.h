@@ -36,7 +36,6 @@ namespace DatabaseSchema {
 	{
 		return {
 			{"adventure_stats",                "player_id"},
-			{"buyer",                          "charid"},
 			{"char_recipe_list",               "char_id"},
 			{"character_activities",           "charid"},
 			{"character_alt_currency",         "char_id"},
@@ -107,6 +106,8 @@ namespace DatabaseSchema {
 			"adventure_details",
 			"adventure_stats",
 			"buyer",
+			"buyer_buy_lines",
+			"buyer_trade_items",
 			"char_recipe_list",
 			"character_activities",
 			"character_alt_currency",
@@ -325,6 +326,9 @@ namespace DatabaseSchema {
 			"banned_ips",
 			"bug_reports",
 			"bugs",
+			"buyer",
+			"buyer_buy_lines",
+			"buyer_trade_items",
 			"completed_shared_task_activity_state",
 			"completed_shared_task_members",
 			"completed_shared_tasks",
