@@ -127,21 +127,11 @@ void command_send_parcel(Client *c, const Seperator *sep)
 
 	const std::string& item_link = linker.GenerateLink();
 
-	if (!e.id) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Failed to send {} to {}.",
-				item_link,
-				name
-			).c_str()
-		);
-	}
-
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"Successfully sent {} to {}.",
+			"{} {} to {}.",
+			!e.id ? "Failed to send" : "Successfully sent",
 			item_link,
 			name
 		).c_str()
