@@ -22,13 +22,8 @@
 #include "../../common/eqemu_config.h"
 #include "../../common/platform.h"
 #include "../../common/crash.h"
-#include "../../common/rulesys.h"
-#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
 #include "../../common/zone_store.h"
-#include "../../common/path_manager.h"
-#include "../../common/repositories/base_data_repository.h"
-#include "../../common/file.h"
 #include "../../common/events/player_event_logs.h"
 
 EQEmuLogSys         LogSys;
@@ -36,11 +31,6 @@ WorldContentService content_service;
 ZoneStore           zone_store;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
-
-void ImportSpells(SharedDatabase *db);
-void ImportSkillCaps(SharedDatabase *db);
-void ImportBaseData(SharedDatabase *db);
-void ImportDBStrings(SharedDatabase *db);
 
 int main(int argc, char **argv) {
 	RegisterExecutablePlatform(ExePlatformClientImport);
@@ -95,261 +85,98 @@ int main(int argc, char **argv) {
 		->LoadLogDatabaseSettings()
 		->StartFileLogs();
 
-	ImportSpells(&content_db);
-	ImportSkillCaps(&content_db);
-	ImportBaseData(&content_db);
-	ImportDBStrings(&database);
+	std::vector<std::string> file_names = {
+		"BaseData.txt",
+		"dbstr_us.txt",
+		"SkillCaps.txt",
+		"spells_us.txt"
+	};
+
+	std::ifstream file;
+
+	for (const auto& file_name : file_names) {
+		const std::string& full_file_name = fmt::format(
+			"{}/import/{}",
+			path.GetServerPath(),
+			file_name
+		);
+
+		file.open(full_file_name);
+		std::string line;
+		if (!file || !file.is_open()) {
+			LogError("Unable to open {} to read, skipping.", full_file_name);
+			continue;
+		}
+
+		std::string table_name;
+		std::string type;
+
+		if (Strings::EqualFold(file_name, "BaseData.txt")) {
+			table_name = "base_data";
+			type       = "base data value";
+		} else if (Strings::EqualFold(file_name, "dbstr_us.txt")) {
+			table_name = "db_str";
+			type       = "database string";
+		} else if (Strings::EqualFold(file_name, "SkillCaps.txt")) {
+			table_name = "skill_caps";
+			type       = "skill cap";
+		} else if (Strings::EqualFold(file_name, "spells_us.txt")) {
+			table_name = "spells_new";
+			type       = "spell";
+		}
+
+		// skill_caps has an AUTO_INCREMENT primary key that is not part of its exported file, unlike other tables
+		// due to this we need to attach an id of '0' to utilize auto increment
+		const std::string& query_prefix = Strings::EqualFold(table_name, "skill_caps") ? "0," : "";
+
+		std::vector<std::string> insert_chunks;
+		while (file) {
+			std::getline(file, line);
+
+			const std::string& insert_chunk = fmt::format(
+				"({}{})",
+				query_prefix,
+				Strings::Replace(Strings::Escape(line), "^", ", ")
+			);
+
+			insert_chunks.emplace_back(insert_chunk);
+		}
+
+		if (insert_chunks.empty()) {
+			LogInfo("There are no {}s to insert, skipping.", type);
+			continue;
+		}
+
+		SharedDatabase& db = (!Strings::EqualFold(table_name, "db_str") ? content_db : database);
+
+		// Empty table before attempting to insert rows
+		db.QueryDatabase(
+			fmt::format(
+				"TRUNCATE `{}`",
+				table_name
+			)
+		);
+
+		const std::string& query = fmt::format(
+			"INSERT INTO `{}` VALUES {}",
+			table_name,
+			Strings::Implode(", ", insert_chunks)
+		);
+
+		// db_str using content_db
+		// base_data, skill_caps, and spells_new use database
+		db.QueryDatabase(query);
+
+		LogInfo(
+			"[{}] {}{} inserted from {}",
+			insert_chunks.size(),
+			type,
+			insert_chunks.size() != 1 ? "s" : "",
+			file_name
+		);
+	}
 
 	LogSys.CloseFileLogs();
 
 	return 0;
-}
-
-int GetSpellColumns(SharedDatabase *db) {
-
-	const std::string query = "DESCRIBE spells_new";
-	auto results = db->QueryDatabase(query);
-	if(!results.Success()) {
-        return 0;
-    }
-
-	return results.RowCount();
-}
-
-bool IsStringField(int i) {
-	switch(i)
-	{
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-		return true;
-		break;
-	default:
-		return false;
-	}
-}
-
-void ImportSpells(SharedDatabase *db) {
-	LogInfo("Importing Spells");
-	std::string file = fmt::format("{}/import/spells_us.txt", path.GetServerPath());
-	FILE *f = fopen(file.c_str(), "r");
-	if(!f) {
-		LogError("Unable to open {} to read, skipping.", file);
-		return;
-	}
-
-	std::string query = "DELETE FROM spells_new";
-	db->QueryDatabase(query);
-
-	int columns = GetSpellColumns(db);
-	int spells_imported = 0;
-
-	char buffer[2048];
-	while(fgets(buffer, 2048, f)) {
-		for(int i = 0; i < 2048; ++i) {
-			if(buffer[i] == '\n') {
-				buffer[i] = 0;
-				break;
-			}
-		}
-
-		std::string escaped = ::Strings::Escape(buffer);
-		auto split = Strings::Split(escaped, '^');
-		int line_columns = (int)split.size();
-
-		std::string sql;
-		if(line_columns >= columns) {
-			sql = "INSERT INTO spells_new VALUES(";
-			for(int i = 0; i < columns; ++i) {
-				if(i != 0) {
-					sql += ", '";
-				} else {
-					sql += "'";
-				}
-
-				if(split[i].compare("") == 0 && !IsStringField(i)) {
-					sql += "0";
-				}
-				else {
-					sql += split[i];
-				}
-				sql += "'";
-			}
-
-			sql += ");";
-		} else {
-			int i = 0;
-			sql = "INSERT INTO spells_new VALUES(";
-			for(; i < line_columns; ++i) {
-				if(i != 0) {
-					sql += ", '";
-				} else {
-					sql += "'";
-				}
-
-				if(split[i].compare("") == 0 && !IsStringField(i)) {
-					sql += "0";
-				} else {
-					sql += split[i];
-				}
-
-				sql += "'";
-			}
-
-			for(; i < columns; ++i) {
-				sql += ", '0'";
-			}
-
-			sql += ");";
-		}
-
-		db->QueryDatabase(sql);
-
-		spells_imported++;
-		if(spells_imported % 1000 == 0) {
-			LogInfo("[{}] spells imported", spells_imported);
-		}
-	}
-
-	if(spells_imported % 1000 != 0) {
-		LogInfo("[{}] spells imported", spells_imported);
-	}
-
-	fclose(f);
-}
-
-void ImportSkillCaps(SharedDatabase *db) {
-	LogInfo("Importing Skill Caps");
-
-	std::string file = fmt::format("{}/import/SkillCaps.txt", path.GetServerPath());
-	FILE *f = fopen(file.c_str(), "r");
-	if(!f) {
-		LogError("Unable to open {} to read, skipping.", file);
-		return;
-	}
-
-	std::string delete_sql = "DELETE FROM skill_caps";
-	db->QueryDatabase(delete_sql);
-
-	char buffer[2048];
-	while(fgets(buffer, 2048, f)) {
-		auto split = Strings::Split(buffer, '^');
-
-		if(split.size() < 4) {
-			continue;
-		}
-
-		int class_id, skill_id, level, cap;
-		class_id = Strings::ToInt(split[0].c_str());
-		skill_id = Strings::ToInt(split[1].c_str());
-		level = Strings::ToInt(split[2].c_str());
-		cap = Strings::ToInt(split[3].c_str());
-
-		std::string sql = StringFormat("INSERT INTO skill_caps(class, skillID, level, cap) VALUES(%d, %d, %d, %d)",
-			class_id, skill_id, level, cap);
-
-		db->QueryDatabase(sql);
-	}
-
-	fclose(f);
-}
-
-void ImportBaseData(SharedDatabase *db)
-{
-	LogInfo("Importing Base Data");
-
-	const std::string& file_name = fmt::format("{}/import/BaseData.txt", path.GetServerPath());
-
-	const auto& file_contents = File::GetContents(file_name);
-	if (!file_contents.error.empty()) {
-		LogError("{}", file_contents.error);
-	}
-
-	db->QueryDatabase("DELETE FROM base_data");
-
-	std::vector<BaseDataRepository::BaseData> v;
-
-	auto e = BaseDataRepository::NewEntity();
-
-	for (const auto& line: Strings::Split(file_contents.contents, "\n")) {
-		const auto& line_data = Strings::Split(line, '^');
-
-		if (line_data.size() < 10) {
-			continue;
-		}
-
-		e.level     = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[0]));
-		e.class_    = static_cast<uint8_t>(Strings::ToUnsignedInt(line_data[1]));
-		e.hp        = Strings::ToFloat(line_data[2]);
-		e.mana      = Strings::ToFloat(line_data[3]);
-		e.end       = Strings::ToFloat(line_data[4]);
-		e.hp_regen  = Strings::ToFloat(line_data[5]);
-		e.end_regen = Strings::ToFloat(line_data[6]);
-		e.hp_fac    = Strings::ToFloat(line_data[7]);
-		e.mana_fac  = Strings::ToFloat(line_data[8]);
-		e.end_fac   = Strings::ToFloat(line_data[9]);
-
-		v.emplace_back(e);
-	}
-
-	BaseDataRepository::InsertMany(*db, v);
-}
-
-void ImportDBStrings(SharedDatabase *db) {
-	LogInfo("Importing DB Strings");
-
-	std::string file = fmt::format("{}/import/dbstr_us.txt", path.GetServerPath());
-	FILE *f = fopen(file.c_str(), "r");
-	if(!f) {
-		LogError("Unable to open {} to read, skipping.", file);
-		return;
-	}
-
-	std::string delete_sql = "DELETE FROM db_str";
-	db->QueryDatabase(delete_sql);
-
-	char buffer[2048];
-	bool first = true;
-	while(fgets(buffer, 2048, f)) {
-		if(first) {
-			first = false;
-			continue;
-		}
-
-		for(int i = 0; i < 2048; ++i) {
-			if(buffer[i] == '\n') {
-				buffer[i] = 0;
-				break;
-			}
-		}
-
-		auto split = Strings::Split(buffer, '^');
-
-		if(split.size() < 2) {
-			continue;
-		}
-
-		std::string sql;
-		int id, type;
-		std::string value;
-
-		id = Strings::ToInt(split[0].c_str());
-		type = Strings::ToInt(split[1].c_str());
-
-		if(split.size() >= 3) {
-			value = ::Strings::Escape(split[2]);
-		}
-
-		sql = StringFormat("INSERT INTO db_str(id, type, value) VALUES(%u, %u, '%s')",
-						   id, type, value.c_str());
-
-		db->QueryDatabase(sql);
-	}
-
-	fclose(f);
 }
