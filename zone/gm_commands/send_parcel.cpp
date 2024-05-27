@@ -82,23 +82,6 @@ void command_send_parcel(Client *c, const Seperator *sep)
 		augment_six   = link_body.augment_6;
 	}
 
-	auto e = CharacterParcelsRepository::NewEntity();
-
-	e.char_id    = character_id;
-	e.item_id    = item_id;
-	e.aug_slot_1 = augment_one;
-	e.aug_slot_2 = augment_two;
-	e.aug_slot_3 = augment_three;
-	e.aug_slot_4 = augment_four;
-	e.aug_slot_5 = augment_five;
-	e.aug_slot_6 = augment_six;
-	e.slot_id    = next_parcel_slot;
-	e.quantity   = quantity;
-	e.from_name  = c->GetCleanName();
-	e.sent_date  = std::time(nullptr);
-
-	e = CharacterParcelsRepository::InsertOne(database, e);
-
 	const auto* item = database.CreateItem(
 		item_id,
 		quantity,
@@ -120,6 +103,23 @@ void command_send_parcel(Client *c, const Seperator *sep)
 		);
 		return;
 	}
+
+	auto e = CharacterParcelsRepository::NewEntity();
+
+	e.char_id    = character_id;
+	e.item_id    = item_id;
+	e.aug_slot_1 = augment_one;
+	e.aug_slot_2 = augment_two;
+	e.aug_slot_3 = augment_three;
+	e.aug_slot_4 = augment_four;
+	e.aug_slot_5 = augment_five;
+	e.aug_slot_6 = augment_six;
+	e.slot_id    = next_parcel_slot;
+	e.quantity   = quantity;
+	e.from_name  = c->GetCleanName();
+	e.sent_date  = std::time(nullptr);
+
+	e = CharacterParcelsRepository::InsertOne(database, e);
 
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
