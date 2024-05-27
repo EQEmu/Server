@@ -1347,7 +1347,7 @@ int64 Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int ac
 		hit_bonus += spellbonuses.increase_archery + aabonuses.increase_archery + itembonuses.increase_archery;
 		hit_bonus -= hit_bonus * RuleR(Combat, ArcheryHitPenalty);
 	}
-	
+
 	accuracy = (accuracy * (100 + hit_bonus)) / 100;
 	return accuracy;
 }
@@ -1381,31 +1381,43 @@ int64 Mob::TuneGetTotalDefense(int avoidance_override, int add_avoidance)
 int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
-	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsOfClientBot()) {
-		if (avoidance_override) {
-			defense = avoidance_override;
+
+	// In new code, AGI becomes a large contributor to avoidance at low levels, since AGI isn't capped by Level but Defense is
+	// A scale factor is implemented for PCs to reduce the effect of AGI at low levels.  This isn't applied to NPCs since they can be
+	// easily controlled via the Database.
+	if (RuleB(Combat, LegacyComputeDefense)) {
+		int agi_scale_factor = 1000;
+
+		if (IsOfClientBot()) {
+			agi_scale_factor = std::min(1000, static_cast<int>(GetLevel()) * 1000 / 70); // Scales Agi Contribution for PC's Level, max Contribution at Level 70
 		}
-		else {
+
+		defense += agi_scale_factor * (800 * (GetAGI() - 40)) / 3600 / 1000;
+
+		if (IsOfClientBot()) {
+			defense += GetHeroicAGI() / 10;
+		}
+
+		defense += itembonuses.AvoidMeleeChance * RuleI(Combat, PCAccuracyAvoidanceMod2Scale) / 100; // item mod2
+	} else {
+		defense += (8000 * (GetAGI() - 40)) / 36000;
+
+		if (IsOfClientBot()) {
 			defense += itembonuses.heroic_agi_avoidance;
 		}
-		defense += add_avoidance; //1 pt = 10 heroic agi
+
+		defense += itembonuses.AvoidMeleeChance; // item mod2
 	}
+
 
 	//516 SE_AC_Mitigation_Max_Percent
 	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;
-	if (ac_bonus)
+	if (ac_bonus) {
 		defense += round(static_cast<double>(defense) * static_cast<double>(ac_bonus) * 0.0001);
+	}
 
-	defense += itembonuses.AvoidMeleeChance; // item mod2
 	if (IsNPC()) {
-		if (avoidance_override) {
-			defense += avoidance_override;
-		}
-		else {
-			defense += CastToNPC()->GetAvoidanceRating();
-		}
-		defense += add_avoidance;
+		defense += CastToNPC()->GetAvoidanceRating();
 	}
 
 	if (IsClient()) {
