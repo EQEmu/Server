@@ -5398,12 +5398,15 @@ bool Mob::RollMeleeCritCheck(Mob *defender, EQ::skills::SkillType skill)
 		crit_chance = crit_chance + GetUndeadSlayRate();
 	}
 
-	if ((GetClass() == Class::Warrior || GetClass() == Class::Berserker) && GetLevel() >= 12) {
-		innate_crit = true;
-	} else if (GetClass() == Class::Ranger && GetLevel() >= 12 && skill == EQ::skills::SkillArchery) {
-		innate_crit = true;
-	} else if (GetClass() == Class::Rogue && GetLevel() >= 12 && skill == EQ::skills::SkillThrowing) {
-		innate_crit = true;
+	if (GetLevel() >= 12) {
+		if (
+			GetClass() == Class::Warrior ||
+			(GetClass() == Class::Ranger && skill == EQ::skills::SkillArchery) ||
+			(GetClass() == Class::Rogue && skill == EQ::skills::SkillThrowing) ||
+			GetClass() == Class::Berserker
+		) {
+			innate_crit = true;
+		}
 	}
 
 	// we have a chance to crit!
@@ -5433,7 +5436,7 @@ bool Mob::RollMeleeCritCheck(Mob *defender, EQ::skills::SkillType skill)
 			dex_bonus = dex_bonus * 3 / 5;
 		}
 
-		LogCombat("dex_bonus ({}) * crit_chance ({}) / 100", dex_bonus, crit_chance);
+		LogCombat("Crit Chance: dex_bonus ({}) * crit_chance ({}) / 100", dex_bonus, crit_chance);
 
 		if (crit_chance) {
 			dex_bonus += dex_bonus * crit_chance / 100;
@@ -5455,27 +5458,18 @@ int Mob::GetUndeadSlayRate()
 void Mob::DoUndeadSlay(DamageHitInfo &hit, int crit_mod)
 {
 
-	int SlayDmgBonus = std::max(
+	int slay_damage_bonus = std::max(
 			{ aabonuses.SlayUndead[1], itembonuses.SlayUndead[1], spellbonuses.SlayUndead[1] });
 
-	LogCombatDetail("Slayundead bonus [{}]", SlayDmgBonus);
+	LogCombatDetail("Slayundead bonus [{}]", slay_damage_bonus);
 
 	hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
-	hit.damage_done = (hit.damage_done * SlayDmgBonus * crit_mod) / 100;
+	hit.damage_done = (hit.damage_done * slay_damage_bonus * crit_mod) / 100;
 	hit.damage_done = static_cast<int>(hit.damage_done * RuleR(Combat, SlayDamageAdjustment));
 
 	LogCombatDetail("Slayundead damage [{}]", hit.damage_done);
 
-	int slay_sex;
-	switch(GetGender()) {
-		case Gender::Female:
-			slay_sex = FEMALE_SLAYUNDEAD;
-			break;
-		case Gender::Male:
-		default:
-			slay_sex = MALE_SLAYUNDEAD;
-			break;
-	}
+	int slay_sex = GetGender() == Gender::Female ? FEMALE_SLAYUNDEAD : MALE_SLAYUNDEAD;
 
 	entity_list.FilteredMessageString(
 			this, /* Sender */
@@ -5488,6 +5482,7 @@ void Mob::DoUndeadSlay(DamageHitInfo &hit, int crit_mod)
 	);
 }
 
+// a lot of good info: http://giline.versus.jp/shiden/damage_e.htm, http://giline.versus.jp/shiden/su.htm
 void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 #ifdef LUA_EQEMU
@@ -5520,81 +5515,68 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 
 	// Step 1: Check if we are critting
 	if (!RollMeleeCritCheck(defender, hit.skill)) {
-		return; 
+		return;
 	}
 
-	LogCombat("Crit Passed");
-
-	int crit_mod = 170 + GetCritDmgMod(hit.skill);
-
-	if (crit_mod < 100) {
-		crit_mod = 100;
-	}
+	int crit_mod = EQ::ClampLower((170 + GetCritDmgMod(hit.skill)), 100);
 
 	// Step 2: Calculate damage
 	hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
 	int og_damage = hit.damage_done;
 	hit.damage_done = hit.damage_done * crit_mod / 100;
 
-	LogCombatDetail("Crit info: [{}] scaled from: [{}]", hit.damage_done, og_damage);
-	// a lot of good info: http://giline.versus.jp/shiden/damage_e.htm, http://giline.versus.jp/shiden/su.htm
+	LogCombatDetail("Crit info: [{}] scaled from: [{}] - IsUndeadForSlay: [{}]", hit.damage_done, og_damage, IsUndeadForSlay() ? "true" : "false");
 
-	LogCombatDetail("is undead for slay [{}]", IsUndeadForSlay()?"true":"false");
 	// Try Slay Undead
 	if (defender->IsUndeadForSlay()) {
-		LogCombatDetail("Trying Undead slay");
 		float chance = GetUndeadSlayRate() / 100.0f;
+		LogCombatDetail("Trying Undead slay: Chance: [{}]", chance);
 
 		if(zone->random.Roll(chance)) {
-			Log(Logs::Detail, Logs::Combat, "Slayundead success");
 			DoUndeadSlay(hit, crit_mod);
 			return;
 		}
 	}
 
 	// Step 3: Check deadly strike
-	if (GetClass() == Class::Rogue && hit.skill == EQ::skills::SkillThrowing) {
-		if (BehindMob(defender, GetX(), GetY())) {
-			int chance = GetLevel() * 12;
-			if (zone->random.Int(1, 1000) < chance) {
-				// Check assassinate
-				int assassinate_damage = TryAssassinate(defender, hit.skill);
+	if (GetClass() == Class::Rogue && hit.skill == EQ::skills::SkillThrowing && BehindMob(defender, GetX(), GetY())) {
+		int chance = GetLevel() * 12;
+		if (zone->random.Int(1, 1000) < chance) {
+			// Check assassinate
+			int assassinate_damage = TryAssassinate(defender, hit.skill);
 
-				if (assassinate_damage) {
-					hit.damage_done = assassinate_damage;
-					return;
-				}
-
-				hit.damage_done = hit.damage_done * 200 / 100;
-
-				entity_list.FilteredMessageCloseString(
-						this, /* Sender */
-						false, /* Skip Sender */
-						RuleI(Range, CriticalDamage),
-						Chat::MeleeCrit, /* Type: 301 */
-						FilterMeleeCrits, /* FilterType: 12 */
-						DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
-						0,
-						GetCleanName(), /* Message1 */
-						itoa(hit.damage_done) /* Message2 */
-				);
+			if (assassinate_damage) {
+				hit.damage_done = assassinate_damage;
 				return;
 			}
+
+			hit.damage_done = hit.damage_done * 200 / 100;
+
+			entity_list.FilteredMessageCloseString(
+					this, /* Sender */
+					false, /* Skip Sender */
+					RuleI(Range, CriticalDamage),
+					Chat::MeleeCrit, /* Type: 301 */
+					FilterMeleeCrits, /* FilterType: 12 */
+					DEADLY_STRIKE, /* MessageFormat: %1 scores a Deadly Strike!(%2) */
+					0,
+					GetCleanName(), /* Message1 */
+					itoa(hit.damage_done) /* Message2 */
+			);
+			return;
 		}
 	}
 
 	// Step 4: check cripple
 	bool berserk = spellbonuses.BerserkSPA || itembonuses.BerserkSPA || aabonuses.BerserkSPA;
 
-	if (!berserk) {
-		if (zone->random.Roll(GetCrippBlowChance())) {
-			berserk = true;
-		}
+	if (!berserk && zone->random.Roll(GetCrippBlowChance())) {
+		berserk = true;
 	}
 
 	if (IsBerserk() || berserk) {
 		hit.damage_done += og_damage * 119 / 100;
-		LogCombatDetail("Crip damage [{}]", hit.damage_done);
+		LogCombatDetail("Crippling damage [{}]", hit.damage_done);
 
 		entity_list.FilteredMessageCloseString(
 				this, /* Sender */
@@ -5611,8 +5593,15 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		// Crippling blows also have a chance to stun
 		// Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a
 		// staggers message.
-		if (defender->GetLevel() <= 55 && !defender->GetSpecialAbility(UNSTUNABLE)) {
-			defender->Emote("staggers.");
+		if (defender->GetLevel() <= RuleI(Combat, MaximumLevelStunsCripplingBlow) && !defender->GetSpecialAbility(UNSTUNABLE)) {
+			entity_list.MessageCloseString(
+				defender,
+				true,
+				RuleI(Range, Emote),
+				Chat::Emote,
+				STAGGERS,
+				GetName()
+			);
 			defender->Stun(RuleI(Combat, StunDuration));
 		}
 		return;
