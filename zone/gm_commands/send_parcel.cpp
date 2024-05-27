@@ -110,6 +110,17 @@ void command_send_parcel(Client *c, const Seperator *sep)
 		augment_six
 	);
 
+	if (!item) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Item ID {} does not exist.",
+				item_id
+			).c_str()
+		);
+		return;
+	}
+
 	EQ::SayLinkEngine linker;
 	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 	linker.SetItemInst(item);
