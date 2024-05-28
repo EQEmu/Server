@@ -132,27 +132,27 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void ExportSpells(SharedDatabase *db)
+void ExportSpells(SharedDatabase* db)
 {
-	LogInfo("Exporting Spells");
-
 	std::ofstream file(fmt::format("{}/export/spells_us.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
 		LogError("Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
-	for (const auto& e : SpellsNewRepository::GetSpellFileLines(*db)) {
-		file << e << std::endl;
-	}
+	const auto& lines = SpellsNewRepository::GetSpellFileLines(*db);
+
+	const std::string& file_string = Strings::Implode("\n", lines);
+
+	file << file_string;
 
 	file.close();
+
+	LogInfo("Exported [{}] Spell{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 
 void ExportSkillCaps(SharedDatabase* db)
 {
-	LogInfo("Exporting Skill Caps");
-
 	std::ofstream file(fmt::format("{}/export/SkillCaps.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
 		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
@@ -165,44 +165,52 @@ void ExportSkillCaps(SharedDatabase* db)
 		RuleI(Character, MaxLevel)
 	);
 
-	for (const auto& e : SkillCapsRepository::GetSkillCapFileLines(*db, skill_cap_max_level)) {
-		file << e << std::endl;
-	}
+	const auto& lines = SkillCapsRepository::GetSkillCapFileLines(*db, skill_cap_max_level);
+
+	const std::string& file_string = Strings::Implode("\n", lines);
+
+	file << file_string;
 
 	file.close();
+
+	LogInfo("Exported [{}] Skill Cap{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 
 void ExportBaseData(SharedDatabase *db)
 {
-	LogInfo("Exporting Base Data");
-
 	std::ofstream file(fmt::format("{}/export/BaseData.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
 		LogError("Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
-	for (const auto& e : BaseDataRepository::GetBaseDataFileLines(*db)) {
-		file << e << std::endl;
-	}
+	const auto& lines = BaseDataRepository::GetBaseDataFileLines(*db);
+
+	const std::string& file_string = Strings::Implode("\n", lines);
+
+	file << file_string;
 
 	file.close();
+
+	LogInfo("Exported [{}] Base Data Entr{}", lines.size(), lines.size() != 1 ? "ies" : "y");
 }
 
 void ExportDBStrings(SharedDatabase *db)
 {
-	LogInfo("Exporting DB Strings");
-
 	std::ofstream file(fmt::format("{}/export/dbstr_us.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
 		LogError("Unable to open export/dbstr_us.txt to write, skipping.");
 		return;
 	}
 
-	for (const auto& e : DbStrRepository::GetDBStrFileLines(*db)) {
-		file << e << std::endl;
-	}
+	const auto& lines = DbStrRepository::GetDBStrFileLines(*db);
+
+	const std::string& file_string = Strings::Implode("\n", lines);
+
+	file << file_string;
 
 	file.close();
+
+	LogInfo("Exported [{}] Database String{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 
