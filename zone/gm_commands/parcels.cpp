@@ -29,7 +29,7 @@ void command_parcels(Client* c, const Seperator* sep)
 
 		const std::string& to_name = sep->arg[2];
 		uint32 item_id  = sep->IsNumber(3) ? Strings::ToUnsignedInt(sep->arg[3]) : 0;
-		int16  quantity = static_cast<int16>(Strings::ToInt(sep->arg[4]));
+		int    quantity = Strings::ToInt(sep->arg[4]);
 
 		std::vector<uint32> augment_ids = { 0, 0, 0, 0, 0, 0 };
 
@@ -101,6 +101,15 @@ void command_parcels(Client* c, const Seperator* sep)
 			return;
 		}
 
+		const std::string& note_string = (
+			!note.empty() ?
+			fmt::format(
+				" with a note of '{}'",
+				note
+			) :
+			""
+		);
+
 		if (item_id == PARCEL_MONEY_ITEM_ID) {
 			if (quantity > std::numeric_limits<int>::max()) {
 				c->Message(
@@ -152,12 +161,14 @@ void command_parcels(Client* c, const Seperator* sep)
 				return;
 			}
 
-			c->MessageString(
+			c->Message(
 				Chat::White,
-				PARCEL_DELIVERY,
-				c->GetCleanName(),
-				"Money",
-				character_name.c_str()
+				fmt::format(
+					"Successfully sent {} Copper to {}{}.",
+					Strings::Commify(quantity),
+					character_name,
+					note_string
+				).c_str()
 			);
 
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
@@ -177,7 +188,16 @@ void command_parcels(Client* c, const Seperator* sep)
 
 			c->SendParcelDeliveryToWorld(ps);
 		} else {
-			auto item = database.GetItem(item_id);
+			auto item = database.CreateItem(
+				item_id,
+				quantity,
+				augment_ids[0],
+				augment_ids[1],
+				augment_ids[2],
+				augment_ids[3],
+				augment_ids[4],
+				augment_ids[5]
+			);
 			if (!item) {
 				c->Message(Chat::White, "Item ID {} does not exist.", item_id);
 				return;
@@ -185,31 +205,14 @@ void command_parcels(Client* c, const Seperator* sep)
 
 			quantity = EQ::Clamp(
 				quantity,
-				std::numeric_limits<int16>::min(),
-				std::numeric_limits<int16>::max()
+				0,
+				std::numeric_limits<int>::max()
 			);
 
-			std::unique_ptr<EQ::ItemInstance> inst(
-				database.CreateItem(
-					item,
-					quantity,
-					augment_ids[0],
-					augment_ids[1],
-					augment_ids[2],
-					augment_ids[3],
-					augment_ids[4],
-					augment_ids[5]
-				)
-			);
-			if (!inst) {
-				c->Message(Chat::White, "Item ID {} does not exist.", item_id);
-				return;
-			}
-
-			if (inst->IsStackable()) {
-				quantity = EQ::ClampUpper(quantity, inst->GetItem()->StackSize);
-			} else if (inst->GetItem()->MaxCharges > 0) {
-				quantity = EQ::ClampUpper(quantity, inst->GetItem()->MaxCharges);
+			if (item->IsStackable()) {
+				quantity = EQ::ClampUpper(quantity, static_cast<int>(item->GetItem()->StackSize));
+			} else if (item->GetItem()->MaxCharges > 0) {
+				quantity = EQ::ClampUpper(quantity, static_cast<int>(item->GetItem()->MaxCharges));
 			}
 
 			CharacterParcelsRepository::CharacterParcels p;
@@ -228,36 +231,14 @@ void command_parcels(Client* c, const Seperator* sep)
 			p.slot_id    = free_slot;
 			p.id         = 0;
 
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+			linker.SetItemInst(item);
+
+			const std::string& item_link = linker.GenerateLink();
+
 			auto result = CharacterParcelsRepository::InsertOne(database, p);
 			if (!result.id) {
-				const auto* item = database.CreateItem(
-					p.item_id,
-					p.quantity,
-					p.aug_slot_1,
-					p.aug_slot_2,
-					p.aug_slot_3,
-					p.aug_slot_4,
-					p.aug_slot_5,
-					p.aug_slot_6
-				);
-				if (!item) {
-					c->Message(
-						Chat::White,
-						fmt::format(
-							"Item ID {} in slot {} does not exist.",
-							p.item_id,
-							p.slot_id
-						).c_str()
-					);
-					return;
-				}
-
-				EQ::SayLinkEngine linker;
-				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-				linker.SetItemInst(item);
-
-				const std::string& item_link = linker.GenerateLink();
-
 				LogError(
 					"Failed to add parcel to database. From {} to {} item {} with a quantity of {}.",
 					p.from_name,
@@ -272,12 +253,14 @@ void command_parcels(Client* c, const Seperator* sep)
 				return;
 			}
 
-			c->MessageString(
+			c->Message(
 				Chat::White,
-				PARCEL_DELIVERY,
-				c->GetCleanName(),
-				inst->GetItem()->Name,
-				character_name.c_str()
+				fmt::format(
+					"Successfully sent {} to {}{}.",
+					item_link,
+					character_name,
+					note_string
+				).c_str()
 			);
 
 			if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_SEND)) {
@@ -397,7 +380,7 @@ void command_parcels(Client* c, const Seperator* sep)
 		}
 
 		const std::string& character_name = sep->arg[2];
-		Client           * character      = entity_list.GetClientByName(character_name.c_str());
+		Client* character = entity_list.GetClientByName(character_name.c_str());
 
 		if (!character) {
 			c->Message(
@@ -432,7 +415,7 @@ void command_parcels(Client* c, const Seperator* sep)
 			).c_str()
 		);
 
-		for (auto const& p: parcels) {
+		for (auto const& p : parcels) {
 			const auto* item = database.CreateItem(
 				p.second.item_id,
 				p.second.quantity,
