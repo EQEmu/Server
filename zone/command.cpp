@@ -207,7 +207,6 @@ int command_init(void)
 		command_add("scale", "Handles NPC scaling", AccountStatus::GMLeadAdmin, command_scale) ||
 		command_add("scribespell", "[Spell ID] - Scribe a spell by ID to your or your target's spell book.", AccountStatus::GMCoder, command_scribespell) ||
 		command_add("scribespells", "[Max level] [Min level] - Scribe all spells for you or your player target that are usable by them, up to level specified. (may freeze client for a few seconds)", AccountStatus::GMLeadAdmin, command_scribespells) ||
-		command_add("send_parcel", "[Character ID|Character Name] [Item ID|Item Link] [Quantity] [Augment One] [Augment Two] [Augment Three] [Augment Four] [Augment Five] [Augment Six] - Sends a Parcel to the specified character using the item ID and data provided or the item link, augments and quantity are optional", AccountStatus::GMLeadAdmin, command_send_parcel) ||
 		command_add("sendzonespawns", "Refresh spawn list for all clients in zone", AccountStatus::GMLeadAdmin, command_sendzonespawns) ||
 		command_add("sensetrap", "Analog for ldon sense trap for the newer clients since we still don't have it working.", AccountStatus::Player, command_sensetrap) ||
 		command_add("serverrules", "Show server rules", AccountStatus::Player, command_serverrules) ||
@@ -900,7 +899,6 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/scribespell.cpp"
 #include "gm_commands/scribespells.cpp"
 #include "gm_commands/sendzonespawns.cpp"
-#include "gm_commands/send_parcel.cpp"
 #include "gm_commands/sensetrap.cpp"
 #include "gm_commands/serverrules.cpp"
 #include "gm_commands/set.cpp"
