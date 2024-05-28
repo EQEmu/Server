@@ -38,7 +38,6 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 		case EQ::skills::SkillDragonPunch:
 		case EQ::skills::SkillEagleStrike:
 		case EQ::skills::SkillTigerClaw:
-		case EQ::skills::SkillRoundKick:
 			if (skill_level >= 25) {
 				base++;
 			}
@@ -108,7 +107,8 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 
 			return static_cast<int>(ac_bonus + skill_bonus);
 		}
-		case EQ::skills::SkillKick: {
+		case EQ::skills::SkillKick:
+		case EQ::skills::SkillRoundKick: {
 			// there is some base *= 4 case in here?
 			float skill_bonus = skill_level / 10.0f;
 			float ac_bonus    = 0.0f;
@@ -119,8 +119,12 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				}
 			}
 
-			if (ac_bonus > skill_bonus) {
-				ac_bonus = skill_bonus;
+			if (skill_level >= 75) {
+				base++;
+			}
+
+			if (skill_level >= 175) {
+				base++;
 			}
 
 			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
@@ -2179,7 +2183,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	* Also: "The chance to taunt an NPC higher level than yourself dropped off at double the rate
 	* if you were above level 60 than if you were below level 60 making it very hard to taunt creature
 	* higher level than yourself if you were above level 60."
-	* 
+	*
 	* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
@@ -2209,7 +2213,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 	if (always_succeed) {
 		taunt_chance = 100;
 	}
-		
+
 	// Modern Taunt
 	if (!RuleB(Combat, ClassicTauntSystem)) {
 		if (
