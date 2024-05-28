@@ -15,15 +15,15 @@ void FindSkill(Client *c, const Seperator *sep)
 			return;
 		}
 
-		const auto& m = EQ::skills::GetSkillTypeMap();
-		const auto& s = m.find(skill_id);
-		if (s != m.end()) {
+		const std::string& skill_name = EQ::skills::GetSkillName(skill_id);
+
+		if (!skill_name.empty()) {
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"Skill {} | {}",
-					s->first,
-					s->second
+					skill_id,
+					skill_name
 				).c_str()
 			);
 		}
