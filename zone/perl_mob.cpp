@@ -2612,7 +2612,7 @@ std::string Perl_Mob_GetClassName(Mob* self)
 
 std::string Perl_Mob_GetRaceName(Mob* self)
 {
-	return GetRaceName(self->GetRace());
+	return EQ::races::GetRaceName(self->GetRace());
 }
 
 void Perl_Mob_DeleteBucket(Mob* self, std::string bucket_name) // @categories Script Utility

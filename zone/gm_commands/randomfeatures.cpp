@@ -8,7 +8,7 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 	}
 
 	auto target = c->GetTarget();
-	
+
 	if (target->RandomizeFeatures()) {
 		c->Message(
 			Chat::White,
@@ -27,7 +27,7 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 				c == target ? "are" : "is",
 				c == target ? "your" : "their",
-				GetRaceIDName(target->GetRace()),
+				EQ::races::GetRaceName(target->GetRace()),
 				target->GetRace()
 			).c_str()
 		);

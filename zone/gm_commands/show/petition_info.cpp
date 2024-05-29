@@ -19,7 +19,7 @@ void ShowPetitionInfo(Client *c, const Seperator *sep)
 					e.accountname,
 					e.zone,
 					GetClassIDName(static_cast<uint8>(e.charclass)),
-					GetRaceIDName(static_cast<uint16>(e.charrace)),
+					EQ::races::GetRaceName(static_cast<uint16>(e.charrace)),
 					e.charlevel
 				).c_str()
 			);
@@ -72,7 +72,7 @@ void ShowPetitionInfo(Client *c, const Seperator *sep)
 			l[0].accountname,
 			l[0].zone,
 			GetClassIDName(static_cast<uint8>(l[0].charclass)),
-			GetRaceIDName(static_cast<uint16>(l[0].charrace)),
+			EQ::races::GetRaceName(static_cast<uint16>(l[0].charrace)),
 			l[0].charlevel
 		).c_str()
 	);

@@ -2158,7 +2158,7 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 	{
 	case Race::Barbarian:
 	case Race::Dwarf:
-	case Race::ERUDITE:
+	case Race::Erudite:
 	case Race::HalfElf:
 	case Race::HighElf:
 	case Race::Human:

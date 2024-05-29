@@ -162,7 +162,7 @@ uint32 Lua_Client::GetDeityBitmask() {
 
 uint16 Lua_Client::GetRaceBitmask() {
 	Lua_Safe_Call_Int();
-	return GetPlayerRaceBit(self->GetBaseRace());
+	return EQ::races::GetPlayerRaceBit(self->GetBaseRace());
 }
 
 int Lua_Client::GetBaseFace() {

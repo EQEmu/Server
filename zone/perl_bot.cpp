@@ -612,7 +612,7 @@ std::string Perl_Bot_GetClassAbbreviation(Bot* self)
 
 std::string Perl_Bot_GetRaceAbbreviation(Bot* self)
 {
-	return GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
 }
 
 void Perl_Bot_DeleteBot(Bot* self) // @categories Script Utility
@@ -650,7 +650,7 @@ void perl_register_bot()
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Bot*, int, int, int, bool, bool))&Perl_Bot_ApplySpellRaid);
 	package.add("Camp", (void(*)(Bot*))&Perl_Bot_Camp);
-	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);	
+	package.add("Camp", (void(*)(Bot*, bool))&Perl_Bot_Camp);
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearDisciplineReuseTimer);
 	package.add("ClearDisciplineReuseTimer", (void(*)(Bot*, uint16))&Perl_Bot_ClearDisciplineReuseTimer);
 	package.add("ClearItemReuseTimer", (void(*)(Bot*))&Perl_Bot_ClearItemReuseTimer);

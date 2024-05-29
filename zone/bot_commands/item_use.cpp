@@ -139,7 +139,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		if (cloth_only && !IsClothClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (((~item_data->Races) & GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & GetPlayerClassBit(bot_iter->GetClass()))) {
+		if (((~item_data->Races) & EQ::races::GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & GetPlayerClassBit(bot_iter->GetClass()))) {
 			continue;
 		}
 

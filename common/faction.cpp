@@ -131,7 +131,7 @@ bool IsOfIndiffRace(int r1, int r2)
 		case Race::WoodElf:
 			if (r2 == Race::Human ||
 			    r2 == Race::Barbarian ||
-			    r2 == Race::ERUDITE ||
+			    r2 == Race::Erudite ||
 			    r2 == Race::HalfElf ||
 			    r2 == Race::Gnome ||
 			    r2 == Race::Halfling ||
@@ -141,7 +141,7 @@ bool IsOfIndiffRace(int r1, int r2)
 				return true;
 			}
 			break;
-		case Race::ERUDITE:
+		case Race::Erudite:
 			if (r2 == Race::Human || r2 == Race::HalfElf) {
 				return true;
 			}

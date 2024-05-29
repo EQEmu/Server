@@ -24,7 +24,7 @@ void SetRacePermanent(Client *c, const Seperator *sep)
 	LogInfo("Race changed by {} for {} to {} ({})",
 		c->GetCleanName(),
 		c->GetTargetDescription(t),
-		GetRaceIDName(race_id),
+		EQ::races::GetRaceName(race_id),
 		race_id
 	);
 
@@ -44,7 +44,7 @@ void SetRacePermanent(Client *c, const Seperator *sep)
 		fmt::format(
 			"Race changed for {} to {} ({}).",
 			c->GetTargetDescription(t),
-			GetRaceIDName(race_id),
+			EQ::races::GetRaceName(race_id),
 			race_id
 		).c_str()
 	);

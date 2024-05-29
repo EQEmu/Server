@@ -2888,7 +2888,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	// Mob Variables
 	Strings::FindReplace(processed, "$mname", GetCleanName());
 	Strings::FindReplace(processed, "$mracep", GetRacePlural());
-	Strings::FindReplace(processed, "$mrace", EQ::races::EQ::races::GetRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mrace", EQ::races::GetRaceName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
 	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
@@ -2896,7 +2896,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
 	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
 	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
-	Strings::FindReplace(processed, "$race", t ? EQ::races::EQ::races::GetRaceName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$race", t ? EQ::races::GetRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 
 	if (emoteid == e->emoteid) {

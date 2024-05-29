@@ -50,7 +50,7 @@ void SetRace(Client *c, const Seperator *sep)
 			"{} {} now temporarily a(n) {} ({}).",
 			c->GetTargetDescription(t, TargetDescriptionType::UCYou),
 			c == t ? "are" : "is",
-			GetRaceIDName(race_id),
+			EQ::races::GetRaceName(race_id),
 			race_id
 		).c_str()
 	);

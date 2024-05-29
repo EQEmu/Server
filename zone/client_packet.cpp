@@ -1462,7 +1462,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		size = 8; break;
 	case Race::VahShir: case Race::Barbarian:
 		size = 7; break;
-	case Race::Human: case Race::HighElf: case Race::ERUDITE: case Race::Iksar: case Race::Drakkin:
+	case Race::Human: case Race::HighElf: case Race::Erudite: case Race::Iksar: case Race::Drakkin:
 		size = 6; break;
 	case Race::HalfElf:
 		size = 5.5; break;

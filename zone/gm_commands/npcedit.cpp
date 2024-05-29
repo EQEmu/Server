@@ -77,7 +77,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
 				npc_id_string,
-				GetRaceIDName(race_id),
+				EQ::races::GetRaceName(race_id),
 				race_id
 			);
 		} else {
@@ -154,7 +154,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				"{} is now a {} ({}).",
 				npc_id_string,
 				gender_id,
-				GetGenderName(gender_id)
+				EQ::races::GetGenderName(gender_id)
 			);
 		} else {
 			c->Message(Chat::White, "Usage: #npcedit gender [Gender ID] - Sets an NPC's Gender");
@@ -1457,7 +1457,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				d = fmt::format(
 					"{} is now using a(n) {} ({}) as their race model.",
 					npc_id_string,
-					GetRaceIDName(race_id),
+					EQ::races::GetRaceName(race_id),
 					race_id
 				);
 			} else {

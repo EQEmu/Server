@@ -194,7 +194,7 @@ std::map<std::string,std::string> EQW::GetPlayerDetails(Const_char *char_name) {
 	res["location_id"] = itoa(cle->zone());
 	res["ip"] = long2ip(cle->GetIP());
 	res["level"] = itoa(cle->level());
-	res["race"] = GetRaceIDName(cle->race());
+	res["race"] = EQ::races::GetRaceName(cle->race());
 	res["race_id"] = itoa(cle->race());
 	res["class"] = GetClassIDName(cle->class_());
 	res["class_id"] = itoa(cle->class_());

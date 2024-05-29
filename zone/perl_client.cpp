@@ -2019,7 +2019,7 @@ uint32_t Perl_Client_GetDeityBitmask(Client* self)
 
 uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
 {
-	return GetPlayerRaceBit(self->GetBaseRace());
+	return EQ::races::GetPlayerRaceBit(self->GetBaseRace());
 }
 
 perl::array Perl_Client_GetLearnableDisciplines(Client* self)

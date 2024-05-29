@@ -20,6 +20,10 @@
 
 const std::string& EQ::races::GetRaceName(uint16 race_id)
 {
+	if (!IsValidRace(race_id)) {
+		return "UNKNOWN RACE";
+	}
+
 	switch (race_id) {
 		case Race::Abhorrent:
 			return "Abhorrent";

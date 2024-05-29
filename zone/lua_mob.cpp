@@ -371,19 +371,14 @@ int Lua_Mob::GetRace() {
 	return self->GetRace();
 }
 
-const char *Lua_Mob::EQ::races::GetRaceName() {
+std::string Lua_Mob::GetRaceName() {
 	Lua_Safe_Call_String();
 	return EQ::races::GetRaceName(self->GetRace());
 }
 
-const char* Lua_Mob::GetBaseRaceName() {
+std::string Lua_Mob::GetBaseRaceName() {
 	Lua_Safe_Call_String();
 	return EQ::races::GetRaceName(self->GetBaseRace());
-}
-
-const char* Lua_Mob::GetBaseRaceName() {
-	Lua_Safe_Call_String();
-	return GetRaceIDName(self->GetBaseRace());
 }
 
 int Lua_Mob::GetGender() {

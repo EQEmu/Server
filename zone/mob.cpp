@@ -7736,7 +7736,7 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 	}
 
 	auto item_races = itm->Races;
-	if(item_races == PLAYER_RACE_ALL_MASK) {
+	if(item_races == PlayerRaceBitmask::All) {
 		return true;
 	}
 

@@ -1073,7 +1073,7 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	if(RuleB(Character,UseOldRaceExpPenalties))
 	{
 		float racemod = 1.0;
-		if(GetBaseRace() == Race::Troll || GetBaseRace() == IKSAR) {
+		if(GetBaseRace() == Race::Troll || GetBaseRace() == Race::Iksar) {
 			racemod = 1.2;
 		} else if(GetBaseRace() == Race::Ogre) {
 			racemod = 1.15;

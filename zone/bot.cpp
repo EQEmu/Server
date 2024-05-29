@@ -902,7 +902,7 @@ void Bot::GenerateBaseStats()
 			BotSize = 7.0;
 			ColdResist += 10;
 			break;
-		case Race::ERUDITE:
+		case Race::Erudite:
 			Strength -= 15;
 			Stamina -= 5;
 			Agility -= 5;
@@ -6753,7 +6753,7 @@ void Bot::CalcBotStats(bool showtext) {
 
 	// this code is annoying since many classes change their name and illusions change the race id
 	/*if (!IsValidRaceClassCombo()) {
-		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", GetRaceIDName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
+		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", EQ::races::GetRaceName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
 		GetBotOwner()->Message(Chat::Yellow, "Previous Bots Code releases did not check Race/Class combinations during create.");
 		GetBotOwner()->Message(Chat::Yellow, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
 	}*/

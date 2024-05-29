@@ -418,7 +418,7 @@ bool lua_is_disc_tome(int item_id) {
 }
 
 std::string lua_get_race_name(uint32 race_id) {
-	return quest_manager.EQ::races::GetRaceName(race_id);
+	return EQ::races::GetRaceName(race_id);
 }
 
 std::string lua_get_spell_name(uint32 spell_id) {

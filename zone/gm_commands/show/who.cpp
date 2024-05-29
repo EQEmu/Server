@@ -78,7 +78,7 @@ void ShowWho(Client *c, const Seperator *sep)
 		const std::string& account_name        = row[8];
 		const std::string& account_ip          = row[9];
 		const std::string& base_class_name     = GetClassIDName(player_class);
-		const std::string& displayed_race_name = GetRaceIDName(player_race);
+		const std::string& displayed_race_name = EQ::races::GetRaceName(player_race);
 
 		if (!search_criteria.empty()) {
 			is_filtered = true;
