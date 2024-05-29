@@ -1472,6 +1472,14 @@ bool EQ::races::IsPlayerRace(uint16 race_id) {
 	);
 }
 
+bool EQ::races::IsValidRace(uint16 race_id) {
+	return (
+		EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3) ||
+		race_id == Race::InteractiveObject ||
+		race_id == Race::Node
+	);
+}
+
 // PlayerAppearance prep
 #define HUMAN_MALE ((Race::Human << 8) | Gender::Male)
 #define HUMAN_FEMALE ((Race::Human << 8) | Gender::Female)

@@ -860,7 +860,7 @@ namespace EQ {
 		const std::string& GetPlayerRaceAbbreviation(uint16 race_id);
 
 		bool IsPlayerRace(uint16 race_id);
-		inline bool IsValidRace(uint16 race_id) { return EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3) || race_id == Race::InteractiveObject || race_id == Race::Node; }
+		bool IsValidRace(uint16 race_id);
 
 		uint16 GetPlayerRaceValue(uint16 race_id);
 		uint16 GetPlayerRaceBit(uint16 race_id);
