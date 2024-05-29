@@ -77,23 +77,44 @@ namespace Class {
 	constexpr uint16 ALL_CLASSES_BITMASK = 65535;
 };
 
+namespace PlayerClassBitmask {
+	constexpr uint16 Unknown      = 0;
+	constexpr uint16 Warrior      = 1;
+	constexpr uint16 Cleric       = 2;
+	constexpr uint16 Paladin      = 4;
+	constexpr uint16 Ranger       = 8;
+	constexpr uint16 ShadowKnight = 16;
+	constexpr uint16 Druid        = 32;
+	constexpr uint16 Monk         = 64;
+	constexpr uint16 Bard         = 128;
+	constexpr uint16 Rogue        = 256;
+	constexpr uint16 Shaman       = 512;
+	constexpr uint16 Necromancer  = 1024;
+	constexpr uint16 Wizard       = 2048;
+	constexpr uint16 Magician     = 4096;
+	constexpr uint16 Enchanter    = 8192;
+	constexpr uint16 Beastlord    = 16384;
+	constexpr uint16 Berserker    = 32768;
+	constexpr uint16 All          = 65535;
+};
+
 static std::map<uint8, uint16> player_class_bitmasks = {
-	{ Class::Warrior,      1 },
-	{ Class::Cleric,       2 },
-	{ Class::Paladin,      4 },
-	{ Class::Ranger,       8 },
-	{ Class::ShadowKnight, 16 },
-	{ Class::Druid,        32 },
-	{ Class::Monk,         64 },
-	{ Class::Bard,         128 },
-	{ Class::Rogue,        256 },
-	{ Class::Shaman,       512 },
-	{ Class::Necromancer,  1024 },
-	{ Class::Wizard,       2048 },
-	{ Class::Magician,     4096 },
-	{ Class::Enchanter,    8192 },
-	{ Class::Beastlord,    16384 },
-	{ Class::Berserker,    32768 },
+	{ Class::Warrior,      PlayerClassBitmask::Warrior },
+	{ Class::Cleric,       PlayerClassBitmask::Cleric },
+	{ Class::Paladin,      PlayerClassBitmask::Paladin },
+	{ Class::Ranger,       PlayerClassBitmask::Ranger },
+	{ Class::ShadowKnight, PlayerClassBitmask::ShadowKnight },
+	{ Class::Druid,        PlayerClassBitmask::Druid },
+	{ Class::Monk,         PlayerClassBitmask::Monk },
+	{ Class::Bard,         PlayerClassBitmask::Bard },
+	{ Class::Rogue,        PlayerClassBitmask::Rogue },
+	{ Class::Shaman,       PlayerClassBitmask::Shaman },
+	{ Class::Necromancer,  PlayerClassBitmask::Necromancer },
+	{ Class::Wizard,       PlayerClassBitmask::Wizard },
+	{ Class::Magician,     PlayerClassBitmask::Magician },
+	{ Class::Enchanter,    PlayerClassBitmask::Enchanter },
+	{ Class::Beastlord,    PlayerClassBitmask::Beastlord },
+	{ Class::Berserker,    PlayerClassBitmask::Berserker },
 };
 
 static std::string shadow_knight_class_name = (
