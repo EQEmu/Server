@@ -3574,6 +3574,21 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	return Quant;	// return the quantity of itemid (0 if it was never found)
 }
 
+std::string QuestManager::varlink(EQ::ItemInstance* inst)
+{
+	QuestManagerCurrentQuestVars();
+
+	if (!inst) {
+		return "INVALID ITEM INSTANCE IN VARLINK";
+	}
+
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+	linker.SetItemInst(inst);
+
+	return linker.GenerateLink();
+}
+
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 std::string QuestManager::varlink(
 	uint32 item_id,
