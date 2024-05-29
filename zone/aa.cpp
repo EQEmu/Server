@@ -1643,9 +1643,9 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank)
 		}
 	}
 
-	auto race = GetPlayerRaceValue(GetBaseRace());
+	auto race = EQ::races::GetPlayerRaceValue(GetBaseRace());
 
-	race = race > PLAYER_RACE_COUNT ? Race::Human : race;
+	race = race > PlayerRace::Count ? Race::Human : race;
 
 	if (!(a->races & (1 << (race - 1)))) {
 		return false;

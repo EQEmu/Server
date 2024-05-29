@@ -3015,7 +3015,7 @@ std::string Perl_Client_GetClassAbbreviation(Client* self)
 
 std::string Perl_Client_GetRaceAbbreviation(Client* self)
 {
-	return GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
 }
 
 void Perl_Client_SetLDoNPoints(Client* self, uint32 theme_id, uint32 points)

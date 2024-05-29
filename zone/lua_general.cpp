@@ -418,7 +418,7 @@ bool lua_is_disc_tome(int item_id) {
 }
 
 std::string lua_get_race_name(uint32 race_id) {
-	return quest_manager.getracename(race_id);
+	return quest_manager.EQ::races::GetRaceName(race_id);
 }
 
 std::string lua_get_spell_name(uint32 spell_id) {
@@ -1999,8 +1999,8 @@ std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
 
-std::string lua_get_gender_name(uint32 gender_id) {
-	return quest_manager.getgendername(gender_id);
+std::string lua_get_gender_name(uint8 gender_id) {
+	return EQ::races::GetGenderName(gender_id);
 }
 
 std::string lua_get_deity_name(uint32 deity_id) {
@@ -5485,7 +5485,7 @@ uint32 lua_get_deity_bitmask(uint16 deity_id) {
 }
 
 uint16 lua_get_race_bitmask(uint16 race_id) {
-	return GetPlayerRaceBit(race_id);
+	return EQ::races::GetPlayerRaceBit(race_id);
 }
 
 std::string lua_get_auto_login_character_name_by_account_id(uint32 account_id) {

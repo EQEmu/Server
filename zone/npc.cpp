@@ -156,7 +156,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	swarm_timer.Disable();
 
 	if (size <= 0.0f) {
-		size = GetRaceGenderDefaultHeight(race, gender);
+		size = EQ::races::GetRaceGenderDefaultHeight(race, gender);
 	}
 
 	// lava dragon is a fixed size model and should always use its default
@@ -1162,9 +1162,9 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			client->Message(Chat::White, fmt::format("Name | {}", npc->name).c_str());
 			client->Message(Chat::White, fmt::format("Level | {}", npc->level).c_str());
 			client->Message(Chat::White, fmt::format("Health | {}", npc->max_hp).c_str());
-			client->Message(Chat::White, fmt::format("Race | {} ({})", GetRaceIDName(npc->race), npc->race).c_str());
+			client->Message(Chat::White, fmt::format("Race | {} ({})", EQ::races::GetRaceName(npc->race), npc->race).c_str());
 			client->Message(Chat::White, fmt::format("Class | {} ({})", GetClassIDName(npc->class_), npc->class_).c_str());
-			client->Message(Chat::White, fmt::format("Gender | {} ({})", GetGenderName(npc->gender), npc->gender).c_str());
+			client->Message(Chat::White, fmt::format("Gender | {} ({})", EQ::races::GetGenderName(npc->gender), npc->gender).c_str());
 			client->Message(Chat::White, fmt::format("Texture | {}", npc->texture).c_str());
 
 			if (npc->d_melee_texture1 || npc->d_melee_texture2) {
@@ -1220,7 +1220,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.walkspeed       = n->GetWalkspeed();
 	e.prim_melee_type = n->GetPrimSkill();
 	e.sec_melee_type  = n->GetSecSkill();
-	
+
 	e.bodytype        = n->GetBodyType();
 	e.npc_faction_id  = n->GetNPCFactionID();
 	e.aggroradius     = n->GetAggroRange();
@@ -1235,7 +1235,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.WIS             = n->GetWIS();
 	e._INT            = n->GetINT();
 	e.CHA             = n->GetCHA();
-	
+
 	e.PR              = n->GetPR();
 	e.MR              = n->GetMR();
 	e.DR              = n->GetDR();
@@ -1255,7 +1255,7 @@ uint32 ZoneDatabase::CreateNewNPCCommand(
 	e.healscale       = n->GetHealScale();
 	e.Avoidance       = n->GetAvoidanceRating();
 	e.heroic_strikethrough = n->GetHeroicStrikethrough();
-	
+
 	e.see_hide        = n->SeeHide();
 	e.see_improved_hide = n->SeeImprovedHide();
 	e.see_invis       = n->SeeInvisible();
@@ -2888,7 +2888,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	// Mob Variables
 	Strings::FindReplace(processed, "$mname", GetCleanName());
 	Strings::FindReplace(processed, "$mracep", GetRacePlural());
-	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mrace", EQ::races::EQ::races::GetRaceName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
 	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
@@ -2896,7 +2896,7 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
 	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
 	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
-	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$race", t ? EQ::races::EQ::races::GetRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 
 	if (emoteid == e->emoteid) {
@@ -3546,7 +3546,7 @@ bool NPC::IsGuard()
 	case Race::HalasCitizen:
 	case Race::NeriakCitizen:
 	case Race::GrobbCitizen:
-	case OGGOK_CITIZEN:
+	case Race::OggokCitizen:
 	case Race::KaladimCitizen:
 		return true;
 	default:

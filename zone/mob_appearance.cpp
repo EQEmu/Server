@@ -358,7 +358,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 
 	LogMobAppearance("[{}]", GetCleanName());
 
-	if (IsPlayerRace(race)) {
+	if (EQ::races::IsPlayerRace(race)) {
 		if (!IsClient()) {
 			for (uint8 slot_id = 0; slot_id <= EQ::textures::materialCount; ++slot_id) {
 				const auto item = database.GetItem(GetEquippedItemFromTextureSlot(slot_id));

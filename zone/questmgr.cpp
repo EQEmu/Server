@@ -1454,10 +1454,6 @@ bool QuestManager::isdisctome(uint32 item_id) {
 	return true;
 }
 
-std::string QuestManager::getracename(uint16 race_id) {
-	return GetRaceIDName(race_id);
-}
-
 std::string QuestManager::getspellname(uint32 spell_id) {
 	if (!IsValidSpell(spell_id)) {
 		return "INVALID SPELL ID IN GETSPELLNAME";
@@ -4341,11 +4337,6 @@ void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id,
 
 void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, float exp_modifier, int16 instance_version) {
 	database.SetEXPModifierByCharID(character_id, zone_id, exp_modifier, instance_version);
-}
-
-std::string QuestManager::getgendername(uint32 gender_id) {
-	std::string gender_name = GetGenderName(gender_id);
-	return gender_name;
 }
 
 std::string QuestManager::getdeityname(uint32 deity_id) {

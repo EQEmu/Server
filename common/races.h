@@ -19,134 +19,9 @@
 #ifndef RACES_H
 #define RACES_H
 #include "../common/types.h"
+#include "data_verification.h"
 #include <string>
-
-namespace Gender {
-	constexpr uint8 Male   = 0;
-	constexpr uint8 Female = 1;
-	constexpr uint8 Neuter = 2;
-}
-
-//theres a big list straight from the client below.
-
-#define HUMAN 1
-#define BARBARIAN 2
-#define ERUDITE 3
-#define WOOD_ELF 4
-#define HIGH_ELF 5
-#define DARK_ELF 6
-#define HALF_ELF 7
-#define DWARF 8
-#define TROLL 9
-#define OGRE 10
-#define HALFLING 11
-#define GNOME 12
-#define WEREWOLF 14
-#define WOLF 42
-#define BEAR 43
-#define SKELETON 60
-#define TIGER 63
-#define ELEMENTAL 75
-#define ALLIGATOR 91
-#define OGGOK_CITIZEN 93
-#define EYE_OF_ZOMM 108
-#define WOLF_ELEMENTAL 120
-#define INVISIBLE_MAN 127
-#define IKSAR 128
-#define VAHSHIR 130
-#define CONTROLLED_BOAT 141
-#define MINOR_ILL_OBJ 142
-#define TREE 143
-#define IKSAR_SKELETON 161
-#define FROGLOK 330
-// TODO: check all clients for (BYTE) usage of '/who all' class and remove FROGLOK2, if possible (330 - 74 = 256 .. WORD->BYTE conversion loss...)
-#define FROGLOK2 74	// Not sure why /who all reports race as 74 for frogloks
-#define FAIRY 473
-#define DRAKKIN 522 // 32768
-#define EMU_RACE_NPC 131069 // was 65533
-#define EMU_RACE_PET 131070 // was 65534
-#define EMU_RACE_UNKNOWN 131071 // was 65535
-
-
-// player race values
-#define PLAYER_RACE_UNKNOWN 0
-#define PLAYER_RACE_HUMAN 1
-#define PLAYER_RACE_BARBARIAN 2
-#define PLAYER_RACE_ERUDITE 3
-#define PLAYER_RACE_WOOD_ELF 4
-#define PLAYER_RACE_HIGH_ELF 5
-#define PLAYER_RACE_DARK_ELF 6
-#define PLAYER_RACE_HALF_ELF 7
-#define PLAYER_RACE_DWARF 8
-#define PLAYER_RACE_TROLL 9
-#define PLAYER_RACE_OGRE 10
-#define PLAYER_RACE_HALFLING 11
-#define PLAYER_RACE_GNOME 12
-#define PLAYER_RACE_IKSAR 13
-#define PLAYER_RACE_VAHSHIR 14
-#define PLAYER_RACE_FROGLOK 15
-#define PLAYER_RACE_DRAKKIN 16
-
-#define PLAYER_RACE_COUNT 16
-
-
-#define PLAYER_RACE_EMU_NPC 17
-#define PLAYER_RACE_EMU_PET 18
-#define PLAYER_RACE_EMU_COUNT 19
-
-
-// player race bits
-#define PLAYER_RACE_UNKNOWN_BIT 0
-#define PLAYER_RACE_HUMAN_BIT 1
-#define PLAYER_RACE_BARBARIAN_BIT 2
-#define PLAYER_RACE_ERUDITE_BIT 4
-#define PLAYER_RACE_WOOD_ELF_BIT 8
-#define PLAYER_RACE_HIGH_ELF_BIT 16
-#define PLAYER_RACE_DARK_ELF_BIT 32
-#define PLAYER_RACE_HALF_ELF_BIT 64
-#define PLAYER_RACE_DWARF_BIT 128
-#define PLAYER_RACE_TROLL_BIT 256
-#define PLAYER_RACE_OGRE_BIT 512
-#define PLAYER_RACE_HALFLING_BIT 1024
-#define PLAYER_RACE_GNOME_BIT 2048
-#define PLAYER_RACE_IKSAR_BIT 4096
-#define PLAYER_RACE_VAHSHIR_BIT 8192
-#define PLAYER_RACE_FROGLOK_BIT 16384
-#define PLAYER_RACE_DRAKKIN_BIT 32768
-
-#define PLAYER_RACE_ALL_MASK 65535
-
-const char* GetRaceIDName(uint16 race_id);
-const char* GetPlayerRaceName(uint32 player_race_value);
-const char* GetGenderName(uint32 gender_id);
-
-bool IsPlayerRace(uint16 race_id);
-const std::string GetPlayerRaceAbbreviation(uint16 race_id);
-
-uint32 GetPlayerRaceValue(uint16 race_id);
-uint16 GetPlayerRaceBit(uint16 race_id);
-
-uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
-uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
-
-float GetRaceGenderDefaultHeight(int race, int gender);
-
-// player race-/gender-based model feature validators
-namespace PlayerAppearance
-{
-	bool IsValidBeard(uint16 race_id, uint8 gender_id, uint8 beard_value, bool use_luclin = true);
-	bool IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 beard_color_value, bool use_luclin = true);
-	bool IsValidDetail(uint16 race_id, uint8 gender_id, uint32 detail_value, bool use_luclin = true);
-	bool IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 eye_color_value, bool use_luclin = true);
-	bool IsValidFace(uint16 race_id, uint8 gender_id, uint8 face_value, bool use_luclin = true);
-	bool IsValidHair(uint16 race_id, uint8 gender_id, uint8 hair_value, bool use_luclin = true);
-	bool IsValidHairColor(uint16 race_id, uint8 gender_id, uint8 hair_color_value, bool use_luclin = true);
-	bool IsValidHead(uint16 race_id, uint8 gender_id, uint8 head_value, bool use_luclin = true);
-	bool IsValidHeritage(uint16 race_id, uint8 gender_id, uint32 heritage_value, bool use_luclin = true);
-	bool IsValidTattoo(uint16 race_id, uint8 gender_id, uint32 tattoo_value, bool use_luclin = true);
-	bool IsValidTexture(uint16 race_id, uint8 gender_id, uint8 texture_value, bool use_luclin = true);
-	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
-}
+#include <map>
 
 namespace Race {
 	constexpr uint16 Doug                     = 0;
@@ -884,8 +759,131 @@ namespace Race {
 	constexpr uint16 Pegasus3                 = 732;
 	constexpr uint16 InteractiveObject        = 2250;
 	constexpr uint16 Node                     = 2254;
+}
 
-	constexpr uint16 ALL_RACES_BITMASK = 65535;
+namespace Gender {
+	constexpr uint8 Male   = 0;
+	constexpr uint8 Female = 1;
+	constexpr uint8 Neuter = 2;
+}
+
+static std::map<uint8, std::string> gender_map = {
+	{ Gender::Male,   "Male" },
+	{ Gender::Female, "Female" },
+	{ Gender::Neuter, "Neuter" }
+};
+
+namespace PlayerRace {
+	constexpr uint16 Unknown   = 0;
+	constexpr uint16 Human     = 1;
+	constexpr uint16 Barbarian = 2;
+	constexpr uint16 Erudite   = 3;
+	constexpr uint16 WoodElf   = 4;
+	constexpr uint16 HighElf   = 5;
+	constexpr uint16 DarkElf   = 6;
+	constexpr uint16 HalfElf   = 7;
+	constexpr uint16 Dwarf     = 8;
+	constexpr uint16 Troll     = 9;
+	constexpr uint16 Ogre      = 10;
+	constexpr uint16 Halfling  = 11;
+	constexpr uint16 Gnome     = 12;
+	constexpr uint16 Iksar     = 13;
+	constexpr uint16 VahShir   = 14;
+	constexpr uint16 Froglok   = 15;
+	constexpr uint16 Drakkin   = 16;
+	constexpr uint16 Count     = 16;
+}
+
+namespace PlayerRaceBitmask {
+	constexpr uint16 Unknown   = 0;
+	constexpr uint16 Human     = 1;
+	constexpr uint16 Barbarian = 2;
+	constexpr uint16 Erudite   = 4;
+	constexpr uint16 WoodElf   = 8;
+	constexpr uint16 HighElf   = 16;
+	constexpr uint16 DarkElf   = 32;
+	constexpr uint16 HalfElf   = 64;
+	constexpr uint16 Dwarf     = 128;
+	constexpr uint16 Troll     = 256;
+	constexpr uint16 Ogre      = 512;
+	constexpr uint16 Halfling  = 1024;
+	constexpr uint16 Gnome     = 2048;
+	constexpr uint16 Iksar     = 4096;
+	constexpr uint16 VahShir   = 8192;
+	constexpr uint16 Froglok   = 16384;
+	constexpr uint16 Drakkin   = 32768;
+	constexpr uint16 All       = 65535;
+}
+
+static std::map<uint16, uint16> player_race_bitmasks = {
+	{ Race::Human,     PlayerRaceBitmask::Human },
+	{ Race::Barbarian, PlayerRaceBitmask::Barbarian },
+	{ Race::Erudite,   PlayerRaceBitmask::Erudite },
+	{ Race::WoodElf,   PlayerRaceBitmask::WoodElf },
+	{ Race::HighElf,   PlayerRaceBitmask::HighElf },
+	{ Race::DarkElf,   PlayerRaceBitmask::DarkElf },
+	{ Race::HalfElf,   PlayerRaceBitmask::HalfElf },
+	{ Race::Dwarf,     PlayerRaceBitmask::Dwarf },
+	{ Race::Troll,     PlayerRaceBitmask::Troll },
+	{ Race::Ogre,      PlayerRaceBitmask::Ogre },
+	{ Race::Halfling,  PlayerRaceBitmask::Halfling },
+	{ Race::Gnome,     PlayerRaceBitmask::Gnome },
+	{ Race::Iksar,     PlayerRaceBitmask::Iksar },
+	{ Race::VahShir,   PlayerRaceBitmask::VahShir },
+	{ Race::Froglok,   PlayerRaceBitmask::Froglok },
+	{ Race::Drakkin,   PlayerRaceBitmask::Drakkin },
+};
+
+static std::map<uint16, std::string> player_race_abbreviations = {
+	{ Race::Human,     "HUM" },
+	{ Race::Barbarian, "BAR" },
+	{ Race::Erudite,   "ERU" },
+	{ Race::WoodElf,   "ELF" },
+	{ Race::HighElf,   "HIE" },
+	{ Race::DarkElf,   "DEF" },
+	{ Race::HalfElf,   "HEF" },
+	{ Race::Dwarf,     "DWF" },
+	{ Race::Troll,     "TRL" },
+	{ Race::Ogre,      "OGR" },
+	{ Race::Halfling,  "HFL" },
+	{ Race::Gnome,     "GNM" },
+	{ Race::Iksar,     "IKS" },
+	{ Race::VahShir,   "VAH" },
+	{ Race::Froglok2,  "FRG" },
+	{ Race::Drakkin,   "DRK" }
+};
+
+namespace EQ {
+	namespace races {
+		const std::string& GetRaceName(uint16 race_id);
+		const std::string& GetGenderName(uint8 gender_id);
+		const std::string& GetPlayerRaceAbbreviation(uint16 race_id);
+
+		bool IsPlayerRace(uint16 race_id);
+		inline bool IsValidRace(uint16 race_id) { return EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3) || race_id == Race::InteractiveObject || race_id == Race::Node; }
+
+		uint16 GetPlayerRaceValue(uint16 race_id);
+		uint16 GetPlayerRaceBit(uint16 race_id);
+
+		float GetRaceGenderDefaultHeight(uint16 race, uint8 gender);
+	}
+}
+
+// player race-/gender-based model feature validators
+namespace PlayerAppearance
+{
+	bool IsValidBeard(uint16 race_id, uint8 gender_id, uint8 beard_value, bool use_luclin = true);
+	bool IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 beard_color_value, bool use_luclin = true);
+	bool IsValidDetail(uint16 race_id, uint8 gender_id, uint32 detail_value, bool use_luclin = true);
+	bool IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 eye_color_value, bool use_luclin = true);
+	bool IsValidFace(uint16 race_id, uint8 gender_id, uint8 face_value, bool use_luclin = true);
+	bool IsValidHair(uint16 race_id, uint8 gender_id, uint8 hair_value, bool use_luclin = true);
+	bool IsValidHairColor(uint16 race_id, uint8 gender_id, uint8 hair_color_value, bool use_luclin = true);
+	bool IsValidHead(uint16 race_id, uint8 gender_id, uint8 head_value, bool use_luclin = true);
+	bool IsValidHeritage(uint16 race_id, uint8 gender_id, uint32 heritage_value, bool use_luclin = true);
+	bool IsValidTattoo(uint16 race_id, uint8 gender_id, uint32 tattoo_value, bool use_luclin = true);
+	bool IsValidTexture(uint16 race_id, uint8 gender_id, uint8 texture_value, bool use_luclin = true);
+	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
 }
 
 #endif

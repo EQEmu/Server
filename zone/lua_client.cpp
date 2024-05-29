@@ -3161,7 +3161,7 @@ std::string Lua_Client::GetClassAbbreviation()
 std::string Lua_Client::GetRaceAbbreviation()
 {
 	Lua_Safe_Call_String();
-	return GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
 }
 
 void Lua_Client::SetLDoNPoints(uint32 theme_id, uint32 points)
