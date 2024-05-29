@@ -1743,3 +1743,27 @@ std::vector<uint32> EQ::InventoryProfile::GetAugmentIDsBySlotID(int16 slot_id)
 
 	return augments;
 }
+
+const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs()
+{
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END },
+		{ EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+
+	std::vector<int16> slot_ids;
+
+	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
+		for (int16 slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			slot_ids.emplace_back(slot_id);
+		}
+	}
+
+	return slot_ids;
+}

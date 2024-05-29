@@ -158,6 +158,9 @@ namespace EQ
 		// Get a list of augments from a specific slot ID
 		std::vector<uint32> GetAugmentIDsBySlotID(int16 slot_id);
 
+		// Get a list of inventory, cursor, bank, and shared bank slot IDs for looping purposes
+		static const std::vector<int16>& GetInventorySlotIDs();
+
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
 
