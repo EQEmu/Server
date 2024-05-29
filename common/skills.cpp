@@ -127,6 +127,10 @@ bool EQ::skills::IsCastingSkill(SkillType skill)
 int32 EQ::skills::GetBaseDamage(SkillType skill)
 {
 	switch (skill) {
+		case SkillArchery:
+			return RuleI(Combat, ArcheryBaseDamage);
+		case SkillBackstab:
+			return RuleI(Combat, BackstabBaseDamage);
 		case SkillBash:
 			return RuleI(Combat, BashBaseDamage);
 		case SkillDragonPunch:
@@ -141,6 +145,8 @@ int32 EQ::skills::GetBaseDamage(SkillType skill)
 			return RuleI(Combat, KickBaseDamage);
 		case SkillRoundKick:
 			return RuleI(Combat, RoundKickBaseDamage);
+		case SkillThrowing:
+			return RuleI(Combat, ThrowingBaseDamage);
 		case SkillTigerClaw:
 			return RuleI(Combat, TigerClawBaseDamage);
 		default:
