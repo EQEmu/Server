@@ -787,7 +787,7 @@ uint8 GetSpellMinimumLevel(uint16 spell_id)
 
 	const auto& spell = spells[spell_id];
 
-	for (int i = 0; i < Class::PLAYER_CLASS_COUNT; i++) {
+	for (int i = 0; i < Class::Berserker; i++) {
 		if (spell.classes[i] < minimum_level) {
 			minimum_level = spell.classes[i];
 		}
@@ -805,7 +805,7 @@ uint8 GetSpellLevel(uint16 spell_id, uint8 class_id)
 		return UINT8_MAX;
 	}
 
-	if (class_id >= Class::PLAYER_CLASS_COUNT) {
+	if (class_id >= Class::Berserker) {
 		return UINT8_MAX;
 	}
 

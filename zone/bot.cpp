@@ -1871,7 +1871,7 @@ void Bot::SetHoldMode() {
 
 // AI Processing for the Bot object
 
-constexpr float MAX_CASTER_DISTANCE[Class::PLAYER_CLASS_COUNT] = {
+constexpr float MAX_CASTER_DISTANCE[Class::Berserker] = {
 	0,
 	(34 * 34),
 	(24 * 24),
@@ -9233,4 +9233,4 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 }
 
-uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::Berserker][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };

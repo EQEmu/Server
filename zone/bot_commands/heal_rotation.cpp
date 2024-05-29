@@ -273,12 +273,12 @@ void bot_command_heal_rotation_adjust_critical(Client* c, const Seperator* sep)
 		armor_type_value = Strings::ToInt(armor_type_arg);
 	}
 
-	if (armor_type_value > ArmorType::Last) {
+	if (armor_type_value > ArmorType::Plate) {
 		c->Message(
 			Chat::White,
 			"You must specify a valid [armor_type: %u-%u] to use this command",
-			ArmorType::First,
-			ArmorType::Last
+			ArmorType::Unknown,
+			ArmorType::Plate
 		);
 		return;
 	}
@@ -373,12 +373,12 @@ void bot_command_heal_rotation_adjust_safe(Client* c, const Seperator* sep)
 		armor_type_value = Strings::ToInt(armor_type_arg);
 	}
 
-	if (armor_type_value > ArmorType::Last) {
+	if (armor_type_value > ArmorType::Plate) {
 		c->Message(
 			Chat::White,
 			"You must specify a valid [armor_type: %u-%u] to use this command",
-			ArmorType::First,
-			ArmorType::Last
+			ArmorType::Unknown,
+			ArmorType::Plate
 		);
 		return;
 	}

@@ -1773,7 +1773,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].environment_type=Strings::ToInt(row[102]);
 		sp[tempid].time_of_day=Strings::ToInt(row[103]);
 
-		for(y=0; y < Class::PLAYER_CLASS_COUNT;y++)
+		for(y=0; y < Class::Berserker;y++)
 			sp[tempid].classes[y]=Strings::ToInt(row[104+y]);
 
 		sp[tempid].casting_animation=Strings::ToInt(row[120]);

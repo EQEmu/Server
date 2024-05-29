@@ -1998,7 +1998,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	{ /*Drakkin*/    70,  80,  85,  75,  80,  85,  75}
 	};
 
-	static const int BaseClass[Class::PLAYER_CLASS_COUNT][8] =
+	static const int BaseClass[Class::Berserker][8] =
 	{              /* STR  STA  AGI  DEX  WIS  INT  CHR  ADD*/
 	{ /*Warrior*/      10,  10,   5,   0,   0,   0,   0,  25},
 	{ /*Cleric*/        5,   5,   0,   0,  10,   0,   0,  30},
@@ -2018,7 +2018,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 	{ /*Berserker*/    10,   5,   0,  10,   0,   0,   0,  25}
 	};
 
-	static const bool ClassRaceLookupTable[Class::PLAYER_CLASS_COUNT][_TABLE_RACES]=
+	static const bool ClassRaceLookupTable[Class::Berserker][_TABLE_RACES]=
 	{                   /*Human  Barbarian Erudite Woodelf Highelf Darkelf Halfelf Dwarf  Troll  Ogre   Halfling Gnome  Iksar  Vahshir Froglok Drakkin*/
 	{ /*Warrior*/         true,  true,     false,  true,   false,  true,   true,   true,  true,  true,  true,    true,  true,  true,   true,   true},
 	{ /*Cleric*/          true,  false,    true,   false,  true,   true,   true,   true,  false, false, true,    true,  false, false,  true,   true},
@@ -2053,7 +2053,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
-	if (classtemp >= Class::PLAYER_CLASS_COUNT) {
+	if (classtemp >= Class::Berserker) {
 		LogInfo(" class is out of range");
 		return false;
 	}

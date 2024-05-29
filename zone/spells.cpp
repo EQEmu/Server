@@ -1119,7 +1119,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 		// calculates minimum level this spell is available - ensures similar casting difficulty for all classes
 
 		int minimum_level = UINT8_MAX;
-		for (int a = 0; a < Class::PLAYER_CLASS_COUNT; a++) {
+		for (int a = 0; a < Class::Berserker; a++) {
 			int this_lvl = spells[spell_id].classes[a];
 			if (this_lvl < minimum_level) {
 				minimum_level = this_lvl;

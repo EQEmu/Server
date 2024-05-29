@@ -72,9 +72,6 @@ namespace Class {
 	constexpr uint8 FellowshipMaster          = 69;
 	constexpr uint8 AlternateCurrencyMerchant = 70;
 	constexpr uint8 MercenaryLiaison          = 71;
-
-	constexpr uint8  PLAYER_CLASS_COUNT  = 16;
-	constexpr uint16 ALL_CLASSES_BITMASK = 65535;
 };
 
 namespace PlayerClassBitmask {
@@ -216,10 +213,6 @@ namespace ArmorType {
 	constexpr uint8 Leather = 2;
 	constexpr uint8 Chain   = 3;
 	constexpr uint8 Plate   = 4;
-
-	constexpr uint8 First = Unknown;
-	constexpr uint8 Last  = Plate;
-	constexpr uint8 Count = Last + 1;
 };
 
 namespace EQ {

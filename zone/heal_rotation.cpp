@@ -498,7 +498,7 @@ HealingStats* HealRotation::TargetHealingStats2(Mob* hr_target)
 
 bool HealRotation::SetArmorTypeSafeHPRatio(uint8 armor_type, float hp_ratio)
 {
-	if (armor_type >= ArmorType::Count)
+	if (armor_type > ArmorType::Plate)
 		return false;
 	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
@@ -512,7 +512,7 @@ bool HealRotation::SetArmorTypeSafeHPRatio(uint8 armor_type, float hp_ratio)
 
 bool HealRotation::SetArmorTypeCriticalHPRatio(uint8 armor_type, float hp_ratio)
 {
-	if (armor_type >= ArmorType::Count)
+	if (armor_type > ArmorType::Plate)
 		return false;
 	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
@@ -526,7 +526,7 @@ bool HealRotation::SetArmorTypeCriticalHPRatio(uint8 armor_type, float hp_ratio)
 
 float HealRotation::ArmorTypeSafeHPRatio(uint8 armor_type)
 {
-	if (armor_type < ArmorType::Count)
+	if (armor_type < ArmorType::Plate)
 		return m_safe_hp_ratio[armor_type];
 	else
 		return m_safe_hp_ratio[ArmorType::Unknown];
@@ -534,7 +534,7 @@ float HealRotation::ArmorTypeSafeHPRatio(uint8 armor_type)
 
 float HealRotation::ArmorTypeCriticalHPRatio(uint8 armor_type)
 {
-	if (armor_type < ArmorType::Count)
+	if (armor_type < ArmorType::Plate)
 		return m_critical_hp_ratio[armor_type];
 	else
 		return m_critical_hp_ratio[ArmorType::Unknown];

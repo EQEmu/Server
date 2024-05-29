@@ -52,7 +52,7 @@ uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, EQ::skills::SkillType skill_
 {
 	if (
 		!EQ::classes::IsPlayerClass(class_id) ||
-		class_id > Class::PLAYER_CLASS_COUNT ||
+		class_id > Class::Berserker ||
 		static_cast<uint32>(skill_id) > (EQ::skills::HIGHEST_SKILL + 1)
 		) {
 		return 0;

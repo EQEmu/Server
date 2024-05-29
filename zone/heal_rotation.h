@@ -151,8 +151,8 @@ private:
 	std::map<Mob*, HealingStats> m_target_healing_stats_1;
 	std::map<Mob*, HealingStats> m_target_healing_stats_2;
 
-	float m_safe_hp_ratio[ArmorType::Count];
-	float m_critical_hp_ratio[ArmorType::Count];
+	float m_safe_hp_ratio[ArmorType::Plate];
+	float m_critical_hp_ratio[ArmorType::Plate];
 };
 
 bool IsHealRotationMemberClass(uint8 class_id);
