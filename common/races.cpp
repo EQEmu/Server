@@ -1475,6 +1475,7 @@ bool EQ::races::IsPlayerRace(uint16 race_id) {
 bool EQ::races::IsValidRace(uint16 race_id) {
 	return (
 		EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3) ||
+		EQ::ValueWithin(race_id, 2253, 2259) ||
 		race_id == Race::InteractiveObject ||
 		race_id == Race::Node
 	);
