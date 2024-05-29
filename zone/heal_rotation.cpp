@@ -498,7 +498,7 @@ HealingStats* HealRotation::TargetHealingStats2(Mob* hr_target)
 
 bool HealRotation::SetArmorTypeSafeHPRatio(uint8 armor_type, float hp_ratio)
 {
-	if (armor_type >= ARMOR_TYPE_COUNT)
+	if (armor_type >= ArmorType::Count)
 		return false;
 	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
@@ -512,7 +512,7 @@ bool HealRotation::SetArmorTypeSafeHPRatio(uint8 armor_type, float hp_ratio)
 
 bool HealRotation::SetArmorTypeCriticalHPRatio(uint8 armor_type, float hp_ratio)
 {
-	if (armor_type >= ARMOR_TYPE_COUNT)
+	if (armor_type >= ArmorType::Count)
 		return false;
 	if (hp_ratio < CRITICAL_HP_RATIO_ABS || hp_ratio > SAFE_HP_RATIO_ABS)
 		return false;
@@ -526,33 +526,33 @@ bool HealRotation::SetArmorTypeCriticalHPRatio(uint8 armor_type, float hp_ratio)
 
 float HealRotation::ArmorTypeSafeHPRatio(uint8 armor_type)
 {
-	if (armor_type < ARMOR_TYPE_COUNT)
+	if (armor_type < ArmorType::Count)
 		return m_safe_hp_ratio[armor_type];
 	else
-		return m_safe_hp_ratio[ARMOR_TYPE_UNKNOWN];
+		return m_safe_hp_ratio[ArmorType::Unknown];
 }
 
 float HealRotation::ArmorTypeCriticalHPRatio(uint8 armor_type)
 {
-	if (armor_type < ARMOR_TYPE_COUNT)
+	if (armor_type < ArmorType::Count)
 		return m_critical_hp_ratio[armor_type];
 	else
-		return m_critical_hp_ratio[ARMOR_TYPE_UNKNOWN];
+		return m_critical_hp_ratio[ArmorType::Unknown];
 }
 
 void HealRotation::ResetArmorTypeHPLimits()
 {
-	m_safe_hp_ratio[ARMOR_TYPE_UNKNOWN] = SAFE_HP_RATIO_BASE;
-	m_safe_hp_ratio[ARMOR_TYPE_CLOTH] = SAFE_HP_RATIO_CLOTH;
-	m_safe_hp_ratio[ARMOR_TYPE_LEATHER] = SAFE_HP_RATIO_LEATHER;
-	m_safe_hp_ratio[ARMOR_TYPE_CHAIN] = SAFE_HP_RATIO_CHAIN;
-	m_safe_hp_ratio[ARMOR_TYPE_PLATE] = SAFE_HP_RATIO_PLATE;
+	m_safe_hp_ratio[ArmorType::Unknown] = SAFE_HP_RATIO_BASE;
+	m_safe_hp_ratio[ArmorType::Cloth] = SAFE_HP_RATIO_CLOTH;
+	m_safe_hp_ratio[ArmorType::Leather] = SAFE_HP_RATIO_LEATHER;
+	m_safe_hp_ratio[ArmorType::Chain] = SAFE_HP_RATIO_CHAIN;
+	m_safe_hp_ratio[ArmorType::Plate] = SAFE_HP_RATIO_PLATE;
 
-	m_critical_hp_ratio[ARMOR_TYPE_UNKNOWN] = CRITICAL_HP_RATIO_BASE;
-	m_critical_hp_ratio[ARMOR_TYPE_CLOTH] = CRITICAL_HP_RATIO_CLOTH;
-	m_critical_hp_ratio[ARMOR_TYPE_LEATHER] = CRITICAL_HP_RATIO_LEATHER;
-	m_critical_hp_ratio[ARMOR_TYPE_CHAIN] = CRITICAL_HP_RATIO_CHAIN;
-	m_critical_hp_ratio[ARMOR_TYPE_PLATE] = CRITICAL_HP_RATIO_PLATE;
+	m_critical_hp_ratio[ArmorType::Unknown] = CRITICAL_HP_RATIO_BASE;
+	m_critical_hp_ratio[ArmorType::Cloth] = CRITICAL_HP_RATIO_CLOTH;
+	m_critical_hp_ratio[ArmorType::Leather] = CRITICAL_HP_RATIO_LEATHER;
+	m_critical_hp_ratio[ArmorType::Chain] = CRITICAL_HP_RATIO_CHAIN;
+	m_critical_hp_ratio[ArmorType::Plate] = CRITICAL_HP_RATIO_PLATE;
 }
 
 bool HealRotation::valid_state()
@@ -596,12 +596,12 @@ bool HealRotation::healable_target(bool use_class_at, bool critical_only)
 		return false;
 
 	if (use_class_at) {
-		if (critical_only && healable_target->GetHPRatio() > m_critical_hp_ratio[ClassArmorType(healable_target->GetClass())])
+		if (critical_only && healable_target->GetHPRatio() > m_critical_hp_ratio[EQ::classes::GetClassArmorType(healable_target->GetClass())])
 			return false;
-		if (healable_target->GetHPRatio() > m_safe_hp_ratio[ClassArmorType(healable_target->GetClass())])
+		if (healable_target->GetHPRatio() > m_safe_hp_ratio[EQ::classes::GetClassArmorType(healable_target->GetClass())])
 			return false;
 		if (healable_target->IsBerserk() && (healable_target->GetClass() == Class::Warrior || healable_target->GetClass() == Class::Berserker)) {
-			if (healable_target->GetHPRatio() <= RuleI(Combat, BerserkerFrenzyEnd) && healable_target->GetHPRatio() > m_critical_hp_ratio[ClassArmorType(healable_target->GetClass())])
+			if (healable_target->GetHPRatio() <= RuleI(Combat, BerserkerFrenzyEnd) && healable_target->GetHPRatio() > m_critical_hp_ratio[EQ::classes::GetClassArmorType(healable_target->GetClass())])
 				return false;
 		}
 	}
@@ -622,17 +622,17 @@ bool HealRotation::healable_target(bool use_class_at, bool critical_only)
 void HealRotation::bias_targets()
 {
 #define LT_HPRATIO(l, r) (l->GetHPRatio() < r->GetHPRatio())
-#define LT_ARMTYPE(l, r) (ClassArmorType(l->GetClass()) < ClassArmorType(r->GetClass()))
+#define LT_ARMTYPE(l, r) (EQ::classes::GetClassArmorType(l->GetClass()) < EQ::classes::GetClassArmorType(r->GetClass()))
 
 #define EQ_ALIVE(l, r) (l->GetAppearance() != eaDead && r->GetAppearance() != eaDead)
 #define EQ_READY(l, r, ct) (l->DontHealMeBefore() <= ct && r->DontHealMeBefore() <= ct)
 #define EQ_TANK(l, r) ((l->HasGroup() && l->GetGroup()->AmIMainTank(l->GetCleanName())) && (r->HasGroup() && r->GetGroup()->AmIMainTank(r->GetCleanName())))
 #define EQ_HEALER(l, r) (IsHealRotationMemberClass(l->GetClass()) && IsHealRotationMemberClass(r->GetClass()))
-#define EQ_ARMTYPE(l, r) (ClassArmorType(l->GetClass()) == ClassArmorType(r->GetClass()))
-#define EQ_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(l->GetClass())) && \
-	r->GetHPRatio() <= (*r->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(r->GetClass())))
-#define EQ_ATWOUND(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeSafeHPRatio(ClassArmorType(l->GetClass())) && \
-	r->GetHPRatio() <= (*r->TargetOfHealRotation())->ArmorTypeSafeHPRatio(ClassArmorType(r->GetClass())))
+#define EQ_ARMTYPE(l, r) (EQ::classes::GetClassArmorType(l->GetClass()) == EQ::classes::GetClassArmorType(r->GetClass()))
+#define EQ_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(EQ::classes::GetClassArmorType(l->GetClass())) && \
+	r->GetHPRatio() <= (*r->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(EQ::classes::GetClassArmorType(r->GetClass())))
+#define EQ_ATWOUND(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeSafeHPRatio(EQ::classes::GetClassArmorType(l->GetClass())) && \
+	r->GetHPRatio() <= (*r->TargetOfHealRotation())->ArmorTypeSafeHPRatio(EQ::classes::GetClassArmorType(r->GetClass())))
 
 #define GT_ALIVE(l, r) (l->GetAppearance() != eaDead && r->GetAppearance() == eaDead)
 #define GT_READY(l, r, ct) (l->DontHealMeBefore() <= ct && r->DontHealMeBefore() > ct)
@@ -640,12 +640,12 @@ void HealRotation::bias_targets()
 #define GT_HEALER(l, r) (IsHealRotationMemberClass(l->GetClass()) && !IsHealRotationMemberClass(r->GetClass()))
 #define GT_HEALFREQ(l, r) (l->HealRotationHealFrequency() > r->HealRotationHealFrequency())
 #define GT_HEALCNT(l, r) (l->HealRotationHealCount() > r->HealRotationHealCount())
-#define GT_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(l->GetClass())) && \
-	r->GetHPRatio() > (*r->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(ClassArmorType(r->GetClass())))
+#define GT_ATCRIT(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(EQ::classes::GetClassArmorType(l->GetClass())) && \
+	r->GetHPRatio() > (*r->TargetOfHealRotation())->ArmorTypeCriticalHPRatio(EQ::classes::GetClassArmorType(r->GetClass())))
 #define GT_XHEALFREQ(l, r) (l->HealRotationExtendedHealFrequency() > r->HealRotationExtendedHealFrequency())
 #define GT_XHEALCNT(l, r) (l->HealRotationExtendedHealCount() > r->HealRotationExtendedHealCount())
-#define GT_ATWOUND(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeSafeHPRatio(ClassArmorType(l->GetClass())) && \
-	r->GetHPRatio() > (*r->TargetOfHealRotation())->ArmorTypeSafeHPRatio(ClassArmorType(r->GetClass())))
+#define GT_ATWOUND(l, r) (l->GetHPRatio() <= (*l->TargetOfHealRotation())->ArmorTypeSafeHPRatio(EQ::classes::GetClassArmorType(l->GetClass())) && \
+	r->GetHPRatio() > (*r->TargetOfHealRotation())->ArmorTypeSafeHPRatio(EQ::classes::GetClassArmorType(r->GetClass())))
 
 	if (m_target_pool.empty()) {
 		m_casting_target_poke = true;
@@ -907,12 +907,12 @@ void HealRotation::bias_targets()
 		LogError("([{}]) [{}] (hp: [{}], at: [{}], dontheal: [{}], crit(base): [{}]([{}]), safe(base): [{}]([{}]), hcnt(ext): [{}]([{}]), hfreq(ext): [{}]([{}]))",
 			(++target_index), tlist_iter->GetCleanName(),
 			tlist_iter->GetHPRatio(),
-			ClassArmorType(tlist_iter->GetClass()),
+			EQ::classes::GetClassArmorType(tlist_iter->GetClass()),
 			((tlist_iter->DontHealMeBefore() > Timer::GetCurrentTime()) ? ('T') : ('F')),
-			((tlist_iter->GetHPRatio()>m_critical_hp_ratio[ClassArmorType(tlist_iter->GetClass())]) ? ('F') : ('T')),
-			((tlist_iter->GetHPRatio()>m_critical_hp_ratio[ARMOR_TYPE_UNKNOWN]) ? ('F') : ('T')),
-			((tlist_iter->GetHPRatio()>m_safe_hp_ratio[ClassArmorType(tlist_iter->GetClass())]) ? ('T') : ('F')),
-			((tlist_iter->GetHPRatio()>m_safe_hp_ratio[ARMOR_TYPE_UNKNOWN]) ? ('T') : ('F')),
+			((tlist_iter->GetHPRatio()>m_critical_hp_ratio[EQ::classes::GetClassArmorType(tlist_iter->GetClass())]) ? ('F') : ('T')),
+			((tlist_iter->GetHPRatio()>m_critical_hp_ratio[ArmorType::Unknown]) ? ('F') : ('T')),
+			((tlist_iter->GetHPRatio()>m_safe_hp_ratio[EQ::classes::GetClassArmorType(tlist_iter->GetClass())]) ? ('T') : ('F')),
+			((tlist_iter->GetHPRatio()>m_safe_hp_ratio[ArmorType::Unknown]) ? ('T') : ('F')),
 			tlist_iter->HealRotationHealCount(),
 			tlist_iter->HealRotationExtendedHealCount(),
 			tlist_iter->HealRotationHealFrequency(),

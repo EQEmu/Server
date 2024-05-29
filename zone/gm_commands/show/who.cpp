@@ -77,7 +77,7 @@ void ShowWho(Client *c, const Seperator *sep)
 		const uint8        account_status      = Strings::ToUnsignedInt(row[7]);
 		const std::string& account_name        = row[8];
 		const std::string& account_ip          = row[9];
-		const std::string& base_class_name     = GetClassIDName(player_class);
+		const std::string& base_class_name     = EQ::classes::GetClassName(player_class);
 		const std::string& displayed_race_name = GetRaceIDName(player_race);
 
 		if (!search_criteria.empty()) {
@@ -128,7 +128,7 @@ void ShowWho(Client *c, const Seperator *sep)
 			"Summon"
 		);
 
-		const std::string& display_class_name = GetClassIDName(player_class, player_level);
+		const std::string& display_class_name = EQ::classes::GetClassName(player_class, player_level);
 
 		const std::string& class_saylink = Saylink::Silent(
 			fmt::format(

@@ -173,7 +173,7 @@ bool EQ::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
 		return false;
 	}
 
-	if (!(Classes & GetPlayerClassBit(GetPlayerClassValue(class_id)))) {
+	if (!(Classes & EQ::classes::GetPlayerClassBit(EQ::classes::GetPlayerClassValue(class_id)))) {
 		return false;
 	}
 
@@ -183,7 +183,7 @@ bool EQ::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
 bool EQ::ItemData::IsClassEquipable(uint16 class_id) const
 {
 
-	if (!(Classes & GetPlayerClassBit(GetPlayerClassValue(class_id)))) {
+	if (!(Classes & EQ::classes::GetPlayerClassBit(EQ::classes::GetPlayerClassValue(class_id)))) {
 		return false;
 	}
 

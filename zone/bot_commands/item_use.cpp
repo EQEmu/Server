@@ -105,41 +105,41 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
 
 	if (class_mask) {
-		ActionableBots::Filter_ByClasses(c, sbl, GetPlayerClassBit(class_mask));
+		ActionableBots::Filter_ByClasses(c, sbl, EQ::classes::GetPlayerClassBit(class_mask));
 	}
 
 	for (const auto& bot_iter : sbl) {
 		if (!bot_iter) {
 			continue;
 		}
-		if (caster_only && !IsCasterClass(bot_iter->GetClass())) {
+		if (caster_only && !EQ::classes::IsCasterClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (hybrid_only && !IsSpellFighterClass(bot_iter->GetClass())) {
+		if (hybrid_only && !EQ::classes::IsSpellFighterClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (melee_only && !IsNonSpellFighterClass(bot_iter->GetClass())) {
+		if (melee_only && !EQ::classes::IsNonSpellFighterClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (wis_caster_only && !IsWISCasterClass(bot_iter->GetClass())) {
+		if (wis_caster_only && !EQ::classes::IsWISCasterClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (int_caster_only && !IsINTCasterClass(bot_iter->GetClass())) {
+		if (int_caster_only && !EQ::classes::IsINTCasterClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (plate_only && !IsPlateClass(bot_iter->GetClass())) {
+		if (plate_only && !EQ::classes::IsPlateClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (chain_only && !IsChainClass(bot_iter->GetClass())) {
+		if (chain_only && !EQ::classes::IsChainClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (leather_only && !IsLeatherClass(bot_iter->GetClass())) {
+		if (leather_only && !EQ::classes::IsLeatherClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (cloth_only && !IsClothClass(bot_iter->GetClass())) {
+		if (cloth_only && !EQ::classes::IsClothClass(bot_iter->GetClass())) {
 			continue;
 		}
-		if (((~item_data->Races) & GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & GetPlayerClassBit(bot_iter->GetClass()))) {
+		if (((~item_data->Races) & GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & EQ::classes::GetPlayerClassBit(bot_iter->GetClass()))) {
 			continue;
 		}
 

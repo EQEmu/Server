@@ -566,10 +566,10 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	}
 
 	LogInfo(
-		"char_name [{}] race_id [{}] class_id [{}]",
-		char_name,
-		GetRaceIDName(race_id),
-		GetClassIDName(class_id)
+	"char_name [{}] race_id [{}] class_id [{}]",
+	char_name,
+	GetRaceIDName(race_id),
+	EQ::classes::GetClassName(class_id)
 	);
 
 	bool is_valid = true;

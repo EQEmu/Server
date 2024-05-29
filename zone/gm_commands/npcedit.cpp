@@ -91,7 +91,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
 				npc_id_string,
-				GetClassIDName(class_id),
+				EQ::classes::GetClassName(class_id),
 				class_id
 			);
 		} else {

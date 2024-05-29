@@ -1102,7 +1102,7 @@ private:
 			for (bcst_levels::iterator levels_iter = bot_levels.begin(); levels_iter != bot_levels.end(); ++levels_iter) {
 				if (levels_iter->second < test_iter->second)
 					test_iter = levels_iter;
-				if (strcasecmp(GetClassIDName(levels_iter->first), GetClassIDName(test_iter->first)) < 0 && levels_iter->second <= test_iter->second)
+				if (strcasecmp(EQ::classes::GetClassName(levels_iter->first).c_str(), EQ::classes::GetClassName(test_iter->first).c_str()) < 0 && levels_iter->second <= test_iter->second)
 					test_iter = levels_iter;
 			}
 
@@ -1114,8 +1114,10 @@ private:
 			else
 				bot_segment = " or %s(%u)";
 
-			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), GetClassIDName(test_iter->first), test_iter->second));
-			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", GetClassIDName(test_iter->first), test_iter->second);
+			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(),
+															  EQ::classes::GetClassName(test_iter->first), test_iter->second));
+			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)",
+																					EQ::classes::GetClassName(test_iter->first), test_iter->second);
 			bot_levels.erase(test_iter);
 		}
 	}
@@ -1645,7 +1647,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const std::string bot_race_name = GetRaceIDName(bot_race);
-		const std::string bot_class_name = GetClassIDName(bot_class);
+		const std::string bot_class_name = EQ::classes::GetClassName(bot_class);
 
 		bot_owner->Message(
 			Chat::White,
@@ -1712,13 +1714,13 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			message = fmt::format(
 				"You cannot create anymore than {} {} bot{}.",
 				bot_creation_limit_class,
-				GetClassIDName(bot_class),
+				EQ::classes::GetClassName(bot_class),
 				bot_creation_limit_class != 1 ? "s" : ""
 			);
 		} else {
 			message = fmt::format(
 				"You cannot create any {} bots.",
-				GetClassIDName(bot_class)
+				EQ::classes::GetClassName(bot_class)
 			);
 		}
 
@@ -1753,7 +1755,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			fmt::format(
 				"You must be level {} to use {} bots.",
 				bot_character_level_class,
-				GetClassIDName(bot_class)
+				EQ::classes::GetClassName(bot_class)
 			).c_str()
 		);
 		return bot_id;
@@ -1781,7 +1783,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			my_bot->GetCleanName(),
 			my_bot->GetBotID(),
 			GetRaceIDName(my_bot->GetRace()),
-			GetClassIDName(my_bot->GetClass())
+			EQ::classes::GetClassName(my_bot->GetClass())
 		).c_str()
 	);
 

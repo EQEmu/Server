@@ -2305,7 +2305,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	final_string += DialogueWindow::Table(
 		DialogueWindow::TableRow(
 			DialogueWindow::TableCell(fmt::format("Race: {}", GetPlayerRaceAbbreviation(GetBaseRace()))) +
-			DialogueWindow::TableCell(fmt::format("Class: {}", GetPlayerClassAbbreviation(GetClass()))) +
+			DialogueWindow::TableCell(fmt::format("Class: {}", EQ::classes::GetPlayerClassAbbreviation(GetClass()))) +
 			DialogueWindow::TableCell(fmt::format("Level: {}", std::to_string(GetLevel())))
 		)
 	);
@@ -2574,7 +2574,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		fmt::format(
 			"Level: {} Class: {} ({}) Race: {} ({}) Damage Shield: {}/{} Size: {:.1f} Run Speed: {} Weight: {:.1f}/{}",
 			GetLevel(),
-			GetClassIDName(GetClass()),
+			EQ::classes::GetClassName(GetClass()),
 			GetClass(),
 			GetRaceIDName(GetRace()),
 			GetRace(),
@@ -3493,7 +3493,7 @@ void Mob::ShowStats(Client* c)
 				"Race: {} ({}) Class: {} ({}) Gender: {} ({})",
 				GetRaceIDName(t->GetRace()),
 				t->GetRace(),
-				GetClassIDName(t->GetClass()),
+				EQ::classes::GetClassName(t->GetClass()),
 				t->GetClass(),
 				GetGenderName(t->GetGender()),
 				t->GetGender()
@@ -7718,11 +7718,11 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	}
 
 	const uint8 class_id = GetClass();
-	if (!IsPlayerClass(class_id)) {
+	if (!EQ::classes::IsPlayerClass(class_id)) {
 		return false;
 	}
 
-	const uint16 class_bitmask = GetPlayerClassBit(class_id);
+	const uint16 class_bitmask = EQ::classes::GetPlayerClassBit(class_id);
 	return (item_classes & class_bitmask);
 }
 

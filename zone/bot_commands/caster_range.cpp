@@ -57,7 +57,7 @@ void bot_command_caster_range(Client* c, const Seperator* sep)
 	int success_count = 0;
 
 	for (auto my_bot : sbl) {
-		if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
+		if (!EQ::classes::IsCasterClass(my_bot->GetClass()) && !EQ::classes::IsHybridClass(my_bot->GetClass())) {
 			continue;
 		}
 

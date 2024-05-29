@@ -134,7 +134,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 	for (const auto& e : l) {
 		if (
 			e.spell_type_index >= Bot::SPELL_TYPE_COUNT ||
-			!IsPlayerClass(e.class_id) ||
+			!EQ::classes::IsPlayerClass(e.class_id) ||
 			e.stance_index >= EQ::constants::STANCE_TYPE_COUNT
 		) {
 			continue;
@@ -208,7 +208,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 		)
 	);
 
-	if (IsPlayerClass(class_id)) {
+	if (EQ::classes::IsPlayerClass(class_id)) {
 		bot_class_count = BotDataRepository::Count(
 			database,
 			fmt::format(
@@ -1969,17 +1969,17 @@ bool BotDatabase::LoadHealRotation(Bot* hr_member, std::list<uint32>& member_lis
 	m->SetAdaptiveTargeting(e.adaptive_targeting);
 	m->SetCastingOverride(e.casting_override);
 
-	m->SetArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN, e.safe_hp_base);
-	m->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH, e.safe_hp_cloth);
-	m->SetArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER, e.safe_hp_leather);
-	m->SetArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN, e.safe_hp_chain);
-	m->SetArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE, e.safe_hp_plate);
+	m->SetArmorTypeSafeHPRatio(ArmorType::Unknown, e.safe_hp_base);
+	m->SetArmorTypeSafeHPRatio(ArmorType::Cloth, e.safe_hp_cloth);
+	m->SetArmorTypeSafeHPRatio(ArmorType::Leather, e.safe_hp_leather);
+	m->SetArmorTypeSafeHPRatio(ArmorType::Chain, e.safe_hp_chain);
+	m->SetArmorTypeSafeHPRatio(ArmorType::Plate, e.safe_hp_plate);
 
-	m->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN, e.critical_hp_base);
-	m->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH, e.critical_hp_cloth);
-	m->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER, e.critical_hp_leather);
-	m->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN, e.critical_hp_chain);
-	m->SetArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE, e.critical_hp_plate);
+	m->SetArmorTypeCriticalHPRatio(ArmorType::Unknown, e.critical_hp_base);
+	m->SetArmorTypeCriticalHPRatio(ArmorType::Cloth, e.critical_hp_cloth);
+	m->SetArmorTypeCriticalHPRatio(ArmorType::Leather, e.critical_hp_leather);
+	m->SetArmorTypeCriticalHPRatio(ArmorType::Chain, e.critical_hp_chain);
+	m->SetArmorTypeCriticalHPRatio(ArmorType::Plate, e.critical_hp_plate);
 
 	load_flag = true;
 
@@ -2064,17 +2064,17 @@ bool BotDatabase::SaveHealRotation(Bot* hr_member, bool& member_fail, bool& targ
 	e.adaptive_targeting = m->AdaptiveTargeting();
 	e.casting_override   = m->CastingOverride();
 
-	e.safe_hp_base    = m->ArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN);
-	e.safe_hp_cloth   = m->ArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH);
-	e.safe_hp_leather = m->ArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER);
-	e.safe_hp_chain   = m->ArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN);
-	e.safe_hp_plate   = m->ArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE);
+	e.safe_hp_base    = m->ArmorTypeSafeHPRatio(ArmorType::Unknown);
+	e.safe_hp_cloth   = m->ArmorTypeSafeHPRatio(ArmorType::Cloth);
+	e.safe_hp_leather = m->ArmorTypeSafeHPRatio(ArmorType::Leather);
+	e.safe_hp_chain   = m->ArmorTypeSafeHPRatio(ArmorType::Chain);
+	e.safe_hp_plate   = m->ArmorTypeSafeHPRatio(ArmorType::Plate);
 
-	e.critical_hp_base    = m->ArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN);
-	e.critical_hp_cloth   = m->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH);
-	e.critical_hp_leather = m->ArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER);
-	e.critical_hp_chain   = m->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN);
-	e.critical_hp_plate   = m->ArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE);
+	e.critical_hp_base    = m->ArmorTypeCriticalHPRatio(ArmorType::Unknown);
+	e.critical_hp_cloth   = m->ArmorTypeCriticalHPRatio(ArmorType::Cloth);
+	e.critical_hp_leather = m->ArmorTypeCriticalHPRatio(ArmorType::Leather);
+	e.critical_hp_chain   = m->ArmorTypeCriticalHPRatio(ArmorType::Chain);
+	e.critical_hp_plate   = m->ArmorTypeCriticalHPRatio(ArmorType::Plate);
 
 	e = BotHealRotationsRepository::InsertOne(database, e);
 

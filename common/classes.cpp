@@ -15,371 +15,58 @@
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 	*/
-#include <fmt/format.h>
 #include "../common/global_define.h"
 #include "../common/classes.h"
 #include "data_verification.h"
 
-const char *GetClassIDName(uint8 class_id, uint8 level)
+const std::string& EQ::classes::GetClassName(uint8 class_id, uint8 level)
 {
-	switch (class_id) {
-		case Class::Warrior: {
-			if (level >= 75) {
-				return "Imperator";
-			} else if (level >= 70) {
-				return "Vanquisher";
-			} else if (level >= 65) {
-				return "Overlord";
-			} else if (level >= 60) {
-				return "Warlord";
-			} else if (level >= 55) {
-				return "Myrmidon";
-			} else if (level >= 51) {
-				return "Champion";
-			} else {
-				return "Warrior";
-			}
-		}
-		case Class::Cleric: {
-			if (level >= 75) {
-				return "Exemplar";
-			} else if (level >= 70) {
-				return "Prelate";
-			} else if (level >= 65) {
-				return "Archon";
-			} else if (level >= 60) {
-				return "High Priest";
-			} else if (level >= 55) {
-				return "Templar";
-			} else if (level >= 51) {
-				return "Vicar";
-			} else {
-				return "Cleric";
-			}
-		}
-		case Class::Paladin: {
-			if (level >= 75) {
-				return "Holy Defender";
-			} else if (level >= 70) {
-				return "Lord";
-			} else if (level >= 65) {
-				return "Lord Protector";
-			} else if (level >= 60) {
-				return "Crusader";
-			} else if (level >= 55) {
-				return "Knight";
-			} else if (level >= 51) {
-				return "Cavalier";
-			} else {
-				return "Paladin";
-			}
-		}
-		case Class::Ranger: {
-			if (level >= 75) {
-				return "Huntmaster";
-			} else if (level >= 70) {
-				return "Plainswalker";
-			} else if (level >= 65) {
-				return "Forest Stalker";
-			} else if (level >= 60) {
-				return "Warder";
-			} else if (level >= 55) {
-				return "Outrider";
-			} else if (level >= 51) {
-				return "Pathfinder";
-			} else {
-				return "Ranger";
-			}
-		}
-		case Class::ShadowKnight: {
-			if (level >= 75) {
-				return "Bloodreaver";
-			} else if (level >= 70) {
-				return "Scourge Knight";
-			} else if (level >= 65) {
-				return "Dread Lord";
-			} else if (level >= 60) {
-				return "Grave Lord";
-			} else if (level >= 55) {
-				return "Revenant";
-			} else if (level >= 51) {
-				return "Reaver";
-			} else {
-				return shadow_knight_class_name.c_str();
-			}
-		}
-		case Class::Druid: {
-			if (level >= 75) {
-				return "Storm Caller";
-			} else if (level >= 70) {
-				return "Natureguard";
-			} else if (level >= 65) {
-				return "Storm Warden";
-			} else if (level >= 60) {
-				return "Hierophant";
-			} else if (level >= 55) {
-				return "Preserver";
-			} else if (level >= 51) {
-				return "Wanderer";
-			} else {
-				return "Druid";
-			}
-		}
-		case Class::Monk: {
-			if (level >= 75) {
-				return "Ashenhand";
-			} else if (level >= 70) {
-				return "Stone Fist";
-			} else if (level >= 65) {
-				return "Transcendent";
-			} else if (level >= 60) {
-				return "Grandmaster";
-			} else if (level >= 55) {
-				return "Master";
-			} else if (level >= 51) {
-				return "Disciple";
-			} else {
-				return "Monk";
-			}
-		}
-		case Class::Bard: {
-			if (level >= 75) {
-				return "Lyricist";
-			} else if (level >= 70) {
-				return "Performer";
-			} else if (level >= 65) {
-				return "Maestro";
-			} else if (level >= 60) {
-				return "Virtuoso";
-			} else if (level >= 55) {
-				return "Troubadour";
-			} else if (level >= 51) {
-				return "Minstrel";
-			} else {
-				return "Bard";
-			}
-		}
-		case Class::Rogue: {
-			if (level >= 75) {
-				return "Shadowblade";
-			} else if (level >= 70) {
-				return "Nemesis";
-			} else if (level >= 65) {
-				return "Deceiver";
-			} else if (level >= 60) {
-				return "Assassin";
-			} else if (level >= 55) {
-				return "Blackguard";
-			} else if (level >= 51) {
-				return "Rake";
-			} else {
-				return "Rogue";
-			}
-		}
-		case Class::Shaman: {
-			if (level >= 75) {
-				return "Spiritwatcher";
-			} else if (level >= 70) {
-				return "Soothsayer";
-			} else if (level >= 65) {
-				return "Prophet";
-			} else if (level >= 60) {
-				return "Oracle";
-			} else if (level >= 55) {
-				return "Luminary";
-			} else if (level >= 51) {
-				return "Mystic";
-			} else {
-				return "Shaman";
-			}
-		}
-		case Class::Necromancer: {
-			if (level >= 75) {
-				return "Deathcaller";
-			} else if (level >= 70) {
-				return "Wraith";
-			} else if (level >= 65) {
-				return "Arch Lich";
-			} else if (level >= 60) {
-				return "Warlock";
-			} else if (level >= 55) {
-				return "Defiler";
-			} else if (level >= 51) {
-				return "Heretic";
-			} else {
-				return "Necromancer";
-			}
-		}
-		case Class::Wizard: {
-			if (level >= 75) {
-				return "Pyromancer";
-			} else if (level >= 70) {
-				return "Grand Arcanist";
-			} else if (level >= 65) {
-				return "Arcanist";
-			} else if (level >= 60) {
-				return "Sorcerer";
-			} else if (level >= 55) {
-				return "Evoker";
-			} else if (level >= 51) {
-				return "Channeler";
-			} else {
-				return "Wizard";
-			}
-		}
-		case Class::Magician: {
-			if (level >= 75) {
-				return "Grand Summoner";
-			} else if (level >= 70) {
-				return "Arch Magus";
-			} else if (level >= 65) {
-				return "Arch Convoker";
-			} else if (level >= 60) {
-				return "Arch Mage";
-			} else if (level >= 55) {
-				return "Conjurer";
-			}
-			if (level >= 51) {
-				return "Elementalist";
-			} else {
-				return "Magician";
-			}
-		}
-		case Class::Enchanter: {
-			if (level >= 75) {
-				return "Entrancer";
-			} else if (level >= 70) {
-				return "Bedazzler";
-			} else if (level >= 65) {
-				return "Coercer";
-			} else if (level >= 60) {
-				return "Phantasmist";
-			} else if (level >= 55) {
-				return "Beguiler";
-			} else if (level >= 51) {
-				return "Illusionist";
-			} else {
-				return "Enchanter";
-			}
-		}
-		case Class::Beastlord: {
-			if (level >= 75) {
-				return "Frostblood";
-			} else if (level >= 70) {
-				return "Wildblood";
-			} else if (level >= 65) {
-				return "Feral Lord";
-			} else if (level >= 60) {
-				return "Savage Lord";
-			} else if (level >= 55) {
-				return "Animist";
-			} else if (level >= 51) {
-				return "Primalist";
-			} else {
-				return "Beastlord";
-			}
-		}
-		case Class::Berserker: {
-			if (level >= 75) {
-				return "Juggernaut";
-			} else if (level >= 70) {
-				return "Ravager";
-			} else if (level >= 65) {
-				return "Fury";
-			} else if (level >= 60) {
-				return "Rager";
-			} else if (level >= 55) {
-				return "Vehement";
-			} else if (level >= 51) {
-				return "Brawler";
-			} else {
-				return "Berserker";
-			}
-		}
-		case Class::Banker:
-			return "Banker";
-		case Class::WarriorGM:
-			return "Warrior Guildmaster";
-		case Class::ClericGM:
-			return "Cleric Guildmaster";
-		case Class::PaladinGM:
-			return "Paladin Guildmaster";
-		case Class::RangerGM:
-			return "Ranger Guildmaster";
-		case Class::ShadowKnightGM:
-			return fmt::format("{} Guildmaster", shadow_knight_class_name).c_str();
-		case Class::DruidGM:
-			return "Druid Guildmaster";
-		case Class::MonkGM:
-			return "Monk Guildmaster";
-		case Class::BardGM:
-			return "Bard Guildmaster";
-		case Class::RogueGM:
-			return "Rogue Guildmaster";
-		case Class::ShamanGM:
-			return "Shaman Guildmaster";
-		case Class::NecromancerGM:
-			return "Necromancer Guildmaster";
-		case Class::WizardGM:
-			return "Wizard Guildmaster";
-		case Class::MagicianGM:
-			return "Magician Guildmaster";
-		case Class::EnchanterGM:
-			return "Enchanter Guildmaster";
-		case Class::BeastlordGM:
-			return "Beastlord Guildmaster";
-		case Class::BerserkerGM:
-			return "Berserker Guildmaster";
-		case Class::Merchant:
-			return "Merchant";
-		case Class::DiscordMerchant:
-			return "Discord Merchant";
-		case Class::AdventureRecruiter:
-			return "Adventure Recruiter";
-		case Class::AdventureMerchant:
-			return "Adventure Merchant";
-		case Class::LDoNTreasure:
-			return "LDoN Treasure";
-		case Class::TributeMaster:
-			return "Tribute Master";
-		case Class::GuildTributeMaster:
-			return "Guild Tribute Master";
-		case Class::GuildBanker:
-			return "Guild Banker";
-		case Class::NorrathsKeepersMerchant:
-			return "Radiant Crystal Merchant";
-		case Class::DarkReignMerchant:
-			return "Ebon Crystal Merchant";
-		case Class::FellowshipMaster:
-			return "Fellowship Master";
-		case Class::AlternateCurrencyMerchant:
-			return "Alternate Currency Merchant";
-		case Class::MercenaryLiaison:
-			return "Mercenary Liaison";
-		default:
-			return "Unknown";
-	}
-}
-
-uint8 GetPlayerClassValue(uint8 class_id)
-{
-	if (!IsPlayerClass(class_id)) {
-		return 0;
+	if (!IsValidClass(class_id)) {
+		return "Unknown";
 	}
 
-	return class_id;
-}
-
-uint16 GetPlayerClassBit(uint8 class_id)
-{
-	if (!IsPlayerClass(class_id)) {
-		return 0;
+	if (level >= 51 && IsPlayerClass(class_id)) {
+		return GetClassLevelName(class_id, level);
 	}
 
-	return player_class_bitmasks[class_id];
+	const auto& e = class_map.find(class_id);
+	return e != class_map.end() ? e->second : "Unknown";
 }
 
-bool IsFighterClass(uint8 class_id)
+const std::string& EQ::classes::GetClassLevelName(uint8 class_id, uint8 level)
+{
+	if (level < 51 || !IsPlayerClass(class_id)) {
+		return GetClassName(class_id);
+	}
+
+	const std::map<uint8, uint8>& levels = {
+		{ 75, 5 },
+		{ 70, 4 },
+		{ 65, 3 },
+		{ 60, 2 },
+		{ 55, 1 }
+	};
+
+	for (const auto& e : levels) {
+		if (level >= e.first) {
+			return player_class_level_names.at(class_id).at(e.second);
+		}
+	}
+
+	return std::string();
+}
+
+uint8 EQ::classes::GetPlayerClassValue(uint8 class_id)
+{
+	return IsPlayerClass(class_id) ? class_id : 0;
+}
+
+uint16 EQ::classes::GetPlayerClassBit(uint8 class_id)
+{
+	return IsPlayerClass(class_id) ? player_class_bitmasks[class_id] : 0;
+}
+
+bool EQ::classes::IsFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -397,7 +84,7 @@ bool IsFighterClass(uint8 class_id)
 	}
 }
 
-bool IsSpellFighterClass(uint8 class_id)
+bool EQ::classes::IsSpellFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Paladin:
@@ -410,7 +97,7 @@ bool IsSpellFighterClass(uint8 class_id)
 	}
 }
 
-bool IsNonSpellFighterClass(uint8 class_id)
+bool EQ::classes::IsNonSpellFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -424,21 +111,21 @@ bool IsNonSpellFighterClass(uint8 class_id)
 	}
 }
 
-bool IsHybridClass(uint8 class_id)
+bool EQ::classes::IsHybridClass(uint8 class_id)
 {
 	switch (class_id) {
-	case Class::Paladin:
-	case Class::Ranger:
-	case Class::ShadowKnight:
-	case Class::Bard:
-	case Class::Beastlord:
-		return true;
-	default:
-		return false;
+		case Class::Paladin:
+		case Class::Ranger:
+		case Class::ShadowKnight:
+		case Class::Bard:
+		case Class::Beastlord:
+			return true;
+		default:
+			return false;
 	}
 }
 
-bool IsCasterClass(uint8 class_id)
+bool EQ::classes::IsCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -454,7 +141,7 @@ bool IsCasterClass(uint8 class_id)
 	}
 }
 
-bool IsINTCasterClass(uint8 class_id)
+bool EQ::classes::IsINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -467,7 +154,7 @@ bool IsINTCasterClass(uint8 class_id)
 	}
 }
 
-bool IsHeroicINTCasterClass(uint8 class_id)
+bool EQ::classes::IsHeroicINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -481,7 +168,7 @@ bool IsHeroicINTCasterClass(uint8 class_id)
 	}
 }
 
-bool IsWISCasterClass(uint8 class_id)
+bool EQ::classes::IsWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -493,7 +180,7 @@ bool IsWISCasterClass(uint8 class_id)
 	}
 }
 
-bool IsHeroicWISCasterClass(uint8 class_id)
+bool EQ::classes::IsHeroicWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -508,7 +195,7 @@ bool IsHeroicWISCasterClass(uint8 class_id)
 	}
 }
 
-bool IsPlateClass(uint8 class_id)
+bool EQ::classes::IsPlateClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -522,7 +209,7 @@ bool IsPlateClass(uint8 class_id)
 	}
 }
 
-bool IsChainClass(uint8 class_id)
+bool EQ::classes::IsChainClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Ranger:
@@ -535,7 +222,7 @@ bool IsChainClass(uint8 class_id)
 	}
 }
 
-bool IsLeatherClass(uint8 class_id)
+bool EQ::classes::IsLeatherClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Druid:
@@ -547,7 +234,7 @@ bool IsLeatherClass(uint8 class_id)
 	}
 }
 
-bool IsClothClass(uint8 class_id)
+bool EQ::classes::IsClothClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -560,65 +247,40 @@ bool IsClothClass(uint8 class_id)
 	}
 }
 
-uint8 ClassArmorType(uint8 class_id)
+uint8 EQ::classes::GetClassArmorType(uint8 class_id)
 {
+	uint8 armor_type = ArmorType::Unknown;
+	if (!IsValidClass(class_id) || !IsPlayerClass(class_id)) {
+		return armor_type;
+	}
+
 	if (IsChainClass(class_id)) {
-		return ARMOR_TYPE_CHAIN;
+		armor_type = ArmorType::Chain;
 	} else if (IsClothClass(class_id)) {
-		return ARMOR_TYPE_CLOTH;
+		armor_type = ArmorType::Cloth;
 	} else if (IsLeatherClass(class_id)) {
-		return ARMOR_TYPE_LEATHER;
+		armor_type = ArmorType::Leather;
 	} else if (IsPlateClass(class_id)) {
-		return ARMOR_TYPE_PLATE;
+		armor_type = ArmorType::Plate;
 	}
 
-	return ARMOR_TYPE_UNKNOWN;
+	return armor_type;
 }
 
-const std::string GetPlayerClassAbbreviation(uint8 class_id)
+const std::string EQ::classes::GetPlayerClassAbbreviation(uint8 class_id)
 {
-	if (!EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker)) {
-		return std::string("UNK");
-	}
-
-	switch (class_id) {
-		case Class::Warrior:
-			return "WAR";
-		case Class::Cleric:
-			return "CLR";
-		case Class::Paladin:
-			return "PAL";
-		case Class::Ranger:
-			return "RNG";
-		case Class::ShadowKnight:
-			return "SHD";
-		case Class::Druid:
-			return "DRU";
-		case Class::Monk:
-			return "MNK";
-		case Class::Bard:
-			return "BRD";
-		case Class::Rogue:
-			return "ROG";
-		case Class::Shaman:
-			return "SHM";
-		case Class::Necromancer:
-			return "NEC";
-		case Class::Wizard:
-			return "WIZ";
-		case Class::Magician:
-			return "MAG";
-		case Class::Enchanter:
-			return "ENC";
-		case Class::Beastlord:
-			return "BST";
-		case Class::Berserker:
-			return "BER";
-	}
-
-	return std::string("UNK");
+	return (
+		(!IsValidClass(class_id) || !IsPlayerClass(class_id)) ?
+		"UNK" :
+		player_class_abbreviations[class_id]
+	);
 }
 
-bool IsPlayerClass(uint8 class_id) {
+bool EQ::classes::IsPlayerClass(uint8 class_id) {
 	return EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker);
+}
+
+bool EQ::classes::IsValidClass(uint8 class_id)
+{
+	return class_map.find(class_id) != class_map.end();
 }

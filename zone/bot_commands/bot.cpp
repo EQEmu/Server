@@ -172,13 +172,13 @@ void bot_command_clone(Client *c, const Seperator *sep)
 			message = fmt::format(
 				"You cannot create anymore than {} {} bot{}.",
 				bot_creation_limit_class,
-				GetClassIDName(my_bot->GetClass()),
+				EQ::classes::GetClassName(my_bot->GetClass()),
 				bot_creation_limit_class != 1 ? "s" : ""
 			);
 		} else {
 			message = fmt::format(
 				"You cannot create any {} bots.",
-				GetClassIDName(my_bot->GetClass())
+				EQ::classes::GetClassName(my_bot->GetClass())
 			);
 		}
 
@@ -702,7 +702,7 @@ void bot_command_list_bots(Client *c, const Seperator *sep)
 				bots_iter.level,
 				GetGenderName(bots_iter.gender),
 				GetRaceIDName(bots_iter.race),
-				GetClassIDName(bots_iter.class_),
+				EQ::classes::GetClassName(bots_iter.class_),
 				bots_iter.owner_name
 			).c_str()
 		);
@@ -754,7 +754,7 @@ void bot_command_list_bots(Client *c, const Seperator *sep)
 					Chat::White,
 					fmt::format(
 						"{} | {} Bot{}",
-						GetClassIDName(class_id),
+						EQ::classes::GetClassName(class_id),
 						class_creation_limit,
 						class_creation_limit != 1 ? "s" : ""
 					).c_str()
@@ -838,9 +838,10 @@ void bot_command_report(Client *c, const Seperator *sep)
 		if (!bot_iter)
 			continue;
 
-		std::string report_msg = StringFormat("%s %s reports", GetClassIDName(bot_iter->GetClass()), bot_iter->GetCleanName());
+		std::string report_msg = StringFormat("%s %s reports",
+											  EQ::classes::GetClassName(bot_iter->GetClass()), bot_iter->GetCleanName());
 		report_msg.append(StringFormat(": %3.1f%% health", bot_iter->GetHPRatio()));
-		if (!IsNonSpellFighterClass(bot_iter->GetClass()))
+		if (!EQ::classes::IsNonSpellFighterClass(bot_iter->GetClass()))
 			report_msg.append(StringFormat(": %3.1f%% mana", bot_iter->GetManaRatio()));
 
 		c->Message(Chat::White, "%s", report_msg.c_str());
@@ -941,13 +942,13 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 			message = fmt::format(
 				"You cannot have more than {} spawned {} bot{}.",
 				bot_spawn_limit_class,
-				GetClassIDName(bot_class),
+				EQ::classes::GetClassName(bot_class),
 				bot_spawn_limit_class != 1 ? "s" : ""
 			);
 		} else {
 			message = fmt::format(
 				"You are not currently allowed to spawn any {} bots.",
-				GetClassIDName(bot_class)
+				EQ::classes::GetClassName(bot_class)
 			);
 		}
 
@@ -966,7 +967,7 @@ void bot_command_spawn(Client *c, const Seperator *sep)
 			fmt::format(
 				"You must be level {} to spawn {} bots.",
 				bot_character_level_class,
-				GetClassIDName(bot_class)
+				EQ::classes::GetClassName(bot_class)
 			).c_str()
 		);
 		return;
@@ -1130,7 +1131,7 @@ void bot_command_stop_melee_level(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
-	if (!IsCasterClass(my_bot->GetClass()) && !IsHybridClass(my_bot->GetClass())) {
+	if (!EQ::classes::IsCasterClass(my_bot->GetClass()) && !EQ::classes::IsHybridClass(my_bot->GetClass())) {
 		c->Message(Chat::White, "You must <target> a caster or hybrid class bot to use this command");
 		return;
 	}

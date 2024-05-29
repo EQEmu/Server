@@ -84,7 +84,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	auto object_count = 0;
 
 	for (int class_id = 0; class_id <= 15; ++class_id) {
-		if (classes_bitmask & GetPlayerClassBit(class_id)) {
+		if (classes_bitmask & EQ::classes::GetPlayerClassBit(class_id)) {
 			window_text.append(message_separator);
 
 			if (object_count >= object_max) {

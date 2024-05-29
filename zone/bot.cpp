@@ -100,7 +100,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	rest_timer.Disable();
 	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
-	if (IsCasterClass(GetClass()))
+	if (EQ::classes::IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
 	else
 		SetStopMeleeLevel(255);
@@ -221,7 +221,7 @@ Bot::Bot(
 	rest_timer.Disable();
 	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
-	if (IsCasterClass(GetClass()))
+	if (EQ::classes::IsCasterClass(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
 	else
 		SetStopMeleeLevel(255);
@@ -1290,7 +1290,7 @@ bool Bot::IsValidRaceClassCombo(uint16 bot_race, uint8 bot_class)
 {
 	bool is_valid = false;
 	auto classes = database.botdb.GetRaceClassBitmask(bot_race);
-	if (auto bot_class_bitmask = GetPlayerClassBit(bot_class); classes & bot_class_bitmask) {
+	if (auto bot_class_bitmask = EQ::classes::GetPlayerClassBit(bot_class); classes & bot_class_bitmask) {
 		is_valid = true;
 	}
 	return is_valid;
@@ -1847,7 +1847,7 @@ void Bot::SetTarget(Mob *mob)
 }
 
 void Bot::SetStopMeleeLevel(uint8 level) {
-	if (IsCasterClass(GetClass()) || IsHybridClass(GetClass()))
+	if (EQ::classes::IsCasterClass(GetClass()) || EQ::classes::IsHybridClass(GetClass()))
 		_stopMeleeLevel = level;
 	else
 		_stopMeleeLevel = 255;
@@ -8559,12 +8559,12 @@ bool Bot::CheckSpawnConditions(Client* c) {
 
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
-	if (!IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
+	if (!IsPlayerRace(race_id) || !EQ::classes::IsPlayerClass(class_id)) {
 		return;
 	}
 
 	const uint16 race_bitmask  = GetPlayerRaceBit(race_id);
-	const uint16 class_bitmask = GetPlayerClassBit(class_id);
+	const uint16 class_bitmask = EQ::classes::GetPlayerClassBit(class_id);
 
 	const auto& l = BotStartingItemsRepository::GetWhere(
 		content_db,

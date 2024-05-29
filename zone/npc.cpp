@@ -1163,7 +1163,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			client->Message(Chat::White, fmt::format("Level | {}", npc->level).c_str());
 			client->Message(Chat::White, fmt::format("Health | {}", npc->max_hp).c_str());
 			client->Message(Chat::White, fmt::format("Race | {} ({})", GetRaceIDName(npc->race), npc->race).c_str());
-			client->Message(Chat::White, fmt::format("Class | {} ({})", GetClassIDName(npc->class_), npc->class_).c_str());
+			client->Message(Chat::White, fmt::format("Class | {} ({})", EQ::classes::GetClassName(npc->class_), npc->class_).c_str());
 			client->Message(Chat::White, fmt::format("Gender | {} ({})", GetGenderName(npc->gender), npc->gender).c_str());
 			client->Message(Chat::White, fmt::format("Texture | {}", npc->texture).c_str());
 
@@ -2896,12 +2896,12 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$mname", GetCleanName());
 	Strings::FindReplace(processed, "$mracep", GetRacePlural());
 	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
-	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
+	Strings::FindReplace(processed, "$mclass", EQ::classes::GetClassName(GetClass()));
 	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
 	// Target Variables
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
-	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
+	Strings::FindReplace(processed, "$class", t ? EQ::classes::GetClassName(t->GetClass()) : "class");
 	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
 	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");

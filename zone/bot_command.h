@@ -1248,7 +1248,7 @@ namespace ActionableBots
 	// Filters actual 'sbl' list
 	static void Filter_ByClasses(Client* bot_owner, std::list<Bot*>& sbl, uint16 class_mask) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
-		sbl.remove_if([class_mask](const Bot* l) { return (GetPlayerClassBit(l->GetClass()) & (~class_mask)); });
+		sbl.remove_if([class_mask](const Bot* l) { return (EQ::classes::GetPlayerClassBit(l->GetClass()) & (~class_mask)); });
 	}
 
 	static void Filter_ByMinLevel(Client* bot_owner, std::list<Bot*>& sbl, uint8 min_level) {

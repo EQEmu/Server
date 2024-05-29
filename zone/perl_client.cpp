@@ -2009,7 +2009,7 @@ bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)
 
 uint16_t Perl_Client_GetClassBitmask(Client* self)
 {
-	return GetPlayerClassBit(self->GetClass());
+	return EQ::classes::GetPlayerClassBit(self->GetClass());
 }
 
 uint32_t Perl_Client_GetDeityBitmask(Client* self)
@@ -3010,7 +3010,7 @@ uint32 Perl_Client_GetEXPForLevel(Client* self, uint16 check_level)
 
 std::string Perl_Client_GetClassAbbreviation(Client* self)
 {
-	return GetPlayerClassAbbreviation(self->GetBaseClass());
+	return EQ::classes::GetPlayerClassAbbreviation(self->GetBaseClass());
 }
 
 std::string Perl_Client_GetRaceAbbreviation(Client* self)

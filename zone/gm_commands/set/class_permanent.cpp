@@ -16,10 +16,10 @@ void SetClassPermanent(Client *c, const Seperator *sep)
 	const uint32 class_id = Strings::ToUnsignedInt(sep->arg[2]);
 
 	LogInfo("Class changed by {} for {} to {} ({}).",
-		c->GetCleanName(),
-		c->GetTargetDescription(t),
-		GetClassIDName(class_id),
-		class_id
+			c->GetCleanName(),
+			c->GetTargetDescription(t),
+			EQ::classes::GetClassName(class_id),
+			class_id
 	);
 
 	t->SetBaseClass(class_id);
@@ -32,7 +32,7 @@ void SetClassPermanent(Client *c, const Seperator *sep)
 			fmt::format(
 				"Class changed for {} to {} ({}).",
 				c->GetTargetDescription(t),
-				GetClassIDName(class_id),
+				EQ::classes::GetClassName(class_id),
 				class_id
 			).c_str()
 		);

@@ -260,7 +260,7 @@ void bot_command_heal_rotation_adjust_critical(Client* c, const Seperator* sep)
 		);
 		c->Message(
 			Chat::White, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
-			ARMOR_TYPE_UNKNOWN, ARMOR_TYPE_CLOTH, ARMOR_TYPE_LEATHER, ARMOR_TYPE_CHAIN, ARMOR_TYPE_PLATE
+			ArmorType::Unknown, ArmorType::Cloth, ArmorType::Leather, ArmorType::Chain, ArmorType::Plate
 		);
 		return;
 	}
@@ -273,12 +273,12 @@ void bot_command_heal_rotation_adjust_critical(Client* c, const Seperator* sep)
 		armor_type_value = Strings::ToInt(armor_type_arg);
 	}
 
-	if (armor_type_value > ARMOR_TYPE_LAST) {
+	if (armor_type_value > ArmorType::Last) {
 		c->Message(
 			Chat::White,
 			"You must specify a valid [armor_type: %u-%u] to use this command",
-			ARMOR_TYPE_FIRST,
-			ARMOR_TYPE_LAST
+			ArmorType::First,
+			ArmorType::Last
 		);
 		return;
 	}
@@ -360,7 +360,7 @@ void bot_command_heal_rotation_adjust_safe(Client* c, const Seperator* sep)
 		);
 		c->Message(
 			Chat::White, "armor_types: %u(Base), %u(Cloth), %u(Leather), %u(Chain), %u(Plate)",
-			ARMOR_TYPE_UNKNOWN, ARMOR_TYPE_CLOTH, ARMOR_TYPE_LEATHER, ARMOR_TYPE_CHAIN, ARMOR_TYPE_PLATE
+			ArmorType::Unknown, ArmorType::Cloth, ArmorType::Leather, ArmorType::Chain, ArmorType::Plate
 		);
 		return;
 	}
@@ -373,12 +373,12 @@ void bot_command_heal_rotation_adjust_safe(Client* c, const Seperator* sep)
 		armor_type_value = Strings::ToInt(armor_type_arg);
 	}
 
-	if (armor_type_value > ARMOR_TYPE_LAST) {
+	if (armor_type_value > ArmorType::Last) {
 		c->Message(
 			Chat::White,
 			"You must specify a valid [armor_type: %u-%u] to use this command",
-			ARMOR_TYPE_FIRST,
-			ARMOR_TYPE_LAST
+			ArmorType::First,
+			ArmorType::Last
 		);
 		return;
 	}
@@ -1011,24 +1011,24 @@ void bot_command_heal_rotation_list(Client* c, const Seperator* sep)
 
 	c->Message(
 		Chat::White, "Base hp limits - critical: %3.1f%%, safe: %3.1f%%",
-		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_UNKNOWN),
-		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_UNKNOWN));
+		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ArmorType::Unknown),
+		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ArmorType::Unknown));
 	c->Message(
 		Chat::White, "Cloth hp limits - critical: %3.1f%%, safe: %3.1f%%",
-		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CLOTH),
-		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_CLOTH));
+		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ArmorType::Cloth),
+		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ArmorType::Cloth));
 	c->Message(
 		Chat::White, "Leather hp limits - critical: %3.1f%%, safe: %3.1f%%",
-		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_LEATHER),
-		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_LEATHER));
+		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ArmorType::Leather),
+		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ArmorType::Leather));
 	c->Message(
 		Chat::White, "Chain hp limits - critical: %3.1f%%, safe: %3.1f%%",
-		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_CHAIN),
-		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_CHAIN));
+		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ArmorType::Chain),
+		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ArmorType::Chain));
 	c->Message(
 		Chat::White, "Plate hp limits - critical: %3.1f%%, safe: %3.1f%%",
-		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ARMOR_TYPE_PLATE),
-		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ARMOR_TYPE_PLATE));
+		(*current_member->MemberOfHealRotation())->ArmorTypeCriticalHPRatio(ArmorType::Plate),
+		(*current_member->MemberOfHealRotation())->ArmorTypeSafeHPRatio(ArmorType::Plate));
 
 	c->Message(Chat::White, "Heal Rotation Members:");
 

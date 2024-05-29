@@ -7699,7 +7699,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_MELEE_THAT_CAN_BASH_OR_KICK_EXCEPT_BARD:
-			if ((GetClass() != Class::Bard) && (GetClass() != Class::Rogue) && IsFighterClass(GetClass()))
+			if ((GetClass() != Class::Bard) && (GetClass() != Class::Rogue) && EQ::classes::IsFighterClass(GetClass()))
 				return true;
 			break;
 
@@ -7709,12 +7709,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_PURE_CASTER:
-			if (IsINTCasterClass(GetClass()))
+			if (EQ::classes::IsINTCasterClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLASS_HYBRID_CLASS:
-			if (IsHybridClass(GetClass()))
+			if (EQ::classes::IsHybridClass(GetClass()))
 				return true;
 			break;
 
@@ -7795,7 +7795,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_CLR_SHM_DRU:
-			if (IsWISCasterClass(GetClass()))
+			if (EQ::classes::IsWISCasterClass(GetClass()))
 				return true;
 			break;
 
@@ -8087,12 +8087,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_KNIGHT_HYBRID_MELEE:
-			if (IsHybridClass(GetClass()) || IsNonSpellFighterClass(GetClass()))
+			if (EQ::classes::IsHybridClass(GetClass()) || EQ::classes::IsNonSpellFighterClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLASS_WARRIOR_CASTER_PRIEST:
-			if (IsCasterClass(GetClass()) || GetClass() == Class::Warrior)
+			if (EQ::classes::IsCasterClass(GetClass()) || GetClass() == Class::Warrior)
 				return true;
 			break;
 
@@ -8255,12 +8255,12 @@ bool Mob::PassCastRestriction(int value)
 		}
 
 		case IS_CLIENT_AND_MALE_PLATE_USER:
-			if (IsClient() && GetGender() == Gender::Male && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Male && EQ::classes::IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == Gender::Male && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Male && (EQ::classes::IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
@@ -8271,12 +8271,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLIENT_AND_FEMALE_PLATE_USER:
-			if (IsClient() && GetGender() == Gender::Female && IsPlateClass(GetClass()))
+			if (IsClient() && GetGender() == Gender::Female && EQ::classes::IsPlateClass(GetClass()))
 				return true;
 			break;
 
 		case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-			if (IsClient() && GetGender() == Gender::Female && (IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
+			if (IsClient() && GetGender() == Gender::Female && (EQ::classes::IsCasterClass(GetClass()) && GetClass() != Class::Cleric))
 				return true;
 			break;
 
@@ -8318,37 +8318,37 @@ bool Mob::PassCastRestriction(int value)
 
 
 		case IS_CLASS_CASTER_PRIEST:
-			if (IsCasterClass(GetClass()))
+			if (EQ::classes::IsCasterClass(GetClass()))
 				return true;
 			break;
 
 		case IS_END_OR_MANA_ABOVE_20_PCT: {
-			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() >= 20) {
+			if (EQ::classes::IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() >= 20) {
 				return true;
 			}
-			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() >= 20) {
+			else if (!EQ::classes::IsNonSpellFighterClass(GetClass()) && GetManaRatio() >= 20) {
 				return true;
 			}
 			break;
 		}
 		case IS_END_OR_MANA_BELOW_10_PCT: {
-			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+			if (EQ::classes::IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
 				return true;
 			}
-			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 10) {
+			else if (!EQ::classes::IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 10) {
 				return true;
 			}
-			else if (IsHybridClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
+			else if (EQ::classes::IsHybridClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 10) {
 				return true;
 			}
 			break;
 		}
 		case IS_END_OR_MANA_BELOW_30_PCT:
 		case IS_END_OR_MANA_BELOW_30_PCT2: {
-			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {
+			if (EQ::classes::IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {
 				return true;
 			}
-			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 30) {
+			else if (!EQ::classes::IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 30) {
 				return true;
 			}
 			break;

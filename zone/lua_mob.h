@@ -104,7 +104,7 @@ public:
 	int GetBaseGender();
 	int GetDeity();
 	int GetRace();
-	const char *GetClassName();
+	std::string GetClassName();
 	const char *GetRaceName();
 	const char* GetBaseRaceName();
 	int GetGender();

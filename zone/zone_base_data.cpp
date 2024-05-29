@@ -18,7 +18,7 @@ void Zone::LoadBaseData()
 	m_base_data.reserve(l.size());
 
 	for (const auto& e : l) {
-		if (e.level < 1 || !IsPlayerClass(e.class_)) {
+		if (e.level < 1 || !EQ::classes::IsPlayerClass(e.class_)) {
 			continue;
 		}
 

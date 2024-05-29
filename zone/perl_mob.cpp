@@ -2607,7 +2607,7 @@ void Perl_Mob_TryMoveAlong(Mob* self, float distance, float angle, bool send) //
 
 std::string Perl_Mob_GetClassName(Mob* self)
 {
-	return GetClassIDName(self->GetClass());
+	return EQ::classes::GetClassName(self->GetClass());
 }
 
 std::string Perl_Mob_GetRaceName(Mob* self)

@@ -5847,7 +5847,7 @@ std::string Perl__silent_saylink(std::string text, std::string link_name)
 
 uint16 Perl__get_class_bitmask(uint8 class_id)
 {
-	return GetPlayerClassBit(class_id);
+	return EQ::classes::GetPlayerClassBit(class_id);
 }
 
 uint32 Perl__get_deity_bitmask(uint32 deity_id)

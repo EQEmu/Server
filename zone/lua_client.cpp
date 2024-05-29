@@ -152,7 +152,7 @@ void Lua_Client::SetBaseGender(int v) {
 
 uint16 Lua_Client::GetClassBitmask() {
 	Lua_Safe_Call_Int();
-	return GetPlayerClassBit(self->GetClass());
+	return EQ::classes::GetPlayerClassBit(self->GetClass());
 }
 
 uint32 Lua_Client::GetDeityBitmask() {
@@ -3155,7 +3155,7 @@ uint32 Lua_Client::GetEXPForLevel(uint16 check_level)
 std::string Lua_Client::GetClassAbbreviation()
 {
 	Lua_Safe_Call_String();
-	return GetPlayerClassAbbreviation(self->GetBaseClass());
+	return EQ::classes::GetPlayerClassAbbreviation(self->GetBaseClass());
 }
 
 std::string Lua_Client::GetRaceAbbreviation()

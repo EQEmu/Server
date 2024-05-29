@@ -494,13 +494,13 @@ public:
 	bool IsGroupDoter() const { return m_CastingRoles.GroupDoter; }
 	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
 
-	bool IsBotCaster() { return IsCasterClass(GetClass()); }
-	bool IsBotHybrid() { return IsHybridClass(GetClass()); }
-	bool IsBotINTCaster() { return IsINTCasterClass(GetClass()); }
-	bool IsBotWISCaster() { return IsWISCasterClass(GetClass()); }
-	bool IsBotSpellFighter() { return IsSpellFighterClass(GetClass()); }
-	bool IsBotFighter() { return IsFighterClass(GetClass()); }
-	bool IsBotNonSpellFighter() { return IsNonSpellFighterClass(GetClass()); }
+	bool IsBotCaster() { return EQ::classes::IsCasterClass(GetClass()); }
+	bool IsBotHybrid() { return EQ::classes::IsHybridClass(GetClass()); }
+	bool IsBotINTCaster() { return EQ::classes::IsINTCasterClass(GetClass()); }
+	bool IsBotWISCaster() { return EQ::classes::IsWISCasterClass(GetClass()); }
+	bool IsBotSpellFighter() { return EQ::classes::IsSpellFighterClass(GetClass()); }
+	bool IsBotFighter() { return EQ::classes::IsFighterClass(GetClass()); }
+	bool IsBotNonSpellFighter() { return EQ::classes::IsNonSpellFighterClass(GetClass()); }
 	uint8 GetBotClass() { return GetClass(); }
 	int GetRawACNoShield(int &shield_ac);
 
