@@ -158,7 +158,7 @@ static std::map<uint8, std::vector<std::string>> player_class_level_names = {
 	{ Class::Berserker,    { "Brawler",      "Vehement",   "Rager",       "Fury",           "Ravager",        "Juggernaut" }},
 };
 
-static std::map<uint8, std::string> class_map = {
+static std::map<uint8, std::string> class_names = {
 	{ Class::Warrior,                   "Warrior" },
 	{ Class::Cleric,                    "Cleric" },
 	{ Class::Paladin,                   "Paladin" },

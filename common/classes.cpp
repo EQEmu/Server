@@ -25,8 +25,7 @@ const std::string& EQ::classes::GetClassName(uint8 class_id, uint8 level)
 		return GetClassLevelName(class_id, level);
 	}
 
-	const auto& e = class_map.find(class_id);
-	return e != class_map.end() ? e->second : "UNKNOWN CLASS";
+	return IsValidClass(class_id) ? class_names[class_id] : "UNKNOWN CLASS";
 }
 
 const std::string& EQ::classes::GetClassLevelName(uint8 class_id, uint8 level)
@@ -274,5 +273,5 @@ bool EQ::classes::IsPlayerClass(uint8 class_id) {
 
 bool EQ::classes::IsValidClass(uint8 class_id)
 {
-	return class_map.find(class_id) != class_map.end();
+	return class_names.find(class_id) != class_names.end();
 }
