@@ -134,7 +134,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 	for (const auto& e : l) {
 		if (
 			e.spell_type_index >= Bot::SPELL_TYPE_COUNT ||
-			!Class::IsPlayerClass(e.class_id) ||
+			!Class::IsPlayer(e.class_id) ||
 			e.stance_index >= EQ::constants::STANCE_TYPE_COUNT
 		) {
 			continue;
@@ -208,7 +208,7 @@ bool BotDatabase::QueryBotCount(const uint32 owner_id, int class_id, uint32& bot
 		)
 	);
 
-	if (Class::IsPlayerClass(class_id)) {
+	if (Class::IsPlayer(class_id)) {
 		bot_class_count = BotDataRepository::Count(
 			database,
 			fmt::format(

@@ -112,31 +112,31 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		if (!bot_iter) {
 			continue;
 		}
-		if (caster_only && !Class::IsCasterClass(bot_iter->GetClass())) {
+		if (caster_only && !Class::IsCaster(bot_iter->GetClass())) {
 			continue;
 		}
-		if (hybrid_only && !Class::IsSpellFighterClass(bot_iter->GetClass())) {
+		if (hybrid_only && !Class::IsSpellFighter(bot_iter->GetClass())) {
 			continue;
 		}
-		if (melee_only && !Class::IsNonSpellFighterClass(bot_iter->GetClass())) {
+		if (melee_only && !Class::IsNonSpellFighter(bot_iter->GetClass())) {
 			continue;
 		}
-		if (wis_caster_only && !Class::IsWISCasterClass(bot_iter->GetClass())) {
+		if (wis_caster_only && !Class::IsWISCaster(bot_iter->GetClass())) {
 			continue;
 		}
-		if (int_caster_only && !Class::IsINTCasterClass(bot_iter->GetClass())) {
+		if (int_caster_only && !Class::IsINTCaster(bot_iter->GetClass())) {
 			continue;
 		}
-		if (plate_only && !Class::IsPlateClass(bot_iter->GetClass())) {
+		if (plate_only && !Class::IsPlate(bot_iter->GetClass())) {
 			continue;
 		}
-		if (chain_only && !Class::IsChainClass(bot_iter->GetClass())) {
+		if (chain_only && !Class::IsChain(bot_iter->GetClass())) {
 			continue;
 		}
-		if (leather_only && !Class::IsLeatherClass(bot_iter->GetClass())) {
+		if (leather_only && !Class::IsLeather(bot_iter->GetClass())) {
 			continue;
 		}
-		if (cloth_only && !Class::IsClothClass(bot_iter->GetClass())) {
+		if (cloth_only && !Class::IsCloth(bot_iter->GetClass())) {
 			continue;
 		}
 		if (((~item_data->Races) & GetPlayerRaceBit(bot_iter->GetRace())) || ((~item_data->Classes) & Class::GetPlayerBit(bot_iter->GetClass()))) {

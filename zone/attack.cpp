@@ -4417,7 +4417,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 			if (IsOfClientBotMerc()) {
 				if (
-					Class::IsPlayerClass(GetClass()) &&
+					Class::IsPlayer(GetClass()) &&
 					RuleI(Combat, FrontalStunImmunityClasses) & Class::GetPlayerBit(GetClass())
 				) {
 					is_immune_to_frontal_stun = true;
@@ -4436,7 +4436,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			} else if (IsNPC()) {
 				if (
 					RuleB(Combat, NPCsUseFrontalStunImmunityClasses) &&
-					Class::IsPlayerClass(GetClass()) &&
+					Class::IsPlayer(GetClass()) &&
 					RuleI(Combat, FrontalStunImmunityClasses) & Class::GetPlayerBit(GetClass())
 				) {
 					is_immune_to_frontal_stun = true;

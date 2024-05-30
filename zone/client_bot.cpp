@@ -22,7 +22,7 @@ uint32 Client::GetBotCreationLimit(uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_creation_limit{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))
@@ -46,7 +46,7 @@ int Client::GetBotRequiredLevel(uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_required_level{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))
@@ -70,7 +70,7 @@ int Client::GetBotSpawnLimit(uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_spawn_limit{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))
@@ -109,7 +109,7 @@ void Client::SetBotCreationLimit(uint32 new_creation_limit, uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_creation_limit{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))
@@ -126,7 +126,7 @@ void Client::SetBotRequiredLevel(int new_required_level, uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_required_level{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))
@@ -143,7 +143,7 @@ void Client::SetBotSpawnLimit(int new_spawn_limit, uint8 class_id)
 	const auto bucket_name = fmt::format(
 		"bot_spawn_limit{}",
 		(
-			class_id && Class::IsPlayerClass(class_id) ?
+			class_id && Class::IsPlayer(class_id) ?
 			fmt::format(
 				"_{}",
 				Strings::ToLower(Class::GetName(class_id))

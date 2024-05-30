@@ -51,7 +51,7 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
 {
 	if (
-		!Class::IsPlayerClass(class_id) ||
+		!Class::IsPlayer(class_id) ||
 		class_id > Class::Berserker ||
 		static_cast<uint32>(skill_id) > (EQ::skills::HIGHEST_SKILL + 1)
 		) {
@@ -79,7 +79,7 @@ void SkillCaps::LoadSkillCaps()
 	for (const auto &e: l) {
 		if (
 			e.level < 1 ||
-			!Class::IsPlayerClass(e.class_id) ||
+			!Class::IsPlayer(e.class_id) ||
 			static_cast<EQ::skills::SkillType>(e.skill_id) >= EQ::skills::SkillCount
 			) {
 			continue;

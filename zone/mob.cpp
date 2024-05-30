@@ -7713,12 +7713,12 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	}
 
 	const uint16 item_classes = item->Classes;
-	if (item_classes == PlayerClassBitmask::All) {
+	if (item_classes == Class::Bitmask::All) {
 		return true;
 	}
 
 	const uint8 class_id = GetClass();
-	if (!Class::IsPlayerClass(class_id)) {
+	if (!Class::IsPlayer(class_id)) {
 		return false;
 	}
 

@@ -841,7 +841,7 @@ void bot_command_report(Client *c, const Seperator *sep)
 		std::string report_msg = StringFormat("%s %s reports",
 											  Class::GetName(bot_iter->GetClass()), bot_iter->GetCleanName());
 		report_msg.append(StringFormat(": %3.1f%% health", bot_iter->GetHPRatio()));
-		if (!Class::IsNonSpellFighterClass(bot_iter->GetClass()))
+		if (!Class::IsNonSpellFighter(bot_iter->GetClass()))
 			report_msg.append(StringFormat(": %3.1f%% mana", bot_iter->GetManaRatio()));
 
 		c->Message(Chat::White, "%s", report_msg.c_str());
@@ -1131,7 +1131,7 @@ void bot_command_stop_melee_level(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "You must <target> a bot that you own to use this command");
 		return;
 	}
-	if (!Class::IsCasterClass(my_bot->GetClass()) && !Class::IsHybridClass(my_bot->GetClass())) {
+	if (!Class::IsCaster(my_bot->GetClass()) && !Class::IsHybrid(my_bot->GetClass())) {
 		c->Message(Chat::White, "You must <target> a caster or hybrid class bot to use this command");
 		return;
 	}

@@ -1125,7 +1125,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	if (
 		m->scribing != memSpellForget &&
 		(
-			!Class::IsPlayerClass(GetClass()) ||
+			!Class::IsPlayer(GetClass()) ||
 			GetLevel() < spells[m->spell_id].classes[GetClass() - 1]
 		)
 	) {

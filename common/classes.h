@@ -24,6 +24,14 @@
 #include <map>
 #include <fmt/format.h>
 
+namespace ArmorType {
+	constexpr uint8 Unknown = 0;
+	constexpr uint8 Cloth   = 1;
+	constexpr uint8 Leather = 2;
+	constexpr uint8 Chain   = 3;
+	constexpr uint8 Plate   = 4;
+};
+
 namespace Class {
 	constexpr uint8 None                      = 0;
 	constexpr uint8 Warrior                   = 1;
@@ -73,6 +81,27 @@ namespace Class {
 	constexpr uint8 AlternateCurrencyMerchant = 70;
 	constexpr uint8 MercenaryLiaison          = 71;
 
+	namespace Bitmask {
+		constexpr uint16 Unknown      = 0;
+		constexpr uint16 Warrior      = 1;
+		constexpr uint16 Cleric       = 2;
+		constexpr uint16 Paladin      = 4;
+		constexpr uint16 Ranger       = 8;
+		constexpr uint16 ShadowKnight = 16;
+		constexpr uint16 Druid        = 32;
+		constexpr uint16 Monk         = 64;
+		constexpr uint16 Bard         = 128;
+		constexpr uint16 Rogue        = 256;
+		constexpr uint16 Shaman       = 512;
+		constexpr uint16 Necromancer  = 1024;
+		constexpr uint16 Wizard       = 2048;
+		constexpr uint16 Magician     = 4096;
+		constexpr uint16 Enchanter    = 8192;
+		constexpr uint16 Beastlord    = 16384;
+		constexpr uint16 Berserker    = 32768;
+		constexpr uint16 All          = 65535;
+	}
+
 	std::string GetName(uint8 class_id, uint8 level = 0);
 	std::string GetLevelName(uint8 class_id, uint8 level = 0);
 	std::string GetAbbreviation(uint8 class_id);
@@ -81,61 +110,40 @@ namespace Class {
 	uint8 GetPlayerValue(uint8 class_id);
 	uint16 GetPlayerBit(uint8 class_id);
 
-	bool IsCasterClass(uint8 class_id);
-	bool IsChainClass(uint8 class_id);
-	bool IsClothClass(uint8 class_id);
-	bool IsFighterClass(uint8 class_id);
-	bool IsHeroicINTCasterClass(uint8 class_id);
-	bool IsHeroicWISCasterClass(uint8 class_id);
-	bool IsHybridClass(uint8 class_id);
-	bool IsINTCasterClass(uint8 class_id);
-	bool IsLeatherClass(uint8 class_id);
-	bool IsNonSpellFighterClass(uint8 class_id);
-	bool IsPlateClass(uint8 class_id);
-	bool IsPlayerClass(uint8 class_id);
-	bool IsSpellFighterClass(uint8 class_id);
-	bool IsValidClass(uint8 class_id);
-	bool IsWISCasterClass(uint8 class_id);
-};
-
-namespace PlayerClassBitmask {
-	constexpr uint16 Unknown      = 0;
-	constexpr uint16 Warrior      = 1;
-	constexpr uint16 Cleric       = 2;
-	constexpr uint16 Paladin      = 4;
-	constexpr uint16 Ranger       = 8;
-	constexpr uint16 ShadowKnight = 16;
-	constexpr uint16 Druid        = 32;
-	constexpr uint16 Monk         = 64;
-	constexpr uint16 Bard         = 128;
-	constexpr uint16 Rogue        = 256;
-	constexpr uint16 Shaman       = 512;
-	constexpr uint16 Necromancer  = 1024;
-	constexpr uint16 Wizard       = 2048;
-	constexpr uint16 Magician     = 4096;
-	constexpr uint16 Enchanter    = 8192;
-	constexpr uint16 Beastlord    = 16384;
-	constexpr uint16 Berserker    = 32768;
-	constexpr uint16 All          = 65535;
-};
+	bool IsCaster(uint8 class_id);
+	bool IsChain(uint8 class_id);
+	bool IsCloth(uint8 class_id);
+	bool IsFighter(uint8 class_id);
+	bool IsHeroicINTCaster(uint8 class_id);
+	bool IsHeroicWISCaster(uint8 class_id);
+	bool IsHybrid(uint8 class_id);
+	bool IsINTCaster(uint8 class_id);
+	bool IsLeather(uint8 class_id);
+	bool IsNonSpellFighter(uint8 class_id);
+	bool IsPlate(uint8 class_id);
+	bool IsPlayer(uint8 class_id);
+	bool IsSpellFighter(uint8 class_id);
+	bool IsValid(uint8 class_id);
+	bool IsWISCaster(uint8 class_id);
+}
 
 static std::map<uint8, uint16> player_class_bitmasks = {
-	{ Class::Warrior,      PlayerClassBitmask::Warrior },
-	{ Class::Cleric,       PlayerClassBitmask::Cleric },
-	{ Class::Paladin,      PlayerClassBitmask::Paladin },
-	{ Class::Ranger,       PlayerClassBitmask::Ranger },
-	{ Class::ShadowKnight, PlayerClassBitmask::ShadowKnight },
-	{ Class::Druid,        PlayerClassBitmask::Druid },
-	{ Class::Monk,         PlayerClassBitmask::Monk },
-	{ Class::Bard,         PlayerClassBitmask::Bard },
-	{ Class::Rogue,        PlayerClassBitmask::Rogue },
-	{ Class::Shaman,       PlayerClassBitmask::Shaman },
-	{ Class::Necromancer,  PlayerClassBitmask::Necromancer },
-	{ Class::Wizard,       PlayerClassBitmask::Wizard },
-	{ Class::Magician,     PlayerClassBitmask::Magician },
-	{ Class::Enchanter,    PlayerClassBitmask::Enchanter },
-	{ Class::Beastlord,    PlayerClassBitmask::Beastlord },
-	{ Class::Berserker,    PlayerClassBitmask::Berserker },
+	{ Class::Warrior,      Class::Bitmask::Warrior },
+	{ Class::Cleric,       Class::Bitmask::Cleric },
+	{ Class::Paladin,      Class::Bitmask::Paladin },
+	{ Class::Ranger,       Class::Bitmask::Ranger },
+	{ Class::ShadowKnight, Class::Bitmask::ShadowKnight },
+	{ Class::Druid,        Class::Bitmask::Druid },
+	{ Class::Monk,         Class::Bitmask::Monk },
+	{ Class::Bard,         Class::Bitmask::Bard },
+	{ Class::Rogue,        Class::Bitmask::Rogue },
+	{ Class::Shaman,       Class::Bitmask::Shaman },
+	{ Class::Necromancer,  Class::Bitmask::Necromancer },
+	{ Class::Wizard,       Class::Bitmask::Wizard },
+	{ Class::Magician,     Class::Bitmask::Magician },
+	{ Class::Enchanter,    Class::Bitmask::Enchanter },
+	{ Class::Beastlord,    Class::Bitmask::Beastlord },
+	{ Class::Berserker,    Class::Bitmask::Berserker },
 };
 
 static std::string shadow_knight_class_name = (
@@ -229,14 +237,6 @@ static std::map<uint8, std::string> class_names = {
 	{ Class::FellowshipMaster,          "Fellowship Master" },
 	{ Class::AlternateCurrencyMerchant, "Alternate Currency Merchant" },
 	{ Class::MercenaryLiaison,          "Mercenary Liaison" }
-};
-
-namespace ArmorType {
-	constexpr uint8 Unknown = 0;
-	constexpr uint8 Cloth   = 1;
-	constexpr uint8 Leather = 2;
-	constexpr uint8 Chain   = 3;
-	constexpr uint8 Plate   = 4;
 };
 
 #endif

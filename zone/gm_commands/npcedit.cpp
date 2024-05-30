@@ -87,7 +87,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "class")) {
 		if (sep->IsNumber(2)) {
 			const uint8 class_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
-			if (!Class::IsValidClass(class_id)) {
+			if (!Class::IsValid(class_id)) {
 				c->Message(
 					Chat::White,
 					fmt::format(

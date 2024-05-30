@@ -100,7 +100,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 	rest_timer.Disable();
 	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
-	if (Class::IsCasterClass(GetClass()))
+	if (Class::IsCaster(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
 	else
 		SetStopMeleeLevel(255);
@@ -221,7 +221,7 @@ Bot::Bot(
 	rest_timer.Disable();
 	ping_timer.Disable();
 	SetFollowDistance(BOT_FOLLOW_DISTANCE_DEFAULT);
-	if (Class::IsCasterClass(GetClass()))
+	if (Class::IsCaster(GetClass()))
 		SetStopMeleeLevel((uint8)RuleI(Bots, CasterStopMeleeLevel));
 	else
 		SetStopMeleeLevel(255);
@@ -1847,7 +1847,7 @@ void Bot::SetTarget(Mob *mob)
 }
 
 void Bot::SetStopMeleeLevel(uint8 level) {
-	if (Class::IsCasterClass(GetClass()) || Class::IsHybridClass(GetClass()))
+	if (Class::IsCaster(GetClass()) || Class::IsHybrid(GetClass()))
 		_stopMeleeLevel = level;
 	else
 		_stopMeleeLevel = 255;
@@ -8559,7 +8559,7 @@ bool Bot::CheckSpawnConditions(Client* c) {
 
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
-	if (!IsPlayerRace(race_id) || !Class::IsPlayerClass(class_id)) {
+	if (!IsPlayerRace(race_id) || !Class::IsPlayer(class_id)) {
 		return;
 	}
 
