@@ -2787,10 +2787,11 @@ void NPC::AISpellsList(Client *c)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Spell {} | Priority: {} Recast Delay: {}",
+					"Spell {} | Priority: {} Recast Delay: {} Resist Difficulty: {}",
 					spell_slot,
 					ai_spell.priority,
-					ai_spell.recast_delay
+					ai_spell.recast_delay,
+					ai_spell.resist_adjust
 				).c_str()
 			);
 
@@ -2912,11 +2913,8 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 				se.priority = 1;
 			}
 
-			if (e.resist_adjust) {
-				se.resist_adjust = e.resist_adjust;
-			}
-			else if (IsValidSpell(e.id)) {
-				se.resist_adjust = spells[e.id].resist_difficulty;
+			if (IsValidSpell(e.id)) {
+				se.resist_adjust = spells[e.spellid].resist_difficulty;
 			}
 
 			ss.entries.push_back(se);
