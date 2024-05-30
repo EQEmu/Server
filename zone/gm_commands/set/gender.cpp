@@ -34,7 +34,7 @@ void SetGender(Client *c, const Seperator *sep)
 		fmt::format(
 			"Gender changed for {} to {} ({}).",
 			c->GetTargetDescription(t),
-			Gender::GetGenderName(gender_id),
+			Gender::GetName(gender_id),
 			gender_id
 		).c_str()
 	);

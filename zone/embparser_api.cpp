@@ -3017,7 +3017,7 @@ std::string Perl__getcleannpcnamebyid(uint32 npc_id)
 
 std::string Perl__getgendername(uint8 gender_id)
 {
-	return Gender::GetGenderName(gender_id);
+	return Gender::GetName(gender_id);
 }
 
 std::string Perl__getdeityname(uint32 deity_id)

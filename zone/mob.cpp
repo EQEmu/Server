@@ -1344,7 +1344,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
 	for (i = 0; i < EQ::textures::materialCount; i++) {
-		if (Race::IsPlayerRace(race) || i > EQ::textures::armorFeet) {
+		if (Race::IsPlayer(race) || i > EQ::textures::armorFeet) {
 			ns->spawn.equipment.Slot[i].Material        = GetEquipmentMaterial(i);
 			ns->spawn.equipment.Slot[i].EliteModel      = IsEliteMaterialItem(i);
 			ns->spawn.equipment.Slot[i].HerosForgeModel = GetHerosForgeModel(i);
@@ -2824,9 +2824,9 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 			"Base Race: {} ({}) Gender: {} ({}) Base Gender: {} ({}) Texture: {} Helmet Texture: {}",
 			Race::GetName(GetBaseRace()),
 			GetBaseRace(),
-			Gender::GetGenderName(GetGender()),
+			Gender::GetName(GetGender()),
 			GetGender(),
-			Gender::GetGenderName(GetBaseGender()),
+			Gender::GetName(GetBaseGender()),
 			GetBaseGender(),
 			GetTexture(),
 			GetHelmTexture()
@@ -3495,7 +3495,7 @@ void Mob::ShowStats(Client* c)
 				t->GetRace(),
 				GetClassIDName(t->GetClass()),
 				t->GetClass(),
-				Gender::GetGenderName(t->GetGender()),
+				Gender::GetName(t->GetGender()),
 				t->GetGender()
 			).c_str()
 		);
@@ -3636,10 +3636,10 @@ void Mob::SendIllusionPacket(const AppearanceStruct& a)
 		(a.race_id ? GetDefaultGender(a.race_id, a.gender_id) : GetBaseGender())
 	);
 
-	float new_size = a.size <= 0.0f ? Gender::GetRaceGenderDefaultHeight(race, gender) : a.size;
+	float new_size = a.size <= 0.0f ? Gender::GetRaceDefaultHeight(race, gender) : a.size;
 
-	uint8 new_texture        = a.texture == UINT8_MAX && !Race::IsPlayerRace(a.race_id) ? GetTexture() : a.texture;
-	uint8 new_helmet_texture = a.helmet_texture == UINT8_MAX && !Race::IsPlayerRace(race) ? GetHelmTexture() : a.helmet_texture;
+	uint8 new_texture        = a.texture == UINT8_MAX && !Race::IsPlayer(a.race_id) ? GetTexture() : a.texture;
+	uint8 new_helmet_texture = a.helmet_texture == UINT8_MAX && !Race::IsPlayer(race) ? GetHelmTexture() : a.helmet_texture;
 
 	uint8 new_hair       = a.hair == UINT8_MAX ? GetHairStyle() : a.hair;
 	uint8 new_hair_color = a.hair_color == UINT8_MAX ? GetHairColor() : a.hair_color;
@@ -3777,7 +3777,7 @@ void Mob::SetFaceAppearance(const FaceChange_Struct& face, bool skip_sender)
 
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 {
-	if (!Race::IsPlayerRace(GetRace())) {
+	if (!Race::IsPlayer(GetRace())) {
 		return false;
 	}
 
@@ -4001,7 +4001,7 @@ bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
 
 uint16 Mob::GetFactionRace() {
 	uint16 current_race = GetRace();
-	if (Race::IsPlayerRace(current_race) || current_race == Race::Tree ||
+	if (Race::IsPlayer(current_race) || current_race == Race::Tree ||
 		current_race == Race::MinorIllusion) {
 		return current_race;
 	}
@@ -4012,7 +4012,7 @@ uint16 Mob::GetFactionRace() {
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 	if (
-		Race::IsPlayerRace(in_race) ||
+		Race::IsPlayer(in_race) ||
 		in_race == Race::Brownie ||
 		in_race == Race::Kerran ||
 		in_race == Race::Lion ||
@@ -7741,7 +7741,7 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 	}
 
 	auto race_id = GetBaseRace();
-	if (!Race::IsPlayerRace(race_id)) {
+	if (!Race::IsPlayer(race_id)) {
 		return false;
 	}
 
@@ -7975,7 +7975,7 @@ void Mob::CommonBreakInvisible()
 }
 
 float Mob::GetDefaultRaceSize(int race_id, int gender_id) const {
-	return Gender::GetRaceGenderDefaultHeight(
+	return Gender::GetRaceDefaultHeight(
 		race_id > 0 ? race_id : race,
 		gender_id >= 0 ? gender_id : gender
 	);

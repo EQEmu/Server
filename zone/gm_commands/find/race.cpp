@@ -19,7 +19,7 @@ void FindRace(Client *c, const Seperator *sep)
 
 		std::string bitmask_string;
 
-		if (Race::IsPlayerRace(race_id)) {
+		if (Race::IsPlayer(race_id)) {
 			bitmask_string = fmt::format(
 				" ({})",
 				Strings::Commify(Race::GetPlayerBit(race_id))
@@ -61,7 +61,7 @@ void FindRace(Client *c, const Seperator *sep)
 
 		std::string bitmask_string;
 
-		if (Race::IsPlayerRace(race_id)) {
+		if (Race::IsPlayer(race_id)) {
 			bitmask_string = fmt::format(
 				" ({})",
 				Strings::Commify(Race::GetPlayerBit(race_id))

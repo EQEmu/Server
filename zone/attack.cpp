@@ -4426,7 +4426,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 
 				if (
 					(
-						Race::IsPlayerRace(GetBaseRace()) &&
+						Race::IsPlayer(GetBaseRace()) &&
 						RuleI(Combat, FrontalStunImmunityRaces) & Race::GetPlayerBit(GetBaseRace())
 					) ||
 					GetBaseRace() == Race::OggokCitizen
@@ -4446,7 +4446,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 					RuleB(Combat, NPCsUseFrontalStunImmunityRaces) &&
 					(
 						(
-							Race::IsPlayerRace(GetBaseRace()) &&
+							Race::IsPlayer(GetBaseRace()) &&
 							RuleI(Combat, FrontalStunImmunityRaces) & Race::GetPlayerBit(GetBaseRace())
 						) ||
 						GetBaseRace() == Race::OggokCitizen

@@ -2000,7 +2000,7 @@ std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 }
 
 std::string lua_get_gender_name(uint8 gender_id) {
-	return Gender::GetGenderName(gender_id);
+	return Gender::GetName(gender_id);
 }
 
 std::string lua_get_deity_name(uint32 deity_id) {

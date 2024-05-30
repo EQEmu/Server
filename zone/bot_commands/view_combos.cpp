@@ -61,7 +61,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	const uint16 bot_race = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[1]));
 	const std::string race_name = Race::GetName(bot_race);
 
-	if (!Race::IsPlayerRace(bot_race)) {
+	if (!Race::IsPlayer(bot_race)) {
 		c->Message(
 			Chat::White,
 			fmt::format(

@@ -700,7 +700,7 @@ void bot_command_list_bots(Client *c, const Seperator *sep)
 						bots_iter.bot_name
 				),
 				bots_iter.level,
-				Gender::GetGenderName(bots_iter.gender),
+				Gender::GetName(bots_iter.gender),
 				Race::GetName(bots_iter.race),
 				GetClassIDName(bots_iter.class_),
 				bots_iter.owner_name

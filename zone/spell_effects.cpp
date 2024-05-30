@@ -10438,7 +10438,7 @@ void Mob::ApplySpellEffectIllusion(int32 spell_id, Mob *caster, int buffslot, in
 			Mob::GetDefaultGender(base, GetGender())
 		);
 
-		auto race_size = Gender::GetRaceGenderDefaultHeight(
+		auto race_size = Gender::GetRaceDefaultHeight(
 			base,
 			gender_id
 		);

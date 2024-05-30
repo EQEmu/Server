@@ -156,7 +156,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	swarm_timer.Disable();
 
 	if (size <= 0.0f) {
-		size = Gender::GetRaceGenderDefaultHeight(race, gender);
+		size = Gender::GetRaceDefaultHeight(race, gender);
 	}
 
 	// lava dragon is a fixed size model and should always use its default
@@ -1164,7 +1164,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			client->Message(Chat::White, fmt::format("Health | {}", npc->max_hp).c_str());
 			client->Message(Chat::White, fmt::format("Race | {} ({})", Race::GetName(npc->race), npc->race).c_str());
 			client->Message(Chat::White, fmt::format("Class | {} ({})", GetClassIDName(npc->class_), npc->class_).c_str());
-			client->Message(Chat::White, fmt::format("Gender | {} ({})", Gender::GetGenderName(npc->gender), npc->gender).c_str());
+			client->Message(Chat::White, fmt::format("Gender | {} ({})", Gender::GetName(npc->gender), npc->gender).c_str());
 			client->Message(Chat::White, fmt::format("Texture | {}", npc->texture).c_str());
 
 			if (npc->d_melee_texture1 || npc->d_melee_texture2) {

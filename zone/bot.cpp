@@ -8559,7 +8559,7 @@ bool Bot::CheckSpawnConditions(Client* c) {
 
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
-	if (!Race::IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
+	if (!Race::IsPlayer(race_id) || !IsPlayerClass(class_id)) {
 		return;
 	}
 

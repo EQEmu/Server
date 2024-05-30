@@ -1669,9 +1669,9 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			Chat::White,
 			fmt::format(
 				"Gender: {} ({}) or {} ({})",
-				Gender::GetGenderName(Gender::Male),
+				Gender::GetName(Gender::Male),
 				Gender::Male,
-				Gender::GetGenderName(Gender::Female),
+				Gender::GetName(Gender::Female),
 				Gender::Female
 			).c_str()
 		);

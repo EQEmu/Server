@@ -24,6 +24,15 @@
 #include <string>
 #include <vector>
 
+namespace Gender {
+	constexpr uint8 Male   = 0;
+	constexpr uint8 Female = 1;
+	constexpr uint8 Neuter = 2;
+
+	const std::string& GetName(uint8 gender_id);
+	float GetRaceDefaultHeight(uint16 race_id, uint8 gender_id);
+}
+
 namespace Race {
 	constexpr uint16 Doug                     = 0;
 	constexpr uint16 Human                    = 1;
@@ -764,20 +773,11 @@ namespace Race {
 	const std::string& GetName(uint16 race_id);
 	const std::string& GetAbbreviation(uint16 race_id);
 
-	bool IsPlayerRace(uint16 race_id);
+	bool IsPlayer(uint16 race_id);
 	bool IsValid(uint16 race_id);
 
 	uint16 GetPlayerValue(uint16 race_id);
 	uint16 GetPlayerBit(uint16 race_id);
-}
-
-namespace Gender {
-	constexpr uint8 Male   = 0;
-	constexpr uint8 Female = 1;
-	constexpr uint8 Neuter = 2;
-
-	const std::string& GetGenderName(uint8 gender_id);
-	float GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id);
 }
 
 static std::map<uint8, std::string> gender_map = {

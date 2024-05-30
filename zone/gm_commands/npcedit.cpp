@@ -165,7 +165,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				"{} is now a {} ({}).",
 				npc_id_string,
 				gender_id,
-				Gender::GetGenderName(gender_id)
+				Gender::GetName(gender_id)
 			);
 		} else {
 			c->Message(Chat::White, "Usage: #npcedit gender [Gender ID] - Sets an NPC's Gender");
