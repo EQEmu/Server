@@ -452,12 +452,6 @@ namespace EQ
 			Guild
 		};
 	};
-
-	namespace stance {
-		std::string GetStanceName(uint8 stance_id);
-		uint8 ConvertStanceTypeToIndex(uint8 stance_id);
-		bool IsValidStance(uint8 stance_id);
-	}
 } /*EQEmu*/
 
 enum ServerLockType : int {
@@ -739,7 +733,9 @@ namespace Stance {
 	constexpr uint32 Efficient2 = 8;
 	constexpr uint32 AEBurn     = 9;
 
-	constexpr uint32 Count = 9;
+	std::string GetName(uint8 stance_id);
+	uint8 GetIndex(uint8 stance_id);
+	bool IsValid(uint8 stance_id);
 }
 
 static std::map<uint32, std::string> stance_names = {

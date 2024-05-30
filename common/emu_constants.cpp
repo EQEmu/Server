@@ -80,19 +80,19 @@ bool Bug::IsValid(uint32 category_id)
 	return bug_category_names.find(category_id) != bug_category_names.end();
 }
 
-std::string EQ::stance::GetStanceName(uint8 stance_id)
+std::string Stance::GetName(uint8 stance_id)
 {
-	return IsValidStance(stance_id) ? stance_names[stance_id] : "UNKNOWN STANCE";
+	return IsValid(stance_id) ? stance_names[stance_id] : "UNKNOWN STANCE";
 }
 
-bool EQ::stance::IsValidStance(uint8 stance_id)
+bool Stance::IsValid(uint8 stance_id)
 {
 	return stance_names.find(stance_id) != stance_names.end();
 }
 
-uint8 EQ::stance::ConvertStanceTypeToIndex(uint8 stance_id)
+uint8 Stance::GetIndex(uint8 stance_id)
 {
-	return IsValidStance(stance_id) ? (stance_id - Stance::Passive) : 0;
+	return IsValid(stance_id) ? (stance_id - Stance::Passive) : 0;
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetLanguageMap()

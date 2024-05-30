@@ -135,7 +135,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 		if (
 			e.spell_type_index >= Bot::SPELL_TYPE_COUNT ||
 			!IsPlayerClass(e.class_id) ||
-			e.stance_index >= Stance::Count
+			e.stance_index >= Stance::AEBurn
 		) {
 			continue;
 		}
@@ -2208,7 +2208,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 	if (
 		spell_type_index >= Bot::SPELL_TYPE_COUNT ||
 		class_index >= Class::PLAYER_CLASS_COUNT ||
-		stance_index >= Stance::Count ||
+		stance_index >= Stance::AEBurn ||
 		conditional_index >= cntHSND
 	) {
 		return 0;

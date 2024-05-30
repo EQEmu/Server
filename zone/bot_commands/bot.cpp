@@ -1063,23 +1063,23 @@ void bot_command_stance(Client *c, const Seperator *sep)
 			fmt::format(
 				"Value: {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({}), {} ({})",
 				Stance::Passive,
-				EQ::stance::GetStanceName(Stance::Passive),
+				Stance::GetName(Stance::Passive),
 				Stance::Balanced,
-				EQ::stance::GetStanceName(Stance::Balanced),
+				Stance::GetName(Stance::Balanced),
 				Stance::Efficient,
-				EQ::stance::GetStanceName(Stance::Efficient),
+				Stance::GetName(Stance::Efficient),
 				Stance::Reactive,
-				EQ::stance::GetStanceName(Stance::Reactive),
+				Stance::GetName(Stance::Reactive),
 				Stance::Aggressive,
-				EQ::stance::GetStanceName(Stance::Aggressive),
+				Stance::GetName(Stance::Aggressive),
 				Stance::Assist,
-				EQ::stance::GetStanceName(Stance::Assist),
+				Stance::GetName(Stance::Assist),
 				Stance::Burn,
-				EQ::stance::GetStanceName(Stance::Burn),
+				Stance::GetName(Stance::Burn),
 				Stance::Efficient2,
-				EQ::stance::GetStanceName(Stance::Efficient2),
+				Stance::GetName(Stance::Efficient2),
 				Stance::AEBurn,
-				EQ::stance::GetStanceName(Stance::AEBurn)
+				Stance::GetName(Stance::AEBurn)
 			).c_str()
 		);
 		return;
@@ -1093,7 +1093,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 		current_flag = true;
 	else if (sep->IsNumber(1)) {
 		bst = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[1]));
-		if (!EQ::stance::IsValidStance(bst)) {
+		if (!Stance::IsValid(bst)) {
 			bst = Stance::Unknown;
 		}
 	}
@@ -1120,7 +1120,7 @@ void bot_command_stance(Client *c, const Seperator *sep)
 			bot_iter,
 			fmt::format(
 				"My current stance is {} ({}).",
-				EQ::stance::GetStanceName(bot_iter->GetBotStance()),
+				Stance::GetName(bot_iter->GetBotStance()),
 				bot_iter->GetBotStance()
 			).c_str()
 		);

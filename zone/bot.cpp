@@ -9229,4 +9229,4 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 }
 
-uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::Count][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };

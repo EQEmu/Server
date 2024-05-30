@@ -605,7 +605,7 @@ public:
 	void SetPetChooser(bool p) { _petChooser = p; }
 	void SetBotOwner(Mob* botOwner) { this->_botOwner = botOwner; }
 	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == Class::Ranger ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
-	void SetBotStance(uint8 stance_id) { _botStance = EQ::stance::IsValidStance(stance_id) ? Stance::Passive : stance_id; }
+	void SetBotStance(uint8 stance_id) { _botStance = Stance::IsValid(stance_id) ? Stance::Passive : stance_id; }
 	void SetBotCasterRange(uint32 bot_caster_range) { m_bot_caster_range = bot_caster_range; }
 	uint32 GetSpellRecastTimer(uint16 spell_id = 0);
 	bool CheckSpellRecastTimer(uint16 spell_id = 0);
@@ -748,7 +748,7 @@ public:
 	//Raid additions
 	Raid* p_raid_instance;
 
-	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::Count][cntHSND];
+	static uint8 spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND];
 
 	bool BotCastMez(Mob* tar, uint8 botLevel, bool checked_los, BotSpell& botSpell, Raid* raid);
 	bool BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpell, Raid* raid);

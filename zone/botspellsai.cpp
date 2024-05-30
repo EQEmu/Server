@@ -2940,11 +2940,11 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	--class_index;
 
 	uint32 stance_id = GetBotStance();
-	if (!EQ::stance::IsValidStance(stance_id)) {
+	if (!Stance::IsValid(stance_id)) {
 		return 0;
 	}
 
-	uint8 stance_index = EQ::stance::ConvertStanceTypeToIndex(stance_id);
+	uint8 stance_index = Stance::GetIndex(stance_id);
 	uint8 type_index = nHSND;
 
 	if (HasGroup()) {

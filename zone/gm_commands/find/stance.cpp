@@ -4,7 +4,7 @@ void FindStance(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const uint8 stance_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
-		const std::string& stance_name = EQ::stance::GetStanceName(stance_id);
+		const std::string& stance_name = Stance::GetName(stance_id);
 		if (Strings::EqualFold(stance_name, "UNKNOWN STANCE")) {
 			c->Message(
 				Chat::White,
