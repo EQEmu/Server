@@ -4,7 +4,7 @@ void FindBodyType(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const uint8 body_type_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
-		const std::string& body_type_name = EQ::bodytype::GetBodyTypeName(body_type_id);
+		const std::string& body_type_name = BodyType::GetBodyTypeName(body_type_id);
 		if (Strings::EqualFold(body_type_name, "UNKNOWN BODY TYPE")) {
 			c->Message(
 				Chat::White,

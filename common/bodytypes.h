@@ -63,6 +63,9 @@ namespace BodyType {
 	constexpr uint8 MonsterSummon  = 64;
 	constexpr uint8 InvisibleMan   = 66;    // no name, seen on 'InvisMan', can be /targeted
 	constexpr uint8 Special        = 67;
+
+	std::string GetBodyTypeName(uint8 body_type_id);
+	bool IsValidBodyType(uint8 body_type_id);
 }
 
 static std::map<uint8, std::string> body_type_names = {
@@ -106,12 +109,5 @@ static std::map<uint8, std::string> body_type_names = {
 	{ BodyType::InvisibleMan,   "Invisible Man" },
 	{ BodyType::Special,        "Special" },
 };
-
-namespace EQ {
-	namespace bodytype {
-		std::string GetBodyTypeName(uint8 body_type_id);
-		bool IsValidBodyType(uint8 body_type_id);
-	}
-}
 
 #endif
