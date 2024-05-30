@@ -59,7 +59,7 @@ int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	return local_array[inv_type];
 }
 
-uint32 Bug::GetCategoryID(const std::string& category_name)
+uint32 Bug::GetID(const std::string& category_name)
 {
 	for (const auto& e : bug_category_names) {
 		if (e.second == category_name) {
@@ -70,12 +70,12 @@ uint32 Bug::GetCategoryID(const std::string& category_name)
 	return BugCategory::Other;
 }
 
-std::string Bug::GetCategoryName(uint32 category_id)
+std::string Bug::GetName(uint32 category_id)
 {
-	return IsValidCategory(category_id) ? bug_category_names[category_id] : "UNKNOWN BUG CATEGORY";
+	return IsValid(category_id) ? bug_category_names[category_id] : "UNKNOWN BUG CATEGORY";
 }
 
-bool Bug::IsValidCategory(uint32 category_id)
+bool Bug::IsValid(uint32 category_id)
 {
 	return bug_category_names.find(category_id) != bug_category_names.end();
 }

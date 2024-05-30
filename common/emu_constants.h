@@ -670,9 +670,9 @@ namespace HeroicBonusBucket
 }
 
 namespace Bug {
-	uint32 GetCategoryID(const std::string& category_name);
-	std::string GetCategoryName(uint32 category_id);
-	bool IsValidCategory(uint32 category_id);
+	uint32 GetID(const std::string& category_name);
+	std::string GetName(uint32 category_id);
+	bool IsValid(uint32 category_id);
 }
 
 namespace BugCategory {

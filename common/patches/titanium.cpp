@@ -2567,7 +2567,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::BugReport_Struct);
 		SETUP_DIRECT_DECODE(BugReport_Struct, structs::BugReport_Struct);
 
-		emu->category_id = Bug::GetCategoryID(eq->category_name);
+		emu->category_id = Bug::GetID(eq->category_name);
 		memcpy(emu->category_name, eq, sizeof(structs::BugReport_Struct));
 
 		FINISH_DIRECT_DECODE();
