@@ -3332,7 +3332,7 @@ StatBonuses* Perl_Mob_GetSpellBonuses(Mob* self)
 
 std::string Perl_Mob_GetClassPlural(Mob* self)
 {
-	return self->GetClassPlural();
+	return Class::GetPlural(self->GetClass());
 }
 
 uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)

@@ -1363,7 +1363,6 @@ public:
 	bool HasSpellEffect(int effect_id);
 
 	std::string GetRacePlural();
-	std::string GetClassPlural();
 
 	//Command #Tune functions
 	void TuneGetStats(Mob* defender, Mob *attacker);

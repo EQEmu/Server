@@ -2897,12 +2897,12 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$mracep", GetRacePlural());
 	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", Class::GetName(GetClass()));
-	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
+	Strings::FindReplace(processed, "$mclassp", Class::GetPlural(GetClass()));
 
 	// Target Variables
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
 	Strings::FindReplace(processed, "$class", t ? Class::GetName(t->GetClass()) : "class");
-	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
+	Strings::FindReplace(processed, "$classp", t ? Class::GetPlural(t->GetClass()) : "classes");
 	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
 	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
 

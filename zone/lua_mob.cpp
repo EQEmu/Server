@@ -3181,7 +3181,7 @@ Lua_Mob_List Lua_Mob::GetCloseMobList(float distance, bool ignore_self) {
 std::string Lua_Mob::GetClassPlural()
 {
 	Lua_Safe_Call_String();
-	return self->GetClassPlural();
+	return Class::GetPlural(self->GetClass());
 }
 
 std::string Lua_Mob::GetRacePlural()

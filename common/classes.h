@@ -104,9 +104,10 @@ namespace Class {
 		constexpr uint16 All          = 65535;
 	}
 
-	std::string GetName(uint8 class_id, uint8 level = 0);
-	std::string GetLevelName(uint8 class_id, uint8 level = 0);
 	std::string GetAbbreviation(uint8 class_id);
+	std::string GetLevelName(uint8 class_id, uint8 level = 0);
+	std::string GetName(uint8 class_id, uint8 level = 0);
+	std::string GetPlural(uint8 class_id);
 
 	uint8 GetArmorType(uint8 class_id);
 	uint8 GetPlayerValue(uint8 class_id);

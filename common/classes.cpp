@@ -66,6 +66,18 @@ uint16 Class::GetPlayerBit(uint8 class_id)
 	return IsPlayer(class_id) ? player_class_bitmasks[class_id] : 0;
 }
 
+std::string Class::GetPlural(uint8 class_id)
+{
+	return (
+		IsValid(class_id) ?
+		fmt::format(
+			"{}s",
+			GetName(class_id)
+		) :
+		"UNKNOWN CLASS"
+	);
+}
+
 bool Class::IsFighter(uint8 class_id)
 {
 	switch (class_id) {
@@ -245,31 +257,6 @@ bool Class::IsCloth(uint8 class_id)
 		default:
 			return false;
 	}
-}
-
-uint8 Class::GetArmorType(uint8 class_id)
-{
-	uint8 armor_type = ArmorType::Unknown;
-	if (!IsPlayer(class_id)) {
-		return armor_type;
-	}
-
-	if (IsChain(class_id)) {
-		armor_type = ArmorType::Chain;
-	} else if (IsCloth(class_id)) {
-		armor_type = ArmorType::Cloth;
-	} else if (IsLeather(class_id)) {
-		armor_type = ArmorType::Leather;
-	} else if (IsPlate(class_id)) {
-		armor_type = ArmorType::Plate;
-	}
-
-	return armor_type;
-}
-
-const std::string Class::GetAbbreviation(uint8 class_id)
-{
-	return IsPlayer(class_id) ? player_class_abbreviations[class_id] : "UNK";
 }
 
 bool Class::IsPlayer(uint8 class_id)

@@ -8442,46 +8442,6 @@ std::string Mob::GetRacePlural()
 	}
 }
 
-std::string Mob::GetClassPlural()
-{
-	switch (GetClass()) {
-		case Class::Warrior:
-			return "Warriors";
-		case Class::Cleric:
-			return "Clerics";
-		case Class::Paladin:
-			return "Paladins";
-		case Class::Ranger:
-			return "Rangers";
-		case Class::ShadowKnight:
-			return fmt::format("{}s", shadow_knight_class_name);
-		case Class::Druid:
-			return "Druids";
-		case Class::Monk:
-			return "Monks";
-		case Class::Bard:
-			return "Bards";
-		case Class::Rogue:
-			return "Rogues";
-		case Class::Shaman:
-			return "Shamans";
-		case Class::Necromancer:
-			return "Necromancers";
-		case Class::Wizard:
-			return "Wizards";
-		case Class::Magician:
-			return "Magicians";
-		case Class::Enchanter:
-			return "Enchanters";
-		case Class::Beastlord:
-			return "Beastlords";
-		case Class::Berserker:
-			return "Berserkers";
-		default:
-			return "Classes";
-	}
-}
-
 DataBucketKey Mob::GetScopedBucketKeys()
 {
 	DataBucketKey k = {};
