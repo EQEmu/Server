@@ -31,12 +31,8 @@ uint32 EQ::deity::GetDeityBitmask(uint32 deity_id)
 
 std::string EQ::deity::GetDeityName(uint32 deity_id)
 {
-	if (!IsValidDeity(deity_id)) {
-		return "UNKNOWN DEITY";
-	}
-
 	const auto& e = deity_names.find(deity_id);
-	return e->second;
+	return e != deity_names.end() ? e->second : "UNKNOWN DEITY";
 }
 
 bool EQ::deity::IsValidDeity(uint32 deity_id)
