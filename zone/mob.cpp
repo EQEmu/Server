@@ -2913,7 +2913,7 @@ void Mob::ShowStats(Client* c)
 		}
 
 		// Body
-		auto bodytype_name = BodyType::GetBodyTypeName(t->GetBodyType());
+		auto bodytype_name = BodyType::GetName(t->GetBodyType());
 		c->Message(
 			Chat::White,
 			fmt::format(

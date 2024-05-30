@@ -1183,7 +1183,8 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			}
 
 			if (npc->bodytype) {
-				client->Message(Chat::White, fmt::format("Body Type | {} ({})", BodyType::GetBodyTypeName(npc->bodytype), npc->bodytype).c_str());
+				client->Message(Chat::White, fmt::format("Body Type | {} ({})",
+														 BodyType::GetName(npc->bodytype), npc->bodytype).c_str());
 			}
 
 			client->Message(Chat::White, "New NPC spawned!");

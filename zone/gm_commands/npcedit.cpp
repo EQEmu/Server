@@ -101,7 +101,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "bodytype")) {
 		if (sep->IsNumber(2)) {
 			const uint8 body_type_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
-			if (!BodyType::IsValidBodyType(body_type_id)) {
+			const std::string& body_type_name = BodyType::GetName(body_type_id);
+			if (Strings::EqualFold(body_type_name, "UNKNOWN BODY TYPE")) {
 				c->Message(
 					Chat::White,
 					fmt::format(
@@ -112,7 +113,6 @@ void command_npcedit(Client *c, const Seperator *sep)
 				return;
 			}
 
-			const std::string& body_type_name = BodyType::GetBodyTypeName(body_type_id);
 			n.bodytype = body_type_id;
 			d = fmt::format(
 				"{} is now using Body Type {} ({}).",

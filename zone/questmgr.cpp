@@ -1484,7 +1484,7 @@ std::string QuestManager::getlanguagename(uint8 language_id) {
 }
 
 std::string QuestManager::getbodytypename(uint8 body_type_id) {
-	return BodyType::GetBodyTypeName(body_type_id);
+	return BodyType::GetName(body_type_id);
 }
 
 std::string QuestManager::getconsiderlevelname(uint8 consider_level) {
