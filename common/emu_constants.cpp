@@ -642,7 +642,7 @@ std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
 
 std::string EQ::constants::GetSpecialAbilityName(int ability_id)
 {
-	return IsValidSpecialAbility(ability_id) ? special_ability_names[ability_id] : "UNKNOWN ABILITY";
+	return IsValidSpecialAbility(ability_id) ? special_ability_names[ability_id] : "UNKNOWN SPECIAL ABILITY";
 }
 
 bool EQ::constants::IsValidSpecialAbility(int ability_id)
