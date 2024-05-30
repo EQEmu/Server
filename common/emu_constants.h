@@ -401,8 +401,8 @@ namespace EQ
 		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
 		std::string GetAppearanceTypeName(uint32 animation_type);
 
-		extern const std::map<uint32, std::string>& GetSpecialAbilityMap();
-		std::string GetSpecialAbilityName(uint32 ability_id);
+		std::string GetSpecialAbilityName(int ability_id);
+		bool IsValidSpecialAbility(int ability_id);
 
 		extern const std::map<uint32, std::string>& GetConsiderColorMap();
 		std::string GetConsiderColorName(uint32 consider_color);
@@ -614,67 +614,128 @@ enum class ApplySpellType {
 	Raid
 };
 
-enum {
-	SPECATK_SUMMON            = 1,
-	SPECATK_ENRAGE            = 2,
-	SPECATK_RAMPAGE           = 3,
-	SPECATK_AREA_RAMPAGE      = 4,
-	SPECATK_FLURRY            = 5,
-	SPECATK_TRIPLE            = 6,
-	SPECATK_QUAD              = 7,
-	SPECATK_INNATE_DW         = 8,
-	SPECATK_BANE              = 9,
-	SPECATK_MAGICAL           = 10,
-	SPECATK_RANGED_ATK        = 11,
-	UNSLOWABLE                = 12,
-	UNMEZABLE                 = 13,
-	UNCHARMABLE               = 14,
-	UNSTUNABLE                = 15,
-	UNSNAREABLE               = 16,
-	UNFEARABLE                = 17,
-	UNDISPELLABLE             = 18,
-	IMMUNE_MELEE              = 19,
-	IMMUNE_MAGIC              = 20,
-	IMMUNE_FLEEING            = 21,
-	IMMUNE_MELEE_EXCEPT_BANE  = 22,
-	IMMUNE_MELEE_NONMAGICAL   = 23,
-	IMMUNE_AGGRO              = 24,
-	IMMUNE_AGGRO_ON           = 25,
-	IMMUNE_CASTING_FROM_RANGE = 26,
-	IMMUNE_FEIGN_DEATH        = 27,
-	IMMUNE_TAUNT              = 28,
-	NPC_TUNNELVISION          = 29,
-	NPC_NO_BUFFHEAL_FRIENDS   = 30,
-	IMMUNE_PACIFY             = 31,
-	LEASH                     = 32,
-	TETHER                    = 33,
-	DESTRUCTIBLE_OBJECT       = 34,
-	NO_HARM_FROM_CLIENT       = 35,
-	ALWAYS_FLEE               = 36,
-	FLEE_PERCENT              = 37,
-	ALLOW_BENEFICIAL          = 38,
-	DISABLE_MELEE             = 39,
-	NPC_CHASE_DISTANCE        = 40,
-	ALLOW_TO_TANK             = 41,
-	IGNORE_ROOT_AGGRO_RULES   = 42,
-	CASTING_RESIST_DIFF       = 43,
-	COUNTER_AVOID_DAMAGE      = 44, // Modify by percent NPC's opponents chance to riposte, block, parry or dodge individually, or for all skills
-	PROX_AGGRO                = 45,
-	IMMUNE_RANGED_ATTACKS     = 46,
-	IMMUNE_DAMAGE_CLIENT      = 47,
-	IMMUNE_DAMAGE_NPC         = 48,
-	IMMUNE_AGGRO_CLIENT       = 49,
-	IMMUNE_AGGRO_NPC          = 50,
-	MODIFY_AVOID_DAMAGE       = 51, // Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
-	IMMUNE_FADING_MEMORIES    = 52,
-	IMMUNE_OPEN               = 53,
-	IMMUNE_ASSASSINATE        = 54,
-	IMMUNE_HEADSHOT           = 55,
-	IMMUNE_AGGRO_BOT          = 56,
-	IMMUNE_DAMAGE_BOT         = 57,
-	MAX_SPECIAL_ATTACK        = 58
-};
+namespace SpecialAbility {
+	constexpr int Summon                     = 1;
+	constexpr int Enrage                     = 2;
+	constexpr int Rampage                    = 3;
+	constexpr int AreaRampage                = 4;
+	constexpr int Flurry                     = 5;
+	constexpr int TripleAttack               = 6;
+	constexpr int QuadrupleAttack            = 7;
+	constexpr int DualWield                  = 8;
+	constexpr int BaneAttack                 = 9;
+	constexpr int MagicalAttack              = 10;
+	constexpr int RangedAttack               = 11;
+	constexpr int SlowImmunity               = 12;
+	constexpr int MesmerizeImmunity          = 13;
+	constexpr int CharmImmunity              = 14;
+	constexpr int StunImmunity               = 15;
+	constexpr int SnareImmunity              = 16;
+	constexpr int FearImmunity               = 17;
+	constexpr int DispellImmunity            = 18;
+	constexpr int MeleeImmunity              = 19;
+	constexpr int MagicImmunity              = 20;
+	constexpr int FleeingImmunity            = 21;
+	constexpr int MeleeImmunityExceptBane    = 22;
+	constexpr int MeleeImmunityExceptMagical = 23;
+	constexpr int AggroImmunity              = 24;
+	constexpr int BeingAggroImmunity         = 25;
+	constexpr int CastingFromRangeImmunity   = 26;
+	constexpr int FeignDeathImmunity         = 27;
+	constexpr int TauntImmunity              = 28;
+	constexpr int TunnelVision               = 29;
+	constexpr int NoBuffHealFriends          = 30;
+	constexpr int PacifyImmunity             = 31;
+	constexpr int Leash                      = 32;
+	constexpr int Tether                     = 33;
+	constexpr int DestructibleObject         = 34;
+	constexpr int HarmFromClientImmunity     = 35;
+	constexpr int AlwaysFlee                 = 36;
+	constexpr int FleePercent                = 37;
+	constexpr int AllowBeneficial            = 38;
+	constexpr int DisableMelee               = 39;
+	constexpr int NPCChaseDistance           = 40;
+	constexpr int AllowedToTank              = 41;
+	constexpr int IgnoreRootAggroRules       = 42;
+	constexpr int CastingResistDifficulty    = 43;
+	constexpr int CounterAvoidDamage         = 44;
+	constexpr int ProximityAggro             = 45;
+	constexpr int RangedAttackImmunity       = 46;
+	constexpr int ClientDamageImmunity       = 47;
+	constexpr int NPCDamageImmunity          = 48;
+	constexpr int ClientAggroImmunity        = 49;
+	constexpr int NPCAggroImmunity           = 50;
+	constexpr int ModifyAvoidDamage          = 51;
+	constexpr int MemoryFadeImmunity         = 52;
+	constexpr int OpenImmunity               = 53;
+	constexpr int AssassinateImmunity        = 54;
+	constexpr int HeadshotImmunity           = 55;
+	constexpr int BotAggroImmunity           = 56;
+	constexpr int BotDamageImmunity          = 57;
+	constexpr int Max                        = 58;
 
+	constexpr int MaxParameters = 9;
+}
+
+static std::map<int, std::string> special_ability_names = {
+	{ SpecialAbility::Summon,                     "Summon" },
+	{ SpecialAbility::Enrage,                     "Enrage" },
+	{ SpecialAbility::Rampage,                    "Rampage" },
+	{ SpecialAbility::AreaRampage,                "Area Rampage" },
+	{ SpecialAbility::Flurry,                     "Flurry" },
+	{ SpecialAbility::TripleAttack,               "Triple Attack" },
+	{ SpecialAbility::QuadrupleAttack,            "Quadruple Attack" },
+	{ SpecialAbility::DualWield,                  "Dual Wield" },
+	{ SpecialAbility::BaneAttack,                 "Bane Attack" },
+	{ SpecialAbility::MagicalAttack,              "Magical Attack" },
+	{ SpecialAbility::RangedAttack,               "Ranged Attack" },
+	{ SpecialAbility::SlowImmunity,               "Immune to Slow" },
+	{ SpecialAbility::MesmerizeImmunity,          "Immune to Mesmerize" },
+	{ SpecialAbility::CharmImmunity,              "Immune to Charm" },
+	{ SpecialAbility::StunImmunity,               "Immune to Stun" },
+	{ SpecialAbility::SnareImmunity,              "Immune to Snare" },
+	{ SpecialAbility::FearImmunity,               "Immune to Fear" },
+	{ SpecialAbility::DispellImmunity,            "Immune to Dispell" },
+	{ SpecialAbility::MeleeImmunity,              "Immune to Melee" },
+	{ SpecialAbility::MagicImmunity,              "Immune to Magic" },
+	{ SpecialAbility::FleeingImmunity,            "Immune to Fleeing" },
+	{ SpecialAbility::MeleeImmunityExceptBane,    "Immune to Melee except Bane" },
+	{ SpecialAbility::MeleeImmunityExceptMagical, "Immune to Non-Magical Melee" },
+	{ SpecialAbility::AggroImmunity,              "Immune to Aggro" },
+	{ SpecialAbility::BeingAggroImmunity,         "Immune to Being Aggro" },
+	{ SpecialAbility::CastingFromRangeImmunity,   "Immune to Ranged Spells" },
+	{ SpecialAbility::FeignDeathImmunity,         "Immune to Feign Death" },
+	{ SpecialAbility::TauntImmunity,              "Immune to Taunt" },
+	{ SpecialAbility::TunnelVision,               "Tunnel Vision" },
+	{ SpecialAbility::NoBuffHealFriends,          "Does Not Heal or Buff Allies" },
+	{ SpecialAbility::PacifyImmunity,             "Immune to Pacify" },
+	{ SpecialAbility::Leash,                      "Leashed" },
+	{ SpecialAbility::Tether,                     "Tethered" },
+	{ SpecialAbility::DestructibleObject,         "Destructible Object" },
+	{ SpecialAbility::HarmFromClientImmunity,     "Immune to Harm from Client" },
+	{ SpecialAbility::AlwaysFlee,                 "Always Flees" },
+	{ SpecialAbility::FleePercent,                "Flee Percentage" },
+	{ SpecialAbility::AllowBeneficial,            "Allows Beneficial Spells" },
+	{ SpecialAbility::DisableMelee,               "Melee is Disabled" },
+	{ SpecialAbility::NPCChaseDistance,           "Chase Distance" },
+	{ SpecialAbility::AllowedToTank,              "Allowed to Tank" },
+	{ SpecialAbility::IgnoreRootAggroRules,       "Ignores Root Aggro" },
+	{ SpecialAbility::CastingResistDifficulty,    "Casting Resist Difficulty" },
+	{ SpecialAbility::CounterAvoidDamage,         "Counter Damage Avoidance" },
+	{ SpecialAbility::ProximityAggro,             "Proximity Aggro" },
+	{ SpecialAbility::RangedAttackImmunity,       "Immune to Ranged Attacks" },
+	{ SpecialAbility::ClientDamageImmunity,       "Immune to Client Damage" },
+	{ SpecialAbility::NPCDamageImmunity,          "Immune to NPC Damage" },
+	{ SpecialAbility::ClientAggroImmunity,        "Immune to Client Aggro" },
+	{ SpecialAbility::NPCAggroImmunity,           "Immune to NPC Aggro" },
+	{ SpecialAbility::ModifyAvoidDamage,          "Modify Damage Avoidance" },
+	{ SpecialAbility::MemoryFadeImmunity,         "Immune to Memory Fades" },
+	{ SpecialAbility::OpenImmunity,               "Immune to Open" },
+	{ SpecialAbility::AssassinateImmunity,        "Immune to Assassinate" },
+	{ SpecialAbility::HeadshotImmunity,           "Immune to Headshot" },
+	{ SpecialAbility::BotAggroImmunity,           "Immune to Bot Aggro" },
+	{ SpecialAbility::BotDamageImmunity,          "Immune to Bot Damage" },
+};
 
 namespace HeroicBonusBucket
 {

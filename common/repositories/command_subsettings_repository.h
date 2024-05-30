@@ -61,6 +61,7 @@ public:
 			{.parent_command = "find", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrace"},
 			{.parent_command = "find", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrecipe"},
 			{.parent_command = "find", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findskill"},
+			{.parent_command = "find", .sub_command = "special_ability", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fsa|findspecialability"},
 			{.parent_command = "find", .sub_command = "spell", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fs|findspell"},
 			{.parent_command = "find", .sub_command = "task", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findtask"},
 			{.parent_command = "find", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fz|findzone"},

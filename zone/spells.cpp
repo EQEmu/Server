@@ -3675,7 +3675,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				if (!will_overwrite && !IsDisciplineBuff(spell_id)) {
 					emptyslot = buffslot;
 				}
-				
+
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
 			} else if (ret == 2) {
@@ -5041,7 +5041,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if(IsMesmerizeSpell(spell_id))
 	{
-		if(GetSpecialAbility(UNMEZABLE)) {
+		if(GetSpecialAbility(SpecialAbility::MesmerizeImmunity)) {
 			LogSpells("We are immune to Mez spells");
 			caster->MessageString(Chat::SpellFailure, CANNOT_MEZ);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
@@ -5068,7 +5068,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	}
 
 	// slow and haste spells
-	if(GetSpecialAbility(UNSLOWABLE) && IsEffectInSpell(spell_id, SE_AttackSpeed))
+	if(GetSpecialAbility(SpecialAbility::SlowImmunity) && IsEffectInSpell(spell_id, SE_AttackSpeed))
 	{
 		LogSpells("We are immune to Slow spells");
 		caster->MessageString(Chat::Red, IMMUNE_ATKSPEED);
@@ -5085,7 +5085,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 	if(IsEffectInSpell(spell_id, SE_Fear))
 	{
 		effect_index = GetSpellEffectIndex(spell_id, SE_Fear);
-		if(GetSpecialAbility(UNFEARABLE)) {
+		if(GetSpecialAbility(SpecialAbility::FearImmunity)) {
 			LogSpells("We are immune to Fear spells");
 			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
@@ -5124,7 +5124,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 	if(IsCharmSpell(spell_id))
 	{
-		if(GetSpecialAbility(UNCHARMABLE))
+		if(GetSpecialAbility(SpecialAbility::CharmImmunity))
 		{
 			LogSpells("We are immune to Charm spells");
 			caster->MessageString(Chat::Red, CANNOT_CHARM);	// need to verify message type, not in MQ2Cast for easy look up
@@ -5173,7 +5173,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 		IsEffectInSpell(spell_id, SE_MovementSpeed)
 	)
 	{
-		if(GetSpecialAbility(UNSNAREABLE)) {
+		if(GetSpecialAbility(SpecialAbility::SnareImmunity)) {
 			LogSpells("We are immune to Snare spells");
 			caster->MessageString(Chat::Red, IMMUNE_MOVEMENT);
 			int32 aggro = caster->CheckAggroAmount(spell_id, this);
@@ -5263,7 +5263,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return 0;
 	}
 
-	if(GetSpecialAbility(IMMUNE_CASTING_FROM_RANGE))
+	if(GetSpecialAbility(SpecialAbility::CastingFromRangeImmunity))
 	{
 		if(!caster->CombatRange(this))
 		{
@@ -5271,7 +5271,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if(GetSpecialAbility(IMMUNE_MAGIC))
+	if(GetSpecialAbility(SpecialAbility::MagicImmunity))
 	{
 		LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
 		return(0);
@@ -5291,8 +5291,8 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
-	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
-		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
+	if(caster->GetSpecialAbility(SpecialAbility::CastingResistDifficulty))
+		resist_modifier += caster->GetSpecialAbilityParam(SpecialAbility::CastingResistDifficulty, 0);
 
 	int64 focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 

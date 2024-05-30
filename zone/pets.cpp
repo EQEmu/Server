@@ -306,7 +306,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		if (activiate_pet){
 			npc->AddToHateList(m_target, 1);
 			npc->SetPetTargetLockID(m_target->GetID());
-			npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+			npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 		}
 		else {
 			npc->CastSpell(SPELL_UNSUMMON_SELF, npc->GetID()); //Live like behavior, damages self for 20K

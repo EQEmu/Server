@@ -232,10 +232,10 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (base_damage == DMG_INVULNERABLE)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	if (who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
+	if (who->GetInvul() || who->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != EQ::skills::SkillBackstab)
+	if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane) && skill != EQ::skills::SkillBackstab)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
 	int64 hate = my_hit.base_damage;
@@ -969,7 +969,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 {
 	if ((other == nullptr ||
 			((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))) {
 		return;
 	}
 
@@ -1350,7 +1350,7 @@ void NPC::RangedAttack(Mob *other)
 		return;
 	}
 
-	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SpecialAbility::RangedAttack))
 		return;
 
 	if (!CheckLosFN(other))
@@ -1360,12 +1360,12 @@ void NPC::RangedAttack(Mob *other)
 	float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
 	float max_range = 250.0f; // needs to be longer than 200(most spells)
 
-	if (GetSpecialAbility(SPECATK_RANGED_ATK)) {
-		int temp_attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+	if (GetSpecialAbility(SpecialAbility::RangedAttack)) {
+		int temp_attacks = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 0);
 		attacks = temp_attacks > 0 ? temp_attacks : 1;
 
-		int temp_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); // Min Range of NPC attack
-		int temp_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); // Max Range of NPC attack
+		int temp_min_range = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 4); // Min Range of NPC attack
+		int temp_max_range = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 1); // Max Range of NPC attack
 		if (temp_max_range)
 			max_range = static_cast<float>(temp_max_range);
 		if (temp_min_range)
@@ -1401,7 +1401,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 		HasDied() ||
 		(!IsAttackAllowed(other)) ||
 		(other->GetInvul() ||
-		other->GetSpecialAbility(IMMUNE_MELEE)))
+		other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))
 	{
 		return;
 	}
@@ -1430,14 +1430,14 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	}
 
 	if (!chance_mod)
-		chance_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2);
+		chance_mod = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 2);
 
 	int TotalDmg = 0;
 	int MaxDmg = GetBaseDamage() * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
 	int MinDmg = GetMinDamage() * RuleR(Combat, ArcheryNPCMultiplier);
 
 	if (!damage_mod)
-		 damage_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3);//Damage modifier
+		 damage_mod = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 3);//Damage modifier
 
 	DamageHitInfo my_hit;
 	my_hit.base_damage = MaxDmg;
@@ -1573,7 +1573,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 {
 	if ((other == nullptr ||
 		((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))) {
 		return;
 	}
 
@@ -2204,7 +2204,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 	if (
 		!RuleB(Combat, TauntOverLevel) &&
 		level_difference < 0 ||
-		who->GetSpecialAbility(IMMUNE_TAUNT)
+		who->GetSpecialAbility(SpecialAbility::TauntImmunity)
 	) {
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		return;
@@ -2404,7 +2404,7 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
 		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
-		!defender->GetSpecialAbility(IMMUNE_HEADSHOT)
+		!defender->GetSpecialAbility(SpecialAbility::HeadshotImmunity)
 	) {
 		uint32 HeadShot_Dmg = aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
@@ -2441,7 +2441,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		GetLevel() >= RuleI(Combat, AssassinateLevelRequirement) &&
 		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
 		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
-		!defender->GetSpecialAbility(IMMUNE_ASSASSINATE)
+		!defender->GetSpecialAbility(SpecialAbility::AssassinateImmunity)
 	) {
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
@@ -2574,7 +2574,7 @@ bool Mob::CanDoSpecialAttack(Mob *other) {
 		return false;
 	}
 
-	if(other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
+	if(other->GetInvul() || other->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		return false;
 
 	return true;

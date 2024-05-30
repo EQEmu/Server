@@ -2671,8 +2671,8 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 
 	if (against_who) {
 		if (
-			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
-			against_who->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) ||
+			against_who->GetSpecialAbility(SpecialAbility::AggroImmunity) ||
+			against_who->GetSpecialAbility(SpecialAbility::ClientAggroImmunity) ||
 			against_who->IsClient() ||
 			GetLevelCon(against_who->GetLevel()) == ConsiderColor::Gray
 		) {
@@ -5060,7 +5060,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			return;
 		}
 
-		if (target->GetSpecialAbility(IMMUNE_OPEN))
+		if (target->GetSpecialAbility(SpecialAbility::OpenImmunity))
 		{
 			LogDebug("[{}] tried to open [{}] but it was immune", GetName(), target->GetName());
 			return;
