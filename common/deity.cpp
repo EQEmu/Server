@@ -19,81 +19,14 @@
 
 #include "deity.h"
 
-EQ::deity::DeityTypeBit EQ::deity::GetDeityBitmask(DeityType deity_type)
+uint32 EQ::deity::GetDeityBitmask(uint32 deity_id)
 {
-	switch (deity_type) {
-		case DeityBertoxxulous:
-			return bit_DeityBertoxxulous;
-		case DeityBrellSirilis:
-			return bit_DeityBrellSirilis;
-		case DeityCazicThule:
-			return bit_DeityCazicThule;
-		case DeityErollisiMarr:
-			return bit_DeityErollisiMarr;
-		case DeityBristlebane:
-			return bit_DeityBristlebane;
-		case DeityInnoruuk:
-			return bit_DeityInnoruuk;
-		case DeityKarana:
-			return bit_DeityKarana;
-		case DeityMithanielMarr:
-			return bit_DeityMithanielMarr;
-		case DeityPrexus:
-			return bit_DeityPrexus;
-		case DeityQuellious:
-			return bit_DeityQuellious;
-		case DeityRallosZek:
-			return bit_DeityRallosZek;
-		case DeityRodcetNife:
-			return bit_DeityRodcetNife;
-		case DeitySolusekRo:
-			return bit_DeitySolusekRo;
-		case DeityTheTribunal:
-			return bit_DeityTheTribunal;
-		case DeityTunare:
-			return bit_DeityTunare;
-		case DeityVeeshan:
-			return bit_DeityVeeshan;
-		case DeityAgnostic_LB:
-		case DeityAgnostic:
-			return bit_DeityAgnostic;
-		default:
-			return bit_DeityAll;
-	}
+	const auto& e = deity_bitmasks.find(deity_id);
+	return e != deity_bitmasks.end() ? e->second : DeityBitmask::All;
 }
 
-const std::map<EQ::deity::DeityType, std::string>& EQ::deity::GetDeityMap()
+std::string EQ::deity::GetDeityName(uint32 deity_id)
 {
-	static const std::map<EQ::deity::DeityType, std::string> deity_map = {
-		{ DeityAgnostic, "Agnostic" },
-		{ DeityAgnostic_LB, "Agnostic" },
-		{ DeityBertoxxulous, "Bertoxxulous" },
-		{ DeityBrellSirilis, "Brell Serilis" },
-		{ DeityBristlebane, "Bristlebane" },
-		{ DeityCazicThule, "Cazic-Thule" },
-		{ DeityErollisiMarr, "Erollisi Marr" },
-		{ DeityInnoruuk, "Innoruuk" },
-		{ DeityKarana, "Karana" },
-		{ DeityMithanielMarr, "Mithaniel Marr" },
-		{ DeityPrexus, "Prexus" },
-		{ DeityQuellious, "Quellious" },
-		{ DeityRallosZek, "Rallos Zek" },
-		{ DeityRodcetNife, "Rodcet Nife" },
-		{ DeitySolusekRo, "Solusek Ro" },
-		{ DeityTheTribunal, "The Tribunal" },
-		{ DeityTunare, "Tunare" },
-		{ DeityVeeshan, "Veeshan" }
-	};
-
-	return deity_map;
-}
-
-std::string EQ::deity::GetDeityName(DeityType deity_type)
-{
-
-	if (EQ::deity::GetDeityMap().find(deity_type) != EQ::deity::GetDeityMap().end()) {
-		return EQ::deity::GetDeityMap().find(deity_type)->second;
-	}
-
-	return std::string();
+	const auto& e = deity_names.find(deity_id);
+	return e != deity_names.end() ? e->second : std::string();
 }

@@ -5480,8 +5480,8 @@ uint16 lua_get_class_bitmask(uint8 class_id) {
 	return GetPlayerClassBit(class_id);
 }
 
-uint32 lua_get_deity_bitmask(uint16 deity_id) {
-	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(deity_id)));
+uint32 lua_get_deity_bitmask(uint32 deity_id) {
+	return EQ::deity::GetDeityBitmask(deity_id);
 }
 
 uint16 lua_get_race_bitmask(uint16 race_id) {

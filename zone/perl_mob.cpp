@@ -3427,7 +3427,7 @@ bool Perl_Mob_IsAlwaysAggro(Mob* self)
 
 std::string Perl_Mob_GetDeityName(Mob* self)
 {
-	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
+	return EQ::deity::GetDeityName(self->GetDeity());
 }
 
 perl::array Perl_Mob_GetBuffs(Mob* self)
