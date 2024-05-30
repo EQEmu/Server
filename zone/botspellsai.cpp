@@ -2935,7 +2935,7 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		return 0;
 
 	uint8 class_index = GetClass();
-	if (class_index > Class::Berserker || class_index < Class::Warrior)
+	if (class_index > Class::Count|| class_index < Class::Warrior)
 		return 0;
 	--class_index;
 

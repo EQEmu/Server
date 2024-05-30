@@ -2207,7 +2207,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 {
 	if (
 		spell_type_index >= Bot::SPELL_TYPE_COUNT ||
-		class_index >= Class::Berserker ||
+		class_index >= Class::Count||
 		stance_index >= EQ::constants::STANCE_TYPE_COUNT ||
 		conditional_index >= cntHSND
 	) {
