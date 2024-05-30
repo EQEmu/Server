@@ -4,7 +4,7 @@ void FindBugCategory(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const uint32 category_id = Strings::ToUnsignedInt(sep->arg[2]);
-		const std::string& category_name = EQ::bug::GetCategoryName(category_id);
+		const std::string& category_name = Bug::GetCategoryName(category_id);
 		if (Strings::EqualFold(category_name, "UNKNOWN BUG CATEGORY")) {
 			c->Message(
 				Chat::White,

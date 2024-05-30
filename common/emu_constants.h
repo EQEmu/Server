@@ -464,12 +464,6 @@ namespace EQ
 
 	} // namespace spells
 
-	namespace bug {
-		uint32 GetCategoryID(const std::string& category_name);
-		std::string GetCategoryName(uint32 category_id);
-		bool IsValidCategory(uint32 category_id);
-	}
-
 	enum WaypointStatus : int {
 		RoamBoxPauseInProgress = -3,
 		QuestControlNoGrid = -2,
@@ -673,6 +667,12 @@ namespace HeroicBonusBucket
 	const std::string DexRangedDamage		= "HDEX-RangedDamage";
 	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
 	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
+}
+
+namespace Bug {
+	uint32 GetCategoryID(const std::string& category_name);
+	std::string GetCategoryName(uint32 category_id);
+	bool IsValidCategory(uint32 category_id);
 }
 
 namespace BugCategory {
