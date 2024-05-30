@@ -21,18 +21,12 @@
 
 uint32 EQ::deity::GetDeityBitmask(uint32 deity_id)
 {
-	if (!IsValidDeity(deity_id)) {
-		return DeityBitmask::All;
-	}
-
-	const auto& e = deity_bitmasks.find(deity_id);
-	return e->second;
+	return IsValidDeity(deity_id) ? deity_bitmasks[deity_id] : DeityBitmask::All;
 }
 
 std::string EQ::deity::GetDeityName(uint32 deity_id)
 {
-	const auto& e = deity_names.find(deity_id);
-	return e != deity_names.end() ? e->second : "UNKNOWN DEITY";
+	return IsValidDeity(deity_id) ? deity_names[deity_id] : "UNKNOWN DEITY";
 }
 
 bool EQ::deity::IsValidDeity(uint32 deity_id)
