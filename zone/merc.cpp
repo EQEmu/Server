@@ -58,7 +58,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	memset(equipment, 0, sizeof(equipment));
 
 	SetMercID(0);
-	SetStance(EQ::constants::stanceBalanced);
+	SetStance(Stance::Balanced);
 	rest_timer.Disable();
 
 	if (GetClass() == Class::Rogue)
@@ -3192,13 +3192,13 @@ MercSpell Merc::GetBestMercSpellForAENuke(Merc* caster, Mob* tar) {
 
 		switch(caster->GetStance())
 		{
-		case EQ::constants::stanceBurnAE:
+		case Stance::AEBurn:
 			initialCastChance = 50;
 			break;
-		case EQ::constants::stanceBalanced:
+		case Stance::Balanced:
 			initialCastChance = 25;
 			break;
-		case EQ::constants::stanceBurn:
+		case Stance::Burn:
 			initialCastChance = 0;
 			break;
 		}
@@ -3244,11 +3244,11 @@ MercSpell Merc::GetBestMercSpellForTargetedAENuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case EQ::constants::stanceBurnAE:
+	case Stance::AEBurn:
 		numTargetsCheck = 1;
 		break;
-	case EQ::constants::stanceBalanced:
-	case EQ::constants::stanceBurn:
+	case Stance::Balanced:
+	case Stance::Burn:
 		numTargetsCheck = 2;
 		break;
 	}
@@ -3298,11 +3298,11 @@ MercSpell Merc::GetBestMercSpellForPBAENuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case EQ::constants::stanceBurnAE:
+	case Stance::AEBurn:
 		numTargetsCheck = 2;
 		break;
-	case EQ::constants::stanceBalanced:
-	case EQ::constants::stanceBurn:
+	case Stance::Balanced:
+	case Stance::Burn:
 		numTargetsCheck = 3;
 		break;
 	}
@@ -3351,11 +3351,11 @@ MercSpell Merc::GetBestMercSpellForAERainNuke(Merc* caster, Mob* tar) {
 
 	switch(caster->GetStance())
 	{
-	case EQ::constants::stanceBurnAE:
+	case Stance::AEBurn:
 		numTargetsCheck = 1;
 		break;
-	case EQ::constants::stanceBalanced:
-	case EQ::constants::stanceBurn:
+	case Stance::Balanced:
+	case Stance::Burn:
 		numTargetsCheck = 2;
 		break;
 	}
@@ -5186,7 +5186,7 @@ void Client::SpawnMerc(Merc* merc, bool setMaxStats) {
 	merc->SetSuspended(false);
 	SetMerc(merc);
 	merc->Unsuspend(setMaxStats);
-	merc->SetStance((EQ::constants::StanceType)GetMercInfo().Stance);
+	merc->SetStance(GetMercInfo().Stance);
 
 	Log(Logs::General, Logs::Mercenaries, "SpawnMerc Success for %s.", GetName());
 
