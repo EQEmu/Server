@@ -74,9 +74,9 @@ int Lua_Inventory::HasItem(int item_id, int quantity) {
 	return self->HasItem(item_id, quantity);
 }
 
-int Lua_Inventory::HasItem(int item_id, int quantity, int where) {
+int Lua_Inventory::HasItem(int item_id, int quantity, uint8 filter) {
 	Lua_Safe_Call_Int();
-	return self->HasItem(item_id, quantity, where);
+	return self->HasItem(item_id, quantity, filter);
 }
 
 bool Lua_Inventory::HasSpaceForItem(Lua_Item item, int quantity) {
@@ -94,9 +94,9 @@ int Lua_Inventory::HasItemByUse(int use, uint8 quantity) {
 	return self->HasItemByUse(use, quantity);
 }
 
-int Lua_Inventory::HasItemByUse(int use, uint8 quantity, uint8 where) {
+int Lua_Inventory::HasItemByUse(int use, uint8 quantity, uint8 filter) {
 	Lua_Safe_Call_Int();
-	return self->HasItemByUse(use, quantity, where);
+	return self->HasItemByUse(use, quantity, filter);
 }
 
 int Lua_Inventory::HasItemByLoreGroup(uint32 loregroup) {
@@ -104,9 +104,9 @@ int Lua_Inventory::HasItemByLoreGroup(uint32 loregroup) {
 	return self->HasItemByLoreGroup(loregroup);
 }
 
-int Lua_Inventory::HasItemByLoreGroup(uint32 loregroup, int where) {
+int Lua_Inventory::HasItemByLoreGroup(uint32 loregroup, uint8 filter) {
 	Lua_Safe_Call_Int();
-	return self->HasItemByLoreGroup(loregroup, where);
+	return self->HasItemByLoreGroup(loregroup, filter);
 }
 
 int Lua_Inventory::FindFreeSlot(bool for_bag, bool try_cursor) {
@@ -222,9 +222,9 @@ luabind::scope lua_register_inventory() {
 	.def("HasAugmentEquippedByID", (bool(Lua_Inventory::*)(uint32))&Lua_Inventory::HasAugmentEquippedByID)
 	.def("HasItem", (int(Lua_Inventory::*)(int))&Lua_Inventory::HasItem)
 	.def("HasItem", (int(Lua_Inventory::*)(int,int))&Lua_Inventory::HasItem)
-	.def("HasItem", (int(Lua_Inventory::*)(int,int,int))&Lua_Inventory::HasItem)
+	.def("HasItem", (int(Lua_Inventory::*)(int,int,uint8))&Lua_Inventory::HasItem)
 	.def("HasItemByLoreGroup", (int(Lua_Inventory::*)(uint32))&Lua_Inventory::HasItemByLoreGroup)
-	.def("HasItemByLoreGroup", (int(Lua_Inventory::*)(uint32,int))&Lua_Inventory::HasItemByLoreGroup)
+	.def("HasItemByLoreGroup", (int(Lua_Inventory::*)(uint32,uint8))&Lua_Inventory::HasItemByLoreGroup)
 	.def("HasItemByUse", (int(Lua_Inventory::*)(int))&Lua_Inventory::HasItemByUse)
 	.def("HasItemByUse", (int(Lua_Inventory::*)(int,uint8))&Lua_Inventory::HasItemByUse)
 	.def("HasItemByUse", (int(Lua_Inventory::*)(int,uint8,uint8))&Lua_Inventory::HasItemByUse)

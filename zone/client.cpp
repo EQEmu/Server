@@ -3072,7 +3072,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 		// Start bind
 		if (!bindwound_timer.Enabled()) {
 			// make sure we actually have a bandage... and consume it.
-			int16 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeBandage, 1, invWhereWorn | invWherePersonal);
+			int16 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeBandage, 1, InventoryFilter::Worn | InventoryFilter::Personal);
 			if (bslot == INVALID_INDEX) {
 				bind_out->type = 3;
 				QueuePacket(outapp);
@@ -10444,7 +10444,7 @@ int Client::CountItem(uint32 item_id)
 	int quantity = 0;
 	EQ::ItemInstance *item = nullptr;
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		item = GetInv().GetItem(slot_id);
 		if (item && item->GetID() == item_id) {
 			quantity += (item->IsStackable() ? item->GetCharges() : 1);
@@ -10465,7 +10465,7 @@ void Client::ResetItemCooldown(uint32 item_id)
 	bool      found_item  = false;
 	const int recast_type = item_data->RecastType;
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		item = GetInv().GetItem(slot_id);
 		if (item) {
 			item_data = item->GetItem();
@@ -10524,7 +10524,7 @@ void Client::SetItemCooldown(uint32 item_id, bool use_saved_timer, uint32 in_sec
 		final_time = total_time - current_time;
 	}
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		item = GetInv().GetItem(slot_id);
 		if (item) {
 			item_data = item->GetItem();
@@ -10585,7 +10585,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 
 	int16 removed_count = 0;
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		if (removed_count == quantity) {
 			break;
 		}
@@ -12518,7 +12518,7 @@ void Client::RemoveItemBySerialNumber(uint32 serial_number, uint32 quantity)
 
 	int16 removed_count = 0;
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		if (removed_count == quantity) {
 			break;
 		}

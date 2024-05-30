@@ -11,7 +11,7 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 
 	int16 removed_count = 0;
 
-	for (const auto& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs()) {
 		item = t->GetInv().GetItem(slot_id);
 		if (item) {
 			int16 stack_size = std::max(item->GetCharges(), static_cast<int16>(1));

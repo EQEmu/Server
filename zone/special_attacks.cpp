@@ -902,7 +902,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 		if(!found) {
 			//if we dont find a quiver, look through our inventory again
 			//not caring if the thing is a quiver.
-			int32 aslot = m_inv.HasItem(AmmoItem->ID, 1, invWherePersonal);
+			int32 aslot = m_inv.HasItem(AmmoItem->ID, 1, InventoryFilter::Personal);
 			if (aslot != INVALID_INDEX) {
 				ammo_slot = aslot;
 				Ammo = m_inv[aslot];
@@ -1519,7 +1519,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 			LogCombat("Using ammo from ammo slot, stack at slot [{}]. [{}] in stack", ammo_slot, RangeWeapon->GetCharges());
 		} else {
 			//look through our inventory for more
-			int32 aslot = m_inv.HasItem(item->ID, 1, invWherePersonal);
+			int32 aslot = m_inv.HasItem(item->ID, 1, InventoryFilter::Personal);
 			if (aslot != INVALID_INDEX) {
 				//the item wont change, but the instance does, not that it matters
 				ammo_slot = aslot;

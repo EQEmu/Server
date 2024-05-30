@@ -29,140 +29,24 @@
 
 extern WorldServer worldserver;
 
-// @merth: this needs to be touched up
-uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
-	if (itemnum == 0)
-		return 0;
-	uint32 x = 0;
-	EQ::ItemInstance *cur = nullptr;
+uint32 Client::NukeItem(uint32 item_id, uint8 filter)
+{
+	EQ::ItemInstance* item = nullptr;
 
-	int i;
-	if(where_to_check & invWhereWorn) {
-		for (i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
+	uint32 removed_count = 0;
 
-				DeleteItemInInventory(i, 0, ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) != 0));
+	for (const int16& slot_id : EQ::InventoryProfile::GetInventorySlotIDs(filter)) {
+		if (!item_id || GetItemIDAt(slot_id) == item_id) {
+			item = m_inv.GetItem(slot_id);
+			if (item) {
+				removed_count += (item->IsStackable() ? item->GetCharges() : 1);
 			}
+
+			DeleteItemInInventory(slot_id, 0, true);
 		}
 	}
 
-	if(where_to_check & invWhereCursor) {
-		if (GetItemIDAt(EQ::invslot::slotCursor) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(EQ::invslot::slotCursor) != INVALID_ID)) {
-			cur = m_inv.GetItem(EQ::invslot::slotCursor);
-			if(cur && cur->GetItem()->Stackable) {
-				x += cur->GetCharges();
-			} else {
-				x++;
-			}
-
-			DeleteItemInInventory(EQ::invslot::slotCursor, 0, true);
-		}
-
-		for (i = EQ::invbag::CURSOR_BAG_BEGIN; i <= EQ::invbag::CURSOR_BAG_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, true);
-			}
-		}
-	}
-
-	if(where_to_check & invWherePersonal) {
-		for (i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, ((((uint64)1 << i) & GetInv().GetLookup()->PossessionsBitmask) != 0));
-			}
-		}
-
-		for (i = EQ::invbag::GENERAL_BAGS_BEGIN; i <= EQ::invbag::GENERAL_BAGS_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, ((((uint64)1 << (EQ::invslot::GENERAL_BEGIN + ((i - EQ::invbag::GENERAL_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT))) & GetInv().GetLookup()->PossessionsBitmask) != 0));
-			}
-		}
-	}
-
-	if(where_to_check & invWhereBank) {
-		for (i = EQ::invslot::BANK_BEGIN; i <= EQ::invslot::BANK_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, ((i - EQ::invslot::BANK_BEGIN) >= GetInv().GetLookup()->InventoryTypeSize.Bank));
-			}
-		}
-
-		for (i = EQ::invbag::BANK_BAGS_BEGIN; i <= EQ::invbag::BANK_BAGS_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, (((i - EQ::invbag::BANK_BAGS_BEGIN) / EQ::invbag::SLOT_COUNT) >= GetInv().GetLookup()->InventoryTypeSize.Bank));
-			}
-		}
-	}
-
-	if(where_to_check & invWhereSharedBank) {
-		for (i = EQ::invslot::SHARED_BANK_BEGIN; i <= EQ::invslot::SHARED_BANK_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, true);
-			}
-		}
-
-		for (i = EQ::invbag::SHARED_BANK_BAGS_BEGIN; i <= EQ::invbag::SHARED_BANK_BAGS_END; i++) {
-			if (GetItemIDAt(i) == itemnum || (itemnum == 0xFFFE && GetItemIDAt(i) != INVALID_ID)) {
-				cur = m_inv.GetItem(i);
-				if(cur && cur->GetItem()->Stackable) {
-					x += cur->GetCharges();
-				} else {
-					x++;
-				}
-
-				DeleteItemInInventory(i, 0, true);
-			}
-		}
-	}
-
-	return x;
+	return removed_count;
 }
 
 
@@ -173,10 +57,10 @@ bool Client::CheckLoreConflict(const EQ::ItemData* item)
 	if (item->LoreGroup == 0) { return false; }
 
 	if (item->LoreGroup == -1) // Standard lore items; look everywhere except the shared bank, return the result
-		return (m_inv.HasItem(item->ID, 0, ~invWhereSharedBank) != INVALID_INDEX);
+		return (m_inv.HasItem(item->ID, 0, ~InventoryFilter::SharedBank) != INVALID_INDEX);
 
 	// If the item has a lore group, we check for other items with the same group and return the result
-	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~invWhereSharedBank) != INVALID_INDEX);
+	return (m_inv.HasItemByLoreGroup(item->LoreGroup, ~InventoryFilter::SharedBank) != INVALID_INDEX);
 }
 
 bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model) {
@@ -991,10 +875,10 @@ void Client::SendCursorBuffer()
 
 	bool lore_pass = true;
 	if (test_item->LoreGroup == -1) {
-		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+		lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(InventoryFilter::SharedBank | InventoryFilter::Cursor)) == INVALID_INDEX);
 	}
 	else if (test_item->LoreGroup != 0) {
-		lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+		lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(InventoryFilter::SharedBank | InventoryFilter::Cursor)) == INVALID_INDEX);
 	}
 
 	if (!lore_pass) {
@@ -1105,7 +989,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 		if(update_db)
 			database.SaveInventory(character_id, inst, slot_id);
 	}
-	
+
 	if(client_update && IsValidSlot(slot_id)) {
 		EQApplicationPacket* outapp = nullptr;
 		if(inst) {
@@ -1736,10 +1620,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 			bool lore_pass = true;
 			if (test_item->LoreGroup == -1) {
-				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+				lore_pass = (m_inv.HasItem(test_item->ID, 0, ~(InventoryFilter::SharedBank | InventoryFilter::Cursor)) == INVALID_INDEX);
 			}
 			else if (test_item->LoreGroup != 0) {
-				lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(invWhereSharedBank | invWhereCursor)) == INVALID_INDEX);
+				lore_pass = (m_inv.HasItemByLoreGroup(test_item->LoreGroup, ~(InventoryFilter::SharedBank | InventoryFilter::Cursor)) == INVALID_INDEX);
 			}
 
 			if (!lore_pass) {
@@ -2507,7 +2391,7 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 	int16 slot=0;
 	for (int i = EQ::textures::textureBegin; i <= EQ::textures::LastTintableTexture; i++) {
 		if ((m_pp.item_tint.Slot[i].Color & 0x00FFFFFF) != (dye->Slot[i].Color & 0x00FFFFFF)) {
-			slot = m_inv.HasItem(32557, 1, invWherePersonal);
+			slot = m_inv.HasItem(32557, 1, InventoryFilter::Personal);
 			if (slot != INVALID_INDEX){
 				DeleteItemInInventory(slot,1,true);
 				uint8 slot2=SlotConvert(i);
@@ -3078,8 +2962,8 @@ void Client::RemoveDuplicateLore(bool client_update)
 			auto inst = *iter;
 			if (inst == nullptr) { continue; }
 			if (!inst->GetItem()->LoreFlag ||
-				((inst->GetItem()->LoreGroup == -1) && (m_inv.HasItem(inst->GetID(), 0, invWhereCursor) == INVALID_INDEX)) ||
-				(inst->GetItem()->LoreGroup && (~inst->GetItem()->LoreGroup) && (m_inv.HasItemByLoreGroup(inst->GetItem()->LoreGroup, invWhereCursor) == INVALID_INDEX))
+				((inst->GetItem()->LoreGroup == -1) && (m_inv.HasItem(inst->GetID(), 0, InventoryFilter::Cursor) == INVALID_INDEX)) ||
+				(inst->GetItem()->LoreGroup && (~inst->GetItem()->LoreGroup) && (m_inv.HasItemByLoreGroup(inst->GetItem()->LoreGroup, InventoryFilter::Cursor) == INVALID_INDEX))
 				) {
 				m_inv.PushCursor(*inst);
 			}
@@ -3303,9 +3187,9 @@ void Client::SetBandolier(const EQApplicationPacket *app)
 			// Check if the player has the item specified in the bandolier set on them.
 			//
 			slot = m_inv.HasItem(m_pp.bandoliers[bss->Number].Items[BandolierSlot].ID, 1,
-							invWhereWorn|invWherePersonal);
+							InventoryFilter::Worn|InventoryFilter::Personal);
 
-			// removed 'invWhereCursor' argument from above and implemented slots 30, 331-340 checks here
+			// removed 'InventoryFilter::Cursor' argument from above and implemented slots 30, 331-340 checks here
 			if (slot == INVALID_INDEX) {
 				if (m_inv.GetItem(EQ::invslot::slotCursor)) {
 					// Below used to check charges but for some reason

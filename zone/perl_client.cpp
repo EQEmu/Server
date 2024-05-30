@@ -751,12 +751,12 @@ int Perl_Client_GetHorseId(Client* self) // @categories Account and Character, S
 
 uint32 Perl_Client_NukeItem(Client* self, uint32 item_id) // @categories Inventory and Items
 {
-	return self->NukeItem(item_id, 0xFF);
+	return self->NukeItem(item_id);
 }
 
-uint32 Perl_Client_NukeItem(Client* self, uint32 item_id, uint8 slot_to_check) // @categories Inventory and Items
+uint32 Perl_Client_NukeItem(Client* self, uint32 item_id, uint8 filter) // @categories Inventory and Items
 {
-	return self->NukeItem(item_id, slot_to_check);
+	return self->NukeItem(item_id, filter);
 }
 
 void Perl_Client_SetTint(Client* self, int16 slot_id, uint32 color) // @categories Inventory and Items

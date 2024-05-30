@@ -114,7 +114,7 @@ void command_gearup(Client *c, const Seperator *sep)
 			const auto *item = database.GetItem(item_id);
 			bool has_item = false;
 			if (t->IsClient()) {
-				has_item = t->CastToClient()->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX;
+				has_item = t->CastToClient()->GetInv().HasItem(item_id, 1, InventoryFilter::Worn) != INVALID_INDEX;
 			} else if (t->IsBot()) {
 				has_item = t->CastToBot()->HasBotItem(item_id) != INVALID_INDEX;
 			}

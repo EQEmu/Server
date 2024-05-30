@@ -1702,7 +1702,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 						(IsBardSong(spell_id) && (slot == CastingSlot::Item|| slot == CastingSlot::PotionBelt))) {
 						//bypass reagent cost
 					}
-					else if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
+					else if(c->GetInv().HasItem(component, component_count, InventoryFilter::Worn|InventoryFilter::Personal) == -1) // item not found
 					{
 						if (!missingreags)
 						{
@@ -1752,7 +1752,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					// now we go looking for and deleting the items one by one
 					for(int s = 0; s < component_count; s++)
 					{
-						inv_slot_id = c->GetInv().HasItem(component, 1, invWhereWorn|invWherePersonal);
+						inv_slot_id = c->GetInv().HasItem(component, 1, InventoryFilter::Worn|InventoryFilter::Personal);
 						if(inv_slot_id != -1)
 						{
 							c->DeleteItemInInventory(inv_slot_id, 1, true);
@@ -3675,7 +3675,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 				if (!will_overwrite && !IsDisciplineBuff(spell_id)) {
 					emptyslot = buffslot;
 				}
-				
+
 				will_overwrite = true;
 				overwrite_slots.push_back(buffslot);
 			} else if (ret == 2) {

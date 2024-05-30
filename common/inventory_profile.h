@@ -32,17 +32,15 @@
 #include <list>
 #include <vector>
 
-
-//FatherNitwit: location bits for searching specific
-//places with HasItem() and HasItemByUse()
-enum {
-	invWhereWorn		= 0x01,
-	invWherePersonal	= 0x02,	//in the character's inventory
-	invWhereBank		= 0x04,
-	invWhereSharedBank	= 0x08,
-	invWhereTrading		= 0x10,
-	invWhereCursor		= 0x20
-};
+namespace InventoryFilter {
+	constexpr uint8 Worn       = 1;
+	constexpr uint8 Personal   = 2;
+	constexpr uint8 Bank       = 4;
+	constexpr uint8 SharedBank = 8;
+	constexpr uint8 Trading    = 16;
+	constexpr uint8 Cursor     = 32;
+	constexpr uint8 All        = std::numeric_limits<uint8>::max();
+}
 
 // ########################################
 // Class: Queue
@@ -159,22 +157,22 @@ namespace EQ
 		std::vector<uint32> GetAugmentIDsBySlotID(int16 slot_id);
 
 		// Get a list of inventory, cursor, bank, and shared bank slot IDs for looping purposes
-		static const std::vector<int16>& GetInventorySlotIDs();
+		static const std::vector<int16>& GetInventorySlotIDs(uint8 filter = InventoryFilter::All);
 
 		// Check whether there is space for the specified number of the specified item.
 		bool HasSpaceForItem(const ItemData *ItemToTry, int16 Quantity);
 
 		// Check whether item exists in inventory
 		// where argument specifies OR'd list of invWhere constants to look
-		int16 HasItem(uint32 item_id, uint8 quantity = 0, uint8 where = 0xFF);
+		int16 HasItem(uint32 item_id, uint8 quantity = 0, uint8 filter = InventoryFilter::All);
 
 		// Check whether item exists in inventory
 		// where argument specifies OR'd list of invWhere constants to look
-		int16 HasItemByUse(uint8 use, uint8 quantity = 0, uint8 where = 0xFF);
+		int16 HasItemByUse(uint8 use, uint8 quantity = 0, uint8 filter = InventoryFilter::All);
 
 		// Check whether item exists in inventory
 		// where argument specifies OR'd list of invWhere constants to look
-		int16 HasItemByLoreGroup(uint32 loregroup, uint8 where = 0xFF);
+		int16 HasItemByLoreGroup(uint32 loregroup, uint8 filter = InventoryFilter::All);
 
 		// Locate an available inventory slot
 		int16 FindFreeSlot(bool for_bag, bool try_cursor, uint8 min_size = 0, bool is_arrow = false);

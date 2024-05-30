@@ -88,9 +88,9 @@ int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id, uint8_t
 	return self->HasItem(item_id, quantity);
 }
 
-int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id, uint8_t quantity, uint8_t where_to_look)
+int Perl_Inventory_HasItem(EQ::InventoryProfile* self, uint32_t item_id, uint8_t quantity, uint8_t filter)
 {
-	return self->HasItem(item_id, quantity, where_to_look);
+	return self->HasItem(item_id, quantity, filter);
 }
 
 int Perl_Inventory_HasItemByLoreGroup(EQ::InventoryProfile* self, uint32_t loregroup)
@@ -98,9 +98,9 @@ int Perl_Inventory_HasItemByLoreGroup(EQ::InventoryProfile* self, uint32_t loreg
 	return self->HasItemByLoreGroup(loregroup);
 }
 
-int Perl_Inventory_HasItemByLoreGroup(EQ::InventoryProfile* self, uint32_t loregroup, uint8_t where_to_look)
+int Perl_Inventory_HasItemByLoreGroup(EQ::InventoryProfile* self, uint32_t loregroup, uint8_t filter)
 {
-	return self->HasItemByLoreGroup(loregroup, where_to_look);
+	return self->HasItemByLoreGroup(loregroup, filter);
 }
 
 int Perl_Inventory_HasItemByUse(EQ::InventoryProfile* self, uint8_t item_use, uint8_t quantity)
@@ -108,9 +108,9 @@ int Perl_Inventory_HasItemByUse(EQ::InventoryProfile* self, uint8_t item_use, ui
 	return self->HasItemByUse(item_use, quantity);
 }
 
-int Perl_Inventory_HasItemByUse(EQ::InventoryProfile* self, uint8_t item_use, uint8_t quantity, uint8_t where_to_look)
+int Perl_Inventory_HasItemByUse(EQ::InventoryProfile* self, uint8_t item_use, uint8_t quantity, uint8_t filter)
 {
-	return self->HasItemByUse(item_use, quantity, where_to_look);
+	return self->HasItemByUse(item_use, quantity, filter);
 }
 
 bool Perl_Inventory_HasSpaceForItem(EQ::InventoryProfile* self, EQ::ItemInstance* item_to_check, uint8_t quantity)

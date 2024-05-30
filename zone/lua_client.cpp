@@ -875,14 +875,14 @@ int Lua_Client::GetHorseId() {
 	return self->GetHorseId();
 }
 
-void Lua_Client::NukeItem(uint32 item_num) {
+uint32 Lua_Client::NukeItem(uint32 item_id) {
 	Lua_Safe_Call_Void();
-	self->NukeItem(item_num, 0xFF);
+	return self->NukeItem(item_id);
 }
 
-void Lua_Client::NukeItem(uint32 item_num, int where_to_check) {
+uint32 Lua_Client::NukeItem(uint32 item_id, uint8 filter) {
 	Lua_Safe_Call_Void();
-	self->NukeItem(item_num, where_to_check);
+	return self->NukeItem(item_id, filter);
 }
 
 void Lua_Client::SetTint(int slot_id, uint32 color) {
@@ -3730,8 +3730,8 @@ luabind::scope lua_register_client() {
 	.def("MoveZoneRaid", (void(Lua_Client::*)(const char*,float,float,float))&Lua_Client::MoveZoneRaid)
 	.def("MoveZoneRaid", (void(Lua_Client::*)(const char*,float,float,float,float))&Lua_Client::MoveZoneRaid)
 	.def("NotifyNewTitlesAvailable", (void(Lua_Client::*)(void))&Lua_Client::NotifyNewTitlesAvailable)
-	.def("NukeItem", (void(Lua_Client::*)(uint32))&Lua_Client::NukeItem)
-	.def("NukeItem", (void(Lua_Client::*)(uint32,int))&Lua_Client::NukeItem)
+	.def("NukeItem", (uint32(Lua_Client::*)(uint32))&Lua_Client::NukeItem)
+	.def("NukeItem", (uint32(Lua_Client::*)(uint32,uint8))&Lua_Client::NukeItem)
 	.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
 	.def("PlayMP3", (void(Lua_Client::*)(std::string))&Lua_Client::PlayMP3)
 	.def("Popup", (void(Lua_Client::*)(const char*,const char*))&Lua_Client::Popup)
@@ -3957,11 +3957,11 @@ luabind::scope lua_register_inventory_where() {
 	return luabind::class_<InventoryWhere>("InventoryWhere")
 		.enum_("constants")
 		[(
-			luabind::value("Personal", static_cast<int>(invWherePersonal)),
-			luabind::value("Bank", static_cast<int>(invWhereBank)),
-			luabind::value("SharedBank", static_cast<int>(invWhereSharedBank)),
-			luabind::value("Trading", static_cast<int>(invWhereTrading)),
-			luabind::value("Cursor", static_cast<int>(invWhereCursor))
+			luabind::value("Personal", static_cast<int>(InventoryFilter::Personal)),
+			luabind::value("Bank", static_cast<int>(InventoryFilter::Bank)),
+			luabind::value("SharedBank", static_cast<int>(InventoryFilter::SharedBank)),
+			luabind::value("Trading", static_cast<int>(InventoryFilter::Trading)),
+			luabind::value("Cursor", static_cast<int>(InventoryFilter::Cursor))
 		)];
 }
 

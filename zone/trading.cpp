@@ -2457,7 +2457,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 	if(!item || !Quantity || !Price || !QtyBuyerWants) return;
 
-	if (m_inv.HasItem(ItemID, Quantity, invWhereWorn | invWherePersonal | invWhereCursor) == INVALID_INDEX) {
+	if (m_inv.HasItem(ItemID, Quantity, InventoryFilter::Worn | InventoryFilter::Personal | InventoryFilter::Cursor) == INVALID_INDEX) {
 		Message(Chat::Red, "You do not have %i %s on you.", Quantity, item->Name);
 		return;
 	}
@@ -2509,7 +2509,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 
 		for(uint32 i = 0; i < Quantity; i++) {
 
-			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
+			int16 SellerSlot = m_inv.HasItem(ItemID, 1, InventoryFilter::Worn|InventoryFilter::Personal|InventoryFilter::Cursor);
 
 			// This shouldn't happen, as we already checked there was space in the Buyer's inventory
 			if (SellerSlot == INVALID_INDEX) {
@@ -2562,7 +2562,7 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 		while(QuantityMoved < Quantity) {
 
 			// Find the slot on the seller that has a stack of at least 1 of the item
-			int16 SellerSlot = m_inv.HasItem(ItemID, 1, invWhereWorn|invWherePersonal|invWhereCursor);
+			int16 SellerSlot = m_inv.HasItem(ItemID, 1, InventoryFilter::Worn|InventoryFilter::Personal|InventoryFilter::Cursor);
 
 			if (SellerSlot == INVALID_INDEX) {
 				LogError("Unexpected error while moving item from seller to buyer");

@@ -598,18 +598,7 @@ bool EQ::InventoryProfile::HasSpaceForItem(const ItemData *ItemToTry, int16 Quan
 
 bool EQ::InventoryProfile::HasAugmentEquippedByID(uint32 item_id)
 {
-	bool has_equipped = false;
-	ItemInstance* item = nullptr;
-
-	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		item = GetItem(slot_id);
-		if (item && item->ContainsAugmentByID(item_id)) {
-			has_equipped = true;
-			break;
-		}
-	}
-
-	return has_equipped;
+	return CountAugmentEquippedByID(item_id);
 }
 
 int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
@@ -629,18 +618,7 @@ int EQ::InventoryProfile::CountAugmentEquippedByID(uint32 item_id)
 
 bool EQ::InventoryProfile::HasItemEquippedByID(uint32 item_id)
 {
-	bool has_equipped = false;
-	ItemInstance* item = nullptr;
-
-	for (int slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; ++slot_id) {
-		item = GetItem(slot_id);
-		if (item && item->GetID() == item_id) {
-			has_equipped = true;
-			break;
-		}
-	}
-
-	return has_equipped;
+	return CountItemEquippedByID(item_id);
 }
 
 int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
@@ -660,143 +638,95 @@ int EQ::InventoryProfile::CountItemEquippedByID(uint32 item_id)
 
 //This function has a flaw in that it only returns the last stack that it looked at
 //when quantity is greater than 1 and not all of quantity can be found in 1 stack.
-int16 EQ::InventoryProfile::HasItem(uint32 item_id, uint8 quantity, uint8 where)
+int16 EQ::InventoryProfile::HasItem(uint32 item_id, uint8 quantity, uint8 filter)
 {
 	int16 slot_id = INVALID_INDEX;
 
-	//Altered by Father Nitwit to support a specification of
-	//where to search, with a default value to maintain compatibility
-
-	// Check each inventory bucket
-	if (where & invWhereWorn) {
-		slot_id = _HasItem(m_worn, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWherePersonal) {
-		slot_id = _HasItem(m_inv, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereBank) {
-		slot_id = _HasItem(m_bank, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereSharedBank) {
-		slot_id = _HasItem(m_shbank, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereTrading) {
-		slot_id = _HasItem(m_trade, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	// Behavioral change - Limbo is no longer checked due to improper handling of return value
-	if (where & invWhereCursor) {
-		// Check cursor queue
+	if (filter == InventoryFilter::All || filter & InventoryFilter::Cursor) {
 		slot_id = _HasItem(m_cursor, item_id, quantity);
-		if (slot_id != INVALID_INDEX)
+		if (slot_id != INVALID_INDEX) {
 			return slot_id;
+		}
+	}
+
+	std::map<uint8, std::map<int16, ItemInstance*>&> search_types = {
+		{ InventoryFilter::Worn,       m_worn },
+		{ InventoryFilter::Personal,   m_inv },
+		{ InventoryFilter::Bank,       m_bank },
+		{ InventoryFilter::SharedBank, m_shbank },
+		{ InventoryFilter::Trading,    m_trade }
+	};
+
+	for (const auto& e : search_types) {
+		if (filter == InventoryFilter::All || filter & e.first) {
+			slot_id = _HasItem(e.second, item_id, quantity);
+			if (slot_id != INVALID_INDEX) {
+				return slot_id;
+			}
+		}
 	}
 
 	return slot_id;
 }
 
 //this function has the same quantity flaw mentioned above in HasItem()
-int16 EQ::InventoryProfile::HasItemByUse(uint8 use, uint8 quantity, uint8 where)
+int16 EQ::InventoryProfile::HasItemByUse(uint8 use, uint8 quantity, uint8 filter)
 {
 	int16 slot_id = INVALID_INDEX;
 
-	// Check each inventory bucket
-	if (where & invWhereWorn) {
-		slot_id = _HasItemByUse(m_worn, use, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWherePersonal) {
-		slot_id = _HasItemByUse(m_inv, use, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereBank) {
-		slot_id = _HasItemByUse(m_bank, use, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereSharedBank) {
-		slot_id = _HasItemByUse(m_shbank, use, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereTrading) {
-		slot_id = _HasItemByUse(m_trade, use, quantity);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	// Behavioral change - Limbo is no longer checked due to improper handling of return value
-	if (where & invWhereCursor) {
-		// Check cursor queue
+	if (filter == InventoryFilter::All || filter & InventoryFilter::Cursor) {
 		slot_id = _HasItemByUse(m_cursor, use, quantity);
-		if (slot_id != INVALID_INDEX)
+		if (slot_id != INVALID_INDEX) {
 			return slot_id;
+		}
+	}
+
+	std::map<uint8, std::map<int16, ItemInstance*>&> search_types = {
+		{ InventoryFilter::Worn,       m_worn },
+		{ InventoryFilter::Personal,   m_inv },
+		{ InventoryFilter::Bank,       m_bank },
+		{ InventoryFilter::SharedBank, m_shbank },
+		{ InventoryFilter::Trading,    m_trade }
+	};
+
+	for (const auto& e : search_types) {
+		if (filter == InventoryFilter::All || filter & e.first) {
+			slot_id = _HasItemByUse(e.second, use, quantity);
+			if (slot_id != INVALID_INDEX) {
+				return slot_id;
+			}
+		}
 	}
 
 	return slot_id;
 }
 
-int16 EQ::InventoryProfile::HasItemByLoreGroup(uint32 loregroup, uint8 where)
+int16 EQ::InventoryProfile::HasItemByLoreGroup(uint32 loregroup, uint8 filter)
 {
 	int16 slot_id = INVALID_INDEX;
 
-	// Check each inventory bucket
-	if (where & invWhereWorn) {
-		slot_id = _HasItemByLoreGroup(m_worn, loregroup);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWherePersonal) {
-		slot_id = _HasItemByLoreGroup(m_inv, loregroup);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereBank) {
-		slot_id = _HasItemByLoreGroup(m_bank, loregroup);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereSharedBank) {
-		slot_id = _HasItemByLoreGroup(m_shbank, loregroup);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	if (where & invWhereTrading) {
-		slot_id = _HasItemByLoreGroup(m_trade, loregroup);
-		if (slot_id != INVALID_INDEX)
-			return slot_id;
-	}
-
-	// Behavioral change - Limbo is no longer checked due to improper handling of return value
-	if (where & invWhereCursor) {
-		// Check cursor queue
+	if (filter == InventoryFilter::All || filter & InventoryFilter::Cursor) {
 		slot_id = _HasItemByLoreGroup(m_cursor, loregroup);
-		if (slot_id != INVALID_INDEX)
+		if (slot_id != INVALID_INDEX) {
 			return slot_id;
+		}
+	}
+
+	std::map<uint8, std::map<int16, ItemInstance*>&> search_types = {
+		{ InventoryFilter::Worn,       m_worn },
+		{ InventoryFilter::Personal,   m_inv },
+		{ InventoryFilter::Bank,       m_bank },
+		{ InventoryFilter::SharedBank, m_shbank },
+		{ InventoryFilter::Trading,    m_trade }
+	};
+
+	for (const auto& e : search_types) {
+		if (filter == InventoryFilter::All || filter & e.first) {
+			slot_id = _HasItemByLoreGroup(e.second, loregroup);
+			if (slot_id != INVALID_INDEX) {
+				return slot_id;
+			}
+		}
 	}
 
 	return slot_id;
@@ -1744,24 +1674,27 @@ std::vector<uint32> EQ::InventoryProfile::GetAugmentIDsBySlotID(int16 slot_id)
 	return augments;
 }
 
-const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs()
+const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs(uint8 filter)
 {
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN,     EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END },
-		{ EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	static const std::map<uint8, std::vector<int16>> slots = {
+		{ InventoryFilter::Worn,       { EQ::invslot::EQUIPMENT_BEGIN,       EQ::invslot::EQUIPMENT_END }},
+		{ InventoryFilter::Personal,   { EQ::invslot::GENERAL_BEGIN,         EQ::invslot::GENERAL_BEGIN }},
+		{ InventoryFilter::Personal,   { EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_BEGIN }},
+		{ InventoryFilter::Cursor,     { EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END }},
+		{ InventoryFilter::Bank,       { EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END }},
+		{ InventoryFilter::Bank,       { EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END }},
+		{ InventoryFilter::SharedBank, { EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END }},
+		{ InventoryFilter::SharedBank, { EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END }},
 	};
 
 	std::vector<int16> slot_ids;
 
-	const size_t slot_index_count = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < slot_index_count; ++slot_index) {
-		for (int16 slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			slot_ids.emplace_back(slot_id);
+	for (const auto& e : slots) {
+		if (filter == InventoryFilter::All || filter & e.first) {
+			for (int16 slot_id = e.second[0]; slot_id <= e.second[1]; ++slot_id) {
+				slot_ids.emplace_back(slot_id);
+				LogInfo("Adding slot ID [{}]", slot_id);
+			}
 		}
 	}
 

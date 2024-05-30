@@ -2738,7 +2738,7 @@ void Client::Handle_OP_AltCurrencyReclaim(const EQApplicationPacket *app)
 
 	/* Item to Currency Storage */
 	if (reclaim->reclaim_flag == 1) {
-		uint32 removed = NukeItem(item_id, invWhereWorn | invWherePersonal | invWhereCursor);
+		uint32 removed = NukeItem(item_id, InventoryFilter::Worn | InventoryFilter::Personal | InventoryFilter::Cursor);
 		if (removed > 0) {
 			AddAlternateCurrencyValue(reclaim->currency_id, removed);
 
@@ -5682,8 +5682,8 @@ void Client::Handle_OP_CrystalCreate(const EQApplicationPacket *app)
 
 void Client::Handle_OP_CrystalReclaim(const EQApplicationPacket *app)
 {
-	const uint32 ebon    = NukeItem(RuleI(Zone, EbonCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
-	const uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), invWhereWorn | invWherePersonal | invWhereCursor);
+	const uint32 ebon    = NukeItem(RuleI(Zone, EbonCrystalItemID), InventoryFilter::Worn | InventoryFilter::Personal | InventoryFilter::Cursor);
+	const uint32 radiant = NukeItem(RuleI(Zone, RadiantCrystalItemID), InventoryFilter::Worn | InventoryFilter::Personal | InventoryFilter::Cursor);
 	if ((ebon + radiant) > 0) {
 		AddEbonCrystals(ebon, true);
 		AddRadiantCrystals(radiant, true);
@@ -5807,7 +5807,7 @@ void Client::Handle_OP_DeleteItem(const EQApplicationPacket *app)
 			RecordPlayerEventLog(PlayerEvent::ITEM_DESTROY, e);
 		}
 	}
-	
+
 	DeleteItemInInventory(alc->from_slot, 1);
 }
 
