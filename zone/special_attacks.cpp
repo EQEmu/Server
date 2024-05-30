@@ -509,7 +509,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		class_id == Class::Monk ||
 		class_id == Class::Beastlord ||
 		class_id == Class::Berserker ||
-		allowed_kick_classes & EQ::classes::GetPlayerClassBit(class_id)
+		allowed_kick_classes & Class::GetPlayerBit(class_id)
 	);
 
 	bool found_skill = false;

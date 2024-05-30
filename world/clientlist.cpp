@@ -1110,7 +1110,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			if (cle->Anon() == 2) { // Roleplay
 				if (admin >= AccountStatus::GMAdmin && admin >= cle->Admin())
 					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(),
-							EQ::classes::GetClassName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+							Class::GetName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= AccountStatus::QuestTroupe && admin < AccountStatus::QuestTroupe && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1121,7 +1121,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			else if (cle->Anon() == 1) { // Anon
 				if (admin >= AccountStatus::GMAdmin && admin >= cle->Admin())
 					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(),
-							EQ::classes::GetClassName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+							Class::GetName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 				else if (cle->Admin() >= AccountStatus::QuestTroupe && cle->GetGM()) {
 					iterator.Advance();
 					continue;
@@ -1131,7 +1131,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			}
 			else
 				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(),
-						EQ::classes::GetClassName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
+						Class::GetName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 
 			fmt::format_to(std::back_inserter(out), fmt::runtime(line));
 			if (out.size() >= 3584) {

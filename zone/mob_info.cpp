@@ -187,7 +187,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "class") {
-		return EQ::classes::GetClassName(mob->GetClass(), 0);
+		return Class::GetName(mob->GetClass(), 0);
 	}
 
 	if (attribute == "level") {

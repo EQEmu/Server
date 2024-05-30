@@ -494,13 +494,13 @@ public:
 	bool IsGroupDoter() const { return m_CastingRoles.GroupDoter; }
 	static void UpdateGroupCastingRoles(const Group* group, bool disband = false);
 
-	bool IsBotCaster() { return EQ::classes::IsCasterClass(GetClass()); }
-	bool IsBotHybrid() { return EQ::classes::IsHybridClass(GetClass()); }
-	bool IsBotINTCaster() { return EQ::classes::IsINTCasterClass(GetClass()); }
-	bool IsBotWISCaster() { return EQ::classes::IsWISCasterClass(GetClass()); }
-	bool IsBotSpellFighter() { return EQ::classes::IsSpellFighterClass(GetClass()); }
-	bool IsBotFighter() { return EQ::classes::IsFighterClass(GetClass()); }
-	bool IsBotNonSpellFighter() { return EQ::classes::IsNonSpellFighterClass(GetClass()); }
+	bool IsBotCaster() { return Class::IsCasterClass(GetClass()); }
+	bool IsBotHybrid() { return Class::IsHybridClass(GetClass()); }
+	bool IsBotINTCaster() { return Class::IsINTCasterClass(GetClass()); }
+	bool IsBotWISCaster() { return Class::IsWISCasterClass(GetClass()); }
+	bool IsBotSpellFighter() { return Class::IsSpellFighterClass(GetClass()); }
+	bool IsBotFighter() { return Class::IsFighterClass(GetClass()); }
+	bool IsBotNonSpellFighter() { return Class::IsNonSpellFighterClass(GetClass()); }
 	uint8 GetBotClass() { return GetClass(); }
 	int GetRawACNoShield(int &shield_ac);
 

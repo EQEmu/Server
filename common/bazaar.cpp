@@ -310,7 +310,7 @@ Bazaar::GetSearchResults(
 			},
 			{
 				.should_check = search._class != 0xFFFFFFFF,
-				.condition = static_cast<bool>(item->Classes & EQ::classes::GetPlayerClassBit(search._class))
+				.condition = static_cast<bool>(item->Classes & Class::GetPlayerBit(search._class))
 			},
 			{
 				.should_check = search.race != 0xFFFFFFFF,

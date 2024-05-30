@@ -87,7 +87,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "class")) {
 		if (sep->IsNumber(2)) {
 			const uint8 class_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
-			if (!EQ::classes::IsValidClass(class_id)) {
+			if (!Class::IsValidClass(class_id)) {
 				c->Message(
 					Chat::White,
 					fmt::format(
@@ -102,7 +102,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
 				npc_id_string,
-				EQ::classes::GetClassName(class_id),
+				Class::GetName(class_id),
 				class_id
 			);
 		} else {

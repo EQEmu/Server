@@ -2945,13 +2945,13 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 				message = fmt::format(
 					"You cannot create anymore than {} {} bot{}.",
 					bot_creation_limit_class,
-					EQ::classes::GetClassName(botclass),
+					Class::GetName(botclass),
 					bot_creation_limit_class != 1 ? "s" : ""
 				);
 			} else {
 				message = fmt::format(
 					"You cannot create any {} bots.",
-					EQ::classes::GetClassName(botclass)
+					Class::GetName(botclass)
 				);
 			}
 
@@ -2990,13 +2990,13 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 					message = fmt::format(
 						"You cannot have more than {} spawned {} bot{}.",
 						bot_spawn_limit_class,
-						EQ::classes::GetClassName(botclass),
+						Class::GetName(botclass),
 						bot_spawn_limit_class != 1 ? "s" : ""
 					);
 				} else {
 					message = fmt::format(
 						"You are not currently allowed to spawn any {} bots.",
-						EQ::classes::GetClassName(botclass)
+						Class::GetName(botclass)
 					);
 				}
 
@@ -3903,7 +3903,7 @@ uint32 QuestManager::getcharidbyname(const char* name) {
 }
 
 std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
-	return EQ::classes::GetClassName(class_id, level);
+	return Class::GetName(class_id, level);
 }
 
 uint32 QuestManager::getcurrencyid(uint32 item_id) {

@@ -18,7 +18,7 @@ void SetClassPermanent(Client *c, const Seperator *sep)
 	LogInfo("Class changed by {} for {} to {} ({}).",
 			c->GetCleanName(),
 			c->GetTargetDescription(t),
-			EQ::classes::GetClassName(class_id),
+			Class::GetName(class_id),
 			class_id
 	);
 
@@ -32,7 +32,7 @@ void SetClassPermanent(Client *c, const Seperator *sep)
 			fmt::format(
 				"Class changed for {} to {} ({}).",
 				c->GetTargetDescription(t),
-				EQ::classes::GetClassName(class_id),
+				Class::GetName(class_id),
 				class_id
 			).c_str()
 		);

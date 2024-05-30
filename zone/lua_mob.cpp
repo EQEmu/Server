@@ -453,7 +453,7 @@ int Lua_Mob::GetClass() {
 
 std::string Lua_Mob::GetClassName() {
 	Lua_Safe_Call_String();
-	return EQ::classes::GetClassName(self->GetClass());
+	return Class::GetName(self->GetClass());
 }
 
 int Lua_Mob::GetLevel() {

@@ -607,7 +607,7 @@ void Perl_Bot_AddItem(Bot *self, perl::reference table_ref)
 
 std::string Perl_Bot_GetClassAbbreviation(Bot* self)
 {
-	return EQ::classes::GetPlayerClassAbbreviation(self->GetClass());
+	return Class::GetAbbreviation(self->GetClass());
 }
 
 std::string Perl_Bot_GetRaceAbbreviation(Bot* self)

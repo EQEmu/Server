@@ -72,6 +72,30 @@ namespace Class {
 	constexpr uint8 FellowshipMaster          = 69;
 	constexpr uint8 AlternateCurrencyMerchant = 70;
 	constexpr uint8 MercenaryLiaison          = 71;
+
+	std::string GetName(uint8 class_id, uint8 level = 0);
+	std::string GetLevelName(uint8 class_id, uint8 level = 0);
+	std::string GetAbbreviation(uint8 class_id);
+
+	uint8 GetArmorType(uint8 class_id);
+	uint8 GetPlayerValue(uint8 class_id);
+	uint16 GetPlayerBit(uint8 class_id);
+
+	bool IsCasterClass(uint8 class_id);
+	bool IsChainClass(uint8 class_id);
+	bool IsClothClass(uint8 class_id);
+	bool IsFighterClass(uint8 class_id);
+	bool IsHeroicINTCasterClass(uint8 class_id);
+	bool IsHeroicWISCasterClass(uint8 class_id);
+	bool IsHybridClass(uint8 class_id);
+	bool IsINTCasterClass(uint8 class_id);
+	bool IsLeatherClass(uint8 class_id);
+	bool IsNonSpellFighterClass(uint8 class_id);
+	bool IsPlateClass(uint8 class_id);
+	bool IsPlayerClass(uint8 class_id);
+	bool IsSpellFighterClass(uint8 class_id);
+	bool IsValidClass(uint8 class_id);
+	bool IsWISCasterClass(uint8 class_id);
 };
 
 namespace PlayerClassBitmask {
@@ -215,31 +239,4 @@ namespace ArmorType {
 	constexpr uint8 Plate   = 4;
 };
 
-namespace EQ {
-	namespace classes {
-		const std::string& GetClassName(uint8 class_id, uint8 level = 0);
-		const std::string& GetClassLevelName(uint8 class_id, uint8 level = 0);
-		const std::string GetPlayerClassAbbreviation(uint8 class_id);
-
-		uint8 GetClassArmorType(uint8 class_id);
-		uint8 GetPlayerClassValue(uint8 class_id);
-		uint16 GetPlayerClassBit(uint8 class_id);
-
-		bool IsCasterClass(uint8 class_id);
-		bool IsChainClass(uint8 class_id);
-		bool IsClothClass(uint8 class_id);
-		bool IsFighterClass(uint8 class_id);
-		bool IsHeroicINTCasterClass(uint8 class_id);
-		bool IsHeroicWISCasterClass(uint8 class_id);
-		bool IsHybridClass(uint8 class_id);
-		bool IsINTCasterClass(uint8 class_id);
-		bool IsLeatherClass(uint8 class_id);
-		bool IsNonSpellFighterClass(uint8 class_id);
-		bool IsPlateClass(uint8 class_id);
-		bool IsPlayerClass(uint8 class_id);
-		bool IsSpellFighterClass(uint8 class_id);
-		bool IsValidClass(uint8 class_id);
-		bool IsWISCasterClass(uint8 class_id);
-	}
-}
 #endif

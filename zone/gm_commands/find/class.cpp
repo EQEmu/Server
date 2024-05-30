@@ -5,7 +5,7 @@ void FindClass(Client *c, const Seperator *sep)
 	if (sep->IsNumber(2)) {
 		const auto class_id = Strings::ToInt(sep->arg[2]);
 		if (EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker)) {
-			const std::string& class_name = EQ::classes::GetClassName(class_id);
+			const std::string& class_name = Class::GetName(class_id);
 			c->Message(
 				Chat::White,
 				fmt::format(
@@ -13,10 +13,10 @@ void FindClass(Client *c, const Seperator *sep)
 					class_id,
 					class_name,
 					(
-						EQ::classes::IsPlayerClass(class_id) ?
+						Class::IsPlayerClass(class_id) ?
 						fmt::format(
 							" ({})",
-							Strings::Commify(EQ::classes::GetPlayerClassBit(class_id))
+							Strings::Commify(Class::GetPlayerBit(class_id))
 						) :
 						""
 					)
@@ -42,7 +42,7 @@ void FindClass(Client *c, const Seperator *sep)
 	auto found_count = 0;
 
 	for (uint16 class_id = Class::Warrior; class_id <= Class::MercenaryLiaison; class_id++) {
-		const std::string& class_name       = EQ::classes::GetClassName(class_id);
+		const std::string& class_name       = Class::GetName(class_id);
 		const auto&        class_name_lower = Strings::ToLower(class_name);
 		if (!Strings::Contains(class_name_lower, search_criteria)) {
 			continue;
@@ -55,10 +55,10 @@ void FindClass(Client *c, const Seperator *sep)
 				class_id,
 				class_name,
 				(
-					EQ::classes::IsPlayerClass(class_id) ?
+					Class::IsPlayerClass(class_id) ?
 					fmt::format(
 						" | ({})",
-						Strings::Commify(EQ::classes::GetPlayerClassBit(class_id))
+						Strings::Commify(Class::GetPlayerBit(class_id))
 					) :
 					""
 				)

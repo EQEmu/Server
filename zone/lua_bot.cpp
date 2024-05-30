@@ -615,7 +615,7 @@ void Lua_Bot::AddItem(const luabind::object& item_table) {
 
 std::string Lua_Bot::GetClassAbbreviation() {
 	Lua_Safe_Call_String();
-	return EQ::classes::GetPlayerClassAbbreviation(self->GetClass());
+	return Class::GetAbbreviation(self->GetClass());
 }
 
 std::string Lua_Bot::GetRaceAbbreviation() {

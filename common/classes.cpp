@@ -19,19 +19,24 @@
 #include "../common/classes.h"
 #include "data_verification.h"
 
-const std::string& EQ::classes::GetClassName(uint8 class_id, uint8 level)
+std::string Class::GetAbbreviation(uint8 class_id)
+{
+	return IsValidClass(class_id) && IsPlayerClass(class_id) ? player_class_abbreviations[class_id] : "UNK";
+}
+
+std::string Class::GetName(uint8 class_id, uint8 level)
 {
 	if (level >= 51 && IsPlayerClass(class_id)) {
-		return GetClassLevelName(class_id, level);
+		return GetLevelName(class_id, level);
 	}
 
 	return IsValidClass(class_id) ? class_names[class_id] : "UNKNOWN CLASS";
 }
 
-const std::string& EQ::classes::GetClassLevelName(uint8 class_id, uint8 level)
+std::string Class::GetLevelName(uint8 class_id, uint8 level)
 {
 	if (level < 51 || !IsPlayerClass(class_id)) {
-		return GetClassName(class_id);
+		return GetName(class_id);
 	}
 
 	const std::map<uint8, uint8>& levels = {
@@ -51,17 +56,17 @@ const std::string& EQ::classes::GetClassLevelName(uint8 class_id, uint8 level)
 	return std::string();
 }
 
-uint8 EQ::classes::GetPlayerClassValue(uint8 class_id)
+uint8 Class::GetPlayerValue(uint8 class_id)
 {
 	return IsPlayerClass(class_id) ? class_id : 0;
 }
 
-uint16 EQ::classes::GetPlayerClassBit(uint8 class_id)
+uint16 Class::GetPlayerBit(uint8 class_id)
 {
 	return IsPlayerClass(class_id) ? player_class_bitmasks[class_id] : 0;
 }
 
-bool EQ::classes::IsFighterClass(uint8 class_id)
+bool Class::IsFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -79,7 +84,7 @@ bool EQ::classes::IsFighterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsSpellFighterClass(uint8 class_id)
+bool Class::IsSpellFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Paladin:
@@ -92,7 +97,7 @@ bool EQ::classes::IsSpellFighterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsNonSpellFighterClass(uint8 class_id)
+bool Class::IsNonSpellFighterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -106,7 +111,7 @@ bool EQ::classes::IsNonSpellFighterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsHybridClass(uint8 class_id)
+bool Class::IsHybridClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Paladin:
@@ -120,7 +125,7 @@ bool EQ::classes::IsHybridClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsCasterClass(uint8 class_id)
+bool Class::IsCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -136,7 +141,7 @@ bool EQ::classes::IsCasterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsINTCasterClass(uint8 class_id)
+bool Class::IsINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -149,7 +154,7 @@ bool EQ::classes::IsINTCasterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsHeroicINTCasterClass(uint8 class_id)
+bool Class::IsHeroicINTCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -163,7 +168,7 @@ bool EQ::classes::IsHeroicINTCasterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsWISCasterClass(uint8 class_id)
+bool Class::IsWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -175,7 +180,7 @@ bool EQ::classes::IsWISCasterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsHeroicWISCasterClass(uint8 class_id)
+bool Class::IsHeroicWISCasterClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Cleric:
@@ -190,7 +195,7 @@ bool EQ::classes::IsHeroicWISCasterClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsPlateClass(uint8 class_id)
+bool Class::IsPlateClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Warrior:
@@ -204,7 +209,7 @@ bool EQ::classes::IsPlateClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsChainClass(uint8 class_id)
+bool Class::IsChainClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Ranger:
@@ -217,7 +222,7 @@ bool EQ::classes::IsChainClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsLeatherClass(uint8 class_id)
+bool Class::IsLeatherClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Druid:
@@ -229,7 +234,7 @@ bool EQ::classes::IsLeatherClass(uint8 class_id)
 	}
 }
 
-bool EQ::classes::IsClothClass(uint8 class_id)
+bool Class::IsClothClass(uint8 class_id)
 {
 	switch (class_id) {
 		case Class::Necromancer:
@@ -242,7 +247,7 @@ bool EQ::classes::IsClothClass(uint8 class_id)
 	}
 }
 
-uint8 EQ::classes::GetClassArmorType(uint8 class_id)
+uint8 Class::GetArmorType(uint8 class_id)
 {
 	uint8 armor_type = ArmorType::Unknown;
 	if (!IsPlayerClass(class_id)) {
@@ -262,16 +267,11 @@ uint8 EQ::classes::GetClassArmorType(uint8 class_id)
 	return armor_type;
 }
 
-const std::string EQ::classes::GetPlayerClassAbbreviation(uint8 class_id)
-{
-	return IsPlayerClass(class_id) ? player_class_abbreviations[class_id] : "UNK";
-}
-
-bool EQ::classes::IsPlayerClass(uint8 class_id) {
+bool Class::IsPlayerClass(uint8 class_id) {
 	return EQ::ValueWithin(class_id, Class::Warrior, Class::Berserker);
 }
 
-bool EQ::classes::IsValidClass(uint8 class_id)
+bool Class::IsValidClass(uint8 class_id)
 {
 	return class_names.find(class_id) != class_names.end();
 }
