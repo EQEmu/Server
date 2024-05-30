@@ -114,6 +114,7 @@ namespace EQ {
 	namespace deity {
 		uint32 GetDeityBitmask(uint32 deity_id);
 		std::string GetDeityName(uint32 deity_id);
+		bool IsValidDeity(uint32 deity_id);
 	}
 }
 

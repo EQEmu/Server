@@ -4,18 +4,18 @@ void FindDeity(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const uint32 deity_id = Strings::ToUnsignedInt(sep->arg[2]);
-		const std::string& deity_name = EQ::deity::GetDeityName(deity_id);
-		if (deity_name.empty()) {
+		if (!EQ::deity::IsValidDeity(deity_id)) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Deity ID {} was not found.",
+					"Deity ID {} does not exist.",
 					deity_id
 				).c_str()
 			);
 			return;
 		}
 
+		const std::string& deity_name = EQ::deity::GetDeityName(deity_id);
 		const uint32 deity_bitmask = EQ::deity::GetDeityBitmask(deity_id);
 
 		c->Message(
