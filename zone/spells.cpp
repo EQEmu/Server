@@ -1955,9 +1955,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	// during this switch, this variable gets set to one of these things
 	// and that causes the spell to be executed differently
 
-	bodyType target_bt = BT_Humanoid;
+	uint8 target_bt = BodyType::Humanoid;
 	SpellTargetType targetType = spells[spell_id].target_type;
-	bodyType mob_body = spell_target ? spell_target->GetBodyType() : BT_Humanoid;
+	uint8 mob_body = spell_target ? spell_target->GetBodyType() : BodyType::Humanoid;
 
 	if(IsIllusionSpell(spell_id)
 		&& spell_target != nullptr // null ptr crash safeguard
@@ -2000,9 +2000,9 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		// target required for these
 		case ST_Undead: {
 			if(!spell_target || (
-				mob_body != BT_SummonedUndead
-				&& mob_body != BT_Undead
-				&& mob_body != BT_Vampire
+				mob_body != BodyType::SummonedUndead
+				&& mob_body != BodyType::Undead
+				&& mob_body != BodyType::Vampire
 				)
 			)
 			{
@@ -2019,7 +2019,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 
 		case ST_Summoned: {
-			if(!spell_target || (mob_body != BT_Summoned && mob_body != BT_Summoned2 && mob_body != BT_Summoned3))
+			if(!spell_target || (mob_body != BodyType::Summoned && mob_body != BodyType::Summoned2 && mob_body != BodyType::Summoned3))
 			{
 				//invalid target
 				LogSpells("Spell [{}] canceled: invalid target of body type [{}] (summoned)", spell_id, mob_body);
@@ -2033,7 +2033,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		case ST_SummonedPet:
 		{
 			if(!spell_target || (spell_target != GetPet()) ||
-				(mob_body != BT_Summoned && mob_body != BT_Summoned2 && mob_body != BT_Summoned3 && mob_body != BT_Animal))
+				(mob_body != BodyType::Summoned && mob_body != BodyType::Summoned2 && mob_body != BodyType::Summoned3 && mob_body != BodyType::Animal))
 			{
 				LogSpells("Spell [{}] canceled: invalid target of body type [{}] (summoned pet)",
 							spell_id, mob_body);
@@ -2047,14 +2047,14 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 		//single body type target spells...
 		//this is a little hackish, but better than duplicating code IMO
-		case ST_Plant: if(target_bt == BT_Humanoid) target_bt = BT_Plant;
-		case ST_Dragon: if(target_bt == BT_Humanoid) target_bt = BT_Dragon;
-		case ST_Giant: if(target_bt == BT_Humanoid) target_bt = BT_Giant;
-		case ST_Animal: if(target_bt == BT_Humanoid) target_bt = BT_Animal;
+		case ST_Plant: if(target_bt == BodyType::Humanoid) target_bt = BodyType::Plant;
+		case ST_Dragon: if(target_bt == BodyType::Humanoid) target_bt = BodyType::Dragon;
+		case ST_Giant: if(target_bt == BodyType::Humanoid) target_bt = BodyType::Giant;
+		case ST_Animal: if(target_bt == BodyType::Humanoid) target_bt = BodyType::Animal;
 
 		// check for special case body types (Velious dragons/giants)
-		if(mob_body == BT_RaidGiant) mob_body = BT_Giant;
-		if(mob_body == BT_VeliousDragon) mob_body = BT_Dragon;
+		if(mob_body == BodyType::RaidGiant) mob_body = BodyType::Giant;
+		if(mob_body == BodyType::VeliousDragon) mob_body = BodyType::Dragon;
 
 		{
 			if(!spell_target || mob_body != target_bt)
@@ -4120,8 +4120,8 @@ bool Mob::SpellOnTarget(
 	}
 
 	//cannot hurt untargetable mobs
-	bodyType bt = spelltar->GetBodyType();
-	if (bt == BT_NoTarget || bt == BT_NoTarget2) {
+	uint8 bt = spelltar->GetBodyType();
+	if (bt == BodyType::NoTarget || bt == BodyType::NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (spelltar->IsNPC()) {
 				if (!spelltar->CastToNPC()->GetSwarmOwner()) {
@@ -4303,9 +4303,9 @@ bool Mob::SpellOnTarget(
 	//check for AE_Undead
 	if (spells[spell_id].target_type == ST_UndeadAE){
 		if (
-			spelltar->GetBodyType() != BT_SummonedUndead &&
-			spelltar->GetBodyType() != BT_Undead &&
-			spelltar->GetBodyType() != BT_Vampire
+			spelltar->GetBodyType() != BodyType::SummonedUndead &&
+			spelltar->GetBodyType() != BodyType::Undead &&
+			spelltar->GetBodyType() != BodyType::Vampire
 		) {
 			safe_delete(action_packet);
 			return false;

@@ -878,18 +878,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				{
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoDAndLater)
 					{
-						bodyType bt = BT_Undead;
+						uint8 bt = BodyType::Undead;
 
 						int MessageID = SENSE_UNDEAD;
 
 						if(effect == SE_SenseSummoned)
 						{
-							bt = BT_Summoned;
+							bt = BodyType::Summoned;
 							MessageID = SENSE_SUMMONED;
 						}
 						else if(effect == SE_SenseAnimals)
 						{
-							bt = BT_Animal;
+							bt = BodyType::Animal;
 							MessageID = SENSE_ANIMAL;
 						}
 
@@ -2758,7 +2758,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SetBodyType:
 			{
-				SetBodyType((bodyType)spell.base_value[i], false);
+				SetBodyType(spell.base_value[i], false);
 				break;
 			}
 
@@ -7562,47 +7562,47 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_ANIMAL_OR_HUMANOID:
-			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Humanoid))
+			if ((GetBodyType() == BodyType::Animal) || (GetBodyType() == BodyType::Humanoid))
 				return true;
 			break;
 
 		case IS_DRAGON:
-			if (GetBodyType() == BT_Dragon || GetBodyType() == BT_VeliousDragon || GetBodyType() == BT_Dragon3)
+			if (GetBodyType() == BodyType::Dragon || GetBodyType() == BodyType::VeliousDragon || GetBodyType() == BodyType::Dragon3)
 				return true;
 			break;
 
 		case IS_ANIMAL_OR_INSECT:
-			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Insect))
+			if ((GetBodyType() == BodyType::Animal) || (GetBodyType() == BodyType::Insect))
 				return true;
 			break;
 
 		case IS_BODY_TYPE_MISC:
-			if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
-				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)||
-				(GetBodyType() == BT_Construct) || (GetBodyType() == BT_Dragon)		 || (GetBodyType() == BT_Insect)||
-				(GetBodyType() == BT_VeliousDragon) || (GetBodyType() == BT_Muramite) || (GetBodyType() == BT_Magical))
+			if ((GetBodyType() == BodyType::Humanoid)  || (GetBodyType() == BodyType::Lycanthrope) || (GetBodyType() == BodyType::Giant) ||
+				(GetBodyType() == BodyType::RaidGiant) || (GetBodyType() == BodyType::RaidColdain) || (GetBodyType() == BodyType::Animal)||
+				(GetBodyType() == BodyType::Construct) || (GetBodyType() == BodyType::Dragon)		 || (GetBodyType() == BodyType::Insect)||
+				(GetBodyType() == BodyType::VeliousDragon) || (GetBodyType() == BodyType::Muramite) || (GetBodyType() == BodyType::Magical))
 				return true;
 			break;
 
 		case IS_BODY_TYPE_MISC2:
-			if ((GetBodyType() == BT_Humanoid) || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
-				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal) ||
-				(GetBodyType() == BT_Insect))
+			if ((GetBodyType() == BodyType::Humanoid) || (GetBodyType() == BodyType::Lycanthrope) || (GetBodyType() == BodyType::Giant) ||
+				(GetBodyType() == BodyType::RaidGiant) || (GetBodyType() == BodyType::RaidColdain) || (GetBodyType() == BodyType::Animal) ||
+				(GetBodyType() == BodyType::Insect))
 				return true;
 			break;
 
 		case IS_PLANT:
-			if (GetBodyType() == BT_Plant)
+			if (GetBodyType() == BodyType::Plant)
 				return true;
 			break;
 
 		case IS_GIANT:
-			if (GetBodyType() == BT_Giant)
+			if (GetBodyType() == BodyType::Giant)
 				return true;
 			break;
 
 		case IS_NOT_ANIMAL_OR_HUMANOID:
-			if ((GetBodyType() != BT_Animal) || (GetBodyType() != BT_Humanoid))
+			if ((GetBodyType() != BodyType::Animal) || (GetBodyType() != BodyType::Humanoid))
 				return true;
 			break;
 
@@ -7643,17 +7643,17 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_UNDEAD_OR_VALDEHOLM_GIANT:
-			if (GetBodyType() == BT_Undead || GetRace() == Race::Giant2 || GetRace() == Race::Giant3)
+			if (GetBodyType() == BodyType::Undead || GetRace() == Race::Giant2 || GetRace() == Race::Giant3)
 				return true;
 			break;
 
 		case IS_ANIMAL_OR_PLANT:
-			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Plant))
+			if ((GetBodyType() == BodyType::Animal) || (GetBodyType() == BodyType::Plant))
 				return true;
 			break;
 
 		case IS_SUMMONED:
-			if (GetBodyType() == BT_Summoned)
+			if (GetBodyType() == BodyType::Summoned)
 				return true;
 			break;
 
@@ -7664,12 +7664,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_UNDEAD:
-			if (GetBodyType() == BT_Undead)
+			if (GetBodyType() == BodyType::Undead)
 				return true;
 			break;
 
 		case IS_NOT_UNDEAD_OR_SUMMONED_OR_VAMPIRE:
-			if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Vampire))
+			if ((GetBodyType() != BodyType::Undead) && (GetBodyType() != BodyType::Summoned) && (GetBodyType() != BodyType::Vampire))
 				return true;
 			break;
 
@@ -7679,12 +7679,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_HUMANOID:
-			if (GetBodyType() == BT_Humanoid)
+			if (GetBodyType() == BodyType::Humanoid)
 				return true;
 			break;
 
 		case IS_UNDEAD_AND_HP_LESS_THAN_10_PCT:
-			if ((GetBodyType() == BT_Undead) && (GetHPRatio() < 10))
+			if ((GetBodyType() == BodyType::Undead) && (GetHPRatio() < 10))
 				return true;
 			break;
 
@@ -8042,12 +8042,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_NOT_UNDEAD_OR_SUMMONED:
-			if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned))
+			if ((GetBodyType() != BodyType::Undead) && (GetBodyType() != BodyType::Summoned))
 				return true;
 			break;
 
 		case IS_NOT_PLANT:
-			if (GetBodyType() != BT_Plant)
+			if (GetBodyType() != BodyType::Plant)
 				return true;
 			break;
 
@@ -8077,12 +8077,12 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_VAMPIRE_OR_UNDEAD_OR_UNDEADPET:
-			if (GetBodyType() == BT_Vampire || GetBodyType() == BT_Undead || GetBodyType() == BT_SummonedUndead)
+			if (GetBodyType() == BodyType::Vampire || GetBodyType() == BodyType::Undead || GetBodyType() == BodyType::SummonedUndead)
 				return true;
 			break;
 
 		case IS_NOT_VAMPIRE_OR_UNDEAD:
-			if (GetBodyType() != BT_Vampire && GetBodyType() != BT_Undead && GetBodyType() != BT_SummonedUndead)
+			if (GetBodyType() != BodyType::Vampire && GetBodyType() != BodyType::Undead && GetBodyType() != BodyType::SummonedUndead)
 				return true;
 			break;
 
@@ -8124,17 +8124,17 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_HUMANOID_LEVEL_84_MAX:
-			if (GetBodyType() == BT_Humanoid && GetLevel() <= 84)
+			if (GetBodyType() == BodyType::Humanoid && GetLevel() <= 84)
 				return true;
 			break;
 
 		case IS_HUMANOID_LEVEL_86_MAX:
-			if (GetBodyType() == BT_Humanoid && GetLevel() <= 86)
+			if (GetBodyType() == BodyType::Humanoid && GetLevel() <= 86)
 				return true;
 			break;
 
 		case IS_HUMANOID_LEVEL_88_MAX:
-			if (GetBodyType() == BT_Humanoid && GetLevel() <= 88)
+			if (GetBodyType() == BodyType::Humanoid && GetLevel() <= 88)
 				return true;
 			break;
 
@@ -8312,7 +8312,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_SUMMONED_OR_UNDEAD:
-			if (GetBodyType() == BT_Summoned || GetBodyType() == BT_Undead)
+			if (GetBodyType() == BodyType::Summoned || GetBodyType() == BodyType::Undead)
 				return true;
 			break;
 

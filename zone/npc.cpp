@@ -76,7 +76,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 		  npc_type_data->gender,
 		  npc_type_data->race,
 		  npc_type_data->class_,
-		  (bodyType) npc_type_data->bodytype,
+		  npc_type_data->bodytype,
 		  npc_type_data->deity,
 		  npc_type_data->level,
 		  npc_type_data->npc_id,
@@ -451,7 +451,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	RestoreMana();
 
-	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+	if (GetBodyType() == BodyType::Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 		m_can_open_doors = false;
 	}
 
@@ -582,7 +582,7 @@ bool NPC::Process()
 		Mob* owner = entity_list.GetMob(ownerid);
 		if (owner != 0)
 		{
-			//if(GetBodyType() != BT_SwarmPet)
+			//if(GetBodyType() != BodyType::SwarmPet)
 			// owner->SetPetID(0);
 			ownerid = 0;
 			petid = 0;
@@ -1183,7 +1183,7 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			}
 
 			if (npc->bodytype) {
-				client->Message(Chat::White, fmt::format("Body Type | {} ({})", EQ::constants::GetBodyTypeName(npc->bodytype), npc->bodytype).c_str());
+				client->Message(Chat::White, fmt::format("Body Type | {} ({})", EQ::bodytype::GetBodyTypeName(npc->bodytype), npc->bodytype).c_str());
 			}
 
 			client->Message(Chat::White, "New NPC spawned!");
@@ -1836,7 +1836,7 @@ void NPC::Disarm(Client* client, int chance) {
 			int matslot = eslot == EQ::invslot::slotPrimary ? EQ::textures::weaponPrimary : EQ::textures::weaponSecondary;
 			if (matslot != -1)
 				SendWearChange(matslot);
-			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQ::invslot::slotPrimary)
+			if ((CastToMob()->GetBodyType() == BodyType::Humanoid || CastToMob()->GetBodyType() == BodyType::Summoned) && eslot == EQ::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
 			client->MessageString(Chat::Skills, DISARM_SUCCESS, GetCleanName());
 			if (chance != 1000)
@@ -2200,7 +2200,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 
 		//Not recommended if using above (However, this will work better on older clients).
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
-			ns->spawn.bodytype = BT_NoTarget;
+			ns->spawn.bodytype = BodyType::NoTarget;
 		}
 
 		if (

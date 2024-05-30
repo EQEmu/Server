@@ -265,7 +265,7 @@ namespace EQ
 		// these two are just quick checks
 		int GetItemBaneDamageBody(bool augments = false) const;
 		int GetItemBaneDamageRace(bool augments = false) const;
-		int GetItemBaneDamageBody(bodyType against, bool augments = false) const;
+		int GetItemBaneDamageBody(uint8 against, bool augments = false) const;
 		int GetItemBaneDamageRace(uint16 against, bool augments = false) const;
 		int GetItemMagical(bool augments = false) const;
 		int GetItemHP(bool augments = false) const;

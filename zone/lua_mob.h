@@ -399,7 +399,7 @@ public:
 	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
-	void SetBodyType(int new_body, bool overwrite_orig);
+	void SetBodyType(uint8 new_body, bool overwrite_orig);
 	void SetTargetable(bool on);
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);

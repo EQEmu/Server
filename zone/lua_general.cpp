@@ -3790,8 +3790,8 @@ std::string lua_get_language_name(uint8 language_id) {
 	return quest_manager.getlanguagename(language_id);
 }
 
-std::string lua_get_body_type_name(uint32 bodytype_id) {
-	return quest_manager.getbodytypename(bodytype_id);
+std::string lua_get_body_type_name(uint8 body_type_id) {
+	return quest_manager.getbodytypename(body_type_id);
 }
 
 std::string lua_get_consider_level_name(uint8 consider_level) {

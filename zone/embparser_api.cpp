@@ -4740,9 +4740,9 @@ std::string Perl__getlanguagename(uint8 language_id)
 	return quest_manager.getlanguagename(language_id);
 }
 
-std::string Perl__getbodytypename(uint32 bodytype_id)
+std::string Perl__getbodytypename(uint8 body_type_id)
 {
-	return quest_manager.getbodytypename(bodytype_id);
+	return quest_manager.getbodytypename(body_type_id);
 }
 
 std::string Perl__getconsiderlevelname(uint8 consider_level)

@@ -5059,7 +5059,7 @@ uint32 EntityList::CheckNPCsClose(Mob *center)
 	while (it != npc_list.end()) {
 		NPC *cur = it->second;
 		if (!cur || cur == center || cur->IsPet() || cur->GetClass() == Class::LDoNTreasure ||
-				cur->GetBodyType() == BT_NoTarget || cur->GetBodyType() == BT_Special) {
+				cur->GetBodyType() == BodyType::NoTarget || cur->GetBodyType() == BodyType::Special) {
 			++it;
 			continue;
 		}
@@ -5419,9 +5419,9 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	while (it != npc_list.end()) {
 		if (!it->second->IsPet()
 				&& it->second->GetClass() != Class::LDoNTreasure
-				&& it->second->GetBodyType() != BT_NoTarget
-				&& it->second->GetBodyType() != BT_NoTarget2
-				&& it->second->GetBodyType() != BT_Special)
+				&& it->second->GetBodyType() != BodyType::NoTarget
+				&& it->second->GetBodyType() != BodyType::NoTarget2
+				&& it->second->GetBodyType() != BodyType::Special)
 			npc_count++;
 		++it;
 	}
@@ -5440,9 +5440,9 @@ void EntityList::AddLootToNPCS(uint32 item_id, uint32 count)
 	while (it != npc_list.end()) {
 		if (!it->second->IsPet()
 				&& it->second->GetClass() != Class::LDoNTreasure
-				&& it->second->GetBodyType() != BT_NoTarget
-				&& it->second->GetBodyType() != BT_NoTarget2
-				&& it->second->GetBodyType() != BT_Special)
+				&& it->second->GetBodyType() != BodyType::NoTarget
+				&& it->second->GetBodyType() != BodyType::NoTarget2
+				&& it->second->GetBodyType() != BodyType::Special)
 			npcs[i++] = it->second;
 		++it;
 	}
@@ -5520,7 +5520,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 	safe_delete(outapp);
 }
 
-Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType, bool skip_client_pets)
+Mob *EntityList::GetClosestMobByBodyType(Mob *sender, uint8 BodyType, bool skip_client_pets)
 {
 
 	if (!sender)

@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 SET(common_sources
     base_packet.cpp
     bazaar.cpp
+    bodytypes.cpp
     classes.cpp
     cli/eqemu_command_handler.cpp
     compression.cpp

@@ -143,7 +143,7 @@ public:
 		uint8 in_gender,
 		uint16 in_race,
 		uint8 in_class,
-		bodyType in_bodytype,
+		uint8 in_bodytype,
 		uint8 in_deity,
 		uint8 in_level,
 		uint32 in_npctype_id,
@@ -236,7 +236,7 @@ public:
 	bool CheckHitChance(Mob* attacker, DamageHitInfo &hit);
 	bool RollMeleeCritCheck(Mob *defender, EQ::skills::SkillType skill);
 	inline bool CanUndeadSlay() { return static_cast<bool>(GetUndeadSlayRate());}
-	inline bool IsUndeadForSlay() { return (GetBodyType() == BT_Undead || GetBodyType() == BT_SummonedUndead || GetBodyType() == BT_Vampire); }
+	inline bool IsUndeadForSlay() { return (GetBodyType() == BodyType::Undead || GetBodyType() == BodyType::SummonedUndead || GetBodyType() == BodyType::Vampire); }
 	int GetUndeadSlayRate();
 	void DoUndeadSlay(DamageHitInfo &hit, int crit_mod);
 	void TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
@@ -1098,9 +1098,9 @@ public:
 	int GetPetACBonusFromOwner();
 	int GetPetATKBonusFromOwner();
 
-	inline const bodyType GetBodyType() const { return bodytype; }
-	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
-	void SetBodyType(bodyType new_body, bool overwrite_orig);
+	inline const uint8 GetBodyType() const { return bodytype; }
+	inline const uint8 GetOrigBodyType() const { return orig_bodytype; }
+	void SetBodyType(uint8 new_body, bool overwrite_orig);
 
 	bool invulnerable;
 	bool qglobal;
@@ -1575,8 +1575,8 @@ protected:
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;
-	bodyType bodytype;
-	bodyType orig_bodytype;
+	uint8 bodytype;
+	uint8 orig_bodytype;
 	uint16 deity;
 	uint8 level;
 	uint8 orig_level;

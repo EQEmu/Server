@@ -95,7 +95,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	Gender::Male, // in_gender
 	Race::Doug, // in_race
 	Class::None, // in_class
-	BT_Humanoid, // in_bodytype
+	BodyType::Humanoid, // in_bodytype
 	Deity::Unknown, // in_deity
 	0, // in_level
 	0, // in_npctype_id
