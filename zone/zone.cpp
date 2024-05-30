@@ -1172,7 +1172,6 @@ bool Zone::Init(bool is_static) {
 
 	// make sure that anything that needs to be loaded prior to scripts is loaded before here
 	// this is to ensure that the scripts have access to the data they need
-	parse->Init();
 	parse->ReloadQuests(true);
 
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
