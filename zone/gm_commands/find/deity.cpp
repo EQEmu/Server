@@ -4,7 +4,7 @@ void FindDeity(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const uint32 deity_id = Strings::ToUnsignedInt(sep->arg[2]);
-		const std::string& deity_name = EQ::deity::GetDeityName(deity_id);
+		const std::string& deity_name = Deity::GetName(deity_id);
 		if (String::EqualFold(deity_name, "UNKNOWN DEITY")) {
 			c->Message(
 				Chat::White,
@@ -15,8 +15,8 @@ void FindDeity(Client *c, const Seperator *sep)
 			);
 			return;
 		}
-	
-		const uint32 deity_bitmask = EQ::deity::GetDeityBitmask(deity_id);
+
+		const uint32 deity_bitmask = Deity::GetBitmask(deity_id);
 
 		c->Message(
 			Chat::White,
@@ -41,7 +41,7 @@ void FindDeity(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		const uint32 deity_bitmask = EQ::deity::GetDeityBitmask(d.first);
+		const uint32 deity_bitmask = Deity::GetBitmask(d.first);
 
 		c->Message(
 			Chat::White,

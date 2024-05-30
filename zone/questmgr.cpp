@@ -4349,7 +4349,7 @@ std::string QuestManager::getgendername(uint32 gender_id) {
 }
 
 std::string QuestManager::getdeityname(uint32 deity_id) {
-	return EQ::deity::GetDeityName(deity_id);
+	return Deity::GetName(deity_id);
 }
 
 std::string QuestManager::getinventoryslotname(int16 slot_id) {

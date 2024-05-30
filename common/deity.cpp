@@ -19,17 +19,17 @@
 
 #include "deity.h"
 
-uint32 EQ::deity::GetDeityBitmask(uint32 deity_id)
+uint32 Deity::GetBitmask(uint32 deity_id)
 {
 	return IsValidDeity(deity_id) ? deity_bitmasks[deity_id] : DeityBitmask::All;
 }
 
-std::string EQ::deity::GetDeityName(uint32 deity_id)
+std::string Deity::GetName(uint32 deity_id)
 {
 	return IsValidDeity(deity_id) ? deity_names[deity_id] : "UNKNOWN DEITY";
 }
 
-bool EQ::deity::IsValidDeity(uint32 deity_id)
+bool Deity::IsValid(uint32 deity_id)
 {
 	return deity_names.find(deity_id) != deity_names.end();
 }

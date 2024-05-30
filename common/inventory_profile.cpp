@@ -354,7 +354,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && source_item->Deity && !(deity::GetDeityBitmask(deity_id) & source_item->Deity)) {
+			if (deity_id && source_item->Deity && !(Deity::GetBitmask(deity_id) & source_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}
@@ -380,7 +380,7 @@ bool EQ::InventoryProfile::SwapItem(
 				fail_state = swapRaceClass;
 				return false;
 			}
-			if (deity_id && destination_item->Deity && !(deity::GetDeityBitmask(deity_id) & destination_item->Deity)) {
+			if (deity_id && destination_item->Deity && !(Deity::GetBitmask(deity_id) & destination_item->Deity)) {
 				fail_state = swapDeity;
 				return false;
 			}

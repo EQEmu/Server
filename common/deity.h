@@ -45,6 +45,10 @@ namespace Deity {
 	constexpr uint32 Tunare        = 215;
 	constexpr uint32 Veeshan       = 216;
 	constexpr uint32 Agnostic2     = 396;
+
+	uint32 GetBitmask(uint32 deity_id);
+	std::string GetName(uint32 deity_id);
+	bool IsValid(uint32 deity_id);
 }
 
 namespace DeityBitmask {
@@ -109,13 +113,5 @@ static std::map<uint32, uint32> deity_bitmasks = {
 	{ Deity::Tunare,        DeityBitmask::Tunare },
 	{ Deity::Veeshan,       DeityBitmask::Veeshan }
 };
-
-namespace EQ {
-	namespace deity {
-		uint32 GetDeityBitmask(uint32 deity_id);
-		std::string GetDeityName(uint32 deity_id);
-		bool IsValidDeity(uint32 deity_id);
-	}
-}
 
 #endif /* COMMON_DEITY_H */
