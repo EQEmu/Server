@@ -70,6 +70,16 @@ uint32 EQ::bug::GetCategoryID(const std::string& category_name)
 	return BugCategory::Other;
 }
 
+std::string EQ::bug::GetCategoryName(uint32 category_id)
+{
+	return IsValidCategory(category_id) ? bug_category_names[category_id] : "UNKNOWN BUG CATEGORY";
+}
+
+bool EQ::bug::IsValidCategory(uint32 category_id)
+{
+	return bug_category_names.find(category_id) != bug_category_names.end();
+}
+
 const char *EQ::constants::GetStanceName(StanceType stance_type) {
 	switch (stance_type) {
 	case stanceUnknown:

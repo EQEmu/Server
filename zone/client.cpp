@@ -11783,11 +11783,11 @@ void Client::RegisterBug(BugReport_Struct* r) {
 	b.target_id           = r->target_id;
 	b.target_name         = r->target_name;
 	b.optional_info_mask  = r->optional_info_mask;
-	b._can_duplicate      = ((r->optional_info_mask & EQ::bug::infoCanDuplicate) != 0 ? 1 : 0);
-	b._crash_bug          = ((r->optional_info_mask & EQ::bug::infoCrashBug) != 0 ? 1 : 0);
-	b._target_info        = ((r->optional_info_mask & EQ::bug::infoTargetInfo) != 0 ? 1 : 0);
-	b._character_flags    = ((r->optional_info_mask & EQ::bug::infoCharacterFlags) != 0 ? 1 : 0);
-	b._unknown_value      = ((r->optional_info_mask & EQ::bug::infoUnknownValue) != 0 ? 1 : 0);
+	b._can_duplicate      = ((r->optional_info_mask & BugInformationFlag::Repeatable) != 0 ? 1 : 0);
+	b._crash_bug          = ((r->optional_info_mask & BugInformationFlag::Crash) != 0 ? 1 : 0);
+	b._target_info        = ((r->optional_info_mask & BugInformationFlag::TargetInfo) != 0 ? 1 : 0);
+	b._character_flags    = ((r->optional_info_mask & BugInformationFlag::CharacterFlags) != 0 ? 1 : 0);
+	b._unknown_value      = ((r->optional_info_mask & BugInformationFlag::Unknown) != 0 ? 1 : 0);
 	b.bug_report          = r->bug_report;
 	b.system_info         = r->system_info;
 

@@ -465,18 +465,10 @@ namespace EQ
 	} // namespace spells
 
 	namespace bug {
-		enum OptionalInfoFlag : uint32 {
-			infoNoOptionalInfo = 0x0,
-			infoCanDuplicate = 0x1,
-			infoCrashBug = 0x2,
-			infoTargetInfo = 0x4,
-			infoCharacterFlags = 0x8,
-			infoUnknownValue = 0xFFFFFFF0
-		};
-
 		uint32 GetCategoryID(const std::string& category_name);
-
-	} // namespace bug
+		std::string GetCategoryName(uint32 category_id);
+		bool IsValidCategory(uint32 category_id);
+	}
 
 	enum WaypointStatus : int {
 		RoamBoxPauseInProgress = -3,
@@ -697,6 +689,15 @@ namespace BugCategory {
 	constexpr uint32 Dialogs       = 10;
 	constexpr uint32 LoNTCG        = 11;
 	constexpr uint32 Mercenaries   = 12;
+}
+
+namespace BugInformationFlag {
+	constexpr uint32 None           = 0;
+	constexpr uint32 Repeatable     = 1;
+	constexpr uint32 Crash          = 2;
+	constexpr uint32 TargetInfo     = 4;
+	constexpr uint32 CharacterFlags = 8;
+	constexpr uint32 Unknown        = 4294967280;
 }
 
 static std::map<uint32, std::string> bug_category_names = {
