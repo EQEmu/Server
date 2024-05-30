@@ -814,46 +814,6 @@ typedef enum {
 #define STAT_TIGER_CLAW          40
 #define STAT_FRENZY              41
 
-/*
-**	Recast timer types. Used as an off set to charProfileStruct timers.
-**
-**	(Another orphaned enumeration...)
-*/
-enum RecastTimerTypes
-{
-	RecTimer_0 = 0,
-	RecTimer_1,
-	RecTimer_WeaponHealClick,		// 2
-	RecTimer_MuramiteBaneNukeClick,	// 3
-	RecTimer_4,
-	RecTimer_DispellClick,			// 5 (also click heal orbs?)
-	RecTimer_Epic,					// 6
-	RecTimer_OoWBPClick,			// 7
-	RecTimer_VishQuestClassItem,	// 8
-	RecTimer_HealPotion,			// 9
-	RecTimer_10,
-	RecTimer_11,
-	RecTimer_12,
-	RecTimer_13,
-	RecTimer_14,
-	RecTimer_15,
-	RecTimer_16,
-	RecTimer_17,
-	RecTimer_18,
-	RecTimer_ModRod,				// 19
-	_RecTimerCount
-};
-
-enum GroupUpdateAction
-{
-	GUA_Joined = 0,
-	GUA_Left = 1,
-	GUA_LastLeft = 6,
-	GUA_FullGroupInfo = 7,
-	GUA_MakeLeader = 8,
-	GUA_Started = 9
-};
-
 static const uint8 DamageTypeSomething	= 0x1C;	//0x1c is something...
 static const uint8 DamageTypeFalling	= 0xFC;
 static const uint8 DamageTypeSpell		= 0xE7;
