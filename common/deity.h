@@ -46,30 +46,30 @@ namespace Deity {
 	constexpr uint32 Veeshan       = 216;
 	constexpr uint32 Agnostic2     = 396;
 
+	namespace Bitmask {
+		constexpr uint32 Agnostic      = 1;
+		constexpr uint32 Bertoxxulous  = 2;
+		constexpr uint32 BrellSirilis  = 4;
+		constexpr uint32 CazicThule    = 8;
+		constexpr uint32 ErollisiMarr  = 16;
+		constexpr uint32 Bristlebane   = 32;
+		constexpr uint32 Innoruuk      = 64;
+		constexpr uint32 Karana        = 128;
+		constexpr uint32 MithanielMarr = 256;
+		constexpr uint32 Prexus        = 512;
+		constexpr uint32 Quellious     = 1024;
+		constexpr uint32 RallosZek     = 2048;
+		constexpr uint32 RodcetNife    = 4096;
+		constexpr uint32 SolusekRo     = 8192;
+		constexpr uint32 TheTribunal   = 16384;
+		constexpr uint32 Tunare        = 32768;
+		constexpr uint32 Veeshan       = 65536;
+		constexpr uint32 All           = std::numeric_limits<uint32>::max();
+	}
+
 	uint32 GetBitmask(uint32 deity_id);
 	std::string GetName(uint32 deity_id);
 	bool IsValid(uint32 deity_id);
-}
-
-namespace DeityBitmask {
-	constexpr uint32 Agnostic      = 1;
-	constexpr uint32 Bertoxxulous  = 2;
-	constexpr uint32 BrellSirilis  = 4;
-	constexpr uint32 CazicThule    = 8;
-	constexpr uint32 ErollisiMarr  = 16;
-	constexpr uint32 Bristlebane   = 32;
-	constexpr uint32 Innoruuk      = 64;
-	constexpr uint32 Karana        = 128;
-	constexpr uint32 MithanielMarr = 256;
-	constexpr uint32 Prexus        = 512;
-	constexpr uint32 Quellious     = 1024;
-	constexpr uint32 RallosZek     = 2048;
-	constexpr uint32 RodcetNife    = 4096;
-	constexpr uint32 SolusekRo     = 8192;
-	constexpr uint32 TheTribunal   = 16384;
-	constexpr uint32 Tunare        = 32768;
-	constexpr uint32 Veeshan       = 65536;
-	constexpr uint32 All           = std::numeric_limits<uint32>::max();
 }
 
 static std::map<uint32, std::string> deity_names = {
@@ -94,24 +94,24 @@ static std::map<uint32, std::string> deity_names = {
 };
 
 static std::map<uint32, uint32> deity_bitmasks = {
-	{ Deity::Agnostic1,     DeityBitmask::Agnostic },
-	{ Deity::Agnostic2,     DeityBitmask::Agnostic },
-	{ Deity::Bertoxxulous,  DeityBitmask::Bertoxxulous },
-	{ Deity::BrellSirilis,  DeityBitmask::BrellSirilis },
-	{ Deity::CazicThule,    DeityBitmask::CazicThule },
-	{ Deity::ErollisiMarr,  DeityBitmask::ErollisiMarr },
-	{ Deity::Bristlebane,   DeityBitmask::Bristlebane },
-	{ Deity::Innoruuk,      DeityBitmask::Innoruuk },
-	{ Deity::Karana,        DeityBitmask::Karana },
-	{ Deity::MithanielMarr, DeityBitmask::MithanielMarr },
-	{ Deity::Prexus,        DeityBitmask::Prexus },
-	{ Deity::Quellious,     DeityBitmask::Quellious },
-	{ Deity::RallosZek,     DeityBitmask::RallosZek },
-	{ Deity::RodcetNife,    DeityBitmask::RodcetNife },
-	{ Deity::SolusekRo,     DeityBitmask::SolusekRo },
-	{ Deity::TheTribunal,   DeityBitmask::TheTribunal },
-	{ Deity::Tunare,        DeityBitmask::Tunare },
-	{ Deity::Veeshan,       DeityBitmask::Veeshan }
+	{ Deity::Agnostic1,     Deity::Bitmask::Agnostic },
+	{ Deity::Agnostic2,     Deity::Bitmask::Agnostic },
+	{ Deity::Bertoxxulous,  Deity::Bitmask::Bertoxxulous },
+	{ Deity::BrellSirilis,  Deity::Bitmask::BrellSirilis },
+	{ Deity::CazicThule,    Deity::Bitmask::CazicThule },
+	{ Deity::ErollisiMarr,  Deity::Bitmask::ErollisiMarr },
+	{ Deity::Bristlebane,   Deity::Bitmask::Bristlebane },
+	{ Deity::Innoruuk,      Deity::Bitmask::Innoruuk },
+	{ Deity::Karana,        Deity::Bitmask::Karana },
+	{ Deity::MithanielMarr, Deity::Bitmask::MithanielMarr },
+	{ Deity::Prexus,        Deity::Bitmask::Prexus },
+	{ Deity::Quellious,     Deity::Bitmask::Quellious },
+	{ Deity::RallosZek,     Deity::Bitmask::RallosZek },
+	{ Deity::RodcetNife,    Deity::Bitmask::RodcetNife },
+	{ Deity::SolusekRo,     Deity::Bitmask::SolusekRo },
+	{ Deity::TheTribunal,   Deity::Bitmask::TheTribunal },
+	{ Deity::Tunare,        Deity::Bitmask::Tunare },
+	{ Deity::Veeshan,       Deity::Bitmask::Veeshan }
 };
 
 #endif /* COMMON_DEITY_H */
