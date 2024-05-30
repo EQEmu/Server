@@ -4,7 +4,7 @@
 const std::string& EQ::bodytype::GetBodyTypeName(uint8 body_type_id)
 {
 	const auto& e = body_type_names.find(body_type_id);
-	return e != body_type_names.end() ? e->second : std::string();
+	return e != body_type_names.end() ? e->second : "UNKNOWN BODY TYPE";
 }
 
 bool EQ::bodytype::IsValidBodyType(uint8 body_type_id)
