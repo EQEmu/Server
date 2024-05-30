@@ -86,7 +86,18 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "class")) {
 		if (sep->IsNumber(2)) {
-			auto class_id = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
+			const uint8 class_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+			if (!EQ::classes::IsValidClass(class_id)) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Class ID {} does not exist.",
+						class_id
+					).c_str()
+				);
+				return;
+			}
+
 			n.class_ = class_id;
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",

@@ -21,16 +21,12 @@
 
 const std::string& EQ::classes::GetClassName(uint8 class_id, uint8 level)
 {
-	if (!IsValidClass(class_id)) {
-		return "Unknown";
-	}
-
 	if (level >= 51 && IsPlayerClass(class_id)) {
 		return GetClassLevelName(class_id, level);
 	}
 
 	const auto& e = class_map.find(class_id);
-	return e != class_map.end() ? e->second : "Unknown";
+	return e != class_map.end() ? e->second : "UNKNOWN CLASS";
 }
 
 const std::string& EQ::classes::GetClassLevelName(uint8 class_id, uint8 level)
@@ -250,7 +246,7 @@ bool EQ::classes::IsClothClass(uint8 class_id)
 uint8 EQ::classes::GetClassArmorType(uint8 class_id)
 {
 	uint8 armor_type = ArmorType::Unknown;
-	if (!IsValidClass(class_id) || !IsPlayerClass(class_id)) {
+	if (!IsPlayerClass(class_id)) {
 		return armor_type;
 	}
 
@@ -270,7 +266,7 @@ uint8 EQ::classes::GetClassArmorType(uint8 class_id)
 const std::string EQ::classes::GetPlayerClassAbbreviation(uint8 class_id)
 {
 	return (
-		(!IsValidClass(class_id) || !IsPlayerClass(class_id)) ?
+		!IsPlayerClass(class_id) ?
 		"UNK" :
 		player_class_abbreviations[class_id]
 	);
