@@ -265,11 +265,7 @@ uint8 EQ::classes::GetClassArmorType(uint8 class_id)
 
 const std::string EQ::classes::GetPlayerClassAbbreviation(uint8 class_id)
 {
-	return (
-		!IsPlayerClass(class_id) ?
-		"UNK" :
-		player_class_abbreviations[class_id]
-	);
+	return IsPlayerClass(class_id) ? player_class_abbreviations[class_id] : "UNK";
 }
 
 bool EQ::classes::IsPlayerClass(uint8 class_id) {
