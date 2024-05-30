@@ -3187,7 +3187,7 @@ std::string Lua_Mob::GetClassPlural()
 std::string Lua_Mob::GetRacePlural()
 {
 	Lua_Safe_Call_String();
-	return self->GetRacePlural();
+	return Race::GetPlural(self->GetRace());
 }
 
 bool Lua_Mob::IsTemporaryPet()

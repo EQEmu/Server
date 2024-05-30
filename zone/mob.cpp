@@ -8402,46 +8402,6 @@ int Mob::DispatchZoneControllerEvent(
 	return ret;
 }
 
-std::string Mob::GetRacePlural()
-{
-	switch (GetBaseRace()) {
-		case Race::Human:
-			return "Humans";
-		case Race::Barbarian:
-			return "Barbarians";
-		case Race::Erudite:
-			return "Erudites";
-		case Race::WoodElf:
-			return "Wood Elves";
-		case Race::HighElf:
-			return "High Elves";
-		case Race::DarkElf:
-			return "Dark Elves";
-		case Race::HalfElf:
-			return "Half Elves";
-		case Race::Dwarf:
-			return "Dwarves";
-		case Race::Troll:
-			return "Trolls";
-		case Race::Ogre:
-			return "Ogres";
-		case Race::Halfling:
-			return "Halflings";
-		case Race::Gnome:
-			return "Gnomes";
-		case Race::Iksar:
-			return "Iksar";
-		case Race::VahShir:
-			return "Vah Shir";
-		case Race::Froglok2:
-			return "Frogloks";
-		case Race::Drakkin:
-			return "Drakkin";
-		default:
-			return "Races";
-	}
-}
-
 std::string Mob::GetClassPlural()
 {
 	switch (GetClass()) {

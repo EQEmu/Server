@@ -3342,7 +3342,7 @@ uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)
 
 std::string Perl_Mob_GetRacePlural(Mob* self)
 {
-	return self->GetRacePlural();
+	return Race::GetPlural(self->GetRace());
 }
 
 uint32 Perl_Mob_GetHateListCount(Mob* self)

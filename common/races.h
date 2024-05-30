@@ -770,8 +770,9 @@ namespace Race {
 	constexpr uint16 InteractiveObject        = 2250;
 	constexpr uint16 Node                     = 2254;
 
-	const std::string& GetName(uint16 race_id);
 	const std::string& GetAbbreviation(uint16 race_id);
+	const std::string& GetName(uint16 race_id);
+	const std::string& GetPlural(uint16 race_id);
 
 	bool IsPlayer(uint16 race_id);
 	bool IsValid(uint16 race_id);

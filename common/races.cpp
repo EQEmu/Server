@@ -18,6 +18,22 @@
 
 #include "races.h"
 
+const std::string& Gender::GetName(uint8 gender_id)
+{
+	return EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter) ? gender_map[gender_id] : "Unknown";
+}
+
+float Gender::GetRaceDefaultHeight(uint16 race_id, uint8 gender_id)
+{
+	const auto& e = race_sizes.find(race_id);
+	if (e != race_sizes.end()) {
+		const uint8 gender_index = gender_id != Gender::Female ? 0 : 1;
+		return e->second[gender_index];
+	}
+
+	return 6.0f;
+}
+
 const std::string& Race::GetName(uint16 race_id)
 {
 	if (!IsValid(race_id)) {
@@ -1334,25 +1350,49 @@ uint16 Race::GetPlayerBit(uint16 race_id)
 	return IsPlayer(race_id) ? player_race_bitmasks[race_id] : PlayerRaceBitmask::Unknown;
 }
 
-float Gender::GetRaceDefaultHeight(uint16 race_id, uint8 gender_id)
-{
-	const auto& e = race_sizes.find(race_id);
-	if (e != race_sizes.end()) {
-		const uint8 gender_index = gender_id != Gender::Female ? 0 : 1;
-		return e->second[gender_index];
-	}
-
-	return 6.0f;
-}
-
-const std::string& Gender::GetName(uint8 gender_id)
-{
-	return EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter) ? gender_map[gender_id] : "Unknown";
-}
-
 const std::string& Race::GetAbbreviation(uint16 race_id)
 {
 	return IsPlayer(race_id) ? player_race_abbreviations[race_id] : "UNK";
+}
+
+const std::string& Race::GetPlural(uint16 race_id)
+{
+	switch (GetBaseRace()) {
+		case Race::Human:
+			return "Humans";
+		case Race::Barbarian:
+			return "Barbarians";
+		case Race::Erudite:
+			return "Erudites";
+		case Race::WoodElf:
+			return "Wood Elves";
+		case Race::HighElf:
+			return "High Elves";
+		case Race::DarkElf:
+			return "Dark Elves";
+		case Race::HalfElf:
+			return "Half Elves";
+		case Race::Dwarf:
+			return "Dwarves";
+		case Race::Troll:
+			return "Trolls";
+		case Race::Ogre:
+			return "Ogres";
+		case Race::Halfling:
+			return "Halflings";
+		case Race::Gnome:
+			return "Gnomes";
+		case Race::Iksar:
+			return "Iksar";
+		case Race::VahShir:
+			return "Vah Shir";
+		case Race::Froglok2:
+			return "Frogloks";
+		case Race::Drakkin:
+			return "Drakkin";
+		default:
+			return fmt::format("{}s", GetName(race_id));
+	}
 }
 
 bool Race::IsPlayer(uint16 race_id)
