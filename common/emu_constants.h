@@ -751,8 +751,8 @@ static std::map<uint32, std::string> stance_names = {
 	{ Stance::Aggressive, "Aggressive" },
 	{ Stance::Assist,     "Assist" },
 	{ Stance::Burn,       "Burn" },
-	{ Stance::Efficient2, "Efficient2" },
-	{ Stance::AEBurn,     "AEBurn" }
+	{ Stance::Efficient2, "Efficient" },
+	{ Stance::AEBurn,     "AE Burn" }
 };
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
