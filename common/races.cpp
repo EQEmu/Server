@@ -1357,7 +1357,7 @@ const std::string& Race::GetAbbreviation(uint16 race_id)
 
 const std::string& Race::GetPlural(uint16 race_id)
 {
-	switch (GetBaseRace()) {
+	switch (race_id) {
 		case Race::Human:
 			return "Humans";
 		case Race::Barbarian:
