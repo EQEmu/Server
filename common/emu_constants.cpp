@@ -67,7 +67,7 @@ uint32 Bug::GetID(const std::string& category_name)
 		}
 	}
 
-	return BugCategory::Other;
+	return Bug::Category::Other;
 }
 
 std::string Bug::GetName(uint32 category_id)
