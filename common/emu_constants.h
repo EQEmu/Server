@@ -465,22 +465,6 @@ namespace EQ
 	} // namespace spells
 
 	namespace bug {
-		enum CategoryID : uint32 {
-			catOther = 0,
-			catVideo,
-			catAudio,
-			catPathing,
-			catQuest,
-			catTradeskills,
-			catSpellStacking,
-			catDoorsPortals,
-			catItems,
-			catNPC,
-			catDialogs,
-			catLoNTCG,
-			catMercenaries
-		};
-
 		enum OptionalInfoFlag : uint32 {
 			infoNoOptionalInfo = 0x0,
 			infoCanDuplicate = 0x1,
@@ -490,8 +474,7 @@ namespace EQ
 			infoUnknownValue = 0xFFFFFFF0
 		};
 
-		const char* CategoryIDToCategoryName(CategoryID category_id);
-		CategoryID CategoryNameToCategoryID(const char* category_name);
+		uint32 GetCategoryID(const std::string& category_name);
 
 	} // namespace bug
 
@@ -699,5 +682,37 @@ namespace HeroicBonusBucket
 	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
 	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
 }
+
+namespace BugCategory {
+	constexpr uint32 Other         = 0;
+	constexpr uint32 Video         = 1;
+	constexpr uint32 Audio         = 2;
+	constexpr uint32 Pathing       = 3;
+	constexpr uint32 Quest         = 4;
+	constexpr uint32 Tradeskills   = 5;
+	constexpr uint32 SpellStacking = 6;
+	constexpr uint32 DoorsPortals  = 7;
+	constexpr uint32 Items         = 8;
+	constexpr uint32 NPC           = 9;
+	constexpr uint32 Dialogs       = 10;
+	constexpr uint32 LoNTCG        = 11;
+	constexpr uint32 Mercenaries   = 12;
+}
+
+static std::map<uint32, std::string> bug_category_names = {
+	{ BugCategory::Other,         "Other" },
+	{ BugCategory::Video,         "Video" },
+	{ BugCategory::Audio,         "Audio" },
+	{ BugCategory::Pathing,       "Pathing" },
+	{ BugCategory::Quest,         "Quest" },
+	{ BugCategory::Tradeskills,   "Tradeskills" },
+	{ BugCategory::SpellStacking, "Spell Stacking" },
+	{ BugCategory::DoorsPortals,  "Doors and Portals" },
+	{ BugCategory::Items,         "Items" },
+	{ BugCategory::NPC,           "NPC" },
+	{ BugCategory::Dialogs,       "Dialogs" },
+	{ BugCategory::LoNTCG,        "LoN - TCG" },
+	{ BugCategory::Mercenaries,   "Mercenaries" }
+};
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
