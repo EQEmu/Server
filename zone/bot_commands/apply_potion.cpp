@@ -45,7 +45,7 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 			c->Message(Chat::White, "This command is restricted to rogue poison potions only!");
 			return;
 		}
-		if ((~potion_data->Races) & EQ::races::GetPlayerRaceBit(my_bot->GetRace())) {
+		if ((~potion_data->Races) & Race::GetPlayerBit(my_bot->GetRace())) {
 
 			c->Message(Chat::White, "Invalid race for potion!");
 			return;

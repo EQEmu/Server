@@ -158,7 +158,7 @@ int32 Client::LevelRegen()
 	bool sitting = IsSitting();
 	bool feigned = GetFeigned();
 	int level = GetLevel();
-	bool bonus = EQ::races::GetPlayerRaceBit(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = Race::GetPlayerBit(GetBaseRace()) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int64 hp = 0;
 	//these calculations should match up with the info from Monkly Business, which was last updated ~05/2008: http://www.monkly-business.net/index.php?pageid=abilities

@@ -760,12 +760,24 @@ namespace Race {
 	constexpr uint16 Pegasus3                 = 732;
 	constexpr uint16 InteractiveObject        = 2250;
 	constexpr uint16 Node                     = 2254;
+
+	const std::string& GetName(uint16 race_id);
+	const std::string& GetAbbreviation(uint16 race_id);
+
+	bool IsPlayerRace(uint16 race_id);
+	bool IsValid(uint16 race_id);
+
+	uint16 GetPlayerValue(uint16 race_id);
+	uint16 GetPlayerBit(uint16 race_id);
 }
 
 namespace Gender {
 	constexpr uint8 Male   = 0;
 	constexpr uint8 Female = 1;
 	constexpr uint8 Neuter = 2;
+
+	const std::string& GetGenderName(uint8 gender_id);
+	float GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id);
 }
 
 static std::map<uint8, std::string> gender_map = {
@@ -1269,22 +1281,6 @@ static const std::map<uint16, std::vector<float>> race_sizes = {
 	{ Race::Chimera,               { 8.0f,   8.0f }},
 	{ Race::Dragorn,               { 7.0f,   8.0f }},
 };
-
-namespace EQ {
-	namespace races {
-		const std::string& GetRaceName(uint16 race_id);
-		const std::string& GetGenderName(uint8 gender_id);
-		const std::string& GetPlayerRaceAbbreviation(uint16 race_id);
-
-		bool IsPlayerRace(uint16 race_id);
-		bool IsValidRace(uint16 race_id);
-
-		uint16 GetPlayerRaceValue(uint16 race_id);
-		uint16 GetPlayerRaceBit(uint16 race_id);
-
-		float GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id);
-	}
-}
 
 // player race-/gender-based model feature validators
 namespace PlayerAppearance

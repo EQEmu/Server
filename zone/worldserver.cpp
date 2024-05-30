@@ -4128,7 +4128,7 @@ bool WorldServer::SendVoiceMacro(Client* From, uint32 Type, char* Target, uint32
 
 	svm->Type = Type;
 
-	uint16 player_race = EQ::races::GetPlayerRaceValue(From->GetRace());
+	uint16 player_race = Race::GetPlayerValue(From->GetRace());
 
 	if (player_race == PlayerRace::Unknown) {
 		player_race = From->GetBaseRace();

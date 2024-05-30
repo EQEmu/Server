@@ -1644,7 +1644,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	}
 
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
-		const std::string bot_race_name = EQ::races::GetRaceName(bot_race);
+		const std::string bot_race_name = Race::GetName(bot_race);
 		const std::string bot_class_name = GetClassIDName(bot_class);
 
 		bot_owner->Message(
@@ -1669,9 +1669,9 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			Chat::White,
 			fmt::format(
 				"Gender: {} ({}) or {} ({})",
-				EQ::races::GetGenderName(Gender::Male),
+				Gender::GetGenderName(Gender::Male),
 				Gender::Male,
-				EQ::races::GetGenderName(Gender::Female),
+				Gender::GetGenderName(Gender::Female),
 				Gender::Female
 			).c_str()
 		);
@@ -1780,7 +1780,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 			"Bot Created | Name: {} ID: {} Race: {} Class: {}",
 			my_bot->GetCleanName(),
 			my_bot->GetBotID(),
-			EQ::races::GetRaceName(my_bot->GetRace()),
+			Race::GetName(my_bot->GetRace()),
 			GetClassIDName(my_bot->GetClass())
 		).c_str()
 	);

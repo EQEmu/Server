@@ -162,7 +162,7 @@ uint32 Lua_Client::GetDeityBitmask() {
 
 uint16 Lua_Client::GetRaceBitmask() {
 	Lua_Safe_Call_Int();
-	return EQ::races::GetPlayerRaceBit(self->GetBaseRace());
+	return Race::GetPlayerBit(self->GetBaseRace());
 }
 
 int Lua_Client::GetBaseFace() {
@@ -3161,7 +3161,7 @@ std::string Lua_Client::GetClassAbbreviation()
 std::string Lua_Client::GetRaceAbbreviation()
 {
 	Lua_Safe_Call_String();
-	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return Race::GetAbbreviation(self->GetBaseRace());
 }
 
 void Lua_Client::SetLDoNPoints(uint32 theme_id, uint32 points)

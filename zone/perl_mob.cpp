@@ -464,7 +464,7 @@ int Perl_Mob_GetBaseRace(Mob* self) // @categories Stats and Attributes
 
 std::string Perl_Mob_GetBaseRaceName(Mob* self) // @categories Stats and Attributes
 {
-	return EQ::races::GetRaceName(self->GetBaseRace());
+	return Race::GetName(self->GetBaseRace());
 }
 
 int Perl_Mob_GetBaseGender(Mob* self) // @categories Stats and Attributes
@@ -2612,7 +2612,7 @@ std::string Perl_Mob_GetClassName(Mob* self)
 
 std::string Perl_Mob_GetRaceName(Mob* self)
 {
-	return EQ::races::GetRaceName(self->GetRace());
+	return Race::GetName(self->GetRace());
 }
 
 void Perl_Mob_DeleteBucket(Mob* self, std::string bucket_name) // @categories Script Utility

@@ -56,7 +56,7 @@ void bot_command_apply_poison(Client* c, const Seperator* sep)
 
 	if (poison_data->ItemType == EQ::item::ItemTypePoison) {
 
-		if ((~poison_data->Races) & EQ::races::GetPlayerRaceBit(my_rogue_bot->GetRace())) {
+		if ((~poison_data->Races) & Race::GetPlayerBit(my_rogue_bot->GetRace())) {
 
 			c->Message(Chat::White, "Invalid race for weapon poison!");
 			return;

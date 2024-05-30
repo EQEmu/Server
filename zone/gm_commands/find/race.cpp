@@ -4,7 +4,7 @@ void FindRace(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const auto race_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
-		const std::string& race_name = EQ::races::GetRaceName(race_id);
+		const std::string& race_name = Race::GetName(race_id);
 		if (EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3)) {
 			c->Message(
 				Chat::White,
@@ -13,10 +13,10 @@ void FindRace(Client *c, const Seperator *sep)
 					race_id,
 					race_name,
 					(
-						EQ::races::IsPlayerRace(race_id) ?
+						Race::IsPlayerRace(race_id) ?
 						fmt::format(
 							" ({})",
-							Strings::Commify(EQ::races::GetPlayerRaceBit(race_id))
+							Strings::Commify(Race::GetPlayerBit(race_id))
 						) :
 						""
 					)
@@ -42,7 +42,7 @@ void FindRace(Client *c, const Seperator *sep)
 	auto found_count = 0;
 
 	for (uint16 race_id = Race::Human; race_id <= Race::Pegasus3; race_id++) {
-		std::string race_name = EQ::races::GetRaceName(race_id);
+		std::string race_name = Race::GetName(race_id);
 		auto race_name_lower = Strings::ToLower(race_name);
 		if (!Strings::Contains(race_name_lower, search_criteria)) {
 			continue;
@@ -55,10 +55,10 @@ void FindRace(Client *c, const Seperator *sep)
 				race_id,
 				race_name,
 				(
-					EQ::races::IsPlayerRace(race_id) ?
+					Race::IsPlayerRace(race_id) ?
 					fmt::format(
 						" ({})",
-						Strings::Commify(EQ::races::GetPlayerRaceBit(race_id))
+						Strings::Commify(Race::GetPlayerBit(race_id))
 					) :
 					""
 				)

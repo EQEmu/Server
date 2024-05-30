@@ -73,7 +73,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	} else if (!strcasecmp(sep->arg[1], "race")) {
 		if (sep->IsNumber(2)) {
 			const uint16 race_id = static_cast<uint16>(Strings::ToUnsignedInt(sep->arg[2]));
-			if (!EQ::races::IsValidRace(race_id)) {
+			if (!Race::IsValid(race_id)) {
 				c->Message(
 					Chat::White,
 					fmt::format(
@@ -88,7 +88,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 			d = fmt::format(
 				"{} is now a(n) {} ({}).",
 				npc_id_string,
-				EQ::races::GetRaceName(race_id),
+				Race::GetName(race_id),
 				race_id
 			);
 		} else {
@@ -165,7 +165,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				"{} is now a {} ({}).",
 				npc_id_string,
 				gender_id,
-				EQ::races::GetGenderName(gender_id)
+				Gender::GetGenderName(gender_id)
 			);
 		} else {
 			c->Message(Chat::White, "Usage: #npcedit gender [Gender ID] - Sets an NPC's Gender");
@@ -1468,7 +1468,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				d = fmt::format(
 					"{} is now using a(n) {} ({}) as their race model.",
 					npc_id_string,
-					EQ::races::GetRaceName(race_id),
+					Race::GetName(race_id),
 					race_id
 				);
 			} else {

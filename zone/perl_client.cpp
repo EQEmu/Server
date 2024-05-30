@@ -2019,7 +2019,7 @@ uint32_t Perl_Client_GetDeityBitmask(Client* self)
 
 uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
 {
-	return EQ::races::GetPlayerRaceBit(self->GetBaseRace());
+	return Race::GetPlayerBit(self->GetBaseRace());
 }
 
 perl::array Perl_Client_GetLearnableDisciplines(Client* self)
@@ -3015,7 +3015,7 @@ std::string Perl_Client_GetClassAbbreviation(Client* self)
 
 std::string Perl_Client_GetRaceAbbreviation(Client* self)
 {
-	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return Race::GetAbbreviation(self->GetBaseRace());
 }
 
 void Perl_Client_SetLDoNPoints(Client* self, uint32 theme_id, uint32 points)

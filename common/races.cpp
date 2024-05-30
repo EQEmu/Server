@@ -18,9 +18,9 @@
 
 #include "races.h"
 
-const std::string& EQ::races::GetRaceName(uint16 race_id)
+const std::string& Race::GetName(uint16 race_id)
 {
-	if (!IsValidRace(race_id)) {
+	if (!IsValid(race_id)) {
 		return "UNKNOWN RACE";
 	}
 
@@ -1300,7 +1300,7 @@ const std::string& EQ::races::GetRaceName(uint16 race_id)
 	}
 }
 
-uint16 EQ::races::GetPlayerRaceValue(uint16 race_id)
+uint16 Race::GetPlayerValue(uint16 race_id)
 {
 	switch (race_id) {
 		case Race::Human:
@@ -1329,12 +1329,12 @@ uint16 EQ::races::GetPlayerRaceValue(uint16 race_id)
 	}
 }
 
-uint16 EQ::races::GetPlayerRaceBit(uint16 race_id)
+uint16 Race::GetPlayerBit(uint16 race_id)
 {
-	return IsPlayerRace(race_id) ? player_race_bitmasks[race_id] : PlayerRaceBitmask::Unknown;
+	return IsPlayer(race_id) ? player_race_bitmasks[race_id] : PlayerRaceBitmask::Unknown;
 }
 
-float EQ::races::GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id)
+float Gender::GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id)
 {
 	const auto& e = race_sizes.find(race_id);
 	if (e != race_sizes.end()) {
@@ -1345,17 +1345,17 @@ float EQ::races::GetRaceGenderDefaultHeight(uint16 race_id, uint8 gender_id)
 	return 6.0f;
 }
 
-const std::string& EQ::races::GetGenderName(uint8 gender_id)
+const std::string& Gender::GetGenderName(uint8 gender_id)
 {
 	return EQ::ValueWithin(gender_id, Gender::Male, Gender::Neuter) ? gender_map[gender_id] : "Unknown";
 }
 
-const std::string& EQ::races::GetPlayerRaceAbbreviation(uint16 race_id)
+const std::string& Race::GetAbbreviation(uint16 race_id)
 {
-	return IsPlayerRace(race_id) ? player_race_abbreviations[race_id] : "UNK";
+	return IsPlayer(race_id) ? player_race_abbreviations[race_id] : "UNK";
 }
 
-bool EQ::races::IsPlayerRace(uint16 race_id)
+bool Race::IsPlayerRace(uint16 race_id)
 {
 	return (
 		EQ::ValueWithin(race_id, Race::Human, Race::Gnome) ||
@@ -1366,7 +1366,7 @@ bool EQ::races::IsPlayerRace(uint16 race_id)
 	);
 }
 
-bool EQ::races::IsValidRace(uint16 race_id)
+bool Race::IsValid(uint16 race_id)
 {
 	return (
 		EQ::ValueWithin(race_id, Race::Human, Race::Pegasus3) ||

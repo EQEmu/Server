@@ -1509,7 +1509,7 @@ void PerlembParser::ExportMobVariables(
 
 	if (mob) {
 		ExportVar(package_name.c_str(), "name", mob->GetName());
-		ExportVar(package_name.c_str(), "race", EQ::races::GetRaceName(mob->GetRace()).c_str());
+		ExportVar(package_name.c_str(), "race", Race::GetName(mob->GetRace()).c_str());
 		ExportVar(package_name.c_str(), "class", GetClassIDName(mob->GetClass()));
 		ExportVar(package_name.c_str(), "ulevel", mob->GetLevel());
 		ExportVar(package_name.c_str(), "userid", mob->GetID());

@@ -27,7 +27,7 @@ void command_randomfeatures(Client *c, const Seperator *sep)
 				c->GetTargetDescription(target, TargetDescriptionType::UCYou),
 				c == target ? "are" : "is",
 				c == target ? "your" : "their",
-				EQ::races::GetRaceName(target->GetRace()),
+				Race::GetName(target->GetRace()),
 				target->GetRace()
 			).c_str()
 		);

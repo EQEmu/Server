@@ -314,7 +314,7 @@ Bazaar::GetSearchResults(
 			},
 			{
 				.should_check = search.race != 0xFFFFFFFF,
-				.condition = static_cast<bool>(item->Races & EQ::races::GetPlayerRaceBit(search.race))
+				.condition = static_cast<bool>(item->Races & Race::GetPlayerBit(search.race))
 			},
 			{
 				.should_check = search.augment != 0,

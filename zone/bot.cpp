@@ -6122,7 +6122,7 @@ void Bot::CalcRestState() {
 
 int32 Bot::LevelRegen() {
 	int level = GetLevel();
-	bool bonus = EQ::races::GetPlayerRaceBit(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
+	bool bonus = Race::GetPlayerBit(_baseRace) & RuleI(Character, BaseHPRegenBonusRaces);
 	uint8 multiplier1 = bonus ? 2 : 1;
 	int64 hp = 0;
 	if (level < 51) {
@@ -6753,7 +6753,7 @@ void Bot::CalcBotStats(bool showtext) {
 
 	// this code is annoying since many classes change their name and illusions change the race id
 	/*if (!IsValidRaceClassCombo()) {
-		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", EQ::races::GetRaceName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
+		GetBotOwner()->Message(Chat::Yellow, "A %s - %s bot was detected. Is this Race/Class combination allowed?.", Race::GetName(GetRace()), GetClassIDName(GetClass(), GetLevel()));
 		GetBotOwner()->Message(Chat::Yellow, "Previous Bots Code releases did not check Race/Class combinations during create.");
 		GetBotOwner()->Message(Chat::Yellow, "Unless you are experiencing heavy lag, you should delete and remake this bot.");
 	}*/
@@ -8559,11 +8559,11 @@ bool Bot::CheckSpawnConditions(Client* c) {
 
 void Bot::AddBotStartingItems(uint16 race_id, uint8 class_id)
 {
-	if (!EQ::races::IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
+	if (!Race::IsPlayerRace(race_id) || !IsPlayerClass(class_id)) {
 		return;
 	}
 
-	const uint16 race_bitmask  = EQ::races::GetPlayerRaceBit(race_id);
+	const uint16 race_bitmask  = Race::GetPlayerBit(race_id);
 	const uint16 class_bitmask = GetPlayerClassBit(class_id);
 
 	const auto& l = BotStartingItemsRepository::GetWhere(

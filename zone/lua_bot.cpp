@@ -620,7 +620,7 @@ std::string Lua_Bot::GetClassAbbreviation() {
 
 std::string Lua_Bot::GetRaceAbbreviation() {
 	Lua_Safe_Call_String();
-	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return Race::GetAbbreviation(self->GetBaseRace());
 }
 
 void Lua_Bot::DeleteBucket(std::string bucket_name)

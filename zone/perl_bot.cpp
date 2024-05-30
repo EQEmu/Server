@@ -612,7 +612,7 @@ std::string Perl_Bot_GetClassAbbreviation(Bot* self)
 
 std::string Perl_Bot_GetRaceAbbreviation(Bot* self)
 {
-	return EQ::races::GetPlayerRaceAbbreviation(self->GetBaseRace());
+	return Race::GetAbbreviation(self->GetBaseRace());
 }
 
 void Perl_Bot_DeleteBot(Bot* self) // @categories Script Utility

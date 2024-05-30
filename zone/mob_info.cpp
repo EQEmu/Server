@@ -183,7 +183,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "race") {
-		return EQ::races::GetRaceName(mob->GetRace());
+		return Race::GetName(mob->GetRace());
 	}
 
 	if (attribute == "class") {

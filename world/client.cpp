@@ -555,7 +555,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	const uint32 race_id  = n->race_id;
 	const uint32 class_id = n->class_id;
 
-	if (!EQ::races::IsPlayerRace(race_id)) {
+	if (!Race::IsPlayerRace(race_id)) {
 		LogInfo("Invalid Race ID.");
 		return false;
 	}
@@ -568,7 +568,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	LogInfo(
 		"char_name [{}] race_id [{}] class_id [{}]",
 		char_name,
-		EQ::races::GetRaceName(race_id),
+		Race::GetName(race_id),
 		GetClassIDName(class_id)
 	);
 
