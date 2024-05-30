@@ -876,12 +876,12 @@ int Lua_Client::GetHorseId() {
 }
 
 uint32 Lua_Client::NukeItem(uint32 item_id) {
-	Lua_Safe_Call_Void();
+	Lua_Safe_Call_Int();
 	return self->NukeItem(item_id);
 }
 
 uint32 Lua_Client::NukeItem(uint32 item_id, uint8 filter) {
-	Lua_Safe_Call_Void();
+	Lua_Safe_Call_Int();
 	return self->NukeItem(item_id, filter);
 }
 
