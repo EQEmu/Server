@@ -4,7 +4,7 @@ void FindSpecialAbility(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
 		const int ability_id = Strings::ToInt(sep->arg[2]);
-		const std::string& ability_name = EQ::constants::GetSpecialAbilityName(ability_id);
+		const std::string& ability_name = SpecialAbility::GetName(ability_id);
 		if (Strings::EqualFold(ability_name, "UNKNOWN SPECIAL ABILITY")) {
 			c->Message(
 				Chat::White,

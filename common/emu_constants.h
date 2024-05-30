@@ -401,9 +401,6 @@ namespace EQ
 		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
 		std::string GetAppearanceTypeName(uint32 animation_type);
 
-		std::string GetSpecialAbilityName(int ability_id);
-		bool IsValidSpecialAbility(int ability_id);
-
 		extern const std::map<uint32, std::string>& GetConsiderColorMap();
 		std::string GetConsiderColorName(uint32 consider_color);
 
@@ -675,6 +672,9 @@ namespace SpecialAbility {
 	constexpr int Max                        = 58;
 
 	constexpr int MaxParameters = 9;
+
+	std::string GetName(int ability_id);
+	bool IsValid(int ability_id);
 }
 
 static std::map<int, std::string> special_ability_names = {

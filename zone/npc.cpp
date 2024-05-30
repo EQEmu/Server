@@ -3946,7 +3946,7 @@ void NPC::DescribeSpecialAbilities(Client* c)
 			messages.emplace_back(
 				fmt::format(
 					"{} ({})",
-					EQ::constants::GetSpecialAbilityName(e),
+					SpecialAbility::GetName(e),
 					e
 				)
 			);
@@ -3963,7 +3963,7 @@ void NPC::DescribeSpecialAbilities(Client* c)
 				messages.emplace_back(
 					fmt::format(
 						"{} ({}) | {}: {}",
-						EQ::constants::GetSpecialAbilityName(e.first),
+						SpecialAbility::GetName(e.first),
 						e.first,
 						a,
 						GetSpecialAbilityParam(e.first, slot_id)
