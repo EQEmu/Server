@@ -3,7 +3,7 @@
 void FindBodyType(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const uint8 body_type_id     = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		const uint8 body_type_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
 		if (!EQ::bodytype::IsValidBodyType(body_type_id)) {
 			c->Message(
 				Chat::White,

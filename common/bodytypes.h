@@ -109,7 +109,7 @@ static std::map<uint8, std::string> body_type_names = {
 
 namespace EQ {
 	namespace bodytype {
-		const std::string& GetBodyTypeName(uint8 body_type_id);
+		std::string GetBodyTypeName(uint8 body_type_id);
 		bool IsValidBodyType(uint8 body_type_id);
 	}
 }
