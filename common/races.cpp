@@ -1357,41 +1357,25 @@ const std::string& Race::GetAbbreviation(uint16 race_id)
 
 const std::string& Race::GetPlural(uint16 race_id)
 {
+	if (
+		race_name == "Iksar" ||
+		race_name == "Vah Shir" ||
+		race_name == "Drakkin"
+	) {
+		return race_name;
+	}
+
+	const std::string& race_name = GetName(race_id);
+
 	switch (race_id) {
-		case Race::Human:
-			return "Humans";
-		case Race::Barbarian:
-			return "Barbarians";
-		case Race::Erudite:
-			return "Erudites";
 		case Race::WoodElf:
-			return "Wood Elves";
 		case Race::HighElf:
-			return "High Elves";
 		case Race::DarkElf:
-			return "Dark Elves";
 		case Race::HalfElf:
-			return "Half Elves";
 		case Race::Dwarf:
-			return "Dwarves";
-		case Race::Troll:
-			return "Trolls";
-		case Race::Ogre:
-			return "Ogres";
-		case Race::Halfling:
-			return "Halflings";
-		case Race::Gnome:
-			return "Gnomes";
-		case Race::Iksar:
-			return "Iksar";
-		case Race::VahShir:
-			return "Vah Shir";
-		case Race::Froglok2:
-			return "Frogloks";
-		case Race::Drakkin:
-			return "Drakkin";
+			return Strings::Replace(race_name, "f", "ves"); // Dwarf becomes Dwarves, Elf becomes Elves
 		default:
-			return fmt::format("{}s", GetName(race_id));
+			return fmt::format("{}s", race_name);
 	}
 }
 
