@@ -16,7 +16,7 @@ void command_goto(Client *c, const Seperator *sep)
 	}
 
 	if (goto_player) {
-		const std::string& name = Strings::Escape(sep->arg[1]);
+		const std::string& name = sep->arg[1];
 		Client* t = entity_list.GetClientByName(name.c_str());
 		if (t) {
 			c->MovePC(

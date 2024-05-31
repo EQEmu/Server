@@ -258,7 +258,7 @@ public:
 
 	void SendChatLineBreak(uint16 color = Chat::White);
 
-	bool GotoPlayer(std::string player_name);
+	bool GotoPlayer(const std::string& player_name);
 	bool GotoPlayerGroup(const std::string& player_name);
 	bool GotoPlayerRaid(const std::string& player_name);
 
