@@ -57,11 +57,10 @@ public:
 	void SetBaseClass(int v);
 	void SetBaseRace(int v);
 	void SetBaseGender(int v);
-	uint16 GetClassBitmask();
-	uint32 GetDeityBitmask();
-	uint16 GetRaceBitmask();
+	int GetClassBitmask();
+	int GetRaceBitmask();
 	int GetBaseFace();
-	int GetLanguageSkill(int skill_id);
+	int GetLanguageSkill(uint16 skill_id);
 	int GetLDoNPointsTheme(int theme);
 	int GetBaseSTR();
 	int GetBaseSTA();
@@ -72,18 +71,14 @@ public:
 	int GetBaseWIS();
 	int GetWeight();
 	uint32 GetEXP();
-	float GetEXPModifier();
-	float GetEXPModifier(uint32 zone_id);
-	float GetEXPModifier(uint32 zone_id, int16 instance_version);
-	float GetAAEXPModifier();
-	float GetAAEXPModifier(uint32 zone_id);
-	float GetAAEXPModifier(uint32 zone_id, int16 instance_version);
-	void SetAAEXPModifier(float aa_modifier);
-	void SetAAEXPModifier(uint32 zone_id, float aa_modifier);
-	void SetAAEXPModifier(uint32 zone_id, float aa_modifier, int16 instance_version);
-	void SetEXPModifier(float exp_modifier);
-	void SetEXPModifier(uint32 zone_id, float exp_modifier);
-	void SetEXPModifier(uint32 zone_id, float exp_modifier, int16 instance_version);
+	double GetEXPModifier(uint32 zone_id);
+	double GetEXPModifier(uint32 zone_id, int16 instance_version);
+	double GetAAEXPModifier(uint32 zone_id);
+	double GetAAEXPModifier(uint32 zone_id, int16 instance_version);
+	void SetAAEXPModifier(uint32 zone_id, double aa_modifier);
+	void SetAAEXPModifier(uint32 zone_id, double aa_modifier, int16 instance_version);
+	void SetEXPModifier(uint32 zone_id, double exp_modifier);
+	void SetEXPModifier(uint32 zone_id, double exp_modifier, int16 instance_version);
 	uint32 GetAAExp();
 	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();
@@ -146,7 +141,7 @@ public:
 	bool TeleportRaidToPlayerByName(std::string player_name);
 	void ChangeLastName(std::string last_name);
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
-	void SetFactionLevel(uint32 char_id, uint32 npc_faction_id, int char_class, int char_race, int char_deity);
+	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);
 	void SetFactionLevel2(uint32 char_id, int faction_id, int char_class, int char_race, int char_deity, int value, int temp);
 	void RewardFaction(int id, int amount);
 	int GetRawItemAC();
@@ -167,21 +162,21 @@ public:
 	bool TakePlatinum(uint32 platinum, bool update_client);
 	bool TGB();
 	int GetSkillPoints();
-	void SetSkillPoints(int skill);
-	void IncreaseSkill(int skill_id);
-	void IncreaseSkill(int skill_id, int value);
+	void SetSkillPoints(uint16 skill_id);
+	void IncreaseSkill(uint16 skill_id);
+	void IncreaseSkill(uint16 skill_id, int value);
 	void IncreaseLanguageSkill(uint8 language_id);
 	void IncreaseLanguageSkill(uint8 language_id, uint8 increase);
-	int GetRawSkill(int skill_id);
-	bool HasSkill(int skill_id);
-	bool CanHaveSkill(int skill_id);
-	void SetSkill(int skill_id, int value);
-	void AddSkill(int skill_id, int value);
+	int GetRawSkill(uint16 skill_id);
+	bool HasSkill(uint16 skill_id);
+	bool CanHaveSkill(uint16 skill_id);
+	void SetSkill(uint16 skill_id, int value);
+	void AddSkill(uint16 skill_id, int value);
 	void CheckSpecializeIncrease(int spell_id);
-	void CheckIncreaseSkill(int skill_id, Lua_Mob target);
-	void CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod);
+	void CheckIncreaseSkill(uint16 skill_id, Lua_Mob target);
+	void CheckIncreaseSkill(uint16 skill_id, Lua_Mob target, int chance_mod);
 	void SetLanguageSkill(uint8 language_id, uint8 language_skill);
-	int MaxSkill(int skill_id);
+	int MaxSkill(uint16 skill_id);
 	bool IsMedding();
 	int GetDuelTarget();
 	bool IsDueling();
@@ -366,13 +361,13 @@ public:
 	void LockSharedTask(bool lock);
 	void EndSharedTask();
 	void EndSharedTask(bool send_fail);
-	int64 GetCorpseCount();
+	int GetCorpseCount();
 	int GetCorpseID(int corpse);
 	int GetCorpseItemAt(int corpse, int slot);
 	void AssignToInstance(int instance_id);
 	void Freeze();
 	void UnFreeze();
-	uint32 GetAggroCount();
+	int GetAggroCount();
 	uint64 GetCarriedMoney();
 	uint32 GetCarriedPlatinum();
 	uint64 GetAllMoney();
@@ -381,14 +376,12 @@ public:
 	void NotifyNewTitlesAvailable();
 	void Signal(int signal_id);
 	void AddAlternateCurrencyValue(uint32 currency, int amount);
-	void SetAlternateCurrencyValue(uint32 currency, uint32 amount);
-	uint32 GetAlternateCurrencyValue(uint32 currency);
+	void SetAlternateCurrencyValue(uint32 currency, int amount);
+	int GetAlternateCurrencyValue(uint32 currency);
 	void SendWebLink(const char *site);
 	bool HasSpellScribed(int spell_id);
-	void ClearAccountFlag(const std::string& flag);
-	void SetAccountFlag(const std::string& flag, const std::string& value);
-	std::string GetAccountFlag(const std::string& flag);
-	luabind::object GetAccountFlags(lua_State* L);
+	void SetAccountFlag(std::string flag, std::string val);
+	std::string GetAccountFlag(std::string flag);
 	int GetAccountAge();
 	Lua_Group GetGroup();
 	Lua_Raid GetRaid();
@@ -402,7 +395,6 @@ public:
 	void QueuePacket(Lua_Packet app, bool ack_req, int client_connection_status, int filter);
 	int GetHunger();
 	int GetThirst();
-	int GetIntoxication();
 	void SetHunger(int in_hunger);
 	void SetThirst(int in_thirst);
 	void SetConsumption(int in_hunger, int in_thirst);
@@ -444,7 +436,7 @@ public:
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity);
-	void SetGMStatus(int new_status);
+	void SetGMStatus(int16 new_status);
 	int16 GetGMStatus();
 	void AddItem(luabind::object item_table);
 	int CountAugmentEquippedByID(uint32 item_id);
@@ -504,45 +496,39 @@ public:
 	bool SetAutoLoginCharacterName(std::string character_name);
 	void DescribeSpecialAbilities(Lua_NPC n);
 	void ResetLeadershipAA();
-	uint8 GetSkillTrainLevel(int skill_id);
+	uint8 GetSkillTrainLevel(uint16 skill_id);
 
 	void ApplySpell(int spell_id);
 	void ApplySpell(int spell_id, int duration);
-	void ApplySpell(int spell_id, int duration, int level);
-	void ApplySpell(int spell_id, int duration, int level, bool allow_pets);
-	void ApplySpell(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
+	void ApplySpell(int spell_id, int duration, bool allow_pets);
+	void ApplySpell(int spell_id, int duration, bool allow_pets, bool allow_bots);
 
 	void ApplySpellGroup(int spell_id);
 	void ApplySpellGroup(int spell_id, int duration);
-	void ApplySpellGroup(int spell_id, int duration, int level);
-	void ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets);
-	void ApplySpellGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
+	void ApplySpellGroup(int spell_id, int duration, bool allow_pets);
+	void ApplySpellGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
 
 	void ApplySpellRaid(int spell_id);
 	void ApplySpellRaid(int spell_id, int duration);
-	void ApplySpellRaid(int spell_id, int duration, int level);
-	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets);
-	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
-	void ApplySpellRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+	void ApplySpellRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
 
 	void SetSpellDuration(int spell_id);
 	void SetSpellDuration(int spell_id, int duration);
-	void SetSpellDuration(int spell_id, int duration, int level);
-	void SetSpellDuration(int spell_id, int duration, int level, bool allow_pets);
-	void SetSpellDuration(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
+	void SetSpellDuration(int spell_id, int duration, bool allow_pets);
+	void SetSpellDuration(int spell_id, int duration, bool allow_pets, bool allow_bots);
 
 	void SetSpellDurationGroup(int spell_id);
 	void SetSpellDurationGroup(int spell_id, int duration);
-	void SetSpellDurationGroup(int spell_id, int duration, int level);
-	void SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets);
-	void SetSpellDurationGroup(int spell_id, int duration, int level, bool allow_pets, bool allow_bots);
+	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets);
+	void SetSpellDurationGroup(int spell_id, int duration, bool allow_pets, bool allow_bots);
 
 	void SetSpellDurationRaid(int spell_id);
 	void SetSpellDurationRaid(int spell_id, int duration);
-	void SetSpellDurationRaid(int spell_id, int duration, int level);
-	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets);
-	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only);
-	void SetSpellDurationRaid(int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots);
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets);
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only);
+	void SetSpellDurationRaid(int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots);
 
 
 	int GetEnvironmentDamageModifier();
@@ -575,8 +561,6 @@ public:
 	void SetBotSpawnLimit(int new_spawn_limit, uint8 class_id);
 	void CampAllBots();
 	void CampAllBots(uint8 class_id);
-	bool RemoveAAPoints(uint32 points);
-	bool RemoveAlternateCurrencyValue(uint32 currency_id, uint32 amount);
 
 	void DialogueWindow(std::string markdown);
 

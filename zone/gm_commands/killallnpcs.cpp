@@ -25,7 +25,7 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 			c,
 			entity->GetHP() + 1000,
 			SPELL_UNKNOWN,
-			EQ::skills::SkillDragonPunch
+			Skill::DragonPunch
 		);
 
 		killed_count++;

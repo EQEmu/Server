@@ -220,16 +220,16 @@ void ExportSkillCaps(SharedDatabase* db)
 	);
 
 	for (uint8 class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
-		for (uint8 skill_id = EQ::skills::Skill1HBlunt; skill_id <= EQ::skills::Skill2HPiercing; skill_id++) {
-			if (SkillUsable(db, skill_id, class_id)) {
+		for (const auto& e : skill_names) {
+			if (SkillUsable(db, e.first, class_id)) {
 				uint32 previous_cap = 0;
 				for (uint8 level = 1; level <= skill_cap_max_level; level++) {
-					uint32 cap = GetSkill(db, skill_id, class_id, level);
+					uint32 cap = GetSkill(db, e.first, class_id, level);
 					if (cap < previous_cap) {
 						cap = previous_cap;
 					}
 
-					file << fmt::format("{}^{}^{}^{}^0", class_id, skill_id, level, cap) << std::endl;
+					file << fmt::format("{}^{}^{}^{}^0", class_id, e.first, level, cap) << std::endl;
 
 					previous_cap = cap;
 				}

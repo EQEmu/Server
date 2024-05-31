@@ -3725,7 +3725,7 @@ void EntityList::SignalMobsByNPCID(uint32 snpc, int signal_id)
 bool EntityList::MakeTrackPacket(Client *client)
 {
 	std::list<std::pair<Mob *, float> > tracking_list;
-	auto distance = static_cast<float>(client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
+	auto distance = static_cast<float>(client->GetSkill(Skill::Tracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));
 
 	if (distance <= 0.0f) {
 		return false;
@@ -5898,7 +5898,7 @@ void EntityList::DamageArea(
 		return;
 	}
 
-	if (damage <= 0) {
+	if (damage <= Damage::None) {
 		return;
 	}
 
@@ -5907,9 +5907,9 @@ void EntityList::DamageArea(
 		if (is_percentage) {
 			const auto damage_percentage = EQ::Clamp(damage, static_cast<int64>(1), static_cast<int64>(100));
 			const auto total_damage = (e->GetMaxHP() / 100) * damage_percentage;
-			e->Damage(sender, total_damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+			e->Damage(sender, total_damage, SPELL_UNKNOWN, Skill::EagleStrike);
 		} else {
-			e->Damage(sender, damage, SPELL_UNKNOWN, EQ::skills::SkillEagleStrike);
+			e->Damage(sender, damage, SPELL_UNKNOWN, Skill::EagleStrike);
 		}
 	}
 }

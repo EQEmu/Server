@@ -302,12 +302,12 @@ public:
 				while (spells[spell_id].type_description_id == 27) {
 					if (!spells[spell_id].good_effect)
 						break;
-					if (spells[spell_id].skill != EQ::skills::SkillOffense &&
-						spells[spell_id].skill != EQ::skills::SkillDefense)
+					if (spells[spell_id].skill_id != Skill::Offense &&
+						spells[spell_id].skill_id != Skill::Defense)
 						break;
 
 					entry_prototype = new STStanceEntry();
-					if (spells[spell_id].skill == EQ::skills::SkillOffense)
+					if (spells[spell_id].skill_id == Skill::Offense)
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Aggressive;
 					else
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Defensive;

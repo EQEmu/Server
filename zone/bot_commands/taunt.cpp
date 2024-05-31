@@ -39,7 +39,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 
 	int taunting_count = 0;
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->GetSkill(EQ::skills::SkillTaunt)) {
+		if (!bot_iter->GetSkill(Skill::Taunt)) {
 			continue;
 		}
 
@@ -67,7 +67,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		if (!bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt)) {
+		if (!bot_iter->GetPet()->GetSkill(Skill::Taunt)) {
 			continue;
 		}
 

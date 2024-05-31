@@ -9,7 +9,7 @@ void command_picklock(Client *c, const Seperator *sep)
 
 	auto t = c->GetTarget()->CastToNPC();
 
-	if (c->HasSkill(EQ::skills::SkillPickLock)) {
+	if (c->HasSkill(Skill::PickLock)) {
 		if (DistanceSquaredNoZ(c->GetPosition(), t->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse)) {
 			c->Message(
 				Chat::White,
@@ -21,7 +21,7 @@ void command_picklock(Client *c, const Seperator *sep)
 			return;
 		}
 
-		c->HandleLDoNPickLock(t, c->GetSkill(EQ::skills::SkillPickLock), LDoNTypeMechanical);
+		c->HandleLDoNPickLock(t, c->GetSkill(Skill::PickLock), LDoNTypeMechanical);
 	} else {
 		c->Message(Chat::White, "You do not have the Pick Lock skill.");
 	}

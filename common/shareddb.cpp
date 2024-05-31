@@ -1764,10 +1764,10 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 
 		int tmp_skill = Strings::ToInt(row[100]);
 
-		if (tmp_skill < 0 || tmp_skill > EQ::skills::HIGHEST_SKILL)
-			sp[tempid].skill = EQ::skills::SkillBegging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
+		if (tmp_skill < 0 || tmp_skill > Skill::Max)
+			sp[tempid].skill_id = Skill::Begging; /* not much better we can do. */ // can probably be changed to client-based 'SkillNone' once activated
         else
-			sp[tempid].skill = static_cast<EQ::skills::SkillType>(tmp_skill);
+			sp[tempid].skill_id = tmp_skill;
 
 		sp[tempid].zone_type=Strings::ToInt(row[101]);
 		sp[tempid].environment_type=Strings::ToInt(row[102]);

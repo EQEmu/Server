@@ -16,31 +16,31 @@
 #include "zone.h"
 #include "zone_config.h"
 
+#include "lua_parser.h"
 #include "lua_bit.h"
-#include "lua_bot.h"
-#include "lua_buff.h"
-#include "lua_client.h"
-#include "lua_corpse.h"
-#include "lua_door.h"
-#include "lua_encounter.h"
 #include "lua_entity.h"
-#include "lua_entity_list.h"
 #include "lua_expedition.h"
-#include "lua_general.h"
-#include "lua_group.h"
-#include "lua_hate_list.h"
-#include "lua_inventory.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
+#include "lua_hate_list.h"
+#include "lua_client.h"
+#include "lua_inventory.h"
 #include "lua_npc.h"
-#include "lua_object.h"
-#include "lua_packet.h"
-#include "lua_parser.h"
-#include "lua_raid.h"
-#include "lua_spawn.h"
 #include "lua_spell.h"
+#include "lua_entity_list.h"
+#include "lua_group.h"
+#include "lua_raid.h"
+#include "lua_corpse.h"
+#include "lua_object.h"
+#include "lua_door.h"
+#include "lua_spawn.h"
+#include "lua_packet.h"
+#include "lua_general.h"
+#include "lua_encounter.h"
 #include "lua_stat_bonuses.h"
+
+#include "lua_bot.h"
 
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
@@ -164,27 +164,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_item_click_client",
 	"event_item_click_cast_client",
 	"event_destroy_item_client",
-	"event_drop_item_client",
-	"event_memorize_spell",
-	"event_unmemorize_spell",
-	"event_scribe_spell",
-	"event_unscribe_spell",
-	"event_loot_added",
-	"event_ldon_points_gain",
-	"event_ldon_points_loss",
-	"event_alt_currency_gain",
-	"event_alt_currency_loss",
-	"event_crystal_gain",
-	"event_crystal_loss",
-	"event_timer_pause",
-	"event_timer_resume",
-	"event_timer_start",
-	"event_timer_stop",
-	"event_entity_variable_delete",
-	"event_entity_variable_set",
-	"event_entity_variable_update",
-	"event_aa_loss",
-	"event_spell_blocked"
+	"event_drop_item_client"
 };
 
 extern Zone *zone;
@@ -199,14 +179,6 @@ std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_regi
 std::map<std::string, bool> lua_encounters_loaded;
 std::map<std::string, Encounter *> lua_encounters;
 
-// use debug.traceback() for errors (luaL_traceback is only in luajit and lua 5.2+)
-static void PushErrorHandler(lua_State* L)
-{
-	lua_getglobal(L, "debug");
-	lua_getfield(L, -1, "traceback");
-	lua_remove(L, -2);
-}
-
 LuaParser::LuaParser() {
 	for (int i = 0; i < _LargestEventID; ++i) {
 		NPCArgumentDispatch[i]       = handle_npc_null;
@@ -217,48 +189,39 @@ LuaParser::LuaParser() {
 		BotArgumentDispatch[i]       = handle_bot_null;
 	}
 
-	NPCArgumentDispatch[EVENT_SAY]                    = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_AGGRO_SAY]              = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_PROXIMITY_SAY]          = handle_npc_event_say;
-	NPCArgumentDispatch[EVENT_TRADE]                  = handle_npc_event_trade;
-	NPCArgumentDispatch[EVENT_HP]                     = handle_npc_event_hp;
-	NPCArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_CAST_ON]                = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_KILLED_MERIT]           = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_SLAY]                   = handle_npc_single_mob;
-	NPCArgumentDispatch[EVENT_ENTER]                  = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_EXIT]                   = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_TASK_ACCEPTED]          = handle_npc_task_accepted;
-	NPCArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_npc_popup;
-	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE]        = handle_npc_waypoint;
-	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART]        = handle_npc_waypoint;
-	NPCArgumentDispatch[EVENT_HATE_LIST]              = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_COMBAT]                 = handle_npc_hate;
-	NPCArgumentDispatch[EVENT_SIGNAL]                 = handle_npc_signal;
-	NPCArgumentDispatch[EVENT_TIMER]                  = handle_npc_timer;
-	NPCArgumentDispatch[EVENT_DEATH]                  = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_npc_death;
-	NPCArgumentDispatch[EVENT_DEATH_ZONE]             = handle_npc_death;
-	NPCArgumentDispatch[EVENT_CAST]                   = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_CAST_BEGIN]             = handle_npc_cast;
-	NPCArgumentDispatch[EVENT_FEIGN_DEATH]            = handle_npc_single_client;
-	NPCArgumentDispatch[EVENT_ENTER_AREA]             = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LEAVE_AREA]             = handle_npc_area;
-	NPCArgumentDispatch[EVENT_LOOT_ZONE]              = handle_npc_loot_zone;
-	NPCArgumentDispatch[EVENT_SPAWN_ZONE]             = handle_npc_spawn_zone;
-	NPCArgumentDispatch[EVENT_PAYLOAD]                = handle_npc_payload;
-	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]           = handle_npc_despawn_zone;
-	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_npc_damage;
-	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_npc_damage;
-	NPCArgumentDispatch[EVENT_LOOT_ADDED]             = handle_npc_loot_added;
-	NPCArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_npc_timer_pause_resume_start;
-	NPCArgumentDispatch[EVENT_TIMER_RESUME]           = handle_npc_timer_pause_resume_start;
-	NPCArgumentDispatch[EVENT_TIMER_START]            = handle_npc_timer_pause_resume_start;
-	NPCArgumentDispatch[EVENT_TIMER_STOP]             = handle_npc_timer_stop;
-	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_npc_entity_variable;
-	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_npc_entity_variable;
-	NPCArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_npc_entity_variable;
-	NPCArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_npc_spell_blocked;
+	NPCArgumentDispatch[EVENT_SAY]             = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_AGGRO_SAY]       = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_PROXIMITY_SAY]   = handle_npc_event_say;
+	NPCArgumentDispatch[EVENT_TRADE]           = handle_npc_event_trade;
+	NPCArgumentDispatch[EVENT_HP]              = handle_npc_event_hp;
+	NPCArgumentDispatch[EVENT_TARGET_CHANGE]   = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_CAST_ON]         = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_KILLED_MERIT]    = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_SLAY]            = handle_npc_single_mob;
+	NPCArgumentDispatch[EVENT_ENTER]           = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_EXIT]            = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_TASK_ACCEPTED]   = handle_npc_task_accepted;
+	NPCArgumentDispatch[EVENT_POPUP_RESPONSE]  = handle_npc_popup;
+	NPCArgumentDispatch[EVENT_WAYPOINT_ARRIVE] = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_WAYPOINT_DEPART] = handle_npc_waypoint;
+	NPCArgumentDispatch[EVENT_HATE_LIST]       = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_COMBAT]          = handle_npc_hate;
+	NPCArgumentDispatch[EVENT_SIGNAL]          = handle_npc_signal;
+	NPCArgumentDispatch[EVENT_TIMER]           = handle_npc_timer;
+	NPCArgumentDispatch[EVENT_DEATH]           = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_COMPLETE]  = handle_npc_death;
+	NPCArgumentDispatch[EVENT_DEATH_ZONE]      = handle_npc_death;
+	NPCArgumentDispatch[EVENT_CAST]            = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_CAST_BEGIN]      = handle_npc_cast;
+	NPCArgumentDispatch[EVENT_FEIGN_DEATH]     = handle_npc_single_client;
+	NPCArgumentDispatch[EVENT_ENTER_AREA]      = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LEAVE_AREA]      = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LOOT_ZONE]       = handle_npc_loot_zone;
+	NPCArgumentDispatch[EVENT_SPAWN_ZONE]      = handle_npc_spawn_zone;
+	NPCArgumentDispatch[EVENT_PAYLOAD]         = handle_npc_payload;
+	NPCArgumentDispatch[EVENT_DESPAWN_ZONE]    = handle_npc_despawn_zone;
+	NPCArgumentDispatch[EVENT_DAMAGE_GIVEN]    = handle_npc_damage;
+	NPCArgumentDispatch[EVENT_DAMAGE_TAKEN]    = handle_npc_damage;
 
 	PlayerArgumentDispatch[EVENT_SAY]                        = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE]       = handle_player_environmental_damage;
@@ -305,7 +268,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_EQUIP_ITEM_CLIENT]          = handle_player_equip_item;
 	PlayerArgumentDispatch[EVENT_UNEQUIP_ITEM_CLIENT]        = handle_player_equip_item;
 	PlayerArgumentDispatch[EVENT_SKILL_UP]                   = handle_player_skill_up;
-	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP]          = handle_player_language_skill_up;
+	PlayerArgumentDispatch[EVENT_LANGUAGE_SKILL_UP]          = handle_player_skill_up;
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_BUY]  = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_MERCHANT_SELL] = handle_player_alt_currency_merchant;
 	PlayerArgumentDispatch[EVENT_MERCHANT_BUY]               = handle_player_merchant;
@@ -329,25 +292,6 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_DESTROY_ITEM_CLIENT]        = handle_player_destroy_item;
 	PlayerArgumentDispatch[EVENT_TARGET_CHANGE]              = handle_player_target_change;
 	PlayerArgumentDispatch[EVENT_DROP_ITEM_CLIENT]           = handle_player_drop_item;
-	PlayerArgumentDispatch[EVENT_MEMORIZE_SPELL]             = handle_player_memorize_scribe_spell;
-	PlayerArgumentDispatch[EVENT_UNMEMORIZE_SPELL]           = handle_player_memorize_scribe_spell;
-	PlayerArgumentDispatch[EVENT_SCRIBE_SPELL]               = handle_player_memorize_scribe_spell;
-	PlayerArgumentDispatch[EVENT_UNSCRIBE_SPELL]             = handle_player_memorize_scribe_spell;
-	PlayerArgumentDispatch[EVENT_LDON_POINTS_GAIN]           = handle_player_ldon_points_gain_loss;
-	PlayerArgumentDispatch[EVENT_LDON_POINTS_LOSS]           = handle_player_ldon_points_gain_loss;
-	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_GAIN]          = handle_player_alt_currency_gain_loss;
-	PlayerArgumentDispatch[EVENT_ALT_CURRENCY_LOSS]          = handle_player_alt_currency_gain_loss;
-	PlayerArgumentDispatch[EVENT_CRYSTAL_GAIN]               = handle_player_crystal_gain_loss;
-	PlayerArgumentDispatch[EVENT_CRYSTAL_LOSS]               = handle_player_crystal_gain_loss;
-	PlayerArgumentDispatch[EVENT_TIMER_PAUSE]                = handle_player_timer_pause_resume_start;
-	PlayerArgumentDispatch[EVENT_TIMER_RESUME]               = handle_player_timer_pause_resume_start;
-	PlayerArgumentDispatch[EVENT_TIMER_START]                = handle_player_timer_pause_resume_start;
-	PlayerArgumentDispatch[EVENT_TIMER_STOP]                 = handle_player_timer_stop;
-	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE]     = handle_player_entity_variable;
-	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]        = handle_player_entity_variable;
-	PlayerArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE]     = handle_player_entity_variable;
-	PlayerArgumentDispatch[EVENT_AA_LOSS]                    = handle_player_aa_loss;
-	PlayerArgumentDispatch[EVENT_SPELL_BLOCKED]              = handle_player_spell_blocked;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK]      = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -360,10 +304,6 @@ LuaParser::LuaParser() {
 	ItemArgumentDispatch[EVENT_UNAUGMENT_ITEM]  = handle_item_augment;
 	ItemArgumentDispatch[EVENT_AUGMENT_INSERT]  = handle_item_augment_insert;
 	ItemArgumentDispatch[EVENT_AUGMENT_REMOVE]  = handle_item_augment_remove;
-	ItemArgumentDispatch[EVENT_TIMER_PAUSE]     = handle_item_timer_pause_resume_start;
-	ItemArgumentDispatch[EVENT_TIMER_RESUME]    = handle_item_timer_pause_resume_start;
-	ItemArgumentDispatch[EVENT_TIMER_START]     = handle_item_timer_pause_resume_start;
-	ItemArgumentDispatch[EVENT_TIMER_STOP]      = handle_item_timer_stop;
 
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_CLIENT]               = handle_spell_event;
 	SpellArgumentDispatch[EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT]      = handle_spell_event;
@@ -374,35 +314,25 @@ LuaParser::LuaParser() {
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_LOAD]   = handle_encounter_load;
 	EncounterArgumentDispatch[EVENT_ENCOUNTER_UNLOAD] = handle_encounter_unload;
 
-	BotArgumentDispatch[EVENT_CAST]                   = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_BEGIN]             = handle_bot_cast;
-	BotArgumentDispatch[EVENT_CAST_ON]                = handle_bot_cast;
-	BotArgumentDispatch[EVENT_COMBAT]                 = handle_bot_combat;
-	BotArgumentDispatch[EVENT_DEATH]                  = handle_bot_death;
-	BotArgumentDispatch[EVENT_DEATH_COMPLETE]         = handle_bot_death;
-	BotArgumentDispatch[EVENT_POPUP_RESPONSE]         = handle_bot_popup_response;
-	BotArgumentDispatch[EVENT_SAY]                    = handle_bot_say;
-	BotArgumentDispatch[EVENT_SIGNAL]                 = handle_bot_signal;
-	BotArgumentDispatch[EVENT_SLAY]                   = handle_bot_slay;
-	BotArgumentDispatch[EVENT_TARGET_CHANGE]          = handle_bot_target_change;
-	BotArgumentDispatch[EVENT_TIMER]                  = handle_bot_timer;
-	BotArgumentDispatch[EVENT_TRADE]                  = handle_bot_trade;
-	BotArgumentDispatch[EVENT_USE_SKILL]              = handle_bot_use_skill;
-	BotArgumentDispatch[EVENT_PAYLOAD]                = handle_bot_payload;
-	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT]         = handle_bot_equip_item;
-	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT]       = handle_bot_equip_item;
-	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]           = handle_bot_damage;
-	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]           = handle_bot_damage;
-	BotArgumentDispatch[EVENT_LEVEL_UP]               = handle_bot_level_up;
-	BotArgumentDispatch[EVENT_LEVEL_DOWN]             = handle_bot_level_down;
-	BotArgumentDispatch[EVENT_TIMER_PAUSE]            = handle_bot_timer_pause_resume_start;
-	BotArgumentDispatch[EVENT_TIMER_RESUME]           = handle_bot_timer_pause_resume_start;
-	BotArgumentDispatch[EVENT_TIMER_START]            = handle_bot_timer_pause_resume_start;
-	BotArgumentDispatch[EVENT_TIMER_STOP]             = handle_bot_timer_stop;
-	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_DELETE] = handle_bot_entity_variable;
-	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_SET]    = handle_bot_entity_variable;
-	BotArgumentDispatch[EVENT_ENTITY_VARIABLE_UPDATE] = handle_bot_entity_variable;
-	BotArgumentDispatch[EVENT_SPELL_BLOCKED]          = handle_bot_spell_blocked;
+	BotArgumentDispatch[EVENT_CAST]             = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_BEGIN]       = handle_bot_cast;
+	BotArgumentDispatch[EVENT_CAST_ON]          = handle_bot_cast;
+	BotArgumentDispatch[EVENT_COMBAT]           = handle_bot_combat;
+	BotArgumentDispatch[EVENT_DEATH]            = handle_bot_death;
+	BotArgumentDispatch[EVENT_DEATH_COMPLETE]   = handle_bot_death;
+	BotArgumentDispatch[EVENT_POPUP_RESPONSE]   = handle_bot_popup_response;
+	BotArgumentDispatch[EVENT_SAY]              = handle_bot_say;
+	BotArgumentDispatch[EVENT_SIGNAL]           = handle_bot_signal;
+	BotArgumentDispatch[EVENT_SLAY]             = handle_bot_slay;
+	BotArgumentDispatch[EVENT_TARGET_CHANGE]    = handle_bot_target_change;
+	BotArgumentDispatch[EVENT_TIMER]            = handle_bot_timer;
+	BotArgumentDispatch[EVENT_TRADE]            = handle_bot_trade;
+	BotArgumentDispatch[EVENT_USE_SKILL]        = handle_bot_use_skill;
+	BotArgumentDispatch[EVENT_PAYLOAD]          = handle_bot_payload;
+	BotArgumentDispatch[EVENT_EQUIP_ITEM_BOT]   = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_UNEQUIP_ITEM_BOT] = handle_bot_equip_item;
+	BotArgumentDispatch[EVENT_DAMAGE_GIVEN]     = handle_bot_damage;
+	BotArgumentDispatch[EVENT_DAMAGE_TAKEN]     = handle_bot_damage;
 #endif
 
 	L = nullptr;
@@ -462,14 +392,13 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 2;
-		PushErrorHandler(L);
+		int npop = 1;
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 3;
+			npop = 2;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -484,7 +413,7 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 		Client *c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
 		quest_manager.StartQuest(npc, c);
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -501,7 +430,9 @@ int LuaParser::_EventNPC(std::string package_name, QuestEventID evt, NPC* npc, M
 
 		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		AddError(fmt::format("Lua Exception | [{}] for NPC [{}] in [{}]: {}", sub_name, npc->GetNPCTypeID(), package_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -556,14 +487,13 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 2;
-		PushErrorHandler(L);
+		int npop = 1;
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 3;
+			npop = 2;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -577,7 +507,7 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 		arg_function(this, L, client, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(client, client);
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -594,7 +524,9 @@ int LuaParser::_EventPlayer(std::string package_name, QuestEventID evt, Client *
 
 		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		AddError(fmt::format("Lua Exception | [{}] for Player in [{}]: {}", sub_name, package_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -634,14 +566,13 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 2;
-		PushErrorHandler(L);
+		int npop = 1;
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 3;
+			npop = 2;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -661,7 +592,7 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 		arg_function(this, L, client, item, mob, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(client, client, item);
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -678,8 +609,9 @@ int LuaParser::_EventItem(std::string package_name, QuestEventID evt, Client *cl
 
 		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		uint32_t item_id = item->GetItem() ? item->GetItem()->ID : 0;
-		AddError(fmt::format("Lua Exception | [{}] for Item [{}] in [{}]: {}", sub_name, item_id, package_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -715,14 +647,13 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 2;
-		PushErrorHandler(L);
+		int npop = 1;
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 3;
+			npop = 2;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -743,7 +674,7 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 		arg_function(this, L, mob, client, spell_id, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(mob, client, nullptr, const_cast<SPDat_Spell_Struct*>(&spells[spell_id]));
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -760,7 +691,9 @@ int LuaParser::_EventSpell(std::string package_name, QuestEventID evt, Mob* mob,
 
 		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		AddError(fmt::format("Lua Exception | [{}] for Spell [{}] in [{}]: {}", sub_name, spell_id, package_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -795,7 +728,6 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 	int start = lua_gettop(L);
 
 	try {
-		PushErrorHandler(L);
 		lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 		lua_getfield(L, -1, sub_name);
 
@@ -809,24 +741,26 @@ int LuaParser::_EventEncounter(std::string package_name, QuestEventID evt, std::
 		arg_function(this, L, enc, data, extra_data, extra_pointers);
 
 		quest_manager.StartQuest(enc, nullptr, nullptr, nullptr, encounter_name);
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
-			lua_pop(L, 3);
+			lua_pop(L, 2);
 			return 0;
 		}
 		quest_manager.EndQuest();
 
 		if(lua_isnumber(L, -1)) {
 			int ret = static_cast<int>(lua_tointeger(L, -1));
-			lua_pop(L, 3);
+			lua_pop(L, 2);
 			return ret;
 		}
 
-		lua_pop(L, 3);
+		lua_pop(L, 2);
 	} catch(std::exception &ex) {
-		AddError(fmt::format("Lua Exception | [{}] for Encounter [{}]: {}", sub_name, encounter_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);
@@ -1175,11 +1109,10 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	}
 
 	auto top = lua_gettop(L);
-	PushErrorHandler(L);
 	if(luaL_loadfile(L, filename.c_str())) {
 		std::string error = lua_tostring(L, -1);
 		AddError(error);
-		lua_pop(L, 2);
+		lua_pop(L, 1);
 		return;
 	}
 
@@ -1199,10 +1132,10 @@ void LuaParser::LoadScript(std::string filename, std::string package_name) {
 
 	lua_setfenv(L, -2); //set the env to the table we made
 
-	if(lua_pcall(L, 0, 0, top + 1)) {
+	if(lua_pcall(L, 0, 0, 0)) {
 		std::string error = lua_tostring(L, -1);
 		AddError(error);
-		lua_pop(L, 2);
+		lua_pop(L, 1);
 	}
 	else {
 		loaded_[package_name] = true;
@@ -1268,8 +1201,6 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_bodytypes(),
 			lua_register_filters(),
 			lua_register_message_types(),
-			lua_register_zone_types(),
-			lua_register_languages(),
 			lua_register_entity(),
 			lua_register_encounter(),
 			lua_register_mob(),
@@ -1311,8 +1242,7 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_journal_speakmode(),
 			lua_register_journal_mode(),
 			lua_register_expedition(),
-			lua_register_expedition_lock_messages(),
-			lua_register_buff()
+			lua_register_expedition_lock_messages()
 		)];
 
 	} catch(std::exception &ex) {
@@ -1584,11 +1514,11 @@ uint64 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 }
 
 
-int64 LuaParser::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default)
+int64 LuaParser::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, uint16 skill_id, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default)
 {
 	int64 retval = 0;
 	for (auto &mod : mods_) {
-		mod.CommonDamage(self, attacker, value, spell_id, skill_used, avoidable, buff_slot, buff_tic, special, retval, ignore_default);
+		mod.CommonDamage(self, attacker, value, spell_id, skill_id, avoidable, buff_slot, buff_tic, special, retval, ignore_default);
 	}
 	return retval;
 }
@@ -1616,41 +1546,6 @@ int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 b
 	int64 retval = 0;
 	for (auto &mod : mods_) {
 		mod.CalcSpellEffectValue_formula(self, formula, base_value, max_value, caster_level, spell_id, ticsremaining, retval, ignoreDefault);
-	}
-	return retval;
-}
-
-int32 LuaParser::UpdatePersonalFaction(Mob *self, int32 npc_value, int32 faction_id, int32 current_value, int32 temp, int32 this_faction_min, int32 this_faction_max, bool &ignore_default)
-{
-	int32 retval = 0;
-	for (auto &mod : mods_) {
-		mod.UpdatePersonalFaction(self, npc_value, faction_id, current_value, temp, this_faction_min, this_faction_max, retval, ignore_default);
-	}
-	return retval;
-}
-
-void LuaParser::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default)
-{
-	for (auto &mod : mods_) {
-		mod.RegisterBug(self, bug, ignore_default);
-	}
-}
-
-
-uint64 LuaParser::SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, bool &ignore_default)
-{
-	uint64 retval = 0;
-	for (auto &mod : mods_) {
-		mod.SetEXP(self, exp_source, current_exp, set_exp, is_rezz_exp, retval, ignore_default);
-	}
-	return retval;
-}
-
-uint64 LuaParser::SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, bool &ignore_default)
-{
-	uint64 retval = 0;
-	for (auto &mod : mods_) {
-		mod.SetAAEXP(self, exp_source, current_aa_exp, set_aa_exp, is_rezz_exp, retval, ignore_default);
 	}
 	return retval;
 }
@@ -1717,14 +1612,13 @@ int LuaParser::_EventBot(
 	int start = lua_gettop(L);
 
 	try {
-		int npop = 2;
-		PushErrorHandler(L);
+		int npop = 1;
 		if(l_func != nullptr) {
 			l_func->push(L);
 		} else {
 			lua_getfield(L, LUA_REGISTRYINDEX, package_name.c_str());
 			lua_getfield(L, -1, sub_name);
-			npop = 3;
+			npop = 2;
 		}
 
 		lua_createtable(L, 0, 0);
@@ -1739,7 +1633,7 @@ int LuaParser::_EventBot(
 		auto* c = (init && init->IsClient()) ? init->CastToClient() : nullptr;
 
 		quest_manager.StartQuest(bot, c);
-		if(lua_pcall(L, 1, 1, start + 1)) {
+		if(lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			AddError(error);
 			quest_manager.EndQuest();
@@ -1756,7 +1650,9 @@ int LuaParser::_EventBot(
 
 		lua_pop(L, npop);
 	} catch(std::exception &ex) {
-		AddError(fmt::format("Lua Exception | [{}] for Bot [{}] in [{}]: {}", sub_name, bot->GetBotID(), package_name, ex.what()));
+		std::string error = "Lua Exception: ";
+		error += std::string(ex.what());
+		AddError(error);
 
 		//Restore our stack to the best of our ability
 		int end = lua_gettop(L);

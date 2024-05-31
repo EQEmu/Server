@@ -147,7 +147,7 @@ struct DBbotspells_Struct {
 };
 
 struct DBTradeskillRecipe_Struct {
-	EQ::skills::SkillType tradeskill;
+	uint16 tradeskill;
 	int16 skill_needed;
 	uint16 trivial;
 	bool nofail;

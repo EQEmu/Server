@@ -26,6 +26,22 @@
 
 #include <string.h>
 
+namespace AttackAnimation {
+	constexpr uint8 Kick            = 1;
+	constexpr uint8 OneHandPiercing = 2;
+	constexpr uint8 TwoHandSlashing = 3;
+	constexpr uint8 TwoHandWeapon   = 4;
+	constexpr uint8 OneHandWeapon   = 5;
+	constexpr uint8 DualWield       = 6;
+	constexpr uint8 TailRake        = 7;
+	constexpr uint8 HandToHand      = 8;
+	constexpr uint8 ShootBow        = 9;
+	constexpr uint8 RoundKick       = 11;
+	constexpr uint8 SwarmAttack     = 20;
+	constexpr uint8 FlyingKick      = 45;
+	constexpr uint8 TigerClaw       = 46;
+	constexpr uint8 EagleStrike     = 47;
+}
 
 // local definitions are the result of using hybrid-client or server-only values and methods
 namespace EQ
@@ -350,7 +366,6 @@ namespace EQ
 		};
 
 		enum EmoteTypes : uint8 {
-			Say,
 			Emote,
 			Shout,
 			Proximity
@@ -358,9 +373,6 @@ namespace EQ
 
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
-
-		extern const std::map<uint8, std::string>& GetLanguageMap();
-		std::string GetLanguageName(uint8 language_id);
 
 		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
 		std::string GetLDoNThemeName(uint32 theme_id);
@@ -397,15 +409,6 @@ namespace EQ
 
 		extern const std::map<uint8, std::string>& GetEmoteTypeMap();
 		std::string GetEmoteTypeName(uint8 emote_type);
-
-		extern const std::map<uint32, std::string>& GetAppearanceTypeMap();
-		std::string GetAppearanceTypeName(uint32 animation_type);
-
-		extern const std::map<uint32, std::string>& GetSpecialAbilityMap();
-		std::string GetSpecialAbilityName(uint32 ability_id);
-
-		extern const std::map<uint32, std::string>& GetConsiderColorMap();
-		std::string GetConsiderColorName(uint32 consider_color);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
@@ -562,17 +565,6 @@ enum ConsiderLevel : uint8 {
 	Scowls
 };
 
-namespace ConsiderColor {
-	constexpr uint32 Green         = 2;
-	constexpr uint32 DarkBlue      = 4;
-	constexpr uint32 Gray          = 6;
-	constexpr uint32 White         = 10;
-	constexpr uint32 Red           = 13;
-	constexpr uint32 Yellow        = 15;
-	constexpr uint32 LightBlue     = 18;
-	constexpr uint32 WhiteTitanium = 20;
-};
-
 enum TargetDescriptionType : uint8 {
 	LCSelf,
 	UCSelf,
@@ -614,67 +606,6 @@ enum class ApplySpellType {
 	Raid
 };
 
-enum {
-	SPECATK_SUMMON            = 1,
-	SPECATK_ENRAGE            = 2,
-	SPECATK_RAMPAGE           = 3,
-	SPECATK_AREA_RAMPAGE      = 4,
-	SPECATK_FLURRY            = 5,
-	SPECATK_TRIPLE            = 6,
-	SPECATK_QUAD              = 7,
-	SPECATK_INNATE_DW         = 8,
-	SPECATK_BANE              = 9,
-	SPECATK_MAGICAL           = 10,
-	SPECATK_RANGED_ATK        = 11,
-	UNSLOWABLE                = 12,
-	UNMEZABLE                 = 13,
-	UNCHARMABLE               = 14,
-	UNSTUNABLE                = 15,
-	UNSNAREABLE               = 16,
-	UNFEARABLE                = 17,
-	UNDISPELLABLE             = 18,
-	IMMUNE_MELEE              = 19,
-	IMMUNE_MAGIC              = 20,
-	IMMUNE_FLEEING            = 21,
-	IMMUNE_MELEE_EXCEPT_BANE  = 22,
-	IMMUNE_MELEE_NONMAGICAL   = 23,
-	IMMUNE_AGGRO              = 24,
-	IMMUNE_AGGRO_ON           = 25,
-	IMMUNE_CASTING_FROM_RANGE = 26,
-	IMMUNE_FEIGN_DEATH        = 27,
-	IMMUNE_TAUNT              = 28,
-	NPC_TUNNELVISION          = 29,
-	NPC_NO_BUFFHEAL_FRIENDS   = 30,
-	IMMUNE_PACIFY             = 31,
-	LEASH                     = 32,
-	TETHER                    = 33,
-	DESTRUCTIBLE_OBJECT       = 34,
-	NO_HARM_FROM_CLIENT       = 35,
-	ALWAYS_FLEE               = 36,
-	FLEE_PERCENT              = 37,
-	ALLOW_BENEFICIAL          = 38,
-	DISABLE_MELEE             = 39,
-	NPC_CHASE_DISTANCE        = 40,
-	ALLOW_TO_TANK             = 41,
-	IGNORE_ROOT_AGGRO_RULES   = 42,
-	CASTING_RESIST_DIFF       = 43,
-	COUNTER_AVOID_DAMAGE      = 44, // Modify by percent NPC's opponents chance to riposte, block, parry or dodge individually, or for all skills
-	PROX_AGGRO                = 45,
-	IMMUNE_RANGED_ATTACKS     = 46,
-	IMMUNE_DAMAGE_CLIENT      = 47,
-	IMMUNE_DAMAGE_NPC         = 48,
-	IMMUNE_AGGRO_CLIENT       = 49,
-	IMMUNE_AGGRO_NPC          = 50,
-	MODIFY_AVOID_DAMAGE       = 51, // Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
-	IMMUNE_FADING_MEMORIES    = 52,
-	IMMUNE_OPEN               = 53,
-	IMMUNE_ASSASSINATE        = 54,
-	IMMUNE_HEADSHOT           = 55,
-	IMMUNE_AGGRO_BOT          = 56,
-	IMMUNE_DAMAGE_BOT         = 57,
-	MAX_SPECIAL_ATTACK        = 58
-};
-
 
 namespace HeroicBonusBucket
 {
@@ -699,5 +630,72 @@ namespace HeroicBonusBucket
 	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
 	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
 }
+
+namespace Language {
+	constexpr uint8 CommonTongue  = 0;
+	constexpr uint8 Barbarian     = 1;
+	constexpr uint8 Erudian       = 2;
+	constexpr uint8 Elvish        = 3;
+	constexpr uint8 DarkElvish    = 4;
+	constexpr uint8 Dwarvish      = 5;
+	constexpr uint8 Troll         = 6;
+	constexpr uint8 Ogre          = 7;
+	constexpr uint8 Gnomish       = 8;
+	constexpr uint8 Halfling      = 9;
+	constexpr uint8 ThievesCant   = 10;
+	constexpr uint8 OldErudian    = 11;
+	constexpr uint8 ElderElvish   = 12;
+	constexpr uint8 Froglok       = 13;
+	constexpr uint8 Goblin        = 14;
+	constexpr uint8 Gnoll         = 15;
+	constexpr uint8 CombineTongue = 16;
+	constexpr uint8 ElderTeirDal  = 17;
+	constexpr uint8 Lizardman     = 18;
+	constexpr uint8 Orcish        = 19;
+	constexpr uint8 Faerie        = 20;
+	constexpr uint8 Dragon        = 21;
+	constexpr uint8 ElderDragon   = 22;
+	constexpr uint8 DarkSpeech    = 23;
+	constexpr uint8 VahShir       = 24;
+	constexpr uint8 Alaran        = 25;
+	constexpr uint8 Hadal         = 26;
+	constexpr uint8 Unknown27     = 27;
+
+	constexpr uint8 MaxValue = 100;
+
+	const std::string& GetName(uint8 language_id);
+	bool IsValid(uint8 language_id);
+}
+
+static std::map<uint8, std::string> language_names = {
+	{ Language::CommonTongue,  "Common Tongue" },
+	{ Language::Barbarian,     "Barbarian" },
+	{ Language::Erudian,       "Erudian" },
+	{ Language::Elvish,        "Elvish" },
+	{ Language::DarkElvish,    "Dark Elvish" },
+	{ Language::Dwarvish,      "Dwarvish" },
+	{ Language::Troll,         "Troll" },
+	{ Language::Ogre,          "Ogre" },
+	{ Language::Gnomish,       "Gnomish" },
+	{ Language::Halfling,      "Halfling" },
+	{ Language::ThievesCant,   "Thieves Cant" },
+	{ Language::OldErudian,    "Old Erudian" },
+	{ Language::ElderElvish,   "Elder Elvish" },
+	{ Language::Froglok,       "Froglok" },
+	{ Language::Goblin,        "Goblin" },
+	{ Language::Gnoll,         "Gnoll" },
+	{ Language::CombineTongue, "Combine Tongue" },
+	{ Language::ElderTeirDal,  "Elder Teir'Dal" },
+	{ Language::Lizardman,     "Lizardman" },
+	{ Language::Orcish,        "Orcish" },
+	{ Language::Faerie,        "Faerie" },
+	{ Language::Dragon,        "Dragon" },
+	{ Language::ElderDragon,   "Elder Dragon" },
+	{ Language::DarkSpeech,    "Dark Speech" },
+	{ Language::VahShir,       "Vah Shir" },
+	{ Language::Alaran,        "Alaran" },
+	{ Language::Hadal,         "Hadal" },
+	{ Language::Unknown27,     "Unknown" }
+};
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

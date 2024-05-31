@@ -1098,12 +1098,12 @@ int32 Perl_StatBonuses_GetSkillReuseTime(StatBonuses* self, int slot)
 
 int32 Perl_StatBonuses_GetSkillDamageAmount(StatBonuses* self, int slot)
 {
-	if (!EQ::ValueWithin(slot, ALL_SKILLS, EQ::skills::HIGHEST_SKILL))
+	if (!EQ::ValueWithin(slot, Skill::All, Skill::Max))
 	{
 		return 0;
 	}
 
-	return slot == ALL_SKILLS ? self->SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 1] : self->SkillDamageAmount[slot];
+	return slot == Skill::All ? self->SkillDamageAmount[Skill::Max + 1] : self->SkillDamageAmount[slot];
 }
 
 int Perl_StatBonuses_GetHPPercentCap(StatBonuses* self, int slot)

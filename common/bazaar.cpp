@@ -178,15 +178,15 @@ Bazaar::GetSearchResults(
 			{STAT_HEROIC_STAMINA,      static_cast<uint32>(inst->GetItemHeroicSta(true))},
 			{STAT_HEROIC_STRENGTH,     static_cast<uint32>(inst->GetItemHeroicStr(true))},
 			{STAT_HEROIC_WISDOM,       static_cast<uint32>(inst->GetItemHeroicWis(true))},
-			{STAT_BASH,                static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillBash, true))},
+			{STAT_BASH,                static_cast<uint32>(inst->GetItemSkillsStat(Skill::Bash, true))},
 			{STAT_BACKSTAB,            static_cast<uint32>(inst->GetItemBackstabDamage(true))},
-			{STAT_DRAGON_PUNCH,        static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillDragonPunch, true))},
-			{STAT_EAGLE_STRIKE,        static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillEagleStrike, true))},
-			{STAT_FLYING_KICK,         static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillFlyingKick, true))},
-			{STAT_KICK,                static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillKick, true))},
-			{STAT_ROUND_KICK,          static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillRoundKick, true))},
-			{STAT_TIGER_CLAW,          static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillTigerClaw, true))},
-			{STAT_FRENZY,              static_cast<uint32>(inst->GetItemSkillsStat(EQ::skills::SkillFrenzy, true))},
+			{STAT_DRAGON_PUNCH,        static_cast<uint32>(inst->GetItemSkillsStat(Skill::DragonPunch, true))},
+			{STAT_EAGLE_STRIKE,        static_cast<uint32>(inst->GetItemSkillsStat(Skill::EagleStrike, true))},
+			{STAT_FLYING_KICK,         static_cast<uint32>(inst->GetItemSkillsStat(Skill::FlyingKick, true))},
+			{STAT_KICK,                static_cast<uint32>(inst->GetItemSkillsStat(Skill::Kick, true))},
+			{STAT_ROUND_KICK,          static_cast<uint32>(inst->GetItemSkillsStat(Skill::RoundKick, true))},
+			{STAT_TIGER_CLAW,          static_cast<uint32>(inst->GetItemSkillsStat(Skill::TigerClaw, true))},
+			{STAT_FRENZY,              static_cast<uint32>(inst->GetItemSkillsStat(Skill::Frenzy, true))},
 		};
 
 		r.item_stat = item_stat_searches.contains(search.item_stat) ? item_stat_searches[search.item_stat] : 0;

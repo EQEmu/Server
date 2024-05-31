@@ -2503,40 +2503,59 @@ void Client::QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call) {
 	safe_delete(qspack);
 }
 
-void Client::DyeArmor(EQ::TintProfile* dye){
-	int16 slot=0;
-	for (int i = EQ::textures::textureBegin; i <= EQ::textures::LastTintableTexture; i++) {
-		if ((m_pp.item_tint.Slot[i].Color & 0x00FFFFFF) != (dye->Slot[i].Color & 0x00FFFFFF)) {
-			slot = m_inv.HasItem(32557, 1, invWherePersonal);
-			if (slot != INVALID_INDEX){
-				DeleteItemInInventory(slot,1,true);
-				uint8 slot2=SlotConvert(i);
-				EQ::ItemInstance* inst = m_inv.GetItem(slot2);
-				if(inst){
-					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
+void Client::DyeArmor(EQ::TintProfile* t)
+{
+	int16 slot_id = 0;
+
+	for (int8 texture_id = EQ::textures::textureBegin; texture_id <= EQ::textures::LastTintableTexture; texture_id++) {
+		if ((m_pp.item_tint.Slot[texture_id].Color & 0x00FFFFFF) != (t->Slot[texture_id].Color & 0x00FFFFFF)) {
+			slot_id = m_inv.HasItem(Item::ID::PrismaticDye, 1, invWherePersonal);
+
+			if (slot_id != INVALID_INDEX) {
+				DeleteItemInInventory(slot_id, 1, true);
+				uint8 slot2 = SlotConvert(texture_id);
+				EQ::ItemInstance* inst                = m_inv.GetItem(slot2);
+				if (inst) {
+					const uint32 armor_color = (
+						static_cast<uint32>(t->Slot[texture_id].Red) << 16 |
+						static_cast<uint32>(t->Slot[texture_id].Green) << 8 |
+						static_cast<uint32>(t->Slot[texture_id].Blue)
+					);
+
 					inst->SetColor(armor_color);
-					database.SaveCharacterMaterialColor(CharacterID(), i, armor_color);
-					database.SaveInventory(CharacterID(),inst,slot2);
-					if(dye->Slot[i].UseTint)
-						m_pp.item_tint.Slot[i].UseTint = 0xFF;
-					else
-						m_pp.item_tint.Slot[i].UseTint=0x00;
+
+					database.SaveCharacterMaterialColor(CharacterID(), texture_id, armor_color);
+					database.SaveInventory(CharacterID(), inst, slot2);
+
+					if (t->Slot[texture_id].UseTint) {
+						m_pp.item_tint.Slot[texture_id].UseTint = 0xFF;
+					} else {
+						m_pp.item_tint.Slot[texture_id].UseTint = 0x00;
+					}
 				}
-				m_pp.item_tint.Slot[i].Blue=dye->Slot[i].Blue;
-				m_pp.item_tint.Slot[i].Red=dye->Slot[i].Red;
-				m_pp.item_tint.Slot[i].Green=dye->Slot[i].Green;
-				SendWearChange(i);
-			}
-			else{
-				Message(Chat::Red,"Could not locate A Vial of Prismatic Dye.");
+
+				m_pp.item_tint.Slot[texture_id].Blue  = t->Slot[texture_id].Blue;
+				m_pp.item_tint.Slot[texture_id].Red   = t->Slot[texture_id].Red;
+				m_pp.item_tint.Slot[texture_id].Green = t->Slot[texture_id].Green;
+
+				SendWearChange(texture_id);
+			} else {
+				const std::string& item_link = database.CreateItemLink(Item::ID::PrismaticDye);
+				Message(
+					Chat::White,
+					fmt::format(
+						"Could not locate a {}.",
+						item_link
+					).c_str()
+				);
 				return;
 			}
 		}
 	}
+
 	auto outapp = new EQApplicationPacket(OP_Dye, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
 }
 
 void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {

@@ -423,22 +423,22 @@ float Lua_NPC::GetGuardPointZ() {
 	return self->GetGuardPoint().z;
 }
 
-void Lua_NPC::SetPrimSkill(int skill_id) {
+void Lua_NPC::SetPrimSkill(uint16 skill_id) {
 	Lua_Safe_Call_Void();
 	self->SetPrimSkill(skill_id);
 }
 
-void Lua_NPC::SetSecSkill(int skill_id) {
+void Lua_NPC::SetSecSkill(uint16 skill_id) {
 	Lua_Safe_Call_Void();
 	self->SetSecSkill(skill_id);
 }
 
-int Lua_NPC::GetPrimSkill() {
+uint16 Lua_NPC::GetPrimSkill() {
 	Lua_Safe_Call_Int();
 	return self->GetPrimSkill();
 }
 
-int Lua_NPC::GetSecSkill() {
+uint16 Lua_NPC::GetSecSkill() {
 	Lua_Safe_Call_Int();
 	return self->GetSecSkill();
 }
@@ -905,11 +905,11 @@ luabind::scope lua_register_npc() {
 	.def("GetNPCStat", (float(Lua_NPC::*)(std::string))&Lua_NPC::GetNPCStat)
 	.def("GetPetSpellID", (int(Lua_NPC::*)(void))&Lua_NPC::GetPetSpellID)
 	.def("GetPlatinum", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetPlatinum)
-	.def("GetPrimSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)
+	.def("GetPrimSkill", (uint16(Lua_NPC::*)(void))&Lua_NPC::GetPrimSkill)
 	.def("GetPrimaryFaction", (int(Lua_NPC::*)(void))&Lua_NPC::GetPrimaryFaction)
 	.def("GetRawAC", (int(Lua_NPC::*)(void))&Lua_NPC::GetRawAC)
 	.def("GetScore", (int(Lua_NPC::*)(void))&Lua_NPC::GetScore)
-	.def("GetSecSkill", (int(Lua_NPC::*)(void))&Lua_NPC::GetSecSkill)
+	.def("GetSecSkill", (uint16(Lua_NPC::*)(void))&Lua_NPC::GetSecSkill)
 	.def("GetSilver", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetSilver)
 	.def("GetSlowMitigation", (int(Lua_NPC::*)(void))&Lua_NPC::GetSlowMitigation)
 	.def("GetSp2", (uint32(Lua_NPC::*)(void))&Lua_NPC::GetSp2)
@@ -979,9 +979,9 @@ luabind::scope lua_register_npc() {
 	.def("SetNPCFactionID", (void(Lua_NPC::*)(int))&Lua_NPC::SetNPCFactionID)
 	.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 	.def("SetPlatinum", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetPlatinum)
-	.def("SetPrimSkill", (void(Lua_NPC::*)(int))&Lua_NPC::SetPrimSkill)
+	.def("SetPrimSkill", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetPrimSkill)
 	.def("SetSaveWaypoint", (void(Lua_NPC::*)(int))&Lua_NPC::SetSaveWaypoint)
-	.def("SetSecSkill", (void(Lua_NPC::*)(int))&Lua_NPC::SetSecSkill)
+	.def("SetSecSkill", (void(Lua_NPC::*)(uint16))&Lua_NPC::SetSecSkill)
 	.def("SetSilver", (void(Lua_NPC::*)(uint32))&Lua_NPC::SetSilver)
 	.def("SetSimpleRoamBox", (void(Lua_NPC::*)(float))&Lua_NPC::SetSimpleRoamBox)
 	.def("SetSimpleRoamBox", (void(Lua_NPC::*)(float, float))&Lua_NPC::SetSimpleRoamBox)

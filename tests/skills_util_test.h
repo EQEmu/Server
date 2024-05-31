@@ -27,7 +27,7 @@ class SkillsUtilsTest: public Test::Suite {
 public:
 	SkillsUtilsTest() {
 		TEST_ADD(SkillsUtilsTest::IsTradeskill);
-		TEST_ADD(SkillsUtilsTest::IsSpecializedSkill);
+		TEST_ADD(SkillsUtilsTest::IsSpecialized);
 	}
 
 	~SkillsUtilsTest() {
@@ -35,13 +35,13 @@ public:
 
 	private:
 	void IsTradeskill() {
-		TEST_ASSERT(EQ::skills::IsTradeskill(EQ::skills::SkillPottery));
-		TEST_ASSERT(!EQ::skills::IsTradeskill(EQ::skills::SkillParry));
+		TEST_ASSERT(Skill::IsTradeskill(Skill::Pottery));
+		TEST_ASSERT(!Skill::IsTradeskill(Skill::Parry));
 	}
 
-	void IsSpecializedSkill() {
-		TEST_ASSERT(EQ::skills::IsSpecializedSkill(EQ::skills::SkillSpecializeConjuration));
-		TEST_ASSERT(!EQ::skills::IsSpecializedSkill(EQ::skills::SkillConjuration))
+	void IsSpecialized() {
+		TEST_ASSERT(Skill::IsSpecialized(Skill::SpecializeConjuration));
+		TEST_ASSERT(!Skill::IsSpecialized(Skill::Conjuration))
 	}
 };
 

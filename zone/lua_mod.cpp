@@ -37,48 +37,45 @@ void LuaMod::Init()
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
 	m_has_calc_spell_effect_value_formula = parser_->HasFunction("CalcSpellEffectValue_formula", package_name_);
-	m_has_update_personal_faction = parser_->HasFunction("UpdatePersonalFaction", package_name_);
-	m_has_register_bug = parser_->HasFunction("RegisterBug", package_name_);
-	m_has_common_damage = parser_->HasFunction("CommonDamage", package_name_);
-	m_has_heal_damage = parser_->HasFunction("HealDamage", package_name_);
-	m_has_is_immune_to_spell = parser_->HasFunction("IsImmuneToSpell", package_name_);
-	m_has_set_aa_exp = parser_->HasFunction("SetAAEXP", package_name_);
-	m_has_set_exp = parser_->HasFunction("SetEXP", package_name_);
 }
 
-void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
-	luabind::adl::object lua_hit = luabind::newtable(L);
-	lua_hit["base_damage"] = hit.base_damage;
-	lua_hit["min_damage"] = hit.min_damage;
-	lua_hit["damage_done"] = hit.damage_done;
-	lua_hit["offense"] = hit.offense;
-	lua_hit["tohit"] = hit.tohit;
-	lua_hit["hand"] = hit.hand;
-	lua_hit["skill"] = (int)hit.skill;
-	e["hit"] = lua_hit;
+void PutDamageHitInfo(lua_State* L, luabind::adl::object& e, DamageHitInfo& hit)
+{
+	luabind::adl::object t = luabind::newtable(L);
+
+	t["base_damage"] = hit.base_damage;
+	t["min_damage"]  = hit.min_damage;
+	t["damage_done"] = hit.damage_done;
+	t["offense"]     = hit.offense;
+	t["tohit"]       = hit.tohit;
+	t["hand"]        = hit.hand;
+	t["skill"]       = hit.skill_id;
+
+	e["hit"] = t;
 }
 
-void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
-	auto luaHitTable = ret["hit"];
-	if (luabind::type(luaHitTable) == LUA_TTABLE) {
-		auto base_damage = luaHitTable["base_damage"];
-		auto min_damage = luaHitTable["min_damage"];
-		auto damage_done = luaHitTable["damage_done"];
-		auto offense = luaHitTable["offense"];
-		auto tohit = luaHitTable["tohit"];
-		auto hand = luaHitTable["hand"];
-		auto skill = luaHitTable["skill"];
+void GetDamageHitInfo(luabind::adl::object& ret, DamageHitInfo& hit)
+{
+	auto t = ret["hit"];
+	if (luabind::type(t) == LUA_TTABLE) {
+		auto base_damage = t["base_damage"];
+		auto min_damage  = t["min_damage"];
+		auto damage_done = t["damage_done"];
+		auto offense     = t["offense"];
+		auto tohit       = t["tohit"];
+		auto hand        = t["hand"];
+		auto skill_id    = t["skill"];
 
 		if (luabind::type(base_damage) == LUA_TNUMBER) {
-			hit.base_damage = luabind::object_cast<int>(base_damage);
+			hit.base_damage = luabind::object_cast<int64>(base_damage);
 		}
 
 		if (luabind::type(min_damage) == LUA_TNUMBER) {
-			hit.min_damage = luabind::object_cast<int>(min_damage);
+			hit.min_damage = luabind::object_cast<int64>(min_damage);
 		}
 
 		if (luabind::type(damage_done) == LUA_TNUMBER) {
-			hit.damage_done = luabind::object_cast<int>(damage_done);
+			hit.damage_done = luabind::object_cast<int64>(damage_done);
 		}
 
 		if (luabind::type(offense) == LUA_TNUMBER) {
@@ -93,52 +90,56 @@ void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
 			hit.hand = luabind::object_cast<int>(hand);
 		}
 
-		if (luabind::type(skill) == LUA_TNUMBER) {
-			hit.skill = (EQ::skills::SkillType)luabind::object_cast<int>(skill);
+		if (luabind::type(skill_id) == LUA_TNUMBER) {
+			hit.skill_id = luabind::object_cast<uint16>(skill_id);
 		}
 	}
 }
 
-void PutExtraAttackOptions(lua_State *L, luabind::adl::object &e, ExtraAttackOptions *opts) {
+void PutExtraAttackOptions(lua_State* L, luabind::adl::object& e, ExtraAttackOptions* opts)
+{
 	if (opts) {
-		luabind::adl::object lua_opts = luabind::newtable(L);
-		lua_opts["damage_percent"] = opts->damage_percent;
-		lua_opts["damage_flat"] = opts->damage_flat;
-		lua_opts["armor_pen_percent"] = opts->armor_pen_percent;
-		lua_opts["armor_pen_flat"] = opts->armor_pen_flat;
-		lua_opts["crit_percent"] = opts->crit_percent;
-		lua_opts["crit_flat"] = opts->crit_flat;
-		lua_opts["hate_percent"] = opts->hate_percent;
-		lua_opts["hate_flat"] = opts->hate_flat;
-		lua_opts["hit_chance"] = opts->hit_chance;
-		lua_opts["melee_damage_bonus_flat"] = opts->melee_damage_bonus_flat;
-		lua_opts["skilldmgtaken_bonus_flat"] = opts->skilldmgtaken_bonus_flat;
-		e["opts"] = lua_opts;
+		luabind::adl::object table = luabind::newtable(L);
+
+		table["damage_percent"]           = opts->damage_percent;
+		table["damage_flat"]              = opts->damage_flat;
+		table["armor_pen_percent"]        = opts->armor_pen_percent;
+		table["armor_pen_flat"]           = opts->armor_pen_flat;
+		table["crit_percent"]             = opts->crit_percent;
+		table["crit_flat"]                = opts->crit_flat;
+		table["hate_percent"]             = opts->hate_percent;
+		table["hate_flat"]                = opts->hate_flat;
+		table["hit_chance"]               = opts->hit_chance;
+		table["melee_damage_bonus_flat"]  = opts->melee_damage_bonus_flat;
+		table["skilldmgtaken_bonus_flat"] = opts->skilldmgtaken_bonus_flat;
+
+		e["opts"] = table;
 	}
 }
 
-void GetExtraAttackOptions(luabind::adl::object &ret, ExtraAttackOptions *opts) {
+void GetExtraAttackOptions(luabind::adl::object& ret, ExtraAttackOptions* opts)
+{
 	if (opts) {
-		auto luaOptsTable = ret["opts"];
-		if (luabind::type(luaOptsTable) == LUA_TTABLE) {
-			auto damage_percent = luaOptsTable["damage_percent"];
-			auto damage_flat = luaOptsTable["damage_flat"];
-			auto armor_pen_percent = luaOptsTable["armor_pen_percent"];
-			auto armor_pen_flat = luaOptsTable["armor_pen_flat"];
-			auto crit_percent = luaOptsTable["crit_percent"];
-			auto crit_flat = luaOptsTable["crit_flat"];
-			auto hate_percent = luaOptsTable["hate_percent"];
-			auto hate_flat = luaOptsTable["hate_flat"];
-			auto hit_chance = luaOptsTable["hit_chance"];
-			auto melee_damage_bonus_flat = luaOptsTable["melee_damage_bonus_flat"];
-			auto skilldmgtaken_bonus_flat = luaOptsTable["skilldmgtaken_bonus_flat"];
+		auto table = ret["opts"];
+		if (luabind::type(table) == LUA_TTABLE) {
+			auto damage_percent           = table["damage_percent"];
+			auto damage_flat              = table["damage_flat"];
+			auto armor_pen_percent        = table["armor_pen_percent"];
+			auto armor_pen_flat           = table["armor_pen_flat"];
+			auto crit_percent             = table["crit_percent"];
+			auto crit_flat                = table["crit_flat"];
+			auto hate_percent             = table["hate_percent"];
+			auto hate_flat                = table["hate_flat"];
+			auto hit_chance               = table["hit_chance"];
+			auto melee_damage_bonus_flat  = table["melee_damage_bonus_flat"];
+			auto skilldmgtaken_bonus_flat = table["skilldmgtaken_bonus_flat"];
 
 			if (luabind::type(damage_percent) == LUA_TNUMBER) {
 				opts->damage_percent = luabind::object_cast<float>(damage_percent);
 			}
 
 			if (luabind::type(damage_flat) == LUA_TNUMBER) {
-				opts->damage_flat = luabind::object_cast<int>(damage_flat);
+				opts->damage_flat = luabind::object_cast<int64>(damage_flat);
 			}
 
 			if (luabind::type(armor_pen_percent) == LUA_TNUMBER) {
@@ -177,61 +178,6 @@ void GetExtraAttackOptions(luabind::adl::object &ret, ExtraAttackOptions *opts) 
 				opts->skilldmgtaken_bonus_flat = luabind::object_cast<int>(skilldmgtaken_bonus_flat);
 			}
 		}
-	}
-}
-
-void LuaMod::UpdatePersonalFaction(Mob *self, int32 npc_value, int32 faction_id, int32 current_value, int32 temp, int32 this_faction_min, int32 this_faction_max, int32 &return_value, bool &ignore_default)
-{
-	int start = lua_gettop(L);
-
-	try {
-		if (!m_has_update_personal_faction) {
-			return;
-		}
-
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
-		lua_getfield(L, -1, "UpdatePersonalFaction");
-
-		Lua_Mob l_self(self);
-		luabind::adl::object e = luabind::newtable(L);
-		e["self"] = l_self;
-		e["npc_value"] = npc_value;
-		e["faction_id"] = faction_id;
-		e["current_value"] = current_value;
-		e["temp"] = temp;
-		e["this_faction_min"] = this_faction_min;
-		e["this_faction_max"] = this_faction_max;
-
-		e.push(L);
-
-		if (lua_pcall(L, 1, 1, 0)) {
-			std::string error = lua_tostring(L, -1);
-			parser_->AddError(error);
-			lua_pop(L, 2);
-			return;
-		}
-
-		if (lua_type(L, -1) == LUA_TTABLE) {
-			luabind::adl::object ret(luabind::from_stack(L, -1));
-			auto ignore_default_obj = ret["ignore_default"];
-			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
-				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
-			}
-
-			auto return_value_obj = ret["return_value"];
-			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
-				return_value = luabind::object_cast<int64>(return_value_obj);
-			}
-		}
-	}
-	catch (std::exception &ex) {
-		parser_->AddError(ex.what());
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
 	}
 }
 
@@ -635,113 +581,6 @@ void LuaMod::GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, boo
 	}
 }
 
-
-void LuaMod::SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, uint64 &return_value, bool &ignore_default)
-{
-	int start = lua_gettop(L);
-
-	try {
-		if (!m_has_set_exp) {
-			return;
-		}
-
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
-		lua_getfield(L, -1, "SetEXP");
-
-		Lua_Mob l_self(self);
-		luabind::adl::object e = luabind::newtable(L);
-		e["self"] = l_self;
-		e["exp_source"] = exp_source;
-		e["current_exp"] = current_exp;
-		e["set_exp"] = set_exp;
-		e["is_rezz_exp"] = is_rezz_exp;
-
-		e.push(L);
-
-		if (lua_pcall(L, 1, 1, 0)) {
-			std::string error = lua_tostring(L, -1);
-			parser_->AddError(error);
-			lua_pop(L, 2);
-			return;
-		}
-
-		if (lua_type(L, -1) == LUA_TTABLE) {
-			luabind::adl::object ret(luabind::from_stack(L, -1));
-			auto ignore_default_obj = ret["ignore_default"];
-			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
-				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
-			}
-
-			auto return_value_obj = ret["return_value"];
-			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
-				return_value = luabind::object_cast<int64>(return_value_obj);
-			}
-		}
-	}
-	catch (std::exception &ex) {
-		parser_->AddError(ex.what());
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-}
-
-void LuaMod::SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, uint64 &return_value, bool &ignore_default)
-{
-	int start = lua_gettop(L);
-
-	try {
-		if (!m_has_set_aa_exp) {
-			return;
-		}
-
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
-		lua_getfield(L, -1, "SetAAEXP");
-
-		Lua_Mob l_self(self);
-		luabind::adl::object e = luabind::newtable(L);
-		e["self"] = l_self;
-		e["exp_source"] = exp_source;
-		e["current_aa_exp"] = current_aa_exp;
-		e["set_aa_exp"] = set_aa_exp;
-		e["is_rezz_exp"] = is_rezz_exp;
-
-		e.push(L);
-
-		if (lua_pcall(L, 1, 1, 0)) {
-			std::string error = lua_tostring(L, -1);
-			parser_->AddError(error);
-			lua_pop(L, 2);
-			return;
-		}
-
-		if (lua_type(L, -1) == LUA_TTABLE) {
-			luabind::adl::object ret(luabind::from_stack(L, -1));
-			auto ignore_default_obj = ret["ignore_default"];
-			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
-				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
-			}
-
-			auto return_value_obj = ret["return_value"];
-			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
-				return_value = luabind::object_cast<int64>(return_value_obj);
-			}
-		}
-	}
-	catch (std::exception &ex) {
-		parser_->AddError(ex.what());
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-}
-
 void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValue, bool &ignoreDefault)
 {
 	int start = lua_gettop(L);
@@ -778,58 +617,6 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValu
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
 				returnValue = luabind::object_cast<uint64>(returnValueObj);
-			}
-		}
-	}
-	catch (std::exception &ex) {
-		parser_->AddError(ex.what());
-	}
-
-	int end = lua_gettop(L);
-	int n = end - start;
-	if (n > 0) {
-		lua_pop(L, n);
-	}
-}
-
-void LuaMod::IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &return_value, bool &ignore_default)
-{
-	int start = lua_gettop(L);
-
-	try {
-		if (!m_has_is_immune_to_spell) {
-			return;
-		}
-
-		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
-		lua_getfield(L, -1, "IsImmuneToSpell");
-
-		Lua_Mob l_self(self);
-		Lua_Mob l_other(caster);
-		luabind::adl::object e = luabind::newtable(L);
-		e["self"] = l_self;
-		e["caster"] = l_other;
-		e["spell_id"] = spell_id;
-
-		e.push(L);
-
-		if (lua_pcall(L, 1, 1, 0)) {
-			std::string error = lua_tostring(L, -1);
-			parser_->AddError(error);
-			lua_pop(L, 2);
-			return;
-		}
-
-		if (lua_type(L, -1) == LUA_TTABLE) {
-			luabind::adl::object ret(luabind::from_stack(L, -1));
-			auto ignore_default_obj = ret["ignore_default"];
-			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
-				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
-			}
-
-			auto return_value_obj = ret["return_value"];
-			if (luabind::type(return_value_obj) == LUA_TBOOLEAN) {
-				return_value = luabind::object_cast<bool>(return_value_obj);
 			}
 		}
 	}
@@ -898,7 +685,6 @@ void LuaMod::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_
 		lua_pop(L, n);
 	}
 }
-
 
 void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default)
 {
@@ -970,8 +756,19 @@ void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug,
 	}
 }
 
-
-void LuaMod::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, int64 &return_value, bool &ignore_default)
+void LuaMod::CommonDamage(
+	Mob* self,
+	Mob* attacker,
+	int64 value,
+	uint16 spell_id,
+	uint16 skill_id,
+	bool avoidable,
+	int8 buff_slot,
+	bool buff_tic,
+	int special,
+	int64& return_value,
+	bool& ignore_default
+)
 {
 	int start = lua_gettop(L);
 
@@ -985,16 +782,17 @@ void LuaMod::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id
 
 		Lua_Mob l_self(self);
 		Lua_Mob l_other(attacker);
+
 		luabind::adl::object e = luabind::newtable(L);
-		e["self"] = l_self;
-		e["attacker"] = l_other;
-		e["value"] = value;
-		e["spell_id"] = spell_id;
-		e["skill_used"] = skill_used;
-		e["avoidable"] = avoidable;
-		e["buff_slot"] = buff_slot;
-		e["buff_tic"] = buff_tic;
-		e["special"] = special;
+		e["self"]       = l_self;
+		e["attacker"]   = l_other;
+		e["value"]      = value;
+		e["spell_id"]   = spell_id;
+		e["skill_used"] = skill_id;
+		e["avoidable"]  = avoidable;
+		e["buff_slot"]  = buff_slot;
+		e["buff_tic"]   = buff_tic;
+		e["special"]    = special;
 
 		e.push(L);
 
@@ -1017,13 +815,12 @@ void LuaMod::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id
 				return_value = luabind::object_cast<int64>(return_value_obj);
 			}
 		}
-	}
-	catch (std::exception &ex) {
+	} catch (std::exception &ex) {
 		parser_->AddError(ex.what());
 	}
 
 	int end = lua_gettop(L);
-	int n = end - start;
+	int n   = end - start;
 	if (n > 0) {
 		lua_pop(L, n);
 	}

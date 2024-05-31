@@ -1778,7 +1778,7 @@ namespace UF
 		eq->unknown891 = 0;
 		eq->unknown892 = 0;
 		eq->unknown893 = 0;
-		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
+		eq->fall_damage = Damage::None;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
 		eq->unknown908 = 2;
 		eq->unknown912 = 2;

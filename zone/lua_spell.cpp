@@ -220,7 +220,7 @@ int Lua_Spell::GetBaseDiff() {
 
 int Lua_Spell::GetSkill() {
 	Lua_Safe_Call_Int();
-	return self->skill;
+	return self->skill_id;
 }
 
 int Lua_Spell::GetZoneType() {

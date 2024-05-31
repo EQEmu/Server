@@ -47,7 +47,7 @@ void command_scribespell(Client *c, const Seperator *sep)
 
 		if (
 			spells[spell_id].classes[Class::Warrior] != 0 &&
-			spells[spell_id].skill != EQ::skills::SkillTigerClaw &&
+			spells[spell_id].skill_id != Skill::TigerClaw &&
 			spells[spell_id].classes[t->GetPP().class_ - 1] > 0 &&
 			!IsDiscipline(spell_id)
 		) {

@@ -83,7 +83,7 @@ public:
 	void AddEntToHateList(
 		Mob *ent,
 		int64 in_hate = 0,
-		int64 in_damage = 0,
+		int64 in_damage = Damage::None,
 		bool in_is_frenzied = false,
 		bool add_to_hate_list_if_not_exist = true
 	);

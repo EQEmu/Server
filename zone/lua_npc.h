@@ -111,10 +111,10 @@ public:
 	float GetGuardPointX();
 	float GetGuardPointY();
 	float GetGuardPointZ();
-	void SetPrimSkill(int skill_id);
-	void SetSecSkill(int skill_id);
-	int GetPrimSkill();
-	int GetSecSkill();
+	void SetPrimSkill(uint16 skill_id);
+	void SetSecSkill(uint16 skill_id);
+	uint16 GetPrimSkill();
+	uint16 GetSecSkill();
 	int GetSwarmOwner();
 	int GetSwarmTarget();
 	void SetSwarmTarget(int target);

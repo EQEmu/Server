@@ -1028,7 +1028,7 @@ namespace SoF
 		eq->unknown887 = 0;
 		eq->unknown888 = 0;
 		eq->unknown889 = 0;
-		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
+		eq->fall_damage = Damage::None;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown891 = 0;
 		eq->unknown904 = 2;
 		eq->unknown908 = 2;

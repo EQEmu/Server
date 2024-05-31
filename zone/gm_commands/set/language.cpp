@@ -43,7 +43,7 @@ void SetLanguage(Client *c, const Seperator *sep)
 			Chat::White,
 			fmt::format(
 				"Set {} ({}) to {} for {}.",
-				EQ::constants::GetLanguageName(language_id),
+				Language::GetName(language_id),
 				language_id,
 				language_skill,
 				c->GetTargetDescription(t)

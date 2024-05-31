@@ -3,21 +3,16 @@
 void FindSkill(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const auto skill_id = Strings::ToInt(sep->arg[2]);
-		if (EQ::ValueWithin(skill_id, EQ::skills::Skill1HBlunt, EQ::skills::SkillCount)) {
-			for (const auto& s : EQ::skills::GetSkillTypeMap()) {
-				if (skill_id == s.first) {
-					c->Message(
-						Chat::White,
-						fmt::format(
-							"Skill {} | {}",
-							s.first,
-							s.second
-						).c_str()
-					);
-					break;
-				}
-			}
+		const uint16 skill_id = Strings::ToInt(sep->arg[2]);
+		const std::string& skill_name = Skill::GetName(skill_id);
+		if (Strings::EqualFold(skill_name, "UNKNOWN SKILL")) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Skill ID {} does not exist.",
+					skill_id
+				).c_str()
+			);
 
 			return;
 		}
@@ -25,21 +20,22 @@ void FindSkill(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Skill ID {} was not found.",
-				skill_id
+				"Skill {} | {}",
+				skill_id,
+				skill_name
 			).c_str()
 		);
 
 		return;
 	}
 
-	const auto& search_criteria = Strings::ToLower(sep->argplus[2]);
+	const std::string& search_criteria = Strings::ToLower(sep->argplus[2]);
 
-	auto found_count = 0;
+	uint32 found_count = 0;
 
-	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+	for (const auto& s : skill_names) {
 		const auto& skill_name_lower = Strings::ToLower(s.second);
-		if (!Strings::Contains(skill_name_lower, sep->argplus[2])) {
+		if (!Strings::Contains(skill_name_lower, search_criteria)) {
 			continue;
 		}
 
@@ -53,22 +49,6 @@ void FindSkill(Client *c, const Seperator *sep)
 		);
 
 		found_count++;
-
-		if (found_count == 50) {
-			break;
-		}
-	}
-
-	if (found_count == 50) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"50 Skills were found matching '{}', max reached.",
-				sep->argplus[2]
-			).c_str()
-		);
-
-		return;
 	}
 
 	c->Message(

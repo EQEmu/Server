@@ -18,257 +18,152 @@
 */
 
 #include "skills.h"
-#include "classes.h"
 
 #include <string.h>
 
-bool EQ::skills::IsTradeskill(SkillType skill)
-{
-	switch (skill) {
-	case SkillFishing:
-	case SkillMakePoison:
-	case SkillTinkering:
-	case SkillResearch:
-	case SkillAlchemy:
-	case SkillBaking:
-	case SkillTailoring:
-	case SkillBlacksmithing:
-	case SkillFletching:
-	case SkillBrewing:
-	case SkillPottery:
-	case SkillJewelryMaking:
-		return true;
-	default:
-		return false;
-	}
-}
-
-bool EQ::skills::IsSpecializedSkill(SkillType skill)
-{
-	// this could be a simple if, but if this is more portable if any IDs change (probably won't)
-	// or any other specialized are added (also unlikely)
-	switch (skill) {
-	case SkillSpecializeAbjure:
-	case SkillSpecializeAlteration:
-	case SkillSpecializeConjuration:
-	case SkillSpecializeDivination:
-	case SkillSpecializeEvocation:
-		return true;
-	default:
-		return false;
-	}
-}
-
-float EQ::skills::GetSkillMeleePushForce(SkillType skill)
+float Skill::GetPushForce(uint16 skill_id)
 {
 	// This is the force/magnitude of the push from an attack of this skill type
 	// You can find these numbers in the clients skill struct
-	switch (skill) {
-	case Skill1HBlunt:
-	case Skill1HSlashing:
-	case SkillHandtoHand:
-	case SkillThrowing:
-		return 0.1f;
-	case Skill2HBlunt:
-	case Skill2HSlashing:
-	case SkillEagleStrike:
-	case SkillKick:
-	case SkillTigerClaw:
-	case Skill2HPiercing:
-		return 0.2f;
-	case SkillArchery:
-		return 0.15f;
-	case SkillBackstab:
-	case SkillBash:
-		return 0.3f;
-	case SkillDragonPunch:
-	case SkillRoundKick:
-		return 0.25f;
-	case SkillFlyingKick:
-		return 0.4f;
-	case Skill1HPiercing:
-	case SkillFrenzy:
-		return 0.05f;
-	case SkillIntimidation:
-		return 2.5f;
-	default:
-		return 0.0f;
+	switch (skill_id) {
+		case OneHandBlunt:
+		case OneHandSlashing:
+		case HandToHand:
+		case Throwing:
+			return 0.1f;
+		case TwoHandBlunt:
+		case TwoHandSlashing:
+		case EagleStrike:
+		case Kick:
+		case TigerClaw:
+		case TwoHandPiercing:
+			return 0.2f;
+		case Archery:
+			return 0.15f;
+		case Backstab:
+		case Bash:
+			return 0.3f;
+		case DragonPunch:
+		case RoundKick:
+			return 0.25f;
+		case FlyingKick:
+			return 0.4f;
+		case OneHandPiercing:
+		case Frenzy:
+			return 0.05f;
+		case Intimidation:
+			return 2.5f;
+		default:
+			return 0.0f;
 	}
 }
 
-bool EQ::skills::IsBardInstrumentSkill(SkillType skill)
+std::string Skill::GetName(uint16 skill_id)
 {
-	switch (skill) {
-	case SkillBrassInstruments:
-	case SkillSinging:
-	case SkillStringedInstruments:
-	case SkillWindInstruments:
-	case SkillPercussionInstruments:
-		return true;
-	default:
-		return false;
+	return IsValid(skill_id) ? skill_names[skill_id] : "UNKNOWN SKILL";
+}
+
+bool Skill::IsTradeskill(uint16 skill_id)
+{
+	switch (skill_id) {
+		case Fishing:
+		case MakePoison:
+		case Tinkering:
+		case Research:
+		case Alchemy:
+		case Baking:
+		case Tailoring:
+		case Blacksmithing:
+		case Fletching:
+		case Brewing:
+		case Pottery:
+		case JewelryMaking:
+			return true;
+		default:
+			return false;
 	}
 }
 
-bool EQ::skills::IsCastingSkill(SkillType skill)
+bool Skill::IsSpecialized(uint16 skill_id)
 {
-	switch (skill) {
-	case SkillAbjuration:
-	case SkillAlteration:
-	case SkillConjuration:
-	case SkillDivination:
-	case SkillEvocation:
-		return true;
-	default:
-		return false;
+	// this could be a simple if, but if this is more portable if any IDs change (probably won't)
+	// or any other specialized are added (also unlikely)
+	switch (skill_id) {
+		case SpecializeAbjuration:
+		case SpecializeAlteration:
+		case SpecializeConjuration:
+		case SpecializeDivination:
+		case SpecializeEvocation:
+			return true;
+		default:
+			return false;
 	}
 }
 
-int32 EQ::skills::GetBaseDamage(SkillType skill)
+bool Skill::IsBardInstrument(uint16 skill_id)
 {
-	switch (skill) {
-	case SkillBash:
-		return 2;
-	case SkillDragonPunch:
-		return 12;
-	case SkillEagleStrike:
-		return 7;
-	case SkillFlyingKick:
-		return 25;
-	case SkillKick:
-		return 3;
-	case SkillRoundKick:
-		return 5;
-	case SkillTigerClaw:
-		return 4;
-	case SkillFrenzy:
-		return 10;
-	default:
-		return 0;
+	switch (skill_id) {
+		case BrassInstruments:
+		case Singing:
+		case StringedInstruments:
+		case WindInstruments:
+		case PercussionInstruments:
+			return true;
+		default:
+			return false;
 	}
 }
 
 const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap()
 {
-	static const std::map<SkillType, std::string> skill_type_map = {
-		{ Skill1HBlunt, "1H Blunt" },
-		{ Skill1HSlashing, "1H Slashing" },
-		{ Skill2HBlunt, "2H Blunt" },
-		{ Skill2HSlashing, "2H Slashing" },
-		{ SkillAbjuration, "Abjuration" },
-		{ SkillAlteration, "Alteration" },
-		{ SkillApplyPoison, "Apply Poison" },
-		{ SkillArchery, "Archery" },
-		{ SkillBackstab, "Backstab" },
-		{ SkillBindWound, "Bind Wound" },
-		{ SkillBash, "Bash" },
-		{ SkillBlock, "Block" },
-		{ SkillBrassInstruments, "Brass Instruments" },
-		{ SkillChanneling, "Channeling" },
-		{ SkillConjuration, "Conjuration" },
-		{ SkillDefense, "Defense" },
-		{ SkillDisarm, "Disarm" },
-		{ SkillDisarmTraps, "Disarm Traps" },
-		{ SkillDivination, "Divination" },
-		{ SkillDodge, "Dodge" },
-		{ SkillDoubleAttack, "Double Attack" },
-		{ SkillDragonPunch, "Dragon Punch" },
-		{ SkillDualWield, "Dual Wield" },
-		{ SkillEagleStrike, "Eagle Strike" },
-		{ SkillEvocation, "Evocation" },
-		{ SkillFeignDeath, "Feign Death" },
-		{ SkillFlyingKick, "Flying Kick" },
-		{ SkillForage, "Forage" },
-		{ SkillHandtoHand, "Hand to Hand" },
-		{ SkillHide, "Hide" },
-		{ SkillKick, "Kick" },
-		{ SkillMeditate, "Meditate" },
-		{ SkillMend, "Mend" },
-		{ SkillOffense, "Offense" },
-		{ SkillParry, "Parry" },
-		{ SkillPickLock, "Pick Lock" },
-		{ Skill1HPiercing, "1H Piercing" },
-		{ SkillRiposte, "Riposte" },
-		{ SkillRoundKick, "Round Kick" },
-		{ SkillSafeFall, "Safe Fall" },
-		{ SkillSenseHeading, "Sense Heading" },
-		{ SkillSinging, "Singing" },
-		{ SkillSneak, "Sneak" },
-		{ SkillSpecializeAbjure, "Specialize Abjuration" },
-		{ SkillSpecializeAlteration, "Specialize Alteration" },
-		{ SkillSpecializeConjuration, "Specialize Conjuration" },
-		{ SkillSpecializeDivination, "Specialize Divination" },
-		{ SkillSpecializeEvocation, "Specialize Evocation" },
-		{ SkillPickPockets, "Pick Pockets" },
-		{ SkillStringedInstruments, "Stringed Instruments" },
-		{ SkillSwimming, "Swimming" },
-		{ SkillThrowing, "Throwing" },
-		{ SkillTigerClaw, "Tiger Claw" },
-		{ SkillTracking, "Tracking" },
-		{ SkillWindInstruments, "Wind Instruments" },
-		{ SkillFishing, "Fishing" },
-		{ SkillMakePoison, "Make Poison" },
-		{ SkillTinkering, "Tinkering" },
-		{ SkillResearch, "Research" },
-		{ SkillAlchemy, "Alchemy" },
-		{ SkillBaking, "Baking" },
-		{ SkillTailoring, "Tailoring" },
-		{ SkillSenseTraps, "Sense Traps" },
-		{ SkillBlacksmithing, "Blacksmithing" },
-		{ SkillFletching, "Fletching" },
-		{ SkillBrewing, "Brewing" },
-		{ SkillAlcoholTolerance, "Alcohol Tolerance" },
-		{ SkillBegging, "Begging" },
-		{ SkillJewelryMaking, "Jewelry Making" },
-		{ SkillPottery, "Pottery" },
-		{ SkillPercussionInstruments, "Percussion Instruments" },
-		{ SkillIntimidation, "Intimidation" },
-		{ SkillBerserking, "Berserking" },
-		{ SkillTaunt, "Taunt" },
-		{ SkillFrenzy, "Frenzy" },
-		{ SkillRemoveTraps, "Remove Traps" },
-		{ SkillTripleAttack, "Triple Attack" },
-		{ Skill2HPiercing, "2H Piercing" }
-	};
-	return skill_type_map;
-}
-
-const std::vector<EQ::skills::SkillType>& EQ::skills::GetExtraDamageSkills()
-{
-	static const std::vector<EQ::skills::SkillType> v = {
-		EQ::skills::SkillBackstab,
-		EQ::skills::SkillBash,
-		EQ::skills::SkillDragonPunch, // Same ID as Tail Rake
-		EQ::skills::SkillEagleStrike,
-		EQ::skills::SkillFlyingKick,
-		EQ::skills::SkillKick,
-		EQ::skills::SkillRoundKick,
-		EQ::skills::SkillRoundKick,
-		EQ::skills::SkillTigerClaw,
-		EQ::skills::SkillFrenzy
-	};
-
-	return v;
-}
-
-std::string EQ::skills::GetSkillName(SkillType skill)
-{
-	if (skill >= Skill1HBlunt && skill <= Skill2HPiercing) {
-		auto skills = GetSkillTypeMap();
-		return skills[skill];
+	switch (skill_id) {
+		case Abjuration:
+		case Alteration:
+		case Conjuration:
+		case Divination:
+		case Evocation:
+			return true;
+		default:
+			return false;
 	}
-	return {};
 }
 
-EQ::SkillProfile::SkillProfile()
+bool Skill::IsMonk(uint16 skill_id)
 {
-	memset(&Skill, 0, (sizeof(uint32) * PACKET_SKILL_ARRAY_SIZE));
+	return (
+		skill_id == Skill::DragonPunch ||
+		skill_id == Skill::EagleStrike ||
+		skill_id == Skill::FlyingKick ||
+		skill_id == Skill::RoundKick ||
+		skill_id == Skill::TigerClaw
+	);
 }
 
-uint32 EQ::SkillProfile::GetSkill(int skill_id)
+int Skill::GetBaseDamage(uint16 skill_id)
 {
-	if (skill_id < 0 || skill_id >= PACKET_SKILL_ARRAY_SIZE)
-		return 0;
+	switch (skill_id) {
+		case Bash:
+			return 2;
+		case DragonPunch:
+			return 12;
+		case EagleStrike:
+			return 7;
+		case FlyingKick:
+			return 25;
+		case Kick:
+			return 3;
+		case RoundKick:
+			return 5;
+		case TigerClaw:
+			return 4;
+		case Frenzy:
+			return 10;
+		default:
+			return 0;
+	}
+}
 
-	return Skill[skill_id];
+bool Skill::IsValid(uint16 skill_id)
+{
+	return skill_names.find(skill_id) != skill_names.end();
 }

@@ -163,7 +163,7 @@ namespace RoF
 		OUT(hit_heading);
 		OUT(hit_pitch);
 		OUT(type);
-		eq->damage = 0;
+		eq->damage = Damage::None;
 		eq->unknown31 = 0;
 		OUT(spell);
 		OUT(spell_level);
@@ -1827,7 +1827,7 @@ namespace RoF
 		eq->unknown891 = 0;
 		eq->unknown892 = 0;
 		eq->unknown893 = 0;
-		eq->fall_damage = 0;	// 0 = Fall Damage on, 1 = Fall Damage off
+		eq->fall_damage = Damage::None;	// 0 = Fall Damage on, 1 = Fall Damage off
 		eq->unknown895 = 0;
 		eq->unknown908 = 2;
 		eq->unknown912 = 2;

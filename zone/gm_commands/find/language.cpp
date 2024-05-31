@@ -3,14 +3,14 @@
 void FindLanguage(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(2)) {
-		const auto language_id = Strings::ToInt(sep->arg[2]);
-		if (EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
+		const uint8 language_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+		const std::string& language_name = Language::GetName(language_id);
+		if (Strings::EqualFold(language_name, "UNKNOWN LANGUAGE")) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Language {} | {}",
-					language_id,
-					EQ::constants::GetLanguageName(language_id)
+					"Language ID {} does not exist.",
+					language_id
 				).c_str()
 			);
 
@@ -20,20 +20,21 @@ void FindLanguage(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Language ID {} was not found.",
-				language_id
+				"Language {} | {}",
+				language_id,
+				language_name
 			).c_str()
 		);
 
 		return;
 	}
 
-	const auto& search_criteria = Strings::ToLower(sep->argplus[2]);
+	const std::string& search_criteria = Strings::ToLower(sep->argplus[2]);
 
-	auto found_count = 0;
+	uint32 found_count = 0;
 
-	for (const auto& l : EQ::constants::GetLanguageMap()) {
-		const auto& language_name_lower = Strings::ToLower(l.second);
+	for (const auto& l : language_names) {
+		const std::string& language_name_lower = Strings::ToLower(l.second);
 		if (!Strings::Contains(language_name_lower, search_criteria)) {
 			continue;
 		}

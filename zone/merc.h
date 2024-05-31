@@ -52,8 +52,8 @@ public:
 	virtual ~Merc();
 
 	//abstract virtual function implementations requird by base abstract class
-	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, uint8 killed_by = 0, bool is_buff_tic = false);
-	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
+	virtual bool Death(Mob* killer_mob, int64 damage, uint16 spell_id, uint16 attack_skill, uint8 killed_by = 0, bool is_buff_tic = false);
+	virtual void Damage(Mob* from, int64 damage, uint16 spell_id, uint16 attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None);
 	virtual bool Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = false,
 	bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr);
 	virtual bool HasRaid() { return false; }
@@ -126,7 +126,7 @@ public:
 	bool IsOfClientBotMerc() const override { return true; }
 
 	virtual void FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho);
-	static Merc* LoadMercenary(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
+	static Merc* LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id, bool updateFromDB = false);
 	void UpdateMercInfo(Client *c);
 	void UpdateMercStats(Client *c, bool setmax = false);
 	void UpdateMercAppearance();
@@ -151,13 +151,13 @@ public:
 
 	// "GET" Class Methods
 	virtual Mob* GetOwner();
-	Client* GetMercenaryOwner();
+	Client* GetMercOwner();
 	virtual Mob* GetOwnerOrSelf();
-	uint32 GetMercenaryID() { return _MercID; }
-	uint32 GetMercenaryCharacterID( ) { return owner_char_id; }
-	uint32 GetMercenaryTemplateID() { return _MercTemplateID; }
-	uint32 GetMercenaryType() { return _MercType; }
-	uint32 GetMercenarySubType() { return _MercSubType; }
+	uint32 GetMercID() { return _MercID; }
+	uint32 GetMercCharacterID( ) { return owner_char_id; }
+	uint32 GetMercTemplateID() { return _MercTemplateID; }
+	uint32 GetMercType() { return _MercType; }
+	uint32 GetMercSubType() { return _MercSubType; }
 	uint8 GetProficiencyID() { return _ProficiencyID; }
 	uint8 GetTierID() { return _TierID; }
 	uint32 GetCostFormula() { return _CostFormula; }
@@ -168,10 +168,10 @@ public:
 	inline const uint8 GetClientVersion() const { return _OwnerClientVersion; }
 
 	virtual void SetTarget(Mob* mob);
-	bool HasSkill(EQ::skills::SkillType skill_id) const;
-	bool CanHaveSkill(EQ::skills::SkillType skill_id) const;
-	uint16 MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const;
-	inline uint16 MaxSkill(EQ::skills::SkillType skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
+	bool HasSkill(uint16 skill_id) const;
+	bool CanHaveSkill(uint16 skill_id) const;
+	uint16 MaxSkill(uint16 skillid, uint16 class_, uint16 level) const;
+	inline uint16 MaxSkill(uint16 skillid) const { return MaxSkill(skillid, GetClass(), GetLevel()); }
 	virtual void DoClassAttacks(Mob *target);
 	void CheckHateList();
 	bool CheckTaunt();
@@ -275,16 +275,19 @@ protected:
 
 	Timer evade_timer; // can be moved to pTimers at some point
 
-	uint16 skills[EQ::skills::HIGHEST_SKILL + 1];
+	uint16 skills[Skill::Max + 1];
 	uint32 equipment[EQ::invslot::EQUIPMENT_COUNT]; //this is an array of item IDs
-	uint32 d_melee_texture1; //this is an item Material value
-	uint32 d_melee_texture2; //this is an item Material value (offhand)
+	uint16 d_melee_texture1; //this is an item Material value
+	uint16 d_melee_texture2; //this is an item Material value (offhand)
 	uint8 prim_melee_type; //Sets the Primary Weapon attack message and animation
 	uint8 sec_melee_type; //Sets the Secondary Weapon attack message and animation
 
 private:
 
 	int32 CalcAC();
+	int32 GetACMit();
+	int32 GetACAvoid();
+	int32 acmod();
 	int32 CalcATK();
 	//int CalcHaste();
 
@@ -304,6 +307,7 @@ private:
 	int32 CalcCorrup();
 	int64 CalcMaxHP();
 	int64 CalcBaseHP();
+	int64 GetClassHPFactor();
 	int64 CalcHPRegen();
 	int64 CalcHPRegenCap();
 	int64 CalcMaxMana();
@@ -327,7 +331,7 @@ private:
 
 	float GetDefaultSize();
 
-	bool LoadMercenarySpells();
+	bool LoadMercSpells();
 	bool CheckStance(int16 stance);
 	std::vector<MercSpell> GetMercSpells() { return merc_spells; }
 

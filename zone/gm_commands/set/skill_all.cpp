@@ -15,7 +15,7 @@ void SetSkillAll(Client *c, const Seperator *sep)
 
 	const uint16 skill_level = Strings::ToUnsignedInt(sep->arg[2]);
 
-	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+	for (const auto& s : skill_names) {
 		if (t->CanHaveSkill(s.first) && t->MaxSkill(s.first)) {
 			if (c != t) {
 				c->Message(

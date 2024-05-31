@@ -65,7 +65,7 @@ void bot_command_pickpocket(Client *c, const Seperator *sep)
 	}
 
 	// Setup variables for calcs
-	bool steal_skill  = my_bot->GetSkill(EQ::skills::SkillPickPockets);
+	bool steal_skill  = my_bot->GetSkill(Skill::PickPockets);
 	bool steal_chance = steal_skill * 100 / (5 * over_level + 5);
 
 	// Determine whether to steal money or an item.

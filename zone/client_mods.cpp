@@ -237,10 +237,9 @@ int64 Client::CalcHPRegen(bool bCombat)
 	item_regen += aabonuses.HPRegen;
 
 	int64 base = 0;
-	auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-	if (base_data.level == GetLevel()) {
-		base = static_cast<int>(base_data.hp_regen);
-	}
+	auto base_data = database.GetBaseData(GetLevel(), GetClass());
+	if (base_data)
+		base = static_cast<int>(base_data->hp_regen);
 
 	auto level = GetLevel();
 	bool skip_innate = false;
@@ -289,7 +288,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_hp = GetMaxHP();
-		int64 fast_regen = 6 * (max_hp / (zone && zone->newzone_data.fast_regen_hp > 0 ? zone->newzone_data.fast_regen_hp : 180));
+		int fast_regen = 6 * (max_hp / zone->newzone_data.fast_regen_hp);
 		if (base < fast_regen) // weird, but what the client is doing
 			base = fast_regen;
 	}
@@ -322,12 +321,11 @@ int64 Client::CalcMaxHP()
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
 	//the aa description
-
-	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;	//Natural Durability, Physical Enhancement, Planar Durability
+	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
-	max_hp += spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange;
-
+	max_hp += spellbonuses.HP + aabonuses.HP;
 	max_hp += GroupLeadershipAAHealthEnhancement();
+	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
 	if (current_hp > max_hp) {
 		current_hp = max_hp;
 	}
@@ -347,7 +345,7 @@ uint32 Mob::GetClassLevelFactor()
 	uint32 multiplier = 0;
 	uint8  mlevel     = GetLevel();
 	switch (GetClass()) {
-		case Class::Warrior: {
+		case WARRIOR: {
 			if (mlevel < 20) {
 				multiplier = 220;
 			}
@@ -374,9 +372,9 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case Class::Druid:
-		case Class::Cleric:
-		case Class::Shaman: {
+		case DRUID:
+		case CLERIC:
+		case SHAMAN: {
 			if (mlevel < 70) {
 				multiplier = 150;
 			}
@@ -385,9 +383,9 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case Class::Berserker:
-		case Class::Paladin:
-		case Class::ShadowKnight: {
+		case BERSERKER:
+		case PALADIN:
+		case SHADOWKNIGHT: {
 			if (mlevel < 35) {
 				multiplier = 210;
 			}
@@ -411,10 +409,10 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case Class::Monk:
-		case Class::Bard:
-		case Class::Rogue:
-		case Class::Beastlord: {
+		case MONK:
+		case BARD:
+		case ROGUE:
+		case BEASTLORD: {
 			if (mlevel < 51) {
 				multiplier = 180;
 			}
@@ -429,7 +427,7 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case Class::Ranger: {
+		case RANGER: {
 			if (mlevel < 58) {
 				multiplier = 200;
 			}
@@ -441,10 +439,10 @@ uint32 Mob::GetClassLevelFactor()
 			}
 			break;
 		}
-		case Class::Magician:
-		case Class::Wizard:
-		case Class::Necromancer:
-		case Class::Enchanter: {
+		case MAGICIAN:
+		case WIZARD:
+		case NECROMANCER:
+		case ENCHANTER: {
 			if (mlevel < 70) {
 				multiplier = 120;
 			}
@@ -488,9 +486,9 @@ int64 Client::CalcBaseHP()
 			stats += 255;
 		}
 		base_hp = 5;
-		auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-		if (base_data.level == GetLevel()) {
-			base_hp += base_data.hp + (base_data.hp_fac * stats);
+		auto base_data = database.GetBaseData(GetLevel(), GetClass());
+		if (base_data) {
+			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
 			base_hp += itembonuses.heroic_max_hp;
 		}
 	}
@@ -506,6 +504,50 @@ int64 Client::CalcBaseHP()
 		base_hp = (5) + (GetLevel() * lm / 10) + (((GetSTA() - Post255) * GetLevel() * lm / 3000)) + ((Post255 * GetLevel()) * lm / 6000);
 	}
 	return base_hp;
+}
+
+// This is for calculating Base HPs + STA bonus for SoD or later clients.
+uint64 Client::GetClassHPFactor()
+{
+	int factor;
+	// Note: Base HP factor under level 41 is equal to factor / 12, and from level 41 to 80 is factor / 6.
+	// Base HP over level 80 is factor / 10
+	// HP per STA point per level is factor / 30 for level 80+
+	// HP per STA under level 40 is the level 80 HP Per STA / 120, and for over 40 it is / 60.
+	switch (GetClass()) {
+		case DRUID:
+		case ENCHANTER:
+		case NECROMANCER:
+		case MAGICIAN:
+		case WIZARD:
+			factor = 240;
+			break;
+		case BEASTLORD:
+		case BERSERKER:
+		case MONK:
+		case ROGUE:
+		case SHAMAN:
+			factor = 255;
+			break;
+		case BARD:
+		case CLERIC:
+			factor = 264;
+			break;
+		case SHADOWKNIGHT:
+		case PALADIN:
+			factor = 288;
+			break;
+		case RANGER:
+			factor = 276;
+			break;
+		case WARRIOR:
+			factor = 300;
+			break;
+		default:
+			factor = 240;
+			break;
+	}
+	return factor;
 }
 
 // This should return the combined AC of all the items the player is wearing.
@@ -524,26 +566,28 @@ int32 Client::GetRawItemAC()
 
 int64 Client::CalcMaxMana()
 {
-	if (IsIntelligenceCasterClass() || IsWisdomCasterClass()) {
-		max_mana = (
-			CalcBaseMana() +
-			itembonuses.Mana +
-			spellbonuses.Mana +
-			aabonuses.Mana +
-			GroupLeadershipAAManaEnhancement()
-		);
-	} else {
-		max_mana = 0;
+	switch (GetCasterClass()) {
+		case 'I':
+		case 'W': {
+				max_mana = (CalcBaseMana() + itembonuses.Mana + spellbonuses.Mana + aabonuses.Mana + GroupLeadershipAAManaEnhancement());
+				break;
+			}
+		case 'N': {
+				max_mana = 0;
+				break;
+			}
+		default: {
+				LogSpells("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
+				max_mana = 0;
+				break;
+			}
 	}
-
 	if (max_mana < 0) {
 		max_mana = 0;
 	}
-
 	if (current_mana > max_mana) {
 		current_mana = max_mana;
 	}
-
 	int mana_perc_cap = spellbonuses.ManaPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if (mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
@@ -551,100 +595,108 @@ int64 Client::CalcMaxMana()
 			current_mana = curMana_cap;
 		}
 	}
-
 	LogSpells("for [{}] returning [{}]", GetName(), max_mana);
 	return max_mana;
 }
 
 int64 Client::CalcBaseMana()
 {
-	int   ConvertedWisInt = 0;
-	int   MindLesserFactor, MindFactor;
-	int   WisInt          = 0;
-	int64 base_mana       = 0;
-	int   wisint_mana     = 0;
-	int64 max_m           = 0;
-
-	if (IsIntelligenceCasterClass()) {
-		WisInt = GetINT();
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-			ConvertedWisInt = WisInt;
-
-			int over200 = WisInt;
-			if (WisInt > 100) {
-				if (WisInt > 200) {
-					over200 = (WisInt - 200) / -2 + WisInt;
+	int ConvertedWisInt = 0;
+	int MindLesserFactor, MindFactor;
+	int WisInt = 0;
+	int64 base_mana = 0;
+	int wisint_mana = 0;
+	int64 max_m = 0;
+	switch (GetCasterClass()) {
+		case 'I':
+			WisInt = GetINT();
+			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
+				if (WisInt > 100) {
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
+					}
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 				}
-				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
-			}
-
-			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-			if (base_data.level == GetLevel()) {
-				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
-			}
-		} else {
-			if (((WisInt - 199) / 2) > 0) {
-				MindLesserFactor = (WisInt - 199) / 2;
-			} else {
-				MindLesserFactor = 0;
-			}
-
-			MindFactor = WisInt - MindLesserFactor;
-
-			if (WisInt > 100) {
-				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-			} else {
-				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
-			}
-		}
-	} else if (IsWisdomCasterClass()) {
-		WisInt = GetWIS();
-
-		if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-			ConvertedWisInt = WisInt;
-
-			int over200 = WisInt;
-			if (WisInt > 100) {
-				if (WisInt > 200) {
-					over200 = (WisInt - 200) / -2 + WisInt;
+				auto base_data = database.GetBaseData(GetLevel(), GetClass());
+				if (base_data) {
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_max_mana;
 				}
-				ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
 			}
-
-			auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-			if (base_data.level == GetLevel()) {
-				max_m = base_data.mana + (ConvertedWisInt * base_data.mana_fac) + itembonuses.heroic_max_mana;
+			else {
+				if ((( WisInt - 199 ) / 2) > 0) {
+					MindLesserFactor = ( WisInt - 199 ) / 2;
+				}
+				else {
+					MindLesserFactor = 0;
+				}
+				MindFactor = WisInt - MindLesserFactor;
+				if (WisInt > 100) {
+					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+				}
+				else {
+					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+				}
 			}
-		} else {
-			if (((WisInt - 199) / 2) > 0) {
-				MindLesserFactor = (WisInt - 199) / 2;
-			} else {
-				MindLesserFactor = 0;
+			break;
+		case 'W':
+			WisInt = GetWIS();
+			if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+				ConvertedWisInt = WisInt;
+				int over200 = WisInt;
+				if (WisInt > 100) {
+					if (WisInt > 200) {
+						over200 = (WisInt - 200) / -2 + WisInt;
+					}
+					ConvertedWisInt = (3 * over200 - 300) / 2 + over200;
+				}
+				auto base_data = database.GetBaseData(GetLevel(), GetClass());
+				if (base_data) {
+					max_m = base_data->base_mana +
+						(ConvertedWisInt * base_data->mana_factor) + itembonuses.heroic_max_mana;
+				}
 			}
-
-			MindFactor = WisInt - MindLesserFactor;
-
-			if (WisInt > 100) {
-				max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
-			} else {
-				max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+			else {
+				if ((( WisInt - 199 ) / 2) > 0) {
+					MindLesserFactor = ( WisInt - 199 ) / 2;
+				}
+				else {
+					MindLesserFactor = 0;
+				}
+				MindFactor = WisInt - MindLesserFactor;
+				if (WisInt > 100) {
+					max_m = (((5 * (MindFactor + 20)) / 2) * 3 * GetLevel() / 40);
+				}
+				else {
+					max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
+				}
 			}
-		}
-	} else {
-		max_m = 0;
+			break;
+		case 'N': {
+				max_m = 0;
+				break;
+			}
+		default: {
+				LogDebug("Invalid Class [{}] in CalcMaxMana", GetCasterClass());
+				max_m = 0;
+				break;
+			}
 	}
-
+	#if EQDEBUG >= 11
+	LogDebug("Client::CalcBaseMana() called for [{}] - returning [{}]", GetName(), max_m);
+	#endif
 	return max_m;
 }
 
 int64 Client::CalcBaseManaRegen()
 {
 	uint8 clevel = GetLevel();
-	int64 regen = 0;
+	int32 regen = 0;
 	if (IsSitting() || (GetHorseId() != 0)) {
-		if (HasSkill(EQ::skills::SkillMeditate)) {
-			regen = (((GetSkill(EQ::skills::SkillMeditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
+		if (HasSkill(Skill::Meditate)) {
+			regen = (((GetSkill(Skill::Meditate) / 10) + (clevel - (clevel / 4))) / 4) + 4;
 		}
 		else {
 			regen = 2;
@@ -658,7 +710,7 @@ int64 Client::CalcBaseManaRegen()
 
 int64 Client::CalcManaRegen(bool bCombat)
 {
-	int64 regen = 0;
+	int regen = 0;
 	auto level = GetLevel();
 	// so the new formulas break down with older skill caps where you don't have the skill until 4 or 8
 	// so for servers that want to use the old skill progression they can set this rule so they
@@ -670,7 +722,7 @@ int64 Client::CalcManaRegen(bool bCombat)
 			// kind of weird to do it here w/e
 			// client does some base medding regen for shrouds here
 			if (GetClass() != Class::Bard) {
-				auto skill = GetSkill(EQ::skills::SkillMeditate);
+				auto skill = GetSkill(Skill::Meditate);
 				if (skill > 0) {
 					regen++;
 					if (skill > 1)
@@ -680,9 +732,9 @@ int64 Client::CalcManaRegen(bool bCombat)
 				}
 			}
 			if (old)
-				regen = std::max(regen, static_cast<int64>(2));
+				regen = std::max(regen, 2);
 		} else if (old) {
-			regen = std::max(regen, static_cast<int64>(1));
+			regen = std::max(regen, 1);
 		}
 	}
 
@@ -789,10 +841,10 @@ uint32 Client::CalcCurrentWeight()
 
 int32 Client::CalcAlcoholPhysicalEffect()
 {
-	if (GetIntoxication() <= 55) {
+	if (m_pp.intoxication <= 55) {
 		return 0;
 	}
-	return (GetIntoxication() - 40) / 16;
+	return (m_pp.intoxication - 40) / 16;
 }
 
 int32 Client::CalcSTR()
@@ -870,8 +922,8 @@ int32 Client::CalcINT()
 	int32 val = m_pp.INT + itembonuses.INT + spellbonuses.INT;
 	int32 mod = aabonuses.INT;
 	INT = val + mod;
-	if (GetIntoxication()) {
-		int32 AlcINT = INT - (int32)((float)GetIntoxication() / 200.0f * (float)INT) - 1;
+	if (m_pp.intoxication) {
+		int32 AlcINT = INT - (int32)((float)m_pp.intoxication / 200.0f * (float)INT) - 1;
 		if ((AlcINT < (int)(0.2 * INT))) {
 			INT = (int)(0.2f * (float)INT);
 		}
@@ -894,8 +946,8 @@ int32 Client::CalcWIS()
 	int32 val = m_pp.WIS + itembonuses.WIS + spellbonuses.WIS;
 	int32 mod = aabonuses.WIS;
 	WIS = val + mod;
-	if (GetIntoxication()) {
-		int32 AlcWIS = WIS - (int32)((float)GetIntoxication() / 200.0f * (float)WIS) - 1;
+	if (m_pp.intoxication) {
+		int32 AlcWIS = WIS - (int32)((float)m_pp.intoxication / 200.0f * (float)WIS) - 1;
 		if ((AlcWIS < (int)(0.2 * WIS))) {
 			WIS = (int)(0.2f * (float)WIS);
 		}
@@ -999,7 +1051,7 @@ int Client::CalcHaste()
 	else {   // 1-50
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 	}
-	h += extra_haste;	//GM granted haste.
+	h += ExtraHaste;	//GM granted haste.
 	Haste = 100 + h;
 	return Haste;
 }
@@ -1069,7 +1121,7 @@ int32	Client::CalcMR()
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
+	if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1143,14 +1195,14 @@ int32	Client::CalcFR()
 			FR = 20;
 	}
 	int c = GetClass();
-	if (c == Class::Ranger) {
+	if (c == RANGER) {
 		FR += 4;
 		int l = GetLevel();
 		if (l > 49) {
 			FR += l - 49;
 		}
 	}
-	if (c == Class::Monk) {
+	if (c == MONK) {
 		FR += 8;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1230,19 +1282,19 @@ int32	Client::CalcDR()
 	}
 	int c = GetClass();
 	// the monk one is part of base resist
-	if (c == Class::Monk) {
+	if (c == MONK) {
 		int l = GetLevel();
 		if (l > 50)
 			DR += l - 50;
 	}
-	if (c == Class::Paladin) {
+	if (c == PALADIN) {
 		DR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			DR += l - 49;
 		}
 	}
-	else if (c == Class::ShadowKnight || c == Class::Beastlord) {
+	else if (c == SHADOWKNIGHT || c == BEASTLORD) {
 		DR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1322,19 +1374,19 @@ int32	Client::CalcPR()
 	}
 	int c = GetClass();
 	// this monk bonus is part of the base
-	if (c == Class::Monk) {
+	if (c == MONK) {
 		int l = GetLevel();
 		if (l > 50)
 			PR += l - 50;
 	}
-	if (c == Class::Rogue) {
+	if (c == ROGUE) {
 		PR += 8;
 		int l = GetLevel();
 		if (l > 49) {
 			PR += l - 49;
 		}
 	}
-	else if (c == Class::ShadowKnight) {
+	else if (c == SHADOWKNIGHT) {
 		PR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1413,7 +1465,7 @@ int32	Client::CalcCR()
 			CR = 25;
 	}
 	int c = GetClass();
-	if (c == Class::Ranger || c == Class::Beastlord) {
+	if (c == RANGER || c == BEASTLORD) {
 		CR += 4;
 		int l = GetLevel();
 		if (l > 49) {
@@ -1447,7 +1499,7 @@ int32 Client::CalcATK()
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	if (GetClass() != Class::Bard || spells[spell_id].is_discipline || spell_id == SPELL_AMPLIFICATION) {
+	if (GetClass() != BARD) {
 		//Other classes can get a base effects mod using SPA 413
 		if (HasBaseEffectFocus()) {
 			return (10 + (GetFocusEffect(focusFcBaseEffects, spell_id) / 10));//TODO: change action->instrument mod to float to support < 10% focus values
@@ -1510,11 +1562,11 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Will need to confirm on live before implementing.
 	*/
 
-	switch (spells[spell_id].skill) {
-	case EQ::skills::SkillPercussionInstruments:
+	switch (spells[spell_id].skill_id) {
+	case Skill::PercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillPercussionInstruments) == 0)
+		else if (GetSkill(Skill::PercussionInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.percussionMod > spellbonuses.percussionMod)
 			effectmod = itembonuses.percussionMod;
@@ -1523,10 +1575,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.percussionMod;
 		break;
-	case EQ::skills::SkillStringedInstruments:
+	case Skill::StringedInstruments:
 		if (itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillStringedInstruments) == 0)
+		else if (GetSkill(Skill::StringedInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.stringedMod > spellbonuses.stringedMod)
 			effectmod = itembonuses.stringedMod;
@@ -1535,10 +1587,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.stringedMod;
 		break;
-	case EQ::skills::SkillWindInstruments:
+	case Skill::WindInstruments:
 		if (itembonuses.windMod == 0 && spellbonuses.windMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillWindInstruments) == 0)
+		else if (GetSkill(Skill::WindInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.windMod > spellbonuses.windMod)
 			effectmod = itembonuses.windMod;
@@ -1547,10 +1599,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.windMod;
 		break;
-	case EQ::skills::SkillBrassInstruments:
+	case Skill::BrassInstruments:
 		if (itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
 			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillBrassInstruments) == 0)
+		else if (GetSkill(Skill::BrassInstruments) == 0)
 			effectmod = 10;
 		else if (itembonuses.brassMod > spellbonuses.brassMod)
 			effectmod = itembonuses.brassMod;
@@ -1559,7 +1611,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		if (IsBardSong(spell_id))
 			effectmod += aabonuses.brassMod;
 		break;
-	case EQ::skills::SkillSinging:
+	case Skill::Singing:
 		if (itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
 			effectmod = 10;
 		else if (itembonuses.singingMod > spellbonuses.singingMod)
@@ -1631,9 +1683,9 @@ int64 Client::CalcBaseEndurance()
 		else if (stats > 100.0f) {
 			stats = 2.5f * (stats - 100.0f) + 100.0f;
 		}
-		auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-		if (base_data.level == GetLevel()) {
-			base_end = base_data.end + itembonuses.heroic_max_end + (base_data.end_fac * static_cast<int>(stats));
+		auto base_data = database.GetBaseData(GetLevel(), GetClass());
+		if (base_data) {
+			base_end = base_data->base_end + itembonuses.heroic_max_end + (base_data->endurance_factor * static_cast<int>(stats));
 		}
 	}
 	else {
@@ -1668,9 +1720,9 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 {
 	int64 base = 0;
 	if (!IsStarved()) {
-		auto base_data = zone->GetBaseData(GetLevel(), GetClass());
-		if (base_data.level == GetLevel()) {
-			base = static_cast<int>(base_data.end_regen);
+		auto base_data = database.GetBaseData(GetLevel(), GetClass());
+		if (base_data) {
+			base = static_cast<int>(base_data->end_regen);
 			if (!auto_attack && base > 0)
 				base += base / 2;
 		}
@@ -1681,7 +1733,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 	int weight_limit = GetSTR();
 	auto level = GetLevel();
-	if (GetClass() == Class::Monk) {
+	if (GetClass() == MONK) {
 		if (level > 99)
 			weight_limit = 58;
 		else if (level > 94)

@@ -15,5 +15,5 @@ void command_damage(Client *c, const Seperator *sep)
 	}
 
 	const auto damage = Strings::ToBigInt(sep->arg[1]);
-	target->Damage(c, damage, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false);
+	target->Damage(c, damage, SPELL_UNKNOWN, Skill::HandToHand, false);
 }

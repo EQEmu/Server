@@ -8,7 +8,7 @@ SkillCaps *SkillCaps::SetContentDatabase(Database *db)
 	return this;
 }
 
-SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
+SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, uint16 skill_id, uint8 level)
 {
 	if (!IsPlayerClass(class_id)) {
 		return SkillCapsRepository::NewEntity();
@@ -24,12 +24,12 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 	return SkillCapsRepository::NewEntity();
 }
 
-uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
+uint8 SkillCaps::GetSkillTrainLevel(uint8 class_id, uint16 skill_id, uint8 level)
 {
 	if (
 		!IsPlayerClass(class_id) ||
 		class_id > Class::PLAYER_CLASS_COUNT ||
-		static_cast<uint32>(skill_id) > (EQ::skills::HIGHEST_SKILL + 1)
+		static_cast<uint32>(skill_id) > (Skill::Max + 1)
 	) {
 		return 0;
 	}
@@ -63,7 +63,7 @@ void SkillCaps::LoadSkillCaps()
 		if (
 			e.level < 1 ||
 			!IsPlayerClass(e.class_id) ||
-			static_cast<EQ::skills::SkillType>(e.skill_id) >= EQ::skills::SkillCount
+			e.skill_id >= Skill::Max
 		) {
 			continue;
 		}

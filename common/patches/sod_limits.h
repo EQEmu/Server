@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -301,13 +301,13 @@ namespace SoD
 	namespace skills {
 		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::SoD; }
 
-		const size_t LastUsableSkill = EQ::skills::SkillTripleAttack;
+		const size_t LastUsableSkill = Skill::TripleAttack;
 
 	} /*skills*/
 
 	namespace spells {
 		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::SoD; }
-		
+
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,
 			Gem2 = 1,
@@ -328,7 +328,7 @@ namespace SoD
 		const int SPELL_ID_MAX = 23000;
 		const int SPELLBOOK_SIZE = 480;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
-		
+
 		const int LONG_BUFFS = 25;
 		const int SHORT_BUFFS = 15;
 		const int DISC_BUFFS = 1;

@@ -48,7 +48,7 @@ bool TitleManager::LoadTitles()
 	for (auto row : results) {
 		TitleEntry title;
 		title.title_id = Strings::ToInt(row[0]);
-		title.skill_id = (EQ::skills::SkillType) Strings::ToInt(row[1]);
+		title.skill_id =  Strings::ToInt(row[1]);
 		title.min_skill_value = Strings::ToInt(row[2]);
 		title.max_skill_value = Strings::ToInt(row[3]);
 		title.min_aa_points = Strings::ToInt(row[4]);
@@ -169,7 +169,7 @@ bool TitleManager::IsClientEligibleForTitle(Client *client, TitleEntry title)
 	}
 
 	if (title.skill_id >= 0) {
-		auto skill_id = static_cast<EQ::skills::SkillType>(title.skill_id);
+		auto skill_id = title.skill_id;
 		if (title.min_skill_value >= 0 && client->GetRawSkill(skill_id) < static_cast<uint32>(title.min_skill_value)) {
 			return false;
 		}

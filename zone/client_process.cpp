@@ -51,7 +51,6 @@
 #include "zone.h"
 #include "zonedb.h"
 #include "../common/events/player_event_logs.h"
-#include "water_map.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -177,10 +176,6 @@ bool Client::Process() {
 			if (myraid) {
 				myraid->MemberZoned(this);
 			}
-			if (IsInAGuild()) {
-				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
-			}
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
@@ -194,23 +189,36 @@ bool Client::Process() {
 		}
 
 		if (camp_timer.Check()) {
-			Raid *myraid = entity_list.GetRaidByClient(this);
-			if (myraid) {
-				myraid->MemberZoned(this);
-			}
+			Raid* raid = entity_list.GetRaidByClient(this);
+			if (raid)
+				raid->RemoveMember(this->GetName());
 			LeaveGroup();
 			Save();
-			if (IsInAGuild()) {
-				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
-			}
-
 			if (GetMerc())
 			{
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
 			instalog = true;
+		}
+
+		if (heroforge_wearchange_timer.Check()) {
+			/*
+				This addresses bug where on zone in heroforge models would not be sent to other clients when this was
+				in Client::CompleteConnect(). Sending after a small 250 ms delay after that function resolves the issue.
+				Unclear the underlying reason for this, if a better solution can be found then can move this back.
+			*/
+			if (queue_wearchange_slot >= 0) { //Resend slot from Client::SwapItem if heroforge item is swapped.
+				SendWearChange(static_cast<uint8>(queue_wearchange_slot));
+			}
+			else { //Send from Client::CompleteConnect()
+				SendWearChangeAndLighting(EQ::textures::LastTexture);
+				Mob *pet = GetPet();
+				if (pet) {
+					pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
+				}
+			}
+			heroforge_wearchange_timer.Disable();
 		}
 
 		if (IsStunned() && stunned_timer.Check())
@@ -327,7 +335,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
+								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
@@ -347,7 +355,7 @@ bool Client::Process() {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
-								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
+								if (CheckLosFN(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
 								}
@@ -424,7 +432,7 @@ bool Client::Process() {
 			}
 		}
 
-		if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
+		if (GetClass() == WARRIOR || GetClass() == BERSERKER) {
 			if (!dead && !IsBerserk() && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
 				entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				berserk = true;
@@ -452,7 +460,7 @@ bool Client::Process() {
 				//you can't see your target
 			}
 			else if (auto_attack_target->GetHP() > -10 && IsAttackAllowed(auto_attack_target)) {
-				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
+				CheckIncreaseSkill(Skill::DualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
 					TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotSecondary);
@@ -509,10 +517,15 @@ bool Client::Process() {
 				Save(0);
 			}
 
-			if (GetIntoxication() > 0)
+			if (m_pp.intoxication > 0)
 			{
-				SetIntoxication(GetIntoxication()-1);
+				--m_pp.intoxication;
 				CalcBonuses();
+			}
+
+			if (ItemTickTimer.Check())
+			{
+				TickItemCheck();
 			}
 
 			if (ItemQuestTimer.Check())
@@ -551,18 +564,13 @@ bool Client::Process() {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
-			if (IsInAGuild()) {
-				guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
-				guild_mgr.SendToWorldSendGuildMembersList(GuildID());
-			}
-
 			return false;
 		}
 		else if (!linkdead_timer.Enabled()) {
 			linkdead_timer.Start(RuleI(Zone, ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
-			SendAppearancePacket(AppearanceType::Linkdead, 1);
+			SendAppearancePacket(AT_Linkdead, 1);
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
@@ -731,8 +739,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 	}
 
-	RecordStats();
-
 	Disconnect();
 }
 
@@ -753,12 +759,10 @@ void Client::BulkSendInventoryItems()
 		}
 	}
 
-	const bool delete_no_rent = database.NoRentExpired(GetName());
-	if (delete_no_rent) { //client was offline for more than 30 minutes, delete no rent items
-		if (RuleB(Inventory, TransformSummonedBags)) {
+	bool deletenorent = database.NoRentExpired(GetName());
+	if (deletenorent) { //client was offline for more than 30 minutes, delete no rent items
+		if (RuleB(Inventory, TransformSummonedBags))
 			DisenchantSummonedBags(false);
-		}
-
 		RemoveNoRent(false);
 	}
 
@@ -847,16 +851,18 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		auto bucket_name = ml.bucket_name;
 		auto const& bucket_value = ml.bucket_value;
 		if (!bucket_name.empty() && !bucket_value.empty()) {
+			auto full_name = fmt::format(
+				"{}-{}",
+				GetBucketKey(),
+				bucket_name
+			);
 
-			DataBucketKey k = GetScopedBucketKeys();
-			k.key = bucket_name;
-
-			auto b = DataBucket::GetData(k);
-			if (b.value.empty()) {
+			auto const& player_value = DataBucket::CheckBucketKey(this, full_name);
+			if (player_value.empty()) {
 				continue;
 			}
 
-			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, b.value)) {
+			if (!zone->CompareDataBucket(ml.bucket_comparison, bucket_value, player_value)) {
 				continue;
 			}
 		}
@@ -902,13 +908,8 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 			auto inst = database.CreateItem(item, charges);
 			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
+				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
 				auto item_charges = charges ? charges : 1;
-
-				// Don't use SellCostMod if using UseClassicPriceMod
-				if (!RuleB(Merchant, UseClassicPriceMod)) {
-					item_price *= RuleR(Merchant, SellCostMod);
-				}
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(npc);
@@ -953,13 +954,8 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			auto charges = item->MaxCharges;
 			auto inst = database.CreateItem(item, charges);
 			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
+				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
 				auto item_charges = charges ? charges : 1;
-
-				// Don't use SellCostMod if using UseClassicPriceMod
-				if (!RuleB(Merchant, UseClassicPriceMod)) {
-					item_price *= RuleR(Merchant, SellCostMod);
-				}
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(npc);
@@ -994,22 +990,22 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 uint8 Client::WithCustomer(uint16 NewCustomer){
 
 	if(NewCustomer == 0) {
-		SetCustomerID(0);
+		CustomerID = 0;
 		return 0;
 	}
 
-	if(GetCustomerID() == 0) {
-		SetCustomerID(NewCustomer);
+	if(CustomerID == 0) {
+		CustomerID = NewCustomer;
 		return 1;
 	}
 
 	// Check that the player browsing our wares hasn't gone away.
 
-	Client* c = entity_list.GetClientByID(GetCustomerID());
+	Client* c = entity_list.GetClientByID(CustomerID);
 
 	if(!c) {
 		LogTrading("Previous customer has gone away");
-		SetCustomerID(NewCustomer);
+		CustomerID = NewCustomer;
 		return 1;
 	}
 
@@ -1029,7 +1025,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 	{
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
-		database.MarkCorpseAsResurrected(PendingRezzDBID);
+		database.MarkCorpseAsRezzed(PendingRezzDBID);
 		LogSpells("Player [{}] got a [{}] Rezz spellid [{}] in zone[{}] instance id [{}]",
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
@@ -1038,7 +1034,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			BuffFadeNonPersistDeath();
 		}
 
-		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
+		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
@@ -1054,21 +1050,19 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				RuleI(Character, OldResurrectionSicknessSpellID) :
 				RuleI(Character, ResurrectionSicknessSpellID)
 			);
-			SpellOnTarget(resurrection_sickness_spell_id, this);
-		} else if (SpellID == SPELL_DIVINE_REZ) {
-			RestoreHealth();
-			RestoreMana();
-			RestoreEndurance();
-		} else {
-			SetHP(GetMaxHP() / 20);
-			SetMana(GetMaxMana() / 20);
-			SetEndurance(GetMaxEndurance() / 20);
+			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		}
-
-		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0) {
-			SetEXP(ExpSource::Resurrection, ((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))), GetAAXP(), true);
-		} else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
-			SetEXP(ExpSource::Resurrection, (GetEXP() + PendingRezzXP), GetAAXP(), true);
+		else {
+			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
+		}
+		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0)
+		{
+				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
+						GetAAXP(),true);
+		}
+		else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
+			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
 		}
 
 		//Was sending the packet back to initiate client zone...
@@ -1125,7 +1119,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	if (
 		m->scribing != memSpellForget &&
 		(
-			!IsPlayerClass(GetClass()) ||
+			!EQ::ValueWithin(GetClass(), PLAYER_CLASS_WARRIOR, PLAYER_CLASS_BERSERKER) ||
 			GetLevel() < spells[m->spell_id].classes[GetClass() - 1]
 		)
 	) {
@@ -1188,10 +1182,10 @@ void Client::CancelSneakHide()
 	if (hidden || improved_hidden) {
 		auto app = new EQApplicationPacket(OP_CancelSneakHide, 0);
 		FastQueuePacket(&app);
-		// SoF and Tit send back a OP_SpawnAppearance turning off AppearanceType::Invisibility
+		// SoF and Tit send back a OP_SpawnAppearance turning off AT_Invis
 		// so we need to handle our sneaking flag only
 		// The later clients send back a OP_Hide (this has a size but data is 0)
-		// as well as OP_SpawnAppearance with AppearanceType::Invisibility and one with AppearanceType::Sneak
+		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
 		// So we don't have to handle any of those flags
 		if (ClientVersionBit() & EQ::versions::maskSoFAndEarlier)
 			sneaking = false;
@@ -1439,22 +1433,6 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 						to_bucket = (int32 *) &trade->cp; break;
 				}
 			}
-			else {
-				switch (mc->cointype2) {
-					case COINTYPE_PP:
-						m_parcel_platinum += mc->amount;
-						break;
-					case COINTYPE_GP:
-						m_parcel_gold += mc->amount;
-						break;
-					case COINTYPE_SP:
-						m_parcel_silver += mc->amount;
-						break;
-					case COINTYPE_CP:
-						m_parcel_copper += mc->amount;
-						break;
-				}
-			}
 			break;
 		}
 		case 4:	// shared bank
@@ -1572,41 +1550,36 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 	Mob* pTrainer = entity_list.GetMob(gmtrain->npcid);
 
-	if (!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM) {
+	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
-	}
 
 	//you can only use your own trainer, client enforces this, but why trust it
 	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-		if (GetClass() != trains_class) {
-			safe_delete(outapp);
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
+		if (GetClass() != trains_class)
 			return;
-		}
 	}
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if (DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2) {
-		safe_delete(outapp);
+	if(DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2)
 		return;
-	}
 
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
 //#pragma GCC push_options
 //#pragma GCC optimize ("O0")
-	for (int sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; ++sk) {
-		if (sk == EQ::skills::SkillTinkering && GetRace() != GNOME) {
+	for (int sk = Skill::OneHandBlunt; sk <= Skill::Max; ++sk) {
+		if (sk == Skill::Tinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQ::skills::SkillType)sk, MaxSkill((EQ::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((uint16)sk, MaxSkill((uint16)sk, GetClass(), RuleI(Character, MaxLevel)));
 			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
 
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && GetClass() == Class::Berserker) {
-		gmtrain->skills[EQ::skills::Skill1HPiercing] = gmtrain->skills[EQ::skills::Skill2HPiercing];
-		gmtrain->skills[EQ::skills::Skill2HPiercing] = 0;
+		gmtrain->skills[Skill::OneHandPiercing] = gmtrain->skills[Skill::TwoHandPiercing];
+		gmtrain->skills[Skill::TwoHandPiercing] = 0;
 	}
 //#pragma GCC pop_options
 
@@ -1632,12 +1605,12 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 	FastQueuePacket(&outapp);
 
 	Mob* pTrainer = entity_list.GetMob(p->npcid);
-	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM)
+	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < WARRIORGM || pTrainer->GetClass() > BERSERKERGM)
 		return;
 
 	//you can only use your own trainer, client enforces this, but why trust it
 	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
+		int trains_class = pTrainer->GetClass() - (WARRIORGM - WARRIOR);
 		if (GetClass() != trains_class)
 			return;
 	}
@@ -1655,148 +1628,140 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 
 void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 {
-	if(!m_pp.points)
+	if (!m_pp.points) {
 		return;
+	}
 
-	int Cost = 0;
+	int cost = 0;
 
-	GMSkillChange_Struct* gmskill = (GMSkillChange_Struct*) app->pBuffer;
+	auto* s = (GMSkillChange_Struct*) app->pBuffer;
 
-	Mob* pTrainer = entity_list.GetMob(gmskill->npcid);
-	if(!pTrainer || !pTrainer->IsNPC() || pTrainer->GetClass() < Class::WarriorGM || pTrainer->GetClass() > Class::BerserkerGM)
+	Mob* m = entity_list.GetMob(s->npcid);
+	if (!m || !m->IsNPC() || m->GetClass() < Class::WarriorGM || m->GetClass() > Class::BerserkerGM) {
 		return;
+	}
 
 	//you can only use your own trainer, client enforces this, but why trust it
 	if (!RuleB(Character, AllowCrossClassTrainers)) {
-		int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-		if (GetClass() != trains_class)
+		uint8 trains_class = m->GetClass() - (Class::WarriorGM - Class::Warrior);
+		if (GetClass() != trains_class) {
 			return;
+		}
 	}
 
 	//you have to be somewhat close to a trainer to be properly using them
-	if(DistanceSquared(m_Position, pTrainer->GetPosition()) > USE_NPC_RANGE2)
+	if (DistanceSquared(m_Position, m->GetPosition()) > USE_NPC_RANGE2) {
 		return;
+	}
 
-	if (gmskill->skillbank == 0x01)
-	{
-		// languages go here
-		if (gmskill->skill_id > 25)
+	if (s->skillbank == Skill::BankType::Skills) {
+		// normal skills go here
+		if (s->skill_id > Skill::Max)
 		{
+			std::cout << "Wrong Training Skill (abilities)" << std::endl;
+			DumpPacket(app);
+			return;
+		}
+
+		uint16 skill_id = s->skill_id;
+
+		if (!CanHaveSkill(skill_id)) {
+			LogSkills("Tried to train skill [{}], which is not allowed", skill_id);
+			return;
+		}
+
+		if (!MaxSkill(skill_id)) {
+			LogSkills("Tried to train skill [{}], but training is not allowed at this level", skill_id);
+			return;
+		}
+
+		uint16 skill_level = GetRawSkill(skill_id);
+
+		if (!skill_level) {
+			const uint16 train_level = GetSkillTrainLevel(skill_id, GetClass());
+			if (!train_level) {
+				LogSkills("Tried to train a new skill [{}] which is invalid for this race/class.", skill_id);
+				return;
+			}
+
+			SetSkill(skill_id, train_level);
+		} else {
+			switch (skill_id) {
+				case Skill::Brewing:
+				case Skill::MakePoison:
+				case Skill::Tinkering:
+				case Skill::Alchemy:
+				case Skill::Baking:
+				case Skill::Tailoring:
+				case Skill::Blacksmithing:
+				case Skill::Fletching:
+				case Skill::JewelryMaking:
+				case Skill::Pottery:
+					if (skill_level >= RuleI(Skills, MaxTrainTradeskills)) {
+						MessageString(Chat::Red, MORE_SKILLED_THAN_I, m->GetCleanName());
+						SetSkill(skill_id, skill_level);
+						return;
+					}
+					break;
+				case Skill::Research:
+					if (skill_level >= RuleI(Skills, MaxTrainResearch)) {
+						MessageString(Chat::Red, MORE_SKILLED_THAN_I, m->GetCleanName());
+						SetSkill(skill_id, skill_level);
+						return;
+					}
+					break;
+				case Skill::SpecializeAbjuration:
+				case Skill::SpecializeAlteration:
+				case Skill::SpecializeConjuration:
+				case Skill::SpecializeDivination:
+				case Skill::SpecializeEvocation:
+					if (skill_level >= RuleI(Skills, MaxTrainSpecializations)) {
+						MessageString(Chat::Red, MORE_SKILLED_THAN_I, m->GetCleanName());
+						SetSkill(skill_id, skill_level);
+						return;
+					}
+				default:
+					break;
+			}
+
+			int max_skill_value = MaxSkill(skill_id);
+			if (skill_level >= max_skill_value) {
+				// Don't allow training over max skill level
+				MessageString(Chat::Red, MORE_SKILLED_THAN_I, m->GetCleanName());
+				SetSkill(skill_id, skill_level);
+				return;
+			}
+
+			if (Skill::IsSpecialized(s->skill_id)) {
+				const uint16 max_spec_skill = GetMaxSkillAfterSpecializationRules(skill_id, max_skill_value);
+				if (skill_level >= max_spec_skill) {
+					// Restrict specialization training to follow the rules
+					MessageString(Chat::Red, MORE_SKILLED_THAN_I, m->GetCleanName());
+					SetSkill(skill_id, skill_level);
+					return;
+				}
+			}
+
+			const uint16 adjusted_skill_level = skill_level - 10;
+			if (adjusted_skill_level > 0) {
+				cost = adjusted_skill_level * adjusted_skill_level * adjusted_skill_level / 100;
+			}
+
+			SetSkill(skill_id, skill_level + 1);
+		}
+	} else if (s->skillbank == Skill::BankType::Languages) {
+		if (s->skill_id > 25) {
 			LogSkills("Wrong Training Skill (languages)");
 			DumpPacket(app);
 			return;
 		}
-		int AdjustedSkillLevel = GetLanguageSkill(gmskill->skill_id) - 10;
-		if(AdjustedSkillLevel > 0)
-			Cost = AdjustedSkillLevel * AdjustedSkillLevel * AdjustedSkillLevel / 100;
 
-		IncreaseLanguageSkill(gmskill->skill_id);
-	}
-	else if (gmskill->skillbank == 0x00)
-	{
-		// normal skills go here
-		if (gmskill->skill_id > EQ::skills::HIGHEST_SKILL)
-		{
-			LogSkills("Wrong Training Skill (abilities)");
-			DumpPacket(app);
-			return;
+		int AdjustedSkillLevel = GetLanguageSkill(s->skill_id) - 10;
+		if (AdjustedSkillLevel > 0) {
+			cost = AdjustedSkillLevel * AdjustedSkillLevel * AdjustedSkillLevel / 100;
 		}
 
-		EQ::skills::SkillType skill = (EQ::skills::SkillType)gmskill->skill_id;
-
-		if(!CanHaveSkill(skill)) {
-			LogSkills("Tried to train skill [{}], which is not allowed", skill);
-			return;
-		}
-
-		if(MaxSkill(skill) == 0) {
-			LogSkills("Tried to train skill [{}], but training is not allowed at this level", skill);
-			return;
-		}
-
-		uint16 skilllevel = GetRawSkill(skill);
-
-		if (skilllevel == 0) {
-			//this is a new skill..
-			uint16 t_level = GetSkillTrainLevel(skill, GetClass());
-
-			if (t_level == 0) {
-				LogSkills("Tried to train a new skill [{}] which is invalid for this race/class.", skill);
-				return;
-			}
-
-			SetSkill(skill, t_level);
-		} else {
-			switch(skill) {
-			case EQ::skills::SkillBrewing:
-			case EQ::skills::SkillMakePoison:
-			case EQ::skills::SkillTinkering:
-			case EQ::skills::SkillAlchemy:
-			case EQ::skills::SkillBaking:
-			case EQ::skills::SkillTailoring:
-			case EQ::skills::SkillBlacksmithing:
-			case EQ::skills::SkillFletching:
-			case EQ::skills::SkillJewelryMaking:
-			case EQ::skills::SkillPottery:
-				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
-					SetSkill(skill, skilllevel);
-					return;
-				}
-				break;
-			case EQ::skills::SkillResearch:
-				if(skilllevel >= RuleI(Skills, MaxTrainResearch)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
-					SetSkill(skill, skilllevel);
-					return;
-				}
-				break;
-			case EQ::skills::SkillSpecializeAbjure:
-			case EQ::skills::SkillSpecializeAlteration:
-			case EQ::skills::SkillSpecializeConjuration:
-			case EQ::skills::SkillSpecializeDivination:
-			case EQ::skills::SkillSpecializeEvocation:
-				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
-					SetSkill(skill, skilllevel);
-					return;
-				}
-			default:
-				break;
-			}
-
-			int MaxSkillValue = MaxSkill(skill);
-			if (skilllevel >= MaxSkillValue)
-			{
-				// Don't allow training over max skill level
-				MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
-				SetSkill(skill, skilllevel);
-				return;
-			}
-
-			if (gmskill->skill_id >= EQ::skills::SkillSpecializeAbjure && gmskill->skill_id <= EQ::skills::SkillSpecializeEvocation)
-			{
-				int MaxSpecSkill = GetMaxSkillAfterSpecializationRules(skill, MaxSkillValue);
-				if (skilllevel >= MaxSpecSkill)
-				{
-					// Restrict specialization training to follow the rules
-					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
-					SetSkill(skill, skilllevel);
-					return;
-				}
-			}
-
-			// Client train a valid skill
-			//
-			int AdjustedSkillLevel = skilllevel - 10;
-
-			if(AdjustedSkillLevel > 0)
-				Cost = AdjustedSkillLevel * AdjustedSkillLevel * AdjustedSkillLevel / 100;
-
-			SetSkill(skill, skilllevel + 1);
-
-
-		}
+		IncreaseLanguageSkill(s->skill_id);
 	}
 
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
@@ -1805,25 +1770,26 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		//
 		auto outapp = new EQApplicationPacket(OP_GMTrainSkillConfirm, sizeof(GMTrainSkillConfirm_Struct));
 
-		GMTrainSkillConfirm_Struct *gmtsc = (GMTrainSkillConfirm_Struct *)outapp->pBuffer;
-		gmtsc->SkillID = gmskill->skill_id;
+		GMTrainSkillConfirm_Struct* gmtsc = (GMTrainSkillConfirm_Struct*) outapp->pBuffer;
+		gmtsc->SkillID = s->skill_id;
 
-		if(gmskill->skillbank == 1) {
+		if (s->skillbank == 1) {
 			gmtsc->NewSkill = (GetLanguageSkill(gmtsc->SkillID) == 1);
 			gmtsc->SkillID += 100;
+		} else {
+			gmtsc->NewSkill = (GetRawSkill(gmtsc->SkillID) == 1);
 		}
-		else
-			gmtsc->NewSkill = (GetRawSkill((EQ::skills::SkillType)gmtsc->SkillID) == 1);
 
-		gmtsc->Cost = Cost;
+		gmtsc->Cost = cost;
 
-		strcpy(gmtsc->TrainerName, pTrainer->GetCleanName());
+		strcpy(gmtsc->TrainerName, m->GetCleanName());
 		QueuePacket(outapp);
 		safe_delete(outapp);
 	}
 
-	if(Cost)
-		TakeMoneyFromPP(Cost);
+	if (cost) {
+		TakeMoneyFromPP(cost);
+	}
 
 	m_pp.points--;
 }
@@ -1894,8 +1860,8 @@ void Client::DoManaRegen() {
 	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
-	if (GetMana() < max_mana && (IsSitting() || CanMedOnHorse()) && HasSkill(EQ::skills::SkillMeditate))
-		CheckIncreaseSkill(EQ::skills::SkillMeditate, nullptr, -5);
+	if (GetMana() < max_mana && (IsSitting() || CanMedOnHorse()) && HasSkill(Skill::Meditate))
+		CheckIncreaseSkill(Skill::Meditate, nullptr, -5);
 
 	SetMana(GetMana() + CalcManaRegen());
 	CheckManaEndUpdate();
@@ -1904,43 +1870,31 @@ void Client::DoManaRegen() {
 void Client::DoStaminaHungerUpdate()
 {
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-	auto sta    = (Stamina_Struct*) outapp->pBuffer;
+	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
 
 	LogFood("hunger_level: [{}] thirst_level: [{}] before loss", m_pp.hunger_level, m_pp.thirst_level);
 
-	if (zone->GetZoneID() != Zones::BAZAAR) {
-		if (!GetGM()) {
-			int loss = RuleI(Character, FoodLossPerUpdate);
-			if (GetHorseId() != 0) {
-				loss *= 3;
-			}
+	if (zone->GetZoneID() != 151 && !GetGM()) {
+		int loss = RuleI(Character, FoodLossPerUpdate);
+		if (GetHorseId() != 0)
+			loss *= 3;
 
-			m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
-			m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
-
-			if (spellbonuses.hunger) {
-				m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
-				m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
-			}
-
-			sta->food  = m_pp.hunger_level;
-			sta->water = m_pp.thirst_level;
-		} else {
-			sta->food  = 6000;
-			sta->water = 6000;
+		m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
+		m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
+		if (spellbonuses.hunger) {
+			m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
+			m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
 		}
-	} else { // No auto food/drink consumption in the Bazaar
-		sta->food  = 6000;
+		sta->food = m_pp.hunger_level;
+		sta->water = m_pp.thirst_level;
+	} else {
+		// No auto food/drink consumption in the Bazaar
+		sta->food = 6000;
 		sta->water = 6000;
 	}
 
-	LogFood(
-		"Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
-		m_pp.hunger_level,
-		m_pp.hunger_level,
-		m_pp.thirst_level,
-		m_pp.thirst_level
-	);
+	LogFood("Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
+	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
 
 	FastQueuePacket(&outapp);
 }
@@ -2017,7 +1971,7 @@ void Client::CalcRestState()
 	for (unsigned int j = 0; j < buff_count; j++) {
 		if(IsValidSpell(buffs[j].spellid)) {
 			if(IsDetrimentalSpell(buffs[j].spellid) && (buffs[j].ticsremaining > 0))
-				if(!IsRestAllowedSpell(buffs[j].spellid))
+				if(!DetrimentalSpellAllowsRest(buffs[j].spellid))
 					return;
 		}
 	}
@@ -2196,9 +2150,9 @@ void Client::HandleRespawnFromHover(uint32 Option)
 			FastQueuePacket(&outapp);
 
 			CalcBonuses();
-			RestoreHealth();
-			RestoreMana();
-			RestoreEndurance();
+			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
+			SetEndurance(GetMaxEndurance());
 
 			m_Position.x = chosen->x;
 			m_Position.y = chosen->y;
@@ -2449,19 +2403,4 @@ void Client::SendGuildLFGuildStatus()
 
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
-}
-
-bool Client::CheckWaterAutoFireLoS(Mob* m)
-{
-	if (
-		!RuleB(Combat, WaterMatchRequiredForAutoFireLoS) ||
-		!zone->watermap
-	) {
-		return true;
-	}
-
-	return (
-		zone->watermap->InLiquid(GetPosition()) ==
-		zone->watermap->InLiquid(m->GetPosition())
-	);
 }

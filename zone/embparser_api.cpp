@@ -554,7 +554,7 @@ uint8 Perl__get_spell_level(uint16 spell_id, uint8 class_id)
 	return spell_level > RuleI(Character, MaxLevel) ? UINT8_MAX : spell_level;
 }
 
-std::string Perl__getskillname(int skill_id)
+std::string Perl__getskillname(uint16 skill_id)
 {
 	return quest_manager.getskillname(skill_id);
 }
@@ -689,7 +689,7 @@ void Perl__doanim(int animation_id, int animation_speed, bool ackreq, int filter
 	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
-void Perl__addskill(int skill_id, int value)
+void Perl__addskill(uint16 skill_id, int value)
 {
 	quest_manager.addskill(skill_id, value);
 }
@@ -699,7 +699,7 @@ void Perl__setlanguage(uint8 language_id, uint8 language_skill)
 	quest_manager.setlanguage(language_id, language_skill);
 }
 
-void Perl__setskill(int skill_id, int value)
+void Perl__setskill(uint16 skill_id, int value)
 {
 	quest_manager.setskill(skill_id, value);
 }

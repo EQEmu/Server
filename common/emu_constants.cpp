@@ -22,6 +22,7 @@
 #include "data_verification.h"
 #include "eqemu_logsys.h"
 #include "eqemu_logsys_log_aliases.h"
+#include "languages.h"
 #include "rulesys.h"
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
@@ -158,51 +159,6 @@ int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
 	return 0;
 }
 
-const std::map<uint8, std::string>& EQ::constants::GetLanguageMap()
-{
-	static const std::map<uint8, std::string> language_map = {
-		{ Language::CommonTongue,  "Common Tongue" },
-		{ Language::Barbarian,     "Barbarian" },
-		{ Language::Erudian,       "Erudian" },
-		{ Language::Elvish,        "Elvish" },
-		{ Language::DarkElvish,    "Dark Elvish" },
-		{ Language::Dwarvish,      "Dwarvish" },
-		{ Language::Troll,         "Troll" },
-		{ Language::Ogre,          "Ogre" },
-		{ Language::Gnomish,       "Gnomish" },
-		{ Language::Halfling,      "Halfling" },
-		{ Language::ThievesCant,   "Thieves Cant" },
-		{ Language::OldErudian,    "Old Erudian" },
-		{ Language::ElderElvish,   "Elder Elvish" },
-		{ Language::Froglok,       "Froglok" },
-		{ Language::Goblin,        "Goblin" },
-		{ Language::Gnoll,         "Gnoll" },
-		{ Language::CombineTongue, "Combine Tongue" },
-		{ Language::ElderTeirDal,  "Elder Teir'Dal" },
-		{ Language::Lizardman,     "Lizardman" },
-		{ Language::Orcish,        "Orcish" },
-		{ Language::Faerie,        "Faerie" },
-		{ Language::Dragon,        "Dragon" },
-		{ Language::ElderDragon,   "Elder Dragon" },
-		{ Language::DarkSpeech,    "Dark Speech" },
-		{ Language::VahShir,       "Vah Shir" },
-		{ Language::Alaran,        "Alaran" },
-		{ Language::Hadal,         "Hadal" },
-		{ Language::Unknown27,     "Unknown" }
-	};
-
-	return language_map;
-}
-
-std::string EQ::constants::GetLanguageName(uint8 language_id)
-{
-	if (!EQ::ValueWithin(language_id, Language::CommonTongue, Language::Unknown27)) {
-		return std::string();
-	}
-
-	return EQ::constants::GetLanguageMap().find(language_id)->second;
-}
-
 const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 {
 	static const std::map<uint32, std::string> ldon_theme_map = {
@@ -219,11 +175,11 @@ const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
 
 std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 {
-	if (!EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
-		return std::string();
+	if (EQ::ValueWithin(theme_id, LDoNThemes::Unused, LDoNThemes::TAK)) {
+		return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
 	}
 
-	return EQ::constants::GetLDoNThemeMap().find(theme_id)->second;
+	return std::string();
 }
 
 const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
@@ -242,11 +198,11 @@ const std::map<int8, std::string>& EQ::constants::GetFlyModeMap()
 
 std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 {
-	if (!EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
-		return std::string();
+	if (EQ::ValueWithin(flymode_id, GravityBehavior::Ground, GravityBehavior::LevitateWhileRunning)) {
+		return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 	}
 
-	return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
+	return std::string();
 }
 
 const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
@@ -364,11 +320,11 @@ const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 
 std::string EQ::constants::GetConsiderLevelName(uint8 faction_consider_level)
 {
-	if (!EQ::ValueWithin(faction_consider_level, ConsiderLevel::Ally, ConsiderLevel::Scowls)) {
-		return std::string();;
+	if (EQ::constants::GetConsiderLevelMap().find(faction_consider_level) != EQ::constants::GetConsiderLevelMap().end()) {
+		return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
 	}
 
-	return EQ::constants::GetConsiderLevelMap().find(faction_consider_level)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
@@ -385,11 +341,11 @@ const std::map<uint8, std::string>& EQ::constants::GetEnvironmentalDamageMap()
 
 std::string EQ::constants::GetEnvironmentalDamageName(uint8 damage_type)
 {
-	if (!EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
-		return std::string();
+	if (EQ::ValueWithin(damage_type, EnvironmentalDamage::Lava, EnvironmentalDamage::Trap)) {
+		return EQ::constants::GetEnvironmentalDamageMap().find(damage_type)->second;
 	}
 
-	return EQ::constants::GetEnvironmentalDamageMap().find(damage_type)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
@@ -406,11 +362,11 @@ const std::map<uint8, std::string>& EQ::constants::GetStuckBehaviorMap()
 
 std::string EQ::constants::GetStuckBehaviorName(uint8 behavior_id)
 {
-	if (!EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
-		return std::string();
+	if (EQ::ValueWithin(behavior_id, StuckBehavior::RunToTarget, StuckBehavior::EvadeCombat)) {
+		return EQ::constants::GetStuckBehaviorMap().find(behavior_id)->second;
 	}
 
-	return EQ::constants::GetStuckBehaviorMap().find(behavior_id)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
@@ -428,11 +384,11 @@ const std::map<uint8, std::string>& EQ::constants::GetSpawnAnimationMap()
 
 std::string EQ::constants::GetSpawnAnimationName(uint8 animation_id)
 {
-	if (!EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
-		return std::string();
+	if (EQ::ValueWithin(animation_id, SpawnAnimations::Standing, SpawnAnimations::Looting)) {
+		return EQ::constants::GetSpawnAnimationMap().find(animation_id)->second;
 	}
 
-	return EQ::constants::GetSpawnAnimationMap().find(animation_id)->second;
+	return std::string();
 }
 
 const std::map<int, std::string>& EQ::constants::GetObjectTypeMap()
@@ -506,11 +462,11 @@ const std::map<int, std::string>& EQ::constants::GetObjectTypeMap()
 
 std::string EQ::constants::GetObjectTypeName(int object_type)
 {
-	if (!EQ::ValueWithin(object_type, ObjectTypes::SmallBag, ObjectTypes::NoDeposit)) {
-		return std::string();
+	if (EQ::ValueWithin(object_type, ObjectTypes::SmallBag, ObjectTypes::NoDeposit)) {
+		return EQ::constants::GetObjectTypeMap().find(object_type)->second;
 	}
 
-	return EQ::constants::GetObjectTypeMap().find(object_type)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetWeatherTypeMap()
@@ -526,11 +482,11 @@ const std::map<uint8, std::string> &EQ::constants::GetWeatherTypeMap()
 
 std::string EQ::constants::GetWeatherTypeName(uint8 weather_type)
 {
-	if (!EQ::ValueWithin(weather_type, WeatherTypes::None, WeatherTypes::Snowing)) {
-		return std::string();
+	if (EQ::ValueWithin(weather_type, WeatherTypes::None, WeatherTypes::Snowing)) {
+		return EQ::constants::GetWeatherTypeMap().find(weather_type)->second;
 	}
 
-	return EQ::constants::GetWeatherTypeMap().find(weather_type)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetEmoteEventTypeMap()
@@ -552,17 +508,16 @@ const std::map<uint8, std::string> &EQ::constants::GetEmoteEventTypeMap()
 
 std::string EQ::constants::GetEmoteEventTypeName(uint8 emote_event_type)
 {
-	if (!EQ::ValueWithin(emote_event_type, EmoteEventTypes::LeaveCombat, EmoteEventTypes::OnDespawn)) {
-		return std::string();
+	if (EQ::ValueWithin(emote_event_type, EmoteEventTypes::LeaveCombat, EmoteEventTypes::OnDespawn)) {
+		return EQ::constants::GetEmoteEventTypeMap().find(emote_event_type)->second;
 	}
 
-	return EQ::constants::GetEmoteEventTypeMap().find(emote_event_type)->second;
+	return std::string();
 }
 
 const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
 {
 	static const std::map<uint8, std::string> emote_type_map = {
-		{ EmoteTypes::Say, "Say" },
 		{ EmoteTypes::Emote, "Emote" },
 		{ EmoteTypes::Shout, "Shout" },
 		{ EmoteTypes::Proximity, "Proximity" }
@@ -573,143 +528,8 @@ const std::map<uint8, std::string> &EQ::constants::GetEmoteTypeMap()
 
 std::string EQ::constants::GetEmoteTypeName(uint8 emote_type)
 {
-	if (!EQ::ValueWithin(emote_type, EmoteTypes::Say, EmoteTypes::Proximity)) {
-		return std::string();
-	}
-
-	return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
-}
-
-const std::map<uint32, std::string>& EQ::constants::GetAppearanceTypeMap()
-{
-	static const std::map<uint32, std::string> appearance_type_map = {
-		{ AppearanceType::Die, "Die" },
-		{ AppearanceType::WhoLevel, "Who Level" },
-		{ AppearanceType::MaxHealth, "Max Health" },
-		{ AppearanceType::Invisibility, "Invisibility" },
-		{ AppearanceType::PVP, "PVP" },
-		{ AppearanceType::Light, "Light" },
-		{ AppearanceType::Animation, "Animation" },
-		{ AppearanceType::Sneak, "Sneak" },
-		{ AppearanceType::SpawnID, "Spawn ID" },
-		{ AppearanceType::Health, "Health" },
-		{ AppearanceType::Linkdead, "Linkdead" },
-		{ AppearanceType::FlyMode, "Fly Mode" },
-		{ AppearanceType::GM, "GM" },
-		{ AppearanceType::Anonymous, "Anonymous" },
-		{ AppearanceType::GuildID, "Guild ID" },
-		{ AppearanceType::GuildRank, "Guild Rank" },
-		{ AppearanceType::AFK, "AFK" },
-		{ AppearanceType::Pet, "Pet" },
-		{ AppearanceType::Summoned, "Summoned" },
-		{ AppearanceType::Split, "Split" },
-		{ AppearanceType::Size, "Size" },
-		{ AppearanceType::SetType, "Set Type" },
-		{ AppearanceType::NPCName, "NPCName" },
-		{ AppearanceType::AARank, "AARank" },
-		{ AppearanceType::CancelSneakHide, "Cancel Sneak Hide" },
-		{ AppearanceType::AreaHealthRegen, "Area Health Regeneration" },
-		{ AppearanceType::AreaManaRegen, "Area Mana Regeneration" },
-		{ AppearanceType::AreaEnduranceRegen, "Area Endurance Regeneration" },
-		{ AppearanceType::FreezeBeneficialBuffs, "Freeze Beneficial Buffs" },
-		{ AppearanceType::NPCTintIndex, "NPC Tint Index" },
-		{ AppearanceType::GroupAutoConsent, "Group Auto Consent" },
-		{ AppearanceType::RaidAutoConsent, "Raid Auto Consent" },
-		{ AppearanceType::GuildAutoConsent, "Guild Auto Consent" },
-		{ AppearanceType::ShowHelm, "Show Helm" },
-		{ AppearanceType::DamageState, "Damage State" },
-		{ AppearanceType::EQPlayers, "EQ Players" },
-		{ AppearanceType::FindBits, "Find Bits" },
-		{ AppearanceType::TextureType, "Texture Type" },
-		{ AppearanceType::FacePick, "Face Pick" },
-		{ AppearanceType::AntiCheat, "Anti Cheat" },
-		{ AppearanceType::GuildShow, "Guild Show" },
-		{ AppearanceType::OfflineMode, "Offline Mode" }
-	};
-
-	return appearance_type_map;
-}
-
-std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
-{
-	const auto& a = EQ::constants::GetAppearanceTypeMap().find(appearance_type);
-	if (a != EQ::constants::GetAppearanceTypeMap().end()) {
-		return a->second;
-	}
-
-	return std::string();
-}
-
-const std::map<uint32, std::string>& EQ::constants::GetSpecialAbilityMap()
-{
-	static const std::map<uint32, std::string> special_ability_map = {
-		{ SPECATK_SUMMON,            "Summon" },
-		{ SPECATK_ENRAGE,            "Enrage" },
-		{ SPECATK_RAMPAGE,           "Rampage" },
-		{ SPECATK_AREA_RAMPAGE,      "Area Rampage" },
-		{ SPECATK_FLURRY,            "Flurry" },
-		{ SPECATK_TRIPLE,            "Triple Attack" },
-		{ SPECATK_QUAD,              "Quadruple Attack" },
-		{ SPECATK_INNATE_DW,         "Dual Wield" },
-		{ SPECATK_BANE,              "Bane Attack" },
-		{ SPECATK_MAGICAL,           "Magical Attack" },
-		{ SPECATK_RANGED_ATK,        "Ranged Attack" },
-		{ UNSLOWABLE,                "Immune to Slow" },
-		{ UNMEZABLE,                 "Immune to Mesmerize" },
-		{ UNCHARMABLE,               "Immune to Charm" },
-		{ UNSTUNABLE,                "Immune to Stun" },
-		{ UNSNAREABLE,               "Immune to Snare" },
-		{ UNFEARABLE,                "Immune to Fear" },
-		{ UNDISPELLABLE,             "Immune to Dispell" },
-		{ IMMUNE_MELEE,              "Immune to Melee" },
-		{ IMMUNE_MAGIC,              "Immune to Magic" },
-		{ IMMUNE_FLEEING,            "Immune to Fleeing" },
-		{ IMMUNE_MELEE_EXCEPT_BANE,  "Immune to Melee except Bane" },
-		{ IMMUNE_MELEE_NONMAGICAL,   "Immune to Non-Magical Melee" },
-		{ IMMUNE_AGGRO,              "Immune to Aggro" },
-		{ IMMUNE_AGGRO_ON,           "Immune to Being Aggro" },
-		{ IMMUNE_CASTING_FROM_RANGE, "Immune to Ranged Spells" },
-		{ IMMUNE_FEIGN_DEATH,        "Immune to Feign Death" },
-		{ IMMUNE_TAUNT,              "Immune to Taunt" },
-		{ NPC_TUNNELVISION,          "Tunnel Vision" },
-		{ NPC_NO_BUFFHEAL_FRIENDS,   "Does Not Heal of Buff Allies" },
-		{ IMMUNE_PACIFY,             "Immune to Pacify" },
-		{ LEASH,                     "Leashed" },
-		{ TETHER,                    "Tethered" },
-		{ DESTRUCTIBLE_OBJECT,       "Destructible Object" },
-		{ NO_HARM_FROM_CLIENT,       "Immune to Harm from Client" },
-		{ ALWAYS_FLEE,               "Always Flees" },
-		{ FLEE_PERCENT,              "Flee Percentage" },
-		{ ALLOW_BENEFICIAL,          "Allows Beneficial Spells" },
-		{ DISABLE_MELEE,             "Melee is Disabled" },
-		{ NPC_CHASE_DISTANCE,        "Chase Distance" },
-		{ ALLOW_TO_TANK,             "Allowed to Tank" },
-		{ IGNORE_ROOT_AGGRO_RULES,   "Ignores Root Aggro" },
-		{ CASTING_RESIST_DIFF,       "Casting Resist Difficulty" },
-		{ COUNTER_AVOID_DAMAGE,      "Counter Damage Avoidance" },
-		{ PROX_AGGRO,                "Proximity Aggro" },
-		{ IMMUNE_RANGED_ATTACKS,     "Immune to Ranged Attacks" },
-		{ IMMUNE_DAMAGE_CLIENT,      "Immune to Client Damage" },
-		{ IMMUNE_DAMAGE_NPC,         "Immune to NPC Damage" },
-		{ IMMUNE_AGGRO_CLIENT,       "Immune to Client Aggro" },
-		{ IMMUNE_AGGRO_NPC,          "Immune to NPC Aggro" },
-		{ MODIFY_AVOID_DAMAGE,       "Modify Damage Avoidance" },
-		{ IMMUNE_FADING_MEMORIES,    "Immune to Memory Fades" },
-		{ IMMUNE_OPEN,               "Immune to Open" },
-		{ IMMUNE_ASSASSINATE,        "Immune to Assassinate" },
-		{ IMMUNE_HEADSHOT,           "Immune to Headshot" },
-		{ IMMUNE_AGGRO_BOT,          "Immune to Bot Aggro" },
-		{ IMMUNE_DAMAGE_BOT,         "Immune to Bot Damage" },
-	};
-
-	return special_ability_map;
-}
-
-std::string EQ::constants::GetSpecialAbilityName(uint32 ability_id)
-{
-	const auto& a = EQ::constants::GetSpecialAbilityMap().find(ability_id);
-	if (a != EQ::constants::GetSpecialAbilityMap().end()) {
-		return a->second;
+	if (EQ::ValueWithin(emote_type, EmoteTypes::Emote, EmoteTypes::Proximity)) {
+		return EQ::constants::GetEmoteTypeMap().find(emote_type)->second;
 	}
 
 	return std::string();
@@ -735,4 +555,14 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 {
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
+}
+
+const std::string& Language::GetName(uint8 language_id)
+{
+	return IsValid(language_id) ? language_names[language_id] : "UNKNOWN LANGUAGE";
+}
+
+bool Language::IsValid(uint8 language_id)
+{
+	return language_names.find(language_id) != language_names.end();
 }

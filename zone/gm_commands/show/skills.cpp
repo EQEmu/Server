@@ -18,7 +18,7 @@ void ShowSkills(Client *c, const Seperator *sep)
 		DialogueWindow::TableCell("Raw")
 	);
 
-	for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+	for (const auto& s : skill_names) {
 		if (t->CanHaveSkill(s.first) && t->MaxSkill(s.first)) {
 			popup_table += DialogueWindow::TableRow(
 				DialogueWindow::TableCell(std::to_string(s.first)) +

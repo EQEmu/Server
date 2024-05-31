@@ -211,11 +211,11 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "tohit") {
-		return std::to_string(mob->compute_tohit(EQ::skills::SkillHandtoHand));
+		return std::to_string(mob->compute_tohit(Skill::HandToHand));
 	}
 
 	if (attribute == "total_to_hit") {
-		return std::to_string(mob->GetTotalToHit(EQ::skills::SkillHandtoHand, 0));
+		return std::to_string(mob->GetTotalToHit(Skill::HandToHand, 0));
 	}
 
 	if (attribute == "defense") {
@@ -227,7 +227,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "offense") {
-		return std::to_string(mob->offense(EQ::skills::SkillHandtoHand));
+		return std::to_string(mob->offense(Skill::HandToHand));
 	}
 
 	if (attribute == "mitigation_ac") {

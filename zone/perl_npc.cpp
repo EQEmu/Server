@@ -415,22 +415,22 @@ float Perl_NPC_GetGuardPointZ(NPC* self) // @categories Script Utility, Spawns
 	return self->GetGuardPoint().z;
 }
 
-void Perl_NPC_SetPrimSkill(NPC* self, int skill_id) // @categories Stats and Attributes
+void Perl_NPC_SetPrimSkill(NPC* self, uint16 skill_id) // @categories Stats and Attributes
 {
 	self->SetPrimSkill(skill_id);
 }
 
-void Perl_NPC_SetSecSkill(NPC* self, int skill_id) // @categories Stats and Attributes
+void Perl_NPC_SetSecSkill(NPC* self, uint16 skill_id) // @categories Stats and Attributes
 {
 	self->SetSecSkill(skill_id);
 }
 
-uint32_t Perl_NPC_GetPrimSkill(NPC* self) // @categories Stats and Attributes
+uint16_t Perl_NPC_GetPrimSkill(NPC* self) // @categories Stats and Attributes
 {
 	return self->GetPrimSkill();
 }
 
-uint32_t Perl_NPC_GetSecSkill(NPC* self) // @categories Stats and Attributes
+uint16_t Perl_NPC_GetSecSkill(NPC* self) // @categories Stats and Attributes
 {
 	return self->GetSecSkill();
 }

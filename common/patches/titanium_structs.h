@@ -527,7 +527,7 @@ struct GMTrainee_Struct
 {
 	/*000*/ uint32 npcid;
 	/*004*/ uint32 playerid;
-	/*008*/ uint32 skills[PACKET_SKILL_ARRAY_SIZE];
+	/*008*/ uint32 skills[Skill::ArraySize];
 	/*408*/ uint8 unknown408[40];
 	/*448*/
 };
@@ -755,7 +755,7 @@ struct BindStruct {
  */
 static const uint32 MAX_PP_LANGUAGE		= 28;
 
-static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
+static const uint32 MAX_PP_SKILL		= Skill::ArraySize;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
 static const uint32 MAX_PP_AA_ARRAY		= 240;
 static const uint32 MAX_GROUP_MEMBERS	= 6;

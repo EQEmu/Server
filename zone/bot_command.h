@@ -25,7 +25,7 @@ class Seperator;
 
 #include "../common/types.h"
 #include "bot.h"
-#include "dialogue_window.h"
+
 
 class BCEnum
 {
@@ -140,530 +140,77 @@ public:
 
 	static std::string SpellTypeEnumToString(BCEnum::SpType spell_type) {
 		switch (spell_type) {
-			case SpT_BindAffinity:
-				return "SpT_BindAffinity";
-			case SpT_Charm:
-				return "SpT_Charm";
-			case SpT_Cure:
-				return "SpT_Cure";
-			case SpT_Depart:
-				return "SpT_Depart";
-			case SpT_Escape:
-				return "SpT_Escape";
-			case SpT_Identify:
-				return "SpT_Identify";
-			case SpT_Invisibility:
-				return "SpT_Invisibility";
-			case SpT_Levitation:
-				return "SpT_Levitation";
-			case SpT_Lull:
-				return "SpT_Lull";
-			case SpT_Mesmerize:
-				return "SpT_Mesmerize";
-			case SpT_MovementSpeed:
-				return "SpT_MovementSpeed";
-			case SpT_Resistance:
-				return "SpT_Resistance";
-			case SpT_Resurrect:
-				return "SpT_Resurrect";
-			case SpT_Rune:
-				return "SpT_Rune";
-			case SpT_SendHome:
-				return "SpT_SendHome";
-			case SpT_Size:
-				return "SpT_Size";
-			case SpT_Stance:
-				return "SpT_Stance";
-			case SpT_SummonCorpse:
-				return "SpT_SummonCorpse";
-			case SpT_WaterBreathing:
-				return "SpT_WaterBreathing";
-			default:
-				return "SpT_None";
+		case SpT_BindAffinity:
+			return "SpT_BindAffinity";
+		case SpT_Charm:
+			return "SpT_Charm";
+		case SpT_Cure:
+			return "SpT_Cure";
+		case SpT_Depart:
+			return "SpT_Depart";
+		case SpT_Escape:
+			return "SpT_Escape";
+		case SpT_Identify:
+			return "SpT_Identify";
+		case SpT_Invisibility:
+			return "SpT_Invisibility";
+		case SpT_Levitation:
+			return "SpT_Levitation";
+		case SpT_Lull:
+			return "SpT_Lull";
+		case SpT_Mesmerize:
+			return "SpT_Mesmerize";
+		case SpT_MovementSpeed:
+			return "SpT_MovementSpeed";
+		case SpT_Resistance:
+			return "SpT_Resistance";
+		case SpT_Resurrect:
+			return "SpT_Resurrect";
+		case SpT_Rune:
+			return "SpT_Rune";
+		case SpT_SendHome:
+			return "SpT_SendHome";
+		case SpT_Size:
+			return "SpT_Size";
+		case SpT_Stance:
+			return "SpT_Stance";
+		case SpT_SummonCorpse:
+			return "SpT_SummonCorpse";
+		case SpT_WaterBreathing:
+			return "SpT_WaterBreathing";
+		default:
+			return "SpT_None";
 		}
 	}
 
 	static std::string TargetTypeEnumToString(BCEnum::TType target_type) {
 		switch (target_type) {
-			case TT_Self:
-				return "TT_Self";
-			case TT_Animal:
-				return "TT_Animal";
-			case TT_Undead:
-				return "TT_Undead";
-			case TT_Summoned:
-				return "TT_Summoned";
-			case TT_Plant:
-				return "TT_Plant";
-			case TT_Single:
-				return "TT_Single";
-			case TT_GroupV1:
-				return "TT_GroupV1";
-			case TT_GroupV2:
-				return "TT_GroupV2";
-			case TT_AECaster:
-				return "TT_AECaster";
-			case TT_AEBard:
-				return "TT_AEBard";
-			case TT_AETarget:
-				return "TT_AETarget";
-			case TT_Corpse:
-				return "TT_Corpse";
-			default:
-				return "TT_None";
-		}
-	}
-};
-
-namespace
-{
-#define HP_RATIO_DELTA 5.0f
-
-	enum { EffectIDFirst = 1, EffectIDLast = 12 };
-
-#define VALIDATECLASSID(x) ((x >= Class::Warrior && x <= Class::Berserker) ? (x) : (0))
-#define CLASSIDTOINDEX(x) ((x >= Class::Warrior && x <= Class::Berserker) ? (x - 1) : (0))
-#define EFFECTIDTOINDEX(x) ((x >= EffectIDFirst && x <= EffectIDLast) ? (x - 1) : (0))
-#define AILMENTIDTOINDEX(x) ((x >= BCEnum::AT_Blindness && x <= BCEnum::AT_Corruption) ? (x - 1) : (0))
-#define RESISTANCEIDTOINDEX(x) ((x >= BCEnum::RT_Fire && x <= BCEnum::RT_Corruption) ? (x - 1) : (0))
-
-	// ActionableTarget action_type
-#define FRIENDLY true
-#define ENEMY false
-}
-
-namespace MyBots
-{
-	static bool IsMyBot(Client *bot_owner, Mob *my_bot) {
-		if (!bot_owner || !my_bot || !my_bot->IsBot()) {
-			return false;
-		}
-
-		auto test_bot = my_bot->CastToBot();
-		if (!test_bot->GetOwner() || !test_bot->GetOwner()->IsClient() || test_bot->GetOwner()->CastToClient() != bot_owner) {
-			return false;
-		}
-
-		return true;
-	}
-
-	static bool IsMyBotInTargetsGroup(Client *bot_owner, Mob *grouped_bot) {
-		if (!bot_owner || !grouped_bot || !grouped_bot->GetGroup() || !IsMyBot(bot_owner, grouped_bot)) {
-			return false;
-		}
-
-		auto target_mob = bot_owner->GetTarget();
-		if (!target_mob) {
-			return false;
-		}
-
-		if (!target_mob->GetGroup() || (!target_mob->IsClient() && !target_mob->IsBot())) {
-			return false;
-		}
-
-		return (grouped_bot->GetGroup() == target_mob->GetGroup());
-	}
-
-	static bool IsMyBotInPlayerGroup(Client *bot_owner, Mob *grouped_bot, Client *grouped_player) {
-		if (!bot_owner || !grouped_player || !grouped_player->GetGroup() || !grouped_bot || !grouped_bot->GetGroup() || !IsMyBot(bot_owner, grouped_bot)) {
-			return false;
-		}
-
-		return (grouped_player->GetGroup() == grouped_bot->GetGroup());
-	}
-
-	static void UniquifySBL(std::list<Bot*> &sbl) {
-		sbl.remove(nullptr);
-		sbl.sort();
-		sbl.unique();
-	}
-
-	static void PopulateSBL_ByTargetedBot(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (IsMyBot(bot_owner, bot_owner->GetTarget())) {
-			sbl.push_back(bot_owner->GetTarget()->CastToBot());
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByNamedBot(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || !name) {
-			return;
-		}
-
-		auto selectable_bot_list = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
-		for (auto bot_iter : selectable_bot_list) {
-			if (!strcasecmp(bot_iter->GetCleanName(), name)) {
-				sbl.push_back(bot_iter);
-				return;
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByMyGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner) {
-			return;
-		}
-
-		if (!bot_owner->GetGroup() && !bot_owner->GetRaid()) {
-			return;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
-			}
-
-			uint32 raid_group = raid->GetGroup(bot_owner);
-			if (raid_group >= MAX_RAID_GROUPS) {
-				return;
-			}
-
-			for (const auto& m : raid->members) {
-				if (m.member && m.group_number == raid_group) {
-					if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-						continue;
-					}
-
-					sbl.push_back(m.member->CastToBot());
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByMyRaidBots(Client* bot_owner, std::list<Bot*>& sbl, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner) {
-			return;
-		}
-
-		if (!bot_owner->GetRaid()) {
-			return;
-		}
-
-		Raid* raid = bot_owner->GetRaid();
-		if (!raid) {
-			return;
-		}
-
-		for (const auto& m : raid->members) {
-			if (m.member) {
-				if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-					continue;
-				}
-
-				sbl.push_back(m.member->CastToBot());
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByTargetsGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner) {
-			return;
-		}
-
-		auto target_mob = bot_owner->GetTarget();
-		if (!target_mob || (!target_mob->GetGroup() && !target_mob->GetRaid()) || (!target_mob->IsClient() && !target_mob->IsBot())) {
-			return;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
-			}
-
-			if (MyBots::IsMyBot(bot_owner, target_mob)) {
-				uint32 raid_group = raid->GetGroup(target_mob->CastToClient());
-				if (raid_group >= MAX_RAID_GROUPS) {
-					return;
-				}
-
-				for (const auto& m : raid->members) {
-					if (m.member && m.group_number == raid_group) {
-						if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-							continue;
-						}
-
-						sbl.push_back(m.member->CastToBot());
-					}
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByNamesGroupedBots(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || !name) {
-			return;
-		}
-
-		Mob* named_mob = nullptr;
-		std::list<Mob*> l_mob_list;
-		entity_list.GetMobList(l_mob_list);
-		for (auto mob_iter : l_mob_list) {
-			if (!strcasecmp(mob_iter->GetCleanName(), name)) {
-				named_mob = mob_iter;
-				break;
-			}
-		}
-
-		if (!named_mob || !MyBots::IsMyBot(bot_owner, named_mob) || (!named_mob->GetGroup() && !named_mob->GetRaid()) || (!named_mob->IsClient() && !named_mob->IsBot())) {
-			return;
-		}
-
-		if (bot_owner->IsRaidGrouped()) {
-			Raid* raid = bot_owner->GetRaid();
-			if (!raid) {
-				return;
-			}
-
-			uint32 raid_group = raid->GetGroup(named_mob->CastToClient());
-			if (raid_group >= MAX_RAID_GROUPS) {
-				return;
-			}
-
-			for (const auto& m : raid->members) {
-				if (m.member && m.group_number == raid_group) {
-					if (!MyBots::IsMyBot(bot_owner, m.member->CastToBot())) {
-						continue;
-					}
-
-					sbl.push_back(m.member->CastToBot());
-				}
-			}
-		}
-		else {
-			std::list<Bot*> group_list;
-			bot_owner->GetGroup()->GetBotList(group_list);
-			for (auto member_iter : group_list) {
-				if (IsMyBot(bot_owner, member_iter)) {
-					sbl.push_back(member_iter);
-				}
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByHealRotation(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || (!name && !bot_owner->GetTarget())) {
-			return;
-		}
-
-		std::list<Bot*> selectable_bot_list;
-		if (name) {
-			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
-		}
-		else {
-			PopulateSBL_ByTargetedBot(bot_owner, selectable_bot_list);
-		}
-
-		if (selectable_bot_list.empty() || !selectable_bot_list.front()->IsHealRotationMember()) {
-			return;
-		}
-
-		auto hrm = (*selectable_bot_list.front()->MemberOfHealRotation())->MemberList();
-		for (auto hrm_iter : *hrm) {
-			if (IsMyBot(bot_owner, hrm_iter)) {
-				sbl.push_back(hrm_iter);
-			}
-		}
-
-		auto hrt = (*selectable_bot_list.front()->MemberOfHealRotation())->TargetList();
-		for (auto hrt_iter : *hrt) {
-			if (IsMyBot(bot_owner, hrt_iter)) {
-				sbl.push_back(hrt_iter->CastToBot());
-			}
-		}
-
-		UniquifySBL(sbl);
-	}
-
-	static void PopulateSBL_ByHealRotationMembers(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || (!name && !bot_owner->GetTarget())) {
-			return;
-		}
-
-		std::list<Bot*> selectable_bot_list;
-		if (name) {
-			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
-		}
-		else {
-			PopulateSBL_ByTargetedBot(bot_owner, selectable_bot_list);
-		}
-
-		if (selectable_bot_list.empty() || !selectable_bot_list.front()->IsHealRotationMember()) {
-			return;
-		}
-
-		auto hrm = (*selectable_bot_list.front()->MemberOfHealRotation())->MemberList();
-		for (auto hrm_iter : *hrm) {
-			if (IsMyBot(bot_owner, hrm_iter)) {
-				sbl.push_back(hrm_iter);
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_ByHealRotationTargets(Client *bot_owner, std::list<Bot*> &sbl, const char* name, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || (!name && !bot_owner->GetTarget())) {
-			return;
-		}
-
-		std::list<Bot*> selectable_bot_list;
-		if (name) {
-			PopulateSBL_ByNamedBot(bot_owner, selectable_bot_list, name);
-		}
-		else {
-			PopulateSBL_ByTargetedBot(bot_owner, selectable_bot_list);
-		}
-
-		if (selectable_bot_list.empty() || !selectable_bot_list.front()->IsHealRotationMember()) {
-			return;
-		}
-
-		auto hrm = (*selectable_bot_list.front()->MemberOfHealRotation())->TargetList();
-		for (auto hrm_iter : *hrm) {
-			if (IsMyBot(bot_owner, hrm_iter)) {
-				sbl.push_back(static_cast<Bot*>(hrm_iter));
-			}
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_BySpawnedBots(Client *bot_owner, std::list<Bot*> &sbl) { // should be used for most spell casting commands
-		sbl.clear();
-		if (!bot_owner) {
-			return;
-		}
-
-		sbl = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
-		sbl.remove(nullptr);
-	}
-
-	static void PopulateSBL_BySpawnedBotsClass(Client * bot_owner, std::list<Bot*> &sbl, uint16 cls, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || !cls) {
-			return;
-		}
-
-		auto selectable_bot_list = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
-		for (auto bot_iter : selectable_bot_list) {
-			if (bot_iter->GetClass() != cls) {
-				continue;
-			}
-
-			sbl.push_back(bot_iter);
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
-		}
-	}
-
-	static void PopulateSBL_BySpawnedBotsRace(Client* bot_owner, std::list<Bot*>& sbl, uint16 race, bool clear_list = true) {
-		if (clear_list) {
-			sbl.clear();
-		}
-
-		if (!bot_owner || !race) {
-			return;
-		}
-
-		auto selectable_bot_list = entity_list.GetBotsByBotOwnerCharacterID(bot_owner->CharacterID());
-		for (auto bot_iter : selectable_bot_list) {
-			if (bot_iter->GetBaseRace() != race) {
-				continue;
-			}
-
-			sbl.push_back(bot_iter);
-		}
-
-		if (!clear_list) {
-			UniquifySBL(sbl);
+		case TT_Self:
+			return "TT_Self";
+		case TT_Animal:
+			return "TT_Animal";
+		case TT_Undead:
+			return "TT_Undead";
+		case TT_Summoned:
+			return "TT_Summoned";
+		case TT_Plant:
+			return "TT_Plant";
+		case TT_Single:
+			return "TT_Single";
+		case TT_GroupV1:
+			return "TT_GroupV1";
+		case TT_GroupV2:
+			return "TT_GroupV2";
+		case TT_AECaster:
+			return "TT_AECaster";
+		case TT_AEBard:
+			return "TT_AEBard";
+		case TT_AETarget:
+			return "TT_AETarget";
+		case TT_Corpse:
+			return "TT_Corpse";
+		default:
+			return "TT_None";
 		}
 	}
 };
@@ -1261,7 +808,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](Bot* l) { return (!l->IsBotArcher()); });
 	}
 
-	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, EQ::skills::SkillType skill_type, float& skill_value) {
+	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, uint16 skill_type, float& skill_value) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
 		skill_value = 0.0f;
 
@@ -1298,7 +845,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Rogue && l->GetLevel() < 5); });
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Bard && l->GetLevel() < 40); });
 
-		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
+		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, Skill::PickLock, pick_lock_value);
 	}
 }
 
@@ -1639,9 +1186,9 @@ void bot_command_apply_potion(Client* c, const Seperator* sep);
 void bot_command_attack(Client *c, const Seperator *sep);
 void bot_command_bind_affinity(Client *c, const Seperator *sep);
 void bot_command_bot(Client *c, const Seperator *sep);
+void bot_command_botgroup(Client *c, const Seperator *sep);
 void bot_command_caster_range(Client* c, const Seperator* sep);
 void bot_command_charm(Client *c, const Seperator *sep);
-void bot_command_click_item(Client* c, const Seperator* sep);
 void bot_command_cure(Client *c, const Seperator *sep);
 void bot_command_defensive(Client *c, const Seperator *sep);
 void bot_command_depart(Client *c, const Seperator *sep);
@@ -1663,7 +1210,6 @@ void bot_command_movement_speed(Client *c, const Seperator *sep);
 void bot_command_owner_option(Client *c, const Seperator *sep);
 void bot_command_pet(Client *c, const Seperator *sep);
 void bot_command_pick_lock(Client *c, const Seperator *sep);
-void bot_command_pickpocket(Client* c, const Seperator* sep);
 void bot_command_precombat(Client* c, const Seperator* sep);
 void bot_command_pull(Client *c, const Seperator *sep);
 void bot_command_release(Client *c, const Seperator *sep);
@@ -1683,73 +1229,72 @@ void bot_command_enforce_spell_list(Client* c, const Seperator* sep);
 void bot_command_summon_corpse(Client *c, const Seperator *sep);
 void bot_command_suspend(Client *c, const Seperator *sep);
 void bot_command_taunt(Client *c, const Seperator *sep);
-void bot_command_timer(Client* c, const Seperator* sep);
 void bot_command_track(Client *c, const Seperator *sep);
 void bot_command_view_combos(Client *c, const Seperator *sep);
 void bot_command_water_breathing(Client *c, const Seperator *sep);
 
 // Bot Subcommands
-void bot_command_appearance(Client *c, const Seperator *sep);
-void bot_command_beard_color(Client *c, const Seperator *sep);
-void bot_command_beard_style(Client *c, const Seperator *sep);
-void bot_command_camp(Client *c, const Seperator *sep);
-void bot_command_clone(Client *c, const Seperator *sep);
-void bot_command_create(Client *c, const Seperator *sep);
-void bot_command_delete(Client *c, const Seperator *sep);
-void bot_command_details(Client *c, const Seperator *sep);
-void bot_command_dye_armor(Client *c, const Seperator *sep);
-void bot_command_eyes(Client *c, const Seperator *sep);
-void bot_command_face(Client *c, const Seperator *sep);
-void bot_command_follow_distance(Client *c, const Seperator *sep);
-void bot_command_hair_color(Client *c, const Seperator *sep);
-void bot_command_hairstyle(Client *c, const Seperator *sep);
-void bot_command_heritage(Client *c, const Seperator *sep);
-void bot_command_inspect_message(Client *c, const Seperator *sep);
-void bot_command_list_bots(Client *c, const Seperator *sep);
-void bot_command_out_of_combat(Client *c, const Seperator *sep);
-void bot_command_report(Client *c, const Seperator *sep);
-void bot_command_spawn(Client *c, const Seperator *sep);
-void bot_command_stance(Client *c, const Seperator *sep);
-void bot_command_stop_melee_level(Client *c, const Seperator *sep);
-void bot_command_suffix(Client *c, const Seperator *sep);
-void bot_command_summon(Client *c, const Seperator *sep);
-void bot_command_surname(Client *c, const Seperator *sep);
-void bot_command_tattoo(Client *c, const Seperator *sep);
-void bot_command_title(Client *c, const Seperator *sep);
-void bot_command_toggle_archer(Client *c, const Seperator *sep);
-void bot_command_toggle_helm(Client *c, const Seperator *sep);
-void bot_command_update(Client *c, const Seperator *sep);
-void bot_command_woad(Client *c, const Seperator *sep);
+void bot_subcommand_bot_appearance(Client *c, const Seperator *sep);
+void bot_subcommand_bot_beard_color(Client *c, const Seperator *sep);
+void bot_subcommand_bot_beard_style(Client *c, const Seperator *sep);
+void bot_subcommand_bot_camp(Client *c, const Seperator *sep);
+void bot_subcommand_bot_clone(Client *c, const Seperator *sep);
+void bot_subcommand_bot_create(Client *c, const Seperator *sep);
+void bot_subcommand_bot_delete(Client *c, const Seperator *sep);
+void bot_subcommand_bot_details(Client *c, const Seperator *sep);
+void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep);
+void bot_subcommand_bot_eyes(Client *c, const Seperator *sep);
+void bot_subcommand_bot_face(Client *c, const Seperator *sep);
+void bot_subcommand_bot_follow_distance(Client *c, const Seperator *sep);
+void bot_subcommand_bot_hair_color(Client *c, const Seperator *sep);
+void bot_subcommand_bot_hairstyle(Client *c, const Seperator *sep);
+void bot_subcommand_bot_heritage(Client *c, const Seperator *sep);
+void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep);
+void bot_subcommand_bot_list(Client *c, const Seperator *sep);
+void bot_subcommand_bot_out_of_combat(Client *c, const Seperator *sep);
+void bot_subcommand_bot_report(Client *c, const Seperator *sep);
+void bot_subcommand_bot_spawn(Client *c, const Seperator *sep);
+void bot_subcommand_bot_stance(Client *c, const Seperator *sep);
+void bot_subcommand_bot_stop_melee_level(Client *c, const Seperator *sep);
+void bot_subcommand_bot_suffix(Client *c, const Seperator *sep);
+void bot_subcommand_bot_summon(Client *c, const Seperator *sep);
+void bot_subcommand_bot_surname(Client *c, const Seperator *sep);
+void bot_subcommand_bot_tattoo(Client *c, const Seperator *sep);
+void bot_subcommand_bot_title(Client *c, const Seperator *sep);
+void bot_subcommand_bot_toggle_archer(Client *c, const Seperator *sep);
+void bot_subcommand_bot_toggle_helm(Client *c, const Seperator *sep);
+void bot_subcommand_bot_update(Client *c, const Seperator *sep);
+void bot_subcommand_bot_woad(Client *c, const Seperator *sep);
 
-void bot_command_circle(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_add_member(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_add_target(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_adjust_critical(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_adjust_safe(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_casting_override(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_change_interval(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_clear_hot(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_clear_targets(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_create(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_delete(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_fast_heals(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_list(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_remove_member(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_remove_target(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_reset_limits(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_save(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_set_hot(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_start(Client *c, const Seperator *sep);
-void bot_command_heal_rotation_stop(Client *c, const Seperator *sep);
-void bot_command_inventory_give(Client *c, const Seperator *sep);
-void bot_command_inventory_list(Client *c, const Seperator *sep);
-void bot_command_inventory_remove(Client *c, const Seperator *sep);
-void bot_command_inventory_window(Client *c, const Seperator *sep);
-void bot_command_pet_get_lost(Client *c, const Seperator *sep);
-void bot_command_pet_remove(Client *c, const Seperator *sep);
-void bot_command_pet_set_type(Client *c, const Seperator *sep);
-void bot_command_portal(Client *c, const Seperator *sep);
+void bot_subcommand_circle(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_adaptive_targeting(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_add_member(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_add_target(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_adjust_critical(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_adjust_safe(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_casting_override(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_change_interval(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_clear_hot(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_clear_targets(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_create(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_delete(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_fast_heals(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_list(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_remove_member(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_remove_target(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_reset_limits(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_save(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_set_hot(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_start(Client *c, const Seperator *sep);
+void bot_subcommand_heal_rotation_stop(Client *c, const Seperator *sep);
+void bot_subcommand_inventory_give(Client *c, const Seperator *sep);
+void bot_subcommand_inventory_list(Client *c, const Seperator *sep);
+void bot_subcommand_inventory_remove(Client *c, const Seperator *sep);
+void bot_subcommand_inventory_window(Client *c, const Seperator *sep);
+void bot_subcommand_pet_get_lost(Client *c, const Seperator *sep);
+void bot_subcommand_pet_remove(Client *c, const Seperator *sep);
+void bot_subcommand_pet_set_type(Client *c, const Seperator *sep);
+void bot_subcommand_portal(Client *c, const Seperator *sep);
 
 
 // bot command helpers
@@ -1766,7 +1311,7 @@ void helper_command_depart_list(Client* bot_owner, Bot* druid_bot, Bot* wizard_b
 bool helper_is_help_or_usage(const char* arg);
 bool helper_no_available_bots(Client *bot_owner, Bot *my_bot = nullptr);
 void helper_send_available_subcommands(Client *bot_owner, const char* command_simile, const std::list<const char*>& subcommand_list);
-void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = Class::None);
+void helper_send_usage_required_bots(Client *bot_owner, BCEnum::SpType spell_type, uint8 bot_class = NO_CLASS);
 bool helper_spell_check_fail(STBaseEntry* local_entry);
 bool helper_spell_list_fail(Client *bot_owner, bcst_list* spell_list, BCEnum::SpType spell_type);
 #endif

@@ -411,7 +411,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 			 * Try Lock pick
 			 */
 		else if (lock_pick_item != nullptr) {
-			if (sender->GetSkill(EQ::skills::SkillPickLock)) {
+			if (sender->GetSkill(Skill::PickLock)) {
 				Timer *pick_lock_timer = sender->GetPickLockTimer();
 				if (lock_pick_item->GetItem()->ItemType == EQ::item::ItemTypeLockPick) {
 					if (!pick_lock_timer->Check()) {
@@ -420,7 +420,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 						return;
 					}
 
-					float player_pick_lock_skill = sender->GetSkill(EQ::skills::SkillPickLock);
+					float player_pick_lock_skill = sender->GetSkill(Skill::PickLock);
 
 					LogSkills("Client has lockpicks: skill=[{}]", player_pick_lock_skill);
 
@@ -430,7 +430,7 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 						pick_lock_timer->Start(1000, true);
 
 						if (!IsDoorOpen()) {
-							sender->CheckIncreaseSkill(EQ::skills::SkillPickLock, nullptr, 1);
+							sender->CheckIncreaseSkill(Skill::PickLock, nullptr, 1);
 							move_door_packet->action = static_cast<uint8>(m_invert_state == 0 ? OPEN_DOOR
 								: OPEN_INVDOOR);
 							sender->MessageString(Chat::LightBlue, DOORS_SUCCESSFUL_PICK);

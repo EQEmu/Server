@@ -216,27 +216,27 @@ void Perl_Client_SetDeity(Client* self, uint32 deity_id) // @categories Account 
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp) // @categories Experience and Level
 {
-	self->AddEXP(ExpSource::Quest, add_exp);
+	self->AddEXP(add_exp);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel) // @categories Experience and Level
 {
-	self->AddEXP(ExpSource::Quest, add_exp, conlevel);
+	self->AddEXP(add_exp, conlevel);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel, bool resexp) // @categories Experience and Level
 {
-	self->AddEXP(ExpSource::Quest, add_exp, conlevel, resexp);
+	self->AddEXP(add_exp, conlevel, resexp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp) // @categories Experience and Level
 {
-	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp);
+	self->SetEXP(set_exp, set_aaxp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp, bool resexp) // @categories Experience and Level
 {
-	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp, resexp);
+	self->SetEXP(set_exp, set_aaxp, resexp);
 }
 
 void Perl_Client_SetBindPoint(Client* self) // @categories Account and Character, Stats and Attributes
@@ -344,9 +344,9 @@ int Perl_Client_GetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uin
 	return self->GetFactionLevel(char_id, npc_id, race_id, class_id, deity_id, faction_id, tnpc);
 }
 
-void Perl_Client_SetFactionLevel(Client* self, uint32 char_id, uint32 npc_faction_id, uint8 char_class, uint8 char_race, uint8 char_deity) // @categories Faction
+void Perl_Client_SetFactionLevel(Client* self, uint32 char_id, uint32 npc_id, uint8 char_class, uint8 char_race, uint8 char_deity) // @categories Faction
 {
-	self->SetFactionLevel(char_id, npc_faction_id, char_class, char_race, char_deity);
+	self->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
 }
 
 void Perl_Client_SetFactionLevel2(Client* self, uint32 char_id, int32 faction_id, uint8 char_class, uint8 char_race, uint8 char_deity, int32 value) // @categories Faction
@@ -454,49 +454,49 @@ void Perl_Client_SetSkillPoints(Client* self, int points) // @categories Skills 
 	self->SetSkillPoints(points);
 }
 
-void Perl_Client_IncreaseSkill(Client* self, int skill_id) // @categories Skills and Recipes
+void Perl_Client_IncreaseSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
 	self->IncreaseSkill(skill_id);
 }
 
-void Perl_Client_IncreaseSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
+void Perl_Client_IncreaseSkill(Client* self, uint16 skill_id, int value) // @categories Skills and Recipes
 {
 	self->IncreaseSkill(skill_id, value);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(language_id);
+	self->IncreaseLanguageSkill(skill_id);
 }
 
-void Perl_Client_IncreaseLanguageSkill(Client* self, uint8 language_id, uint8 increase) // @categories Skills and Recipes
+void Perl_Client_IncreaseLanguageSkill(Client* self, int skill_id, int value) // @categories Skills and Recipes
 {
-	self->IncreaseLanguageSkill(language_id, increase);
+	self->IncreaseLanguageSkill(skill_id, value);
 }
 
-uint32_t Perl_Client_GetRawSkill(Client* self, int skill_id) // @categories Skills and Recipes
+uint32_t Perl_Client_GetRawSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
-	return self->GetRawSkill(static_cast<EQ::skills::SkillType>(skill_id));
+	return self->GetRawSkill(skill_id);
 }
 
-bool Perl_Client_HasSkill(Client* self, int skill_id) // @categories Skills and Recipes
+bool Perl_Client_HasSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
-	return self->HasSkill(static_cast<EQ::skills::SkillType>(skill_id));
+	return self->HasSkill(skill_id);
 }
 
-bool Perl_Client_CanHaveSkill(Client* self, int skill_id) // @categories Skills and Recipes
+bool Perl_Client_CanHaveSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
-	return self->CanHaveSkill(static_cast<EQ::skills::SkillType>(skill_id));
+	return self->CanHaveSkill(skill_id);
 }
 
-void Perl_Client_SetSkill(Client* self, int skill_id, uint16 value) // @categories Skills and Recipes
+void Perl_Client_SetSkill(Client* self, uint16 skill_id, uint16 value) // @categories Skills and Recipes
 {
-	self->SetSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
+	self->SetSkill(skill_id, value);
 }
 
-void Perl_Client_AddSkill(Client* self, int skill_id, uint16 value) // @categories Skills and Recipes
+void Perl_Client_AddSkill(Client* self, uint16 skill_id, uint16 value) // @categories Skills and Recipes
 {
-	self->AddSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
+	self->AddSkill(skill_id, value);
 }
 
 void Perl_Client_CheckSpecializeIncrease(Client* self, uint16 spell_id) // @categories Spells and Disciplines
@@ -504,34 +504,34 @@ void Perl_Client_CheckSpecializeIncrease(Client* self, uint16 spell_id) // @cate
 	self->CheckSpecializeIncrease(spell_id);
 }
 
-bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id) // @categories Skills and Recipes
+bool Perl_Client_CheckIncreaseSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
-	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr);
+	return self->CheckIncreaseSkill(skill_id, nullptr);
 }
 
-bool Perl_Client_CheckIncreaseSkill(Client* self, int skill_id, int chance_modifier) // @categories Skills and Recipes
+bool Perl_Client_CheckIncreaseSkill(Client* self, uint16 skill_id, int chance_modifier) // @categories Skills and Recipes
 {
-	return self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), nullptr, chance_modifier);
+	return self->CheckIncreaseSkill(skill_id, nullptr, chance_modifier);
 }
 
-void Perl_Client_SetLanguageSkill(Client* self, uint8 language_id, uint8 language_skill) // @categories Account and Character, Skills and Recipes, Stats and Attributes
+void Perl_Client_SetLanguageSkill(Client* self, int language_id, int value) // @categories Account and Character, Skills and Recipes, Stats and Attributes
 {
-	self->SetLanguageSkill(language_id, language_skill);
+	self->SetLanguageSkill(language_id, value);
 }
 
 int Perl_Client_MaxSkill(Client* self, uint16 skill_id) // @categories Skills and Recipes
 {
-	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass(), self->GetLevel());
+	return self->MaxSkill(skill_id, self->GetClass(), self->GetLevel());
 }
 
 int Perl_Client_MaxSkill(Client* self, uint16 skill_id, uint16 class_id) // @categories Skills and Recipes
 {
-	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), class_id, self->GetLevel());
+	return self->MaxSkill(skill_id, class_id, self->GetLevel());
 }
 
 int Perl_Client_MaxSkill(Client* self, uint16 skill_id, uint16 class_id, uint16 level) // @categories Skills and Recipes
 {
-	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id), class_id, level);
+	return self->MaxSkill(skill_id, class_id, level);
 }
 
 void Perl_Client_GMKill(Client* self) // @categories Script Utility
@@ -1159,23 +1159,7 @@ void Perl_Client_AddPVPPoints(Client* self, uint32 points) // @categories Curren
 
 void Perl_Client_AddCrystals(Client* self, uint32 radiant_count, uint32 ebon_count) // @categories Currency and Points
 {
-	if (ebon_count != 0) {
-		if (ebon_count > 0) {
-			self->AddEbonCrystals(ebon_count);
-			return;
-		}
-
-		self->RemoveEbonCrystals(ebon_count);
-	}
-
-	if (radiant_count != 0) {
-		if (radiant_count > 0) {
-			self->AddRadiantCrystals(radiant_count);
-			return;
-		}
-
-		self->RemoveRadiantCrystals(radiant_count);
-	}
+	self->AddCrystals(radiant_count, ebon_count);
 }
 
 void Perl_Client_SetEbonCrystals(Client* self, uint32 value)
@@ -1208,7 +1192,7 @@ void Perl_Client_ReadBook(Client* self, const char* book_text, uint8 type) // @c
 	self->QuestReadBook(book_text, type);
 }
 
-void Perl_Client_SetGMStatus(Client* self, int new_status) // @categories Script Utility
+void Perl_Client_SetGMStatus(Client* self, int16 new_status) // @categories Script Utility
 {
 	self->SetGMStatus(new_status);
 }
@@ -1280,17 +1264,17 @@ uint32_t Perl_Client_GetIP(Client* self) // @categories Script Utility
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage);
+	self->AddLevelBasedExp(exp_percentage);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level);
+	self->AddLevelBasedExp(exp_percentage, max_level);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level, bool ignore_mods) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level, ignore_mods);
+	self->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
 }
 
 void Perl_Client_IncrementAA(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement
@@ -1413,7 +1397,7 @@ void Perl_Client_EndSharedTask(Client* self, bool send_fail)
 	return self->EndSharedTask(send_fail);
 }
 
-int64_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
+uint32_t Perl_Client_GetCorpseCount(Client* self) // @categories Account and Character, Corpse
 {
 	return self->GetCorpseCount();
 }
@@ -1440,15 +1424,15 @@ void Perl_Client_RemoveFromInstance(Client* self, uint16 instance_id) // @catego
 
 void Perl_Client_Freeze(Client* self)
 {
-	self->SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
+	self->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 }
 
 void Perl_Client_UnFreeze(Client* self)
 {
-	self->SendAppearancePacket(AppearanceType::Animation, Animation::Standing);
+	self->SendAppearancePacket(AT_Anim, ANIM_STAND);
 }
 
-uint32 Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
+int Perl_Client_GetAggroCount(Client* self) // @categories Script Utility, Hate and Aggro
 {
 	return self->GetAggroCount();
 }
@@ -1488,12 +1472,12 @@ void Perl_Client_NotifyNewTitlesAvailable(Client* self) // @categories Account a
 	self->NotifyNewTitlesAvailable();
 }
 
-void Perl_Client_AddAlternateCurrencyValue(Client* self, uint32 currency_id, int amount) // @categories Currency and Points
+void Perl_Client_AddAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
 {
-	self->AddAlternateCurrencyValue(currency_id, amount, true);
+	self->AddAlternateCurrencyValue(currency_id, amount);
 }
 
-void Perl_Client_SetAlternateCurrencyValue(Client* self, uint32 currency_id, uint32 amount) // @categories Currency and Points
+void Perl_Client_SetAlternateCurrencyValue(Client* self, uint32 currency_id, int32 amount) // @categories Currency and Points
 {
 	self->SetAlternateCurrencyValue(currency_id, amount);
 }
@@ -1518,11 +1502,6 @@ bool Perl_Client_HasSpellScribed(Client* self, int spell_id) // @categories Spel
 	return self->HasSpellScribed(spell_id);
 }
 
-void Perl_Client_ClearAccountFlag(Client* self, std::string flag) // @categories Account and Character
-{
-	self->ClearAccountFlag(flag);
-}
-
 void Perl_Client_SetAccountFlag(Client* self, std::string flag, std::string value) // @categories Account and Character
 {
 	self->SetAccountFlag(flag, value);
@@ -1533,21 +1512,6 @@ std::string Perl_Client_GetAccountFlag(Client* self, std::string flag) // @categ
 	return self->GetAccountFlag(flag);
 }
 
-perl::array Perl_Client_GetAccountFlags(Client* self)
-{
-	perl::array result;
-
-	const auto& l = self->GetAccountFlags();
-
-	result.reserve(l.size());
-
-	for (const auto& e : l) {
-		result.push_back(e);
-	}
-
-	return result;
-}
-
 int Perl_Client_GetHunger(Client* self) // @categories Account and Character, Stats and Attributes
 {
 	return self->GetHunger();
@@ -1556,11 +1520,6 @@ int Perl_Client_GetHunger(Client* self) // @categories Account and Character, St
 int Perl_Client_GetThirst(Client* self) // @categories Account and Character, Stats and Attributes
 {
 	return self->GetThirst();
-}
-
-int Perl_Client_GetIntoxication(Client* self) // @categories Account and Character, Stats and Attributes
-{
-	return self->GetIntoxication();
 }
 
 void Perl_Client_SetHunger(Client* self, int in_hunger) // @categories Script Utility, Stats and Attributes
@@ -1591,7 +1550,7 @@ void Perl_Client_SilentMessage(Client* self, const char* message) // @categories
 				if (self->GetTarget()->CastToNPC()->IsMoving() &&
 					  !self->GetTarget()->CastToNPC()->IsOnHatelist(self->GetTarget()))
 					self->GetTarget()->CastToNPC()->PauseWandering(RuleI(NPC, SayPauseTimeInSec));
-				self->ChannelMessageReceived(ChatChannel_Say, Language::CommonTongue, Language::MaxValue, message, nullptr, true);
+				self->ChannelMessageReceived(8, 0, 100, message, nullptr, true);
 			}
 		}
 	}
@@ -2007,17 +1966,12 @@ bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)
 	return self->HasDisciplineLearned(spell_id);
 }
 
-uint16_t Perl_Client_GetClassBitmask(Client* self)
+uint32_t Perl_Client_GetClassBitmask(Client* self)
 {
 	return GetPlayerClassBit(self->GetClass());
 }
 
-uint32_t Perl_Client_GetDeityBitmask(Client* self)
-{
-	return static_cast<uint32_t>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(self->GetDeity())));
-}
-
-uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
+uint32_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
 {
 	return GetPlayerRaceBit(self->GetBaseRace());
 }
@@ -2126,62 +2080,42 @@ EQ::InventoryProfile* Perl_Client_GetInventory(Client* self)
 	return &self->GetInv();
 }
 
-float Perl_Client_GetAAEXPModifier(Client* self)
-{
-	return zone->GetAAEXPModifier(self);
-}
-
-float Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
+double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id)
 {
 	return self->GetAAEXPModifier(zone_id);
 }
 
-float Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+double Perl_Client_GetAAEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
 {
 	return self->GetAAEXPModifier(zone_id, instance_version);
 }
 
-float Perl_Client_GetEXPModifier(Client* self)
-{
-	return zone->GetEXPModifier(self);
-}
-
-float Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
+double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id)
 {
 	return self->GetEXPModifier(zone_id);
 }
 
-float Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
+double Perl_Client_GetEXPModifier(Client* self, uint32 zone_id, int16 instance_version)
 {
 	return self->GetEXPModifier(zone_id, instance_version);
 }
 
-void Perl_Client_SetAAEXPModifier(Client* self, float aa_modifier)
-{
-	zone->SetAAEXPModifier(self, aa_modifier);
-}
-
-void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, float aa_modifier)
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier)
 {
 	self->SetAAEXPModifier(zone_id, aa_modifier);
 }
 
-void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, float aa_modifier, int16 instance_version)
+void Perl_Client_SetAAEXPModifier(Client* self, uint32 zone_id, double aa_modifier, int16 instance_version)
 {
 	self->SetAAEXPModifier(zone_id, aa_modifier, instance_version);
 }
 
-void Perl_Client_SetEXPModifier(Client* self, float exp_modifier)
-{
-	zone->SetEXPModifier(self, exp_modifier);
-}
-
-void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, float exp_modifier)
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier)
 {
 	self->SetEXPModifier(zone_id, exp_modifier);
 }
 
-void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, float exp_modifier, int16 instance_version)
+void Perl_Client_SetEXPModifier(Client* self, uint32 zone_id, double exp_modifier, int16 instance_version)
 {
 	self->SetEXPModifier(zone_id, exp_modifier, instance_version);
 }
@@ -2268,14 +2202,14 @@ void Perl_Client_UntrainDiscBySpellID(Client* self, uint16 spell_id, bool update
 
 void Perl_Client_SummonBaggedItems(Client* self, uint32 bag_item_id, perl::reference bag_items_ref) // @categories Inventory and Items, Script Utility
 {
-	std::vector<LootItem> bagged_items;
+	std::vector<ServerLootItem_Struct> bagged_items;
 
 	perl::array bag_items = bag_items_ref;
 	for (perl::hash bag_item : bag_items) // only works if all elements are hashrefs
 	{
 		if (bag_item.exists("item_id") && bag_item.exists("charges"))
 		{
-			LootItem item{};
+			ServerLootItem_Struct item{};
 			item.item_id = bag_item["item_id"];
 			item.charges = bag_item["charges"];
 			item.attuned = bag_item.exists("attuned") ? bag_item["attuned"] : 0;
@@ -2657,74 +2591,59 @@ void Perl_Client_ApplySpell(Client* self, int spell_id, int duration)
 	self->ApplySpell(spell_id, duration);
 }
 
-void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, int level)
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->ApplySpell(spell_id, duration, level);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets);
 }
 
-void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets);
-}
-
-void Perl_Client_ApplySpell(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
-{
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
 }
 
 void Perl_Client_ApplySpellGroup(Client* self, int spell_id)
 {
-	self->ApplySpell(spell_id, 0, -1, ApplySpellType::Group);
+	self->ApplySpell(spell_id, 0, ApplySpellType::Group);
 }
 
 void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration)
 {
-	self->ApplySpell(spell_id, duration, -1, ApplySpellType::Group);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group);
 }
 
-void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, int level)
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets);
 }
 
-void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets);
-}
-
-void Perl_Client_ApplySpellGroup(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
-{
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
 }
 
 void Perl_Client_ApplySpellRaid(Client* self, int spell_id)
 {
-	self->ApplySpell(spell_id, 0, -1, ApplySpellType::Raid);
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
 }
 
 void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration)
 {
-	self->ApplySpell(spell_id, duration, -1, ApplySpellType::Raid);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
 }
 
-void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level)
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets);
 }
 
-void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
 }
 
-void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
+void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
-}
-
-void Perl_Client_ApplySpellRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots)
-{
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
 }
 
 void Perl_Client_SetSpellDuration(Client* self, int spell_id)
@@ -2737,74 +2656,59 @@ void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration)
 	self->SetSpellDuration(spell_id, duration);
 }
 
-void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, int level)
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->SetSpellDuration(spell_id, duration, level);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets);
 }
 
-void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets);
-}
-
-void Perl_Client_SetSpellDuration(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
-{
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Solo, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Solo, allow_pets, true, allow_bots);
 }
 
 void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id)
 {
-	self->SetSpellDuration(spell_id, 0, -1, ApplySpellType::Group);
+	self->SetSpellDuration(spell_id, 0, ApplySpellType::Group);
 }
 
 void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration)
 {
-	self->SetSpellDuration(spell_id, duration, -1, ApplySpellType::Group);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group);
 }
 
-void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, int level)
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets);
 }
 
-void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, bool allow_pets, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets);
-}
-
-void Perl_Client_SetSpellDurationGroup(Client* self, int spell_id, int duration, int level, bool allow_pets, bool allow_bots)
-{
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Group, allow_pets, true, allow_bots);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Group, allow_pets, true, allow_bots);
 }
 
 void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id)
 {
-	self->ApplySpell(spell_id, 0, -1, ApplySpellType::Raid);
+	self->ApplySpell(spell_id, 0, ApplySpellType::Raid);
 }
 
 void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration)
 {
-	self->ApplySpell(spell_id, duration, -1, ApplySpellType::Raid);
+	self->ApplySpell(spell_id, duration, ApplySpellType::Raid);
 }
 
-void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level)
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets)
 {
-	self->ApplySpell(spell_id, duration, level, ApplySpellType::Raid);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets);
 }
 
-void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level, bool allow_pets)
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only);
 }
 
-void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only)
+void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, bool allow_pets, bool is_raid_group_only, bool allow_bots)
 {
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only);
-}
-
-void Perl_Client_SetSpellDurationRaid(Client* self, int spell_id, int duration, int level, bool allow_pets, bool is_raid_group_only, bool allow_bots)
-{
-	self->SetSpellDuration(spell_id, duration, level, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
+	self->SetSpellDuration(spell_id, duration, ApplySpellType::Raid, allow_pets, is_raid_group_only, allow_bots);
 }
 
 perl::array Perl_Client_GetPEQZoneFlags(Client* self)
@@ -3173,9 +3077,9 @@ void Perl_Client_ResetLeadershipAA(Client* self)
 	self->ResetLeadershipAA();
 }
 
-uint8 Perl_Client_GetSkillTrainLevel(Client* self, int skill_id)
+uint8 Perl_Client_GetSkillTrainLevel(Client* self, uint16 skill_id)
 {
-	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
+	return self->GetSkillTrainLevel(skill_id, self->GetClass());
 }
 
 void perl_register_client()
@@ -3192,7 +3096,6 @@ void perl_register_client()
 	package.add("AddEXP", (void(*)(Client*, uint32))&Perl_Client_AddEXP);
 	package.add("AddEXP", (void(*)(Client*, uint32, uint8))&Perl_Client_AddEXP);
 	package.add("AddEXP", (void(*)(Client*, uint32, uint8, bool))&Perl_Client_AddEXP);
-	package.add("AddEbonCrystals", &Perl_Client_AddEbonCrystals);
 	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32))&Perl_Client_AddExpeditionLockout);
 	package.add("AddExpeditionLockout", (void(*)(Client*, std::string, std::string, uint32, std::string))&Perl_Client_AddExpeditionLockout);
 	package.add("AddExpeditionLockoutDuration", (void(*)(Client*, std::string, std::string, int))&Perl_Client_AddExpeditionLockoutDuration);
@@ -3208,25 +3111,21 @@ void perl_register_client()
 	package.add("AddPlatinum", (void(*)(Client*, uint32))&Perl_Client_AddPlatinum);
 	package.add("AddPlatinum", (void(*)(Client*, uint32, bool))&Perl_Client_AddPlatinum);
 	package.add("AddPVPPoints", &Perl_Client_AddPVPPoints);
-	package.add("AddRadiantCrystals", &Perl_Client_AddRadiantCrystals);
 	package.add("AddSkill", &Perl_Client_AddSkill);
 	package.add("Admin", &Perl_Client_Admin);
 	package.add("ApplySpell", (void(*)(Client*, int))&Perl_Client_ApplySpell);
 	package.add("ApplySpell", (void(*)(Client*, int, int))&Perl_Client_ApplySpell);
-	package.add("ApplySpell", (void(*)(Client*, int, int, int))&Perl_Client_ApplySpell);
-	package.add("ApplySpell", (void(*)(Client*, int, int, int, bool))&Perl_Client_ApplySpell);
-	package.add("ApplySpell", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpell);
+	package.add("ApplySpell", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpell);
 	package.add("ApplySpellGroup", (void(*)(Client*, int))&Perl_Client_ApplySpellGroup);
 	package.add("ApplySpellGroup", (void(*)(Client*, int, int))&Perl_Client_ApplySpellGroup);
-	package.add("ApplySpellGroup", (void(*)(Client*, int, int, int))&Perl_Client_ApplySpellGroup);
-	package.add("ApplySpellGroup", (void(*)(Client*, int, int, int, bool))&Perl_Client_ApplySpellGroup);
-	package.add("ApplySpellGroup", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellGroup);
+	package.add("ApplySpellGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellGroup);
 	package.add("ApplySpellRaid", (void(*)(Client*, int))&Perl_Client_ApplySpellRaid);
 	package.add("ApplySpellRaid", (void(*)(Client*, int, int))&Perl_Client_ApplySpellRaid);
-	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int))&Perl_Client_ApplySpellRaid);
-	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool))&Perl_Client_ApplySpellRaid);
-	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
-	package.add("ApplySpellRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_ApplySpellRaid);
+	package.add("ApplySpellRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_ApplySpellRaid);
 	package.add("AssignTask", (void(*)(Client*, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int))&Perl_Client_AssignTask);
 	package.add("AssignTask", (void(*)(Client*, int, int, bool))&Perl_Client_AssignTask);
@@ -3246,13 +3145,11 @@ void perl_register_client()
 	package.add("CashReward", &Perl_Client_CashReward);
 	package.add("ChangeLastName", &Perl_Client_ChangeLastName);
 	package.add("CharacterID", &Perl_Client_CharacterID);
-	package.add("CheckIncreaseSkill", (bool(*)(Client*, int))&Perl_Client_CheckIncreaseSkill);
-	package.add("CheckIncreaseSkill", (bool(*)(Client*, int, int))&Perl_Client_CheckIncreaseSkill);
+	package.add("CheckIncreaseSkill", (bool(*)(Client*, uint16))&Perl_Client_CheckIncreaseSkill);
+	package.add("CheckIncreaseSkill", (bool(*)(Client*, uint16, int))&Perl_Client_CheckIncreaseSkill);
 	package.add("CheckSpecializeIncrease", &Perl_Client_CheckSpecializeIncrease);
 	package.add("ClearCompassMark", &Perl_Client_ClearCompassMark);
-	package.add("ClearAccountFlag", &Perl_Client_ClearAccountFlag);
 	package.add("ClearPEQZoneFlag", &Perl_Client_ClearPEQZoneFlag);
-	package.add("ClearXTargets", &Perl_Client_ClearXTargets);
 	package.add("ClearZoneFlag", &Perl_Client_ClearZoneFlag);
 	package.add("Connected", &Perl_Client_Connected);
 	package.add("CountAugmentEquippedByID", &Perl_Client_CountAugmentEquippedByID);
@@ -3264,7 +3161,6 @@ void perl_register_client()
 	package.add("CreateExpeditionFromTemplate", &Perl_Client_CreateExpeditionFromTemplate);
 	package.add("CreateTaskDynamicZone", &Perl_Client_CreateTaskDynamicZone);
 	package.add("DecreaseByID", &Perl_Client_DecreaseByID);
-	package.add("DescribeSpecialAbilities", &Perl_Client_DescribeSpecialAbilities);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16))&Perl_Client_DeleteItemInInventory);
 	package.add("DeleteItemInInventory", (void(*)(Client*, int16, int16, bool))&Perl_Client_DeleteItemInInventory);
@@ -3292,10 +3188,8 @@ void perl_register_client()
 	package.add("ForageItem", &Perl_Client_ForageItem);
 	package.add("Freeze", &Perl_Client_Freeze);
 	package.add("GMKill", &Perl_Client_GMKill);
-	package.add("GetAAEXPModifier", (float(*)(Client*))&Perl_Client_GetAAEXPModifier);
-	package.add("GetAAEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
-	package.add("GetAAEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
-	package.add("GetAAEXPPercentage", &Perl_Client_GetAAEXPPercentage);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetAAEXPModifier);
+	package.add("GetAAEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetAAEXPModifier);
 	package.add("GetAAExp", &Perl_Client_GetAAExp);
 	package.add("GetAALevel", &Perl_Client_GetAALevel);
 	package.add("GetAAPercent", &Perl_Client_GetAAPercent);
@@ -3303,7 +3197,6 @@ void perl_register_client()
 	package.add("GetAFK", &Perl_Client_GetAFK);
 	package.add("GetAccountAge", &Perl_Client_GetAccountAge);
 	package.add("GetAccountFlag", &Perl_Client_GetAccountFlag);
-	package.add("GetAccountFlags", &Perl_Client_GetAccountFlags);
 	package.add("GetAggroCount", &Perl_Client_GetAggroCount);
 	package.add("GetAllMoney", &Perl_Client_GetAllMoney);
 	package.add("GetAlternateCurrencyValue", &Perl_Client_GetAlternateCurrencyValue);
@@ -3311,7 +3204,6 @@ void perl_register_client()
 	package.add("GetAugmentAt", &Perl_Client_GetAugmentAt);
 	package.add("GetAugmentIDAt", &Perl_Client_GetAugmentIDAt);
 	package.add("GetAugmentIDsBySlotID", &Perl_Client_GetAugmentIDsBySlotID);
-	package.add("GetAutoLoginCharacterName", &Perl_Client_GetAutoLoginCharacterName);
 	package.add("GetBaseAGI", &Perl_Client_GetBaseAGI);
 	package.add("GetBaseCHA", &Perl_Client_GetBaseCHA);
 	package.add("GetBaseDEX", &Perl_Client_GetBaseDEX);
@@ -3340,7 +3232,6 @@ void perl_register_client()
 	package.add("GetCarriedMoney", &Perl_Client_GetCarriedMoney);
 	package.add("GetCarriedPlatinum", &Perl_Client_GetCarriedPlatinum);
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
-	package.add("GetClassAbbreviation", &Perl_Client_GetClassAbbreviation);
 	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
 	package.add("GetClientVersion", &Perl_Client_GetClientVersion);
@@ -3349,17 +3240,13 @@ void perl_register_client()
 	package.add("GetCorpseID", &Perl_Client_GetCorpseID);
 	package.add("GetCorpseItemAt", &Perl_Client_GetCorpseItemAt);
 	package.add("GetCustomItemData", &Perl_Client_GetCustomItemData);
-	package.add("GetDeityBitmask", &Perl_Client_GetDeityBitmask);
 	package.add("GetDiscSlotBySpellID", &Perl_Client_GetDiscSlotBySpellID);
 	package.add("GetDisciplineTimer", &Perl_Client_GetDisciplineTimer);
 	package.add("GetDuelTarget", &Perl_Client_GetDuelTarget);
 	package.add("GetEnvironmentDamageModifier", &Perl_Client_GetEnvironmentDamageModifier);
 	package.add("GetEXP", &Perl_Client_GetEXP);
-	package.add("GetEXPForLevel", &Perl_Client_GetEXPForLevel);
-	package.add("GetEXPModifier", (float(*)(Client*))&Perl_Client_GetEXPModifier);
-	package.add("GetEXPModifier", (float(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
-	package.add("GetEXPModifier", (float(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
-	package.add("GetEXPPercentage", &Perl_Client_GetEXPPercentage);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32))&Perl_Client_GetEXPModifier);
+	package.add("GetEXPModifier", (double(*)(Client*, uint32, int16))&Perl_Client_GetEXPModifier);
 	package.add("GetEbonCrystals", &Perl_Client_GetEbonCrystals);
 	package.add("GetEndurance", &Perl_Client_GetEndurance);
 	package.add("GetEnduranceRatio", &Perl_Client_GetEnduranceRatio);
@@ -3381,7 +3268,6 @@ void perl_register_client()
 	package.add("GetHorseId", &Perl_Client_GetHorseId);
 	package.add("GetHealAmount", &Perl_Client_GetHealAmount);
 	package.add("GetHunger", &Perl_Client_GetHunger);
-	package.add("GetIntoxication", &Perl_Client_GetIntoxication);
 	package.add("GetIP", &Perl_Client_GetIP);
 	package.add("GetIPExemption", &Perl_Client_GetIPExemption);
 	package.add("GetIPString", &Perl_Client_GetIPString);
@@ -3410,12 +3296,9 @@ void perl_register_client()
 	package.add("GetMoney", &Perl_Client_GetMoney);
 	package.add("GetPVP", &Perl_Client_GetPVP);
 	package.add("GetPVPPoints", &Perl_Client_GetPVPPoints);
-	package.add("GetRaceAbbreviation", &Perl_Client_GetRaceAbbreviation);
 	package.add("GetRaceBitmask", &Perl_Client_GetRaceBitmask);
 	package.add("GetRadiantCrystals", &Perl_Client_GetRadiantCrystals);
 	package.add("GetRaid", &Perl_Client_GetRaid);
-	package.add("GetRaidOrGroupOrSelf", (perl::array(*)(Client*))&Perl_Client_GetRaidOrGroupOrSelf);
-	package.add("GetRaidOrGroupOrSelf", (perl::array(*)(Client*, bool))&Perl_Client_GetRaidOrGroupOrSelf);
 	package.add("GetRaidPoints", &Perl_Client_GetRaidPoints);
 	package.add("GetRawItemAC", &Perl_Client_GetRawItemAC);
 	package.add("GetRawSkill", &Perl_Client_GetRawSkill);
@@ -3436,13 +3319,10 @@ void perl_register_client()
 	package.add("GetTaskActivityDoneCount", &Perl_Client_GetTaskActivityDoneCount);
 	package.add("GetThirst", &Perl_Client_GetThirst);
 	package.add("GetTotalSecondsPlayed", &Perl_Client_GetTotalSecondsPlayed);
-	package.add("GetSkillTrainLevel", &Perl_Client_GetSkillTrainLevel);
 	package.add("GetWeight", &Perl_Client_GetWeight);
 	package.add("GetPEQZoneFlags", &Perl_Client_GetPEQZoneFlags);
 	package.add("GetZoneFlags", &Perl_Client_GetZoneFlags);
 	package.add("GoFish", &Perl_Client_GoFish);
-	package.add("GrantAllAAPoints", (void(*)(Client*))&Perl_Client_GrantAllAAPoints);
-	package.add("GrantAllAAPoints", (void(*)(Client*, uint8))&Perl_Client_GrantAllAAPoints);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GrantAlternateAdvancementAbility", (bool(*)(Client*, int, int, bool))&Perl_Client_GrantAlternateAdvancementAbility);
 	package.add("GuildID", &Perl_Client_GuildID);
@@ -3451,7 +3331,6 @@ void perl_register_client()
 	package.add("HasDisciplineLearned", &Perl_Client_HasDisciplineLearned);
 	package.add("HasExpeditionLockout", &Perl_Client_HasExpeditionLockout);
 	package.add("HasItemEquippedByID", &Perl_Client_HasItemEquippedByID);
-	package.add("HasItemOnCorpse", &Perl_Client_HasItemOnCorpse);
 	package.add("HasPEQZoneFlag", &Perl_Client_HasPEQZoneFlag);
 	package.add("HasRecipeLearned", &Perl_Client_HasRecipeLearned);
 	package.add("HasSkill", &Perl_Client_HasSkill);
@@ -3462,8 +3341,8 @@ void perl_register_client()
 	package.add("IncStats", &Perl_Client_IncStats);
 	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8))&Perl_Client_IncreaseLanguageSkill);
 	package.add("IncreaseLanguageSkill", (void(*)(Client*, uint8, uint8))&Perl_Client_IncreaseLanguageSkill);
-	package.add("IncreaseSkill", (void(*)(Client*, int))&Perl_Client_IncreaseSkill);
-	package.add("IncreaseSkill", (void(*)(Client*, int, int))&Perl_Client_IncreaseSkill);
+	package.add("IncreaseSkill", (void(*)(Client*, uint16))&Perl_Client_IncreaseSkill);
+	package.add("IncreaseSkill", (void(*)(Client*, uint16, int))&Perl_Client_IncreaseSkill);
 	package.add("IncrementAA", &Perl_Client_IncrementAA);
 	package.add("IsAutoAttackEnabled", &Perl_Client_IsAutoAttackEnabled);
 	package.add("IsAutoFireEnabled", &Perl_Client_IsAutoFireEnabled);
@@ -3472,7 +3351,6 @@ void perl_register_client()
 	package.add("IsDueling", &Perl_Client_IsDueling);
 	package.add("IsEXPEnabled", &Perl_Client_IsEXPEnabled);
 	package.add("IsGrouped", &Perl_Client_IsGrouped);
-	package.add("IsInAGuild", &Perl_Client_IsInAGuild);
 	package.add("IsLD", &Perl_Client_IsLD);
 	package.add("IsMedding", &Perl_Client_IsMedding);
 	package.add("IsRaidGrouped", &Perl_Client_IsRaidGrouped);
@@ -3551,11 +3429,8 @@ void perl_register_client()
 	package.add("ReadBookByName", &Perl_Client_ReadBookByName);
 	package.add("RefundAA", &Perl_Client_RefundAA);
 	package.add("ReloadDataBuckets", &Perl_Client_ReloadDataBuckets);
-	package.add("RemoveAAPoints", &Perl_Client_RemoveAAPoints);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
-	package.add("RemoveAlternateCurrencyValue", (bool(*)(Client*, uint32, uint32))&Perl_Client_RemoveAlternateCurrencyValue);
-	package.add("RemoveEbonCrystals", &Perl_Client_RemoveEbonCrystals);
 	package.add("RemoveExpeditionLockout", &Perl_Client_RemoveExpeditionLockout);
 	package.add("RemoveFromInstance", &Perl_Client_RemoveFromInstance);
 	package.add("RemoveItem", (void(*)(Client*, uint32))&Perl_Client_RemoveItem);
@@ -3563,7 +3438,6 @@ void perl_register_client()
 	package.add("RemoveLDoNLoss", &Perl_Client_RemoveLDoNLoss);
 	package.add("RemoveLDoNWin", &Perl_Client_RemoveLDoNWin);
 	package.add("RemoveNoRent", &Perl_Client_RemoveNoRent);
-	package.add("RemoveRadiantCrystals", &Perl_Client_RemoveRadiantCrystals);
 	package.add("ResetAA", &Perl_Client_ResetAA);
 	package.add("ResetAllDisciplineTimers", &Perl_Client_ResetAllDisciplineTimers);
 	package.add("ResetAllCastbarCooldowns", &Perl_Client_ResetAllCastbarCooldowns);
@@ -3572,7 +3446,6 @@ void perl_register_client()
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
-	package.add("ResetLeadershipAA", &Perl_Client_ResetLeadershipAA);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
@@ -3596,9 +3469,8 @@ void perl_register_client()
 	package.add("SendToInstance", &Perl_Client_SendToInstance);
 	package.add("SendWebLink", &Perl_Client_SendWebLink);
 	package.add("SendZoneFlagInfo", &Perl_Client_SendZoneFlagInfo);
-	package.add("SetAAEXPModifier", (void(*)(Client*, float))&Perl_Client_SetAAEXPModifier);
-	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float))&Perl_Client_SetAAEXPModifier);
-	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, float, int16))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetAAEXPModifier);
+	package.add("SetAAEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetAAEXPModifier);
 	package.add("SetAAPoints", &Perl_Client_SetAAPoints);
 	package.add("SetAATitle", (void(*)(Client*, std::string))&Perl_Client_SetAATitle);
 	package.add("SetAATitle", (void(*)(Client*, std::string, bool))&Perl_Client_SetAATitle);
@@ -3606,8 +3478,6 @@ void perl_register_client()
 	package.add("SetAccountFlag", &Perl_Client_SetAccountFlag);
 	package.add("SetAlternateCurrencyValue", &Perl_Client_SetAlternateCurrencyValue);
 	package.add("SetAnon", &Perl_Client_SetAnon);
-	package.add("SetAutoLoginCharacterName", (bool(*)(Client*))&Perl_Client_SetAutoLoginCharacterName);
-	package.add("SetAutoLoginCharacterName", (bool(*)(Client*, std::string))&Perl_Client_SetAutoLoginCharacterName);
 	package.add("SetBaseClass", &Perl_Client_SetBaseClass);
 	package.add("SetBaseGender", &Perl_Client_SetBaseGender);
 	package.add("SetBaseRace", &Perl_Client_SetBaseRace);
@@ -3634,9 +3504,8 @@ void perl_register_client()
 	package.add("SetDueling", &Perl_Client_SetDueling);
 	package.add("SetEXP", (void(*)(Client*, uint64, uint64))&Perl_Client_SetEXP);
 	package.add("SetEXP", (void(*)(Client*, uint64, uint64, bool))&Perl_Client_SetEXP);
-	package.add("SetEXPModifier", (void(*)(Client*, float))&Perl_Client_SetEXPModifier);
-	package.add("SetEXPModifier", (void(*)(Client*, uint32, float))&Perl_Client_SetEXPModifier);
-	package.add("SetEXPModifier", (void(*)(Client*, uint32, float, int16))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double))&Perl_Client_SetEXPModifier);
+	package.add("SetEXPModifier", (void(*)(Client*, uint32, double, int16))&Perl_Client_SetEXPModifier);
 	package.add("SetEbonCrystals", &Perl_Client_SetEbonCrystals);
 	package.add("SetEndurance", &Perl_Client_SetEndurance);
 	package.add("SetEnvironmentDamageModifier", &Perl_Client_SetEnvironmentDamageModifier);
@@ -3654,7 +3523,6 @@ void perl_register_client()
 	package.add("SetInvulnerableEnvironmentDamage", &Perl_Client_SetInvulnerableEnvironmentDamage);
 	package.add("SetItemCooldown", &Perl_Client_SetItemCooldown);
 	package.add("SetLanguageSkill", &Perl_Client_SetLanguageSkill);
-	package.add("SetLDoNPoints", &Perl_Client_SetLDoNPoints);
 	package.add("SetMaterial", &Perl_Client_SetMaterial);
 	package.add("SetPEQZoneFlag", &Perl_Client_SetPEQZoneFlag);
 	package.add("SetPVP", &Perl_Client_SetPVP);
@@ -3665,21 +3533,17 @@ void perl_register_client()
 	package.add("SetSkillPoints", &Perl_Client_SetSkillPoints);
 	package.add("SetSpellDuration", (void(*)(Client*, int))&Perl_Client_SetSpellDuration);
 	package.add("SetSpellDuration", (void(*)(Client*, int, int))&Perl_Client_SetSpellDuration);
-	package.add("SetSpellDuration", (void(*)(Client*, int, int, int))&Perl_Client_SetSpellDuration);
-	package.add("SetSpellDuration", (void(*)(Client*, int, int, int, bool))&Perl_Client_SetSpellDuration);
-	package.add("SetSpellDuration", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDuration);
+	package.add("SetSpellDuration", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDuration);
 	package.add("SetSpellDurationGroup", (void(*)(Client*, int))&Perl_Client_SetSpellDurationGroup);
 	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationGroup);
-	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, int))&Perl_Client_SetSpellDurationGroup);
-	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, int, bool))&Perl_Client_SetSpellDurationGroup);
-	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationGroup);
+	package.add("SetSpellDurationGroup", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationGroup);
 	package.add("SetSpellDurationRaid", (void(*)(Client*, int))&Perl_Client_SetSpellDurationRaid);
 	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int))&Perl_Client_SetSpellDurationRaid);
-	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, int))&Perl_Client_SetSpellDurationRaid);
-	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, int, bool))&Perl_Client_SetSpellDurationRaid);
-	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, int, bool, bool))&Perl_Client_SetSpellDurationRaid);
-	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_SetSpellDurationRaid);
-	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, int, bool, bool, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool))&Perl_Client_SetSpellDurationRaid);
+	package.add("SetSpellDurationRaid", (void(*)(Client*, int, int, bool, bool, bool))&Perl_Client_SetSpellDurationRaid);
 	package.add("SetStartZone", (void(*)(Client*, uint32))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float))&Perl_Client_SetStartZone);
 	package.add("SetStartZone", (void(*)(Client*, uint32, float, float, float, float))&Perl_Client_SetStartZone);
@@ -3705,7 +3569,6 @@ void perl_register_client()
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Client_SummonItem);
 	package.add("SummonItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint16))&Perl_Client_SummonItem);
-	package.add("SummonItemIntoInventory", &Perl_Client_SummonItemIntoInventory);
 	package.add("TGB", &Perl_Client_TGB);
 	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t))&Perl_Client_TakeMoneyFromPP);
 	package.add("TakeMoneyFromPP", (bool(*)(Client*, uint64_t, bool))&Perl_Client_TakeMoneyFromPP);

@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -196,7 +196,7 @@ namespace UF
 		const uint64 CURSOR_BITMASK = 0x0000000200000000;
 		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 34-slot count (RoF+)
 		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 34)); // based on 34-slot count (RoF+)
-		
+
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
 		const char* GetInvCorpseSlotName(int16 inv_slot);
@@ -245,7 +245,7 @@ namespace UF
 		const int16 SOCKET_COUNT = 5;
 
 		const char* GetInvAugIndexName(int16 aug_index);
-	
+
 	} /*invaug*/
 
 	namespace item {
@@ -303,13 +303,13 @@ namespace UF
 	namespace skills {
 		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::UF; }
 
-		const size_t LastUsableSkill = EQ::skills::SkillTripleAttack;
+		const size_t LastUsableSkill = Skill::TripleAttack;
 
 	} /*skills*/
 
 	namespace spells {
 		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::UF; }
-		
+
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,
 			Gem2 = 1,
@@ -332,7 +332,7 @@ namespace UF
 		const int SPELL_ID_MAX = 28000;
 		const int SPELLBOOK_SIZE = 720;
 		const int SPELL_GEM_COUNT = static_cast<uint32>(CastingSlot::MaxGems);
-		
+
 		const int LONG_BUFFS = 30;
 		const int SHORT_BUFFS = 20;
 		const int DISC_BUFFS = 1;

@@ -443,7 +443,7 @@ int Perl_Spell_GetShortBuffBox(SPDat_Spell_Struct* self)
 
 int Perl_Spell_GetSkill(SPDat_Spell_Struct* self)
 {
-	return self->skill;
+	return self->skill_id;
 }
 
 bool Perl_Spell_GetSneak(SPDat_Spell_Struct* self)

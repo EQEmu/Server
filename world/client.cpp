@@ -1749,6 +1749,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.skills[EQ::skills::SkillSwimming]     = RuleI(Skills, SwimmingStartValue);
 	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
+	/* Set default skills for everybody */
+	pp.skills[Skill::Swimming]     = RuleI(Skills, SwimmingStartValue);
+	pp.skills[Skill::SenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+
 	/* Set Racial and Class specific language and skills */
 	SetRacialLanguages(&pp);
 	SetRaceStartingSkills(&pp);
@@ -2134,12 +2138,12 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
-	for (uint32 i = 0; i <= EQ::skills::HIGHEST_SKILL; ++i) {
+	for (uint32 i = 0; i <= Skill::Max; ++i) {
 		if (pp->skills[i] == 0) {
 			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
-			if (EQ::skills::IsSpecializedSkill((EQ::skills::SkillType)i) ||
-				(EQ::skills::IsTradeskill((EQ::skills::SkillType)i) && i != EQ::skills::SkillFishing) ||
-				i == EQ::skills::SkillAlcoholTolerance || i == EQ::skills::SkillBindWound)
+			if (Skill::IsSpecialized(i) ||
+				(Skill::IsTradeskill(i) && i != Skill::Fishing) ||
+				i == Skill::AlcoholTolerance || i == Skill::BindWound)
 				continue;
 
 			pp->skills[i] = skill_caps.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1).cap;
@@ -2171,7 +2175,7 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case DARK_ELF:
 		{
-			pp->skills[EQ::skills::SkillHide] = 50;
+			pp->skills[Skill::Hide] = 50;
 			break;
 		}
 	case FROGLOK:
@@ -2183,13 +2187,13 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case GNOME:
 		{
-			pp->skills[EQ::skills::SkillTinkering] = 50;
+			pp->skills[Skill::Tinkering] = 50;
 			break;
 		}
 	case HALFLING:
 		{
-			pp->skills[EQ::skills::SkillHide] = 50;
-			pp->skills[EQ::skills::SkillSneak] = 50;
+			pp->skills[Skill::Hide] = 50;
+			pp->skills[Skill::Sneak] = 50;
 			break;
 		}
 	case IKSAR:
@@ -2202,14 +2206,14 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case WOOD_ELF:
 		{
-			pp->skills[EQ::skills::SkillForage] = 50;
-			pp->skills[EQ::skills::SkillHide] = 50;
+			pp->skills[Skill::Forage] = 50;
+			pp->skills[Skill::Hide] = 50;
 			break;
 		}
 	case VAHSHIR:
 		{
-			pp->skills[EQ::skills::SkillSafeFall] = 50;
-			pp->skills[EQ::skills::SkillSneak] = 50;
+			pp->skills[Skill::SafeFall] = 50;
+			pp->skills[Skill::Sneak] = 50;
 			break;
 		}
 	}

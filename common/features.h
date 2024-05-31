@@ -117,32 +117,6 @@ Zone Numerical configuration
 
 */
 
-//Reuse times for various skills, here for convenience, in sec
-//set to 0 to disable server side checking of timers.
-enum {	//reuse times
-	FeignDeathReuseTime = 9,
-	SneakReuseTime = 7,
-	HideReuseTime = 8,
-	TauntReuseTime = 5,
-	InstillDoubtReuseTime = 9,
-	FishingReuseTime = 11,
-	ForagingReuseTime = 50,
-	MendReuseTime = 360,
-	BashReuseTime = 5,
-	BackstabReuseTime = 9,
-	KickReuseTime = 5,
-	TailRakeReuseTime = 6,
-	EagleStrikeReuseTime = 5,
-	RoundKickReuseTime = 9,
-	TigerClawReuseTime = 6,
-	FlyingKickReuseTime = 7,
-	SenseTrapsReuseTime = 9,
-	DisarmTrapsReuseTime = 9,
-	HarmTouchReuseTime = 4300,
-	LayOnHandsReuseTime = 4300,
-	FrenzyReuseTime = 10
-};
-
 enum {	//timer settings, all in milliseconds
 	AImovement_duration = 100,
 	AIthink_duration = 50,

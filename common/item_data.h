@@ -46,6 +46,12 @@
 
 #include "emu_constants.h"
 
+namespace Item {
+	namespace ID {
+		constexpr uint32 Arrow        = 8005;
+		constexpr uint32 PrismaticDye = 32557;
+	}
+}
 
 namespace EQ
 {
