@@ -1357,6 +1357,7 @@ const std::string& Race::GetAbbreviation(uint16 race_id)
 
 const std::string& Race::GetPlural(uint16 race_id)
 {
+	const std::string& race_name = GetName(race_id);
 	if (
 		race_name == "Iksar" ||
 		race_name == "Vah Shir" ||
@@ -1364,8 +1365,6 @@ const std::string& Race::GetPlural(uint16 race_id)
 	) {
 		return race_name;
 	}
-
-	const std::string& race_name = GetName(race_id);
 
 	switch (race_id) {
 		case Race::WoodElf:
