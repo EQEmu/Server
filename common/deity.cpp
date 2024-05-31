@@ -21,12 +21,12 @@
 
 uint32 Deity::GetBitmask(uint32 deity_id)
 {
-	return IsValidDeity(deity_id) ? deity_bitmasks[deity_id] : Deity::Bitmask::All;
+	return IsValid(deity_id) ? deity_bitmasks[deity_id] : Deity::Bitmask::All;
 }
 
 std::string Deity::GetName(uint32 deity_id)
 {
-	return IsValidDeity(deity_id) ? deity_names[deity_id] : "UNKNOWN DEITY";
+	return IsValid(deity_id) ? deity_names[deity_id] : "UNKNOWN DEITY";
 }
 
 bool Deity::IsValid(uint32 deity_id)
