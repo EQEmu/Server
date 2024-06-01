@@ -155,7 +155,7 @@ uint16 Lua_Client::GetClassBitmask() {
 	return GetPlayerClassBit(self->GetClass());
 }
 
-uint32 Lua_Client::GetDeity::Bitmask() {
+uint32 Lua_Client::GetDeityBitmask() {
 	Lua_Safe_Call_Int();
 	return Deity::GetBitmask(GetDeity());
 }
