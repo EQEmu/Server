@@ -32,6 +32,7 @@
 #include "../../common/repositories/skill_caps_repository.h"
 #include "../../common/file.h"
 #include "../../common/events/player_event_logs.h"
+#include "../../common/skill_caps.h"
 
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
@@ -213,17 +214,16 @@ void ExportSkillCaps(SharedDatabase* db)
 		return;
 	}
 
-	const uint8 skill_cap_max_level = (
-		RuleI(Character, SkillCapMaxLevel) > 0 ?
-		RuleI(Character, SkillCapMaxLevel) :
-		RuleI(Character, MaxLevel)
-	);
-
 	for (uint8 class_id = Class::Warrior; class_id <= Class::Berserker; class_id++) {
 		for (uint8 skill_id = EQ::skills::Skill1HBlunt; skill_id <= EQ::skills::Skill2HPiercing; skill_id++) {
 			if (SkillUsable(db, skill_id, class_id)) {
 				uint32 previous_cap = 0;
-				for (uint8 level = 1; level <= skill_cap_max_level; level++) {
+
+				for (
+					uint8 level = 1;
+					level <= SkillCaps::GetSkillCapMaxLevel(class_id, static_cast<EQ::skills::SkillType>(skill_id));
+					level++
+					) {
 					uint32 cap = GetSkill(db, skill_id, class_id, level);
 					if (cap < previous_cap) {
 						cap = previous_cap;
