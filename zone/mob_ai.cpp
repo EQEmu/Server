@@ -2913,7 +2913,10 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 				se.priority = 1;
 			}
 
-			if (IsValidSpell(e.id)) {
+			if (e.resist_adjust) {
+				se.resist_adjust = e.resist_adjust;
+			}
+			else if (IsValidSpell(e.spellid)) {
 				se.resist_adjust = spells[e.spellid].resist_difficulty;
 			}
 
