@@ -3389,6 +3389,9 @@ void Client::SendEdgeStatBulkUpdate()
 
 	// Construct packet
 	opcode = OP_EdgeStats;
+	if (!opcode || opcode == OP_Unknown) {
+		opcode = 0x1338;
+	}
 	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * ((int)(eStatEntry::eStatMax) - 1)));
 	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 	itempacket->count = (int)(eStatMax) - 1;
@@ -3410,6 +3413,9 @@ void Client::SendEdgeHPStats()
 
 	// Construct packet
 	opcode = OP_EdgeStats;
+	if (!opcode || opcode == OP_Unknown) {
+		opcode = 0x1338;
+	}
 	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
 	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 	itempacket->count = 2;
@@ -3429,6 +3435,9 @@ void Client::SendEdgeManaStats()
 
 	// Construct packet
 	opcode = OP_EdgeStats;
+	if (!opcode || opcode == OP_Unknown) {
+		opcode = 0x1338;
+	}
 	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
 	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 	itempacket->count = 2;
@@ -3448,6 +3457,9 @@ void Client::SendEdgeEnduranceStats()
 
 	// Construct packet
 	opcode = OP_EdgeStats;
+	if (!opcode || opcode == OP_Unknown) {
+		opcode = 0x1338;
+	}
 	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
 	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 	itempacket->count = 2;
