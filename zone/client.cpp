@@ -9186,7 +9186,7 @@ bool Client::GotoPlayer(const std::string& player_name)
 
 	const auto& e = l.front();
 
-	if (e.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
+	if (e.zone_instance > 0 && !database.CheckInstanceExists(e.zone_instance)) {
 		Message(Chat::Yellow, "Instance no longer exists...");
 		return false;
 	}
