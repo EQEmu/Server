@@ -26,6 +26,35 @@
 
 #include <string.h>
 
+namespace ComparisonType {
+	constexpr uint8 Equal          = 0;
+	constexpr uint8 NotEqual       = 1;
+	constexpr uint8 GreaterOrEqual = 2;
+	constexpr uint8 LesserOrEqual  = 3;
+	constexpr uint8 Greater        = 4;
+	constexpr uint8 Lesser         = 5;
+	constexpr uint8 Any            = 6;
+	constexpr uint8 NotAny         = 7;
+	constexpr uint8 Between        = 8;
+	constexpr uint8 NotBetween     = 9;
+
+	const std::string& GetName(uint8 type);
+	bool IsValid(uint8 type);
+}
+
+static std::map<uint8, std::string> comparison_types = {
+	{ ComparisonType::Equal,          "Equal" },
+	{ ComparisonType::NotEqual,       "Not Equal" },
+	{ ComparisonType::GreaterOrEqual, "Greater or Equal" },
+	{ ComparisonType::LesserOrEqual,  "Lesser or Equal" },
+	{ ComparisonType::Greater,        "Greater" },
+	{ ComparisonType::Lesser,         "Lesser" },
+	{ ComparisonType::Any,            "Any" },
+	{ ComparisonType::NotAny,         "Not Any" },
+	{ ComparisonType::Between,        "Between" },
+	{ ComparisonType::NotBetween,     "Not Between" },
+};
+
 
 // local definitions are the result of using hybrid-client or server-only values and methods
 namespace EQ
@@ -586,19 +615,6 @@ enum ReloadWorld : uint8 {
 	NoRepop = 0,
 	Repop,
 	ForceRepop
-};
-
-enum BucketComparison : uint8 {
-	BucketEqualTo = 0,
-	BucketNotEqualTo,
-	BucketGreaterThanOrEqualTo,
-	BucketLesserThanOrEqualTo,
-	BucketGreaterThan,
-	BucketLesserThan,
-	BucketIsAny,
-	BucketIsNotAny,
-	BucketIsBetween,
-	BucketIsNotBetween
 };
 
 enum class EntityFilterType {
