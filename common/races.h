@@ -19,6 +19,7 @@
 #ifndef RACES_H
 #define RACES_H
 #include "../common/types.h"
+#include "../common/strings.h"
 #include "fmt/format.h"
 #include "data_verification.h"
 #include <map>
