@@ -6619,14 +6619,6 @@ uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool from_buff_tic)
 {
-	/*
-	if (!RuleB(Custom, MulticlassingEnabled)) {
-		if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration && type != focusReduceRecastTime) {
-			return 0;
-		}
-	}*/
-
-
 	int64 realTotal = 0;
 	int64 realTotal2 = 0;
 	int64 realTotal3 = 0;
@@ -6640,7 +6632,9 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 	}
 
 	//Check if item focus effect exists for the mob.
+	LogDebug("Checking if Focus of type [{}] exists", (int)type);
 	if (itembonuses.FocusEffects[type]) {
+		LogDebug("Focus of type [{}] found", (int)type);
 
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
