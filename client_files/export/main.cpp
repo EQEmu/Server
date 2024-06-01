@@ -159,13 +159,7 @@ void ExportSkillCaps(SharedDatabase* db)
 		return;
 	}
 
-	const uint8 skill_cap_max_level = (
-		RuleI(Character, SkillCapMaxLevel) > 0 ?
-		RuleI(Character, SkillCapMaxLevel) :
-		RuleI(Character, MaxLevel)
-	);
-
-	const auto& lines = SkillCapsRepository::GetSkillCapFileLines(*db, skill_cap_max_level);
+	const auto& lines = SkillCapsRepository::GetSkillCapFileLines(*db);
 
 	const std::string& file_string = Strings::Implode("\n", lines);
 

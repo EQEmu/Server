@@ -44,24 +44,14 @@ public:
      */
 
 	// Custom extended repository methods here
-	static std::vector<std::string> GetSkillCapFileLines(Database& db, uint8 max_level)
+	static std::vector<std::string> GetSkillCapFileLines(Database& db)
 	{
 		std::vector<std::string> lines;
 
-		std::string level_string;
-
-		if (max_level > 0) {
-			level_string = fmt::format(
-				" WHERE `level` <= {}",
-				max_level
-			);
-		}
-
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"SELECT CONCAT_WS('^', `class_id`, `skill_id`, `level`, `cap`, `class_`) FROM {}{} ORDER BY `class_id`, `skill_id`, `level` ASC",
-				TableName(),
-				level_string
+				"SELECT CONCAT_WS('^', `class_id`, `skill_id`, `level`, `cap`, `class_`) FROM {} ORDER BY `class_id`, `skill_id`, `level` ASC",
+				TableName()
 			)
 		);
 
