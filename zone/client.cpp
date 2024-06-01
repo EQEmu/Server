@@ -9170,29 +9170,32 @@ void Client::SetSecondaryWeaponOrnamentation(uint32 model_id)
  *
  * @param player_name
  */
-bool Client::GotoPlayer(std::string player_name)
+bool Client::GotoPlayer(const std::string& player_name)
 {
 	const auto& l = CharacterDataRepository::GetWhere(
 		database,
-		fmt::format("name = '{}' AND last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1", player_name)
+		fmt::format(
+			"name = '{}' AND last_login > (UNIX_TIMESTAMP() - 600) LIMIT 1",
+			Strings::Escape(player_name)
+		)
 	);
 
 	if (l.empty()) {
 		return false;
 	}
 
-	const auto& c = l[0];
+	const auto& e = l.front();
 
-	if (c.zone_instance > 0 && !database.CheckInstanceExists(c.zone_instance)) {
+	if (e.zone_instance > 0 && !database.CheckInstanceExists(e.zone_instance)) {
 		Message(Chat::Yellow, "Instance no longer exists...");
 		return false;
 	}
 
-	if (c.zone_instance > 0) {
-		database.AddClientToInstance(c.zone_instance, CharacterID());
+	if (e.zone_instance > 0) {
+		database.AddClientToInstance(e.zone_instance, CharacterID());
 	}
 
-	MovePC(c.zone_id, c.zone_instance, c.x, c.y, c.z, c.heading);
+	MovePC(e.zone_id, e.zone_instance, e.x, e.y, e.z, e.heading);
 
 	return true;
 }
