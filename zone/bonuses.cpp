@@ -2220,7 +2220,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				// These don't generate the IMMUNE_ATKSPEED message and the icon shows up
 				// but have no effect on the mobs attack speed
-				if (GetSpecialAbility(UNSLOWABLE))
+				if (GetSpecialAbility(SpecialAbility::SlowImmunity))
 					break;
 
 				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)

@@ -13,6 +13,7 @@
 #include "find/recipe.cpp"
 #include "find/skill.cpp"
 #include "find/spell.cpp"
+#include "find/special_ability.cpp"
 #include "find/task.cpp"
 #include "find/zone.cpp"
 
@@ -48,6 +49,7 @@ void command_find(Client *c, const Seperator *sep)
 		Cmd{.cmd = "race", .u = "race [Search Criteria]", .fn = FindRace, .a = {"#findrace"}},
 		Cmd{.cmd = "recipe", .u = "recipe [Search Criteria]", .fn = FindRecipe, .a = {"#findrecipe"}},
 		Cmd{.cmd = "skill", .u = "skill [Search Criteria]", .fn = FindSkill, .a = {"#findskill"}},
+		Cmd{.cmd = "special_ability", .u = "special_ability [Search Criteria]", .fn = FindSpecialAbility, .a = {"#fsa", "#findspecialability"}},
 		Cmd{.cmd = "spell", .u = "spell [Search Criteria]", .fn = FindSpell, .a = {"#fs", "#findspell"}},
 		Cmd{.cmd = "task", .u = "task [Search Criteria]", .fn = FindTask, .a = {"#findtask"}},
 		Cmd{.cmd = "zone", .u = "zone [Search Criteria]", .fn = FindZone, .a = {"#fz", "#findzone"}},
