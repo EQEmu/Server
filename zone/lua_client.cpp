@@ -157,7 +157,7 @@ uint16 Lua_Client::GetClassBitmask() {
 
 uint32 Lua_Client::GetDeityBitmask() {
 	Lua_Safe_Call_Int();
-	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(GetDeity())));
+	return Deity::GetBitmask(GetDeity());
 }
 
 uint16 Lua_Client::GetRaceBitmask() {

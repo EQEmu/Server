@@ -53,7 +53,7 @@ Beacon::Beacon(const glm::vec4 &in_pos, int lifetime) : Mob(
 	Race::InvisibleMan, // in_race
 	Class::None, // in_class
 	BT_NoTarget, // in_bodytype
-	0, // in_deity
+	Deity::Unknown, // in_deity
 	0, // in_level
 	0, // in_npctype_id
 	0.0f, // in_size

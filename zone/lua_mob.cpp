@@ -3301,7 +3301,7 @@ bool Lua_Mob::IsAlwaysAggro()
 std::string Lua_Mob::GetDeityName()
 {
 	Lua_Safe_Call_String();
-	return EQ::deity::GetDeityName(static_cast<EQ::deity::DeityType>(self->GetDeity()));
+	return Deity::GetName(self->GetDeity());
 }
 
 luabind::object Lua_Mob::GetBuffs(lua_State* L)

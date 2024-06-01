@@ -652,7 +652,7 @@ NPCType *Bot::FillNPCTypeStruct(
 	n->race = botRace;
 	n->class_ = botClass;
 	n->bodytype = 1;
-	n->deity = EQ::deity::DeityAgnostic;
+	n->deity = Deity::Agnostic1;
 	n->level = botLevel;
 	n->npc_spells_id = botSpellsID;
 	n->AC = ac;
@@ -712,7 +712,7 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(
 	n->race = botRace;
 	n->class_ = botClass;
 	n->bodytype = 1;
-	n->deity = EQ::deity::DeityAgnostic;
+	n->deity = Deity::Agnostic1;
 	n->level = botLevel;
 	n->AC = 12;
 	n->ATK = 75;
