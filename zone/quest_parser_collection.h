@@ -42,12 +42,6 @@
 #define QuestFailedToLoad 0xFFFFFFFF
 #define QuestUnloaded 0x00
 
-// an encounter can register events before the object is loaded
-// this represents the object not being loaded yet
-// eq.register_npc_event(Event.death_complete, -1, AllDeath);
-// eq.register_npc_event(Event.say, -1, All_Say);
-std::string ENCOUNTER_NO_ENTITY_ID = "-1";
-
 extern const ZoneConfig *Config;
 class Client;
 class Mob;
