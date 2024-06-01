@@ -5,7 +5,7 @@ void FindDeity(Client *c, const Seperator *sep)
 	if (sep->IsNumber(2)) {
 		const uint32 deity_id = Strings::ToUnsignedInt(sep->arg[2]);
 		const std::string& deity_name = Deity::GetName(deity_id);
-		if (String::EqualFold(deity_name, "UNKNOWN DEITY")) {
+		if (Strings::EqualFold(deity_name, "UNKNOWN DEITY")) {
 			c->Message(
 				Chat::White,
 				fmt::format(
