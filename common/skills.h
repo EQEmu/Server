@@ -152,14 +152,12 @@ namespace Skill {
 
 	constexpr int ArraySize = 100;
 
-		constexpr int format_as(SkillType skill) { return static_cast<int>(skill); }
-
-		bool IsTradeskill(SkillType skill);
-		bool IsSpecializedSkill(SkillType skill);
-		float GetSkillMeleePushForce(SkillType skill);
-		bool IsBardInstrumentSkill(SkillType skill);
-		bool IsCastingSkill(SkillType skill);
-		int32 GetBaseDamage(SkillType skill);
+	bool IsTradeskill(uint16 skill_id);
+	bool IsSpecialized(uint16 skill_id);
+	float GetMeleePushForce(uint16 skill_id);
+	bool IsBardInstrument(uint16 skill_id);
+	bool IsCasting(uint16 skill_id);
+	int GetBaseDamage(uint16 skill_id);
 
 static std::vector<uint16> extra_damage_skills = {
 	Skill::Backstab,
