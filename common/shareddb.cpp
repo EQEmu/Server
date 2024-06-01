@@ -310,27 +310,32 @@ SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
 {
-    // Delete cursor items
-    std::string query = StringFormat("DELETE FROM inventory WHERE slotid = %i OR (slotid >= %i AND slotid <= %i)",
-                                    EQ::invslot::slotCursor,
-                                    EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
-    auto results = QueryDatabase(query);
+	// Delete cursor items
+	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
+	                                       "AND ((slotid >= %i AND slotid <= %i) "
+	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
+	                                       char_id, 
+										   EQ::invbag::TRADE_BAGS_END + 1,
+										   INT16_MAX,										   
+										   EQ::invslot::slotCursor,
+	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
+	const auto results = QueryDatabase(query);
     if (!results.Success()) {
         std::cout << "Clearing cursor failed: " << results.ErrorMessage() << std::endl;
         return false;
     }
 
-    int i = EQ::invslot::slotCursor;
-    for(auto it = start; it != end; ++it, i++) {
-        if (i > EQ::invbag::CURSOR_BAG_END) { break; } // shouldn't be anything in the queue that indexes this high
-        EQ::ItemInstance *inst = *it;
-        int16 use_slot = (i == EQ::invslot::slotCursor) ? EQ::invslot::slotCursor : i;
-        if (!SaveInventory(char_id, inst, use_slot)) {
-            return false;
-        }
+    int i = EQ::invbag::TRADE_BAGS_END + 1;
+    for(auto& it = start; it != end; ++it, i++) {
+		if (i >= INT16_MAX) { break; } // shouldn't be anything in the queue that indexes this high
+		const EQ::ItemInstance *inst = *it;
+		const int16 use_slot = (i == (EQ::invbag::TRADE_BAGS_END + 1)) ? EQ::invslot::slotCursor : i;
+		if (!SaveInventory(char_id, inst, use_slot)) {
+			return false;
+		}
     }
 
-    return true;
+	return true;
 }
 
 bool SharedDatabase::VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance* inst)
