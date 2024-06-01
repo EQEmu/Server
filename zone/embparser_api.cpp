@@ -5951,12 +5951,12 @@ bool Perl__send_parcel(perl::reference table_ref)
 
 std::string Perl__getpetcommandname(uint32_t pet_command)
 {
-	return EQ::constants::GetPetCommandName(pet_command);
+	return Pets::Command::GetName(pet_command);
 }
 
 std::string Perl__getpettypename(uint8_t pet_type)
 {
-	return EQ::constants::GetPetTypeName(pet_type);
+	return Pets::Type::GetName(pet_type);
 }
 
 void perl_register_quest()

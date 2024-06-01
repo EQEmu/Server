@@ -809,13 +809,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				// stand and follow on charm.
 				if (caster->IsClient()) {
 					Client *cpet = caster->CastToClient();
-					cpet->SetPetCommandState(PetButton::Sit,0);
-					cpet->SetPetCommandState(PetButton::Follow, 1);
-					cpet->SetPetCommandState(PetButton::Guard, 0);
-					cpet->SetPetCommandState(PetButton::Stop, 0);
+					cpet->SetPetButtonState(Pets::Button::Sit, Pets::Button::Off);
+					cpet->SetPetButtonState(Pets::Button::Follow, Pets::Button::On);
+					cpet->SetPetButtonState(Pets::Button::Guard, Pets::Button::Off);
+					cpet->SetPetButtonState(Pets::Button::Stop, Pets::Button::Off);
 				}
 
-				SetPetType(PetType::Charmed);
+				SetPetType(Pets::Type::Charmed);
 
 				// This was done in AddBuff, but we were not a pet yet, so
 				// the target windows didn't get updated.
@@ -1306,18 +1306,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					if (IsClient() && pet) {
 						auto c = CastToClient();
 						if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
-							c->SetPetCommandState(PetButton::Sit, 0);
-							c->SetPetCommandState(PetButton::Stop, 0);
-							c->SetPetCommandState(PetButton::Regroup, 0);
-							c->SetPetCommandState(PetButton::Follow, 1);
-							c->SetPetCommandState(PetButton::Guard, 0);
+							c->SetPetButtonState(Pets::Button::Sit, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::Stop, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::Regroup, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::Follow, Pets::Button::On);
+							c->SetPetButtonState(Pets::Button::Guard, Pets::Button::Off);
 							// Creating pet from spell - taunt always false
 							// If suspended pet - that will be restore there
 							// If logging in, client will send toggle
-							c->SetPetCommandState(PetButton::Hold, 0);
-							c->SetPetCommandState(PetButton::GreaterHold, 0);
-							c->SetPetCommandState(PetButton::Focus, 0);
-							c->SetPetCommandState(PetButton::SpellHold, 0);
+							c->SetPetButtonState(Pets::Button::Hold, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::GreaterHold, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::Focus, Pets::Button::Off);
+							c->SetPetButtonState(Pets::Button::SpellHold, Pets::Button::Off);
 						}
 					}
 				}
@@ -1600,7 +1600,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					GetOwnerID() &&		// I'm a pet
 					caster &&					// there's a caster
 					caster->GetID() == GetOwnerID()	&& // and it's my master
-					GetPetType() != PetType::Charmed
+					GetPetType() != Pets::Type::Charmed
 				)
 				{
 				uint16 pet_spellid =  CastToNPC()->GetPetSpellID();
@@ -4398,7 +4398,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SendAppearancePacket(AppearanceType::Pet, 0, true, true);
 				Mob* owner = GetOwner();
 				SetOwnerID(0);
-				SetPetType(PetType::None);
+				SetPetType(Pets::Type::None);
 				SetHeld(false);
 				SetGHeld(false);
 				SetNoCast(false);

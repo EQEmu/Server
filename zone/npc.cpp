@@ -3776,7 +3776,7 @@ void NPC::SetTaunting(bool is_taunting) {
 	taunting = is_taunting;
 
 	if (IsPet() && IsPetOwnerClient()) {
-		GetOwner()->CastToClient()->SetPetCommandState(PetButton::Taunt, is_taunting);
+		GetOwner()->CastToClient()->SetPetButtonState(Pets::Button::Taunt, is_taunting);
 	}
 }
 

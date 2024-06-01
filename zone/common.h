@@ -527,7 +527,7 @@ struct StatBonuses {
 	uint8	TradeSkillMastery;					// Allow number of tradeskills to exceed 200 skill.
 	int16	NoBreakAESneak;						// Percent value
 	int16	FeignedCastOnChance;				// Percent Value
-	bool	PetCommands[PetCommand::Max];		// SPA 267
+	bool	PetCommands[Pets::Command::Max];		// SPA 267
 	int	FeignedMinionChance;				// SPA 281 base1 = chance, just like normal FD
 	int	GrantForage; // affects max skill of forage as well as granting non-forage classes forage
 	int aura_slots;

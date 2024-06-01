@@ -2492,7 +2492,7 @@ void PerlembParser::ExportEventVariables(
 		case EVENT_PET_COMMAND_FAIL:
 		case EVENT_PET_COMMAND_SUCCESS: {
 			ExportVar(package_name.c_str(), "command_id", extra_data);
-			ExportVar(package_name.c_str(), "command_name", EQ::constants::GetPetCommandName(extra_data).c_str());
+			ExportVar(package_name.c_str(), "command_name", Pets::Command::GetName(extra_data).c_str());
 			break;
 		}
 

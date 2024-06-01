@@ -1121,7 +1121,7 @@ uint8 Perl_Mob_GetPetType(Mob* self) // @categories Script Utility, Pet
 
 std::string Perl_Mob_GetPetTypeName(Mob* self) // @categories Script Utility, Pet
 {
-	return EQ::constants::GetPetTypeName(self->GetPetType());
+	return Pets::Type::GetName(self->GetPetType());
 }
 
 int Perl_Mob_GetBodyType(Mob* self) // @categories Stats and Attributes

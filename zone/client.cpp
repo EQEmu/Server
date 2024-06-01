@@ -5814,17 +5814,17 @@ void Client::SuspendMinion(int value)
 			// TODO: These pet command states need to be synced ...
 			// Will just fix them for now
 			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-				SetPetCommandState(PetButton::Sit, 0);
-				SetPetCommandState(PetButton::Stop, 0);
-				SetPetCommandState(PetButton::Regroup, 0);
-				SetPetCommandState(PetButton::Follow, 1);
-				SetPetCommandState(PetButton::Guard, 0);
+				SetPetButtonState(Pets::Button::Sit, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::Stop, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::Regroup, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::Follow, Pets::Button::On);
+				SetPetButtonState(Pets::Button::Guard, Pets::Button::Off);
 				// Taunt saved on client side for logging on with pet
 				// In our db for when we zone.
-				SetPetCommandState(PetButton::Hold, 0);
-				SetPetCommandState(PetButton::GreaterHold, 0);
-				SetPetCommandState(PetButton::Focus, 0);
-				SetPetCommandState(PetButton::SpellHold, 0);
+				SetPetButtonState(Pets::Button::Hold, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::GreaterHold, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::Focus, Pets::Button::Off);
+				SetPetButtonState(Pets::Button::SpellHold, Pets::Button::Off);
 			}
 		}
 		else
@@ -6305,9 +6305,9 @@ void Client::CheckLDoNHail(NPC* n)
 
 	auto pet = GetPet();
 	if (pet) {
-		if (pet->GetPetType() == PetType::Charmed) {
+		if (pet->GetPetType() == Pets::Type::Charmed) {
 			pet->BuffFadeByEffect(SE_Charm);
-		} else if (pet->GetPetType() == PetType::NPCFollow) {
+		} else if (pet->GetPetType() == Pets::Type::NPCFollow) {
 			pet->SetOwnerID(0);
 		} else {
 			pet->Depop();
@@ -8854,12 +8854,14 @@ void Client::ProcessAggroMeter()
 	}
 }
 
-void Client::SetPetCommandState(int button, int state)
+void Client::SetPetButtonState(uint32 button_id, uint32 state)
 {
 	auto app = new EQApplicationPacket(OP_PetCommandState, sizeof(PetCommandState_Struct));
-	auto pcs = (PetCommandState_Struct *)app->pBuffer;
-	pcs->button_id = button;
-	pcs->state = state;
+	auto c   = (PetCommandState_Struct*) app->pBuffer;
+
+	c->button_id = button_id;
+	c->state     = state;
+
 	FastQueuePacket(&app);
 }
 

@@ -443,7 +443,7 @@ public:
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 	void ReloadExpansionProfileSetting();
 
-	void SetPetCommandState(int button, int state);
+	void SetPetButtonState(uint32 button_id, uint32 state);
 
 	bool AutoAttackEnabled() const { return auto_attack; }
 	bool AutoFireEnabled() const { return auto_fire; }

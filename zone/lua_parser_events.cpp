@@ -672,7 +672,7 @@ void handle_npc_pet_command(
 	lua_pushinteger(L, extra_data);
 	lua_setfield(L, -2, "command_id");
 
-	lua_pushstring(L, EQ::constants::GetPetCommandName(extra_data).c_str());
+	lua_pushstring(L, Pets::Command::GetName(extra_data).c_str());
 	lua_setfield(L, -2, "command_name");
 }
 

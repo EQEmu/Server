@@ -5587,12 +5587,12 @@ uint32 lua_get_zone_uptime()
 
 std::string lua_get_pet_command_name(uint32 pet_command)
 {
-	return EQ::constants::GetPetCommandName(pet_command);
+	return Pets::Command::GetName(pet_command);
 }
 
 std::string lua_get_pet_type_name(uint8 pet_type)
 {
-	return EQ::constants::GetPetTypeName(pet_type);
+	return Pets::Type::GetName(pet_type);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \

@@ -285,7 +285,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
-	if (record.petcontrol == PetType::TargetLock)
+	if (record.petcontrol == Pets::Type::TargetLock)
 	{
 		Mob* m_target = GetTarget();
 
@@ -331,7 +331,7 @@ void NPC::TryDepopTargetLockedPets(Mob* current_target) {
 			return;
 		}
 		//Use when pets are given petype 5
-		if (IsPet() && GetPetType() == PetType::TargetLock && GetPetTargetLockID()) {
+		if (IsPet() && GetPetType() == Pets::Type::TargetLock && GetPetTargetLockID()) {
 			CastSpell(SPELL_UNSUMMON_SELF, GetID()); //Live like behavior, damages self for 20K
 			if (!HasDied()) {
 				Kill(); //Ensure pet dies if over 20k HP.
@@ -364,8 +364,8 @@ Pet::Pet(NPCType *type_data, Mob *owner, uint8_t type, uint16 spell_id, int16 po
 	if (owner && owner->IsClient()) {
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
 			if (
-				(GetPetType() != PetType::Familiar && GetPetType() != PetType::Animation) ||
-				aabonuses.PetCommands[PetCommand::Taunt]
+				(GetPetType() != Pets::Type::Familiar && GetPetType() != Pets::Type::Animation) ||
+				aabonuses.PetCommands[Pets::Command::Taunt]
 			) {
 				SetTaunting(true);
 			}
@@ -577,7 +577,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 
 		if (item2) {
 			bool noDrop           = (item2->NoDrop == 0); // Field is reverse logic
-			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && _CLIENTPET(this) && GetPetType() <= PetType::Normal);
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && _CLIENTPET(this) && GetPetType() <= Pets::Type::Normal);
 
 			if (!noDrop || petCanHaveNoDrop) {
 				AddLootDrop(item2, LootdropEntriesRepository::NewNpcEntity(), true);

@@ -1757,7 +1757,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_AddPetCommand:
-			if (base_value && limit_value < PetCommand::Max)
+			if (base_value && limit_value < Pets::Command::Max)
 				newbon->PetCommands[limit_value] = true;
 			break;
 
@@ -1765,7 +1765,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->FeignedMinionChance < base_value) {
 				newbon->FeignedMinionChance = base_value;
 			}
-			newbon->PetCommands[PetCommand::FeignDeath] = true;
+			newbon->PetCommands[Pets::Command::FeignDeath] = true;
 			break;
 
 		case SE_AdditionalAura:

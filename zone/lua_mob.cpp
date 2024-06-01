@@ -3389,7 +3389,7 @@ uint8 Lua_Mob::GetPetType()
 std::string Lua_Mob::GetPetTypeName()
 {
 	Lua_Safe_Call_String();
-	return EQ::constants::GetPetTypeName(self->GetPetType());
+	return Pets::Type::GetName(self->GetPetType());
 }
 
 luabind::scope lua_register_mob() {
