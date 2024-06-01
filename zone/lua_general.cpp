@@ -3991,6 +3991,10 @@ void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
 	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
 }
 
+std::string lua_item_link(Lua_ItemInst inst) {
+	return quest_manager.varlink(inst);
+}
+
 std::string lua_item_link(uint32 item_id) {
 	return quest_manager.varlink(item_id);
 }
@@ -5922,6 +5926,7 @@ luabind::scope lua_register_general() {
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
+		luabind::def("item_link", (std::string(*)(Lua_ItemInst))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32,int16))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32,int16,uint32))&lua_item_link),

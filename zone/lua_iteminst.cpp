@@ -337,6 +337,17 @@ luabind::object Lua_ItemInst::GetAugmentIDs(lua_State* L)
 	return lua_table;
 }
 
+std::string Lua_ItemInst::GetItemLink()
+{
+	Lua_Safe_Call_String();
+
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+	linker.SetItemInst(self);
+
+	return linker.GenerateLink();
+}
+
 luabind::scope lua_register_iteminst() {
 	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
@@ -363,6 +374,7 @@ luabind::scope lua_register_iteminst() {
 	.def("GetItem", (Lua_Item(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItem)
 	.def("GetItem", (Lua_ItemInst(Lua_ItemInst::*)(uint8))&Lua_ItemInst::GetItem)
 	.def("GetItemID", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetItemID)
+	.def("GetItemLink", (std::string(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemLink)
 	.def("GetItemScriptID", (uint32(Lua_ItemInst::*)(void))&Lua_ItemInst::GetItemScriptID)
 	.def("GetKillsNeeded", (uint32(Lua_ItemInst::*)(int))&Lua_ItemInst::GetKillsNeeded)
 	.def("GetMaxEvolveLvl", (int(Lua_ItemInst::*)(void))&Lua_ItemInst::GetMaxEvolveLvl)

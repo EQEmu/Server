@@ -4940,6 +4940,11 @@ void Perl__set_proximity_range(float x_range, float y_range, float z_range, bool
 	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
 }
 
+std::string Perl__varlink(EQ::ItemInstance* inst)
+{
+	return quest_manager.varlink(inst);
+}
+
 std::string Perl__varlink(uint32 item_id)
 {
 	return quest_manager.varlink(item_id);
@@ -6856,6 +6861,7 @@ void perl_register_quest()
 	package.add("updatetaskactivity", (void(*)(int, int, int))&Perl__updatetaskactivity);
 	package.add("updatetaskactivity", (void(*)(int, int, int, bool))&Perl__updatetaskactivity);
 	package.add("UpdateZoneHeader", &Perl__UpdateZoneHeader);
+	package.add("varlink", (std::string(*)(EQ::ItemInstance*))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32, int16))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32, int16, uint32))&Perl__varlink);
