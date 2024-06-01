@@ -204,7 +204,7 @@ Bot::Bot(
 		);
 	}
 
-	SetTaunting((GetClass() == Class::Warrior || GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (GetBotStance() == EQ::constants::stanceAggressive));
+	SetTaunting((GetClass() == Class::Warrior || GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight) && (GetBotStance() == Stance::Aggressive));
 	SetPauseAI(false);
 
 	m_auto_defend_timer.Disable();
@@ -1899,8 +1899,8 @@ void Bot::AI_Process()
 #define NOT_GUARDING (!GetGuardFlag())
 #define HOLDING (GetHoldFlag())
 #define NOT_HOLDING (!GetHoldFlag())
-#define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
-#define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
+#define PASSIVE (GetBotStance() == Stance::Passive)
+#define NOT_PASSIVE (GetBotStance() != Stance::Passive)
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 
@@ -6912,16 +6912,16 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 		if ((botCasterClass == Class::Paladin || botCasterClass == Class::Beastlord || botCasterClass == Class::Ranger) && (caster->HasGroup() || caster->IsRaidGrouped())) {
 			float hpRatioToHeal = 25.0f;
 			switch(caster->GetBotStance()) {
-			case EQ::constants::stanceReactive:
-			case EQ::constants::stanceBalanced:
+			case Stance::Reactive:
+			case Stance::Balanced:
 				hpRatioToHeal = 50.0f;
 				break;
-			case EQ::constants::stanceBurn:
-			case EQ::constants::stanceBurnAE:
+			case Stance::Burn:
+			case Stance::AEBurn:
 				hpRatioToHeal = 20.0f;
 				break;
-			case EQ::constants::stanceAggressive:
-			case EQ::constants::stanceEfficient:
+			case Stance::Aggressive:
+			case Stance::Efficient:
 			default:
 				hpRatioToHeal = 25.0f;
 				break;
@@ -7655,11 +7655,7 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	EQ::constants::StanceType defaultStance = EQ::constants::stanceBalanced;
-	if (GetClass() == Class::Warrior)
-		defaultStance = EQ::constants::stanceAggressive;
-
-	_botStance = defaultStance;
+	_botStance = GetClass() == Class::Warrior ? Stance::Aggressive : Stance::Balanced;
 }
 
 void Bot::BotGroupSay(Mob* speaker, const char* msg, ...) {
@@ -9233,4 +9229,4 @@ void Bot::DoItemClick(const EQ::ItemData *item, uint16 slot_id)
 
 }
 
-uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][Class::PLAYER_CLASS_COUNT][Stance::AEBurn][cntHSND] = { 0 };

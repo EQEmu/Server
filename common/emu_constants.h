@@ -204,19 +204,6 @@ namespace EQ
 		const size_t SAY_LINK_CLOSER_SIZE = 1;
 		const size_t SAY_LINK_MAXIMUM_SIZE = (SAY_LINK_OPENER_SIZE + SAY_LINK_BODY_SIZE + SAY_LINK_TEXT_SIZE + SAY_LINK_CLOSER_SIZE);
 
-		enum StanceType : int {
-			stanceUnknown = 0,
-			stancePassive,
-			stanceBalanced,
-			stanceEfficient,
-			stanceReactive,
-			stanceAggressive,
-			stanceAssist,
-			stanceBurn,
-			stanceEfficient2,
-			stanceBurnAE
-		};
-
 		enum BotSpellIDs : int {
 			Warrior = 3001,
 			Cleric,
@@ -356,9 +343,6 @@ namespace EQ
 			Proximity
 		};
 
-		const char *GetStanceName(StanceType stance_type);
-		int ConvertStanceTypeToIndex(StanceType stance_type);
-
 		extern const std::map<uint8, std::string>& GetLanguageMap();
 		std::string GetLanguageName(uint8 language_id);
 
@@ -406,10 +390,6 @@ namespace EQ
 
 		extern const std::map<uint32, std::string>& GetConsiderColorMap();
 		std::string GetConsiderColorName(uint32 consider_color);
-
-		const int STANCE_TYPE_FIRST = stancePassive;
-		const int STANCE_TYPE_LAST = stanceBurnAE;
-		const int STANCE_TYPE_COUNT = stanceBurnAE;
 
 	} /*constants*/
 
@@ -508,7 +488,7 @@ namespace EQ
 			Raid,
 			Guild
 		};
-	}; // namespace consent
+	};
 } /*EQEmu*/
 
 enum ServerLockType : int {
@@ -699,5 +679,35 @@ namespace HeroicBonusBucket
 	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
 	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
 }
+
+namespace Stance {
+	constexpr uint32 Unknown    = 0;
+	constexpr uint32 Passive    = 1;
+	constexpr uint32 Balanced   = 2;
+	constexpr uint32 Efficient  = 3;
+	constexpr uint32 Reactive   = 4;
+	constexpr uint32 Aggressive = 5;
+	constexpr uint32 Assist     = 6;
+	constexpr uint32 Burn       = 7;
+	constexpr uint32 Efficient2 = 8;
+	constexpr uint32 AEBurn     = 9;
+
+	std::string GetName(uint8 stance_id);
+	uint8 GetIndex(uint8 stance_id);
+	bool IsValid(uint8 stance_id);
+}
+
+static std::map<uint32, std::string> stance_names = {
+	{ Stance::Unknown,    "Unknown" },
+	{ Stance::Passive,    "Passive" },
+	{ Stance::Balanced,   "Balanced" },
+	{ Stance::Efficient,  "Efficient" },
+	{ Stance::Reactive,   "Reactive" },
+	{ Stance::Aggressive, "Aggressive" },
+	{ Stance::Assist,     "Assist" },
+	{ Stance::Burn,       "Burn" },
+	{ Stance::Efficient2, "Efficient" },
+	{ Stance::AEBurn,     "AE Burn" }
+};
 
 #endif /*COMMON_EMU_CONSTANTS_H*/

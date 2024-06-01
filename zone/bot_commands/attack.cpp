@@ -40,7 +40,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	sbl.remove(nullptr);
 	for (auto bot_iter : sbl) {
 
-		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != EQ::constants::stancePassive) {
+		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != Stance::Passive) {
 
 			if (!first_attacker) {
 				first_attacker = bot_iter;
