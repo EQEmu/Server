@@ -737,7 +737,7 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
 }
 
-const std::string& ComparisonType::GetName(uint8 type)
+std::string ComparisonType::GetName(uint8 type)
 {
 	return IsValid(type) ? comparison_types[type] : "UNKNOWN COMPARISON TYPE";
 }

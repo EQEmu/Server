@@ -38,7 +38,7 @@ namespace ComparisonType {
 	constexpr uint8 Between        = 8;
 	constexpr uint8 NotBetween     = 9;
 
-	const std::string& GetName(uint8 type);
+	std::string GetName(uint8 type);
 	bool IsValid(uint8 type);
 }
 
