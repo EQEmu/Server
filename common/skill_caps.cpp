@@ -1,11 +1,30 @@
 #include "skill_caps.h"
 #include "timer.h"
 
+std::map<uint8_t, int32_t> skill_max_level = {};
+
 SkillCaps *SkillCaps::SetContentDatabase(Database *db)
 {
 	m_content_database = db;
 
 	return this;
+}
+
+int32_t SkillCaps::GetSkillCapMaxLevel(uint8 class_id, EQ::skills::SkillType skill_id)
+{
+	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	if (class_id > class_count || static_cast<uint32>(skill_id) > skill_count) {
+		return 0;
+	}
+
+	const int max_level_key = (class_id * 1000000) + skill_id;
+	auto it = skill_max_level.find(max_level_key);
+	if (it != skill_max_level.end()) {
+		return it->second;
+	}
+
+	return RuleI(Character, MaxLevel);
 }
 
 SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills::SkillType skill_id, uint8 level)
@@ -14,8 +33,18 @@ SkillCapsRepository::SkillCaps SkillCaps::GetSkillCap(uint8 class_id, EQ::skills
 		return SkillCapsRepository::NewEntity();
 	}
 
-	const uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
+	const uint32 class_count = Class::PLAYER_CLASS_COUNT;
+	const uint32 skill_count = EQ::skills::HIGHEST_SKILL + 1;
+	if (class_id > class_count || static_cast<uint32>(skill_id) > skill_count) {
+		return SkillCapsRepository::NewEntity();
+	}
 
+	const uint8 skill_cap_max_level = GetSkillCapMaxLevel(class_id, skill_id);
+	if (level > skill_cap_max_level) {
+		level = skill_cap_max_level;
+	}
+
+	const uint64_t key = (class_id * 1000000) + (level * 1000) + static_cast<uint32>(skill_id);
 	auto pos = m_skill_caps.find(key);
 	if (pos != m_skill_caps.end()) {
 		return pos->second;
@@ -70,6 +99,18 @@ void SkillCaps::LoadSkillCaps()
 
 		const uint64_t key = (e.class_id * 1000000) + (e.level * 1000) + e.skill_id;
 		m_skill_caps[key] = e;
+
+		const int max_level_key = (e.class_id * 1000000) + e.skill_id;
+		auto it = skill_max_level.find(max_level_key);
+		if (it != skill_max_level.end()) {
+			// Key found, update the value if the new level is higher
+			if (e.level > it->second) {
+				it->second = e.level;
+			}
+		} else {
+			// Key not found, insert the new key-value pair
+			skill_max_level[max_level_key] = e.level;
+		}
 	}
 
 	LogInfo(
