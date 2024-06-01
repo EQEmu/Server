@@ -461,37 +461,6 @@ namespace EQ
 
 	} // namespace spells
 
-	namespace bug {
-		enum CategoryID : uint32 {
-			catOther = 0,
-			catVideo,
-			catAudio,
-			catPathing,
-			catQuest,
-			catTradeskills,
-			catSpellStacking,
-			catDoorsPortals,
-			catItems,
-			catNPC,
-			catDialogs,
-			catLoNTCG,
-			catMercenaries
-		};
-
-		enum OptionalInfoFlag : uint32 {
-			infoNoOptionalInfo = 0x0,
-			infoCanDuplicate = 0x1,
-			infoCrashBug = 0x2,
-			infoTargetInfo = 0x4,
-			infoCharacterFlags = 0x8,
-			infoUnknownValue = 0xFFFFFFF0
-		};
-
-		const char* CategoryIDToCategoryName(CategoryID category_id);
-		CategoryID CategoryNameToCategoryID(const char* category_name);
-
-	} // namespace bug
-
 	enum WaypointStatus : int {
 		RoamBoxPauseInProgress = -3,
 		QuestControlNoGrid = -2,
@@ -760,5 +729,52 @@ namespace HeroicBonusBucket
 	const std::string DexMaxEndurance		= "HDEX-MaxEndurance";
 	const std::string DexEnduranceRegen		= "HDEX-EnduranceRegen";
 }
+
+namespace Bug {
+	namespace Category {
+		constexpr uint32 Other         = 0;
+		constexpr uint32 Video         = 1;
+		constexpr uint32 Audio         = 2;
+		constexpr uint32 Pathing       = 3;
+		constexpr uint32 Quest         = 4;
+		constexpr uint32 Tradeskills   = 5;
+		constexpr uint32 SpellStacking = 6;
+		constexpr uint32 DoorsPortals  = 7;
+		constexpr uint32 Items         = 8;
+		constexpr uint32 NPC           = 9;
+		constexpr uint32 Dialogs       = 10;
+		constexpr uint32 LoNTCG        = 11;
+		constexpr uint32 Mercenaries   = 12;
+	}
+
+	namespace InformationFlag {
+		constexpr uint32 None           = 0;
+		constexpr uint32 Repeatable     = 1;
+		constexpr uint32 Crash          = 2;
+		constexpr uint32 TargetInfo     = 4;
+		constexpr uint32 CharacterFlags = 8;
+		constexpr uint32 Unknown        = 4294967280;
+	}
+
+	uint32 GetID(const std::string& category_name);
+	std::string GetName(uint32 category_id);
+	bool IsValid(uint32 category_id);
+}
+
+static std::map<uint32, std::string> bug_category_names = {
+	{ Bug::Category::Other,         "Other" },
+	{ Bug::Category::Video,         "Video" },
+	{ Bug::Category::Audio,         "Audio" },
+	{ Bug::Category::Pathing,       "Pathing" },
+	{ Bug::Category::Quest,         "Quest" },
+	{ Bug::Category::Tradeskills,   "Tradeskills" },
+	{ Bug::Category::SpellStacking, "Spell Stacking" },
+	{ Bug::Category::DoorsPortals,  "Doors and Portals" },
+	{ Bug::Category::Items,         "Items" },
+	{ Bug::Category::NPC,           "NPC" },
+	{ Bug::Category::Dialogs,       "Dialogs" },
+	{ Bug::Category::LoNTCG,        "LoN - TCG" },
+	{ Bug::Category::Mercenaries,   "Mercenaries" }
+};
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
