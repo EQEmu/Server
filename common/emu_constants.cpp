@@ -206,41 +206,57 @@ std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 	return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 }
 
-const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
+const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
 {
-	static const std::map<uint8, std::string> account_status_map = {
-		{ AccountStatus::Player, "Player" },
-		{ AccountStatus::Steward, "Steward" },
-		{ AccountStatus::ApprenticeGuide, "Apprentice Guide" },
-		{ AccountStatus::Guide, "Guide" },
-		{ AccountStatus::QuestTroupe, "Quest Troupe" },
-		{ AccountStatus::SeniorGuide, "Senior Guide" },
-		{ AccountStatus::GMTester, "GM Tester" },
-		{ AccountStatus::EQSupport, "EQ Support" },
-		{ AccountStatus::GMStaff, "GM Staff" },
-		{ AccountStatus::GMAdmin, "GM Admin" },
-		{ AccountStatus::GMLeadAdmin, "GM Lead Admin" },
-		{ AccountStatus::QuestMaster, "Quest Master" },
-		{ AccountStatus::GMAreas, "GM Areas" },
-		{ AccountStatus::GMCoder, "GM Coder" },
-		{ AccountStatus::GMMgmt, "GM Mgmt" },
-		{ AccountStatus::GMImpossible, "GM Impossible" },
-		{ AccountStatus::Max, "GM Max" }
+	static const std::map<bodyType, std::string> bodytype_map = {
+		{ BT_Humanoid, "Humanoid" },
+		{ BT_Lycanthrope, "Lycanthrope" },
+		{ BT_Undead, "Undead" },
+		{ BT_Giant, "Giant" },
+		{ BT_Construct, "Construct" },
+		{ BT_Extraplanar, "Extraplanar" },
+		{ BT_Magical, "Magical" },
+		{ BT_SummonedUndead, "Summoned Undead" },
+		{ BT_RaidGiant, "Raid Giant" },
+		{ BT_RaidColdain, "Raid Coldain" },
+		{ BT_NoTarget, "Untargetable" },
+		{ BT_Vampire, "Vampire" },
+		{ BT_Atenha_Ra, "Aten Ha Ra" },
+		{ BT_Greater_Akheva, "Greater Akheva" },
+		{ BT_Khati_Sha, "Khati Sha" },
+		{ BT_Seru, "Seru" },
+		{ BT_Grieg_Veneficus, "Grieg Veneficus" },
+		{ BT_Draz_Nurakk, "Draz Nurakk" },
+		{ BT_Zek, "Zek" },
+		{ BT_Luggald, "Luggald" },
+		{ BT_Animal, "Animal" },
+		{ BT_Insect, "Insect" },
+		{ BT_Monster, "Monster" },
+		{ BT_Summoned, "Summoned" },
+		{ BT_Plant, "Plant" },
+		{ BT_Dragon, "Dragon" },
+		{ BT_Summoned2, "Summoned 2" },
+		{ BT_Summoned3, "Summoned 3" },
+		{ BT_Dragon2, "Dragon 2" },
+		{ BT_VeliousDragon, "Velious Dragon" },
+		{ BT_Familiar, "Familiar" },
+		{ BT_Dragon3, "Dragon 3" },
+		{ BT_Boxes, "Boxes" },
+		{ BT_Muramite, "Muramite" },
+		{ BT_NoTarget2, "Untargetable 2" },
+		{ BT_SwarmPet, "Swarm Pet" },
+		{ BT_MonsterSummon, "Monster Summon" },
+		{ BT_InvisMan, "Invisible Man" },
+		{ BT_Special, "Special" },
 	};
 
-	return account_status_map;
+	return bodytype_map;
 }
 
-std::string EQ::constants::GetAccountStatusName(uint8 account_status)
+std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
 {
-	for (
-		auto status_level = EQ::constants::GetAccountStatusMap().rbegin();
-		status_level != EQ::constants::GetAccountStatusMap().rend();
-		++status_level
-	) {
-		if (account_status >= status_level->first) {
-			return status_level->second;
-		}
+	if (EQ::constants::GetBodyTypeMap().find(bodytype_id) != EQ::constants::GetBodyTypeMap().end()) {
+		return EQ::constants::GetBodyTypeMap().find(bodytype_id)->second;
 	}
 
 	return std::string();
@@ -571,6 +587,21 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 {
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
+}
+
+std::string AccountStatus::GetName(uint8 account_status)
+{
+	for (
+		auto e = account_status_names.rbegin();
+		e != account_status_names.rend();
+		++e
+	) {
+		if (account_status >= e->first) {
+			return e->second;
+		}
+	}
+
+	return "UNKNOWN ACCOUNT STATUS";
 }
 
 std::string ComparisonType::GetName(uint8 type)
