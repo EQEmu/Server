@@ -263,7 +263,7 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID event
 bool QuestParserCollection::ItemHasEncounterSub(EQ::ItemInstance* inst, QuestEventID event_id)
 {
 	if (inst) {
-		return return HasEncounterSub(event_id, fmt::format("item_{}", inst->GetID())) || HasEncounterSub(event_id, "item_-1");
+		return HasEncounterSub(event_id, fmt::format("item_{}", inst->GetID())) || HasEncounterSub(event_id, "item_-1");
 	}
 
 	return false;
