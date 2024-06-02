@@ -658,13 +658,3 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
 }
-
-std::string ObjectType::GetName(uint32 object_type)
-{
-	return IsValid(object_type) ? object_types[object_type] : "UNKNOWN OBJECT TYPE";
-}
-
-bool ObjectType::IsValid(uint32 object_type)
-{
-	return object_types.find(object_type) != object_types.end();
-}
