@@ -310,14 +310,13 @@ SharedDatabase::MailKeys SharedDatabase::GetMailKey(int character_id)
 
 bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end)
 {
+	const int LIMBO_OFFSET = EQ::invbag::TRADE_BAGS_END + 1;
+
 	// Delete cursor items
 	const std::string query = StringFormat("DELETE FROM inventory WHERE charid = %i "
 	                                       "AND ((slotid >= %i AND slotid <= %i) "
 	                                       "OR slotid = %i OR (slotid >= %i AND slotid <= %i) )",
-	                                       char_id, 
-										   EQ::invbag::TRADE_BAGS_END + 1,
-										   INT16_MAX,										   
-										   EQ::invslot::slotCursor,
+	                                       char_id, LIMBO_OFFSET, LIMBO_OFFSET + 999, EQ::invslot::slotCursor,
 	                                       EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END);
 	const auto results = QueryDatabase(query);
     if (!results.Success()) {
@@ -325,11 +324,11 @@ bool SharedDatabase::SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::co
         return false;
     }
 
-    int i = EQ::invbag::TRADE_BAGS_END + 1;
+    int i = LIMBO_OFFSET;
     for(auto& it = start; it != end; ++it, i++) {
-		if (i >= INT16_MAX) { break; } // shouldn't be anything in the queue that indexes this high
+		if (i > LIMBO_OFFSET + 999) { break; } // shouldn't be anything in the queue that indexes this high
 		const EQ::ItemInstance *inst = *it;
-		const int16 use_slot = (i == (EQ::invbag::TRADE_BAGS_END + 1)) ? EQ::invslot::slotCursor : i;
+		const int16 use_slot = (i == LIMBO_OFFSET) ? EQ::invslot::slotCursor : i;
 		if (!SaveInventory(char_id, inst, use_slot)) {
 			return false;
 		}
@@ -1068,9 +1067,10 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 		RunGenerateCallback(inst);
 
 		int16 put_slot_id;
-		if (slot_id >= EQ::invbag::CURSOR_BAG_BEGIN && slot_id <= EQ::invbag::CURSOR_BAG_END) {
+		if (slot_id > (EQ::invbag::TRADE_BAGS_END)) {
 			put_slot_id = inv->PushCursor(*inst);
 		}
+
 		/* COMMENTING THIS OUT FOR NOW.. THIS IS CAUSING ISSUES
 		else if (slot_id >= 3111 && slot_id <= 3179) {
 			// Admins: please report any occurrences of this error
