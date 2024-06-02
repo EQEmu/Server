@@ -431,6 +431,10 @@ namespace EQ
 
 		extern const std::map<uint32, std::string>& GetConsiderColorMap();
 		std::string GetConsiderColorName(uint32 consider_color);
+
+		const int STANCE_TYPE_FIRST = stancePassive;
+		const int STANCE_TYPE_LAST  = stanceBurnAE;
+		const int STANCE_TYPE_COUNT = stanceBurnAE;
 	} /*constants*/
 
 	namespace profile {
