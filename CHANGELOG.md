@@ -1,3 +1,45 @@
+## [22.52.0] 6/1/2024
+
+### Code
+
+* Cleanup Bucket Comparison Code ([#4374](https://github.com/EQEmu/Server/pull/4374)) @Kinglykrab 2024-06-02
+* Cleanup Bug Category Code ([#4367](https://github.com/EQEmu/Server/pull/4367)) @Kinglykrab 2024-06-01
+* Cleanup Deity Code ([#4363](https://github.com/EQEmu/Server/pull/4363)) @Kinglykrab 2024-06-01
+* Cleanup Special Ability Code ([#4365](https://github.com/EQEmu/Server/pull/4365)) @Kinglykrab 2024-06-01
+* Remove unused code in common/eq_constants.h ([#4364](https://github.com/EQEmu/Server/pull/4364)) @Kinglykrab 2024-06-01
+
+### Combat
+
+* Adjustments to Crippling Blows/Slay Undead and Confirmed Critical Code ([#4354](https://github.com/EQEmu/Server/pull/4354)) @fryguy503 2024-05-27
+
+### Fixes
+
+* Add protection to ensure adventure points award are only attempted on players ([#4371](https://github.com/EQEmu/Server/pull/4371)) @joligario 2024-05-31
+* Adjust Kick/RoundKick Damage Lower levels ([#4355](https://github.com/EQEmu/Server/pull/4355)) @fryguy503 2024-05-28
+* Bazaar Search not working correctly for Iksar, Vashir, Drakkin and Froglok races ([#4379](https://github.com/EQEmu/Server/pull/4379)) @neckkola 2024-06-02
+* Fix Unescaped String in Client::GotoPlayer ([#4373](https://github.com/EQEmu/Server/pull/4373)) @Kinglykrab 2024-06-01
+
+### NPC Spells
+
+* Fixed an issue where the repository spell adj value was overriding the spell difficulty default value ([#4370](https://github.com/EQEmu/Server/pull/4370)) @regneq 2024-06-01
+
+### Quest API
+
+* Add Item Link Methods to Perl/Lua ([#4359](https://github.com/EQEmu/Server/pull/4359)) @Kinglykrab 2024-06-01
+
+### Quests
+
+* Fix Lua encounter double register ([#4369](https://github.com/EQEmu/Server/pull/4369)) @Akkadius 2024-05-31
+* Fix issue with Lua encounters loading in certain circumstances ([#4378](https://github.com/EQEmu/Server/pull/4378)) @Akkadius 2024-06-01
+
+### Rules
+
+* Add Skill Base Damage Rules ([#4360](https://github.com/EQEmu/Server/pull/4360)) @Kinglykrab 2024-06-01
+
+### Skills
+
+* Fix caps out of bounds issue ([#4377](https://github.com/EQEmu/Server/pull/4377)) @Akkadius 2024-06-01
+
 ## [22.51.1] 5/27/2024
 
 ### Fixes
