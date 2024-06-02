@@ -2053,7 +2053,7 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 	// if out of range looking it up in the table would crash stuff
 	// so we return from these
-	if (classtemp >= Class::Berserker) {
+	if (classtemp >= Class::PlayerMax) {
 		LogInfo(" class is out of range");
 		return false;
 	}

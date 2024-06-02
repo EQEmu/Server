@@ -81,7 +81,7 @@ namespace Class {
 	constexpr uint8 AlternateCurrencyMerchant = 70;
 	constexpr uint8 MercenaryLiaison          = 71;
 
-	constexpr uint8 Count = Berserker;
+	constexpr uint8 PlayerMax = Berserker;
 
 	namespace Bitmask {
 		constexpr uint16 Unknown      = 0;
