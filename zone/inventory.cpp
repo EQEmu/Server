@@ -3383,61 +3383,66 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 
 void Client::SendEdgeStatBulkUpdate()
 {
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	EdgeStat_Struct* itempacket = nullptr;
+	if (RuleB(Custom, ServerAuthStats)) {
+		EmuOpcode opcode = OP_Unknown;
+		EQApplicationPacket* outapp = nullptr;
+		EdgeStat_Struct* itempacket = nullptr;
 
-	// Construct packet
-	opcode = OP_EdgeStats;
-	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * ((int)(eStatEntry::eStatMax) - 1)));
-	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
-	itempacket->count = (int)(eStatMax) - 1;
-	for(int guava = 0; guava < eStatEntry::eStatMax - 1; guava++)
-	{
-		//LogDebug("EdgePacket packing [{}] value [{}]", (eStatEntry)guava, GetStatValueEdgeType((eStatEntry)guava));
-		itempacket->entries[guava].statKey = (eStatEntry)guava;
-		itempacket->entries[guava].statValue = GetStatValueEdgeType((eStatEntry)guava);
+		// Construct packet
+		opcode = OP_EdgeStats;
+		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * ((int)(eStatEntry::eStatMax) - 1)));
+		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		itempacket->count = (int)(eStatMax) - 1;
+		for(int i = 0; i < eStatEntry::eStatMax - 1; i++)
+		{			
+			itempacket->entries[i].statKey = (eStatEntry)i;
+			itempacket->entries[i].statValue = GetStatValueEdgeType((eStatEntry)i);
+		}
+		QueuePacket(outapp);
+		safe_delete(outapp);
 	}
-	QueuePacket(outapp);
-	safe_delete(outapp);
 }
 
 void Client::SendEdgeHPStats()
 {
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	EdgeStat_Struct* itempacket = nullptr;
+	if (RuleB(Custom, ServerAuthStats)) {
+		EmuOpcode opcode = OP_Unknown;
+		EQApplicationPacket* outapp = nullptr;
+		EdgeStat_Struct* itempacket = nullptr;
 
-	// Construct packet
-	opcode = OP_EdgeStats;
-	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
-	itempacket->count = 2;
-	itempacket->entries[0].statKey = eStatCurHP;
-	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurHP);
-	itempacket->entries[1].statKey = eStatMaxHP;
-	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxHP);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+		// Construct packet
+		opcode = OP_EdgeStats;
+		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		itempacket->count = 2;
+		itempacket->entries[0].statKey = eStatCurHP;
+		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurHP);
+		itempacket->entries[1].statKey = eStatMaxHP;
+		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxHP);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::SendEdgeManaStats()
 {
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	EdgeStat_Struct* itempacket = nullptr;
+	if (RuleB(Custom, ServerAuthStats)) {
+		EmuOpcode opcode = OP_Unknown;
+		EQApplicationPacket* outapp = nullptr;
+		EdgeStat_Struct* itempacket = nullptr;
 
-	// Construct packet
-	opcode = OP_EdgeStats;
-	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
-	itempacket->count = 2;
-	itempacket->entries[0].statKey = eStatCurMana;
-	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurMana);
-	itempacket->entries[1].statKey = eStatMaxMana;
-	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxMana);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+		// Construct packet
+		opcode = OP_EdgeStats;
+		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		itempacket->count = 2;
+		itempacket->entries[0].statKey = eStatCurMana;
+		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurMana);
+		itempacket->entries[1].statKey = eStatMaxMana;
+		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxMana);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 void Client::SendEdgeEnduranceStats()
@@ -3448,6 +3453,7 @@ void Client::SendEdgeEnduranceStats()
 
 	// Construct packet
 	opcode = OP_EdgeStats;
+	LogDebug("opcode: [{}]", opcode);
 	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
 	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 	itempacket->count = 2;

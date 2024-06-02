@@ -35,14 +35,13 @@ so we know the enum type for the opcode defines must be at least
 
 typedef enum { //EQEmu internal opcodes list
 	OP_Unknown=0,
-
+	
 //a preprocessor hack so we dont have to maintain two lists
 #define N(x) x
 	#include "emu_oplist.h"
 	#include "mail_oplist.h"
 #undef N
 
-    OP_EdgeStats = 0x1338, // add this here instead of opcode patches to allow for upstream changes
     _maxEmuOpcode
 } EmuOpcode;
 
