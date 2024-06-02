@@ -282,88 +282,77 @@ void Adventure::IncrementAssassinationCount()
 void Adventure::Finished(AdventureWinStatus ws)
 {
 	auto iter = players.begin();
-	while(iter != players.end())
-	{
+	while (iter != players.end()) {
 		ClientListEntry *current = client_list.FindCharacter((*iter).c_str());
-		if(current)
-		{
-			if(current->Online() == CLE_Status::InZone)
-			{
+		auto character_id = database.GetCharacterID(*iter);
+
+		if (character_id == 0) {
+			continue;
+		}
+
+		if (current) {
+			if (current->Online() == CLE_Status::InZone) {
 				//We can send our packets only.
-				auto pack =
-				    new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
+				auto pack = new ServerPacket(ServerOP_AdventureFinish, sizeof(ServerAdventureFinish_Struct));
 				ServerAdventureFinish_Struct *af = (ServerAdventureFinish_Struct*)pack->pBuffer;
 				strcpy(af->player, (*iter).c_str());
 				af->theme = GetTemplate()->theme;
-				if(ws == AWS_Win)
-				{
+				if (ws == AWS_Win) {
 					af->win = true;
 					af->points = GetTemplate()->win_points;
 				}
-				else if(ws == AWS_SecondPlace)
-				{
+				else if (ws == AWS_SecondPlace) {
 					af->win = true;
 					af->points = GetTemplate()->lose_points;
 				}
-				else
-				{
+				else {
 					af->win = false;
 					af->points = 0;
 				}
-
 				zoneserver_list.SendPacket(current->zone(), current->instance(), pack);
-				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+				database.UpdateAdventureStatsEntry(character_id, GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 				delete pack;
 			}
-			else
-			{
+			else {
 				AdventureFinishEvent afe;
 				afe.name = (*iter);
-				if(ws == AWS_Win)
-				{
+				if (ws == AWS_Win) {
 					afe.theme = GetTemplate()->theme;
 					afe.points = GetTemplate()->win_points;
 					afe.win = true;
 				}
-				else if(ws == AWS_SecondPlace)
-				{
+				else if (ws == AWS_SecondPlace) {
 					afe.theme = GetTemplate()->theme;
 					afe.points = GetTemplate()->lose_points;
 					afe.win = true;
 				}
-				else
-				{
+				else {
 					afe.win = false;
 					afe.points = 0;
 				}
 				adventure_manager.AddFinishedEvent(afe);
-				database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+				database.UpdateAdventureStatsEntry(character_id, GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 			}
 		}
-		else
-		{
+		else {
 			AdventureFinishEvent afe;
 			afe.name = (*iter);
-			if(ws == AWS_Win)
-			{
+			if (ws == AWS_Win) {
 				afe.theme = GetTemplate()->theme;
 				afe.points = GetTemplate()->win_points;
 				afe.win = true;
 			}
-			else if(ws == AWS_SecondPlace)
-			{
+			else if (ws == AWS_SecondPlace) {
 				afe.theme = GetTemplate()->theme;
 				afe.points = GetTemplate()->lose_points;
 				afe.win = true;
 			}
-			else
-			{
+			else {
 				afe.win = false;
 				afe.points = 0;
 			}
 			adventure_manager.AddFinishedEvent(afe);
-
-			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter)), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
+			database.UpdateAdventureStatsEntry(character_id, GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;
 	}

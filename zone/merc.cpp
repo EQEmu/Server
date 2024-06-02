@@ -1191,13 +1191,13 @@ void Merc::AI_Process() {
 							Attack(GetTarget(), EQ::invslot::slotPrimary, true);
 						}
 
-						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_TRIPLE)) {
+						if(GetOwner() && GetTarget() && GetSpecialAbility(SpecialAbility::TripleAttack)) {
 							tripleSuccess = true;
 							Attack(GetTarget(), EQ::invslot::slotPrimary, true);
 						}
 
 						//quad attack, does this belong here??
-						if(GetOwner() && GetTarget() && GetSpecialAbility(SPECATK_QUAD)) {
+						if(GetOwner() && GetTarget() && GetSpecialAbility(SpecialAbility::QuadrupleAttack)) {
 							Attack(GetTarget(), EQ::invslot::slotPrimary, true);
 						}
 					}
@@ -1888,7 +1888,7 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 
 									selectedMercSpell = GetBestMercSpellForAENuke(this, tar);
 
-									if(selectedMercSpell.spellid == 0 && !tar->GetSpecialAbility(UNSTUNABLE) && !tar->IsStunned()) {
+									if(selectedMercSpell.spellid == 0 && !tar->GetSpecialAbility(SpecialAbility::StunImmunity) && !tar->IsStunned()) {
 										uint8 stunChance = 15;
 										if(zone->random.Roll(stunChance)) {
 											selectedMercSpell = GetBestMercSpellForStun(this);

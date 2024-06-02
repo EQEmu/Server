@@ -2014,7 +2014,7 @@ uint16_t Perl_Client_GetClassBitmask(Client* self)
 
 uint32_t Perl_Client_GetDeityBitmask(Client* self)
 {
-	return static_cast<uint32_t>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(self->GetDeity())));
+	return Deity::GetBitmask(self->GetDeity());
 }
 
 uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes

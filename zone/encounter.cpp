@@ -41,7 +41,7 @@ Encounter::Encounter(const char *enc_name) : Mob(
 	Race::InvisibleMan, // in_race
 	Class::None, // in_class
 	BT_NoTarget, // in_bodytype
-	0, // in_deity
+	Deity::Unknown, // in_deity
 	0, // in_level
 	0, // in_npcype_id
 	0, // in_size

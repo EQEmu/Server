@@ -438,12 +438,12 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	int counter_parry   = 0;
 	int counter_dodge   = 0;
 
-	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)) {
-		counter_all     = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
-		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 1);
-		counter_block   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
-		counter_parry   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
-		counter_dodge   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
+	if (attacker->GetSpecialAbility(SpecialAbility::CounterAvoidDamage)) {
+		counter_all     = attacker->GetSpecialAbilityParam(SpecialAbility::CounterAvoidDamage, 0);
+		counter_riposte = attacker->GetSpecialAbilityParam(SpecialAbility::CounterAvoidDamage, 1);
+		counter_block   = attacker->GetSpecialAbilityParam(SpecialAbility::CounterAvoidDamage, 2);
+		counter_parry   = attacker->GetSpecialAbilityParam(SpecialAbility::CounterAvoidDamage, 3);
+		counter_dodge   = attacker->GetSpecialAbilityParam(SpecialAbility::CounterAvoidDamage, 4);
 	}
 
 	int modify_all     = 0;
@@ -452,12 +452,12 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	int modify_parry   = 0;
 	int modify_dodge   = 0;
 
-	if (GetSpecialAbility(MODIFY_AVOID_DAMAGE)) {
-		modify_all     = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 0);
-		modify_riposte = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 1);
-		modify_block   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 2);
-		modify_parry   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 3);
-		modify_dodge   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 4);
+	if (GetSpecialAbility(SpecialAbility::ModifyAvoidDamage)) {
+		modify_all     = GetSpecialAbilityParam(SpecialAbility::ModifyAvoidDamage, 0);
+		modify_riposte = GetSpecialAbilityParam(SpecialAbility::ModifyAvoidDamage, 1);
+		modify_block   = GetSpecialAbilityParam(SpecialAbility::ModifyAvoidDamage, 2);
+		modify_parry   = GetSpecialAbilityParam(SpecialAbility::ModifyAvoidDamage, 3);
+		modify_dodge   = GetSpecialAbilityParam(SpecialAbility::ModifyAvoidDamage, 4);
 	}
 
 	/* Heroic Strikethrough Implementation per Dev Quotes (2018):
@@ -1129,13 +1129,13 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 	int64 banedmg = 0;
 
 	//can't hit invulnerable stuff with weapons.
-	if (against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)) {
+	if (against->GetInvul() || against->GetSpecialAbility(SpecialAbility::MeleeImmunity)) {
 		return 0;
 	}
 
 	//check to see if our weapons or fists are magical.
-	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
-		if (GetSpecialAbility(SPECATK_MAGICAL)) {
+	if (against->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptMagical)) {
+		if (GetSpecialAbility(SpecialAbility::MagicalAttack)) {
 			dmg = 1;
 		}
 		//On live this occurs for ALL NPC's >= 10
@@ -1178,7 +1178,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 	}
 
 	int eledmg = 0;
-	if (!against->GetSpecialAbility(IMMUNE_MAGIC)) {
+	if (!against->GetSpecialAbility(SpecialAbility::MagicImmunity)) {
 		if (weapon_item && weapon_item->ElemDmgAmt) {
 			//we don't check resist for npcs here
 			eledmg = weapon_item->ElemDmgAmt;
@@ -1186,7 +1186,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		}
 	}
 
-	if (against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)) {
+	if (against->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
 		if (weapon_item) {
 			if (weapon_item->BaneDmgBody == against->GetBodyType()) {
 				banedmg += weapon_item->BaneDmgAmt;
@@ -1198,7 +1198,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		}
 
 		if (!banedmg) {
-			if (!GetSpecialAbility(SPECATK_BANE))
+			if (!GetSpecialAbility(SpecialAbility::BaneAttack))
 				return 0;
 			else
 				return 1;
@@ -1233,7 +1233,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 	int64 banedmg = 0;
 	int x = 0;
 
-	if (!against || against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE))
+	if (!against || against->GetInvul() || against->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		return 0;
 
 	// check for items being illegally attained
@@ -1261,7 +1261,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 		}
 	}
 
-	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
+	if (against->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptMagical)) {
 		if (weapon_item) {
 			// check to see if the weapon is magic
 			bool MagicWeapon = weapon_item->GetItemMagical(true) || spellbonuses.MagicWeapon || itembonuses.MagicWeapon;
@@ -1298,7 +1298,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 				RuleI(Combat, PetAttackMagicLevel)) { // pets wouldn't actually use this but...
 				dmg = 1; // it gives us an idea if we can hit
 			}
-			else if (MagicGloves || GetSpecialAbility(SPECATK_MAGICAL)) {
+			else if (MagicGloves || GetSpecialAbility(SpecialAbility::MagicalAttack)) {
 				dmg = 1;
 			}
 			else
@@ -1328,7 +1328,7 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 	}
 
 	int eledmg = 0;
-	if (!against->GetSpecialAbility(IMMUNE_MAGIC)) {
+	if (!against->GetSpecialAbility(SpecialAbility::MagicImmunity)) {
 		if (weapon_item && weapon_item->GetItem() && weapon_item->GetItemElementalFlag(true))
 			// the client actually has the way this is done, it does not appear to check req!
 			eledmg = against->ResistElementalWeaponDmg(weapon_item);
@@ -1338,9 +1338,9 @@ int64 Mob::GetWeaponDamage(Mob *against, const EQ::ItemInstance *weapon_item, in
 		(weapon_item->GetItemBaneDamageBody(true) || weapon_item->GetItemBaneDamageRace(true)))
 		banedmg = against->CheckBaneDamage(weapon_item);
 
-	if (against->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE)) {
+	if (against->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane)) {
 		if (!banedmg) {
-			if (!GetSpecialAbility(SPECATK_BANE))
+			if (!GetSpecialAbility(SpecialAbility::BaneAttack))
 				return 0;
 			else
 				return 1;
@@ -3190,19 +3190,19 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		return;
 	}
 
-	if (IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO)) {
+	if (IsFamiliar() || GetSpecialAbility(SpecialAbility::AggroImmunity)) {
 		return;
 	}
 
-	if (other->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) {
+	if (other->IsBot() && GetSpecialAbility(SpecialAbility::BotAggroImmunity)) {
 		return;
 	}
 
-	if (other->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) {
+	if (other->IsClient() && GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) {
 		return;
 	}
 
-	if (other->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
+	if (other->IsNPC() && GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) {
 		return;
 	}
 
@@ -3214,12 +3214,12 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 		return;
 	}
 
-	if (other->GetSpecialAbility(IMMUNE_AGGRO_ON)) {
+	if (other->GetSpecialAbility(SpecialAbility::BeingAggroImmunity)) {
 		return;
 	}
 
-	if (GetSpecialAbility(NPC_TUNNELVISION)) {
-		int tv_mod = GetSpecialAbilityParam(NPC_TUNNELVISION, 0);
+	if (GetSpecialAbility(SpecialAbility::TunnelVision)) {
+		int tv_mod = GetSpecialAbilityParam(SpecialAbility::TunnelVision, 0);
 
 		Mob *top = GetTarget();
 		if (top && top != other) {
@@ -3299,10 +3299,10 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 			// cb:2007-08-17
 			// owner must get on list, but he's not actually gained any hate yet
 			if (
-				!owner->GetSpecialAbility(IMMUNE_AGGRO) &&
-				!(owner->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
-				!(owner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
-				!(owner->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC))
+				!owner->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
+				!(owner->IsBot() && GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
+				!(owner->IsClient() && GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
+				!(owner->IsNPC() && GetSpecialAbility(SpecialAbility::NPCAggroImmunity))
 			) {
 				if (owner->IsClient() && !CheckAggro(owner)) {
 					owner->CastToClient()->AddAutoXTarget(this);
@@ -3315,10 +3315,10 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	if (mypet && !mypet->IsHeld() && !mypet->IsPetStop()) { // I have a pet, add other to it
 		if (
 			!mypet->IsFamiliar() &&
-			!mypet->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(IsBot() && mypet->GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
-			!(IsClient() && mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
-			!(IsNPC() && mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC))
+			!mypet->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
+			!(IsBot() && mypet->GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
+			!(IsClient() && mypet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
+			!(IsNPC() && mypet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity))
 		) {
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -3326,10 +3326,10 @@ void Mob::AddToHateList(Mob* other, int64 hate /*= 0*/, int64 damage /*= 0*/, bo
 	else if (myowner) { // I am a pet, add other to owner if it's NPC/LD
 		if (
 			myowner->IsAIControlled() &&
-			!myowner->GetSpecialAbility(IMMUNE_AGGRO) &&
-			!(myowner->IsBot() && GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
-			!(myowner->IsClient() && GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
-			!(myowner->IsNPC() && GetSpecialAbility(IMMUNE_AGGRO_NPC))
+			!myowner->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
+			!(myowner->IsBot() && GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
+			!(myowner->IsClient() && GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
+			!(myowner->IsNPC() && GetSpecialAbility(SpecialAbility::NPCAggroImmunity))
 		) {
 			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
 		}
@@ -4095,8 +4095,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 	}
 
 	// this should actually happen MUCH sooner, need to investigate though -- good enough for now
-	if ((skill_used == EQ::skills::SkillArchery || skill_used == EQ::skills::SkillThrowing) && GetSpecialAbility(IMMUNE_RANGED_ATTACKS)) {
-		LogCombat("Avoiding [{}] damage due to IMMUNE_RANGED_ATTACKS", damage);
+	if ((skill_used == EQ::skills::SkillArchery || skill_used == EQ::skills::SkillThrowing) && GetSpecialAbility(SpecialAbility::RangedAttackImmunity)) {
+		LogCombat("Avoiding [{}] damage due to SpecialAbility::RangedAttackImmunity", damage);
 		damage = DMG_INVULNERABLE;
 	}
 
@@ -4174,12 +4174,12 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			Mob* pet = GetPet();
 			pet &&
 			!pet->IsFamiliar() &&
-			!pet->GetSpecialAbility(IMMUNE_AGGRO) &&
+			!pet->GetSpecialAbility(SpecialAbility::AggroImmunity) &&
 			!pet->IsEngaged() &&
 			attacker &&
-			!(attacker->IsBot() && pet->GetSpecialAbility(IMMUNE_AGGRO_BOT)) &&
-			!(attacker->IsClient() && pet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT)) &&
-			!(attacker->IsNPC() && pet->GetSpecialAbility(IMMUNE_AGGRO_NPC)) &&
+			!(attacker->IsBot() && pet->GetSpecialAbility(SpecialAbility::BotAggroImmunity)) &&
+			!(attacker->IsClient() && pet->GetSpecialAbility(SpecialAbility::ClientAggroImmunity)) &&
+			!(attacker->IsNPC() && pet->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) &&
 			attacker != this &&
 			!attacker->IsCorpse() &&
 			!pet->IsGHeld() &&
@@ -4463,7 +4463,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				can_stun = false;
 			}
 
-			if (GetSpecialAbility(UNSTUNABLE)) {
+			if (GetSpecialAbility(SpecialAbility::StunImmunity)) {
 				can_stun = false;
 			}
 		}
@@ -5188,7 +5188,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 	}
 
-	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK)) {
+	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SpecialAbility::RangedAttack)) {
 		rangedattk = true;
 	}
 
@@ -5593,7 +5593,7 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 		// Crippling blows also have a chance to stun
 		// Kayen: Crippling Blow would cause a chance to interrupt for npcs < 55, with a
 		// staggers message.
-		if (defender->GetLevel() <= RuleI(Combat, MaximumLevelStunsCripplingBlow) && !defender->GetSpecialAbility(UNSTUNABLE)) {
+		if (defender->GetLevel() <= RuleI(Combat, MaximumLevelStunsCripplingBlow) && !defender->GetSpecialAbility(SpecialAbility::StunImmunity)) {
 			entity_list.MessageCloseString(
 				defender,
 				true,
@@ -6485,7 +6485,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	// this appears where they do special attack dmg mods
 	int spec_mod = 0;
 	if (IsSpecialAttack(eSpecialAttacks::Rampage)) {
-		int mod = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
+		int mod = GetSpecialAbilityParam(SpecialAbility::Rampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
@@ -6496,7 +6496,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		}
 	}
 	else if (IsSpecialAttack(eSpecialAttacks::AERampage)) {
-		int mod = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
+		int mod = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
@@ -6799,8 +6799,8 @@ void NPC::SetAttackTimer()
 
 		//special offhand stuff
 		if (i == EQ::invslot::slotSecondary) {
-			// SPECATK_QUAD is uncheesable
-			if (!CanThisClassDualWield() || (HasTwoHanderEquipped() && !GetSpecialAbility(SPECATK_QUAD))) {
+			// SpecialAbility::QuadrupleAttack is uncheesable
+			if (!CanThisClassDualWield() || (HasTwoHanderEquipped() && !GetSpecialAbility(SpecialAbility::QuadrupleAttack))) {
 				attack_dw_timer.Disable();
 				continue;
 			}
@@ -6958,18 +6958,18 @@ void Mob::DoMainHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool ram
 	// thresholds, and if its truely random, then this should work
 	// out reasonably and will save us compute resources.
 	int32 RandRoll = zone->random.Int(0, 99);
-	if ((CanThisClassDoubleAttack() || GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD))
+	if ((CanThisClassDoubleAttack() || GetSpecialAbility(SpecialAbility::TripleAttack) || GetSpecialAbility(SpecialAbility::QuadrupleAttack))
 		// check double attack, this is NOT the same rules that clients use...
 		&&
 		RandRoll < (GetLevel() + NPCDualAttackModifier)) {
 		Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 		// lets see if we can do a triple attack with the main hand
 		// pets are excluded from triple and quads...
-		if ((GetSpecialAbility(SPECATK_TRIPLE) || GetSpecialAbility(SPECATK_QUAD)) && !IsPet() &&
+		if ((GetSpecialAbility(SpecialAbility::TripleAttack) || GetSpecialAbility(SpecialAbility::QuadrupleAttack)) && !IsPet() &&
 			RandRoll < (GetLevel() + NPCTripleAttackModifier)) {
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 			// now lets check the quad attack
-			if (GetSpecialAbility(SPECATK_QUAD) && RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
+			if (GetSpecialAbility(SpecialAbility::QuadrupleAttack) && RandRoll < (GetLevel() + NPCQuadAttackModifier)) {
 				Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 			}
 		}
@@ -6983,9 +6983,9 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts, bool ramp
 	}
 
 	// Mobs will only dual wield w/ the flag or have a secondary weapon
-	// For now, SPECATK_QUAD means innate DW when Combat:UseLiveCombatRounds is true
-	if ((GetSpecialAbility(SPECATK_INNATE_DW) ||
-		(RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SPECATK_QUAD))) ||
+	// For now, SpecialAbility::QuadrupleAttack means innate DW when Combat:UseLiveCombatRounds is true
+	if ((GetSpecialAbility(SpecialAbility::DualWield) ||
+		(RuleB(Combat, UseLiveCombatRounds) && GetSpecialAbility(SpecialAbility::QuadrupleAttack))) ||
 		GetEquippedItemFromTextureSlot(EQ::textures::weaponSecondary) != 0) {
 		if (CheckDualWield()) {
 			Attack(target, EQ::invslot::slotSecondary, false, false, false, opts);

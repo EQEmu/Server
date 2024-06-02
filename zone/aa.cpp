@@ -167,7 +167,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
@@ -272,7 +272,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(IMMUNE_AGGRO, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
@@ -401,7 +401,7 @@ void Mob::WakeTheDead(uint16 spell_id, Corpse *corpse_to_use, Mob *tar, uint32 d
 		made_npc->npc_spells_id = 7;
 		break;
 	case Class::Paladin:
-		//SPECATK_TRIPLE
+		//SpecialAbility::TripleAttack
 		strcpy(made_npc->special_abilities, "6,1");
 		made_npc->current_hp = made_npc->current_hp * 150 / 100;
 		made_npc->max_hp = made_npc->max_hp * 150 / 100;

@@ -513,7 +513,7 @@ void Perl__sfollow()
 	quest_manager.sfollow();
 }
 
-void Perl__changedeity(int deity_id)
+void Perl__changedeity(uint32 deity_id)
 {
 	quest_manager.changedeity(deity_id);
 }
@@ -4940,6 +4940,11 @@ void Perl__set_proximity_range(float x_range, float y_range, float z_range, bool
 	quest_manager.set_proximity_range(x_range, y_range, z_range, enable_say);
 }
 
+std::string Perl__varlink(EQ::ItemInstance* inst)
+{
+	return quest_manager.varlink(inst);
+}
+
 std::string Perl__varlink(uint32 item_id)
 {
 	return quest_manager.varlink(item_id);
@@ -5845,9 +5850,9 @@ uint16 Perl__get_class_bitmask(uint8 class_id)
 	return GetPlayerClassBit(class_id);
 }
 
-uint32 Perl__get_deity_bitmask(uint16 deity_id)
+uint32 Perl__get_deity_bitmask(uint32 deity_id)
 {
-	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(deity_id)));
+	return Deity::GetBitmask(deity_id);
 }
 
 uint16 Perl__get_race_bitmask(uint16 race_id)
@@ -6856,6 +6861,7 @@ void perl_register_quest()
 	package.add("updatetaskactivity", (void(*)(int, int, int))&Perl__updatetaskactivity);
 	package.add("updatetaskactivity", (void(*)(int, int, int, bool))&Perl__updatetaskactivity);
 	package.add("UpdateZoneHeader", &Perl__UpdateZoneHeader);
+	package.add("varlink", (std::string(*)(EQ::ItemInstance*))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32, int16))&Perl__varlink);
 	package.add("varlink", (std::string(*)(uint32, int16, uint32))&Perl__varlink);

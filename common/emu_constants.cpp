@@ -59,68 +59,25 @@ int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	return local_array[inv_type];
 }
 
-const char* EQ::bug::CategoryIDToCategoryName(CategoryID category_id) {
-	switch (category_id) {
-	case catVideo:
-		return "Video";
-	case catAudio:
-		return "Audio";
-	case catPathing:
-		return "Pathing";
-	case catQuest:
-		return "Quest";
-	case catTradeskills:
-		return "Tradeskills";
-	case catSpellStacking:
-		return "Spell stacking";
-	case catDoorsPortals:
-		return "Doors/Portals";
-	case catItems:
-		return "Items";
-	case catNPC:
-		return "NPC";
-	case catDialogs:
-		return "Dialogs";
-	case catLoNTCG:
-		return "LoN - TCG";
-	case catMercenaries:
-		return "Mercenaries";
-	case catOther:
-	default:
-		return "Other";
+uint32 Bug::GetID(const std::string& category_name)
+{
+	for (const auto& e : bug_category_names) {
+		if (e.second == category_name) {
+			return e.first;
+		}
 	}
+
+	return Bug::Category::Other;
 }
 
-EQ::bug::CategoryID EQ::bug::CategoryNameToCategoryID(const char* category_name) {
-	if (!category_name)
-		return catOther;
+std::string Bug::GetName(uint32 category_id)
+{
+	return IsValid(category_id) ? bug_category_names[category_id] : "UNKNOWN BUG CATEGORY";
+}
 
-	if (!strcmp(category_name, "Video"))
-		return catVideo;
-	if (!strcmp(category_name, "Audio"))
-		return catAudio;
-	if (!strcmp(category_name, "Pathing"))
-		return catPathing;
-	if (!strcmp(category_name, "Quest"))
-		return catQuest;
-	if (!strcmp(category_name, "Tradeskills"))
-		return catTradeskills;
-	if (!strcmp(category_name, "Spell stacking"))
-		return catSpellStacking;
-	if (!strcmp(category_name, "Doors/Portals"))
-		return catDoorsPortals;
-	if (!strcmp(category_name, "Items"))
-		return catItems;
-	if (!strcmp(category_name, "NPC"))
-		return catNPC;
-	if (!strcmp(category_name, "Dialogs"))
-		return catDialogs;
-	if (!strcmp(category_name, "LoN - TCG"))
-		return catLoNTCG;
-	if (!strcmp(category_name, "Mercenaries"))
-		return catMercenaries;
-
-	return catOther;
+bool Bug::IsValid(uint32 category_id)
+{
+	return bug_category_names.find(category_id) != bug_category_names.end();
 }
 
 const char *EQ::constants::GetStanceName(StanceType stance_type) {
@@ -640,79 +597,14 @@ std::string EQ::constants::GetAppearanceTypeName(uint32 appearance_type)
 	return std::string();
 }
 
-const std::map<uint32, std::string>& EQ::constants::GetSpecialAbilityMap()
+std::string SpecialAbility::GetName(int ability_id)
 {
-	static const std::map<uint32, std::string> special_ability_map = {
-		{ SPECATK_SUMMON,            "Summon" },
-		{ SPECATK_ENRAGE,            "Enrage" },
-		{ SPECATK_RAMPAGE,           "Rampage" },
-		{ SPECATK_AREA_RAMPAGE,      "Area Rampage" },
-		{ SPECATK_FLURRY,            "Flurry" },
-		{ SPECATK_TRIPLE,            "Triple Attack" },
-		{ SPECATK_QUAD,              "Quadruple Attack" },
-		{ SPECATK_INNATE_DW,         "Dual Wield" },
-		{ SPECATK_BANE,              "Bane Attack" },
-		{ SPECATK_MAGICAL,           "Magical Attack" },
-		{ SPECATK_RANGED_ATK,        "Ranged Attack" },
-		{ UNSLOWABLE,                "Immune to Slow" },
-		{ UNMEZABLE,                 "Immune to Mesmerize" },
-		{ UNCHARMABLE,               "Immune to Charm" },
-		{ UNSTUNABLE,                "Immune to Stun" },
-		{ UNSNAREABLE,               "Immune to Snare" },
-		{ UNFEARABLE,                "Immune to Fear" },
-		{ UNDISPELLABLE,             "Immune to Dispell" },
-		{ IMMUNE_MELEE,              "Immune to Melee" },
-		{ IMMUNE_MAGIC,              "Immune to Magic" },
-		{ IMMUNE_FLEEING,            "Immune to Fleeing" },
-		{ IMMUNE_MELEE_EXCEPT_BANE,  "Immune to Melee except Bane" },
-		{ IMMUNE_MELEE_NONMAGICAL,   "Immune to Non-Magical Melee" },
-		{ IMMUNE_AGGRO,              "Immune to Aggro" },
-		{ IMMUNE_AGGRO_ON,           "Immune to Being Aggro" },
-		{ IMMUNE_CASTING_FROM_RANGE, "Immune to Ranged Spells" },
-		{ IMMUNE_FEIGN_DEATH,        "Immune to Feign Death" },
-		{ IMMUNE_TAUNT,              "Immune to Taunt" },
-		{ NPC_TUNNELVISION,          "Tunnel Vision" },
-		{ NPC_NO_BUFFHEAL_FRIENDS,   "Does Not Heal of Buff Allies" },
-		{ IMMUNE_PACIFY,             "Immune to Pacify" },
-		{ LEASH,                     "Leashed" },
-		{ TETHER,                    "Tethered" },
-		{ DESTRUCTIBLE_OBJECT,       "Destructible Object" },
-		{ NO_HARM_FROM_CLIENT,       "Immune to Harm from Client" },
-		{ ALWAYS_FLEE,               "Always Flees" },
-		{ FLEE_PERCENT,              "Flee Percentage" },
-		{ ALLOW_BENEFICIAL,          "Allows Beneficial Spells" },
-		{ DISABLE_MELEE,             "Melee is Disabled" },
-		{ NPC_CHASE_DISTANCE,        "Chase Distance" },
-		{ ALLOW_TO_TANK,             "Allowed to Tank" },
-		{ IGNORE_ROOT_AGGRO_RULES,   "Ignores Root Aggro" },
-		{ CASTING_RESIST_DIFF,       "Casting Resist Difficulty" },
-		{ COUNTER_AVOID_DAMAGE,      "Counter Damage Avoidance" },
-		{ PROX_AGGRO,                "Proximity Aggro" },
-		{ IMMUNE_RANGED_ATTACKS,     "Immune to Ranged Attacks" },
-		{ IMMUNE_DAMAGE_CLIENT,      "Immune to Client Damage" },
-		{ IMMUNE_DAMAGE_NPC,         "Immune to NPC Damage" },
-		{ IMMUNE_AGGRO_CLIENT,       "Immune to Client Aggro" },
-		{ IMMUNE_AGGRO_NPC,          "Immune to NPC Aggro" },
-		{ MODIFY_AVOID_DAMAGE,       "Modify Damage Avoidance" },
-		{ IMMUNE_FADING_MEMORIES,    "Immune to Memory Fades" },
-		{ IMMUNE_OPEN,               "Immune to Open" },
-		{ IMMUNE_ASSASSINATE,        "Immune to Assassinate" },
-		{ IMMUNE_HEADSHOT,           "Immune to Headshot" },
-		{ IMMUNE_AGGRO_BOT,          "Immune to Bot Aggro" },
-		{ IMMUNE_DAMAGE_BOT,         "Immune to Bot Damage" },
-	};
-
-	return special_ability_map;
+	return IsValid(ability_id) ? special_ability_names[ability_id] : "UNKNOWN SPECIAL ABILITY";
 }
 
-std::string EQ::constants::GetSpecialAbilityName(uint32 ability_id)
+bool SpecialAbility::IsValid(int ability_id)
 {
-	const auto& a = EQ::constants::GetSpecialAbilityMap().find(ability_id);
-	if (a != EQ::constants::GetSpecialAbilityMap().end()) {
-		return a->second;
-	}
-
-	return std::string();
+	return special_ability_names.find(ability_id) != special_ability_names.end();
 }
 
 const std::map<uint32, std::string>& EQ::constants::GetConsiderColorMap()
@@ -735,4 +627,14 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 {
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
+}
+
+std::string ComparisonType::GetName(uint8 type)
+{
+	return IsValid(type) ? comparison_types[type] : "UNKNOWN COMPARISON TYPE";
+}
+
+bool ComparisonType::IsValid(uint8 type)
+{
+	return comparison_types.find(type) != comparison_types.end();
 }

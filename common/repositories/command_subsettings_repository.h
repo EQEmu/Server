@@ -49,8 +49,10 @@ public:
 		// these are the base definitions for command_subsettings and can be over-ridden by the database
 		std::vector<CommandSubsettingsRepository::CommandSubsettings> static_records = {
 			{.parent_command = "find", .sub_command = "aa", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findaa"},
+			{.parent_command = "find", .sub_command = "bug_category", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbugcategory"},
 			{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
 			{.parent_command = "find", .sub_command = "class", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findclass"},
+			{.parent_command = "find", .sub_command = "comparison_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcomparisontype"},
 			{.parent_command = "find", .sub_command = "currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcurrency"},
 			{.parent_command = "find", .sub_command = "deity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "finddeity"},
 			{.parent_command = "find", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findemote"},
@@ -61,6 +63,7 @@ public:
 			{.parent_command = "find", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrace"},
 			{.parent_command = "find", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrecipe"},
 			{.parent_command = "find", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findskill"},
+			{.parent_command = "find", .sub_command = "special_ability", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fsa|findspecialability"},
 			{.parent_command = "find", .sub_command = "spell", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fs|findspell"},
 			{.parent_command = "find", .sub_command = "task", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findtask"},
 			{.parent_command = "find", .sub_command = "zone", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fz|findzone"},

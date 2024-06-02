@@ -4803,7 +4803,7 @@ bool Mob::HateSummon() {
 	if (IsCharmed())
 		return false;
 
-	int summon_level = GetSpecialAbility(SPECATK_SUMMON);
+	int summon_level = GetSpecialAbility(SpecialAbility::Summon);
 	if(summon_level == 1 || summon_level == 2) {
 		if(!GetTarget()) {
 			return false;
@@ -4814,19 +4814,19 @@ bool Mob::HateSummon() {
 	}
 
 	// validate hp
-	int hp_ratio = GetSpecialAbilityParam(SPECATK_SUMMON, 1);
+	int hp_ratio = GetSpecialAbilityParam(SpecialAbility::Summon, 1);
 	hp_ratio = hp_ratio > 0 ? hp_ratio : 97;
 	if(GetHPRatio() > static_cast<float>(hp_ratio)) {
 		return false;
 	}
 
 	// now validate the timer
-	int summon_timer_duration = GetSpecialAbilityParam(SPECATK_SUMMON, 0);
+	int summon_timer_duration = GetSpecialAbilityParam(SpecialAbility::Summon, 0);
 	summon_timer_duration = summon_timer_duration > 0 ? summon_timer_duration : 6000;
-	Timer *timer = GetSpecialAbilityTimer(SPECATK_SUMMON);
+	Timer *timer = GetSpecialAbilityTimer(SpecialAbility::Summon);
 	if (!timer)
 	{
-		StartSpecialAbilityTimer(SPECATK_SUMMON, summon_timer_duration);
+		StartSpecialAbilityTimer(SpecialAbility::Summon, summon_timer_duration);
 	} else {
 		if(!timer->Check())
 			return false;
@@ -5261,20 +5261,20 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		return;
 	}
 
-	if (!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if (!IsValidSpell(spell_id) || on->GetSpecialAbility(SpecialAbility::HarmFromClientImmunity)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
 
-	if (IsBot() && on->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
+	if (IsBot() && on->GetSpecialAbility(SpecialAbility::BotDamageImmunity)) {
 		return;
 	}
 
-	if (IsClient() && on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
+	if (IsClient() && on->GetSpecialAbility(SpecialAbility::ClientDamageImmunity)) {
 		return;
 	}
 
-	if (IsNPC() && on->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
+	if (IsNPC() && on->GetSpecialAbility(SpecialAbility::NPCDamageImmunity)) {
 		return;
 	}
 
@@ -6148,7 +6148,7 @@ void Mob::SetBottomRampageList()
 			continue;
 		}
 
-		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+		if (!mob->GetSpecialAbility(SpecialAbility::Rampage)) {
 			continue;
 		}
 
@@ -6175,7 +6175,7 @@ void Mob::SetTopRampageList()
 			continue;
 		}
 
-		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+		if (!mob->GetSpecialAbility(SpecialAbility::Rampage)) {
 			continue;
 		}
 
@@ -7501,7 +7501,7 @@ bool Mob::HasSpellEffect(int effect_id)
 
 int Mob::GetSpecialAbility(int ability)
 {
-	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if (ability >= SpecialAbility::Max || ability < 0) {
 		return 0;
 	}
 
@@ -7510,7 +7510,7 @@ int Mob::GetSpecialAbility(int ability)
 
 bool Mob::HasSpecialAbilities()
 {
-	for (int i = 0; i < MAX_SPECIAL_ATTACK; ++i) {
+	for (int i = 0; i < SpecialAbility::Max; ++i) {
 		if (GetSpecialAbility(i)) {
 			return true;
 		}
@@ -7520,7 +7520,7 @@ bool Mob::HasSpecialAbilities()
 }
 
 int Mob::GetSpecialAbilityParam(int ability, int param) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if(param >= SpecialAbility::MaxParameters || param < 0 || ability >= SpecialAbility::Max || ability < 0) {
 		return 0;
 	}
 
@@ -7528,7 +7528,7 @@ int Mob::GetSpecialAbilityParam(int ability, int param) {
 }
 
 void Mob::SetSpecialAbility(int ability, int level) {
-	if(ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if(ability >= SpecialAbility::Max || ability < 0) {
 		return;
 	}
 
@@ -7536,7 +7536,7 @@ void Mob::SetSpecialAbility(int ability, int level) {
 }
 
 void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
-	if(param >= MAX_SPECIAL_ATTACK_PARAMS || param < 0 || ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if(param >= SpecialAbility::MaxParameters || param < 0 || ability >= SpecialAbility::Max || ability < 0) {
 		return;
 	}
 
@@ -7544,7 +7544,7 @@ void Mob::SetSpecialAbilityParam(int ability, int param, int value) {
 }
 
 void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
-	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if (ability >= SpecialAbility::Max || ability < 0) {
 		return;
 	}
 
@@ -7557,7 +7557,7 @@ void Mob::StartSpecialAbilityTimer(int ability, uint32 time) {
 }
 
 void Mob::StopSpecialAbilityTimer(int ability) {
-	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if (ability >= SpecialAbility::Max || ability < 0) {
 		return;
 	}
 
@@ -7565,7 +7565,7 @@ void Mob::StopSpecialAbilityTimer(int ability) {
 }
 
 Timer *Mob::GetSpecialAbilityTimer(int ability) {
-	if (ability >= MAX_SPECIAL_ATTACK || ability < 0) {
+	if (ability >= SpecialAbility::Max || ability < 0) {
 		return nullptr;
 	}
 
@@ -7573,10 +7573,10 @@ Timer *Mob::GetSpecialAbilityTimer(int ability) {
 }
 
 void Mob::ClearSpecialAbilities() {
-	for(int a = 0; a < MAX_SPECIAL_ATTACK; ++a) {
+	for(int a = 0; a < SpecialAbility::Max; ++a) {
 		SpecialAbilities[a].level = 0;
 		safe_delete(SpecialAbilities[a].timer);
-		for(int p = 0; p < MAX_SPECIAL_ATTACK_PARAMS; ++p) {
+		for(int p = 0; p < SpecialAbility::MaxParameters; ++p) {
 			SpecialAbilities[a].params[p] = 0;
 		}
 	}
@@ -7599,12 +7599,12 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 			SetSpecialAbility(ability_id, value);
 
 			switch (ability_id) {
-				case SPECATK_QUAD:
+				case SpecialAbility::QuadrupleAttack:
 					if (value > 0) {
-						SetSpecialAbility(SPECATK_TRIPLE, 1);
+						SetSpecialAbility(SpecialAbility::TripleAttack, 1);
 					}
 					break;
-				case DESTRUCTIBLE_OBJECT:
+				case SpecialAbility::DestructibleObject:
 					if (value == 0) {
 						SetDestructibleObject(false);
 					} else {
@@ -7616,7 +7616,7 @@ void Mob::ProcessSpecialAbilities(const std::string &str) {
 			}
 
 			for (size_t i = 2, param_id = 0; i < sub_sp.size(); ++i, ++param_id) {
-				if (param_id >= MAX_SPECIAL_ATTACK_PARAMS) {
+				if (param_id >= SpecialAbility::MaxParameters) {
 					break;
 				}
 
