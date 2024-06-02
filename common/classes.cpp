@@ -21,7 +21,7 @@
 
 std::string Class::GetAbbreviation(uint8 class_id)
 {
-	return IsValidClass(class_id) && IsPlayerClass(class_id) ? player_class_abbreviations[class_id] : "UNK";
+	return IsValid(class_id) && IsPlayer(class_id) ? player_class_abbreviations[class_id] : "UNK";
 }
 
 std::string Class::GetName(uint8 class_id, uint8 level)
