@@ -4,7 +4,7 @@ void command_goto(Client *c, const Seperator *sep)
 {
 	const uint16 arguments = sep->argnum;
 
-	const bool goto_player   = !sep->IsNumber(1) && sep->arg[1];
+	const bool goto_player   = arguments > 0 && !sep->IsNumber(1);
 	const bool goto_position = sep->IsNumber(1) && sep->IsNumber(2) && sep->IsNumber(3);
 	const bool goto_target   = !arguments && c->GetTarget();
 
@@ -77,6 +77,14 @@ void command_goto(Client *c, const Seperator *sep)
 			t->GetY(),
 			t->GetZ(),
 			t->GetHeading()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Going to {} in the same zone.",
+				c->GetTargetDescription(t)
+			).c_str()
 		);
 	}
 }
