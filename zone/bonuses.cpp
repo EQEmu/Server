@@ -2438,6 +2438,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_CastingLevel2:
 			{
 				new_bonus->effective_casting_level += effect_value;
+
+				if (RuleB(Spells, AllowSnareEffectsOverrideBonus) && effect_value < 0) {
+					new_bonus->movementspeed = effect_value;
+				}
 				break;
 			}
 
