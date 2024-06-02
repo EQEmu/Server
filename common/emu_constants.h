@@ -23,6 +23,7 @@
 #include "eq_limits.h"
 #include "emu_versions.h"
 #include "bodytypes.h"
+#include "pets.h"
 
 #include <string.h>
 #include <limits>

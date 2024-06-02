@@ -70,6 +70,7 @@ SET(common_sources
     path_manager.cpp
     perl_eqdb.cpp
     perl_eqdb_res.cpp
+    pets.cpp
     process/process.cpp
     process.cpp
     proc_launcher.cpp
@@ -591,6 +592,7 @@ SET(common_headers
     packet_dump_file.h
     packet_functions.h
     path_manager.cpp
+    pets.h
     platform.h
     process/process.h
     process.h
