@@ -52,7 +52,7 @@ Mob::Mob(
 	uint8 in_gender,
 	uint16 in_race,
 	uint8 in_class,
-	bodyType in_bodytype,
+	uint8 in_bodytype,
 	uint8 in_deity,
 	uint8 in_level,
 	uint32 in_npctype_id,
@@ -696,14 +696,14 @@ bool Mob::IsInvisible(Mob* other) const
 	}
 
 	//check invis vs. undead
-	if (other->GetBodyType() == BT_Undead || other->GetBodyType() == BT_SummonedUndead) {
+	if (other->GetBodyType() == BodyType::Undead || other->GetBodyType() == BodyType::SummonedUndead) {
 		if (invisible_undead && (invisible_undead > other->SeeInvisibleUndead())) {
 			return true;
 		}
 	}
 
 	//check invis vs. animals. //TODO: should we have a specific see invisible animal stat or this how live does it?
-	if (other->GetBodyType() == BT_Animal){
+	if (other->GetBodyType() == BodyType::Animal){
 		if (invisible_animals && (invisible_animals > other->SeeInvisible())) {
 			return true;
 		}
@@ -2913,7 +2913,7 @@ void Mob::ShowStats(Client* c)
 		}
 
 		// Body
-		auto bodytype_name = EQ::constants::GetBodyTypeName(t->GetBodyType());
+		auto bodytype_name = BodyType::GetName(t->GetBodyType());
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -7073,7 +7073,7 @@ bool Mob::IsControllableBoat() const {
 	);
 }
 
-void Mob::SetBodyType(bodyType new_body, bool overwrite_orig) {
+void Mob::SetBodyType(uint8 new_body, bool overwrite_orig) {
 	bool needs_spawn_packet = false;
 	if(bodytype == 11 || bodytype >= 65 || new_body == 11 || new_body >= 65) {
 		needs_spawn_packet = true;

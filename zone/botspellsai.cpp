@@ -771,9 +771,9 @@ bool Bot::BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 		}
 
 		if (botClass == Class::Magician || botClass == Class::ShadowKnight || botClass == Class::Necromancer || botClass == Class::Paladin || botClass == Class::Ranger || botClass == Class::Druid || botClass == Class::Cleric) {
-			if (tar->GetBodyType() == BT_Undead || tar->GetBodyType() == BT_SummonedUndead || tar->GetBodyType() == BT_Vampire)
+			if (tar->GetBodyType() == BodyType::Undead || tar->GetBodyType() == BodyType::SummonedUndead || tar->GetBodyType() == BodyType::Vampire)
 				botSpell = GetBestBotSpellForNukeByTargetType(this, ST_Undead);
-			else if (tar->GetBodyType() == BT_Summoned || tar->GetBodyType() == BT_Summoned2 || tar->GetBodyType() == BT_Summoned3)
+			else if (tar->GetBodyType() == BodyType::Summoned || tar->GetBodyType() == BodyType::Summoned2 || tar->GetBodyType() == BodyType::Summoned3)
 				botSpell = GetBestBotSpellForNukeByTargetType(this, ST_Summoned);
 		}
 

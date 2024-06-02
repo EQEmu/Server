@@ -1483,8 +1483,8 @@ std::string QuestManager::getlanguagename(uint8 language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }
 
-std::string QuestManager::getbodytypename(uint32 bodytype_id) {
-	return EQ::constants::GetBodyTypeName(static_cast<bodyType>(bodytype_id));
+std::string QuestManager::getbodytypename(uint8 body_type_id) {
+	return BodyType::GetName(body_type_id);
 }
 
 std::string QuestManager::getconsiderlevelname(uint8 consider_level) {

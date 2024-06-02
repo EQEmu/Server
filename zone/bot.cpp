@@ -5481,13 +5481,13 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 		if (!Result) {
 			if (caster->IsBot()) {
 				if (spells[spell_id].target_type == ST_Undead) {
-					if ((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Undead) && (GetBodyType() != BT_Vampire)) {
+					if ((GetBodyType() != BodyType::SummonedUndead) && (GetBodyType() != BodyType::Undead) && (GetBodyType() != BodyType::Vampire)) {
 						LogSpellsDetail("Bot's target is not an undead");
 						return true;
 					}
 				}
 				if (spells[spell_id].target_type == ST_Summoned) {
-					if ((GetBodyType() != BT_SummonedUndead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Summoned2) && (GetBodyType() != BT_Summoned3)) {
+					if ((GetBodyType() != BodyType::SummonedUndead) && (GetBodyType() != BodyType::Summoned) && (GetBodyType() != BodyType::Summoned2) && (GetBodyType() != BodyType::Summoned3)) {
 						LogSpellsDetail("Bot's target is not a summoned creature");
 						return true;
 					}

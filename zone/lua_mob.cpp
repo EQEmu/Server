@@ -1995,9 +1995,9 @@ void Lua_Mob::SetRunning(bool running) {
 	self->SetRunning(running);
 }
 
-void Lua_Mob::SetBodyType(int new_body, bool overwrite_orig) {
+void Lua_Mob::SetBodyType(uint8 new_body, bool overwrite_orig) {
 	Lua_Safe_Call_Void();
-	self->SetBodyType(static_cast<bodyType>(new_body), overwrite_orig);
+	self->SetBodyType(new_body, overwrite_orig);
 }
 
 void Lua_Mob::SetTargetable(bool on) {
@@ -3869,7 +3869,7 @@ luabind::scope lua_register_mob() {
 	.def("SetAllowBeneficial", (void(Lua_Mob::*)(bool))&Lua_Mob::SetAllowBeneficial)
 	.def("SetAppearance", (void(Lua_Mob::*)(int))&Lua_Mob::SetAppearance)
 	.def("SetAppearance", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetAppearance)
-	.def("SetBodyType", (void(Lua_Mob::*)(int,bool))&Lua_Mob::SetBodyType)
+	.def("SetBodyType", (void(Lua_Mob::*)(uint8,bool))&Lua_Mob::SetBodyType)
 	.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
 	.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
 	.def("SetBuffDuration", (void(Lua_Mob::*)(int))&Lua_Mob::SetBuffDuration)

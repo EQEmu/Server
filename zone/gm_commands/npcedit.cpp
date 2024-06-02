@@ -100,21 +100,25 @@ void command_npcedit(Client *c, const Seperator *sep)
 		}
 	} else if (!strcasecmp(sep->arg[1], "bodytype")) {
 		if (sep->IsNumber(2)) {
-			auto body_type_id   = static_cast<uint8_t>(Strings::ToUnsignedInt(sep->arg[2]));
-			auto body_type_name = EQ::constants::GetBodyTypeName(static_cast<bodyType>(body_type_id));
+			const uint8 body_type_id = static_cast<uint8>(Strings::ToUnsignedInt(sep->arg[2]));
+			const std::string& body_type_name = BodyType::GetName(body_type_id);
+			if (Strings::EqualFold(body_type_name, "UNKNOWN BODY TYPE")) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Body Type {} does not exist.",
+						body_type_id
+					).c_str()
+				);
+				return;
+			}
+
 			n.bodytype = body_type_id;
 			d = fmt::format(
-				"{} is now using Body Type {}.",
+				"{} is now using Body Type {} ({}).",
 				npc_id_string,
-				(
-					!body_type_name.empty() ?
-					fmt::format(
-						"{} ({})",
-						body_type_name,
-						body_type_id
-					) :
-					std::to_string(body_type_id)
-				)
+				body_type_name,
+				body_type_id
 			);
 		} else {
 			c->Message(Chat::White, "Usage: #npcedit bodytype [Body Type ID] - Sets an NPC's Bodytype");

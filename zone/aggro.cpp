@@ -222,7 +222,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 		if (
 			GetLevel() < RuleI(Aggro, MinAggroLevel) &&
 			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
-			GetBodyType() != BT_Undead &&
+			GetBodyType() != BodyType::Undead &&
 			!AlwaysAggro()
 		) {
 			to_who->Message(
@@ -496,7 +496,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		RuleB(Aggro, UseLevelAggro) &&
 		(
 			GetLevel() >= RuleI(Aggro, MinAggroLevel) ||
-			GetBodyType() == BT_Undead ||
+			GetBodyType() == BodyType::Undead ||
 			AlwaysAggro() ||
 			(
 				mob->IsClient() &&
@@ -524,7 +524,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	} else {
 		if (
 			(
-				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BT_Undead) ||
+				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BodyType::Undead) ||
 				(GetINT() <= RuleI(Aggro, IntAggroThreshold)) ||
 				AlwaysAggro() ||
 				(
@@ -671,9 +671,9 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		target_owner = nullptr;
 
 	//cannot hurt untargetable mobs
-	bodyType bt = target->GetBodyType();
+	uint8 bt = target->GetBodyType();
 
-	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
+	if(bt == BodyType::NoTarget || bt == BodyType::NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (target->IsNPC()) {
 				if (!target->CastToNPC()->GetSwarmOwner()) {

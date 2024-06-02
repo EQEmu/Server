@@ -443,7 +443,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_feign_remember_timer = std::make_unique<Timer>(AIfeignremember_delay);
 	AI_scan_door_open_timer = std::make_unique<Timer>(AI_scan_door_open_interval);
 
-	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+	if (GetBodyType() == BodyType::Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 		SetCanOpenDoors(false);
 	}
 

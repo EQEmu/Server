@@ -70,7 +70,7 @@ Corpse::Corpse(
 	npc->GetGender(), // in_gender
 	npc->GetRace(), // in_race
 	npc->GetClass(), // in_class
-	BT_Humanoid, // in_bodytype
+	BodyType::Humanoid, // in_bodytype
 	npc->GetDeity(), // in_deity
 	npc->GetLevel(), // in_level
 	npc->GetNPCTypeID(), // in_npctype_id
@@ -189,7 +189,7 @@ Corpse::Corpse(Client *c, int32 rez_exp, KilledByTypes in_killed_by) : Mob(
 	c->GetGender(), // in_gender
 	c->GetRace(), // in_race
 	c->GetClass(), // in_class
-	BT_Humanoid, // in_bodytype
+	BodyType::Humanoid, // in_bodytype
 	c->GetDeity(), // in_deity
 	c->GetLevel(), // in_level
 	0, // in_npctype_id
@@ -495,7 +495,7 @@ Corpse::Corpse(
 	gender, // in_gender
 	race, // in_race
 	class_, // in_class
-	BT_Humanoid, // in_bodytype
+	BodyType::Humanoid, // in_bodytype
 	deity, // in_deity
 	level, // in_level
 	0, // in_npctype_id

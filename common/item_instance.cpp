@@ -1292,7 +1292,7 @@ int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 	return race;
 }
 
-int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageBody(uint8 against, bool augments) const
 {
 	int64 damage = 0;
 	const auto item = GetItem();
