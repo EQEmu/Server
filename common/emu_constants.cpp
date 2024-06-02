@@ -206,62 +206,6 @@ std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 	return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 }
 
-const std::map<bodyType, std::string>& EQ::constants::GetBodyTypeMap()
-{
-	static const std::map<bodyType, std::string> bodytype_map = {
-		{ BT_Humanoid, "Humanoid" },
-		{ BT_Lycanthrope, "Lycanthrope" },
-		{ BT_Undead, "Undead" },
-		{ BT_Giant, "Giant" },
-		{ BT_Construct, "Construct" },
-		{ BT_Extraplanar, "Extraplanar" },
-		{ BT_Magical, "Magical" },
-		{ BT_SummonedUndead, "Summoned Undead" },
-		{ BT_RaidGiant, "Raid Giant" },
-		{ BT_RaidColdain, "Raid Coldain" },
-		{ BT_NoTarget, "Untargetable" },
-		{ BT_Vampire, "Vampire" },
-		{ BT_Atenha_Ra, "Aten Ha Ra" },
-		{ BT_Greater_Akheva, "Greater Akheva" },
-		{ BT_Khati_Sha, "Khati Sha" },
-		{ BT_Seru, "Seru" },
-		{ BT_Grieg_Veneficus, "Grieg Veneficus" },
-		{ BT_Draz_Nurakk, "Draz Nurakk" },
-		{ BT_Zek, "Zek" },
-		{ BT_Luggald, "Luggald" },
-		{ BT_Animal, "Animal" },
-		{ BT_Insect, "Insect" },
-		{ BT_Monster, "Monster" },
-		{ BT_Summoned, "Summoned" },
-		{ BT_Plant, "Plant" },
-		{ BT_Dragon, "Dragon" },
-		{ BT_Summoned2, "Summoned 2" },
-		{ BT_Summoned3, "Summoned 3" },
-		{ BT_Dragon2, "Dragon 2" },
-		{ BT_VeliousDragon, "Velious Dragon" },
-		{ BT_Familiar, "Familiar" },
-		{ BT_Dragon3, "Dragon 3" },
-		{ BT_Boxes, "Boxes" },
-		{ BT_Muramite, "Muramite" },
-		{ BT_NoTarget2, "Untargetable 2" },
-		{ BT_SwarmPet, "Swarm Pet" },
-		{ BT_MonsterSummon, "Monster Summon" },
-		{ BT_InvisMan, "Invisible Man" },
-		{ BT_Special, "Special" },
-	};
-
-	return bodytype_map;
-}
-
-std::string EQ::constants::GetBodyTypeName(bodyType bodytype_id)
-{
-	if (EQ::constants::GetBodyTypeMap().find(bodytype_id) != EQ::constants::GetBodyTypeMap().end()) {
-		return EQ::constants::GetBodyTypeMap().find(bodytype_id)->second;
-	}
-
-	return std::string();
-}
-
 const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 {
 	static const std::map<uint8, std::string> consider_level_map = {
