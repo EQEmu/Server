@@ -26,6 +26,48 @@
 
 #include <string.h>
 
+namespace AccountStatus {
+	constexpr uint8 Player          = 0;
+	constexpr uint8 Steward         = 10;
+	constexpr uint8 ApprenticeGuide = 20;
+	constexpr uint8 Guide           = 50;
+	constexpr uint8 QuestTroupe     = 80;
+	constexpr uint8 SeniorGuide     = 81;
+	constexpr uint8 GMTester        = 85;
+	constexpr uint8 EQSupport       = 90;
+	constexpr uint8 GMStaff         = 95;
+	constexpr uint8 GMAdmin         = 100;
+	constexpr uint8 GMLeadAdmin     = 150;
+	constexpr uint8 QuestMaster     = 160;
+	constexpr uint8 GMAreas         = 170;
+	constexpr uint8 GMCoder         = 180;
+	constexpr uint8 GMMgmt          = 200;
+	constexpr uint8 GMImpossible    = 250;
+	constexpr uint8 Max             = 255;
+
+	std::string GetName(uint8 account_status);
+}
+
+static std::map<uint8, std::string> account_status_names = {
+	{ AccountStatus::Player,          "Player" },
+	{ AccountStatus::Steward,         "Steward" },
+	{ AccountStatus::ApprenticeGuide, "Apprentice Guide" },
+	{ AccountStatus::Guide,           "Guide" },
+	{ AccountStatus::QuestTroupe,     "Quest Troupe" },
+	{ AccountStatus::SeniorGuide,     "Senior Guide" },
+	{ AccountStatus::GMTester,        "GM Tester" },
+	{ AccountStatus::EQSupport,       "EQ Support" },
+	{ AccountStatus::GMStaff,         "GM Staff" },
+	{ AccountStatus::GMAdmin,         "GM Admin" },
+	{ AccountStatus::GMLeadAdmin,     "GM Lead Admin" },
+	{ AccountStatus::QuestMaster,     "Quest Master" },
+	{ AccountStatus::GMAreas,         "GM Areas" },
+	{ AccountStatus::GMCoder,         "GM Coder" },
+	{ AccountStatus::GMMgmt,          "GM Mgmt" },
+	{ AccountStatus::GMImpossible,    "GM Impossible" },
+	{ AccountStatus::Max,             "GM Max" }
+};
+
 namespace ComparisonType {
 	constexpr uint8 Equal          = 0;
 	constexpr uint8 NotEqual       = 1;
@@ -54,7 +96,6 @@ static std::map<uint8, std::string> comparison_types = {
 	{ ComparisonType::Between,        "Between" },
 	{ ComparisonType::NotBetween,     "Not Between" },
 };
-
 
 // local definitions are the result of using hybrid-client or server-only values and methods
 namespace EQ
@@ -507,26 +548,6 @@ enum ServerLockType : int {
 	List,
 	Lock,
 	Unlock
-};
-
-enum AccountStatus : uint8 {
-	Player = 0,
-	Steward = 10,
-	ApprenticeGuide = 20,
-	Guide = 50,
-	QuestTroupe = 80,
-	SeniorGuide = 81,
-	GMTester = 85,
-	EQSupport = 90,
-	GMStaff = 95,
-	GMAdmin = 100,
-	GMLeadAdmin = 150,
-	QuestMaster = 160,
-	GMAreas = 170,
-	GMCoder = 180,
-	GMMgmt = 200,
-	GMImpossible = 250,
-	Max = 255
 };
 
 enum Invisibility : uint8 {

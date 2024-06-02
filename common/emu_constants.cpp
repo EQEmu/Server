@@ -206,46 +206,6 @@ std::string EQ::constants::GetFlyModeName(int8 flymode_id)
 	return EQ::constants::GetFlyModeMap().find(flymode_id)->second;
 }
 
-const std::map<uint8, std::string>& EQ::constants::GetAccountStatusMap()
-{
-	static const std::map<uint8, std::string> account_status_map = {
-		{ AccountStatus::Player, "Player" },
-		{ AccountStatus::Steward, "Steward" },
-		{ AccountStatus::ApprenticeGuide, "Apprentice Guide" },
-		{ AccountStatus::Guide, "Guide" },
-		{ AccountStatus::QuestTroupe, "Quest Troupe" },
-		{ AccountStatus::SeniorGuide, "Senior Guide" },
-		{ AccountStatus::GMTester, "GM Tester" },
-		{ AccountStatus::EQSupport, "EQ Support" },
-		{ AccountStatus::GMStaff, "GM Staff" },
-		{ AccountStatus::GMAdmin, "GM Admin" },
-		{ AccountStatus::GMLeadAdmin, "GM Lead Admin" },
-		{ AccountStatus::QuestMaster, "Quest Master" },
-		{ AccountStatus::GMAreas, "GM Areas" },
-		{ AccountStatus::GMCoder, "GM Coder" },
-		{ AccountStatus::GMMgmt, "GM Mgmt" },
-		{ AccountStatus::GMImpossible, "GM Impossible" },
-		{ AccountStatus::Max, "GM Max" }
-	};
-
-	return account_status_map;
-}
-
-std::string EQ::constants::GetAccountStatusName(uint8 account_status)
-{
-	for (
-		auto status_level = EQ::constants::GetAccountStatusMap().rbegin();
-		status_level != EQ::constants::GetAccountStatusMap().rend();
-		++status_level
-	) {
-		if (account_status >= status_level->first) {
-			return status_level->second;
-		}
-	}
-
-	return std::string();
-}
-
 const std::map<uint8, std::string>& EQ::constants::GetConsiderLevelMap()
 {
 	static const std::map<uint8, std::string> consider_level_map = {
@@ -571,6 +531,21 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 {
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
+}
+
+std::string AccountStatus::GetName(uint8 account_status)
+{
+	for (
+		auto e = account_status_names.rbegin();
+		e != account_status_names.rend();
+		++e
+	) {
+		if (account_status >= e->first) {
+			return e->second;
+		}
+	}
+
+	return "UNKNOWN ACCOUNT STATUS";
 }
 
 std::string ComparisonType::GetName(uint8 type)
