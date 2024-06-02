@@ -42,7 +42,8 @@ typedef enum { //EQEmu internal opcodes list
 	#include "mail_oplist.h"
 #undef N
 
-	_maxEmuOpcode
+    OP_EdgeStats = 0x1338, // add this here instead of opcode patches to allow for upstream changes
+    _maxEmuOpcode
 } EmuOpcode;
 
 constexpr int format_as(EmuOpcode opcode) { return static_cast<int>(opcode); }

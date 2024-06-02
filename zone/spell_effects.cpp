@@ -6632,7 +6632,6 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 	}
 
 	//Check if item focus effect exists for the mob.
-	LogDebug("Checking if Focus of type [{}] exists", (int)type);
 	if (itembonuses.FocusEffects[type]) {
 		LogDebug("Focus of type [{}] found", (int)type);
 

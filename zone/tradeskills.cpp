@@ -389,6 +389,22 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 		return;
 	}
 
+	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeUnattuner) {
+		EQ::ItemInstance* inst = container->GetItem(0);
+		if (inst && inst->IsAttuned()) {
+			inst->SetAttuned(false);
+			user->PushItemOnCursor(*inst, true);
+
+			container->Clear();
+			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
+
+			auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+			user->QueuePacket(outapp);
+			safe_delete(outapp);
+			return;
+		}		
+	}
+
 	DBTradeskillRecipe_Struct spec;
 	bool is_augmented = false;
 

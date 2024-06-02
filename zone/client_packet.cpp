@@ -368,7 +368,6 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-	ConnectedOpcodes[OP_Checksum] = &Client::Handle_OP_Checksum;
 
 	// Use or Ignore sense heading based on rule.
 	bool train = RuleB(Skills, TrainSenseHeading);
@@ -16295,18 +16294,6 @@ void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
 		entity_list.ZoneWho(this, whoall);
 	else
 		WhoAll(whoall);
-	return;
-}
-
-void Client::Handle_OP_Checksum(const EQApplicationPacket *app)
-{
-	if (app->size != sizeof(SimpleChecksum_Struct*)){
-		LogDebug("Recieved invalid checksum packet");
-	}
-
-	SimpleChecksum_Struct* checksum = (SimpleChecksum_Struct*)app->pBuffer;
-
-	LogDebug("Got Checksum Struct: %d", checksum->checksum);
 	return;
 }
 
