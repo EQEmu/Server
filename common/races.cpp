@@ -1318,20 +1318,11 @@ const std::string& Race::GetName(uint16 race_id)
 
 uint16 Race::GetPlayerValue(uint16 race_id)
 {
+	if (EQ::ValueWithin(race_id, Race::Human, Race::Gnome)) {
+		return race_id;
+	}
+
 	switch (race_id) {
-		case Race::Human:
-		case Race::Barbarian:
-		case Race::Erudite:
-		case Race::WoodElf:
-		case Race::HighElf:
-		case Race::DarkElf:
-		case Race::HalfElf:
-		case Race::Dwarf:
-		case Race::Troll:
-		case Race::Ogre:
-		case Race::Halfling:
-		case Race::Gnome:
-			return race_id;
 		case Race::Iksar:
 			return PlayerRace::Iksar;
 		case Race::VahShir:
