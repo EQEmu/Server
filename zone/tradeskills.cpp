@@ -370,8 +370,6 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeDetransformationmold) {
-		LogTradeskillsDetail("Check 1");
-
 		const EQ::ItemInstance* inst = container->GetItem(0);
 		if (inst && inst->GetOrnamentationIcon()) {
 			const EQ::ItemData* new_weapon = inst->GetItem();
@@ -418,9 +416,6 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	if (!content_db.GetTradeRecipe(container, c_type, some_id, user, &spec, &is_augmented)) {
-
-		LogTradeskillsDetail("Check 2");
-
 		if (!is_augmented) {
 			user->MessageString(Chat::Emote, TRADESKILL_NOCOMBINE);
 		} else {
@@ -440,9 +435,6 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	// bit 5 (0x10): no learn message, use unlisted flag to prevent it showing up on search
 	// bit 6 (0x20): unlisted recipe flag
 	if ((spec.must_learn & 0xF) == 1 && !spec.has_learnt) {
-
-		LogTradeskillsDetail("Check 3");
-
 		// Made up message for the client. Just giving a DNC is the other option.
 		user->Message(Chat::LightBlue, "You need to learn how to combine these first.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
@@ -452,9 +444,6 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 	// Character does not have the required skill.
 	if(spec.skill_needed > 0 && user->GetSkill(spec.tradeskill) < spec.skill_needed ) {
-
-		LogTradeskillsDetail("Check 4");
-
 		// Notify client.
 		user->Message(Chat::LightBlue, "You are not skilled enough.");
 		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
