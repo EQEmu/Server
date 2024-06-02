@@ -52,6 +52,7 @@ public:
 			{.parent_command = "find", .sub_command = "bug_category", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findbugcategory"},
 			{.parent_command = "find", .sub_command = "character", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcharacter"},
 			{.parent_command = "find", .sub_command = "class", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findclass"},
+			{.parent_command = "find", .sub_command = "comparison_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcomparisontype"},
 			{.parent_command = "find", .sub_command = "currency", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findcurrency"},
 			{.parent_command = "find", .sub_command = "deity", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "finddeity"},
 			{.parent_command = "find", .sub_command = "emote", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findemote"},

@@ -628,3 +628,13 @@ std::string EQ::constants::GetConsiderColorName(uint32 consider_color)
 	const auto& c = EQ::constants::GetConsiderColorMap().find(consider_color);
 	return c != EQ::constants::GetConsiderColorMap().end() ? c->second : std::string();
 }
+
+std::string ComparisonType::GetName(uint8 type)
+{
+	return IsValid(type) ? comparison_types[type] : "UNKNOWN COMPARISON TYPE";
+}
+
+bool ComparisonType::IsValid(uint8 type)
+{
+	return comparison_types.find(type) != comparison_types.end();
+}

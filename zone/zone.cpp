@@ -2987,179 +2987,69 @@ std::string Zone::GetAAName(int aa_id)
 	return std::string();
 }
 
-bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_value, const std::string& player_value)
+bool Zone::CompareDataBucket(uint8 comparison_type, const std::string& bucket, const std::string& value)
 {
-	std::vector<std::string> bucket_checks;
-	bool found = false;
-	bool passes = false;
-
-	switch (bucket_comparison) {
-		case BucketComparison::BucketEqualTo:
-		{
-			if (player_value != bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketNotEqualTo:
-		{
-			if (player_value == bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketGreaterThanOrEqualTo:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) < Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketLesserThanOrEqualTo:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) > Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketGreaterThan:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) <= Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketLesserThan:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) >= Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-
-			break;
-		}
-		case BucketComparison::BucketIsAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
-				found = true;
-			}
-
-			if (!found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsNotAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
-				found = true;
-			}
-
-			if (found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				!Strings::IsNumber(player_value) ||
-				!Strings::IsNumber(bucket_checks[0]) ||
-				!Strings::IsNumber(bucket_checks[1])
-			) {
-				break;
-			}
-
-			if (
-				!EQ::ValueWithin(
-					Strings::ToBigInt(player_value),
-					Strings::ToBigInt(bucket_checks[0]),
-					Strings::ToBigInt(bucket_checks[1])
-				)
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsNotBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				!Strings::IsNumber(player_value) ||
-				!Strings::IsNumber(bucket_checks[0]) ||
-				!Strings::IsNumber(bucket_checks[1])
-			) {
-				break;
-			}
-
-			if (
-				EQ::ValueWithin(
-					Strings::ToBigInt(player_value),
-					Strings::ToBigInt(bucket_checks[0]),
-					Strings::ToBigInt(bucket_checks[1])
-				)
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
+	if (!ComparisonType::IsValid(comparison_type)) {
+		return false;
 	}
 
-	return passes;
+	if (EQ::ValueWithin(comparison_type, ComparisonType::Equal, ComparisonType::NotEqual)) {
+		const bool is_equal = value == bucket;
+
+		return comparison_type == ComparisonType::Equal ? is_equal : !is_equal;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::GreaterOrEqual, ComparisonType::LesserOrEqual)) {
+		if (!Strings::IsNumber(value) || !Strings::IsNumber(bucket)) {
+			return false;
+		}
+
+		const int64 p = Strings::ToBigInt(value);
+		const int64 b = Strings::ToBigInt(bucket);
+
+		const bool is_greater_or_equal = p >= b;
+		const bool is_lesser_or_equal  = p <= b;
+
+		return comparison_type == ComparisonType::GreaterOrEqual ? is_greater_or_equal : is_lesser_or_equal;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Greater, ComparisonType::Lesser)) {
+		if (!Strings::IsNumber(value) || !Strings::IsNumber(bucket)) {
+			return false;
+		}
+
+		const bool is_greater = Strings::ToBigInt(value) > Strings::ToBigInt(bucket);
+
+		return comparison_type == ComparisonType::Greater ? is_greater : !is_greater;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Any, ComparisonType::NotAny)) {
+		const auto& values = Strings::Split(bucket, "|");
+		if (values.empty()) {
+			return false;
+		}
+
+		const bool is_any = std::find(values.begin(), values.end(), value) != values.end();
+
+		return comparison_type == ComparisonType::Any ? is_any : !is_any;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Between, ComparisonType::NotBetween)) {
+		if (!Strings::IsNumber(value)) {
+			return false;
+		}
+
+		const auto& values = Strings::Split(bucket, "|");
+		if (values.empty()) {
+			return false;
+		}
+
+		if (!Strings::IsNumber(values[0]) || !Strings::IsNumber(values[1])) {
+			return false;
+		}
+
+		const bool is_between = EQ::ValueWithin(
+			Strings::ToBigInt(value),
+			Strings::ToBigInt(values[0]),
+			Strings::ToBigInt(values[1])
+		);
+
+		return comparison_type == ComparisonType::Between ? is_between : !is_between;
+	}
+
+	return false;
 }
 
 void Zone::ReloadContentFlags()
