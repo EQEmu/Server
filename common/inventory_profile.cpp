@@ -1693,7 +1693,7 @@ const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs(uint8 filter
 		if (filter == InventoryFilter::All || filter & e.first) {
 			for (int16 slot_id = e.second[0]; slot_id <= e.second[1]; ++slot_id) {
 				slot_ids.emplace_back(slot_id);
-				LogInfo("Adding slot ID [{}]", slot_id);
+				LogInventoryDetail("Adding slot ID [{}]", slot_id);
 			}
 		}
 	}
