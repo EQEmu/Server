@@ -94,7 +94,7 @@ static std::map<uint8, std::string> comparison_types = {
 	{ ComparisonType::Any,            "Any" },
 	{ ComparisonType::NotAny,         "Not Any" },
 	{ ComparisonType::Between,        "Between" },
-	{ ComparisonType::NotBetween,     "Not Between" }
+	{ ComparisonType::NotBetween,     "Not Between" },
 };
 
 // local definitions are the result of using hybrid-client or server-only values and methods
