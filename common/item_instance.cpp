@@ -327,7 +327,7 @@ bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) co
 			)
 		) &&
 		(
-			RuleB(Items, AllowAugmentsInInvisibleAugmentSlots) ||
+			RuleB(Items, AugmentItemAllowInvisibleAugments) ||
 			m_item->AugSlotVisible[slot]
 		)
 	);

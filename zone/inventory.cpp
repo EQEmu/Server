@@ -384,7 +384,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 					return false;
 				}
 
-				if (!RuleB(Items, AllowAugmentsInInvisibleAugmentSlots) && item->AugSlotVisible[iter] == 0) {
+				if (!RuleB(Items, SummonItemAllowInvisibleAugments) && item->AugSlotVisible[iter] == 0) {
 					Message(
 						Chat::Red,
 						fmt::format(
