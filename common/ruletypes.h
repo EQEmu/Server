@@ -994,6 +994,7 @@ RULE_BOOL(Items, DisableNoRent, false, "Enable this to disable No Rent Items")
 RULE_BOOL(Items, DisableNoTransfer, false, "Enable this to disable No Transfer Items")
 RULE_BOOL(Items, DisablePotionBelt, false, "Enable this to disable Potion Belt Items")
 RULE_BOOL(Items, DisableSpellFocusEffects, false, "Enable this to disable Spell Focus Effects on Items")
+RULE_BOOL(Items, AllowAugmentsInInvisibleAugmentSlots, false, "Enable this to allow augments to be put in invisible augment slots of items in Client::SummonItem")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Parcel)
