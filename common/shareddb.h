@@ -221,11 +221,11 @@ protected:
 	std::unique_ptr<EQ::MemoryMappedFile>                        faction_associations_mmf;
 	std::unique_ptr<EQ::FixedMemoryHashSet<FactionAssociations>> faction_associations_hash;
 	std::unique_ptr<EQ::MemoryMappedFile>                        spells_mmf;
-private:
-	std::unordered_map<std::string, int> generated_item_cache;
 public:
 	void SetSharedItemsCount(uint32 shared_items_count);
 	void SetSharedSpellsCount(uint32 shared_spells_count);
+private:
+	std::unordered_map<std::string, int> generated_item_cache;
 protected:
 	uint32 m_shared_items_count = 0;
 	uint32 m_shared_spells_count = 0;
