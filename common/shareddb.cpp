@@ -787,14 +787,14 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 	}
 
 	// Only allow creation of dynamic items which aren't already dynamic items
-    if (!inst->GetCustomData("Customized").empty()) {	
-		// This data is important to preserve to properly track the item in inventories.
-		if (inst->GetCustomData("original_id").empty()) {
-			inst->SetCustomData("original_id", std::to_string(inst->GetID()));
-		}
-		
+    if (!inst->GetCustomData("Customized").empty()) {		
         std::string key = md5::digest(inst->GetCustomDataString());
-        if (key != inst->GetItem()->Comment) {
+        if (key != inst->GetItem()->Comment) {			
+			// This data is important to preserve to properly track the item in inventories.
+			if (inst->GetCustomData("original_id").empty()) {
+				inst->SetCustomData("original_id", std::to_string(inst->GetID()));
+			}
+
 			if (inst->GetItemType() == EQ::item::ItemTypeAugmentation) {
 				LogError("Attempted to create illegal Dynamic Item: Augment");
 				return;
@@ -893,60 +893,11 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->SellRate = 0;
             inst->SetComment(key);
         }
-
-		// Check if we have this one cached already, if it does shortcut this whole proceedure
-		auto it = generated_item_cache.find(key);
-        if (it != generated_item_cache.end()) {
-            inst->SetID((uint32)it->second);
-            return;
-        }
-		
-		uint32 new_id = 0xFFFFFFF; // Default new ID
-		// Check if this item already has a reserved ID
-		std::string        query = StringFormat("SELECT data_buckets.value FROM data_buckets WHERE data_buckets.key = 'di_%s' LIMIT 1", key.c_str());
-		MySQLRequestResult results = QueryDatabase(query);
-		MySQLRequestRow    row;
-		if (results.RowCount() > 0) {
-			row    = results.begin();
-			new_id = Strings::ToUnsignedInt(row[0]);
-			LogInventoryDetail("Found an existing ID for Dynamic Item: [{}], Name: [{}]", new_id, inst->GetItem()->Name);
-		} else {
-			// Find the lowest existing row
-			query   = "SELECT data_buckets.value FROM data_buckets WHERE data_buckets.key LIKE 'di_%' ORDER BY data_buckets.value ASC LIMIT 1";
-			results = QueryDatabase(query);
-			if (results.RowCount() > 0) {				
-				row = results.begin();
-				new_id = Strings::ToUnsignedInt(row[0]) - 1;
-				LogInventoryDetail("Found lowest previous ID: [{}]", new_id);
-			} else {
-				LogError("ERROR: No existing IDs. Assigning DEFAULT.");
-			}
-
-			// Write back new_id for this item
-			LogInventoryDetail("Writing [{}] as new ID for dynamic item named [{}]", new_id, inst->GetItem()->Name);
-			query = StringFormat("INSERT INTO data_buckets (`key`, `value`) VALUES ('di_%s', %u)", key.c_str(), new_id);
-			QueryDatabase(query);
-		}	
-
-
-		LogDebug("Setting [{}] to ID for item [{}]", new_id, inst->GetItem()->Name);
-		if (!items_hash->exists(new_id)) {
-			inst->SetID(new_id);
-			items_hash->insert(new_id, *inst->GetItem());			
-		} else {			
-			inst->SetID(items_hash->at(new_id).ID);
-		}
-
-		generated_item_cache[key] = inst->GetID();
-		
-		/* This is old and does not apply to new implementation.
-
         auto it = generated_item_cache.find(key);
         if (it != generated_item_cache.end()) {
             inst->SetID((uint32)it->second);
             return;
-        }	
-
+        }
 		// If we don't have a local cached copy let's check where it's at in the items_hash or insert it for the first time
 		// And assign to our local cache. This should only happen once per zone per item that hasn't synced
 		EQ::ItemData* data = nullptr;
@@ -978,7 +929,11 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			items_hash->insert(next_id, *inst->GetItem());
 			generated_item_cache[key] = next_id;
 		}
-		*/
+
+		if (!inst->GetCustomData("Discovery").empty()) {
+			strn0cpy(inst->GetMutableItem()->CharmFile, std::to_string(inst->GetID()).c_str(), sizeof(inst->GetMutableItem()->CharmFile));
+			inst->SetCustomData("Discovery", std::to_string(inst->GetID()));
+		}
 	}
 }
 
