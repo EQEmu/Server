@@ -10434,7 +10434,7 @@ void Client::Handle_OP_Mend(const EQApplicationPacket *app)
 
 	int mendhp = GetMaxHP() / 4;
 	int currenthp = GetHP();
-	if (zone->random.Int(0, 199) < (int)GetSkill(EQ::skills::SkillMend)) {
+	if (zone->random.Int(0, RuleI(Character, MendAlwaysSucceedValue)) < (int)GetSkill(EQ::skills::SkillMend)) {
 
 		int criticalchance = spellbonuses.CriticalMend + itembonuses.CriticalMend + aabonuses.CriticalMend;
 
@@ -14644,12 +14644,18 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 		sa_out->parameter = 0;
 		entity_list.QueueClients(this, outapp, true);
 		safe_delete(outapp);
-	}
-	else {
+	} else {
 		CheckIncreaseSkill(EQ::skills::SkillSneak, nullptr, 5);
 	}
+
 	float hidechance = ((GetSkill(EQ::skills::SkillSneak) / 300.0f) + .25) * 100;
+
+	if (RuleB(Character, SneakAlwaysSucceedOver100)) {
+		hidechance = std::max(10, (int)GetSkill(EQ::skills::SkillSneak));
+	}
+
 	float random = zone->random.Real(0, 99);
+
 	if (!was && random < hidechance) {
 		sneaking = true;
 	}
