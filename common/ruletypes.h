@@ -503,6 +503,7 @@ RULE_BOOL(Spells, RequireMnemonicRetention, true, "Enabling will require spell s
 RULE_BOOL(Spells, EvacClearCharmPet, false, "Enable to have evac in zone clear charm from charm pets and detach buffs.")
 RULE_BOOL(Spells, ManaTapsRequireNPCMana, false, "Enabling will require target to have mana to tap. Default off as many npc's are caster class with 0 mana and need fixed.")
 RULE_INT(Spells, HarmTouchCritRatio, 200, "Harmtouch crit bonus, on top of BaseCritRatio")
+RULE_BOOL(Spells, UseClassicHarmTouchDamage, false, "Use pre 2007 Harm Touch calculations - Default: False")
 RULE_BOOL(Spells, UseClassicSpellFocus, false, "Enabling will tell the server to handle random focus damage as classic spell imports lack the limit values.")
 RULE_BOOL(Spells, ManaTapsOnAnyClass, false, "Enabling this will allow you to cast mana taps on any class, this will bypass ManaTapsRequireNPCMana rule.")
 RULE_INT(Spells, HealAmountMessageFilterThreshold, 100, "Lifetaps below this threshold will not have a message sent to the client (Heal will still process) 0 to Disable.")
