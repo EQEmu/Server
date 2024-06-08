@@ -542,8 +542,8 @@ namespace RoF2
 				LogTrading(
 					"(RoF2) AddTraderToBazaarWindow action <green>[{}] trader_id <green>[{}] entity_id <green>[{}] zone_id <green>[{}]",
 					eq->action,
-					eq->entity_id,
 					eq->trader_id,
+					eq->entity_id,
 					eq->zone_id
 				);
 				dest->FastQueuePacket(&outapp);
