@@ -431,7 +431,7 @@ bool IsCharmSpell(uint16 spell_id)
 	return IsEffectInSpell(spell_id, SE_Charm);
 }
 
-bool IsResurrectionSpell(uint16 spell_id) {
+bool IsResurrectionSicknessSpell(uint16 spell_id) {
 	return (
 		spell_id == SPELL_RESURRECTION_SICKNESS ||
 		spell_id == SPELL_RESURRECTION_SICKNESS2 ||
