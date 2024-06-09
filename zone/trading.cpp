@@ -1128,6 +1128,7 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 		return;
 	}
 
+	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}';", CharacterID()));
 	TraderRepository::ReplaceMany(database, trader_items);
 	safe_delete(inv);
 

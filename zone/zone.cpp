@@ -1194,13 +1194,6 @@ bool Zone::Init(bool is_static) {
 	LoadZoneObjects();
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
-
-	//clear trader items if we are loading the bazaar
-	if (strncasecmp(short_name, "bazaar", 6) == 0) {
-		TraderRepository::Truncate(database);
-		database.DeleteBuyLines(0);
-	}
-
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
 	LoadNPCEmotes(&npc_emote_list);
