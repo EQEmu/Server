@@ -2315,3 +2315,104 @@ bool IsCastNotStandingSpell(uint16 spell_id) {
 	*/
 	return spells[spell_id].cast_not_standing;
 }
+
+bool IsAegolismSpell(uint16 spell_id) {
+
+	if (!IsValidSpell(spell_id)) {
+		return 0;
+	}
+
+	bool has_max_hp = false;
+	bool has_current_hp = false;
+	bool has_ac = false;
+
+	for (int i = 0; i < EFFECT_COUNT; ++i) {
+
+		if (i == 0 && spells[spell_id].effect_id[i] != SE_StackingCommand_Block) {
+			return 0;
+		}
+
+		if (i == 1 && spells[spell_id].effect_id[i] == SE_TotalHP) {
+			has_max_hp = true;
+		}
+
+		if (i == 2 && spells[spell_id].effect_id[i] == SE_CurrentHPOnce) {
+			has_current_hp = true;
+		}
+
+		if (i == 3 && spells[spell_id].effect_id[i] == SE_ArmorClass) {
+			has_ac = true;
+		}
+
+		if (i == 4 && spells[spell_id].effect_id[i] != SE_StackingCommand_Overwrite) {
+			return 0;
+		}
+	}
+
+	if (has_max_hp == true && has_current_hp == true && has_ac == true) {
+		return 1;
+	}
+	return 0;
+}
+
+
+bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
+	
+	if (!IsValidSpell(spell_id)) {
+		return 0;
+	}
+
+	bool has_max_hp = false;
+	bool has_current_hp = false;
+	bool fail = false;
+
+	for (int i = 0; i < EFFECT_COUNT; ++i) {
+
+		if ((i < 2 && spells[spell_id].effect_id[i] != SE_CHA) ||
+			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
+			fail = true;
+		}
+
+		if (i == 2 && spells[spell_id].effect_id[i] == SE_TotalHP) {
+			has_max_hp = true;
+		}
+
+		if (i == 3 && spells[spell_id].effect_id[i] == SE_CurrentHPOnce) {
+			has_current_hp = true;
+		}
+	}
+
+	if (has_max_hp == true && has_current_hp == true && fail == false) {
+		return 1;
+	}
+
+	return 0;
+}
+
+bool AegolismStackingIsArmorClassSpell(uint16 spell_id) {
+
+	if (!IsValidSpell(spell_id)) {
+		return 0;
+	}
+
+	bool has_ac = false;
+	bool fail = false;
+
+	for (int i = 0; i < EFFECT_COUNT; ++i) {
+
+		if ((i < 3 && spells[spell_id].effect_id[i] != SE_CHA) ||
+			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
+			fail = true;
+		}
+
+		if (i == 3 && spells[spell_id].effect_id[i] == SE_ArmorClass) {
+			has_ac = true;
+		}
+	}
+
+	if (has_ac == true && fail == false) {
+		return 1;
+	}
+
+	return 0;
+}
