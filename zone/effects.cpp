@@ -109,7 +109,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target) {
 				}
 
 				//This adds the extra damage from the AA Unholy Touch, 450 per level to the AA Improved Harm TOuch.
-				if (spell_id == SPELL_IMP_HARM_TOUCH && (IsClient() || IsBot())) { //Improved Harm Touch
+				if (spell_id == SPELL_IMP_HARM_TOUCH && IsOfClientBotMerc()) { //Improved Harm Touch
 					value -= GetAA(aaUnholyTouch) * 450; //Unholy Touch
 				}
 			}
