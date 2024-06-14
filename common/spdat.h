@@ -1522,6 +1522,7 @@ bool IsSummonPetSpell(uint16 spell_id);
 bool IsSummonPCSpell(uint16 spell_id);
 bool IsPetSpell(uint16 spell_id);
 bool IsCharmSpell(uint16 spell_id);
+bool IsResurrectionSicknessSpell(uint16 spell_id);
 bool IsBlindSpell(uint16 spell_id);
 bool IsHealthSpell(uint16 spell_id);
 bool IsCastTimeReductionSpell(uint16 spell_id);
