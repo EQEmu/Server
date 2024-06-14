@@ -54,8 +54,8 @@ void ShowRecipe(Client *c, const Seperator *sep)
 				e.iscontainer > 0 ? " (Container)" : "",
 				(
 					e.item_id > 1000 ?
-					database.CreateItemLink(e.item_id) :
-					EQ::constants::GetObjectTypeName(e.item_id)
+					database.CreateItemLink(static_cast<uint32>(e.item_id)) :
+					ObjectType::GetName(static_cast<uint32>(e.item_id))
 				),
 				(
 					can_summon_items && e.item_id > 1000 ?

@@ -12,6 +12,7 @@
 #include "find/item.cpp"
 #include "find/language.cpp"
 #include "find/npctype.cpp"
+#include "find/object_type.cpp"
 #include "find/race.cpp"
 #include "find/recipe.cpp"
 #include "find/skill.cpp"
@@ -52,6 +53,7 @@ void command_find(Client *c, const Seperator *sep)
 				"#findnpctype"
 			}
 		},
+		Cmd{.cmd = "object_type", .u = "object_type [Search Criteria]", .fn = FindObjectType, .a = {"#findobjecttype"}},
 		Cmd{.cmd = "race", .u = "race [Search Criteria]", .fn = FindRace, .a = {"#findrace"}},
 		Cmd{.cmd = "recipe", .u = "recipe [Search Criteria]", .fn = FindRecipe, .a = {"#findrecipe"}},
 		Cmd{.cmd = "skill", .u = "skill [Search Criteria]", .fn = FindSkill, .a = {"#findskill"}},

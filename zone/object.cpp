@@ -1293,3 +1293,13 @@ void Object::FixZ()
 		}
 	}
 }
+
+std::string ObjectType::GetName(uint32 object_type)
+{
+	return IsValid(object_type) ? object_types[object_type] : "UNKNOWN OBJECT TYPE";
+}
+
+bool ObjectType::IsValid(uint32 object_type)
+{
+	return object_types.find(object_type) != object_types.end();
+}

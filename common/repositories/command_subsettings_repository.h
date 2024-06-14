@@ -61,6 +61,7 @@ public:
 			{.parent_command = "find", .sub_command = "item", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fi|finditem|itemsearch"},
 			{.parent_command = "find", .sub_command = "language", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findlanguage"},
 			{.parent_command = "find", .sub_command = "npc_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "fn|findnpc|findnpctype"},
+			{.parent_command = "find", .sub_command = "object_type", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findobjecttype"},
 			{.parent_command = "find", .sub_command = "race", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrace"},
 			{.parent_command = "find", .sub_command = "recipe", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findrecipe"},
 			{.parent_command = "find", .sub_command = "skill", .access_level = AccountStatus::QuestTroupe, .top_level_aliases = "findskill"},
