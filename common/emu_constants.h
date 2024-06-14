@@ -374,9 +374,6 @@ namespace EQ
 		extern const std::map<int8, std::string>& GetFlyModeMap();
 		std::string GetFlyModeName(int8 flymode_id);
 
-		extern const std::map<uint8, std::string>& GetAccountStatusMap();
-		std::string GetAccountStatusName(uint8 account_status);
-
 		extern const std::map<uint8, std::string>& GetConsiderLevelMap();
 		std::string GetConsiderLevelName(uint8 consider_level);
 
