@@ -384,7 +384,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 					return false;
 				}
 
-				if(item->AugSlotVisible[iter] == 0) {
+				if (!RuleB(Items, SummonItemAllowInvisibleAugments) && item->AugSlotVisible[iter] == 0) {
 					Message(
 						Chat::Red,
 						fmt::format(
@@ -1105,7 +1105,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 		if(update_db)
 			database.SaveInventory(character_id, inst, slot_id);
 	}
-	
+
 	if(client_update && IsValidSlot(slot_id)) {
 		EQApplicationPacket* outapp = nullptr;
 		if(inst) {

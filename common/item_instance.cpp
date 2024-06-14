@@ -303,47 +303,34 @@ int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augment_type) const
 		return INVALID_INDEX;
 	}
 
-	auto i = invaug::SOCKET_BEGIN;
-	for (; i <= invaug::SOCKET_END; ++i) {
-		if (GetItem(i)) {
-			continue;
-		}
-
-		if (
-			augment_type == -1 ||
-			(
-				m_item->AugSlotType[i] &&
-				((1 << (m_item->AugSlotType[i] - 1)) & augment_type)
-			)
-		) {
-			break;
+	for (int16 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; ++slot_id) {
+		if (IsAugmentSlotAvailable(augment_type, slot_id)) {
+			return slot_id;
 		}
 	}
 
-	return (i <= invaug::SOCKET_END) ? i : INVALID_INDEX;
+	return INVALID_INDEX;
 }
 
 bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const
 {
-	if (!m_item || !m_item->IsClassCommon()) {
+	if (!m_item || !m_item->IsClassCommon() || GetItem(slot)) {
 		return false;
 	}
 
-	if (
+	return (
 		(
-			!GetItem(slot) &&
-			m_item->AugSlotVisible[slot]
+			augment_type == -1 ||
+			(
+				m_item->AugSlotType[slot] &&
+				((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+			)
 		) &&
-		augment_type == -1 ||
 		(
-			m_item->AugSlotType[slot] &&
-			((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+			RuleB(Items, AugmentItemAllowInvisibleAugments) ||
+			m_item->AugSlotVisible[slot]
 		)
-	) {
-		return true;
-	}
-
-	return false;
+	);
 }
 
 // Retrieve item inside container
