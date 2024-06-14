@@ -318,6 +318,7 @@ std::unique_ptr<EQ::ItemInstance> ZoneDatabase::LoadSingleTraderItem(uint32 char
 
 	if (results.empty()) {
 		LogTrading("Could not find item serial number {} for character id {}", serial_number, char_id);
+		return nullptr;
 	}
 
 	int item_id = results.at(0).item_id;
