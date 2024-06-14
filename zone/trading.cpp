@@ -1049,6 +1049,10 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 
 	//Check inventory for no-trade items
 	for (auto const &i: inv->serial_number) {
+		if (i <= 0) {
+			continue;
+		}
+
 		auto inst = FindTraderItemBySerialNumber(i);
 		if (inst) {
 			if (inst->GetItem() && inst->GetItem()->NoDrop == 0) {
@@ -1067,7 +1071,16 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 	}
 
 	for (uint32 i = 0; i < max_items; i++) {
+		if (inv->serial_number[i] <= 0) {
+			continue;
+		}
+
 		auto inst = FindTraderItemBySerialNumber(inv->serial_number[i]);
+		if (!inst) {
+			trade_items_valid = false;
+			break;
+		}
+
 		auto it   = std::find(std::begin(in->serial_number), std::end(in->serial_number), inv->serial_number[i]);
 		if (inst && it != std::end(in->serial_number)) {
 			inst->SetPrice(in->item_cost[i]);
@@ -1106,18 +1119,16 @@ void Client::TraderStartTrader(const EQApplicationPacket *app)
 			trade_items_valid = false;
 			continue;
 		}
-		else if (!in->serial_number[i]) {
-			break;
-		}
 	}
 
 	if (!trade_items_valid) {
-		Message(Chat::Red, "You are not able to become a trader at this time.");
+		Message(Chat::Red, "You are not able to become a trader at this time.  Invalid item found.");
 		TraderEndTrader();
 		safe_delete(inv);
 		return;
 	}
 
+	TraderRepository::DeleteWhere(database, fmt::format("`char_id` = '{}';", CharacterID()));
 	TraderRepository::ReplaceMany(database, trader_items);
 	safe_delete(inv);
 
