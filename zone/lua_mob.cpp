@@ -371,14 +371,14 @@ int Lua_Mob::GetRace() {
 	return self->GetRace();
 }
 
-const char *Lua_Mob::GetRaceName() {
+std::string Lua_Mob::GetRaceName() {
 	Lua_Safe_Call_String();
-	return GetRaceIDName(self->GetRace());
+	return Race::GetName(self->GetRace());
 }
 
-const char* Lua_Mob::GetBaseRaceName() {
+std::string Lua_Mob::GetBaseRaceName() {
 	Lua_Safe_Call_String();
-	return GetRaceIDName(self->GetBaseRace());
+	return Race::GetName(self->GetBaseRace());
 }
 
 int Lua_Mob::GetGender() {
@@ -3187,7 +3187,7 @@ std::string Lua_Mob::GetClassPlural()
 std::string Lua_Mob::GetRacePlural()
 {
 	Lua_Safe_Call_String();
-	return self->GetRacePlural();
+	return Race::GetPlural(self->GetRace());
 }
 
 bool Lua_Mob::IsTemporaryPet()

@@ -156,7 +156,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	swarm_timer.Disable();
 
 	if (size <= 0.0f) {
-		size = GetRaceGenderDefaultHeight(race, gender);
+		size = Gender::GetRaceDefaultHeight(race, gender);
 	}
 
 	// lava dragon is a fixed size model and should always use its default
@@ -1162,9 +1162,9 @@ NPC* NPC::SpawnNPC(const char* spawncommand, const glm::vec4& position, Client* 
 			client->Message(Chat::White, fmt::format("Name | {}", npc->name).c_str());
 			client->Message(Chat::White, fmt::format("Level | {}", npc->level).c_str());
 			client->Message(Chat::White, fmt::format("Health | {}", npc->max_hp).c_str());
-			client->Message(Chat::White, fmt::format("Race | {} ({})", GetRaceIDName(npc->race), npc->race).c_str());
+			client->Message(Chat::White, fmt::format("Race | {} ({})", Race::GetName(npc->race), npc->race).c_str());
 			client->Message(Chat::White, fmt::format("Class | {} ({})", GetClassIDName(npc->class_), npc->class_).c_str());
-			client->Message(Chat::White, fmt::format("Gender | {} ({})", GetGenderName(npc->gender), npc->gender).c_str());
+			client->Message(Chat::White, fmt::format("Gender | {} ({})", Gender::GetName(npc->gender), npc->gender).c_str());
 			client->Message(Chat::White, fmt::format("Texture | {}", npc->texture).c_str());
 
 			if (npc->d_melee_texture1 || npc->d_melee_texture2) {
@@ -2894,8 +2894,8 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 
 	// Mob Variables
 	Strings::FindReplace(processed, "$mname", GetCleanName());
-	Strings::FindReplace(processed, "$mracep", GetRacePlural());
-	Strings::FindReplace(processed, "$mrace", GetPlayerRaceName(GetRace()));
+	Strings::FindReplace(processed, "$mracep", Race::GetPlural(GetRace()));
+	Strings::FindReplace(processed, "$mrace", Race::GetName(GetRace()));
 	Strings::FindReplace(processed, "$mclass", GetClassIDName(GetClass()));
 	Strings::FindReplace(processed, "$mclassp", GetClassPlural());
 
@@ -2903,8 +2903,8 @@ void NPC::DoNPCEmote(uint8 event_, uint32 emote_id, Mob* t)
 	Strings::FindReplace(processed, "$name", t ? t->GetCleanName() : "foe");
 	Strings::FindReplace(processed, "$class", t ? GetClassIDName(t->GetClass()) : "class");
 	Strings::FindReplace(processed, "$classp", t ? t->GetClassPlural() : "classes");
-	Strings::FindReplace(processed, "$race", t ? GetPlayerRaceName(t->GetRace()) : "race");
-	Strings::FindReplace(processed, "$racep", t ? t->GetRacePlural() : "races");
+	Strings::FindReplace(processed, "$race", t ? Race::GetName(t->GetRace()) : "race");
+	Strings::FindReplace(processed, "$racep", t ? Race::GetPlural(t->GetRace()) : "races");
 
 	if (emoteid == e->emoteid) {
 		if (event_ == EQ::constants::EmoteEventTypes::Hailed && t) {
@@ -3553,7 +3553,7 @@ bool NPC::IsGuard()
 	case Race::HalasCitizen:
 	case Race::NeriakCitizen:
 	case Race::GrobbCitizen:
-	case OGGOK_CITIZEN:
+	case Race::OggokCitizen:
 	case Race::KaladimCitizen:
 		return true;
 	default:

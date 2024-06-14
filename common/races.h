@@ -19,133 +19,20 @@
 #ifndef RACES_H
 #define RACES_H
 #include "../common/types.h"
+#include "../common/strings.h"
+#include "fmt/format.h"
+#include "data_verification.h"
+#include <map>
 #include <string>
+#include <vector>
 
 namespace Gender {
 	constexpr uint8 Male   = 0;
 	constexpr uint8 Female = 1;
 	constexpr uint8 Neuter = 2;
-}
 
-//theres a big list straight from the client below.
-
-#define HUMAN 1
-#define BARBARIAN 2
-#define ERUDITE 3
-#define WOOD_ELF 4
-#define HIGH_ELF 5
-#define DARK_ELF 6
-#define HALF_ELF 7
-#define DWARF 8
-#define TROLL 9
-#define OGRE 10
-#define HALFLING 11
-#define GNOME 12
-#define WEREWOLF 14
-#define WOLF 42
-#define BEAR 43
-#define SKELETON 60
-#define TIGER 63
-#define ELEMENTAL 75
-#define ALLIGATOR 91
-#define OGGOK_CITIZEN 93
-#define EYE_OF_ZOMM 108
-#define WOLF_ELEMENTAL 120
-#define INVISIBLE_MAN 127
-#define IKSAR 128
-#define VAHSHIR 130
-#define CONTROLLED_BOAT 141
-#define MINOR_ILL_OBJ 142
-#define TREE 143
-#define IKSAR_SKELETON 161
-#define FROGLOK 330
-// TODO: check all clients for (BYTE) usage of '/who all' class and remove FROGLOK2, if possible (330 - 74 = 256 .. WORD->BYTE conversion loss...)
-#define FROGLOK2 74	// Not sure why /who all reports race as 74 for frogloks
-#define FAIRY 473
-#define DRAKKIN 522 // 32768
-#define EMU_RACE_NPC 131069 // was 65533
-#define EMU_RACE_PET 131070 // was 65534
-#define EMU_RACE_UNKNOWN 131071 // was 65535
-
-
-// player race values
-#define PLAYER_RACE_UNKNOWN 0
-#define PLAYER_RACE_HUMAN 1
-#define PLAYER_RACE_BARBARIAN 2
-#define PLAYER_RACE_ERUDITE 3
-#define PLAYER_RACE_WOOD_ELF 4
-#define PLAYER_RACE_HIGH_ELF 5
-#define PLAYER_RACE_DARK_ELF 6
-#define PLAYER_RACE_HALF_ELF 7
-#define PLAYER_RACE_DWARF 8
-#define PLAYER_RACE_TROLL 9
-#define PLAYER_RACE_OGRE 10
-#define PLAYER_RACE_HALFLING 11
-#define PLAYER_RACE_GNOME 12
-#define PLAYER_RACE_IKSAR 13
-#define PLAYER_RACE_VAHSHIR 14
-#define PLAYER_RACE_FROGLOK 15
-#define PLAYER_RACE_DRAKKIN 16
-
-#define PLAYER_RACE_COUNT 16
-
-
-#define PLAYER_RACE_EMU_NPC 17
-#define PLAYER_RACE_EMU_PET 18
-#define PLAYER_RACE_EMU_COUNT 19
-
-
-// player race bits
-#define PLAYER_RACE_UNKNOWN_BIT 0
-#define PLAYER_RACE_HUMAN_BIT 1
-#define PLAYER_RACE_BARBARIAN_BIT 2
-#define PLAYER_RACE_ERUDITE_BIT 4
-#define PLAYER_RACE_WOOD_ELF_BIT 8
-#define PLAYER_RACE_HIGH_ELF_BIT 16
-#define PLAYER_RACE_DARK_ELF_BIT 32
-#define PLAYER_RACE_HALF_ELF_BIT 64
-#define PLAYER_RACE_DWARF_BIT 128
-#define PLAYER_RACE_TROLL_BIT 256
-#define PLAYER_RACE_OGRE_BIT 512
-#define PLAYER_RACE_HALFLING_BIT 1024
-#define PLAYER_RACE_GNOME_BIT 2048
-#define PLAYER_RACE_IKSAR_BIT 4096
-#define PLAYER_RACE_VAHSHIR_BIT 8192
-#define PLAYER_RACE_FROGLOK_BIT 16384
-#define PLAYER_RACE_DRAKKIN_BIT 32768
-
-#define PLAYER_RACE_ALL_MASK 65535
-
-const char* GetRaceIDName(uint16 race_id);
-const char* GetPlayerRaceName(uint32 player_race_value);
-const char* GetGenderName(uint32 gender_id);
-
-bool IsPlayerRace(uint16 race_id);
-const std::string GetPlayerRaceAbbreviation(uint16 race_id);
-
-uint32 GetPlayerRaceValue(uint16 race_id);
-uint16 GetPlayerRaceBit(uint16 race_id);
-
-uint16 GetRaceIDFromPlayerRaceValue(uint32 player_race_value);
-uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
-
-float GetRaceGenderDefaultHeight(int race, int gender);
-
-// player race-/gender-based model feature validators
-namespace PlayerAppearance
-{
-	bool IsValidBeard(uint16 race_id, uint8 gender_id, uint8 beard_value, bool use_luclin = true);
-	bool IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 beard_color_value, bool use_luclin = true);
-	bool IsValidDetail(uint16 race_id, uint8 gender_id, uint32 detail_value, bool use_luclin = true);
-	bool IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 eye_color_value, bool use_luclin = true);
-	bool IsValidFace(uint16 race_id, uint8 gender_id, uint8 face_value, bool use_luclin = true);
-	bool IsValidHair(uint16 race_id, uint8 gender_id, uint8 hair_value, bool use_luclin = true);
-	bool IsValidHairColor(uint16 race_id, uint8 gender_id, uint8 hair_color_value, bool use_luclin = true);
-	bool IsValidHead(uint16 race_id, uint8 gender_id, uint8 head_value, bool use_luclin = true);
-	bool IsValidHeritage(uint16 race_id, uint8 gender_id, uint32 heritage_value, bool use_luclin = true);
-	bool IsValidTattoo(uint16 race_id, uint8 gender_id, uint32 tattoo_value, bool use_luclin = true);
-	bool IsValidTexture(uint16 race_id, uint8 gender_id, uint8 texture_value, bool use_luclin = true);
-	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
+	const std::string& GetName(uint8 gender_id);
+	float GetRaceDefaultHeight(uint16 race_id, uint8 gender_id);
 }
 
 namespace Race {
@@ -885,7 +772,537 @@ namespace Race {
 	constexpr uint16 InteractiveObject        = 2250;
 	constexpr uint16 Node                     = 2254;
 
-	constexpr uint16 ALL_RACES_BITMASK = 65535;
+	const std::string& GetAbbreviation(uint16 race_id);
+	const std::string& GetName(uint16 race_id);
+	const std::string& GetPlural(uint16 race_id);
+
+	bool IsPlayer(uint16 race_id);
+	bool IsValid(uint16 race_id);
+
+	uint16 GetPlayerValue(uint16 race_id);
+	uint16 GetPlayerBit(uint16 race_id);
+}
+
+static std::map<uint8, std::string> gender_map = {
+	{ Gender::Male,   "Male" },
+	{ Gender::Female, "Female" },
+	{ Gender::Neuter, "Neuter" }
+};
+
+namespace PlayerRace {
+	constexpr uint16 Unknown   = 0;
+	constexpr uint16 Human     = 1;
+	constexpr uint16 Barbarian = 2;
+	constexpr uint16 Erudite   = 3;
+	constexpr uint16 WoodElf   = 4;
+	constexpr uint16 HighElf   = 5;
+	constexpr uint16 DarkElf   = 6;
+	constexpr uint16 HalfElf   = 7;
+	constexpr uint16 Dwarf     = 8;
+	constexpr uint16 Troll     = 9;
+	constexpr uint16 Ogre      = 10;
+	constexpr uint16 Halfling  = 11;
+	constexpr uint16 Gnome     = 12;
+	constexpr uint16 Iksar     = 13;
+	constexpr uint16 VahShir   = 14;
+	constexpr uint16 Froglok   = 15;
+	constexpr uint16 Drakkin   = 16;
+	constexpr uint16 Count     = 16;
+}
+
+namespace PlayerRaceBitmask {
+	constexpr uint16 Unknown   = 0;
+	constexpr uint16 Human     = 1;
+	constexpr uint16 Barbarian = 2;
+	constexpr uint16 Erudite   = 4;
+	constexpr uint16 WoodElf   = 8;
+	constexpr uint16 HighElf   = 16;
+	constexpr uint16 DarkElf   = 32;
+	constexpr uint16 HalfElf   = 64;
+	constexpr uint16 Dwarf     = 128;
+	constexpr uint16 Troll     = 256;
+	constexpr uint16 Ogre      = 512;
+	constexpr uint16 Halfling  = 1024;
+	constexpr uint16 Gnome     = 2048;
+	constexpr uint16 Iksar     = 4096;
+	constexpr uint16 VahShir   = 8192;
+	constexpr uint16 Froglok   = 16384;
+	constexpr uint16 Drakkin   = 32768;
+	constexpr uint16 All       = 65535;
+}
+
+static std::map<uint16, uint16> player_race_bitmasks = {
+	{ Race::Human,     PlayerRaceBitmask::Human },
+	{ Race::Barbarian, PlayerRaceBitmask::Barbarian },
+	{ Race::Erudite,   PlayerRaceBitmask::Erudite },
+	{ Race::WoodElf,   PlayerRaceBitmask::WoodElf },
+	{ Race::HighElf,   PlayerRaceBitmask::HighElf },
+	{ Race::DarkElf,   PlayerRaceBitmask::DarkElf },
+	{ Race::HalfElf,   PlayerRaceBitmask::HalfElf },
+	{ Race::Dwarf,     PlayerRaceBitmask::Dwarf },
+	{ Race::Troll,     PlayerRaceBitmask::Troll },
+	{ Race::Ogre,      PlayerRaceBitmask::Ogre },
+	{ Race::Halfling,  PlayerRaceBitmask::Halfling },
+	{ Race::Gnome,     PlayerRaceBitmask::Gnome },
+	{ Race::Iksar,     PlayerRaceBitmask::Iksar },
+	{ Race::VahShir,   PlayerRaceBitmask::VahShir },
+	{ Race::Froglok,   PlayerRaceBitmask::Froglok },
+	{ Race::Drakkin,   PlayerRaceBitmask::Drakkin },
+};
+
+static std::map<uint16, std::string> player_race_abbreviations = {
+	{ Race::Human,     "HUM" },
+	{ Race::Barbarian, "BAR" },
+	{ Race::Erudite,   "ERU" },
+	{ Race::WoodElf,   "ELF" },
+	{ Race::HighElf,   "HIE" },
+	{ Race::DarkElf,   "DEF" },
+	{ Race::HalfElf,   "HEF" },
+	{ Race::Dwarf,     "DWF" },
+	{ Race::Troll,     "TRL" },
+	{ Race::Ogre,      "OGR" },
+	{ Race::Halfling,  "HFL" },
+	{ Race::Gnome,     "GNM" },
+	{ Race::Iksar,     "IKS" },
+	{ Race::VahShir,   "VAH" },
+	{ Race::Froglok2,  "FRG" },
+	{ Race::Drakkin,   "DRK" }
+};
+
+static const std::map<uint16, std::vector<float>> race_sizes = {
+	{ Race::Human,                 { 7.0f,   7.0f }},
+	{ Race::Barbarian,             { 5.0f,   5.0f }},
+	{ Race::Erudite,               { 5.0f,   5.0f }},
+	{ Race::WoodElf,               { 5.5f,   5.5f }},
+	{ Race::HighElf,               { 4.0f,   4.0f }},
+	{ Race::DarkElf,               { 8.0f,   8.0f }},
+	{ Race::HalfElf,               { 9.0f,   9.0f }},
+	{ Race::Dwarf,                 { 3.5f,   3.5f }},
+	{ Race::Troll,                 { 3.0f,   3.0f }},
+	{ Race::Ogre,                  { 2.0f,   2.0f }},
+	{ Race::Halfling,              { 8.5f,   8.5f }},
+	{ Race::Gnome,                 { 8.0f,   8.0f }},
+	{ Race::Aviak,                 { 21.0f,  21.0f }},
+	{ Race::Werewolf,              { 20.0f,  20.0f }},
+	{ Race::Brownie,               { 3.5f,   3.5f }},
+	{ Race::Centaur,               { 3.0f,   3.0f }},
+	{ Race::Golem,                 { 2.0f,   2.0f }},
+	{ Race::Giant,                 { 5.0f,   5.0f }},
+	{ Race::Trakanon,              { 5.0f,   5.0f }},
+	{ Race::VenrilSathir,          { 7.5f,   7.5f }},
+	{ Race::EvilEye,               { 5.0f,   5.0f }},
+	{ Race::Beetle,                { 7.0f,   7.0f }},
+	{ Race::Kerran,                { 4.0f,   4.0f }},
+	{ Race::Fish,                  { 4.7f,   4.7f }},
+	{ Race::Fairy,                 { 8.0f,   8.0f }},
+	{ Race::Froglok,               { 3.0f,   3.0f }},
+	{ Race::FroglokGhoul,          { 12.0f,  12.0f }},
+	{ Race::Fungusman,             { 5.0f,   5.0f }},
+	{ Race::Gargoyle,              { 21.0f,  21.0f }},
+	{ Race::Gasbag,                { 3.0f,   3.0f }},
+	{ Race::GelatinousCube,        { 9.0f,   9.0f }},
+	{ Race::Ghost,                 { 2.0f,   2.0f }},
+	{ Race::Ghoul,                 { 3.0f,   3.0f }},
+	{ Race::GiantBat,              { 4.0f,   4.0f }},
+	{ Race::GiantEel,              { 20.0f,  20.0f }},
+	{ Race::GiantRat,              { 5.0f,   5.0f }},
+	{ Race::GiantSnake,            { 5.0f,   5.0f }},
+	{ Race::GiantSpider,           { 9.0f,   9.0f }},
+	{ Race::Gnoll,                 { 25.0f,  25.0f }},
+	{ Race::Goblin,                { 10.0f,  10.0f }},
+	{ Race::Gorilla,               { 2.5f,   2.5f }},
+	{ Race::Wolf,                  { 7.0f,   7.0f }},
+	{ Race::Bear,                  { 5.0f,   5.0f }},
+	{ Race::FreeportGuard,         { 1.5f,   1.5f }},
+	{ Race::DemiLich,              { 1.0f,   1.0f }},
+	{ Race::Imp,                   { 3.5f,   3.5f }},
+	{ Race::Griffin,               { 7.0f,   7.0f }},
+	{ Race::Kobold,                { 7.0f,   7.0f }},
+	{ Race::LavaDragon,            { 3.0f,   3.0f }},
+	{ Race::Lion,                  { 3.0f,   3.0f }},
+	{ Race::LizardMan,             { 7.0f,   7.0f }},
+	{ Race::Mimic,                 { 12.0f,  12.0f }},
+	{ Race::Minotaur,              { 8.0f,   8.0f }},
+	{ Race::Orc,                   { 9.0f,   9.0f }},
+	{ Race::HumanBeggar,           { 4.0f,   4.0f }},
+	{ Race::Pixie,                 { 11.5f,  11.5f }},
+	{ Race::Drachnid,              { 8.0f,   8.0f }},
+	{ Race::SolusekRo,             { 12.0f,  12.0f }},
+	{ Race::Bloodgill,             { 20.0f,  20.0f }},
+	{ Race::Skeleton,              { 10.0f,  10.0f }},
+	{ Race::Shark,                 { 6.5f,   6.5f }},
+	{ Race::Tunare,                { 17.0f,  17.0f }},
+	{ Race::Tiger,                 { 1.0f,   1.0f }},
+	{ Race::Treant,                { 4.0f,   4.0f }},
+	{ Race::Vampire,               { 8.0f,   8.0f }},
+	{ Race::StatueOfRallosZek,     { 5.0f,   5.0f }},
+	{ Race::HighpassCitizen,       { 1.0f,   1.0f }},
+	{ Race::TentacleTerror,        { 5.0f,   5.0f }},
+	{ Race::Wisp,                  { 5.0f,   5.0f }},
+	{ Race::Zombie,                { 5.0f,   5.0f }},
+	{ Race::QeynosCitizen,         { 9.0f,   9.0f }},
+	{ Race::Ship,                  { 3.0f,   3.0f }},
+	{ Race::Launch,                { 8.0f,   8.0f }},
+	{ Race::Piranha,               { 2.0f,   2.0f }},
+	{ Race::Elemental,             { 24.0f,  24.0f }},
+	{ Race::Puma,                  { 10.0f,  10.0f }},
+	{ Race::NeriakCitizen,         { 3.0f,   3.0f }},
+	{ Race::EruditeCitizen,        { 7.0f,   7.0f }},
+	{ Race::Bixie,                 { 9.0f,   9.0f }},
+	{ Race::ReanimatedHand,        { 11.0f,  11.0f }},
+	{ Race::RivervaleCitizen,      { 2.5f,   2.5f }},
+	{ Race::Scarecrow,             { 14.0f,  14.0f }},
+	{ Race::Skunk,                 { 8.0f,   8.0f }},
+	{ Race::SnakeElemental,        { 7.0f,   7.0f }},
+	{ Race::Spectre,               { 12.0f,  12.0f }},
+	{ Race::Sphinx,                { 27.0f,  27.0f }},
+	{ Race::Armadillo,             { 2.0f,   2.0f }},
+	{ Race::ClockworkGnome,        { 9.0f,   9.0f }},
+	{ Race::Drake,                 { 9.0f,   9.0f }},
+	{ Race::HalasCitizen,          { 9.0f,   9.0f }},
+	{ Race::Alligator,             { 3.0f,   3.0f }},
+	{ Race::GrobbCitizen,          { 3.0f,   3.0f }},
+	{ Race::OggokCitizen,          { 10.0f,  10.0f }},
+	{ Race::KaladimCitizen,        { 15.0f,  15.0f }},
+	{ Race::CazicThule,            { 15.0f,  15.0f }},
+	{ Race::Cockatrice,            { 9.0f,   9.0f }},
+	{ Race::DaisyMan,              { 7.0f,   7.0f }},
+	{ Race::ElfVampire,            { 7.0f,   7.0f }},
+	{ Race::Denizen,               { 8.0f,   8.0f }},
+	{ Race::Dervish,               { 3.0f,   3.0f }},
+	{ Race::Efreeti,               { 3.0f,   3.0f }},
+	{ Race::FroglokTadpole,        { 7.0f,   7.0f }},
+	{ Race::PhinigelAutropos,      { 13.0f,  13.0f }},
+	{ Race::Leech,                 { 9.0f,   9.0f }},
+	{ Race::Swordfish,             { 5.0f,   5.0f }},
+	{ Race::Felguard,              { 7.0f,   7.0f }},
+	{ Race::Mammoth,               { 9.0f,   9.0f }},
+	{ Race::EyeOfZomm,             { 8.0f,   8.0f }},
+	{ Race::Wasp,                  { 5.5f,   5.5f }},
+	{ Race::Mermaid,               { 4.0f,   4.0f }},
+	{ Race::Harpy,                 { 25.0f,  25.0f }},
+	{ Race::Fayguard,              { 22.0f,  22.0f }},
+	{ Race::Drixie,                { 20.0f,  20.0f }},
+	{ Race::GhostShip,             { 10.0f,  10.0f }},
+	{ Race::Clam,                  { 13.5f,  13.5f }},
+	{ Race::SeaHorse,              { 12.0f,  12.0f }},
+	{ Race::DwarfGhost,            { 3.0f,   3.0f }},
+	{ Race::EruditeGhost,          { 30.0f,  30.0f }},
+	{ Race::Sabertooth,            { 35.0f,  35.0f }},
+	{ Race::WolfElemental,         { 1.5f,   1.5f }},
+	{ Race::Gorgon,                { 8.0f,   8.0f }},
+	{ Race::DragonSkeleton,        { 3.0f,   3.0f }},
+	{ Race::Innoruuk,              { 2.0f,   2.0f }},
+	{ Race::Unicorn,               { 5.0f,   5.0f }},
+	{ Race::Pegasus,               { 2.0f,   2.0f }},
+	{ Race::Djinn,                 { 7.0f,   7.0f }},
+	{ Race::InvisibleMan,          { 4.0f,   4.0f }},
+	{ Race::Iksar,                 { 8.0f,   8.0f }},
+	{ Race::Scorpion,              { 8.0f,   8.0f }},
+	{ Race::VahShir,               { 7.0f,   7.0f }},
+	{ Race::Sarnak,                { 8.0f,   8.0f }},
+	{ Race::Draglock,              { 7.0f,   7.0f }},
+	{ Race::Drolvarg,              { 7.0f,   7.0f }},
+	{ Race::Mosquito,              { 10.0f,  10.0f }},
+	{ Race::Rhinoceros,            { 3.0f,   3.0f }},
+	{ Race::Xalgoz,                { 8.0f,   8.0f }},
+	{ Race::KunarkGoblin,          { 9.0f,   9.0f }},
+	{ Race::Yeti,                  { 15.0f,  15.0f }},
+	{ Race::IksarCitizen,          { 5.0f,   5.0f }},
+	{ Race::ForestGiant,           { 10.0f,  10.0f }},
+	{ Race::Boat,                  { 7.0f,   7.0f }},
+	{ Race::MinorIllusion,         { 7.0f,   7.0f }},
+	{ Race::Tree,                  { 7.0f,   7.0f }},
+	{ Race::Burynai,               { 7.0f,   7.0f }},
+	{ Race::Goo,                   { 12.0f,  12.0f }},
+	{ Race::SarnakSpirit,          { 4.0f,   4.0f }},
+	{ Race::IksarSpirit,           { 5.0f,   5.0f }},
+	{ Race::KunarkFish,            { 3.0f,   3.0f }},
+	{ Race::IksarScorpion,         { 30.0f,  30.0f }},
+	{ Race::Erollisi,              { 30.0f,  30.0f }},
+	{ Race::Tribunal,              { 15.0f,  15.0f }},
+	{ Race::Bertoxxulous,          { 20.0f,  20.0f }},
+	{ Race::Bristlebane,           { 10.0f,  10.0f }},
+	{ Race::FayDrake,              { 14.0f,  14.0f }},
+	{ Race::UndeadSarnak,          { 14.0f,  14.0f }},
+	{ Race::Ratman,                { 16.0f,  16.0f }},
+	{ Race::Wyvern,                { 15.0f,  15.0f }},
+	{ Race::Wurm,                  { 30.0f,  30.0f }},
+	{ Race::Devourer,              { 15.0f,  15.0f }},
+	{ Race::IksarGolem,            { 7.5f,   7.5f }},
+	{ Race::UndeadIksar,           { 5.0f,   5.0f }},
+	{ Race::ManEatingPlant,        { 4.0f,   4.0f }},
+	{ Race::Raptor,                { 15.0f,  15.0f }},
+	{ Race::SarnakGolem,           { 6.5f,   6.5f }},
+	{ Race::WaterDragon,           { 3.0f,   3.0f }},
+	{ Race::AnimatedHand,          { 12.0f,  12.0f }},
+	{ Race::Succulent,             { 10.0f,  10.0f }},
+	{ Race::Holgresh,              { 10.5f,  10.5f }},
+	{ Race::Brontotherium,         { 10.0f,  10.0f }},
+	{ Race::SnowDervish,           { 7.5f,   7.5f }},
+	{ Race::DireWolf,              { 12.5f,  12.5f }},
+	{ Race::Manticore,             { 9.0f,   9.0f }},
+	{ Race::Totem,                 { 20.0f,  20.0f }},
+	{ Race::IceSpectre,            { 2.0f,   2.0f }},
+	{ Race::EnchantedArmor,        { 10.0f,  10.0f }},
+	{ Race::SnowRabbit,            { 25.0f,  25.0f }},
+	{ Race::Walrus,                { 8.0f,   8.0f }},
+	{ Race::Geonid,                { 10.0f,  10.0f }},
+	{ Race::Unknown,               { 18.0f,  18.0f }},
+	{ Race::Unknown2,              { 45.0f,  45.0f }},
+	{ Race::Yakkar,                { 13.0f,  13.0f }},
+	{ Race::Faun,                  { 15.0f,  15.0f }},
+	{ Race::Coldain,               { 8.0f,   8.0f }},
+	{ Race::VeliousDragon,         { 30.0f,  30.0f }},
+	{ Race::Hag,                   { 25.0f,  25.0f }},
+	{ Race::Hippogriff,            { 25.0f,  25.0f }},
+	{ Race::Siren,                 { 10.0f,  10.0f }},
+	{ Race::FrostGiant,            { 13.0f,  13.0f }},
+	{ Race::StormGiant,            { 5.0f,   5.0f }},
+	{ Race::Othmir,                { 3.5f,   3.5f }},
+	{ Race::Ulthork,               { 15.0f,  15.0f }},
+	{ Race::ClockworkDragon,       { 35.0f,  35.0f }},
+	{ Race::Abhorrent,             { 11.0f,  11.0f }},
+	{ Race::SeaTurtle,             { 15.0f,  15.0f }},
+	{ Race::BlackAndWhiteDragon,   { 50.0f,  50.0f }},
+	{ Race::GhostDragon,           { 13.0f,  13.0f }},
+	{ Race::RonnieTest,            { 7.0f,   7.0f }},
+	{ Race::PrismaticDragon,       { 60.0f,  60.0f }},
+	{ Race::Shiknar,               { 22.0f,  22.0f }},
+	{ Race::Rockhopper,            { 22.0f,  22.0f }},
+	{ Race::Underbulk,             { 21.0f,  21.0f }},
+	{ Race::Grimling,              { 22.0f,  22.0f }},
+	{ Race::Worm,                  { 15.0f,  15.0f }},
+	{ Race::EvanTest,              { 25.0f,  25.0f }},
+	{ Race::KhatiSha,              { 23.0f,  23.0f }},
+	{ Race::Owlbear,               { 8.0f,   8.0f }},
+	{ Race::RhinoBeetle,           { 15.0f,  15.0f }},
+	{ Race::Vampire2,              { 10.0f,  10.0f }},
+	{ Race::EarthElemental,        { 7.0f,   7.0f }},
+	{ Race::AirElemental,          { 12.0f,  12.0f }},
+	{ Race::WaterElemental,        { 9.5f,   9.5f }},
+	{ Race::FireElemental,         { 12.0f,  12.0f }},
+	{ Race::WetfangMinnow,         { 12.0f,  12.0f }},
+	{ Race::ThoughtHorror,         { 12.0f,  12.0f }},
+	{ Race::Tegi,                  { 15.0f,  15.0f }},
+	{ Race::Horse,                 { 4.0f,   4.0f }},
+	{ Race::Shissar,               { 5.0f,   5.0f }},
+	{ Race::FungalFiend,           { 105.0f, 105.0f }},
+	{ Race::VampireVolatalis,      { 20.0f,  20.0f }},
+	{ Race::Stonegrabber,          { 5.0f,   5.0f }},
+	{ Race::ScarletCheetah,        { 10.0f,  10.0f }},
+	{ Race::Zelniak,               { 10.0f,  10.0f }},
+	{ Race::Lightcrawler,          { 10.0f,  10.0f }},
+	{ Race::Shade,                 { 20.0f,  20.0f }},
+	{ Race::Sunflower,             { 13.5f,  13.5f }},
+	{ Race::Shadel,                { 8.0f,   8.0f }},
+	{ Race::Shrieker,              { 10.0f,  10.0f }},
+	{ Race::Galorian,              { 3.0f,   3.0f }},
+	{ Race::Netherbian,            { 5.0f,   5.0f }},
+	{ Race::Akhevan,               { 9.0f,   9.0f }},
+	{ Race::GriegVeneficus,        { 10.0f,  10.0f }},
+	{ Race::SonicWolf,             { 8.0f,   8.0f }},
+	{ Race::GroundShaker,          { 8.0f,   8.0f }},
+	{ Race::VahShirSkeleton,       { 8.0f,   8.0f }},
+	{ Race::Wretch,                { 5.0f,   5.0f }},
+	{ Race::LordInquisitorSeru,    { 5.0f,   5.0f }},
+	{ Race::Recuso,                { 5.0f,   5.0f }},
+	{ Race::VahShirKing,           { 9.0f,   9.0f }},
+	{ Race::VahShirGuard,          { 9.0f,   9.0f }},
+	{ Race::TeleportMan,           { 9.0f,   9.0f }},
+	{ Race::Werewolf2,             { 8.5f,   8.5f }},
+	{ Race::Nymph,                 { 7.0f,   7.0f }},
+	{ Race::Dryad,                 { 8.0f,   8.0f }},
+	{ Race::Treant2,               { 7.0f,   7.0f }},
+	{ Race::Fly,                   { 11.0f,  11.0f }},
+	{ Race::TarewMarr,             { 7.0f,   7.0f }},
+	{ Race::SolusekRo2,            { 9.0f,   9.0f }},
+	{ Race::ClockworkGolem,        { 8.0f,   8.0f }},
+	{ Race::ClockworkBrain,        { 8.0f,   8.0f }},
+	{ Race::Banshee,               { 9.0f,   9.0f }},
+	{ Race::GuardOfJustice,        { 10.0f,  10.0f }},
+	{ Race::MiniPom,               { 3.0f,   3.0f }},
+	{ Race::DiseasedFiend,         { 4.0f,   4.0f }},
+	{ Race::SolusekRoGuard,        { 3.0f,   3.0f }},
+	{ Race::BertoxxulousNew,       { 3.0f,   3.0f }},
+	{ Race::TribunalNew,           { 4.0f,   4.0f }},
+	{ Race::TerrisThule,           { 10.0f,  10.0f }},
+	{ Race::Vegerog,               { 10.0f,  10.0f }},
+	{ Race::Crocodile,             { 2.0f,   2.0f }},
+	{ Race::Bat,                   { 8.0f,   8.0f }},
+	{ Race::Hraquis,               { 14.0f,  14.0f }},
+	{ Race::Tranquilion,           { 7.0f,   7.0f }},
+	{ Race::TinSoldier,            { 5.0f,   5.0f }},
+	{ Race::NightmareWraith,       { 9.0f,   9.0f }},
+	{ Race::Malarian,              { 7.0f,   7.0f }},
+	{ Race::KnightOfPestilence,    { 7.0f,   7.0f }},
+	{ Race::Lepertoloth,           { 10.0f,  10.0f }},
+	{ Race::Bubonian,              { 10.0f,  10.0f }},
+	{ Race::BubonianUnderling,     { 12.0f,  12.0f }},
+	{ Race::Pusling,               { 9.0f,   9.0f }},
+	{ Race::WaterMephit,           { 7.0f,   7.0f }},
+	{ Race::Stormrider,            { 12.0f,  12.0f }},
+	{ Race::JunkBeast,             { 13.0f,  13.0f }},
+	{ Race::BrokenClockwork,       { 16.0f,  16.0f }},
+	{ Race::GiantClockwork,        { 9.0f,   9.0f }},
+	{ Race::ClockworkBeetle,       { 10.0f,  10.0f }},
+	{ Race::NightmareGoblin,       { 25.0f,  25.0f }},
+	{ Race::Karana,                { 15.0f,  15.0f }},
+	{ Race::BloodRaven,            { 25.0f,  25.0f }},
+	{ Race::NightmareGargoyle,     { 8.0f,   8.0f }},
+	{ Race::MouthOfInsanity,       { 11.0f,  11.0f }},
+	{ Race::SkeletalHorse,         { 9.0f,   9.0f }},
+	{ Race::Saryrn,                { 2.0f,   2.0f }},
+	{ Race::FenninRo,              { 5.0f,   5.0f }},
+	{ Race::Tormentor,             { 4.0f,   4.0f }},
+	{ Race::SoulDevourer,          { 8.5f,   8.5f }},
+	{ Race::Nightmare,             { 4.0f,   4.0f }},
+	{ Race::NewRallosZek,          { 15.0f,  15.0f }},
+	{ Race::VallonZek,             { 1.0f,   1.0f }},
+	{ Race::TallonZek,             { 2.0f,   2.0f }},
+	{ Race::AirMephit,             { 40.0f,  40.0f }},
+	{ Race::EarthMephit,           { 8.0f,   8.0f }},
+	{ Race::FireMephit,            { 12.0f,  12.0f }},
+	{ Race::NightmareMephit,       { 3.0f,   3.0f }},
+	{ Race::Zebuxoruk,             { 8.0f,   8.0f }},
+	{ Race::MithanielMarr,         { 99.0f,  99.0f }},
+	{ Race::UndeadKnight,          { 9.0f,   9.0f }},
+	{ Race::Rathe,                 { 100.0f, 100.0f }},
+	{ Race::Xegony,                { 100.0f, 100.0f }},
+	{ Race::Fiend,                 { 10.0f,  10.0f }},
+	{ Race::TestObject,            { 27.5f,  27.5f }},
+	{ Race::Crab,                  { 20.0f,  20.0f }},
+	{ Race::Phoenix,               { 5.0f,   5.0f }},
+	{ Race::Quarm,                 { 8.0f,   8.0f }},
+	{ Race::Bear2,                 { 5.0f,   5.0f }},
+	{ Race::EarthGolem,            { 3.0f,   3.0f }},
+	{ Race::IronGolem,             { 11.5f,  11.5f }},
+	{ Race::StormGolem,            { 25.0f,  25.0f }},
+	{ Race::AirGolem,              { 80.0f,  80.0f }},
+	{ Race::WoodGolem,             { 20.0f,  20.0f }},
+	{ Race::FireGolem,             { 9.0f,   9.0f }},
+	{ Race::WaterGolem,            { 8.0f,   8.0f }},
+	{ Race::WarWraith,             { 5.0f,   5.0f }},
+	{ Race::Wrulon,                { 4.0f,   4.0f }},
+	{ Race::Kraken,                { 7.0f,   7.0f }},
+	{ Race::PoisonFrog,            { 10.0f,  10.0f }},
+	{ Race::Nilborien,             { 11.0f,  11.0f }},
+	{ Race::Valorian,              { 8.0f,   8.0f }},
+	{ Race::WarBoar,               { 5.0f,   5.0f }},
+	{ Race::Efreeti2,              { 30.0f,  30.0f }},
+	{ Race::WarBoar2,              { 7.0f,   7.0f }},
+	{ Race::Valorian2,             { 15.0f,  15.0f }},
+	{ Race::AnimatedArmor,         { 9.0f,   9.0f }},
+	{ Race::UndeadFootman,         { 9.0f,   9.0f }},
+	{ Race::RallosOgre,            { 3.0f,   3.0f }},
+	{ Race::Arachnid,              { 32.5f,  32.5f }},
+	{ Race::CrystalSpider,         { 15.0f,  15.0f }},
+	{ Race::ZebuxoruksCage,        { 7.5f,   7.5f }},
+	{ Race::Portal,                { 10.0f,  10.0f }},
+	{ Race::Froglok2,              { 10.0f,  10.0f }},
+	{ Race::TrollCrewMember,       { 9.0f,   9.0f }},
+	{ Race::PirateDeckhand,        { 20.0f,  20.0f }},
+	{ Race::BrokenSkullPirate,     { 25.0f,  25.0f }},
+	{ Race::PirateGhost,           { 12.0f,  12.0f }},
+	{ Race::OneArmedPirate,        { 8.0f,   8.0f }},
+	{ Race::SpiritmasterNadox,     { 20.0f,  20.0f }},
+	{ Race::BrokenSkullTaskmaster, { 10.0f,  9.0f }},
+	{ Race::GnomePirate,           { 8.0f,   8.0f }},
+	{ Race::DarkElfPirate,         { 12.0f,  12.0f }},
+	{ Race::OgrePirate,            { 8.0f,   8.0f }},
+	{ Race::HumanPirate,           { 2.0f,   2.0f }},
+	{ Race::EruditePirate,         { 3.0f,   3.0f }},
+	{ Race::Frog,                  { 7.0f,   7.0f }},
+	{ Race::TrollZombie,           { 1.5f,   1.5f }},
+	{ Race::Luggald,               { 3.0f,   3.0f }},
+	{ Race::Luggald2,              { 3.0f,   3.0f }},
+	{ Race::Luggald3,              { 3.0f,   3.0f }},
+	{ Race::Drogmor,               { 3.0f,   3.0f }},
+	{ Race::FroglokSkeleton,       { 2.0f,   2.0f }},
+	{ Race::UndeadFroglok,         { 3.0f,   3.0f }},
+	{ Race::KnightOfHate,          { 3.0f,   3.0f }},
+	{ Race::ArcanistOfHate,        { 4.5f,   4.5f }},
+	{ Race::Veksar,                { 7.0f,   7.0f }},
+	{ Race::Veksar2,               { 7.0f,   7.0f }},
+	{ Race::Veksar3,               { 22.0f,  5.7f }},
+	{ Race::Chokidai,              { 8.0f,   22.0f }},
+	{ Race::UndeadChokidai,        { 15.0f,  8.0f }},
+	{ Race::UndeadVeksar,          { 22.0f,  15.0f }},
+	{ Race::UndeadVampire,         { 8.0f,   22.0f }},
+	{ Race::Vampire3,              { 15.0f,  8.0f }},
+	{ Race::RujarkianOrc,          { 80.0f,  15.0f }},
+	{ Race::BoneGolem,             { 150.0f, 80.0f }},
+	{ Race::Synarcana,             { 7.0f,   150.0f }},
+	{ Race::SandElf,               { 12.0f,  7.0f }},
+	{ Race::MasterVampire,         { 35.0f,  12.0f }},
+	{ Race::MasterOrc,             { 20.0f,  35.0f }},
+	{ Race::Skeleton2,             { 9.0f,   20.0f }},
+	{ Race::Mummy,                 { 20.0f,  9.0f }},
+	{ Race::NewGoblin,             { 20.0f,  20.0f }},
+	{ Race::Insect,                { 20.0f,  20.0f }},
+	{ Race::FroglokGhost,          { 20.0f,  20.0f }},
+	{ Race::Dervish2,              { 20.0f,  20.0f }},
+	{ Race::Shade2,                { 9.0f,   20.0f }},
+	{ Race::Golem2,                { 4.0f,   9.0f }},
+	{ Race::EvilEye2,              { 4.0f,   4.0f }},
+	{ Race::Box,                   { 10.0f,  4.0f }},
+	{ Race::Barrel,                { 5.0f,   10.0f }},
+	{ Race::Chest,                 { 8.0f,   5.0f }},
+	{ Race::Vase,                  { 10.0f,  8.0f }},
+	{ Race::Table,                 { 2.0f,   10.0f }},
+	{ Race::WeaponRack,            { 36.0f,  5.7f }},
+	{ Race::Coffin,                { 14.0f,  2.0f }},
+	{ Race::Bones,                 { 7.0f,   36.0f }},
+	{ Race::Jokester,              { 250.0f, 14.0f }},
+	{ Race::Nihil,                 { 9.0f,   7.0f }},
+	{ Race::Trusik,                { 7.0f,   250.0f }},
+	{ Race::StoneWorker,           { 4.0f,   9.0f }},
+	{ Race::Hynid,                 { 8.0f,   7.0f }},
+	{ Race::Turepta,               { 23.0f,  4.0f }},
+	{ Race::Cragbeast,             { 70.0f,  8.0f }},
+	{ Race::Stonemite,             { 7.0f,   23.0f }},
+	{ Race::Ukun,                  { 20.0f,  70.0f }},
+	{ Race::Ixt,                   { 5.0f,   7.0f }},
+	{ Race::Ikaav,                 { 1.0f,   20.0f }},
+	{ Race::Aneuk,                 { 4.0f,   5.0f }},
+	{ Race::Kyv,                   { 4.0f,   1.0f }},
+	{ Race::Noc,                   { 10.0f,  4.0f }},
+	{ Race::Ratuk,                 { 7.0f,   4.0f }},
+	{ Race::Taneth,                { 7.0f,   10.0f }},
+	{ Race::Huvul,                 { 7.0f,   7.0f }},
+	{ Race::Mutna,                 { 7.0f,   7.0f }},
+	{ Race::Mastruq,               { 8.0f,   7.0f }},
+	{ Race::Taelosian,             { 7.0f,   7.0f }},
+	{ Race::DiscordShip,           { 7.5f,   8.0f }},
+	{ Race::StoneWorker2,          { 4.0f,   7.0f }},
+	{ Race::MataMuram,             { 3.0f,   7.5f }},
+	{ Race::LightingWarrior,       { 1.0f,   4.0f }},
+	{ Race::Succubus,              { 9.0f,   3.0f }},
+	{ Race::Bazu,                  { 7.0f,   1.0f }},
+	{ Race::Feran,                 { 8.0f,   9.0f }},
+	{ Race::Pyrilen,               { 7.0f,   7.0f }},
+	{ Race::Chimera,               { 8.0f,   8.0f }},
+	{ Race::Dragorn,               { 8.0f,   7.0f }},
+	{ Race::Murkglider,            { 6.0f,   8.0f }},
+	{ Race::Rat,                   { 6.0f,   8.0f }},
+};
+
+
+// player race-/gender-based model feature validators
+namespace PlayerAppearance
+{
+	bool IsValidBeard(uint16 race_id, uint8 gender_id, uint8 beard_value, bool use_luclin = true);
+	bool IsValidBeardColor(uint16 race_id, uint8 gender_id, uint8 beard_color_value, bool use_luclin = true);
+	bool IsValidDetail(uint16 race_id, uint8 gender_id, uint32 detail_value, bool use_luclin = true);
+	bool IsValidEyeColor(uint16 race_id, uint8 gender_id, uint8 eye_color_value, bool use_luclin = true);
+	bool IsValidFace(uint16 race_id, uint8 gender_id, uint8 face_value, bool use_luclin = true);
+	bool IsValidHair(uint16 race_id, uint8 gender_id, uint8 hair_value, bool use_luclin = true);
+	bool IsValidHairColor(uint16 race_id, uint8 gender_id, uint8 hair_color_value, bool use_luclin = true);
+	bool IsValidHead(uint16 race_id, uint8 gender_id, uint8 head_value, bool use_luclin = true);
+	bool IsValidHeritage(uint16 race_id, uint8 gender_id, uint32 heritage_value, bool use_luclin = true);
+	bool IsValidTattoo(uint16 race_id, uint8 gender_id, uint32 tattoo_value, bool use_luclin = true);
+	bool IsValidTexture(uint16 race_id, uint8 gender_id, uint8 texture_value, bool use_luclin = true);
+	bool IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_value, bool use_luclin = true);
 }
 
 #endif

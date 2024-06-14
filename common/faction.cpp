@@ -95,12 +95,12 @@ bool IsOfEqualRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case DARK_ELF:
+		case Race::DarkElf:
 			if (r2 == Race::NeriakCitizen) {
 				return true;
 			}
 			break;
-		case BARBARIAN:
+		case Race::Barbarian:
 			if (r2 == Race::HalasCitizen) {
 				return true;
 			}
@@ -116,49 +116,49 @@ bool IsOfIndiffRace(int r1, int r2)
 	}
 	// TODO: add more values
 	switch (r1) {
-		case DARK_ELF:
-		case OGRE:
-		case TROLL:
-			if (r2 == OGRE || r2 == TROLL || r2 == DARK_ELF) {
+		case Race::DarkElf:
+		case Race::Ogre:
+		case Race::Troll:
+			if (r2 == Race::Ogre || r2 == Race::Troll || r2 == Race::DarkElf) {
 				return true;
 			}
 			break;
-		case HUMAN:
-		case BARBARIAN:
-		case HALF_ELF:
-		case GNOME:
-		case HALFLING:
-		case WOOD_ELF:
-			if (r2 == HUMAN ||
-			    r2 == BARBARIAN ||
-			    r2 == ERUDITE ||
-			    r2 == HALF_ELF ||
-			    r2 == GNOME ||
-			    r2 == HALFLING ||
-			    r2 == DWARF ||
-			    r2 == HIGH_ELF ||
-			    r2 == WOOD_ELF) {
+		case Race::Human:
+		case Race::Barbarian:
+		case Race::HalfElf:
+		case Race::Gnome:
+		case Race::Halfling:
+		case Race::WoodElf:
+			if (r2 == Race::Human ||
+			    r2 == Race::Barbarian ||
+			    r2 == Race::Erudite ||
+			    r2 == Race::HalfElf ||
+			    r2 == Race::Gnome ||
+			    r2 == Race::Halfling ||
+			    r2 == Race::Dwarf ||
+			    r2 == Race::HighElf ||
+			    r2 == Race::WoodElf) {
 				return true;
 			}
 			break;
-		case ERUDITE:
-			if (r2 == HUMAN || r2 == HALF_ELF) {
+		case Race::Erudite:
+			if (r2 == Race::Human || r2 == Race::HalfElf) {
 				return true;
 			}
 			break;
-		case DWARF:
-			if (r2 == HALFLING || r2 == GNOME) {
+		case Race::Dwarf:
+			if (r2 == Race::Halfling || r2 == Race::Gnome) {
 				return true;
 			}
 			break;
-		case HIGH_ELF:
-			if (r2 == WOOD_ELF) {
+		case Race::HighElf:
+			if (r2 == Race::WoodElf) {
 				return true;
 			}
 			break;
-		case VAHSHIR:
+		case Race::VahShir:
 			return true;
-		case IKSAR:
+		case Race::Iksar:
 			return false;
 	}
 	return false;

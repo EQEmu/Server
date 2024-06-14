@@ -105,8 +105,8 @@ public:
 	int GetDeity();
 	int GetRace();
 	const char *GetClassName();
-	const char *GetRaceName();
-	const char* GetBaseRaceName();
+	std::string GetRaceName();
+	std::string GetBaseRaceName();
 	int GetGender();
 	int GetTexture();
 	int GetHelmTexture();

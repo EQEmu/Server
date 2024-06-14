@@ -464,7 +464,7 @@ int Perl_Mob_GetBaseRace(Mob* self) // @categories Stats and Attributes
 
 std::string Perl_Mob_GetBaseRaceName(Mob* self) // @categories Stats and Attributes
 {
-	return GetRaceIDName(self->GetBaseRace());
+	return Race::GetName(self->GetBaseRace());
 }
 
 int Perl_Mob_GetBaseGender(Mob* self) // @categories Stats and Attributes
@@ -2612,7 +2612,7 @@ std::string Perl_Mob_GetClassName(Mob* self)
 
 std::string Perl_Mob_GetRaceName(Mob* self)
 {
-	return GetRaceIDName(self->GetRace());
+	return Race::GetName(self->GetRace());
 }
 
 void Perl_Mob_DeleteBucket(Mob* self, std::string bucket_name) // @categories Script Utility
@@ -3342,7 +3342,7 @@ uint32 Perl_Mob_GetMobTypeIdentifier(Mob* self)
 
 std::string Perl_Mob_GetRacePlural(Mob* self)
 {
-	return self->GetRacePlural();
+	return Race::GetPlural(self->GetRace());
 }
 
 uint32 Perl_Mob_GetHateListCount(Mob* self)

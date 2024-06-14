@@ -540,7 +540,7 @@ bool Perl__isdisctome(int item_id)
 
 std::string Perl__getracename(uint16 race_id)
 {
-	return quest_manager.getracename(race_id);
+	return Race::GetName(race_id);
 }
 
 std::string Perl__getspellname(uint32 spell_id)
@@ -3015,9 +3015,9 @@ std::string Perl__getcleannpcnamebyid(uint32 npc_id)
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
 
-std::string Perl__getgendername(uint32 gender_id)
+std::string Perl__getgendername(uint8 gender_id)
 {
-	return quest_manager.getgendername(gender_id);
+	return Gender::GetName(gender_id);
 }
 
 std::string Perl__getdeityname(uint32 deity_id)
@@ -5857,7 +5857,7 @@ uint32 Perl__get_deity_bitmask(uint32 deity_id)
 
 uint16 Perl__get_race_bitmask(uint16 race_id)
 {
-	return GetPlayerRaceBit(race_id);
+	return Race::GetPlayerBit(race_id);
 }
 
 std::string Perl__GetAutoLoginCharacterNameByAccountID(uint32 account_id)

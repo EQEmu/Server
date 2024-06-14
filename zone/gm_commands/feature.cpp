@@ -83,7 +83,7 @@ void command_feature(Client *c, const Seperator *sep)
 		feature_changed = "Beard Color";
 		value_changed = f.beardcolor;
 	} else if (is_details) {
-		if (t->GetRace() != DRAKKIN) {
+		if (t->GetRace() != Race::Drakkin) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
@@ -116,7 +116,7 @@ void command_feature(Client *c, const Seperator *sep)
 		feature_changed = "Helmet Texture";
 		value_changed = helm_texture;
 	} else if (is_heritage) {
-		if (t->GetRace() != DRAKKIN) {
+		if (t->GetRace() != Race::Drakkin) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
@@ -148,7 +148,7 @@ void command_feature(Client *c, const Seperator *sep)
 		feature_changed = "Size";
 		value_changed = size;
 	} else if (is_tattoo) {
-		if (t->GetRace() != DRAKKIN) {
+		if (t->GetRace() != Race::Drakkin) {
 			c->Message(Chat::White, "You must target a Drakkin to use this command.");
 			return;
 		}
