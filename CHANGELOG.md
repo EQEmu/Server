@@ -1,3 +1,32 @@
+## [22.53.0] 6/14/2024
+
+### Bug
+
+* Anon players should not show in /who all ([#4392](https://github.com/EQEmu/Server/pull/4392)) @fryguy503 2024-06-14
+* Escape should put player into SOS if owned. ([#4388](https://github.com/EQEmu/Server/pull/4388)) @fryguy503 2024-06-07
+* Prevent Resurrection Spells from being resisted ([#4393](https://github.com/EQEmu/Server/pull/4393)) @fryguy503 2024-06-14
+
+### Code
+
+* Cleanup Account Status Code ([#4376](https://github.com/EQEmu/Server/pull/4376)) @Kinglykrab 2024-06-02
+* Cleanup Body Type Code ([#4366](https://github.com/EQEmu/Server/pull/4366)) @Kinglykrab 2024-06-02
+* Cleanup Object Type Code ([#4375](https://github.com/EQEmu/Server/pull/4375)) @Kinglykrab 2024-06-14
+* Remove unused code in emu_constants.h ([#4384](https://github.com/EQEmu/Server/pull/4384)) @Kinglykrab 2024-06-14
+
+### Fixes
+
+* Fix #goto Target ([#4382](https://github.com/EQEmu/Server/pull/4382)) @Kinglykrab 2024-06-03
+* Fix Swarm Pet Damage Messages ([#4383](https://github.com/EQEmu/Server/pull/4383)) @Kinglykrab 2024-06-04
+* Fix for players having empty bazaar window dropdown list, even though trader is tagged as a trader. ([#4391](https://github.com/EQEmu/Server/pull/4391)) @neckkola 2024-06-14
+* Fix potential trader crash when serialized item not found ([#4386](https://github.com/EQEmu/Server/pull/4386)) @joligario 2024-06-14
+
+### Rules
+
+* Add Invisible Augment Rules ([#4385](https://github.com/EQEmu/Server/pull/4385)) @Kinglykrab 2024-06-14
+* Classic Harm Touch Formula ([#4394](https://github.com/EQEmu/Server/pull/4394)) @fryguy503 2024-06-14
+* Mend/Sneak allow success tuning ([#4390](https://github.com/EQEmu/Server/pull/4390)) @fryguy503 2024-06-14
+* Snare Override Movement Bonus ([#4381](https://github.com/EQEmu/Server/pull/4381)) @fryguy503 2024-06-02
+
 ## [22.52.0] 6/1/2024
 
 ### Code
