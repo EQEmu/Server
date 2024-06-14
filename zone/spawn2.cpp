@@ -801,6 +801,10 @@ void SpawnConditionManager::UpdateSpawnEvent(SpawnEvent &event)
 {
 	auto e = SpawnEventsRepository::FindOne(database, event.id);
 
+	if (!e.id) {
+		return;
+	}
+
 	e.next_minute = event.next.minute;
 	e.next_hour   = event.next.hour;
 	e.next_day    = event.next.day;
