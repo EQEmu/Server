@@ -810,7 +810,10 @@ void Client::CompleteConnect()
 				SetBucket("SeasonalCharacter", fmt::to_string(RuleI(Custom, EnableSeasonalCharacters)));
 			}
 			DataBucket::GetDataBuckets(this);
-		}		
+		}
+
+		if (IsSeasonal())
+			SendAppearancePacket(AppearanceType::PVP, true, true, false);		
 
 		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
 			parse->EventPlayer(EVENT_CONNECT, this, "", 0);

@@ -527,6 +527,11 @@ bool Client::Process() {
 			}
 			
 			SendEdgeStatBulkUpdate();
+			if (IsSeasonal()) {
+				SendAppearancePacket(AppearanceType::PVP, true, true, false);
+			} else {
+				SendAppearancePacket(AppearanceType::PVP, false, true, false);
+			}
 		}
 	}
 
