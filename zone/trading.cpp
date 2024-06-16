@@ -41,7 +41,7 @@ extern QueryServ* QServ;
 
 // The maximum amount of a single bazaar/barter transaction expressed in copper.
 // Equivalent to 2 Million plat
-auto constexpr MAX_TRANSACTION_VALUE = 2000000000;
+constexpr auto MAX_TRANSACTION_VALUE = 2000000000;
 // ##########################################
 // Trade implementation
 // ##########################################
