@@ -1,3 +1,9 @@
+## [22.53.1] 6/16/2024
+
+### Fixes
+
+* Fix trader mode ([#4397](https://github.com/EQEmu/Server/pull/4397)) @joligario 2024-06-17
+
 ## [22.53.0] 6/14/2024
 
 ### Bug
