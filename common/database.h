@@ -244,6 +244,7 @@ public:
 
 	void PurgeAllDeletedDataBuckets();
 	void ClearGuildOnlineStatus();
+	void ClearTraderDetails();
 
 
 	/* Database Variables */
