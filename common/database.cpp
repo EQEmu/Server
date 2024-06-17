@@ -77,6 +77,7 @@
 #include "zone_store.h"
 #include "repositories/merchantlist_temp_repository.h"
 #include "repositories/bot_data_repository.h"
+#include "repositories/trader_repository.h"
 
 extern Client client;
 
@@ -2103,4 +2104,9 @@ void Database::PurgeCharacterParcels()
 void Database::ClearGuildOnlineStatus()
 {
 	GuildMembersRepository::ClearOnlineStatus(*this);
+}
+
+void Database::ClearTraderDetails()
+{
+	TraderRepository::Truncate(*this);
 }
