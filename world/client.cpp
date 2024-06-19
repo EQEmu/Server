@@ -1892,6 +1892,20 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	content_db.SetStartingItems(&pp, &inv, pp.race, cc->class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
+	// Seasonal
+	if (RuleI(Custom, EnableSeasonalCharacters)) {
+		int char_id = database.GetCharacterID(pp.name);
+		int season  = RuleI(Custom, EnableSeasonalCharacters);
+		
+		// Construct the SQL query
+		std::string query = StringFormat(
+			"INSERT INTO data_buckets (`key`, `value`, `character_id`, `npc_id`, `bot_id`) "
+			"VALUES ('SeasonalCharacter', '%d', %d, 0, 0);", season, char_id);
+		
+		// Execute the query
+		database.QueryDatabase(query);
+	}
+
 	const bool success = StoreCharacter(GetAccountID(), &pp, &inv);
 
 	LogInfo("Character creation {} for [{}]", success ? "succeeded" : "failed", pp.name);
