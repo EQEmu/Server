@@ -839,7 +839,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										loot_drop_entry.equip_item = 1;
 										loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
 										if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-											if (IsSeasonal() == tradingWith->GetOwner()->IsSeasonal()) {
+											if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 												tradingWith->CastToNPC()->AddLootDropFixed(
 													bagitem,
 													loot_drop_entry,
@@ -852,7 +852,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 												}
 											} else {
 												PushItemOnCursor(*baginst, true);
-												if (tradingWith->GetOwner()->IsSeasonal()) {
+												if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 													Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
 												}												
 											}
@@ -880,7 +880,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							new_loot_drop_entry.equip_item = 1;
 							new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 
-							if (IsSeasonal() == tradingWith->GetOwner()->IsSeasonal()) {
+							if (IsClient() && CastToClient()->IsSeasonal() == tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 								tradingWith->CastToNPC()->AddLootDropFixed(
 									item,
 									new_loot_drop_entry,
@@ -894,7 +894,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 								}
 							} else {
 								PushItemOnCursor(*inst, true);
-								if (tradingWith->GetOwner()->IsSeasonal()) {
+								if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 									Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
 								}												
 							}
