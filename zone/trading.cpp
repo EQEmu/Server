@@ -880,16 +880,23 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							new_loot_drop_entry.equip_item = 1;
 							new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
 
-							tradingWith->CastToNPC()->AddLootDropFixed(
-								item,
-								new_loot_drop_entry,
-								true
-							);
+							if (IsSeasonal() == tradingWith->GetOwner()->IsSeasonal()) {
+								tradingWith->CastToNPC()->AddLootDropFixed(
+									item,
+									new_loot_drop_entry,
+									true
+								);
 
-							
-							if (tradingWith->IsCharmed()) {
-								PushItemOnCursor(*inst, true);
-								Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+								
+								if (tradingWith->IsCharmed()) {
+									PushItemOnCursor(*inst, true);
+									Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+								}
+							} else {
+								PushItemOnCursor(*baginst, true);
+								if (tradingWith->GetOwner()->IsSeasonal()) {
+									Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
+								}												
 							}
 						}
 					}
