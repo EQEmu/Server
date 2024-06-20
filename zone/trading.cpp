@@ -839,15 +839,22 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 										loot_drop_entry.equip_item = 1;
 										loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
 										if (tradingWith->IsPet() && tradingWith->GetOwner() && tradingWith->GetOwner()->IsClient()) {
-											tradingWith->CastToNPC()->AddLootDropFixed(
-												bagitem,
-												loot_drop_entry,
-												true
-											);
+											if (IsSeasonal() == tradingWith->GetOwner()->IsSeasonal()) {
+												tradingWith->CastToNPC()->AddLootDropFixed(
+													bagitem,
+													loot_drop_entry,
+													true
+												);
 
-											if (tradingWith->IsCharmed()) {
+												if (tradingWith->IsCharmed()) {
+													PushItemOnCursor(*baginst, true);
+													Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+												}
+											} else {
 												PushItemOnCursor(*baginst, true);
-												Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+												if (tradingWith->GetOwner()->IsSeasonal()) {
+													Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
+												}												
 											}
 										}
 										// Return quest items being traded to non-quest NPC when the rule is true

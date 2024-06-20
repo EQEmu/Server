@@ -1359,6 +1359,10 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		case 4:	// shared bank
 		{
+			if (IsSeasonal()) {
+				Message(Chat::Red, "Seasonal Characters may not access the shared bank.");
+				return;
+			}
 			uint32 distance = 0;
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
@@ -1479,6 +1483,10 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		case 4:	// shared bank
 		{
+			if (IsSeasonal()) {
+				Message(Chat::Red, "Seasonal Characters may not access the shared bank.");
+				return;
+			}
 			uint32 distance = 0;
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
