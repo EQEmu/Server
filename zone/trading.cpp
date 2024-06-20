@@ -1015,6 +1015,7 @@ void Client::Trader_ShowItems(){
 		outints->ItemCost[i] = TraderItems->ItemCost[i];
 		outints->Items[i] = TraderItems->Items[i];
 	}
+
 	outints->Code = BazaarTrader_ShowItems;
 
 	QueuePacket(outapp);

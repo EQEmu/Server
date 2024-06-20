@@ -679,6 +679,24 @@ void Expedition::TryAddClient(
 		return;
 	}
 
+	// Have to do it this way because we cant get a client handle on both inviter and invitee simultaneously
+	if (RuleI(Custom, EnableSeasonalCharacters)) {
+		int char_id = database.GetCharacterID(inviter_name);
+		int inviter_season = 0;
+		std::string query = StringFormat("SELECT value FROM data_buckets WHERE data_buckets.character_id = %i AND data_buckets.key = 'SeasonalCharacter'");
+
+		auto results = database.QueryDatabase(query);
+		if (results.RowCount() == 1) {
+			auto row = results.begin();
+
+			inviter_season = Strings::ToInt(row[0]);
+		}
+
+		if (add_client->GetSeason() != inviter_season) {
+			return;
+		}
+	}
+
 	LogExpeditionsDetail(
 		"Add player request for expedition [{}] by inviter [{}] add name [{}] swap name [{}]",
 		m_id, inviter_name, add_client->GetName(), swap_remove_name
@@ -749,8 +767,15 @@ void Expedition::DzAddPlayer(
 	}
 
 	Client* add_client = entity_list.GetClientByName(add_char_name.c_str());
+
 	if (add_client)
 	{
+		// Block if seasonal
+		if (add_client->IsSeasonal() != requester->IsSeasonal()) {
+			requester->Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
+			return;
+		}
+
 		// client is online in this zone
 		TryAddClient(add_client, requester->GetName(), swap_remove_name, requester);
 	}

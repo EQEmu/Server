@@ -6187,6 +6187,8 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
+
+		
 		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
 		expedition->DzAddPlayer(this, dzcmd->name);
 	}
@@ -12385,6 +12387,12 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 
 		} else {
 			Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
+
+			if (IsSeasonal() != player_to_invite->IsSeasonal()) {
+				Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
+				return;
+			}
+
 			if (!player_to_invite) {
 				break;
 			}
@@ -15603,16 +15611,6 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	// SoF sends 1 or more unhandled OP_Trader packets of size 96 when a trade has completed.
 	// I don't know what they are for (yet), but it doesn't seem to matter that we ignore them.
 
-	if (IsSeasonal()) {
-		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
-		return;		
-	}
-
-	if (IsHardcore()) {
-		Message(Chat::Red, "A Discordant may not trade with other players.");
-		return;	
-	}
-
 	uint32 max_items = EQ::invtype::BAZAAR_SIZE;
 
 	/*
@@ -15788,12 +15786,6 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 	// Client has elected to buy an item from a Trader
 	//
 
-	if (IsSeasonal()) {
-		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
-		return;		
-	}
-
-
 	if (app->size != sizeof(TraderBuy_Struct)) {
 		LogError("Wrong size: OP_TraderBuy, size=[{}], expected [{}]", app->size, sizeof(TraderBuy_Struct));
 		return;
@@ -15883,17 +15875,6 @@ void Client::Handle_OP_TradeRequestAck(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 {
-	// Disable Trader Actions for Seasonal Characters 
-	if (IsSeasonal() && !app->size == 4) {
-		Message(Chat::Red, "Seasonal Characters may not use traders until the end of the season.");
-		return;		
-	}
-
-	if (IsHardcore() && !app->size == 4) {
-		Message(Chat::Red, "A Discordant may not trade with other players.");
-		return;		
-	}
-
 	// Bazaar Trader:
 	if (app->size == sizeof(TraderClick_Struct))
 	{
@@ -15918,10 +15899,16 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 
 			Client* Trader = entity_list.GetClientByID(tcs->TraderID);
 
+
 			if (Trader)
 			{
-				outtcs->Approval = Trader->WithCustomer(GetID());
-				LogTrading("Client::Handle_OP_TraderShop: Shop Request ([{}]) to ([{}]) with Approval: [{}]", GetCleanName(), Trader->GetCleanName(), outtcs->Approval);
+				if (Trader->IsSeasonal() != IsSeasonal()) {
+					Message(Chat::Red, "Seasonal characters may only buy from Seasonal traders.");
+					outtcs->Approval = 0;
+				} else {
+					outtcs->Approval = Trader->WithCustomer(GetID());
+					LogTrading("Client::Handle_OP_TraderShop: Shop Request ([{}]) to ([{}]) with Approval: [{}]", GetCleanName(), Trader->GetCleanName(), outtcs->Approval);
+				}
 			}
 			else {
 				LogTrading("Client::Handle_OP_TraderShop: entity_list.GetClientByID(tcs->traderid)"
@@ -15929,13 +15916,13 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 				safe_delete(outapp);
 				return;
 			}
+			
 
 			outtcs->TraderID = tcs->TraderID;
 
 			outtcs->Unknown008 = 0x3f800000;
 
 			QueuePacket(outapp);
-
 
 			if (outtcs->Approval) {
 				BulkSendTraderInventory(Trader->CharacterID());
@@ -15945,8 +15932,10 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 			}
 			else
 			{
-				MessageString(Chat::Yellow, TRADER_BUSY);
-				LogTrading("Client::Handle_OP_TraderShop: Trader Busy");
+				if (Trader->IsSeasonal() == IsSeasonal()) {
+					MessageString(Chat::Yellow, TRADER_BUSY);
+					LogTrading("Client::Handle_OP_TraderShop: Trader Busy");
+				}
 			}
 
 			safe_delete(outapp);
