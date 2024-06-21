@@ -683,7 +683,7 @@ void Expedition::TryAddClient(
 	if (RuleI(Custom, EnableSeasonalCharacters)) {
 		int char_id = database.GetCharacterID(inviter_name);
 		int inviter_season = 0;
-		std::string query = StringFormat("SELECT value FROM data_buckets WHERE data_buckets.character_id = %i AND data_buckets.key = 'SeasonalCharacter'");
+		std::string query = StringFormat("SELECT data_buckets.value FROM data_buckets WHERE data_buckets.character_id = %i AND data_buckets.key = 'SeasonalCharacter'", char_id);
 
 		auto results = database.QueryDatabase(query);
 		if (results.Success()) {
