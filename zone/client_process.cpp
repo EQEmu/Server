@@ -1359,10 +1359,6 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		case 4:	// shared bank
 		{
-			if (IsSeasonal()) {
-				Message(Chat::Red, "Seasonal Characters may not access the shared bank.");
-				return;
-			}
 			uint32 distance = 0;
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
@@ -1483,10 +1479,6 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		}
 		case 4:	// shared bank
 		{
-			if (IsSeasonal()) {
-				Message(Chat::Red, "Seasonal Characters may not access the shared bank.");
-				return;
-			}
 			uint32 distance = 0;
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
@@ -1543,11 +1535,19 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 		{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared)
 			{
-				if (from_bucket == &m_pp.platinum_shared)
-					amount_to_add = 0 - amount_to_take;
+				if (IsSeasonal()) {
+					Message(Chat::Red, "WARNING: Seasonal Characters may not access the Shared Bank. Any deposited platinum visible here is a visual glitch only.");
 
-				database.SetSharedPlatinum(AccountID(),amount_to_add);
-			}
+					AddPlatinum(amount_to_take, true);
+					m_pp.platinum_shared = 0;
+					m_pp.platinum_cursor = 0;
+				} else {
+					if (from_bucket == &m_pp.platinum_shared)
+						amount_to_add = 0 - amount_to_take;
+
+					database.SetSharedPlatinum(AccountID(),amount_to_add);
+				}
+			}			
 		}
 		else{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
@@ -1590,6 +1590,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	}
 
 	SaveCurrency();
+	SendMoneyUpdate();
 }
 
 void Client::OPGMTraining(const EQApplicationPacket *app)

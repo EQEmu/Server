@@ -1311,7 +1311,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			firstlogon = Strings::ToInt(row[3]);
 	}
 
-	if (RuleB(Character, SharedBankPlat))
+	if (RuleB(Character, SharedBankPlat) && !IsSeasonal())
 		m_pp.platinum_shared = database.GetSharedPlatinum(AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
