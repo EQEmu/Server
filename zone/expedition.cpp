@@ -686,7 +686,7 @@ void Expedition::TryAddClient(
 		std::string query = StringFormat("SELECT value FROM data_buckets WHERE data_buckets.character_id = %i AND data_buckets.key = 'SeasonalCharacter'");
 
 		auto results = database.QueryDatabase(query);
-		if (results.RowCount() == 1) {
+		if (results.Success()) {
 			auto row = results.begin();
 
 			inviter_season = Strings::ToInt(row[0]);
