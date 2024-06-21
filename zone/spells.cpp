@@ -2467,16 +2467,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 	if(!IsValidSpell(spell_id))
 		return false;
 
-	if (spell_target && spell_target != this && IsClient() && spell_target->IsClient()) {
-		if (CastToClient()->IsSeasonal() != spell_target->CastToClient()->IsSeasonal()) {
-			return false;
-		}
-
-		if (CastToClient()->IsHardcore() || spell_target->CastToClient()->IsHardcore()) {
-			return false;
-		}
-	}
-
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && !spell_target->IsBot() && (spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS)) {
 		Mob* owner = spell_target->GetOwner();
@@ -3918,6 +3908,19 @@ bool Mob::SpellOnTarget(
 	bool disable_buff_overwrite
 ) {
 	auto spellOwner = GetOwnerOrSelf();
+
+
+	if (spellOwner->IsClient() || (spellOwner->IsPet() && spellOwner->GetOwner() && spellOwner->GetOwner()->IsClient())) {
+		if (spelltar->IsClient() || (spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsClient())) {
+			bool tar_season = spelltar->HasOwner() ? spelltar->GetOwner()->CastToClient()->IsSeasonal() : spelltar->CastToClient()->IsSeasonal();
+			bool own_season = spellOwner->HasOwner() ? spellOwner->GetOwner()->CastToClient()->IsSeasonal() : spellOwner->CastToClient()->IsSeasonal();
+
+			if (tar_season != own_season) {
+				Message(Chat::Red, "Seasonal and non-Seasonal Characters may not affect each other with spells.");
+				return false;
+			}			
+		}
+	}
 
 	// well we can't cast a spell on target without a target
 	if (!spelltar) {

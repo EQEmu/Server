@@ -1376,7 +1376,7 @@ void EntityList::MassGroupBuff(
 		if (is_detrimental_spell) {
 			continue;
 		}
-
+		
 		caster->SpellOnTarget(spell_id, current_mob);
 	}
 }
