@@ -692,6 +692,7 @@ void Expedition::TryAddClient(
 			inviter_season = Strings::ToInt(row[0]);
 		}
 
+		LogDebug("WTF: [{}], [{}], [{}]", char_id, inviter_season, add_client->GetSeason());
 		if (add_client->GetSeason() != inviter_season) {
 			return;
 		}
