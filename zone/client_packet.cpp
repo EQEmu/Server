@@ -12388,7 +12388,7 @@ void Client::Handle_OP_RaidCommand(const EQApplicationPacket* app)
 		} else {
 			Client* player_to_invite = entity_list.GetClientByName(raid_command_packet->player_name);
 
-			if (IsSeasonal() != player_to_invite->IsSeasonal()) {
+			if (player_to_invite && IsSeasonal() != player_to_invite->IsSeasonal()) {
 				Message(Chat::Red, "Seasonal characters may only group with other Seasonal characters.");
 				return;
 			}
