@@ -847,11 +847,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 												);
 
 												if (tradingWith->IsCharmed()) {
-													PushItemOnCursor(*baginst, true);
-													Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+													//PushItemOnCursor(*baginst, true);
+													//Message(Chat::Yellow, "The magic of your charm returns your items to you.");
 												}
 											} else {
-												PushItemOnCursor(*baginst, true);
+												//PushItemOnCursor(*baginst, true);
 												if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
 													Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
 												}												
