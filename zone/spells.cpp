@@ -165,6 +165,10 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		if (spells[spell_id].target_type == ST_Corpse) {
 			return GetID();
 		}
+
+		if (IsAllianceSpell(spell_id)) {
+			return GetID();
+		}
 		
 		// Targeting ourselves, hit ourselves with beneficials, otherwise traverse as pet target
 		if (target_id == GetID()) {
