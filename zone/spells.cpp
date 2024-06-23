@@ -152,7 +152,10 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
-		
+		// Shortcut Project Illusion 
+		if (IsIllusionSpell(spell_id) && HasProjectIllusion()) {
+			return target_id;
+		}		
 
 		// Shortcut PBAoE, we don't care what the target is here
 		if (spells[spell_id].target_type == ST_AECaster) {
@@ -160,16 +163,18 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		}
 
 		// Shortcut Self, these have only one potential valid target
-		if (spells[spell_id].target_type == ST_Self && !(IsIllusionSpell(spell_id) && HasProjectIllusion())) {
-			return GetID();
-		}	
-
-		if (spells[spell_id].target_type == ST_Corpse) {
+		if (spells[spell_id].target_type == ST_Self) {
 			return GetID();
 		}
 
+		// Shortcut rez-like spells, these go to original target
+		if (spells[spell_id].target_type == ST_Corpse) {
+			return target_id;
+		}
+
+		// Shortcut alliance-like spells.
 		if (IsAllianceSpell(spell_id)) {
-			return GetID();
+			return target_id;
 		}
 		
 		// Targeting ourselves, hit ourselves with beneficials, otherwise traverse as pet target
