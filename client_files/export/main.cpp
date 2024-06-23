@@ -39,10 +39,10 @@ ZoneStore           zone_store;
 PathManager         path;
 PlayerEventLogs     player_event_logs;
 
-void ExportSpells(SharedDatabase *db);
-void ExportSkillCaps(SharedDatabase *db);
-void ExportBaseData(SharedDatabase *db);
-void ExportDBStrings(SharedDatabase *db);
+void ExportSpells(SharedDatabase *db, SharedDatabase *database);
+void ExportSkillCaps(SharedDatabase *db, SharedDatabase *database);
+void ExportBaseData(SharedDatabase *db, SharedDatabase *database);
+void ExportDBStrings(SharedDatabase *db, SharedDatabase *database);
 
 int main(int argc, char **argv)
 {
@@ -105,38 +105,38 @@ int main(int argc, char **argv)
 	}
 
 	if (arg_1 == "spells") {
-		ExportSpells(&content_db);
+		ExportSpells(&content_db, &database);
 		return 0;
 	}
 	if (arg_1 == "skills") {
-		ExportSkillCaps(&content_db);
+		ExportSkillCaps(&content_db, &database);
 		return 0;
 	}
 	if (arg_1 == "basedata") {
-		ExportBaseData(&content_db);
+		ExportBaseData(&content_db, &database);
 		return 0;
 	}
 	if (arg_1 == "dbstring") {
-		ExportDBStrings(&database);
+		ExportDBStrings(&database, &database);
 		return 0;
 	}
 
-	ExportSpells(&content_db);
-	ExportSkillCaps(&content_db);
-	ExportBaseData(&content_db);
-	ExportDBStrings(&database);
+	ExportSpells(&content_db,&database);
+	ExportSkillCaps(&content_db,&database);
+	ExportBaseData(&content_db,&database);
+	ExportDBStrings(&database,&database);
 
 	LogSys.CloseFileLogs();
 
 	return 0;
 }
 
-void ExportSpells(SharedDatabase *db)
+void ExportSpells(SharedDatabase *db, SharedDatabase *database)
 {
 	bool implied_targeting = false;
 
 	std::string rule_query = "SELECT rule_value FROM rule_values WHERE rule_name='Spells:UseSpellImpliedTargeting'";
-    auto rule_results = db->QueryDatabase(rule_query);
+    auto rule_results = database->QueryDatabase(rule_query);
     if (rule_results.Success()) {    
     	if (rule_results.RowCount() > 0) {       
 			auto row = rule_results.begin();
@@ -225,12 +225,12 @@ uint32 GetSkill(SharedDatabase* db, int skill_id, int class_id, int level)
 	return e.cap;
 }
 
-void ExportSkillCaps(SharedDatabase* db)
+void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
 {
 	bool multiclassing = false;
 
 	std::string query = "SELECT rule_value FROM rule_values WHERE rule_name='Custom:MulticlassingEnabled'";
-    auto results = db->QueryDatabase(query);
+    auto results = database->QueryDatabase(query);
     if (results.Success()) {    
     	if (results.RowCount() > 0) {       
 			auto row = results.begin();
@@ -295,7 +295,7 @@ void ExportSkillCaps(SharedDatabase* db)
 	file.close();
 }
 
-void ExportBaseData(SharedDatabase *db)
+void ExportBaseData(SharedDatabase *db, SharedDatabase *database)
 {
 	LogInfo("Exporting Base Data");
 
@@ -329,7 +329,7 @@ void ExportBaseData(SharedDatabase *db)
 	fclose(f);
 }
 
-void ExportDBStrings(SharedDatabase *db)
+void ExportDBStrings(SharedDatabase *db, SharedDatabase *database)
 {
 	LogInfo("Exporting DB Strings");
 
