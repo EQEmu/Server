@@ -152,6 +152,11 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
+		// Shortcut Self, these have only one potential valid target
+		if (spells[spell_id].target_type == ST_Self) {
+			return GetID();
+		}
+
 		// Shortcut Project Illusion 
 		if (IsIllusionSpell(spell_id) && HasProjectIllusion()) {
 			return target_id;
@@ -162,18 +167,13 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			return target_id;
 		}
 
-		// Shortcut Self, these have only one potential valid target
-		if (spells[spell_id].target_type == ST_Self) {
-			return GetID();
-		}
-
 		// Shortcut rez-like spells, these go to original target
-		if (spells[spell_id].target_type == ST_Corpse) {
+		if (spells[spell_id].target_type == ST_Corpse ) {
 			return target_id;
 		}
 
-		// Shortcut alliance-like spells.
-		if (IsAllianceSpell(spell_id)) {
+		// Shortcut alliance and pacify type spells.
+		if (IsAllianceSpell(spell_id) || IsEffectInSpell(spell_id, SE_Lull)) {
 			return target_id;
 		}
 		
