@@ -100,7 +100,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 		cle = iterator.GetData();
 		
 		// Skip if zone is exempt;
-		if (cle->zone() == zone) {
+		if (cle->zone() == zone || cle->zone() < 1 || cle->zone() > 999) {
 			iterator.Advance();
 		}
 
