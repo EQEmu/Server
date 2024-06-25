@@ -94,7 +94,7 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	int count = 0;
 	iterator.Reset();
 
-	const auto& zone = RuleI(World, IPExemptionZones);
+	const auto& zone = RuleI(World, IPExemptionZone);
 
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
