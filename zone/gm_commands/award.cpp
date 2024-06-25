@@ -22,7 +22,7 @@ void command_award(Client *c, const Seperator *sep)
     );
     
     if (l.empty()) {
-        c->Message(Chat::White, "Unable to find character %s", Strings::Escape(sep->arg[1]).c_str());
+        c->Message(Chat::White, "Unable to find character %s", character_name.c_str());
         return;
     }
 
@@ -44,8 +44,8 @@ void command_award(Client *c, const Seperator *sep)
         reason += sep->arg[i];
     }
 
-    c->Message(Chat::White, "Awarded %d EoM to %s for %s.", Strings::ToInt(sep->arg[2]), sep->arg[1].c_str(), reason.c_str());
-    zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + sep->arg[1] + " for " + reason);
+    c->Message(Chat::White, "Awarded %d EoM to %s for %s.", Strings::ToInt(sep->arg[2]), character_name.c_str(), reason.c_str());
+    zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name + " for " + reason);
 
     quest_manager.WorldWideSignal(WWSignalUpdateType_Character, 666);
 }
