@@ -11,11 +11,13 @@ void command_award(Client *c, const Seperator *sep)
         return;
     }
 
+    std::string character_name = Strings::Escape(sep->arg[1]);
+
     const auto& l = CharacterDataRepository::GetWhere(
         database,
         fmt::format(
             "`name` = '{}'",
-            Strings::Escape(sep->arg[1])
+            character_name
         )
     );
     
