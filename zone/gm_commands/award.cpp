@@ -33,10 +33,17 @@ void command_award(Client *c, const Seperator *sep)
 
     DataBucket::SetData(k);    
 
-    std::string reason = sep->arg[3];
+    // Join all arguments from sep->arg[3] onwards to form the reason string
+    std::string reason;
+    for (int i = 3; i <= arguments; ++i) {
+        if (i > 3) {
+            reason += " ";
+        }
+        reason += sep->arg[i];
+    }
 
     c->Message(Chat::White, "Awarded %d EoM to %s for %s.", Strings::ToInt(sep->arg[2]), sep->arg[1], reason.c_str());
-    zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + sep->arg[1] + " Reason: " + reason);
+    zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + sep->arg[1] + " Reason:" + reason);
 
     quest_manager.WorldWideSignal(WWSignalUpdateType_Character, 666);
 }
