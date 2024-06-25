@@ -152,12 +152,8 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
-		// Shortcut Self, these have only one potential valid target
-		if (spells[spell_id].target_type == ST_Self) {
-			return GetID();
-		}
-
 		// Shortcut Project Illusion 
+		// DO NOT CHANGE THE ORDER OF THIS
 		if (IsIllusionSpell(spell_id) && HasProjectIllusion()) {
 			return target_id;
 		}		
@@ -175,6 +171,12 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		// Shortcut alliance and pacify type spells.
 		if (IsAllianceSpell(spell_id) || IsEffectInSpell(spell_id, SE_Lull)) {
 			return target_id;
+		}
+
+		// Shortcut Self, these have only one potential valid target
+		// THIS NEEDS TO GO LAST OF THESE CHECKS
+		if (spells[spell_id].target_type == ST_Self) {
+			return GetID();
 		}
 		
 		// Targeting ourselves, hit ourselves with beneficials, otherwise traverse as pet target
