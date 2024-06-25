@@ -6844,6 +6844,62 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 	}
 }
 
+Mob* Mob::GetMeleeImpliedTarget(Mob* original_target) {
+	if (!original_target) {
+		return original_target;
+	}
+
+	// Assumptions; This might be called by an NPC (player pet) but will never be used to attack a Client
+	if (!original_target->IsClient() && !original_target->IsPetOwnerClient()) {
+		return original_target;
+	}
+
+	Mob* candidate_target = nullptr;
+	if (original_target->GetTarget() && !original_target->GetTarget()->IsClient()) {
+		candidate_target = original_target->GetTarget();
+	}
+
+	if(!candidate_target) {
+		return original_target;
+	}
+
+	bool has_aggro = candidate_target->CheckAggro(this);
+	if (!has_aggro) {
+		Client* client = nullptr;
+		if (IsClient()) {
+			client = CastToClient();
+		} else if (GetOwner() && IsPetOwnerClient()) {
+			client = GetOwner()->CastToClient();
+		}
+
+		if (client) {
+			if (client->IsGrouped()) {
+				Group* group = entity_list.GetGroupByClient(client); 
+				for (const auto &member : group->members) {
+					if (member && candidate_target->CheckAggro(member)) {
+						return candidate_target;
+					}
+				}
+			}
+
+			if (client->IsRaidGrouped()) {
+				Raid* raid = entity_list.GetRaidByClient(client);
+				for (const auto &member : raid->members) {
+					if (member.member && candidate_target->CheckAggro(member.member)) {
+						return candidate_target;
+					}
+				}
+			}
+		}
+	}
+	
+	if (has_aggro) {
+		return candidate_target;
+	} else {			
+		return original_target;
+	}
+}
+
 bool Mob::CheckDualWield()
 {
 	// Pets /might/ follow a slightly different progression

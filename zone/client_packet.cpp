@@ -11184,6 +11184,10 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	switch (PetCommand)
 	{
 	case PET_ATTACK: {
+		if (RuleB(Pets, UsePetCommandImpliedTargeting)) {
+			target = GetMeleeImpliedTarget(target);
+		}
+		
 		if (!target)
 			break;
 		if (target->IsMezzed()) {
