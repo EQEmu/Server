@@ -941,3 +941,4 @@ void command_bot(Client *c, const Seperator *sep)
 #include "gm_commands/zone_instance.cpp"
 #include "gm_commands/zsave.cpp"
 #include "gm_commands/seasonal.cpp"
+#include "gm_commands/soulmark.cpp"
