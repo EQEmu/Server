@@ -52,7 +52,7 @@ void command_soulmark(Client *c, const Seperator *sep)
         k.value = reason;  // Set the flag with the reason
 
         DataBucket::SetData(k);
-        c->Message(Chat::White, "Soulmark added to %s (AccountID: %d) with reason: %s.", character_name.c_str(), account_id, reason.c_str());
+        c->Message(Chat::White, "Soulmark added to %s (AccountID: %d) Reason: %s.", character_name.c_str(), account_id, reason.c_str());
     } else if (action == "Remove") {
         std::string existing_flag = DataBucket::GetData(key);
         if (!existing_flag.empty()) {
