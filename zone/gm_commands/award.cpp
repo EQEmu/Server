@@ -6,8 +6,8 @@
 void command_award(Client *c, const Seperator *sep)
 {
     int arguments = sep->argnum;
-    if (arguments < 4 || !sep->IsNumber(2)) {
-        c->Message(Chat::White, "Usage: #award [Character Name] [Amount] [Reason]");
+    if (arguments < 3 || !sep->IsNumber(2)) {
+        c->Message(Chat::White, "Usage: #award [Character Name] [Amount] [Reason (optional)]");
         return;
     }
 
@@ -37,15 +37,20 @@ void command_award(Client *c, const Seperator *sep)
 
     // Join all arguments from sep->arg[3] onwards to form the reason string
     std::string reason;
-    for (int i = 3; i < arguments; ++i) {
+    for (int i = 3; i < arguments; ++i) { // Fix loop to go to the last argument
         if (i > 3) {
             reason += " ";
         }
         reason += sep->arg[i];
     }
 
-    c->Message(Chat::White, "Awarded %d EoM to %s for %s.", Strings::ToInt(sep->arg[2]), character_name.c_str(), reason.c_str());
-    zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name + " for " + reason);
+    c->Message(Chat::White, "Awarded %d EoM to %s", Strings::ToInt(sep->arg[2]), character_name.c_str());
+    if (!reason.empty()) {
+        c->Message(Chat::White, "Reason: %s", reason.c_str());
+        zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name + " for " + reason);
+    } else {
+        zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name);
+    }
 
     quest_manager.WorldWideSignal(WWSignalUpdateType_Character, 666);
 }
