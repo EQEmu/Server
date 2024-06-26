@@ -2,29 +2,48 @@
 #include "../zone.h"
 #include "../../common/repositories/character_data_repository.h"
 #include "../questmgr.h"
+#include <algorithm> // For std::transform
 
 void command_soulmark(Client *c, const Seperator *sep)
 {
     int arguments = sep->argnum;
-    if (arguments < 4) {  // Adjusted to expect a reason
+    if (arguments < 2) {  // Expecting at least 3 arguments to include reason
+        c->Message(Chat::White, "Insufficient Number of Arguments");
         c->Message(Chat::White, "Usage: #soulmark [Add/Remove] [Character] [Reason]");
         return;
     }
 
     std::string action = sep->arg[1];
     std::string character_name = sep->arg[2];
-    std::string reason;
+
+    // Convert action to lowercase to make the comparison case-insensitive
+    std::transform(action.begin(), action.end(), action.begin(), ::tolower);
+
+    // Check if action is valid
+    if (action != "add" && action != "remove") {
+        c->Message(Chat::White, "Invalid Action Verb");
+        c->Message(Chat::White, "Usage: #soulmark [Add/Remove] [Character] [Reason]");
+        return;
+    }
+
+    if (action == "add" && arguments <= 2) {
+        c->Message(Chat::White, "Insufficient Number of Arguments");
+        c->Message(Chat::White, "Usage: #soulmark [Add/Remove] [Character] [Reason]");
+        return;
+    }
 
     // Concatenate all arguments from sep->arg[3] onwards to form the reason string
-    for (int i = 3; i < arguments; ++i) {
+    std::string reason;
+    for (int i = 3; i <= arguments; i++) {
         if (i > 3) {
             reason += " ";
         }
         reason += sep->arg[i];
     }
 
-    if (action != "Add" && action != "Remove") {
-        c->Message(Chat::White, "Usage: #soulmark [Add/Remove] [Character] [Reason]");
+    if (action == "add" && reason.empty()) {
+        c->Message(Chat::White, "Reason is a required argument");
+        c->Message(Chat::White, "Usage: #soulmark [Add/Remove] [Character] [Reason]");        
         return;
     }
 
@@ -46,14 +65,14 @@ void command_soulmark(Client *c, const Seperator *sep)
 
     std::string key = fmt::format("{}-CheaterFlag", account_id);
 
-    if (action == "Add") {
+    if (action == "add") {
         DataBucketKey k;
         k.key = key;
         k.value = reason;  // Set the flag with the reason
 
         DataBucket::SetData(k);
         c->Message(Chat::White, "Soulmark added to %s (AccountID: %d) Reason: %s.", character_name.c_str(), account_id, reason.c_str());
-    } else if (action == "Remove") {
+    } else if (action == "remove") {
         std::string existing_flag = DataBucket::GetData(key);
         if (!existing_flag.empty()) {
             DataBucketKey k;

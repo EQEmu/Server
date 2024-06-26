@@ -1771,6 +1771,9 @@ void NPC::Disarm(Client* client, int chance) {
 					// Remove item from loot table
 					RemoveItem(weapon->ID);
 					CalcBonuses();
+					client->PushItemOnCursor(*inst, true);
+					
+					/*
 					if (inst) {
 						// create a ground item
 						Object* object = new Object(inst, GetX(), GetY(), GetZ(), 0.0f, 300000);
@@ -1778,6 +1781,7 @@ void NPC::Disarm(Client* client, int chance) {
 						object->StartDecay();
 						safe_delete(inst);
 					}
+					*/
 				}
 			}
 			// Update Appearance

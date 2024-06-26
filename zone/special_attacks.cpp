@@ -1850,6 +1850,15 @@ void NPC::DoClassAttacks(Mob *target) {
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), false);
+
+		// Add a rule here pls
+		for (const auto& h : hate_list.GetHateList()) {
+			auto hater = h->entity_on_hatelist;
+			if (hater->GetTarget()->GetID() == GetOwner()->GetID() && hater->IsNPC()) {
+				Taunt(hater->CastToNPC(), false);
+				hater->AddToHateList(this);
+			}
+		}
 	}
 
 	if(!ca_time) {
