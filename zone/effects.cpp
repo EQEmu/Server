@@ -1163,6 +1163,11 @@ void EntityList::AESpell(
 		max_targets = nullptr;
 	}
 
+	if (!IsValidSpell(spell_id)) {
+		LogError("AESpell called with invalid spell ID");
+		return;
+	}
+
 	/**
 	 * Max AOE targets
 	 */

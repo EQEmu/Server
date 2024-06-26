@@ -1776,6 +1776,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	{
 		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
+	
 	// we're done casting, now try to apply the spell
 	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
 	{
