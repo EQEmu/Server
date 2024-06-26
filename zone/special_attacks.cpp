@@ -1854,7 +1854,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		// Add a rule here pls
 		for (const auto& h : hate_list.GetHateList()) {
 			auto hater = h->entity_on_hatelist;
-			if (hater->GetTarget()->GetID() == GetOwner()->GetID() && hater->IsNPC()) {
+			if (hater && hater->GetTarget()->GetID() == GetOwner()->GetID() && hater->IsNPC()) {
 				Taunt(hater->CastToNPC(), false);
 				hater->AddToHateList(this);
 			}
