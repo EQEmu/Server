@@ -2349,7 +2349,7 @@ bool IsAegolismSpell(uint16 spell_id) {
 		}
 	}
 
-	if (has_max_hp == true && has_current_hp == true && has_ac == true) {
+	if (has_max_hp && has_current_hp && has_ac) {
 		return 1;
 	}
 	return 0;
@@ -2358,19 +2358,22 @@ bool IsAegolismSpell(uint16 spell_id) {
 
 bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
 	
+	/*
+		This is hardcoded to be specific to the type of HP buffs that are removed if a mob has an Aegolism buff.
+	*/
+
 	if (!IsValidSpell(spell_id)) {
 		return 0;
 	}
 
 	bool has_max_hp = false;
 	bool has_current_hp = false;
-	bool fail = false;
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
 		if ((i < 2 && spells[spell_id].effect_id[i] != SE_CHA) ||
 			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
-			fail = true;
+			return 0;;
 		}
 
 		if (i == 2 && spells[spell_id].effect_id[i] == SE_TotalHP) {
@@ -2382,7 +2385,7 @@ bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
 		}
 	}
 
-	if (has_max_hp == true && has_current_hp == true && fail == false) {
+	if (has_max_hp && has_current_hp) {
 		return 1;
 	}
 
@@ -2390,19 +2393,20 @@ bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
 }
 
 bool AegolismStackingIsArmorClassSpell(uint16 spell_id) {
-
+	/*
+		This is hardcoded to be specific to the type of AC buffs that are removed if a mob has an Aegolism buff.
+	*/
 	if (!IsValidSpell(spell_id)) {
 		return 0;
 	}
 
 	bool has_ac = false;
-	bool fail = false;
 
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
 		if ((i < 3 && spells[spell_id].effect_id[i] != SE_CHA) ||
 			i > 3 && spells[spell_id].effect_id[i] != SE_Blank) {
-			fail = true;
+			return 0;
 		}
 
 		if (i == 3 && spells[spell_id].effect_id[i] == SE_ArmorClass) {
@@ -2410,7 +2414,7 @@ bool AegolismStackingIsArmorClassSpell(uint16 spell_id) {
 		}
 	}
 
-	if (has_ac == true && fail == false) {
+	if (has_ac) {
 		return 1;
 	}
 
