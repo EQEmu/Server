@@ -10915,7 +10915,6 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	// This packet is only sent from the client if we ctrl click items in inventory
 	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
-
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -10932,8 +10931,8 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 			return; // Packet size does not match expected size
 		}
 
-		const auto from_parent = multi_move->moves[0].from_slot.Slot;
-		const auto to_parent   = multi_move->moves[0].to_slot.Slot;
+		const int16 from_parent = multi_move->moves[0].from_slot.Slot;
+		const int16 to_parent   = multi_move->moves[0].to_slot.Slot;
 
 		// CTRL + left click drops an item into a bag without opening it.
 		// This can be a bag, in which case it tries to fill the target bag with the contents of the bag on the cursor
@@ -10972,8 +10971,9 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 					bool error = false;
 					SwapItemResync(mi);
 					InterrogateInventory(this, false, true, false, error, false);
-					if (error)
+					if (error) {
 						InterrogateInventory(this, true, false, true, error);
+					}
 				}
 			}
 		// This is the swap.
@@ -10989,14 +10989,14 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 
 			for (int i = 0; i < multi_move->count; i++) {
 				// These are always bags, so we don't need to worry about raw items in slotCursor
-				auto from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				int16 from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
 				if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
 					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
 				} else if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
 					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
 				}
 
-				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				int16 to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
 				if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
@@ -11004,9 +11004,11 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 				}
 
 				// Probably need some error checking here, but I wasn't able to produce any error states on purpose.
-				MoveInfo move;
-				move.item = m_inv.PopItem(from_slot); // Don't delete the instance here
-				move.to_slot = to_slot;
+				MoveInfo move{
+					.item = m_inv.PopItem(from_slot), // Don't delete the instance here
+					.to_slot = to_slot
+				};
+
 				if (move.item) {
 					items.push_back(move);
 				}
@@ -11016,7 +11018,6 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 				PutItemInInventory(move.to_slot, *move.item); // This saves inventory too
 			}
 		}
-
 	} else {
 		LinkDead(); // This packet should not be sent by an older client
 		return;
