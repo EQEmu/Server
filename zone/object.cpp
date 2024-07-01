@@ -579,7 +579,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 			if (sender->CheckLoreConflict(item)) {
 				duplicate_lore = true;
 
-				const int16 lore_item_slot = sender->GetInv().HasItem(item->ID, 0, invWhereBank);
+				const int16 lore_item_slot = sender->GetInv().HasItem(item->ID, 0, InventoryFilter::Bank);
 				if (lore_item_slot != INVALID_INDEX) { // if the duplicate is in the bank, delete it.
 					sender->DeleteItemInInventory(lore_item_slot);
 				} else { // otherwise, we delete the new one

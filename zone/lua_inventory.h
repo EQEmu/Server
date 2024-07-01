@@ -50,13 +50,13 @@ public:
 	bool HasItemEquippedByID(uint32 item_id);
 	int HasItem(int item_id);
 	int HasItem(int item_id, int quantity);
-	int HasItem(int item_id, int quantity, int where);
+	int HasItem(int item_id, int quantity, uint8 filter);
 	bool HasSpaceForItem(Lua_Item item, int quantity);
 	int HasItemByUse(int use);
 	int HasItemByUse(int use, uint8 quantity);
-	int HasItemByUse(int use, uint8 quantity, uint8 where);
+	int HasItemByUse(int use, uint8 quantity, uint8 filter);
 	int HasItemByLoreGroup(uint32 loregroup);
-	int HasItemByLoreGroup(uint32 loregroup, int where);
+	int HasItemByLoreGroup(uint32 loregroup, uint8 filter);
 	int FindFreeSlot(bool for_bag, bool try_cursor);
 	int FindFreeSlot(bool for_bag, bool try_cursor, int min_size);
 	int FindFreeSlot(bool for_bag, bool try_cursor, int min_size, bool is_arrow);

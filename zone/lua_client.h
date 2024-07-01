@@ -235,8 +235,8 @@ public:
 	bool AutoSplitEnabled();
 	void SetHorseId(int id);
 	int GetHorseId();
-	void NukeItem(uint32 item_num);
-	void NukeItem(uint32 item_num, int where_to_check);
+	uint32 NukeItem(uint32 item_id);
+	uint32 NukeItem(uint32 item_id, uint8 filter);
 	void SetTint(int slot_id, uint32 color);
 	void SetMaterial(int slot_id, uint32 item_id);
 	void Undye();

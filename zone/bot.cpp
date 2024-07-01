@@ -6813,10 +6813,10 @@ bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 		return false;
 
 	if (item->LoreGroup == -1)	// Standard lore items; look everywhere except the shared bank, return the result
-		return (m_inv.HasItem(item->ID, 0, invWhereWorn) != INVALID_INDEX);
+		return (m_inv.HasItem(item->ID, 0, InventoryFilter::Worn) != INVALID_INDEX);
 
 	//If the item has a lore group, we check for other items with the same group and return the result
-	return (m_inv.HasItemByLoreGroup(item->LoreGroup, invWhereWorn) != INVALID_INDEX);
+	return (m_inv.HasItemByLoreGroup(item->LoreGroup, InventoryFilter::Worn) != INVALID_INDEX);
 }
 
 bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes) {

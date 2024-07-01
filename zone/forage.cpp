@@ -187,13 +187,13 @@ uint32 ZoneDatabase::LoadFishing(uint32 zone_id, uint8 skill_level, uint32 &npc_
 bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
 	const EQ::ItemInstance* Pole = m_inv[EQ::invslot::slotPrimary];
-	int32 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
+	int32 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, InventoryFilter::Worn | InventoryFilter::Personal);
 	const EQ::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
 	if (!Pole || !Pole->IsClassCommon() || Pole->GetItem()->ItemType != EQ::item::ItemTypeFishingPole) {
-		if (m_inv.HasItemByUse(EQ::item::ItemTypeFishingPole, 1, invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor))	//We have a fishing pole somewhere, just not equipped
+		if (m_inv.HasItemByUse(EQ::item::ItemTypeFishingPole, 1, InventoryFilter::Worn | InventoryFilter::Personal | InventoryFilter::Bank | InventoryFilter::SharedBank | InventoryFilter::Trading | InventoryFilter::Cursor))	//We have a fishing pole somewhere, just not equipped
 			MessageString(Chat::Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
 		else	//We don't have a fishing pole anywhere
 			MessageString(Chat::Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
@@ -285,7 +285,7 @@ void Client::GoFish(bool guarantee, bool use_bait)
 	uint16 fishing_skill = GetSkill(EQ::skills::SkillFishing);	//will take into account skill bonuses on pole & bait
 
 	//make sure we still have a fishing pole on:
-	int16 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
+	int16 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, InventoryFilter::Worn | InventoryFilter::Personal);
 	const EQ::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX) {
 		Bait = m_inv.GetItem(bslot);
