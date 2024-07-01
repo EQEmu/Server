@@ -633,8 +633,8 @@ namespace SBIndex {
 	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 0; // SPA 288
 	constexpr uint16 SKILLATK_PROC_CHANCE                   = 1; // SPA 288
 	constexpr uint16 SKILLATK_PROC_SKILL                    = 2; // SPA 288
-	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
-	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
+	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 0; // SPA 219
+	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 1; // SPA 219
 	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
 	constexpr uint16 DOUBLE_RIPOSTE_SKILL_ATK_CHANCE        = 1; // SPA 223
 	constexpr uint16 DOUBLE_RIPOSTE_SKILL                   = 2; // SPA 223
