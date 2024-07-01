@@ -318,10 +318,10 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		SendParcelAck();
 		return;
 	}
-	auto next_slot = INVALID_INDEX;
+	auto free_slot = INVALID_INDEX;
 	if (!send_to_client.at(0).character_name.empty()) {
-		next_slot = FindNextFreeParcelSlot(send_to_client.at(0).char_id);
-		if (next_slot == INVALID_INDEX) {
+		free_slot = FindNextFreeParcelSlot(send_to_client.at(0).char_id);
+		if (free_slot == INVALID_INDEX) {
 			Message(
 				Chat::Yellow,
 				fmt::format(
@@ -378,7 +378,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			parcel_out.quantity  = quantity;
 			parcel_out.item_id   = inst->GetID();
 			parcel_out.char_id   = send_to_client.at(0).char_id;
-			parcel_out.slot_id   = next_slot;
+			parcel_out.slot_id   = free_slot;
 			parcel_out.id        = 0;
 
 			if (inst->IsAugmented()) {
@@ -521,7 +521,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			parcel_out.quantity  = parcel_in->quantity;
 			parcel_out.item_id   = PARCEL_MONEY_ITEM_ID;
 			parcel_out.char_id   = send_to_client.at(0).char_id;
-			parcel_out.slot_id   = next_slot;
+			parcel_out.slot_id   = free_slot;
 			parcel_out.id        = 0;
 
 			auto result = CharacterParcelsRepository::InsertOne(database, parcel_out);
