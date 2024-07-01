@@ -44,7 +44,23 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<std::string> GetSkillCapFileLines(Database& db)
+	{
+		std::vector<std::string> lines;
 
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT CONCAT_WS('^', `class_id`, `skill_id`, `level`, `cap`, `class_`) FROM {} ORDER BY `class_id`, `skill_id`, `level` ASC",
+				TableName()
+			)
+		);
+
+		for (auto row : results) {
+			lines.emplace_back(row[0]);
+		}
+
+		return lines;
+	}
 };
 
 #endif //EQEMU_SKILL_CAPS_REPOSITORY_H
