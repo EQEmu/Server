@@ -2486,8 +2486,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 		return false;
 
 	if (!spell_target) {
-		Message(Chat::SpellFailure, "ERROR: ATTEMPTED TO CAST SPELL WITH NO TARGET");
-		return false;
+		if (IsBeneficialSpell(spell_id)) {
+			spell_target = this;
+		} else {
+			Message(Chat::SpellFailure, "Invalid spellcasting state reached, please report this as a bug.");
+			return false;
+		}
 	}
 
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
