@@ -1510,7 +1510,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	Mob *spell_target = entity_list.GetMob(target_id);
 	// here we do different things if this is a bard casting a bard song from
 	// a spell bar slot
-	if(IsBardSong(spell_id)) // bard's can move when casting any spell...
+	if(IsBardSong(spell_id) || slot > CastingSlot::MaxGems) // bard's can move when casting any spell...
 	{
 		if (IsBardSong(spell_id) && slot < CastingSlot::MaxGems) {
 			if (spells[spell_id].buff_duration == 0xFFFF) {
@@ -3800,6 +3800,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].RootBreakChance = 0;
 	buffs[emptyslot].virus_spread_time = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
+	buffs[emptyslot].ticsinitial = duration;
 
 	if (level_override > 0 || buffs[emptyslot].hit_number > 0) {
 		buffs[emptyslot].UpdateClient = true;
@@ -5319,6 +5320,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	{
 		if(!caster->CombatRange(this))
 		{
+			caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells cast from outside of melee range.");
 			return(0);
 		}
 	}
@@ -5326,6 +5328,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if(GetSpecialAbility(IMMUNE_MAGIC))
 	{
 		LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
+		caster->Message(Chat::SpellFailure, "Your spell is ineffective! This opponent will resist all spells.");
 		return(0);
 	}
 

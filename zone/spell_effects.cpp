@@ -4083,7 +4083,44 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			break;
 		}
 
+		case SE_Silence: {
+			if (IsClient() || IsPetOwnerClient()) {
+				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
+
+				if (resist_check == 100) {
+					break;
+				} else if (!TryFadeEffect(slot)) {
+					BuffFadeBySlot(slot);
+				}
+			}
+		}
+
+		case SE_Mez: {
+			if (IsClient() || IsPetOwnerClient()) {
+				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
+
+				if (resist_check == 100) {
+					break;
+				} else if (!TryFadeEffect(slot)) {
+					BuffFadeBySlot(slot);
+				}
+			}
+		}
+
 		case SE_Charm: {
+			if (IsClient() || IsPetOwnerClient()) {
+				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
+
+				if (resist_check == 100) {
+					break;
+				} else if (!TryFadeEffect(slot)) {
+					BuffFadeBySlot(slot);
+				}
+			}
+
 			if (!caster || !PassCharismaCheck(caster, buff.spellid)) {
 				BuffFadeByEffect(SE_Charm);
 
@@ -4098,6 +4135,17 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Root: {
+			if (IsClient() || IsPetOwnerClient()) {
+				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
+
+				if (resist_check == 100) {
+					break;
+				} else if (!TryFadeEffect(slot)) {
+					BuffFadeBySlot(slot);
+				}
+			}
+
 			/* Root formula derived from extensive personal live parses - Kayen
 			ROOT has a 70% chance to do a resist check to break.
 			*/
@@ -4116,6 +4164,17 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Fear: {
+			if (IsClient() || IsPetOwnerClient()) {
+				int resist_mod = 10 * (buff.ticsinitial - buff.ticsremaining); // 10 resist mod for each tic of this buff endured.
+				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster, true, spells[buff.spellid].resist_difficulty - resist_mod);
+
+				if (resist_check == 100) {
+					break;
+				} else if (!TryFadeEffect(slot)) {
+					BuffFadeBySlot(slot);
+				}
+			}
+
 			if (zone->random.Roll(RuleI(Spells, FearBreakCheckChance))) {
 				float resist_check = ResistSpell(spells[buff.spellid].resist_type, buff.spellid, caster,0,0,true);
 
