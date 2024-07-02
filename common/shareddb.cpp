@@ -1631,11 +1631,11 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			if (modifiedName[0] != '\0') {
 				strn0cpy(item.Name, modifiedName, sizeof(item.Name));
 			}
+		}
 
-			// Bard Instrument that isn't a weapon which fits in primary/secondary
-			if ((item.Slots & (8192 | 16384)) && (item.Classes & GetPlayerClassBit(Class::Bard)) && (item.Damage <= 0)) {
-				item.Slots |= 2048;
-			}
+		// Bard Instrument that isn't a weapon which fits in primary/secondary
+		if ((item.Slots & (8192 | 16384)) && (item.Classes & GetPlayerClassBit(Class::Bard)) && (item.Damage <= 0) && (item.BardValue > 0)) {
+			item.Slots |= 2048;
 		}
 
 		if (RuleB(Custom, PowerSourceItemUpgrade)) {
