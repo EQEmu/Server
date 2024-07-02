@@ -5189,7 +5189,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 				if (caster->GetLevelCon(GetLevel()+1) == ConsiderColor::LightBlue ||
 				    caster->GetLevelCon(GetLevel()+1) == ConsiderColor::Green ||
 					caster->GetLevelCon(GetLevel()+1) == ConsiderColor::Gray ||
-					GetLeve() <= 46) {
+					GetLevel() <= 46) {
 
 					return false;		
 				}
