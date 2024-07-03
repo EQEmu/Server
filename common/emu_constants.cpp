@@ -80,39 +80,19 @@ bool Bug::IsValid(uint32 category_id)
 	return bug_category_names.find(category_id) != bug_category_names.end();
 }
 
-const char *EQ::constants::GetStanceName(StanceType stance_type) {
-	switch (stance_type) {
-	case stanceUnknown:
-		return "Unknown";
-	case stancePassive:
-		return "Passive";
-	case stanceBalanced:
-		return "Balanced";
-	case stanceEfficient:
-		return "Efficient";
-	case stanceReactive:
-		return "Reactive";
-	case stanceAggressive:
-		return "Aggressive";
-	case stanceAssist:
-		return "Assist";
-	case stanceBurn:
-		return "Burn";
-	case stanceEfficient2:
-		return "Efficient2";
-	case stanceBurnAE:
-		return "BurnAE";
-	default:
-		return "Invalid";
-	}
+std::string Stance::GetName(uint8 stance_id)
+{
+	return IsValid(stance_id) ? stance_names[stance_id] : "UNKNOWN STANCE";
 }
 
-int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
-	if (EQ::ValueWithin(stance_type, EQ::constants::stancePassive, EQ::constants::stanceBurnAE)) {
-		return (stance_type - EQ::constants::stancePassive);
-	}
+bool Stance::IsValid(uint8 stance_id)
+{
+	return stance_names.find(stance_id) != stance_names.end();
+}
 
-	return 0;
+uint8 Stance::GetIndex(uint8 stance_id)
+{
+	return IsValid(stance_id) ? (stance_id - Stance::Passive) : 0;
 }
 
 const std::map<uint8, std::string>& EQ::constants::GetLanguageMap()

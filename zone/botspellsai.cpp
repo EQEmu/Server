@@ -629,16 +629,16 @@ bool Bot::BotCastCombatBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 				float manaRatioToCast = 75.0f;
 
 				switch(GetBotStance()) {
-				case EQ::constants::stanceEfficient:
+				case Stance::Efficient:
 					manaRatioToCast = 90.0f;
 					break;
-				case EQ::constants::stanceBalanced:
-				case EQ::constants::stanceAggressive:
+				case Stance::Balanced:
+				case Stance::Aggressive:
 					manaRatioToCast = 75.0f;
 					break;
-				case EQ::constants::stanceReactive:
-				case EQ::constants::stanceBurn:
-				case EQ::constants::stanceBurnAE:
+				case Stance::Reactive:
+				case Stance::Burn:
+				case Stance::AEBurn:
 					manaRatioToCast = 50.0f;
 					break;
 				default:
@@ -746,18 +746,18 @@ bool Bot::BotCastNuke(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 			float manaRatioToCast = 75.0f;
 
 			switch(GetBotStance()) {
-			case EQ::constants::stanceEfficient:
+			case Stance::Efficient:
 				manaRatioToCast = 90.0f;
 				break;
-			case EQ::constants::stanceBalanced:
+			case Stance::Balanced:
 				manaRatioToCast = 75.0f;
 				break;
-			case EQ::constants::stanceReactive:
-			case EQ::constants::stanceAggressive:
+			case Stance::Reactive:
+			case Stance::Aggressive:
 				manaRatioToCast = 50.0f;
 				break;
-			case EQ::constants::stanceBurn:
-			case EQ::constants::stanceBurnAE:
+			case Stance::Burn:
+			case Stance::AEBurn:
 				manaRatioToCast = 25.0f;
 				break;
 			default:
@@ -924,16 +924,16 @@ bool Bot::BotCastBuff(Mob* tar, uint8 botLevel, uint8 botClass) {
 				float manaRatioToCast = 75.0f;
 
 				switch (GetBotStance()) {
-				case EQ::constants::stanceEfficient:
+				case Stance::Efficient:
 					manaRatioToCast = 90.0f;
 						break;
-				case EQ::constants::stanceBalanced:
-				case EQ::constants::stanceAggressive:
+				case Stance::Balanced:
+				case Stance::Aggressive:
 					manaRatioToCast = 75.0f;
 						break;
-				case EQ::constants::stanceReactive:
-				case EQ::constants::stanceBurn:
-				case EQ::constants::stanceBurnAE:
+				case Stance::Reactive:
+				case Stance::Burn:
+				case Stance::AEBurn:
 					manaRatioToCast = 50.0f;
 						break;
 				default:
@@ -1088,18 +1088,18 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 				float hpRatioToCast = 0.0f;
 
 				switch (GetBotStance()) {
-					case EQ::constants::stanceEfficient:
-					case EQ::constants::stanceAggressive:
+					case Stance::Efficient:
+					case Stance::Aggressive:
 						hpRatioToCast = isPrimaryHealer ? 90.0f : 50.0f;
 						break;
-					case EQ::constants::stanceBalanced:
+					case Stance::Balanced:
 						hpRatioToCast = isPrimaryHealer ? 95.0f : 75.0f;
 						break;
-					case EQ::constants::stanceReactive:
+					case Stance::Reactive:
 						hpRatioToCast = isPrimaryHealer ? 100.0f : 90.0f;
 						break;
-					case EQ::constants::stanceBurn:
-					case EQ::constants::stanceBurnAE:
+					case Stance::Burn:
+					case Stance::AEBurn:
 						hpRatioToCast = isPrimaryHealer ? 75.0f : 25.0f;
 						break;
 					default:
@@ -2939,11 +2939,12 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		return 0;
 	--class_index;
 
-	EQ::constants::StanceType stance_type = GetBotStance();
-	if (stance_type < EQ::constants::stancePassive || stance_type > EQ::constants::stanceBurnAE)
+	uint32 stance_id = GetBotStance();
+	if (!Stance::IsValid(stance_id)) {
 		return 0;
+	}
 
-	uint8 stance_index = EQ::constants::ConvertStanceTypeToIndex(stance_type);
+	uint8 stance_index = Stance::GetIndex(stance_id);
 	uint8 type_index = nHSND;
 
 	if (HasGroup()) {

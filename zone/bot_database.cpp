@@ -135,7 +135,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 		if (
 			e.spell_type_index >= Bot::SPELL_TYPE_COUNT ||
 			!IsPlayerClass(e.class_id) ||
-			e.stance_index >= EQ::constants::STANCE_TYPE_COUNT
+			e.stance_index >= Stance::AEBurn
 		) {
 			continue;
 		}
@@ -761,7 +761,7 @@ bool BotDatabase::LoadStance(Bot* b, bool& stance_flag)
 
 	auto e = l.front();
 
-	b->SetBotStance(static_cast<EQ::constants::StanceType>(e.stance_id));
+	b->SetBotStance(e.stance_id);
 
 	stance_flag = true;
 
@@ -793,7 +793,7 @@ bool BotDatabase::SaveStance(Bot* b)
 		database,
 		BotStancesRepository::BotStances{
 			.bot_id = b->GetBotID(),
-			.stance_id = static_cast<uint8_t>(b->GetBotStance())
+			.stance_id = b->GetBotStance()
 		}
 	);
 }
@@ -2208,7 +2208,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 	if (
 		spell_type_index >= Bot::SPELL_TYPE_COUNT ||
 		class_index >= Class::PLAYER_CLASS_COUNT ||
-		stance_index >= EQ::constants::STANCE_TYPE_COUNT ||
+		stance_index >= Stance::AEBurn ||
 		conditional_index >= cntHSND
 	) {
 		return 0;

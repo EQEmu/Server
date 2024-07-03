@@ -34,7 +34,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	Bot* bot_puller = nullptr;
 	for (auto bot_iter : sbl) {
 
-		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == EQ::constants::stancePassive) {
+		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == Stance::Passive) {
 			continue;
 		}
 
