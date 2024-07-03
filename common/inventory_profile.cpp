@@ -1678,13 +1678,13 @@ const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs(uint8 filter
 {
 	static const std::map<uint8, std::vector<int16>> slots = {
 		{ InventoryFilter::Worn,       { EQ::invslot::EQUIPMENT_BEGIN,       EQ::invslot::EQUIPMENT_END }},
-		{ InventoryFilter::Personal,   { EQ::invslot::GENERAL_BEGIN,         EQ::invslot::GENERAL_BEGIN }},
-		{ InventoryFilter::Personal,   { EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_BEGIN }},
+		{ InventoryFilter::Personal,   { EQ::invslot::GENERAL_BEGIN,         EQ::invslot::GENERAL_END }},
+		{ InventoryFilter::Personal,   { EQ::invbag::GENERAL_BAGS_BEGIN,     EQ::invbag::GENERAL_BAGS_END }},
 		{ InventoryFilter::Cursor,     { EQ::invbag::CURSOR_BAG_BEGIN,       EQ::invbag::CURSOR_BAG_END }},
 		{ InventoryFilter::Bank,       { EQ::invslot::BANK_BEGIN,            EQ::invslot::BANK_END }},
 		{ InventoryFilter::Bank,       { EQ::invbag::BANK_BAGS_BEGIN,        EQ::invbag::BANK_BAGS_END }},
 		{ InventoryFilter::SharedBank, { EQ::invslot::SHARED_BANK_BEGIN,     EQ::invslot::SHARED_BANK_END }},
-		{ InventoryFilter::SharedBank, { EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END }},
+		{ InventoryFilter::SharedBank, { EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END }}
 	};
 
 	std::vector<int16> slot_ids;
@@ -1693,7 +1693,6 @@ const std::vector<int16>& EQ::InventoryProfile::GetInventorySlotIDs(uint8 filter
 		if (filter == InventoryFilter::All || filter & e.first) {
 			for (int16 slot_id = e.second[0]; slot_id <= e.second[1]; ++slot_id) {
 				slot_ids.emplace_back(slot_id);
-				LogInventoryDetail("Adding slot ID [{}]", slot_id);
 			}
 		}
 	}
