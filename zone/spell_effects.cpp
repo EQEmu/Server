@@ -1401,7 +1401,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
 				if (buffslot > -1) {
-					buffs[buffslot].melee_rune = effect_value;
+					int bonus_value = caster->GetHealAmt();
+					if (IsBardSong(spell_id) && bonus_value > 0) {
+						bonus_value = std::ceil(RuleI(Custom, BardSongHealAmtReductionFactor) * bonus_value);
+					}
+
+					buffs[buffslot].melee_rune = effect_value + bonus_value;
 				}
 				break;
 			}
@@ -1412,7 +1417,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Spell Absorb Rune: %+i", effect_value);
 #endif
 				if (effect_value > 0 && buffslot > -1) {
-					buffs[buffslot].magic_rune = effect_value;
+					int bonus_value = caster->GetHealAmt();
+					if (IsBardSong(spell_id) && bonus_value > 0) {
+						bonus_value = std::ceil(RuleI(Custom, BardSongHealAmtReductionFactor) * bonus_value);
+					}
+
+					buffs[buffslot].magic_rune = effect_value + bonus_value;
 				}
 
 				break;
@@ -1421,7 +1431,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_MitigateMeleeDamage:
 			{
 				if (buffslot > -1) {
-					buffs[buffslot].melee_rune = spells[spell_id].max_value[i];
+					int bonus_value = caster->GetHealAmt();
+					if (IsBardSong(spell_id) && bonus_value > 0) {
+						bonus_value = std::ceil(RuleI(Custom, BardSongHealAmtReductionFactor) * bonus_value);
+					}
+
+					int eff_value = spells[spell_id].max_value[i];
+
+					buffs[buffslot].melee_rune = eff_value + bonus_value;
 				}
 				break;
 			}
@@ -1445,7 +1462,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_MitigateSpellDamage:
 			{
 				if (buffslot > -1) {
-					buffs[buffslot].magic_rune = spells[spell_id].max_value[i];
+					int bonus_value = caster->GetHealAmt();
+					if (IsBardSong(spell_id) && bonus_value > 0) {
+						bonus_value = std::ceil(RuleI(Custom, BardSongHealAmtReductionFactor) * bonus_value);
+					}
+
+					int eff_value = spells[spell_id].max_value[i];
+
+					buffs[buffslot].magic_rune = eff_value + bonus_value;
 				}
 				break;
 			}
@@ -1453,7 +1477,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_MitigateDotDamage:
 			{
 				if (buffslot > -1) {
-					buffs[buffslot].dot_rune = spells[spell_id].max_value[i];
+					int bonus_value = caster->GetHealAmt();
+					if (IsBardSong(spell_id) && bonus_value > 0) {
+						bonus_value = std::ceil(RuleI(Custom, BardSongHealAmtReductionFactor) * bonus_value);
+					}
+
+					int eff_value = spells[spell_id].max_value[i];
+
+					buffs[buffslot].dot_rune = eff_value + bonus_value;
 				}
 				break;
 			}

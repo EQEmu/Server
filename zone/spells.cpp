@@ -205,30 +205,30 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 
 		// Check if we already have a valid target
 		if (IsBeneficialSpell(spell_id)) {
-			if (target_mob->IsOfClientBotMerc() || (target_mob->IsPet() && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBotMerc())) {
+			if (target_mob->IsOfClientBotMerc() || ((target_mob->IsPet() || target_mob->IsCharmed()) && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBotMerc())) {
 				return target_id;
 			}
 
 			if (target_target) {
-				if (target_target->IsOfClientBotMerc() || (target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBotMerc())) {
+				if (target_target->IsOfClientBotMerc() || ((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBotMerc())) {
 					return target_target->GetID();
 				}
 			}
 
 			return GetID();
 		} else {
-			if (target_mob->IsNPC() && !(target_mob->IsPet() && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBot())) {
+			if (target_mob->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBot())) {
 				return target_id;
 			}
 
 			if (target_target) {
-				if (target_target->IsNPC() && !(target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
+				if (target_target->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
 					return target_target->GetID();
 				}
 
 				if (GetPet() && GetPet()->GetTarget()) {
 					target_target = GetPet()->GetTarget();
-					if (target_target->IsNPC() && !(target_target->IsPet() && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
+					if (target_target->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner()->IsOfClientBot())) {
 						return target_target->GetID();
 					}
 				} else {
