@@ -179,6 +179,7 @@
 #define CORPSE_DECAY_TIME_MINUTE    495		//This corpse will decay in %1 minute(s) %2 seconds.
 #define DISC_LEVEL_ERROR			503		//You must be a level %1 ... to use this discipline.
 #define DISCIPLINE_CANUSEIN			504		//You can use a new discipline in %1 minutes %2 seconds.
+#define SHARE_MONEY					511		//%1 shares money with the group.
 #define PVP_ON						552		//You are now player kill and follow the ways of Discord.
 #define GENERIC_STRINGID_SAY		554		//%1 says '%T2'
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
@@ -530,6 +531,8 @@
 #define GROUP_INVITEE_NOT_FOUND		12268	//You must target a player or use /invite <name> to invite someone to your group.
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define ALREADY_IN_PARTY			12272	//That person is already in your party.
+#define TALKING_TO_SELF				12323	//Talking to yourself again?
+#define SPLIT_NO_GROUP				12328	//You are not in a group! Keep it all.
 #define NO_LONGER_HIDDEN			12337   //You are no longer hidden.
 #define STOP_SNEAKING				12338	//You stop sneaking
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
@@ -580,6 +583,7 @@
 #define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.
 #define HOT_HEALED_OTHER			12998	//%1 healed you for %2 hit points by %3.
 #define DISC_LEVEL_USE_ERROR		13004	//You are not sufficient level to use this discipline.
+#define SPLIT_FAIL					13112	//There is not enough to split, keep it.
 #define TOGGLE_ON					13172	//Asking server to turn ON your incoming tells.
 #define TOGGLE_OFF					13173	//Asking server to turn OFF all incoming tells for you.
 #define DUEL_INPROGRESS				13251	//You have already accepted a duel with someone else cowardly dog.
