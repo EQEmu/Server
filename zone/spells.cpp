@@ -148,7 +148,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			} else {
 				Message(Chat::SpellFailure, "You must have a pet in order to cast this spell or ability (%s).", spells[spell_id].name);
 				InterruptSpell(spell_id);
-				return 0;
+				return target_id;
 			}
 		}
 
@@ -188,7 +188,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			} else {
 				Message(Chat::SpellFailure, "You may not cast this type of spell or ability on yourself (%s).", spells[spell_id].name);
 				InterruptSpell();
-				return 0;
+				return target_id;
 			}
 		}
 
@@ -197,7 +197,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			if (IsBeneficialSpell(spell_id)) {
 				return GetID();
 			} else {
-				return 0;
+				return target_id;
 			}			
 		}
 
