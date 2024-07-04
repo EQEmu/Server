@@ -498,13 +498,14 @@ public:
 	bool	LimitCheckName(const char* npc_name);
 
 	int		GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con);
+	std::list<Mob*> GetHatedList(Mob *attacker, Mob *exclude, bool inc_gray_con);
 	bool	Merc_AICheckCloseBeneficialSpells(Merc* caster, uint8 iChance, float iRange, uint32 iSpellTypes);
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
 
 	Corpse* GetClosestCorpse(Mob* sender, const char *Name);
 	void	TryWakeTheDead(Mob* sender, Mob* target, int32 spell_id, uint32 max_distance, uint32 duration, uint32 amount_pets);
-	NPC* GetClosestBanker(Mob* sender, uint32 &distance);
+	NPC*    GetClosestBanker(Mob* sender, uint32 &distance);
 	void	CameraEffect(uint32 duration, float intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType, bool skip_client_pets=false);
 	void	ForceGroupUpdate(uint32 gid);

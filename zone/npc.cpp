@@ -601,6 +601,20 @@ bool NPC::Process()
 		DepopSwarmPets();
 	}
 
+	if (RuleB(Spells, SwarmPetFullAggro) && swarm_timer.Enabled() && !GetTarget()) {
+		Mob* owner = entity_list.GetMob(GetSwarmOwner());
+		if (owner->IsClient()) {
+			for (auto* npc : entity_list.GetHatedList(owner, this, true)) {
+				if (npc && !npc->IsClient()) {
+					zone->AddAggroMob();
+					AddToHateList(npc, 1, 0, true, false, false, SPELL_UNKNOWN, true);
+					SetTarget(npc);
+					break;
+				}
+			}
+		}
+	}
+
 	if (mob_close_scan_timer.Check()) {
 		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}

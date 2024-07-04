@@ -451,6 +451,7 @@ RULE_INT(Spells, AI_HealHPPct, 50, "Hitpoint percentage at which NPC starts heal
 RULE_BOOL(Spells, SHDProcIDOffByOne, true, "Pre June 2009 SHD spell procs were off by 1, they stopped doing this in June 2009 (UF+ spell files need this false)")
 RULE_BOOL(Spells, Jun182014HundredHandsRevamp, false, "This should be true for if you import a spell file newer than June 18, 2014")
 RULE_BOOL(Spells, SwarmPetTargetLock, false, "Use old method of swarm pets target locking till target dies then despawning")
+RULE_BOOL(Spells, SwarmPetFullAggro, false, "Add all of player's haters to swarm pet aggro list")
 RULE_BOOL(Spells, NPC_UseFocusFromSpells, true, "Allow NPC to use most spell derived focus effects")
 RULE_BOOL(Spells, NPC_UseFocusFromItems, false, "Allow NPC to use most item derived focus effects")
 RULE_BOOL(Spells, UseAdditiveFocusFromWornSlot, false, "Allows an additive focus effect to be calculated from worn slot. Does not apply limits checks. Can only have one additive focus rule be true.")

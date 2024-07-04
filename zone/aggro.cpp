@@ -608,6 +608,42 @@ int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 	return Count;
 }
 
+std::list<Mob*> EntityList::GetHatedList(Mob *attacker, Mob *exclude, bool inc_gray_con)
+{
+	std::list<Mob*> result;
+
+	// Return a list of how many mobs, within aggro range, hate *attacker
+	if (!attacker)
+		return result;	
+
+	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+		NPC *mob = it->second;
+		if (!mob || (mob == exclude)) {
+			continue;
+		}
+
+		if (!mob->IsEngaged()) {
+			continue;
+		}
+
+		if (!mob->CheckAggro(attacker)) {
+			continue;
+		}
+
+		float aggro_range = mob->GetAggroRange();
+
+		// Square it because we will be using DistNoRoot
+
+		aggro_range *= aggro_range;
+
+		if (DistanceSquared(mob->GetPosition(), attacker->GetPosition()) > aggro_range) {
+			continue;
+		}
+		result.push_back(mob);
+	}
+	return result;
+}
+
 /**
  * @param target
  * @param isSpellAttack

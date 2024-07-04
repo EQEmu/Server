@@ -172,6 +172,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
 			}
+			
+			Client* client;
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
@@ -1394,6 +1396,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		timer_duration = 0;
 	}
 
+	LogDebug("Setting timer_duration to [{}]", timer_duration);
+
 	if (!IsCastWhileInvisibleSpell(rank->spell))
 		CommonBreakInvisible();
 
@@ -1469,6 +1473,26 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 			}
 		}
 	}
+
+	int buff_count = GetMaxTotalSlots();
+	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i) {
+		auto buff = buffs[buffs_i];
+		if (IsEffectInSpell(buff.spellid, SE_HastenedAASkill)) {
+			total_reduction += spells[buff.spellid].base_value[GetSpellEffectIndex(buff.spellid, SE_HastenedAASkill)];
+		}
+	}
+
+	if (IsClient()) {
+		for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::EQUIPMENT_END; slot++) {
+			auto * item = GetInv().GetItem(slot);
+			if (item) {
+				int worn_spellid = item->GetItem()->Worn.Effect;
+				if (worn_spellid > 0 && IsEffectInSpell(worn_spellid, SE_HastenedAASkill)) {
+					total_reduction += spells[worn_spellid].base_value[GetSpellEffectIndex(worn_spellid, SE_HastenedAASkill)];
+				}
+			}
+		}
+	}	
 
 	return total_reduction;
 }
