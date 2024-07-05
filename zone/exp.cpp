@@ -535,10 +535,6 @@ void Client::AddEXP(uint64 in_add_exp, uint8 conlevel, bool resexp) {
 					DiscoverItem(new_item->GetItem()->ID);
 				}
 
-				if (!GetGM() && DiscoverArtifact(new_item)) {
-					DiscoverItem(new_item->GetItem()->ID);
-				}
-
 				for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
 					const EQ::ItemInstance *aug_i = old_item->GetAugment(r);
 					if (!aug_i) // no aug, try next slot!

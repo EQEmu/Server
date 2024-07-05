@@ -997,11 +997,11 @@ RULE_REAL(Custom, CustomSpellProcScalingFactor, 1.0, "Scale overridden sympathet
 RULE_REAL(Custom, ItemExtraSpellAmtMaximumPercentage, 0.0, "Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
 RULE_BOOL(Custom, LessStrictSpellStacking, true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
 RULE_INT(Custom, EnableSeasonalCharacters, 0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
-RULE_INT(Custom, ArtifactDiscoveryChance, 0, "Percentage chance that a looted Tier 2 item will be discovered as an Artifact, 0 to disable.")
 RULE_BOOL(Custom, PowerSourceItemUpgrade, false, "Enable to add Power Source to all items which can be equipped by some race and class.")
 RULE_REAL(Custom, PowerSourceItemUpgradeRateScale, 1.0, "Scale XP rate of items using this value.")
 RULE_BOOL(Custom, CombatProcsOnSpellCast, false, "Allow combat procs to happen on spell cast. Only one weapon with procs will be chosen from primary, secondary, ranged")
 RULE_INT(Custom, CombatProcsOnSpellCastProbability, 1, "Adjust the proc rate of weapons based on spell cast time")
+RULE_INT(Custom, BardSongHealAmtReductionFactor, 0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Parcel)

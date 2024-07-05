@@ -1645,10 +1645,6 @@ void Corpse::LootCorpseItem(Client *c, const EQApplicationPacket *app)
 			c->DiscoverItem(inst->GetItem()->ID);
 		}
 
-		if (!c->GetGM() && c->DiscoverArtifact(inst)) {
-			c->DiscoverItem(inst->GetItem()->ID);
-		}
-
 		/* First add it to the looter - this will do the bag contents too */
 		if (lootitem->auto_loot > 0) {
 			if (!c->AutoPutLootInInventory(*inst, true, true, bag_item_data)) {

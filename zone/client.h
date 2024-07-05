@@ -828,8 +828,6 @@ public:
 	void DiscoverItem(uint32 itemid);
 	std::string GetDiscoverer(uint32 itemid);
 
-	bool DiscoverArtifact(EQ::ItemInstance* inst);
-	bool CanDiscoverArtifact(EQ::ItemInstance* inst);
 	void ReloadDynamicItem(uint16 slot_id);
 
 	bool TGB() const { return tgb; }

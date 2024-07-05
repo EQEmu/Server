@@ -5351,20 +5351,17 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 
 void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on, int level_override)
 {
-	LogSpells("Entered ExecWeaponProc");
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
 	if (!on) {
 		return;
 	}
 
-	LogSpells("Entered ExecWeaponProc 2");
 	if (!IsValidSpell(spell_id) || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
 
-	LogSpells("Entered ExecWeaponProc 3");
 	if (IsClient()) {
 		Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, on->GetID()));
 		if (new_target) {
@@ -5372,7 +5369,6 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		}
 	}
 
-	LogSpells("Entered ExecWeaponProc 4");
 	if (IsBot() && on->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
 		return;
 	}
@@ -5385,12 +5381,10 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		return;
 	}
 
-	LogSpells("Entered ExecWeaponProc 5");
 	if (IsNoCast()) {
 		return;
 	}
 
-	LogSpells("Entered ExecWeaponProc 6");
 	if (!IsValidSpell(spell_id)) { // Check for a valid spell otherwise it will crash through the function
 		if (IsClient()) {
 			Message(
@@ -5418,7 +5412,6 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		return;
 	}
 
-	LogSpells("Entered ExecWeaponProc 7");
 	if (inst && IsClient()) {
 		//const cast is dirty but it would require redoing a ton of interfaces at this point
 		//It should be safe as we don't have any truly const EQ::ItemInstance floating around anywhere.
@@ -5450,7 +5443,6 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance* inst, uint16 spell_id, Mob* on,
 		twin_proc = true;
 	}
 
-	LogSpells("Entered ExecWeaponProc 8");
 	if (
 		IsBeneficialSpell(spell_id) &&
 		(
@@ -6363,7 +6355,6 @@ void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 	}
 
 	Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, target->GetID()));
-
 	if (new_target) {
 		target = new_target;
 	}

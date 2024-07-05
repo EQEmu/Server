@@ -859,6 +859,25 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					CastToNPC()->ModifyStatsOnCharm(false);
 				}
 
+
+				// Custom charm inventory handling
+				if (IsNPC() && GetOwner()->IsClient()) {
+					auto inventory = CastToNPC()->GetLootList();
+					std::vector<std::string> inventory_strings;
+
+					inventory_strings.push_back("0");
+
+					for (int item_id : inventory) {
+						inventory_strings.push_back(std::to_string(item_id));
+					}
+
+					auto serialized_inventory = Strings::Join(inventory_strings, ",");
+
+					CastToNPC()->SetEntityVariable("is_charmed", serialized_inventory);
+
+					LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+				}
+
 				bool bBreak = false;
 
 				// define spells with fixed duration
@@ -4556,6 +4575,27 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					owner->SetPet(0);
 				}
 
+				// Custom charm inventory handling
+				auto serialized_inventory = GetEntityVariable("is_charmed");
+				if (!serialized_inventory.empty()) {
+					// Clear current loot list
+					while(CastToNPC()->CountLoot()) {
+						for (int item_id : CastToNPC()->GetLootList()) {
+							LogDebug("Removed Item: [{}], qty [{}]", item_id, CastToNPC()->CountItem(item_id));
+							CastToNPC()->RemoveItem(item_id);
+						}
+					}
+
+					auto inventory = Strings::Split(serialized_inventory, ",");
+
+					for (auto item : inventory) {
+						int item_id = Strings::ToInt(item);
+						if (item_id > 0) {
+							CastToNPC()->AddItem(item_id, database.GetItem(item_id)->MaxCharges, true);
+						}
+					}
+				}
+
 				// Any client that has a previous charmed pet targetted shouldo
 				// no longer see the buffs on the old pet.
 				// QueueClientsByTarget preserves GM and leadership cases.
@@ -6561,14 +6601,8 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 
 		if (proc_target) {
 			proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, proc_target->GetID()));
-			
-			if ((proc_target->IsClient() || proc_target->IsPetOwnerClient()) && IsDetrimentalSpell(proc_spellid)) {
-				return false; // Cancel this if, after implied targeting, we are still trying to proc a detrimental ability on a client or client pet
-			}
-
-			if ((proc_target->IsNPC() && !proc_target->IsPetOwnerClient()) && IsBeneficialSpell(proc_spellid)) {
-				proc_target = this;
-				return true;
+			if (!proc_target) {
+				return false;
 			}
 
 			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);

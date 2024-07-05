@@ -203,37 +203,46 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 
 		Mob* target_target = target_mob->GetTarget();
 
+		bool target_beneficial_valid  = (target_mob->IsClient() || target_mob->IsPetOwnerClient() || (target_mob->GetOwner() && target_mob->GetOwner()->IsClient()));
+		bool target_detrimental_valid = (!target_beneficial_valid && target_mob->IsNPC());
+
+		bool tt_beneficial_valid = false;
+		bool tt_detrimental_valid = false;
+
+		if (target_target) {
+			tt_beneficial_valid = (target_target->IsClient() || target_target->IsPetOwnerClient() || (target_target->GetOwner() && target_target->GetOwner()->IsClient()));
+			tt_detrimental_valid = (!tt_beneficial_valid && target_target->IsNPC());;
+		}
+
 		// Check if we already have a valid target
 		if (IsBeneficialSpell(spell_id)) {
-			if (target_mob->IsOfClientBotMerc() || ((target_mob->IsPet() || target_mob->IsCharmed()) && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBotMerc())) {
+			if (target_beneficial_valid) {
 				return target_id;
-			}
-
-			if (target_target) {
-				if (target_target->IsOfClientBotMerc() || ((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBotMerc())) {
+			} else {
+				if (tt_beneficial_valid) {
 					return target_target->GetID();
 				}
-			}
+			}		
 
 			return GetID();
 		} else {
-			if (target_mob->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_mob->GetOwner() && target_mob->GetOwner()->IsOfClientBot())) {
+			if (target_detrimental_valid) {
 				return target_id;
-			}
-
-			if (target_target) {
-				if (target_target->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner() && target_target->GetOwner()->IsOfClientBot())) {
+			} else {
+				if (tt_detrimental_valid) {
 					return target_target->GetID();
-				}
-
-				if (GetPet() && GetPet()->GetTarget()) {
-					target_target = GetPet()->GetTarget();
-					if (target_target->IsNPC() && !((target_mob->IsPet() || target_mob->IsCharmed()) && target_target->GetOwner()->IsOfClientBot())) {
-						return target_target->GetID();
-					}
 				} else {
-					Message(Chat::SpellFailure, "No valid target was found for this spell or ability (%s).", spells[spell_id].name);
-				}
+					if (GetPet() && GetPet()->GetTarget()) {
+						target_target = GetPet()->GetTarget();
+						if (target_target) {							
+							tt_detrimental_valid = (!tt_beneficial_valid && target_target->IsNPC());;
+						}
+
+						if (tt_detrimental_valid) {
+							return target_target->GetID();
+						}
+					}
+ 				}
 			}
 		}		
 	}
