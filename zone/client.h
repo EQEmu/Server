@@ -1108,6 +1108,12 @@ public:
 	void DropItemQS(EQ::ItemInstance* inst, bool pickup);
 	bool HasItemOnCorpse(uint32 item_id);
 
+	// Pet Bag Methods
+
+	bool IsPetBagActive();
+	EQ::ItemInstance* GetActivePetBag();
+	std::vector<EQ::ItemInstance*> GetPetBagContents();
+
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
 
 	int GetItemLinkHash(const EQ::ItemInstance* inst); // move to ItemData..or make use of the pre-calculated database field

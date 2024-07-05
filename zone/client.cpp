@@ -12141,6 +12141,26 @@ void Client::SendPath(Mob* target)
 	SendPathPacket(points);
 }
 
+/*
+bool Client::IsPetBagActive() {
+	return false;
+}
+
+EQ::ItemInstance* Client::GetActivePetBag() {
+	if (IsPetBagActive()) {
+
+	}
+
+	return nullptr;
+}
+
+std::vector<EQ::ItemInstance*> Client::GetPetBagContents() {
+
+	return nullptr;
+}
+
+*/
+
 void Client::UseAugmentContainer(int container_slot)
 {
 	auto in_augment = new AugmentItem_Struct[sizeof(AugmentItem_Struct)];

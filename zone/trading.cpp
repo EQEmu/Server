@@ -845,16 +845,6 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 													loot_drop_entry,
 													true
 												);
-
-												if (tradingWith->IsCharmed()) {
-													//PushItemOnCursor(*baginst, true);
-													//Message(Chat::Yellow, "The magic of your charm returns your items to you.");
-												}
-											} else {
-												//PushItemOnCursor(*baginst, true);
-												if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-													Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
-												}												
 											}
 										}
 										// Return quest items being traded to non-quest NPC when the rule is true
@@ -887,11 +877,11 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									true
 								);
 
-								
-								if (tradingWith->IsCharmed()) {
+								if (RuleB(Custom, StripCharmItems) && tradingWith->IsCharmed()) {
 									PushItemOnCursor(*inst, true);
-									Message(Chat::Yellow, "The magic of your charm returns your items to you.");
+									Message(Chat::Yellow, "The magic of your charm spell returns your items to you.");
 								}
+
 							} else {
 								PushItemOnCursor(*inst, true);
 								if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {

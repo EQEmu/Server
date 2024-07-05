@@ -273,15 +273,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				// for offensive spells check if we have a spell rune on
-				int64 dmg = effect_value;
-				if (RuleB(Custom,CustomSpellProcHandling) && caster->EntityVariableExists(std::to_string(spell_id) + "_damage_override")) {
-					try {
-						dmg = std::stoll(caster->GetEntityVariable(std::to_string(spell_id) + "_damage_override"));
-					} catch (const std::exception& e) {
-						LogError("Error reading damage_override");
-					}
-					caster->DeleteEntityVariable(std::to_string(spell_id) + "_damage_override");
-				}
+				int64 dmg = effect_value;				
 
 				if(dmg < 0)
 				{
@@ -861,11 +853,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 
 				// Custom charm inventory handling
-				if (IsNPC() && GetOwner()->IsClient()) {
+				if (RuleB(Custom, StripCharmItems) && IsNPC() && GetOwner()->IsClient()) {
 					auto inventory = CastToNPC()->GetLootList();
 					std::vector<std::string> inventory_strings;
-
-					inventory_strings.push_back("0");
 
 					for (int item_id : inventory) {
 						inventory_strings.push_back(std::to_string(item_id));
@@ -4575,9 +4565,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					owner->SetPet(0);
 				}
 
-				// Custom charm inventory handling
-				auto serialized_inventory = GetEntityVariable("is_charmed");
-				if (!serialized_inventory.empty()) {
+				// Custom charm inventory handling				
+				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed")) {
+					auto serialized_inventory = GetEntityVariable("is_charmed");
+					LogDebug("Serialized Inventory: [{}]", serialized_inventory);
+
 					// Clear current loot list
 					while(CastToNPC()->CountLoot()) {
 						for (int item_id : CastToNPC()->GetLootList()) {
@@ -4586,14 +4578,22 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						}
 					}
 
-					auto inventory = Strings::Split(serialized_inventory, ",");
+					if (!serialized_inventory.empty()) {
+						auto inventory = Strings::Split(serialized_inventory, ",");
 
-					for (auto item : inventory) {
-						int item_id = Strings::ToInt(item);
-						if (item_id > 0) {
-							CastToNPC()->AddItem(item_id, database.GetItem(item_id)->MaxCharges, true);
+						for (auto item : inventory) {
+							int item_id = Strings::ToInt(item);
+							auto item_data = database.GetItem(item_id);
+
+							LogDebug("ItemID to Add: [{}]", item_id);
+
+							if (item_data) {
+								CastToNPC()->AddItem(item_data, item_data->MaxCharges);
+							}							
 						}
 					}
+
+					DeleteEntityVariable("is_charmed");
 				}
 
 				// Any client that has a previous charmed pet targetted shouldo
@@ -6554,44 +6554,6 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
 		Mob* proc_target = GetTarget();
 		int64 damage_override = 0;
-		
-		if (RuleB(Custom, CustomSpellProcHandling) && strncmp(spells[focusspellid].name, "Sympathetic", 11) == 0) {
-			auto romanToInt = [](const std::string& name) -> int {
-				std::map<char, int> romanValues = {{'I', 1}, {'V', 5}, {'X', 10}, {'L', 50},
-												{'C', 100}, {'D', 500}, {'M', 1000}};
-				int result = 0;
-				int prevValue = 0;
-				for (int i = name.size() - 1; i >= 0; --i) {
-					if (romanValues.count(name[i]) == 0) break;
-					int currentValue = romanValues[name[i]];
-					if (currentValue < prevValue)
-						result -= currentValue;
-					else
-						result += currentValue;
-					prevValue = currentValue;
-				}
-				return result;
-			};
-
-			uint32 cast_time_factor = spells[spell_id].cast_time / 1000;
-			uint32 mana_cost_factor = spells[spell_id].mana / 10;
-			uint32 rank_factor 		= romanToInt(spells[focusspellid].name);
-			double scaling_factor 	= RuleR(Custom, CustomSpellProcScalingFactor);
-			
-			LogDebug("rank_factor: [{}], cost_factor: [{}], time_factor: [{}], scaling_factor: [{}]", rank_factor, mana_cost_factor, cast_time_factor, scaling_factor);
-			damage_override = rank_factor * mana_cost_factor * cast_time_factor * scaling_factor;
-
-			if (IsBeneficialSpell(proc_spellid)) {
-				damage_override = std::llabs(damage_override);
-			} else {
-				damage_override = -std::llabs(damage_override);
-			}
-
-			LogDebug("Setting damage_override to [{}]", damage_override);
-
-			// I hate myself
-			SetEntityVariable(std::to_string(proc_spellid) + "_damage_override", std::to_string(damage_override));
-		}
 		
 		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
 		if (!IsTargetRequiredForSpell(proc_spellid)) {
