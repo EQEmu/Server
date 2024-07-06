@@ -603,7 +603,7 @@ bool NPC::Process()
 
 	if (RuleB(Spells, SwarmPetFullAggro) && swarm_timer.Enabled() && !GetTarget()) {
 		Mob* owner = entity_list.GetMob(GetSwarmOwner());
-		if (owner->IsClient()) {
+		if (owner && owner->IsClient()) {
 			for (auto* npc : entity_list.GetHatedList(owner, this, true)) {
 				if (npc && !npc->IsClient()) {
 					zone->AddAggroMob();
