@@ -1625,5 +1625,8 @@ bool IsSpellUsableInThisZoneType(uint16 spell_id, uint8 zone_type);
 const char *GetSpellName(uint16 spell_id);
 int GetSpellStatValue(uint16 spell_id, const char* stat_identifier, uint8 slot = 0);
 bool IsCastRestrictedSpell(uint16 spell_id);
+bool IsAegolismSpell(uint16 spell_id);
+bool AegolismStackingIsSymbolSpell(uint16 spell_id);
+bool AegolismStackingIsArmorClassSpell(uint16 spell_id);
 
 #endif
