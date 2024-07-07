@@ -115,7 +115,7 @@ Group::~Group()
 }
 
 //Split money used in OP_Split (/split and /autosplit).
-void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
+void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter, bool share)
 {
 	// Return early if no money to split.
 	if (!copper && !silver && !gold && !platinum) {
@@ -152,6 +152,8 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 		return;
 	}
 
+	uint8 random_member = zone->random.Int(0, member_count - 1);
+
 	// Calculate split and remainder for each coin type
 	uint32 copper_split       = copper / member_count;
 	uint32 copper_remainder   = copper % member_count;
@@ -167,21 +169,38 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 		if (m && m->IsClient()) {
 			Client *member_client = m->CastToClient();
 
-			uint32 receive_copper = copper_split;
-			uint32 receive_silver = silver_split;
+			uint32 receive_copper   = copper_split;
+			uint32 receive_silver   = silver_split;
 			uint32 receive_gold     = gold_split;
 			uint32 receive_platinum = platinum_split;
 
-			// splitter gets the remainders of coin
-			if (member_client == splitter) {
-				receive_copper += copper_remainder;
-				receive_silver += silver_remainder;
-				receive_gold += gold_remainder;
+			// if /split is used then splitter gets the remainder + split.
+			// if /autosplit is used then random players in the group will get the remainder + split.
+			if(share ? member_client == splitter : member_client == members[random_member]) {
+				receive_copper   += copper_remainder;
+				receive_silver   += silver_remainder;
+				receive_gold     += gold_remainder;
 				receive_platinum += platinum_remainder;
 			}
 
-			// Add the coins to the player's purse.
-			member_client->AddMoneyToPP(receive_copper, receive_silver, receive_gold, receive_platinum, true);
+			// the group member other than the character doing the /split only gets this message "(splitter) shares the money with the group"
+			if (share && member_client != splitter) {
+				member_client->MessageString(
+					YOU_RECEIVE_AS_SPLIT,
+					SHARE_MONEY,
+					splitter->GetCleanName()
+				);
+			}
+
+			// Check if there are any coins to add to the player's purse.
+			if (receive_copper || receive_silver || receive_gold || receive_platinum) {
+				member_client->AddMoneyToPP(receive_copper, receive_silver, receive_gold, receive_platinum, true);
+				member_client->MessageString(
+					Chat::MoneySplit,
+					YOU_RECEIVE_AS_SPLIT,
+					Strings::Money(receive_platinum, receive_gold, receive_silver, receive_copper).c_str()
+				);
+			}
 
 			// If logging of player money transactions is enabled, record the transaction.
 			if (player_event_logs.IsEventEnabled(PlayerEvent::SPLIT_MONEY)) {
@@ -194,13 +213,6 @@ void Group::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinu
 				};
 				RecordPlayerEventLogWithClient(member_client, PlayerEvent::SPLIT_MONEY, e);
 			}
-
-			// Notify the player of their received coins.
-			member_client->MessageString(
-				Chat::MoneySplit,
-				YOU_RECEIVE_AS_SPLIT,
-				Strings::Money(receive_platinum, receive_gold, receive_silver, receive_copper).c_str()
-			);
 		}
 	}
 }
