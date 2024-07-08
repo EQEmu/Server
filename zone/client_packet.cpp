@@ -10939,7 +10939,6 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
 	// This packet is only sent from the client if we ctrl click items in inventory
 	if (m_ClientVersionBit & EQ::versions::maskRoF2AndLater) {
-		
 		if (!CharacterID()) {
 			LinkDead();
 			return;
@@ -10955,9 +10954,9 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 			LinkDead();
 			return; // Packet size does not match expected size
 		}
-			
-		const auto from_parent = multi_move->moves[0].from_slot.Slot;
-		const auto to_parent   = multi_move->moves[0].to_slot.Slot;
+
+		const int16 from_parent = multi_move->moves[0].from_slot.Slot;
+		const int16 to_parent   = multi_move->moves[0].to_slot.Slot;
 
 		// CTRL + left click drops an item into a bag without opening it.
 		// This can be a bag, in which case it tries to fill the target bag with the contents of the bag on the cursor
@@ -10976,14 +10975,14 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 		if (left_click) {
 			for (int i = 0; i < multi_move->count; i++) {
 				MoveItem_Struct* mi = new MoveItem_Struct();
-				mi->from_slot 	= multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);									
+				mi->from_slot 	= multi_move->moves[i].from_slot.SubIndex == -1 ? multi_move->moves[i].from_slot.Slot : m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
 				mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
-				
-				if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
+
+				if (multi_move->moves[i].to_slot.Type == EQ::invtype::typeBank) { // Target is bank inventory
 					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
-				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
+				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::typeSharedBank) { // Target is shared bank inventory
 					mi->to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
-				}				
+				}
 
 				// This sends '1' as the stack count for unstackable items, which our titanium-era SwapItem blows up
 				if (m_inv.GetItem(mi->from_slot)->IsStackable()) {
@@ -10994,15 +10993,17 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 
 				if (!SwapItem(mi) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot)) {
 					bool error = false;
-					SwapItemResync(mi);					
+					SwapItemResync(mi);
 					InterrogateInventory(this, false, true, false, error, false);
-					if (error)
+					if (error) {
 						InterrogateInventory(this, true, false, true, error);
+					}
 				}
 			}
 		// This is the swap.
 		// Client behavior is just to move stacks without combining them
-		} else {			
+		// Items get rearranged to fill the 'top' of the bag first
+		} else {
 			struct MoveInfo {
 				EQ::ItemInstance* item;
 				uint16 to_slot;
@@ -11013,32 +11014,35 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 
 			for (int i = 0; i < multi_move->count; i++) {
 				// These are always bags, so we don't need to worry about raw items in slotCursor
-				auto from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
-				if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
+				uint16 from_slot   = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot, multi_move->moves[i].from_slot.SubIndex);
+				if (multi_move->moves[i].from_slot.Type == EQ::invtype::typeBank) { // Target is bank inventory
 					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
-				} else if (multi_move->moves[i].from_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
+				} else if (multi_move->moves[i].from_slot.Type == EQ::invtype::typeSharedBank) { // Target is shared bank inventory
 					from_slot = m_inv.CalcSlotId(multi_move->moves[i].from_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].from_slot.SubIndex);
 				}
 
-				auto to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
-				if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventoryBank) { // Target is bank inventory
+				uint16 to_slot   = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot, multi_move->moves[i].to_slot.SubIndex);
+				if (multi_move->moves[i].to_slot.Type == EQ::invtype::typeBank) { // Target is bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
-				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::inventorySharedBank) { // Target is shared bank inventory
+				} else if (multi_move->moves[i].to_slot.Type == EQ::invtype::typeSharedBank) { // Target is shared bank inventory
 					to_slot = m_inv.CalcSlotId(multi_move->moves[i].to_slot.Slot + EQ::invslot::SHARED_BANK_BEGIN, multi_move->moves[i].to_slot.SubIndex);
 				}
 
-				// Probably need some error checking here, but I wasn't able to produce any error states on purpose.				
-				MoveInfo move;
-				move.item = m_inv.PopItem(from_slot); // Don't delete the instance here
-				move.to_slot = to_slot;
-				if (move.item) {				
+				// Probably need some error checking here, but I wasn't able to produce any error states on purpose.
+				MoveInfo move{
+					.item = m_inv.PopItem(from_slot), // Don't delete the instance here
+					.to_slot = to_slot
+				};
+
+				if (move.item) {
 					items.push_back(move);
-				}
+					database.SaveInventory(CharacterID(), NULL, from_slot);
+				}				
 			}
 
 			for (const MoveInfo& move : items) {
 				PutItemInInventory(move.to_slot, *move.item); // This saves inventory too
-			}
+			}			
 		}
 		
 	} else {
