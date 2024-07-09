@@ -135,21 +135,38 @@ public:
 		return 1;
 	}
 
-	static int DeleteBuyLine(Database &db, uint32 char_id, int32 slot_id = 0xffffffff)
+	static bool DeleteBuyLine(Database &db, uint32 char_id, int32 slot_id = 0xffffffff)
 	{
+		std::vector<BuyerBuyLines> buylines{};
 		if (slot_id == 0xffffffff) {
-			return DeleteWhere(db, fmt::format("`char_id` = '{}'", char_id));
+			auto buylines = GetWhere(db, fmt::format("`char_id` = '{}'", char_id));
+			DeleteWhere(db, fmt::format("`char_id` = '{}'", char_id));
 		}
 		else {
-			return DeleteWhere(
+			auto buylines = GetWhere(db, fmt::format("`char_id` = '{}' AND `buy_slot_id` = '{}'", char_id, slot_id));
+			DeleteWhere(db, fmt::format("`char_id` = '{}' AND `buy_slot_id` = '{}'", char_id, slot_id));
+		}
+
+		if (buylines.empty()) {
+			return 0;
+		}
+
+		std::vector<std::string> buyline_ids{};
+		for (auto const          &bl: buylines) {
+			buyline_ids.push_back((std::to_string(bl.id)));
+		}
+
+		if (!buyline_ids.empty()) {
+			BuyerTradeItemsRepository::DeleteWhere(
 				db,
 				fmt::format(
-					"`char_id` = '{}' AND `buy_slot_id` = '{}'",
-					char_id,
-					slot_id
+					"`buyer_buy_lines_id` IN({})",
+					Strings::Implode(", ", buyline_ids)
 				)
 			);
 		}
+
+		return 1;
 	}
 
 	static std::vector<BuyerLineItems_Struct> GetBuyLines(Database &db, uint32 char_id)

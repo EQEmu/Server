@@ -2127,5 +2127,5 @@ void Database::ClearTraderDetails()
 
 void Database::ClearBuyerDetails()
 {
-	BuyerRepository::DeleteWhere(*this, "`id` >= 0");
+	BuyerRepository::DeleteBuyer(*this, 0);
 }

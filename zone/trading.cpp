@@ -2633,7 +2633,7 @@ void Client::ToggleBuyerMode(bool status)
 		b.char_zone_id     = GetZoneID();
 		b.char_name        = GetCleanName();
 		b.transaction_date = time(nullptr);
-		BuyerRepository::DeleteWhere(database, fmt::format("`char_id` = '{}';", GetBuyerID()));
+		BuyerRepository::DeleteBuyer(database, GetBuyerID());
 		BuyerRepository::InsertOne(database, b);
 
 		data->status = BuyerBarter::On;
@@ -2644,7 +2644,7 @@ void Client::ToggleBuyerMode(bool status)
 	}
 	else {
 		data->status = BuyerBarter::Off;
-		auto results = BuyerRepository::DeleteWhere(database, fmt::format("`char_id` = '{}'", GetBuyerID()));
+		BuyerRepository::DeleteBuyer(database, GetBuyerID());
 		SetCustomerID(0);
 		SendBuyerToBarterWindow(this, Barter_RemoveFromBarterWindow);
 		SendBuyerMode(false);
@@ -2652,7 +2652,7 @@ void Client::ToggleBuyerMode(bool status)
 		if (!IsInBuyerSpace()) {
 			Message(Chat::Red, "You must be in a Barter Stall to start Barter Mode.");
 		}
-		Message(Chat::Yellow, fmt::format("Barter Mode OFF. Buy lines deactivated.", results).c_str());
+		Message(Chat::Yellow, fmt::format("Barter Mode OFF. Buy lines deactivated.").c_str());
 	}
 
 	entity_list.QueueClients(this, outapp.get(), false);

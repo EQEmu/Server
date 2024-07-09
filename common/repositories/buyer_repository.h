@@ -4,6 +4,8 @@
 #include "../database.h"
 #include "../strings.h"
 #include "base/base_buyer_repository.h"
+#include "base/base_buyer_trade_items_repository.h"
+#include "base/base_buyer_buy_lines_repository.h"
 
 class BuyerRepository: public BaseBuyerRepository {
 public:
@@ -89,6 +91,48 @@ public:
 		auto e = b.front();
 
 		return e.transaction_date;
+	}
+
+	static bool DeleteBuyer(Database &db, uint32 char_id)
+	{
+		if (char_id == 0) {
+			Truncate(db);
+			BaseBuyerBuyLinesRepository::Truncate(db);
+			BaseBuyerTradeItemsRepository::Truncate(db);
+		}
+		else {
+			auto buyer = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+			if (buyer.empty()) {
+				return false;
+			}
+
+			auto buy_lines = BaseBuyerBuyLinesRepository::GetWhere(
+				db,
+				fmt::format("`buyer_id` = '{}'", buyer.front().id)
+			);
+			if (buy_lines.empty()) {
+				return false;
+			}
+
+			std::vector<std::string> buy_line_ids{};
+			for (auto const &bl: buy_lines) {
+				buy_line_ids.push_back(std::to_string(bl.id));
+			}
+
+			DeleteWhere(db, fmt::format("`char_id` = '{}';", char_id));
+			BaseBuyerBuyLinesRepository::DeleteWhere(
+				db,
+				fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))
+			);
+			BaseBuyerTradeItemsRepository::DeleteWhere(
+				db,
+				fmt::format(
+					"`buyer_buy_lines_id` IN({})",
+					Strings::Implode(", ", buy_line_ids))
+			);
+		}
+
+		return true;
 	}
 };
 

@@ -5697,9 +5697,7 @@ CREATE TABLE `buyer_buy_lines` (
 	`item_icon` INT(11) UNSIGNED NOT NULL DEFAULT '0',
 	`item_name` VARCHAR(64) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
-	INDEX `charid_buy_slotid` (`char_id`, `buy_slot_id`) USING BTREE,
-	INDEX `fk_buyer_id` (`buyer_id`) USING BTREE,
-	CONSTRAINT `buyer_id` FOREIGN KEY (`buyer_id`) REFERENCES `buyer` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+	INDEX `buyerid_charid_buyslotid` (`buyer_id`, `char_id`, `buy_slot_id`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
@@ -5713,8 +5711,7 @@ CREATE TABLE `buyer_trade_items` (
 	`item_icon` INT(11) NOT NULL DEFAULT '0',
 	`item_name` VARCHAR(64) NOT NULL DEFAULT '0' COLLATE 'latin1_swedish_ci',
 	PRIMARY KEY (`id`) USING BTREE,
-	INDEX `fk_buyer_buy_lines_id` (`buyer_buy_lines_id`) USING BTREE,
-	CONSTRAINT `buyer_buy_lines_id` FOREIGN KEY (`buyer_buy_lines_id`) REFERENCES `buyer_buy_lines` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+	INDEX `buyerbuylinesid` (`buyer_buy_lines_id`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
