@@ -264,6 +264,7 @@ bool NPC::MeetsLootDropLevelRequirements(LootdropEntriesRepository::LootdropEntr
 
 uint32 NPC::DoUpgradeLoot(uint32 itemID) {
 	if (RuleB(Custom, DoItemUpgrades)) {
+		zone->random.Reseed();
 		uint32 roll = zone->random.Real(0.0, 100.0);        
 		uint32 newID = itemID % 1000000;
 

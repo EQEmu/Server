@@ -167,33 +167,24 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 
 uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 	if (RuleB(Custom, DoItemUpgrades)) {
+		zone->random.Reseed();
+		uint32 roll = zone->random.Real(0.0, 100.0);        
+		uint32 newID = item_id % 1000000;
 
-		LogDebug("Attempting Upgrade for: [{}]", item_id);
+		// TODO: Affix system will need to update this
+		uint32 currentTier = item_id / 1000000;
 
-		uint32 new_item_id = item_id;
+		if (roll <= RuleR(Custom, Tier2ItemDropRate) && currentTier < 2) {
+			newID += 2000000;
+		} else if (roll <= RuleR(Custom, Tier1ItemDropRate) && currentTier < 1) {
+			newID += 1000000;
+		}
 
-		if (item_id < 1000000) { // this is a normal item
-			int roll = zone->random.Int(1, 100);
-
-			LogDebug("Upgrade Rolled: [{}]", roll);
-
-			if (roll <= RuleI(Item, RoseColoredQuestWeightDrop)) {
-				new_item_id += 1000000;
-			} else {
-				new_item_id += 2000000;
-			}
-
-			if (new_item_id != item_id) {
-				const EQ::ItemData* item = database.GetItem(new_item_id);
-				if (item != nullptr) {
-					item_id = new_item_id;
-					LogDebug("Found eligible upgrade for [{}] is [{}]", item_id, new_item_id);
-				} else {
-					LogDebug("Unable to find a valid upgrade for [{}]", item_id);
-				}
-			}
+		if (database.GetItem(newID) && newID > item_id) {
+			item_id = newID;
 		}
 	}
+	
 	return item_id;
 }
 
@@ -220,7 +211,46 @@ uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 
 
 bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
+	item_id += 1000000;	
 	item_id = GetApocItemUpgrade(item_id);
+
+	if ((!DataBucket::GetData("eom_17779").empty())) {
+		LogDebug("Trying Second-Round Upgrade");
+		auto old_id = item_id;
+		item_id = GetApocItemUpgrade(item_id);
+
+		if (item_id > old_id) {
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+
+			linker.SetItemData(database.GetItem(old_id));
+			auto old_item_lnk = linker.GenerateLink();
+
+			linker.SetItemData(database.GetItem(item_id));
+			auto new_item_lnk = linker.GenerateLink();
+
+			Message(Chat::Yellow, "The tides of fate have shifted! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+		}
+	}
+
+	if ((IsSeasonal())) {
+		LogDebug("Trying Second-Round Upgrade");
+		auto old_id = item_id;
+		item_id = GetApocItemUpgrade(item_id);
+
+		if (item_id > old_id) {
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+
+			linker.SetItemData(database.GetItem(old_id));
+			auto old_item_lnk = linker.GenerateLink();
+
+			linker.SetItemData(database.GetItem(item_id));
+			auto new_item_lnk = linker.GenerateLink();
+
+			Message(Chat::Yellow, "Your seasonal status has upgraded an item reward! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+		}
+	}
 
 	return SummonItem(item_id, charges, aug1, aug2, aug3, aug4, aug5, aug6, attuned, to_slot, ornament_icon, ornament_idfile, ornament_hero_model, artifact_disco);
 }
