@@ -215,6 +215,7 @@ Client::Client(EQStreamInterface *ieqs) : Mob(
 	guild_id = GUILD_NONE;
 	guildrank = 0;
 	guild_tribute_opt_in = 0;
+	SetGuildListDirty(false);
 	GuildBanker = false;
 	memset(lskey, 0, sizeof(lskey));
 	strcpy(account_name, "");
@@ -410,8 +411,12 @@ Client::~Client() {
 		zone->ClearEXPModifier(this);
 	}
 
-	if(IsInAGuild())
-		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+	if (!IsZoning()) {
+		if(IsInAGuild()) {
+			guild_mgr.UpdateDbMemberOnline(CharacterID(), false);
+			guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), 0, time(nullptr));
+		}
+	}
 
 	Mob* horse = entity_list.GetMob(CastToClient()->GetHorseId());
 	if (horse)

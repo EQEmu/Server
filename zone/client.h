@@ -739,6 +739,7 @@ public:
 	void GoToDeath();
 	inline const int32 GetInstanceID() const { return zone->GetInstanceID(); }
 	void SetZoning(bool in) { bZoning = in; }
+	bool IsZoning() { return bZoning; }
 
 	void ShowSpells(Client* c, ShowSpellType show_spell_type);
 
