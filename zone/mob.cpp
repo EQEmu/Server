@@ -3217,6 +3217,14 @@ void Mob::ShowStats(Client* c)
 			).c_str()
 		);
 
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | Haste: {}",
+				GetHaste()
+			).c_str()
+		);
+
 		// Stats
 		c->Message(
 			Chat::White,
@@ -5431,10 +5439,19 @@ int Mob::GetHaste()
 		h += spellbonuses.hastetype2 > 10 ? 10 : spellbonuses.hastetype2;
 
 	// 26+ no cap, 1-25 10
-	if (level > 25 || (IsClient() && RuleB(Character, IgnoreLevelBasedHasteCaps))) // 26+
+	if (
+		level > 25 ||
+		(
+			(IsNPC() && RuleB(NPC, NPCIgnoreLevelBasedHasteCaps)) ||
+			(IsBot() && RuleB(Bots, BotsIgnoreLevelBasedHasteCaps)) ||
+			(IsMerc() && RuleB(Mercs, MercsIgnoreLevelBasedHasteCaps))
+		)
+	) {
 		h += itembonuses.haste;
-	else // 1-25
+	}
+	else { // 1-25
 		h += itembonuses.haste > 10 ? 10 : itembonuses.haste;
+	}
 
 	// mobs are different!
 	Mob *owner = nullptr;
@@ -5446,23 +5463,36 @@ int Mob::GetHaste()
 		cap = 10 + level;
 		cap += std::max(0, owner->GetLevel() - 39) + std::max(0, owner->GetLevel() - 60);
 	} else {
-		cap = 150;
+		cap = (IsNPC() ? RuleI(NPC, NPCHasteCap) : IsBot() ? RuleI(Bots, BotsHasteCap) : IsMerc() ? RuleI(Mercs, MercsHasteCap) : 150);
 	}
 
 	if(h > cap)
 		h = cap;
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
-	if (level > 50 || (IsClient() && RuleB(Character, IgnoreLevelBasedHasteCaps))) { // 51+
-		cap = RuleI(Character, Hastev3Cap);
-		if (spellbonuses.hastetype3 > cap) {
-			h += cap;
-		} else {
-			h += spellbonuses.hastetype3;
+	if (
+		(IsNPC() && !RuleB(NPC, NPCIgnoreLevelBasedHasteCaps)) ||
+		(IsBot() && !RuleB(Bots, BotsIgnoreLevelBasedHasteCaps)) ||
+		(IsMerc() && !RuleB(Mercs, MercsIgnoreLevelBasedHasteCaps))
+	) {
+		if (level > 50) { // 51+
+			cap = (IsNPC() ? RuleI(NPC, NPCHastev3Cap) : IsBot() ? RuleI(Bots, BotsHastev3Cap) : IsMerc() ? RuleI(Mercs, MercsHastev3Cap) : RuleI(Character, Hastev3Cap));
+
+			if (spellbonuses.hastetype3 > cap) {
+				h += cap;
+			}
+			else {
+				h += spellbonuses.hastetype3;
+			}
 		}
-	} else { // 1-50
-		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
+		else { // 1-50
+			h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
+		}
 	}
+	else {
+		h += spellbonuses.hastetype3; 
+	}
+
 	h += extra_haste;	//GM granted haste.
 
 	return 100 + h;
