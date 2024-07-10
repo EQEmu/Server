@@ -216,7 +216,7 @@ bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 a
 	if (RuleB(Custom, DoItemUpgrades)) {
 		int original_id = item_id;
 	
-		if (original_id != GetMaxItemUpgrade(original_id)) {
+		if (GetMaxItemUpgrade(original_id) > original_id) {
 			LogDebug("Trying to upgrade: [{}]", original_id);
 
 			item_id += 1000000;
