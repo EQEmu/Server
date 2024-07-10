@@ -88,21 +88,39 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 //Check current CLE Entry IPs against incoming connection
 
 void ClientList::GetCLEIP(uint32 in_ip) {
+	LogInfo("Entered GetCLEIP");
 	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	int count = 0;
 	iterator.Reset();
 
-	const auto& zone = RuleI(World, IPExemptionZone);
+	const auto& zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
 
 	while (iterator.MoreElements()) {
+        ClientListEntry* cle = iterator.GetData();
+        
+        bool isExcluded = false;
+        if (!zones.empty() && cle->zone()) {
+            for (const auto& z : zones) {
+                if (Strings::ToUnsignedInt(z) == cle->zone()) {
+                    LogInfo("Zone [{}] is excluded by list entry [{}]", cle->zone(), z);
+                    isExcluded = true;
+                    break;
+                }
+            }
+        }
+
+        if (isExcluded) {
+            iterator.RemoveCurrent();
+        } else {
+            iterator.Advance();
+        }
+    }
+
+    iterator.Reset();	
+	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
-		
-		// Skip if zone is exempt;
-		if (cle->zone() == zone || cle->zone() < 1 || cle->zone() > 999) {
-			iterator.Advance();
-		}
 
 		if (
 			cle->GetIP() == in_ip &&
