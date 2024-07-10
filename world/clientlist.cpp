@@ -97,30 +97,18 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 
 	const auto& zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
 
-	while (iterator.MoreElements()) {
-        ClientListEntry* cle = iterator.GetData();
-        
-        bool isExcluded = false;
-        if (!zones.empty() && cle->zone()) {
-            for (const auto& z : zones) {
-                if (Strings::ToUnsignedInt(z) == cle->zone()) {
-                    LogInfo("Zone [{}] is excluded by list entry [{}]", cle->zone(), z);
-                    isExcluded = true;
-                    break;
-                }
-            }
-        }
-
-        if (isExcluded) {
-            iterator.RemoveCurrent();
-        } else {
-            iterator.Advance();
-        }
-    }
-
     iterator.Reset();	
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
+
+		if (!zones.empty() && cle->zone()) {
+            for (const auto& z : zones) {
+                if (Strings::ToUnsignedInt(z) == cle->zone()) {
+                    iterator.Advance();
+					continue;
+                }
+            }
+        }
 
 		if (
 			cle->GetIP() == in_ip &&
