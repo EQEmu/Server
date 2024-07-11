@@ -2415,7 +2415,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 				DialogueWindow::TableCell(
 					fmt::format(
 						"{} ({})",
-						Strings::Commify(GetHaste()),
+						IsClient() ? Strings::Commify(CastToClient()->GetHaste()) : Strings::Commify(GetHaste()),
 						Strings::Commify(RuleI(Character, HasteCap))
 					)
 				)
@@ -2682,12 +2682,12 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		).c_str()
 	);
 
-	if (GetHaste()) {
+	if ((IsClient() && CastToClient()->GetHaste()) || (!IsClient() && GetHaste())) {
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Haste: {}/{} (Item: {} + Spell: {} + Over: {})",
-				Strings::Commify(GetHaste()),
+				IsClient() ? Strings::Commify(CastToClient()->GetHaste()) : Strings::Commify(GetHaste()),
 				Strings::Commify(RuleI(Character, HasteCap)),
 				Strings::Commify(itembonuses.haste),
 				Strings::Commify(spellbonuses.haste + spellbonuses.hastetype2),
