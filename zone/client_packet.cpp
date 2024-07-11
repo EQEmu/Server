@@ -15778,7 +15778,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 	}
 	else {
 		LogTrading("Unknown size for OP_Trader: [{}]\n", app->size);
-		LogError("Unknown size for OP_Trader: [{}]\n", app->size);
+		//LogError("Unknown size for OP_Trader: [{}]\n", app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -16005,7 +16005,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 	else
 	{
 		LogTrading("Unknown size for OP_TraderShop: [{}]\n", app->size);
-		LogError("Unknown size for OP_TraderShop: [{}]\n", app->size);
+		//LogError("Unknown size for OP_TraderShop: [{}]\n", app->size);
 		DumpPacket(app);
 		return;
 	}
