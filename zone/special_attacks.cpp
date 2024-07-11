@@ -1849,18 +1849,11 @@ void NPC::DoClassAttacks(Mob *target) {
 		DistanceSquared(GetPosition(), target->GetPosition()) <= (RuleI(Pets, PetTauntRange) * RuleI(Pets, PetTauntRange))
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
-		Taunt(target->CastToNPC(), false);
-
-		// Add a rule here pls
-		for (const auto& h : hate_list.GetHateList()) {
-			if (h) {
-				auto hater = h->entity_on_hatelist;
-				if (hater) {
-					if (hater->GetTarget() && hater->GetTarget()->GetID() == GetOwner()->GetID() && hater->IsNPC()) {
-						Taunt(hater->CastToNPC(), false);
-						hater->AddToHateList(this);
-					}
-				}
+		Taunt(target->CastToNPC(), true);
+		for (const auto & ent : entity_list.GetNPCList()) {			
+			auto mob = ent.second;
+			if (mob && mob->IsOnHatelist(GetOwner()) && mob->GetTarget() && mob->GetTarget()->GetID() == GetOwner()->GetID()) {
+				Taunt(mob, true);
 			}
 		}
 	}
