@@ -797,13 +797,6 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
-	if (
-		RuleB(World, EnableIPExemptions) ||
-		RuleI(World, MaxClientsPerIP) > 0
-	) {
-		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
-	}
-
 	auto ew = (EnterWorld_Struct *) app->pBuffer;
 	strn0cpy(char_name, ew->name, sizeof(char_name));
 
@@ -819,18 +812,6 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		LogInfo("Could not get CharInfo for [{}]", char_name);
 		eqs->Close();
 		return true;
-	}
-
-	auto r = content_service.FindZone(zone_id, instance_id);
-	if (r.zone_id && r.instance.id != instance_id) {
-		LogInfo(
-			"Zone [{}] has been remapped to instance_id [{}] from instance_id [{}] for client [{}]",
-			r.zone.short_name,
-			r.instance.id,
-			instance_id,
-			char_name
-		);
-		instance_id = r.instance.id;
 	}
 
 	const auto& e = l.front();
@@ -850,6 +831,46 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	charid      = e.id;
 	zone_id     = e.zone_id;
 	instance_id = e.zone_instance;
+
+	auto r = content_service.FindZone(zone_id, instance_id);
+	if (r.zone_id && r.instance.id != instance_id) {
+		LogInfo(
+			"Zone [{}] has been remapped to instance_id [{}] from instance_id [{}] for client [{}]",
+			r.zone.short_name,
+			r.instance.id,
+			instance_id,
+			char_name
+		);
+		instance_id = r.instance.id;
+	}
+
+	if (
+		RuleB(World, EnableIPExemptions) ||
+		RuleI(World, MaxClientsPerIP) > 0
+	) {
+		bool skip_cleip_check = false;
+		const auto& zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
+
+
+		LogInfo("About to enter GetCLEIP on behalf of [{}] while entering? zone [{}]", char_name, zone_id);
+
+		if (!zones.empty() && zone_id) {
+			for (const auto& z : zones) {
+				if (Strings::ToUnsignedInt(z) == zone_id) {
+					LogInfo("[{}] matches [{}], skipping CLEIP evaluation", Strings::ToUnsignedInt(z), zone_id);
+					skip_cleip_check = true;
+					break;
+				} else {
+					LogInfo("No match Match");
+				}
+			}
+		}
+
+		if (!skip_cleip_check) {
+			LogInfo("Actually entering GetCLEIP");
+			client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
+		}		
+	}
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)

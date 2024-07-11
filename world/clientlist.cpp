@@ -86,7 +86,6 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 }
 
 //Check current CLE Entry IPs against incoming connection
-
 void ClientList::GetCLEIP(uint32 in_ip) {
 	LogInfo("Entered GetCLEIP");
 	ClientListEntry* cle = nullptr;
@@ -104,9 +103,12 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 		if (!zones.empty() && cle->zone()) {
             for (const auto& z : zones) {
                 if (Strings::ToUnsignedInt(z) == cle->zone()) {
+					LogInfo("[{}] matches [{}], skipping CLEIP evaluation", Strings::ToUnsignedInt(z), cle->zone());
                     iterator.Advance();
 					continue;
-                }
+                } else {
+					LogInfo("[{}] does not match [{}], proceeding with CLEIP evaluation", Strings::ToUnsignedInt(z), cle->zone());
+				}
             }
         }
 
