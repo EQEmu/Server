@@ -2175,7 +2175,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			swarm_owner->IsClient() &&
 			RuleB(Pets, ClientPetsUseOwnerNameInLastName)
 		) {
-			const auto& tmp_lastname = fmt::format("{}'s Swarm", swarm_owner->GetName());
+			const auto& tmp_lastname = fmt::format("{}`s Swarm", swarm_owner->GetName());
 			if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
 				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
@@ -2205,19 +2205,19 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 						case Race::FireElemental2:
 						case Race::FireElemental:
 						case Race::Elemental:
-							tmp_lastname = fmt::format("{}'s Elemental Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Elemental Minion", c->GetName());
 							break;
 						case Race::Skeleton:
 						case Race::Skeleton2:
 						case Race::Skeleton3:
-							tmp_lastname = fmt::format("{}'s Skeletal Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Skeletal Minion", c->GetName());
 							break;
 						case Race::Spectre:
 						case Race::Spectre2:
-							tmp_lastname = fmt::format("{}'s Reaper", c->GetName());
+							tmp_lastname = fmt::format("{}`s Reaper", c->GetName());
 							break;
 						default:
-							tmp_lastname = fmt::format("{}'s Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Minion", c->GetName());
 					}
 
 					if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {

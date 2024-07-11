@@ -4647,7 +4647,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		//this was done to simplify the code here (since we can only effectively skip one mob on queue)		
 		Mob* skip = attacker;
 		eqFilterType filter;				
-		if (attacker && attacker->IsPet() && !attacker->IsBot()) {
+		if (attacker && (attacker->IsPet() || attacker->IsTempPet()) && !attacker->IsBot()) {
 			//attacker is a pet, let pet owners see their pet's damage
 			Mob* owner = attacker->GetOwner();
 			if (owner && owner->IsClient()) {

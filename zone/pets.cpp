@@ -163,21 +163,15 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	// 3 - Random name if client, `s pet for others
 	// 4 - Keep DB name
 	// 5 - `s ward
-
-
 	if (petname != nullptr) {
 		// Name was provided, use it.
 		strn0cpy(npc_type->name, petname, 64);
 		EntityList::RemoveNumbers(npc_type->name);
 		entity_list.MakeNameUnique(npc_type->name);
 	} else if (record.petnaming == 0) {
-		strcpy(npc_type->name, GetCleanName());
-		npc_type->name[25] = '\0';
-		strcat(npc_type->name, "`s_pet");
+		snprintf(npc_type->name, sizeof(npc_type->name), "%s`s_%s", GetCleanName(), spells[spell_id].name);
 	} else if (record.petnaming == 1) {
-		strcpy(npc_type->name, GetName());
-		npc_type->name[19] = '\0';
-		strcat(npc_type->name, "`s_familiar");
+		snprintf(npc_type->name, sizeof(npc_type->name), "%s`s_%s", GetCleanName(), spells[spell_id].name);
 	} else if (record.petnaming == 2) {
 		strcpy(npc_type->name, GetName());
 		npc_type->name[21] = 0;
@@ -191,9 +185,14 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		npc_type->name[24] = '\0';
 		strcat(npc_type->name, "`s_ward");
 	} else {
-		strcpy(npc_type->name, GetCleanName());
-		npc_type->name[25] = '\0';
-		strcat(npc_type->name, "`s_pet");
+		snprintf(npc_type->name, sizeof(npc_type->name), "%s`s_%s", GetCleanName(), spells[spell_id].name);
+	}
+
+	// Replace spaces with underscores
+	for (char* p = npc_type->name; *p; ++p) {
+		if (*p == ' ') {
+			*p = '_';
+		}
 	}
 
 	// Beastlord Pets

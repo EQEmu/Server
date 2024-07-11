@@ -2356,7 +2356,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if((spell_id != 6882) && (spell_id != 6884)) // Chaotic Jester/Steadfast Servant
 				{
 					char pet_name[64];
-					snprintf(pet_name, sizeof(pet_name), "%s`s_pet", caster->GetCleanName());
+					snprintf(pet_name, sizeof(pet_name), "%s`s_%s", caster->GetCleanName(), spells[spell_id].name);
+
+					// Replace spaces with underscores
+					for (char* p = pet_name; *p; ++p) {
+						if (*p == ' ') {
+							*p = '_';
+						}
+					}
+
 					caster->TemporaryPets(spell_id, this, pet_name);
 				}
 				else
