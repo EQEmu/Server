@@ -299,7 +299,7 @@ bool Client::Process() {
 				- being stunned or mezzed
 				- having used a ranged weapon recently
 		*/
-		if (auto_attack) {
+		if (auto_attack || AutoFireEnabled()) {
 			if (!IsAIControlled() && !dead
 				&& !(spellend_timer.Enabled() && casting_spell_id && !IsBardSong(casting_spell_id))
 				&& !IsStunned() && !IsFeared() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()
@@ -315,7 +315,9 @@ bool Client::Process() {
 			}
 		}
 
-		if (AutoFireEnabled()) {
+		Mob *auto_attack_target = GetTarget();
+
+		if (AutoFireEnabled() && may_use_attacks) {
 			if (GetTarget() == this) {
 				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
 				auto_fire = false;
@@ -329,6 +331,7 @@ bool Client::Process() {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
+									LogDebug("Check 1");
 									RangedAttack(GetTarget());
 									if (CheckDoubleRangedAttack())
 										RangedAttack(GetTarget(), true);
@@ -362,9 +365,7 @@ bool Client::Process() {
 					}
 				}
 			}
-		}
-
-		Mob *auto_attack_target = GetTarget();
+		}		
 
 		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) {
 			//check if change
