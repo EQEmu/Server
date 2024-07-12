@@ -811,11 +811,30 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 				const bool pets_can_take_quest_items = RuleB(Pets, CanTakeQuestItems);
 				const bool is_pet_and_can_have_nodrop_items = (RuleB(Pets, CanTakeNoDrop) &&	is_pet);
 				const bool is_pet_and_can_have_quest_items = (pets_can_take_quest_items &&	is_pet);
+
+
+				EQ::ItemInstance* pet_bag = nullptr;
+				if (RuleB(Custom, EnablePetBags) && is_pet) {
+					pet_bag = tradingWith->GetOwner()->CastToClient()->GetActivePetBag();
+				}
 				// if it was not a NO DROP or Attuned item (or if a GM is trading), let the NPC have it
-				if (RuleB(Custom, MulticlassingEnabled) && is_pet) {
+				if (RuleB(Custom, EnablePetBags) && is_pet && pet_bag) {
 					tradingWith->SayString(TRADE_BACK, GetCleanName());
 					PushItemOnCursor(*inst, true);
-					Message(Chat::Red, "You must use a Summoner's Syncrosatchel to equip your pet.");
+
+					
+					EQ::SayLinkEngine linker;
+					linker.SetLinkType(EQ::saylink::SayLinkItemData);
+					linker.SetItemData(pet_bag->GetItem());
+
+					auto pet_bag_link = linker.GenerateLink();
+
+					if (tradingWith->GetOwner()->GetID() == GetID()) {
+						Message(Chat::Yellow, "You must either use your [%s] to manage your pet's inventory, or put it inside of another bag to disable it.", pet_bag_link.c_str());
+					} else {
+						Message(Chat::Yellow, "This pet cannot accept trades due to being managed with a [%s]", pet_bag_link.c_str());
+					}
+					
 				} else {
 					if (GetGM() ||
 						(!restrict_quest_items_to_quest_npc || (is_quest_npc && item->IsQuestItem()) || !item->IsQuestItem()) && // If rule is enabled, return any quest items given to non-quest NPCs

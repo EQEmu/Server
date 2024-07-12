@@ -197,13 +197,13 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
 		if (is_equipped_weapon) {
-			if (IsClient()) {
+			if (true) {
 				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
 					return 0;
 				}
 
-				const auto inst = CastToClient()->m_inv[inventory_slot];
+				const auto inst = m_inv[inventory_slot];
 
 				if (inst) {
 					auto augment = inst->GetOrnamentationAugment();

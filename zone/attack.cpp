@@ -2150,10 +2150,18 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//figure out what weapon they are using, if any
 	const EQ::ItemData *weapon = nullptr;
+	const EQ::ItemInstance *weapon_instance = nullptr;
 	if (Hand == EQ::invslot::slotPrimary && equipment[EQ::invslot::slotPrimary] > 0) {
 		weapon = database.GetItem(equipment[EQ::invslot::slotPrimary]);
+		weapon_instance = GetInv().GetItem(EQ::invslot::slotPrimary);
 	} else if (equipment[EQ::invslot::slotSecondary]) {
 		weapon = database.GetItem(equipment[EQ::invslot::slotSecondary]);
+		weapon_instance = GetInv().GetItem(EQ::invslot::slotSecondary);
+	}
+
+	if (weapon_instance) {
+		LogDebug("Found a weapon instance: [{}]", weapon_instance->GetID());
+		weapon = weapon_instance->GetItem();
 	}
 
 	//We dont factor much from the weapon into the attack.
@@ -2267,6 +2275,14 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		my_hit.min_damage = GetMinDamage();
 		int32 hate = my_hit.base_damage + my_hit.min_damage;
 
+		if (GetOwner() && weapon_instance) {
+			int64 base_damage_bonus = weapon_instance->GetItemWeaponDamage(true);
+			if (weapon_instance->GetItemType() == EQ::item::ItemType2HBlunt || weapon_instance->GetItemType() == EQ::item::ItemType2HSlash || weapon_instance->GetItemType() == EQ::item::ItemType2HPiercing) {
+				base_damage_bonus /= 2;
+			}
+			my_hit.base_damage += base_damage_bonus;
+		}	
+
 		int hit_chance_bonus = 0;
 
 		if (opts) {
@@ -2318,10 +2334,10 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	bool has_hit = my_hit.damage_done > 0;
 	if (has_hit && !bRiposte && !other->HasDied()) {
-		TryWeaponProc(nullptr, weapon, other, Hand);
+		TryWeaponProc(weapon_instance, weapon, other, Hand);
 
 		if (!other->HasDied()) {
-			TrySpellProc(nullptr, weapon, other, Hand);
+			TrySpellProc(weapon_instance, weapon, other, Hand);
 		}
 
 		if (HasSkillProcSuccess() && !other->HasDied()) {
@@ -5203,7 +5219,7 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 			const EQ::ItemData *aug = aug_i->GetItem();
 			if (!aug)
 				continue;
-
+			
 			if (aug->Proc.Type == EQ::item::ItemEffectCombatProc && IsValidSpell(aug->Proc.Effect)) {
 				float APC = ProcChance * (100.0f + // Proc chance for this aug
 					static_cast<float>(aug->ProcRate)) / 100.0f;

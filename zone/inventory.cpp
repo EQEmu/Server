@@ -1855,8 +1855,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			Message(Chat::Red, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		LogInventory("Invalid slot move from slot [{}] to slot [{}] with [{}] charges!", src_slot_check, dst_slot_check, stack_count_check);
 		return false;
-	}
-
+	}	
+	
 	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF) { return true; } // Can't do RoF+
@@ -2463,7 +2463,31 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		SendEdgeStatBulkUpdate();
 	}
 
-	ApplyWeaponsStance();	
+	ApplyWeaponsStance();
+
+	if (RuleB(Custom, EnablePetBags)) {
+		auto pet_bag_idx = GetActivePetBagSlot();
+		// Check to see if we are moving an entire pet bag first
+		if (dst_inst && IsValidPetBag(dst_inst->GetID()) || src_inst && IsValidPetBag(src_inst->GetID())) {
+			if (IsPetBagActive()) {
+				DoPetBagResync();
+			} else {
+				DoPetBagFlush();
+			}
+		}
+
+		if (pet_bag_idx) {
+			if (EQ::InventoryProfile::CalcSlotId(move_in->to_slot) == pet_bag_idx) {
+				DoPetBagResync();
+			}
+
+			if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
+				DoPetBagResync();		
+			}
+		}
+	}
+
+
 	return true;
 }
 

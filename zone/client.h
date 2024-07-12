@@ -1112,7 +1112,10 @@ public:
 
 	bool IsPetBagActive();
 	EQ::ItemInstance* GetActivePetBag();
-	std::vector<EQ::ItemInstance*> GetPetBagContents();
+	void DoPetBagResync();
+	int16 GetActivePetBagSlot();
+	bool IsValidPetBag(int item_id);
+	void DoPetBagFlush(); 
 
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
 

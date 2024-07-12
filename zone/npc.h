@@ -209,6 +209,17 @@ public:
 		uint32 augment_five = 0,
 		uint32 augment_six = 0
 	);
+	void AddItemFixed(
+		uint32 item_id,
+		uint16 charges,
+		bool equip_item = true,
+		uint32 augment_one = 0,
+		uint32 augment_two = 0,
+		uint32 augment_three = 0,
+		uint32 augment_four = 0,
+		uint32 augment_five = 0,
+		uint32 augment_six = 0
+	);
 	void AddLootTable();
 	void AddLootTable(uint32 loottable_id, bool is_global = false);
 	void AddLootDropTable(uint32 lootdrop_id, uint8 drop_limit, uint8 min_drop);

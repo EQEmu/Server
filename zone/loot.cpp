@@ -610,6 +610,41 @@ void NPC::AddItem(
 	);
 }
 
+void NPC::AddItemFixed(
+	uint32 item_id,
+	uint16 charges,
+	bool equip_item,
+	uint32 augment_one,
+	uint32 augment_two,
+	uint32 augment_three,
+	uint32 augment_four,
+	uint32 augment_five,
+	uint32 augment_six
+)
+{
+	const auto *item = database.GetItem(item_id);
+	if (!item) {
+		return;
+	}
+
+	auto l = LootdropEntriesRepository::NewNpcEntity();
+
+	l.equip_item   = static_cast<uint8>(equip_item ? 1 : 0);
+	l.item_charges = charges;
+
+	AddLootDropFixed(
+		item,
+		l,
+		true,
+		augment_one,
+		augment_two,
+		augment_three,
+		augment_four,
+		augment_five,
+		augment_six
+	);
+}
+
 void NPC::AddLootTable()
 {
 	AddLootTable(m_loottable_id);

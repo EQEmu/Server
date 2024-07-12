@@ -1010,6 +1010,8 @@ RULE_BOOL(Custom, CombatProcsOnSpellCast, false, "Allow combat procs to happen o
 RULE_INT(Custom,  CombatProcsOnSpellCastProbability, 1, "Adjust the proc rate of weapons based on spell cast time")
 RULE_INT(Custom,  BardSongHealAmtReductionFactor, 0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_BOOL(Custom, StripCharmItems, true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
+RULE_BOOL(Custom, EnablePetBags, true, "Enable 'Pet Bag' features")
+RULE_STRING(Custom, PetBagList, "199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

@@ -284,6 +284,11 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	SetPetID(npc->GetID());
 	// We need to handle PetType 5 (petHatelist), add the current target to the hatelist of the pet
 
+
+	if (IsClient()) {
+		CastToClient()->DoPetBagResync();
+	}
+
 	if (record.petcontrol == petTargetLock)
 	{
 		Mob* m_target = GetTarget();
@@ -313,7 +318,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 				npc->Kill(); //Ensure pet dies if over 20k HP.
 			}
 		}
-	}
+	}	
 }
 
 void NPC::TryDepopTargetLockedPets(Mob* current_target) {

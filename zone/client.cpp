@@ -12141,25 +12141,98 @@ void Client::SendPath(Mob* target)
 	SendPathPacket(points);
 }
 
-/*
+
 bool Client::IsPetBagActive() {
-	return false;
+	return GetActivePetBagSlot() > 0;
 }
 
 EQ::ItemInstance* Client::GetActivePetBag() {
-	if (IsPetBagActive()) {
+	return GetInv().GetItem(GetActivePetBagSlot());
+}
 
+int16 Client::GetActivePetBagSlot() {
+	EQ::ItemInstance* active_bag = nullptr;
+	uint16 active_bag_slot = 0;
+	if (RuleB(Custom, EnablePetBags)) {
+		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
+			//LogDebug("Checking Slot [{}]", slot);
+			auto potential_bag = GetInv().GetItem(slot);
+			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {		
+				if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
+					active_bag = potential_bag;
+					active_bag_slot = slot;
+				}
+			}
+		}
 	}
-
-	return nullptr;
+	return active_bag_slot;
 }
 
-std::vector<EQ::ItemInstance*> Client::GetPetBagContents() {
-
-	return nullptr;
+bool Client::IsValidPetBag(int item_id) {
+	std::vector<std::string> item_strings = Strings::Split(RuleS(Custom, PetBagList), ",");
+	for (const std::string& item_string : item_strings) {
+		if (item_id == Strings::ToInt(item_string)) {
+			return true;
+		}
+	}
+	return false;
 }
 
-*/
+// It might make more sense to do invidual syncs at some point in the future, but this is fast enough
+void Client::DoPetBagResync() {
+	if (RuleB(Custom, EnablePetBags)) {
+		auto pet_bag = GetActivePetBag();
+		auto pet_bag_slot = GetActivePetBagSlot();
+		Mob* pet 	 = GetPet();
+
+		if (pet && pet_bag) {
+			// Clear existing pet inventory
+			DoPetBagFlush();
+
+			NPC* pet_npc = pet->CastToNPC();
+
+			int bag_top = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, 0);
+			int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
+
+			for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
+				auto item_inst = GetInv().GetItem(slot_id);								
+				if (item_inst) {
+					auto aug0 = item_inst->GetAugment(0);
+					auto aug1 = item_inst->GetAugment(1);
+					auto aug2 = item_inst->GetAugment(2);
+					auto aug3 = item_inst->GetAugment(3);
+					auto aug4 = item_inst->GetAugment(4);
+					auto aug5 = item_inst->GetAugment(5);
+
+					pet_npc->AddItemFixed(item_inst->GetID(), 1,	true, 
+										  aug0 != nullptr ? aug0->GetID() : 0, 
+										  aug1 != nullptr ? aug1->GetID() : 0, 
+										  aug2 != nullptr ? aug2->GetID() : 0, 
+										  aug3 != nullptr ? aug3->GetID() : 0, 
+										  aug4 != nullptr ? aug4->GetID() : 0, 
+										  aug5 != nullptr ? aug5->GetID() : 0);
+				}
+			}
+
+			pet->SendWearChange(EQ::textures::weaponPrimary);
+			pet->SendWearChange(EQ::textures::weaponSecondary);
+		}
+	}
+}
+
+void Client::DoPetBagFlush() {
+	if (RuleB(Custom, EnablePetBags)) {
+		Mob* pet 	 = GetPet();
+
+		if (pet) {
+			// Clear existing pet inventory
+			NPC* pet_npc = pet->CastToNPC();
+			while (!pet_npc->GetLootList().empty()) {
+				pet_npc->RemoveItem(pet_npc->GetLootList().front());
+			}
+		}
+	}
+}
 
 void Client::UseAugmentContainer(int container_slot)
 {
