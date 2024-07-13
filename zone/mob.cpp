@@ -877,8 +877,9 @@ int Mob::_GetRunSpeed() const {
 
 int Mob::_GetFearSpeed() const {
 
-	if (IsRooted() || IsStunned() || IsMezzed())
+	if (IsRooted() || IsStunned() || IsMezzed()) {
 		return 0;
+	}
 
 	//float speed_mod = fearspeed;
 	int speed_mod = GetBaseFearSpeed();

@@ -564,6 +564,55 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return false;
 }
 
+int EntityList::FleeAllyCount(Mob *attacker, Mob *exclude)
+{
+	// Return a list of how many NPCs of the same faction or race are within aggro range of the given exclude Mob.
+	if (!attacker) {
+		return 0;
+	}
+
+	int count = 0;
+
+	for (auto it = npc_list.begin(); it != npc_list.end(); ++it) {
+		NPC *mob = it->second;
+		if (!mob || (mob == exclude)) {
+			continue;
+		}
+
+		float AggroRange = mob->GetAggroRange();
+		float AssistRange = mob->GetAssistRange();
+
+		if(AssistRange > AggroRange) {
+			AggroRange = AssistRange;
+		}
+
+		// Square it because we will be using DistNoRoot
+		AggroRange *= AggroRange;
+
+		if (DistanceSquared(mob->GetPosition(), exclude->GetPosition()) > AggroRange) {
+			continue;
+		}
+
+		// If exclude doesn't have a faction, check for buddies based on race. Also exclude common factions such as noob monsters, indifferent, kos, kos animal
+		if(exclude->GetPrimaryFaction() != 0 &&
+			exclude->GetPrimaryFaction() != 394 && exclude->GetPrimaryFaction() != 463 && exclude->GetPrimaryFaction() != 366 && exclude->GetPrimaryFaction() != 367) {
+			if (mob->GetPrimaryFaction() != exclude->GetPrimaryFaction()) {
+					continue;
+			}
+		} else {
+			if (mob->GetBaseRace() != exclude->GetBaseRace() || mob->IsCharmedPet()) {
+				continue;
+			}
+		}
+
+		LogFleeDetail("[{}] on faction [{}] with AggroRange [{}] is at [{}], [{}], [{}] and will count as an ally for [{}]", mob->GetName(), mob->GetPrimaryFaction(), AggroRange, mob->GetX(), mob->GetY(), mob->GetZ(), exclude->GetName());
+		++count;
+	}
+
+	return count;
+
+}
+
 int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker
