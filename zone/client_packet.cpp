@@ -15970,7 +15970,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 				);
 			}
 			else {
-				if (trader_client->IsSeasonal == IsSeasonal()) {
+				if (trader_client->IsSeasonal() == IsSeasonal()) {
 					MessageString(Chat::Yellow, TRADER_BUSY);
 				}
 				LogTrading("Client::Handle_OP_TraderShop: Trader Busy");
