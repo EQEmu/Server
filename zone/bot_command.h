@@ -1295,8 +1295,8 @@ namespace ActionableBots
 	static void Filter_ByHighestPickLock(Client* bot_owner, std::list<Bot*>& sbl, float& pick_lock_value) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() != Class::Rogue && l->GetClass() != Class::Bard); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Rogue && l->GetLevel() < 5); });
-		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == Class::Bard && l->GetLevel() < 40); });
+		sbl.remove_if([bot_owner](const Bot* l) { return (l->HasClass(Class::Rogue) && l->GetLevel() < 5); });
+		sbl.remove_if([bot_owner](const Bot* l) { return (l->HasClass(Class::Bard) && l->GetLevel() < 40); });
 
 		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
 	}

@@ -1281,7 +1281,7 @@ void bot_command_toggle_archer(Client *c, const Seperator *sep)
 		}
 		bot_iter->ChangeBotArcherWeapons(bot_iter->IsBotArcher());
 
-		if (bot_iter->GetClass() == Class::Ranger && bot_iter->GetLevel() >= 61) {
+		if (bot_iter->HasClass(Class::Ranger) && bot_iter->GetLevel() >= 61) {
 			bot_iter->SetRangerAutoWeaponSelect(bot_iter->IsBotArcher());
 		}
 	}

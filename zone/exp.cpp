@@ -128,8 +128,8 @@ uint64 Client::CalcEXP(uint8 consider_level, bool ignore_modifiers) {
 
 		if (RuleB(Character, UseRaceClassExpBonuses)) {
 			if (
-				GetClass() == Class::Warrior ||
-				GetClass() == Class::Rogue ||
+				HasClass(Class::Warrior) ||
+				HasClass(Class::Rogue) ||
 				GetBaseRace() == HALFLING
 			) {
 				total_modifier *= 1.05;
@@ -295,7 +295,7 @@ void Client::CalculateStandardAAExp(uint64 &add_aaxp, uint8 conlevel, bool resex
 			aatotalmod *= 1.05;
 		}
 
-		if (GetClass() == Class::Rogue || GetClass() == Class::Warrior) {
+		if (HasClass(Class::Rogue) || HasClass(Class::Warrior)) {
 			aatotalmod *= 1.05;
 		}
 	}
@@ -443,7 +443,7 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 				totalmod *= 1.05;
 			}
 
-			if (GetClass() == Class::Rogue || GetClass() == Class::Warrior) {
+			if (HasClass(Class::Rogue) || HasClass(Class::Warrior)) {
 				totalmod *= 1.05;
 			}
 		}
@@ -500,11 +500,11 @@ void Client::CalculateExp(uint64 in_add_exp, uint64 &add_exp, uint64 &add_aaxp, 
 void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, bool resexp) {
 	if (!IsEXPEnabled()) {
 		return;
-	}	
-	
+	}
+
 	LogDebug("Raw in_add_exp: [{}]", in_add_exp);
 
-	if (RuleB(Custom, PowerSourceItemUpgrade)) {		
+	if (RuleB(Custom, PowerSourceItemUpgrade)) {
 		EQ::ItemInstance* old_item = m_inv.GetItem(EQ::invslot::slotPowerSource);
 
 		if (old_item) {
@@ -512,12 +512,12 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 			EQ::SayLinkEngine linker;
 
 			uint64 tar_item_exp   = old_item->GetItem()->CalculateGearScore() * RuleR(Custom, PowerSourceItemUpgradeRateScale);
-			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));			
+			uint64 cur_item_exp   = in_add_exp + Strings::ToUnsignedBigInt(old_item->GetCustomData("Exp"));
 
 			double percentage = (static_cast<double>(cur_item_exp) / static_cast<double>(tar_item_exp)) * 100;
 
-			linker.SetLinkType(EQ::saylink::SayLinkItemInst);	
-			
+			linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+
 			if (!new_item) {
 				linker.SetItemInst(old_item);
 				Message(Chat::Experience, "Your [%s] is fully upgraded and cannot accumulate any additional experience.", linker.GenerateLink().c_str());
@@ -527,7 +527,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 			linker.SetItemInst(old_item);
 			Message(Chat::Experience, "Your [%s] has gained experience! (%.3f%%)", linker.GenerateLink().c_str(), percentage);
 
-			if (cur_item_exp <= tar_item_exp) {			
+			if (cur_item_exp <= tar_item_exp) {
 				old_item->SetCustomData("Exp", fmt::to_string(cur_item_exp));
 				database.UpdateInventorySlot(CharacterID(), old_item, EQ::invslot::slotPowerSource);
 			} else if (new_item) {
@@ -539,12 +539,12 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 					const EQ::ItemInstance *aug_i = old_item->GetAugment(r);
 					if (!aug_i) // no aug, try next slot!
 							continue;
-									
-					new_item->PutAugment(r, *old_item->RemoveAugment(r));		
+
+					new_item->PutAugment(r, *old_item->RemoveAugment(r));
 				}
 
 				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
-				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {	
+				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
 					m_inv.GetItem(EQ::invslot::slotPowerSource)->SetAttuned(true);
 
 					linker.SetItemInst(old_item);
@@ -554,7 +554,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 					auto  new_item_lnk = linker.GenerateLink().c_str();
 
 					Message(Chat::Experience, "Your [%s] has upgraded into [%s]!", upgrade_item_lnk, new_item_lnk);
-					SendSound();		
+					SendSound();
 				} else {
 					if (old_item) {
 						PutItemInInventory(EQ::invslot::slotPowerSource, *old_item, true);
@@ -563,10 +563,10 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 				}
 
 				safe_delete(old_item);
-			}			
+			}
 			return;
 		}
-	}	
+	}
 
 	EVENT_ITEM_ScriptStopReturn();
 
@@ -1154,15 +1154,15 @@ uint32 Client::GetEXPForLevel(uint16 check_level)
 	if(RuleB(Character,UseOldClassExpPenalties))
 	{
 		float classmod = 1.0;
-		if(GetClass() == Class::Paladin || GetClass() == Class::ShadowKnight || GetClass() == Class::Ranger || GetClass() == Class::Bard) {
+		if(HasClass(Class::Paladin) || HasClass(Class::ShadowKnight) || HasClass(Class::Ranger) || HasClass(Class::Bard)) {
 			classmod = 1.4;
-		} else if(GetClass() == Class::Monk) {
+		} else if(HasClass(Class::Monk)) {
 			classmod = 1.2;
-		} else if(GetClass() == Class::Wizard || GetClass() == Class::Enchanter || GetClass() == Class::Magician || GetClass() == Class::Necromancer) {
+		} else if(HasClass(Class::Wizard) || HasClass(Class::Enchanter) || HasClass(Class::Magician) || HasClass(Class::Necromancer)) {
 			classmod = 1.1;
-		} else if(GetClass() == Class::Rogue) {
+		} else if(HasClass(Class::Rogue)) {
 			classmod = 0.91;
-		} else if(GetClass() == Class::Warrior) {
+		} else if(HasClass(Class::Warrior)) {
 			classmod = 0.9;
 		}
 

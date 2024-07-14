@@ -66,7 +66,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 	chance += itembonuses.FrenziedDevastation + spellbonuses.FrenziedDevastation + aabonuses.FrenziedDevastation;
 
 	//Crtical Hit Calculation pathway
-	if (chance > 0 || (IsOfClientBot() && (GetClassesBits() & GetPlayerClassBit(Class::Wizard)) && GetLevel() >= RuleI(Spells, WizCritLevel))) {
+	if (chance > 0 || (IsOfClientBot() && (HasClass(Class::Wizard)) && GetLevel() >= RuleI(Spells, WizCritLevel))) {
 		 int32 ratio = RuleI(Spells, BaseCritRatio); //Critical modifier is applied from spell effects only. Keep at 100 for live like criticals.
 
 		//Improved Harm Touch is a guaranteed crit if you have at least one level of SCF.
@@ -82,7 +82,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 			Critical = true;
 			ratio += itembonuses.SpellCritDmgIncrease + spellbonuses.SpellCritDmgIncrease + aabonuses.SpellCritDmgIncrease;
 			ratio += itembonuses.SpellCritDmgIncNoStack + spellbonuses.SpellCritDmgIncNoStack + aabonuses.SpellCritDmgIncNoStack;
-		} else if ((IsOfClientBot() && GetClass() == Class::Wizard) || (IsMerc() && GetClass() == CASTERDPS)) {
+		} else if ((IsOfClientBot() && HasClass(Class::Wizard)) || (IsMerc() && GetClass() == CASTERDPS)) {
 			if ((GetLevel() >= RuleI(Spells, WizCritLevel)) && zone->random.Roll(RuleI(Spells, WizCritChance))) {
 				//Wizard innate critical chance is calculated seperately from spell effect and is not a set ratio. (20-70 is parse confirmed)
 				ratio += zone->random.Int(RuleI(Spells, WizardCritMinimumRandomRatio), RuleI(Spells, WizardCritMaximumRandomRatio));
@@ -90,7 +90,7 @@ int64 Mob::GetActSpellDamage(uint16 spell_id, int64 value, Mob* target, int perc
 			}
 		}
 
-		if (IsOfClientBot() && (GetClassesBits() & GetPlayerClassBit(Class::Wizard))) {
+		if (IsOfClientBot() && (HasClass(Class::Wizard))) {
 			ratio += RuleI(Spells, WizCritRatio); //Default is zero
 		}
 
@@ -358,7 +358,7 @@ int64 Mob::GetActDoTDamage(uint16 spell_id, int64 value, Mob* target, bool from_
 				const int value = RuleI(Spells, DOTsScaleWithSpellDmgPerTickPercent);
 				if (value != 0) {
 					extra_dmg = (extra_dmg * value) / 100;
-				}				
+				}
 			}
 
 			if (RuleB(Spells, DOTBonusDamageSplitOverDuration)) {
@@ -464,7 +464,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 		}
 	}
 
-	if ((GetClassesBits() & GetPlayerClassBit(Class::Cleric))) {
+	if ((HasClass(Class::Cleric))) {
 		value += int64(base_value*RuleI(Spells, ClericInnateHealFocus) / 100);  //confirmed on live parsing clerics get an innate 5 pct heal focus
 	}
 	value += int64(base_value*GetFocusEffect(focusImprovedHeal, spell_id, nullptr, from_buff_tic) / 100);
@@ -571,7 +571,7 @@ int64 Mob::GetActSpellHealing(uint16 spell_id, int64 value, Mob* target, bool fr
 			}
 		}
 
-		value += extra_heal;		
+		value += extra_heal;
 		value *= critical_modifier;
 	}
 
@@ -726,7 +726,7 @@ bool Client::TrainDiscipline(uint32 itemid) {
 			if (class_bit & (1 << class_index)) {
 				// Check if the player's class level is sufficient to use the spell
 				const auto level_required = spell.classes[class_index];
-				
+
 				if (level_required != 255 && GetLevel() >= level_required) {
 					canLearn = true;
 					break; // Stop checking once we find a class that can learn the spell
@@ -935,7 +935,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	for (int i = 0; i < 16; ++i) {
 		if (class_bits & (1 << i)) {
 			uint8 level_to_use = spell.classes[i];
-			
+
 			if (level_to_use <= GetLevel()) {
 				canLearn = true;
 				break; // Stop checking once we find a class that can learn the spell
@@ -998,7 +998,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		if (reduced_recast > 0) {
 			instant_recast = false;
 
-			if (GetClass() == Class::Bard && IsCasting() && spells[spell_id].cast_time == 0) {
+			if (HasClass(Class::Bard) && IsCasting() && spells[spell_id].cast_time == 0) {
 				if (DoCastingChecksOnCaster(spell_id, EQ::spells::CastingSlot::Discipline)) {
 					SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, (uint32)DiscTimer, reduced_recast, false);
 				}
@@ -1013,7 +1013,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 
 	if (instant_recast) {
-		if (GetClass() == Class::Bard && IsCasting() && spells[spell_id].cast_time == 0) {
+		if (HasClass(Class::Bard) && IsCasting() && spells[spell_id].cast_time == 0) {
 			if (DoCastingChecksOnCaster(spell_id, EQ::spells::CastingSlot::Discipline)) {
 				SpellFinished(spell_id, entity_list.GetMob(target), EQ::spells::CastingSlot::Discipline, 0, -1, spells[spell_id].resist_difficulty, false, -1, 0xFFFFFFFF, 0, false);
 			}
@@ -1376,7 +1376,7 @@ void EntityList::MassGroupBuff(
 		if (is_detrimental_spell) {
 			continue;
 		}
-		
+
 		caster->SpellOnTarget(spell_id, current_mob);
 	}
 }
@@ -1417,7 +1417,7 @@ void EntityList::AEAttack(
 			) {
 
 			for (int i = 0; i < attack_rounds; i++) {
-				if (!attacker->IsClient() || (attacker->GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Ranger)))) {
+				if (!attacker->IsClient() || (attacker->HasClass(Class::Ranger) || attacker->HasClass(Class::Monk))) {
 					if (attacker->CheckLosFN(current_mob)) {
 						attacker->Attack(current_mob, Hand, false, false, is_from_spell);
 					}

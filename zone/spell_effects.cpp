@@ -273,7 +273,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				// for offensive spells check if we have a spell rune on
-				int64 dmg = effect_value;				
+				int64 dmg = effect_value;
 
 				if(dmg < 0)
 				{
@@ -289,10 +289,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						else {
 							//maybe allowing pets to cast spells as if the owner cast them by a % number.
 							if (RuleI(Spells, PetsScaleWithOwnerPercent) > 0 && caster->GetOwner() && caster->GetOwner()->IsClient() && !IsCharmed())
-							{	
+							{
 								//share stats
 								Client* owner = caster->GetOwner()->CastToClient();
-								dmg = owner->GetActSpellDamage(spell_id, dmg, this, RuleI(Spells, PetsScaleWithOwnerPercent));								
+								dmg = owner->GetActSpellDamage(spell_id, dmg, this, RuleI(Spells, PetsScaleWithOwnerPercent));
 							}
 							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
 						}
@@ -461,7 +461,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_CurrentMana:
 			{
 				// Bards don't get mana from effects, good or bad.
-				if(GetClass() == Class::Bard && !RuleB(Custom, MulticlassingEnabled))
+				if(HasClass(Class::Bard) && !RuleB(Custom, MulticlassingEnabled))
 					break;
 				if(IsManaTapSpell(spell_id)) {
 					if (!IsPureMeleeClass()) {
@@ -498,7 +498,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_CurrentManaOnce:
 			{
 				// Bards don't get mana from effects, good or bad.
-				if(GetClass() == Class::Bard && !RuleB(Custom, MulticlassingEnabled))
+				if(HasClass(Class::Bard) && !RuleB(Custom, MulticlassingEnabled))
 					break;
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Current Mana Once: %+i", effect_value);
@@ -1971,7 +1971,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
 				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
 					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
@@ -2493,13 +2493,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 
 				switch(spells[spell_id].skill) {
-				case EQ::skills::SkillThrowing:					
+				case EQ::skills::SkillThrowing:
 					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, 0, 0, 0, 4.0f, true);
 					break;
-				case EQ::skills::SkillArchery:					
+				case EQ::skills::SkillArchery:
 					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, 0, 0, 0, nullptr, 0, 4.0f, true);
 					break;
-				default:					
+				default:
 					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, 0);
 					break;
 				}
@@ -3547,7 +3547,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 	*/
 
 	//This is checked from Mob::SpellEffects and applied to instant spells and runes.
-	if (caster && caster->GetClassesBits() != GetPlayerClassBit(Class::Bard) && caster->HasBaseEffectFocus()) {
+	if (caster && caster->HasClass(Class::Bard) && caster->HasBaseEffectFocus()) {
 
 		oval = effect_value;
 		int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
@@ -3561,7 +3561,7 @@ int64 Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level
 	else if (caster_id && instrument_mod > 10) {
 
 		Mob* buff_caster = entity_list.GetMob(caster_id);//If targeted bard song needed to confirm caster is not bard.
-		if (buff_caster && (buff_caster->GetClassesBits() & GetPlayerClassBit(Class::Bard) == 0)) {
+		if (buff_caster && (buff_caster->HasClass(Class::Bard) == 0)) {
 			oval = effect_value;
 			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
@@ -3918,7 +3918,7 @@ void Mob::BuffProcess()
 				{
 					bool suspended = false;
 
-					if (RuleB(Custom, SuspendGroupBuffs) && IsBeneficialSpell(buffs[buffs_i].spellid)) {						
+					if (RuleB(Custom, SuspendGroupBuffs) && IsBeneficialSpell(buffs[buffs_i].spellid)) {
 						uint32 spellid = buffs[buffs_i].spellid;
 						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
 							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
@@ -3940,7 +3940,7 @@ void Mob::BuffProcess()
 											}
 										}
 									}
-								}							
+								}
 							}
 
 							if (IsPet() && GetOwner()) {
@@ -3957,7 +3957,7 @@ void Mob::BuffProcess()
 
 					if (buffs[buffs_i].ticsremaining < 0) {
 						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
-						BuffFadeBySlot(buffs_i);						
+						BuffFadeBySlot(buffs_i);
 					}
 					else
 					{
@@ -3976,11 +3976,11 @@ void Mob::BuffProcess()
                 {
                     CastToClient()->SendBuffDurationPacket(buffs[buffs_i], buffs_i);
                     CastToClient()->SendBuffNumHitPacket(buffs[buffs_i], buffs_i);
-                    buffs[buffs_i].UpdateClient = false;                    
+                    buffs[buffs_i].UpdateClient = false;
                 }
             }
 		}
-	}	
+	}
 }
 
 void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
@@ -4460,7 +4460,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				uint16 proc_id = GetProcID(buffs[slot].spellid, i);
 
 				// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
+				if (proc_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
 					proc_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 				}
 
@@ -4586,7 +4586,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					owner->SetPet(0);
 				}
 
-				// Custom charm inventory handling				
+				// Custom charm inventory handling
 				if (RuleB(Custom, StripCharmItems) && EntityVariableExists("is_charmed")) {
 					auto serialized_inventory = GetEntityVariable("is_charmed");
 					LogDebug("Serialized Inventory: [{}]", serialized_inventory);
@@ -4610,7 +4610,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 							if (item_data) {
 								CastToNPC()->AddItem(item_data, item_data->MaxCharges);
-							}							
+							}
 						}
 					}
 
@@ -5735,7 +5735,7 @@ int64 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			case SE_LimitMaxLevel:
 				if (IsNPC()) {
 					break;
-				}				
+				}
 
 				spell_level = GetSpellLevelForCaster(spell_id);
 
@@ -6575,7 +6575,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
 		Mob* proc_target = GetTarget();
 		int64 damage_override = 0;
-		
+
 		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
 		if (!IsTargetRequiredForSpell(proc_spellid)) {
 			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
@@ -6601,7 +6601,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 }
 
 uint16 Mob::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
-	
+
 	if (!RuleB(Custom, MulticlassingEnabled) && IsBardSong(spell_id)) {
 		return 0;
 	}
@@ -7895,7 +7895,7 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_CLASS_WIZARD:
 		case IS_WIZARD_USED_ON_MAGE_FIRE_PET:
-			if (GetClass() == Class::Wizard)
+			if (HasClass(Class::Wizard))
 				return true;
 			break;
 
@@ -7940,7 +7940,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_PURE_MELEE:
-			if (GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Rogue) | GetPlayerClassBit(Class::Warrior) | GetPlayerClassBit(Class::Berserker)))
+			if (HasClass(Class::Monk) || HasClass(Class::Rogue) || HasClass(Class::Warrior) || HasClass(Class::Berserker))
 				return true;
 			break;
 
@@ -7955,78 +7955,78 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_WARRIOR:
-			if (GetClass() == Class::Warrior)
+			if (HasClass(Class::Warrior))
 				return true;
 			break;
 
 		case IS_CLASS_CLERIC:
-			if (GetClass() == Class::Cleric)
+			if (HasClass(Class::Cleric))
 				return true;
 			break;
 
 		case IS_CLASS_PALADIN:
-			if (GetClass() == Class::Paladin)
+			if (HasClass(Class::Paladin))
 				return true;
 			break;
 
 		case IS_CLASS_RANGER:
-			if (GetClass() == Class::Ranger)
+			if (HasClass(Class::Ranger))
 				return true;
 			break;
 
 		case IS_CLASS_SHADOWKNIGHT:
-			if (GetClass() == Class::ShadowKnight)
+			if (HasClass(Class::ShadowKnight))
 				return true;
 			break;
 
 		case IS_CLASS_DRUID:
-			if (GetClass() == Class::Druid)
+			if (HasClass(Class::Druid))
 				return true;
 			break;
 
 		case IS_CLASS_MONK:
-			if (GetClass() == Class::Monk)
+			if (HasClass(Class::Monk))
 				return true;
 			break;
 
 		case IS_CLASS_BARD2:
 		case IS_CLASS_BARD:
-			if (GetClass() == Class::Bard)
+			if (HasClass(Class::Bard))
 				return true;
 			break;
 
 		case IS_CLASS_ROGUE:
-			if (GetClass() == Class::Rogue)
+			if (HasClass(Class::Rogue))
 				return true;
 			break;
 
 		case IS_CLASS_SHAMAN:
-			if (GetClass() == Class::Shaman)
+			if (HasClass(Class::Shaman))
 				return true;
 			break;
 
 		case IS_CLASS_NECRO:
-			if (GetClass() == Class::Necromancer)
+			if (HasClass(Class::Necromancer))
 				return true;
 			break;
 
 		case IS_CLASS_MAGE:
-			if (GetClass() == Class::Magician)
+			if (HasClass(Class::Magician))
 				return true;
 			break;
 
 		case IS_CLASS_ENCHANTER:
-			if (GetClass() == Class::Enchanter)
+			if (HasClass(Class::Enchanter))
 				return true;
 			break;
 
 		case IS_CLASS_BEASTLORD:
-			if (GetClass() == Class::Beastlord)
+			if (HasClass(Class::Beastlord))
 				return true;
 			break;
 
 		case IS_CLASS_BERSERKER:
-			if (GetClass() == Class::Berserker)
+			if (HasClass(Class::Berserker))
 				return true;
 			break;
 
@@ -8136,8 +8136,8 @@ bool Mob::PassCastRestriction(int value)
 		}
 
 		case IS_CLASS_CHAIN_OR_PLATE:
-			if ((GetClass() == Class::Warrior) || (GetClass() == Class::Bard) || (GetClass() == Class::ShadowKnight) || (GetClass() == Class::Paladin) || (GetClass() == Class::Cleric)
-				|| (GetClass() == Class::Ranger) || (GetClass() == Class::Shaman) || (GetClass() == Class::Rogue) || (GetClass() == Class::Berserker)) {
+			if ((HasClass(Class::Warrior)) || (HasClass(Class::Bard)) || (HasClass(Class::ShadowKnight)) || (HasClass(Class::Paladin)) || (HasClass(Class::Cleric))
+				|| (HasClass(Class::Ranger)) || (HasClass(Class::Shaman)) || (HasClass(Class::Rogue)) || (HasClass(Class::Berserker))) {
 				return true;
 			}
 			break;
@@ -8328,7 +8328,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLASS_WARRIOR_CASTER_PRIEST:
-			if (IsCasterClass(GetClass()) || GetClass() == Class::Warrior)
+			if (IsCasterClass(GetClass()) || HasClass(Class::Warrior))
 				return true;
 			break;
 
@@ -8502,7 +8502,7 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
 			if (IsClient() && GetGender() == Gender::Male &&
-				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
+				(HasClass(Class::Beastlord) || HasClass(Class::Berserker) || HasClass(Class::Monk) || HasClass(Class::Ranger) || HasClass(Class::Rogue)))
 				return true;
 			break;
 
@@ -8518,7 +8518,7 @@ bool Mob::PassCastRestriction(int value)
 
 		case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
 			if (IsClient() && GetGender() == Gender::Female &&
-				(GetClass() == Class::Beastlord || GetClass() == Class::Berserker || GetClass() == Class::Monk || GetClass() == Class::Ranger || GetClass() == Class::Rogue))
+				(HasClass(Class::Beastlord) || HasClass(Class::Berserker) || HasClass(Class::Monk) || HasClass(Class::Ranger) || HasClass(Class::Rogue)))
 				return true;
 			break;
 

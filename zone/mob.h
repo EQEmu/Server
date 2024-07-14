@@ -510,7 +510,7 @@ public:
 	void ApplySpellBuff(int spell_id, int duration = 0, int level_override = -1);
 	int GetBuffStatValueBySpell(int32 spell_id, const char* stat_identifier);
 	int GetBuffStatValueBySlot(uint8 slot, const char* stat_identifier);
-	
+
 	void ClearRestingDetrimentalEffects();
 
 	uint32 GetApocItemUpgrade(uint32 item_id);
@@ -1313,6 +1313,7 @@ public:
 	Trade* trade;
 
 	uint32 GetClassesBits() const;
+	bool HasClass(uint8 player_class) const;
 
 	bool ShieldAbility(uint32 target_id, int shielder_max_distance = 15, int shield_duration = 12000, int shield_target_mitigation = 50, int shielder_mitigation = 75, bool use_aa = false, bool can_shield_npc = true);
 	void DoShieldDamageOnShielder(Mob *shield_target, int64 hit_damage_done, EQ::skills::SkillType skillInUse);

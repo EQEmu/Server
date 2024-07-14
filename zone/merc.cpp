@@ -61,7 +61,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 	SetStance(Stance::Balanced);
 	rest_timer.Disable();
 
-	if (GetClass() == Class::Rogue)
+	if (HasClass(Class::Rogue))
 		evade_timer.Start();
 
 	int r;
@@ -1076,7 +1076,7 @@ void Merc::AI_Process() {
 
 		float meleeDistance = GetMaxMeleeRangeToTarget(GetTarget());
 
-		if(GetClass() == Class::ShadowKnight || GetClass() == Class::Paladin || GetClass() == Class::Warrior) {
+		if(HasClass(Class::ShadowKnight) || HasClass(Class::Paladin) || HasClass(Class::Warrior)) {
 			meleeDistance = meleeDistance * .30;
 		}
 		else {
@@ -1104,7 +1104,7 @@ void Merc::AI_Process() {
 
 			if(AI_movement_timer->Check()) {
 				if (!IsMoving()) {
-					if (GetClass() == Class::Rogue) {
+					if (HasClass(Class::Rogue)) {
 						if (HasTargetReflection() && !GetTarget()->IsFeared() && !GetTarget()->IsStunned()) {
 							// Hate redux actions
 							if (evade_timer.Check(false)) {
@@ -1226,7 +1226,7 @@ void Merc::AI_Process() {
 				}
 
 				// TODO: Do mercs berserk? Find this out on live...
-				//if (GetClass() == Class::Warrior || GetClass() == Class::Berserker) {
+				//if (HasClass(Class::Warrior) || HasClass(Class::Berserker)) {
 				//      if(GetHP() > 0 && !berserk && GetHPRatio() < 30) {
 				//              entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				//              berserk = true;
@@ -1671,8 +1671,8 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 											continue;
 										}
 
-										if(IsEngaged() && (g->members[i]->GetClass() == Class::Necromancer && hpr >= 50)
-											|| (g->members[i]->GetClass() == Class::Shaman && hpr >= 80)) {
+										if(IsEngaged() && (g->members[i]->HasClass(Class::Necromancer) && hpr >= 50)
+											|| (g->members[i]->HasClass(Class::Shaman) && hpr >= 80)) {
 												//allow necros to lifetap & shaman to canni without wasting mana
 												continue;
 										}

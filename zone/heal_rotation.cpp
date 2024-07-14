@@ -600,7 +600,7 @@ bool HealRotation::healable_target(bool use_class_at, bool critical_only)
 			return false;
 		if (healable_target->GetHPRatio() > m_safe_hp_ratio[ClassArmorType(healable_target->GetClass())])
 			return false;
-		if (healable_target->IsBerserk() && (healable_target->GetClass() == Class::Warrior || healable_target->GetClass() == Class::Berserker)) {
+		if (healable_target->IsBerserk() && (healable_target->HasClass(Class::Warrior) || healable_target->HasClass(Class::Berserker))) {
 			if (healable_target->GetHPRatio() <= RuleI(Combat, BerserkerFrenzyEnd) && healable_target->GetHPRatio() > m_critical_hp_ratio[ClassArmorType(healable_target->GetClass())])
 				return false;
 		}
@@ -610,7 +610,7 @@ bool HealRotation::healable_target(bool use_class_at, bool critical_only)
 			return false;
 		if (healable_target->GetHPRatio() > SAFE_HP_RATIO_BASE)
 			return false;
-		if (healable_target->IsBerserk() && (healable_target->GetClass() == Class::Warrior || healable_target->GetClass() == Class::Berserker)) {
+		if (healable_target->IsBerserk() && (healable_target->HasClass(Class::Warrior) || healable_target->HasClass(Class::Berserker))) {
 			if (healable_target->GetHPRatio() <= RuleI(Combat, BerserkerFrenzyEnd) && healable_target->GetHPRatio() > CRITICAL_HP_RATIO_BASE)
 				return false;
 		}

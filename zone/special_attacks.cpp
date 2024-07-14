@@ -332,7 +332,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 
 	// make sure were actually able to use such an attack. (Bards can throw while casting. ~Kayen confirmed on live 1/22)
 	if (
-		(spellend_timer.Enabled() && GetClass() != Class::Bard && !RuleB(Custom,MulticlassingEnabled)) || 
+		(spellend_timer.Enabled() && GetClass() != Class::Bard && !RuleB(Custom,MulticlassingEnabled)) ||
 		IsFeared() ||
 		IsStunned() ||
 		IsMezzed() ||
@@ -466,9 +466,9 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		DoAnim(anim1HWeapon, 0, false);
 
-		LogDebug("Attempting Frenzy: [{}]", GetClassesBits() & GetPlayerClassBit(Class::Berserker));
+		LogDebug("Attempting Frenzy: [{}]", HasClass(Class::Berserker));
 
-		if (GetClassesBits() & GetPlayerClassBit(Class::Berserker)) {
+		if (HasClass(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 
 			if (zone->random.Roll0(450) < chance) {
@@ -508,12 +508,14 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	// Warrior, Ranger, Monk, Beastlord, and Berserker can kick always
 	const uint32 allowed_kick_classes = RuleI(Combat, ExtraAllowedKickClassesBitmask);
 
-	const bool can_use_kick = (GetClassesBits() & ((GetPlayerClassBit(Class::Warrior) | 
-													GetPlayerClassBit(Class::Ranger) | 
-													GetPlayerClassBit(Class::Monk) | 
-													GetPlayerClassBit(Class::Beastlord) | 
-													GetPlayerClassBit(Class::Berserker) | 
-													allowed_kick_classes)));
+	const bool can_use_kick = (
+		HasClass(Class::Warrior) ||
+		HasClass(Class::Ranger) ||
+		HasClass(Class::Monk) ||
+		HasClass(Class::Beastlord) ||
+		HasClass(Class::Berserker) ||
+		(GetClassesBits() & allowed_kick_classes)
+	);
 
 	bool found_skill = false;
 
@@ -540,7 +542,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		}
 	}
 
-	if ((GetClassesBits() & GetPlayerClassBit(Class::Monk)) &&
+	if ((HasClass(Class::Monk)) &&
 		(ca_atk->m_skill == EQ::skills::SkillFlyingKick ||
 		 ca_atk->m_skill == EQ::skills::SkillDragonPunch ||
 		 ca_atk->m_skill == EQ::skills::SkillEagleStrike ||
@@ -611,7 +613,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 	if (
 		ca_atk->m_atk == 100 &&
 		ca_atk->m_skill == EQ::skills::SkillBackstab &&
-		((GetClassesBits() & GetPlayerClassBit(Class::Rogue)))
+		((HasClass(Class::Rogue)))
 	) {
 		reuse_time = BackstabReuseTime - 1 - skill_reduction;
 		TryBackstab(GetTarget(), reuse_time);
@@ -835,7 +837,7 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	else if (other == this)
 		return;
 	if (!CheckLosFN(other)) {
-		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch
 		return;
 	}
 	//make sure the attack and ranged timers are up
@@ -1040,7 +1042,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	} else {
 		WDmg = weapon_damage;
 	}
-	
+
 	if (LaunchProjectile) { // 1: Shoot the Projectile once we calculate weapon damage.
 		if (!RuleB(Custom, MulticlassingEnabled)) {
 			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
@@ -1151,7 +1153,7 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 	if (!other)
 		return false;
 	if (!CheckLosFN(other)) {
-		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch
 		return;
 	}
 	int slot = -1;
@@ -1600,7 +1602,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		return;
 	}
 	if (!CheckLosFN(other)) {
-		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch 
+		MessageString(Chat::Red, CANT_SEE_TARGET); //Should force client to cry like a bitch
 		return;
 	}
 	const EQ::ItemInstance *m_RangeWeapon = nullptr;//throwing weapon
@@ -1888,7 +1890,7 @@ void NPC::DoClassAttacks(Mob *target) {
 	) {
 		GetOwner()->MessageString(Chat::PetResponse, PET_TAUNTING);
 		Taunt(target->CastToNPC(), true);
-		for (const auto & ent : entity_list.GetNPCList()) {			
+		for (const auto & ent : entity_list.GetNPCList()) {
 			auto mob = ent.second;
 			if (mob && mob->IsOnHatelist(GetOwner()) && mob->GetTarget() && mob->GetTarget()->GetID() == GetOwner()->GetID()) {
 				Taunt(mob, true);
@@ -1960,7 +1962,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy);
 			DoAnim(anim2HSlashing, 0, false);
 
-			if (GetClass() == Class::Berserker) {
+			if (HasClass(Class::Berserker)) {
 				int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 				if (zone->random.Roll0(450) < chance)
 					AtkRounds++;
@@ -2120,7 +2122,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
 		// bards can do riposte frenzy for some reason
-		if (!IsRiposte && GetClass() == Class::Berserker) {
+		if (!IsRiposte && HasClass(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
 			if (zone->random.Roll0(450) < chance)
 				AtkRounds++;

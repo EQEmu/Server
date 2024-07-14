@@ -169,7 +169,7 @@ bool Bot::BotCastCombatSong(Mob* tar, uint8 botLevel) {
 
 bool Bot::BotCastHateReduction(Mob* tar, uint8 botLevel, const BotSpell& botSpell) {
 	bool casted_spell = false;
-	if (GetClass() == Class::Bard) {
+	if (HasClass(Class::Bard)) {
 		std::list<BotSpell_wPriority> botSongList = GetPrioritizedBotSpellsBySpellType(this, SpellType_HateRedux);
 		for (auto iter : botSongList) {
 			if (!iter.SpellId)
@@ -391,7 +391,7 @@ bool Bot::BotCastDOT(Mob* tar, uint8 botLevel, const BotSpell& botSpell, const b
 			return casted_spell;
 		}
 
-		if (GetClass() == Class::Bard) {
+		if (HasClass(Class::Bard)) {
 			std::list<BotSpell_wPriority> dotList = GetPrioritizedBotSpellsBySpellType(this, SpellType_DOT);
 
 			const int maxDotSelect = 5;
@@ -1004,11 +1004,11 @@ bool Bot::BotCastHeal(Mob* tar, uint8 botLevel, uint8 botClass, BotSpell& botSpe
 		}
 
 		if (hpr < 95 || tar->IsClient() || botClass == Class::Bard) {
-			if (tar->GetClass() == Class::Necromancer && hpr >= 40) {
+			if (tar->HasClass(Class::Necromancer) && hpr >= 40) {
 				return false;
 			}
 
-			if (tar->GetClass() == Class::Shaman && hpr >= 80) {
+			if (tar->HasClass(Class::Shaman) && hpr >= 80) {
 				return false;
 			}
 

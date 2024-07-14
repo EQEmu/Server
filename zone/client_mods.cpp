@@ -578,7 +578,7 @@ int64 Client::CalcMaxMana()
 	return max_mana;
 }
 
-int64 Client::CalcBaseMana() {    
+int64 Client::CalcBaseMana() {
 	int classes_bits = GetClassesBits();
 	int64 highest_base_mana = 0;
 
@@ -589,7 +589,7 @@ int64 Client::CalcBaseMana() {
 			LogSpells("Checking Class ID [{}], bit [{}]", class_id, class_bit);
 			int64 class_base_mana = _CalcBaseMana(class_id);
 			if (class_base_mana > highest_base_mana) {
-				highest_base_mana = class_base_mana; 
+				highest_base_mana = class_base_mana;
 			}
 		}
 	}
@@ -644,7 +644,7 @@ int64 Client::_CalcBaseMana(uint8 class_id)
 			max_m = (((5 * (MindFactor + 200)) / 2) * 3 * GetLevel() / 100);
 		}
 	}
-	
+
 	return max_m;
 }
 
@@ -1079,7 +1079,7 @@ int32	Client::CalcMR()
 			MR = 20;
 	}
 	MR += itembonuses.MR + spellbonuses.MR + aabonuses.MR;
-	if (GetClassesBits() & (GetPlayerClassBit(Class::Warrior) | GetPlayerClassBit(Class::Berserker))) {
+	if (HasClass(Class::Warrior) || HasClass(Class::Berserker)) {
 		MR += GetLevel() / 2;
 	}
 	if (MR < 1) {
@@ -1632,7 +1632,7 @@ void Client::CalcMaxEndurance()
 int64 Client::CalcBaseEndurance() {
     if (RuleB(Custom, MulticlassingEnabled)) {
         int classes_bits = GetClassesBits();
-        int64 highest_base_endur = 0; 
+        int64 highest_base_endur = 0;
 
         for (const auto& class_bitmask : player_class_bitmasks) {
             uint8 class_id = class_bitmask.first;
@@ -1640,12 +1640,12 @@ int64 Client::CalcBaseEndurance() {
             if ((classes_bits & class_bit) != 0) {
                 int64 class_base_endur = _CalcBaseEndurance(class_id);
                 if (class_base_endur > highest_base_endur) {
-                    highest_base_endur = class_base_endur; 
+                    highest_base_endur = class_base_endur;
                 }
             }
         }
 
-        return highest_base_endur > 0 ? highest_base_endur : 5; 
+        return highest_base_endur > 0 ? highest_base_endur : 5;
     } else {
         return _CalcBaseEndurance(GetClass());
     }
@@ -1713,7 +1713,7 @@ int64 Client::CalcEnduranceRegen(bool bCombat)
 
 	int weight_limit = GetSTR();
 	auto level = GetLevel();
-	if (GetClass() == Class::Monk && !RuleB(Custom, MulticlassingEnabled)) {
+	if (HasClass(Class::Monk) && !RuleB(Custom, MulticlassingEnabled)) {
 		if (level > 99)
 			weight_limit = 58;
 		else if (level > 94)

@@ -982,7 +982,7 @@ public:
 	inline PTimerList &GetPTimers() { return(p_timers); }
 
 	//Dynamic AA timer stuff
-	int GetDynamicAATimer(int aa_id);	
+	int GetDynamicAATimer(int aa_id);
 	int SetDynamicAATimer(int aa_id);
 
 	//New AA Methods
@@ -1082,7 +1082,7 @@ public:
 		}
 	}
 
-	int  GetSeason() { 
+	int  GetSeason() {
 		if (IsSeasonal()) {
 			return Strings::ToInt(GetBucket("SeasonalCharacter"), 0);
 		} else {
@@ -1137,7 +1137,7 @@ public:
 	void DoPetBagResync();
 	int16 GetActivePetBagSlot();
 	bool IsValidPetBag(int item_id);
-	void DoPetBagFlush(); 
+	void DoPetBagFlush();
 
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
 

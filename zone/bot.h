@@ -604,7 +604,7 @@ public:
 	void SetBotCharmer(bool c) { _botCharmer = c; }
 	void SetPetChooser(bool p) { _petChooser = p; }
 	void SetBotOwner(Mob* botOwner) { this->_botOwner = botOwner; }
-	void SetRangerAutoWeaponSelect(bool enable) { GetClass() == Class::Ranger ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
+	void SetRangerAutoWeaponSelect(bool enable) { HasClass(Class::Ranger) ? _rangerAutoWeaponSelect = enable : _rangerAutoWeaponSelect = false; }
 	void SetBotStance(uint8 stance_id) { _botStance = Stance::IsValid(stance_id) ? Stance::Passive : stance_id; }
 	void SetBotCasterRange(uint32 bot_caster_range) { m_bot_caster_range = bot_caster_range; }
 	uint32 GetSpellRecastTimer(uint16 spell_id = 0);

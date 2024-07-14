@@ -995,10 +995,10 @@ bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
 	if (IsClient()) {
 		int classes_bits = CastToClient()->GetClassesBits();
 		std::vector<uint16> classes = {
-			Class::ShadowKnight, 
-			Class::Bard, 
-			Class::Necromancer, 
-			Class::Wizard,			
+			Class::ShadowKnight,
+			Class::Bard,
+			Class::Necromancer,
+			Class::Wizard,
 			Class::Magician,
 			Class::Enchanter,
 		};
@@ -1006,7 +1006,7 @@ bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
 			if (classes_bits & (1 << (classid - 1))) {
 				return true;
 			}
-		}		
+		}
 	} else {
 		switch (GetClass()) {
 			case Class::ShadowKnight:
@@ -1022,7 +1022,7 @@ bool Mob::IsIntelligenceCasterClass(uint8 class_id) const
 			case Class::MagicianGM:
 			case Class::EnchanterGM:
 				return true;
-		}	
+		}
     }
 	return false;
 }
@@ -1032,12 +1032,12 @@ bool Mob::IsWisdomCasterClass(uint8 class_id) const
 	if (IsClient()) {
 		int classes_bits = CastToClient()->GetClassesBits();
 		std::vector<uint16> classes = {
-			Class::Cleric, 
-			Class::Paladin, 
-			Class::Ranger, 
+			Class::Cleric,
+			Class::Paladin,
+			Class::Ranger,
 			Class::Druid,
 			Class::Shaman,
-			Class::Beastlord, 
+			Class::Beastlord,
 		};
 		for (const auto& class_id : classes) {
 			if (classes_bits & (1 << (class_id - 1))) {
@@ -1071,7 +1071,7 @@ bool Mob::IsPureMeleeClass(uint8 class_id) const
 		std::vector<uint16> classes = {
 			Class::Warrior,
 			Class::Monk,
-			Class::Rogue,			 
+			Class::Rogue,
 			Class::Berserker,
 		};
 		for (const auto& classid : classes) {
@@ -1095,26 +1095,26 @@ bool Mob::IsPureMeleeClass(uint8 class_id) const
 	return false;
 }
 
-bool Mob::IsWarriorClass(uint8 class_id) const 
-{ 
+bool Mob::IsWarriorClass(uint8 class_id) const
+{
 	if (IsClient()) {
 		int classes_bits = CastToClient()->GetClassesBits();
 		std::vector<uint16> classes = {
 			Class::Warrior,
 			Class::Paladin,
 			Class::Ranger,
-			Class::ShadowKnight, 
-			Class::Monk, 
+			Class::ShadowKnight,
+			Class::Monk,
 			Class::Bard,
-			Class::Rogue,			
-			Class::Beastlord, 
-			Class::Berserker,			
+			Class::Rogue,
+			Class::Beastlord,
+			Class::Berserker,
 		};
 		for (const auto& classid : classes) {
 			if (classes_bits & (1 << (classid - 1))) {
 				return true;
 			}
-		}		
+		}
 	} else {
         switch (GetClass()) {
 			case Class::Warrior:
@@ -2283,7 +2283,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 
 	std::string bard_info;
 
-	if (GetClass() == Class::Bard) {
+	if (HasClass(Class::Bard)) {
 		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
 		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
 		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
@@ -2584,7 +2584,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 	}
 
 	// Bard Modifiers
-	if (GetClass() == Class::Bard) {
+	if (HasClass(Class::Bard)) {
 		final_string += bard_info + DialogueWindow::Break(1);
 	}
 
@@ -2853,7 +2853,7 @@ void Mob::SendStatsWindow(Client* c, bool use_window)
 		);
 	}
 
-	if (GetClass() == Class::Bard) {
+	if (HasClass(Class::Bard)) {
 		const auto brass_mod  = IsBot() ? CastToBot()->GetBrassMod() : CastToClient()->GetBrassMod();
 		const auto perc_mod   = IsBot() ? CastToBot()->GetPercMod() : CastToClient()->GetPercMod();
 		const auto sing_mod   = IsBot() ? CastToBot()->GetSingMod() : CastToClient()->GetSingMod();
@@ -4690,8 +4690,8 @@ bool Mob::CanThisClassDualWield(void) const {
 			return false;
 
 		// Dual-Wielding Empty Fists
-		if (!pinst && !sinst && GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Beastlord))) {			
-			return true;			
+		if (!pinst && !sinst && (HasClass(Class::Monk) || HasClass(Class::Beastlord))) {
+			return true;
 		}
 
 		return true;
@@ -4722,10 +4722,10 @@ bool Mob::CanThisClassTripleAttack() const
 			return (
 				GetLevel() >= 60 &&
 				(
-					GetClass() == Class::Warrior ||
-					GetClass() == Class::Ranger ||
-					GetClass() == Class::Monk ||
-					GetClass() == Class::Berserker
+					HasClass(Class::Warrior) ||
+					HasClass(Class::Ranger) ||
+					HasClass(Class::Monk) ||
+					HasClass(Class::Berserker)
 				)
 			);
 		} else {
@@ -4745,6 +4745,14 @@ uint32 Mob::GetClassesBits() const
 			return 0;
 		}
 	}
+}
+
+bool Mob::HasClass(uint8 player_class) const {
+	if (player_class >= Class::Warrior && player_class <= Class::Beastlord) {
+		return GetPlayerClassBit(player_class) & GetClassesBits();
+	}
+
+	return false;
 }
 
 bool Mob::CanThisClassParry(void) const
@@ -4884,7 +4892,7 @@ bool Mob::HateSummon() {
 
 	int summon_level = GetSpecialAbility(SpecialAbility::Summon);
 	int times_summoned;
-	
+
 	if(summon_level == 1 || summon_level == 2) {
 		if(!GetTarget()) {
 			return false;
@@ -4926,7 +4934,7 @@ bool Mob::HateSummon() {
 		}
 		timer->Start(summon_timer_duration);
 	}
-		
+
 	// get summon target
 	SetTarget(GetHateTop());
 	if(target)
@@ -5337,12 +5345,14 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	int32 cast_reducer_amt = GetFocusEffect(focusFcCastTimeAmt, spell_id);
 	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
 
-	if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
-		(GetClassesBits() & (GetPlayerClassBit(Class::Ranger) | GetPlayerClassBit(Class::ShadowKnight) | GetPlayerClassBit(Class::Paladin) | GetPlayerClassBit(Class::Beastlord)))) {
-		int level_mod = std::min(15, GetLevel() - 50);
-		cast_reducer += level_mod * 3;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
+			(GetClassesBits() & (GetPlayerClassBit(Class::Ranger) | GetPlayerClassBit(Class::ShadowKnight) | GetPlayerClassBit(Class::Paladin) | GetPlayerClassBit(Class::Beastlord)))) {
+			int level_mod = std::min(15, GetLevel() - 50);
+			cast_reducer += level_mod * 3;
+		}
 	}
-	
+
 	cast_reducer = std::min(cast_reducer, 50);  //Max cast time with focusSpellHaste and level reducer is 50% of cast time.
 	cast_reducer += cast_reducer_no_limit;
 	casttime = casttime * (100 - cast_reducer) / 100;
@@ -6372,7 +6382,7 @@ void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 		if (m_inv.GetItem(EQ::invslot::slotSecondary) != nullptr) {
 			weapon_selector.push_back(m_inv.GetItem(EQ::invslot::slotSecondary));
 		}
-		
+
 		if (m_inv.GetItem(EQ::invslot::slotRange) != nullptr) {
 			weapon_selector.push_back(m_inv.GetItem(EQ::invslot::slotRange));
 		}
@@ -6382,7 +6392,7 @@ void Mob::TrySympatheticProc(Mob* target, uint32 spell_id)
 
 			TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, spells[spell_id].cast_time);
 		}
-	} 
+	}
 
 	const uint16 focus_trigger = GetSympatheticSpellProcID(focus_spell);
 

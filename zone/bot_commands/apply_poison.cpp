@@ -21,7 +21,7 @@ void bot_command_apply_poison(Client* c, const Seperator* sep)
 		t &&
 		t->IsBot() &&
 		t->CastToBot()->GetBotOwnerCharacterID() == c->CharacterID() &&
-		t->GetClass() == Class::Rogue
+		t->HasClass(Class::Rogue)
 		) {
 		my_rogue_bot = t->CastToBot();
 	}

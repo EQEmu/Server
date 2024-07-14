@@ -2303,7 +2303,7 @@ void Client::SetGM(bool toggle) {
 }
 
 void Client::ReadBook(BookRequest_Struct *book) {
-    int16 book_language = 0;    
+    int16 book_language = 0;
     char *txtfile = book->txtfile;
     std::string txtfileString = txtfile;
     uint32 itemID = 0; // itemID from custom data rider
@@ -2335,8 +2335,8 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		booktxt2 = content_db.GetBook(bookString.c_str(), &book_language);
 	}
 
-	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2) {		
-		if (itemID > 999999) {			
+	if (RuleB(Custom, UseDynamicItemDiscoveryTags) && book->type == 2) {
+		if (itemID > 999999) {
 			auto discover_charname = GetDiscoverer(itemID);
 
 			if (!discover_charname.empty()) {
@@ -2344,14 +2344,14 @@ void Client::ReadBook(BookRequest_Struct *book) {
 				booktxt2 += "<br>Discovered by: " + discover_charname;
 			}
 		} else {
-			const auto* item_data = database.GetItem(itemID);			
+			const auto* item_data = database.GetItem(itemID);
 			if (item_data) {
 				std::string item_name = item_data->Name;
 				if (item_name.find("Fine Steel") == 0) {
 					booktxt2 += "<br>Discovered by: Enchanted Loom";
 				}
 			}
-		}		
+		}
 	}
 
 	if (booktxt2[0] != '\0') {
@@ -2853,7 +2853,7 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const
 }
 
 uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 level) const
-{	
+{
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
 		class_id == Class::Berserker &&
@@ -2870,7 +2870,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 l
 			uint16 classID = i + 1;
 
 			auto skillCap = skill_caps.GetSkillCap(classID, skill_id, level);
-			
+
 			if (skillCap.cap > maxSkill) {
 				maxSkill = skillCap.cap;
 			}
@@ -2880,7 +2880,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skill_id, uint16 class_id, uint8 l
 	return maxSkill;
 }
 
-uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skill_id, uint16 class_id, uint16 level) const 
+uint16 Client::MaxSkillOriginal(EQ::skills::SkillType skill_id, uint16 class_id, uint16 level) const
 {
 	if (
 		ClientVersion() < EQ::versions::ClientVersion::RoF2 &&
@@ -3236,7 +3236,7 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 
 						int max_percent = 50 + maxHPBonus;
 
-						if ((GetClassesBits() & GetPlayerClassBit(Class::Monk)) && GetSkill(EQ::skills::SkillBindWound) > 200) {
+						if ((HasClass(Class::Monk)) && GetSkill(EQ::skills::SkillBindWound) > 200) {
 							max_percent = 70 + maxHPBonus;
 						}
 
@@ -3285,10 +3285,9 @@ bool Client::BindWound(Mob *bindmob, bool start, bool fail)
 					else {
 						int percent_base = 50;
 						if (GetRawSkill(EQ::skills::SkillBindWound) > 200) {
-							if ((GetClassesBits() & (GetPlayerClassBit(Class::Monk) | GetPlayerClassBit(Class::Beastlord))))
+							if (HasClass(Class::Monk) || HasClass(Class::Warrior) || HasClass(Class::Rogue) || HasClass(Class::Berserker)) {
 								percent_base = 70;
-							else if ((GetLevel() > 50) && (GetClassesBits() & (GetPlayerClassBit(Class::Warrior) | GetPlayerClassBit(Class::Rogue) | GetPlayerClassBit(Class::Cleric))))
-								percent_base = 70;
+							}
 						}
 
 						int percent_bonus = spellbonuses.MaxBindWound + itembonuses.MaxBindWound + aabonuses.MaxBindWound;
@@ -4471,7 +4470,7 @@ bool Client::IsDiscovered(uint32 item_id) {
 	const auto& l = DiscoveredItemsRepository::GetWhere(
 		database,
 		fmt::format(
-			"item_id = {} AND account_status = {}", 
+			"item_id = {} AND account_status = {}",
 			item_id,
 			GetSeason()
 		)
@@ -4492,10 +4491,10 @@ std::string Client::GetDiscoverer(uint32 item_id) {
 			GetSeason()
 		)
 	);
-	
+
 	if (l.empty()) { return ""; }
 
-	return l[0].char_name;	
+	return l[0].char_name;
 }
 
 void Client::DiscoverItem(uint32 item_id) {
@@ -4505,7 +4504,7 @@ void Client::DiscoverItem(uint32 item_id) {
 		e.account_status = GetSeason();
 		e.char_name = GetCleanName();
 		e.discovered_date = std::time(nullptr);
-		e.item_id = item_id;	
+		e.item_id = item_id;
 		auto d = DiscoveredItemsRepository::InsertOne(database, e);
 
 		if (player_event_logs.IsEventEnabled(PlayerEvent::DISCOVER_ITEM)) {
@@ -4534,7 +4533,7 @@ void Client::ReloadDynamicItem(uint16 slot_id) {
 	if (inst) {
 		database.RunGenerateCallback(inst);
 		PutItemInInventory(slot_id, *inst, true);
-	}	
+	}
 }
 
 void Client::UpdateLFP() {
@@ -7672,13 +7671,13 @@ bool Client::ReloadCharacterFaction(Client *c, uint32 facid, uint32 charid)
 
 FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_race, uint32 p_class, uint32 p_deity, int32 pFaction, Mob* tnpc)
 {
-	if (RuleB(Custom, MulticlassingEnabled)) {		
-		FACTION_VALUE faction_val = FACTION_SCOWLS;	
-		
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		FACTION_VALUE faction_val = FACTION_SCOWLS;
+
 		for (const auto& class_bitmask : player_class_bitmasks) {
             uint8 class_id = class_bitmask.first;
             uint16 class_bit = class_bitmask.second;
-			
+
             if ((GetClassesBits() & class_bit) != 0) {
 				faction_val = std::min(_GetFactionLevel(char_id, npc_id, p_race, class_id, p_deity, pFaction, tnpc), faction_val);
 			}
@@ -12297,7 +12296,7 @@ int16 Client::GetActivePetBagSlot() {
 		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
 			//LogDebug("Checking Slot [{}]", slot);
 			auto potential_bag = GetInv().GetItem(slot);
-			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {		
+			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {
 				if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
 					active_bag = potential_bag;
 					active_bag_slot = slot;
@@ -12335,7 +12334,7 @@ void Client::DoPetBagResync() {
 			int bag_bot = EQ::InventoryProfile::CalcSlotId(pet_bag_slot, pet_bag->GetItem()->BagSlots);
 
 			for (int slot_id = bag_top; slot_id < bag_bot; slot_id++) {
-				auto item_inst = GetInv().GetItem(slot_id);								
+				auto item_inst = GetInv().GetItem(slot_id);
 				if (item_inst) {
 					auto aug0 = item_inst->GetAugment(0);
 					auto aug1 = item_inst->GetAugment(1);
@@ -12344,12 +12343,12 @@ void Client::DoPetBagResync() {
 					auto aug4 = item_inst->GetAugment(4);
 					auto aug5 = item_inst->GetAugment(5);
 
-					pet_npc->AddItemFixed(item_inst->GetID(), 1,	true, 
-										  aug0 != nullptr ? aug0->GetID() : 0, 
-										  aug1 != nullptr ? aug1->GetID() : 0, 
-										  aug2 != nullptr ? aug2->GetID() : 0, 
-										  aug3 != nullptr ? aug3->GetID() : 0, 
-										  aug4 != nullptr ? aug4->GetID() : 0, 
+					pet_npc->AddItemFixed(item_inst->GetID(), 1,	true,
+										  aug0 != nullptr ? aug0->GetID() : 0,
+										  aug1 != nullptr ? aug1->GetID() : 0,
+										  aug2 != nullptr ? aug2->GetID() : 0,
+										  aug3 != nullptr ? aug3->GetID() : 0,
+										  aug4 != nullptr ? aug4->GetID() : 0,
 										  aug5 != nullptr ? aug5->GetID() : 0);
 				}
 			}

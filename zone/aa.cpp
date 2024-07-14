@@ -172,7 +172,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
 			}
-			
+
 			Client* client;
 		}
 
@@ -940,7 +940,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 			aai->classes = 0xFFFFFFF;
 		} else {
 			aai->classes = ability->classes;
-		}	
+		}
 	} else {
 		if(!(ability->classes & (1 << GetClass()))) {
 			return;
@@ -951,7 +951,7 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
-	
+
 	aai->id = rank->id;
 	aai->upper_hotkey_sid = rank->upper_hotkey_sid;
 	aai->lower_hotkey_sid = rank->lower_hotkey_sid;
@@ -1079,7 +1079,7 @@ int Client::GetDynamicAATimer(int aa_id) {
     for (int i = 1; i < 100; i++) {
         std::string key = "aaTimer_" + std::to_string(i);
         std::string bucketValue = GetBucket(key);
-        
+
         // Check if the bucket has a value before attempting conversion
         if (!bucketValue.empty()) {
             int value = std::stoi(bucketValue); // Convert string value to integer
@@ -1110,9 +1110,9 @@ int Client::SetDynamicAATimer(int aa_id) {
 
 void Client::ResetAlternateAdvancementTimer(int ability) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(casting_spell_aa_id);
-	if(rank) {		
+	if(rank) {
 		SendAlternateAdvancementTimer(rank->spell_type, 0, time(0));
-		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);		
+		p_timers.Clear(&database, rank->spell_type + pTimerAAStart);
 	}
 }
 
@@ -1426,10 +1426,10 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	else {
 		//Bards can cast instant cast AAs while they are casting or channeling item cast.
-		
+
 		auto effective_cast_time = RuleB(Custom, MulticlassingEnabled) ? 0 : spells[rank->spell].cast_time;
 
-		if (!RuleB(Custom, MulticlassingEnabled) && GetClass() == Class::Bard && IsCasting() && spells[rank->spell].cast_time == 0) {
+		if (!RuleB(Custom, MulticlassingEnabled) && HasClass(Class::Bard) && IsCasting() && spells[rank->spell].cast_time == 0) {
 			if (!DoCastingChecksOnCaster(rank->spell, EQ::spells::CastingSlot::AltAbility)) {
 				return;
 			}
@@ -1438,8 +1438,8 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 				spell_type + pTimerAAStart, timer_duration, false, rank->id)) {
 				return;
 			}
-		} 
-		else { 
+		}
+		else {
 			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, effective_cast_time, 0, 0, -1, spell_type + pTimerAAStart, timer_duration, nullptr, rank->id)) {
 				return;
 			}
@@ -1492,7 +1492,7 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 				}
 			}
 		}
-	}	
+	}
 
 	return total_reduction;
 }

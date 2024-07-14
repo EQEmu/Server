@@ -1491,7 +1491,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		if (headshot > 0) {
 			hit.damage_done = headshot;
 		}
-		else if (GetClass() == Class::Ranger && GetLevel() > 50) { // no double dmg on headshot
+		else if (HasClass(Class::Ranger) && GetLevel() > 50) { // no double dmg on headshot
 			if ((defender->IsNPC() && !defender->IsMoving() && !defender->IsRooted()) || !RuleB(Combat, ArcheryBonusRequiresStationary)) {
 				hit.damage_done *= 2;
 				MessageString(Chat::MeleeCrit, BOW_DOUBLE_DAMAGE);
@@ -1516,7 +1516,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 				hit.damage_done = ass;
 		}
 	}
-	else if (hit.skill == EQ::skills::SkillFrenzy && GetClass() == Class::Berserker && GetLevel() > 50) {
+	else if (hit.skill == EQ::skills::SkillFrenzy && HasClass(Class::Berserker) && GetLevel() > 50) {
 		extra_mincap = 4 * GetLevel() / 5;
 	}
 

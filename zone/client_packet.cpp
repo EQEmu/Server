@@ -3049,7 +3049,7 @@ void Client::Handle_OP_ApplyPoison(const EQApplicationPacket *app)
 
 	bool IsPoison = (poison && poison->ItemType == EQ::item::ItemTypePoison);
 
-	if (IsPoison && (GetClassesBits() & GetPlayerClassBit(Class::Rogue))) {
+	if (IsPoison && (HasClass(Class::Rogue))) {
 		// Live always checks for skillup, even when poison is too high
 		CheckIncreaseSkill(EQ::skills::SkillApplyPoison, nullptr, 10);
 
@@ -4594,7 +4594,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 	else if (slot == CastingSlot::Ability) {
 		uint16 spell_to_cast = 0;
 
-		if (castspell->spell_id == SPELL_LAY_ON_HANDS && (GetClassesBits() & GetPlayerClassBit(Class::Paladin))) {
+		if (castspell->spell_id == SPELL_LAY_ON_HANDS && (HasClass(Class::Paladin))) {
 			if (!p_timers.Expired(&database, pTimerLayHands)) {
 				Message(Chat::Red, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
@@ -4602,7 +4602,7 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			}
 			spell_to_cast = SPELL_LAY_ON_HANDS;
 			p_timers.Start(pTimerLayHands, LayOnHandsReuseTime);
-		} else if ((castspell->spell_id == SPELL_HARM_TOUCH || castspell->spell_id == SPELL_HARM_TOUCH2) && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
+		} else if ((castspell->spell_id == SPELL_HARM_TOUCH || castspell->spell_id == SPELL_HARM_TOUCH2) && (HasClass(Class::ShadowKnight))) {
 			if (!p_timers.Expired(&database, pTimerHarmTouch)) {
 				Message(Chat::Red, "Ability recovery time not yet met.");
 				InterruptSpell(castspell->spell_id);
@@ -9028,7 +9028,7 @@ void Client::Handle_OP_Hide(const EQApplicationPacket *app)
 			hidden = true;
 		tmHidden = Timer::GetCurrentTime();
 	}
-	if (GetClassesBits() & GetPlayerClassBit(Class::Rogue)) {
+	if (HasClass(Class::Rogue)) {
 		auto outapp = new EQApplicationPacket(OP_SimpleMessage, sizeof(SimpleMessage_Struct));
 		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;
@@ -9577,7 +9577,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				Bards on live can click items while casting spell gems, it stops that song cast and replaces it with item click cast.
 				Can not click while casting other items.
 			*/
-			if (GetClass() == Class::Bard && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && !RuleB(Custom, MulticlassingEnabled))
+			if (HasClass(Class::Bard) && IsCasting() && casting_spell_slot < CastingSlot::MaxGems && !RuleB(Custom, MulticlassingEnabled))
 			{
 				is_casting_bard_song = true;
 			}
@@ -9745,7 +9745,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						}
 
 
-						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
+						if (HasClass(Class::Bard) && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
 
@@ -9819,7 +9819,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
 
-						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
+						if (HasClass(Class::Bard) && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
 
@@ -10923,7 +10923,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	/*
-	if (spellend_timer.Enabled() && casting_spell_id && !(GetClassesBits() & GetPlayerClassBit(Class::Bard)));
+	if (spellend_timer.Enabled() && casting_spell_id && !(HasClass(Class::Bard)));
 	{
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
@@ -14857,7 +14857,7 @@ void Client::Handle_OP_Sneak(const EQApplicationPacket *app)
 	sa_out->parameter = sneaking;
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	if (GetClassesBits() & GetPlayerClassBit(Class::Rogue)) {
+	if (HasClass(Class::Rogue)) {
 		outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
 		SimpleMessage_Struct *msg = (SimpleMessage_Struct *)outapp->pBuffer;
 		msg->color = 0x010E;

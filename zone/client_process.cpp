@@ -365,7 +365,7 @@ bool Client::Process() {
 					}
 				}
 			}
-		}		
+		}
 
 		if (auto_attack && auto_attack_target != nullptr && may_use_attacks && attack_timer.Check()) {
 			//check if change
@@ -426,7 +426,7 @@ bool Client::Process() {
 			}
 		}
 
-		if (GetClassesBits() & (GetPlayerClassBit(Class::Berserker) | GetPlayerClassBit(Class::Warrior))) {
+		if (HasClass(Class::Warrior) || HasClass(Class::Berserker)) {
 			if (!dead && !IsBerserk() && GetHPRatio() < RuleI(Combat, BerserkerFrenzyStart)) {
 				entity_list.MessageCloseString(this, false, 200, 0, BERSERK_START, GetName());
 				berserk = true;
@@ -526,7 +526,7 @@ bool Client::Process() {
 			{
 				ItemTimerCheck();
 			}
-			
+
 			SendEdgeStatBulkUpdate();
 			if (IsSeasonal()) {
 				SendAppearancePacket(AppearanceType::PVP, true, true, false);
@@ -1557,7 +1557,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 
 					database.SetSharedPlatinum(AccountID(),amount_to_add);
 				}
-			}			
+			}
 		}
 		else{
 			if (to_bucket == &m_pp.platinum_shared || from_bucket == &m_pp.platinum_shared){
@@ -1617,13 +1617,13 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 
 	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
 
-	if (!RuleB(Character, AllowCrossClassTrainers)) {		
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
 		if (GetClass() != trains_class) {
 			Message(Chat::White, "You are not a member of the %s class guild.  Begone.", class_names[GetClass()]);
 			safe_delete(outapp);
 			return;
 		}
-	} 
+	}
 
 	//you have to be somewhat close to a trainer to be properly using them
 	if (DistanceSquared(m_Position,pTrainer->GetPosition()) > USE_NPC_RANGE2) {
@@ -1649,7 +1649,7 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			gmtrain->skills[sk] = 0; // If trains_class isn't represented in our classes, set skill to 0
 			continue; // Skip the rest of the loop and continue with the next skill
 		}
-		
+
 		if (sk == EQ::skills::SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; // Non-gnomes can't tinker!
 		} else {
@@ -1657,13 +1657,13 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 			// This is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			// set it to 1 with CanHaveSkill or you won't be able to train past 1.
 		}
-	}	
+	}
 
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && GetClass() == Class::Berserker) {
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && HasClass(Class::Berserker)) {
 		gmtrain->skills[EQ::skills::Skill1HPiercing] = gmtrain->skills[EQ::skills::Skill2HPiercing];
 		gmtrain->skills[EQ::skills::Skill2HPiercing] = 0;
 	}
-	
+
 //#pragma GCC pop_options
 
 	uchar ending[]={0x34,0x87,0x8a,0x3F,0x01
@@ -1692,7 +1692,7 @@ void Client::OPGMEndTraining(const EQApplicationPacket *app)
 		return;
 
 	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-	if (!RuleB(Character, AllowCrossClassTrainers)) {		
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
 		if (GetClass() != trains_class) {
 			return;
 		}
@@ -1723,7 +1723,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		return;
 
 	int trains_class = pTrainer->GetClass() - (Class::WarriorGM - Class::Warrior);
-	if (!RuleB(Character, AllowCrossClassTrainers)) {		
+	if (!RuleB(Character, AllowCrossClassTrainers)) {
 		if (GetClass() != trains_class) {
 			return;
 		}
@@ -2082,20 +2082,20 @@ void Client::CalcRestState()
 }
 
 void Mob::ClearRestingDetrimentalEffects()
-{	 
+{
 	if (RuleB(Custom, ClearRestingDetrimentalEffectsEnabled)) {
 		const auto source_mob = GetOwnerOrSelf();
 		if (source_mob->IsClient() && source_mob->CastToClient()->CanFastRegen()) {
-			const uint32 buff_count = GetMaxTotalSlots();			
+			const uint32 buff_count = GetMaxTotalSlots();
 			for (unsigned int j = 0; j < buff_count; j++) {
 				const uint16 buff_id = buffs[j].spellid;
 				if(
-					IsValidSpell(buff_id) && 
+					IsValidSpell(buff_id) &&
 					IsDetrimentalSpell(buff_id) &&
 					(buffs[j].ticsremaining > 0) &&
 					(!IsCharmSpell(buff_id) || !IsResistDebuffSpell(buff_id) || IsClient())
 				) {
-					BuffFadeBySlot(j);					
+					BuffFadeBySlot(j);
 				}
 			}
 		}

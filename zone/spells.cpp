@@ -139,7 +139,7 @@ void NPC::SpellProcess()
 	Mob::SpellProcess();
 }
 
-uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {	
+uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 	if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
 		// Shortcut Pet-Only spells, these only have one potential valid target
 		if (spells[spell_id].target_type == ST_Pet) {
@@ -152,11 +152,11 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 			}
 		}
 
-		// Shortcut Project Illusion 
+		// Shortcut Project Illusion
 		// DO NOT CHANGE THE ORDER OF THIS
 		if (IsIllusionSpell(spell_id) && HasProjectIllusion()) {
 			return target_id;
-		}		
+		}
 
 		// Shortcut PBAoE, we don't care what the target is here
 		if (spells[spell_id].target_type == ST_AECaster) {
@@ -178,12 +178,12 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		if (spells[spell_id].target_type == ST_Self) {
 			return GetID();
 		}
-		
+
 		// Targeting ourselves, hit ourselves with beneficials, otherwise traverse as pet target
 		if (target_id == GetID()) {
 			if (IsBeneficialSpell(spell_id)) {
 				return GetID();
-			} else if (GetPet() && GetPet()->GetTarget()) {								
+			} else if (GetPet() && GetPet()->GetTarget()) {
 				target_id = GetPet()->GetTarget()->GetID();
 			} else {
 				Message(Chat::SpellFailure, "You may not cast this type of spell or ability on yourself (%s).", spells[spell_id].name);
@@ -198,7 +198,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 				return GetID();
 			} else {
 				return target_id;
-			}			
+			}
 		}
 
 		Mob* target_target = target_mob->GetTarget();
@@ -222,7 +222,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 				if (tt_beneficial_valid) {
 					return target_target->GetID();
 				}
-			}		
+			}
 
 			return GetID();
 		} else {
@@ -234,7 +234,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 				} else {
 					if (GetPet() && GetPet()->GetTarget()) {
 						target_target = GetPet()->GetTarget();
-						if (target_target) {							
+						if (target_target) {
 							tt_detrimental_valid = (!tt_beneficial_valid && target_target->IsNPC());;
 						}
 
@@ -244,7 +244,7 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 					}
  				}
 			}
-		}		
+		}
 	}
 
 	return target_id;
@@ -486,11 +486,11 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// Replace missing cast messages for 'Bards'
 	if (RuleB(Custom, MulticlassingEnabled) && IsClient() && !IsBardSong(spell_id)) {
 		FilteredMessageString(this, Chat::Spells, (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 12205, spells[spell_id].name);
-		entity_list.FilteredMessageCloseString(this, 
-											   true, 
-											   RuleI(Range, SpellMessages), 
-											   Chat::Spells, 
-											   (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells), 
+		entity_list.FilteredMessageCloseString(this,
+											   true,
+											   RuleI(Range, SpellMessages),
+											   Chat::Spells,
+											   (IsBardSong(spell_id) ? FilterBardSongs : FilterPCSpells),
 											   12206,
 											   0,
 											   GetCleanName());
@@ -1212,7 +1212,7 @@ bool Client::CheckFizzle(uint16 spell_id)
 
 	//Live AA - Spell Casting Expertise, Mastery of the Past
 	no_fizzle_level = aabonuses.MasteryofPast + itembonuses.MasteryofPast + spellbonuses.MasteryofPast;
-	
+
 	//is there any sort of focus that affects fizzling?
 
 	int par_skill;
@@ -1221,8 +1221,8 @@ bool Client::CheckFizzle(uint16 spell_id)
 	uint8 spell_level = 255;
 	uint8 spell_class = 0;
 	unsigned int class_bits = GetClassesBits();
-	for (int n = 0; n < sizeof(class_bits) * 8; ++n) { 
-		if (class_bits & (1U << n)) { 
+	for (int n = 0; n < sizeof(class_bits) * 8; ++n) {
+		if (class_bits & (1U << n)) {
 			int class_id = n + 1;
 			if (spells[spell_id].classes[class_id-1] < no_fizzle_level) {
 				return true;
@@ -1233,9 +1233,9 @@ bool Client::CheckFizzle(uint16 spell_id)
 			}
 		}
 	}
-	
+
 	//IIRC even if you are lagging behind the skill levels you don't fizzle much
-	par_skill = spell_level * 5 - 10; 
+	par_skill = spell_level * 5 - 10;
 	if (par_skill > 235) {
 		par_skill = 235;
 	}
@@ -1827,7 +1827,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	{
 		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
-	
+
 	// we're done casting, now try to apply the spell
 	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
 	{
@@ -1836,7 +1836,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		// if there are issues I guess we can do something else, but this should work
 		StopCasting();
 		return;
-	}   
+	}
 
 	if (target && slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1 && !target->IsMezzed()) {
 		if(IsOfClientBotMerc()) {
@@ -1846,7 +1846,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		if (RuleB(Custom, CombatProcsOnSpellCast) && IsClient()) {
 			if (IsHealthSpell(spell_id) || IsDamageSpell(spell_id)) {
 				std::vector<EQ::ItemInstance*> weapon_selector;
-				Client* c = CastToClient();			
+				Client* c = CastToClient();
 
 				if (c->GetInv().GetItem(EQ::invslot::slotPrimary) && c->GetInv().GetItem(EQ::invslot::slotPrimary)->HasProc()) {
 					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotPrimary));
@@ -1855,7 +1855,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				if (c->GetInv().GetItem(EQ::invslot::slotSecondary) && c->GetInv().GetItem(EQ::invslot::slotSecondary)->HasProc()) {
 					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotSecondary));
 				}
-				
+
 				if (c->GetInv().GetItem(EQ::invslot::slotRange) && c->GetInv().GetItem(EQ::invslot::slotRange)->HasProc()) {
 					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotRange));
 				}
@@ -1866,11 +1866,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 					TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, IsBardSong(spell_id) ? (probability / 4) : probability);
 				}
 			}
-		} 
+		}
 
 		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 		TryTwincast(this, target, spell_id);
-	}	
+	}
 
 	if (IsClient() && DeleteChargeFromSlot >= 0) {
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
@@ -1943,7 +1943,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				auto tt = spells[spell_id].target_type;
 				if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
 					SendSpellBarEnable(spell_id);
-				}				
+				}
 			}
 
 			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
@@ -1953,7 +1953,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
 			}
 			if (RuleB(Spells, EnableBardMelody)) {
-				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);				
+				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 			}
 
 			if (!IsFromItem) {
@@ -2936,7 +2936,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			}
 		}
 		//handle bard AA and Discipline recast timers when singing
-		if (!RuleB(Custom, MulticlassingEnabled) && GetClass() == Class::Bard && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
+		if (!RuleB(Custom, MulticlassingEnabled) && HasClass(Class::Bard) && spell_id != casting_spell_id && timer != 0xFFFFFFFF) {
 			CastToClient()->GetPTimers().Start(timer, timer_duration);
 			LogSpells("Spell [{}]: Setting BARD custom reuse timer [{}] to [{}]", spell_id, casting_spell_timer, casting_spell_timer_duration);
 		}
@@ -3996,7 +3996,7 @@ bool Mob::SpellOnTarget(
 			if (tar_season != own_season) {
 				Message(Chat::Red, "Seasonal and non-Seasonal Characters may not affect each other with spells.");
 				return false;
-			}			
+			}
 		}
 	}
 
@@ -4714,7 +4714,7 @@ bool Mob::SpellOnTarget(
 		}
 		safe_delete(action_packet);
 		return false;
-	}	
+	}
 
 	//Check SE_Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
 	if (spelltar) {
@@ -5263,7 +5263,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 					caster->GetLevelCon(GetLevel()+1) == ConsiderColor::Gray ||
 					GetLevel() <= 46) {
 
-					return false;		
+					return false;
 				}
 
 				if (caster->GetLevel() <= 46) {
@@ -5274,7 +5274,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 					}
 				}
 				return true;
-			} else {		
+			} else {
 				if(GetLevel() > spells[spell_id].max_value[effect_index] && spells[spell_id].max_value[effect_index] != 0)
 				{
 					LogSpells("Our level ([{}]) is higher than the limit of this Charm spell ([{}])", GetLevel(), spells[spell_id].max_value[effect_index]);
@@ -6509,7 +6509,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 	}
 
 	// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-	if (spell_id == SPELL_VAMPIRIC_EMBRACE && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
+	if (spell_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
 		spell_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 	}
 
@@ -6565,7 +6565,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 
 bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 	// Special case for Vampiric Embrace. If this is a Shadow Knight, the proc is different.
-	if (spell_id == SPELL_VAMPIRIC_EMBRACE && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight))) {
+	if (spell_id == SPELL_VAMPIRIC_EMBRACE && (HasClass(Class::ShadowKnight))) {
 		spell_id = SPELL_VAMPIRIC_EMBRACE_OF_SHADOW;
 	}
 
@@ -6665,7 +6665,7 @@ bool Mob::UseBardSpellLogic(uint16 spell_id, int slot)
 	(
 		IsValidSpell(spell_id) &&
 		slot != -1 &&
-		GetClassesBits() & GetPlayerClassBit(Class::Bard) &&
+		HasClass(Class::Bard) &&
 		slot <= EQ::spells::SPELL_GEM_COUNT &&
 		IsBardSong(spell_id)
 	);
@@ -6676,7 +6676,7 @@ int Mob::GetCasterLevel(uint16 spell_id) {
 
 	level += itembonuses.effective_casting_level + spellbonuses.effective_casting_level + aabonuses.effective_casting_level;
 
-	if (GetClassesBits() == GetPlayerClassBit(Class::Bard) && !RuleB(Custom, MulticlassingEnabled)) {
+	if (!RuleB(Custom, MulticlassingEnabled) && HasClass(Class::Bard)) {
 		// Bards receive effective casting level increases to resists/effect. They don't receive benefit from spells like intellectual superiority, however.
 		level -= spellbonuses.effective_casting_level;
 	}
