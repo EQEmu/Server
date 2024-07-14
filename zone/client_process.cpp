@@ -1034,10 +1034,6 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
-		if (RuleB(Spells, BuffsFadeOnDeath)) {
-			BuffFadeNonPersistDeath();
-		}
-
 		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
@@ -1054,12 +1050,53 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				RuleI(Character, OldResurrectionSicknessSpellID) :
 				RuleI(Character, ResurrectionSicknessSpellID)
 			);
+
+			if (RuleB(Spells, BuffsFadeOnDeath)) {
+				BuffFadeNonPersistDeath();
+			}
+
 			SpellOnTarget(resurrection_sickness_spell_id, this);
 		} else if (SpellID == SPELL_DIVINE_REZ) {
+			if (RuleB(Spells, BuffsFadeOnDeath)) {
+				BuffFadeNonPersistDeath();
+			}
+
 			RestoreHealth();
 			RestoreMana();
 			RestoreEndurance();
 		} else {
+			if (RuleB(Character, UseResurrectionSickness)) {
+				int resurrection_sickness_spell_id = (
+				RuleB(Character, UseOldRaceRezEffects) &&
+					(
+						GetRace() == BARBARIAN ||
+						GetRace() == DWARF ||
+						GetRace() == TROLL ||
+						GetRace() == OGRE
+					) ?
+					RuleI(Character, OldResurrectionSicknessSpellID) :
+					RuleI(Character, ResurrectionSicknessSpellID)
+				);
+
+				bool has_rez_effects = false;
+
+				for (int slot = 0; slot < GetMaxTotalSlots(); slot++) {
+					if (IsValidSpell(buffs[slot].spellid) && IsResurrectionSicknessSpell(buffs[slot].spellid)){
+						has_rez_effects = true;
+						break;
+					}
+				}
+
+				// Need to wipe buffs after checking if client had rez effects.
+				if (RuleB(Spells, BuffsFadeOnDeath)) {
+					BuffFadeNonPersistDeath();
+				}
+
+				if (has_rez_effects) {
+					SpellOnTarget(resurrection_sickness_spell_id, this);
+				}
+			}
+
 			SetHP(GetMaxHP() / 20);
 			SetMana(GetMaxMana() / 20);
 			SetEndurance(GetMaxEndurance() / 20);
