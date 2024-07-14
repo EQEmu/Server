@@ -1654,10 +1654,6 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 				if (inspect_buffs) { // if inspect_buffs is true we're sending a mob's buffs to those with the LAA
 					Send = clear_target_window;
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
-						if (c->GetGM()) {
-							c->Message(Chat::White, "Your GM flag allows you to always see your targets' buffs.");
-						}
-
 						Send = !clear_target_window;
 					} else if (c->IsRaidGrouped()) {
 						Raid *raid = c->GetRaid();
