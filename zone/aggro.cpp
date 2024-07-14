@@ -595,7 +595,7 @@ int EntityList::FleeAllyCount(Mob *attacker, Mob *exclude)
 
 		// If exclude doesn't have a faction, check for buddies based on race. Also exclude common factions such as noob monsters, indifferent, kos, kos animal
 		if(exclude->GetPrimaryFaction() != 0 &&
-			exclude->GetPrimaryFaction() != 394 && exclude->GetPrimaryFaction() != 463 && exclude->GetPrimaryFaction() != 366 && exclude->GetPrimaryFaction() != 367) {
+			exclude->GetPrimaryFaction() != 5023 && exclude->GetPrimaryFaction() != 5032 && exclude->GetPrimaryFaction() != 5013 && exclude->GetPrimaryFaction() != 5014) {
 			if (mob->GetPrimaryFaction() != exclude->GetPrimaryFaction()) {
 					continue;
 			}
