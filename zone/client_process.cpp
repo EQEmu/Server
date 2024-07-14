@@ -916,8 +916,13 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 			auto inst = database.CreateItem(item, charges);
 			if (inst) {
-				auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
+				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
 				auto item_charges = charges ? charges : 1;
+
+				// Don't use SellCostMod if using UseClassicPriceMod
+				if (!RuleB(Merchant, UseClassicPriceMod)) {
+					item_price *= RuleR(Merchant, SellCostMod);
+				}
 
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(npc);
@@ -960,11 +965,16 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					handy_chance--;
 				}
 
-				auto charges = item->MaxCharges;
-				auto inst = database.CreateItem(item, charges);
-				if (inst) {
-					auto item_price = static_cast<uint32>(item->Price * RuleR(Merchant, SellCostMod) * item->SellRate);
-					auto item_charges = charges ? charges : 1;
+			auto charges = item->MaxCharges;
+			auto inst = database.CreateItem(item, charges);
+			if (inst) {
+				auto item_price = static_cast<uint32>(item->Price * item->SellRate);
+				auto item_charges = charges ? charges : 1;
+
+				// Don't use SellCostMod if using UseClassicPriceMod
+				if (!RuleB(Merchant, UseClassicPriceMod)) {
+					item_price *= RuleR(Merchant, SellCostMod);
+				}
 
 					if (RuleB(Merchant, UsePriceMod)) {
 						item_price *= Client::CalcPriceMod(npc);
@@ -1000,22 +1010,22 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 uint8 Client::WithCustomer(uint16 NewCustomer){
 
 	if(NewCustomer == 0) {
-		CustomerID = 0;
+		SetCustomerID(0);
 		return 0;
 	}
 
-	if(CustomerID == 0) {
-		CustomerID = NewCustomer;
+	if(GetCustomerID() == 0) {
+		SetCustomerID(NewCustomer);
 		return 1;
 	}
 
 	// Check that the player browsing our wares hasn't gone away.
 
-	Client* c = entity_list.GetClientByID(CustomerID);
+	Client* c = entity_list.GetClientByID(GetCustomerID());
 
 	if(!c) {
 		LogTrading("Previous customer has gone away");
-		CustomerID = NewCustomer;
+		SetCustomerID(NewCustomer);
 		return 1;
 	}
 
@@ -1072,10 +1082,9 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		}
 
 		if(spells[SpellID].base_value[0] < 100 && spells[SpellID].base_value[0] > 0 && PendingRezzXP > 0) {
-				SetEXP(((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))),
-						GetAAXP(),true);
+			SetEXP(ExpSource::Resurrection, ((int)(GetEXP()+((float)((PendingRezzXP / 100) * spells[SpellID].base_value[0])))), GetAAXP(), true);
 		} else if (spells[SpellID].base_value[0] == 100 && PendingRezzXP > 0) {
-			SetEXP((GetEXP() + PendingRezzXP), GetAAXP(), true);
+			SetEXP(ExpSource::Resurrection, (GetEXP() + PendingRezzXP), GetAAXP(), true);
 		}
 
 		//Was sending the packet back to initiate client zone...
@@ -1764,8 +1773,8 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		uint16 skilllevel = GetRawSkill(skill);
 
 		if (skilllevel == 0) {
-			//this is a new skill..			
-			uint16 t_level = SkillTrainLevel(skill, trains_class);
+			//this is a new skill..
+			uint16 t_level = GetSkillTrainLevel(skill, GetClass());
 
 			if (GetClassesBits() & GetPlayerClassBit(trains_class) == 0) {
 				LogSkills("Tried to train a new skill [{}] which is invalid for this race/class.", skill);
@@ -1951,31 +1960,43 @@ void Client::DoManaRegen() {
 void Client::DoStaminaHungerUpdate()
 {
 	auto outapp = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-	Stamina_Struct *sta = (Stamina_Struct *)outapp->pBuffer;
+	auto sta    = (Stamina_Struct*) outapp->pBuffer;
 
 	LogFood("hunger_level: [{}] thirst_level: [{}] before loss", m_pp.hunger_level, m_pp.thirst_level);
 
-	if (zone->GetZoneID() != 151 && !GetGM()) {
-		int loss = RuleI(Character, FoodLossPerUpdate);
-		if (GetHorseId() != 0)
-			loss *= 3;
+	if (zone->GetZoneID() != Zones::BAZAAR) {
+		if (!GetGM()) {
+			int loss = RuleI(Character, FoodLossPerUpdate);
+			if (GetHorseId() != 0) {
+				loss *= 3;
+			}
 
-		m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
-		m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
-		if (spellbonuses.hunger) {
-			m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
-			m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
+			m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
+			m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
+
+			if (spellbonuses.hunger) {
+				m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
+				m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
+			}
+
+			sta->food  = m_pp.hunger_level;
+			sta->water = m_pp.thirst_level;
+		} else {
+			sta->food  = 6000;
+			sta->water = 6000;
 		}
-		sta->food = m_pp.hunger_level;
-		sta->water = m_pp.thirst_level;
-	} else {
-		// No auto food/drink consumption in the Bazaar
-		sta->food = 6000;
+	} else { // No auto food/drink consumption in the Bazaar
+		sta->food  = 6000;
 		sta->water = 6000;
 	}
 
-	LogFood("Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
-	    m_pp.hunger_level, m_pp.hunger_level, m_pp.thirst_level, m_pp.thirst_level);
+	LogFood(
+		"Current hunger_level: [{}] = ([{}] minutes left) thirst_level: [{}] = ([{}] minutes left) - after loss",
+		m_pp.hunger_level,
+		m_pp.hunger_level,
+		m_pp.thirst_level,
+		m_pp.thirst_level
+	);
 
 	FastQueuePacket(&outapp);
 }

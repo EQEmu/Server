@@ -250,4 +250,135 @@ protected:
 	void FixZ();
 };
 
+namespace ObjectType {
+	constexpr uint32 SmallBag             = 0;
+	constexpr uint32 LargeBag             = 1;
+	constexpr uint32 Quiver               = 2;
+	constexpr uint32 BeltPouch            = 3;
+	constexpr uint32 WristPouch           = 4;
+	constexpr uint32 Backpack             = 5;
+	constexpr uint32 SmallChest           = 6;
+	constexpr uint32 LargeChest           = 7;
+	constexpr uint32 Bandolier            = 8;
+	constexpr uint32 Medicine             = 9;
+	constexpr uint32 Tinkering            = 10;
+	constexpr uint32 Lexicon              = 11;
+	constexpr uint32 PoisonMaking         = 12;
+	constexpr uint32 Quest                = 13;
+	constexpr uint32 MixingBowl           = 14;
+	constexpr uint32 Baking               = 15;
+	constexpr uint32 Tailoring            = 16;
+	constexpr uint32 Blacksmithing        = 17;
+	constexpr uint32 Fletching            = 18;
+	constexpr uint32 Brewing              = 19;
+	constexpr uint32 JewelryMaking        = 20;
+	constexpr uint32 Pottery              = 21;
+	constexpr uint32 Kiln                 = 22;
+	constexpr uint32 KeyMaker             = 23;
+	constexpr uint32 ResearchWIZ          = 24;
+	constexpr uint32 ResearchMAG          = 25;
+	constexpr uint32 ResearchNEC          = 26;
+	constexpr uint32 ResearchENC          = 27;
+	constexpr uint32 Unknown              = 28;
+	constexpr uint32 ResearchPractice     = 29;
+	constexpr uint32 Alchemy              = 30;
+	constexpr uint32 HighElfForge         = 31;
+	constexpr uint32 DarkElfForge         = 32;
+	constexpr uint32 OgreForge            = 33;
+	constexpr uint32 DwarfForge           = 34;
+	constexpr uint32 GnomeForge           = 35;
+	constexpr uint32 BarbarianForge       = 36;
+	constexpr uint32 IksarForge           = 37;
+	constexpr uint32 HumanForgeOne        = 38;
+	constexpr uint32 HumanForgeTwo        = 39;
+	constexpr uint32 HalflingTailoringOne = 40;
+	constexpr uint32 HalflingTailoringTwo = 41;
+	constexpr uint32 EruditeTailoring     = 42;
+	constexpr uint32 WoodElfTailoring     = 43;
+	constexpr uint32 WoodElfFletching     = 44;
+	constexpr uint32 IksarPottery         = 45;
+	constexpr uint32 Fishing              = 46;
+	constexpr uint32 TrollForge           = 47;
+	constexpr uint32 WoodElfForge         = 48;
+	constexpr uint32 HalflingForge        = 49;
+	constexpr uint32 EruditeForge         = 50;
+	constexpr uint32 Merchant             = 51;
+	constexpr uint32 FroglokForge         = 52;
+	constexpr uint32 Augmenter            = 53;
+	constexpr uint32 Churn                = 54;
+	constexpr uint32 TransformationMold   = 55;
+	constexpr uint32 DetransformationMold = 56;
+	constexpr uint32 Unattuner            = 57;
+	constexpr uint32 TradeskillBag        = 58;
+	constexpr uint32 CollectibleBag       = 59;
+	constexpr uint32 NoDeposit            = 60;
+
+	std::string GetName(uint32 object_type);
+	bool IsValid(uint32 object_type);
+}
+
+static std::map<uint32, std::string> object_types = {
+	{ ObjectType::SmallBag,             "Small Bag" },
+	{ ObjectType::LargeBag,             "Large Bag" },
+	{ ObjectType::Quiver,               "Quiver" },
+	{ ObjectType::BeltPouch,            "Belt Pouch" },
+	{ ObjectType::WristPouch,           "Wrist Pouch" },
+	{ ObjectType::Backpack,             "Backpack" },
+	{ ObjectType::SmallChest,           "Small Chest" },
+	{ ObjectType::LargeChest,           "Large Chest" },
+	{ ObjectType::Bandolier,            "Bandolier" },
+	{ ObjectType::Medicine,             "Medicine" },
+	{ ObjectType::Tinkering,            "Tinkering" },
+	{ ObjectType::Lexicon,              "Lexicon" },
+	{ ObjectType::PoisonMaking,         "Mortar and Pestle" },
+	{ ObjectType::Quest,                "Quest" },
+	{ ObjectType::MixingBowl,           "Mixing Bowl" },
+	{ ObjectType::Baking,               "Baking" },
+	{ ObjectType::Tailoring,            "Tailoring" },
+	{ ObjectType::Blacksmithing,        "Blacksmithing" },
+	{ ObjectType::Fletching,            "Fletching" },
+	{ ObjectType::Brewing,              "Brewing" },
+	{ ObjectType::JewelryMaking,        "Jewelry Making" },
+	{ ObjectType::Pottery,              "Pottery" },
+	{ ObjectType::Kiln,                 "Kiln" },
+	{ ObjectType::KeyMaker,             "Key Maker" },
+	{ ObjectType::ResearchWIZ,          "Lexicon" },
+	{ ObjectType::ResearchMAG,          "Lexicon" },
+	{ ObjectType::ResearchNEC,          "Lexicon" },
+	{ ObjectType::ResearchENC,          "Lexicon" },
+	{ ObjectType::Unknown,              "Unknown" },
+	{ ObjectType::ResearchPractice,     "Lexicon" },
+	{ ObjectType::Alchemy,              "Alchemy" },
+	{ ObjectType::HighElfForge,         "High Elf Forge" },
+	{ ObjectType::DarkElfForge,         "Dark Elf Forge" },
+	{ ObjectType::OgreForge,            "Ogre Forge" },
+	{ ObjectType::DwarfForge,           "Dwarf Forge" },
+	{ ObjectType::GnomeForge,           "Gnome Forge" },
+	{ ObjectType::BarbarianForge,       "Barbarian Forge" },
+	{ ObjectType::IksarForge,           "Iksar Forge" },
+	{ ObjectType::HumanForgeOne,        "Human Forge" },
+	{ ObjectType::HumanForgeTwo,        "Human Forge" },
+	{ ObjectType::HalflingTailoringOne, "Halfling Tailoring" },
+	{ ObjectType::HalflingTailoringTwo, "Halfling Tailoring" },
+	{ ObjectType::EruditeTailoring,     "Erudite Tailoring" },
+	{ ObjectType::WoodElfTailoring,     "Wood Elf Tailoring" },
+	{ ObjectType::WoodElfFletching,     "Wood Elf Fletching" },
+	{ ObjectType::IksarPottery,         "Iksar Pottery" },
+	{ ObjectType::Fishing,              "Fishing" },
+	{ ObjectType::TrollForge,           "Troll Forge" },
+	{ ObjectType::WoodElfForge,         "Wood Elf Forge" },
+	{ ObjectType::HalflingForge,        "Halfling Forge" },
+	{ ObjectType::EruditeForge,         "Erudite Forge" },
+	{ ObjectType::Merchant,             "Merchant" },
+	{ ObjectType::FroglokForge,         "Froglok Forge" },
+	{ ObjectType::Augmenter,            "Augmenter" },
+	{ ObjectType::Churn,                "Churn" },
+	{ ObjectType::TransformationMold,   "Transformation Mold" },
+	{ ObjectType::DetransformationMold, "Detransformation Mold" },
+	{ ObjectType::Unattuner,            "Unattuner" },
+	{ ObjectType::TradeskillBag,        "Tradeskill Bag" },
+	{ ObjectType::CollectibleBag,       "Collectible Bag" },
+	{ ObjectType::NoDeposit,            "No Deposit" }
+};
+
 #endif

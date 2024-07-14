@@ -490,7 +490,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 					return false;
 				}
 
-				if(item->AugSlotVisible[iter] == 0) {
+				if (!RuleB(Items, SummonItemAllowInvisibleAugments) && item->AugSlotVisible[iter] == 0) {
 					Message(
 						Chat::Red,
 						fmt::format(
@@ -1224,7 +1224,7 @@ void Client::DeleteItemInInventory(int16 slot_id, int16 quantity, bool client_up
 		if(update_db)
 			database.SaveInventory(character_id, inst, slot_id);
 	}
-	
+
 	if(client_update && IsValidSlot(slot_id)) {
 		EQApplicationPacket* outapp = nullptr;
 		if(inst) {
@@ -1998,19 +1998,19 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		LogInventory("Dest slot [{}] has item [{}] ([{}]) with [{}] charges in it", dst_slot_id, dst_inst->GetItem()->Name, dst_inst->GetItem()->ID, dst_inst->GetCharges());
 		dstitemid = dst_inst->GetItem()->ID;
 	}
-	if (Trader && srcitemid>0){
+	if (IsTrader() && srcitemid>0){
 		EQ::ItemInstance* srcbag;
 		EQ::ItemInstance* dstbag;
 		uint32 srcbagid =0;
 		uint32 dstbagid = 0;
 
 		if (src_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && src_slot_id <= EQ::invbag::GENERAL_BAGS_END) {
-			srcbag = m_inv.GetItem(((int)(src_slot_id / EQ::invbag::SLOT_COUNT)) - 3);
+			srcbag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(src_slot_id));
 			if (srcbag)
 				srcbagid = srcbag->GetItem()->ID;
 		}
 		if (dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN && dst_slot_id <= EQ::invbag::GENERAL_BAGS_END) {
-			dstbag = m_inv.GetItem(((int)(dst_slot_id / EQ::invbag::SLOT_COUNT)) - 3);
+			dstbag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
 		}
@@ -2018,7 +2018,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
 		    (srcitemid && src_inst && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
 		    (dstitemid && dst_inst && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
-			Trader_EndTrader();
+			TraderEndTrader();
 			Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}
 	}
@@ -2325,6 +2325,27 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 
 		LogInventory("Moving entire item from slot [{}] to slot [{}]", src_slot_id, dst_slot_id);
+		if (src_inst->IsStackable() &&
+			dst_slot_id >= EQ::invbag::GENERAL_BAGS_BEGIN &&
+			dst_slot_id <= EQ::invbag::GENERAL_BAGS_END
+			)	{
+			EQ::ItemInstance *bag = nullptr;
+			bag = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(dst_slot_id));
+			if (bag) {
+				if (bag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) {
+					PutItemInInventory(dst_slot_id, *src_inst, true);
+					//This resets the UF client to recognize the new serial item of the placed item
+					//if it came from a stack without having to close the trader window and re-open.
+					//It is not required for the RoF2 client.
+					if (ClientVersion() < EQ::versions::ClientVersion::RoF2) {
+						auto outapp  = new EQApplicationPacket(OP_Trader, sizeof(TraderBuy_Struct));
+						auto data    = (TraderBuy_Struct *) outapp->pBuffer;
+						data->action = BazaarBuyItem;
+						FastQueuePacket(&outapp);
+					}
+				}
+			}
+		}
 
 		if (src_slot_id <= EQ::invslot::EQUIPMENT_END) {
 			if(src_inst) {

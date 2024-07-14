@@ -23,62 +23,95 @@
 #include "types.h"
 #include <map>
 #include <string>
+#include <limits>
 
+namespace Deity {
+	constexpr uint32 Unknown       = 0;
+	constexpr uint32 Agnostic1     = 140;
+	constexpr uint32 Bertoxxulous  = 201;
+	constexpr uint32 BrellSirilis  = 202;
+	constexpr uint32 CazicThule    = 203;
+	constexpr uint32 ErollisiMarr  = 204;
+	constexpr uint32 Bristlebane   = 205;
+	constexpr uint32 Innoruuk      = 206;
+	constexpr uint32 Karana        = 207;
+	constexpr uint32 MithanielMarr = 208;
+	constexpr uint32 Prexus        = 209;
+	constexpr uint32 Quellious     = 210;
+	constexpr uint32 RallosZek     = 211;
+	constexpr uint32 RodcetNife    = 212;
+	constexpr uint32 SolusekRo     = 213;
+	constexpr uint32 TheTribunal   = 214;
+	constexpr uint32 Tunare        = 215;
+	constexpr uint32 Veeshan       = 216;
+	constexpr uint32 Agnostic2     = 396;
 
-namespace EQ
-{
-	namespace deity {
-		enum DeityType {
-			DeityUnknown = 0,
-			DeityAgnostic_LB = 140,
-			DeityBertoxxulous = 201,
-			DeityBrellSirilis,
-			DeityCazicThule,
-			DeityErollisiMarr,
-			DeityBristlebane,
-			DeityInnoruuk,
-			DeityKarana,
-			DeityMithanielMarr,
-			DeityPrexus,
-			DeityQuellious,
-			DeityRallosZek,
-			DeityRodcetNife,
-			DeitySolusekRo,
-			DeityTheTribunal,
-			DeityTunare,
-			DeityVeeshan,
-			DeityAgnostic = 396
-		};
+	namespace Bitmask {
+		constexpr uint32 Agnostic      = 1;
+		constexpr uint32 Bertoxxulous  = 2;
+		constexpr uint32 BrellSirilis  = 4;
+		constexpr uint32 CazicThule    = 8;
+		constexpr uint32 ErollisiMarr  = 16;
+		constexpr uint32 Bristlebane   = 32;
+		constexpr uint32 Innoruuk      = 64;
+		constexpr uint32 Karana        = 128;
+		constexpr uint32 MithanielMarr = 256;
+		constexpr uint32 Prexus        = 512;
+		constexpr uint32 Quellious     = 1024;
+		constexpr uint32 RallosZek     = 2048;
+		constexpr uint32 RodcetNife    = 4096;
+		constexpr uint32 SolusekRo     = 8192;
+		constexpr uint32 TheTribunal   = 16384;
+		constexpr uint32 Tunare        = 32768;
+		constexpr uint32 Veeshan       = 65536;
+		constexpr uint32 All           = std::numeric_limits<uint32>::max();
+	}
 
-		enum DeityTypeBit : uint32 {
-			bit_DeityAgnostic      = 0x00000001,
-			bit_DeityBertoxxulous  = 0x00000002,
-			bit_DeityBrellSirilis  = 0x00000004,
-			bit_DeityCazicThule    = 0x00000008,
-			bit_DeityErollisiMarr  = 0x00000010,
-			bit_DeityBristlebane   = 0x00000020,
-			bit_DeityInnoruuk      = 0x00000040,
-			bit_DeityKarana        = 0x00000080,
-			bit_DeityMithanielMarr = 0x00000100,
-			bit_DeityPrexus        = 0x00000200,
-			bit_DeityQuellious     = 0x00000400,
-			bit_DeityRallosZek     = 0x00000800,
-			bit_DeityRodcetNife    = 0x00001000,
-			bit_DeitySolusekRo     = 0x00002000,
-			bit_DeityTheTribunal   = 0x00004000,
-			bit_DeityTunare        = 0x00008000,
-			bit_DeityVeeshan       = 0x00010000,
-			bit_DeityAll           = UINT32_MAX
-		};
+	uint32 GetBitmask(uint32 deity_id);
+	std::string GetName(uint32 deity_id);
+	bool IsValid(uint32 deity_id);
+}
 
-		constexpr int format_as(DeityType type) { return static_cast<int>(type); }
+static std::map<uint32, std::string> deity_names = {
+	{ Deity::Agnostic1,     "Agnostic" },
+	{ Deity::Agnostic2,     "Agnostic" },
+	{ Deity::Bertoxxulous,  "Bertoxxulous" },
+	{ Deity::BrellSirilis,  "Brell Serilis" },
+	{ Deity::Bristlebane,   "Bristlebane" },
+	{ Deity::CazicThule,    "Cazic-Thule" },
+	{ Deity::ErollisiMarr,  "Erollisi Marr" },
+	{ Deity::Innoruuk,      "Innoruuk" },
+	{ Deity::Karana,        "Karana" },
+	{ Deity::MithanielMarr, "Mithaniel Marr" },
+	{ Deity::Prexus,        "Prexus" },
+	{ Deity::Quellious,     "Quellious" },
+	{ Deity::RallosZek,     "Rallos Zek" },
+	{ Deity::RodcetNife,    "Rodcet Nife" },
+	{ Deity::SolusekRo,     "Solusek Ro" },
+	{ Deity::TheTribunal,   "The Tribunal" },
+	{ Deity::Tunare,        "Tunare" },
+	{ Deity::Veeshan,       "Veeshan" }
+};
 
-		extern DeityTypeBit GetDeityBitmask(DeityType deity_type);
-		extern std::string GetDeityName(DeityType deity_type);
-		extern const std::map<DeityType, std::string>& GetDeityMap();
-
-	} /*deity*/
-
-} /*EQEmu*/
+static std::map<uint32, uint32> deity_bitmasks = {
+	{ Deity::Agnostic1,     Deity::Bitmask::Agnostic },
+	{ Deity::Agnostic2,     Deity::Bitmask::Agnostic },
+	{ Deity::Bertoxxulous,  Deity::Bitmask::Bertoxxulous },
+	{ Deity::BrellSirilis,  Deity::Bitmask::BrellSirilis },
+	{ Deity::CazicThule,    Deity::Bitmask::CazicThule },
+	{ Deity::ErollisiMarr,  Deity::Bitmask::ErollisiMarr },
+	{ Deity::Bristlebane,   Deity::Bitmask::Bristlebane },
+	{ Deity::Innoruuk,      Deity::Bitmask::Innoruuk },
+	{ Deity::Karana,        Deity::Bitmask::Karana },
+	{ Deity::MithanielMarr, Deity::Bitmask::MithanielMarr },
+	{ Deity::Prexus,        Deity::Bitmask::Prexus },
+	{ Deity::Quellious,     Deity::Bitmask::Quellious },
+	{ Deity::RallosZek,     Deity::Bitmask::RallosZek },
+	{ Deity::RodcetNife,    Deity::Bitmask::RodcetNife },
+	{ Deity::SolusekRo,     Deity::Bitmask::SolusekRo },
+	{ Deity::TheTribunal,   Deity::Bitmask::TheTribunal },
+	{ Deity::Tunare,        Deity::Bitmask::Tunare },
+	{ Deity::Veeshan,       Deity::Bitmask::Veeshan }
+};
 
 #endif /* COMMON_DEITY_H */

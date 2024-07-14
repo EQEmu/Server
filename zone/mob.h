@@ -41,8 +41,6 @@
 
 char* strn0cpy(char* dest, const char* source, uint32 size);
 
-#define MAX_SPECIAL_ATTACK_PARAMS 9
-
 class Client;
 class EQApplicationPacket;
 class Group;
@@ -102,22 +100,22 @@ public:
 						CLIENT_KICKED, DISCONNECTED, CLIENT_ERROR, CLIENT_CONNECTINGALL };
 	enum eStandingPetOrder { SPO_Follow, SPO_Sit, SPO_Guard, SPO_FeignDeath };
 
-	struct SpecialAbility {
-		SpecialAbility() {
+	struct MobSpecialAbility {
+		MobSpecialAbility() {
 			level = 0;
 			timer = nullptr;
-			for(int i = 0; i < MAX_SPECIAL_ATTACK_PARAMS; ++i) {
+			for (int i = 0; i < SpecialAbility::MaxParameters; ++i) {
 				params[i] = 0;
 			}
 		}
 
-		~SpecialAbility() {
+		~MobSpecialAbility() {
 			safe_delete(timer);
 		}
 
 		int level;
 		Timer *timer;
-		int params[MAX_SPECIAL_ATTACK_PARAMS];
+		int params[SpecialAbility::MaxParameters];
 	};
 
 	struct AuraInfo {
@@ -145,7 +143,7 @@ public:
 		uint8 in_gender,
 		uint16 in_race,
 		uint8 in_class,
-		bodyType in_bodytype,
+		uint8 in_bodytype,
 		uint8 in_deity,
 		uint8 in_level,
 		uint32 in_npctype_id,
@@ -560,7 +558,7 @@ public:
 	virtual inline uint8 GetBaseGender() const { return base_gender; }
 	virtual uint16 GetFactionRace();
 	virtual inline uint16 GetDeity() const { return deity; }
-	virtual EQ::deity::DeityTypeBit GetDeityBit() { return EQ::deity::GetDeityBitmask((EQ::deity::DeityType)deity); }
+	virtual uint32 GetDeityBit() { return Deity::GetBitmask(deity); }
 	inline uint16 GetRace() const { return race; }
 	inline uint16 GetModel() const { return (use_model == 0) ? race : use_model; }
 	inline uint8 GetGender() const { return gender; }
@@ -1029,15 +1027,15 @@ public:
 	int16 GetModVulnerability(const uint8 resist);
 
 	void SetAllowBeneficial(bool value) { m_AllowBeneficial = value; }
-	bool GetAllowBeneficial() { if (m_AllowBeneficial || GetSpecialAbility(ALLOW_BENEFICIAL)){return true;} return false; }
+	bool GetAllowBeneficial() { if (m_AllowBeneficial || GetSpecialAbility(SpecialAbility::AllowBeneficial)){return true;} return false; }
 	void SetDisableMelee(bool value) { m_DisableMelee = value; }
-	bool IsMeleeDisabled() { if (m_DisableMelee || GetSpecialAbility(DISABLE_MELEE)){return true;} return false; }
+	bool IsMeleeDisabled() { if (m_DisableMelee || GetSpecialAbility(SpecialAbility::DisableMelee)){return true;} return false; }
 
 	bool IsOffHandAtk() const { return offhand; }
 	inline void OffHandAtk(bool val) { offhand = val; }
 
-	void SetFlurryChance(uint8 value) { SetSpecialAbilityParam(SPECATK_FLURRY, 0, value); }
-	uint8 GetFlurryChance() { return GetSpecialAbilityParam(SPECATK_FLURRY, 0); }
+	void SetFlurryChance(uint8 value) { SetSpecialAbilityParam(SpecialAbility::Flurry, 0, value); }
+	uint8 GetFlurryChance() { return GetSpecialAbilityParam(SpecialAbility::Flurry, 0); }
 
 	static uint32 GetAppearanceValue(EmuAppearance in_appearance);
 	void SendAppearancePacket(uint32 type, uint32 value, bool whole_zone = true, bool ignore_self = false, Client* target = nullptr);
@@ -1103,9 +1101,9 @@ public:
 	int GetPetACBonusFromOwner();
 	int GetPetATKBonusFromOwner();
 
-	inline const bodyType GetBodyType() const { return bodytype; }
-	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
-	void SetBodyType(bodyType new_body, bool overwrite_orig);
+	inline const uint8 GetBodyType() const { return bodytype; }
+	inline const uint8 GetOrigBodyType() const { return orig_bodytype; }
+	void SetBodyType(uint8 new_body, bool overwrite_orig);
 
 	bool invulnerable;
 	bool qglobal;
@@ -1113,12 +1111,15 @@ public:
 	virtual void SetAttackTimer();
 	inline void SetInvul(bool invul) { invulnerable=invul; }
 	inline bool GetInvul(void) { return invulnerable; }
-	inline void SetExtraHaste(int Haste) { ExtraHaste = Haste; }
+	void SetExtraHaste(int haste, bool need_to_save = true);
+	inline int GetExtraHaste() { return extra_haste; }
 	virtual int GetHaste();
 	int32 GetMeleeMitigation();
 
 	uint8 GetWeaponDamageBonus(const EQ::ItemData* weapon, bool offhand = false);
 	const DamageTable &GetDamageTable() const;
+	int GetMobFixedOffenseSkill();
+	int GetMobFixedWeaponSkill();
 	void ApplyDamageTable(DamageHitInfo &hit);
 	virtual int GetHandToHandDamage(void);
 
@@ -1579,8 +1580,8 @@ protected:
 	uint8 base_gender;
 	uint16 base_race;
 	uint8 class_;
-	bodyType bodytype;
-	bodyType orig_bodytype;
+	uint8 bodytype;
+	uint8 orig_bodytype;
 	uint16 deity;
 	uint8 level;
 	uint8 orig_level;
@@ -1733,7 +1734,7 @@ protected:
 
 	uint8 aa_title;
 
-	int ExtraHaste; // for the #haste command
+	int extra_haste; // for the #haste command
 	bool mezzed;
 	bool stunned;
 	bool charmed; //this isnt fully implemented yet
@@ -1874,7 +1875,7 @@ protected:
 	void InsertQuestGlobal(int charid, int npcid, int zoneid, const char *name, const char *value, int expdate);
 	uint32 emoteid;
 
-	SpecialAbility SpecialAbilities[MAX_SPECIAL_ATTACK];
+	MobSpecialAbility SpecialAbilities[SpecialAbility::Max];
 	bool bEnraged;
 	bool destructibleobject;
 

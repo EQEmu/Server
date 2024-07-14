@@ -1620,11 +1620,39 @@ int64 LuaParser::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 b
 	return retval;
 }
 
+int32 LuaParser::UpdatePersonalFaction(Mob *self, int32 npc_value, int32 faction_id, int32 current_value, int32 temp, int32 this_faction_min, int32 this_faction_max, bool &ignore_default)
+{
+	int32 retval = 0;
+	for (auto &mod : mods_) {
+		mod.UpdatePersonalFaction(self, npc_value, faction_id, current_value, temp, this_faction_min, this_faction_max, retval, ignore_default);
+	}
+	return retval;
+}
+
 void LuaParser::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default)
 {
 	for (auto &mod : mods_) {
 		mod.RegisterBug(self, bug, ignore_default);
 	}
+}
+
+
+uint64 LuaParser::SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, bool &ignore_default)
+{
+	uint64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.SetEXP(self, exp_source, current_exp, set_exp, is_rezz_exp, retval, ignore_default);
+	}
+	return retval;
+}
+
+uint64 LuaParser::SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, bool &ignore_default)
+{
+	uint64 retval = 0;
+	for (auto &mod : mods_) {
+		mod.SetAAEXP(self, exp_source, current_aa_exp, set_aa_exp, is_rezz_exp, retval, ignore_default);
+	}
+	return retval;
 }
 
 int LuaParser::EventBot(

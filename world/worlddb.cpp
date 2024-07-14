@@ -715,7 +715,7 @@ void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, Cha
 		{
 			case StartZoneIndex::Odus:
 			{
-				if (in_cc->deity == EQ::deity::DeityCazicThule) // Cazic-Thule Erudites go to Paineel
+				if (in_cc->deity == Deity::CazicThule) // Cazic-Thule Erudites go to Paineel
 				{
 					in_pp->zone_id = Zones::PAINEEL; // paineel
 					in_pp->binds[0].zone_id = Zones::PAINEEL;

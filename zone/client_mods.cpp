@@ -289,7 +289,7 @@ int64 Client::CalcHPRegen(bool bCombat)
 
 	if (!bCombat && CanFastRegen() && (IsSitting() || CanMedOnHorse())) {
 		auto max_hp = GetMaxHP();
-		int64 fast_regen = 6 * (max_hp / (zone ? zone->newzone_data.fast_regen_hp : 180));
+		int64 fast_regen = 6 * (max_hp / (zone && zone->newzone_data.fast_regen_hp > 0 ? zone->newzone_data.fast_regen_hp : 180));
 		if (base < fast_regen) // weird, but what the client is doing
 			base = fast_regen;
 	}
@@ -322,7 +322,7 @@ int64 Client::CalcMaxHP()
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
 	//the aa description
-	
+
 	nd += aabonuses.PercentMaxHPChange + spellbonuses.PercentMaxHPChange + itembonuses.PercentMaxHPChange;	//Natural Durability, Physical Enhancement, Planar Durability
 	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
 	max_hp += spellbonuses.FlatMaxHPChange + aabonuses.FlatMaxHPChange + itembonuses.FlatMaxHPChange;
@@ -1009,7 +1009,7 @@ int Client::CalcHaste()
 	else {   // 1-50
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
 	}
-	h += ExtraHaste;	//GM granted haste.
+	h += extra_haste;	//GM granted haste.
 	Haste = 100 + h;
 	return Haste;
 }

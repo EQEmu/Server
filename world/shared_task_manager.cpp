@@ -1355,6 +1355,10 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, const SharedTaskR
 		return false;
 	}
 
+	if (is_gm) {
+		client_list.SendCharacterMessage(requester->CharID(), Chat::White, "Your GM flag allows you to bypass shared task minimum player requirements.");
+	}
+
 	// check if party member count is above the maximum
 	// todo: live creates the shared task but truncates members if it exceeds max (sorted by leader and raid group numbers)
 	if (task.max_players > 0 && request.members.size() > task.max_players) {

@@ -94,6 +94,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			case GMHiddenSummon:
 			case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 				target_zone_id = zonesummon_id;
+				target_instance_id = zonesummon_instance_id;
 				break;
 			case GateToBindPoint:
 			case ZoneToBindPoint:
@@ -126,6 +127,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		// WildcardX 27 January 2008
 		if (zone_mode == EvacToSafeCoords && zonesummon_id) {
 			target_zone_id = zonesummon_id;
+			target_instance_id = zonesummon_instance_id;
 		} else {
 			target_zone_id = zc->zoneID;
 		}
@@ -379,8 +381,8 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
-		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
-		Message(Chat::Yellow, "Bypassing Expansion zone checks because GM status is set");
+		LogInfo("[{}] Bypassing zone expansion checks because GM flag is set", GetCleanName());
+		Message(Chat::White, "Your GM flag allows you to bypass zone expansion checks.");
 	}
 
 	if (zoning_message == ZoningMessage::ZoneSuccess) {
@@ -581,6 +583,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	zone_mode = ZoneUnsolicited;
 	m_ZoneSummonLocation = glm::vec4();
 	zonesummon_id = 0;
+	zonesummon_instance_id = 0;
 	zonesummon_ignorerestrictions = 0;
 
 	// this simply resets the zone shutdown timer
@@ -967,6 +970,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			// we hide the real zoneid we want to evac/succor to here
 			zonesummon_id = zoneID;
+			zonesummon_instance_id = instance_id;
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
@@ -1373,7 +1377,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 		return false;
 	}
 
-	if (GetLevel() < z->min_level) {
+	if (!GetGM() && GetLevel() < z->min_level) {
 		LogInfo(
 			"Character [{}] does not meet minimum level requirement ([{}] < [{}])!",
 			GetCleanName(),
@@ -1383,7 +1387,7 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 		return false;
 	}
 
-	if (GetLevel() > z->max_level) {
+	if (!GetGM() && GetLevel() > z->max_level) {
 		LogInfo(
 			"Character [{}] does not meet maximum level requirement ([{}] > [{}])!",
 			GetCleanName(),
@@ -1403,15 +1407,19 @@ bool Client::CanEnterZone(const std::string& zone_short_name, int16 instance_ver
 		return false;
 	}
 
-	if (!z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToBool(z->flag_needed)) {
-		if (!GetGM() && !HasZoneFlag(z->zoneidnumber)) {
-			LogInfo(
-				"Character [{}] does not have the flag to be in this zone [{}]!",
-				GetCleanName(),
-				z->flag_needed
-			);
-			return false;
-		}
+	if (
+		!GetGM() &&
+		!z->flag_needed.empty() &&
+		Strings::IsNumber(z->flag_needed) &&
+		Strings::ToBool(z->flag_needed) &&
+		!HasZoneFlag(z->zoneidnumber)
+	) {
+		LogInfo(
+			"Character [{}] does not have the flag to be in this zone [{}]!",
+			GetCleanName(),
+			z->flag_needed
+		);
+		return false;
 	}
 
 	return true;

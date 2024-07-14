@@ -279,6 +279,7 @@ public:
 	inline void	MerchantOpenShop() { merchant_open = true; }
 	inline void	MerchantCloseShop() { merchant_open = false; }
 	inline bool	IsMerchantOpen() { return merchant_open; }
+	inline uint8 GetGreedPercent() { return NPCTypedata->greed; }
 	inline bool GetParcelMerchant() { return NPCTypedata->is_parcel_merchant; }
 	void	Depop(bool start_spawn_timer = false);
 	void	Stun(int duration);
@@ -323,7 +324,7 @@ public:
 	float GetSlowMitigation() const { return slow_mitigation; }
 	float	GetAttackSpeed() const {return attack_speed;}
 	int		GetAttackDelay() const {return attack_delay;}
-	bool	IsAnimal() const { return(bodytype == BT_Animal); }
+	bool	IsAnimal() const { return(bodytype == BodyType::Animal); }
 	uint16	GetPetSpellID() const {return pet_spell_id;}
 	void	SetPetSpellID(uint16 amt) {pet_spell_id = amt;}
 	uint32	GetMaxDamage(uint8 tlevel);

@@ -198,11 +198,13 @@ public:
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
 	uint64 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
 	int64 CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, bool &ignoreDefault);
+	int32 UpdatePersonalFaction(Mob *self, int32 npc_value, int32 faction_id, int32 current_value, int32 temp, int32 this_faction_min, int32 this_faction_max, bool &ignore_default);
 	void RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default);
 	int64 CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, bool &ignore_default);
 	uint64 HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, bool &ignore_default);
+	uint64 SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, bool &ignore_default);
+	uint64 SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, bool &ignore_default);
 	bool IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &ignore_default);
-	
 private:
 	LuaParser();
 	LuaParser(const LuaParser&);

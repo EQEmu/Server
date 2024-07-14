@@ -269,7 +269,6 @@ public:
 	bool CanThisClassBlock();
 	void SetInvul(bool value);
 	bool GetInvul();
-	void SetExtraHaste(int haste);
 	int GetHaste();
 	int GetHandToHandDamage();
 	int GetHandToHandDelay();
@@ -400,7 +399,7 @@ public:
 	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
-	void SetBodyType(int new_body, bool overwrite_orig);
+	void SetBodyType(uint8 new_body, bool overwrite_orig);
 	void SetTargetable(bool on);
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);
@@ -592,6 +591,9 @@ public:
 	bool IsWisdomCasterClass();
 	std::string GetConsiderColor(Lua_Mob other);
 	std::string GetConsiderColor(uint8 other_level);
+	int GetExtraHaste();
+	void SetExtraHaste(int haste);
+	void SetExtraHaste(int haste, bool need_to_save);
 };
 
 #endif

@@ -284,9 +284,13 @@ bool WorldBoot::DatabaseLoadRoutines(int argc, char **argv)
 	database.ClearRaid();
 	database.ClearRaidDetails();
 	database.ClearRaidLeader();
+	LogInfo("Clearing guild online status");
+	database.ClearGuildOnlineStatus();
 	LogInfo("Clearing inventory snapshots");
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
+	LogInfo("Clearing trader table details");
+	database.ClearTraderDetails();
 
 	if (!content_db.LoadItems(hotfix_name)) {
 		LogError("Error: Could not load item data. But ignoring");

@@ -222,7 +222,7 @@ void NPC::DescribeAggro(Client *to_who, Mob *mob, bool verbose) {
 		if (
 			GetLevel() < RuleI(Aggro, MinAggroLevel) &&
 			mob->GetLevelCon(GetLevel()) == ConsiderColor::Gray &&
-			GetBodyType() != BT_Undead &&
+			GetBodyType() != BodyType::Undead &&
 			!AlwaysAggro()
 		) {
 			to_who->Message(
@@ -412,13 +412,13 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		(
 			!RuleB(Aggro, AggroPlayerPets) ||
 			pet_owner->CastToClient()->GetGM() ||
-			mob->GetSpecialAbility(IMMUNE_AGGRO)
+			mob->GetSpecialAbility(SpecialAbility::AggroImmunity)
 		)
 	) {
 		return false;
 	}
 
-	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(IMMUNE_AGGRO_NPC)) {
+	if (IsNPC() && mob->IsNPC() && mob->GetSpecialAbility(SpecialAbility::NPCAggroImmunity)) {
 		return false;
 	}
 
@@ -452,8 +452,8 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		return false;
 	}
 
-	// Don't aggro new clients if we are already engaged unless PROX_AGGRO is set
-	if (IsEngaged() && (!GetSpecialAbility(PROX_AGGRO) || (GetSpecialAbility(PROX_AGGRO) && !CombatRange(mob)))) {
+	// Don't aggro new clients if we are already engaged unless SpecialAbility::ProximityAggro is set
+	if (IsEngaged() && (!GetSpecialAbility(SpecialAbility::ProximityAggro) || (GetSpecialAbility(SpecialAbility::ProximityAggro) && !CombatRange(mob)))) {
 		LogAggro(
 			"[{}] is in combat, and does not have prox_aggro, or does and is out of combat range with [{}]",
 			GetName(),
@@ -496,7 +496,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 		RuleB(Aggro, UseLevelAggro) &&
 		(
 			GetLevel() >= RuleI(Aggro, MinAggroLevel) ||
-			GetBodyType() == BT_Undead ||
+			GetBodyType() == BodyType::Undead ||
 			AlwaysAggro() ||
 			(
 				mob->IsClient() &&
@@ -524,7 +524,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	} else {
 		if (
 			(
-				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BT_Undead) ||
+				(RuleB(Aggro, UndeadAlwaysAggro) && GetBodyType() == BodyType::Undead) ||
 				(GetINT() <= RuleI(Aggro, IntAggroThreshold)) ||
 				AlwaysAggro() ||
 				(
@@ -670,19 +670,19 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return true;
 	}
 
-	if (target->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
+	if (target->GetSpecialAbility(SpecialAbility::HarmFromClientImmunity)) {
 		return false;
 	}
 
-	if (IsBot() && target->GetSpecialAbility(IMMUNE_DAMAGE_BOT)) {
+	if (IsBot() && target->GetSpecialAbility(SpecialAbility::BotDamageImmunity)) {
 		return false;
 	}
 
-	if (IsClient() && target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT)) {
+	if (IsClient() && target->GetSpecialAbility(SpecialAbility::ClientDamageImmunity)) {
 		return false;
 	}
 
-	if (IsNPC() && target->GetSpecialAbility(IMMUNE_DAMAGE_NPC)) {
+	if (IsNPC() && target->GetSpecialAbility(SpecialAbility::NPCDamageImmunity)) {
 		return false;
 	}
 
@@ -707,9 +707,9 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		target_owner = nullptr;
 
 	//cannot hurt untargetable mobs
-	bodyType bt = target->GetBodyType();
+	uint8 bt = target->GetBodyType();
 
-	if(bt == BT_NoTarget || bt == BT_NoTarget2) {
+	if(bt == BodyType::NoTarget || bt == BodyType::NoTarget2) {
 		if (RuleB(Pets, UnTargetableSwarmPet)) {
 			if (target->IsNPC()) {
 				if (!target->CastToNPC()->GetSwarmOwner()) {
@@ -1089,13 +1089,13 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage, ExtraAtt
 	float _zDist = m_Position.z - other->GetZ();
 	_zDist *= _zDist;
 
-	if (GetSpecialAbility(NPC_CHASE_DISTANCE)) {
+	if (GetSpecialAbility(SpecialAbility::NPCChaseDistance)) {
 
 		bool DoLoSCheck = true;
-		float max_dist = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 0));
-		float min_distance = static_cast<float>(GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 1));
+		float max_dist = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 0));
+		float min_distance = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 1));
 
-		if (GetSpecialAbilityParam(NPC_CHASE_DISTANCE, 2)) {
+		if (GetSpecialAbilityParam(SpecialAbility::NPCChaseDistance, 2)) {
 			DoLoSCheck = false; //Ignore line of sight check
 		}
 

@@ -20,6 +20,7 @@
 #include "../common/events/player_event_logs.h"
 #include "../common/repositories/trader_repository.h"
 #include "../common/repositories/character_parcels_repository.h"
+#include "../common/repositories/character_parcels_containers_repository.h"
 #include "worldserver.h"
 #include "string_ids.h"
 #include "client.h"
@@ -106,7 +107,7 @@ void Client::SendBulkParcels()
 	}
 }
 
-void Client::SendParcel(const Parcel_Struct &parcel_in)
+void Client::SendParcel(Parcel_Struct &parcel_in)
 {
 	auto results = CharacterParcelsRepository::GetWhere(
 		database,
@@ -403,7 +404,30 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				return;
 			}
 
-			RemoveItem(parcel_out.item_id, parcel_out.quantity);
+			std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> all_entries{};
+			if (inst->IsNoneEmptyContainer()) {
+				CharacterParcelsContainersRepository::CharacterParcelsContainers cpc{};
+
+				for (auto const &kv: *inst->GetContents()) {
+					cpc.parcels_id = result.id;
+					cpc.slot_id    = kv.first;
+					cpc.item_id    = kv.second->GetID();
+					if (kv.second->IsAugmented()) {
+						auto augs      = kv.second->GetAugmentIDs();
+						cpc.aug_slot_1 = augs.at(0);
+						cpc.aug_slot_2 = augs.at(1);
+						cpc.aug_slot_3 = augs.at(2);
+						cpc.aug_slot_4 = augs.at(3);
+						cpc.aug_slot_5 = augs.at(4);
+						cpc.aug_slot_6 = augs.at(5);
+					}
+					cpc.quantity   = kv.second->GetCharges() > 0 ? kv.second->GetCharges() : 1;
+					all_entries.push_back(cpc);
+				}
+				CharacterParcelsContainersRepository::InsertMany(database, all_entries);
+			}
+
+			RemoveItemBySerialNumber(inst->GetSerialNumber(), parcel_out.quantity);
 			std::unique_ptr<EQApplicationPacket> outapp(new EQApplicationPacket(OP_ShopSendParcel));
 			QueuePacket(outapp.get());
 
@@ -435,6 +459,23 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 				e.sent_date        = parcel_out.sent_date;
 
 				RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
+
+				if (!all_entries.empty()) {
+					for (auto const &i: all_entries) {
+						e.from_player_name = parcel_out.from_name;
+						e.to_player_name   = send_to_client.at(0).character_name;
+						e.item_id          = i.item_id;
+						e.aug_slot_1       = i.aug_slot_1;
+						e.aug_slot_2       = i.aug_slot_2;
+						e.aug_slot_3       = i.aug_slot_3;
+						e.aug_slot_4       = i.aug_slot_4;
+						e.aug_slot_5       = i.aug_slot_5;
+						e.aug_slot_6       = i.aug_slot_6;
+						e.quantity         = i.quantity;
+						e.sent_date        = parcel_out.sent_date;
+						RecordPlayerEventLog(PlayerEvent::PARCEL_SEND, e);
+					}
+				}
 			}
 
 			Parcel_Struct ps{};
@@ -663,8 +704,54 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					}
 				}
 				else if (free_id != INVALID_INDEX) {
+					std::vector<CharacterParcelsContainersRepository::CharacterParcelsContainers> results{};
+
+					if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
+						results = CharacterParcelsContainersRepository::GetWhere(database, fmt::format("`parcels_id` = {}", p->second.id));
+						for (auto const &i : results) {
+							std::unique_ptr<EQ::ItemInstance> item(
+								database.CreateItem(
+									i.item_id,
+									i.quantity,
+									i.aug_slot_1,
+									i.aug_slot_2,
+									i.aug_slot_3,
+									i.aug_slot_4,
+									i.aug_slot_5,
+									i.aug_slot_6
+								)
+							);
+							if (CheckLoreConflict(item->GetItem())) {
+								Message(
+									Chat::Yellow,
+									fmt::format("Lore Item Found in Inventory: {}", item->GetItem()->Name).c_str());
+								MessageString(Chat::Yellow, DUP_LORE);
+								Message(Chat::Red, "Unable to retrieve parcel.");
+								SendParcelRetrieveAck();
+								return;
+							}
+						}
+					}
 					inst->SetCharges(item_quantity > 0 ? item_quantity : 1);
 					if (PutItemInInventory(free_id, *inst.get(), true)) {
+						if (inst->IsClassBag() && inst->GetItem()->BagSlots > 0) {
+							for (auto const &i: results) {
+								std::unique_ptr<EQ::ItemInstance> item(
+									database.CreateItem(
+										i.item_id,
+										i.quantity,
+										i.aug_slot_1,
+										i.aug_slot_2,
+										i.aug_slot_3,
+										i.aug_slot_4,
+										i.aug_slot_5,
+										i.aug_slot_6
+									)
+								);
+								auto bag_slot = EQ::InventoryProfile::CalcSlotId(free_id, i.slot_id);
+								PutItemInInventory(bag_slot, *item.get(), true);
+							}
+						}
 						MessageString(
 							Chat::Yellow,
 							PARCEL_DELIVERED,
@@ -672,6 +759,34 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 							inst->GetItem()->Name,
 							p->second.from_name.c_str()
 						);
+						if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
+							PlayerEvent::ParcelRetrieve e{};
+							e.from_player_name = p->second.from_name;
+							e.item_id          = p->second.item_id;
+							e.aug_slot_1       = p->second.aug_slot_1;
+							e.aug_slot_2       = p->second.aug_slot_2;
+							e.aug_slot_3       = p->second.aug_slot_3;
+							e.aug_slot_4       = p->second.aug_slot_4;
+							e.aug_slot_5       = p->second.aug_slot_5;
+							e.aug_slot_6       = p->second.aug_slot_6;
+							e.quantity         = p->second.quantity;
+							e.sent_date        = p->second.sent_date;
+							RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
+
+							for (auto const &i:results) {
+								e.from_player_name = p->second.from_name;
+								e.item_id          = i.item_id;
+								e.aug_slot_1       = i.aug_slot_1;
+								e.aug_slot_2       = i.aug_slot_2;
+								e.aug_slot_3       = i.aug_slot_3;
+								e.aug_slot_4       = i.aug_slot_4;
+								e.aug_slot_5       = i.aug_slot_5;
+								e.aug_slot_6       = i.aug_slot_6;
+								e.quantity         = i.quantity;
+								e.sent_date        = p->second.sent_date;
+								RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
+							}
+						}
 					}
 					else {
 						MessageString(Chat::Yellow, PARCEL_INV_FULL, merchant->GetCleanName());
@@ -685,22 +800,6 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 					return;
 				}
 			}
-		}
-
-		if (player_event_logs.IsEventEnabled(PlayerEvent::PARCEL_RETRIEVE)) {
-			PlayerEvent::ParcelRetrieve e{};
-			e.from_player_name = p->second.from_name;
-			e.item_id          = p->second.item_id;
-			e.aug_slot_1       = p->second.aug_slot_1;
-			e.aug_slot_2       = p->second.aug_slot_2;
-			e.aug_slot_3       = p->second.aug_slot_3;
-			e.aug_slot_4       = p->second.aug_slot_4;
-			e.aug_slot_5       = p->second.aug_slot_5;
-			e.aug_slot_6       = p->second.aug_slot_6;
-			e.quantity         = p->second.quantity;
-			e.sent_date        = p->second.sent_date;
-
-			RecordPlayerEventLog(PlayerEvent::PARCEL_RETRIEVE, e);
 		}
 
 		DeleteParcel(p->second.id);

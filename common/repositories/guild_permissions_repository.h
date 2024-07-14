@@ -45,6 +45,31 @@ public:
 
 	// Custom extended repository methods here
 
+	static std::map<std::string, GuildPermissions> LoadAll(Database &db)
+	{
+		std::map<std::string, GuildPermissions> all_entries;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} WHERE `guild_id` < {}",
+				BaseSelect(),
+				RoF2::constants::MAX_GUILD_ID
+			));
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			GuildPermissions e{};
+
+			e.id         = static_cast<int32_t>(atoi(row[0]));
+			e.perm_id    = static_cast<int32_t>(atoi(row[1]));
+			e.guild_id   = static_cast<int32_t>(atoi(row[2]));
+			e.permission = static_cast<int32_t>(atoi(row[3]));
+
+			auto key = fmt::format("{}-{}", e.guild_id, e.perm_id);
+			all_entries.emplace(key, e);
+		}
+
+		return all_entries;
+	}
 };
 
 #endif //EQEMU_GUILD_PERMISSIONS_REPOSITORY_H

@@ -32,6 +32,7 @@
 #include "../../common/repositories/skill_caps_repository.h"
 #include "../../common/file.h"
 #include "../../common/events/player_event_logs.h"
+#include "../../common/skill_caps.h"
 
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
@@ -225,24 +226,9 @@ uint32 GetSkill(SharedDatabase* db, int skill_id, int class_id, int level)
 	return e.cap;
 }
 
-void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
+void ExportSkillCaps(SharedDatabase *db, SharedDatabase *database)
 {
-	bool multiclassing = false;
-
-	std::string query = "SELECT rule_value FROM rule_values WHERE rule_name='Custom:MulticlassingEnabled'";
-    auto results = database->QueryDatabase(query);
-    if (results.Success()) {    
-    	if (results.RowCount() > 0) {       
-			auto row = results.begin();
-			multiclassing = (row[0] && std::string(row[0]) == "true");
-		}
-	}
-
-	LogInfo("Exporting Skill Caps. Multiclassing Mutations {}", multiclassing ? "Enabled" : "Disabled");
-
-	const int MAX_SKILLS = 78; // Adjust if necessary, assuming 0-77 inclusive
-    const int MAX_LEVELS = 100;
-    int skills_array[MAX_SKILLS][MAX_LEVELS] = {0}; // Initialize all to 0
+	LogInfo("Exporting Skill Caps");
 
 	std::ofstream file(fmt::format("{}/export/SkillCaps.txt", path.GetServerPath()));
 	if (!file || !file.is_open()) {
@@ -250,15 +236,22 @@ void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
 		return;
 	}
 
-	const uint8 skill_cap_max_level = (
-		RuleI(Character, SkillCapMaxLevel) > 0 ?
-		RuleI(Character, SkillCapMaxLevel) :
-		RuleI(Character, MaxLevel)
-	);
+	bool multiclassing = false;
 
+	std::string query = "SELECT rule_value FROM rule_values WHERE rule_name='Custom:MulticlassingEnabled'";
+    auto results = database->QueryDatabase(query);
+    if (results.Success()) {
+    	if (results.RowCount() > 0) {
+			auto row = results.begin();
+			multiclassing = (row[0] && std::string(row[0]) == "true");
+		}
+	}
+
+	LogInfo("Exporting Skill Caps. Multiclassing Mutations {}", multiclassing ? "Enabled" : "Disabled");
+	int skills_array[EQ::skills::SkillCount][75] = {0}; // Initialize all to 0
 	if (multiclassing) {
-        for (int skill = 0; skill < MAX_SKILLS; ++skill) {
-            for (int level = 1; level <= MAX_LEVELS; ++level) {
+        for (int skill = EQ::skills::Skill1HBlunt; skill < EQ::skills::SkillCount; ++skill) {
+            for (int level = 1; level <= 75; ++level) {
                 int highest_cap = 0;
                 for (int cl = 1; cl <= 16; ++cl) {
                     if (SkillUsable(db, skill, cl)) {
@@ -268,7 +261,7 @@ void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
                         }
                     }
                 }
-                skills_array[skill][level-1] = highest_cap; // Store the highest cap for this skill and level
+                skills_array[skill][level-1] = highest_cap;
             }
         }
     }
@@ -277,8 +270,13 @@ void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
 		for (uint8 skill_id = EQ::skills::Skill1HBlunt; skill_id <= EQ::skills::Skill2HPiercing; skill_id++) {
 			if (SkillUsable(db, skill_id, class_id)) {
 				uint32 previous_cap = 0;
-				for (uint8 level = 1; level <= skill_cap_max_level; level++) {
-					int cap = multiclassing ? skills_array[skill_id][level-1] : GetSkill(db, skill_id, class_id, level);
+
+				for (
+					uint8 level = 1;
+					level <= SkillCaps::GetSkillCapMaxLevel(class_id, static_cast<EQ::skills::SkillType>(skill_id));
+					level++
+					) {
+					uint32 cap = multiclassing ? skills_array[skill_id][level-1] : GetSkill(db, skill_id, class_id, level);
 					if (cap < previous_cap) {
 						cap = previous_cap;
 					}
@@ -290,7 +288,6 @@ void ExportSkillCaps(SharedDatabase* db, SharedDatabase *database)
 			}
 		}
 	}
-	
 
 	file.close();
 }

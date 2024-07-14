@@ -179,6 +179,7 @@
 #define CORPSE_DECAY_TIME_MINUTE    495		//This corpse will decay in %1 minute(s) %2 seconds.
 #define DISC_LEVEL_ERROR			503		//You must be a level %1 ... to use this discipline.
 #define DISCIPLINE_CANUSEIN			504		//You can use a new discipline in %1 minutes %2 seconds.
+#define SHARE_MONEY					511		//%1 shares money with the group.
 #define PVP_ON						552		//You are now player kill and follow the ways of Discord.
 #define GENERIC_STRINGID_SAY		554		//%1 says '%T2'
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
@@ -195,6 +196,7 @@
 #define PARCEL_DELAY                734     //%1 tells you, 'You must give me a chance to send the last parcel before I can send another!'
 #define PARCEL_DUPLICATE_DELETE     737     //Duplicate lore items are not allowed! Your duplicate %1 has been deleted!
 #define PARCEL_DELIVER_3            741     //%1 told you, 'I will deliver the stack of %2 %3 to %4 as soon as possible!'
+#define TRADER_MODE_FAILED_ROF2	    785     //Your attempt to become a trader has failed.
 #define PARCEL_INV_FULL             790     //%1 tells you, 'Your inventory appears full!  Unable to retrieve parceled item.'
 #define AA_CAP						1000	//You have reached the AA point cap, and cannot gain any further experience until some of your stored AA point pool is used.
 #define GM_GAINXP					1002	//[GM] You have gained %1 AXP and %2 EXP (%3).
@@ -203,6 +205,7 @@
 #define FINISHING_BLOW				1009	//%1 scores a Finishing Blow!!
 #define ASSASSINATES				1016	//%1 ASSASSINATES their victim!!
 #define CRIPPLING_BLOW				1021	//%1 lands a Crippling Blow!(%2)
+#define STAGGERS					1022	//%1 staggers.
 #define CRITICAL_HIT				1023	//%1 scores a critical hit! (%2)
 #define DEADLY_STRIKE				1024	//%1 scores a Deadly Strike!(%2)
 #define RESISTS_URGE				1025	//%1 resists their urge to flee.
@@ -427,6 +430,9 @@
 #define GENERIC_STRING				6688	//%1 (used to any basic message)
 #define SENTINEL_TRIG_YOU			6724	//You have triggered your sentinel.
 #define SENTINEL_TRIG_OTHER			6725	//%1 has triggered your sentinel.
+#define TRADER_MODE_OFF				6741 	//Bazaar Trader Mode *OFF*
+#define TRADER_MODE_ON				6742 	//Bazaar Trader Mode *ON*
+#define TRADER_SET_PRICE			6754 	//To become a merchant you must assign a price to an item in your list. Do this by selecting an item, then selecting a money amount, and then clicking set price.
 #define IDENTIFY_SPELL				6765	//Item Lore: %1.
 #define PET_NOW_HOLDING				6834	//Now holding, Master.  I will not start attacks until ordered.
 #define PET_ON_GHOLD				6843	//Pet greater hold has been set to on.
@@ -525,6 +531,8 @@
 #define GROUP_INVITEE_NOT_FOUND		12268	//You must target a player or use /invite <name> to invite someone to your group.
 #define GROUP_INVITEE_SELF			12270	//12270 You cannot invite yourself.
 #define ALREADY_IN_PARTY			12272	//That person is already in your party.
+#define TALKING_TO_SELF				12323	//Talking to yourself again?
+#define SPLIT_NO_GROUP				12328	//You are not in a group! Keep it all.
 #define NO_LONGER_HIDDEN			12337   //You are no longer hidden.
 #define STOP_SNEAKING				12338	//You stop sneaking
 #define NOT_IN_CONTROL				12368	//You do not have control of yourself right now.
@@ -575,6 +583,7 @@
 #define HOT_HEAL_OTHER				12997	//You have healed %1 for %2 hit points with your %3.
 #define HOT_HEALED_OTHER			12998	//%1 healed you for %2 hit points by %3.
 #define DISC_LEVEL_USE_ERROR		13004	//You are not sufficient level to use this discipline.
+#define SPLIT_FAIL					13112	//There is not enough to split, keep it.
 #define TOGGLE_ON					13172	//Asking server to turn ON your incoming tells.
 #define TOGGLE_OFF					13173	//Asking server to turn OFF all incoming tells for you.
 #define DUEL_INPROGRESS				13251	//You have already accepted a duel with someone else cowardly dog.

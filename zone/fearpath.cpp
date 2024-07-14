@@ -44,13 +44,13 @@ void Mob::CheckFlee()
 	}
 
 	//dont bother if we are immune to fleeing
-	if (GetSpecialAbility(IMMUNE_FLEEING) || spellbonuses.ImmuneToFlee) {
+	if (GetSpecialAbility(SpecialAbility::FleeingImmunity) || spellbonuses.ImmuneToFlee) {
 		LogFlee("Mob [{}] is immune to fleeing via special ability or spell bonus", GetCleanName());
 		return;
 	}
 
 	// Undead do not flee
-	if (GetBodyType() == BT_Undead) {
+	if (GetBodyType() == BodyType::Undead) {
 		return;
 	}
 
@@ -60,7 +60,7 @@ void Mob::CheckFlee()
 	}
 
 	int hp_ratio   = GetIntHPRatio();
-	int flee_ratio = GetSpecialAbility(FLEE_PERCENT); // if a special flee_percent exists
+	int flee_ratio = GetSpecialAbility(SpecialAbility::FleePercent); // if a special SpecialAbility::FleePercent exists
 	Mob *hate_top  = GetHateTop();
 
 	LogFlee("Mob [{}] hp_ratio [{}] flee_ratio [{}]", GetCleanName(), hp_ratio, flee_ratio);
@@ -137,10 +137,10 @@ void Mob::CheckFlee()
 	);
 
 	// If we got here we are allowed to roll on flee chance if there is not other hated NPC's in the area.
-	// ALWAYS_FLEE, skip roll
+	// SpecialAbility::AlwaysFlee, skip roll
 	// if FleeIfNotAlone is true, we skip alone check
 	// roll chance
-	if (GetSpecialAbility(ALWAYS_FLEE) ||
+	if (GetSpecialAbility(SpecialAbility::AlwaysFlee) ||
 		((RuleB(Combat, FleeIfNotAlone) || entity_list.GetHatedCount(hate_top, this, true) == 0) &&
 		 zone->random.Roll(flee_chance))) {
 
@@ -164,14 +164,14 @@ void Mob::ProcessFlee()
 
 	//Stop fleeing if effect is applied after they start to run.
 	//When ImmuneToFlee effect fades it will turn fear back on and check if it can still flee.
-	if (flee_mode && (GetSpecialAbility(IMMUNE_FLEEING) || spellbonuses.ImmuneToFlee) &&
+	if (flee_mode && (GetSpecialAbility(SpecialAbility::FleeingImmunity) || spellbonuses.ImmuneToFlee) &&
 		!spellbonuses.IsFeared && !spellbonuses.IsBlind) {
 		currently_fleeing = false;
 		return;
 	}
 
 	int hpratio = GetIntHPRatio();
-	int fleeratio = GetSpecialAbility(FLEE_PERCENT); // if a special flee_percent exists
+	int fleeratio = GetSpecialAbility(SpecialAbility::FleePercent); // if a special SpecialAbility::FleePercent exists
 	Mob *hate_top = GetHateTop();
 
 	// If no special flee_percent check for Gray or Other con rates

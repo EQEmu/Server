@@ -92,10 +92,20 @@ BaseGuildManager::~BaseGuildManager()
 bool BaseGuildManager::LoadGuilds()
 {
 	ClearGuilds();
-	auto guilds             = GuildsRepository::All(*m_db);
-	auto guilds_ranks       = GuildRanksRepository::All(*m_db);
-	auto guilds_permissions = GuildPermissionsRepository::All(*m_db);
-	auto guilds_tributes    = GuildTributesRepository::All(*m_db);
+	auto guilds             = GuildsRepository::GetWhere(
+		*m_db,
+		fmt::format("`id` < '{}'", RoF2::constants::MAX_GUILD_ID)
+	);
+	auto guilds_ranks       = GuildRanksRepository::LoadAll(*m_db);
+	auto guilds_permissions = GuildPermissionsRepository::LoadAll(*m_db);
+	auto guilds_tributes    = GuildTributesRepository::GetWhere(
+		*m_db,
+		fmt::format(
+			"`guild_id` < '{}'",
+			RoF2::constants::MAX_GUILD_ID
+		)
+	);
+
 
 	if (guilds.empty()) {
 		LogGuilds("No Guilds found in database.");
@@ -108,22 +118,27 @@ bool BaseGuildManager::LoadGuilds()
 
 		_CreateGuild(g.id, g.name, g.leader, g.minstatus, g.motd, g.motd_setter, g.channel, g.url, g.favor);
 
-		for (auto const &r: guilds_ranks) {
-			if (r.guild_id == g.id) {
-				m_guilds[g.id]->rank_names[r.rank_] = r.title;
+		for (int i = 1; i <= GUILD_MAX_RANK; i++) {
+			auto key = fmt::format("{}-{}", g.id, i);
+
+			if (guilds_ranks.contains(key)) {
+				m_guilds[g.id]->rank_names[i] = guilds_ranks.find(key)->second;
 			}
 		}
 
 		auto count = 0;
 
-		for (auto const &p: guilds_permissions) {
-			if (p.guild_id == g.id) {
+		for (int i = 1; i <= GUILD_MAX_FUNCTIONS; i++) {
+			auto key = fmt::format("{}-{}", g.id, i);
+			if (guilds_permissions.contains(key)) {
+				auto p = guilds_permissions.find(key)->second;
 				m_guilds[g.id]->functions[p.perm_id].id         = p.id;
 				m_guilds[g.id]->functions[p.perm_id].guild_id   = p.guild_id;
 				m_guilds[g.id]->functions[p.perm_id].perm_id    = p.perm_id;
 				m_guilds[g.id]->functions[p.perm_id].perm_value = p.permission;
-				count++;
 			}
+
+			count++;
 		}
 
 		if (count < GUILD_MAX_FUNCTIONS) {
@@ -929,33 +944,24 @@ bool BaseGuildManager::GetCharInfo(uint32 char_id, CharGuildInfo &into)
 
 }
 
-//returns ownership of the buffer.
-uint8 *BaseGuildManager::MakeGuildList(const char *head_name, uint32 &length) const
+GuildsListMessaging_Struct BaseGuildManager::MakeGuildList()
 {
-	//dynamic structs will make this a lot less painful.
+	GuildsListMessaging_Struct guild_list_messaging{};
+	uint32                     string_length = 0;
 
-	length = sizeof(GuildsList_Struct);
-	auto buffer = new uint8[length];
+	for (auto const &g: m_guilds) {
+		GuildsListMessagingEntry_Struct guild_entry{};
 
-	//a bit little better than memsetting the whole thing...
-	uint32 r, pos;
-	for (r = 0, pos = 0; r <= MAX_NUMBER_GUILDS; r++, pos += 64) {
-		//strcpy((char *) buffer+pos, "BAD GUILD");
-		// These 'BAD GUILD' entries were showing in the drop-downs for selecting guilds in the LFP window,
-		// so just fill unused entries with an empty string instead.
-		buffer[pos] = '\0';
+		guild_entry.guild_id   = g.first;
+		guild_entry.guild_name = g.second->name;
+		string_length         += g.second->name.length() + 1;
+		guild_list_messaging.guild_detail.push_back(guild_entry);
 	}
 
-	strn0cpy((char *) buffer, head_name, 64);
+	guild_list_messaging.no_of_guilds  = m_guilds.size();
+	guild_list_messaging.string_length = string_length;
 
-	std::map<uint32, GuildInfo *>::const_iterator cur, end;
-	cur = m_guilds.begin();
-	end = m_guilds.end();
-	for (; cur != end; ++cur) {
-		pos = 64 + (64 * cur->first);
-		strn0cpy((char *) buffer + pos, cur->second->name.c_str(), 64);
-	}
-	return (buffer);
+	return guild_list_messaging;
 }
 
 const char *BaseGuildManager::GetRankName(uint32 guild_id, uint8 rank) const

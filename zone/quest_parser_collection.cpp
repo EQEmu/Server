@@ -31,6 +31,12 @@
 
 #include <stdio.h>
 
+// an encounter can register events before the object is loaded
+// examples
+// eq.register_npc_event(Event.death_complete, -1, AllDeath);
+// eq.register_npc_event(Event.say, -1, All_Say);
+const std::string ENCOUNTER_NO_ENTITY_ID = "-1";
+
 extern Zone* zone;
 extern void MapOpcodes();
 
@@ -116,13 +122,7 @@ bool QuestParserCollection::HasQuestSub(uint32 npc_id, QuestEventID event_id)
 
 bool QuestParserCollection::NPCHasEncounterSub(uint32 npc_id, QuestEventID event_id)
 {
-	return HasEncounterSub(
-		event_id,
-		fmt::format(
-			"npc_{}",
-			npc_id
-		)
-	);
+	return HasEncounterSub(event_id, fmt::format("npc_{}", npc_id)) || HasEncounterSub(event_id, "npc_" + ENCOUNTER_NO_ENTITY_ID);
 }
 
 bool QuestParserCollection::HasQuestSubLocal(uint32 npc_id, QuestEventID event_id)
@@ -234,13 +234,8 @@ bool QuestParserCollection::PlayerHasQuestSubGlobal(QuestEventID event_id)
 
 bool QuestParserCollection::SpellHasEncounterSub(uint32 spell_id, QuestEventID event_id)
 {
-	return HasEncounterSub(
-		event_id,
-		fmt::format(
-			"spell_{}",
-			spell_id
-		)
-	);
+	return HasEncounterSub(event_id, fmt::format("spell_{}", spell_id)) ||
+		   HasEncounterSub(event_id, "spell_" + ENCOUNTER_NO_ENTITY_ID);
 }
 
 bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID event_id)
@@ -272,16 +267,11 @@ bool QuestParserCollection::SpellHasQuestSub(uint32 spell_id, QuestEventID event
 	return false;
 }
 
-bool QuestParserCollection::ItemHasEncounterSub(EQ::ItemInstance* inst, QuestEventID event_id)
+bool QuestParserCollection::ItemHasEncounterSub(EQ::ItemInstance *inst, QuestEventID event_id)
 {
 	if (inst) {
-		return HasEncounterSub(
-			event_id,
-			fmt::format(
-				"item_{}",
-				inst->GetID()
-			)
-		);
+		return HasEncounterSub(event_id, fmt::format("item_{}", inst->GetID())) ||
+			   HasEncounterSub(event_id, "item_" + ENCOUNTER_NO_ENTITY_ID);
 	}
 
 	return false;

@@ -286,13 +286,17 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 	// enforce flags before they hit zoning process
 	auto z = GetZone(m_destination_zone_name, 0);
 	if (z && !z->flag_needed.empty() && Strings::IsNumber(z->flag_needed) && Strings::ToInt(z->flag_needed) == 1) {
-		if (!sender->GetGM() && !sender->HasZoneFlag(z->zoneidnumber)) {
-			LogInfo(
-				"Character [{}] does not have the flag to be in this zone [{}]!",
-				sender->GetCleanName(),
-				z->flag_needed
-			);
-			sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
+		if (!sender->HasZoneFlag(z->zoneidnumber)) {
+			if (!sender->GetGM()) {
+				LogInfo(
+					"Character [{}] does not have the flag to be in this zone [{}]!",
+					sender->GetCleanName(),
+					z->flag_needed
+				);
+				sender->MessageString(Chat::LightBlue, DOORS_LOCKED);
+			} else {
+				sender->Message(Chat::White, "Your GM flag allows you to use this door.");
+			}
 		}
 	}
 
@@ -318,20 +322,40 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 		/**
 		 * Guild Doors
 		 */
-		if ((GetGuildID() > 0) && !sender->GetGM()) {
+		if (GetGuildID() > 0) {
 			std::string guild_name;
-			char        door_message[240];
+			const bool has_guild_name = guild_mgr.GetGuildNameByID(m_guild_id, guild_name);
+			if (!sender->GetGM()) {
+				std::string door_message;
 
-			if (guild_mgr.GetGuildNameByID(m_guild_id, guild_name)) {
-				sprintf(door_message, "Only members of the <%s> guild may enter here", guild_name.c_str());
-			}
-			else {
-				strcpy(door_message, "Door is locked by an unknown guild");
-			}
+				if (has_guild_name) {
+					door_message = fmt::format(
+						"Only members of the <{}> guild may enter here.",
+						guild_name
+					);
+				} else {
+					door_message = "Door is locked by an unknown guild.";
+				}
 
-			sender->Message(Chat::LightBlue, door_message);
-			safe_delete(outapp);
-			return;
+				sender->Message(Chat::LightBlue, door_message.c_str());
+				safe_delete(outapp);
+				return;
+			} else {
+				sender->Message(
+					Chat::White,
+					fmt::format(
+						"Your GM flag allows you to use this door{}.",
+						(
+							has_guild_name ?
+							fmt::format(
+								" assigned to the <{}> guild",
+								guild_name
+							) :
+							""
+						)
+					).c_str()
+				);
+			}
 		}
 
 		/**
@@ -515,8 +539,13 @@ void Doors::HandleClick(Client *sender, uint8 trigger)
 	}
 
 	// teleport door
-	if (((m_open_type == 57) || (m_open_type == 58)) && HasDestinationZone()) {
-		bool has_key_required = (required_key_item && ((required_key_item == player_key) || sender->GetGM()));
+	if (EQ::ValueWithin(m_open_type, 57, 58) && HasDestinationZone()) {
+		bool has_key_required = (required_key_item && required_key_item == player_key);
+
+		if (sender->GetGM() && has_key_required) {
+			has_key_required = false;
+			sender->Message(Chat::White, "Your GM flag allows you to open this door without a key.");
+		}
 
 		if (IsDestinationZoneSame() && (!required_key_item)) {
 			if (!disable_add_to_key_ring) {

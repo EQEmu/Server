@@ -66,7 +66,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
-	int16                           status = database.CheckStatus(id);
+	int16                           status = database.GetAccountStatus(id);
 
 	LogDebug(
 		"id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
@@ -146,7 +146,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
-	int16                     status = database.CheckStatus(id);
+	int16                     status = database.GetAccountStatus(id);
 
 	LogDebug(
 		"id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",

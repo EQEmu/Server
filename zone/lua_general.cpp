@@ -3790,8 +3790,8 @@ std::string lua_get_language_name(uint8 language_id) {
 	return quest_manager.getlanguagename(language_id);
 }
 
-std::string lua_get_body_type_name(uint32 bodytype_id) {
-	return quest_manager.getbodytypename(bodytype_id);
+std::string lua_get_body_type_name(uint8 body_type_id) {
+	return quest_manager.getbodytypename(body_type_id);
 }
 
 std::string lua_get_consider_level_name(uint8 consider_level) {
@@ -3989,6 +3989,10 @@ void lua_do_anim(int animation_id, int animation_speed, bool ackreq)
 void lua_do_anim(int animation_id, int animation_speed, bool ackreq, int filter)
 {
 	quest_manager.doanim(animation_id, animation_speed, ackreq, static_cast<eqFilterType>(filter));
+}
+
+std::string lua_item_link(Lua_ItemInst inst) {
+	return quest_manager.varlink(inst);
 }
 
 std::string lua_item_link(uint32 item_id) {
@@ -5480,8 +5484,8 @@ uint16 lua_get_class_bitmask(uint8 class_id) {
 	return GetPlayerClassBit(class_id);
 }
 
-uint32 lua_get_deity_bitmask(uint16 deity_id) {
-	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(deity_id)));
+uint32 lua_get_deity_bitmask(uint32 deity_id) {
+	return Deity::GetBitmask(deity_id);
 }
 
 uint16 lua_get_race_bitmask(uint16 race_id) {
@@ -5502,6 +5506,83 @@ uint32 lua_get_zone_id_by_long_name(std::string zone_long_name) {
 
 std::string lua_get_zone_short_name_by_long_name(std::string zone_long_name) {
 	return zone_store.GetZoneShortNameByLongName(zone_long_name);
+}
+
+bool lua_send_parcel(luabind::object lua_table)
+{
+	if (luabind::type(lua_table) != LUA_TTABLE) {
+		return false;
+	}
+
+	if (
+		(luabind::type(lua_table["name"]) == LUA_TNIL && luabind::type(lua_table["character_id"]) == LUA_TNIL) ||
+		luabind::type(lua_table["item_id"]) == LUA_TNIL ||
+		luabind::type(lua_table["quantity"]) == LUA_TNIL
+	) {
+		return false;
+	}
+
+	std::string name         = luabind::type(lua_table["name"]) != LUA_TNIL ? luabind::object_cast<std::string>(lua_table["name"]) : "";
+	uint32      character_id = luabind::type(lua_table["character_id"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["character_id"]) : 0;
+
+	if (character_id) {
+		const std::string& character_name = database.GetCharName(character_id);
+		if (character_name.empty()) {
+			return false;
+		}
+
+		name = character_name;
+	} else {
+		auto v = CharacterParcelsRepository::GetParcelCountAndCharacterName(database, name);
+		if (v.at(0).character_name.empty()) {
+			return false;
+		}
+
+		character_id = v.at(0).char_id;
+	}
+
+	if (!character_id) {
+		return false;
+	}
+
+	const int next_parcel_slot = CharacterParcelsRepository::GetNextFreeParcelSlot(database, character_id, RuleI(Parcel, ParcelMaxItems));
+	if (next_parcel_slot == INVALID_INDEX) {
+		return false;
+	}
+
+	const uint32 item_id         = luabind::object_cast<uint32>(lua_table["item_id"]);
+	const int16  quantity        = luabind::object_cast<int16>(lua_table["quantity"]);
+	const uint32 augment_one     = luabind::type(lua_table["augment_one"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_one"]) : 0;
+	const uint32 augment_two     = luabind::type(lua_table["augment_two"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_two"]) : 0;
+	const uint32 augment_three   = luabind::type(lua_table["augment_three"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_three"]) : 0;
+	const uint32 augment_four    = luabind::type(lua_table["augment_four"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_four"]) : 0;
+	const uint32 augment_five    = luabind::type(lua_table["augment_five"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_five"]) : 0;
+	const uint32 augment_six     = luabind::type(lua_table["augment_six"]) != LUA_TNIL ? luabind::object_cast<uint32>(lua_table["augment_six"]) : 0;
+	const std::string& from_name = luabind::type(lua_table["from_name"]) != LUA_TNIL ? luabind::object_cast<std::string>(lua_table["from_name"]) : std::string();
+	const std::string& note      = luabind::type(lua_table["note"]) != LUA_TNIL ? luabind::object_cast<std::string>(lua_table["note"]) : std::string();
+
+	auto e = CharacterParcelsRepository::NewEntity();
+
+	e.char_id    = character_id;
+	e.item_id    = item_id;
+	e.aug_slot_1 = augment_one;
+	e.aug_slot_2 = augment_two;
+	e.aug_slot_3 = augment_three;
+	e.aug_slot_4 = augment_four;
+	e.aug_slot_5 = augment_five;
+	e.aug_slot_6 = augment_six;
+	e.slot_id    = next_parcel_slot;
+	e.quantity   = quantity;
+	e.from_name  = from_name;
+	e.note       = note;
+	e.sent_date  = std::time(nullptr);
+
+	return CharacterParcelsRepository::InsertOne(database, e).id;
+}
+
+uint32 lua_get_zone_uptime()
+{
+	return Timer::GetCurrentTime() / 1000;
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -5845,6 +5926,7 @@ luabind::scope lua_register_general() {
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_count_item", &lua_merchant_count_item),
+		luabind::def("item_link", (std::string(*)(Lua_ItemInst))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32,int16))&lua_item_link),
 		luabind::def("item_link", (std::string(*)(uint32,int16,uint32))&lua_item_link),
@@ -6307,6 +6389,8 @@ luabind::scope lua_register_general() {
 		luabind::def("set_auto_login_character_name_by_account_id", &lua_set_auto_login_character_name_by_account_id),
 		luabind::def("get_zone_id_by_long_name", &lua_get_zone_id_by_long_name),
 		luabind::def("get_zone_short_name_by_long_name", &lua_get_zone_short_name_by_long_name),
+		luabind::def("send_parcel", &lua_send_parcel),
+		luabind::def("get_zone_uptime", &lua_get_zone_uptime),
 		/*
 			Cross Zone
 		*/
@@ -7869,6 +7953,22 @@ luabind::scope lua_register_journal_mode() {
 			luabind::value("None", static_cast<int>(Journal::Mode::None)),
 			luabind::value("Log1", static_cast<int>(Journal::Mode::Log1)),
 			luabind::value("Log2", static_cast<int>(Journal::Mode::Log2))
+		)];
+}
+
+
+luabind::scope lua_register_exp_source() {
+	return luabind::class_<ExpSource>("ExpSource")
+		.enum_("constants")
+		[(
+			luabind::value("Quest", static_cast<int>(ExpSource::Quest)),
+			luabind::value("GM", static_cast<int>(ExpSource::GM)),
+			luabind::value("Kill", static_cast<int>(ExpSource::Kill)),
+			luabind::value("Death", static_cast<int>(ExpSource::Death)),
+			luabind::value("Resurrection", static_cast<int>(ExpSource::Resurrection)),
+			luabind::value("LDoNChest", static_cast<int>(ExpSource::LDoNChest)),
+			luabind::value("Task", static_cast<int>(ExpSource::Task)),
+			luabind::value("Sacrifice", static_cast<int>(ExpSource::Sacrifice))
 		)];
 }
 

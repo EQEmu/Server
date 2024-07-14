@@ -48,7 +48,7 @@ int Lua_Raid::GetGroup(Lua_Client c) {
 
 void Lua_Raid::SplitExp(uint64 exp, Lua_Mob other) {
 	Lua_Safe_Call_Void();
-	self->SplitExp(exp, other);
+	self->SplitExp(ExpSource::Quest, exp, other);
 }
 
 uint32 Lua_Raid::GetTotalRaidDamage(Lua_Mob other) {

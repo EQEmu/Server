@@ -1012,6 +1012,26 @@ void Mob::TuneMeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override
 
 	auto roll = RollD20(hit.offense, mitigation);
 
+	// Add bonus to roll if level difference is sufficient
+	const int level_diff            = attacker->GetLevel() - GetLevel();
+	const int level_diff_roll_check = RuleI(Combat, LevelDifferenceRollCheck);
+
+	if (level_diff_roll_check >= 0) {
+		if (level_diff > level_diff_roll_check) {
+			roll += RuleR(Combat, LevelDifferenceRollBonus);
+
+			if (roll > 2.0f) {
+				roll = 2.0f;
+			}
+		} else if (level_diff < (-level_diff_roll_check)) {
+			roll -= RuleR(Combat, LevelDifferenceRollBonus);
+
+			if (roll < 0.1f) {
+				roll = 0.1f;
+			}
+		}
+	}
+
 	// +0.5 for rounding, min to 1 dmg
 	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
 }
@@ -1124,17 +1144,28 @@ int64 Mob::Tuneoffense(EQ::skills::SkillType skill, int atk_override, int add_at
 		break;
 	}
 
-	if (stat_bonus >= 75)
+	if (stat_bonus >= 75) {
 		offense += (2 * stat_bonus - 150) / 3;
+	}
 
 	int32 tune_atk = GetATK();
+
+	// GetATK() = ATK + itembonuses.ATK + spellbonuses.ATK.  However, ATK appears to already be itembonuses.ATK + spellbonuses.ATK for PCs, so as is, it is double counting attack
+	// This causes attack to be significantly more important than it should be based on era rule of thumbs.  I do not want to change the GetATK() function in case doing so breaks something,
+	// so instead I am just adding a /2 to remedy the double counting.  NPCs do not have this issue, so they are broken up.
+	// PCAttackPowerScaling is used to help bring attack power further in line with era estimates.
+	if (IsOfClientBotMerc()) {
+		offense += (GetATK() / 2 + GetPetATKBonusFromOwner()) * RuleI(Combat, PCAttackPowerScaling) / 100;
+	} else {
+		offense += GetATK();
+	}
+
 	if (atk_override) {
 		tune_atk = atk_override;
 	}
 
 	tune_atk += add_atk;
 
-	offense += tune_atk + GetPetATKBonusFromOwner();
 	return offense;
 }
 
@@ -1267,8 +1298,15 @@ int64 Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int ac
 	// unsure on the stacking order of these effects, rather hard to parse
 	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
 	// mod2 accuracy -- flat bonus
-	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing)
+	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing) {
 		accuracy += itembonuses.HitChance;
+	} else {
+		// Applying a scale factor as sources suggest Accuracy should reduce number of missing by 0.1% per point, so 150 = 15% reduction in misses.
+		// Based on my calculator 150 Accuracy was reducing misses by too much (closer to 20%)
+		// NOTE: This doesn't mean if you have a 30% miss chance you now miss 15%.  It means if you have a 30% miss chance you now have a 30% * (100% - 15%) = 30% * 85% = 25.5% miss chance
+		// Using same scale factor for Avoidance and Accuracy since they impact the formula about the same.
+		accuracy += itembonuses.HitChance * RuleI(Combat, PCAccuracyAvoidanceMod2Scale) / 100;
+	}
 
 	//518 Increase ATK accuracy by percentage, stackable
 	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
@@ -1305,6 +1343,11 @@ int64 Mob::TuneGetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int ac
 		aabonuses.HitChanceEffect[skill] +
 		spellbonuses.HitChanceEffect[skill];
 
+	if (skill == EQ::skills::SkillArchery) {
+		hit_bonus += spellbonuses.increase_archery + aabonuses.increase_archery + itembonuses.increase_archery;
+		hit_bonus -= hit_bonus * RuleR(Combat, ArcheryHitPenalty);
+	}
+
 	accuracy = (accuracy * (100 + hit_bonus)) / 100;
 	return accuracy;
 }
@@ -1338,31 +1381,43 @@ int64 Mob::TuneGetTotalDefense(int avoidance_override, int add_avoidance)
 int64 Mob::Tunecompute_defense(int avoidance_override, int add_avoidance)
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
-	defense += (8000 * (GetAGI() - 40)) / 36000;
-	if (IsOfClientBot()) {
-		if (avoidance_override) {
-			defense = avoidance_override;
+
+	// In new code, AGI becomes a large contributor to avoidance at low levels, since AGI isn't capped by Level but Defense is
+	// A scale factor is implemented for PCs to reduce the effect of AGI at low levels.  This isn't applied to NPCs since they can be
+	// easily controlled via the Database.
+	if (RuleB(Combat, LegacyComputeDefense)) {
+		int agi_scale_factor = 1000;
+
+		if (IsOfClientBot()) {
+			agi_scale_factor = std::min(1000, static_cast<int>(GetLevel()) * 1000 / 70); // Scales Agi Contribution for PC's Level, max Contribution at Level 70
 		}
-		else {
+
+		defense += agi_scale_factor * (800 * (GetAGI() - 40)) / 3600 / 1000;
+
+		if (IsOfClientBot()) {
+			defense += GetHeroicAGI() / 10;
+		}
+
+		defense += itembonuses.AvoidMeleeChance * RuleI(Combat, PCAccuracyAvoidanceMod2Scale) / 100; // item mod2
+	} else {
+		defense += (8000 * (GetAGI() - 40)) / 36000;
+
+		if (IsOfClientBot()) {
 			defense += itembonuses.heroic_agi_avoidance;
 		}
-		defense += add_avoidance; //1 pt = 10 heroic agi
+
+		defense += itembonuses.AvoidMeleeChance; // item mod2
 	}
+
 
 	//516 SE_AC_Mitigation_Max_Percent
 	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;
-	if (ac_bonus)
+	if (ac_bonus) {
 		defense += round(static_cast<double>(defense) * static_cast<double>(ac_bonus) * 0.0001);
+	}
 
-	defense += itembonuses.AvoidMeleeChance; // item mod2
 	if (IsNPC()) {
-		if (avoidance_override) {
-			defense += avoidance_override;
-		}
-		else {
-			defense += CastToNPC()->GetAvoidanceRating();
-		}
-		defense += add_avoidance;
+		defense += CastToNPC()->GetAvoidanceRating();
 	}
 
 	if (IsClient()) {
@@ -1498,7 +1553,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 	// this appears where they do special attack dmg mods
 	int spec_mod = 0;
 	if (IsSpecialAttack(eSpecialAttacks::Rampage)) {
-		int mod = GetSpecialAbilityParam(SPECATK_RAMPAGE, 2);
+		int mod = GetSpecialAbilityParam(SpecialAbility::Rampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
@@ -1509,7 +1564,7 @@ void Mob::TuneCommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraA
 		}
 	}
 	else if (IsSpecialAttack(eSpecialAttacks::AERampage)) {
-		int mod = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
+		int mod = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 2);
 		if (mod > 0)
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {

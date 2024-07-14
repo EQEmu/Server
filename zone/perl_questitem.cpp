@@ -288,6 +288,15 @@ perl::array Perl_QuestItem_GetAugmentIDs(EQ::ItemInstance* self)
 	return result;
 }
 
+std::string Perl_QuestItem_GetItemLink(EQ::ItemInstance* self)
+{
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+	linker.SetItemInst(self);
+
+	return linker.GenerateLink();
+}
+
 
 void perl_register_questitem()
 {
@@ -313,6 +322,7 @@ void perl_register_questitem()
 	package.add("GetItem", (EQ::ItemData*(*)(EQ::ItemInstance*))&Perl_QuestItem_GetItem);
 	package.add("GetItem", (EQ::ItemInstance*(*)(EQ::ItemInstance*, uint8))&Perl_QuestItem_GetItem);
 	package.add("GetItemID", &Perl_QuestItem_GetItemID);
+	package.add("GetItemLink", &Perl_QuestItem_GetItemLink);
 	package.add("GetItemScriptID", &Perl_QuestItem_GetItemScriptID);
 	package.add("GetKillsNeeded", &Perl_QuestItem_GetKillsNeeded);
 	package.add("GetMaxEvolveLevel", &Perl_QuestItem_GetMaxEvolveLevel);

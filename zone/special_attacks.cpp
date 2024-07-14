@@ -38,7 +38,6 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 		case EQ::skills::SkillDragonPunch:
 		case EQ::skills::SkillEagleStrike:
 		case EQ::skills::SkillTigerClaw:
-		case EQ::skills::SkillRoundKick:
 			if (skill_level >= 25) {
 				base++;
 			}
@@ -108,7 +107,8 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 
 			return static_cast<int>(ac_bonus + skill_bonus);
 		}
-		case EQ::skills::SkillKick: {
+		case EQ::skills::SkillKick:
+		case EQ::skills::SkillRoundKick: {
 			// there is some base *= 4 case in here?
 			float skill_bonus = skill_level / 10.0f;
 			float ac_bonus    = 0.0f;
@@ -119,8 +119,12 @@ int Mob::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 				}
 			}
 
-			if (ac_bonus > skill_bonus) {
-				ac_bonus = skill_bonus;
+			if (skill_level >= 75) {
+				base++;
+			}
+
+			if (skill_level >= 175) {
+				base++;
 			}
 
 			if (RuleB(Character, ItemExtraSkillDamageCalcAsPercent) && GetSkillDmgAmt(skill) > 0) {
@@ -228,10 +232,10 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (base_damage == DMG_INVULNERABLE)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	if (who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
+	if (who->GetInvul() || who->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		my_hit.damage_done = DMG_INVULNERABLE;
 
-	if (who->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_BANE) && skill != EQ::skills::SkillBackstab)
+	if (who->GetSpecialAbility(SpecialAbility::MeleeImmunityExceptBane) && skill != EQ::skills::SkillBackstab)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
 	int64 hate = my_hit.base_damage;
@@ -257,10 +261,40 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
 
+	// Rogue Backstab Haste Correction
+	// Haste should only provide a max of a 2 s reduction to Backstab cooldown, but it seems that while BackstabReuseTimer can be reduced, there is another timer (repop on the button)
+	// that is controlling the actual cooldown.  I'm not sure how this is implemented, but it is impacted by spell haste (including bard v2 and v3), but not worn haste.
+	// This code applies an adjustment to backstab accuracy to compensate for this so that Rogue DPS doesn't significantly outclass other classes.
+
+	if (
+		RuleB(Combat, RogueBackstabHasteCorrection) &&
+		skill == EQ::skills::SkillBackstab &&
+		GetHaste() > 100
+	) {
+		int haste_spell = spellbonuses.haste - spellbonuses.inhibitmelee + spellbonuses.hastetype2 + spellbonuses.hastetype3;
+		int haste_worn = itembonuses.haste;
+
+		// Compute Intended Cooldown.  100% Spell = 1 s reduction (max), 40% Worn = 1 s reduction (max).
+		int reduction_intended_spell = haste_spell > 100 ? 100 : haste_spell;
+		int reduction_intended_worn = 2.5 * (haste_worn > 40 ? 40 : haste_worn);
+		int16 intended_cooldown = 1000 - reduction_intended_spell - reduction_intended_worn;
+
+		// Compute Actual Cooldown.  Actual only impacted by spell haste ( + v2 + v3), and is 10 s / (100 + haste)
+		int actual_cooldown = 100000 / (100 + haste_spell);
+
+		// Compute Accuracy Adjustment
+		int backstab_accuracy_adjust = actual_cooldown * 1000 / intended_cooldown;
+
+		// orig_accuracy = my_hit.tohit;
+		int adjusted_accuracy = my_hit.tohit * backstab_accuracy_adjust / 1000;
+		my_hit.tohit = adjusted_accuracy;
+	}
+
 	my_hit.hand = EQ::invslot::slotPrimary; // Avoid checks hand for throwing/archery exclusion, primary should
 						  // work for most
-	if (skill == EQ::skills::SkillThrowing || skill == EQ::skills::SkillArchery)
+	if (skill == EQ::skills::SkillThrowing || skill == EQ::skills::SkillArchery) {
 		my_hit.hand = EQ::invslot::slotRange;
+	}
 
 	DoAttack(who, my_hit);
 
@@ -268,16 +302,20 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
 
 	// Make sure 'this' has not killed the target and 'this' is not dead (Damage shield ect).
-	if (!GetTarget())
+	if (!GetTarget()) {
 		return;
-	if (HasDied())
+	}
+
+	if (HasDied()) {
 		return;
+	}
 
 	TryCastOnSkillUse(who, skill);
 
 	if (HasSkillProcs()) {
 		TrySkillProc(who, skill, ReuseTime * 1000);
 	}
+
 	if (my_hit.damage_done > 0 && HasSkillProcSuccess()) {
 		TrySkillProc(who, skill, ReuseTime * 1000, true);
 	}
@@ -944,7 +982,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 {
 	if ((other == nullptr ||
 			((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || !CheckLosFN(other) || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+			HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || !CheckLosFN(other) || other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))) {
 		return;
 	}
 
@@ -1335,7 +1373,7 @@ void NPC::RangedAttack(Mob *other)
 		return;
 	}
 
-	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!HasBowAndArrowEquipped() && !GetSpecialAbility(SpecialAbility::RangedAttack))
 		return;
 
 	if (!CheckLosFN(other))
@@ -1345,12 +1383,12 @@ void NPC::RangedAttack(Mob *other)
 	float min_range = static_cast<float>(RuleI(Combat, MinRangedAttackDist));
 	float max_range = 250.0f; // needs to be longer than 200(most spells)
 
-	if (GetSpecialAbility(SPECATK_RANGED_ATK)) {
-		int temp_attacks = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 0);
+	if (GetSpecialAbility(SpecialAbility::RangedAttack)) {
+		int temp_attacks = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 0);
 		attacks = temp_attacks > 0 ? temp_attacks : 1;
 
-		int temp_min_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 4); // Min Range of NPC attack
-		int temp_max_range = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 1); // Max Range of NPC attack
+		int temp_min_range = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 4); // Min Range of NPC attack
+		int temp_max_range = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 1); // Max Range of NPC attack
 		if (temp_max_range)
 			max_range = static_cast<float>(temp_max_range);
 		if (temp_min_range)
@@ -1386,7 +1424,7 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 		HasDied() ||
 		(!IsAttackAllowed(other)) ||
 		(other->GetInvul() ||
-		other->GetSpecialAbility(IMMUNE_MELEE)))
+		other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))
 	{
 		return;
 	}
@@ -1415,14 +1453,14 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 	}
 
 	if (!chance_mod)
-		chance_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 2);
+		chance_mod = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 2);
 
 	int TotalDmg = 0;
 	int MaxDmg = GetBaseDamage() * RuleR(Combat, ArcheryNPCMultiplier); // should add a field to npc_types
 	int MinDmg = GetMinDamage() * RuleR(Combat, ArcheryNPCMultiplier);
 
 	if (!damage_mod)
-		 damage_mod = GetSpecialAbilityParam(SPECATK_RANGED_ATK, 3);//Damage modifier
+		 damage_mod = GetSpecialAbilityParam(SpecialAbility::RangedAttack, 3);//Damage modifier
 
 	DamageHitInfo my_hit;
 	my_hit.base_damage = MaxDmg;
@@ -1558,7 +1596,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 {
 	if ((other == nullptr ||
 		((IsClient() && CastToClient()->dead) || (other->IsClient() && other->CastToClient()->dead)) ||
-		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE)))) {
+		HasDied() || (!IsAttackAllowed(other)) || (other->GetInvul() || other->GetSpecialAbility(SpecialAbility::MeleeImmunity)))) {
 		return;
 	}
 	if (!CheckLosFN(other)) {
@@ -1842,7 +1880,7 @@ void NPC::DoClassAttacks(Mob *target) {
 		IsTaunting() &&
 		HasOwner() &&
 		target->IsNPC() &&
-		target->GetBodyType() != BT_Undead &&
+		target->GetBodyType() != BodyType::Undead &&
 		taunt_time &&
 		type_of_pet &&
 		type_of_pet != petTargetLock &&
@@ -2177,7 +2215,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	* Also: "The chance to taunt an NPC higher level than yourself dropped off at double the rate
 	* if you were above level 60 than if you were below level 60 making it very hard to taunt creature
 	* higher level than yourself if you were above level 60."
-	* 
+	*
 	* See http://www.elitegamerslounge.com/home/soearchive/viewtopic.php?t=81156 */
 void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell, int32 bonus_hate)
 {
@@ -2198,7 +2236,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 	if (
 		!RuleB(Combat, TauntOverLevel) &&
 		level_difference < 0 ||
-		who->GetSpecialAbility(IMMUNE_TAUNT)
+		who->GetSpecialAbility(SpecialAbility::TauntImmunity)
 	) {
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 		return;
@@ -2207,7 +2245,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool from_spell
 	if (always_succeed) {
 		taunt_chance = 100;
 	}
-		
+
 	// Modern Taunt
 	if (!RuleB(Combat, ClassicTauntSystem)) {
 		if (
@@ -2397,8 +2435,8 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 		!defender->IsClient() &&
 		skillInUse == EQ::skills::SkillArchery &&
 		GetTarget() == defender &&
-		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
-		!defender->GetSpecialAbility(IMMUNE_HEADSHOT)
+		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, HeadshotOnlyHumanoids)) &&
+		!defender->GetSpecialAbility(SpecialAbility::HeadshotImmunity)
 	) {
 		uint32 HeadShot_Dmg = aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
@@ -2434,8 +2472,8 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 		!defender->IsClient() &&
 		GetLevel() >= RuleI(Combat, AssassinateLevelRequirement) &&
 		(skillInUse == EQ::skills::SkillBackstab || skillInUse == EQ::skills::SkillThrowing) &&
-		(defender->GetBodyType() == BT_Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
-		!defender->GetSpecialAbility(IMMUNE_ASSASSINATE)
+		(defender->GetBodyType() == BodyType::Humanoid || !RuleB(Combat, AssassinateOnlyHumanoids)) &&
+		!defender->GetSpecialAbility(SpecialAbility::AssassinateImmunity)
 	) {
 		int chance = GetDEX();
 		if (skillInUse == EQ::skills::SkillBackstab) {
@@ -2568,7 +2606,7 @@ bool Mob::CanDoSpecialAttack(Mob *other) {
 		return false;
 	}
 
-	if(other->GetInvul() || other->GetSpecialAbility(IMMUNE_MELEE))
+	if(other->GetInvul() || other->GetSpecialAbility(SpecialAbility::MeleeImmunity))
 		return false;
 
 	return true;

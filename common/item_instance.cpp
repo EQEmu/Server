@@ -303,47 +303,34 @@ int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augment_type) const
 		return INVALID_INDEX;
 	}
 
-	auto i = invaug::SOCKET_BEGIN;
-	for (; i <= invaug::SOCKET_END; ++i) {
-		if (GetItem(i)) {
-			continue;
-		}
-
-		if (
-			augment_type == -1 ||
-			(
-				m_item->AugSlotType[i] &&
-				((1 << (m_item->AugSlotType[i] - 1)) & augment_type)
-			)
-		) {
-			break;
+	for (int16 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; ++slot_id) {
+		if (IsAugmentSlotAvailable(augment_type, slot_id)) {
+			return slot_id;
 		}
 	}
 
-	return (i <= invaug::SOCKET_END) ? i : INVALID_INDEX;
+	return INVALID_INDEX;
 }
 
 bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const
 {
-	if (!m_item || !m_item->IsClassCommon()) {
+	if (!m_item || !m_item->IsClassCommon() || GetItem(slot)) {
 		return false;
 	}
 
-	if (
+	return (
 		(
-			!GetItem(slot) &&
-			m_item->AugSlotVisible[slot]
+			augment_type == -1 ||
+			(
+				m_item->AugSlotType[slot] &&
+				((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+			)
 		) &&
-		augment_type == -1 ||
 		(
-			m_item->AugSlotType[slot] &&
-			((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+			RuleB(Items, AugmentItemAllowInvisibleAugments) ||
+			m_item->AugSlotVisible[slot]
 		)
-	) {
-		return true;
-	}
-
-	return false;
+	);
 }
 
 // Retrieve item inside container
@@ -1375,7 +1362,7 @@ int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 	return race;
 }
 
-int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageBody(uint8 against, bool augments) const
 {
 	int64 damage = 0;
 	const auto item = GetItem();
@@ -1893,6 +1880,142 @@ std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
 	}
 
 	return augments;
+}
+
+int EQ::ItemInstance::GetItemRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Regen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemManaRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ManaRegen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemManaRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDamageShield(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DamageShield;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDamageShield();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDSMitigation(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DSMitigation;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDSMitigation();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemHealAmt(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->HealAmt;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemHealAmt();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSpellDamage(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->SpellDmg;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSpellDamage();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemClairvoyance(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Clairvoyance;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemClairvoyance();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ExtraDmgSkill == skill ? item->ExtraDmgAmt : 0;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSkillsStat(skill);
+				}
+			}
+		}
+	}
+	return stat;
 }
 
 //

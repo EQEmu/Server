@@ -58,72 +58,75 @@ namespace EQ
 		};
 
 		enum ItemType : uint8 {
-/*9138*/	ItemType1HSlash = 0,
-/*9141*/	ItemType2HSlash,
-/*9140*/	ItemType1HPiercing,
-/*9139*/	ItemType1HBlunt,
-/*9142*/	ItemType2HBlunt,
-/*5504*/	ItemTypeBow, // 5
-/*----*/	ItemTypeUnknown1,
-/*----*/	ItemTypeLargeThrowing,
-/*5505*/	ItemTypeShield,
-/*5506*/	ItemTypeScroll,
-/*5507*/	ItemTypeArmor, // 10
-/*5508*/	ItemTypeMisc,			// a lot of random crap has this item use.
-/*7564*/	ItemTypeLockPick,
-/*----*/	ItemTypeUnknown2,
-/*5509*/	ItemTypeFood,
-/*5510*/	ItemTypeDrink, // 15
-/*5511*/	ItemTypeLight,
-/*5512*/	ItemTypeCombinable,		// not all stackable items are this use...
-/*5513*/	ItemTypeBandage,
-/*----*/	ItemTypeSmallThrowing,
-/*----*/	ItemTypeSpell, // 20	// spells and tomes
-/*5514*/	ItemTypePotion,
-/*----*/	ItemTypeUnknown3,
-/*0406*/	ItemTypeWindInstrument,
-/*0407*/	ItemTypeStringedInstrument,
-/*0408*/	ItemTypeBrassInstrument, // 25
-/*0405*/	ItemTypePercussionInstrument,
-/*5515*/	ItemTypeArrow,
-/*----*/	ItemTypeUnknown4,
-/*5521*/	ItemTypeJewelry,
-/*----*/	ItemTypeSkull, // 30
-/*5516*/	ItemTypeBook,			// skill-up tomes/books? (would probably need a pp flag if true...)
-/*5517*/	ItemTypeNote,
-/*5518*/	ItemTypeKey,
-/*----*/	ItemTypeCoin,
-/*5520*/	ItemType2HPiercing, // 35
-/*----*/	ItemTypeFishingPole,
-/*----*/	ItemTypeFishingBait,
-/*5519*/	ItemTypeAlcohol,
-/*----*/	ItemTypeKey2,			// keys and satchels?? (questable keys?)
-/*----*/	ItemTypeCompass, // 40
-/*----*/	ItemTypeUnknown5,
-/*----*/	ItemTypePoison,			// might be wrong, but includes poisons
-/*----*/	ItemTypeUnknown6,
-/*----*/	ItemTypeUnknown7,
-/*5522*/	ItemTypeMartial, // 45
-/*----*/	ItemTypeUnknown8,
-/*----*/	ItemTypeUnknown9,
-/*----*/	ItemTypeUnknown10,
-/*----*/	ItemTypeUnknown11,
-/*----*/	ItemTypeSinging, // 50
-/*5750*/	ItemTypeAllInstrumentTypes,
-/*5776*/	ItemTypeCharm,
-/*----*/	ItemTypeDye,
-/*----*/	ItemTypeAugmentation,
-/*----*/	ItemTypeAugmentationSolvent, // 55
-/*----*/	ItemTypeAugmentationDistiller,
-/*----*/	ItemTypeUnknown12,
-/*----*/	ItemTypeFellowshipKit,
-/*----*/	ItemTypeUnknown13,
-/*----*/	ItemTypeRecipe, // 60
-/*----*/	ItemTypeAdvancedRecipe,
-/*----*/	ItemTypeJournal,		// only one(1) database entry
-/*----*/	ItemTypeAltCurrency,	// alt-currency (as opposed to coinage)
-/*5881*/	ItemTypePerfectedAugmentationDistiller,
-/*----*/	ItemTypeCount
+			/*9138*/ ItemType1HSlash = 0,
+			/*9141*/ ItemType2HSlash,
+			/*9140*/ ItemType1HPiercing,
+			/*9139*/ ItemType1HBlunt,
+			/*9142*/ ItemType2HBlunt,
+			/*5504*/ ItemTypeBow,                 // 5
+			/*----*/ ItemTypeUnknown1,
+			/*----*/ ItemTypeLargeThrowing,
+			/*5505*/ ItemTypeShield,
+			/*5506*/ ItemTypeScroll,
+			/*5507*/ ItemTypeArmor,               // 10
+			/*5508*/ ItemTypeMisc,                // a lot of random crap has this item use.
+			/*7564*/ ItemTypeLockPick,
+			/*----*/ ItemTypeUnknown2,
+			/*5509*/ ItemTypeFood,
+			/*5510*/ ItemTypeDrink,               // 15
+			/*5511*/ ItemTypeLight,
+			/*5512*/ ItemTypeCombinable,          // not all stackable items are this use...
+			/*5513*/ ItemTypeBandage,
+			/*----*/ ItemTypeSmallThrowing,
+			/*----*/ ItemTypeSpell,               // 20	// spells and tomes
+			/*5514*/ ItemTypePotion,
+			/*----*/ ItemTypeUnknown3,
+			/*0406*/ ItemTypeWindInstrument,
+			/*0407*/ ItemTypeStringedInstrument,
+			/*0408*/ ItemTypeBrassInstrument,     // 25
+			/*0405*/ ItemTypePercussionInstrument,
+			/*5515*/ ItemTypeArrow,
+			/*----*/ ItemTypeUnknown4,
+			/*5521*/ ItemTypeJewelry,
+			/*----*/ ItemTypeSkull,               // 30
+			/*5516*/ ItemTypeBook,                // skill-up tomes/books? (would probably need a pp flag if true...)
+			/*5517*/ ItemTypeNote,
+			/*5518*/ ItemTypeKey,
+			/*----*/ ItemTypeCoin,
+			/*5520*/ ItemType2HPiercing,          // 35
+			/*----*/ ItemTypeFishingPole,
+			/*----*/ ItemTypeFishingBait,
+			/*5519*/ ItemTypeAlcohol,
+			/*----*/ ItemTypeKey2,                // keys and satchels?? (questable keys?)
+			/*----*/ ItemTypeCompass,             // 40
+			/*----*/ ItemTypeUnknown5,
+			/*----*/ ItemTypePoison,              // might be wrong, but includes poisons
+			/*----*/ ItemTypeUnknown6,
+			/*----*/ ItemTypeUnknown7,
+			/*5522*/ ItemTypeMartial,             // 45
+			/*----*/ ItemTypeAllEffects,
+			/*----*/ ItemTypeUnknown9,
+			/*----*/ ItemTypeUnknown10,
+			/*----*/ ItemTypeFocusEffect,
+			/*----*/ ItemTypeSinging,             // 50
+			/*5750*/ ItemTypeAllInstrumentTypes,
+			/*5776*/ ItemTypeCharm,
+			/*----*/ ItemTypeDye,
+			/*----*/ ItemTypeAugmentation,
+			/*----*/ ItemTypeAugmentationSolvent, // 55
+			/*----*/ ItemTypeAugmentationDistiller,
+			/*----*/ ItemTypeAlternateAbility,
+			/*----*/ ItemTypeFellowshipKit,
+			/*----*/ ItemTypeUnknown13,
+			/*----*/ ItemTypeRecipe,              // 60
+			/*----*/ ItemTypeAdvancedRecipe,
+			/*----*/ ItemTypeJournal,             // only one(1) database entry
+			/*----*/ ItemTypeAltCurrency,         // alt-currency (as opposed to coinage)
+			/*5881*/ ItemTypePerfectedAugmentationDistiller,
+			/*----*/ ItemTypeCount,
+			/*----*/ ItemTypeCollectible,
+			/*----*/ ItemTypeContainer,
+			/*----*/ ItemTypeAll     = 0xFF
 
 /*
 			Unknowns:

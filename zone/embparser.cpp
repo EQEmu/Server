@@ -223,6 +223,11 @@ PerlembParser::~PerlembParser()
 	safe_delete(perl);
 }
 
+void PerlembParser::Init()
+{
+	ReloadQuests();
+}
+
 void PerlembParser::ReloadQuests()
 {
 	try {
@@ -1542,16 +1547,17 @@ void PerlembParser::ExportMobVariables(
 void PerlembParser::ExportZoneVariables(std::string& package_name)
 {
 	if (zone) {
-		ExportVar(package_name.c_str(), "zoneid", zone->GetZoneID());
-		ExportVar(package_name.c_str(), "zoneln", zone->GetLongName());
-		ExportVar(package_name.c_str(), "zonesn", zone->GetShortName());
 		ExportVar(package_name.c_str(), "instanceid", zone->GetInstanceID());
 		ExportVar(package_name.c_str(), "instanceversion", zone->GetInstanceVersion());
 		TimeOfDay_Struct eqTime{ };
 		zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 		ExportVar(package_name.c_str(), "zonehour", eqTime.hour - 1);
+		ExportVar(package_name.c_str(), "zoneid", zone->GetZoneID());
+		ExportVar(package_name.c_str(), "zoneln", zone->GetLongName());
 		ExportVar(package_name.c_str(), "zonemin", eqTime.minute);
+		ExportVar(package_name.c_str(), "zonesn", zone->GetShortName());
 		ExportVar(package_name.c_str(), "zonetime", (eqTime.hour - 1) * 100 + eqTime.minute);
+		ExportVar(package_name.c_str(), "zoneuptime", Timer::GetCurrentTime() / 1000);
 		ExportVar(package_name.c_str(), "zoneweather", zone->zone_weather);
 	}
 }

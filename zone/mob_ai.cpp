@@ -33,6 +33,9 @@
 #include "../common/data_verification.h"
 
 #include "bot.h"
+#include "../common/repositories/npc_spells_repository.h"
+#include "../common/repositories/npc_spells_entries_repository.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
@@ -440,7 +443,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_feign_remember_timer = std::make_unique<Timer>(AIfeignremember_delay);
 	AI_scan_door_open_timer = std::make_unique<Timer>(AI_scan_door_open_interval);
 
-	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+	if (GetBodyType() == BodyType::Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 		SetCanOpenDoors(false);
 	}
 
@@ -567,7 +570,7 @@ void Mob::AI_ShutDown() {
 	viral_timer.Disable();
 	flee_timer.Disable();
 
-	for (int sat = 0; sat < MAX_SPECIAL_ATTACK; ++sat) {
+	for (int sat = 0; sat < SpecialAbility::Max; ++sat) {
 		if (SpecialAbilities[sat].timer)
 			SpecialAbilities[sat].timer->Disable();
 	}
@@ -1059,7 +1062,7 @@ void Mob::AI_Process() {
 		}
 		// we are prevented from getting here if we are blind and don't have a target in range
 		// from above, so no extra blind checks needed
-		if ((IsRooted() && !GetSpecialAbility(IGNORE_ROOT_AGGRO_RULES)) || IsBlind())
+		if ((IsRooted() && !GetSpecialAbility(SpecialAbility::IgnoreRootAggroRules)) || IsBlind())
 			SetTarget(hate_list.GetClosestEntOnHateList(this));
 		else {
 			if (AI_target_check_timer->Check()) {
@@ -1122,16 +1125,16 @@ void Mob::AI_Process() {
 		}
 
 		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
-		if (GetSpecialAbility(TETHER)) {
-			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
+		if (GetSpecialAbility(SpecialAbility::Tether)) {
+			float tether_range = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::Tether, 0));
 			tether_range = tether_range > 0.0f ? tether_range * tether_range : pAggroRange * pAggroRange;
 
 			if (DistanceSquaredNoZ(m_Position, npcSpawnPoint) > tether_range) {
 				GMMove(npcSpawnPoint.x, npcSpawnPoint.y, npcSpawnPoint.z, npcSpawnPoint.w);
 			}
 		}
-		else if (GetSpecialAbility(LEASH)) {
-			float leash_range = static_cast<float>(GetSpecialAbilityParam(LEASH, 0));
+		else if (GetSpecialAbility(SpecialAbility::Leash)) {
+			float leash_range = static_cast<float>(GetSpecialAbilityParam(SpecialAbility::Leash, 0));
 			leash_range = leash_range > 0.0f ? leash_range * leash_range : pAggroRange * pAggroRange;
 
 			if (DistanceSquaredNoZ(m_Position, npcSpawnPoint) > leash_range) {
@@ -1166,33 +1169,33 @@ void Mob::AI_Process() {
 					TriggerDefensiveProcs(target, EQ::invslot::slotPrimary, false);
 
 					bool specialed = false; // NPCs can only do one of these a round
-					if (GetSpecialAbility(SPECATK_FLURRY)) {
-						int flurry_chance = GetSpecialAbilityParam(SPECATK_FLURRY, 0);
+					if (GetSpecialAbility(SpecialAbility::Flurry)) {
+						int flurry_chance = GetSpecialAbilityParam(SpecialAbility::Flurry, 0);
 						flurry_chance = flurry_chance > 0 ? flurry_chance : RuleI(Combat, NPCFlurryChance);
 
 						if (zone->random.Roll(flurry_chance)) {
 							ExtraAttackOptions opts;
-							int                cur = GetSpecialAbilityParam(SPECATK_FLURRY, 2);
+							int                cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 2);
 							if (cur > 0)
 								opts.damage_percent = cur / 100.0f;
 
-							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 3);
+							cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 3);
 							if (cur > 0)
 								opts.damage_flat = cur;
 
-							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 4);
+							cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 4);
 							if (cur > 0)
 								opts.armor_pen_percent = cur / 100.0f;
 
-							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 5);
+							cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 5);
 							if (cur > 0)
 								opts.armor_pen_flat = cur;
 
-							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 6);
+							cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 6);
 							if (cur > 0)
 								opts.crit_percent = cur / 100.0f;
 
-							cur = GetSpecialAbilityParam(SPECATK_FLURRY, 7);
+							cur = GetSpecialAbilityParam(SpecialAbility::Flurry, 7);
 							if (cur > 0)
 								opts.crit_flat = cur;
 
@@ -1224,32 +1227,32 @@ void Mob::AI_Process() {
 					}
 
 
-					if (GetSpecialAbility(SPECATK_RAMPAGE) && !specialed) {
-						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
+					if (GetSpecialAbility(SpecialAbility::Rampage) && !specialed) {
+						int rampage_chance = GetSpecialAbilityParam(SpecialAbility::Rampage, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if (zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
-							int                cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 3);
+							int                cur = GetSpecialAbilityParam(SpecialAbility::Rampage, 3);
 							if (cur > 0) {
 								opts.damage_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 4);
+							cur = GetSpecialAbilityParam(SpecialAbility::Rampage, 4);
 							if (cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 5);
+							cur = GetSpecialAbilityParam(SpecialAbility::Rampage, 5);
 							if (cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 6);
+							cur = GetSpecialAbilityParam(SpecialAbility::Rampage, 6);
 							if (cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_RAMPAGE, 7);
+							cur = GetSpecialAbilityParam(SpecialAbility::Rampage, 7);
 							if (cur > 0) {
 								opts.crit_flat = cur;
 							}
@@ -1266,37 +1269,37 @@ void Mob::AI_Process() {
 						}
 					}
 
-					if (GetSpecialAbility(SPECATK_AREA_RAMPAGE) && !specialed) {
-						int rampage_chance = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 0);
+					if (GetSpecialAbility(SpecialAbility::AreaRampage) && !specialed) {
+						int rampage_chance = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 0);
 						rampage_chance = rampage_chance > 0 ? rampage_chance : 20;
 						if (zone->random.Roll(rampage_chance)) {
 							ExtraAttackOptions opts;
-							int                cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 3);
+							int                cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 3);
 							if (cur > 0) {
 								opts.damage_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 4);
+							cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 4);
 							if (cur > 0) {
 								opts.armor_pen_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 5);
+							cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 5);
 							if (cur > 0) {
 								opts.armor_pen_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 6);
+							cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 6);
 							if (cur > 0) {
 								opts.crit_percent = cur / 100.0f;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 7);
+							cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 7);
 							if (cur > 0) {
 								opts.crit_flat = cur;
 							}
 
-							cur = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 8);
+							cur = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 8);
 							if (cur > 0) {
 								opts.range_percent = cur;
 							}
@@ -1325,7 +1328,7 @@ void Mob::AI_Process() {
 			if (!HateSummon()) {
 
 				//could not summon them, check ranged...
-				if (GetSpecialAbility(SPECATK_RANGED_ATK) || HasBowAndArrowEquipped()) {
+				if (GetSpecialAbility(SpecialAbility::RangedAttack) || HasBowAndArrowEquipped()) {
 					doranged = true;
 				}
 
@@ -1958,10 +1961,10 @@ void Mob::StartEnrage()
 	if (bEnraged)
 		return;
 
-	if(!GetSpecialAbility(SPECATK_ENRAGE))
+	if(!GetSpecialAbility(SpecialAbility::Enrage))
 		return;
 
-	int hp_ratio = GetSpecialAbilityParam(SPECATK_ENRAGE, 0);
+	int hp_ratio = GetSpecialAbilityParam(SpecialAbility::Enrage, 0);
 	hp_ratio = hp_ratio > 0 ? hp_ratio : RuleI(NPC, StartEnrageValue);
 	if(GetHPRatio() > static_cast<float>(hp_ratio)) {
 		return;
@@ -1972,13 +1975,13 @@ void Mob::StartEnrage()
 		return;
 	}
 
-	Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
+	Timer *timer = GetSpecialAbilityTimer(SpecialAbility::Enrage);
 	if (timer && !timer->Check())
 		return;
 
-	int enraged_duration = GetSpecialAbilityParam(SPECATK_ENRAGE, 1);
+	int enraged_duration = GetSpecialAbilityParam(SpecialAbility::Enrage, 1);
 	enraged_duration = enraged_duration > 0 ? enraged_duration : EnragedDurationTimer;
-	StartSpecialAbilityTimer(SPECATK_ENRAGE, enraged_duration);
+	StartSpecialAbilityTimer(SpecialAbility::Enrage, enraged_duration);
 
 	// start the timer. need to call IsEnraged frequently since we dont have callback timers :-/
 	bEnraged = true;
@@ -1987,13 +1990,13 @@ void Mob::StartEnrage()
 
 void Mob::ProcessEnrage(){
 	if(IsEnraged()){
-		Timer *timer = GetSpecialAbilityTimer(SPECATK_ENRAGE);
+		Timer *timer = GetSpecialAbilityTimer(SpecialAbility::Enrage);
 		if(timer && timer->Check()){
 			entity_list.MessageCloseString(this, true, 200, Chat::NPCEnrage, NPC_ENRAGE_END, GetCleanName());
 
-			int enraged_cooldown = GetSpecialAbilityParam(SPECATK_ENRAGE, 2);
+			int enraged_cooldown = GetSpecialAbilityParam(SpecialAbility::Enrage, 2);
 			enraged_cooldown = enraged_cooldown > 0 ? enraged_cooldown : EnragedTimer;
-			StartSpecialAbilityTimer(SPECATK_ENRAGE, enraged_cooldown);
+			StartSpecialAbilityTimer(SpecialAbility::Enrage, enraged_cooldown);
 			bEnraged = false;
 		}
 	}
@@ -2029,7 +2032,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 				target->GetCleanName());
 		}
 
-		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
+		int num_attacks = GetSpecialAbilityParam(SpecialAbility::Flurry, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
 			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
@@ -2043,7 +2046,7 @@ bool Mob::AddRampage(Mob *mob)
 		return false;
 	}
 
-	if (!GetSpecialAbility(SPECATK_RAMPAGE)) {
+	if (!GetSpecialAbility(SpecialAbility::Rampage)) {
 		return false;
 	}
 
@@ -2070,7 +2073,7 @@ void Mob::RemoveFromRampageList(Mob* mob, bool remove_feigned)
 
 	if (
 		IsNPC() &&
-		GetSpecialAbility(SPECATK_RAMPAGE) &&
+		GetSpecialAbility(SpecialAbility::Rampage) &&
 		(
 			remove_feigned  ||
 			mob->IsNPC() ||
@@ -2097,7 +2100,7 @@ bool Mob::Rampage(ExtraAttackOptions *opts)
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, NPC_RAMPAGE, GetCleanName());
 	}
 
-	int rampage_targets = GetSpecialAbilityParam(SPECATK_RAMPAGE, 1);
+	int rampage_targets = GetSpecialAbilityParam(SpecialAbility::Rampage, 1);
 
 	if (rampage_targets == 0) { // if set to 0 or not set in the DB
 		rampage_targets = RuleI(Combat, DefaultRampageTargets);
@@ -2170,7 +2173,7 @@ void Mob::AreaRampage(ExtraAttackOptions *opts)
 		entity_list.MessageCloseString(this, true, 200, Chat::NPCRampage, AE_RAMPAGE, GetCleanName());
 	}
 
-	int rampage_targets = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 1);
+	int rampage_targets = GetSpecialAbilityParam(SpecialAbility::AreaRampage, 1);
 	rampage_targets = rampage_targets > 0 ? rampage_targets : -1;
 	m_specialattacks = eSpecialAttacks::AERampage;
 	index_hit = hate_list.AreaRampage(this, GetTarget(), rampage_targets, opts);
@@ -2784,10 +2787,11 @@ void NPC::AISpellsList(Client *c)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Spell {} | Priority: {} Recast Delay: {}",
+					"Spell {} | Priority: {} Recast Delay: {} Resist Difficulty: {}",
 					spell_slot,
 					ai_spell.priority,
-					ai_spell.recast_delay
+					ai_spell.recast_delay,
+					ai_spell.resist_adjust
 				).c_str()
 			);
 
@@ -2841,102 +2845,88 @@ void NPC::AISpellsList(Client *c)
 	return;
 }
 
-DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
+DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 npc_spells_id)
 {
-	if (iDBSpellsID == 0)
+	if (npc_spells_id == 0) {
 		return nullptr;
+	}
 
-	auto it = npc_spells_cache.find(iDBSpellsID);
-
+	auto it = npc_spells_cache.find(npc_spells_id);
 	if (it != npc_spells_cache.end()) { // it's in the cache, easy =)
 		return &it->second;
 	}
 
-	if (!npc_spells_loadtried.count(iDBSpellsID)) { // no reason to ask the DB again if we have failed once already
-		npc_spells_loadtried.insert(iDBSpellsID);
+	if (!npc_spells_loadtried.count(npc_spells_id)) { // no reason to ask the DB again if we have failed once already
+		npc_spells_loadtried.insert(npc_spells_id);
 
-		std::string query = StringFormat("SELECT id, parent_list, attack_proc, proc_chance, "
-						 "range_proc, rproc_chance, defensive_proc, dproc_chance, "
-						 "fail_recast, engaged_no_sp_recast_min, engaged_no_sp_recast_max, "
-						 "engaged_b_self_chance, engaged_b_other_chance, engaged_d_chance, "
-						 "pursue_no_sp_recast_min, pursue_no_sp_recast_max, "
-						 "pursue_d_chance, idle_no_sp_recast_min, idle_no_sp_recast_max, "
-						 "idle_b_chance FROM npc_spells WHERE id=%d",
-						 iDBSpellsID);
-		auto results = QueryDatabase(query);
-		if (!results.Success()) {
+		auto ns = NpcSpellsRepository::FindOne(*this, npc_spells_id);
+		if (!ns.id) {
 			return nullptr;
 		}
 
-		if (results.RowCount() != 1)
-			return nullptr;
+		DBnpcspells_Struct ss;
 
-		auto row = results.begin();
-		DBnpcspells_Struct spell_set;
+		ss.parent_list                     = ns.parent_list;
+		ss.attack_proc                     = ns.attack_proc;
+		ss.proc_chance                     = ns.proc_chance;
+		ss.range_proc                      = ns.range_proc;
+		ss.rproc_chance                    = ns.rproc_chance;
+		ss.defensive_proc                  = ns.defensive_proc;
+		ss.dproc_chance                    = ns.dproc_chance;
+		ss.fail_recast                     = ns.fail_recast;
+		ss.engaged_no_sp_recast_min        = ns.engaged_no_sp_recast_min;
+		ss.engaged_no_sp_recast_max        = ns.engaged_no_sp_recast_max;
+		ss.engaged_beneficial_self_chance  = ns.engaged_b_self_chance;
+		ss.engaged_beneficial_other_chance = ns.engaged_b_other_chance;
+		ss.engaged_detrimental_chance      = ns.engaged_d_chance;
+		ss.pursue_no_sp_recast_min         = ns.pursue_no_sp_recast_min;
+		ss.pursue_no_sp_recast_max         = ns.pursue_no_sp_recast_max;
+		ss.pursue_detrimental_chance       = ns.pursue_d_chance;
+		ss.idle_no_sp_recast_min           = ns.idle_no_sp_recast_min;
+		ss.idle_no_sp_recast_max           = ns.idle_no_sp_recast_max;
+		ss.idle_beneficial_chance          = ns.idle_b_chance;
 
-		spell_set.parent_list = Strings::ToInt(row[1]);
-		spell_set.attack_proc = Strings::ToInt(row[2]);
-		spell_set.proc_chance = Strings::ToInt(row[3]);
-		spell_set.range_proc = Strings::ToInt(row[4]);
-		spell_set.rproc_chance = Strings::ToInt(row[5]);
-		spell_set.defensive_proc = Strings::ToInt(row[6]);
-		spell_set.dproc_chance = Strings::ToInt(row[7]);
-		spell_set.fail_recast = Strings::ToInt(row[8]);
-		spell_set.engaged_no_sp_recast_min = Strings::ToInt(row[9]);
-		spell_set.engaged_no_sp_recast_max = Strings::ToInt(row[10]);
-		spell_set.engaged_beneficial_self_chance = Strings::ToInt(row[11]);
-		spell_set.engaged_beneficial_other_chance = Strings::ToInt(row[12]);
-		spell_set.engaged_detrimental_chance = Strings::ToInt(row[13]);
-		spell_set.pursue_no_sp_recast_min = Strings::ToInt(row[14]);
-		spell_set.pursue_no_sp_recast_max = Strings::ToInt(row[15]);
-		spell_set.pursue_detrimental_chance = Strings::ToInt(row[16]);
-		spell_set.idle_no_sp_recast_min = Strings::ToInt(row[17]);
-		spell_set.idle_no_sp_recast_max = Strings::ToInt(row[18]);
-		spell_set.idle_beneficial_chance = Strings::ToInt(row[19]);
+		auto entries = NpcSpellsEntriesRepository::GetWhere(
+			*this,
+			fmt::format(
+				"npc_spells_id = {} {} ORDER BY minlevel",
+				npc_spells_id,
+				ContentFilterCriteria::apply()
+			)
+		);
 
-		// pulling fixed values from an auto-increment field is dangerous...
-		query = StringFormat(
-		    "SELECT spellid, type, minlevel, maxlevel, "
-		    "manacost, recast_delay, priority, min_hp, max_hp, resist_adjust "
-		    "FROM npc_spells_entries "
-		    "WHERE npc_spells_id=%d ORDER BY minlevel",
-		    iDBSpellsID);
-		results = QueryDatabase(query);
+		for (auto &e: entries) {
+			DBnpcspells_entries_Struct se{};
 
-		if (!results.Success()) {
-			return nullptr;
-		}
-
-		int entryIndex = 0;
-		for (row = results.begin(); row != results.end(); ++row, ++entryIndex) {
-			DBnpcspells_entries_Struct entry;
-			int spell_id = Strings::ToInt(row[0]);
-			entry.spellid = spell_id;
-			entry.type = Strings::ToUnsignedInt(row[1]);
-			entry.minlevel = Strings::ToInt(row[2]);
-			entry.maxlevel = Strings::ToInt(row[3]);
-			entry.manacost = Strings::ToInt(row[4]);
-			entry.recast_delay = Strings::ToInt(row[5]);
-			entry.priority = Strings::ToInt(row[6]);
-			entry.min_hp = Strings::ToInt(row[7]);
-			entry.max_hp = Strings::ToInt(row[8]);
+			se.spellid      = e.spellid;
+			se.type         = e.type;
+			se.minlevel     = e.minlevel;
+			se.maxlevel     = e.maxlevel;
+			se.manacost     = e.manacost;
+			se.recast_delay = e.recast_delay;
+			se.priority     = e.priority;
+			se.min_hp       = e.min_hp;
+			se.max_hp       = e.max_hp;
 
 			// some spell types don't make much since to be priority 0, so fix that
-			if (!(entry.type & SPELL_TYPES_INNATE) && entry.priority == 0)
-				entry.priority = 1;
+			if (!(se.type & SPELL_TYPES_INNATE) && se.priority == 0) {
+				se.priority = 1;
+			}
 
-			if (row[9])
-				entry.resist_adjust = Strings::ToInt(row[9]);
-			else if (IsValidSpell(spell_id))
-				entry.resist_adjust = spells[spell_id].resist_difficulty;
+			if (e.resist_adjust) {
+				se.resist_adjust = e.resist_adjust;
+			}
+			else if (IsValidSpell(e.spellid)) {
+				se.resist_adjust = spells[e.spellid].resist_difficulty;
+			}
 
-			spell_set.entries.push_back(entry);
+			ss.entries.push_back(se);
 		}
 
-		npc_spells_cache.emplace(std::make_pair(iDBSpellsID, spell_set));
+		npc_spells_cache.emplace(std::make_pair(npc_spells_id, ss));
 
-		return &npc_spells_cache[iDBSpellsID];
-    }
+		return &npc_spells_cache[npc_spells_id];
+	}
 
 	return nullptr;
 }

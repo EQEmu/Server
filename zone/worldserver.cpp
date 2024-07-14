@@ -2086,6 +2086,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_ReloadNPCSpells:
+	{
+		if (zone && zone->IsLoaded()) {
+			zone->SendReloadMessage("NPC Spells");
+			content_db.ClearNPCSpells();
+			for (auto& e : entity_list.GetNPCList()) {
+				e.second->ReloadSpells();
+			}
+		}
+		break;
+	}
 	case ServerOP_ReloadPerlExportSettings:
 	{
 		zone->SendReloadMessage("Perl Event Export Settings");
@@ -3550,18 +3561,18 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
 			std::string reload_quest_saylink = Saylink::Silent("#reload quest", "Locally");
-			std::string reload_world_saylink = Saylink::Silent("#reload world", "Globally");
-			worldserver.SendEmoteMessage(
-				0,
-				0,
-				AccountStatus::ApprenticeGuide,
-				Chat::Yellow,
-				fmt::format(
+			std::string reload_world_saylink = Saylink::Silent("#reload world 1", "Globally");
+			for (const auto& [client_id, client] : entity_list.GetClientList()) {
+				if (client->Admin() < AccountStatus::ApprenticeGuide) {
+					continue;
+				}
+
+				client->Message(Chat::Yellow, fmt::format(
 					"A quest, plugin, or global script has changed. Reload: [{}] [{}]",
 					reload_quest_saylink,
 					reload_world_saylink
-				).c_str()
-			);
+				).c_str());
+			}
 		}
 		break;
 	}
@@ -3904,10 +3915,92 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			}
 			break;
 		}
-	default: {
-		LogInfo("Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
-		break;
-	}
+		case ServerOP_TraderMessaging: {
+			auto            in = (TraderMessaging_Struct *) pack->pBuffer;
+			for (auto const &c: entity_list.GetClientList()) {
+				if (c.second->ClientVersion() >= EQ::versions::ClientVersion::RoF2) {
+					auto outapp    = new EQApplicationPacket(OP_BecomeTrader, sizeof(BecomeTrader_Struct));
+					auto out       = (BecomeTrader_Struct *) outapp->pBuffer;
+					switch (in->action) {
+						case TraderOn: {
+							out->action = AddTraderToBazaarWindow;
+							break;
+						}
+						case TraderOff: {
+							out->action = RemoveTraderFromBazaarWindow;
+							break;
+						}
+						default: {
+							out->action = 0;
+						}
+					}
+					out->entity_id = in->entity_id;
+					out->zone_id   = in->zone_id;
+					out->trader_id = in->trader_id;
+					strn0cpy(out->trader_name, in->trader_name, sizeof(out->trader_name));
+
+					c.second->QueuePacket(outapp);
+					safe_delete(outapp);
+				}
+				if (zone && zone->GetZoneID() == Zones::BAZAAR) {
+					if (in->action == TraderOn) {
+						c.second->SendBecomeTrader(TraderOn, in->entity_id);
+					}
+					else {
+						c.second->SendBecomeTrader(TraderOff, in->entity_id);
+					}
+				}
+			}
+			break;
+		}
+		case ServerOP_BazaarPurchase: {
+			auto in        = (BazaarPurchaseMessaging_Struct *) pack->pBuffer;
+			auto trader_pc = entity_list.GetClientByCharID(in->trader_buy_struct.trader_id);
+			if (!trader_pc) {
+				LogTrading("Request trader_id <red>[{}] could not be found in zone_id <red>[{}]",
+						   in->trader_buy_struct.trader_id,
+						   zone->GetZoneID()
+				);
+				return;
+			}
+
+			auto item_sn = Strings::ToUnsignedBigInt(in->trader_buy_struct.serial_number);
+			auto outapp  = std::make_unique<EQApplicationPacket>(OP_Trader, sizeof(TraderBuy_Struct));
+			auto data    = (TraderBuy_Struct *) outapp->pBuffer;
+
+			memcpy(data, &in->trader_buy_struct, sizeof(TraderBuy_Struct));
+
+			if (trader_pc->ClientVersion() < EQ::versions::ClientVersion::RoF) {
+				data->price = in->trader_buy_struct.price * in->trader_buy_struct.quantity;
+			}
+
+			TraderRepository::UpdateActiveTransaction(database, in->id, false);
+
+			trader_pc->RemoveItemBySerialNumber(item_sn, in->trader_buy_struct.quantity);
+			trader_pc->AddMoneyToPP(in->trader_buy_struct.price * in->trader_buy_struct.quantity, true);
+			trader_pc->QueuePacket(outapp.get());
+
+			if (player_event_logs.IsEventEnabled(PlayerEvent::TRADER_SELL)) {
+				auto e = PlayerEvent::TraderSellEvent{
+					.item_id              = in->trader_buy_struct.item_id,
+					.item_name            = in->trader_buy_struct.item_name,
+					.buyer_id             = in->buyer_id,
+					.buyer_name           = in->trader_buy_struct.buyer_name,
+					.price                = in->trader_buy_struct.price,
+					.charges              = in->trader_buy_struct.quantity,
+					.total_cost           = (in->trader_buy_struct.price * in->trader_buy_struct.quantity),
+					.player_money_balance = trader_pc->GetCarriedMoney(),
+				};
+
+				RecordPlayerEventLogWithClient(trader_pc, PlayerEvent::TRADER_SELL, e);
+			}
+
+			break;
+		}
+		default: {
+			LogInfo("Unknown ZS Opcode [{}] size [{}]", (int) pack->opcode, pack->size);
+			break;
+		}
 	}
 }
 

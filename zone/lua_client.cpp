@@ -167,7 +167,7 @@ bool Lua_Client::AddExtraClass(int class_id) {
 
 uint32 Lua_Client::GetDeityBitmask() {
 	Lua_Safe_Call_Int();
-	return static_cast<uint32>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(GetDeity())));
+	return Deity::GetBitmask(GetDeity());
 }
 
 uint16 Lua_Client::GetRaceBitmask() {
@@ -262,27 +262,27 @@ void Lua_Client::SetDeity(int v) {
 
 void Lua_Client::AddEXP(uint32 add_exp) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp);
+	self->AddEXP(ExpSource::Quest, add_exp);
 }
 
 void Lua_Client::AddEXP(uint32 add_exp, int conlevel) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp, conlevel);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel);
 }
 
 void Lua_Client::AddEXP(uint32 add_exp, int conlevel, bool resexp) {
 	Lua_Safe_Call_Void();
-	self->AddEXP(add_exp, conlevel, resexp);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel, resexp);
 }
 
 void Lua_Client::SetEXP(uint64 set_exp, uint64 set_aaxp) {
 	Lua_Safe_Call_Void();
-	self->SetEXP(set_exp, set_aaxp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp);
 }
 
 void Lua_Client::SetEXP(uint64 set_exp, uint64 set_aaxp, bool resexp) {
 	Lua_Safe_Call_Void();
-	self->SetEXP(set_exp, set_aaxp, resexp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp, resexp);
 }
 
 void Lua_Client::SetBindPoint() {
@@ -1418,17 +1418,17 @@ uint32 Lua_Client::GetIP() {
 
 void Lua_Client::AddLevelBasedExp(int exp_pct) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_pct);
 }
 
 void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct, max_level);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_pct, max_level);
 }
 
 void Lua_Client::AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods) {
 	Lua_Safe_Call_Void();
-	self->AddLevelBasedExp(exp_pct, max_level, ignore_mods);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_pct, max_level, ignore_mods);
 }
 
 void Lua_Client::IncrementAA(int aa) {
@@ -3469,6 +3469,18 @@ void Lua_Client::DescribeSpecialAbilities(Lua_NPC n)
 	n.DescribeSpecialAbilities(self);
 }
 
+void Lua_Client::ResetLeadershipAA()
+{
+	Lua_Safe_Call_Void();
+	self->ResetLeadershipAA();
+}
+
+uint8 Lua_Client::GetSkillTrainLevel(int skill_id)
+{
+	Lua_Safe_Call_Int();
+	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 	.def(luabind::constructor<>())
@@ -3720,6 +3732,7 @@ luabind::scope lua_register_client() {
 	.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetScribeableSpells)
 	.def("GetScribedSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribedSpells)
 	.def("GetSkillPoints", (int(Lua_Client::*)(void))&Lua_Client::GetSkillPoints)
+	.def("GetSkillTrainLevel", (uint8(Lua_Client::*)(int))&Lua_Client::GetSkillTrainLevel)
 	.def("GetSpellDamage", (int(Lua_Client::*)(void))&Lua_Client::GetSpellDamage)
 	.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))&Lua_Client::GetSpellIDByBookSlot)
 	.def("GetSpentAA", (int(Lua_Client::*)(void))&Lua_Client::GetSpentAA)
@@ -3853,11 +3866,13 @@ luabind::scope lua_register_client() {
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
 	.def("RemoveAlternateCurrencyValue", (bool(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveAlternateCurrencyValue)
+	.def("RemoveEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveEbonCrystals)
 	.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 	.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
 	.def("RemoveLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNLoss)
 	.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
+	.def("RemoveRadiantCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveRadiantCrystals)
 	.def("ResetAA", (void(Lua_Client::*)(void))&Lua_Client::ResetAA)
 	.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
 	.def("ResetAllCastbarCooldowns", (void(Lua_Client::*)(void))&Lua_Client::ResetAllCastbarCooldowns)
@@ -3865,9 +3880,8 @@ luabind::scope lua_register_client() {
 	.def("ResetCastbarCooldownBySlot", (void(Lua_Client::*)(int))&Lua_Client::ResetCastbarCooldownBySlot)
 	.def("ResetCastbarCooldownBySpellID", (void(Lua_Client::*)(uint32))&Lua_Client::ResetCastbarCooldownBySpellID)
 	.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
-	.def("RemoveEbonCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveEbonCrystals)
 	.def("ResetItemCooldown", (void(Lua_Client::*)(uint32))&Lua_Client::ResetItemCooldown)
-	.def("RemoveRadiantCrystals", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveRadiantCrystals)
+	.def("ResetLeadershipAA", (void(Lua_Client::*)(void))&Lua_Client::ResetLeadershipAA)
 	.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
 	.def("RewardFaction", (void(Lua_Client::*)(int,int))&Lua_Client::RewardFaction)
 	.def("Save", (void(Lua_Client::*)(int))&Lua_Client::Save)

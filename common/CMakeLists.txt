@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 SET(common_sources
     base_packet.cpp
+    bazaar.cpp
+    bodytypes.cpp
     classes.cpp
     cli/eqemu_command_handler.cpp
     compression.cpp
@@ -178,6 +180,7 @@ SET(repositories
     repositories/base/base_character_material_repository.h
     repositories/base/base_character_memmed_spells_repository.h
     repositories/base/base_character_parcels_repository.h
+    repositories/base/base_character_parcels_containers_repository.h
     repositories/base/base_character_peqzone_flags_repository.h
     repositories/base/base_character_pet_buffs_repository.h
     repositories/base/base_character_pet_info_repository.h
@@ -359,6 +362,7 @@ SET(repositories
     repositories/character_material_repository.h
     repositories/character_memmed_spells_repository.h
     repositories/character_parcels_repository.h
+    repositories/character_parcels_containers_repository.h
     repositories/character_peqzone_flags_repository.h
     repositories/character_pet_buffs_repository.h
     repositories/character_pet_info_repository.h
@@ -499,6 +503,7 @@ SET(repositories
 
 SET(common_headers
     additive_lagged_fibonacci_engine.h
+    bazaar.h
     base_packet.h
     bodytypes.h
     classes.h

@@ -174,7 +174,7 @@ void ShowWho(Client *c, const Seperator *sep)
 			account_status ?
 			fmt::format(
 				"* {} * ",
-				EQ::constants::GetAccountStatusName(account_status)
+				AccountStatus::GetName(account_status)
 			) :
 			""
 		);

@@ -772,67 +772,47 @@ typedef enum {
 	FilterShowSelfOnly
 } eqFilterMode;
 
-#define	STAT_STR		0
-#define	STAT_STA		1
-#define	STAT_AGI		2
-#define	STAT_DEX		3
-#define	STAT_INT		4
-#define	STAT_WIS		5
-#define	STAT_CHA		6
-#define	STAT_MAGIC		7
-#define	STAT_COLD		8
-#define	STAT_FIRE		9
-#define	STAT_POISON		10
-#define	STAT_DISEASE		11
-#define	STAT_MANA		12
-#define	STAT_HP			13
-#define	STAT_AC			14
-#define STAT_ENDURANCE		15
-#define STAT_ATTACK		16
-#define STAT_HP_REGEN		17
-#define STAT_MANA_REGEN		18
-#define STAT_HASTE		19
-#define STAT_DAMAGE_SHIELD	20
-
-/*
-**	Recast timer types. Used as an off set to charProfileStruct timers.
-**
-**	(Another orphaned enumeration...)
-*/
-enum RecastTimerTypes
-{
-	RecTimer_0 = 0,
-	RecTimer_1,
-	RecTimer_WeaponHealClick,		// 2
-	RecTimer_MuramiteBaneNukeClick,	// 3
-	RecTimer_4,
-	RecTimer_DispellClick,			// 5 (also click heal orbs?)
-	RecTimer_Epic,					// 6
-	RecTimer_OoWBPClick,			// 7
-	RecTimer_VishQuestClassItem,	// 8
-	RecTimer_HealPotion,			// 9
-	RecTimer_10,
-	RecTimer_11,
-	RecTimer_12,
-	RecTimer_13,
-	RecTimer_14,
-	RecTimer_15,
-	RecTimer_16,
-	RecTimer_17,
-	RecTimer_18,
-	RecTimer_ModRod,				// 19
-	_RecTimerCount
-};
-
-enum GroupUpdateAction
-{
-	GUA_Joined = 0,
-	GUA_Left = 1,
-	GUA_LastLeft = 6,
-	GUA_FullGroupInfo = 7,
-	GUA_MakeLeader = 8,
-	GUA_Started = 9
-};
+#define STAT_STR                 0
+#define STAT_STA                 1
+#define STAT_AGI                 2
+#define STAT_DEX                 3
+#define STAT_INT                 4
+#define STAT_WIS                 5
+#define STAT_CHA                 6
+#define STAT_MAGIC               7
+#define STAT_COLD                8
+#define STAT_FIRE                9
+#define STAT_POISON              10
+#define STAT_DISEASE             11
+#define STAT_MANA                12
+#define STAT_HP                  13
+#define STAT_AC                  14
+#define STAT_ENDURANCE           15
+#define STAT_ATTACK              16
+#define STAT_HP_REGEN            17
+#define STAT_MANA_REGEN          18
+#define STAT_HASTE               19
+#define STAT_DAMAGE_SHIELD       20
+#define STAT_DS_MITIGATION       22
+#define	STAT_HEAL_AMOUNT         23
+#define	STAT_SPELL_DAMAGE        24
+#define	STAT_CLAIRVOYANCE        25
+#define	STAT_HEROIC_AGILITY      26
+#define	STAT_HEROIC_CHARISMA     27
+#define	STAT_HEROIC_DEXTERITY    28
+#define	STAT_HEROIC_INTELLIGENCE 29
+#define	STAT_HEROIC_STAMINA      30
+#define	STAT_HEROIC_STRENGTH     31
+#define	STAT_HEROIC_WISDOM       32
+#define	STAT_BASH                33
+#define	STAT_BACKSTAB            34
+#define	STAT_DRAGON_PUNCH        35
+#define	STAT_EAGLE_STRIKE        36
+#define	STAT_FLYING_KICK         37
+#define STAT_KICK                38
+#define	STAT_ROUND_KICK          39
+#define STAT_TIGER_CLAW          40
+#define STAT_FRENZY              41
 
 static const uint8 DamageTypeSomething	= 0x1C;	//0x1c is something...
 static const uint8 DamageTypeFalling	= 0xFC;
@@ -1130,6 +1110,18 @@ namespace RaidLootType {
 namespace LeadershipAbilitySlot {
 	constexpr uint16 HealthOfTargetsTarget = 14;
 }
+
+enum ExpSource
+{
+	Quest,
+	GM,
+	Kill,
+	Death,
+	Resurrection,
+	LDoNChest,
+	Task,
+	Sacrifice
+};
 
 #define PARCEL_SEND_ITEMS    0
 #define PARCEL_SEND_MONEY    1

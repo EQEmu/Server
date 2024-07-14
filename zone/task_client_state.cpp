@@ -419,7 +419,7 @@ void ClientTaskState::RecordCompletedTask(uint32_t character_id, const TaskInfor
 			[&](const CompletedTaskInformation& completed) { return completed.task_id == client_task.task_id; }
 		), m_completed_tasks.end());
 
-		size_t erased = m_completed_tasks.size() - before;
+		size_t erased = before - m_completed_tasks.size();
 
 		LogTasksDetail("KeepOneRecord erased [{}] elements", erased);
 
@@ -1091,14 +1091,14 @@ void ClientTaskState::RewardTask(Client *c, const TaskInformation *ti, ClientTas
 
 	auto experience_reward = ti->experience_reward;
 	if (experience_reward > 0) {
-		c->AddEXP(experience_reward);
+		c->AddEXP(ExpSource::Task, experience_reward);
 	} else if (experience_reward < 0) {
 		uint32 pos_reward = experience_reward * -1;
 		// Minimal Level Based Exp reward Setting is 101 (1% exp at level 1)
 		if (pos_reward > 100 && pos_reward < 25700) {
 			uint8 max_level   = pos_reward / 100;
 			uint8 exp_percent = pos_reward - (max_level * 100);
-			c->AddLevelBasedExp(exp_percent, max_level, RuleB(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods));
+			c->AddLevelBasedExp(ExpSource::Task, exp_percent, max_level, RuleB(TaskSystem, ExpRewardsIgnoreLevelBasedEXPMods));
 		}
 	}
 

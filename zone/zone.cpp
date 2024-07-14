@@ -68,6 +68,7 @@
 #include "../common/repositories/merc_stance_entries_repository.h"
 #include "../common/repositories/alternate_currency_repository.h"
 #include "../common/repositories/graveyard_repository.h"
+#include "../common/repositories/trader_repository.h"
 
 #include <time.h>
 
@@ -158,7 +159,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool is_static) {
 	LogInfo("Zone server [{}] listening on port [{}]", zonename, ZoneConfig::get()->ZonePort);
 	LogInfo("Zone bootup type [{}] short_name [{}] zone_id [{}] instance_id [{}]",
 		(is_static) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
-	parse->Init();
 	UpdateWindowTitle(nullptr);
 
 	// Dynamic zones need to Sync here.
@@ -1096,20 +1096,21 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 
 Zone::~Zone() {
 	spawn2_list.Clear();
-	safe_delete(zonemap);
-	safe_delete(watermap);
-	safe_delete(pathing);
 	if (worldserver.Connected()) {
 		worldserver.SetZoneData(0);
 	}
-	safe_delete_array(short_name);
-	safe_delete_array(long_name);
-	safe_delete(Weather_Timer);
 	npc_emote_list.clear();
 	zone_point_list.Clear();
 	entity_list.Clear();
+	parse->ReloadQuests();
 	ClearBlockedSpells();
 
+	safe_delete_array(short_name);
+	safe_delete_array(long_name);
+	safe_delete(Weather_Timer);
+	safe_delete(zonemap);
+	safe_delete(watermap);
+	safe_delete(pathing);
 	safe_delete(Instance_Timer);
 	safe_delete(Instance_Shutdown_Timer);
 	safe_delete(Instance_Warning_timer);
@@ -1138,9 +1139,40 @@ bool Zone::Init(bool is_static) {
 		}
 	}
 
+	if (!map_name) {
+		LogError("No map name found for zone [{}]", GetShortName());
+		return false;
+	}
+
 	zonemap  = Map::LoadMapFile(map_name);
 	watermap = WaterMap::LoadWaterMapfile(map_name);
 	pathing  = IPathfinder::Load(map_name);
+
+	LogInfo("Loading timezone data");
+	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
+
+	LoadLDoNTraps();
+	LoadLDoNTrapEntries();
+
+	LoadDynamicZoneTemplates();
+	DynamicZone::CacheAllFromDatabase();
+	Expedition::CacheAllFromDatabase();
+
+	content_db.LoadGlobalLoot();
+
+	npc_scale_manager->LoadScaleData();
+
+	LoadGrids();
+
+	if (RuleB(Zone, LevelBasedEXPMods)) {
+		LoadLevelEXPMods();
+	}
+
+	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
+
+	// make sure that anything that needs to be loaded prior to scripts is loaded before here
+	// this is to ensure that the scripts have access to the data they need
+	parse->ReloadQuests(true);
 
 	spawn_conditions.LoadSpawnConditions(short_name, instanceid);
 
@@ -1158,37 +1190,16 @@ bool Zone::Init(bool is_static) {
 
 	LogInfo("Loading adventure flavor text");
 	LoadAdventureFlavor();
-
 	LoadGroundSpawns();
 	LoadZoneObjects();
-
-	RespawnTimesRepository::ClearExpiredRespawnTimers(database);
-
 	LoadZoneDoors();
 	LoadZoneBlockedSpells();
-
-	//clear trader items if we are loading the bazaar
-	if (strncasecmp(short_name, "bazaar", 6) == 0) {
-		database.DeleteTraderItem(0);
-		database.DeleteBuyLines(0);
-	}
-
-	LoadLDoNTraps();
-	LoadLDoNTrapEntries();
 	LoadVeteranRewards();
 	LoadAlternateCurrencies();
 	LoadNPCEmotes(&npc_emote_list);
-
 	LoadAlternateAdvancement();
-
-	content_db.LoadGlobalLoot();
-
 	LoadBaseData();
-
-	//Load merchant data
 	LoadMerchants();
-
-	//Load temporary merchant data
 	LoadTempMerchantData();
 
 	// Merc data
@@ -1197,28 +1208,12 @@ bool Zone::Init(bool is_static) {
 		LoadMercenarySpells();
 	}
 
-	if (RuleB(Zone, LevelBasedEXPMods)) {
-		LoadLevelEXPMods();
-	}
-
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
-	LoadDynamicZoneTemplates();
-
-	DynamicZone::CacheAllFromDatabase();
-	Expedition::CacheAllFromDatabase();
-
 	guild_mgr.LoadGuilds();
 
-	LogInfo("Loading timezone data");
-	zone_time.setEQTimeZone(content_db.GetZoneTimezone(zoneid, GetInstanceVersion()));
-
 	LogInfo("Zone booted successfully zone_id [{}] time_offset [{}]", zoneid, zone_time.getEQTimeZone());
-
-	LoadGrids();
-
-	npc_scale_manager->LoadScaleData();
 
 	// logging origination information
 	LogSys.origination_info.zone_short_name = zone->short_name;
@@ -1364,9 +1359,9 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 	newzone_data.maxclip                   = z->maxclip;
 	newzone_data.time_type                 = z->time_type;
 	newzone_data.gravity                   = z->gravity;
-	newzone_data.fast_regen_hp             = z->fast_regen_hp;
-	newzone_data.fast_regen_mana           = z->fast_regen_mana;
-	newzone_data.fast_regen_endurance      = z->fast_regen_endurance;
+	newzone_data.fast_regen_hp             = z->fast_regen_hp > 0 ? z->fast_regen_hp : 180;
+	newzone_data.fast_regen_mana           = z->fast_regen_mana > 0 ? z->fast_regen_mana : 180;
+	newzone_data.fast_regen_endurance      = z->fast_regen_endurance > 0 ? z->fast_regen_endurance : 180;
 	newzone_data.npc_aggro_max_dist        = z->npc_max_aggro_dist;
 	newzone_data.underworld_teleport_index = z->underworld_teleport_index;
 	newzone_data.lava_damage               = z->lava_damage;
@@ -2897,6 +2892,8 @@ std::string Zone::GetZoneDescription()
 
 void Zone::SendReloadMessage(std::string reload_type)
 {
+	LogInfo("Reloaded [{}]", reload_type);
+
 	worldserver.SendEmoteMessage(
 		0,
 		0,
@@ -2983,179 +2980,69 @@ std::string Zone::GetAAName(int aa_id)
 	return std::string();
 }
 
-bool Zone::CompareDataBucket(uint8 bucket_comparison, const std::string& bucket_value, const std::string& player_value)
+bool Zone::CompareDataBucket(uint8 comparison_type, const std::string& bucket, const std::string& value)
 {
-	std::vector<std::string> bucket_checks;
-	bool found = false;
-	bool passes = false;
-
-	switch (bucket_comparison) {
-		case BucketComparison::BucketEqualTo:
-		{
-			if (player_value != bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketNotEqualTo:
-		{
-			if (player_value == bucket_value) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketGreaterThanOrEqualTo:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) < Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketLesserThanOrEqualTo:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) > Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketGreaterThan:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) <= Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketLesserThan:
-		{
-			if (!Strings::IsNumber(player_value) || !Strings::IsNumber(bucket_value)) {
-				break;
-			}
-
-			if (Strings::ToBigInt(player_value) >= Strings::ToBigInt(bucket_value)) {
-				break;
-			}
-
-			passes = true;
-
-			break;
-		}
-		case BucketComparison::BucketIsAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
-				found = true;
-			}
-
-			if (!found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsNotAny:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (std::find(bucket_checks.begin(), bucket_checks.end(), player_value) != bucket_checks.end()) {
-				found = true;
-			}
-
-			if (found) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				!Strings::IsNumber(player_value) ||
-				!Strings::IsNumber(bucket_checks[0]) ||
-				!Strings::IsNumber(bucket_checks[1])
-			) {
-				break;
-			}
-
-			if (
-				!EQ::ValueWithin(
-					Strings::ToBigInt(player_value),
-					Strings::ToBigInt(bucket_checks[0]),
-					Strings::ToBigInt(bucket_checks[1])
-				)
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
-		case BucketComparison::BucketIsNotBetween:
-		{
-			bucket_checks = Strings::Split(bucket_value, "|");
-			if (bucket_checks.empty()) {
-				break;
-			}
-
-			if (
-				!Strings::IsNumber(player_value) ||
-				!Strings::IsNumber(bucket_checks[0]) ||
-				!Strings::IsNumber(bucket_checks[1])
-			) {
-				break;
-			}
-
-			if (
-				EQ::ValueWithin(
-					Strings::ToBigInt(player_value),
-					Strings::ToBigInt(bucket_checks[0]),
-					Strings::ToBigInt(bucket_checks[1])
-				)
-			) {
-				break;
-			}
-
-			passes = true;
-			break;
-		}
+	if (!ComparisonType::IsValid(comparison_type)) {
+		return false;
 	}
 
-	return passes;
+	if (EQ::ValueWithin(comparison_type, ComparisonType::Equal, ComparisonType::NotEqual)) {
+		const bool is_equal = value == bucket;
+
+		return comparison_type == ComparisonType::Equal ? is_equal : !is_equal;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::GreaterOrEqual, ComparisonType::LesserOrEqual)) {
+		if (!Strings::IsNumber(value) || !Strings::IsNumber(bucket)) {
+			return false;
+		}
+
+		const int64 p = Strings::ToBigInt(value);
+		const int64 b = Strings::ToBigInt(bucket);
+
+		const bool is_greater_or_equal = p >= b;
+		const bool is_lesser_or_equal  = p <= b;
+
+		return comparison_type == ComparisonType::GreaterOrEqual ? is_greater_or_equal : is_lesser_or_equal;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Greater, ComparisonType::Lesser)) {
+		if (!Strings::IsNumber(value) || !Strings::IsNumber(bucket)) {
+			return false;
+		}
+
+		const bool is_greater = Strings::ToBigInt(value) > Strings::ToBigInt(bucket);
+
+		return comparison_type == ComparisonType::Greater ? is_greater : !is_greater;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Any, ComparisonType::NotAny)) {
+		const auto& values = Strings::Split(bucket, "|");
+		if (values.empty()) {
+			return false;
+		}
+
+		const bool is_any = std::find(values.begin(), values.end(), value) != values.end();
+
+		return comparison_type == ComparisonType::Any ? is_any : !is_any;
+	} else if (EQ::ValueWithin(comparison_type, ComparisonType::Between, ComparisonType::NotBetween)) {
+		if (!Strings::IsNumber(value)) {
+			return false;
+		}
+
+		const auto& values = Strings::Split(bucket, "|");
+		if (values.empty()) {
+			return false;
+		}
+
+		if (!Strings::IsNumber(values[0]) || !Strings::IsNumber(values[1])) {
+			return false;
+		}
+
+		const bool is_between = EQ::ValueWithin(
+			Strings::ToBigInt(value),
+			Strings::ToBigInt(values[0]),
+			Strings::ToBigInt(values[1])
+		);
+
+		return comparison_type == ComparisonType::Between ? is_between : !is_between;
+	}
+
+	return false;
 }
 
 void Zone::ReloadContentFlags()

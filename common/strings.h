@@ -86,6 +86,7 @@ class Strings {
 public:
 	static bool Contains(std::vector<std::string> container, const std::string& element);
 	static bool Contains(const std::string& subject, const std::string& search);
+	static bool ContainsLower(const std::string& subject, const std::string& search);
 	static int ToInt(const std::string &s, int fallback = 0);
 	static int64 ToBigInt(const std::string &s, int64 fallback = 0);
 	static uint32 ToUnsignedInt(const std::string &s, uint32 fallback = 0);

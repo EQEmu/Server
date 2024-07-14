@@ -32,6 +32,7 @@
 #include "../strings.h"
 #include "../item_instance.h"
 #include "titanium_structs.h"
+#include "../rulesys.h"
 #include "../path_manager.h"
 #include "../raid.h"
 #include "../guilds.h"
@@ -197,64 +198,135 @@ namespace Titanium
 
 	ENCODE(OP_BazaarSearch)
 	{
-		if (((*p)->size == sizeof(BazaarReturnDone_Struct)) || ((*p)->size == sizeof(BazaarWelcome_Struct))) {
-
-			EQApplicationPacket *in = *p;
-			*p = nullptr;
-			dest->FastQueuePacket(&in, ack_req);
-			return;
-		}
-
-		//consume the packet
 		EQApplicationPacket *in = *p;
 		*p = nullptr;
 
-		//store away the emu struct
-		unsigned char *__emu_buffer = in->pBuffer;
-		BazaarSearchResults_Struct *emu = (BazaarSearchResults_Struct *)__emu_buffer;
+		uint32 action = *(uint32 *)in->pBuffer;
 
-		//determine and verify length
-		int entrycount = in->size / sizeof(BazaarSearchResults_Struct);
-		if (entrycount == 0 || (in->size % sizeof(BazaarSearchResults_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(BazaarSearchResults_Struct));
-			delete in;
-			return;
+		switch (action) {
+			case BazaarSearch: {
+				LogTrading(
+					"Encode OP_BazaarSearch(Ti) BazaarSearch action <green>[{}]",
+					action
+				);
+				std::vector<BazaarSearchResultsFromDB_Struct> results {};
+				auto bsms = (BazaarSearchMessaging_Struct *)in->pBuffer;
+				EQ::Util::MemoryStreamReader ss(
+					reinterpret_cast<char *>(bsms->payload),
+					in->size - sizeof(BazaarSearchMessaging_Struct)
+				);
+				cereal::BinaryInputArchive ar(ss);
+				ar(results);
+
+				auto  size    = results.size() * sizeof(structs::BazaarSearchResults_Struct);
+				auto  buffer  = new uchar[size];
+				uchar *bufptr = buffer;
+				memset(buffer, 0, size);
+
+				for (auto row = results.begin(); row != results.end(); ++row) {
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, structs::TiBazaarTraderBuyerActions::BazaarSearch);
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, row->trader_entity_id);
+					bufptr += 4;
+					VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->item_id);
+					VARSTRUCT_ENCODE_TYPE(int32, bufptr, row->serial_number);
+					bufptr += 4;
+					if (row->stackable) {
+						strn0cpy(
+							reinterpret_cast<char *>(bufptr),
+							fmt::format("{}({})", row->item_name.c_str(), row->charges).c_str(),
+							64
+						);
+					}
+					else {
+						strn0cpy(
+							reinterpret_cast<char *>(bufptr),
+							fmt::format("{}({})", row->item_name.c_str(), row->count).c_str(),
+							64
+						);
+					}
+					bufptr += 64;
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, row->cost);
+					VARSTRUCT_ENCODE_TYPE(uint32, bufptr, row->item_stat);
+				}
+
+				auto outapp = new EQApplicationPacket(OP_BazaarSearch, size);
+				memcpy(outapp->pBuffer, buffer, size);
+				dest->FastQueuePacket(&outapp);
+
+				safe_delete(outapp);
+				safe_delete_array(buffer);
+				safe_delete(in);
+				break;
+			}
+			case BazaarInspect:
+			case WelcomeMessage: {
+				LogTrading(
+					"Encode OP_BazaarSearch(Ti) BazaarInspect/WelcomeMessage action <green>[{}]",
+					action
+				);
+				dest->FastQueuePacket(&in, ack_req);
+				break;
+			}
+			default: {
+				LogTrading(
+					"Encode OP_BazaarSearch(Ti) unhandled action <red>[{}]",
+					action
+				);
+				dest->FastQueuePacket(&in, ack_req);
+			}
 		}
-
-		//make the EQ struct.
-		in->size = sizeof(structs::BazaarSearchResults_Struct)*entrycount;
-		in->pBuffer = new unsigned char[in->size];
-		structs::BazaarSearchResults_Struct *eq = (structs::BazaarSearchResults_Struct *) in->pBuffer;
-
-		//zero out the packet. We could avoid this memset by setting all fields (including unknowns) in the loop.
-		memset(in->pBuffer, 0, in->size);
-
-		for (int i = 0; i < entrycount; i++, eq++, emu++) {
-			eq->Beginning.Action = emu->Beginning.Action;
-			eq->Beginning.Unknown001 = emu->Beginning.Unknown001;
-			eq->Beginning.Unknown002 = emu->Beginning.Unknown002;
-			eq->NumItems = emu->NumItems;
-			eq->SerialNumber = emu->SerialNumber;
-			eq->SellerID = emu->SellerID;
-			eq->Cost = emu->Cost;
-			eq->ItemStat = emu->ItemStat;
-			strcpy(eq->ItemName, emu->ItemName);
-		}
-
-		delete[] __emu_buffer;
-		dest->FastQueuePacket(&in, ack_req);
 	}
 
 	ENCODE(OP_BecomeTrader)
 	{
-		ENCODE_LENGTH_EXACT(BecomeTrader_Struct);
-		SETUP_DIRECT_ENCODE(BecomeTrader_Struct, structs::BecomeTrader_Struct);
+		uint32 action = *(uint32 *)(*p)->pBuffer;
 
-		OUT(ID);
-		OUT(Code);
-
-		FINISH_ENCODE();
+		switch (action)
+		{
+			case TraderOff:
+			{
+				ENCODE_LENGTH_EXACT(BecomeTrader_Struct);
+				SETUP_DIRECT_ENCODE(BecomeTrader_Struct, structs::BecomeTrader_Struct);
+				LogTrading(
+					"Encode OP_BecomeTrader(Ti) TraderOff action <green>[{}] entity_id <green>[{}] trader_name "
+					"<green>[{}]",
+					emu->action,
+					emu->entity_id,
+					emu->trader_name
+				);
+				eq->action    = structs::TiBazaarTraderBuyerActions::Zero;
+				eq->entity_id = emu->entity_id;
+				FINISH_ENCODE();
+				break;
+			}
+			case TraderOn:
+			{
+				ENCODE_LENGTH_EXACT(BecomeTrader_Struct);
+				SETUP_DIRECT_ENCODE(BecomeTrader_Struct, structs::BecomeTrader_Struct);
+				LogTrading(
+					"Encode OP_BecomeTrader(Ti) TraderOn action <green>[{}] entity_id <green>[{}] trader_name "
+					"<green>[{}]",
+					emu->action,
+					emu->entity_id,
+					emu->trader_name
+				);
+				eq->action    = structs::TiBazaarTraderBuyerActions::BeginTraderMode;
+				eq->entity_id = emu->entity_id;
+				strn0cpy(eq->trader_name, emu->trader_name, sizeof(eq->trader_name));
+				FINISH_ENCODE();
+				break;
+			}
+			default:
+			{
+				LogTrading(
+					"Encode OP_BecomeTrader(Ti) unhandled action <red>[{}] Sending packet as is.",
+					action
+				);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+				dest->FastQueuePacket(&in, ack_req);
+			}
+		}
 	}
 
 	ENCODE(OP_Buff)
@@ -734,7 +806,7 @@ namespace Titanium
 						break;
 					}
 				}
-				break; 
+				break;
 			}
 			case AppearanceType::GuildShow: {
 				FAIL_ENCODE();
@@ -746,6 +818,28 @@ namespace Titanium
 		}
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_GuildsList)
+	{
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		GuildsListMessaging_Struct   glms{};
+		EQ::Util::MemoryStreamReader ss(reinterpret_cast<char *>(in->pBuffer), in->size);
+		cereal::BinaryInputArchive   ar(ss);
+		ar(glms);
+
+		auto outapp = new EQApplicationPacket(OP_GuildsList, sizeof(structs::GuildsList_Struct));
+		auto out    = (structs::GuildsList_Struct *) outapp->pBuffer;
+
+		for (auto const& g : glms.guild_detail) {
+			if (g.guild_id < Titanium::constants::MAX_GUILD_ID) {
+				strn0cpy(out->Guilds[g.guild_id].name, g.guild_name.c_str(), sizeof(out->Guilds[g.guild_id].name));
+			}
+		}
+
+		dest->FastQueuePacket(&outapp);
 	}
 
 	ENCODE(OP_GuildMemberAdd)
@@ -1988,30 +2082,168 @@ namespace Titanium
 
 	ENCODE(OP_Trader)
 	{
-		if ((*p)->size != sizeof(TraderBuy_Struct)) {
-			EQApplicationPacket *in = *p;
-			*p = nullptr;
-			dest->FastQueuePacket(&in, ack_req);
-			return;
-		}
+		auto action = *(uint32 *) (*p)->pBuffer;
 
-		ENCODE_FORWARD(OP_TraderBuy);
+		switch (action) {
+			case TraderOn: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				LogTrading(
+					"Encode OP_Trader BeginTraderMode action <green>[{}]",
+					action
+				);
+
+				eq->action = structs::TiBazaarTraderBuyerActions::BeginTraderMode;
+				OUT(entity_id);
+
+				FINISH_ENCODE();
+				break;
+			}
+			case TraderOff: {
+				ENCODE_LENGTH_EXACT(Trader_ShowItems_Struct);
+				SETUP_DIRECT_ENCODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				LogTrading(
+					"Encode OP_Trader EndTraderMode action <green>[{}]",
+					action
+				);
+
+				eq->action = structs::TiBazaarTraderBuyerActions::EndTraderMode;
+				OUT(entity_id);
+
+				FINISH_ENCODE();
+				break;
+			}
+			case ListTraderItems: {
+				ENCODE_LENGTH_EXACT(Trader_Struct);
+				SETUP_DIRECT_ENCODE(Trader_Struct, structs::Trader_Struct);
+				LogTrading(
+					"Encode OP_Trader ListTraderItems action <green>[{}]",
+					action
+				);
+
+				eq->action = structs::TiBazaarTraderBuyerActions::ListTraderItems;
+				std::copy_n(emu->items, UF::invtype::BAZAAR_SIZE, eq->item_id);
+				std::copy_n(emu->item_cost, UF::invtype::BAZAAR_SIZE, eq->item_cost);
+
+				FINISH_ENCODE();
+				break;
+			}
+			case BuyTraderItem: {
+				ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+				SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"Encode OP_Trader item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
+
+				eq->action = structs::TiBazaarTraderBuyerActions::BuyTraderItem;
+				OUT(price);
+				OUT(trader_id);
+				OUT(item_id);
+				OUT(already_sold);
+				OUT(quantity);
+				strn0cpy(eq->item_name, emu->item_name, sizeof(eq->item_name));
+
+				FINISH_ENCODE();
+				break;
+			}
+			case ItemMove: {
+				LogTrading(
+					"Encode OP_Trader ItemMove action <green>[{}]",
+					action
+				);
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+				dest->FastQueuePacket(&in, ack_req);
+				break;
+			}
+			default: {
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				dest->FastQueuePacket(&in, ack_req);
+				LogError("Unknown Encode OP_Trader action <red>{} received.  Unhandled.", action);
+			}
+		}
 	}
 
 	ENCODE(OP_TraderBuy)
 	{
 		ENCODE_LENGTH_EXACT(TraderBuy_Struct);
 		SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+		LogTrading(
+			"Encode OP_TraderBuy item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+			emu->item_id,
+			emu->price,
+			emu->quantity,
+			emu->trader_id
+		);
 
-		OUT(Action);
-		OUT(Price);
-		OUT(TraderID);
-		memcpy(eq->ItemName, emu->ItemName, sizeof(eq->ItemName));
-		OUT(ItemID);
-		OUT(Quantity);
-		OUT(AlreadySold);
+		OUT(action);
+		OUT(price);
+		OUT(trader_id);
+		OUT(item_id);
+		OUT(already_sold);
+		OUT(quantity);
+		OUT_str(item_name);
 
 		FINISH_ENCODE();
+	}
+
+	ENCODE(OP_TraderShop)
+	{
+		auto action = *(uint32 *)(*p)->pBuffer;
+
+		switch (action) {
+			case ClickTrader: {
+				ENCODE_LENGTH_EXACT(TraderClick_Struct);
+				SETUP_DIRECT_ENCODE(TraderClick_Struct, structs::TraderClick_Struct);
+				LogTrading(
+					"ClickTrader action <green>[{}] trader_id <green>[{}]",
+					action,
+					emu->TraderID
+				);
+
+				eq->action    = 0;
+				eq->trader_id = emu->TraderID;
+				eq->approval  = emu->Approval;
+
+				FINISH_ENCODE();
+				break;
+			}
+			case BuyTraderItem: {
+				ENCODE_LENGTH_EXACT(TraderBuy_Struct);
+				SETUP_DIRECT_ENCODE(TraderBuy_Struct, structs::TraderBuy_Struct);
+				LogTrading(
+					"Encode OP_TraderShop item_id <green>[{}] price <green>[{}] quantity <green>[{}] trader_id <green>[{}]",
+					eq->item_id,
+					eq->price,
+					eq->quantity,
+					eq->trader_id
+				);
+
+				eq->action = structs::TiBazaarTraderBuyerActions::BuyTraderItem;
+				OUT(price);
+				OUT(trader_id);
+				OUT(item_id);
+				OUT(already_sold);
+				OUT(quantity);
+				strn0cpy(eq->item_name, emu->item_name, sizeof(eq->item_name));
+
+				FINISH_ENCODE();
+				break;
+			}
+			default: {
+				EQApplicationPacket *in = *p;
+				*p = nullptr;
+
+				dest->FastQueuePacket(&in, ack_req);
+				LogError("Unknown Encode OP_TraderShop action <red>[{}] received.  Unhandled.", action);
+			}
+		}
 	}
 
 	ENCODE(OP_TributeItem)
@@ -2264,6 +2496,53 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_BazaarSearch)
+	{
+		uint32 action = *(uint32 *) __packet->pBuffer;
+
+		switch (action) {
+			case structs::TiBazaarTraderBuyerActions::BazaarSearch: {
+				DECODE_LENGTH_EXACT(structs::BazaarSearch_Struct);
+				SETUP_DIRECT_DECODE(BazaarSearchCriteria_Struct, structs::BazaarSearch_Struct);
+
+				emu->action           = eq->Beginning.Action;
+				emu->item_stat        = eq->ItemStat;
+				emu->max_cost         = eq->MaxPrice;
+				emu->min_cost         = eq->MinPrice;
+				emu->max_level        = eq->MaxLlevel;
+				emu->min_level        = eq->Minlevel;
+				emu->race             = eq->Race;
+				emu->slot             = eq->Slot;
+				emu->type             = eq->Type == UINT32_MAX ? UINT8_MAX : eq->Type;
+				emu->trader_entity_id = eq->TraderID;
+				emu->trader_id        = 0;
+				emu->_class           = eq->Class_;
+				emu->search_scope     = eq->TraderID > 0 ? NonRoFBazaarSearchScope : Local_Scope;
+				emu->max_results      = RuleI(Bazaar, MaxSearchResults);
+				strn0cpy(emu->item_name, eq->Name, sizeof(emu->item_name));
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TiBazaarTraderBuyerActions::BazaarInspect: {
+				SETUP_DIRECT_DECODE(BazaarInspect_Struct, structs::BazaarInspect_Struct);
+
+				IN(action);
+				memcpy(emu->player_name, eq->player_name, sizeof(emu->player_name));
+				IN(serial_number);
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TiBazaarTraderBuyerActions::WelcomeMessage: {
+				break;
+			}
+			default: {
+				LogTrading("(Ti) Unhandled action <red>[{}]", action);
+			}
+		}
+	}
+
 	DECODE(OP_Buff)
 	{
 		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
@@ -2288,7 +2567,7 @@ namespace Titanium
 		DECODE_LENGTH_EXACT(structs::BugReport_Struct);
 		SETUP_DIRECT_DECODE(BugReport_Struct, structs::BugReport_Struct);
 
-		emu->category_id = EQ::bug::CategoryNameToCategoryID(eq->category_name);
+		emu->category_id = Bug::GetID(eq->category_name);
 		memcpy(emu->category_name, eq, sizeof(structs::BugReport_Struct));
 
 		FINISH_DIRECT_DECODE();
@@ -2903,18 +3182,90 @@ namespace Titanium
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_Trader)
+	{
+		auto action = (uint32) __packet->pBuffer[0];
+
+		switch (action) {
+			case structs::TiBazaarTraderBuyerActions::BeginTraderMode: {
+				DECODE_LENGTH_EXACT(structs::BeginTrader_Struct);
+				SETUP_DIRECT_DECODE(ClickTrader_Struct, structs::BeginTrader_Struct);
+				LogTrading(
+					"Decode OP_Trader BeginTraderMode action <red>[{}]",
+					action
+				);
+
+				emu->action      = TraderOn;
+				emu->unknown_004 = 0;
+				std::copy_n(eq->serial_number, Titanium::invtype::BAZAAR_SIZE, emu->serial_number);
+				std::copy_n(eq->cost, Titanium::invtype::BAZAAR_SIZE, emu->item_cost);
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TiBazaarTraderBuyerActions::EndTraderMode: {
+				DECODE_LENGTH_EXACT(structs::Trader_ShowItems_Struct);
+				SETUP_DIRECT_DECODE(Trader_ShowItems_Struct, structs::Trader_ShowItems_Struct);
+				LogTrading(
+					"Decode OP_Trader(Ti) EndTraderMode action <red>[{}]",
+					action
+				);
+
+				emu->action = TraderOff;
+				IN(entity_id);
+
+				FINISH_DIRECT_DECODE();
+				break;
+			}
+			case structs::TiBazaarTraderBuyerActions::PriceUpdate:
+			case structs::TiBazaarTraderBuyerActions::ItemMove:
+			case structs::TiBazaarTraderBuyerActions::EndTransaction:
+			case structs::TiBazaarTraderBuyerActions::ListTraderItems: {
+				LogTrading(
+					"Decode OP_Trader(Ti) Price/ItemMove/EndTransaction/ListTraderItems action <red>[{}]",
+					action
+				);
+				break;
+			}
+			case structs::TiBazaarTraderBuyerActions::ReconcileItems: {
+				break;
+			}
+			default: {
+				LogError("Unhandled(Ti) action <red>[{}] received.", action);
+			}
+		}
+	}
+
 	DECODE(OP_TraderBuy)
 	{
 		DECODE_LENGTH_EXACT(structs::TraderBuy_Struct);
 		SETUP_DIRECT_DECODE(TraderBuy_Struct, structs::TraderBuy_Struct);
 		MEMSET_IN(TraderBuy_Struct);
 
-		IN(Action);
-		IN(Price);
-		IN(TraderID);
-		memcpy(emu->ItemName, eq->ItemName, sizeof(emu->ItemName));
-		IN(ItemID);
-		IN(Quantity);
+		IN(action);
+		IN(price);
+		IN(trader_id);
+		memcpy(emu->item_name, eq->item_name, sizeof(emu->item_name));
+		IN(item_id);
+		IN(quantity);
+
+		FINISH_DIRECT_DECODE();
+	}
+
+	DECODE(OP_TraderShop)
+	{
+		DECODE_LENGTH_EXACT(structs::TraderClick_Struct);
+		SETUP_DIRECT_DECODE(TraderClick_Struct, structs::TraderClick_Struct);
+		LogTrading(
+			"(Ti) action <green>[{}] trader_id <green>[{}] approval <green>[{}]",
+			eq->action,
+			eq->trader_id,
+			eq->approval
+		);
+
+		emu->Code     = ClickTrader;
+		emu->TraderID = eq->trader_id;
+		emu->Approval = eq->approval;
 
 		FINISH_DIRECT_DECODE();
 	}

@@ -1441,8 +1441,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_SlayUndead: {
 			if (newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < base_value) {
-				newbon->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = base_value; // Rate
-				newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+				newbon->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = base_value; // Rate
+				newbon->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = limit_value; // Damage Modifier
 			}
 			break;
 		}
@@ -2224,7 +2224,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				// These don't generate the IMMUNE_ATKSPEED message and the icon shows up
 				// but have no effect on the mobs attack speed
-				if (GetSpecialAbility(UNSLOWABLE))
+				if (GetSpecialAbility(SpecialAbility::SlowImmunity))
 					break;
 
 				if (effect_value < 0) //A few spells use negative values(Descriptions all indicate it should be a slow)
@@ -2236,6 +2236,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 						new_bonus->inhibitmelee = effect_value;
 				}
 
+				break;
+			}
+
+			case SE_IncreaseArchery:
+			{
+				new_bonus->increase_archery += effect_value;
 				break;
 			}
 
@@ -2436,6 +2442,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_CastingLevel2:
 			{
 				new_bonus->effective_casting_level += effect_value;
+
+				if (RuleB(Spells, SnareOverridesSpeedBonuses) && effect_value < 0) {
+					new_bonus->movementspeed = effect_value;
+				}
 				break;
 			}
 
@@ -2790,6 +2800,25 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->MinDamageModifier[skill] = effect_value;
 				else if (effect_value > 0 && new_bonus->MinDamageModifier[skill] < effect_value)
 					new_bonus->MinDamageModifier[skill] = effect_value;
+				break;
+			}
+
+			case SE_ReduceSkill: {
+				// Bad data or unsupported new skill
+				if (spells[spell_id].base_value[i] > EQ::skills::HIGHEST_SKILL) {
+					break;
+				}
+				//cap skill reducation at 100%
+				uint32 skill_reducation_percent = spells[spell_id].formula[i];
+				if (spells[spell_id].formula[i] > 100) {
+					skill_reducation_percent = 100;
+				}
+
+				if (spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+					if (new_bonus->ReduceSkill[spells[spell_id].base_value[i]] < skill_reducation_percent) {
+						new_bonus->ReduceSkill[spells[spell_id].base_value[i]] = skill_reducation_percent;
+					}
+				}
 				break;
 			}
 
@@ -3335,6 +3364,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_Blind:
+				if (!RuleB(Combat, AllowRaidTargetBlind) && IsRaidTarget()) { // do not blind raid targets
+					break;
+				}
+
 				new_bonus->IsBlind = true;
 				break;
 
@@ -3560,8 +3593,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_SlayUndead: {
 				if (new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] < effect_value) {
-					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = effect_value; // Rate
-					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = limit_value; // Damage Modifier
+					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_RATE_MOD] = limit_value; // Rate
+					new_bonus->SlayUndead[SBIndex::SLAYUNDEAD_DMG_MOD] = effect_value; // Damage Modifier
 				}
 				break;
 			}
@@ -4132,7 +4165,7 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 			continue;
 
 		// TEST CODE: test for bazaar trader crashing with charm items
-		if (Trader)
+		if (IsTrader())
 			if (i >= EQ::invbag::GENERAL_BAGS_BEGIN && i <= EQ::invbag::GENERAL_BAGS_END) {
 				EQ::ItemInstance* parent_item = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)
@@ -4224,7 +4257,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 			continue;
 
 		// TEST CODE: test for bazaar trader crashing with charm items
-		if (Trader)
+		if (IsTrader())
 			if (i >= EQ::invbag::GENERAL_BAGS_BEGIN && i <= EQ::invbag::GENERAL_BAGS_END) {
 				EQ::ItemInstance* parent_item = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(i));
 				if (parent_item && parent_item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)
@@ -4516,6 +4549,12 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					if (negate_spellbonus) { spellbonuses.inhibitmelee = effect_value; }
 					if (negate_aabonus) { aabonuses.inhibitmelee = effect_value; }
 					if (negate_itembonus) { itembonuses.inhibitmelee = effect_value; }
+					break;
+
+				case SE_IncreaseArchery:
+					if (negate_spellbonus) { spellbonuses.increase_archery = effect_value; }
+					if (negate_aabonus) { aabonuses.increase_archery = effect_value; }
+					if (negate_itembonus) { itembonuses.increase_archery = effect_value; }
 					break;
 
 				case SE_TotalHP:

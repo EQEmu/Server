@@ -216,27 +216,27 @@ void Perl_Client_SetDeity(Client* self, uint32 deity_id) // @categories Account 
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp) // @categories Experience and Level
 {
-	self->AddEXP(add_exp);
+	self->AddEXP(ExpSource::Quest, add_exp);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel) // @categories Experience and Level
 {
-	self->AddEXP(add_exp, conlevel);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel);
 }
 
 void Perl_Client_AddEXP(Client* self, uint32 add_exp, uint8 conlevel, bool resexp) // @categories Experience and Level
 {
-	self->AddEXP(add_exp, conlevel, resexp);
+	self->AddEXP(ExpSource::Quest, add_exp, conlevel, resexp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp) // @categories Experience and Level
 {
-	self->SetEXP(set_exp, set_aaxp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp);
 }
 
 void Perl_Client_SetEXP(Client* self, uint64 set_exp, uint64 set_aaxp, bool resexp) // @categories Experience and Level
 {
-	self->SetEXP(set_exp, set_aaxp, resexp);
+	self->SetEXP(ExpSource::Quest, set_exp, set_aaxp, resexp);
 }
 
 void Perl_Client_SetBindPoint(Client* self) // @categories Account and Character, Stats and Attributes
@@ -1370,17 +1370,17 @@ uint32_t Perl_Client_GetIP(Client* self) // @categories Script Utility
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage, max_level);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level);
 }
 
 void Perl_Client_AddLevelBasedExp(Client* self, uint8 exp_percentage, uint8 max_level, bool ignore_mods) // @categories Experience and Level
 {
-	self->AddLevelBasedExp(exp_percentage, max_level, ignore_mods);
+	self->AddLevelBasedExp(ExpSource::Quest, exp_percentage, max_level, ignore_mods);
 }
 
 void Perl_Client_IncrementAA(Client* self, uint32 aa_skill_id) // @categories Alternative Advancement
@@ -2119,7 +2119,7 @@ bool Perl_Client_AddExtraClass(Client* self, int class_id)
 
 uint32_t Perl_Client_GetDeityBitmask(Client* self)
 {
-	return static_cast<uint32_t>(EQ::deity::GetDeityBitmask(static_cast<EQ::deity::DeityType>(self->GetDeity())));
+	return Deity::GetBitmask(self->GetDeity());
 }
 
 uint16_t Perl_Client_GetRaceBitmask(Client* self) // @categories Stats and Attributes
@@ -3281,6 +3281,16 @@ int Perl_Client_IsHardcore(Client* self) {
 	return self->IsHardcore() ? 1 : 0;
 }
 
+void Perl_Client_ResetLeadershipAA(Client* self)
+{
+	self->ResetLeadershipAA();
+}
+
+uint8 Perl_Client_GetSkillTrainLevel(Client* self, int skill_id)
+{
+	return self->GetSkillTrainLevel(static_cast<EQ::skills::SkillType>(skill_id), self->GetClass());
+}
+
 void perl_register_client()
 {
 	perl::interpreter perl(PERL_GET_THX);
@@ -3542,6 +3552,7 @@ void perl_register_client()
 	package.add("GetTaskActivityDoneCount", &Perl_Client_GetTaskActivityDoneCount);
 	package.add("GetThirst", &Perl_Client_GetThirst);
 	package.add("GetTotalSecondsPlayed", &Perl_Client_GetTotalSecondsPlayed);
+	package.add("GetSkillTrainLevel", &Perl_Client_GetSkillTrainLevel);
 	package.add("GetWeight", &Perl_Client_GetWeight);
 	package.add("GetPEQZoneFlags", &Perl_Client_GetPEQZoneFlags);
 	package.add("GetZoneFlags", &Perl_Client_GetZoneFlags);
@@ -3677,6 +3688,7 @@ void perl_register_client()
 	package.add("ResetCastbarCooldownBySpellID", &Perl_Client_ResetCastbarCooldownBySpellID);
 	package.add("ResetDisciplineTimer", &Perl_Client_ResetDisciplineTimer);
 	package.add("ResetItemCooldown", &Perl_Client_ResetItemCooldown);
+	package.add("ResetLeadershipAA", &Perl_Client_ResetLeadershipAA);
 	package.add("ResetTrade", &Perl_Client_ResetTrade);
 	package.add("Save", &Perl_Client_Save);
 	package.add("ScribeSpell", (void(*)(Client*, uint16, int))&Perl_Client_ScribeSpell);
