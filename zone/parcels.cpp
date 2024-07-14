@@ -278,13 +278,35 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		return;
 	}
 
+	if (RuleI(Custom, EnableSeasonalCharacters)) {
+		DataBucketKey db_key = {};
+		db_key.character_id = database.GetCharacterID(parcel_in->send_to);
+		db_key.key = "SeasonalCharacter";
+
+		bool dst_seasonal = (Strings::ToInt(DataBucket::GetData(db_key).value) == RuleI(Custom,EnableSeasonalCharacters));
+		if (dst_seasonal != IsSeasonal()) {
+			SendParcelIconStatus();
+			Message(
+				Chat::Yellow,
+				fmt::format(
+					"{} tells you, 'Unfortunately, I cannot send your parcel. You must be a participant in the same Season as your intended recipient.'",
+					merchant->GetCleanName(),
+					RuleI(Parcel, ParcelMaxItems)
+				).c_str()
+			);
+			DoParcelCancel();
+			SendParcelAck();
+			return;
+		}
+	}
+
 	auto num_of_parcels = GetParcelCount();
 	if (num_of_parcels >= RuleI(Parcel, ParcelMaxItems)) {
 		SendParcelIconStatus();
 		Message(
 			Chat::Yellow,
 			fmt::format(
-				"{} tells you, 'Unfortunately, I cannot send your parcel as you are at your parcel limit of {}. Please retrieve a parcel and try again.",
+				"{} tells you, 'Unfortunately, I cannot send your parcel as you are at your parcel limit of {}. Please retrieve a parcel and try again.'",
 				merchant->GetCleanName(),
 				RuleI(Parcel, ParcelMaxItems)
 			).c_str()
@@ -298,7 +320,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 		Message(
 			Chat::Yellow,
 			fmt::format(
-				"{} tells you, 'Unfortunately, {} cannot accept any more parcels at this time. Please try again later.",
+				"{} tells you, 'Unfortunately, {} cannot accept any more parcels at this time. Please try again later.'",
 				merchant->GetCleanName(),
 				send_to_client.at(0).character_name == GetCleanName() ? "you" : send_to_client.at(0).character_name
 			).c_str()
@@ -325,7 +347,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			Message(
 				Chat::Yellow,
 				fmt::format(
-					"{} tells you, 'Unfortunately, {} cannot accept any more parcels at this time. Please try again later.",
+					"{} tells you, 'Unfortunately, {} cannot accept any more parcels at this time. Please try again later.'",
 					merchant->GetCleanName(),
 					send_to_client.at(0).character_name
 				).c_str()
@@ -341,7 +363,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 			auto inst = GetInv().GetItem(parcel_in->item_slot);
 			if (!inst) {
 				LogError(
-					"Handle_OP_ShopSendParcel Could not find item in inventory slot {} for character {}.",
+					"Handle_OP_ShopSendParcel Could not find item in inventory slot {} for character {}.'",
 					parcel_in->item_slot,
 					GetCleanName()
 				);
@@ -400,7 +422,7 @@ void Client::DoParcelSend(const Parcel_Struct *parcel_in)
 					parcel_out.item_id,
 					parcel_out.quantity
 				);
-				Message(Chat::Yellow, "Unable to save parcel to the database. Please see an administrator.");
+				Message(Chat::Yellow, "Unable to save parcel to the database. Please see an administrator.'");
 				return;
 			}
 
@@ -628,7 +650,11 @@ void Client::DoParcelRetrieve(const ParcelRetrieve_Struct &parcel_in)
 				"Attempt to retrieve parcel with erroneous item id or quantity for client character id {}.",
 				CharacterID()
 			);
+			Message(Chat::Red, "Error retrieving parcel with item_id [{}]. Screenshot this error and report to a GM", item_id);
 			SendParcelRetrieveAck();
+			DeleteParcel(p->second.id);
+			SendParcelDelete(parcel_in);
+			m_parcels.erase(p);
 			return;
 		}
 

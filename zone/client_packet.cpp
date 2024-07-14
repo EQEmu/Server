@@ -810,7 +810,7 @@ void Client::CompleteConnect()
 		RecordPlayerEventLog(PlayerEvent::WENT_ONLINE, PlayerEvent::EmptyEvent{});
 
 		if (IsSeasonal())
-			SendAppearancePacket(AppearanceType::PVP, true, true, false);		
+			SendAppearancePacket(AppearanceType::PVP, true, true, false);
 
 		if (parse->PlayerHasQuestSub(EVENT_CONNECT)) {
 			parse->EventPlayer(EVENT_CONNECT, this, "", 0);
@@ -1336,11 +1336,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	database.LoadCharacterInspectMessage(cid, &m_inspect_message); /* Load Character Inspect Message */
 	database.LoadCharacterSpellBook(cid, &m_pp); /* Load Character Spell Book */
 	database.LoadCharacterMemmedSpells(cid, &m_pp);  /* Load Character Memorized Spells */
-	
+
 	if (!RuleB(Custom, ServerAuthStats)) {
 		database.LoadCharacterDisciplines(cid, &m_pp); /* Load Character Disciplines */
 	}
-	
+
 	database.LoadCharacterLanguages(cid, &m_pp); /* Load Character Languages */
 	database.LoadCharacterLeadershipAbilities(cid, &m_pp); /* Load Character Leadership AA's */
 	database.LoadCharacterTribute(this); /* Load CharacterTribute */
@@ -4348,7 +4348,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
-	
+
 	if (GetGM())
 	{
 		OnDisconnect(true);
@@ -5474,7 +5474,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 			}
 		} else {
 			MessageString(Chat::White, CORPSE_DECAY_NOW);
-		}		
+		}
 	}
 }
 
@@ -6232,7 +6232,7 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 	if (expedition)
 	{
 
-		
+
 		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
 		expedition->DzAddPlayer(this, dzcmd->name);
 	}
@@ -9743,13 +9743,13 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 						if (!IsCastWhileInvisibleSpell(item->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
 						}
-						
-						
+
+
 						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
 
-						else {						
+						else {
 							CastSpell(item->Click.Effect, target_id, CastingSlot::Item, item->CastTime, 0, 0, slot_id);
 						}
 					} else {
@@ -9817,8 +9817,8 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					if (i == 0) {
 						if (!IsCastWhileInvisibleSpell(augitem->Click.Effect)) {
 							CommonBreakInvisible(); // client can't do this for us :(
-						}						
-						
+						}
+
 						if (GetClass() == Class::Bard && !(RuleB(Custom, MulticlassingEnabled))) {
 							DoBardCastingFromItemClick(is_casting_bard_song, item->CastTime, item->Click.Effect, target_id, CastingSlot::Item, slot_id, item->RecastType, item->RecastDelay);
 						}
@@ -10416,7 +10416,7 @@ void Client::Handle_OP_LootRequest(const EQApplicationPacket *app)
 		Message(Chat::Red, "Error: OP_LootRequest: Corpse not found (ent = 0)");
 		Corpse::SendLootReqErrorPacket(this);
 		return;
-	}	
+	}
 
 	if (ent->IsCorpse())
 	{
@@ -10920,7 +10920,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 		return;
 	}
 
-	
+
 	MoveItem_Struct* mi = (MoveItem_Struct*)app->pBuffer;
 	/*
 	if (spellend_timer.Enabled() && casting_spell_id && !(GetClassesBits() & GetPlayerClassBit(Class::Bard)));
@@ -11081,14 +11081,14 @@ void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 				if (move.item) {
 					items.push_back(move);
 					database.SaveInventory(CharacterID(), NULL, from_slot);
-				}				
+				}
 			}
 
 			for (const MoveInfo& move : items) {
 				PutItemInInventory(move.to_slot, *move.item); // This saves inventory too
-			}			
+			}
 		}
-		
+
 	} else {
 		LinkDead(); // This packet should not be sent by an older client
 		return;
@@ -11235,7 +11235,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if (RuleB(Pets, UsePetCommandImpliedTargeting)) {
 			target = GetMeleeImpliedTarget(target);
 		}
-		
+
 		if (!target)
 			break;
 		if (target->IsMezzed()) {
@@ -11427,16 +11427,16 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	}
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			bool taunt_status = mypet->CastToNPC()->IsTaunting();			
+			bool taunt_status = mypet->CastToNPC()->IsTaunting();
 			if (RuleB(Custom, TauntTogglesPetTanking)) {
 				if (!taunt_status) {
 					mypet->SetSpecialAbility(41, 1);
-				} else {					
+				} else {
 					mypet->SetSpecialAbility(41, 0);
 				}
 			}
 			mypet->CastToNPC()->SetTaunting(!taunt_status);
-			MessageString(Chat::PetResponse, !taunt_status ? PET_DO_TAUNT : PET_NO_TAUNT);			
+			MessageString(Chat::PetResponse, !taunt_status ? PET_DO_TAUNT : PET_NO_TAUNT);
 		}
 		break;
 	}
@@ -15785,6 +15785,26 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 				TradeRequestFailed(app);
 				return;
 			}
+
+			if (RuleI(Custom, EnableSeasonalCharacters)) {
+				DataBucketKey db_key = {};
+				db_key.character_id = database.GetCharacterID(in->seller_name);
+				db_key.key = "SeasonalCharacter";
+
+				bool dst_seasonal = (Strings::ToInt(DataBucket::GetData(db_key).value) == RuleI(Custom,EnableSeasonalCharacters));
+				if (dst_seasonal != IsSeasonal()) {
+					SendParcelIconStatus();
+						Message(
+						Chat::Yellow,
+						"You may not purchase from this trader, because they are not a member of the same Season as you are."
+					);
+					in->method     = ByParcel;
+					in->sub_action = Failed;
+					TradeRequestFailed(app);
+					return;
+				}
+			}
+
 			LogTrading("Buy item by parcel delivery <green>[{}] item_id <green>[{}] quantity <green>[{}] "
 					   "serial_number <green>[{}]",
 					   in->trader_id,
@@ -15861,7 +15881,7 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 			Message(Chat::Red, "Seasonal Characters may not trade with other players who are not Seasonal.");
 			return;
 		}
-		
+
 		tradee->CastToClient()->QueuePacket(app);
 	}
 	else if (tradee && (tradee->IsNPC() || tradee->IsBot())) {
@@ -15933,7 +15953,7 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 				);
 				return;
 			}
-			
+
 
 			data->Code       = ClickTrader;
 			data->TraderID   = in->TraderID;
@@ -15950,7 +15970,9 @@ void Client::Handle_OP_TraderShop(const EQApplicationPacket *app)
 				);
 			}
 			else {
-				MessageString(Chat::Yellow, TRADER_BUSY);
+				if (trader_client->IsSeasonal == IsSeasonal()) {
+					MessageString(Chat::Yellow, TRADER_BUSY);
+				}
 				LogTrading("Client::Handle_OP_TraderShop: Trader Busy");
 			}
 

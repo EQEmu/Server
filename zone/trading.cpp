@@ -754,8 +754,8 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 
 				EQ::SayLinkEngine linker;
 				linker.SetLinkType(EQ::saylink::SayLinkItemInst);
-				linker.SetItemInst(insts[i - EQ::invslot::TRADE_BEGIN]);				
-				
+				linker.SetItemInst(insts[i - EQ::invslot::TRADE_BEGIN]);
+
 				Message(Chat::Red, "[%s] is not eligible to be traded to an NPC.", linker.GenerateLink().c_str());
 				insts[i - EQ::invslot::TRADE_BEGIN] = nullptr;
 			}
@@ -825,7 +825,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					tradingWith->SayString(TRADE_BACK, GetCleanName());
 					PushItemOnCursor(*inst, true);
 
-					
+
 					EQ::SayLinkEngine linker;
 					linker.SetLinkType(EQ::saylink::SayLinkItemData);
 					linker.SetItemData(pet_bag->GetItem());
@@ -837,7 +837,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					} else {
 						Message(Chat::Yellow, "This pet cannot accept trades due to being managed with a [%s]", pet_bag_link.c_str());
 					}
-					
+
 				} else {
 					if (GetGM() ||
 						(!restrict_quest_items_to_quest_npc || (is_quest_npc && item->IsQuestItem()) || !item->IsQuestItem()) && // If rule is enabled, return any quest items given to non-quest NPCs
@@ -919,12 +919,12 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							} else {
 								PushItemOnCursor(*inst, true);
 								if (tradingWith->GetOwner()->CastToClient()->IsSeasonal()) {
-									Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");													
-								}												
+									Message(Chat::Red, "You may not equip the pets of Seasonal Characters unless you are also Seasonal.");
+								}
 							}
 						}
 					}
-				
+
 					// Return quest items being traded to non-quest NPC when the rule is true
 					else if (restrict_quest_items_to_quest_npc && (!is_quest_npc && item->IsQuestItem())) {
 						tradingWith->SayString(TRADE_BACK, GetCleanName());
@@ -1843,6 +1843,22 @@ void Client::SendBazaarWelcome()
 void Client::DoBazaarSearch(BazaarSearchCriteria_Struct search_criteria)
 {
 	auto results = Bazaar::GetSearchResults(database, search_criteria, GetZoneID());
+
+	if (RuleI(Custom, EnableSeasonalCharacters)) {
+		for (auto it = results.begin(); it != results.end(); ) {
+			DataBucketKey db_key = {};
+			db_key.character_id = database.GetCharacterID(it->trader_name);
+			db_key.key = "SeasonalCharacter";
+
+			bool trader_seasonal = (Strings::ToInt(DataBucket::GetData(db_key).value) == RuleI(Custom, EnableSeasonalCharacters));
+			if (trader_seasonal != IsSeasonal()) {
+				it = results.erase(it);
+			} else {
+				++it;
+			}
+		}
+	}
+
 	if (results.empty()) {
 		SendBazaarDone(GetID());
 		return;
