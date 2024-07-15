@@ -1844,7 +1844,7 @@ void NPC::Disarm(Client* client, int chance) {
 					RemoveItem(weapon->ID);
 					CalcBonuses();
 					client->PushItemOnCursor(*inst, true);
-					
+
 					/*
 					if (inst) {
 						// create a ground item
@@ -2252,7 +2252,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			if (c) {
 				SetPetOwnerClient(true);
 				if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
-					std::string tmp_lastname;				
+					std::string tmp_lastname;
 					switch(ns->spawn.race) {
 						case Race::AirElemental2:
 						case Race::AirElemental:
@@ -3820,6 +3820,13 @@ void NPC::SetTaunting(bool is_taunting) {
 
 	if (IsPet() && IsPetOwnerClient()) {
 		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
+		if (RuleB(Custom, TauntTogglesPetTanking)) {
+			if (is_taunting) {
+				SetSpecialAbility(41, 1);
+			} else {
+				SetSpecialAbility(41, 0);
+			}
+		}
 	}
 }
 
