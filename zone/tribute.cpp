@@ -48,7 +48,7 @@ but I dont see a point to that right now, so I dont do it.
 
 */
 extern WorldServer worldserver;
-std::map<uint32, TributeData> tribute_list;
+std::map<uint32, TributeData> tribute_list{};
 
 void Client::ToggleTribute(bool enabled) {
 	if(enabled) {
@@ -620,6 +620,26 @@ void Client::SendGuildTributeDonatePlatReply(GuildTributeDonatePlatRequest_Struc
 	QueuePacket(outapp);
 	safe_delete(outapp)
 
+}
+
+std::map<uint32, TributeData> Client::GetTributeList() {
+	return tribute_list;
+}
+
+uint32 Client::LookupTributeItemID(uint32 tribute_id, uint32 tier)
+{
+	if (!tribute_id && !tier) {
+		return 0;
+	}
+
+	if (tribute_list.contains(tribute_id)) {
+		auto tribute = tribute_list.find(tribute_id);
+		auto item_id = tribute->second.tiers[tier].tribute_item_id;
+		if (!item_id) {
+			return 0;
+		}
+		return item_id;
+	}
 }
 
 /*

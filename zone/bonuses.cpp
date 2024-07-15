@@ -183,13 +183,19 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 	}
 
 	if (IsOfClientBot()) {
-		for (i = EQ::invslot::TRIBUTE_BEGIN; i <= EQ::invslot::TRIBUTE_END; i++) {
-			const EQ::ItemInstance* inst = m_inv[i];
-			if (!inst) {
-				continue;
-			}
+		if (CastToClient()->GetPP().tribute_active) {
+			for (auto const &t: CastToClient()->GetPP().tributes) {
+				auto item_id = CastToClient()->LookupTributeItemID(t.tribute, t.tier);
+				if (item_id) {
+					const EQ::ItemInstance *inst = database.CreateItem(item_id);
+					if (!inst) {
+						continue;
+					}
 
-			AddItemBonuses(inst, b, false, true);
+					AddItemBonuses(inst, b, false, true);
+					safe_delete(inst);
+				}
+			}
 		}
 	}
 
