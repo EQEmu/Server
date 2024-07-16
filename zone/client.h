@@ -70,7 +70,6 @@ namespace EQ
 #include "../common/data_verification.h"
 #include "../common/repositories/character_parcels_repository.h"
 #include "../common/repositories/trader_repository.h"
-#include "../common/guild_base.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -968,8 +967,6 @@ public:
 	void ChangeTributeSettings(TributeInfo_Struct *t);
 	void SendTributeTimer();
 	void ToggleTribute(bool enabled);
-	std::map<uint32, TributeData> GetTributeList();
-	uint32 LookupTributeItemID(uint32 tribute_id, uint32 tier);
 	void SendPathPacket(const std::vector<FindPerson_Point> &path);
 
 	inline PTimerList &GetPTimers() { return(p_timers); }
