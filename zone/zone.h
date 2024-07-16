@@ -125,6 +125,7 @@ public:
 	bool CanCastOutdoor() const { return (can_castoutdoor); } //qadar
 	bool CanDoCombat() const { return (can_combat); }
 	bool CanLevitate() const { return (can_levitate); } // Magoth78
+	bool IsWaterZone(float z);
 	bool Depop(bool StartSpawnTimer = false);
 	bool did_adventure_actions;
 	bool GetAuth(

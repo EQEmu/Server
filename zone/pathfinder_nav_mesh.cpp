@@ -300,7 +300,7 @@ IPathfinder::IPath PathfinderNavmesh::FindPath(const glm::vec3 &start, const glm
 	return IPath();
 }
 
-glm::vec3 PathfinderNavmesh::GetRandomLocation(const glm::vec3 &start)
+glm::vec3 PathfinderNavmesh::GetRandomLocation(const glm::vec3 &start, int flags)
 {
 	if (start.x == 0.0f && start.y == 0.0)
 		return glm::vec3(0.f);
@@ -315,7 +315,7 @@ glm::vec3 PathfinderNavmesh::GetRandomLocation(const glm::vec3 &start)
 	}
 
 	dtQueryFilter filter;
-	filter.setIncludeFlags(65535U ^ 2048);
+	filter.setIncludeFlags(flags);
 	filter.setAreaCost(0, 1.0f); //Normal
 	filter.setAreaCost(1, 3.0f); //Water
 	filter.setAreaCost(2, 5.0f); //Lava
