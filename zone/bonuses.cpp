@@ -182,7 +182,7 @@ void Mob::CalcItemBonuses(StatBonuses* b) {
 		SetDualWeaponsEquipped(true);
 	}
 
-	if (IsOfClientBot()) {
+	if (IsClient()) {
 		if (CastToClient()->GetPP().tribute_active) {
 			for (auto const &t: CastToClient()->GetPP().tributes) {
 				auto item_id = CastToClient()->LookupTributeItemID(t.tribute, t.tier);
