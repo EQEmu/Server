@@ -7609,19 +7609,21 @@ bool Mob::CheckItemRaceClassDietyRestrictionsOnCast(uint32 inventory_slot) {
 		}
 	}
 	if (itm && (itm->GetItem()->Click.Type == EQ::item::ItemEffectEquipClick) && inventory_slot > EQ::invslot::EQUIPMENT_END) {
-		if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
-			std::string message = fmt::format(
-				"Attempted to click an equip-only effect on item_name [{}] item_id [{}] without equipping it!",
-				itm->GetItem()->Name,
-				itm->GetItem()->ID
-			);
+		if (!(itm->GetItem()->Classes & bitmask && itm->IsAttuned())) {
+			if (CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoF) {
+				std::string message = fmt::format(
+					"Attempted to click an equip-only effect on item_name [{}] item_id [{}] without equipping it!",
+					itm->GetItem()->Name,
+					itm->GetItem()->ID
+				);
 
-			RecordPlayerEventLogWithClient(CastToClient(), PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+				RecordPlayerEventLogWithClient(CastToClient(), PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
+			}
+			else {
+				MessageString(Chat::Red, MUST_EQUIP_ITEM);
+			}
+			return(false);
 		}
-		else {
-			MessageString(Chat::Red, MUST_EQUIP_ITEM);
-		}
-		return(false);
 	}
 
 	return true;
