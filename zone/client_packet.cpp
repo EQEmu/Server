@@ -15731,7 +15731,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			LogError("Unknown size for OP_Trader: [{}]\n", app->size);
+			LogErrorDetail("Unknown size for OP_Trader: [{}]\n", app->size);
 		}
 	}
 }
