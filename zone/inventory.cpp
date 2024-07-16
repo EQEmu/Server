@@ -168,7 +168,7 @@ uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		zone->random.Reseed();
-		uint32 roll = zone->random.Real(0.0, 100.0);        
+		uint32 roll = zone->random.Real(0.0, 100.0);
 		uint32 newID = item_id % 1000000;
 
 		// TODO: Affix system will need to update this
@@ -184,7 +184,7 @@ uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 			item_id = newID;
 		}
 	}
-	
+
 	LogDebug("Got item_id [{}]", item_id);
 	return item_id;
 }
@@ -192,7 +192,7 @@ uint32 Mob::GetApocItemUpgrade(uint32 item_id) {
 uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		uint32 new_item_id = item_id;
-		uint32 base_item_id = item_id % 1000000;	
+		uint32 base_item_id = item_id % 1000000;
 		int rank = item_id / 1000000 + 1;
 		LogDebug("[{}] is rank [{}]", new_item_id, rank);
 
@@ -201,13 +201,13 @@ uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 			new_item_id = base_item_id + (rank * 1000000);
 			LogDebug("Found eligible upgrade for [{}] is [{}]", item_id, new_item_id);
 			rank++;
-		} 
+		}
 
 
 		LogDebug("[{}] is maximum upgrade for [{}]", new_item_id, item_id);
 		return new_item_id;
 	}
-	
+
 	return item_id;
 }
 
@@ -215,7 +215,7 @@ uint32 Mob::GetMaxItemUpgrade(uint32 item_id) {
 bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6, bool attuned, uint16 to_slot, uint32 ornament_icon, uint32 ornament_idfile, uint32 ornament_hero_model, bool artifact_disco) {
 	if (RuleB(Custom, DoItemUpgrades)) {
 		int original_id = item_id;
-	
+
 		if (GetMaxItemUpgrade(original_id) > original_id) {
 			LogDebug("Trying to upgrade: [{}]", original_id);
 
@@ -754,7 +754,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 		RecordPlayerEventLog(PlayerEvent::ITEM_CREATION, e);
 	}
-	
+
 	if (!GetGM()) {
 		if (RuleB(Character, EnableDiscoveredItems) && !IsDiscovered(inst->GetItem()->ID)) {
 			DiscoverItem(inst->GetItem()->ID);
@@ -783,7 +783,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 		slot_id
 	);
 
-	if (IsSeasonal()) {				
+	if (IsSeasonal()) {
 		Message(Chat::Red, "Seasonal Characters may not drop items.");
 		SendCursorBuffer();
 		return;
@@ -1017,7 +1017,7 @@ void Client::DropInst(const EQ::ItemInstance* inst)
 		return;
 	}
 
-	if (RuleI(Custom, EnableSeasonalCharacters) == Strings::ToInt(GetBucket("SeasonalCharacter"), 0)) {				
+	if (RuleI(Custom, EnableSeasonalCharacters) == Strings::ToInt(GetBucket("SeasonalCharacter"), 0)) {
 		Message(Chat::Red, "Seasonal Characters may not drop items.");
 		SendCursorBuffer();
 		return;
@@ -1835,7 +1835,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			(src_slot_check >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && src_slot_check <= EQ::invbag::SHARED_BANK_BAGS_END) ||
 			(dst_slot_check >= EQ::invslot::SHARED_BANK_BEGIN && dst_slot_check <= EQ::invslot::SHARED_BANK_END) ||
 			(dst_slot_check >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && dst_slot_check <= EQ::invbag::SHARED_BANK_BAGS_END))
-		{			
+		{
 			Message(Chat::Red, "Seasonal characters may not access the shared bank.");
 			return false;
 		}
@@ -1855,8 +1855,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			Message(Chat::Red, "Warning: Invalid slot move from slot %u to slot %u with %u charges!", src_slot_check, dst_slot_check, stack_count_check);
 		LogInventory("Invalid slot move from slot [{}] to slot [{}] with [{}] charges!", src_slot_check, dst_slot_check, stack_count_check);
 		return false;
-	}	
-	
+	}
+
 	if (move_in->from_slot == move_in->to_slot) { // Item summon, no further processing needed
 		if(RuleB(QueryServ, PlayerLogMoves)) { QSSwapItemAuditor(move_in); } // QS Audit
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF) { return true; } // Can't do RoF+
@@ -2062,7 +2062,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 		}
 	}
-	
+
 	if (dst_inst &&
 		(dst_slot_id >= EQ::invslot::SHARED_BANK_BEGIN) && (dst_slot_id <= EQ::invslot::SHARED_BANK_END) ||
 		(dst_slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) && (dst_slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
@@ -2367,7 +2367,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 					linker.SetItemInst(src_inst);
 					Message(Chat::Experience, "You stop focusing your experience on improving your [%s].", linker.GenerateLink().c_str());
-				}	
+				}
 			}
 
 			if (dst_inst) {
@@ -2417,14 +2417,14 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 					linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 					linker.SetItemInst(dst_inst);
 					Message(Chat::Experience, "You stop focusing your experience on improving your [%s].", linker.GenerateLink().c_str());
-				}				
+				}
 			}
 
 			if (src_inst) {
 				if (parse->ItemHasQuestSub(src_inst, EVENT_EQUIP_ITEM)) {
 					parse->EventItem(EVENT_EQUIP_ITEM, this, src_inst, nullptr, "", dst_slot_id);
 				}
-								
+
 				if (parse->PlayerHasQuestSub(EVENT_EQUIP_ITEM_CLIENT)) {
 					const auto& export_string = fmt::format(
 						"{} {}",
@@ -2432,7 +2432,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 						dst_slot_id
 					);
 					std::vector<std::any> args = { src_inst };
-					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);				
+					parse->EventPlayer(EVENT_EQUIP_ITEM_CLIENT, this, export_string, src_inst->GetItem()->ID, &args);
 				}
 
 				if (RuleB(Custom, PowerSourceItemUpgrade) && dst_slot_id == EQ::invslot::slotPowerSource) {
@@ -2443,7 +2443,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 					uint64 tar_item_exp   = src_inst->GetItem()->CalculateGearScore();
 					LogDebug("GEAR SCORE: [{}]", tar_item_exp);
-				}				
+				}
 			}
 		}
 	}
@@ -2503,7 +2503,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			}
 
 			if (EQ::InventoryProfile::CalcSlotId(move_in->from_slot) == pet_bag_idx) {
-				DoPetBagResync();		
+				DoPetBagResync();
 			}
 		}
 	}
@@ -3369,7 +3369,7 @@ int64_t Client::GetStatValueEdgeType(eStatEntry eLabel)
 	switch (eLabel)
 	{
 		case eStatMaxHP:
-		{	
+		{
 			CalcMaxHP();
 			return GetMaxHP();
 		}
@@ -3477,7 +3477,7 @@ void Client::SendEdgeStatBulkUpdate()
 		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 		itempacket->count = (int)(eStatMax) - 1;
 		for(int i = 0; i < eStatEntry::eStatMax - 1; i++)
-		{			
+		{
 			itempacket->entries[i].statKey = (eStatEntry)i;
 			itempacket->entries[i].statValue = GetStatValueEdgeType((eStatEntry)i);
 		}
@@ -3530,22 +3530,24 @@ void Client::SendEdgeManaStats()
 
 void Client::SendEdgeEnduranceStats()
 {
-	EmuOpcode opcode = OP_Unknown;
-	EQApplicationPacket* outapp = nullptr;
-	EdgeStat_Struct* itempacket = nullptr;
+	if (RuleB(Custom, ServerAuthStats)) {
+		EmuOpcode opcode = OP_Unknown;
+		EQApplicationPacket* outapp = nullptr;
+		EdgeStat_Struct* itempacket = nullptr;
 
-	// Construct packet
-	opcode = OP_EdgeStats;
-	LogDebug("opcode: [{}]", opcode);
-	outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
-	itempacket = (EdgeStat_Struct*)outapp->pBuffer;
-	itempacket->count = 2;
-	itempacket->entries[0].statKey = eStatCurEndur;
-	itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurEndur);
-	itempacket->entries[1].statKey = eStatMaxEndur;
-	itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxEndur);
-	QueuePacket(outapp);
-	safe_delete(outapp);
+		// Construct packet
+		opcode = OP_EdgeStats;
+		LogDebug("opcode: [{}]", opcode);
+		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
+		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
+		itempacket->count = 2;
+		itempacket->entries[0].statKey = eStatCurEndur;
+		itempacket->entries[0].statValue = GetStatValueEdgeType(eStatCurEndur);
+		itempacket->entries[1].statKey = eStatMaxEndur;
+		itempacket->entries[1].statValue = GetStatValueEdgeType(eStatMaxEndur);
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
 }
 
 uint32 Client::GetEquipmentColor(uint8 material_slot) const

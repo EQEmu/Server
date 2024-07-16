@@ -1708,9 +1708,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 				// Taunt persists when zoning on newer clients, overwrite default.
 				if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
-					if (!firstlogon) {
-						pet->SetTaunting(m_petinfo.taunting);
-					}
+					pet->SetTaunting(m_petinfo.taunting);
 				}
 
 				DoPetBagResync();
@@ -11428,13 +11426,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 	case PET_TAUNT: {
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			bool taunt_status = mypet->CastToNPC()->IsTaunting();
-			if (RuleB(Custom, TauntTogglesPetTanking)) {
-				if (!taunt_status) {
-					mypet->SetSpecialAbility(41, 1);
-				} else {
-					mypet->SetSpecialAbility(41, 0);
-				}
-			}
 			mypet->CastToNPC()->SetTaunting(!taunt_status);
 			MessageString(Chat::PetResponse, !taunt_status ? PET_DO_TAUNT : PET_NO_TAUNT);
 		}
@@ -11444,7 +11435,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			MessageString(Chat::PetResponse, PET_DO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(true);
-			mypet->SetSpecialAbility(41, 1);
 		}
 		break;
 	}
@@ -11452,7 +11442,6 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			MessageString(Chat::PetResponse, PET_NO_TAUNT);
 			mypet->CastToNPC()->SetTaunting(false);
-			mypet->SetSpecialAbility(41, 0);
 		}
 		break;
 	}
@@ -15742,7 +15731,7 @@ void Client::Handle_OP_Trader(const EQApplicationPacket *app)
 			break;
 		}
 		default: {
-			LogError("Unknown size for OP_Trader: [{}]\n", app->size);
+			LogErrorDetail("Unknown size for OP_Trader: [{}]\n", app->size);
 		}
 	}
 }

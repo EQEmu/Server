@@ -5419,6 +5419,14 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		}
 	}
 
+	if (caster->IsClient()) {
+		resist_modifier -= caster->CastToClient()->GetHeroicCHA();
+	}
+
+	if (caster->IsPet() && caster->GetOwner() && caster->GetOwner()->IsClient()) {
+		resist_modifier -= caster->GetOwner()->CastToClient()->GetHeroicCHA();
+	}
+
 	if(caster->GetSpecialAbility(SpecialAbility::CastingResistDifficulty))
 		resist_modifier += caster->GetSpecialAbilityParam(SpecialAbility::CastingResistDifficulty, 0);
 
