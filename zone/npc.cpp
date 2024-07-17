@@ -604,12 +604,13 @@ bool NPC::Process()
 	if (RuleB(Spells, SwarmPetFullAggro) && swarm_timer.Enabled() && !GetTarget()) {
 		Mob* owner = entity_list.GetMob(GetSwarmOwner());
 		if (owner && owner->IsClient()) {
-			for (auto* npc : entity_list.GetHatedList(owner, this, true)) {
-				if (npc && !npc->IsClient()) {
-					zone->AddAggroMob();
-					AddToHateList(npc, 1, 0, true, false, false, SPELL_UNKNOWN, true);
-					SetTarget(npc);
-					break;
+			for (const auto& npc_entity : entity_list.GetNPCList()) {
+				auto entity_id = npc_entity.first;
+				auto npc = npc_entity.second;
+
+				if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc)) {
+					AddToHateList(npc, 100, 100);
+					LogDebug("Adding [{}] to swarm pet hate list", npc->GetName());
 				}
 			}
 		}
