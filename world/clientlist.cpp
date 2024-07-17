@@ -92,25 +92,10 @@ void ClientList::GetCLEIP(uint32 in_ip) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
 	int count = 0;
-	iterator.Reset();
 
-	const auto& zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
-
-    iterator.Reset();	
+    iterator.Reset();
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
-
-		if (!zones.empty() && cle->zone()) {
-            for (const auto& z : zones) {
-                if (Strings::ToUnsignedInt(z) == cle->zone()) {
-					LogInfo("[{}] matches [{}], skipping CLEIP evaluation", Strings::ToUnsignedInt(z), cle->zone());
-                    iterator.Advance();
-					continue;
-                } else {
-					LogInfo("[{}] does not match [{}], proceeding with CLEIP evaluation", Strings::ToUnsignedInt(z), cle->zone());
-				}
-            }
-        }
 
 		if (
 			cle->GetIP() == in_ip &&
@@ -801,13 +786,13 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 				strcpy(plname,cle->name());
 
 				// Send different info for multiclass strings. Requires clientside support.
-				if (RuleB(Custom, MulticlassingEnabled)) {      
+				if (RuleB(Custom, MulticlassingEnabled)) {
 					std::string query = StringFormat("SELECT `value` FROM `data_buckets` WHERE `key` = 'GestaltClasses' AND `character_id` = %d", cle->CharID());
 					auto results = database.QueryDatabase(query);
 					bool found = false;
 
 					for (auto& row = results.begin(); row != results.end(); ++row) {
-						if (row[0]) { 
+						if (row[0]) {
 							plclass_ = static_cast<uint32>(Strings::ToInt(row[0]));
 							found = true;
 							break;
@@ -966,16 +951,16 @@ void ClientList::SendFriendsWho(ServerFriendsWho_Struct *FriendsWho, WorldTCPCon
 			}
 
 			char PlayerName[64]={0};
-			strcpy(PlayerName,cle->name());	
-			
+			strcpy(PlayerName,cle->name());
+
 			// Send different info for multiclass strings. Requires clientside support.
-			if (RuleB(Custom, MulticlassingEnabled)) {      
+			if (RuleB(Custom, MulticlassingEnabled)) {
 				std::string query = StringFormat("SELECT `value` FROM `data_buckets` WHERE `key` = 'GestaltClasses' AND `character_id` = %d", cle->CharID());
 				auto results = database.QueryDatabase(query);
 				bool found = false;
 
 				for (auto& row = results.begin(); row != results.end(); ++row) {
-					if (row[0]) { 
+					if (row[0]) {
 						PlayerClass = static_cast<uint32>(Strings::ToInt(row[0]));
 						found = true;
 						break;

@@ -516,7 +516,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			join->lsaccount_id = GetLSID();
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
-		}		
+		}
 
 		if (!is_player_zoning)
 			SendGuildList();
@@ -725,7 +725,7 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 				entry_enabled = false;
 			}
 		}
-		
+
 		if (RuleB(Custom, BlockClassOnAccountProgression)) {
 			if (account_progression < 3 && character_create_race_class_combos[i].Class == Class::Beastlord) {
 				entry_enabled = false;
@@ -734,7 +734,7 @@ bool Client::HandleCharacterCreateRequestPacket(const EQApplicationPacket *app) 
 				entry_enabled = false;
 			}
 		}
-		
+
 		if (entry_enabled) {
 			RaceClassCombos *cmb = (RaceClassCombos*)ptr;
 			cmb->ExpansionRequired = character_create_race_class_combos[i].ExpansionRequired;
@@ -842,34 +842,6 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 			char_name
 		);
 		instance_id = r.instance.id;
-	}
-
-	if (
-		RuleB(World, EnableIPExemptions) ||
-		RuleI(World, MaxClientsPerIP) > 0
-	) {
-		bool skip_cleip_check = false;
-		const auto& zones = Strings::Split(RuleS(World, IPExemptionZones), ",");
-
-
-		LogInfo("About to enter GetCLEIP on behalf of [{}] while entering? zone [{}]", char_name, zone_id);
-
-		if (!zones.empty() && zone_id) {
-			for (const auto& z : zones) {
-				if (Strings::ToUnsignedInt(z) == zone_id) {
-					LogInfo("[{}] matches [{}], skipping CLEIP evaluation", Strings::ToUnsignedInt(z), zone_id);
-					skip_cleip_check = true;
-					break;
-				} else {
-					LogInfo("No match Match");
-				}
-			}
-		}
-
-		if (!skip_cleip_check) {
-			LogInfo("Actually entering GetCLEIP");
-			client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
-		}		
 	}
 
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
@@ -1918,12 +1890,12 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	if (RuleI(Custom, EnableSeasonalCharacters)) {
 		int char_id = database.GetCharacterID(pp.name);
 		int season  = RuleI(Custom, EnableSeasonalCharacters);
-		
+
 		// Construct the SQL query
 		std::string query = StringFormat(
 			"INSERT INTO data_buckets (`key`, `value`, `character_id`, `npc_id`, `bot_id`) "
 			"VALUES ('SeasonalCharacter', '%d', %d, 0, 0);", season, char_id);
-		
+
 		// Execute the query
 		database.QueryDatabase(query);
 	}
@@ -2456,7 +2428,7 @@ bool Client::StoreCharacter(
 	if (!v.empty()) {
 		InventoryRepository::InsertMany(database, v);
 	}
-	
+
 	return true;
 }
 
