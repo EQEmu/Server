@@ -178,7 +178,7 @@ public:
 		ZoneRepository::Zone                 zone;
 	};
 
-	FindZoneResult FindZone(uint32 zone, uint32 instance_id);
+	FindZoneResult FindZone(uint32 zone_id, uint32 instance_id);
 	bool IsInPublicStaticInstance(uint32 instance_id);
 
 private:
