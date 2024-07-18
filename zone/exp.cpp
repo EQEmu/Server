@@ -48,6 +48,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp)
 	int aaLimit = RuleI(AA, ModernAAScalingAALimit);
 
 	// Are we within the scaling window?
+	LogDebug("earnedAA: [{}], aaLimit: [{}], aaMinimum [{}]", earnedAA, aaMinimum, aaLimit);
 	if (earnedAA >= aaLimit || earnedAA < aaMinimum)
 	{
 		LogDebug("Not within AA scaling window");
@@ -78,7 +79,7 @@ static uint64 ScaleAAXPBasedOnCurrentAATotal(int earnedAA, uint64 add_aaxp)
 	}
 
 	Log(Logs::Detail,
-		Logs::None,
+		Logs::Debug,
 		"Total before the modifier %d :: NewTotal %d :: ScaleRange: %d, SpentAA: %d, RemainingAA: %d, normalizedScale: %0.3f",
 		add_aaxp, totalWithExpMod, scaleRange, earnedAA, remainingAA, normalizedScale);
 
@@ -592,7 +593,7 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 	// Are we also doing linear AA acceleration?
 	if (RuleB(AA, ModernAAScalingEnabled) && aaexp > 0)
 	{
-		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints(), aaexp);
+		aaexp = ScaleAAXPBasedOnCurrentAATotal(GetAAPoints() + GetSpentAA(), aaexp);
 	}
 
 	// Check for AA XP Cap
