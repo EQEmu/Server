@@ -797,6 +797,8 @@ void Client::CompleteConnect()
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
 
+	sent_inventory = 0;
+
 	// the way that the client deals with positions during the initial spawn struct
 	// is subtly different from how it deals with getting a position update
 	// if a mob is slightly in the wall or slightly clipping a floor they will be
@@ -1220,10 +1222,10 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
 {
+	sent_inventory = 0;
 	auto outapp = new EQApplicationPacket(OP_0x0347, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-
 	return;
 }
 
@@ -4867,35 +4869,6 @@ void Client::Handle_OP_ClientTimeStamp(const EQApplicationPacket *app)
 void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (IsAIControlled())
 		return;
-
-	if (RuleB(Custom, BlockBankItemsOnZone) && Connected() && sent_inventory < (EQ::invslot::SHARED_BANK_END+1)) {
-		const EQ::ItemInstance* inst = nullptr;
-		// Jump the gaps
-		if (sent_inventory < EQ::invslot::GENERAL_BEGIN) {
-			sent_inventory = EQ::invslot::GENERAL_BEGIN;
-		} else if (sent_inventory > EQ::invslot::GENERAL_END && sent_inventory < EQ::invslot::BANK_BEGIN) {
-			sent_inventory = EQ::invslot::BANK_BEGIN;
-		} else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
-			sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
-		} else {
-			sent_inventory++;
-		}
-
-		if (RuleB(Custom, SendGeneralInventoryAtOnce) && sent_inventory == EQ::invslot::GENERAL_BEGIN) {
-			for (int16 slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; slot_id++) {
-				inst = m_inv[slot_id];
-				if (inst) {
-					SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
-				}
-			}
-			sent_inventory = EQ::invslot::GENERAL_END;
-		} else {
-			inst = m_inv[sent_inventory];
-			if (inst) {
-				SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
-			}
-		}
-	}
 
 	if (dead)
 		return;

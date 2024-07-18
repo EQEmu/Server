@@ -111,6 +111,37 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
+		if (RuleB(Custom, BlockBankItemsOnZone) && Connected() && sent_inventory < (EQ::invslot::SHARED_BANK_END+1)) {
+			LogDebug("Parsing inventory slot: [{}]", sent_inventory);
+			const EQ::ItemInstance* inst = nullptr;
+			// Jump the gaps
+			if (sent_inventory < EQ::invslot::GENERAL_BEGIN) {
+				sent_inventory = EQ::invslot::GENERAL_BEGIN;
+			} else if (sent_inventory > EQ::invslot::GENERAL_END && sent_inventory < EQ::invslot::BANK_BEGIN) {
+				sent_inventory = EQ::invslot::BANK_BEGIN;
+			} else if (sent_inventory > EQ::invslot::BANK_END && sent_inventory < EQ::invslot::SHARED_BANK_BEGIN) {
+				sent_inventory = EQ::invslot::SHARED_BANK_BEGIN;
+			} else {
+				sent_inventory++;
+			}
+
+			if (RuleB(Custom, SendGeneralInventoryAtOnce) && sent_inventory == EQ::invslot::GENERAL_BEGIN) {
+				for (int16 slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; slot_id++) {
+					inst = m_inv[slot_id];
+					if (inst) {
+						SendItemPacket(slot_id, inst, ItemPacketType::ItemPacketTrade);
+					}
+				}
+				sent_inventory = EQ::invslot::GENERAL_END;
+			} else {
+
+				inst = m_inv[sent_inventory];
+				if (inst) {
+					SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);
+				}
+			}
+		}
+
 		if (IsTracking() && (ClientVersion() >= EQ::versions::ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
