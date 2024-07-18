@@ -778,8 +778,8 @@ void Client::BulkSendInventoryItems()
 	EQ::OutBuffer ob;
 	EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
-	// Possessions items
-	for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id <= EQ::invslot::POSSESSIONS_END; slot_id++) {
+	// Equipment items
+	for (int16 slot_id = EQ::invslot::EQUIPMENT_BEGIN; slot_id <= EQ::invslot::EQUIPMENT_END; slot_id++) {
 		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
@@ -792,32 +792,48 @@ void Client::BulkSendInventoryItems()
 		last_pos = ob.tellp();
 	}
 
-	// Bank items
-	for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
-		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+	if (!RuleB(Custom, BlockBankItemsOnZone)) {
+		// General Items
+		for (int16 slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; slot_id++) {
+			const EQ::ItemInstance* inst = m_inv[slot_id];
+			if (!inst)
+				continue;
 
-		inst->Serialize(ob, slot_id);
+			inst->Serialize(ob, slot_id);
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			if (ob.tellp() == last_pos)
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
-		last_pos = ob.tellp();
-	}
+			last_pos = ob.tellp();
+		}
 
-	// SharedBank items
-	for (int16 slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; slot_id++) {
-		const EQ::ItemInstance* inst = m_inv[slot_id];
-		if (!inst)
-			continue;
+		// Bank items
+		for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
+			const EQ::ItemInstance* inst = m_inv[slot_id];
+			if (!inst)
+				continue;
 
-		inst->Serialize(ob, slot_id);
+			inst->Serialize(ob, slot_id);
 
-		if (ob.tellp() == last_pos)
-			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+			if (ob.tellp() == last_pos)
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
 
-		last_pos = ob.tellp();
+			last_pos = ob.tellp();
+		}
+
+		// SharedBank items
+		for (int16 slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; slot_id++) {
+			const EQ::ItemInstance* inst = m_inv[slot_id];
+			if (!inst)
+				continue;
+
+			inst->Serialize(ob, slot_id);
+
+			if (ob.tellp() == last_pos)
+				LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
+
+			last_pos = ob.tellp();
+		}
 	}
 
 	auto outapp = new EQApplicationPacket(OP_CharInventory);

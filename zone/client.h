@@ -2012,6 +2012,8 @@ private:
 	int32 max_end;
 	int32 current_endurance;
 
+	int sent_inventory;
+
 	// https://github.com/EQEmu/Server/pull/2479
 	bool m_lock_save_position = false;
 public:

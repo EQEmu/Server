@@ -1050,6 +1050,8 @@ RULE_INT(Custom,  BardSongHealAmtReductionFactor, 0.10, "Factor to multiple rune
 RULE_BOOL(Custom, StripCharmItems, true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
 RULE_BOOL(Custom, EnablePetBags, true, "Enable 'Pet Bag' features")
 RULE_STRING(Custom, PetBagList, "199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
+RULE_BOOL(Custom, BlockBankItemsOnZone, true, "Don't send bank contents on zoning or initial login")
+RULE_BOOL(Custom, SendGeneralInventoryAtOnce, true, "Send all of the general inventory in first ClientUpdate")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
