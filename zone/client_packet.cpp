@@ -1830,12 +1830,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		FastQueuePacket(&outapp);
 	}
 
-	if (IsSeasonal()) {
-		SendAppearancePacket(AppearanceType::PVP, true, true, false);
-	} else {
-		SendAppearancePacket(AppearanceType::PVP, false, true, false);
-	}
-
 	/*
 	Weather Packet
 	This shouldn't be moved, this seems to be what the client

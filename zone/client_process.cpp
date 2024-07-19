@@ -64,6 +64,12 @@ bool Client::Process() {
 	bool ret = true;
 
 	if (Connected() || IsLD()) {
+		if (IsSeasonal()) {
+			SendAppearancePacket(AppearanceType::PVP, true, true, false);
+		} else {
+			SendAppearancePacket(AppearanceType::PVP, false, true, false);
+		}
+
 		// try to send all packets that weren't sent before
 		if (!IsLD() && zoneinpacket_timer.Check()) {
 			SendAllPackets();
