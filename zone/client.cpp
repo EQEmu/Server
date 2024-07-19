@@ -525,8 +525,13 @@ void Client::SendZoneInPackets()
 	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
 	safe_delete(outapp);
 	SetSpawned();
-	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
+	if (GetPVP(false)) { //force a PVP update until we fix the spawn struct
 		SendAppearancePacket(AppearanceType::PVP, GetPVP(false), true, false);
+	}
+
+	if (IsSeasonal()) {
+		SendAppearancePacket(AppearanceType::PVP, true, true, false);
+	}
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
