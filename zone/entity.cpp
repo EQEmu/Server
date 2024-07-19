@@ -1443,8 +1443,9 @@ void EntityList::SendZoneSeasonalUpdates(Client *to)
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if(c->IsSeasonal());
+		if(c->IsSeasonal()) {
 			c->SendAppearancePacket(AppearanceType::PVP, true, true, false, to);
+		}
 		++it;
 	}
 }
@@ -5045,7 +5046,7 @@ void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 			Buffer += sizeof(WhoAllPlayerPart4);
 		}
 
-	}	
+	}
 
 	c->QueuePacket(outapp);
 

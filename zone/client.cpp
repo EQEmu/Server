@@ -3015,7 +3015,7 @@ void Client::SetPVP(bool toggle, bool message) {
 		}
 	}
 
-	SendAppearancePacket(AppearanceType::PVP, GetPVP());
+	//SendAppearancePacket(AppearanceType::PVP, GetPVP());
 	Save();
 }
 
