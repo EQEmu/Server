@@ -1829,47 +1829,25 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	// we're done casting, now try to apply the spell
-	if(!SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true))
+	bool spell_success = SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true);
+	if (target && slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1 && !target->IsMezzed()) {
+		if(IsOfClientBotMerc()) {
+			TrySympatheticProc(target, spell_id);
+		}
+
+		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+		if (spell_success) {
+			TryTwincast(this, target, spell_id);
+		}
+	}
+
+	if(!spell_success)
 	{
 		LogSpells("Casting of [{}] canceled: SpellFinished returned false", spell_id);
 		// most of the cases we return false have a message already or are logic errors that shouldn't happen
 		// if there are issues I guess we can do something else, but this should work
 		StopCasting();
 		return;
-	}
-
-	if (target && slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1 && !target->IsMezzed()) {
-		if(IsOfClientBotMerc()) {
-			TrySympatheticProc(target, spell_id);
-		}
-
-		if (RuleB(Custom, CombatProcsOnSpellCast) && IsClient()) {
-			if (IsHealthSpell(spell_id) || IsDamageSpell(spell_id)) {
-				std::vector<EQ::ItemInstance*> weapon_selector;
-				Client* c = CastToClient();
-
-				if (c->GetInv().GetItem(EQ::invslot::slotPrimary) && c->GetInv().GetItem(EQ::invslot::slotPrimary)->HasProc()) {
-					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotPrimary));
-				}
-
-				if (c->GetInv().GetItem(EQ::invslot::slotSecondary) && c->GetInv().GetItem(EQ::invslot::slotSecondary)->HasProc()) {
-					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotSecondary));
-				}
-
-				if (c->GetInv().GetItem(EQ::invslot::slotRange) && c->GetInv().GetItem(EQ::invslot::slotRange)->HasProc()) {
-					weapon_selector.push_back(c->GetInv().GetItem(EQ::invslot::slotRange));
-				}
-
-				if (!weapon_selector.empty()) {
-					EQ::ItemInstance* selected_weapon = weapon_selector[zone->random.Roll0(weapon_selector.size() - 1)];
-					uint16 probability = spells[spell_id].cast_time * RuleI(Custom, CombatProcsOnSpellCastProbability);
-					TryWeaponProc(selected_weapon, selected_weapon->GetItem(), target, IsBardSong(spell_id) ? (probability / 4) : probability);
-				}
-			}
-		}
-
-		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
-		TryTwincast(this, target, spell_id);
 	}
 
 	if (IsClient() && DeleteChargeFromSlot >= 0) {

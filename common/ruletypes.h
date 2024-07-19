@@ -1025,30 +1025,42 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Custom)
 // Multiclassing Engine
-RULE_BOOL(Custom, 	ServerAuthStats, true, "Enable this rule in order to send explicit client updates. Requires client dll.")
-RULE_BOOL(Custom, 	MulticlassingEnabled, true, "Enable this to enable all multiclass-related tweaks. Requires ServerAuthStats enabled.")
-RULE_BOOL(Custom, 	SuspendGroupBuffs, true, "Enable this to cause self buffs and group's buffs to not tick down")
-RULE_BOOL(Custom, 	FadeNPCDebuffsOutofCombat, true, "Enable to to cause NPCs to lose all buffs automatically when combat ends")
-RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, true, "Enable appfending Discovered By: items using the charmfile method")
-RULE_BOOL(Custom, 	UseDynamicAATimers, true, "Enable using dynamic AA timers")
-RULE_BOOL(Custom, 	DoItemUpgrades, true, "Retribution item upgrades")
-RULE_REAL(Custom, 	Tier2ItemDropRate, 25, "Percentage chance that a drop will be upgraded to Tier 2. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Tier2.")
-RULE_REAL(Custom, 	Tier1ItemDropRate, 50, "Percentage chance that a drop will be upgraded to Tier 1. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Unmodified")
-RULE_BOOL(Custom, 	TauntTogglesPetTanking, true, "Enable to let pets hold aggro while taunt is on")
-RULE_BOOL(Custom, 	UseTHJItemMutations, true, "Rename items according to THJ standards and apply other mutations")
-RULE_BOOL(Custom, 	EatCombatTrades, true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
-RULE_BOOL(Custom, 	ClearRestingDetrimentalEffectsEnabled, false, "Remove detrimental spell effects from self and pets when OOC regen engages")
-RULE_REAL(Custom, 	ItemExtraSpellAmtMaximumPercentage, 0.0, "Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
-RULE_BOOL(Custom, 	LessStrictSpellStacking, true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
-RULE_INT(Custom,  	EnableSeasonalCharacters, 0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
-RULE_BOOL(Custom, 	PowerSourceItemUpgrade, false, "Enable to add Power Source to all items which can be equipped by some race and class.")
-RULE_REAL(Custom, 	PowerSourceItemUpgradeRateScale, 1.0, "Scale XP rate of items using this value.")
-RULE_INT(Custom,  	BardSongHealAmtReductionFactor, 0.10, "Factor to multiple rune healamt bonus values by for bard songs")
-RULE_BOOL(Custom, 	StripCharmItems, true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
-RULE_BOOL(Custom, 	EnablePetBags, true, "Enable 'Pet Bag' features")
-RULE_STRING(Custom, PetBagList, "199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
-RULE_BOOL(Custom,   BlockBankItemsOnZone, true, "Don't send bank contents on zoning or initial login")
-RULE_BOOL(Custom, 	SendGeneralInventoryAtOnce, true, "Send all of the general inventory in first ClientUpdate")
+RULE_BOOL(Custom, 	ServerAuthStats, 						true, "Enable this rule in order to send explicit client updates. Requires client dll.")
+RULE_BOOL(Custom, 	MulticlassingEnabled, 					true, "Enable this to enable all multiclass-related tweaks. Requires ServerAuthStats and UseDynamicAATimers for full functionality.")
+RULE_BOOL(Custom, 	UseDynamicAATimers, 					true, "Enable using dynamic AA timers. Required to deconflict multiclass AA timers")
+
+// Needed to support 200-slot bags
+RULE_BOOL(Custom,   BlockBankItemsOnZone, 					true, "Don't send bank contents on zoning or initial login")
+RULE_BOOL(Custom, 	SendGeneralInventoryAtOnce, 			true, "Send all of the general inventory in first ClientUpdate")
+
+// The Heroes Journey Options
+RULE_BOOL(Custom, 	SuspendGroupBuffs, 						true, 	"Enable this to cause self buffs and group's buffs to not tick down")
+RULE_BOOL(Custom, 	FadeNPCDebuffsOutofCombat, 				true, 	"Enable to to cause NPCs to lose all buffs automatically when combat ends")
+RULE_BOOL(Custom, 	UseTHJItemMutations, 					true, 	"Rename items according to THJ standards and apply other mutations")
+RULE_BOOL(Custom, 	ClearRestingDetrimentalEffectsEnabled, 	true, 	"Remove detrimental spell effects from self and pets when OOC regen engages")
+RULE_REAL(Custom, 	ItemExtraSpellAmtMaximumPercentage, 	0.0, 	"Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
+
+// Item Upgrades
+RULE_BOOL(Custom, 	DoItemUpgrades, 						true, "Retribution item upgrades")
+RULE_REAL(Custom, 	Tier2ItemDropRate, 						25, "Percentage chance that a drop will be upgraded to Tier 2. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Tier2.")
+RULE_REAL(Custom, 	Tier1ItemDropRate, 						50, "Percentage chance that a drop will be upgraded to Tier 1. These percentages are independent of one another, but Tier2 is rolled first. Default value is twice as rare as Unmodified")
+RULE_BOOL(Custom, 	PowerSourceItemUpgrade, 		 		false, "Enable to add Power Source to all items which can be equipped by some race and class.")
+RULE_REAL(Custom, 	PowerSourceItemUpgradeRateScale, 		1.0, "Scale XP rate of items using this value.")
+
+// General QoL and Customizations
+RULE_BOOL(Custom, 	UseDynamicItemDiscoveryTags, 			true, "Enable appfending Discovered By: items using the charmfile method")
+RULE_BOOL(Custom, 	TauntTogglesPetTanking, 				true, "Enable to let pets hold aggro while taunt is on")
+RULE_BOOL(Custom, 	LessStrictSpellStacking, 				true, "Don't check songs and buffs or detrimental and beneficial against each other for buff slot blocking")
+RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
+RULE_STRING(Custom, PetBagList, 							"199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
+RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
+
+// Exploit Prevention
+RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
+RULE_BOOL(Custom, 	StripCharmItems, 						true, "Remove all items handed to charmed mobs when charm breaks. Additionally, return items handed to charmed mobs and give mob a copy.")
+
+// Seasonal
+RULE_INT(Custom,  	EnableSeasonalCharacters, 				0, "Set to Seasonal ID to track for current Seasonal characters, 0 to disable.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY

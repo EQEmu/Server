@@ -2945,14 +2945,14 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 						linker.SetItemData(database.GetItem(item->item_id));
 						auto new_item_lnk = linker.GenerateLink();
 
-						killer->Message(Chat::Yellow, "The tides of fate have shifted! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+						killer->Message(Chat::Yellow, "Luck is with you! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
 
 						if (killer->IsGrouped()) {
 							Group* g = entity_list.GetGroupByClient(killer->CastToClient());
 							if (g) {
 								for (const auto &m : g->members) {
 									if (m && m->GetID() != killer->GetID()) {
-										m->Message(Chat::Yellow, "The tides of fate have shifted! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+										m->Message(Chat::Yellow, "Luck is with you! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
 									}
 								}
 							}
@@ -2961,7 +2961,7 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 							if (r) {
 								for (const auto &m : r->members) {
 									if (m.member && m.member->GetID() != killer->GetID()) {
-										m.member->Message(Chat::Yellow, "The tides of fate have shifted! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+										m.member->Message(Chat::Yellow, "Luck is with you! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
 									}
 								}
 							}

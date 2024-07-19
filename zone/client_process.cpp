@@ -112,7 +112,7 @@ bool Client::Process() {
 		}
 
 		if (RuleB(Custom, BlockBankItemsOnZone) && Connected() && sent_inventory < (EQ::invslot::SHARED_BANK_END+1)) {
-			LogDebug("Parsing inventory slot: [{}]", sent_inventory);
+			LogInventoryDetail("Filling character [{}] inventory slot: [{}] ", GetCleanName(), sent_inventory);
 			const EQ::ItemInstance* inst = nullptr;
 			// Jump the gaps
 			if (sent_inventory < EQ::invslot::GENERAL_BEGIN) {
@@ -134,7 +134,6 @@ bool Client::Process() {
 				}
 				sent_inventory = EQ::invslot::GENERAL_END;
 			} else {
-
 				inst = m_inv[sent_inventory];
 				if (inst) {
 					SendItemPacket(sent_inventory, inst, ItemPacketType::ItemPacketTrade);

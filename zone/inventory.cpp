@@ -227,7 +227,7 @@ bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 a
 			if ((!DataBucket::GetData("eom_17779").empty()) && item_id < GetMaxItemUpgrade(original_id)) {
 				LogDebug("Trying Second-Round Upgrade");
 				auto old_id = item_id;
-				item_id = GetApocItemUpgrade(item_id);
+				item_id = GetMaxItemUpgrade(item_id);
 
 				if (item_id > old_id) {
 					EQ::SayLinkEngine linker;
@@ -239,7 +239,7 @@ bool Client::SummonApocItem(uint32 item_id, int16 charges, uint32 aug1, uint32 a
 					linker.SetItemData(database.GetItem(item_id));
 					auto new_item_lnk = linker.GenerateLink();
 
-					Message(Chat::Yellow, "The tides of fate have shifted! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
+					Message(Chat::Yellow, "Luck is with you! [%s] has become [%s].", old_item_lnk.c_str(), new_item_lnk.c_str());
 				}
 			}
 
