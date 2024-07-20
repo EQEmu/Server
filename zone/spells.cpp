@@ -1320,6 +1320,7 @@ void Mob::ZeroCastingVars()
 //This will cause server to stop trying to pulse a bard song. Does not stop song clientside.
 void Mob::ZeroBardPulseVars()
 {
+	LogDebug("Zeroing BardPulseVars");
 	bardsong = 0;
 	bardsong_target_id = 0;
 	bardsong_slot = CastingSlot::Gem1;
@@ -1375,6 +1376,7 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	if(!spellid)
 		return;
 
+	LogDebug("Tracing: [{}], [{}]", bardsong, IsBardSong(casting_spell_id));
 	if (bardsong || IsBardSong(casting_spell_id)) {
 		ZeroBardPulseVars();
 	}
@@ -1389,14 +1391,16 @@ void Mob::InterruptSpell(uint16 message, uint16 color, uint16 spellid)
 	// clients need some packets
 	if (IsClient() && message != SONG_ENDS)
 	{
-		// the interrupt message
-		outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
-		InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
-		ic->messageid = message;
-		ic->spawnid = GetID();
-		outapp->priority = 5;
-		CastToClient()->QueuePacket(outapp);
-		safe_delete(outapp);
+		if (!RuleB(Custom, MulticlassingEnabled)) {
+			// the interrupt message
+			outapp = new EQApplicationPacket(OP_InterruptCast, sizeof(InterruptCast_Struct));
+			InterruptCast_Struct* ic = (InterruptCast_Struct*) outapp->pBuffer;
+			ic->messageid = message;
+			ic->spawnid = GetID();
+			outapp->priority = 5;
+			CastToClient()->QueuePacket(outapp);
+			safe_delete(outapp);
+		}
 
 		SendSpellBarEnable(spellid);
 	}
@@ -1916,11 +1920,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		{
 			Client *c = CastToClient();
 
-			// This exists normal bard song looping for the song types which are handled by buff suspending logic
 			if (RuleB(Custom, MulticlassingEnabled)) {
 				auto tt = spells[spell_id].target_type;
 				if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
-					SendSpellBarEnable(spell_id);
+					c->SendSpellBarEnable(spell_id);
 				}
 			}
 
@@ -1945,7 +1948,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		if(IsClient())
 		{
 			Client *c = CastToClient();
-			SendSpellBarEnable(spell_id);
+			c->SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
 			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
@@ -2993,7 +2996,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 }
 
 bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
-
+	LogDebug("Applying Bard Pulse [{}]", spell_id);
 	/*
 		Check any bard specific special behaviors we need before applying the next pulse.
 		Note: Silence does not stop an active bard pulse.
@@ -3001,6 +3004,11 @@ bool Mob::ApplyBardPulse(int32 spell_id, Mob *spell_target, CastingSlot slot) {
 	if (!spell_target) {
 		return false;
 	}
+
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		spell_target->SetEntityVariable("BardPulse", std::to_string(spell_id));
+	}
+
 	/*
 		Bard song charm that have no mana will continue to try and pulse on target, but will only reapply when charm fades.
 		Live does not spam client with do not take hold messages. Checking here avoids that from happening. Only try to reapply if charm fades.
@@ -3780,6 +3788,11 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	}
 	//do not fade buff if from bard pulse, live does not give a fades message.
 	bool from_bard_song_pulse = caster ? caster->IsActiveBardSong(spell_id) : false;
+
+	if (RuleB(Custom, MulticlassingEnabled) && Strings::ToInt(GetEntityVariable("BardPulse")) == spell_id) {
+		DeleteEntityVariable("BardPulse");
+		from_bard_song_pulse = true;
+	}
 
 	// at this point we know that this buff will stick, but we have
 	// to remove some other buffs already worn if will_overwrite is true
