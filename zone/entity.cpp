@@ -1655,9 +1655,9 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 					Send = clear_target_window;
 					if (c->GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs)) {
 						if (c->GetGM()) {
-							if (!c->EntityVariableExists("see_buffs_flag")) {
+							if (!c->EntityVariableExists(SEE_BUFFS_FLAG)) {
 								c->Message(Chat::White, "Your GM flag allows you to always see your targets' buffs.");
-								c->SetEntityVariable("see_buffs_flag", "1");
+								c->SetEntityVariable(SEE_BUFFS_FLAG, "1");
 							}
 						}
 

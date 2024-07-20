@@ -793,7 +793,7 @@ void Client::CompleteConnect()
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
 
-	DeleteEntityVariable("see_buffs_flag");
+	DeleteEntityVariable(SEE_BUFFS_FLAG);
 
 	// the way that the client deals with positions during the initial spawn struct
 	// is subtly different from how it deals with getting a position update
