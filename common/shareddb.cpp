@@ -132,7 +132,7 @@ std::string md5::digest(std::string str)
 
         for (int k = 0; k < 64; k++)
             current_chunk.in_chars[k] = padded_message[k + i * 64];
-    
+
         for (int k = 0; k < 16; k++)
             m_array[k] = current_chunk.in_ints[k];
 
@@ -140,7 +140,7 @@ std::string md5::digest(std::string str)
         {
             uint32_t F, g;
             if (j < 16)
-            {   
+            {
                 F = (B & C) | ((~B) & D);
                 g = j;
             }
@@ -378,7 +378,7 @@ bool SharedDatabase::SaveInventory(uint32 char_id, const EQ::ItemInstance* inst,
 	if (slot_id >= EQ::invslot::GUILD_TRIBUTE_BEGIN && slot_id <= EQ::invslot::GUILD_TRIBUTE_END)
 		return true;
 
-	if ((slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invslot::SHARED_BANK_END) || 
+	if ((slot_id >= EQ::invslot::SHARED_BANK_BEGIN && slot_id <= EQ::invslot::SHARED_BANK_END) ||
 	    (slot_id >= EQ::invbag::SHARED_BANK_BAGS_BEGIN && slot_id <= EQ::invbag::SHARED_BANK_BAGS_END)) {
         // Shared bank inventory
 		if (!inst) {
@@ -753,7 +753,7 @@ bool SharedDatabase::GetSharedBank(uint32 id, EQ::InventoryProfile *inv, bool is
 			inst->SetCustomDataString(data_str);
 		}
 
-		RunGenerateCallback(inst);
+		//RunGenerateCallback(inst);
 
 		// theoretically inst can be nullptr ... this would be very bad ...
 		const int16 put_slot_id = inv->PutItem(slot_id, *inst);
@@ -787,9 +787,9 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 	}
 
 	// Only allow creation of dynamic items which aren't already dynamic items
-    if (!inst->GetCustomData("Customized").empty()) {		
+    if (!inst->GetCustomData("Customized").empty()) {
         std::string key = md5::digest(inst->GetCustomDataString());
-        if (key != inst->GetItem()->Comment) {			
+        if (key != inst->GetItem()->Comment) {
 			// This data is important to preserve to properly track the item in inventories.
 			if (inst->GetCustomData("original_id").empty()) {
 				inst->SetCustomData("original_id", std::to_string(inst->GetID()));
@@ -805,7 +805,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			if (!inst->GetCustomData("Name").empty()) {
 				strn0cpy(inst->GetMutableItem()->Name, inst->GetCustomData("Name").c_str(), sizeof(inst->GetMutableItem()->Name));
 			}
-			
+
 			inst->GetMutableItem()->ArtifactFlag = Strings::ToInt(inst->GetCustomData("ArtifactFlag"), inst->GetItem()->ArtifactFlag);
 			inst->GetMutableItem()->Attuneable   = Strings::ToInt(inst->GetCustomData("Attuneable"), inst->GetItem()->Attuneable);
 			inst->GetMutableItem()->Season       = Strings::ToInt(inst->GetCustomData("Season"), 0);
@@ -864,7 +864,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->ADex             += Strings::ToInt(inst->GetCustomData("ADex"), 0);
 			inst->GetMutableItem()->ACha             += Strings::ToInt(inst->GetCustomData("ACha"), 0);
 			inst->GetMutableItem()->AInt             += Strings::ToInt(inst->GetCustomData("AInt"), 0);
-			inst->GetMutableItem()->AWis             += Strings::ToInt(inst->GetCustomData("AWis"), 0);			
+			inst->GetMutableItem()->AWis             += Strings::ToInt(inst->GetCustomData("AWis"), 0);
 			inst->GetMutableItem()->Proc.Level       += Strings::ToInt(inst->GetCustomData("Proc.Level"), 0);
 			inst->GetMutableItem()->Proc.Level2      += Strings::ToInt(inst->GetCustomData("Proc.Level2"), 0);
 			inst->GetMutableItem()->Click.Level      += Strings::ToInt(inst->GetCustomData("Click.Level"), 0);
@@ -874,7 +874,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 			inst->GetMutableItem()->BagSlots		 += Strings::ToInt(inst->GetCustomData("BagSlots"), 0);
 
 			// Delay is weird, we want to set a hard floor on how low we can go.
-			inst->GetMutableItem()->Delay = std::max((uint8)(inst->GetMutableItem()->Delay + Strings::ToInt(inst->GetCustomData("Delay"), 0)), std::min((uint8)15, GetItem(inst->GetItem()->OriginalID)->Delay));			
+			inst->GetMutableItem()->Delay = std::max((uint8)(inst->GetMutableItem()->Delay + Strings::ToInt(inst->GetCustomData("Delay"), 0)), std::min((uint8)15, GetItem(inst->GetItem()->OriginalID)->Delay));
 
 			if (!inst->GetCustomData("force_unlimited_charges").empty() && inst->IsCharged()) {
 				uint32 new_cast_time = std::max(static_cast<uint32>(5000), Strings::ToUnsignedInt(inst->GetCustomData("force_unlimited_charges")));
@@ -885,7 +885,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 				inst->GetMutableItem()->CastTime_	= std::max(new_cast_time, static_cast<uint32>(inst->GetItem()->CastTime_));
 				if (inst->GetItem()->Classes && inst->GetItem()->Races) {
 					inst->GetMutableItem()->Click.Type = 4; // Must Equip
-				}				
+				}
 			}
 
 			// Prevent items of this type from being sold to vendors.
@@ -901,7 +901,7 @@ void SharedDatabase::RunGenerateCallback(EQ::ItemInstance* inst) {
 		// If we don't have a local cached copy let's check where it's at in the items_hash or insert it for the first time
 		// And assign to our local cache. This should only happen once per zone per item that hasn't synced
 		EQ::ItemData* data = nullptr;
-		
+
 		uint32 next_id = 0xFFFFFFF;
 		// Strategy here is to assign free item ID from the upper bound with decrementing ID.
 		// This makes lookup faster for reassigning to cache.
@@ -1064,7 +1064,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			}
 		}
 
-		RunGenerateCallback(inst);
+		//RunGenerateCallback(inst);
 
 		int16 put_slot_id;
 		if (slot_id > (EQ::invbag::TRADE_BAGS_END)) {
@@ -1077,7 +1077,7 @@ bool SharedDatabase::GetInventory(uint32 char_id, EQ::InventoryProfile *inv)
 			LogError("Warning: Defunct location for item in inventory: charid={}, item_id={}, slot_id={} .. pushing to cursor...",
 				char_id, item_id, slot_id);
 			put_slot_id = inv->PushCursor(*inst);
-		} 
+		}
 		*/
 		else {
 			put_slot_id = inv->PutItem(slot_id, *inst);
@@ -1176,9 +1176,9 @@ bool SharedDatabase::GetInventory(uint32 account_id, char *name, EQ::InventoryPr
 			}
 		}
 
-		RunGenerateCallback(inst);
-		
-		int16 put_slot_id;		
+		//RunGenerateCallback(inst);
+
+		int16 put_slot_id;
 		put_slot_id = inv->PutItem(slot_id, *inst);
 
 		safe_delete(inst);
@@ -1610,7 +1610,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.CharmFileID = Strings::IsNumber(row[ItemField::charmfileid]) ? Strings::ToUnsignedInt(row[ItemField::charmfileid]) : 0;
 		strn0cpy(item.CharmFile, row[ItemField::charmfile], sizeof(item.CharmFile));
 		strn0cpy(item.Filename, row[ItemField::filename], sizeof(item.Filename));
-		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);		
+		item.ScriptFileID = Strings::ToUnsignedInt(row[ItemField::scriptfileid]);
 
 		if (RuleB(Custom, UseDynamicItemDiscoveryTags)) {
 			snprintf(item.CharmFile, sizeof(item.CharmFile), "%d#%s", item.ID, row[ItemField::charmfile]);
@@ -1661,7 +1661,7 @@ EQ::ItemData *SharedDatabase::GetItem(uint32 id) const
 
 	if (!items_hash || id > items_hash->max_key()) {
 		return nullptr;
-	}	
+	}
 
 	if (items_hash->exists(id)) {
 		return &(items_hash->at(id));
@@ -1756,7 +1756,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->SetOrnamentIcon(ornamenticon);
 		inst->SetOrnamentationIDFile(ornamentidfile);
 		inst->SetOrnamentHeroModel(ornament_hero_model);
-		RunGenerateCallback(inst);
+		//RunGenerateCallback(inst);
 	}
 
 	return inst;
@@ -1800,7 +1800,7 @@ EQ::ItemInstance* SharedDatabase::CreateItem(
 		inst->SetOrnamentIcon(ornamenticon);
 		inst->SetOrnamentationIDFile(ornamentidfile);
 		inst->SetOrnamentHeroModel(ornament_hero_model);
-		RunGenerateCallback(inst);
+		//RunGenerateCallback(inst);
 	}
 
 	return inst;
