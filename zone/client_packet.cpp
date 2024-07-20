@@ -793,6 +793,8 @@ void Client::CompleteConnect()
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
 
+	DeleteEntityVariable("see_buffs_flag");
+
 	// the way that the client deals with positions during the initial spawn struct
 	// is subtly different from how it deals with getting a position update
 	// if a mob is slightly in the wall or slightly clipping a floor they will be
