@@ -35,11 +35,13 @@
 #include "zone.h"
 #include "data_bucket.h"
 #include "../common/events/player_event_logs.h"
+#include "worldserver.h"
 
 #include <cctype>
 
 extern Zone      *zone;
 extern QueryServ *QServ;
+extern WorldServer worldserver;
 
 #ifdef EMBPERL_XS_CLASSES
 
@@ -5953,13 +5955,13 @@ bool Perl__send_parcel(perl::reference table_ref)
 		ps.item_slot = e.slot_id;
 		strn0cpy(ps.send_to, name.c_str(), sizeof(ps.send_to));
 
-		std::unique_ptr<ServerPacket> out(new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct)));
-		auto                          data = (Parcel_Struct *) out->pBuffer;
+		std::unique_ptr<ServerPacket> server_packet(new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct)));
+		auto                          data = (Parcel_Struct *) server_packet->pBuffer;
 
 		data->item_slot = ps.item_slot;
 		strn0cpy(data->send_to, ps.send_to, sizeof(data->send_to));
 
-		worldserver.SendPacket(out.get());
+		worldserver.SendPacket(server_packet.get());
 	}
 
 	return out;
