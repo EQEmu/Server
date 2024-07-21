@@ -2471,16 +2471,34 @@ void Client::SellToBuyer(const EQApplicationPacket *app)
 					)
 				);
 				RemoveItem(sell_line.item_id, sell_line.seller_quantity);
-				if (!buyer->PutItemInInventoryWithStacking(buy_inst.get())) {
-					buyer->Message(Chat::Red, "Error putting item in your inventory.");
-					PutItemInInventoryWithStacking(buy_inst.get());
-					SendBarterBuyerClientMessage(
-						sell_line,
-						Barter_SellerTransactionComplete,
-						Barter_Failure,
-						Barter_Failure
-					);
-					return;
+				if (buy_inst->IsStackable()) {
+					if (!buyer->PutItemInInventoryWithStacking(buy_inst.get())) {
+						buyer->Message(Chat::Red, "Error putting item in your inventory.");
+						PutItemInInventoryWithStacking(buy_inst.get());
+						SendBarterBuyerClientMessage(
+							sell_line,
+							Barter_SellerTransactionComplete,
+							Barter_Failure,
+							Barter_Failure
+						);
+						return;
+					}
+				}
+				else {
+					for (int i = 1; i <= sell_line.seller_quantity; i++) {
+						buy_inst->SetCharges(1);
+						if (!buyer->PutItemInInventoryWithStacking(buy_inst.get())) {
+							buyer->Message(Chat::Red, "Error putting item in your inventory.");
+							PutItemInInventoryWithStacking(buy_inst.get());
+							SendBarterBuyerClientMessage(
+							sell_line,
+								Barter_SellerTransactionComplete,
+								Barter_Failure,
+								Barter_Failure
+							);
+							return;
+						}
+					}
 				}
 
 				uint64 total_cost = (uint64) sell_line.item_cost * (uint64) sell_line.seller_quantity;
@@ -4140,7 +4158,7 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 				buyer->GetCleanName(),
 				ti.item_name
 			);
-			Message(
+			buyer->Message(
 				Chat::Red,
 				fmt::format(
 					"{} wanted to sell you {} however you no longer have compensation item {}",
@@ -4161,7 +4179,7 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 			buyer->GetCleanName(),
 			total_cost
 		);
-		Message(
+		buyer->Message(
 			Chat::Red,
 			fmt::format(
 				"{} wanted to sell you {} however you have insufficient funds.",
@@ -4172,7 +4190,7 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 		buyer_error = true;
 	}
 
-	auto buy_item_slot_id = GetInv().HasItem(
+	auto buy_item_slot_id = buyer->GetInv().HasItem(
 		sell_line.item_id,
 		sell_line.seller_quantity,
 		invWherePersonal
@@ -4184,7 +4202,7 @@ bool Client::DoBarterBuyerChecks(BuyerLineSellItem_Struct &sell_line)
 			sell_line.item_name,
 			buyer->GetCleanName()
 		);
-		Message(
+		buyer->Message(
 			Chat::Red,
 			fmt::format(
 				"{} wanted to sell you {} however you already have the LORE item.",

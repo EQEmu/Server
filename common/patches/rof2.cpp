@@ -2864,8 +2864,12 @@ namespace RoF2
 			outapp->WriteUInt8(0);
 		}
 
-		outapp->WriteUInt16(emu->zone_id);
-		outapp->WriteUInt16(emu->zoneInstance);
+		outapp->WriteUInt32(emu->zone_id);
+		// this appears to be incorrect and breaks zone matching for trader/barter/buyer functions
+		// with the zone routing updates the instance was being set as 3 for bazaar on my install.
+		// Tested with PEQ and it also creates intance id of 3 for bazaar.
+		// the client (RoF2) reads the above as uint32
+		//outapp->WriteUInt16(emu->zoneInstance);
 
 		outapp->WriteFloat(emu->y);
 		outapp->WriteFloat(emu->x);
