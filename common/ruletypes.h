@@ -242,6 +242,9 @@ RULE_INT(Mercs, AggroRadiusPuller, 25, "Determines the distance from which a mer
 RULE_INT(Mercs, ResurrectRadius, 50, "Determines the distance from which a healer merc will attempt to resurrect a group member's corpse")
 RULE_INT(Mercs, ScaleRate, 100, "Merc scale factor")
 RULE_BOOL(Mercs, AllowMercSuspendInCombat, true, "Allow merc suspend in combat")
+RULE_BOOL(Mercs, MercsIgnoreLevelBasedHasteCaps, false, "Ignores hard coded level based haste caps.")
+RULE_INT(Mercs, MercsHasteCap, 100, "Haste cap for non-v3(over haste) haste")
+RULE_INT(Mercs, MercsHastev3Cap, 25, "Haste cap for v3(over haste) haste")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Guild)
@@ -668,6 +671,9 @@ RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the NPC will heal on gate if e
 RULE_BOOL(NPC, AnimalsOpenDoors, true, "Determines or not whether animals open doors or not when they approach them")
 RULE_INT(NPC, MaxRaceID, 732, "Maximum Race ID, RoF2 by default supports up to 732")
 RULE_BOOL(NPC, DisableLastNames, false, "Enable to disable NPC Last Names")
+RULE_BOOL(NPC, NPCIgnoreLevelBasedHasteCaps, false, "Ignores hard coded level based haste caps.")
+RULE_INT(NPC, NPCHasteCap, 150, "Haste cap for non-v3(over haste) haste")
+RULE_INT(NPC, NPCHastev3Cap, 25, "Haste cap for v3(over haste) haste")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
@@ -759,6 +765,9 @@ RULE_BOOL(Bots, CazicTouchBotsOwner, true, "Default True. Cazic Touch/DT will hi
 RULE_INT(Bots, BotsClickItemsMinLvl, 1, "Minimum level for bots to be able to use ^clickitem. Default 1.")
 RULE_BOOL(Bots, BotsCanClickItems, true, "Enables the ability for bots to click items they have equipped. Default TRUE")
 RULE_BOOL(Bots, CanClickMageEpicV1, true, "Whether or not bots are allowed to click Mage Epic 1.0. Default TRUE")
+RULE_BOOL(Bots, BotsIgnoreLevelBasedHasteCaps, false, "Ignores hard coded level based haste caps.")
+RULE_INT(Bots, BotsHasteCap, 100, "Haste cap for non-v3(over haste) haste")
+RULE_INT(Bots, BotsHastev3Cap, 25, "Haste cap for v3(over haste) haste")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Chat)
