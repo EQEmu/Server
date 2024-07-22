@@ -362,6 +362,10 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 }
 
 uint8 GetPlayerClassIDByName(const std::string& class_name) {
+    if (class_name.empty()) {
+        return 255;
+    }
+
     auto it = std::find_if(class_names.begin(), class_names.end(),
                            [&class_name](const std::pair<uint8, std::string>& pair) {
                                return pair.second == class_name;
@@ -370,9 +374,10 @@ uint8 GetPlayerClassIDByName(const std::string& class_name) {
     if (it != class_names.end()) {
         return it->first;
     } else {
-        return 255;
+        return 255; // Return an error code or invalid value
     }
 }
+
 uint8 GetPlayerClassValue(uint8 class_id)
 {
 	if (!IsPlayerClass(class_id)) {

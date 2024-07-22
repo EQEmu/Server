@@ -3466,7 +3466,7 @@ void perl_register_client()
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
 	package.add("GetClassAbbreviation", &Perl_Client_GetClassAbbreviation);
 	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
-	package.add("HasClassID", (bool(*)(Client*, int))&Perl_Client_HasClass);
+	package.add("HasClassID", (bool(*)(Client*, int))&Perl_Client_HasClassID);
 	package.add("HasClass", (bool(*)(Client*, std::string))&Perl_Client_HasClass);
 	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
 	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
