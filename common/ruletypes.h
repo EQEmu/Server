@@ -1054,6 +1054,7 @@ RULE_BOOL(Custom, 	LessStrictSpellStacking, 				true, "Don't check songs and buf
 RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
 RULE_STRING(Custom, PetBagList, 							"199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
 RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
+RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")

@@ -5319,10 +5319,15 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 			}
 		}
 	}
-	//If OneProcPerWeapon is not enabled, we reset the try for that weapon regardless of if we procced or not.
-	//This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
-	if (!RuleB(Combat, OneProcPerWeapon))
+
+	if (RuleB(Custom, MultipleTwoHandedProcs) && weapon && (weapon->IsType2HWeapon() || weapon->ItemType == EQ::item::ItemTypeBow)) {
+		// Override the OneProcPerWeapon rule for two-handed weapons
 		proced = false;
+	} else if (!RuleB(Combat, OneProcPerWeapon)) {
+		// If OneProcPerWeapon is not enabled, reset the try for that weapon regardless of if we procced or not.
+		// This is for some servers that may want to have as many procs triggering from weapons as possible in a single round.
+		proced = false;
+	}
 
 	if (!proced && inst) {
 		for (int r = EQ::invaug::SOCKET_BEGIN; r <= EQ::invaug::SOCKET_END; r++) {
