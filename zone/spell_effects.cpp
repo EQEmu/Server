@@ -1328,6 +1328,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Summon %s: %s", (effect==SE_Familiar)?"Familiar":"Pet", spell.teleport_zone);
 #endif
+
+				if (GetPet() && GetPet()->IsFamiliar())
+				{
+					auto mypet = GetPet();
+					SetPet(nullptr);
+					mypet->CastToNPC()->Depop();
+				}
+
 				if(GetPet())
 				{
 					MessageString(Chat::Shout, ONLY_ONE_PET);
@@ -4563,7 +4571,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Familiar:
 			{
 				Mob *mypet = GetPet();
-				if (mypet){
+				if (mypet && mypet->IsFamiliar()){
 					if(mypet->IsNPC())
 						mypet->CastToNPC()->Depop();
 					SetPetID(0);
