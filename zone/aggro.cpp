@@ -456,9 +456,22 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	// Frustrated mobs (all rooted up with no one to kill)
 	// will engage without PROX_AGGRO ability if someone new is close now.
 
-	bool is_frustrated = (IsRooted() && !CombatRange(target));
+	const bool is_frustrated = IsRooted() && !CombatRange(target);
 
-	if (!is_frustrated && IsEngaged() && (!GetSpecialAbility(SpecialAbility::ProximityAggro) && GetBodyType() != BodyType::Undead || (GetSpecialAbility(SpecialAbility::ProximityAggro) && !CombatRange(mob)))) {
+	if (
+		!is_frustrated &&
+		IsEngaged() &&
+		(
+			(
+				!GetSpecialAbility(SpecialAbility::ProximityAggro) &&
+				GetBodyType() != BodyType::Undead
+			) ||
+			(
+				GetSpecialAbility(SpecialAbility::ProximityAggro) &&
+				!CombatRange(mob)
+			)
+		)
+	) {
 		LogAggro(
 			"[{}] is in combat, and does not have prox_aggro, or does and is out of combat range with [{}]",
 			GetName(),
