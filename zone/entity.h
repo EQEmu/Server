@@ -60,7 +60,7 @@ class Bot;
 
 extern EntityList entity_list;
 
-constexpr std::string SEE_BUFFS_FLAG = "see_buffs_flag";
+constexpr const char* SEE_BUFFS_FLAG = "see_buffs_flag";
 
 class Entity
 {
