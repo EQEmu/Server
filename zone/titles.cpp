@@ -19,7 +19,7 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/strings.h"
 #include "../common/misc_functions.h"
-#include "../common/repositories/titles_repository.h"
+#include "../common/repositories/player_titlesets_repository.h"
 
 #include "client.h"
 #include "entity.h"
@@ -343,7 +343,7 @@ void Client::RemoveTitle(int title_set)
 		return;
 	}
 
-	TitlesRepository::DeleteWhere(
+	PlayerTitlesetsRepository::DeleteWhere(
 		database,
 		fmt::format(
 			"`title_set` = {} AND `char_id` = {}",
