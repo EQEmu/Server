@@ -139,6 +139,7 @@ const std::string GetPlayerClassAbbreviation(uint8 class_id);
 
 uint8 GetPlayerClassValue(uint8 class_id);
 uint16 GetPlayerClassBit(uint8 class_id);
+uint8 GetPlayerClassIDByName(const std::string& class_name);
 
 bool IsFighterClass(uint8 class_id);
 bool IsSpellFighterClass(uint8 class_id);

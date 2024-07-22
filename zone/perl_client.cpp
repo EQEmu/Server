@@ -2107,6 +2107,12 @@ bool Perl_Client_HasClass(Client* self, int class_id)
 	return self->HasClass(class_id);
 }
 
+bool Perl_Client_HasClass(Client* self, std::string class_name)
+{
+	int class_id = GetPlayerClassIDByName(class_name);
+	return self->HasClass(class_id);
+}
+
 uint16_t Perl_Client_GetClassBitmask(Client* self)
 {
 	return GetPlayerClassBit(self->GetClass());
@@ -3460,7 +3466,8 @@ void perl_register_client()
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
 	package.add("GetClassAbbreviation", &Perl_Client_GetClassAbbreviation);
 	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
-	package.add("HasClass", &Perl_Client_HasClass);
+	package.add("HasClass", (bool(*)(Client*, int))&Perl_Client_HasClass);
+	package.add("HasClass", (bool(*)(Client*, std::string))&Perl_Client_HasClass);
 	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
 	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
