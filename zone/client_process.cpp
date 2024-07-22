@@ -1034,22 +1034,27 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
+		const bool use_old_resurrection = (
+			RuleB(Character, UseOldRaceRezEffects) &&
+			(
+				GetRace() == Race::Barbarian ||
+				GetRace() == Race::Dwarf ||
+				GetRace() == Race::Troll ||
+				GetRace() == Race::Ogre
+			)
+		);
+
+		const uint16 resurrection_sickness_spell_id = (
+			use_old_resurrection ?
+			RuleI(Character, OldResurrectionSicknessSpellID) :
+			RuleI(Character, ResurrectionSicknessSpellID)
+		);
+
 		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
 			SetMana(0);
-			int resurrection_sickness_spell_id = (
-				RuleB(Character, UseOldRaceRezEffects) &&
-			    (
-					GetRace() == BARBARIAN ||
-					GetRace() == DWARF ||
-					GetRace() == TROLL ||
-					GetRace() == OGRE
-				) ?
-				RuleI(Character, OldResurrectionSicknessSpellID) :
-				RuleI(Character, ResurrectionSicknessSpellID)
-			);
 
 			if (RuleB(Spells, BuffsFadeOnDeath)) {
 				BuffFadeNonPersistDeath();
@@ -1066,23 +1071,11 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 			RestoreEndurance();
 		} else {
 			if (RuleB(Character, UseResurrectionSickness)) {
-				int resurrection_sickness_spell_id = (
-				RuleB(Character, UseOldRaceRezEffects) &&
-					(
-						GetRace() == BARBARIAN ||
-						GetRace() == DWARF ||
-						GetRace() == TROLL ||
-						GetRace() == OGRE
-					) ?
-					RuleI(Character, OldResurrectionSicknessSpellID) :
-					RuleI(Character, ResurrectionSicknessSpellID)
-				);
-
-				bool has_rez_effects = false;
+				bool has_resurrection_sickness = false;
 
 				for (int slot = 0; slot < GetMaxTotalSlots(); slot++) {
 					if (IsValidSpell(buffs[slot].spellid) && IsResurrectionSicknessSpell(buffs[slot].spellid)){
-						has_rez_effects = true;
+						has_resurrection_sickness = true;
 						break;
 					}
 				}
@@ -1092,7 +1085,7 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 					BuffFadeNonPersistDeath();
 				}
 
-				if (has_rez_effects) {
+				if (has_resurrection_sickness) {
 					SpellOnTarget(resurrection_sickness_spell_id, this);
 				}
 			}
