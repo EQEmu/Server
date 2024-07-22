@@ -2102,6 +2102,11 @@ bool Perl_Client_HasDisciplineLearned(Client* self, uint16 spell_id)
 	return self->HasDisciplineLearned(spell_id);
 }
 
+bool Perl_Client_HasClass(Client* self, int class_id)
+{
+	return self->HasClass(class_id);
+}
+
 uint16_t Perl_Client_GetClassBitmask(Client* self)
 {
 	return GetPlayerClassBit(self->GetClass());
@@ -2112,7 +2117,7 @@ uint32_t Perl_Client_GetClassesBitmask(Client* self)
 	return self->GetClassesBits();
 }
 
-bool Perl_Client_AddExtraClass(Client* self, int class_id) 
+bool Perl_Client_AddExtraClass(Client* self, int class_id)
 {
 	return self->AddExtraClass(class_id);
 }
@@ -3455,6 +3460,7 @@ void perl_register_client()
 	package.add("GetCharacterFactionLevel", &Perl_Client_GetCharacterFactionLevel);
 	package.add("GetClassAbbreviation", &Perl_Client_GetClassAbbreviation);
 	package.add("GetClassBitmask", &Perl_Client_GetClassBitmask);
+	package.add("HasClass", &Perl_Client_HasClass);
 	package.add("GetClassesBitmask", &Perl_Client_GetClassesBitmask);
 	package.add("AddExtraClass", (bool(*)(Client*, int))&Perl_Client_AddExtraClass);
 	package.add("GetClientMaxLevel", &Perl_Client_GetClientMaxLevel);
@@ -3829,7 +3835,7 @@ void perl_register_client()
 	package.add("SummonFixedItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32))&Perl_Client_SummonFixedItem);
 	package.add("SummonFixedItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32))&Perl_Client_SummonFixedItem);
 	package.add("SummonFixedItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32))&Perl_Client_SummonFixedItem);
-	package.add("SummonFixedItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint16))&Perl_Client_SummonFixedItem);	
+	package.add("SummonFixedItem", (void(*)(Client*, uint32, int16, bool, uint32, uint32, uint32, uint32, uint32, uint16))&Perl_Client_SummonFixedItem);
 	package.add("ReturnItem", (void(*)(Client*, uint32))&Perl_Client_ReturnItem);
 	package.add("ReturnItem", (void(*)(Client*, uint32, int16))&Perl_Client_ReturnItem);
 	package.add("ReturnItem", (void(*)(Client*, uint32, int16, bool))&Perl_Client_ReturnItem);

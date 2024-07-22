@@ -155,6 +155,11 @@ uint16 Lua_Client::GetClassBitmask() {
 	return self->GetClassesBits();
 }
 
+bool Lua_Client::HasClass(int class_id) {
+	Lua_Safe_Call_Int();
+	return self->HasClass(class_id);
+}
+
 int Lua_Client::GetClassesBitmask() {
 	Lua_Safe_Call_Int();
 	return self->GetClassesBits();
@@ -3651,6 +3656,7 @@ luabind::scope lua_register_client() {
 	.def("GetCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetCharacterFactionLevel)
 	.def("GetClassAbbreviation", (std::string(Lua_Client::*)(void))&Lua_Client::GetClassAbbreviation)
 	.def("GetClassBitmask", (uint16(Lua_Client::*)(void))&Lua_Client::GetClassBitmask)
+	.def("HasClass", (bool(Lua_Client::*)(int))&Lua_Client::AddExtraClass)
 	.def("GetClassesBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetClassesBitmask)
 	.def("AddExtraClass", (bool(Lua_Client::*)(int))&Lua_Client::AddExtraClass)
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
@@ -4026,7 +4032,7 @@ luabind::scope lua_register_client() {
 	.def("ReturnItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32))&Lua_Client::ReturnItem)
 	.def("ReturnItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32))&Lua_Client::ReturnItem)
 	.def("ReturnItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool))&Lua_Client::ReturnItem)
-	.def("ReturnItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::ReturnItem)	
+	.def("ReturnItem", (void(Lua_Client::*)(uint32,int,uint32,uint32,uint32,uint32,uint32,bool,int))&Lua_Client::ReturnItem)
 	.def("SummonItemIntoInventory", (void(Lua_Client::*)(luabind::adl::object))&Lua_Client::SummonItemIntoInventory)
 	.def("TGB", (bool(Lua_Client::*)(void))&Lua_Client::TGB)
 	.def("TakeMoneyFromPP", (bool(Lua_Client::*)(uint64))&Lua_Client::TakeMoneyFromPP)
