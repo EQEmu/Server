@@ -4536,7 +4536,7 @@ void Client::ReloadDynamicItem(uint16 slot_id) {
 	EQ::ItemInstance* inst = GetInv().GetItem(slot_id);
 
 	if (inst) {
-		database.RunGenerateCallback(inst);
+		//database.RunGenerateCallback(inst);
 		PutItemInInventory(slot_id, *inst, true);
 	}
 }

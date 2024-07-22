@@ -142,7 +142,7 @@ void NPC::SpellProcess()
 uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 	if (IsClient() && RuleB(Spells, UseSpellImpliedTargeting)) {
 		// Shortcut Pet-Only spells, these only have one potential valid target
-		if (spells[spell_id].target_type == ST_Pet) {
+		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
 			if (GetPet()) {
 				return GetPet()->GetID();
 			} else {
@@ -1916,10 +1916,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 
 	if(bard_song_mode)
 	{
+		LogSpells("Setting up Bard Song [{}]", spell_id);
 		if(IsClient())
 		{
 			Client *c = CastToClient();
 
+			LogSpells("Check 1");
 			if (RuleB(Custom, MulticlassingEnabled)) {
 				auto tt = spells[spell_id].target_type;
 				if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
@@ -1927,16 +1929,19 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				}
 			}
 
+			LogSpells("Check 2");
 			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}
+			LogSpells("Check 3");
 			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
 				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
 			}
+			LogSpells("Check 4");
 			if (RuleB(Spells, EnableBardMelody)) {
 				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 			}
-
+			LogSpells("Check 5");
 			if (!IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}

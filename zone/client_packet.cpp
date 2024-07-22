@@ -4357,6 +4357,8 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 	if (zone->GetZoneID() == Zones::BAZAAR) {
 		camp_timer.Start(5000, true);
 		return;
+	} else {
+		LogDebug("Zone ID: [{}]", zone->GetZoneID());
 	}
 
 	camp_timer.Start(29000, true);

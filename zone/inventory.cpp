@@ -29,6 +29,54 @@
 
 extern WorldServer worldserver;
 
+void Client::ValidateAugments(EQ::ItemInstance* item) {
+    if (!item) {
+        return;
+    }
+
+	bool change = false;
+
+	LogDebugDetail("Checking item [{}] for invalid augments.", item->GetItem()->Name);
+
+    // Check for Invalid Aug Types
+    for (int index = EQ::invaug::SOCKET_BEGIN; index <= EQ::invaug::SOCKET_END; ++index) {
+        int slotTypeID = item->GetItem()->AugSlotType[index];
+        auto augment = item->GetAugment(index);
+
+        if (augment) {
+            int augmentTypeBitmask = augment->GetAugmentType();
+
+            // Perform the bitwise AND operation correctly
+            if ((augmentTypeBitmask & (1 << (slotTypeID - 1))) == 0) {
+				LogDebugDetail("Found invalid Augment slotted: [{}]", augment->GetItem()->Name);
+                auto aug = item->RemoveAugment(index);
+				if (aug) {
+					LogDebugDetail("Pushing Augment [{}] to inventory.", aug->GetItem()->Name);
+                	bool success = PutItemInInventory(GetInv().FindFreeSlot(false, true, aug->GetItem()->Size), *aug, true);
+					if (!success) {
+						Message(Chat::Red, "FAILED TO PLACE INVALID AUGMENT [{}] ID [{}]. SCREENSHOT THIS AND REPORT IT.", aug->GetItem()->Name, aug->GetID());
+					} else {
+						EQ::SayLinkEngine linker;
+
+						linker.SetLinkType(EQ::saylink::SayLinkItemInst);
+						linker.SetItemInst(aug);
+
+						auto aug_link = linker.GenerateLink();
+
+						Message(Chat::Yellow, "INFO: Your augment [%s] was placed in an invalid slot, and has been moved into your bags.", aug_link.c_str());
+					}
+				}
+				change = true;
+            }
+        }
+    }
+	if (change) {
+		item->UpdateOrnamentationInfo();
+		SendItemPacket(GetInv().GetSlotByItemInst(item), item, ItemPacketType::ItemPacketTrade);
+	}
+}
+
+
 // @merth: this needs to be touched up
 uint32 Client::NukeItem(uint32 itemnum, uint8 where_to_check) {
 	if (itemnum == 0)
@@ -1984,6 +2032,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 	uint32 dstitemid = 0;
 	EQ::ItemInstance* src_inst = m_inv.GetItem(src_slot_id);
 	EQ::ItemInstance* dst_inst = m_inv.GetItem(dst_slot_id);
+
 	if (src_inst){
 		LogInventory("Src slot [{}] has item [{}] ([{}]) with [{}] charges in it", src_slot_id, src_inst->GetItem()->Name, src_inst->GetItem()->ID, src_inst->GetCharges());
 		srcitemid = src_inst->GetItem()->ID;
@@ -2508,6 +2557,8 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		}
 	}
 
+	if (src_inst) { ValidateAugments(src_inst); }
+	if (dst_inst) { ValidateAugments(dst_inst); }
 
 	return true;
 }
