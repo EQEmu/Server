@@ -343,6 +343,18 @@ void Client::RemoveTitle(int title_set)
 		return;
 	}
 
+	for (const auto& title : TitleManager::GetTitles()) {
+		if (title.titleset == title_set) {
+			if (std::string(m_pp.title) == title.prefix) {
+				SetAATitle("");
+			} else if (std::string(m_pp.suffix) == title.suffix) {
+				SetTitleSuffix("");
+			}
+
+			break;
+		}
+	}
+
 	PlayerTitlesetsRepository::DeleteWhere(
 		database,
 		fmt::format(
