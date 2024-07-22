@@ -89,7 +89,7 @@ public:
 	SharedDatabase();
 	SharedDatabase(const char *host, const char *user, const char *passwd, const char *database, uint32 port);
 	virtual ~SharedDatabase();
-	
+
 	/**
 	 * Character
 	 */

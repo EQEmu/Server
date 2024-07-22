@@ -3931,7 +3931,26 @@ void Mob::BuffProcess()
 											suspended = true;
 										} else if (caster->FindSpellBookSlotBySpellID(spellid) >= 0 && !spells[spellid].short_buff_box && !IsBardSong(spellid)) {
 											suspended = true;
-										} else if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
+										}
+									}
+								}
+							}
+
+							if (IsPet() && GetOwner()) {
+								SendPetBuffsToClient();
+							}
+						}
+					}
+
+					if (RuleB(Custom, MulticlassingEnabled) && IsBardSong(buffs[buffs_i].spellid)) {
+						if (IsClient() || (IsPetOwnerClient()) && buffs[buffs_i].caster_name) {
+							uint32 spellid = buffs[buffs_i].spellid;
+							Client* caster = entity_list.GetClientByName(buffs[buffs_i].caster_name);
+							Client* client = GetOwnerOrSelf()->CastToClient();
+							if (caster && client) {
+								if (caster == client || (client->GetGroup() && client->GetGroup()->IsGroupMember(client))) {
+									if (GetSpellEffectIndex(spellid, SE_DivineAura) == -1) {
+										if (caster->FindMemmedSpellBySpellID(spellid) >= 0 && IsBardSong(spellid)) {
 											if (buffs[buffs_i].ticsremaining == 1 && caster == this && caster->IsLinkedSpellReuseTimerReady(spells[spellid].timer_id)) {
 												auto tt = spells[spellid].target_type;
 												if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
@@ -3941,10 +3960,6 @@ void Mob::BuffProcess()
 										}
 									}
 								}
-							}
-
-							if (IsPet() && GetOwner()) {
-								SendPetBuffsToClient();
 							}
 						}
 					}
@@ -4823,6 +4838,12 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		if(p) {
 			notify->MessageString(Chat::SpellWornOff, SPELL_WORN_OFF_OF,
 				spells[buffs[slot].spellid].name, GetCleanName());
+		}
+	}
+
+	if (RuleB(Custom, MulticlassingEnabled)) {
+		if (buffs[slot].spellid = bardsong) {
+			ZeroBardPulseVars();
 		}
 	}
 
