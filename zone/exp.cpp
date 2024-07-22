@@ -545,9 +545,8 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 				}
 
 				old_item = m_inv.PopItem(EQ::invslot::slotPowerSource);
-				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
-					m_inv.GetItem(EQ::invslot::slotPowerSource)->SetAttuned(true);
 
+				if (PutItemInInventory(EQ::invslot::slotPowerSource, *new_item, true)) {
 					linker.SetItemInst(old_item);
 					auto upgrade_item_lnk = linker.GenerateLink().c_str();
 
@@ -563,7 +562,14 @@ void Client::AddEXP(ExpSource exp_source, uint64 in_add_exp, uint8 conlevel, boo
 					}
 				}
 
+				if (new_item->GetID() >= 2000000) {
+					new_item->SetAttuned(true);
+					PushItemOnCursor(*new_item, true);
+					DeleteItemInInventory(EQ::invslot::slotPowerSource, 0, true, true);
+				}
+
 				safe_delete(old_item);
+				SendItemPacket(EQ::invslot::slotPowerSource, GetInv().GetItem(EQ::invslot::slotPowerSource), ItemPacketType::ItemPacketTrade);
 			}
 			return;
 		}
