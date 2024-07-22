@@ -321,44 +321,42 @@ bool Client::Process() {
 				auto_fire = false;
 			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
-			if (ranged)
-			{
+			if (ranged) {
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQ::item::ItemTypeBow) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									RangedAttack(GetTarget());
-									if (CheckDoubleRangedAttack())
+									if (RangedAttack(GetTarget()) && CheckDoubleRangedAttack()) {
 										RangedAttack(GetTarget(), true);
-								}
-								else
+									}
+								} else {
 									ranged_timer.Start();
-							}
-							else
+								}
+							} else {
 								ranged_timer.Start();
-						}
-						else
+							}
+						} else {
 							ranged_timer.Start();
+						}
 					}
-				}
-				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
+				} else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
-								}
-								else
+								} else {
 									ranged_timer.Start();
-							}
-							else
+								}
+							} else {
 								ranged_timer.Start();
-						}
-						else
+							}
+						} else {
 							ranged_timer.Start();
+						}
 					}
 				}
 			}
