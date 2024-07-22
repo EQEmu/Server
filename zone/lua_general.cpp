@@ -26,6 +26,8 @@
 #include "data_bucket.h"
 #include "expedition.h"
 #include "dialogue_window.h"
+#include "../common/events/player_event_logs.h"
+#include "worldserver.h"
 
 struct Events { };
 struct Factions { };
@@ -56,6 +58,8 @@ extern std::map<std::string, Encounter *> lua_encounters;
 
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
+
+extern WorldServer worldserver;
 
 void unregister_event(std::string package_name, std::string name, int evt);
 
@@ -5577,7 +5581,22 @@ bool lua_send_parcel(luabind::object lua_table)
 	e.note       = note;
 	e.sent_date  = std::time(nullptr);
 
-	return CharacterParcelsRepository::InsertOne(database, e).id;
+	auto out = CharacterParcelsRepository::InsertOne(database, e).id;
+	if (out) {
+		Parcel_Struct ps{};
+		ps.item_slot = e.slot_id;
+		strn0cpy(ps.send_to, name.c_str(), sizeof(ps.send_to));
+
+		std::unique_ptr<ServerPacket> server_packet(new ServerPacket(ServerOP_ParcelDelivery, sizeof(Parcel_Struct)));
+		auto                          data = (Parcel_Struct *) server_packet->pBuffer;
+
+		data->item_slot = ps.item_slot;
+		strn0cpy(data->send_to, ps.send_to, sizeof(data->send_to));
+
+		worldserver.SendPacket(server_packet.get());
+	}
+
+	return out;
 }
 
 uint32 lua_get_zone_uptime()
