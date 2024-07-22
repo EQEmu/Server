@@ -4749,8 +4749,10 @@ uint32 Mob::GetClassesBits() const
 }
 
 bool Mob::HasClass(uint8 player_class) const {
-	if (player_class >= Class::Warrior && player_class <= Class::Beastlord) {
-		return GetPlayerClassBit(player_class) & GetClassesBits();
+	if (player_class >= Class::Warrior && player_class <= Class::Berserker) {
+		if (GetPlayerClassBit(player_class) & GetClassesBits()) {
+			return true;
+		}
 	}
 
 	return false;
