@@ -155,7 +155,7 @@ uint16 Lua_Client::GetClassBitmask() {
 	return self->GetClassesBits();
 }
 
-bool Lua_Client::HasClass(int class_id) {
+bool Lua_Client::HasClassID(int class_id) {
 	Lua_Safe_Call_Int();
 	return self->HasClass(class_id);
 }
@@ -3656,7 +3656,7 @@ luabind::scope lua_register_client() {
 	.def("GetCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetCharacterFactionLevel)
 	.def("GetClassAbbreviation", (std::string(Lua_Client::*)(void))&Lua_Client::GetClassAbbreviation)
 	.def("GetClassBitmask", (uint16(Lua_Client::*)(void))&Lua_Client::GetClassBitmask)
-	.def("HasClass", (bool(Lua_Client::*)(int))&Lua_Client::AddExtraClass)
+	.def("HasClassID", (bool(Lua_Client::*)(int))&Lua_Client::HasClassID)
 	.def("GetClassesBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetClassesBitmask)
 	.def("AddExtraClass", (bool(Lua_Client::*)(int))&Lua_Client::AddExtraClass)
 	.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
