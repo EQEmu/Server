@@ -343,7 +343,7 @@ void Client::RemoveTitle(int title_set)
 		return;
 	}
 
-	for (const auto& title : TitleManager::GetTitles()) {
+	for (const auto& title : title_manager.GetTitles()) {
 		if (title.titleset == title_set) {
 			if (std::string(m_pp.title) == title.prefix) {
 				SetAATitle("");
