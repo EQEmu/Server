@@ -2500,15 +2500,26 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 				}
 
+				// Custom behavior. base value of 0 means 'use weapon' for Not-throwing not-archery
+				// Figure out how to do archery and throwing better later.
+
+				int base_damage = spells[spell_id].base_value[i];
+
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
 					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, 0, 0, 0, 4.0f, true);
 					break;
 				case EQ::skills::SkillArchery:
+					if (caster->IsClient() && caster->GetInv().GetItem(EQ::invslot::slotRange)) {
+						base_damage = base_damage ? base_damage : caster->GetInv().GetItem(EQ::invslot::slotRange)->GetItemWeaponDamage();
+					}
 					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, 0, 0, 0, nullptr, 0, 4.0f, true);
 					break;
 				default:
-					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, 0);
+					if (caster->IsClient() && caster->GetInv().GetItem(EQ::invslot::slotPrimary)) {
+						base_damage = base_damage ? base_damage : caster->GetInv().GetItem(EQ::invslot::slotPrimary)->GetItemWeaponDamage();
+					}
+					caster->DoMeleeSkillAttackDmg(this, base_damage, spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, 0);
 					break;
 				}
 				break;
