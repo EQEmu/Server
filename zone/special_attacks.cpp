@@ -1043,17 +1043,10 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	}
 
 	if (LaunchProjectile) { // 1: Shoot the Projectile once we calculate weapon damage.
-		if (!RuleB(Custom, MulticlassingEnabled)) {
-			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-				Ammo, AmmoSlot, speed, DisableProcs);
-		}
-		else {
-			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
-				Ammo, AmmoSlot, speed, !DisableProcs);
-		}
+		TryProjectileAttack(other, AmmoItem, EQ::skills::SkillArchery, (WDmg + ADmg), RangeWeapon,
+							Ammo, AmmoSlot, speed, DisableProcs);
 		return;
 	}
-
 
 	if (focus) {
 		WDmg += WDmg * focus / 100;
@@ -1104,6 +1097,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
+	LogDebug("Doing Archery Attack Damage. Procs Disaled? [{}]", DisableProcs);
 
 	if (!DisableProcs) {
 		// Weapon Proc

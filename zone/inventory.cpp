@@ -3588,7 +3588,6 @@ void Client::SendEdgeEnduranceStats()
 
 		// Construct packet
 		opcode = OP_EdgeStats;
-		LogDebug("opcode: [{}]", opcode);
 		outapp = new EQApplicationPacket(OP_EdgeStats, 4 + (sizeof(EdgeStatEntry_Struct) * 2));
 		itempacket = (EdgeStat_Struct*)outapp->pBuffer;
 		itempacket->count = 2;
