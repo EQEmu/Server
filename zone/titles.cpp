@@ -347,7 +347,9 @@ void Client::RemoveTitle(int title_set)
 		if (title.titleset == title_set) {
 			if (std::string(m_pp.title) == title.prefix) {
 				SetAATitle("");
-			} else if (std::string(m_pp.suffix) == title.suffix) {
+			}
+
+			if (std::string(m_pp.suffix) == title.suffix) {
 				SetTitleSuffix("");
 			}
 
