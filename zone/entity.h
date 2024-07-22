@@ -60,6 +60,8 @@ class Bot;
 
 extern EntityList entity_list;
 
+constexpr const char* SEE_BUFFS_FLAG = "see_buffs_flag";
+
 class Entity
 {
 public:
