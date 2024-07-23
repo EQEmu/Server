@@ -192,7 +192,6 @@ private:
 	// holds a record of the zone table from the database
 	WorldContentService *LoadStaticGlobalZoneInstances();
 	std::vector<InstanceListRepository::InstanceList> m_zone_static_instances;
-	WorldContentService * LoadZones();
 };
 
 extern WorldContentService content_service;
