@@ -2864,7 +2864,7 @@ namespace RoF2
 			outapp->WriteUInt8(0);
 		}
 
-		outapp->WriteUInt32(emu->zone_id);
+		outapp->WriteUInt16(emu->zone_id);
 		outapp->WriteUInt16(emu->zoneInstance);
 
 		outapp->WriteFloat(emu->y);
