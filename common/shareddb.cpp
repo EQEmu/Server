@@ -1705,7 +1705,7 @@ std::string SharedDatabase::GetBook(const char *txtfile, int16 *language)
 	}
 
     if (results.RowCount() == 0) {
-        LogError("No book to send, ({})", txtfile);
+        LogErrorDetail("No book to send, ({})", txtfile);
         txtout.assign(" ",1);
         return txtout;
     }
