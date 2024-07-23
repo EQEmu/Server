@@ -368,13 +368,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_Save] = &Client::Handle_OP_Save;
 	ConnectedOpcodes[OP_SaveOnZoneReq] = &Client::Handle_OP_SaveOnZoneReq;
 	ConnectedOpcodes[OP_SelectTribute] = &Client::Handle_OP_SelectTribute;
-
-	// Use or Ignore sense heading based on rule.
-	bool train = RuleB(Skills, TrainSenseHeading);
-
-	ConnectedOpcodes[OP_SenseHeading] =
-		(train) ? &Client::Handle_OP_SenseHeading : &Client::Handle_OP_Ignore;
-
+	ConnectedOpcodes[OP_SenseHeading] = &Client::Handle_OP_SenseHeading;
 	ConnectedOpcodes[OP_SenseTraps] = &Client::Handle_OP_SenseTraps;
 	ConnectedOpcodes[OP_SetGuildMOTD] = &Client::Handle_OP_SetGuildMOTD;
 	ConnectedOpcodes[OP_SetRunMode] = &Client::Handle_OP_SetRunMode;
@@ -796,6 +790,8 @@ void Client::CompleteConnect()
 	if (parse->PlayerHasQuestSub(EVENT_ENTER_ZONE)) {
 		parse->EventPlayer(EVENT_ENTER_ZONE, this, "", 0);
 	}
+
+	DeleteEntityVariable(SEE_BUFFS_FLAG);
 
 	sent_inventory = 0;
 
@@ -13788,14 +13784,24 @@ void Client::Handle_OP_SelectTribute(const EQApplicationPacket *app)
 
 void Client::Handle_OP_SenseHeading(const EQApplicationPacket *app)
 {
-	if (!HasSkill(EQ::skills::SkillSenseHeading))
+	if (!HasSkill(EQ::skills::SkillSenseHeading)) {
 		return;
+	}
 
-	int chancemod = 0;
+	if (RuleB(Skills, TrainSenseHeading)) {
+		CheckIncreaseSkill(EQ::skills::SkillSenseHeading, nullptr, 0);
+		return;
+	}
 
-	CheckIncreaseSkill(EQ::skills::SkillSenseHeading, nullptr, chancemod);
+	if (parse->PlayerHasQuestSub(EVENT_USE_SKILL)) {
+		const auto& export_string = fmt::format(
+			"{} {}",
+			EQ::skills::SkillSenseHeading,
+			GetRawSkill(EQ::skills::SkillSenseHeading)
+		);
 
-	return;
+		parse->EventPlayer(EVENT_USE_SKILL, this, export_string, 0);
+	}
 }
 
 void Client::Handle_OP_SenseTraps(const EQApplicationPacket *app)

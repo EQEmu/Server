@@ -353,46 +353,42 @@ bool Client::Process() {
 				auto_fire = false;
 			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
-			if (ranged)
-			{
+			if (ranged) {
 				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQ::item::ItemTypeBow) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
-									LogCombat("Attempting ranged attack");
 									if (RangedAttack(GetTarget()) && CheckDoubleRangedAttack()) {
-										LogCombat("Attempting ranged double attack");
 										RangedAttack(GetTarget(), true);
 									}
-								}
-								else
+								} else {
 									ranged_timer.Start();
-							}
-							else
+								}
+							} else {
 								ranged_timer.Start();
-						}
-						else
+							}
+						} else {
 							ranged_timer.Start();
+						}
 					}
-				}
-				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
+				} else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient()) && IsAttackAllowed(GetTarget())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
 								if (CheckLosFN(GetTarget()) && CheckWaterAutoFireLoS(GetTarget())) {
 									//client has built in los check, but auto fire does not.. done last.
 									ThrowingAttack(GetTarget());
-								}
-								else
+								} else {
 									ranged_timer.Start();
-							}
-							else
+								}
+							} else {
 								ranged_timer.Start();
-						}
-						else
+							}
+						} else {
 							ranged_timer.Start();
+						}
 					}
 				}
 			}
@@ -1092,32 +1088,62 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 				name, (uint16)spells[SpellID].base_value[0],
 				SpellID, ZoneID, InstanceID);
 
-		if (RuleB(Spells, BuffsFadeOnDeath)) {
-			BuffFadeNonPersistDeath();
-		}
+		const bool use_old_resurrection = (
+			RuleB(Character, UseOldRaceRezEffects) &&
+			(
+				GetRace() == Race::Barbarian ||
+				GetRace() == Race::Dwarf ||
+				GetRace() == Race::Troll ||
+				GetRace() == Race::Ogre
+			)
+		);
+
+		const uint16 resurrection_sickness_spell_id = (
+			use_old_resurrection ?
+			RuleI(Character, OldResurrectionSicknessSpellID) :
+			RuleI(Character, ResurrectionSicknessSpellID)
+		);
 
 		int SpellEffectDescNum = GetSpellEffectDescriptionNumber(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
 		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetHP(GetMaxHP() / 5);
 			SetMana(0);
-			int resurrection_sickness_spell_id = (
-				RuleB(Character, UseOldRaceRezEffects) &&
-			    (
-					GetRace() == BARBARIAN ||
-					GetRace() == DWARF ||
-					GetRace() == TROLL ||
-					GetRace() == OGRE
-				) ?
-				RuleI(Character, OldResurrectionSicknessSpellID) :
-				RuleI(Character, ResurrectionSicknessSpellID)
-			);
+
+			if (RuleB(Spells, BuffsFadeOnDeath)) {
+				BuffFadeNonPersistDeath();
+			}
+
 			SpellOnTarget(resurrection_sickness_spell_id, this);
 		} else if (SpellID == SPELL_DIVINE_REZ) {
+			if (RuleB(Spells, BuffsFadeOnDeath)) {
+				BuffFadeNonPersistDeath();
+			}
+
 			RestoreHealth();
 			RestoreMana();
 			RestoreEndurance();
 		} else {
+			if (RuleB(Character, UseResurrectionSickness)) {
+				bool has_resurrection_sickness = false;
+
+				for (int slot = 0; slot < GetMaxTotalSlots(); slot++) {
+					if (IsValidSpell(buffs[slot].spellid) && IsResurrectionSicknessSpell(buffs[slot].spellid)){
+						has_resurrection_sickness = true;
+						break;
+					}
+				}
+
+				// Need to wipe buffs after checking if client had rez effects.
+				if (RuleB(Spells, BuffsFadeOnDeath)) {
+					BuffFadeNonPersistDeath();
+				}
+
+				if (has_resurrection_sickness) {
+					SpellOnTarget(resurrection_sickness_spell_id, this);
+				}
+			}
+
 			SetHP(GetMaxHP() / 20);
 			SetMana(GetMaxMana() / 20);
 			SetEndurance(GetMaxEndurance() / 20);

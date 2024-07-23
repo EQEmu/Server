@@ -25,6 +25,13 @@ void SetLevel(Client *c, const Seperator *sep)
 	t->SetLevel(level, true);
 
 	if (t->IsClient()) {
+		for (const auto& s : EQ::skills::GetSkillTypeMap()) {
+			const uint16 max_skill_value = t->CastToClient()->MaxSkill(s.first);
+			if (t->GetSkill(s.first) > max_skill_value) {
+				t->CastToClient()->SetSkill(s.first, max_skill_value);
+			}
+		}
+
 		t->CastToClient()->SendLevelAppearance();
 
 		if (RuleB(Bots, Enabled) && RuleB(Bots, BotLevelsWithOwner)) {
