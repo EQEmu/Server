@@ -1976,7 +1976,7 @@ namespace RoF2
 		uchar             *__emu_buffer = in->pBuffer;
 		ItemPacket_Struct *old_item_pkt = (ItemPacket_Struct *) __emu_buffer;
 
-		switch(old_item_pkt->PacketType) 			
+		switch(old_item_pkt->PacketType)
 		{
 			case ItemPacketParcel: {
 				ParcelMessaging_Struct       pms{};
@@ -2865,11 +2865,7 @@ namespace RoF2
 		}
 
 		outapp->WriteUInt32(emu->zone_id);
-		// this appears to be incorrect and breaks zone matching for trader/barter/buyer functions
-		// with the zone routing updates the instance was being set as 3 for bazaar on my install.
-		// Tested with PEQ and it also creates intance id of 3 for bazaar.
-		// the client (RoF2) reads the above as uint32
-		//outapp->WriteUInt16(emu->zoneInstance);
+		outapp->WriteUInt16(emu->zoneInstance);
 
 		outapp->WriteFloat(emu->y);
 		outapp->WriteFloat(emu->x);
@@ -4752,7 +4748,7 @@ namespace RoF2
 			VARSTRUCT_ENCODE_STRING(Buffer, emu->lastName);
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, 0);	// aatitle
-			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show); 
+			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, emu->guild_show);
 			VARSTRUCT_ENCODE_TYPE(uint8, Buffer, 0); // TempPet
 
 			VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->petOwnerId);
