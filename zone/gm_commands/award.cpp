@@ -4,7 +4,7 @@
 #include "../questmgr.h"
 
 void command_award(Client *c, const Seperator *sep)
-{   
+{
     int arguments = sep->argnum;
     if (arguments <= 3) {
         c->Message(Chat::White, "Insufficient Number of Arguments");
@@ -26,7 +26,7 @@ void command_award(Client *c, const Seperator *sep)
             character_name
         )
     );
-    
+
     if (l.empty()) {
         c->Message(Chat::White, "Unable to find character %s", character_name.c_str());
         c->Message(Chat::White, "Usage: #award [Character Name] [Amount] [Reason]");
@@ -49,13 +49,16 @@ void command_award(Client *c, const Seperator *sep)
         c->Message(Chat::White, "Usage: #award [Character Name] [Amount] [Reason]");
         return;
     }
-    
+
     DataBucketKey k;
     k.character_id = e.id;
     k.key = "EoM-Award";
-    k.value = sep->arg[2];
 
-    DataBucket::SetData(k);    
+	DataBucket::GetData(k);
+
+	k.value += sep->arg[2];
+
+    DataBucket::SetData(k);
 
     c->Message(Chat::White, "Awarded %d EoM to %s. Reason: %s", Strings::ToInt(sep->arg[2]), character_name.c_str(), reason.c_str());
     zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name + " Reason: " + reason);
