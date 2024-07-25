@@ -1680,20 +1680,347 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 }
 
 NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
-	// Each Race needs to be handled individually. In the interest of readability we aren't going to try to be super efficient here.
+	float level_size_scale = 1.0f + (npc->level / 50.0f);
+    switch (npc->race) {
+        case Race::GiantRat:
+            npc->race = Race::Rat;
+			static const int defaultTextures[] = {0, 3, 4};
+			switch(npc->texture) {
+				case 1:
+					npc->texture = 2;
+					break;
+				case 2:
+					npc->texture = 1;
+					break;
+				case 0:
+				default:
+					npc->texture = defaultTextures[zone->random.Int(0, 2)];
+					break;
 
-	if (npc->race == Race::Drake) {
-		npc->race 	= Race::Drake3;
-		npc->gender = Gender::Neuter;
+			}
+            npc->size *= level_size_scale;
+            break;
 
-		if (npc->texture < 1 || npc->texture > 3) {
-			npc->texture = 0; // Black Drake. Red, Blue, Green map correctly already.
-		}
-	}
+        case Race::GiantBat:
+            npc->race = Race::Bat2;
+            npc->gender = Gender::Neuter;
+            npc->size *= level_size_scale;
+            break;
 
+        case Race::GiantSpider:
+            npc->race = Race::Spider;
+            npc->gender = Gender::Neuter;
+            npc->size *= level_size_scale;
+            break;
 
-	return npc;
+        case Race::Wolf:
+            npc->race = Race::Wolf2;
+            npc->gender = Gender::Neuter;
+            npc->size *= level_size_scale;
+            break;
+
+		case Race::Bear:
+			if (npc->texture < 2) {
+				npc->race = Race::Bear2;
+				npc->size *= level_size_scale;
+			}
+			break;
+
+		case Race::Fairy:
+			npc->race = Race::Fairy2;
+			npc->gender = Gender::Neuter;
+			npc->size *= level_size_scale;
+			break;
+
+		case Race::Unicorn:
+			npc->race = Race::Unicorn3;
+			// This one appears to map well. Maybe revisit
+			break;
+
+		case Race::Gargoyle:
+			npc->race = Race::NightmareGargoyle;
+			break;
+
+		case Race::Vampire:
+			npc->race = Race::Vampire3;
+			npc->texture = 1;
+			npc->helmtexture = 1;
+			break;
+
+		case Race::Kobold:
+			if (strstr(npc->name, "werebat") == nullptr) {
+				npc->race = Race::Kobold2;
+				npc->texture = zone->random.Int(0, 6);
+				npc->helmtexture = zone->random.Int(0, 6);
+			}
+			break;
+
+		case Race::EruditeGhost:
+			npc->race = Race::HumanGhost;
+			break;
+
+		case Race::Imp:
+			npc->race = Race::Fiend;
+			break;
+
+		case Race::Golem:
+			npc->race = Race::Muddite;
+			break;
+
+		case Race::TentacleTerror:
+			npc->race = Race::TentacleTerror2;
+			break;
+
+		case Race::Kerran:
+			npc->race = Race::Kerran2;
+			break;
+
+		case Race::EruditeCitizen:
+			npc->race = Race::Erudite2;
+			if (npc->gender == 0 && npc->texture == 0 && npc->helmtexture == 0) {
+				npc->gender = Gender::Male;
+				npc->texture = 4;
+				npc->helmtexture = 4;
+			} else {
+				npc->gender == Gender::Male;
+				npc->texture = zone->random.Int(0, 3);
+				npc->helmtexture = zone->random.Int(0, 3);
+			}
+			break;
+
+		case Race::Fungusman:
+			npc->race = Race::Sporali;
+			break;
+
+		case Race::Aviak:
+			npc->race = Race::Aviak2;
+			break;
+
+		case Race::Harpy:
+			npc->race = Race::Harpy2;
+			break;
+
+		case Race::Minotaur:
+			npc->race = Race::Minotaur4;
+			break;
+
+		case Race::Puma:
+			npc->race = Race::Puma2;
+			// I think this maps correctly natively
+			break;
+
+		case Race::Goblin:
+			npc->race = Race::NewGoblin;
+			if (npc->texture == 3) {
+				npc->texture = 1;
+			}
+			break;
+
+		case Race::Beetle:
+			npc->race = Race::Beetle2;
+			switch (npc->texture) {
+				case 0:
+				case 1:
+					npc->texture = 0;
+					break;
+				case 3:
+					npc->texture = 1;
+					break;
+				default:
+					npc->texture = 2;
+					break;
+			}
+			npc->size  *= level_size_scale;
+			break;
+
+		case Race::PhinigelAutropos:
+			npc->race = Race::Kedge;
+			break;
+
+		case Race::Scarecrow:
+			npc->race = Race::Scarecrow2;
+			npc->texture = zone->random.Int(0,1);
+			npc->helmtexture =  zone->random.Int(0,3);
+			break;
+
+		case Race::Zombie:
+			npc->race = Race::Zombie2;
+			break;
+
+		case Race::Ghoul:
+			npc->race = Race::Ghoul2;
+			break;
+
+		case Race::GiantSnake:
+			npc->race = Race::Snake;
+			npc->size  *= level_size_scale;
+			break;
+
+		case Race::ClockworkGnome:
+			npc->race = Race::Gnomework;
+			npc->gender = Gender::Neuter;
+			npc->texture = zone->random.Int(0,3);
+			npc->helmtexture = zone->random.Int(0,3);
+			break;
+
+		case Race::Treant:
+			npc->race = Race::Treant3;
+			switch(zone->GetZoneID()) {
+				case Zones::GFAYDARK:
+				case Zones::LFAYDARK:
+					npc->texture 		= 2;
+					npc->helmtexture 	= zone->random.Int(0,3);
+					break;
+				case Zones::NORTHKARANA:
+				case Zones::EASTKARANA:
+				case Zones::QEY2HH1:
+				case Zones::SOUTHKARANA:
+				default:
+					npc->texture 		= 1;
+					npc->helmtexture 	= zone->random.Int(0,3);
+			}
+			npc->size  *= level_size_scale;
+			npc->gender = Gender::Neuter;
+			break;
+
+		case Race::Brownie:
+			npc->race = Race::Brownie2;
+			npc->texture = 0;
+			npc->helmtexture = 0;
+			break;
+
+        case Race::Orc: {
+			static const std::vector<std::pair<int, int>> deathfistCasters = {
+				{1, 1}, {1, 4}
+			};
+			static const std::vector<std::pair<int, int>> deathfistElites = {
+				{2, 2}
+			};
+			static const std::vector<std::pair<int, int>> deathfistTrash = {
+				{0, 0}, {0, 3}, {0, 9}, {1, 0}, {1, 3}, {1, 9}, {2, 0}, {2, 9}
+			};
+
+			static const std::vector<std::pair<int, int>> crushboneCasters = {
+				{3, 4}, {3, 9}, {4, 4}, {4, 9}, {5, 4}, {5, 6}, {5, 7}
+			};
+			static const std::vector<std::pair<int, int>> crushboneElites = {
+				{3, 0}, {5, 0}, {5, 5}
+			};
+			static const std::vector<std::pair<int, int>> crushboneTrash = {
+				{3, 3}, {4, 0}, {4, 3},  {5, 3}, {5, 9}
+			};
+
+			static const std::vector<std::pair<int, int>> frostCasters = {
+				{6, 6}, {7, 6}, {7, 7}
+			};
+			static const std::vector<std::pair<int, int>> frostElites = {
+				{7, 5}
+			};
+			static const std::vector<std::pair<int, int>> frostTrash = {
+				{6, 0}, {6, 3}, {7, 0}, {7, 3}, {7, 4}, {7, 9}, {8, 0}, {8, 3}, {8, 8}, {8, 9}
+			};
+
+            bool isCaster = IsCasterClass(npc->class_);
+            bool isElite = (strcasestr(npc->name, "centurion") != nullptr) ||
+                           (strcasestr(npc->name, "legionnaire") != nullptr) ||
+                           npc->rare_spawn || npc->raid_target || npc->unique_spawn_by_name;
+            bool isStandard = strcasestr(npc->name, "pawn") != nullptr;
+
+            const std::vector<std::pair<int, int>>* appearancePool = nullptr;
+            std::vector<std::pair<int, int>> combinedPool;
+
+            if (npc->texture == 0) {
+                // Deathfist
+                if (isCaster) {
+                    appearancePool = &deathfistCasters;
+                } else if (isElite) {
+                    appearancePool = &deathfistElites;
+                } else if (isStandard) {
+                    appearancePool = &deathfistTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), deathfistCasters.begin(), deathfistCasters.end());
+                    combinedPool.insert(combinedPool.end(), deathfistElites.begin(), deathfistElites.end());
+                    combinedPool.insert(combinedPool.end(), deathfistTrash.begin(), deathfistTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            } else if (npc->texture == 1) {
+                // Crushbone
+                if (isCaster) {
+                    appearancePool = &crushboneCasters;
+                } else if (isElite) {
+                    appearancePool = &crushboneElites;
+                } else if (isStandard) {
+                    appearancePool = &crushboneTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), crushboneCasters.begin(), crushboneCasters.end());
+                    combinedPool.insert(combinedPool.end(), crushboneElites.begin(), crushboneElites.end());
+                    combinedPool.insert(combinedPool.end(), crushboneTrash.begin(), crushboneTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            } else {
+                // Frost (default)
+                if (isCaster) {
+                    appearancePool = &frostCasters;
+                } else if (isElite) {
+                    appearancePool = &frostElites;
+                } else if (isStandard) {
+                    appearancePool = &frostTrash;
+                } else {
+                    combinedPool.insert(combinedPool.end(), frostCasters.begin(), frostCasters.end());
+                    combinedPool.insert(combinedPool.end(), frostElites.begin(), frostElites.end());
+                    combinedPool.insert(combinedPool.end(), frostTrash.begin(), frostTrash.end());
+                    appearancePool = &combinedPool;
+                }
+            }
+
+            if (appearancePool != nullptr && !appearancePool->empty()) {
+                int randomIndex = zone->random.Int(0, appearancePool->size() - 1);
+                npc->texture = (*appearancePool)[randomIndex].first;
+                npc->helmtexture = (*appearancePool)[randomIndex].second;
+				npc->race = Race::Orc2;
+				npc->gender = Gender::Neuter;
+            }
+
+            break;
+        }
+
+        case Race::Drake:
+            npc->race = Race::Drake3;
+            npc->gender = Gender::Neuter;
+            if (npc->texture < 1 || npc->texture > 3) {
+                npc->texture = 0; // Black Drake
+            }
+            npc->size *= level_size_scale;
+            break;
+
+        case Race::Wurm:
+            npc->race = Race::Wurm2;
+            npc->gender = Gender::Neuter;
+            if (strstr(npc->name, "flame") != nullptr || strstr(npc->name, "fire") != nullptr) {
+                npc->texture = 1;
+            } else if (strstr(npc->name, "frost") != nullptr) {
+                npc->texture = 3;
+            } else {
+                npc->texture = zone->random.Int(0, 5);
+            }
+            break;
+
+        case Race::Wyvern:
+            npc->race = Race::Wyvern2;
+            break;
+
+        case Race::Raptor:
+            npc->race = Race::Raptor2;
+            break;
+
+        default:
+            // Handle other races if necessary
+            break;
+    }
+
+    return npc;
 }
+
 
 const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load /*= false*/)
 {
