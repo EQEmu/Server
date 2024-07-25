@@ -586,7 +586,7 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		bool found = false;
 
 		for (auto& row = results.begin(); row != results.end(); ++row) {
-			if (row[0]) { 
+			if (row[0]) {
 				pp->classes = static_cast<uint32>(Strings::ToInt(row[0]));
 				found = true;
 				break;
@@ -1679,6 +1679,18 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	return results.Success();
 }
 
+const NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
+	// Each Race needs to be handled individually. In the interest of readability we aren't going to try to be super efficient here.
+	if (npc->race == Race::Drake) {
+		npc->race 	= Race::Drake3;
+		npc->gender = Gender::Neuter;
+
+		if (npc->texture < 1 || npc->texture > 3) {
+			npc->texture = 0; // Black Drake. Red, Blue, Green map correctly already.
+		}
+	}
+}
+
 const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load /*= false*/)
 {
 	const NPCType *npc = nullptr;
@@ -1932,6 +1944,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		t->faction_amount         = n.faction_amount;
 		t->keeps_sold_items       = n.keeps_sold_items;
 
+
+
 		// If NPC with duplicate NPC id already in table,
 		// free item we attempted to add.
 		if (zone->npctable.find(t->npc_id) != zone->npctable.end()) {
@@ -1939,6 +1953,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			delete t;
 			return nullptr;
 		}
+
+		t = MutateRace(t);
 
 		zone->npctable[t->npc_id] = t;
 		npc = t;
@@ -3156,7 +3172,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			pet_buff.ticsremaining  = p->Buffs[slot_id].duration;
 			pet_buff.counters       = p->Buffs[slot_id].counters;
 			pet_buff.instrument_mod = p->Buffs[slot_id].bard_modifier;
-			pet_buff.castername     = p->Buffs[slot_id].caster_name;			
+			pet_buff.castername     = p->Buffs[slot_id].caster_name;
 
 			pet_buffs.push_back(pet_buff);
 		}

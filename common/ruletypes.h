@@ -1048,6 +1048,7 @@ RULE_BOOL(Custom, 	FadeNPCDebuffsOutofCombat, 				true, 	"Enable to to cause NPC
 RULE_BOOL(Custom, 	UseTHJItemMutations, 					true, 	"Rename items according to THJ standards and apply other mutations")
 RULE_BOOL(Custom, 	ClearRestingDetrimentalEffectsEnabled, 	true, 	"Remove detrimental spell effects from self and pets when OOC regen engages")
 RULE_REAL(Custom, 	ItemExtraSpellAmtMaximumPercentage, 	0.0, 	"Adjust the maximum effectiveness of Spell Damage and Heal Amount. 0.0 to Disable, 1.0 to allow adding up to the base effect value, 2.0 to allow double effect value, etc.")
+RULE_BOOL(Custom, 	UseTHJRaceMutations, 					false, 	"Enable to load New-Style Models for THJ")
 
 // Item Upgrades
 RULE_BOOL(Custom, 	DoItemUpgrades, 						true, "Retribution item upgrades")
