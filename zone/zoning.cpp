@@ -94,7 +94,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			case GMHiddenSummon:
 			case ZoneSolicited: //we told the client to zone somewhere, so we know where they are going.
 				target_zone_id = zonesummon_id;
-				target_instance_id = zonesummon_instance_id;
 				break;
 			case GateToBindPoint:
 			case ZoneToBindPoint:
@@ -127,7 +126,6 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		// WildcardX 27 January 2008
 		if (zone_mode == EvacToSafeCoords && zonesummon_id) {
 			target_zone_id = zonesummon_id;
-			target_instance_id = zonesummon_instance_id;
 		} else {
 			target_zone_id = zc->zoneID;
 		}
@@ -575,7 +573,6 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	zone_mode = ZoneUnsolicited;
 	m_ZoneSummonLocation = glm::vec4();
 	zonesummon_id = 0;
-	zonesummon_instance_id = 0;
 	zonesummon_ignorerestrictions = 0;
 
 	// this simply resets the zone shutdown timer
@@ -962,7 +959,6 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 
 			// we hide the real zoneid we want to evac/succor to here
 			zonesummon_id = zoneID;
-			zonesummon_instance_id = instance_id;
 
 			outapp->priority = 6;
 			FastQueuePacket(&outapp);
