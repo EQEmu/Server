@@ -1679,8 +1679,9 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 	return results.Success();
 }
 
-const NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
+NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 	// Each Race needs to be handled individually. In the interest of readability we aren't going to try to be super efficient here.
+
 	if (npc->race == Race::Drake) {
 		npc->race 	= Race::Drake3;
 		npc->gender = Gender::Neuter;
