@@ -19,6 +19,7 @@
 #include "../common/rulesys.h"
 
 #include "map.h"
+#include "water_map.h"
 #include "zone.h"
 
 #ifdef _WINDOWS
@@ -278,10 +279,10 @@ void Mob::CalculateNewFearpoint()
 	if (RuleB(Pathing, Fear) && zone->pathing) {
 		glm::vec3 Node;
 		int flags = PathingNotDisabled ^ PathingZoneLine;
-		if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && !zone->IsWaterZone(GetZ())) {
+		if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && !zone->IsWaterZone(GetZOffset())) {
 			Node = glm::vec3(0.0f);
 		} else {
-			Node = zone->pathing->GetRandomLocation(glm::vec3(GetX(), GetY(), GetZ()), flags);
+			Node = zone->pathing->GetRandomLocation(glm::vec3(GetX(), GetY(), GetZOffset()), flags);
 		}
 
 		if (Node.x != 0.0f || Node.y != 0.0f || Node.z != 0.0f) {
@@ -294,7 +295,7 @@ void Mob::CalculateNewFearpoint()
 			auto partial = false;
 			auto stuck = false;
 			auto route = zone->pathing->FindPath(
-				glm::vec3(GetX(), GetY(), GetZ()),
+				glm::vec3(GetX(), GetY(), GetZOffset()),
 				glm::vec3(Node.x, Node.y, Node.z),
 				partial,
 				stuck,
@@ -308,7 +309,7 @@ void Mob::CalculateNewFearpoint()
 			// check route for LOS failures to prevent mobs ending up outside of playable area
 			// only checking the last few hops because LOS will often fail in a valid route which can result in mobs getting undesirably trapped
 			auto iter = route.begin();
-			glm::vec3 previous_pos(GetX(), GetY(), GetZ());
+			glm::vec3 previous_pos(GetX(), GetY(), GetZOffset());
 			while (iter != route.end() && have_los == true) {
 				auto &current_node = (*iter);
 				iter++;
@@ -346,6 +347,79 @@ void Mob::CalculateNewFearpoint()
 			}
 		}
 	}
+
+	// fallback logic if pathing system can't be used
+	bool inliquid = zone->HasWaterMap() && zone->watermap->InLiquid(glm::vec3(GetPosition())) || zone->IsWaterZone(GetZ());
+	bool stay_inliquid = (inliquid && IsNPC() && CastToNPC()->IsUnderwaterOnly());
+	bool levitating = IsClient() && (FindType(SE_Levitate) || flymode != GravityBehavior::Ground);
+	bool open_outdoor_zone = !zone->CanCastOutdoor() && !zone->IsCity();
+
+	int loop = 0;
+	float ranx, rany, ranz;
+	currently_fleeing = false;
+	glm::vec3 myloc(GetX(), GetY(), GetZ());
+	glm::vec3 myceil = myloc;
+	float ceil = zone->zonemap->FindCeiling(myloc, &myceil);
+
+	if (ceil != BEST_Z_INVALID) {
+		ceil -= 1.0f;
+	}
+
+	while (loop < 100) { //Max 100 tries
+		int ran = 250 - (loop * 2);
+		loop++;
+
+		if (open_outdoor_zone && loop < 20) { // try a distant loc first; other way will likely pick a close loc
+			ranx = zone->random.Int(0, ran);
+			rany = zone->random.Int(0, ran);
+			if (ranx + rany < 200) {
+				continue;
+			}
+
+			ranx = GetX() + (zone->random.Int(0, 1) == 1 ? ranx : -ranx);
+			rany = GetY() + (zone->random.Int(0, 1) == 1 ? rany : -rany);
+		} else {
+			ranx = GetX() + zone->random.Int(0, ran - 1) - zone->random.Int(0, ran - 1);
+			rany = GetY() + zone->random.Int(0, ran - 1) - zone->random.Int(0, ran - 1);
+		}
+
+		ranz = BEST_Z_INVALID;
+		glm::vec3 newloc(ranx, rany, ceil != BEST_Z_INVALID ? ceil : GetZ());
+
+		if (stay_inliquid || levitating || (loop > 50 && inliquid)) {
+			if (zone->zonemap->CheckLoS(myloc, newloc)) {
+				ranz = GetZ();
+				currently_fleeing = true;
+				break;
+			}
+		} else {
+			if (ceil != BEST_Z_INVALID) {
+				ranz = zone->zonemap->FindGround(newloc, &myceil);
+			} else {
+				ranz = zone->zonemap->FindBestZ(newloc, &myceil);
+			}
+
+			if (ranz != BEST_Z_INVALID) {
+				ranz = SetBestZ(ranz);
+			}
+		}
+
+		if (ranz == BEST_Z_INVALID) {
+			continue;
+		}
+
+		float fdist = ranz - GetZ();
+		if (fdist >= -50 && fdist <= 50 && CheckCoordLosNoZLeaps(GetX(), GetY(), GetZ(), ranx, rany, ranz)) {
+			currently_fleeing = true;
+			break;
+		}
+	}
+
+	if (currently_fleeing) {
+		m_FearWalkTarget = glm::vec3(ranx, rany, ranz);
+		LogPathingDetail("Non-pathed fearpoint [{}], [{}], [{}] selected for [{}]", ranx, rany, ranz, GetName());
+	}
+
 	return;
 }
 

@@ -678,6 +678,7 @@ public:
 	inline const float GetRelativeHeading() const { return m_RelativePosition.w; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
+	inline const float SetBestZ(float z_coord) const { return z_coord + GetZOffset(); }
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const; // Checks races - used on mob instantiation
 	bool GetIsBoat() const { return is_boat; } // Set on instantiation for speed

@@ -2,6 +2,7 @@
 #include "../common/misc_functions.h"
 #include "../common/compression.h"
 
+#include "client.h"
 #include "map.h"
 #include "raycast_mesh.h"
 #include "zone.h"
@@ -93,6 +94,64 @@ float Map::FindClosestZ(glm::vec3 &start, glm::vec3 *result) const {
 	}
 
 	return ClosestZ;
+}
+
+float Map::FindCeiling(glm::vec3 &start, glm::vec3 *result) const {
+	// Unlike FindBestZ, this method finds the closest Z above point.
+
+	if (!imp) {
+		return false;
+	}
+
+	glm::vec3 tmp;
+	if (!result) {
+		result = &tmp;
+	}
+
+	glm::vec3 from(start.x, start.y, start.z);
+	glm::vec3 to(start.x, start.y, -BEST_Z_INVALID);
+	float hit_distance;
+	bool hit = false;
+
+	// Find nearest Z above us
+	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
+	if (hit) {
+		return result->z;
+	}
+
+	return BEST_Z_INVALID;
+}
+
+float Map::FindGround(glm::vec3 &start, glm::vec3 *result) const {
+	// Unlike FindBestZ, this method finds the closest Z below point.
+
+	if (!imp) {
+		return false;
+	}
+
+	glm::vec3 tmp;
+
+	if (!result) {
+		result = &tmp;
+	}
+
+	glm::vec3 from(start.x, start.y, start.z);
+	glm::vec3 to(start.x, start.y, BEST_Z_INVALID);
+	float hit_distance;
+	bool hit = false;
+
+	// Find nearest Z below us
+	hit = imp->rm->raycast((const RmReal*)&from, (const RmReal*)&to, (RmReal*)result, nullptr, &hit_distance);
+
+	if (hit && zone->newzone_data.underworld != 0.0f && result->z < zone->newzone_data.underworld) {
+		hit = false;
+	}
+
+	if (hit) {
+		return result->z;
+	}
+
+	return BEST_Z_INVALID;
 }
 
 bool Map::LineIntersectsZone(glm::vec3 start, glm::vec3 end, float step, glm::vec3 *result) const {
