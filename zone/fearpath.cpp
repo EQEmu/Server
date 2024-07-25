@@ -306,44 +306,58 @@ void Mob::CalculateNewFearpoint()
 			int route_count = 0;
 			bool have_los = true;
 
-			// check route for LOS failures to prevent mobs ending up outside of playable area
-			// only checking the last few hops because LOS will often fail in a valid route which can result in mobs getting undesirably trapped
-			auto iter = route.begin();
-			glm::vec3 previous_pos(GetX(), GetY(), GetZOffset());
-			while (iter != route.end() && have_los == true) {
-				auto &current_node = (*iter);
-				iter++;
-				route_count++;
-
-				if (iter == route.end()) {
-					continue;
-				}
-
-				previous_pos = current_node.pos;
-				auto &next_node = (*iter);
-
-				if (next_node.teleport) {
-					continue;
-				}
-
-				if ((route_size - route_count) < 5 && !zone->zonemap->CheckLoS(previous_pos, next_node.pos)) {
-					have_los = false;
-					break;
+			if (route_size == 2) {
+				// FindPath() often fails to compute a route in some places, so to prevent running through walls we need to check LOS on all 2 node routes
+				// size 2 route usually means FindPath() bugged out.  sometimes it returns locs outside the geometry
+				if (CheckLosFN(Node.x, Node.y, Node.z, 6.0)) {
+					LogPathingDetail("Direct route to fearpoint [{}], [{}], [{}] calculated for [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName());
+					m_FearWalkTarget = last_good_loc;
+					currently_fleeing = true;
+					return;
 				} else {
-					last_good_loc = next_node.pos;
+					LogPathingDetail("FindRoute() returned single hop route to destination without LOS: [{}], [{}], [{}] for [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName());
 				}
-			}
+				// use fallback logic if LOS fails
+			} else if (!stuck) {
+				// check route for LOS failures to prevent mobs ending up outside of playable area
+				// only checking the last few hops because LOS will often fail in a valid route which can result in mobs getting undesirably trapped
+				auto iter = route.begin();
+				glm::vec3 previous_pos(GetX(), GetY(), GetZOffset());
+				while (iter != route.end() && have_los == true) {
+					auto &current_node = (*iter);
+					iter++;
+					route_count++;
 
-			if (have_los || route_count > 2) {
-				if (have_los) {
-					LogPathingDetail("Route to fearpoint [{}], [{}], [{}] calculated for [{}]; route size: [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_size);
-				} else {
-					LogPathingDetail("Using truncated route to fearpoint [{}], [{}], [{}] for [{}]; node count: [{}]; route size [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_count, route_size);
+					if (iter == route.end()) {
+						continue;
+					}
+
+					previous_pos = current_node.pos;
+					auto &next_node = (*iter);
+
+					if (next_node.teleport) {
+						continue;
+					}
+
+					if ((route_size - route_count) < 5 && !zone->zonemap->CheckLoS(previous_pos, next_node.pos)) {
+						have_los = false;
+						break;
+					} else {
+						last_good_loc = next_node.pos;
+					}
 				}
 
-				m_FearWalkTarget = last_good_loc;
-				currently_fleeing = true;
-				return;
+				if (have_los || route_count > 2) {
+					if (have_los) {
+						LogPathingDetail("Route to fearpoint [{}], [{}], [{}] calculated for [{}]; route size: [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_size);
+					} else {
+						LogPathingDetail("Using truncated route to fearpoint [{}], [{}], [{}] for [{}]; node count: [{}]; route size [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_count, route_size);
+					}
+
+					m_FearWalkTarget = last_good_loc;
+					currently_fleeing = true;
+					return;
+				}
 			}
 		}
 	}
