@@ -1690,6 +1690,9 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			npc->texture = 0; // Black Drake. Red, Blue, Green map correctly already.
 		}
 	}
+
+
+	return npc;
 }
 
 const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load /*= false*/)
