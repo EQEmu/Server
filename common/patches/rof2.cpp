@@ -886,7 +886,8 @@ namespace RoF2
 					}
 					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_entity_id);
 					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_id);
-					VARSTRUCT_ENCODE_TYPE(uint32, eq, b.buyer_zone_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_id);
+					VARSTRUCT_ENCODE_TYPE(uint16, eq, b.buyer_zone_instance_id);
 					VARSTRUCT_ENCODE_STRING(eq, b.buyer_name.c_str());
 				}
 				dest->QueuePacket(outapp.get());

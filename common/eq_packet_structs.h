@@ -3359,6 +3359,7 @@ struct BuyerLineItemsSearch_Struct {
 	uint32                                  buyer_id;
 	uint32                                  buyer_entity_id;
 	uint32                                  buyer_zone_id;
+	uint32                                  buyer_zone_instance_id;
 	std::string                             buyer_name;
 	std::vector<BuyerLineTradeItems_Struct> trade_items;
 
@@ -3377,6 +3378,7 @@ struct BuyerLineItemsSearch_Struct {
 			CEREAL_NVP(buyer_id),
 			CEREAL_NVP(buyer_entity_id),
 			CEREAL_NVP(buyer_zone_id),
+			CEREAL_NVP(buyer_zone_instance_id),
 			CEREAL_NVP(buyer_name),
 			CEREAL_NVP(trade_items)
 		);

@@ -2291,7 +2291,7 @@ void Client::SendBuyerResults(BarterSearchRequest_Struct& bsr)
 
 		if (bsr.search_scope == 1) {
 			// Local Buyers
-			results = BuyerBuyLinesRepository::SearchBuyLines(database, search_string, 0, GetZoneID());
+			results = BuyerBuyLinesRepository::SearchBuyLines(database, search_string, 0, GetZoneID(), GetInstanceID());
 		}
 		else if (bsr.buyer_id) {
 			// Specific Buyer
@@ -2645,12 +2645,13 @@ void Client::ToggleBuyerMode(bool status)
 		SetBuyerID(CharacterID());
 
 		BuyerRepository::Buyer b{};
-		b.id               = 0;
-		b.char_id          = GetBuyerID();
-		b.char_entity_id   = GetID();
-		b.char_zone_id     = GetZoneID();
-		b.char_name        = GetCleanName();
-		b.transaction_date = time(nullptr);
+		b.id                    = 0;
+		b.char_id               = GetBuyerID();
+		b.char_entity_id        = GetID();
+		b.char_zone_id          = GetZoneID();
+		b.char_zone_instance_id = GetInstanceID();
+		b.char_name             = GetCleanName();
+		b.transaction_date      = time(nullptr);
 		BuyerRepository::DeleteBuyer(database, GetBuyerID());
 		BuyerRepository::InsertOne(database, b);
 

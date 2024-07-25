@@ -211,7 +211,13 @@ public:
 		return all_entries;
 	}
 
-	static BuyerLineSearch_Struct SearchBuyLines(Database& db, std::string& search_string, uint32 char_id = 0, uint32 zone_id = 0)
+	static BuyerLineSearch_Struct SearchBuyLines(
+		Database &db,
+		std::string &search_string,
+		uint32 char_id = 0,
+		uint32 zone_id = 0,
+		uint32 zone_instance_id = 0
+	)
 	{
 		BuyerLineSearch_Struct all_entries{};
 		std::string where_clause(fmt::format("`item_name` LIKE \"%{}%\" ", search_string));
@@ -221,7 +227,14 @@ public:
 		}
 
 		if (zone_id) {
-			auto buyers = BuyerRepository::GetWhere(db, fmt::format("`char_zone_id` = '{}'", zone_id));
+			auto buyers = BuyerRepository::GetWhere(
+				db,
+				fmt::format(
+					"`char_zone_id` = '{}' AND char_zone_instance_id = '{}'",
+					zone_id,
+					zone_instance_id
+				)
+			);
 
 			std::vector<std::string> char_ids{};
 			for (auto const &bl : buyers) {
@@ -277,9 +290,10 @@ public:
 				char_names.cend(),
 				[&](BuyerRepository::Buyer e) { return e.char_id == l.char_id; }
 			);
-			blis.buyer_name      = it != char_names.end() ? it->char_name : std::string("");
-			blis.buyer_entity_id = it != char_names.end() ? it->char_entity_id : 0;
-			blis.buyer_zone_id   = it != char_names.end() ? it->char_zone_id : 0;
+			blis.buyer_name             = it != char_names.end() ? it->char_name : std::string("");
+			blis.buyer_entity_id        = it != char_names.end() ? it->char_entity_id : 0;
+			blis.buyer_zone_id          = it != char_names.end() ? it->char_zone_id : 0;
+			blis.buyer_zone_instance_id = it != char_names.end() ? it->char_zone_instance_id : 0;
 			strn0cpy(blis.item_name, l.item_name.c_str(), sizeof(blis.item_name));
 
 			for (auto const &i: GetSubIDs(buy_line_trade_items, l.id)) {
