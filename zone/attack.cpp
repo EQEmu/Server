@@ -2186,7 +2186,7 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	return true;
 }
 
-bool Client::CheckDeath()
+bool Client::CheckIfAlreadyDead()
 {
 	if (!ClientFinishedLoading()) {
 		return false;
@@ -4374,7 +4374,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 				if (IsNPC()) {
 					died = !CastToNPC()->GetDepop();
 				} else if (IsClient()) {
-					died = CastToClient()->CheckDeath();
+					died = CastToClient()->CheckIfAlreadyDead();
 				}
 
 				if (died) {

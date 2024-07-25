@@ -44,13 +44,13 @@ int Mob::GetFleeRatio(Mob* other)
 	}
 
 	// If no special flee_percent check for Gray or Other con rates
-	if (GetLevelCon(hate_top->GetLevel(), GetLevel()) == ConsiderColor::Gray && flee_ratio == 0 && RuleB(Combat, FleeGray) &&
-		GetLevel() <= RuleI(Combat, FleeGrayMaxLevel)) {
-		flee_ratio = RuleI(Combat, FleeGrayHPRatio);
-		LogFlee("Mob [{}] using combat flee gray flee_ratio [{}]", GetCleanName(), flee_ratio);
-	} else if (flee_ratio == 0) {
+	if (flee_ratio == 0) {
 		flee_ratio = RuleI(Combat, FleeHPRatio);
-		LogFlee("Mob [{}] using combat flee flee_ratio [{}]", GetCleanName(), flee_ratio);
+		if (GetLevelCon(hate_top->GetLevel(), GetLevel()) == ConsiderColor::Gray && RuleB(Combat, FleeGray) &&
+			GetLevel() <= RuleI(Combat, FleeGrayMaxLevel)) {
+			flee_ratio = RuleI(Combat, FleeGrayHPRatio);
+			LogFlee("Mob [{}] using combat flee gray flee_ratio [{}]", GetCleanName(), flee_ratio);
+		}
 	}
 
 	return flee_ratio;
@@ -262,14 +262,13 @@ void Mob::CalculateNewFearpoint()
 {
 	// blind waypoint logic isn't the same as fear's.  Has a chance to run toward the player
 	// chance is very high if the player is moving, otherwise it's low
-	if (IsBlind() && !IsFeared() && GetTarget())
-	{
+	if (IsBlind() && !IsFeared() && GetTarget()) {
 		int roll = 20;
-		if (GetTarget()->GetCurrentSpeed() > 0.1f || (GetTarget()->IsClient() && GetTarget()->animation != 0))
+		if (GetTarget()->GetCurrentSpeed() > 0.1f || (GetTarget()->IsClient() && GetTarget()->animation != 0)) {
 			roll = 80;
+		}
 
-		if (zone->random.Roll(roll))
-		{
+		if (zone->random.Roll(roll)) {
 			m_FearWalkTarget = glm::vec3(GetTarget()->GetPosition());
 			currently_fleeing = true;
 			return;
@@ -279,6 +278,7 @@ void Mob::CalculateNewFearpoint()
 	if (RuleB(Pathing, Fear) && zone->pathing) {
 		glm::vec3 Node;
 		int flags = PathingNotDisabled ^ PathingZoneLine;
+
 		if (IsNPC() && CastToNPC()->IsUnderwaterOnly() && !zone->IsWaterZone(GetZOffset())) {
 			Node = glm::vec3(0.0f);
 		} else {
