@@ -1682,6 +1682,82 @@ bool ZoneDatabase::RestoreCharacterInvSnapshot(uint32 character_id, uint32 times
 NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 	float level_size_scale = 1.0f + (npc->level / 50.0f);
     switch (npc->race) {
+		case Race::Human:
+		case Race::Erudite:
+		case Race::Barbarian:
+		case Race::HalfElf:
+		case Race::HighElf:
+		case Race::WoodElf:
+		case Race::DarkElf:
+		case Race::Halfling:
+		case Race::Gnome:
+		case Race::Dwarf:
+		case Race::Troll:
+		case Race::Ogre:
+		case Race::Iksar:
+		case Race::Froglok2:
+			switch (npc->class_) {
+				case Class::Warrior:
+				case Class::Paladin:
+				case Class::ShadowKnight:
+				case Class::WarriorGM:
+				case Class::ShadowKnightGM:
+				case Class::PaladinGM:
+					npc->texture = zone->random.Int(2,3);
+					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
+					break;
+				case Class::Cleric:
+				case Class::Rogue:
+				case Class::Shaman:
+				case Class::Ranger:
+				case Class::Berserker:
+				case Class::ClericGM:
+				case Class::RogueGM:
+				case Class::ShamanGM:
+				case Class::RangerGM:
+				case Class::BerserkerGM:
+					npc->texture = zone->random.Int(1,2);
+					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
+					break;
+				case Class::Beastlord:
+				case Class::BeastlordGM:
+				case Class::Druid:
+				case Class::DruidGM:
+				case Class::Monk:
+				case Class::MonkGM:
+					npc->texture = 1;
+					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
+					break;
+				case Class::Wizard:
+				case Class::WizardGM:
+				case Class::Magician:
+				case Class::MagicianGM:
+				case Class::Necromancer:
+				case Class::NecromancerGM:
+				case Class::Enchanter:
+				case Class::EnchanterGM:
+					npc->texture = zone->random.Int(10,16);
+					npc->helmtexture = 0;
+					break;
+				default:
+					npc->texture = zone->random.Int(0,1);
+					npc->helmtexture = 0;
+					break;
+			}
+			break;
+
+		case Race::Fayguard:
+			npc->race = Race::WoodElf;
+			if (npc->texture == 0 && npc->gender == Gender::Male) {
+				npc->gender = zone->random.Int(0,1);
+				npc->texture = zone->random.Int(2,3);
+				npc->helmtexture = npc->texture;
+			} else {
+				npc->texture = zone->random.Int(0,1);
+				npc->helmtexture = 0;
+			}
+			break;
+
         case Race::GiantRat:
             npc->race = Race::Rat;
 			static const int defaultTextures[] = {0, 3, 4};
@@ -1860,8 +1936,19 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			break;
 
 		case Race::DragonSkeleton:
+			npc->race = Race::Dracolich;
+			npc->size = 100;
+			break;
+
+		case Race::Coldain:
+			if (strstr(npc->name, "Dain_Frostreaver_IV") == nullptr) {
+				npc->race = Race::Coldain2;
+			}
+			break;
+
+		case Race::Trakanon:
 			npc->race = Race::Drake2;
-			npc->size = npc->size * 25;
+			npc->size = 130;
 			break;
 
 		case Race::CazicThule:
@@ -1953,7 +2040,8 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 
 		case Race::Unicorn:
 			npc->race = Race::Unicorn3;
-			// This one appears to map well. Maybe revisit
+			npc->helmtexture = npc->texture;
+			// This does not map super well. PoG Horses are broken.
 			break;
 
 		case Race::Gargoyle:
@@ -1982,8 +2070,27 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			npc->race = Race::Fiend;
 			break;
 
+		case Race::ForestGiant:
+			npc->race = Race::ForestGiant2;
+			npc->helmtexture = npc->texture;
+			break;
+
+		case Race::FrostGiant:
+			npc->race = Race::Giant2;
+			npc->texture = zone->random.Int(0,2);
+			npc->helmtexture = npc->texture;
+			break;
+
+		case Race::StormGiant:
+			npc->race = Race::Giant4;
+			npc->texture = zone->random.Int(0,2);
+			npc->helmtexture = npc->texture;
+			npc->size = 25;
+			break;
+
 		case Race::Golem:
 			npc->race = Race::Muddite;
+			npc->gender = Gender::Neuter;
 			switch (npc->texture) {
 				case 0:
 				default:
@@ -2002,8 +2109,39 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			}
 			break;
 
+		case Race::IksarCitizen:
+			npc->helmtexture = 0;
+			npc->race = Race::Iksar;
+			if (npc->gender = 2) {
+				npc->gender = zone->random.Int(0,1);
+				npc->texture = 2;
+			} else {
+				npc->texture = 2;
+			}
+
+			switch (npc->class_) {
+				case Class::Wizard:
+				case Class::Necromancer:
+				case Class::Magician:
+				case Class::Enchanter:
+					npc->texture = zone->random.Int(10,16);
+					break;
+				default:
+					npc->texture = 2;
+					break;
+			}
+
+			npc->luclinface = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+			break;
+
 		case Race::TentacleTerror:
 			npc->race = Race::TentacleTerror2;
+			break;
+
+		case Race::IksarSpirit:
+			npc->race = Race::IksarGhost;
 			break;
 
 		case Race::Kerran:
@@ -2023,7 +2161,19 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			}
 			break;
 
+		case Race::Felguard:
+			npc->race = Race::HighElf;
+			npc->gender = zone->random.Int(0,1);
+			npc->luclinface = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+			npc->texture = zone->random.Int(2,3);
+			npc->helmtexture = zone->random.Int(0,1) == 1 ? 0 : npc->texture;
+			break;
+
 		case Race::Fungusman:
+			const static int defTextures[] = {0, 10, 11, 12, 2, 4, 6, 8};
+			npc->texture = defTextures[zone->random.Int(0, (sizeof(defTextures) / sizeof(defTextures[0])) - 1)];
 			npc->race = Race::Sporali;
 			break;
 
