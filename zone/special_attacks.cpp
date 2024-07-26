@@ -474,6 +474,17 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			if (zone->random.Roll0(450) < chance) {
 				attack_rounds++;
 			}
+
+			if (attack_rounds > 1) {
+				entity_list.FilteredMessageClose(this,
+												 true,
+												 RuleI(Range, CriticalDamage),
+												 Chat::NPCFlurry,
+												 FilterMeleeCrits,
+												 "%s executes a FRENZIED FLURRY of attacks on %s!",
+												 GetCleanName(),
+												 GetTarget()->GetCleanName());
+			}
 		}
 
 		const EQ::ItemInstance* primary_in_use = GetInv().GetItem(EQ::invslot::slotPrimary);
