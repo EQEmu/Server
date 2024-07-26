@@ -328,16 +328,16 @@ void Mob::CalculateNewFearpoint()
 					iter++;
 					route_count++;
 
-				if (iter == route.end()) {
-					continue;
-				}
+					if (iter == route.end()) {
+						continue;
+					}
 
-				previous_pos = current_node.pos;
-				auto &next_node = (*iter);
+					previous_pos = current_node.pos;
+					auto &next_node = (*iter);
 
-				if (next_node.teleport) {
-					continue;
-				}
+					if (next_node.teleport) {
+						continue;
+					}
 
 					if ((route_size - route_count) < 5 && !zone->zonemap->CheckLoS(previous_pos, next_node.pos)) {
 						have_los = false;
@@ -347,16 +347,17 @@ void Mob::CalculateNewFearpoint()
 					}
 				}
 
-			if (have_los || route_count > 2) {
-				if (have_los) {
-					LogPathingDetail("Route to fearpoint [{}], [{}], [{}] calculated for [{}]; route size: [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_size);
-				} else {
-					LogPathingDetail("Using truncated route to fearpoint [{}], [{}], [{}] for [{}]; node count: [{}]; route size [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_count, route_size);
-				}
+				if (have_los || route_count > 2) {
+					if (have_los) {
+						LogPathingDetail("Route to fearpoint [{}], [{}], [{}] calculated for [{}]; route size: [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_size);
+					} else {
+						LogPathingDetail("Using truncated route to fearpoint [{}], [{}], [{}] for [{}]; node count: [{}]; route size [{}]", last_good_loc.x, last_good_loc.y, last_good_loc.z, GetName(), route_count, route_size);
+					}
 
-				m_FearWalkTarget = last_good_loc;
-				currently_fleeing = true;
-				return;
+					m_FearWalkTarget = last_good_loc;
+					currently_fleeing = true;
+					return;
+				}
 			}
 		}
 	}
@@ -435,4 +436,3 @@ void Mob::CalculateNewFearpoint()
 
 	return;
 }
-
