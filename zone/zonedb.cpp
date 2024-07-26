@@ -1726,6 +1726,225 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 			}
 			break;
 
+		case Race::QeynosCitizen:
+			npc->race = Race::Human2;
+			if (npc->texture == 1 && npc->helmtexture == 1 && npc->class_ != Class::Merchant) {
+				npc->texture = 3;
+				npc->helmtexture = 3;
+			} else {
+				int choice = zone->random.Int(0,6);
+				npc->texture = 0;
+				switch(choice) {
+					case 0:
+					case 3:
+						npc->helmtexture = 0;
+						break;
+					case 1:
+						npc->helmtexture = 1;
+						break;
+					case 2:
+						npc->helmtexture = 2;
+						break;
+					case 4:
+						npc->helmtexture = 4;
+						break;
+					case 5:
+						npc->helmtexture = 5;
+						break;
+					case 6:
+						npc->helmtexture = npc->gender == Gender::Male ? 6 : 7;
+						break;
+				}
+			}
+			break;
+
+		case Race::Giant:
+			npc->race = Race::Giant3;
+			switch (npc->texture) {
+				case 0: // Cyclops
+					break;
+				case 1: // Fire Giant
+					npc->texture = 0;
+					npc->helmtexture = 0;
+					break;
+				case 2: // Hill Giant
+					npc->texture = 1;
+					npc->helmtexture = 1;
+					break;
+				case 3: // Ice Giant
+					npc->texture = 2;
+					npc->helmtexture = 2;
+					break;
+				case 4: // Sand Giant
+					break;
+			}
+			break;
+
+		case Race::OggokCitizen:
+			npc->race = Race::Ogre;
+			if (npc->gender == 0 && npc->texture == 0) {
+				npc->texture = 3;
+			} else {
+				npc->texture = 1;
+			}
+			break;
+
+		case Race::Spectre:
+			npc->race = Race::Spectre2;
+			break;
+
+		case Race::Gorgon:
+			npc->race = Race::DemonVulture;
+			break;
+
+		case Race::Denizen:
+			npc->race = Race::Amygdalan;
+			break;
+
+		case Race::FroglokGhoul:
+			npc->race = Race::UndeadFroglok;
+			break;
+
+		case Race::Alligator:
+			npc->race = Race::Crocodile;
+			npc->size *= .5;
+			break;
+
+		case Race::GrobbCitizen:
+			npc->race = Race::Troll;
+			if (npc->gender == Gender::Female) {
+				npc->texture = 1;
+			} else {
+				if (npc->texture = 1) {
+					npc->texture = 1;
+				} else {
+					npc->texture = 3;
+				}
+			}
+			break;
+
+		case Race::Froglok:
+			npc->race = Race::Froglok2;
+			npc->gender = zone->random.Int(0,1) ? Gender::Male : Gender::Female;
+
+			switch(npc->class_) {
+				case Class::Warrior:
+				case Class::ShadowKnight:
+				case Class::Paladin:
+				case Class::Cleric:
+					npc->texture = zone->random.Int(1,3);
+					npc->helmtexture = npc->texture;
+					break;
+				case Class::Wizard:
+				case Class::Magician:
+				case Class::Necromancer:
+				case Class::Enchanter:
+					npc->texture = zone->random.Int(10,16);
+					npc->helmtexture = 0;
+					break;
+				case Class::Druid:
+				case Class::Shaman:
+					npc->texture = zone->random.Int(2,3);
+					npc->helmtexture = npc->texture;
+					break;
+				default:
+					npc->texture = zone->random.Int(1,3);
+					npc->helmtexture = npc->texture;
+					break;
+			}
+
+			npc->luclinface = zone->random.Int(0,9);
+			npc->eyecolor1 = zone->random.Int(0,9);
+			npc->eyecolor2 = npc->eyecolor1;
+
+			break;
+
+		case Race::DragonSkeleton:
+			npc->race = Race::Drake2;
+			npc->size = npc->size * 25;
+			break;
+
+		case Race::CazicThule:
+			npc->race = Race::CazicThule2;
+			break;
+
+		case Race::Sphinx:
+			npc->race = Race::Sphinx2;
+			break;
+
+		case Race::Mammoth:
+			npc->race = Race::Mammoth2;
+			break;
+
+		case Race::ManEatingPlant:
+			npc->race = Race::VineMaw;
+			break;
+
+		case Race::Pegasus:
+			npc->race = Race::Pegasus2;
+			break;
+
+		case Race::UndeadIksar:
+			npc->race = Race::IksarSkeleton;
+			break;
+
+		case Race::Gorilla:
+			npc->race = Race::Gorilla2;
+			npc->texture = 0;
+			npc->helmtexture = 0;
+			break;
+
+		case Race::Scorpion:
+			npc->race = Race::Scorpion2;
+			break;
+
+		case Race::Burynai:
+			npc->race = Race::Burynai2;
+			npc->texture = zone->random.Int(0,4);
+			npc->helmtexture = npc->texture;
+			break;
+
+		case Race::Centaur:
+			npc->race = Race::Centaur2;
+			if (strstr(npc->name, "_foal") != nullptr) {
+				npc->texture = 0;
+				npc->helmtexture = 0;
+			} else {
+				npc->texture = zone->random.Int(1, 7);
+				npc->helmtexture = npc->texture;
+			}
+			break;
+
+		case Race::Griffin:
+			npc->race = Race::Griffin2;
+			break;
+
+		case Race::Lion:
+			npc->race = Race::Puma2;
+			npc->texture = 6;
+			npc->helmtexture = npc->gender == Gender::Male ? 7 : 0;
+			npc->gender = Gender::Neuter;
+			break;
+
+		case Race::Gnoll:
+			npc->race = Race::Gnoll2;
+			switch (npc->texture) {
+				default:
+				case 0:
+					npc->texture = zone->random.Int(0,1) == 1 ? 4 : 0;
+					break;
+				case 1:
+					npc->texture = 2;
+					break;
+				case 2:
+					npc->texture = 3;
+					break;
+				case 3:
+					npc->texture = 1;
+					break;
+			}
+			break;
+
 		case Race::Fairy:
 			npc->race = Race::Fairy2;
 			npc->gender = Gender::Neuter;
@@ -1765,6 +1984,22 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 
 		case Race::Golem:
 			npc->race = Race::Muddite;
+			switch (npc->texture) {
+				case 0:
+				default:
+					const static int defTextures[] = {0, 9, 8, 7};
+					npc->texture = defTextures[zone->random.Int(0, (sizeof(defTextures) / sizeof(defTextures[0])) - 1)];
+					break;
+				case 1:
+					npc->texture = 5;
+					break;
+				case 2:
+					npc->texture = 1;
+					break;
+				case 3:
+					npc->texture = 2;
+					break;
+			}
 			break;
 
 		case Race::TentacleTerror:
@@ -1983,6 +2218,77 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 
             break;
         }
+
+		case Race::GelatinousCube:
+			npc->race = Race::GelatinousCube2;
+			break;
+
+		case Race::Ratman:
+			npc->race = Race::Ratman2;
+			npc->texture = zone->random.Int(0,2);
+			break;
+
+		case Race::Dervish:
+			if (npc->texture != 0) {
+				npc->texture = zone->random.Int(0,2);
+				npc->helmtexture = npc->texture;
+				npc->race = Race::Dervish3;
+			}
+			break;
+
+		case Race::NeriakCitizen:
+			if (zone->GetZoneID() == Zones::HATEPLANEB) {
+				npc->gender = zone->random.Int(0,1);
+				if (npc->texture == 0) {
+					npc->race = Race::KnightOfHate;
+				} else {
+					npc->race = Race::ArcanistOfHate;
+				}
+			}
+			break;
+
+		case Race::ElfVampire:
+			npc->race = Race::UndeadVampire;
+			break;
+
+		case Race::Bixie:
+			npc->race = Race::Bixie2;
+			npc->texture = zone->random.Int(0,2);
+			npc->helmtexture = zone->random.Int(0,2);
+			break;
+
+		case Race::LavaDragon:
+			npc->race = Race::Dragon5;
+			switch(npc->texture) {
+				case 0:
+					npc->texture = 4;
+					break;
+				case 1:
+					npc->texture = 0;
+					break;
+				case 2:
+					npc->texture = 1;
+					break;
+				case 3:
+					npc->texture = 0;
+					break;
+				case 4:
+					npc->texture = 5;
+					break;
+				case 5:
+					npc->texture = 1;
+					break;
+				case 6:
+					npc->texture = 3;
+					break;
+				case 7:
+					npc->texture = 2;
+					break;
+			}
+			npc->helmtexture = npc->texture;
+			npc->size = 100;
+
+		break;
 
         case Race::Drake:
             npc->race = Race::Drake3;
