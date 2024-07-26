@@ -476,12 +476,18 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			}
 		}
 
-		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
-		reuse_time = (reuse_time * haste_modifier) / 100;
-
 		const EQ::ItemInstance* primary_in_use = GetInv().GetItem(EQ::invslot::slotPrimary);
 		if (primary_in_use && GetWeaponDamage(GetTarget(), primary_in_use) <= 0) {
 			max_dmg = DMG_INVULNERABLE;
+		}
+
+		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
+		reuse_time = (reuse_time * haste_modifier) / 100;
+
+		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
+			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
+			int weapon_ratio = weapon_damage / GetWeaponSpeedbyHand(EQ::invslot::slotPrimary);
+			max_dmg = max_dmg + (weapon_damage * weapon_ratio);
 		}
 
 		while (attack_rounds > 0) {

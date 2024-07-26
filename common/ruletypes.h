@@ -1064,6 +1064,9 @@ RULE_BOOL(Custom, 	EnablePetBags, 							true, "Enable 'Pet Bag' features")
 RULE_STRING(Custom, PetBagList, 							"199999,900000", "Comma-seperated list of ItemIDs for Enabled Pet Bags")
 RULE_REAL(Custom,  	ItemExtraSpellAmtBardFactor, 			0.10, "Factor to multiple rune healamt bonus values by for bard songs")
 RULE_BOOL(Custom,   MultipleTwoHandedProcs,					false, "Allow two-handed weapons to proc multiple procs (such as augments)")
+RULE_INT(Custom,   	DevastatingFrenzyRateModifier, 			0, "Subtract this value from the chance for Devastating Frenzy to trigger")
+RULE_REAL(Custom,   DevastatingFrenzyDamageMultiplier, 		1.0, "Apply this multiplier for each 20% missing hp from target whenever Devastating Frenzy triggers")
+RULE_BOOL(Custom,   FrenzyScaleOnWeapon, 					true, "Add weapon damage to frenzy, and delay to frenzy reuse")
 
 // Exploit Prevention
 RULE_BOOL(Custom, 	EatCombatTrades, 						true, "Don't return items traded to NPCs during combat. Prevents duplication bug.")
