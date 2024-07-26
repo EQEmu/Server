@@ -12301,7 +12301,7 @@ void Client::SendPath(Mob* target)
 
 
 bool Client::IsPetBagActive() {
-	return GetActivePetBagSlot() > 0;
+	return GetActivePetBagSlot() >= 0;
 }
 
 EQ::ItemInstance* Client::GetActivePetBag() {
@@ -12310,10 +12310,9 @@ EQ::ItemInstance* Client::GetActivePetBag() {
 
 int16 Client::GetActivePetBagSlot() {
 	EQ::ItemInstance* active_bag = nullptr;
-	uint16 active_bag_slot = 0;
+	uint16 active_bag_slot = -1;
 	if (RuleB(Custom, EnablePetBags)) {
 		for (int slot = EQ::invslot::GENERAL_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
-			//LogDebug("Checking Slot [{}]", slot);
 			auto potential_bag = GetInv().GetItem(slot);
 			if (potential_bag && IsValidPetBag(potential_bag->GetID())) {
 				if (!active_bag || active_bag->GetItem()->BagSlots > potential_bag->GetItem()->BagSlots) {
@@ -12329,7 +12328,7 @@ int16 Client::GetActivePetBagSlot() {
 bool Client::IsValidPetBag(int item_id) {
 	std::vector<std::string> item_strings = Strings::Split(RuleS(Custom, PetBagList), ",");
 	for (const std::string& item_string : item_strings) {
-		if (item_id == Strings::ToInt(item_string)) {
+		if (item_id == Strings::ToInt(item_string, -1)) {
 			return true;
 		}
 	}
