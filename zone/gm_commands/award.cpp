@@ -63,6 +63,5 @@ void command_award(Client *c, const Seperator *sep)
     c->Message(Chat::White, "Awarded %d EoM to %s. Reason: %s", Strings::ToInt(sep->arg[2]), character_name.c_str(), reason.c_str());
     zone->SendDiscordMessage("admin", fmt::to_string(c->GetCleanName()) + " awarded " + sep->arg[2] + " EoM to " + character_name + " Reason: " + reason);
 
-    quest_manager.WorldWideSignal(WWSignalUpdateType_Character, 666);
-    quest_manager.WorldWideSignal(WWSignalUpdateType_Character, 666);
+	quest_manager.CrossZoneSignal(CZUpdateType_Character, 0, 666, character_name.c_str());
 }
