@@ -14937,7 +14937,10 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			playeraction = 4;
 			SetFeigned(false);
 		}
-
+		else if (sa->parameter == Animation::Freeze) {
+			SetAppearance(eaStanding);
+			playeraction = 0;
+		}
 		else {
 			LogError("Client [{}] :: unknown appearance [{}]", name, (int)sa->parameter);
 			return;
