@@ -5613,7 +5613,7 @@ int Mob::GetHaste()
 		}
 	}
 	else {
-		h += spellbonuses.hastetype3; 
+		h += spellbonuses.hastetype3;
 	}
 
 	h += extra_haste;	//GM granted haste.
@@ -7417,13 +7417,13 @@ uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 	uint16 weapon_speed = 0;
 	switch (hand) {
 
-		case 13:
+		case EQ::invslot::slotPrimary:
 			weapon_speed = attack_timer.GetDuration();
 			break;
-		case 14:
+		case EQ::invslot::slotSecondary:
 			weapon_speed = attack_dw_timer.GetDuration();
 			break;
-		case 11:
+		case EQ::invslot::slotRange:
 			weapon_speed = ranged_timer.GetDuration();
 			break;
 		default:

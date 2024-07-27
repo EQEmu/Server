@@ -462,7 +462,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		int max_dmg       = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
 
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
-		DoAnim(anim1HWeapon, 0, false);
 
 		if (HasClass(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
@@ -474,15 +473,49 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 			if (zone->random.Roll0(450) < chance) {
 				attack_rounds++;
 			}
-		}
 
-		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
-		reuse_time = (reuse_time * haste_modifier) / 100;
+			if (attack_rounds > 1) {
+				entity_list.FilteredMessageClose(this,
+												 true,
+												 RuleI(Range, CriticalDamage),
+												 Chat::NPCFlurry,
+												 FilterMeleeCrits,
+												 "%s executes a FRENZIED FLURRY of attacks on %s!",
+												 GetCleanName(),
+												 GetTarget()->GetCleanName());
+
+				Message(Chat::NPCFlurry, "You unleash a FRENZIED FLURRY of attacks on %s!", GetTarget()->GetCleanName());
+			}
+		}
 
 		const EQ::ItemInstance* primary_in_use = GetInv().GetItem(EQ::invslot::slotPrimary);
 		if (primary_in_use && GetWeaponDamage(GetTarget(), primary_in_use) <= 0) {
 			max_dmg = DMG_INVULNERABLE;
 		}
+
+		reuse_time = FrenzyReuseTime - 1 - skill_reduction;
+		reuse_time = (reuse_time * haste_modifier) / 100;
+
+		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
+			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
+			int weapon_ratio = weapon_damage / GetWeaponSpeedbyHand(EQ::invslot::slotPrimary);
+			max_dmg = max_dmg + weapon_damage + (weapon_damage * weapon_ratio);
+		}
+
+		int animType = anim1HWeapon;
+		switch (primary_in_use->GetItemType()) {
+			case EQ::item::ItemType2HSlash:
+			case EQ::item::ItemType2HBlunt:
+				animType = anim2HSlashing;
+				break;
+			case EQ::item::ItemType2HPiercing:
+				animType = anim2HWeapon;
+				break;
+			case EQ::item::ItemType1HPiercing:
+				animType = anim1HPiercing;
+				break;
+		}
+		DoAnim(animType, 0, false);
 
 		while (attack_rounds > 0) {
 			if (GetTarget()) {

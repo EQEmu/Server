@@ -5720,6 +5720,10 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 			dex_bonus += dex_bonus * crit_chance / 100;
 		}
 
+		if (GetLevel() >= 51 && hit.skill == EQ::skills::SkillFrenzy) {
+			roll *= (defender->GetHPRatio() / 100);
+		}
+
 		// check if we crited
 		if (roll < dex_bonus) {
 			// step 1: check for finishing blow
@@ -5738,6 +5742,29 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 
 			hit.damage_done = hit.damage_done * crit_mod / 100;
 			LogCombatDetail("Crit success roll [{}] dex chance [{}] og dmg [{}] crit_mod [{}] new dmg [{}]", roll, dex_bonus, og_damage, crit_mod, hit.damage_done);
+
+			if (RuleR(Custom, DevastatingFrenzyDamageMultiplier) > 0 &&
+				HasClass(Class::Berserker) &&
+				GetLevel() >= 51 && // Replace this for correct check for Decap AA
+				hit.skill == EQ::skills::SkillFrenzy) {
+
+				int target_hp_ratio = defender->GetHPRatio();
+
+				uint64 scale = RuleR(Custom, DevastatingFrenzyDamageMultiplier) * ((100 - target_hp_ratio) / 20);
+
+				hit.damage_done = hit.damage_done + (hit.damage_done * scale);
+				hit.min_damage  = hit.min_damage  + (hit.min_damage + scale);
+
+				entity_list.FilteredMessageClose(this,
+													false,
+													RuleI(Range, CriticalDamage),
+													Chat::MeleeCrit,
+													FilterMeleeCrits,
+													"%s lands a Cleaving Blow! (%i)",
+													GetCleanName(),
+													hit.damage_done + hit.min_damage);
+				return;
+			}
 
 			// step 3: check deadly strike
 			if ((HasClass(Class::Rogue)) && hit.skill == EQ::skills::SkillThrowing) {
