@@ -462,7 +462,6 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		int max_dmg       = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
 
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
-		DoAnim(anim1HWeapon, 0, false);
 
 		if (HasClass(Class::Berserker)) {
 			int chance = GetLevel() * 2 + GetSkill(EQ::skills::SkillFrenzy);
@@ -484,6 +483,8 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 												 "%s executes a FRENZIED FLURRY of attacks on %s!",
 												 GetCleanName(),
 												 GetTarget()->GetCleanName());
+
+				Message(Chat::NPCFlurry, "You unleash a FRENZIED FLURRY of attacks on %s!", GetTarget()->GetCleanName());
 			}
 		}
 
@@ -498,8 +499,23 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		if (RuleB(Custom, FrenzyScaleOnWeapon)) {
 			int weapon_damage = GetWeaponDamage(GetTarget(), primary_in_use);
 			int weapon_ratio = weapon_damage / GetWeaponSpeedbyHand(EQ::invslot::slotPrimary);
-			max_dmg = max_dmg + (weapon_damage * weapon_ratio);
+			max_dmg = max_dmg + weapon_damage + (weapon_damage * weapon_ratio);
 		}
+
+		int animType = anim1HWeapon;
+		switch (primary_in_use->GetItemType()) {
+			case EQ::item::ItemType2HSlash:
+			case EQ::item::ItemType2HBlunt:
+				animType = anim2HSlashing;
+				break;
+			case EQ::item::ItemType2HPiercing:
+				animType = anim2HWeapon;
+				break;
+			case EQ::item::ItemType1HPiercing:
+				animType = anim1HPiercing;
+				break;
+		}
+		DoAnim(animType, 0, false);
 
 		while (attack_rounds > 0) {
 			if (GetTarget()) {
