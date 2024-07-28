@@ -14938,8 +14938,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 		}
 		else if (sa->parameter == Animation::Freeze) {
-			SetAppearance(eaStanding);
-			playeraction = 0;
+			SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false);
 		}
 		else {
 			LogError("Client [{}] :: unknown appearance [{}]", name, (int)sa->parameter);
