@@ -2741,7 +2741,9 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 			return nullptr;
 		}
 
-		t = MutateRace(t);
+		if (RuleB(Custom, UseTHJRaceMutations)) {
+			t = MutateRace(t);
+		}
 
 		zone->npctable[t->npc_id] = t;
 		npc = t;
