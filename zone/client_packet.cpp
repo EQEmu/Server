@@ -14938,6 +14938,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			SetFeigned(false);
 		}
 		else if (sa->parameter == Animation::Freeze) {
+			LogError("Handled Freeze Animation packet for Client [{}] in zone [{}]", GetCleanName(), zone->GetShortName());
 			SendAppearancePacket(AppearanceType::Animation, Animation::Freeze, false);
 		}
 		else {
