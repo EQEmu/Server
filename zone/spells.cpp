@@ -1465,6 +1465,8 @@ void Mob::StopCasting()
 		mc->keepcasting = 0;
 		mc->slot = casting_slot;
 		c->FastQueuePacket(&outapp);
+
+		SendSpellBarEnable(casting_spell_id);
 	}
 	ZeroCastingVars();
 }
@@ -1921,32 +1923,25 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		{
 			Client *c = CastToClient();
 
-			LogSpells("Check 1");
 			if (RuleB(Custom, MulticlassingEnabled)) {
 				auto tt = spells[spell_id].target_type;
 				if (tt != ST_AECaster && tt != ST_Target && tt != ST_AETarget) {
 					c->SendSpellBarEnable(spell_id);
 				}
 			}
-
-			LogSpells("Check 2");
 			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}
-			LogSpells("Check 3");
 			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
 				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
 			}
-			LogSpells("Check 4");
 			if (RuleB(Spells, EnableBardMelody)) {
 				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 			}
-			LogSpells("Check 5");
 			if (!IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}
 		}
-		LogSpells("Bard song [{}] should be started", spell_id);
 	}
 	else
 	{
@@ -1987,9 +1982,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// It also needs to be <users's ping to not cause issues
 	delaytimer = true;
 	spellend_timer.Start(10, true);
-
-	LogSpells("Spell casting of [{}] is finished", spell_id);
-
 }
 
 bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, CastingSlot slot, bool isproc)
@@ -5885,8 +5877,12 @@ void Mob::Stun(int duration)
 	if(IsValidSpell(spell_id) && !spells[spell_id].uninterruptable) {
 		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
 
-		if(zone->random.Int(0,99) > persistent_casting)
+		if(zone->random.Int(0,99) > persistent_casting) {
 			InterruptSpell(spell_id);
+			if (IsClient()) {
+				SendSpellBarEnable(spell_id);
+			}
+		}
 	}
 
 	if(duration > 0)
