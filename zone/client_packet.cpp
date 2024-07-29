@@ -14757,10 +14757,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			playeraction = 4;
 			SetFeigned(false);
 		}
-		else if (sa->parameter == Animation::Freeze) {
-			// Client seems to expect an ack here
-			SendAppearancePacket(AppearanceType::Animation, Animation::Freeze);
-		}
 
 		else {
 			LogError("Client [{}] :: unknown appearance [{}]", name, (int)sa->parameter);
