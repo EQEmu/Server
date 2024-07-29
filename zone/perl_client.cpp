@@ -3119,6 +3119,11 @@ bool Perl_Client_ReloadDataBuckets(Client* self)
 	return DataBucket::GetDataBuckets(self);
 }
 
+bool Perl_Client_IsTrader(Client* self)
+{
+	return self->IsTrader();
+}
+
 uint32 Perl_Client_GetEXPForLevel(Client* self, uint16 check_level)
 {
 	return self->GetEXPForLevel(check_level);
@@ -3680,6 +3685,7 @@ void perl_register_client()
 	package.add("ReadBookByName", &Perl_Client_ReadBookByName);
 	package.add("RefundAA", &Perl_Client_RefundAA);
 	package.add("ReloadDataBuckets", &Perl_Client_ReloadDataBuckets);
+	package.add("IsTrader", &Perl_Client_IsTrader);
 	package.add("RemoveAAPoints", &Perl_Client_RemoveAAPoints);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*))&Perl_Client_RemoveAllExpeditionLockouts);
 	package.add("RemoveAllExpeditionLockouts", (void(*)(Client*, std::string))&Perl_Client_RemoveAllExpeditionLockouts);
