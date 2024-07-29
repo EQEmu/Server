@@ -7449,6 +7449,9 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 			if (IsBot()) {
 				GetOwner()->Message(Chat::Red, "%s says, 'Casting failed for %s. This could be due to zone restrictions, target restrictions or other limiting factors.", GetCleanName(), CastToBot()->GetBotItem(item_slot)->GetItem()->Name);
 			}
+		} else {
+			// Brute force spell bar
+			SendSpellBarEnable(spell_id);
 		}
 	}
 	//Instant cast items do not stop bard songs or interrupt casting.
@@ -7476,6 +7479,10 @@ void Mob::DoBardCastingFromItemClick(bool is_casting_bard_song, uint32 cast_time
 		else {
 			if (IsBot()) {
 				GetOwner()->Message(Chat::Red, "%s says, 'Casting failed for %s. This could be due to zone restrictions, target restrictions or other limiting factors.", GetCleanName(), CastToBot()->GetBotItem(item_slot)->GetItem()->Name);
+			}
+			if (IsClient()) {
+				// Brute force spell bar
+				SendSpellBarEnable(spell_id);
 			}
 		}
 	}
