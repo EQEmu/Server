@@ -284,7 +284,8 @@ uint32 Mob::GetHerosForgeModel(uint8 material_slot) const
 			if (IsClient()) {
 				const auto inst = CastToClient()->m_inv[slot];
 				if (inst) {
-					auto augment = inst->GetOrnamentationAugment();
+					const auto augment = inst->GetOrnamentationAugment();
+
 					if (augment) {
 						item              = augment->GetItem();
 						heros_forge_model = item->HerosForgeModel;
