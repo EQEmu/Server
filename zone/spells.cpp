@@ -128,6 +128,11 @@ void Mob::SpellProcess()
 	{
 		spellend_timer.Disable();
 		delaytimer = false;
+
+		if (IsClient()) {
+			CastToClient()->SendSpellBarEnable(casting_spell_id);
+		}
+
 		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
 	}
