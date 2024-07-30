@@ -197,16 +197,18 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
 		if (is_equipped_weapon) {
-			if (true) {
+			if (IsClient()) {
 				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
 					return 0;
 				}
 
-				const auto inst = m_inv[inventory_slot];
+				const auto inst = CastToClient()->m_inv[inventory_slot];
 
+				LogDebug("Check 1");
 				if (inst) {
-					auto augment = inst->GetOrnamentationAugment();
+					LogDebug("Check 2");
+					const auto augment = inst->GetOrnamentationAugment();
 
 					if (augment) {
 						item = augment->GetItem();
@@ -218,10 +220,11 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					}
 				}
 			}
-
+			LogDebug("Check 3, equipment_material [{}]", equipment_material);
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 			}
+			LogDebug("Check 4 equipment_material [{}]", equipment_material);
 		} else {
 			equipment_material = item->Material;
 		}
