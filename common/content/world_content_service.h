@@ -160,6 +160,7 @@ public:
 	WorldContentService * SetExpansionContext();
 
 	bool DoesPassContentFiltering(const ContentFlags& f);
+	bool DoesZonePassContentFiltering(const ZoneRepository::Zone& z);
 
 	WorldContentService * SetDatabase(Database *database);
 	Database *GetDatabase() const;
@@ -189,10 +190,8 @@ private:
 	Database *m_content_database;
 
 	// holds a record of the zone table from the database
-	std::vector<ZoneRepository::Zone> m_zones = {};
 	WorldContentService *LoadStaticGlobalZoneInstances();
-	std::vector<InstanceListRepository::InstanceList> m_zone_instances;
-	WorldContentService * LoadZones();
+	std::vector<InstanceListRepository::InstanceList> m_zone_static_instances;
 };
 
 extern WorldContentService content_service;
