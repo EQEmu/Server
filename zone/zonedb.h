@@ -400,7 +400,6 @@ public:
 	/* Buyer/Barter  */
 	void AddBuyLine(uint32 CharID, uint32 BuySlot, uint32 ItemID, const char *ItemName, uint32 Quantity, uint32 Price);
 	void RemoveBuyLine(uint32 CharID, uint32 BuySlot);
-	void DeleteBuyLines(uint32 CharID);
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
 

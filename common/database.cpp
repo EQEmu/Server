@@ -78,6 +78,7 @@
 #include "repositories/merchantlist_temp_repository.h"
 #include "repositories/bot_data_repository.h"
 #include "repositories/trader_repository.h"
+#include "repositories/buyer_repository.h"
 
 extern Client client;
 
@@ -2122,4 +2123,9 @@ void Database::ClearGuildOnlineStatus()
 void Database::ClearTraderDetails()
 {
 	TraderRepository::Truncate(*this);
+}
+
+void Database::ClearBuyerDetails()
+{
+	BuyerRepository::DeleteBuyer(*this, 0);
 }

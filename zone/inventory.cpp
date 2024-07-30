@@ -1864,6 +1864,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 		LogInventory("Dest slot [{}] has item [{}] ([{}]) with [{}] charges in it", dst_slot_id, dst_inst->GetItem()->Name, dst_inst->GetItem()->ID, dst_inst->GetCharges());
 		dstitemid = dst_inst->GetItem()->ID;
 	}
+	if (IsBuyer() && srcitemid > 0) {
+		CheckIfMovedItemIsPartOfBuyLines(srcitemid);
+	}
+
 	if (IsTrader() && srcitemid>0){
 		EQ::ItemInstance* srcbag;
 		EQ::ItemInstance* dstbag;
@@ -4850,3 +4854,63 @@ bool Client::HasItemOnCorpse(uint32 item_id)
 
 	return false;
 }
+
+bool Client::PutItemInInventoryWithStacking(EQ::ItemInstance *inst)
+{
+	auto free_id = GetInv().FindFirstFreeSlotThatFitsItem(inst->GetItem());
+	if (inst->IsStackable()) {
+		if (TryStacking(inst, ItemPacketTrade, true, false)) {
+			return true;
+		}
+	}
+	if (free_id != INVALID_INDEX) {
+		if (PutItemInInventory(free_id, *inst, true)) {
+			return true;
+		}
+	}
+	return false;
+};
+
+bool Client::FindNumberOfFreeInventorySlotsWithSizeCheck(std::vector<BuyerLineTradeItems_Struct> items)
+{
+	uint32 count = 0;
+	for (int16         i = EQ::invslot::GENERAL_BEGIN; i <= EQ::invslot::GENERAL_END; i++) {
+		if ((((uint64) 1 << i) & GetInv().GetLookup()->PossessionsBitmask) == 0) {
+			continue;
+		}
+
+		EQ::ItemInstance *inv_item = GetInv().GetItem(i);
+
+		if (!inv_item) {
+			// Found available slot in personal inventory.  Fits all sizes
+			count++;
+		}
+
+		if (count >= items.size()) {
+			return true;
+		}
+
+		if (inv_item->IsClassBag()) {
+			for (auto const& item:items) {
+				auto item_tmp = database.GetItem(item.item_id);
+				if (EQ::InventoryProfile::CanItemFitInContainer(item_tmp, inv_item->GetItem())) {
+					int16 base_slot_id = EQ::InventoryProfile::CalcSlotId(i, EQ::invbag::SLOT_BEGIN);
+					uint8 bag_size     = inv_item->GetItem()->BagSlots;
+
+					for (uint8 bag_slot = EQ::invbag::SLOT_BEGIN; bag_slot < bag_size; bag_slot++) {
+						auto bag_item = GetInv().GetItem(base_slot_id + bag_slot);
+						if (!bag_item) {
+							// Found a bag slot that fits the item
+							count++;
+						}
+					}
+
+					if (count >= items.size()) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+};

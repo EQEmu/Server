@@ -60,7 +60,8 @@ namespace PlayerEvent {
 		GUILD_TRIBUTE_DONATE_PLAT,
 		PARCEL_SEND,
 		PARCEL_RETRIEVE,
-		PARCEL_DELETE, 
+		PARCEL_DELETE,
+		BARTER_TRANSACTION,
 		MAX // dont remove
 	};
 
@@ -122,7 +123,8 @@ namespace PlayerEvent {
 		"Guild Tribute Donate Platinum",
 		"Parcel Item Sent",
 		"Parcel Item Retrieved",
-		"Parcel Prune Routine"
+		"Parcel Prune Routine",
+		"Barter Transaction"
 	};
 
 	// Generic struct used by all events
@@ -1079,6 +1081,32 @@ namespace PlayerEvent {
 				CEREAL_NVP(aug_slot_5),
 				CEREAL_NVP(aug_slot_6)
 				);
+		}
+	};
+
+	struct BarterTransaction {
+		std::string                             status;
+		uint32                                  item_id;
+		uint32                                  item_quantity;
+		std::string                             item_name;
+		std::vector<BuyerLineTradeItems_Struct> trade_items;
+		std::string                             buyer_name;
+		std::string                             seller_name;
+		uint64                                  total_cost;
+		// cereal
+		template<class Archive>
+		void serialize(Archive &ar)
+		{
+			ar(
+				CEREAL_NVP(status),
+				CEREAL_NVP(item_id),
+				CEREAL_NVP(item_quantity),
+				CEREAL_NVP(item_name),
+				CEREAL_NVP(trade_items),
+				CEREAL_NVP(buyer_name),
+				CEREAL_NVP(seller_name),
+				CEREAL_NVP(total_cost)
+			);
 		}
 	};
 }

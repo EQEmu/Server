@@ -1742,7 +1742,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 
 			zoneserver_list.SendPacketToBootedZones(pack);
-
 			break;
 		}
 		case ServerOP_BazaarPurchase: {
@@ -1753,9 +1752,40 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					"ServerOP_BazaarPurchase",
 					in->trader_buy_struct.trader_id
 				);
+				return;
 			}
 
 			zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+			break;
+		}
+		case ServerOP_BuyerMessaging: {
+			auto in = (BuyerMessaging_Struct *)pack->pBuffer;
+			switch (in->action) {
+				case Barter_AddToBarterWindow:
+				case Barter_RemoveFromBarterWindow: {
+					if (in->buyer_id <= 0) {
+						LogTrading("World Message <red>[{}] received with invalid buyer_id <red>[{}]",
+								   "ServerOP_BecomeBuyer",
+								   in->buyer_id
+						);
+						return;
+					}
+
+					zoneserver_list.SendPacketToBootedZones(pack);
+					break;
+				}
+				case Barter_SellItem: {
+					zoneserver_list.SendPacket(Zones::BAZAAR, pack);
+					break;
+				}
+				case Barter_FailedTransaction:
+				case Barter_BuyerTransactionComplete: {
+					zoneserver_list.SendPacket(in->zone_id, pack);
+					break;
+				}
+				default:
+					return;
+			}
 		}
 		default: {
 			LogInfo("Unknown ServerOPcode from zone {:#04x}, size [{}]", pack->opcode, pack->size);

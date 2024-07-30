@@ -354,15 +354,15 @@ struct Spawn_Struct_Bitfields
 /*29*/	unsigned   showname:1;
 /*30*/	unsigned   idleanimationsoff:1; // what we called statue?
 /*31*/	unsigned   untargetable:1;	// bClickThrough
-/* do these later
-32	unsigned   buyer:1;
-33	unsigned   offline:1;
-34	unsigned   interactiveobject:1;
-35	unsigned   flung:1; // hmm this vfunc appears to do stuff with leve and flung variables
-36	unsigned   title:1;
-37	unsigned   suffix:1;
-38	unsigned   padding1:1;
-39	unsigned   padding2:1;
+	// byte 5
+/*32	unsigned   buyer:1;
+/*33	unsigned   offline:1;
+/*34	unsigned   interactiveobject:1;
+/*35	unsigned   flung:1; // hmm this vfunc appears to do stuff with leve and flung variables
+/*36	unsigned   title:1;
+/*37	unsigned   suffix:1;
+/*38	unsigned   padding1:1;
+/*39	unsigned   padding2:1;
 40	unsinged   padding3:1;
 */
 	/*
@@ -3107,19 +3107,139 @@ struct EnvDamage2_Struct {
 
 //Bazaar Stuff
 enum RoF2BazaarTraderBuyerActions {
-	Zero            = 0,
-	BeginTraderMode = 1,
-	EndTraderMode   = 2,
-	PriceUpdate     = 3,
-	EndTransaction  = 4,
-	BazaarSearch    = 7,
-	WelcomeMessage  = 9,
-	BuyTraderItem   = 10,
-	ListTraderItems = 11,
-	BazaarInspect   = 18,
-	ClickTrader     = 28,
-	ItemMove        = 19,
-	ReconcileItems  = 20
+	Zero             = 0,
+	BeginTraderMode  = 1,
+	EndTraderMode    = 2,
+	PriceUpdate      = 3,
+	EndTransaction   = 4,
+	BazaarSearch     = 7,
+	WelcomeMessage   = 9,
+	BuyTraderItem    = 10,
+	ListTraderItems  = 11,
+	BazaarInspect    = 18,
+	ClickTrader      = 28,
+	ItemMove         = 19,
+	ReconcileItems   = 20
+};
+
+enum RoF2BuyerActions {
+	BuyerSearchResults   = 0x00,
+	BuyerBuyLine         = 0x06,
+	BuyerModifyBuyLine   = 0x07,
+	BuyerRemoveItem      = 0x08,
+	BuyerSellItem        = 0x09,
+	BuyerBuyItem         = 0x0a,
+	BuyerInspectBegin    = 0x0b,
+	BuyerInspectEnd      = 0x0c,
+	BuyerAppearance      = 0x0d,
+	BuyerSendBuyLine     = 0x0e,
+	BuyerItemInspect     = 0x0f,
+	BuyerBrowsingBuyLine = 0x10,
+	BarterWelcomeMessage = 0x11,
+	BuyerWelcomeMessage  = 0x13,
+	BuyerGreeting        = 0x14,
+	BuyerInventoryFull   = 0x16
+};
+
+struct BarterItemSearchLinkRequest_Struct {
+	uint32 action;
+	uint32 unknown_004;
+	uint32 seller_id;
+	uint32 buyer_id;
+	uint32 unknown_016;
+	uint32 slot_id; // 0xffffffff main buy line 0x0 trade_item_1, 0x1 trade_item_2
+	uint32 item_id;
+	uint32 unknown_028;
+};
+
+struct BuyerWelcomeMessageUpdate_Struct {
+	uint32 action;
+	char   unknown_004[64];
+	uint32 unknown_068;
+	char   welcome_message[256];
+};
+
+struct Buyer_SetAppearance_Struct {
+	uint32	action;
+	uint32	entity_id;
+	char	unknown[64];
+	uint32	enabled;
+};
+
+struct BuyerRemoveItem_Struct {
+	uint32	action;
+	uint32	unknown004;
+	uint32	slot_id;
+	uint32	toggle;
+};
+
+struct BuyerLineSellItem_Struct {
+	uint32                     action;
+	uint32                     purchase_method; // 0 direct merchant, 1 via /barter window
+	uint32                     unknown008;
+	uint32                     buyer_entity_id;
+	uint32                     seller_entity_id;
+	char                       unknown[15];
+	uint32                     slot;
+	uint8                      enabled;
+	uint32                     item_id;
+	char                       item_name[64];
+	uint32                     item_icon;
+	uint32                     item_quantity;
+	uint8                      item_toggle;
+	uint32                     item_cost;
+	uint32                     no_trade_items;
+	BuyerLineTradeItems_Struct trade_items[10];
+	char                       unknown2[13];
+	uint32                     seller_quantity;
+};
+
+struct BuyerLineItemsSearch_Struct {
+	uint32                     slot;
+	uint8                      enabled;
+	uint32                     item_id;
+	char                       item_name[64];
+	uint32                     item_icon;
+	uint32                     item_quantity;
+	uint8                      item_toggle;
+	uint32                     item_cost;
+	uint32                     buyer_id;
+	BuyerLineTradeItems_Struct trade_items[MAX_BUYER_COMPENSATION_ITEMS];
+};
+
+struct BuyerLineSearch_Struct {
+	uint32                                   action;
+	uint32                                   no_items;
+	std::vector<BuyerLineItemsSearch_Struct> buy_line;
+};
+
+struct BuyerStart_Struct {
+	uint32                     action;
+	uint16                     no_buyer_lines;
+	uint32                     slot;
+	uint8                      enabled;
+	uint32                     item_id;
+	char                       item_name[1];    // vary length
+	uint32                     item_icon;
+	uint32                     item_quantity;
+	uint8                      toggle;
+	uint32                     item_cost;
+	uint32                     no_trade_items;
+	BuyerLineTradeItems_Struct trade_items[1]; // size is actually no_trade_items.  If 0, then this is not in packet
+	char                       unknown[13];
+};
+
+struct BuyerItemSearchResultEntry_Struct {
+	char   item_name[64];
+	uint32 item_id;
+	uint32 item_icon;
+	uint32 unknown_072;
+};
+
+struct BuyerItemSearchResults_Struct {
+	uint32                            action;
+	uint32                            result_count;
+	BuyerItemSearchResultEntry_Struct results[];
 };
 
 enum {
