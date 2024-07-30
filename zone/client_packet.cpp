@@ -764,10 +764,8 @@ void Client::CompleteConnect()
 
 	entity_list.SendTraders(this);
 
-	SendWearChangeAndLighting(EQ::textures::LastTexture);
-	Mob* pet = GetPet();
+	Mob *pet = GetPet();
 	if (pet) {
-		pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
 		pet->SendPetBuffsToClient();
 	}
 
@@ -971,6 +969,8 @@ void Client::CompleteConnect()
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
+
+	heroforge_wearchange_timer.Start(250);
 
 	RecordStats();
 	AutoGrantAAPoints();
@@ -16251,7 +16251,7 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 		return;
 
 	// Hero Forge ID needs to be fixed here as RoF2 appears to send an incorrect value.
-	if (wc->wear_slot_id >= 0 && wc->wear_slot_id < EQ::textures::weaponPrimary)
+	if (wc->hero_forge_model != 0 && wc->wear_slot_id >= 0 && wc->wear_slot_id < EQ::textures::weaponPrimary)
 		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
 
 	// we could maybe ignore this and just send our own from moveitem

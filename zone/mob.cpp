@@ -510,6 +510,8 @@ Mob::Mob(
 	use_double_melee_round_dmg_bonus = false;
 	dw_same_delay                    = 0;
 
+	queue_wearchange_slot = -1;
+
 	m_manual_follow = false;
 
 	mob_close_scan_timer.Trigger();

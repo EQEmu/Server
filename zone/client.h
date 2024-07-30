@@ -2096,6 +2096,8 @@ private:
 	Timer pick_lock_timer;
 	Timer parcel_timer;	//Used to limit the number of parcels to one every 30 seconds (default).  Changable via rule.
 
+	Timer heroforge_wearchange_timer;
+
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
 
