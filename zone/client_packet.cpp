@@ -16035,7 +16035,8 @@ void Client::Handle_OP_WearChange(const EQApplicationPacket *app)
 		wc->hero_forge_model = GetHerosForgeModel(wc->wear_slot_id);
 
 	// we could maybe ignore this and just send our own from moveitem
-	entity_list.QueueClients(this, app, false);
+	// We probably need to skip this entirely when it is send as an ack, but not sure how to ID that.
+	entity_list.QueueClients(this, app, true);
 }
 
 void Client::Handle_OP_WhoAllRequest(const EQApplicationPacket *app)
