@@ -1689,8 +1689,6 @@ protected:
 	int32 appearance_effects_id[MAX_APPEARANCE_EFFECTS];
 	int32 appearance_effects_slot[MAX_APPEARANCE_EFFECTS];
 
-	int queue_wearchange_slot;
-
 	Timer shield_timer;
 	uint32 m_shield_target_id;
 	uint32 m_shielder_id;
