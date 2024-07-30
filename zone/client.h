@@ -1980,7 +1980,6 @@ private:
 
 	glm::vec4 m_ZoneSummonLocation;
 	uint16 zonesummon_id;
-	uint8 zonesummon_instance_id;
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;
 
