@@ -582,6 +582,76 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	return false;
 }
 
+int EntityList::FleeAllyCount(Mob* attacker, Mob* skipped)
+{
+	// Return a list of how many NPCs of the same faction or race are within aggro range of the given exclude Mob.
+	if (!attacker) {
+		return 0;
+	}
+
+	int count = 0;
+
+	for (const auto& e : npc_list) {
+		NPC* n = e.second;
+		if (!n || n == skipped) {
+			continue;
+		}
+
+		float       aggro_range  = n->GetAggroRange();
+		const float assist_range = n->GetAssistRange();
+
+		if (assist_range > aggro_range) {
+			aggro_range = assist_range;
+		}
+
+		// Square it because we will be using DistNoRoot
+		aggro_range *= aggro_range;
+
+		if (DistanceSquared(n->GetPosition(), skipped->GetPosition()) > aggro_range) {
+			continue;
+		}
+
+		const auto& excluded = Strings::Split(RuleS(Aggro, ExcludedFleeAllyFactionIDs));
+
+		const auto& f = std::find_if(
+			excluded.begin(),
+			excluded.end(),
+			[&](std::string x) {
+				return Strings::ToUnsignedInt(x) == skipped->GetPrimaryFaction();
+			}
+		);
+
+		const bool is_excluded = f != excluded.end();
+
+		// If exclude doesn't have a faction, check for buddies based on race.
+		// Also exclude common factions such as noob monsters, indifferent, kos, kos animal
+		if (!is_excluded) {
+			if (n->GetPrimaryFaction() != skipped->GetPrimaryFaction()) {
+				continue;
+			}
+		} else {
+			if (n->GetBaseRace() != skipped->GetBaseRace() || n->IsCharmedPet()) {
+				continue;
+			}
+		}
+
+		LogFleeDetail(
+		"[{}] on faction [{}] with aggro_range [{}] is at [{}], [{}], [{}] and will count as an ally for [{}]",
+		n->GetName(),
+		n->GetPrimaryFaction(),
+		aggro_range,
+		n->GetX(),
+		n->GetY(),
+		n->GetZ(),
+		skipped->GetName()
+		);
+
+		++count;
+	}
+
+	return count;
+}
+
 int EntityList::GetHatedCount(Mob *attacker, Mob *exclude, bool inc_gray_con)
 {
 	// Return a list of how many non-feared, non-mezzed, non-green mobs, within aggro range, hate *attacker

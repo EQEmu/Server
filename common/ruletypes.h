@@ -699,6 +699,7 @@ RULE_BOOL(Aggro, UndeadAlwaysAggro, true, "should undead always aggro?")
 RULE_INT(Aggro, BardAggroCap, 40, "per song bard aggro cap.")
 RULE_INT(Aggro, InitialAggroBonus, 100, "Initial Aggro Bonus, Default: 100")
 RULE_INT(Aggro, InitialPetAggroBonus, 100, "Initial Pet Aggro Bonus, Default 100")
+RULE_STRING(Aggro, ExcludedFleeAllyFactionIDs, "0|5013|5014|5023|5032", "Common Faction IDs that are excluded from faction checks in EntityList::FleeAllyCount")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(TaskSystem)

@@ -678,6 +678,7 @@ public:
 	inline const float GetRelativeHeading() const { return m_RelativePosition.w; }
 	inline const float GetSize() const { return size; }
 	inline const float GetBaseSize() const { return base_size; }
+	inline const float SetBestZ(float z_coord) const { return z_coord + GetZOffset(); }
 	inline const GravityBehavior GetFlyMode() const { return flymode; }
 	bool IsBoat() const; // Checks races - used on mob instantiation
 	bool GetIsBoat() const { return is_boat; } // Set on instantiation for speed
@@ -717,6 +718,7 @@ public:
 	float GetMovespeed() const { return IsRunning() ? GetRunspeed() : GetWalkspeed(); }
 	bool IsRunning() const { return m_is_running; }
 	void SetRunning(bool val) { m_is_running = val; }
+	float GetCurrentSpeed() { return current_speed; }
 	virtual void GMMove(float x, float y, float z, float heading = 0.01, bool save_guard_spot = true);
 	virtual void GMMove(const glm::vec4 &position, bool save_guard_spot = true);
 	void SetDelta(const glm::vec4& delta);
@@ -1074,6 +1076,7 @@ public:
 	inline virtual bool HasOwner() { if (!GetOwnerID()){ return false; } return entity_list.GetMob(GetOwnerID()) != 0; }
 	inline virtual bool IsPet() { return HasOwner() && !IsMerc(); }
 	bool HasPet() const;
+	virtual bool IsCharmedPet() { return IsPet() && IsCharmed(); }
 	inline bool HasTempPetsActive() const { return(hasTempPet); }
 	inline void SetTempPetsActive(bool i) { hasTempPet = i; }
 	inline int16 GetTempPetCount() const { return count_TempPet; }
@@ -1210,8 +1213,12 @@ public:
 	int GetFearSpeed() { return _GetFearSpeed(); }
 	bool IsFeared() { return (spellbonuses.IsFeared || flee_mode); } // This returns true if the mob is feared or fleeing due to low HP
 	inline void StartFleeing() { flee_mode = true; CalculateNewFearpoint(); }
+	void StopFleeing();
+	inline bool IsFleeing() { return flee_mode; }
 	void ProcessFlee();
 	void CheckFlee();
+	void FleeInfo(Mob* client);
+	int GetFleeRatio(Mob* other = nullptr);
 	inline bool IsBlind() { return spellbonuses.IsBlind; }
 
 	inline bool			CheckAggro(Mob* other) {return hate_list.IsEntOnHateList(other);}

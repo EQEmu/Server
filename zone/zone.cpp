@@ -2686,6 +2686,22 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 	return 0;
 }
 
+bool Zone::IsWaterZone(float z)
+{
+
+	switch (GetZoneID()) {
+		case Zones::KEDGE:
+			return true;
+		case Zones::POWATER:
+			if (z < 0.0f) {
+				return true;
+			}
+			return false;
+		default:
+			return false;
+	}
+}
+
 void Zone::SetIsHotzone(bool is_hotzone)
 {
 	Zone::is_hotzone = is_hotzone;

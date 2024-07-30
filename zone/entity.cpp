@@ -4483,6 +4483,36 @@ void EntityList::QuestJournalledSayClose(
 	delete outapp;
 }
 
+bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
+		float trg_x, float trg_y, float trg_z, float perwalk)
+{
+	if (zone->zonemap == nullptr) {
+		return true;
+	}
+
+	glm::vec3 myloc;
+	glm::vec3 oloc;
+	glm::vec3 hit;
+
+	myloc.x = cur_x;
+	myloc.y = cur_y;
+	myloc.z = cur_z+5;
+
+	oloc.x = trg_x;
+	oloc.y = trg_y;
+	oloc.z = trg_z+5;
+
+	if (myloc.x == oloc.x && myloc.y == oloc.y && myloc.z == oloc.z) {
+		return true;
+	}
+
+	if (!zone->zonemap->LineIntersectsZoneNoZLeaps(myloc,oloc,perwalk,&hit)) {
+		return true;
+	}
+
+	return false;
+}
+
 Corpse *EntityList::GetClosestCorpse(Mob *sender, const char *Name)
 {
 	if (!sender)

@@ -116,6 +116,7 @@ public:
 	inline const time_t& GetSpawnTimeStamp() const { return spawn_timestamp; }
 
 	virtual const char* GetName() { return ""; }
+	bool CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z, float trg_x, float trg_y, float trg_z, float perwalk=1);
 
 	Bot* CastToBot();
 	const Bot* CastToBot() const;
@@ -503,9 +504,10 @@ public:
 	Mob*	GetTargetForMez(Mob* caster);
 	uint32	CheckNPCsClose(Mob *center);
 
+	int		FleeAllyCount(Mob* attacker, Mob* skipped);
 	Corpse* GetClosestCorpse(Mob* sender, const char *Name);
 	void	TryWakeTheDead(Mob* sender, Mob* target, int32 spell_id, uint32 max_distance, uint32 duration, uint32 amount_pets);
-	NPC* GetClosestBanker(Mob* sender, uint32 &distance);
+	NPC*	GetClosestBanker(Mob* sender, uint32 &distance);
 	void	CameraEffect(uint32 duration, float intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, uint8 BodyType, bool skip_client_pets=false);
 	void	ForceGroupUpdate(uint32 gid);

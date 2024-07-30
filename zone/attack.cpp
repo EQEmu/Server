@@ -2186,6 +2186,19 @@ bool Client::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::Skil
 	return true;
 }
 
+bool Client::CheckIfAlreadyDead()
+{
+	if (!ClientFinishedLoading()) {
+		return false;
+	}
+
+	if (dead) {
+		return false;	//cant die more than once...
+	}
+
+	return true;
+}
+
 //SYNC WITH: tune.cpp, mob.h TuneNPCAttack
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
@@ -2460,11 +2473,6 @@ void NPC::Damage(Mob* other, int64 damage, uint16 spell_id, EQ::skills::SkillTyp
 
 	//do a majority of the work...
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
-
-	if (damage > 0) {
-		//see if we are gunna start fleeing
-		if (!IsPet()) CheckFlee();
-	}
 }
 
 bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillType attack_skill, KilledByTypes killed_by, bool is_buff_tic)
@@ -4132,6 +4140,7 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 			AddToHateList(attacker, 0, damage, true, false, iBuffTic, spell_id);
 	}
 
+	bool died = false;
 	if (damage > 0) {
 		//if there is some damage being done and theres an attacker involved
 		int previous_hp_ratio = GetHPRatio();
@@ -4256,6 +4265,8 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		//final damage has been determined.
+		int old_hp_ratio = (int)GetHPRatio();
+
 		SetHP(int64(GetHP() - damage));
 
 		const auto has_bot_given_event = parse->BotHasQuestSub(EVENT_DAMAGE_GIVEN);
@@ -4355,11 +4366,21 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		if (HasDied()) {
 			bool IsSaved = false;
 
-			if (TryDivineSave())
+			if (TryDivineSave()) {
 				IsSaved = true;
+			}
 
 			if (!IsSaved && !TrySpellOnDeath()) {
-				SetHP(-500);
+				if (IsNPC()) {
+					died = !CastToNPC()->GetDepop();
+				} else if (IsClient()) {
+					died = CastToClient()->CheckIfAlreadyDead();
+				}
+
+				if (died) {
+					SetHP(-500);
+				}
+
 				// killedByType is clarified in Client::Death if we are client.
 				if (Death(attacker, damage, spell_id, skill_used, KilledByTypes::Killed_NPC, iBuffTic)) {
 					return;
@@ -4529,8 +4550,21 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 		}
 
 		//send an HP update if we are hurt
-		if (GetHP() < GetMaxHP()) {
-			SendHPUpdate(); // the OP_Damage actually updates the client in these cases, so we skip the HP update for them
+		if(GetHP() < GetMaxHP())
+		{
+			// Don't send a HP update for melee damage unless we've damaged ourself.
+			if (IsNPC()) {
+				int cur_hp_ratio = (int)GetHPRatio();
+				if (cur_hp_ratio != old_hp_ratio) {
+					SendHPUpdate(true);
+				}
+			} else if (!iBuffTic || died)	{ // Let regen handle buff tics unless this tic killed us.
+				SendHPUpdate(true);
+			}
+
+			if (!died && IsNPC()) {
+				CheckFlee();
+			}
 		}
 	}	//end `if damage was done`
 
