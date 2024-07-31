@@ -2,6 +2,7 @@
 
 ### Code
 
+* Cleanup Client File Exporting ([#4348](https://github.com/EQEmu/Server/pull/4348)) @Kinglykrab 2024-07-31
 * Cleanup Stance Code ([#4368](https://github.com/EQEmu/Server/pull/4368)) @Kinglykrab 2024-07-03
 * Mask GM Show Buff message behind EntityVariable ([#4419](https://github.com/EQEmu/Server/pull/4419)) @nytmyr 2024-07-22
 
