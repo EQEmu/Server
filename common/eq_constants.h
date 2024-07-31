@@ -758,10 +758,10 @@ typedef enum {
 	FilterFocusEffects = 22,	//0=show, 1=hide
 	FilterPetSpells = 23,		//0=show, 1=hide
 	FilterHealOverTime = 24,	//0=show, 1=mine only, 2=hide
-	FilterUnknown25 = 25,
-	FilterUnknown26 = 26,
-	FilterUnknown27 = 27,
-	FilterUnknown28 = 28,
+	FilterItemSpeech = 25,		//0=show, 1=hide // RoF2 Confirmed
+	FilterStrikethrough = 26,	//0=show, 1=hide // RoF2 Confirmed
+	FilterStuns = 27,			//0=show, 1=hide // RoF2 Confirmed
+	FilterBardSongsOnPets = 28,	//0=show, 1=hide // RoF2 Confirmed
 	_FilterCount
 } eqFilterType;
 

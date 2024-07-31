@@ -1478,8 +1478,10 @@ int64 Mob::DoDamageCaps(int64 base_damage)
 //SYNC WITH: tune.cpp, mob.h TuneDoAttack
 void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool FromRiposte)
 {
-	if (!other)
+	if (!other) {
 		return;
+	}
+
 	LogCombat("[{}]::DoAttack vs [{}] base [{}] min [{}] offense [{}] tohit [{}] skill [{}]", GetName(),
 		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
 
@@ -1491,14 +1493,22 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 	if (!FromRiposte && other->AvoidDamage(this, hit)) {
 		if (int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
 				strike_through && zone->random.Roll(strike_through)) {
-			MessageString(Chat::StrikeThrough,
-				STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+
+			FilteredMessageString(
+				this, /* Sender */
+				Chat::StrikeThrough, /* Type: 339 */
+				FilterStrikethrough, /* FilterType: 12 */
+				STRIKETHROUGH_STRING /* You strike through your opponent's defenses! */
+			);
+
 			hit.damage_done = 1;			// set to one, we will check this to continue
 		}
+
 		if (hit.damage_done == DMG_RIPOSTED) {
 			DoRiposte(other);
 			return;
 		}
+
 		LogCombat("Avoided/strikethrough damage with code [{}]", hit.damage_done);
 	}
 
@@ -1510,9 +1520,19 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 					int stun_resist2 = other->spellbonuses.FrontalStunResist + other->itembonuses.FrontalStunResist + other->aabonuses.FrontalStunResist;
 					int stun_resist = other->spellbonuses.StunResist + other->itembonuses.StunResist + other->aabonuses.StunResist;
 					if (zone->random.Roll(stun_resist2)) {
-						other->MessageString(Chat::Stun, AVOID_STUNNING_BLOW);
+						other->FilteredMessageString(
+							this,
+							Chat::Stun,
+							FilterStuns,
+							AVOID_STUNNING_BLOW
+						);
 					} else if (zone->random.Roll(stun_resist)) {
-						other->MessageString(Chat::Stun, SHAKE_OFF_STUN);
+						other->FilteredMessageString(
+							this,
+							Chat::Stun,
+							FilterStuns,
+							SHAKE_OFF_STUN
+						);
 					} else {
 						other->Stun(3000); // yuck -- 3 seconds
 					}
@@ -4506,32 +4526,59 @@ void Mob::CommonDamage(Mob* attacker, int64 &damage, const uint16 spell_id, cons
 						Stun(RuleI(Combat, StunDuration));
 						if (RuleB(Combat, ClientStunMessage) && attacker->IsClient()) {
 							if (attacker) {
-								entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned after being bashed by %s.", GetCleanName(), attacker->GetCleanName());
-							}
-							else {
-								entity_list.MessageClose(this, true, 500, Chat::Emote, "%s is stunned by a bash to the head.", GetCleanName());
+								entity_list.FilteredMessageClose(
+									this,
+									true,
+									RuleI(Range, StunMessages),
+									Chat::Stun,
+									FilterStuns,
+									"%s is stunned after being bashed by %s.",
+									GetCleanName(),
+									attacker->GetCleanName()
+								);
+							} else {
+								entity_list.FilteredMessageClose(
+									this,
+									true,
+									RuleI(Range, StunMessages),
+									Chat::Stun,
+									FilterStuns,
+									"%s is stunned by a bash to the head.",
+									GetCleanName()
+								);
 							}
 						}
-					}
-					else {
+					} else {
 						// stun resist passed!
-						if (IsClient())
-							MessageString(Chat::Stun, SHAKE_OFF_STUN);
+						if (IsClient()) {
+							FilteredMessageString(
+								this,
+								Chat::Stun,
+								FilterStuns,
+								SHAKE_OFF_STUN
+							);
+						}
+					}
+				} else {
+					// stun resist 2 passed!
+					if (IsClient()) {
+						FilteredMessageString(
+							this,
+							Chat::Stun,
+							FilterStuns,
+							AVOID_STUNNING_BLOW
+						);
 					}
 				}
-				else {
-					// stun resist 2 passed!
-					if (IsClient())
-						MessageString(Chat::Stun, AVOID_STUNNING_BLOW);
-				}
-			}
-			else {
+			} else {
 				// main stun failed -- extra interrupt roll
-				if (IsCasting() &&
-					!EQ::ValueWithin(casting_spell_id, 859, 1023)) // these spells are excluded
-																	  // 90% chance >< -- stun immune won't reach this branch though :(
-					if (zone->random.Int(0, 9) > 1)
+				// these spells are excluded
+				// 90% chance >< -- stun immune won't reach this branch though :(
+				if (IsCasting() && !EQ::ValueWithin(casting_spell_id, 859, 1023)) {
+					if (zone->random.Int(0, 9) > 1) {
 						InterruptSpell();
+					}
+				}
 			}
 		}
 
