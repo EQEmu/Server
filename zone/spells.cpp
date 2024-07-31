@@ -129,7 +129,7 @@ void Mob::SpellProcess()
 		spellend_timer.Disable();
 		delaytimer = false;
 
-		if (IsClient()) {
+		if (IsClient() && !bardsong) {
 			CastToClient()->SendSpellBarEnable(casting_spell_id);
 		}
 
