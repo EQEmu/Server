@@ -424,7 +424,7 @@ public:
 	bool IsDead();
 	int CalcCurrentWeight();
 	int CalcATK();
-	void FilteredMessage(Mob *sender, uint32 type, int filter, const char* message);
+	void FilteredMessage(Lua_Mob sender, uint32 type, int filter, const char* message);
 	void EnableAreaHPRegen(int value);
 	void DisableAreaHPRegen();
 	void EnableAreaManaRegen(int value);

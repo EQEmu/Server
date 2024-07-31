@@ -1771,7 +1771,7 @@ int Lua_Client::CalcATK() {
 	return self->CalcATK();
 }
 
-void Lua_Client::FilteredMessage(Mob *sender, uint32 type, int filter, const char *message)
+void Lua_Client::FilteredMessage(Lua_Mob sender, uint32 type, int filter, const char *message)
 {
 	Lua_Safe_Call_Void();
 	self->FilteredMessage(sender, type, (eqFilterType)filter, message);
