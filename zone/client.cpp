@@ -3403,6 +3403,11 @@ void Client::ServerFilter(SetServerFilter_Struct* filter){
 	} else { // these clients don't have a 'self only' filter
 		Filter1(FilterHealOverTime);
 	}
+
+	Filter1(FilterItemSpeech);
+	Filter1(FilterStrikethrough);
+	Filter1(FilterStuns);
+	Filter1(FilterBardSongsOnPets);
 }
 
 // this version is for messages with no parameters
