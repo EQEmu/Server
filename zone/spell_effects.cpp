@@ -27,6 +27,7 @@
 #include "../common/misc_functions.h"
 
 #include "bot.h"
+#include "pets.h"
 #include "quest_parser_collection.h"
 #include "lua_parser.h"
 #include "string_ids.h"
@@ -1338,7 +1339,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if(GetPet())
 				{
-					MessageString(Chat::Shout, ONLY_ONE_PET);
+					if (!RuleB(Custom, EnableMultipet)) {
+						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
+						break;
+					} else {
+						if (std::find(spawned_pets.begin(), spawned_pets.end(), spell_id) != spawned_pets.end() || spell_id == GetPet()->CastToNPC()->GetPetSpellID()) {
+							Message(Chat::SpellFailure, "You may only have one pet of a particular type at a time.");
+						} else {
+							char pet_name[64];
+							GetRandPetName(pet_name);
+							TemporaryPets(spell_id, nullptr, pet_name);
+							spawned_pets.push_back(spell_id);
+						}
+					}
 				}
 				else
 				{

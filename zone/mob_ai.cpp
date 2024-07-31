@@ -1420,49 +1420,59 @@ void Mob::AI_Process() {
 				// we're a pet, do as we're told
 				switch (pStandingPetOrder) {
 					case SPO_Follow: {
-
 						Mob *owner = GetOwner();
 						if (owner == nullptr) {
 							break;
 						}
 
-						glm::vec4 pet_owner_position = owner->GetPosition();
-						float     distance_to_owner  = DistanceSquared(m_Position, pet_owner_position);
-						float     z_distance         = pet_owner_position.z - m_Position.z;
+						glm::vec4 owner_position = owner->GetPosition();
+						float owner_heading 	 = owner->GetHeading();
 
-						if (distance_to_owner >= 400 || z_distance > 100) {
+						// Convert heading to radians
+						float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
 
+						// Adjust heading by adding 1 radian
+						float adjusted_heading = heading_radians + 1.0f;
+
+						if (adjusted_heading >= 2.0f * M_PI) {
+							adjusted_heading -= 2.0f * M_PI;
+						}
+
+						// Calculate new x, y positions offset by 5 units
+						float offset_distance = 5.0f;
+
+						glm::vec4 target_position;
+						target_position.x = owner_position.x + offset_distance * sin(adjusted_heading);
+						target_position.y = owner_position.y + offset_distance * cos(adjusted_heading);
+						target_position.z = owner_position.z;
+						target_position.w = owner_position.w;
+
+						float xy_distance = DistanceSquared(GetPosition(), target_position);
+						float z_distance = owner_position.z - GetPosition().z;
+
+						if (xy_distance >= 2 || z_distance > 100) {
 							bool running = false;
 
 							/**
 							 * Distance: >= 35 (Run if far away)
 							 */
-							if (distance_to_owner >= 1225) {
+							if (xy_distance >= 1225) {
 								running = true;
 							}
 
 							/**
 							 * Distance: >= 450 (Snap to owner)
 							 */
-							if (distance_to_owner >= 202500 || z_distance > 100) {
+							if (xy_distance >= 202500 || z_distance > 100) {
+								Teleport(target_position);
+							} else {
 								if (running) {
-									RunTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
-								}
-								else {
-									WalkTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
+									RunToPrecise(target_position.x, target_position.y, target_position.z);
+								} else {
+									WalkToPrecise(target_position.x, target_position.y, target_position.z);
 								}
 							}
-							else {
-
-								if (running) {
-									RunTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
-								}
-								else {
-									WalkTo(pet_owner_position.x, pet_owner_position.y, pet_owner_position.z);
-								}
-							}
-						}
-						else {
+						} else {
 							StopNavigation();
 						}
 
@@ -1488,7 +1498,87 @@ void Mob::AI_Process() {
 					return;
 				}
 			}
-				/* Entity has been assigned another entity to follow */
+			else if (IsNPC() && CastToNPC()->GetSwarmInfo() && CastToNPC()->GetSwarmInfo()->permanent) {
+				auto this_npc = CastToNPC();
+				auto owner = this_npc->GetOwner();
+
+				if (owner) {
+					glm::vec4 owner_position = owner->GetPosition();
+					float owner_heading = owner->GetHeading();
+
+					// Convert heading to radians
+					float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
+
+					std::list<uint16> spawned_pets = owner->spawned_pets;
+
+					if (owner->GetPet()) {
+						spawned_pets.push_front(0);
+					}
+
+					uint16 spell_id = this_npc->GetSwarmInfo()->spell_id;
+
+					// Find the index of spell_id in spawned_pets
+					auto it = std::find(spawned_pets.begin(), spawned_pets.end(), spell_id);
+
+					// Calculate the slot index to use
+					int index = 0;
+					if (it != spawned_pets.end()) {
+						index = std::distance(spawned_pets.begin(), it);
+					}
+
+					// Define the total number of slots including the fixed pet at +1 radian
+					int total_slots = 1 + spawned_pets.size();
+
+					// Calculate the offset for the slot, ensuring we skip the fixed position at +1 radian
+					float base_offset = heading_radians + 1.0f; // Fixed pet position at +1 radian
+					float slot_increment = (2.0f * M_PI) / total_slots;
+					float offset = base_offset - (index * slot_increment);
+
+					// Ensure the offset does not exceed 2π
+					if (offset >= 2.0f * M_PI) {
+						offset -= 2.0f * M_PI;
+					}
+
+					// Calculate new x, y positions offset by 5 units
+					float offset_distance = 5.0f;
+
+					glm::vec4 target_position;
+					target_position.x = owner_position.x + offset_distance * sin(offset);
+					target_position.y = owner_position.y + offset_distance * cos(offset);
+					target_position.z = owner_position.z;
+					target_position.w = owner_position.w;
+
+					float xy_distance = DistanceSquared(GetPosition(), target_position);
+					float z_distance = owner_position.z - GetPosition().z;
+
+					if (xy_distance >= 2 || z_distance > 100) {
+						bool running = false;
+
+						/**
+						 * Distance: >= 35 (Run if far away)
+						 */
+						if (xy_distance >= 1225) {
+							running = true;
+						}
+
+						/**
+						 * Distance: >= 450 (Snap to owner)
+						 */
+						if (xy_distance >= 202500 || z_distance > 100) {
+							Teleport(target_position);
+						} else {
+							if (running) {
+								RunToPrecise(target_position.x, target_position.y, target_position.z);
+							} else {
+								WalkToPrecise(target_position.x, target_position.y, target_position.z);
+							}
+						}
+					} else {
+						StopNavigation();
+					}
+				}
+			}
+			/* Entity has been assigned another entity to follow */
 			else if (GetFollowID()) {
 				Mob *follow = entity_list.GetMob(static_cast<uint16>(GetFollowID()));
 				if (!follow) {

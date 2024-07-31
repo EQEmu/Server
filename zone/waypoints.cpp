@@ -621,6 +621,16 @@ void Mob::RunTo(float x, float y, float z)
 	mMovementManager->NavigateTo(this, x, y, z, MovementRunning);
 }
 
+void Mob::WalkToPrecise(float x, float y, float z)
+{
+	mMovementManager->NavigateToPrecise(this, x, y, z, MovementWalking);
+}
+
+void Mob::RunToPrecise(float x, float y, float z)
+{
+	mMovementManager->NavigateToPrecise(this, x, y, z, MovementRunning);
+}
+
 void Mob::NavigateTo(float x, float y, float z)
 {
 	if (IsRunning()) {

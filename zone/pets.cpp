@@ -41,7 +41,7 @@
 
 
 // need to pass in a char array of 64 chars
-void GetRandPetName(char *name)
+void Mob::GetRandPetName(char *name)
 {
 	std::string temp;
 	temp.reserve(64);
@@ -179,7 +179,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	} else if (record.petnaming == 4) {
 		// Keep the DB name
 	} else if (record.petnaming == 3 && IsClient()) {
-		GetRandPetName(npc_type->name);
+		Mob::GetRandPetName(npc_type->name);
 	} else if (record.petnaming == 5 && IsClient()) {
 		strcpy(npc_type->name, GetName());
 		npc_type->name[24] = '\0';
@@ -318,7 +318,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 				npc->Kill(); //Ensure pet dies if over 20k HP.
 			}
 		}
-	}	
+	}
 }
 
 void NPC::TryDepopTargetLockedPets(Mob* current_target) {
@@ -330,6 +330,7 @@ void NPC::TryDepopTargetLockedPets(Mob* current_target) {
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+				owner->spawned_pets.remove(GetSwarmInfo()->spell_id);
 			}
 			Depop();
 			return;

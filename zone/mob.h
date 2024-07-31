@@ -704,6 +704,8 @@ public:
 
 	void CopyHateList(Mob* to);
 
+	void GetRandPetName(char *name);
+
 	//Group
 	virtual bool HasRaid() = 0;
 	virtual bool HasGroup() = 0;
@@ -1234,6 +1236,8 @@ public:
 	float				CalculateHeadingToTarget(float in_x, float in_y) { return HeadingAngleToMob(in_x, in_y); }
 	virtual void		WalkTo(float x, float y, float z);
 	virtual void		RunTo(float x, float y, float z);
+	virtual void		WalkToPrecise(float x, float y, float z);
+	virtual void		RunToPrecise(float x, float y, float z);
 	void				NavigateTo(float x, float y, float z);
 	void				RotateTo(float new_heading);
 	void				RotateToWalking(float new_heading);
@@ -1781,6 +1785,8 @@ public:
 
 	void SetSpawnedInWater(bool spawned_in_water);
 	bool turning;
+
+	std::list<uint16> spawned_pets;
 
 protected:
 

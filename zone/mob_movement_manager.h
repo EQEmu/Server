@@ -49,6 +49,7 @@ public:
 	void RotateTo(Mob *who, float to, MobMovementMode mob_movement_mode = MovementRunning);
 	void Teleport(Mob *who, float x, float y, float z, float heading);
 	void NavigateTo(Mob *who, float x, float y, float z, MobMovementMode mode = MovementRunning);
+	void NavigateToPrecise(Mob *who, float x, float y, float z, MobMovementMode mode = MovementRunning);
 	void StopNavigation(Mob *who);
 
 	void SendCommandToClients(

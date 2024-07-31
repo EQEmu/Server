@@ -2558,6 +2558,8 @@ bool NPC::Death(Mob* killer_mob, int64 damage, uint16 spell, EQ::skills::SkillTy
 		Mob* owner = entity_list.GetMobID(GetSwarmOwner());
 		if (owner) {
 			owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+
+			owner->spawned_pets.remove(GetSwarmInfo()->spell_id);
 		}
 	}
 

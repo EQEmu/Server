@@ -597,20 +597,49 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if (swarm_timer.Check()) {
-		DepopSwarmPets();
-	}
-
-	if (RuleB(Spells, SwarmPetFullAggro) && swarm_timer.Enabled() && !GetTarget()) {
+	if (GetSwarmInfo()) {
 		Mob* owner = entity_list.GetMob(GetSwarmOwner());
-		if (owner && owner->IsClient()) {
-			for (const auto& npc_entity : entity_list.GetNPCList()) {
-				auto entity_id = npc_entity.first;
-				auto npc = npc_entity.second;
 
-				if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc)) {
-					AddToHateList(npc, 100, 100);
-					LogDebug("Adding [{}] to swarm pet hate list", npc->GetName());
+		if (swarm_timer.Check() || GetSwarmInfo()->permanent) {
+			bool depop = true;
+
+			if (GetSwarmInfo()->permanent && owner->IsClient()) {
+				Client* owner_client = owner->CastToClient();
+				int 	spell_gem = owner_client->FindMemmedSpellBySpellID(GetSwarmInfo()->spell_id);
+
+				if (spell_gem <= EQ::spells::SPELL_GEM_COUNT && spell_gem >= 0) {
+					depop = false;
+				}
+
+				if (!IsTaunting()) {
+					SetTaunting(true);
+				}
+			}
+
+			if (depop) {
+				DepopSwarmPets();
+			}
+		}
+
+		if (RuleB(Spells, SwarmPetFullAggro) && !GetTarget()) {
+			if (owner && owner->IsClient()) {
+				std::vector<NPC*> eligible_npcs;
+				for (const auto& npc_entity : entity_list.GetNPCList()) {
+					NPC* npc = npc_entity.second;
+
+					if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc)) {
+						eligible_npcs.push_back(npc);
+					}
+				}
+
+				if (!owner->GetPet() || (owner->GetPet() && !owner->GetPet()->IsHeld())) {
+					if (!eligible_npcs.empty()) {
+						int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
+						NPC* random_npc = eligible_npcs[random_index];
+
+						AddToHateList(random_npc, 100, 100);
+						LogDebugDetail("Adding [{}] to swarm pet hate list", random_npc->GetName());
+					}
 				}
 			}
 		}
@@ -2240,6 +2269,40 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			}
 		}
 
+		if (RuleB(Pets, ClientPetsUseOwnerNameInLastName) && GetSwarmInfo()->permanent && swarm_owner->IsClient()) {
+			if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
+				std::string tmp_lastname;
+				switch(ns->spawn.race) {
+					case Race::AirElemental2:
+					case Race::AirElemental:
+					case Race::EarthElemental2:
+					case Race::EarthElemental:
+					case Race::WaterElemental2:
+					case Race::WaterElemental:
+					case Race::FireElemental2:
+					case Race::FireElemental:
+					case Race::Elemental:
+						tmp_lastname = fmt::format("{}`s Elemental", swarm_owner->GetName());
+						break;
+					case Race::Skeleton:
+					case Race::Skeleton2:
+					case Race::Skeleton3:
+						tmp_lastname = fmt::format("{}`s Skeleton", swarm_owner->GetName());
+						break;
+					case Race::Spectre:
+					case Race::Spectre2:
+						tmp_lastname = fmt::format("{}`s Reaper", swarm_owner->GetName());
+						break;
+					default:
+						tmp_lastname = fmt::format("{}`s Warder", swarm_owner->GetName());
+				}
+
+				if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
+					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+				}
+			}
+		}
+
 		if (swarm_owner->IsBot()) {
 			SetPetOwnerBot(true);
 		} else if (swarm_owner->IsNPC()) {
@@ -2264,19 +2327,19 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 						case Race::FireElemental2:
 						case Race::FireElemental:
 						case Race::Elemental:
-							tmp_lastname = fmt::format("{}`s Elemental Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Elemental", c->GetName());
 							break;
 						case Race::Skeleton:
 						case Race::Skeleton2:
 						case Race::Skeleton3:
-							tmp_lastname = fmt::format("{}`s Skeletal Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Skeleton", c->GetName());
 							break;
 						case Race::Spectre:
 						case Race::Spectre2:
 							tmp_lastname = fmt::format("{}`s Reaper", c->GetName());
 							break;
 						default:
-							tmp_lastname = fmt::format("{}`s Minion", c->GetName());
+							tmp_lastname = fmt::format("{}`s Warder", c->GetName());
 					}
 
 					if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
@@ -3185,6 +3248,7 @@ void NPC::DepopSwarmPets()
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
+				owner->spawned_pets.remove(GetSwarmInfo()->spell_id);
 			}
 			Depop();
 			return;
