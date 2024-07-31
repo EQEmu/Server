@@ -5251,17 +5251,17 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 
 			// Special handling for dire charm
 			if (spell_id == 2759 || spell_id == 2760 || spell_id == 2761) {
-				if (caster->GetLevelCon(GetLevel()+1) == ConsiderColor::LightBlue ||
-				    caster->GetLevelCon(GetLevel()+1) == ConsiderColor::Green ||
-					caster->GetLevelCon(GetLevel()+1) == ConsiderColor::Gray ||
+				if (caster->GetLevelCon(GetLevel()) == ConsiderColor::LightBlue ||
+				    caster->GetLevelCon(GetLevel()) == ConsiderColor::Green ||
+					caster->GetLevelCon(GetLevel()) == ConsiderColor::Gray ||
 					GetLevel() <= 46) {
 
 					return false;
 				}
 
 				if (caster->GetLevel() <= 46) {
-					if (caster->GetLevelCon(GetLevel()+1) != ConsiderColor::Yellow &&
-					    caster->GetLevelCon(GetLevel()+1) != ConsiderColor::Red) {
+					if (caster->GetLevelCon(GetLevel()) != ConsiderColor::Yellow &&
+					    caster->GetLevelCon(GetLevel()) != ConsiderColor::Red) {
 
 						return false;
 					}
