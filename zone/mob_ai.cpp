@@ -1512,7 +1512,7 @@ void Mob::AI_Process() {
 					std::list<uint16> spawned_pets = owner->spawned_pets;
 
 					if (owner->GetPet()) {
-						spawned_pets.push_front(0);
+						spawned_pets.push_front(0); // placeholder to represent primary pet
 					}
 
 					uint16 spell_id = this_npc->GetSwarmInfo()->spell_id;
@@ -1527,12 +1527,12 @@ void Mob::AI_Process() {
 					}
 
 					// Define the total number of slots including the fixed pet at +1 radian
-					int total_slots = 1 + spawned_pets.size();
+					int total_slots = spawned_pets.size();
 
 					// Calculate the offset for the slot, ensuring we skip the fixed position at +1 radian
 					float base_offset = heading_radians + 1.0f; // Fixed pet position at +1 radian
 					float slot_increment = (2.0f * M_PI) / total_slots;
-					float offset = base_offset - (index * slot_increment);
+					float offset = base_offset + (index * slot_increment);
 
 					// Ensure the offset does not exceed 2π
 					if (offset >= 2.0f * M_PI) {
