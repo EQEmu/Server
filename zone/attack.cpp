@@ -1520,9 +1520,19 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, boo
 					int stun_resist2 = other->spellbonuses.FrontalStunResist + other->itembonuses.FrontalStunResist + other->aabonuses.FrontalStunResist;
 					int stun_resist = other->spellbonuses.StunResist + other->itembonuses.StunResist + other->aabonuses.StunResist;
 					if (zone->random.Roll(stun_resist2)) {
-						other->MessageString(Chat::Stun, AVOID_STUNNING_BLOW);
+						other->FilteredMessageString(
+							this,
+							Chat::Stun,
+							FilterStuns,
+							AVOID_STUNNING_BLOW
+						);
 					} else if (zone->random.Roll(stun_resist)) {
-						other->MessageString(Chat::Stun, SHAKE_OFF_STUN);
+						other->FilteredMessageString(
+							this,
+							Chat::Stun,
+							FilterStuns,
+							SHAKE_OFF_STUN
+						);
 					} else {
 						other->Stun(3000); // yuck -- 3 seconds
 					}
