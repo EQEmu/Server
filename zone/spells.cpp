@@ -2701,6 +2701,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 			if (isproc) {
 				SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, true, level_override);
 			} else {
+
 				if (spells[spell_id].target_type == ST_TargetOptional){
 					if (!TrySpellProjectile(spell_target, spell_id))
 						return false;
@@ -2711,6 +2712,20 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, in
 						return false;
 					}
 				}
+				/*
+				else {
+					if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
+						if (spell_target == GetPet()) {
+							for (const auto& ent : entity_list.GetNPCList()) {
+								NPC* mob = ent.second;
+								if (mob->GetSwarmOwner() == GetID()) {
+									SpellOnTarget(spell_id, mob, 0, true, resist_adjust, false, level_override);
+								}
+							}
+						}
+					}
+				}
+				*/
 			}
 
 			if(IsIllusionSpell(spell_id)
@@ -4813,6 +4828,23 @@ bool Mob::SpellOnTarget(
 	}
 
 	LogSpells("Cast of [{}] by [{}] on [{}] complete successfully", spell_id, GetName(), spelltar->GetName());
+
+	if ((IsBeneficialSpell(spell_id) && spelltar->GetOwner() && spelltar->GetOwner()->IsClient()) && reflect_effectiveness >= 0) {
+		bool skip = false;
+
+		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id) ) {
+			skip = true;
+		}
+
+		if (!skip) {
+			for (const auto& ent : entity_list.GetNPCList()) {
+				NPC* mob = ent.second;
+				if (mob->GetSwarmOwner() == GetID()) {
+					SpellOnTarget(spell_id, mob, -1, true, resist_adjust, true, level_override);
+				}
+			}
+		}
+	}
 
 	return true;
 }

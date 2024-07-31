@@ -1432,14 +1432,14 @@ void Mob::AI_Process() {
 						float heading_radians = (owner_heading / 512.0f) * 2.0f * M_PI;
 
 						// Adjust heading by adding 1 radian
-						float adjusted_heading = heading_radians + 1.0f;
+						float adjusted_heading = heading_radians + (M_PI/2) + RuleR(Custom, PetPlacementAdjustment);
 
 						if (adjusted_heading >= 2.0f * M_PI) {
 							adjusted_heading -= 2.0f * M_PI;
 						}
 
 						// Calculate new x, y positions offset by 5 units
-						float offset_distance = 5.0f;
+						float offset_distance = std::max(5.0f, static_cast<float>(owner->spawned_pets.size()));
 
 						glm::vec4 target_position;
 						target_position.x = owner_position.x + offset_distance * sin(adjusted_heading);
@@ -1450,7 +1450,7 @@ void Mob::AI_Process() {
 						float xy_distance = DistanceSquared(GetPosition(), target_position);
 						float z_distance = owner_position.z - GetPosition().z;
 
-						if (xy_distance >= 2 || z_distance > 100) {
+						if (xy_distance >= 0.1 || z_distance > 100) {
 							bool running = false;
 
 							/**
@@ -1520,17 +1520,21 @@ void Mob::AI_Process() {
 					// Find the index of spell_id in spawned_pets
 					auto it = std::find(spawned_pets.begin(), spawned_pets.end(), spell_id);
 
+					// Define the total number of slots including the fixed pet at +1 radian
+					int total_slots = std::max(3, static_cast<int>(spawned_pets.size()));
+
 					// Calculate the slot index to use
 					int index = 0;
 					if (it != spawned_pets.end()) {
 						index = std::distance(spawned_pets.begin(), it);
+						if (index == 1 && spawned_pets.size() == 2)
+						{
+							index = 2;
+						}
 					}
 
-					// Define the total number of slots including the fixed pet at +1 radian
-					int total_slots = spawned_pets.size();
-
 					// Calculate the offset for the slot, ensuring we skip the fixed position at +1 radian
-					float base_offset = heading_radians + 1.0f; // Fixed pet position at +1 radian
+					float base_offset = heading_radians + (M_PI/2) + RuleR(Custom, PetPlacementAdjustment); // Fixed pet position at +1 radian
 					float slot_increment = (2.0f * M_PI) / total_slots;
 					float offset = base_offset + (index * slot_increment);
 
@@ -1540,7 +1544,7 @@ void Mob::AI_Process() {
 					}
 
 					// Calculate new x, y positions offset by 5 units
-					float offset_distance = 5.0f;
+					float offset_distance = std::max(5.0f, static_cast<float>(total_slots));
 
 					glm::vec4 target_position;
 					target_position.x = owner_position.x + offset_distance * sin(offset);
@@ -1551,7 +1555,7 @@ void Mob::AI_Process() {
 					float xy_distance = DistanceSquared(GetPosition(), target_position);
 					float z_distance = owner_position.z - GetPosition().z;
 
-					if (xy_distance >= 2 || z_distance > 100) {
+					if (xy_distance >= 0.1 || z_distance > 100) {
 						bool running = false;
 
 						/**

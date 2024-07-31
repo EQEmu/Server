@@ -600,23 +600,8 @@ bool NPC::Process()
 	if (GetSwarmInfo()) {
 		Mob* owner = entity_list.GetMob(GetSwarmOwner());
 
-		if (swarm_timer.Check() || GetSwarmInfo()->permanent) {
-			bool depop = true;
-
-			if (GetSwarmInfo()->permanent && owner->IsClient()) {
-				Client* owner_client = owner->CastToClient();
-				int 	spell_gem = owner_client->FindMemmedSpellBySpellID(GetSwarmInfo()->spell_id);
-
-				if (spell_gem <= EQ::spells::SPELL_GEM_COUNT && spell_gem >= 0) {
-					depop = false;
-				}
-
-				if (!IsTaunting()) {
-					SetTaunting(true);
-				}
-			}
-
-			if (depop) {
+		if (swarm_timer.Check()) {
+			if (!GetSwarmInfo()->permanent) {
 				DepopSwarmPets();
 			}
 		}
@@ -632,14 +617,16 @@ bool NPC::Process()
 					}
 				}
 
-				if (!owner->GetPet() || (owner->GetPet() && !owner->GetPet()->IsHeld())) {
-					if (!eligible_npcs.empty()) {
-						int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
-						NPC* random_npc = eligible_npcs[random_index];
+				bool hold = false;
+				if (owner->GetPet() && (owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
+					hold = true;
+				}
 
-						AddToHateList(random_npc, 100, 100);
-						LogDebugDetail("Adding [{}] to swarm pet hate list", random_npc->GetName());
-					}
+				if (!eligible_npcs.empty() && !hold) {
+					int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
+					NPC* random_npc = eligible_npcs[random_index];
+
+					AddToHateList(random_npc, 100, 100);
 				}
 			}
 		}
@@ -2293,6 +2280,8 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 					case Race::Spectre2:
 						tmp_lastname = fmt::format("{}`s Reaper", swarm_owner->GetName());
 						break;
+					case Race::InvisibleMan:
+						tmp_lastname = fmt::format("{}`s Animation", swarm_owner->GetName());
 					default:
 						tmp_lastname = fmt::format("{}`s Warder", swarm_owner->GetName());
 				}
@@ -2338,6 +2327,8 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 						case Race::Spectre2:
 							tmp_lastname = fmt::format("{}`s Reaper", c->GetName());
 							break;
+						case Race::InvisibleMan:
+							tmp_lastname = fmt::format("{}`s Animation", c->GetName());
 						default:
 							tmp_lastname = fmt::format("{}`s Warder", c->GetName());
 					}

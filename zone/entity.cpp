@@ -4393,6 +4393,10 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 	if (!other || !owner)
 		return;
 
+	if (owner->GetPet() && (owner->GetPet()->IsGHeld() || owner->GetPet()->IsHeld())) {
+		return;
+	}
+
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {
 		NPC* n = it->second;
@@ -4416,6 +4420,10 @@ void EntityList::AddTempPetsToHateListOnOwnerDamage(Mob *owner, Mob* attacker, i
 {
 	if (!attacker || !owner)
 		return;
+
+	if (owner->GetPet() && (owner->GetPet()->IsGHeld() || owner->GetPet()->IsHeld())) {
+		return;
+	}
 
 	auto it = npc_list.begin();
 	while (it != npc_list.end()) {

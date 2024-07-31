@@ -1337,14 +1337,40 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					mypet->CastToNPC()->Depop();
 				}
 
+				int class_id = Class::None;
+				for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+					if (GetSpellLevel(spell_id, i) < UINT8_MAX) {
+						class_id = i;
+						break;
+					}
+				}
+
+				bool class_match = false;
+				if (class_id > Class::None) {
+					if (GetPet() && GetPet()->IsNPC()) {
+						if (GetSpellLevel(GetPet()->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
+							class_match = true;
+						}
+
+						if (!class_match) {
+							for (const uint16& psi : spawned_pets) {
+								if (GetSpellLevel(psi, class_id) < UINT8_MAX) {
+									class_match = true;
+									break;
+								}
+							}
+						}
+					}
+				}
+
 				if(GetPet())
 				{
 					if (!RuleB(Custom, EnableMultipet)) {
 						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
 						break;
 					} else {
-						if (std::find(spawned_pets.begin(), spawned_pets.end(), spell_id) != spawned_pets.end() || spell_id == GetPet()->CastToNPC()->GetPetSpellID()) {
-							Message(Chat::SpellFailure, "You may only have one pet of a particular type at a time.");
+						if (class_match) {
+							Message(Chat::SpellFailure, "You may only have one pet from a particular class at any one time.");
 						} else {
 							char pet_name[64];
 							GetRandPetName(pet_name);

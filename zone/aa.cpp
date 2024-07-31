@@ -158,13 +158,6 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 		swarm_pet_npc->StartSwarmTimer(pet_duration * 1000);
 
-		if (RuleB(Custom, EnableMultipet) && pet_duration == 1) {
-			swarm_pet_npc->GetSwarmInfo()->permanent = true;
-			swarm_pet_npc->SetTaunting(true);
-		} else {
-			swarm_pet_npc->GetSwarmInfo()->permanent = false;
-		}
-
 		//removing this prevents the pet from attacking
 		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
@@ -176,13 +169,20 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::ClientAggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
 			}
 
-			Client* client;
+			if (RuleB(Custom, EnableMultipet) && pet_duration == 1) {
+				swarm_pet_npc->GetSwarmInfo()->permanent = true;
+				swarm_pet_npc->SetTaunting(true);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
+			} else {
+				swarm_pet_npc->GetSwarmInfo()->permanent = false;
+			}
 		}
 
 		//we allocated a new NPC type object, give the NPC ownership of that memory
