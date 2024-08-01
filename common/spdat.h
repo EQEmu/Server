@@ -1553,6 +1553,7 @@ bool IsHarmTouchSpell(uint16 spell_id);
 int GetSpellEffectIndex(uint16 spell_id, int effect_id);
 uint8 GetSpellMinimumLevel(uint16 spell_id);
 uint8 GetSpellLevel(uint16 spell_id, uint8 class_id);
+uint8 GetPetOriginClass(uint16 spell_id);
 int CalcBuffDuration_formula(int level, int formula, int duration);
 int32 CalculatePoisonCounters(uint16 spell_id);
 int32 CalculateDiseaseCounters(uint16 spell_id);

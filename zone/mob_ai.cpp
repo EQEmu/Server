@@ -1151,11 +1151,20 @@ void Mob::AI_Process() {
 		bool is_combat_range = CombatRange(target);
 
 		if (is_combat_range) {
-			if (IsMoving()) {
-				StopNavigation();
-			}
-
 			FaceTarget();
+
+			if (IsNPC() && (IsPet() || CastToNPC()->GetSwarmOwner()) && GetTarget() && GetTarget()->GetTarget() && GetTarget()->GetTarget()->GetID() != GetID()) {
+				if (!BehindMob(GetTarget(), GetX(), GetY())) {
+					glm::vec3 target_position;
+					PlotPositionAroundTarget(target, target_position.x, target_position.y, target_position.z, true);
+					RunToPrecise(target_position.x, target_position.y, target_position.z);
+					LogDebug("Moving Behind to [{}][{}][{}] Currently [{}]", target_position.x, target_position.y, target_position.z, MobAngle(target, GetX(), GetY()));
+				}
+			}  else {
+				if (IsMoving()) {
+					StopNavigation();
+				}
+			}
 
 			//casting checked above...
 			if (target && !IsStunned() && !IsMezzed() && GetAppearance() != eaDead && !IsMeleeDisabled()) {

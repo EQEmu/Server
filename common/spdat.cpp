@@ -822,6 +822,17 @@ uint8 GetSpellLevel(uint16 spell_id, uint8 class_id)
 	return spells[spell_id].classes[class_id - 1];
 }
 
+// Returns the ID of the first class which has access to this spell
+uint8 GetPetOriginClass(uint16 spell_id) {
+	for (int i = Class::Warrior; i <= Class::Berserker; i++) {
+		if (GetSpellLevel(spell_id, i) < UINT8_MAX) {
+			return i;
+		}
+	}
+
+	return Class::None;
+}
+
 // this will find the first occurrence of effect. this is handy
 // for spells like mez and charm, but if the effect appears more than once
 // in a spell this will just give back the first one.
@@ -2367,7 +2378,7 @@ bool IsAegolismSpell(uint16 spell_id) {
 
 
 bool AegolismStackingIsSymbolSpell(uint16 spell_id) {
-	
+
 	/*
 		This is hardcoded to be specific to the type of HP buffs that are removed if a mob has an Aegolism buff.
 	*/

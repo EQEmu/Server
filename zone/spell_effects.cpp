@@ -1337,24 +1337,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					mypet->CastToNPC()->Depop();
 				}
 
-				int class_id = Class::None;
-				for (int i = Class::Warrior; i <= Class::Berserker; i++) {
-					if (GetSpellLevel(spell_id, i) < UINT8_MAX) {
-						class_id = i;
-						break;
-					}
-				}
+				int class_id = GetPetOriginClass(spell_id);
 
 				bool class_match = false;
 				if (class_id > Class::None) {
 					if (GetPet() && GetPet()->IsNPC()) {
-						if (GetSpellLevel(GetPet()->CastToNPC()->GetPetSpellID(), class_id) < UINT8_MAX) {
+						if (class_id ==  GetPetOriginClass(GetPet()->CastToNPC()->GetPetSpellID())) {
 							class_match = true;
 						}
 
 						if (!class_match) {
 							for (const uint16& psi : spawned_pets) {
-								if (GetSpellLevel(psi, class_id) < UINT8_MAX) {
+								if (class_id == GetPetOriginClass(psi)) {
 									class_match = true;
 									break;
 								}

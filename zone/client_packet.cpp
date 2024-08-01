@@ -11282,6 +11282,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				mypet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
 				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
 				SetTarget(target);
+
+				// Multipet stuff
+				if (RuleB(Custom, EnableMultipet)) {
+					for (auto& mob : GetSwarmPets()) {
+						mob->SetTarget(target);
+						MessageString(Chat::PetResponse, PET_ATTACKING, mob->GetCleanName(), target->GetCleanName());
+					}
+				}
 			}
 		}
 		break;
@@ -11324,6 +11332,14 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
 				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
+
+				// Multipet stuff
+				if (RuleB(Custom, EnableMultipet)) {
+					for (auto& mob : GetSwarmPets()) {
+						mob->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
+						MessageString(Chat::PetResponse, PET_ATTACKING, mob->GetCleanName(), target->GetCleanName());
+					}
+				}
 			}
 		}
 		break;

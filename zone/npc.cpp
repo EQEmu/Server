@@ -626,7 +626,9 @@ bool NPC::Process()
 					int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
 					NPC* random_npc = eligible_npcs[random_index];
 
-					AddToHateList(random_npc, 100, 100);
+					if (DistanceSquared(GetPosition(), random_npc->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+						AddToHateList(random_npc, 100, 100);
+					}
 				}
 			}
 		}
@@ -2241,7 +2243,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		swarm_owner->SetTempPetCount(swarm_owner->GetTempPetCount() + 1);
 
 		//Not recommended if using above (However, this will work better on older clients).
-		if (RuleB(Pets, UnTargetableSwarmPet)) {
+		if (RuleB(Pets, UnTargetableSwarmPet) && !GetSwarmInfo()->permanent) {
 			ns->spawn.bodytype = BodyType::NoTarget;
 		}
 

@@ -12334,6 +12334,21 @@ bool Client::IsValidPetBag(int item_id) {
 	return false;
 }
 
+std::vector<NPC*> Client::GetSwarmPets(bool permanent_only) {
+	std::vector<NPC*> return_vec;
+	for (const auto& ent : entity_list.GetNPCList()) {
+		NPC* mob = ent.second;
+		if (mob->GetSwarmOwner() == GetID()) {
+			if (permanent_only && !mob->GetSwarmInfo()->permanent) {
+				continue;
+			}
+			return_vec.push_back(mob);
+		}
+	}
+
+	return return_vec;
+}
+
 // It might make more sense to do invidual syncs at some point in the future, but this is fast enough
 void Client::DoPetBagResync() {
 	if (RuleB(Custom, EnablePetBags)) {
