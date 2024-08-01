@@ -598,16 +598,18 @@ bool NPC::Process()
 	SpellProcess();
 
 	if (GetSwarmInfo()) {
-		Mob* owner = entity_list.GetMob(GetSwarmOwner());
-
 		if (swarm_timer.Check()) {
 			if (!GetSwarmInfo()->permanent) {
 				DepopSwarmPets();
 			}
 		}
 
-		if (RuleB(Spells, SwarmPetFullAggro) && !GetTarget()) {
-			if (owner && owner->IsClient()) {
+		Mob* owner = entity_list.GetMob(GetSwarmOwner());
+		bool held = false;
+		if (owner && owner->IsClient()) {
+			if (owner->GetPet()) { held  = owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld(); }
+			// Normal Swarm Pets
+			if (!GetSwarmInfo()->permanent && RuleB(Spells, SwarmPetFullAggro) && !GetTarget()) {
 				std::vector<NPC*> eligible_npcs;
 				for (const auto& npc_entity : entity_list.GetNPCList()) {
 					NPC* npc = npc_entity.second;
@@ -615,20 +617,23 @@ bool NPC::Process()
 					if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc)) {
 						eligible_npcs.push_back(npc);
 					}
-				}
 
-				bool hold = false;
-				if (owner->GetPet() && (owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld())) {
-					hold = true;
-				}
+					if (!eligible_npcs.empty() && !held) {
+						int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
+						NPC* random_npc = eligible_npcs[random_index];
 
-				if (!eligible_npcs.empty() && !hold) {
-					int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
-					NPC* random_npc = eligible_npcs[random_index];
-
-					if (DistanceSquared(GetPosition(), random_npc->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
-						AddToHateList(random_npc, 100, 100);
+						if (DistanceSquared(GetPosition(), random_npc->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+							AddToHateList(random_npc, 100, 100);
+							SetTarget(random_npc);
+						}
 					}
+				}
+			} else if (GetSwarmInfo()->permanent && !GetTarget()) {
+				if (owner->GetPet() && owner->GetPet()->GetTarget()) {
+					auto target = owner->GetPet()->GetTarget();
+					AddToHateList(target, 100, 0, true, false, false, SPELL_UNKNOWN, true);
+					SetTarget(target);
+					MessageString(Chat::PetResponse, PET_ATTACKING, GetCleanName(), target->GetCleanName());
 				}
 			}
 		}
@@ -3878,8 +3883,12 @@ void NPC::SetTaunting(bool is_taunting) {
 
 	if (IsPet() && IsPetOwnerClient()) {
 		GetOwner()->CastToClient()->SetPetCommandState(PET_BUTTON_TAUNT, is_taunting);
+	}
+
+	if (IsPet() || GetSwarmInfo()) {
 		if (RuleB(Custom, TauntTogglesPetTanking)) {
 			SetSpecialAbility(SpecialAbility::AllowedToTank, is_taunting ? 1 : 0);
+			//SetSpecialAbility(SpecialAbility::AggroImmunity, is_taunting ? 0 : 1);
 		}
 	}
 }

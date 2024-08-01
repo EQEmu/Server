@@ -11286,6 +11286,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 				// Multipet stuff
 				if (RuleB(Custom, EnableMultipet)) {
 					for (auto& mob : GetSwarmPets()) {
+						mob->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
 						mob->SetTarget(target);
 						MessageString(Chat::PetResponse, PET_ATTACKING, mob->GetCleanName(), target->GetCleanName());
 					}
@@ -11354,6 +11355,15 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 				SetPetCommandState(PET_BUTTON_STOP, 0);
+			}
+
+			// Multipet stuff
+			if (RuleB(Custom, EnableMultipet)) {
+				for (auto& mob : GetSwarmPets()) {
+					mob->SayString(this, Chat::PetResponse, PET_CALMING);
+					mob->WipeHateList();
+					mob->SetTarget(nullptr);
+				}
 			}
 		}
 		break;
