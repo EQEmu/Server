@@ -180,7 +180,12 @@ void QuestManager::ClearAllTimers() {
 //quest perl functions
 void QuestManager::echo(int colour, const char *str) {
 	QuestManagerCurrentQuestVars();
-	entity_list.MessageClose(initiator, false, 200, colour, str);
+
+	if (!owner) {
+		return;
+	}
+
+	entity_list.MessageClose(owner, false, 200, colour, str);
 }
 
 void QuestManager::say(const char *str, Journal::Options &opts) {
@@ -199,9 +204,12 @@ void QuestManager::say(const char *str, Journal::Options &opts) {
 
 void QuestManager::me(const char *str) {
 	QuestManagerCurrentQuestVars();
-	if (!initiator)
+
+	if (!owner) {
 		return;
-	entity_list.MessageClose(initiator, false, 200, 10, str);
+	}
+
+	entity_list.MessageClose(owner, false, 200, 10, str);
 }
 
 void QuestManager::summonitem(uint32 itemid, int16 charges) {

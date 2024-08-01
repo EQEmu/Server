@@ -44,7 +44,24 @@ public:
      */
 
 	// Custom extended repository methods here
+	static std::vector<std::string> GetBaseDataFileLines(Database& db)
+	{
+		std::vector<std::string> lines;
 
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT CONCAT_WS('^', {}) FROM {} ORDER BY `level`, `class` ASC",
+				ColumnsRaw(),
+				TableName()
+			)
+		);
+
+		for (auto row : results) {
+			lines.emplace_back(row[0]);
+		}
+
+		return lines;
+	}
 };
 
 #endif //EQEMU_BASE_DATA_REPOSITORY_H

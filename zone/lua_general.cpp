@@ -7256,10 +7256,10 @@ luabind::scope lua_register_filters() {
 			luabind::value("FocusEffects", FilterFocusEffects),
 			luabind::value("PetSpells", FilterPetSpells),
 			luabind::value("HealOverTime", FilterHealOverTime),
-			luabind::value("Unknown25", FilterUnknown25),
-			luabind::value("Unknown26", FilterUnknown26),
-			luabind::value("Unknown27", FilterUnknown27),
-			luabind::value("Unknown28", FilterUnknown28)
+			luabind::value("ItemSpeech", FilterItemSpeech),
+			luabind::value("Strikethrough", FilterStrikethrough),
+			luabind::value("Stuns", FilterStuns),
+			luabind::value("BardSongsOnPets", FilterBardSongsOnPets)
 		)];
 }
 

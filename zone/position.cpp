@@ -4,6 +4,8 @@
 #include <cmath>
 #include "../common/strings.h"
 #include "../common/data_verification.h"
+#include <numbers>
+#include "../common/types.h"
 
 constexpr float position_eps = 0.0001f;
 
@@ -281,4 +283,55 @@ float CalculateHeadingAngleBetweenPositions(float x1, float y1, float x2, float 
 	} else {
 		return (90.0f - angle + 270.0f) * 511.5f * 0.0027777778f;
 	}
+}
+bool IsWithinCircularArc(glm::vec4 arc_center, glm::vec4 point, uint32 arc_offset, uint32 arc_radius, uint32 arc_radius_limit)
+{
+	auto CheckClockwise = [](double v_x, double v_y, double check_x, double check_y) -> bool {
+		return -v_y * check_x + v_x * check_y >= 0;
+	};
+
+	auto CheckRadiusLimit = [](double check_x, double check_y, uint32 radius, uint32 radius_limit) -> bool {
+		auto w = check_x * check_x + check_y * check_y;
+		if (w >= radius_limit * radius_limit && w <= radius * radius) {
+			return true;
+		}
+		return false;
+	};
+
+	auto DegreesToRadians = [](float in) -> double {
+		return in / 180.0f * std::numbers::pi;
+	};
+
+	auto h = arc_center.w / 512.0f * 360.0f + arc_offset;
+	auto a = DegreesToRadians(h);
+
+	auto vs_x = -arc_radius * cos(a);
+	auto vs_y = arc_radius * sin(a);
+
+	h += 90;
+	a = DegreesToRadians(h);
+	auto ve_x = -arc_radius * cos(a);
+	auto ve_y = arc_radius * sin(a);
+
+	double check_x = point.x - arc_center.x;
+	double check_y = point.y - arc_center.y;
+
+	return CheckClockwise(vs_x, vs_y, check_x, check_y) && CheckRadiusLimit(check_x, check_y, arc_radius, arc_radius_limit) && !CheckClockwise(ve_x, ve_y, check_x, check_y);
+}
+
+bool IsWithinSquare(glm::vec4 center, uint32 area, glm::vec4 position) {
+	auto l = std::abs(std::sqrt(area));
+	if (l <= 0) {
+		return false;
+	}
+
+	auto x_min = center.x - l;
+	auto x_max = center.x + l;
+	auto y_min = center.y - l;
+	auto y_max = center.y + l;
+
+	auto x = position.x;
+	auto y = position.y;
+
+	return x > x_min && x < x_max && y > y_min && y < y_max;
 }

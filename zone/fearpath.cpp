@@ -436,3 +436,6 @@ void Mob::CalculateNewFearpoint()
 
 	return;
 }
+
+	return;
+}

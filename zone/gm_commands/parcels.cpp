@@ -163,7 +163,7 @@ void command_parcels(Client *c, const Seperator *sep)
 				return;
 			}
 
-			CharacterParcelsRepository::CharacterParcels parcel_out;
+			auto parcel_out = CharacterParcelsRepository::NewEntity();
 			parcel_out.from_name = c->GetName();
 			parcel_out.note      = note;
 			parcel_out.sent_date = time(nullptr);
@@ -241,7 +241,7 @@ void command_parcels(Client *c, const Seperator *sep)
 					? inst->GetItem()->MaxCharges : (int16) quantity;
 			}
 
-			CharacterParcelsRepository::CharacterParcels parcel_out;
+			auto parcel_out = CharacterParcelsRepository::NewEntity();
 			parcel_out.from_name = c->GetName();
 			parcel_out.note      = note.empty() ? "" : note;
 			parcel_out.sent_date = time(nullptr);

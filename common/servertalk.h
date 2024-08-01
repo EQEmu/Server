@@ -140,6 +140,7 @@
 
 #define ServerOP_TraderMessaging    0x0120
 #define ServerOP_BazaarPurchase     0x0121
+#define ServerOP_BuyerMessaging     0x0122
 
 #define ServerOP_InstanceUpdateTime			0x014F
 #define ServerOP_AdventureRequest			0x0150

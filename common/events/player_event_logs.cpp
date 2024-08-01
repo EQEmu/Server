@@ -706,6 +706,7 @@ void PlayerEventLogs::SetSettingsDefaults()
 	m_settings[PlayerEvent::PARCEL_SEND].event_enabled               = 1;
 	m_settings[PlayerEvent::PARCEL_RETRIEVE].event_enabled           = 1;
 	m_settings[PlayerEvent::PARCEL_DELETE].event_enabled             = 1;
+	m_settings[PlayerEvent::BARTER_TRANSACTION].event_enabled        = 1;
 
 	for (int i = PlayerEvent::GM_COMMAND; i != PlayerEvent::MAX; i++) {
 		m_settings[i].retention_days = RETENTION_DAYS_DEFAULT;

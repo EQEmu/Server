@@ -733,6 +733,7 @@ RULE_INT(Range, SpellParticles, 135, "The packet range in which spell particles 
 RULE_INT(Range, DamageMessages, 50, "The packet range in which damage messages are sent (non-crit)")
 RULE_INT(Range, SpellMessages, 75, "The packet range in which spell damage messages are sent")
 RULE_INT(Range, SongMessages, 75, "The packet range in which song messages are sent")
+RULE_INT(Range, StunMessages, 75, "The packet range in which stun messages are sent")
 RULE_INT(Range, ClientPositionUpdates, 300, "Distance in which the own changed position is communicated to other clients")
 RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit messages are sent")
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
@@ -825,6 +826,7 @@ RULE_INT(Bazaar, MaxBarterSearchResults, 200, "The maximum results returned in t
 RULE_REAL(Bazaar, ParcelDeliveryCostMod, 0.20, "Cost of parcel delivery for a bazaar purchase as a percentage of item cost. Default is 20% of item cost. RoF+ Only.")
 RULE_INT(Bazaar, VoucherDeliveryCost, 200, "Number of vouchers for direct delivery for a bazaar purchase. Default is 200 vouchers. RoF+ Only.")
 RULE_BOOL(Bazaar, EnableParcelDelivery, true, "Enable bazaar purchases via parcel delivery.  Default is True.")
+RULE_INT(Bazaar, MaxBuyerInventorySearchResults, 200, "Maximum number of search results when a Buyer searches the global item list. Default is 200. RoF+ Only.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mail)

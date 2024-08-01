@@ -651,7 +651,6 @@ Json::Value ApiGetClientListDetail(EQ::Net::WebsocketServerConnection *connectio
 		row["base_wis"]                                = client->GetBaseWIS();
 		row["become_npc_level"]                        = client->GetBecomeNPCLevel();
 		row["boat_id"]                                 = client->GetBoatID();
-		row["buyer_welcome_message"]                   = client->GetBuyerWelcomeMessage();
 		row["calc_atk"]                                = client->CalcATK();
 		row["calc_base_mana"]                          = client->CalcBaseMana();
 		row["calc_current_weight"]                     = client->CalcCurrentWeight();
