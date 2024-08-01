@@ -15820,7 +15820,7 @@ void Client::Handle_OP_TraderBuy(const EQApplicationPacket *app)
 						Chat::Yellow,
 						"You may not purchase from this trader, because they are not a member of the same Season as you are."
 					);
-					in->method     = ByParcel;
+					in->method     = BazaarByParcel;
 					in->sub_action = Failed;
 					TradeRequestFailed(app);
 					return;
