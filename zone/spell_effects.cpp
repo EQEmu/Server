@@ -6812,8 +6812,6 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 
 	//Check if item focus effect exists for the mob.
 	if (itembonuses.FocusEffects[type]) {
-		LogDebug("Focus of type [{}] found", (int)type);
-
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
@@ -6977,8 +6975,6 @@ int64 Mob::GetFocusEffect(focusType type, uint16 spell_id, Mob *caster, bool fro
 		if (UsedItem && rand_effectiveness && focus_max_real != 0) {
 			realTotal = CalcFocusEffect(type, UsedFocusID, spell_id);
 		}
-
-		LogDebug("GetFocusEffect 2? [{}], [{}], [{}]", rand_effectiveness, UsedItem ? UsedItem->ID : 0, realTotal);
 
 		if ((rand_effectiveness && UsedItem) || (realTotal != 0 && UsedItem)) {
 			// there are a crap ton more of these, I was able to verify these ones though

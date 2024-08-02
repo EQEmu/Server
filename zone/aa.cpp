@@ -89,6 +89,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
+	bool permanent = pet.duration == 1;
+
 	pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000;
 
 	pet.npc_id = record.npc_type;
@@ -278,7 +280,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				tmp_lastname = fmt::format("{}'s Earth Elemental", GetCleanName());
 				break;
 			case 1936:
-				tmp_lastname = fmt::format("{}'s Elemental Manifestation", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Elemental", GetCleanName());
 				break;
 			case 1400:
 			case 1402:
@@ -396,7 +398,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
 			}
 
-			if (RuleB(Custom, EnableMultipet) && pet_duration == 1) {
+			if (RuleB(Custom, EnableMultipet) && permanent) {
 				swarm_pet_npc->GetSwarmInfo()->permanent = true;
 				swarm_pet_npc->SetTaunting(true);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
