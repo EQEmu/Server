@@ -308,13 +308,14 @@ bool Database::ReserveName(uint32 account_id, const std::string& name)
 		return false;
 	}
 
-	const int guild_id = RuleI(Character, DefaultGuild);
+	const uint32 guild_id = RuleI(Character, DefaultGuild);
 	if (guild_id != 0) {
 		if (e.id) {
 			auto g = GuildMembersRepository::NewEntity();
 
 			g.char_id  = e.id;
 			g.guild_id = guild_id;
+			g.rank_    = RuleI(Character, DefaultGuildRank);
 
 			GuildMembersRepository::InsertOne(*this, g);
 		}
