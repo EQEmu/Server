@@ -58,7 +58,34 @@ public:
 		);
 
 		for (auto row : results) {
-			lines.emplace_back(row[0]);
+			std::string line = row[0];
+			std::stringstream ss(line);
+			std::string item;
+			std::vector<std::string> columns;
+
+			// Split the line into columns
+			while (std::getline(ss, item, '^')) {
+				columns.push_back(item);
+			}
+
+			// Check if the 98th column exists
+			if (columns.size() >= 98) {
+				// Modify the 98th column value if it is '14' or '38'
+				if (columns[98] == "14" || columns[98] == "38") {
+					columns[98] = "6";
+				}
+			}
+
+			// Reconstruct the line
+			std::string modified_line;
+			for (size_t i = 0; i < columns.size(); ++i) {
+				if (i > 0) {
+					modified_line += '^';
+				}
+				modified_line += columns[i];
+			}
+
+			lines.emplace_back(modified_line);
 		}
 
 		return lines;

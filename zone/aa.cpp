@@ -145,7 +145,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 5505:
 			case 10586:
 				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}`s Animation", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Animation", GetCleanName());
 				break;
 			//Beastlord Pets
 			case 2612:
@@ -164,7 +164,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 5538:
 			case 10379:
 				tmp_name 	 = fmt::format("{}`s Warder", GetCleanName());
-				tmp_lastname = fmt::format("{}`s Warder", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Warder", GetCleanName());
 				break;
 			// Shaman Pets
 			case 164:
@@ -176,7 +176,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 5389:
 			case 9983:
 				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}`s Spirit", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Spirit", GetCleanName());
 				break;
 			// Necromancer Skeletons...
 			case 338:
@@ -193,7 +193,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 443:
 			case 1621:
 			case 1622:
-				tmp_lastname = fmt::format("{}`s Skeleton", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Skeleton", GetCleanName());
 				break;
 			// Necromancer Spectres
 			case 1623:
@@ -204,7 +204,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 5438:
 			case 10506:
 			case 10561:
-				tmp_lastname = fmt::format("{}`s Spectre", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Spectre", GetCleanName());
 				break;
 			// Magician
 			case 3317:
@@ -222,7 +222,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 1674:
 			case 1678:
 			case 10695:
-				tmp_lastname = fmt::format("{}`s Air Elemental", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Air Elemental", GetCleanName());
 				break;
 			case 3320:
 			case 315:
@@ -239,7 +239,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 1672:
 			case 5480:
 			case 10708:
-				tmp_lastname = fmt::format("{}`s Water Elemental", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Water Elemental", GetCleanName());
 				break;
 			case 3322:
 			case 316:
@@ -257,7 +257,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 1677:
 			case 5485:
 			case 10719:
-				tmp_lastname = fmt::format("{}`s Fire Elemental", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Fire Elemental", GetCleanName());
 				break;
 			case 3324:
 			case 58:
@@ -275,19 +275,22 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 1675:
 			case 5495:
 			case 10753:
-				tmp_lastname = fmt::format("{}`s Earth Elemental", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Earth Elemental", GetCleanName());
+				break;
+			case 1936:
+				tmp_lastname = fmt::format("{}'s Elemental Manifestation", GetCleanName());
 				break;
 			case 1400:
 			case 1402:
 			case 1404:
 			case 4888:
 			case 10769:
-				tmp_lastname = fmt::format("{}`s Summoned Monster", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Summoned Monster", GetCleanName());
 				break;
 			// Druid
 			case 1475:
 				strn0cpy(made_npc->name, bearNames[zone->random.Roll0(bearNames.size()-1)].c_str(), sizeof(made_npc->name));
-				tmp_lastname = fmt::format("{}`s Tiny Bear", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Tiny Bear", GetCleanName());
 				break;
 			// Cleric
 			case 1721:
@@ -296,22 +299,36 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			case 11751:
 			case 11752:
 				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}`s Holy Hammer", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Holy Hammer", GetCleanName());
 				break;
 			// Wizard
 			case 1722:
 			case 5460:
 			case 10840:
 				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}`s Animated Sword", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Animated Sword", GetCleanName());
 				break;
 			default:
 				tmp_name     = spells[spell_id].name;
-				tmp_lastname = fmt::format("{}`s Pet", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Pet", GetCleanName());
 		}
 
 		strcpy(made_npc->name, tmp_name.empty() ? name_override : tmp_name.c_str());
 		strcpy(made_npc->lastname, tmp_lastname.c_str());
+
+		// Replace spaces with underscores
+		for (char* p = made_npc->name; *p; ++p) {
+			if (*p == ' ') {
+				*p = '_';
+			}
+		}
+
+		for (char* p = made_npc->name; *p; ++p) {
+			if (*p == '\'') {
+				*p = '`';
+			}
+		}
+
 		npc_type = made_npc;
 	}
 

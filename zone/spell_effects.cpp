@@ -1356,8 +1356,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 				}
-
-				if(GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter && RuleB(Custom, EnableMultipet)))
+				if (GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter && RuleB(Custom, EnableMultipet)))
 				{
 					if (!RuleB(Custom, EnableMultipet)) {
 						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
@@ -1366,7 +1365,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						if (class_match) {
 							Message(Chat::SpellFailure, "You may only have one pet from a particular class at any one time.");
 						} else if (spawned_pets.size() >= 2) { // ADJUST MULTIPET MAX COUNT LOGIC HERE
-							Message(Chat::SpellFailure, "You cannot control any additional permanent pets.");
+							Message(Chat::SpellFailure, "You cannot control any additional Secondary Pets.");
 						} else {
 							char pet_name[64];
 							GetRandPetName(pet_name);
