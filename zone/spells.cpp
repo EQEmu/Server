@@ -5511,8 +5511,8 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	if (RuleB(Spells,July242002PetResists) && IsPetOwnerClient() && caster->IsNPC() && !caster->IsPetOwnerClient()) {
 		auto owner = GetOwner();
 		if (owner != nullptr) {
-			target_resist = std::max(target_resist, owner->GetResist(resist_type));
-			level = owner->GetLevel();
+			target_resist = std::max(target_resist, target_resist + owner->GetResist(resist_type));
+			level = std::max(owner->GetLevel(), GetLevel());
 		}
 	}
 
