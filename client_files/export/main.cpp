@@ -97,6 +97,8 @@ int main(int argc, char **argv)
 		content_db.SetMySQL(database);
 	}
 
+	RuleManager::Instance()->LoadRules(&database, "default", false);
+
 	LogSys.SetDatabase(&database)
 		->SetLogPath(path.GetLogPath())
 		->LoadLogDatabaseSettings()
@@ -159,7 +161,13 @@ void ExportSkillCaps(SharedDatabase* db)
 		return;
 	}
 
-	const auto& lines = SkillCapsRepository::GetSkillCapFileLines(*db);
+	std::vector<std::string> lines;
+	if (!RuleB(Custom, MulticlassingEnabled)) {
+		lines = SkillCapsRepository::GetSkillCapFileLines(*db);
+	} else {
+		LogInfo("Multiclassing Enabled. Exporting Multiclass Skillcaps.");
+		lines = SkillCapsRepository::GetSkillCapFileLinesMulticlass(*db);
+	}
 
 	const std::string& file_string = Strings::Implode("\n", lines);
 

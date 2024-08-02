@@ -61,6 +61,33 @@ public:
 
 		return lines;
 	}
+
+	static std::vector<std::string> GetSkillCapFileLinesMulticlass(Database& db)
+	{
+		std::vector<std::string> lines;
+
+		// Query to get the maximum cap for each skill at each level
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT level, skill_id, MAX(cap) as max_cap FROM {} GROUP BY level, skill_id ORDER BY level, skill_id ASC",
+				TableName()
+			)
+		);
+
+		// Iterate through the results
+		for (auto row : results) {
+			int level = std::stoi(row[0]);
+			int skill_id = std::stoi(row[1]);
+			int max_cap = std::stoi(row[2]);
+
+			// Create lines for each class (assuming class IDs are from 1 to 16)
+			for (int class_id = 1; class_id <= 16; ++class_id) {
+				lines.emplace_back(fmt::format("{}^{}^{}^{}^{}", class_id, skill_id, level, max_cap, class_id));
+			}
+		}
+
+		return lines;
+	}
 };
 
 #endif //EQEMU_SKILL_CAPS_REPOSITORY_H
