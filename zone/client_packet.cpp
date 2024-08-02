@@ -1711,6 +1711,31 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			}
 			m_petinfo.SpellID = 0;
 		}
+
+		if (RuleB(Custom, EnableMultipet)) {
+			for (int i = 0; i < MAXPETS; i++) {
+				if (m_petinfoextra[i].SpellID > 1 && m_petinfoextra[i].SpellID <= SPDAT_RECORDS) {
+					SetEntityVariable("OverridePetPower", std::to_string(m_petinfoextra[i].petpower));
+					SetEntityVariable("OverridePetSize", std::to_string(m_petinfoextra[i].size));
+
+					auto new_pet = TemporaryPets(m_petinfoextra[i].SpellID, nullptr, m_petinfoextra[i].Name);
+
+					DeleteEntityVariable("OverridePetPower");
+					DeleteEntityVariable("OverridePetSize");
+
+					if (new_pet) {
+						LogDebug("PASS Perm Pet Creation");
+
+						new_pet->CastToNPC()->SetPetState(m_petinfoextra[i].Buffs, m_petinfoextra[i].Items);
+						new_pet->CastToNPC()->CalcBonuses();
+						new_pet->CastToNPC()->SetHP(m_petinfoextra[i].HP);
+						new_pet->CastToNPC()->SetMana(m_petinfoextra[i].Mana);
+					} else {
+						LogDebug("FAIL Perm Pet Creation");
+					}
+				}
+			}
+		}
 	}
 	/* Moved here so it's after where we load the pet data. */
 	if (!aabonuses.ZoneSuspendMinion && !spellbonuses.ZoneSuspendMinion && !itembonuses.ZoneSuspendMinion) {

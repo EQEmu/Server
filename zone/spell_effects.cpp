@@ -1337,41 +1337,39 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					mypet->CastToNPC()->Depop();
 				}
 
+				if (!RuleB(Custom, EnableMultipet) && GetPet()) {
+					MessageString(Chat::SpellFailure, ONLY_ONE_PET);
+					break;
+				}
+
 				int class_id = GetPetOriginClass(spell_id);
+				if ((GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter) && IsClient() && RuleB(Custom, EnableMultipet)))
+				{
+					bool class_match = false;
+					if (class_id > Class::None) {
+						if (GetPet() && GetPet()->IsNPC()) {
+							if (class_id ==  GetPetOriginClass(GetPet()->CastToNPC()->GetPetSpellID())) {
+								class_match = true;
+							}
 
-				bool class_match = false;
-				if (class_id > Class::None) {
-					if (GetPet() && GetPet()->IsNPC()) {
-						if (class_id ==  GetPetOriginClass(GetPet()->CastToNPC()->GetPetSpellID())) {
-							class_match = true;
-						}
-
-						if (!class_match) {
-							for (const uint16& psi : spawned_pets) {
-								if (class_id == GetPetOriginClass(psi)) {
-									class_match = true;
-									break;
+							if (!class_match) {
+								for (const auto pet : CastToClient()->GetSwarmPets(true)) {
+									if (class_id == GetPetOriginClass(pet->GetPetSpellID())) {
+										class_match = true;
+										break;
+									}
 								}
 							}
 						}
 					}
-				}
-				if (GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter && RuleB(Custom, EnableMultipet)))
-				{
-					if (!RuleB(Custom, EnableMultipet)) {
-						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
-						break;
+					if (class_match) {
+						Message(Chat::SpellFailure, "You may only have one pet from a particular class at any one time.");
+					} else if (CastToClient()->GetSwarmPets(true).size() >= 2) { // ADJUST MULTIPET MAX COUNT LOGIC HERE
+						Message(Chat::SpellFailure, "You cannot control any additional Secondary Pets.");
 					} else {
-						if (class_match) {
-							Message(Chat::SpellFailure, "You may only have one pet from a particular class at any one time.");
-						} else if (spawned_pets.size() >= 2) { // ADJUST MULTIPET MAX COUNT LOGIC HERE
-							Message(Chat::SpellFailure, "You cannot control any additional Secondary Pets.");
-						} else {
-							char pet_name[64];
-							GetRandPetName(pet_name);
-							TemporaryPets(spell_id, nullptr, pet_name);
-							spawned_pets.push_back(spell_id);
-						}
+						char pet_name[64];
+						GetRandPetName(pet_name);
+						TemporaryPets(spell_id, nullptr, pet_name);
 					}
 				}
 				else

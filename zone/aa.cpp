@@ -48,7 +48,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 extern WorldServer worldserver;
 extern QueryServ* QServ;
 
-void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
+Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
 	//It might not be a bad idea to put these into the database, eventually..
 
@@ -56,11 +56,10 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	// do nothing if it's a corpse
 	if (targ != nullptr && targ->IsCorpse())
-		return;
+		return nullptr;
 
 	// yep, even these need pet power!
 	int act_power = 0;
-
 	if (IsOfClientBot()) {
 		act_power = GetFocusEffect(focusPetPower, spell_id);
 		if (IsClient()) {
@@ -68,12 +67,16 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
+	if (!GetEntityVariable("OverridePetPower").empty()) {
+		act_power = Strings::ToInt(GetEntityVariable("OverridePetPower"));
+	}
+
 	PetRecord record;
 	if (!content_db.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		LogError("Unknown swarm pet spell id: {}, check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
-		return;
+		return nullptr;
 	}
 
 	SwarmPet_Struct pet;
@@ -89,7 +92,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	bool permanent = pet.duration == 1;
+	bool permanent = (pet.duration == 1 && pet.count == 1);
 
 	pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000;
 
@@ -102,7 +105,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//log write
 		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
 		Message(0, "Unable to find pet!");
-		return;
+		return nullptr;
 	}
 
 	if (name_override != nullptr) {
@@ -404,8 +407,6 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				swarm_pet_npc->SetTaunting(true);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
-				swarm_pet_npc->SetPetPower(act_power);
-				swarm_pet_npc->SetPetSpellID(spell_id);
 			} else {
 				swarm_pet_npc->GetSwarmInfo()->permanent = false;
 			}
@@ -416,6 +417,15 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
 		entity_list.AddNPC(swarm_pet_npc, true, true);
+
+		if (RuleB(Custom, EnableMultipet) && permanent) {
+			swarm_pet_npc->SetPetPower(act_power);
+			swarm_pet_npc->SetPetSpellID(spell_id);
+
+			if (!GetEntityVariable("OverridePetSize").empty()) {
+				swarm_pet_npc->size = Strings::ToFloat(GetEntityVariable("OverridePetSize"), swarm_pet_npc->size);
+			}
+		}
 		summon_count--;
 	}
 
@@ -429,6 +439,12 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	// The other pointers we make are handled elsewhere.
 	delete made_npc;
+
+	if (permanent) {
+		return swarm_pet_npc;
+	} else {
+		return nullptr;
+	}
 }
 
 void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg) {

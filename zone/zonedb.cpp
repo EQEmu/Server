@@ -4057,6 +4057,12 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	auto pet_info           = client->GetPetInfo(PetInfoType::Current);
 	auto suspended_pet_info = client->GetPetInfo(PetInfoType::Suspended);
 
+	PetInfo* perm_pet[MAXPETS];
+	for (int i = 0; i < MAXPETS; i++) {
+		perm_pet[i] = &client->m_petinfoextra[i];
+		memset(perm_pet[i], 0, sizeof(PetInfo));
+	}
+
 	memset(pet_info, 0, sizeof(PetInfo));
 	memset(suspended_pet_info, 0, sizeof(PetInfo));
 
@@ -4074,11 +4080,17 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 
 	PetInfo* p;
 
+
+	// TODO - REFACTOR THIS
 	for (const auto& e : info) {
 		if (e.pet == PetInfoType::Current) {
 			p = pet_info;
 		} else if (e.pet == PetInfoType::Suspended) {
 			p = suspended_pet_info;
+		} else if (e.pet == PetInfoType::PermanentSlot1) {
+			p = perm_pet[0];
+		} else if (e.pet == PetInfoType::PermanentSlot2) {
+			p = perm_pet[1];
 		} else {
 			continue;
 		}

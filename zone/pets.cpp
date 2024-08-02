@@ -555,7 +555,6 @@ void NPC::TryDepopTargetLockedPets(Mob* current_target) {
 			Mob* owner = entity_list.GetMobID(GetSwarmInfo()->owner_id);
 			if (owner) {
 				owner->SetTempPetCount(owner->GetTempPetCount() - 1);
-				owner->spawned_pets.remove(GetSwarmInfo()->spell_id);
 			}
 			Depop();
 			return;
