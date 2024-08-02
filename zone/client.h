@@ -18,6 +18,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#define MAXPETS 2
+
 class Client;
 class EQApplicationPacket;
 class DynamicZone;
@@ -466,7 +468,20 @@ public:
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
 	inline const EQ::InventoryProfile& GetInv() const { return m_inv; }
-	inline PetInfo* GetPetInfo(int pet_info_type) { return pet_info_type == PetInfoType::Suspended ? &m_suspendedminion : &m_petinfo; }
+	inline PetInfo* GetPetInfo(int pet_info_type) {
+		switch (pet_info_type) {
+			case PetInfoType::Current:
+				return &m_petinfo;
+			case PetInfoType::Suspended:
+				return &m_suspendedminion;
+			case PetInfoType::PermanentSlot1:
+				return &m_petinfoextra[0];
+			case PetInfoType::PermanentSlot2:
+				return &m_petinfoextra[1];
+			default:
+				return nullptr;
+		}
+	}
 	inline InspectMessage_Struct& GetInspectMessage() { return m_inspect_message; }
 	inline const InspectMessage_Struct& GetInspectMessage() const { return m_inspect_message; }
 	void ReloadExpansionProfileSetting();
@@ -2053,6 +2068,8 @@ private:
 public:
 	bool IsLockSavePosition() const;
 	void SetLockSavePosition(bool lock_save_position);
+
+	PetInfo m_petinfoextra[MAXPETS]; // Hacky.
 private:
 
 	PlayerProfile_Struct m_pp;

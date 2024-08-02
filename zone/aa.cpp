@@ -404,6 +404,8 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				swarm_pet_npc->SetTaunting(true);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
+				swarm_pet_npc->SetPetPower(act_power);
+				swarm_pet_npc->SetPetSpellID(spell_id);
 			} else {
 				swarm_pet_npc->GetSwarmInfo()->permanent = false;
 			}

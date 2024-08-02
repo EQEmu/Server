@@ -719,6 +719,8 @@ namespace Language {
 namespace PetInfoType {
 	constexpr int Current   = 0;
 	constexpr int Suspended = 1;
+	constexpr int PermanentSlot1 = 2;
+	constexpr int PermanentSlot2 = 3;
 }
 
 namespace BuffEffectType {

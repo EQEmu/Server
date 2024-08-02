@@ -4015,7 +4015,7 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
-	spelltar = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, spelltar->GetID()));
+	//spelltar = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, spelltar->GetID()));
 
 	if (spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn()) {
 		return false;

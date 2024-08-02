@@ -743,6 +743,31 @@ bool Client::Save(uint8 iCommitNow) {
 	} else {
 		memset(&m_petinfo, 0, sizeof(struct PetInfo));
 	}
+
+	if (RuleB(Custom, EnableMultipet)) {
+		auto swarm_pets = GetSwarmPets(true);
+		int num_pets = std::min(static_cast<int>(swarm_pets.size()), MAXPETS);
+
+		for (int i = 0; i < num_pets; ++i) {
+			auto& pet_info = m_petinfoextra[i];
+			auto& perm_pet = swarm_pets[i];
+
+			pet_info.SpellID 	= perm_pet->GetPetSpellID();
+			pet_info.HP      	= perm_pet->GetHP();
+			pet_info.Mana 	 	= perm_pet->GetMana();
+			pet_info.petpower 	= perm_pet->GetPetPower();
+			pet_info.size 		= perm_pet->GetSize();
+			pet_info.taunting	= perm_pet->IsTaunting();
+
+			perm_pet->GetPetState(pet_info.Buffs, pet_info.Items, pet_info.Name);
+		}
+
+		// Zero out remaining pet slots
+		for (int i = num_pets; i < MAXPETS; ++i) {
+			memset(&m_petinfoextra[i], 0, sizeof(struct PetInfo));
+		}
+	}
+
 	database.SavePetInfo(this);
 
 	if(tribute_timer.Enabled()) {

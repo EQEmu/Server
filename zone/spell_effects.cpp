@@ -6645,7 +6645,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 {
 	// We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
-		Mob* proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, GetTarget()->GetID()));
+		Mob* proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, GetTarget() != nullptr ? GetTarget()->GetID() : GetID()));
 		int64 damage_override = 0;
 
 		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.

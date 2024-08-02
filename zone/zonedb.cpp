@@ -3894,7 +3894,7 @@ void ZoneDatabase::SavePetInfo(Client *client)
 	std::vector<CharacterPetInventoryRepository::CharacterPetInventory> inventory;
 	auto item = CharacterPetInventoryRepository::NewEntity();
 
-	for (int pet_info_type = PetInfoType::Current; pet_info_type <= PetInfoType::Suspended; pet_info_type++) {
+	for (int pet_info_type = PetInfoType::Current; pet_info_type <= PetInfoType::PermanentSlot2; pet_info_type++) {
 		p = client->GetPetInfo(pet_info_type);
 		if (!p) {
 			continue;
