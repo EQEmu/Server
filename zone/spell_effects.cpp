@@ -1357,7 +1357,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				if(GetPet())
+				if(GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter && RuleB(Custom, EnableMultipet)))
 				{
 					if (!RuleB(Custom, EnableMultipet)) {
 						MessageString(Chat::SpellFailure, ONLY_ONE_PET);

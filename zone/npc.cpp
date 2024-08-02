@@ -600,6 +600,7 @@ bool NPC::Process()
 	if (GetSwarmInfo()) {
 		if (swarm_timer.Check()) {
 			if (!GetSwarmInfo()->permanent) {
+				LogDebug("Depopping Swarm Pet!");
 				DepopSwarmPets();
 			}
 		}
@@ -2252,52 +2253,18 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			ns->spawn.bodytype = BodyType::NoTarget;
 		}
 
+		/*
 		if (
 			!IsCharmed() &&
 			swarm_owner->IsClient() &&
 			RuleB(Pets, ClientPetsUseOwnerNameInLastName)
 		) {
-			const auto& tmp_lastname = fmt::format("{}`s Swarm", swarm_owner->GetName());
+			const auto& tmp_lastname = fmt::format("{}`s Pet", swarm_owner->GetName());
 			if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
 				strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
 		}
-
-		if (RuleB(Pets, ClientPetsUseOwnerNameInLastName) && GetSwarmInfo()->permanent && swarm_owner->IsClient()) {
-			if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
-				std::string tmp_lastname;
-				switch(ns->spawn.race) {
-					case Race::AirElemental2:
-					case Race::AirElemental:
-					case Race::EarthElemental2:
-					case Race::EarthElemental:
-					case Race::WaterElemental2:
-					case Race::WaterElemental:
-					case Race::FireElemental2:
-					case Race::FireElemental:
-					case Race::Elemental:
-						tmp_lastname = fmt::format("{}`s Elemental", swarm_owner->GetName());
-						break;
-					case Race::Skeleton:
-					case Race::Skeleton2:
-					case Race::Skeleton3:
-						tmp_lastname = fmt::format("{}`s Skeleton", swarm_owner->GetName());
-						break;
-					case Race::Spectre:
-					case Race::Spectre2:
-						tmp_lastname = fmt::format("{}`s Reaper", swarm_owner->GetName());
-						break;
-					case Race::InvisibleMan:
-						tmp_lastname = fmt::format("{}`s Animation", swarm_owner->GetName());
-					default:
-						tmp_lastname = fmt::format("{}`s Warder", swarm_owner->GetName());
-				}
-
-				if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
-					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
-				}
-			}
-		}
+		*/
 
 		if (swarm_owner->IsBot()) {
 			SetPetOwnerBot(true);
@@ -2311,39 +2278,6 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			const auto c = entity_list.GetClientByID(GetOwnerID());
 			if (c) {
 				SetPetOwnerClient(true);
-				if (RuleB(Pets, ClientPetsUseOwnerNameInLastName)) {
-					std::string tmp_lastname;
-					switch(ns->spawn.race) {
-						case Race::AirElemental2:
-						case Race::AirElemental:
-						case Race::EarthElemental2:
-						case Race::EarthElemental:
-						case Race::WaterElemental2:
-						case Race::WaterElemental:
-						case Race::FireElemental2:
-						case Race::FireElemental:
-						case Race::Elemental:
-							tmp_lastname = fmt::format("{}`s Elemental", c->GetName());
-							break;
-						case Race::Skeleton:
-						case Race::Skeleton2:
-						case Race::Skeleton3:
-							tmp_lastname = fmt::format("{}`s Skeleton", c->GetName());
-							break;
-						case Race::Spectre:
-						case Race::Spectre2:
-							tmp_lastname = fmt::format("{}`s Reaper", c->GetName());
-							break;
-						case Race::InvisibleMan:
-							tmp_lastname = fmt::format("{}`s Animation", c->GetName());
-						default:
-							tmp_lastname = fmt::format("{}`s Warder", c->GetName());
-					}
-
-					if (tmp_lastname.size() < sizeof(ns->spawn.lastName)) {
-						strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
-					}
-				}
 			} else {
 				Mob* owner = entity_list.GetMob(GetOwnerID());
 				if (owner) {

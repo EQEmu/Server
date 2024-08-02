@@ -107,7 +107,211 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//we have to make a custom NPC type for this name change
 		made_npc = new NPCType;
 		memcpy(made_npc, npc_type, sizeof(NPCType));
-		strcpy(made_npc->name, name_override);
+
+		std::string tmp_lastname;
+		std::string tmp_name;
+
+		std::vector<std::string> bearNames = {
+			"Yogi", "Boo", "Pip", "Nugget", "Snick", "Pebble", "Fizz", "Munch", "Squirt", "Binky",
+			"Tiny Grizzle", "Snugglepaws", "Honey Nibbles", "Bearly There", "Cuddlycub", "Fuzzlet",
+			"Pint-Sized Paws", "Mini Growl", "Buttonbear", "Teacup Teddie",
+			"Coco", "Bubba", "Milo", "Teddy", "Biscuit", "Frodo", "Gizmo", "Fluffy", "Mochi", "Waffles",
+			"Bamboo", "Chomp", "Sprout", "Rolo", "Munchkin", "Pudding", "Pipsqueak", "Fuzzball", "Nibbles",
+			"Pickles", "Popcorn", "Ziggy", "Sparky", "Scooter", "Whiskers", "Snickers", "Wiggles",
+			"Bubbles", "Chubby", "Choco", "Snickerdoodle", "Cupcake", "Tootsie", "Doodle", "Muffin",
+			"Peanut", "Buttons", "Truffles", "Brownie", "Gingersnap", "Poppy", "Puff", "Smores",
+			"Marshmallow", "Cuddles", "Pumpkin", "Ruffles", "Tater", "Sprinkles", "Chewy", "Puffball",
+			"Cupcake", "Fudge", "Chester", "Cosmo", "Clover", "Dobby", "Squeaky", "Nibbler", "Tater Tot",
+			"Dumpling", "Wombat", "BoBo", "Churro", "Scooby", "Pudding", "Ducky", "Peaches", "Rascal",
+			"Smidge", "Bean", "Scruffy", "Gus", "Rugrat", "Hobbit"
+		};
+
+		switch (spell_id) {
+			// Enchanter Pets
+			case 285:
+			case 681:
+			case 295:
+			case 682:
+			case 683:
+			case 684:
+			case 685:
+			case 686:
+			case 687:
+			case 688:
+			case 689:
+			case 670:
+			case 1723:
+			case 3034:
+			case 5505:
+			case 10586:
+				tmp_name     = spells[spell_id].name;
+				tmp_lastname = fmt::format("{}`s Animation", GetCleanName());
+				break;
+			//Beastlord Pets
+			case 2612:
+			case 2633:
+			case 2614:
+			case 2616:
+			case 2618:
+			case 2621:
+			case 2623:
+			case 2626:
+			case 2627:
+			case 2631:
+			case 3457:
+			case 3461:
+			case 5531:
+			case 5538:
+			case 10379:
+				tmp_name 	 = fmt::format("{}`s Warder", GetCleanName());
+				tmp_lastname = fmt::format("{}`s Warder", GetCleanName());
+				break;
+			// Shaman Pets
+			case 164:
+			case 577:
+			case 165:
+			case 166:
+			case 1574:
+			case 3377:
+			case 5389:
+			case 9983:
+				tmp_name     = spells[spell_id].name;
+				tmp_lastname = fmt::format("{}`s Spirit", GetCleanName());
+				break;
+			// Necromancer Skeletons...
+			case 338:
+			case 491:
+			case 351:
+			case 362:
+			case 492:
+			case 440:
+			case 493:
+			case 441:
+			case 494:
+			case 442:
+			case 495:
+			case 443:
+			case 1621:
+			case 1622:
+				tmp_lastname = fmt::format("{}`s Skeleton", GetCleanName());
+				break;
+			// Necromancer Spectres
+			case 1623:
+			case 3304:
+			case 3310:
+			case 3314:
+			case 5431:
+			case 5438:
+			case 10506:
+			case 10561:
+				tmp_lastname = fmt::format("{}`s Spectre", GetCleanName());
+				break;
+			// Magician
+			case 3317:
+			case 317:
+			case 400:
+			case 404:
+			case 396:
+			case 499:
+			case 572:
+			case 576:
+			case 623:
+			case 627:
+			case 631:
+			case 635:
+			case 1674:
+			case 1678:
+			case 10695:
+				tmp_lastname = fmt::format("{}`s Air Elemental", GetCleanName());
+				break;
+			case 3320:
+			case 315:
+			case 398:
+			case 402:
+			case 336:
+			case 497:
+			case 570:
+			case 574:
+			case 621:
+			case 625:
+			case 629:
+			case 633:
+			case 1672:
+			case 5480:
+			case 10708:
+				tmp_lastname = fmt::format("{}`s Water Elemental", GetCleanName());
+				break;
+			case 3322:
+			case 316:
+			case 399:
+			case 403:
+			case 395:
+			case 498:
+			case 571:
+			case 575:
+			case 622:
+			case 626:
+			case 630:
+			case 634:
+			case 1673:
+			case 1677:
+			case 5485:
+			case 10719:
+				tmp_lastname = fmt::format("{}`s Fire Elemental", GetCleanName());
+				break;
+			case 3324:
+			case 58:
+			case 397:
+			case 401:
+			case 335:
+			case 496:
+			case 569:
+			case 573:
+			case 620:
+			case 624:
+			case 628:
+			case 632:
+			case 1671:
+			case 1675:
+			case 5495:
+			case 10753:
+				tmp_lastname = fmt::format("{}`s Earth Elemental", GetCleanName());
+				break;
+			case 1400:
+			case 1402:
+			case 1404:
+			case 4888:
+			case 10769:
+				tmp_lastname = fmt::format("{}`s Summoned Monster", GetCleanName());
+				break;
+			// Druid
+			case 1475:
+				strn0cpy(made_npc->name, bearNames[zone->random.Roll0(bearNames.size()-1)].c_str(), sizeof(made_npc->name));
+				tmp_lastname = fmt::format("{}`s Tiny Bear", GetCleanName());
+				break;
+			// Cleric
+			case 1721:
+			case 5256:
+			case 11750:
+			case 11751:
+			case 11752:
+				tmp_name     = spells[spell_id].name;
+				tmp_lastname = fmt::format("{}`s Holy Hammer", GetCleanName());
+				break;
+			// Wizard
+			case 1722:
+			case 5460:
+			case 10840:
+				tmp_name     = spells[spell_id].name;
+				tmp_lastname = fmt::format("{}`s Animated Sword", GetCleanName());
+				break;
+			default:
+				tmp_name     = spells[spell_id].name;
+				tmp_lastname = fmt::format("{}`s Pet", GetCleanName());
+		}
+
+		strcpy(made_npc->name, tmp_name.empty() ? name_override : tmp_name.c_str());
+		strcpy(made_npc->lastname, tmp_lastname.c_str());
 		npc_type = made_npc;
 	}
 
