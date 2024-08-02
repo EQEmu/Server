@@ -399,6 +399,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			}
 
 			if (RuleB(Custom, EnableMultipet) && permanent) {
+				LogDebug("Multipet Detected. Making Permanent.");
 				swarm_pet_npc->GetSwarmInfo()->permanent = true;
 				swarm_pet_npc->SetTaunting(true);
 				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);

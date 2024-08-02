@@ -6645,7 +6645,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 {
 	// We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
-		Mob* proc_target = GetTarget();
+		Mob* proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, GetTarget()->GetID()));
 		int64 damage_override = 0;
 
 		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
@@ -6654,8 +6654,15 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 			return true;
 		}
 
-		if (proc_target) {
-			proc_target = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, proc_target->GetID()));
+		if (proc_target || !GetEntityVariable("SympProcTargetOverride").empty()) {
+			LogDebug("Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
+			if (!GetEntityVariable("SympProcTargetOverride").empty()) {
+				proc_target = entity_list.GetMob(Strings::ToUnsignedInt(GetEntityVariable("SympProcTargetOverride")));
+				if (proc_target) {
+					LogDebug("Got Target: [{}]", proc_target->GetCleanName());
+				}
+			}
+
 			if (!proc_target) {
 				return false;
 			}

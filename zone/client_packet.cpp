@@ -11229,176 +11229,158 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			target = GetMeleeImpliedTarget(target);
 		}
 
-		if (!target)
-			break;
-		if (target->IsMezzed()) {
-			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), target->GetCleanName());
-			break;
-		}
-		if (mypet->IsFeared())
-			break; //prevent pet from attacking stuff while feared
-
-		if (!mypet->IsAttackAllowed(target)) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
+		if (!target) {
 			break;
 		}
 
-		// default range is 200, takes Z into account
-		// really they do something weird where they're added to the aggro list then remove them
-		// and will attack if they come in range -- too lazy, lets remove exploits for now
-		if (DistanceSquared(mypet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
-			// they say they're attacking then remove on live ... so they don't really say anything in this case ...
-			break;
-		}
+		for (auto& pet : GetAllPets()) {
+			if (target->IsMezzed()) {
+				MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), target->GetCleanName());
+				break;
+			}
+			if (pet->IsFeared()) {
+				break; //prevent pet from attacking stuff while feared
+			}
+			if (!pet->IsAttackAllowed(target)) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
+			}
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (target != this && DistanceSquared(mypet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
-				mypet->SetFeigned(false);
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
-				}
-				if (mypet->IsPetRegroup()) {
-					mypet->SetPetRegroup(false);
-					SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				}
+			// default range is 200, takes Z into account
+			// really they do something weird where they're added to the aggro list then remove them
+			// and will attack if they come in range -- too lazy, lets remove exploits for now
+			if (DistanceSquared(pet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+				// they say they're attacking then remove on live ... so they don't really say anything in this case ...
+				break;
+			}
 
-				// fix GUI sit button to be unpressed and stop sitting regen
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
-					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-					mypet->SetAppearance(eaStanding);
-				}
-
-				zone->AddAggroMob();
-				// classic acts like qattack
-				int hate = 1;
-				if (mypet->IsEngaged()) {
-					auto top = mypet->GetHateMost();
-					if (top && top != target)
-						hate += mypet->GetHateAmount(top) - mypet->GetHateAmount(target) + 100; // should be enough to cause target change
-				}
-				mypet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
-				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), target->GetCleanName());
-				SetTarget(target);
-
-				// Multipet stuff
-				if (RuleB(Custom, EnableMultipet)) {
-					for (auto& mob : GetSwarmPets()) {
-						mob->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
-						mob->SetTarget(target);
-						MessageString(Chat::PetResponse, PET_ATTACKING, mob->GetCleanName(), target->GetCleanName());
+			if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
+				if (target != this && DistanceSquared(pet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+					pet->SetFeigned(false);
+					if (pet->IsPetStop()) {
+						pet->SetPetStop(false);
+						SetPetCommandState(PET_BUTTON_STOP, 0);
 					}
+					if (pet->IsPetRegroup()) {
+						pet->SetPetRegroup(false);
+						SetPetCommandState(PET_BUTTON_REGROUP, 0);
+					}
+
+					// fix GUI sit button to be unpressed and stop sitting regen
+					SetPetCommandState(PET_BUTTON_SIT, 0);
+					if (pet->GetPetOrder() == SPO_Sit || pet->GetPetOrder() == SPO_FeignDeath) {
+						pet->SetPetOrder(pet->GetPreviousPetOrder());
+						pet->SetAppearance(eaStanding);
+					}
+
+					zone->AddAggroMob();
+					// classic acts like qattack
+					int hate = 1;
+					if (pet->IsEngaged()) {
+						auto top = pet->GetHateMost();
+						if (top && top != target)
+							hate += pet->GetHateAmount(top) - pet->GetHateAmount(target) + 100; // should be enough to cause target change
+					}
+					pet->AddToHateList(target, hate, 0, true, false, false, SPELL_UNKNOWN, true);
+					MessageString(Chat::PetResponse, PET_ATTACKING, pet->GetCleanName(), target->GetCleanName());
 				}
 			}
 		}
 		break;
 	}
 	case PET_QATTACK: {
-		if (mypet->IsFeared())
-			break; //prevent pet from attacking stuff while feared
+		if (RuleB(Pets, UsePetCommandImpliedTargeting)) {
+			target = GetMeleeImpliedTarget(target);
+		}
 
-		if (!GetTarget())
-			break;
-		if (GetTarget()->IsMezzed()) {
-			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+		if (!target) {
 			break;
 		}
 
-		if (!mypet->IsAttackAllowed(GetTarget())) {
-			mypet->SayString(this, NOT_LEGAL_TARGET);
-			break;
-		}
+		for (auto& pet : GetAllPets()) {
+			if (target->IsMezzed()) {
+				MessageString(Chat::NPCQuestSay, CANNOT_WAKE, pet->GetCleanName(), target->GetCleanName());
+				break;
+			}
+			if (pet->IsFeared()) {
+				break; //prevent pet from attacking stuff while feared
+			}
+			if (!pet->IsAttackAllowed(target)) {
+				pet->SayString(this, NOT_LEGAL_TARGET);
+				break;
+			}
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			if (GetTarget() != this && DistanceSquaredNoZ(mypet->GetPosition(), GetTarget()->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
-				mypet->SetFeigned(false);
-				if (mypet->IsPetStop()) {
-					mypet->SetPetStop(false);
-					SetPetCommandState(PET_BUTTON_STOP, 0);
-				}
-				if (mypet->IsPetRegroup()) {
-					mypet->SetPetRegroup(false);
-					SetPetCommandState(PET_BUTTON_REGROUP, 0);
-				}
+			// default range is 200, takes Z into account
+			// really they do something weird where they're added to the aggro list then remove them
+			// and will attack if they come in range -- too lazy, lets remove exploits for now
+			if (DistanceSquared(pet->GetPosition(), target->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
+				// they say they're attacking then remove on live ... so they don't really say anything in this case ...
+				break;
+			}
 
-				// fix GUI sit button to be unpressed and stop sitting regen
-				SetPetCommandState(PET_BUTTON_SIT, 0);
-				if (mypet->GetPetOrder() == SPO_Sit || mypet->GetPetOrder() == SPO_FeignDeath) {
-					mypet->SetPetOrder(mypet->GetPreviousPetOrder());
-					mypet->SetAppearance(eaStanding);
-				}
-
-				zone->AddAggroMob();
-				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
-				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
-
-				// Multipet stuff
-				if (RuleB(Custom, EnableMultipet)) {
-					for (auto& mob : GetSwarmPets()) {
-						mob->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
-						MessageString(Chat::PetResponse, PET_ATTACKING, mob->GetCleanName(), target->GetCleanName());
+			if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
+				if (target != this && DistanceSquaredNoZ(pet->GetPosition(), target->GetPosition()) <= (RuleR(Pets, AttackCommandRange)*RuleR(Pets, AttackCommandRange))) {
+					pet->SetFeigned(false);
+					if (pet->IsPetStop()) {
+						pet->SetPetStop(false);
+						SetPetCommandState(PET_BUTTON_STOP, 0);
 					}
+					if (pet->IsPetRegroup()) {
+						pet->SetPetRegroup(false);
+						SetPetCommandState(PET_BUTTON_REGROUP, 0);
+					}
+
+					// fix GUI sit button to be unpressed and stop sitting regen
+					SetPetCommandState(PET_BUTTON_SIT, 0);
+					if (pet->GetPetOrder() == SPO_Sit || pet->GetPetOrder() == SPO_FeignDeath) {
+						pet->SetPetOrder(pet->GetPreviousPetOrder());
+						pet->SetAppearance(eaStanding);
+					}
+
+					zone->AddAggroMob();
+					pet->AddToHateList(target, 1, 0, true, false, false, SPELL_UNKNOWN, true);
+					MessageString(Chat::PetResponse, PET_ATTACKING, pet->GetCleanName(), target->GetCleanName());
 				}
 			}
 		}
 		break;
 	}
 	case PET_BACKOFF: {
-		if (mypet->IsFeared()) break; //keeps pet running while feared
+		for (auto& pet : GetAllPets()) {
+			if (pet->IsFeared()) break; //keeps pet running while feared
 
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			mypet->SayString(this, Chat::PetResponse, PET_CALMING);
-			mypet->WipeHateList();
-			mypet->SetTarget(nullptr);
-			if (mypet->IsPetStop()) {
-				mypet->SetPetStop(false);
-				SetPetCommandState(PET_BUTTON_STOP, 0);
-			}
-
-			// Multipet stuff
-			if (RuleB(Custom, EnableMultipet)) {
-				for (auto& mob : GetSwarmPets()) {
-					mob->SayString(this, Chat::PetResponse, PET_CALMING);
-					mob->WipeHateList();
-					mob->SetTarget(nullptr);
+			if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
+				pet->SayString(this, Chat::PetResponse, PET_CALMING);
+				pet->WipeHateList();
+				pet->SetTarget(nullptr);
+				if (pet->IsPetStop()) {
+					pet->SetPetStop(false);
+					SetPetCommandState(PET_BUTTON_STOP, 0);
 				}
 			}
 		}
 		break;
 	}
 	case PET_HEALTHREPORT: {
-		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
-			MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(mypet->GetHPRatio(), val1));
-			mypet->ShowBuffs(this);
+		for (auto& pet : GetAllPets()) {
+			if ((pet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || pet->GetPetType() != petAnimation) {
+				MessageString(Chat::PetResponse, PET_REPORT_HP, ConvertArrayF(pet->GetHPRatio(), val1));
+				pet->ShowBuffs(this);
+			}
 		}
 		break;
 	}
 	case PET_GETLOST: {
-		if (mypet->Charmed())
-			break;
-		if (mypet->GetPetType() == petCharmed || !mypet->IsNPC()) {
-			// eqlive ignores this command
-			// we could just remove the charm
-			// and continue
-			mypet->BuffFadeByEffect(SE_Charm);
-			break;
-		}
-		else {
-			SetPet(nullptr);
-		}
+		for (auto& pet : GetAllPets()) {
+			if (pet->Charmed()){
+				break;
+			} else {
+				SetPet(nullptr);
+			}
 
-		mypet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
-		mypet->CastToNPC()->Depop();
-
-		//Oddly, the client (Titanium) will still allow "/pet get lost" command despite me adding the code below. If someone can figure that out, you can uncomment this code and use it.
-		/*
-		if((mypet->GetPetType() == petAnimation && GetAA(aaAnimationEmpathy) >= 2) || mypet->GetPetType() != petAnimation) {
-		mypet->SayString(PET_GETLOST_STRING);
-		mypet->CastToNPC()->Depop();
+			pet->SayString(this, Chat::PetResponse, PET_GETLOST_STRING);
+			pet->CastToNPC()->Depop();
 		}
-		*/
-
 		break;
 	}
 	case PET_GUARDHERE: {

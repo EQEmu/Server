@@ -12357,6 +12357,21 @@ std::vector<NPC*> Client::GetSwarmPets(bool permanent_only) {
 	return return_vec;
 }
 
+std::vector<NPC*> Client::GetAllPets() {
+    std::vector<NPC*> pet_list;
+
+    if (GetPet()) {
+        pet_list.insert(pet_list.begin(), GetPet()->CastToNPC());
+    }
+
+    if (RuleB(Custom, EnableMultipet)) {
+        std::vector<NPC*> swarm_pets = GetSwarmPets(true);
+        pet_list.insert(pet_list.end(), swarm_pets.begin(), swarm_pets.end());
+    }
+
+    return pet_list;
+}
+
 // It might make more sense to do invidual syncs at some point in the future, but this is fast enough
 void Client::DoPetBagResync() {
 	if (RuleB(Custom, EnablePetBags)) {

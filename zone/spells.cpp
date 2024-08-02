@@ -4015,6 +4015,8 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
+	spelltar = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, spelltar->GetID()));
+
 	if (spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn()) {
 		return false;
 	}
@@ -4829,19 +4831,18 @@ bool Mob::SpellOnTarget(
 
 	LogSpells("Cast of [{}] by [{}] on [{}] complete successfully", spell_id, GetName(), spelltar->GetName());
 
-	if ((IsBeneficialSpell(spell_id) && spelltar->GetOwner() && spelltar->GetOwner()->IsClient()) && reflect_effectiveness >= 0) {
-		bool skip = false;
-
-		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id) ) {
-			skip = true;
+	if (IsClient() && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) && reflect_effectiveness >=0) {
+		if (IsSummonPetSpell(spell_id) || IsGroupSpell(spell_id)) {
+			return true;
 		}
 
-		if (!skip) {
-			for (const auto& ent : entity_list.GetNPCList()) {
-				NPC* mob = ent.second;
-				if (mob->GetSwarmOwner() == GetID()) {
-					SpellOnTarget(spell_id, mob, -1, true, resist_adjust, true, level_override);
-				}
+		for (const auto& pet : CastToClient()->GetAllPets()) {
+			if (pet->GetID() != spelltar->GetID()) {
+				SetEntityVariable("SympProcTargetOverride", std::to_string(pet->GetID()));
+				LogDebug("Setting Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
+				SpellOnTarget(spell_id, pet, -1, true, resist_adjust, true, level_override);
+				TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
+				DeleteEntityVariable("SympProcTargetOverride");
 			}
 		}
 	}

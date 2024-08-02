@@ -1174,6 +1174,7 @@ public:
 	bool IsValidPetBag(int item_id);
 	void DoPetBagFlush();
 	std::vector<NPC*> GetSwarmPets(bool permanent_only = true);
+	std::vector<NPC*> GetAllPets();
 
 	bool IsAugmentRestricted(uint8 item_type, uint32 augment_restriction);
 
