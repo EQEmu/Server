@@ -1685,7 +1685,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 				case Class::WarriorGM:
 				case Class::ShadowKnightGM:
 				case Class::PaladinGM:
-					npc->texture = zone->random.Int(2,3);
+					npc->texture = std::max(npc->texture, static_cast<uint8>(zone->random.Int(2,3)));
 					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
 					break;
 				case Class::Cleric:
@@ -1698,7 +1698,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 				case Class::ShamanGM:
 				case Class::RangerGM:
 				case Class::BerserkerGM:
-					npc->texture = zone->random.Int(1,2);
+					npc->texture = std::max(npc->texture, static_cast<uint8>(zone->random.Int(1,2)));
 					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
 					break;
 				case Class::Beastlord:
@@ -1707,7 +1707,7 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 				case Class::DruidGM:
 				case Class::Monk:
 				case Class::MonkGM:
-					npc->texture = 1;
+					npc->texture = std::max(npc->texture, static_cast<uint8>(1));
 					npc->helmtexture = zone->random.Int(0,1) ? npc->texture : 0;
 					break;
 				case Class::Wizard:
@@ -1718,11 +1718,11 @@ NPCType* ZoneDatabase::MutateRace(NPCType* npc) {
 				case Class::NecromancerGM:
 				case Class::Enchanter:
 				case Class::EnchanterGM:
-					npc->texture = zone->random.Int(10,16);
+					npc->texture = std::max(npc->texture, static_cast<uint8>(zone->random.Int(10,16)));
 					npc->helmtexture = 0;
 					break;
 				default:
-					npc->texture = zone->random.Int(0,1);
+					npc->texture = std::max(npc->texture, static_cast<uint8>(zone->random.Int(0,2)));
 					npc->helmtexture = 0;
 					break;
 			}
