@@ -70,7 +70,6 @@ public:
 
 			// Check if the 98th column exists
 			if (columns.size() >= 98) {
-				// Modify the 98th column value if it is '14' or '38'
 				if (columns[98] == "14" || columns[98] == "38") {
 					columns[98] = "6";
 				}
