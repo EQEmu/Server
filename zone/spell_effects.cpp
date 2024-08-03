@@ -6646,39 +6646,41 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 {
 	// We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
-		Mob* proc_target = entity_list.GetMob(GetSpellImpliedTargetID(proc_spellid, GetTarget() != nullptr ? GetTarget()->GetID() : GetID()));
-		int64 damage_override = 0;
+		Mob* proc_target = GetTarget();
 
-		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
-		if (!IsTargetRequiredForSpell(proc_spellid)) {
-			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
-			return true;
+		Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(proc_spellid,(proc_target ?  proc_target->GetID() : GetID())));
+		if (new_target) {
+			proc_target = new_target;
+			LogSpells("Sympathetic Proc found new target with Implied Targeting: [{}]", new_target->GetCleanName());
 		}
 
-		if (!proc_target && IsBeneficialSpell(proc_spellid)) {
-			proc_target = this;
+		if (!GetEntityVariable(fmt::format("SpellTargetHint_%d", spell_id)).empty()) {
+			Mob * hint_target = entity_list.GetMob(Strings::ToUnsignedInt(GetEntityVariable(fmt::format("SpellTargetHint_%d", spell_id))));
+			if (hint_target) {
+				proc_target = hint_target;
+				LogSpells("Sympathetic Proc target found a target hint to [{}]", hint_target->GetCleanName());
+			}
 		}
 
-		if (proc_target || !GetEntityVariable("SympProcTargetOverride").empty()) {
-			LogDebug("Override: [{}]", GetEntityVariable("SympProcTargetOverride"));
-			if (!GetEntityVariable("SympProcTargetOverride").empty()) {
-				proc_target = entity_list.GetMob(Strings::ToUnsignedInt(GetEntityVariable("SympProcTargetOverride")));
-				if (proc_target) {
-					LogDebug("Got Target: [{}]", proc_target->GetCleanName());
-				}
+		if (!GetEntityVariable("SympProcTargetOverride").empty()) {
+			Mob * override_target = entity_list.GetMob(Strings::ToUnsignedInt(GetEntityVariable("SympProcTargetOverride")));
+			if (override_target) {
+				proc_target = override_target;
+				LogSpells("Sympathetic Proc target forcibly overridden to [{}]", override_target->GetCleanName());
 			}
+		}
 
-			if (!proc_target) {
-				return false;
-			}
-
+		if (proc_target) {
+			LogSpells("Sympathetic Proc final target: [{}]", proc_target->GetCleanName());
 			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
 			return true;
 		}
-
-		if (EntityVariableExists(std::to_string(spell_id) + "_damage_override"))
-		{
-			DeleteEntityVariable(std::to_string(spell_id) + "_damage_override");
+		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		else if (!IsTargetRequiredForSpell(proc_spellid)) {
+			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].resist_difficulty);
+			return true;
+		} else {
+			LogSpells("Sympathetic Proc could not find a target");
 		}
 	}
 	return false;

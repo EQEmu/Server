@@ -1839,18 +1839,30 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		DeleteChargeFromSlot = GetItemSlotToConsumeCharge(spell_id, inventory_slot);
 	}
 
+	// Clean up target hints just in case.
+	DeleteEntityVariable(fmt::format("SpellTargetHint_%d", spell_id));
+
 	// we're done casting, now try to apply the spell
 	bool spell_success = SpellFinished(spell_id, spell_target, slot, mana_used, inventory_slot, resist_adjust, false,-1, 0xFFFFFFFF, 0, true);
-	if (target && slot < CastingSlot::MaxGems && slot >= CastingSlot::Gem1 && !target->IsMezzed()) {
-		if(IsOfClientBotMerc()) {
-			TrySympatheticProc(target, spell_id);
+	if (slot <= CastingSlot::MaxGems && slot >= CastingSlot::Gem1) {
+		if (target && !target->IsMezzed()) {
+			if(IsOfClientBotMerc()) {
+				TrySympatheticProc(target, spell_id);
+
+			}
+			if (spell_success) {
+				TryTwincast(this, target, spell_id);
+			}
 		}
 
 		TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
-		if (spell_success) {
-			TryTwincast(this, target, spell_id);
-		}
+
+	} else {
+		LogDebug("Spell was not eligible for Sympathetic Procs");
 	}
+
+	// Clean up target hints after riders are done
+	DeleteEntityVariable(fmt::format("SpellTargetHint_%d", spell_id));
 
 	if(!spell_success)
 	{
@@ -3997,7 +4009,6 @@ bool Mob::SpellOnTarget(
 ) {
 	auto spellOwner = GetOwnerOrSelf();
 
-
 	if (spellOwner->IsClient() || (spellOwner->IsPet() && spellOwner->GetOwner() && spellOwner->GetOwner()->IsClient())) {
 		if (spelltar->IsClient() || (spelltar->IsPet() && spelltar->GetOwner() && spelltar->GetOwner()->IsClient())) {
 			bool tar_season = spelltar->HasOwner() ? spelltar->GetOwner()->CastToClient()->IsSeasonal() : spelltar->CastToClient()->IsSeasonal();
@@ -4017,8 +4028,6 @@ bool Mob::SpellOnTarget(
 		return false;
 	}
 
-	//spelltar = entity_list.GetMob(GetSpellImpliedTargetID(spell_id, spelltar->GetID()));
-
 	if (spelltar->IsClient() && spelltar->CastToClient()->IsHoveringForRespawn()) {
 		return false;
 	}
@@ -4037,6 +4046,10 @@ bool Mob::SpellOnTarget(
 			MessageString(Chat::SpellFailure, SPELL_NO_HOLD);
 			return false;
 		}
+	}
+
+	if (GetEntityVariable(fmt::format("SpellTargetHint_%d", spell_id)).empty()) {
+		SetEntityVariable(fmt::format("SpellTargetHint_%d", spell_id), fmt::to_string(spelltar->GetID()));
 	}
 
 	EQApplicationPacket *action_packet = nullptr, *message_packet = nullptr;
