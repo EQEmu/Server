@@ -393,6 +393,12 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		if (npc_dup != nullptr)
 			swarm_pet_npc->GiveNPCTypeData(npc_dup);
 
+		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
+			swarm_pet_npc->GetSwarmInfo()->permanent = true;
+		} else {
+			swarm_pet_npc->GetSwarmInfo()->permanent = false;
+		}
+
 		entity_list.AddNPC(swarm_pet_npc, true, true);
 
 		//give the pets somebody to "love"
@@ -409,7 +415,6 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 
 		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
-			swarm_pet_npc->GetSwarmInfo()->permanent = true;
 			swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
 			swarm_pet_npc->SetPetPower(act_power);
 			swarm_pet_npc->SetPetSpellID(spell_id);
@@ -417,8 +422,6 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			if (!GetEntityVariable("OverridePetSize").empty()) {
 				swarm_pet_npc->size = Strings::ToFloat(GetEntityVariable("OverridePetSize"), swarm_pet_npc->size);
 			}
-		} else {
-			swarm_pet_npc->GetSwarmInfo()->permanent = false;
 		}
 
 		summon_count--;

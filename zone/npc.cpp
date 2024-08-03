@@ -600,10 +600,7 @@ bool NPC::Process()
 	if (GetSwarmInfo()) {
 		if (swarm_timer.Check()) {
 			if (!GetSwarmInfo()->permanent) {
-				LogDebug("Depopping Swarm Pet!");
 				DepopSwarmPets();
-			} else {
-				LogDebug("Skipping Depop of Permanent Pet");
 			}
 		}
 
@@ -613,22 +610,13 @@ bool NPC::Process()
 			if (owner->GetPet()) { held  = owner->GetPet()->IsHeld() || owner->GetPet()->IsGHeld(); }
 			// Normal Swarm Pets
 			if (!GetSwarmInfo()->permanent && RuleB(Spells, SwarmPetFullAggro) && !GetTarget()) {
-				std::vector<NPC*> eligible_npcs;
 				for (const auto& npc_entity : entity_list.GetNPCList()) {
-					NPC* npc = npc_entity.second;
+					auto entity_id = npc_entity.first;
+					auto npc = npc_entity.second;
 
 					if (npc->IsOnHatelist(owner) && !IsOnHatelist(npc)) {
-						eligible_npcs.push_back(npc);
-					}
-
-					if (!eligible_npcs.empty() && !held) {
-						int random_index = zone->random.Int(0, eligible_npcs.size() - 1);
-						NPC* random_npc = eligible_npcs[random_index];
-
-						if (DistanceSquared(GetPosition(), random_npc->GetPosition()) >= RuleR(Aggro, PetAttackRange)) {
-							AddToHateList(random_npc, 100, 100);
-							SetTarget(random_npc);
-						}
+						AddToHateList(npc, 100, 100);
+						LogDebug("Adding [{}] to swarm pet hate list", npc->GetName());
 					}
 				}
 			} else if (GetSwarmInfo()->permanent && !GetTarget()) {

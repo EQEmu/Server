@@ -2267,7 +2267,6 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	if (weapon_instance) {
-		LogDebug("Found a weapon instance: [{}]", weapon_instance->GetID());
 		weapon = weapon_instance->GetItem();
 	}
 

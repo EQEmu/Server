@@ -129,12 +129,12 @@ void Mob::SpellProcess()
 		spellend_timer.Disable();
 		delaytimer = false;
 
-		if (IsClient() && !bardsong) {
-			CastToClient()->SendSpellBarEnable(casting_spell_id);
-		}
-
 		CastedSpellFinished(casting_spell_id, casting_spell_targetid, casting_spell_slot,
 			casting_spell_mana, casting_spell_inventory_slot, casting_spell_resist_adjust);
+
+		if (IsClient() && !IsBardSong(casting_spell_id)) {
+			CastToClient()->SendSpellBarEnable(casting_spell_id);
+		}
 	}
 
 }
@@ -1953,7 +1953,6 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		if(IsClient())
 		{
 			Client *c = CastToClient();
-			c->SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
 			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
