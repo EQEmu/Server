@@ -1548,8 +1548,7 @@ public:
 	Timer *duration;
 	uint32 target; //the target ID
 	uint32 owner_id;
-	bool   permanent;
-	uint32 spell_id;
+	bool   permanent = false;
 };
 
 enum AATimers

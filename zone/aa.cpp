@@ -92,7 +92,9 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		}
 	}
 
-	bool permanent = (pet.duration == 1 && pet.count == 1);
+	if (!GetEntityVariable("MultiPetSpell").empty()) {
+		pet.count = 1;
+	}
 
 	pet.duration += GetFocusEffect(focusSwarmPetDuration, spell_id) / 1000;
 
@@ -387,7 +389,11 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 		//removing this prevents the pet from attacking
 		swarm_pet_npc->GetSwarmInfo()->owner_id = GetID();
 
-		swarm_pet_npc->GetSwarmInfo()->spell_id = spell_id;
+		//we allocated a new NPC type object, give the NPC ownership of that memory
+		if (npc_dup != nullptr)
+			swarm_pet_npc->GiveNPCTypeData(npc_dup);
+
+		entity_list.AddNPC(swarm_pet_npc, true, true);
 
 		//give the pets somebody to "love"
 		if (targ != nullptr) {
@@ -395,37 +401,26 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 			if (RuleB(Spells, SwarmPetTargetLock) || sticktarg) {
 				swarm_pet_npc->GetSwarmInfo()->target = targ->GetID();
 				swarm_pet_npc->SetPetTargetLockID(targ->GetID());
-				swarm_pet_npc->SetSpecialAbility(SpecialAbility::ClientAggroImmunity, 1);
+				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 1);
 			}
 			else {
 				swarm_pet_npc->GetSwarmInfo()->target = 0;
 			}
-
-			if (RuleB(Custom, EnableMultipet) && permanent) {
-				LogDebug("Multipet Detected. Making Permanent.");
-				swarm_pet_npc->GetSwarmInfo()->permanent = true;
-				swarm_pet_npc->SetTaunting(true);
-				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
-				swarm_pet_npc->SetSpecialAbility(SpecialAbility::AggroImmunity, 0);
-			} else {
-				swarm_pet_npc->GetSwarmInfo()->permanent = false;
-			}
 		}
 
-		//we allocated a new NPC type object, give the NPC ownership of that memory
-		if (npc_dup != nullptr)
-			swarm_pet_npc->GiveNPCTypeData(npc_dup);
-
-		entity_list.AddNPC(swarm_pet_npc, true, true);
-
-		if (RuleB(Custom, EnableMultipet) && permanent) {
+		if (RuleB(Custom, EnableMultipet) && !GetEntityVariable("MultiPetSpell").empty()) {
+			swarm_pet_npc->GetSwarmInfo()->permanent = true;
+			swarm_pet_npc->SetSpecialAbility(SpecialAbility::AllowedToTank, 1);
 			swarm_pet_npc->SetPetPower(act_power);
 			swarm_pet_npc->SetPetSpellID(spell_id);
 
 			if (!GetEntityVariable("OverridePetSize").empty()) {
 				swarm_pet_npc->size = Strings::ToFloat(GetEntityVariable("OverridePetSize"), swarm_pet_npc->size);
 			}
+		} else {
+			swarm_pet_npc->GetSwarmInfo()->permanent = false;
 		}
+
 		summon_count--;
 	}
 
@@ -440,7 +435,7 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	// The other pointers we make are handled elsewhere.
 	delete made_npc;
 
-	if (permanent) {
+	if (!GetEntityVariable("MultiPetSpell").empty()) {
 		return swarm_pet_npc;
 	} else {
 		return nullptr;

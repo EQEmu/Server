@@ -1717,11 +1717,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 				if (m_petinfoextra[i].SpellID > 1 && m_petinfoextra[i].SpellID <= SPDAT_RECORDS) {
 					SetEntityVariable("OverridePetPower", std::to_string(m_petinfoextra[i].petpower));
 					SetEntityVariable("OverridePetSize", std::to_string(m_petinfoextra[i].size));
+					SetEntityVariable("MultiPetSpell", "true");
 
 					auto new_pet = TemporaryPets(m_petinfoextra[i].SpellID, nullptr, m_petinfoextra[i].Name);
 
 					DeleteEntityVariable("OverridePetPower");
 					DeleteEntityVariable("OverridePetSize");
+					DeleteEntityVariable("MultiPetSpell");
 
 					if (new_pet) {
 						LogDebug("PASS Perm Pet Creation");

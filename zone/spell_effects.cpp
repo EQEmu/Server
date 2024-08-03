@@ -1369,7 +1369,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					} else {
 						char pet_name[64];
 						GetRandPetName(pet_name);
+
+						SetEntityVariable("MultiPetSpell", "true");
 						TemporaryPets(spell_id, nullptr, pet_name);
+						DeleteEntityVariable("MultiPetSpell");
 					}
 				}
 				else

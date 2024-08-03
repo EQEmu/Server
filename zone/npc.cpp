@@ -602,6 +602,8 @@ bool NPC::Process()
 			if (!GetSwarmInfo()->permanent) {
 				LogDebug("Depopping Swarm Pet!");
 				DepopSwarmPets();
+			} else {
+				LogDebug("Skipping Depop of Permanent Pet");
 			}
 		}
 
