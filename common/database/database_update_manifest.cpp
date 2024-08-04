@@ -5718,6 +5718,22 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 )"
+	},
+	ManifestEntry{
+		.version = 9282,
+		.description = "2024_08_02_spell_buckets_comparison.sql",
+		.check = "SHOW COLUMNS FROM `spell_buckets` LIKE 'bucket_comparison'",
+		.condition = "empty",
+		.match = "",
+		.sql = R"(
+ALTER TABLE `spell_buckets`
+CHANGE COLUMN `spellid` `spell_id` int UNSIGNED NOT NULL FIRST,
+CHANGE COLUMN `key` `bucket_name` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `spell_id`,
+CHANGE COLUMN `value` `bucket_value` varchar(100) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT '' AFTER `bucket_name`,
+ADD COLUMN `bucket_comparison` tinyint UNSIGNED NOT NULL DEFAULT 0 AFTER `bucket_value`,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`spell_id`) USING BTREE;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
