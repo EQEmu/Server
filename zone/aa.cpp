@@ -285,7 +285,7 @@ Mob* Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 				tmp_lastname = fmt::format("{}'s Earth Elemental", GetCleanName());
 				break;
 			case 1936:
-				tmp_lastname = fmt::format("{}'s Elemental", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Elemental Avatar", GetCleanName());
 				break;
 			case 1400:
 			case 1402:

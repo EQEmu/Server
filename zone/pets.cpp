@@ -364,7 +364,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 				tmp_lastname = fmt::format("{}'s Earth Elemental", GetCleanName());
 				break;
 			case 1936:
-				tmp_lastname = fmt::format("{}'s Elemental Manifestation", GetCleanName());
+				tmp_lastname = fmt::format("{}'s Elemental Avatar", GetCleanName());
 				break;
 			case 1400:
 			case 1402:
