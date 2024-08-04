@@ -1461,7 +1461,6 @@ void Mob::AI_Process() {
 
 						if (xy_distance >= 0.1 || z_distance > 100) {
 							bool running = false;
-
 							/**
 							 * Distance: >= 35 (Run if far away)
 							 */
@@ -1472,6 +1471,7 @@ void Mob::AI_Process() {
 							/**
 							 * Distance: >= 450 (Snap to owner)
 							 */
+
 							if (xy_distance >= 202500 || z_distance > 100) {
 								Teleport(target_position);
 							} else {
@@ -1481,6 +1481,7 @@ void Mob::AI_Process() {
 									WalkToPrecise(target_position.x, target_position.y, target_position.z);
 								}
 							}
+
 						} else {
 							StopNavigation();
 						}

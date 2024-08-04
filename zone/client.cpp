@@ -8862,9 +8862,9 @@ void Client::CheckRegionTypeChanges()
 		return;
 
 	if (last_region_type == RegionTypePVP)
-		temp_pvp = true;
+		//temp_pvp = true;
 	else if (temp_pvp)
-		temp_pvp = false;
+		//temp_pvp = false;
 }
 
 void Client::ProcessAggroMeter()
