@@ -8860,11 +8860,6 @@ void Client::CheckRegionTypeChanges()
 	// PVP is the only state we need to keep track of, so we can just return now for PVP servers
 	if (RuleI(World, PVPSettings) > 0)
 		return;
-
-	if (last_region_type == RegionTypePVP)
-		//temp_pvp = true;
-	else if (temp_pvp)
-		//temp_pvp = false;
 }
 
 void Client::ProcessAggroMeter()
@@ -12368,30 +12363,53 @@ bool Client::IsValidPetBag(int item_id) {
 }
 
 std::vector<NPC*> Client::GetSwarmPets(bool permanent_only) {
-	std::vector<NPC*> return_vec;
-	for (const auto& ent : entity_list.GetNPCList()) {
-		NPC* mob = ent.second;
-		if (mob->GetSwarmOwner() == GetID()) {
-			if (permanent_only && !mob->GetSwarmInfo()->permanent) {
-				continue;
-			}
-			return_vec.push_back(mob);
-		}
-	}
+    std::vector<NPC*> return_vec;
 
-	return return_vec;
+    // Iterate through the NPC list
+    for (const auto& ent : entity_list.GetNPCList()) {
+        NPC* mob = ent.second;
+
+        // Check if the NPC is a swarm pet owned by this client
+        if (mob->GetSwarmOwner() == GetID()) {
+            // If only permanent swarm pets are requested, skip non-permanent ones
+            if (permanent_only && !mob->GetSwarmInfo()->permanent) {
+                continue;
+            }
+            // Add the swarm pet to the return vector
+            return_vec.push_back(mob);
+        }
+    }
+
+    return return_vec;
 }
+
 
 std::vector<NPC*> Client::GetAllPets() {
     std::vector<NPC*> pet_list;
 
+    // Check if the client has a main pet and add it to the list
     if (GetPet()) {
-        pet_list.insert(pet_list.begin(), GetPet()->CastToNPC());
+        pet_list.push_back(GetPet()->CastToNPC());
     }
 
+    // If multipet rule is enabled, get swarm pets and add them to the list
     if (RuleB(Custom, EnableMultipet)) {
         std::vector<NPC*> swarm_pets = GetSwarmPets(true);
+
+        // Debugging: Check the contents of the swarm_pets vector
+        LogDebugDetail("Swarm Pets Count: {}", swarm_pets.size());
+        for (const auto& pet : swarm_pets) {
+            LogDebugDetail("Swarm Pet ID: {}", pet->GetID());
+        }
+
+        // Add swarm pets to the pet_list
         pet_list.insert(pet_list.end(), swarm_pets.begin(), swarm_pets.end());
+    }
+
+    // Debugging: Check the contents of the pet_list vector
+    LogDebugDetail("Total Pets Count: {}", pet_list.size());
+    for (const auto& pet : pet_list) {
+        LogDebugDetail("Pet ID: {}", pet->GetID());
     }
 
     return pet_list;

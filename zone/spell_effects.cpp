@@ -1337,68 +1337,109 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					mypet->CastToNPC()->Depop();
 				}
 
-				if (!RuleB(Custom, EnableMultipet) && GetPet()) {
-					MessageString(Chat::SpellFailure, ONLY_ONE_PET);
-					break;
-				}
-
-				int class_id = GetPetOriginClass(spell_id);
-				if ((GetPet() || (GetPetOriginClass(spell_id) == Class::Enchanter) && IsClient() && RuleB(Custom, EnableMultipet)))
-				{
-					bool class_match = false;
-					if (class_id > Class::None) {
-						if (GetPet() && GetPet()->IsNPC()) {
-							if (class_id ==  GetPetOriginClass(GetPet()->CastToNPC()->GetPetSpellID())) {
-								class_match = true;
-							}
-
-							if (!class_match) {
-								for (const auto pet : CastToClient()->GetSwarmPets(true)) {
-									if (class_id == GetPetOriginClass(pet->GetPetSpellID())) {
-										class_match = true;
-										break;
-									}
-								}
+				if (!RuleB(Custom, EnableMultipet) || !IsClient()) {
+					if (GetPet()) {
+						MessageString(Chat::SpellFailure, ONLY_ONE_PET);
+						break;
+					} else {
+						MakePet(spell_id, spell.teleport_zone);
+						// TODO: we need to sync the states for these clients ...
+						// Will fix buttons for now
+						Mob *pet=GetPet();
+						if (IsClient() && pet) {
+							auto c = CastToClient();
+							if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
+								c->SetPetCommandState(PET_BUTTON_SIT, 0);
+								c->SetPetCommandState(PET_BUTTON_STOP, 0);
+								c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
+								c->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+								c->SetPetCommandState(PET_BUTTON_GUARD, 0);
+								// Creating pet from spell - taunt always false
+								// If suspended pet - that will be restore there
+								// If logging in, client will send toggle
+								c->SetPetCommandState(PET_BUTTON_HOLD, 0);
+								c->SetPetCommandState(PET_BUTTON_GHOLD, 0);
+								c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
+								c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
 							}
 						}
 					}
-					if (class_match) {
-						Message(Chat::SpellFailure, "You may only have one pet from a particular class at any one time.");
-					} else if (CastToClient()->GetSwarmPets(true).size() >= 2) { // ADJUST MULTIPET MAX COUNT LOGIC HERE
-						Message(Chat::SpellFailure, "You cannot control any additional Secondary Pets.");
-					} else {
-						char pet_name[64];
-						GetRandPetName(pet_name);
+				} else {
+					// First we need to inventory all of the permanent pets that we have spawned
+					// and check if we have a class match already.
+					bool class_match 	= false;
+					int  pet_class 		= GetPetOriginClass(spell_id);
 
+					LogDebug("Pet List Size: [{}]", CastToClient()->GetAllPets().size());
+					for (const auto pet : CastToClient()->GetAllPets()) {
+						LogDebug("Check Class: [{}], pet_class: [{}], spell_id [{}], size [{}]", GetPetOriginClass(pet->GetPetSpellID()), pet_class, spell_id,  CastToClient()->GetAllPets().size());
+						if (pet_class > Class::None) {
+							LogDebug("Pet: [{}]", spells[pet->GetPetSpellID()].name);
+							class_match = (GetPetOriginClass(pet->GetPetSpellID()) == pet_class);
+						}
+					}
+
+					// Special Handling for SHD\NEC multiclass here
+					if (class_match && (GetClassesBits() & GetPlayerClassBit(Class::ShadowKnight)) && (GetClassesBits() & GetPlayerClassBit(Class::Necromancer))) {
+						if (GetSpellLevel(spell_id, Class::ShadowKnight) <= GetLevel() || GetSpellLevel(spell_id, Class::Necromancer) <= GetLevel()) {
+							int shd_count = 0;
+							int nec_count = 0;
+
+							// Count the spell being cast
+							GetSpellLevel(spell_id, Class::ShadowKnight) > GetLevel() ? nec_count++ : shd_count++;
+
+							// Count existing pets
+							for (const auto& pet : CastToClient()->GetAllPets()) {
+								if (GetSpellLevel(pet->GetPetSpellID(), Class::ShadowKnight) <= GetLevel() || GetSpellLevel(pet->GetPetSpellID(), Class::Necromancer) <= GetLevel()) {
+									GetSpellLevel(pet->GetPetSpellID(), Class::ShadowKnight) > GetLevel() ? nec_count++ : shd_count++;
+								}
+							}
+
+							// Determine if class_match should be true based on pet counts
+							class_match = ((shd_count + nec_count) > 2) || nec_count > 1;
+							LogDebug("class_match [{}], shd_count [{}] nec_count [{}]", class_match, shd_count, nec_count);
+						}
+					}
+
+					if (class_match) {
+						Message(Chat::SpellFailure, "You may only have one permanent pet from a particular class at any one time.");
+					} else
+					if (CastToClient()->GetSwarmPets(true).size() >= 2) { // ADJUST MULTIPET MAX COUNT LOGIC HERE
+						Message(Chat::SpellFailure, "You cannot control any additional permanent pets.");
+					} else
+					if (!GetPet()) {
+						MakePet(spell_id, spell.teleport_zone);
+						// TODO: we need to sync the states for these clients ...
+						// Will fix buttons for now
+						Mob *pet=GetPet();
+						if (IsClient() && pet) {
+							auto c = CastToClient();
+							if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
+								c->SetPetCommandState(PET_BUTTON_SIT, 0);
+								c->SetPetCommandState(PET_BUTTON_STOP, 0);
+								c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
+								c->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
+								c->SetPetCommandState(PET_BUTTON_GUARD, 0);
+								// Creating pet from spell - taunt always false
+								// If suspended pet - that will be restore there
+								// If logging in, client will send toggle
+								c->SetPetCommandState(PET_BUTTON_HOLD, 0);
+								c->SetPetCommandState(PET_BUTTON_GHOLD, 0);
+								c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
+								c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
+							}
+						}
+					} else {
+						// Permanent Swarm Pet hack
+						char pet_name[64];
+
+						GetRandPetName(pet_name);
 						SetEntityVariable("MultiPetSpell", "true");
 						TemporaryPets(spell_id, nullptr, pet_name);
 						DeleteEntityVariable("MultiPetSpell");
 					}
 				}
-				else
-				{
-					MakePet(spell_id, spell.teleport_zone);
-					// TODO: we need to sync the states for these clients ...
-					// Will fix buttons for now
-					Mob *pet=GetPet();
-					if (IsClient() && pet) {
-						auto c = CastToClient();
-						if (c->ClientVersionBit() & EQ::versions::maskUFAndLater) {
-							c->SetPetCommandState(PET_BUTTON_SIT, 0);
-							c->SetPetCommandState(PET_BUTTON_STOP, 0);
-							c->SetPetCommandState(PET_BUTTON_REGROUP, 0);
-							c->SetPetCommandState(PET_BUTTON_FOLLOW, 1);
-							c->SetPetCommandState(PET_BUTTON_GUARD, 0);
-							// Creating pet from spell - taunt always false
-							// If suspended pet - that will be restore there
-							// If logging in, client will send toggle
-							c->SetPetCommandState(PET_BUTTON_HOLD, 0);
-							c->SetPetCommandState(PET_BUTTON_GHOLD, 0);
-							c->SetPetCommandState(PET_BUTTON_FOCUS, 0);
-							c->SetPetCommandState(PET_BUTTON_SPELLHOLD, 0);
-						}
-					}
-				}
+
 				break;
 			}
 
