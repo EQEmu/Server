@@ -3411,7 +3411,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 							if (PutItemInInventory(item_slot, *item_one_to_push, true)) { // Successfully added an augment to the item
 								CalcBonuses();
 								if (material != EQ::textures::materialInvalid) { // Visible item augged while equipped. Send WC in case ornamentation changed.
-									SendWearChange(material);
+									SendWearChange(material, this);
 								}
 							} else {
 								Message(Chat::Red, "Error: No available slot for end result. Please free up the augment slot.");
@@ -3601,6 +3601,7 @@ void Client::Handle_OP_AugmentItem(const EQApplicationPacket *app)
 				);
 				break;
 		}
+
 	} else {
 		Object::HandleAugmentation(this, in_augment, m_tradeskill_object); // Delegate to tradeskill object to perform combine
 	}

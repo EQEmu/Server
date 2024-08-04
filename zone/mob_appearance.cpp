@@ -197,41 +197,33 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		const auto is_equipped_weapon = EQ::ValueWithin(material_slot, EQ::textures::weaponPrimary, EQ::textures::weaponSecondary);
 
 		if (is_equipped_weapon) {
-			if (IsClient() || IsPetOwnerClient()) {
-				const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
-				if (inventory_slot == INVALID_INDEX) {
-					return 0;
-				}
+			const auto inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
+			if (inventory_slot == INVALID_INDEX) {
+				return 0;
+			}
+			const auto inst = IsClient() ? CastToClient()->m_inv[inventory_slot] : m_inv[inventory_slot];
 
-				const auto inst = m_inv[inventory_slot];
-
-				if (inst) {
-					const auto augment = inst->GetOrnamentationAugment();
-					LogDebug("Found an item in inventory slot [{}]", inventory_slot);
-					if (augment) {
-						item = augment->GetItem();
-						LogDebug("Found an augment [{}]", augment->GetID());
-						if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
-							equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
-						}
-						LogDebug("1 equipment_material: [{}]", equipment_material);
-					} else if (inst->GetOrnamentationIDFile()) {
-						equipment_material = inst->GetOrnamentationIDFile();
-						LogDebug("2 equipment_material: [{}]", equipment_material);
+			if (inst) {
+				const auto augment = inst->GetOrnamentationAugment();
+				if (augment) {
+					item = augment->GetItem();
+					if (item && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
+						equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 					}
+				} else if (inst->GetOrnamentationIDFile()) {
+					equipment_material = inst->GetOrnamentationIDFile();
 				}
 			}
+
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
-				LogDebug("3 equipment_material: [{}]", equipment_material);
 			}
+
 		} else {
 			equipment_material = item->Material;
-			LogDebug("4 equipment_material: [{}]", equipment_material);
 		}
 	}
 
-	LogDebug("final equipment_material: [{}]", equipment_material);
 	return equipment_material;
 }
 
