@@ -205,9 +205,7 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 
 				const auto inst = CastToClient()->m_inv[inventory_slot];
 
-				LogDebug("Check 1");
 				if (inst) {
-					LogDebug("Check 2");
 					const auto augment = inst->GetOrnamentationAugment();
 
 					if (augment) {
@@ -220,11 +218,9 @@ uint32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 					}
 				}
 			}
-			LogDebug("Check 3, equipment_material [{}]", equipment_material);
 			if (!equipment_material && strlen(item->IDFile) > 2 && Strings::IsNumber(&item->IDFile[2])) {
 				equipment_material = Strings::ToUnsignedInt(&item->IDFile[2]);
 			}
-			LogDebug("Check 4 equipment_material [{}]", equipment_material);
 		} else {
 			equipment_material = item->Material;
 		}

@@ -525,15 +525,13 @@ void EQStream::FastQueuePacket(EQApplicationPacket **p, bool ack_req)
 		return;
 	}
 
-	LogDebug("Check 1... [{}]", pack->GetOpcode());
-
 	uint16 opcode = 0;
 	if(pack->GetOpcodeBypass() != 0) {
 		opcode = pack->GetOpcodeBypass();
 	} else {
 		opcode = (*OpMgr)->EmuToEQ(pack->GetOpcode());
 	}
-	
+
 
 	if (!ack_req) {
 		NonSequencedPush(new EQProtocolPacket(opcode, pack->pBuffer, pack->size));

@@ -63,16 +63,13 @@ public:
 			std::string item;
 			std::vector<std::string> columns;
 
-			// Split the line into columns
 			while (std::getline(ss, item, '^')) {
 				columns.push_back(item);
 			}
 
-			// Check if the 98th column exists
-			if (columns.size() >= 98) {
-				if (columns[98] == "14" || columns[98] == "38") {
-					columns[98] = "6";
-				}
+
+			if (columns[98] == "14" || columns[98] == "38") {
+				columns[98] = "6";
 			}
 
 			// Reconstruct the line
