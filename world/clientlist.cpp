@@ -87,7 +87,6 @@ void ClientList::CLERemoveZSRef(ZoneServer* iZS) {
 
 //Check current CLE Entry IPs against incoming connection
 void ClientList::GetCLEIP(uint32 in_ip) {
-	LogInfo("Entered GetCLEIP");
 	ClientListEntry* cle = nullptr;
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
 
@@ -96,6 +95,11 @@ void ClientList::GetCLEIP(uint32 in_ip) {
     iterator.Reset();
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
+
+		if (cle->zone() == Zones::BAZAAR) {
+			iterator.Advance();
+			continue;
+		}
 
 		if (
 			cle->GetIP() == in_ip &&

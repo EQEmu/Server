@@ -765,6 +765,13 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		return true;
 	}
 
+	if (
+		RuleB(World, EnableIPExemptions) ||
+		RuleI(World, MaxClientsPerIP) > 0
+	) {
+		client_list.GetCLEIP(GetIP()); //Check current CLE Entry IPs against incoming connection
+	}
+
 	auto ew = (EnterWorld_Struct *) app->pBuffer;
 	strn0cpy(char_name, ew->name, sizeof(char_name));
 
