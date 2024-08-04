@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_CHAR_RECIPE_LIST_REPOSITORY_H
 #define EQEMU_CHAR_RECIPE_LIST_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_char_recipe_list_repository.h"
 
 class CharRecipeListRepository: public BaseCharRecipeListRepository {
@@ -64,6 +44,38 @@ public:
      */
 
 	// Custom extended repository methods here
+
+	static CharRecipeList GetCharRecipeListEntry(
+		const std::vector<CharRecipeList> &recipe_list,
+		uint32 recipe_id
+	)
+	{
+		for (auto &e : recipe_list) {
+			if (e.recipe_id == recipe_id) {
+				return e;
+			}
+		}
+
+		return NewEntity();
+	}
+
+	// insert with ON DUPLICATE KEY UPDATE to leave rows that exist unchanged
+	static int InsertUpdateMany(Database& db, const std::vector<CharRecipeList>& entries)
+	{
+		std::vector<std::string> values;
+		values.reserve(entries.size());
+
+		for (const auto& e: entries)
+		{
+			values.emplace_back(fmt::format("({},{},{})", e.char_id, e.recipe_id, e.madecount));
+		}
+
+		auto results = db.QueryDatabase(fmt::format(
+			"INSERT INTO {0} (char_id, recipe_id, madecount) VALUES {1} ON DUPLICATE KEY UPDATE {2}={2}",
+			TableName(), fmt::join(values, ","), PrimaryKey()));
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
 
 };
 

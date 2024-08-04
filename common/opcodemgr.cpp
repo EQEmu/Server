@@ -184,6 +184,9 @@ uint16 RegularOpcodeManager::EmuToEQ(const EmuOpcode emu_op) {
 	MOpcodes.lock();
 	res = emu_to_eq[emu_op];
 	MOpcodes.unlock();
+
+	LogNetcodeDetail("[Opcode Manager] Translate emu [{}] ({:#06x}) eq [{:#06x}]", OpcodeNames[emu_op], emu_op, res);
+
 #ifdef DEBUG_TRANSLATE
 	fprintf(stderr, "M Translate Emu %s (%d) to EQ 0x%.4x\n", OpcodeNames[emu_op], emu_op, res);
 #endif

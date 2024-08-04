@@ -30,7 +30,7 @@ struct EQStreamManagerInterfaceOptions
 
 		//World seems to support both compression and xor zone supports one or the others.
 		//Enforce one or the other in the convienence construct
-		//Login I had trouble getting to recognize compression at all 
+		//Login I had trouble getting to recognize compression at all
 		//but that might be because it was still a bit buggy when i was testing that.
 		if (compressed) {
 			daybreak_options.encode_passes[0] = EQ::Net::EncodeCompression;
@@ -100,6 +100,7 @@ public:
 	virtual MatchState CheckSignature(const Signature *sig) { return MatchFailed; }
 	virtual EQStreamState GetState() = 0;
 	virtual void SetOpcodeManager(OpcodeManager **opm) = 0;
+	virtual OpcodeManager* GetOpcodeManager() const = 0;
 	virtual const EQ::versions::ClientVersion ClientVersion() const { return EQ::versions::ClientVersion::Unknown; }
 	virtual Stats GetStats() const = 0;
 	virtual void ResetStats() = 0;

@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_EXPEDITIONS_REPOSITORY_H
 #define EQEMU_EXPEDITIONS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_expeditions_repository.h"
 
 class ExpeditionsRepository: public BaseExpeditionsRepository {
@@ -65,6 +45,90 @@ public:
 
 	// Custom extended repository methods here
 
+	struct CharacterExpedition
+	{
+		uint32_t    id;
+		std::string name;
+		uint32_t    expedition_id;
+	};
+
+	static std::vector<CharacterExpedition> GetCharactersWithExpedition(
+		Database& db, const std::vector<std::string>& character_names)
+	{
+		if (character_names.empty())
+		{
+			return {};
+		}
+
+		std::vector<CharacterExpedition> entries;
+
+		auto joined_character_names = fmt::format("'{}'", Strings::Join(character_names, "','"));
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				character_data.id,
+				character_data.name,
+				MAX(expeditions.id)
+			FROM character_data
+				LEFT JOIN dynamic_zone_members
+					ON character_data.id = dynamic_zone_members.character_id
+				LEFT JOIN expeditions
+					ON dynamic_zone_members.dynamic_zone_id = expeditions.dynamic_zone_id
+			WHERE character_data.name IN ({})
+			GROUP BY character_data.id
+			ORDER BY FIELD(character_data.name, {})
+		),
+			joined_character_names,
+			joined_character_names
+		));
+
+		if (results.Success())
+		{
+			entries.reserve(results.RowCount());
+
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				CharacterExpedition entry{};
+				entry.id            = std::strtoul(row[0], nullptr, 10);
+				entry.name          = row[1];
+				entry.expedition_id = row[2] ? std::strtoul(row[2], nullptr, 10) : 0;
+
+				entries.emplace_back(std::move(entry));
+			}
+		}
+
+		return entries;
+	}
+
+	static uint32_t GetIDByMemberID(Database& db, uint32_t character_id)
+	{
+		if (character_id == 0)
+		{
+			return 0;
+		}
+
+		uint32_t expedition_id = 0;
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				expeditions.id
+			FROM expeditions
+				INNER JOIN dynamic_zone_members
+					ON expeditions.dynamic_zone_id = dynamic_zone_members.dynamic_zone_id
+			WHERE
+				dynamic_zone_members.character_id = {}
+		),
+			character_id
+		));
+
+		if (results.Success() && results.RowCount() > 0)
+		{
+			auto row = results.begin();
+			expedition_id = std::strtoul(row[0], nullptr, 10);
+		}
+
+		return expedition_id;
+	}
 };
 
 #endif //EQEMU_EXPEDITIONS_REPOSITORY_H

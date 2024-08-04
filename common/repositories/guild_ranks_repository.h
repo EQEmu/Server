@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_GUILD_RANKS_REPOSITORY_H
 #define EQEMU_GUILD_RANKS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_guild_ranks_repository.h"
 
 class GuildRanksRepository: public BaseGuildRanksRepository {
@@ -65,6 +45,45 @@ public:
 
 	// Custom extended repository methods here
 
+	static int UpdateTitle(Database &db, uint32 guild_id, uint32 rank, std::string title)
+	{
+		auto guild_rank = GetWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
+		if (guild_rank.empty()) {
+			return 0;
+		}
+
+		auto r = guild_rank[0];
+		r.title = title;
+
+		DeleteWhere(db, fmt::format("guild_id = '{}' AND rank = '{}'", guild_id, rank));
+		InsertOne(db, r);
+
+		return 1;
+	}
+
+	static std::map<std::string, std::string> LoadAll(Database &db)
+	{
+		std::map<std::string, std::string> all_entries;
+
+		auto results = db.QueryDatabase(fmt::format(
+			"{} WHERE `guild_id` < {}",
+			BaseSelect(),
+			RoF2::constants::MAX_GUILD_ID)
+		);
+
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			GuildRanks e{};
+
+			e.guild_id = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rank_    = row[1] ? static_cast<uint8_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.title    = row[2] ? row[2] : "";
+
+			auto key = fmt::format("{}-{}", e.guild_id, e.rank_);
+			all_entries.emplace(key, e.title);
+		}
+
+		return all_entries;
+	}
 };
 
 #endif //EQEMU_GUILD_RANKS_REPOSITORY_H

@@ -51,6 +51,7 @@ void MySQLRequestResult::ZeroOut()
 	m_RowCount = 0;
 	m_RowsAffected = 0;
 	m_LastInsertedID = 0;
+	m_error_message = "";
 }
 
 MySQLRequestResult::~MySQLRequestResult()
@@ -136,4 +137,24 @@ MySQLRequestResult& MySQLRequestResult::operator=(MySQLRequestResult&& other)
 	// pre move instance.
 	other.ZeroOut();
 	return *this;
+}
+
+uint32 MySQLRequestResult::GetErrorNumber() const
+{
+	return m_ErrorNumber;
+}
+
+void MySQLRequestResult::SetErrorNumber(uint32 m_error_number)
+{
+	m_ErrorNumber = m_error_number;
+}
+
+const std::string &MySQLRequestResult::GetErrorMessage() const
+{
+	return m_error_message;
+}
+
+void MySQLRequestResult::SetErrorMessage(const std::string &m_error_message)
+{
+	MySQLRequestResult::m_error_message = m_error_message;
 }

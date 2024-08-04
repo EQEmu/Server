@@ -22,15 +22,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_config.h"
 #include "../common/misc_functions.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/random.h"
 #include "../common/json/json.h"
 #include "../common/event_sub.h"
 #include "web_interface.h"
-#include "world_store.h"
+#include "../common/zone_store.h"
 
 extern uint32 numzones;
-extern bool holdzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 volatile bool UCSServerAvailable_ = false;
@@ -43,7 +42,7 @@ ZSList::ZSList()
 	memset(pLockedZones, 0, sizeof(pLockedZones));
 
 	m_tick = std::make_unique<EQ::Timer>(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1));
-	m_keepalive = std::make_unique<EQ::Timer>(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1));
 }
 
 ZSList::~ZSList() {
@@ -51,23 +50,21 @@ ZSList::~ZSList() {
 
 void ZSList::ShowUpTime(WorldTCPConnection* con, const char* adminname) {
 	uint32 ms = Timer::GetCurrentTime();
-	uint32 d = ms / 86400000;
-	ms -= d * 86400000;
-	uint32 h = ms / 3600000;
-	ms -= h * 3600000;
-	uint32 m = ms / 60000;
-	ms -= m * 60000;
-	uint32 s = ms / 1000;
-	if (d)
-		con->SendEmoteMessage(adminname, 0, 0, 0, "Worldserver Uptime: %02id %02ih %02im %02is", d, h, m, s);
-	else if (h)
-		con->SendEmoteMessage(adminname, 0, 0, 0, "Worldserver Uptime: %02ih %02im %02is", h, m, s);
-	else
-		con->SendEmoteMessage(adminname, 0, 0, 0, "Worldserver Uptime: %02im %02is", m, s);
+	std::string time_string = Strings::MillisecondsToTime(ms);
+	con->SendEmoteMessage(
+		adminname,
+		0,
+		AccountStatus::Player,
+		Chat::White,
+		fmt::format(
+			"Worldserver Uptime | {}",
+			time_string
+		).c_str()
+	);
 }
 
 void ZSList::Add(ZoneServer* zoneserver) {
-	zone_server_list.push_back(std::unique_ptr<ZoneServer>(zoneserver));
+	zone_server_list.emplace_back(std::unique_ptr<ZoneServer>(zoneserver));
 	zoneserver->SendGroupIDs();
 }
 
@@ -110,7 +107,16 @@ void ZSList::Process() {
 	}
 
 	if (reminder && reminder->Check() && shutdowntimer) {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i minutes...", ((shutdowntimer->GetRemainingTime() / 1000) / 60));
+		SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::Player,
+			Chat::System,
+			fmt::format(
+				"[SYSTEM] World will be shutting down in {} minutes.",
+				((shutdowntimer->GetRemainingTime() / 1000) / 60)
+			).c_str()
+		);
 	}
 }
 
@@ -261,14 +267,39 @@ bool ZSList::IsZoneLocked(uint16 iZoneID) {
 }
 
 void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
-	int x = 0;
-	for (auto &zone : pLockedZones) {
-		if (zone) {
-			connection->SendEmoteMessageRaw(to, 0, 0, 0, ZoneName(zone, true));
-			x++;
+	int zone_count = 0;
+	for (const auto& zone_id : pLockedZones) {
+		if (zone_id) {
+			int zone_number = (zone_count + 1);
+			connection->SendEmoteMessageRaw(
+				to,
+				0,
+				AccountStatus::Player,
+				Chat::White,
+				fmt::format(
+					"Zone {} | Name: {} ({}) ID: {}",
+					zone_number,
+					ZoneLongName(zone_id),
+					ZoneName(zone_id),
+					zone_id
+				).c_str()
+			);
+			zone_count++;
 		}
 	}
-	connection->SendEmoteMessage(to, 0, 0, 0, "%i zones locked.", x);
+
+	std::string zone_message = (
+		zone_count ?
+		fmt::format("{} Zones are locked.", zone_count) :
+		"There are no zones locked."
+	);
+	connection->SendEmoteMessage(
+		to,
+		0,
+		AccountStatus::Player,
+		Chat::White,
+		zone_message.c_str()
+	);
 }
 
 void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* connection) {
@@ -280,19 +311,19 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 		strcpy(locked, "No");
 	}
 
-	fmt::memory_buffer out;
+	auto out = fmt::memory_buffer();
 
 	if (connection->IsConsole()) {
-		fmt::format_to(out, "World Locked: {}\r\n", locked);
+		fmt::format_to(std::back_inserter(out), "World Locked: {}\r\n", locked);
 	}
 	else {
-		fmt::format_to(out, "World Locked: {}^", locked);
+		fmt::format_to(std::back_inserter(out), "World Locked: {}^", locked);
 	}
 	if (connection->IsConsole()) {
-		fmt::format_to(out, "Zoneservers online:\r\n");
+		fmt::format_to(std::back_inserter(out), "Zoneservers online:\r\n");
 	}
 	else {
-		fmt::format_to(out, "Zoneservers online:^");
+		fmt::format_to(std::back_inserter(out), "Zoneservers online:^");
 	}
 
 	int v = 0, w = 0, x = 0, y = 0, z = 0;
@@ -321,7 +352,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 		else
 			is_static_string[0] = 'D';
 
-		if (admin >= 150) {
+		if (admin >= AccountStatus::GMLeadAdmin) {
 			if (zone_server_data->GetZoneID()) {
 				snprintf(zone_data_string, sizeof(zone_data_string), "%s (%i)", zone_server_data->GetZoneName(), zone_server_data->GetZoneID());
 			}
@@ -332,7 +363,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				zone_data_string[0] = 0;
 			}
 
-			fmt::format_to(out,
+			fmt::format_to(std::back_inserter(out),
 				"#{:<3} :: {} :: {}:{:<5} :: {:2} :: {}:{} :: {} :: ({})",
 				zone_server_data->GetID(),
 				is_static_string,
@@ -346,15 +377,20 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				);
 
 			if (out.size() >= 3584) {
-				auto output = fmt::to_string(out);
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				connection->SendEmoteMessageRaw(
+					to,
+					0,
+					AccountStatus::Player,
+					Chat::NPCQuestSay,
+					out.data()
+				);
 				out.clear();
 			}
 			else {
 				if (connection->IsConsole())
-					fmt::format_to(out, "\r\n");
+					fmt::format_to(std::back_inserter(out), "\r\n");
 				else
-					fmt::format_to(out, "^");
+					fmt::format_to(std::back_inserter(out), "^");
 			}
 			x++;
 		}
@@ -363,18 +399,23 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				strcpy(zone_data_string, zone_server_data->GetZoneName());
 			else
 				zone_data_string[0] = 0;
-			fmt::format_to(out, "  #{} {}  {}", zone_server_data->GetID(), is_static_string, zone_data_string);
+			fmt::format_to(std::back_inserter(out), "  #{} {}  {}", zone_server_data->GetID(), is_static_string, zone_data_string);
 			if (out.size() >= 3584) {
-				auto output = fmt::to_string(out);
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				connection->SendEmoteMessageRaw(
+					to,
+					0,
+					AccountStatus::Player,
+					Chat::NPCQuestSay,
+					out.data()
+				);
 				out.clear();
 			}
 			else {
 				if (connection->IsConsole()) {
-					fmt::format_to(out, "\r\n");
+					fmt::format_to(std::back_inserter(out), "\r\n");
 				}
 				else {
-					fmt::format_to(out, "^");
+					fmt::format_to(std::back_inserter(out), "^");
 				}
 			}
 			x++;
@@ -384,16 +425,21 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 	}
 
 	if (connection->IsConsole()) {
-		fmt::format_to(out, "{} servers listed. {} servers online.\r\n", x, y);
+		fmt::format_to(std::back_inserter(out), "{} servers listed. {} servers online.\r\n", x, y);
 	}
 	else {
-		fmt::format_to(out, "{} servers listed. {} servers online.^", x, y);
+		fmt::format_to(std::back_inserter(out), "{} servers listed. {} servers online.^", x, y);
 	}
 
-	fmt::format_to(out, "{} zones are static zones, {} zones are booted zones, {} zones available.", z, w, v);
+	fmt::format_to(std::back_inserter(out), "{} zones are static zones, {} zones are booted zones, {} zones available.", z, w, v);
 
-	auto output = fmt::to_string(out);
-	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+	connection->SendEmoteMessageRaw(
+		to,
+		0,
+		AccountStatus::Player,
+		Chat::NPCQuestSay,
+		out.data()
+	);
 }
 
 void ZSList::SendChannelMessage(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...) {
@@ -524,20 +570,52 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 	ZoneServer* zs = 0;
 	ZoneServer* zs2 = 0;
 	uint32 zoneid;
-	if (!(zoneid = ZoneID(zonename)))
-		SendEmoteMessage(adminname, 0, 0, 0, "Error: SOP_ZoneBootup: zone '%s' not found in 'zone' table. Typo protection=ON.", zonename);
-	else {
-		if (ZoneServerID != 0)
+	if (!(zoneid = ZoneID(zonename))) {
+		SendEmoteMessage(
+			adminname,
+			0,
+			AccountStatus::Player,
+			Chat::White,
+			fmt::format(
+				"Error: SOP_ZoneBootup: Zone '{}' not found in 'zone' table.",
+				zonename
+			).c_str()
+		);
+	} else {
+		if (ZoneServerID != 0) {
 			zs = FindByID(ZoneServerID);
-		else
-			SendEmoteMessage(adminname, 0, 0, 0, "Error: SOP_ZoneBootup: ServerID must be specified");
+		} else {
+			SendEmoteMessage(
+				adminname,
+				0,
+				AccountStatus::Player,
+				Chat::White,
+				"Error: SOP_ZoneBootup: Server ID must be specified."
+			);
+		}
 
-		if (zs == 0)
-			SendEmoteMessage(adminname, 0, 0, 0, "Error: SOP_ZoneBootup: zoneserver not found");
-		else {
+		if (!zs) {
+			SendEmoteMessage(
+				adminname,
+				0,
+				AccountStatus::Player,
+				Chat::White,
+				"Error: SOP_ZoneBootup: Zoneserver not found."
+			);
+		} else {
 			zs2 = FindByName(zonename);
 			if (zs2 != 0)
-				SendEmoteMessage(adminname, 0, 0, 0, "Error: SOP_ZoneBootup: zone '%s' already being hosted by ZoneServer #%i", zonename, zs2->GetID());
+				SendEmoteMessage(
+					adminname,
+					0,
+					AccountStatus::Player,
+					Chat::White,
+					fmt::format(
+						"Error: SOP_ZoneBootup: Zone '{}' already being hosted by Zoneserver ID {}.",
+						zonename,
+						zs2->GetID()
+					).c_str()
+				);
 			else {
 				zs->TriggerBootup(zoneid, 0, adminname, iMakeStatic);
 			}
@@ -677,7 +755,16 @@ void ZSList::UpdateUCSServerAvailable(bool ucss_available) {
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
 	if (time > 0) {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.", (time / 60));
+		SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::Player,
+			Chat::System,
+			fmt::format(
+				"[SYSTEM] World will be shutting down in {} minutes.",
+				(time / 60)
+			).c_str()
+		);
 
 		time *= 1000;
 		interval *= 1000;
@@ -690,7 +777,13 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		reminder->Start();
 	}
 	else {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
+		SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::Player,
+			Chat::Yellow,
+			"[SYSTEM] World is shutting down."
+		);
 		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_ShutdownAll;
 		pack->size = 0;
@@ -763,4 +856,16 @@ void ZSList::OnKeepAlive(EQ::Timer *t)
 const std::list<std::unique_ptr<ZoneServer>> &ZSList::getZoneServerList() const
 {
 	return zone_server_list;
+}
+
+bool ZSList::SendPacketToBootedZones(ServerPacket* pack)
+{
+	for (auto const& z : zone_server_list) {
+		auto r = z.get();
+		if (r && r->GetZoneID() > 0) {
+			r->SendPacket(pack);
+		}
+	}
+
+	return true;
 }

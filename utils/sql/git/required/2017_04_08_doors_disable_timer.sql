@@ -1,1 +1,0 @@
-ALTER TABLE `doors` ADD COLUMN `disable_timer` TINYINT(2) NOT NULL DEFAULT '0' AFTER `triggertype`;

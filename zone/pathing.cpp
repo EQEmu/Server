@@ -40,16 +40,16 @@ void CullPoints(std::vector<FindPerson_Point> &points) {
 }
 
 void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
-	EQ::Any data(points);
+	std::any data(points);
 	EQ::Task([=](EQ::Task::ResolveFn resolve, EQ::Task::RejectFn reject) {
-		auto points = EQ::any_cast<std::vector<FindPerson_Point>>(data);
+		auto points = std::any_cast<std::vector<FindPerson_Point>>(data);
 		CullPoints(points);
 		resolve(points);
 	})
-	.Then([this](const EQ::Any &result) {
-		auto points = EQ::any_cast<std::vector<FindPerson_Point>>(result);
+	.Then([this](const std::any &result) {
+		auto points = std::any_cast<std::vector<FindPerson_Point>>(result);
 		if (points.size() < 2) {
-			if (Admin() > 10) {
+			if (Admin() > AccountStatus::Steward) {
 				Message(Chat::System, "Too few points");
 			}
 		
@@ -59,7 +59,7 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 		}
 		
 		if (points.size() > 36) {
-			if (Admin() > 10) {
+			if (Admin() > AccountStatus::Steward) {
 				Message(Chat::System, "Too many points %u", points.size());
 			}
 		
@@ -68,7 +68,7 @@ void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
 			return;
 		}
 		
-		if (Admin() > 10) {
+		if (Admin() > AccountStatus::Steward) {
 			Message(Chat::System, "Total points %u", points.size());
 		}
 		

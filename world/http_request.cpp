@@ -54,7 +54,7 @@ int HTTPRequest::getInt(const char *name, int default_value) const {
 	res = m_values.find(name);
 	if(res == m_values.end())
 		return(default_value);
-	return(atoi(res->second.c_str()));
+	return(Strings::ToInt(res->second.c_str()));
 }
 
 float HTTPRequest::getFloat(const char *name, float default_value) const {
@@ -62,7 +62,7 @@ float HTTPRequest::getFloat(const char *name, float default_value) const {
 	res = m_values.find(name);
 	if(res == m_values.end())
 		return(default_value);
-	return(atof(res->second.c_str()));
+	return(Strings::ToFloat(res->second.c_str()));
 }
 
 void HTTPRequest::header(Const_char *name, Const_char *value) {

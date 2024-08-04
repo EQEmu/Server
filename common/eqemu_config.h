@@ -20,7 +20,9 @@
 
 #include "json/json.h"
 #include "linked_list.h"
+#include "path_manager.h"
 #include <fstream>
+#include <fmt/format.h>
 
 struct LoginConfig {
 	std::string LoginHost;
@@ -58,14 +60,7 @@ class EQEmuConfig
 		uint16 WorldHTTPPort;
 		std::string WorldHTTPMimeFile;
 		std::string SharedKey;
-
-		// From <chatserver/>
-		std::string ChatHost;
-		uint16 ChatPort;
-
-		// From <mailserver/>
-		std::string MailHost;
-		uint16 MailPort;
+		bool DisableConfigChecks;
 
 		// From <database/>
 		std::string DatabaseHost;
@@ -117,11 +112,19 @@ class EQEmuConfig
 		uint16 ZonePortHigh;
 		uint8 DefaultStatus;
 
+		bool auto_database_updates;
+
+		const std::string &GetUCSHost() const;
+		uint16 GetUCSPort() const;
+
 //	uint16 DynamicCount;
 
 //	map<string,uint16> StaticZones;
 
 	protected:
+
+		std::string m_ucs_host;
+		uint16      m_ucs_port;
 
 		static EQEmuConfig *_config;
 		Json::Value _root;
@@ -130,7 +133,7 @@ class EQEmuConfig
 		void parse_config();
 
 		EQEmuConfig()
-		{			
+		{
 
 		}
 		virtual ~EQEmuConfig() {}
@@ -144,41 +147,44 @@ class EQEmuConfig
 			return (_config);
 		}
 
-		// Allow the use to set the conf file to be used.
-		static void SetConfigFile(std::string file)
-		{
-			EQEmuConfig::ConfigFile = file;
-		}
-
 		// Load the config
-		static bool LoadConfig()
+		static bool LoadConfig(const std::string& path = "")
 		{
 			if (_config != nullptr) {
 				return true;
 			}
 			_config = new EQEmuConfig;
 
-			return parseFile();
+			return parseFile(path);
 		}
 
 		// Load config file and parse data
-		static bool parseFile() {
+		static bool parseFile(const std::string& file_path = ".")
+		{
 			if (_config == nullptr) {
-				return LoadConfig();
+				return LoadConfig(file_path);
 			}
 
-			std::ifstream fconfig(EQEmuConfig::ConfigFile, std::ifstream::binary);
+			std::string file = fmt::format(
+				"{}/{}",
+				(file_path.empty() ? path.GetServerPath() : file_path),
+				EQEmuConfig::ConfigFile
+			);
+
+			std::ifstream fconfig(file, std::ifstream::binary);
+
 			try {
 				fconfig >> _config->_root;
 				_config->parse_config();
 			}
 			catch (std::exception &) {
 				return false;
-			}			
+			}
 			return true;
 		}
 
 		void Dump() const;
+		void CheckUcsConfigConversion();
 };
 
 #endif

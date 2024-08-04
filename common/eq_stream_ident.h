@@ -18,7 +18,7 @@ public:
 	~EQStreamIdentifier();
 
 	//registration interface.
-	void RegisterPatch(const EQStreamInterface::Signature &sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs);
+	void RegisterPatch(EQStreamInterface::Signature sig, const char *name, OpcodeManager ** opcodes, const StructStrategy *structs);
 
 	//main processing interface
 	void Process();

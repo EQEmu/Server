@@ -46,27 +46,21 @@ public:
 	}
 
 	// Load the config
-	static bool LoadConfig() {
+	static bool LoadConfig(const std::string& path = "") {
 		if (_world_config != nullptr)
 			delete _world_config;
 		_world_config=new WorldConfig;
 		_config=_world_config;
 
-		return _config->parseFile();
+		return _config->parseFile(path);
 	}
 
 	// Accessors for the static private object
 	static void LockWorld() { if (_world_config) _world_config->Locked=true; }
 	static void UnlockWorld() { if (_world_config) _world_config->Locked=false; }
 
-	static void DisableStats() { if (_world_config) _world_config->UpdateStats=false; }
-	static void EnableStats() { if (_world_config) _world_config->UpdateStats=true; }
-
-	static void DisableLoginserver() { if (_world_config) _world_config->LoginDisabled=true; }
-	static void EnableLoginserver() { if (_world_config) _world_config->LoginDisabled=false; }
-
-	static void SetWorldAddress(std::string addr) { if (_world_config) _world_config->WorldAddress=addr; }
-	static void SetLocalAddress(std::string addr) { if (_world_config) _world_config->LocalAddress=addr; }
+	static void SetWorldAddress(const std::string& addr) { if (_world_config) _world_config->WorldAddress=addr; }
+	static void SetLocalAddress(const std::string& addr) { if (_world_config) _world_config->LocalAddress=addr; }
 
 	void Dump() const;
 };

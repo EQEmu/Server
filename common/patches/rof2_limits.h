@@ -158,6 +158,7 @@ namespace RoF2
 				slotCursor
 			};
 
+			constexpr int16 format_as(InventorySlots slot) { return static_cast<int16>(slot); }
 		} // namespace enum_
 		using namespace enum_;
 
@@ -270,6 +271,7 @@ namespace RoF2
 		const size_t CHARACTER_CREATION_LIMIT = 12;
 
 		const size_t SAY_LINK_BODY_SIZE = 56;
+		const uint32 MAX_GUILD_ID       = 50000;
 
 	} /*constants*/
 

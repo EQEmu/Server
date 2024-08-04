@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12)
 
 SET(eqlogin_sources
 	account_management.cpp
@@ -22,7 +22,7 @@ SET(eqlogin_headers
 	loginserver_command_handler.h
 	loginserver_webserver.h
 	login_server.h
-	login_structures.h
+	login_types.h
 	options.h
 	server_manager.h
 	world_server.h

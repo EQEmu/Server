@@ -4,22 +4,23 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_GM_IPS_REPOSITORY_H
 #define EQEMU_BASE_GM_IPS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseGmIpsRepository {
 public:
 	struct GmIps {
 		std::string name;
-		int         account_id;
+		int32_t     account_id;
 		std::string ip_address;
 	};
 
@@ -37,9 +38,23 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"name",
+			"account_id",
+			"ip_address",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -51,7 +66,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -67,16 +82,16 @@ public:
 
 	static GmIps NewEntity()
 	{
-		GmIps entry{};
+		GmIps e{};
 
-		entry.name       = "";
-		entry.account_id = 0;
-		entry.ip_address = "";
+		e.name       = "";
+		e.account_id = 0;
+		e.ip_address = "";
 
-		return entry;
+		return e;
 	}
 
-	static GmIps GetGmIpsEntry(
+	static GmIps GetGmIps(
 		const std::vector<GmIps> &gm_ipss,
 		int gm_ips_id
 	)
@@ -97,21 +112,22 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				gm_ips_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.ip_address = row[2] ? row[2] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -136,24 +152,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		GmIps gm_ips_entry
+		const GmIps &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = '" + EscapeString(gm_ips_entry.name) + "'");
-		update_values.push_back(columns[1] + " = " + std::to_string(gm_ips_entry.account_id));
-		update_values.push_back(columns[2] + " = '" + EscapeString(gm_ips_entry.ip_address) + "'");
+		v.push_back(columns[0] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[1] + " = " + std::to_string(e.account_id));
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				gm_ips_entry.account_id
+				e.account_id
 			)
 		);
 
@@ -162,57 +178,57 @@ public:
 
 	static GmIps InsertOne(
 		Database& db,
-		GmIps gm_ips_entry
+		GmIps e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
-		insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-		insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.account_id));
+		v.push_back("'" + Strings::Escape(e.ip_address) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			gm_ips_entry.account_id = results.LastInsertedID();
-			return gm_ips_entry;
+			e.account_id = results.LastInsertedID();
+			return e;
 		}
 
-		gm_ips_entry = NewEntity();
+		e = NewEntity();
 
-		return gm_ips_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<GmIps> gm_ips_entries
+		const std::vector<GmIps> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &gm_ips_entry: gm_ips_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back("'" + EscapeString(gm_ips_entry.name) + "'");
-			insert_values.push_back(std::to_string(gm_ips_entry.account_id));
-			insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.account_id));
+			v.push_back("'" + Strings::Escape(e.ip_address) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -233,19 +249,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.ip_address = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<GmIps> GetWhere(Database& db, std::string where_filter)
+	static std::vector<GmIps> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<GmIps> all_entries;
 
@@ -260,19 +276,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			GmIps entry{};
+			GmIps e{};
 
-			entry.name       = row[0] ? row[0] : "";
-			entry.account_id = atoi(row[1]);
-			entry.ip_address = row[2] ? row[2] : "";
+			e.name       = row[0] ? row[0] : "";
+			e.account_id = row[1] ? static_cast<int32_t>(atoi(row[1])) : 0;
+			e.ip_address = row[2] ? row[2] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -297,6 +313,92 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const GmIps &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.account_id));
+		v.push_back("'" + Strings::Escape(e.ip_address) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<GmIps> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.account_id));
+			v.push_back("'" + Strings::Escape(e.ip_address) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_GM_IPS_REPOSITORY_H

@@ -1,0 +1,73 @@
+{
+	"server": {
+		"zones": {
+			"defaultstatus": "0",
+			"ports": {
+				"low": "7000",
+				"high": "7400"
+			}
+		},
+		"qsdatabase": {
+			"host": "127.0.0.1",
+			"port": "3306",
+			"username": "peq",
+			"password": "peqpass",
+			"db": "peq"
+		},
+		"chatserver": {
+			"port": "7778",
+			"host": ""
+		},
+		"mailserver": {
+			"host": "",
+			"port": "7778"
+		},
+		"webinterface": {
+			"port": "9081"
+		},
+		"world": {
+			"longname": "New Devbox",
+			"address": "192.168.1.100",
+			"localaddress": "192.168.1.100",
+			"loginserver1": {
+				"account": "",
+				"password": "",
+				"legacy": 0,
+				"host": "login.projecteq.net",
+				"port": "5998"
+			},
+			"tcp": {
+				"ip": "127.0.0.1",
+				"port": "9001"
+			},
+			"telnet": {
+				"ip": "0.0.0.0",
+				"port": "9000",
+				"enabled": "true"
+			},
+			"key": "random-generate-here",
+			"http": {
+				"port": "9080",
+				"enabled": "true",
+				"mimefile": "mime.types"
+			},
+			"shortname": "dev"
+		},
+		"database": {
+			"db": "peq",
+			"host": "127.0.0.1",
+			"port": "3306",
+			"username": "peq",
+			"password": "peqpass"
+		},
+		"files": {
+			"opcodes": "assets/patches/opcodes.conf",
+			"mail_opcodes": "assets/patches/mail_opcodes.conf"
+		},
+		"directories": {
+			"patches": "assets/patches/",
+			"opcodes": "assets/patches/",
+			"plugins": "quests/plugins/"
+		}
+	}
+}

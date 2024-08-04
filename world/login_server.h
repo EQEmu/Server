@@ -1,20 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
 #ifndef LOGINSERVER_H
 #define LOGINSERVER_H
 
@@ -42,20 +25,20 @@ public:
 	void SendAccountUpdate(ServerPacket *pack);
 	bool Connected()
 	{
-		if (IsLegacy) {
-			if (legacy_client) {
-				return legacy_client->Connected();
+		if (m_is_legacy) {
+			if (m_legacy_client) {
+				return m_legacy_client->Connected();
 			}
 		}
 		else {
-			if (client) {
-				return client->Connected();
+			if (m_client) {
+				return m_client->Connected();
 			}
 		}
 
 		return false;
 	}
-	bool CanUpdate() { return CanAccountUpdate; }
+	bool CanUpdate() { return m_can_account_update; }
 
 private:
 	void ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p);
@@ -70,15 +53,15 @@ private:
 	void OnKeepAlive(EQ::Timer *t);
 	std::unique_ptr<EQ::Timer> m_keepalive;
 
-	std::unique_ptr<EQ::Net::ServertalkClient> client;
-	std::unique_ptr<EQ::Net::ServertalkLegacyClient> legacy_client;
-	std::unique_ptr<EQ::Timer> statusupdate_timer;
-	char	LoginServerAddress[256];
-	uint32	LoginServerIP;
-	uint16	LoginServerPort;
-	std::string LoginAccount;
-	std::string LoginPassword;
-	bool	CanAccountUpdate;
-	bool    IsLegacy;
+	std::unique_ptr<EQ::Net::ServertalkClient>       m_client;
+	std::unique_ptr<EQ::Net::ServertalkLegacyClient> m_legacy_client;
+	std::unique_ptr<EQ::Timer>                       m_statusupdate_timer;
+	char                                             m_loginserver_address[256];
+	uint32                                           m_loginserver_ip;
+	uint16                                           m_loginserver_port;
+	std::string                                      m_login_account;
+	std::string                                      m_login_password;
+	bool                                             m_can_account_update;
+	bool                                             m_is_legacy;
 };
 #endif

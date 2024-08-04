@@ -25,7 +25,7 @@
 #include "../common/races.h"
 #include "../common/classes.h"
 #include "../common/misc.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "zoneserver.h"
 #include "zonelist.h"
 #include "clientlist.h"
@@ -37,6 +37,7 @@
 #include "launcher_list.h"
 #include "launcher_link.h"
 #include "wguild_mgr.h"
+#include "../common/emu_constants.h"
 
 #ifdef seed
 #undef seed
@@ -130,7 +131,7 @@ std::vector<std::string> EQW::ListBootedZones() {
 std::map<std::string,std::string> EQW::GetZoneDetails(Const_char *zone_ref) {
 	std::map<std::string,std::string> res;
 
-	ZoneServer *zs = zoneserver_list.FindByID(atoi(zone_ref));
+	ZoneServer *zs = zoneserver_list.FindByID(Strings::ToInt(zone_ref));
 	if(zs == nullptr) {
 		res["error"] = "Invalid zone.";
 		return(res);
@@ -315,7 +316,7 @@ int EQW::CountBugs() {
         return 0;
 
     auto row = results.begin();
-    return atoi(row[0]);
+    return Strings::ToInt(row[0]);
 }
 
 std::vector<std::string> EQW::ListBugs(uint32 offset) {
@@ -360,7 +361,13 @@ void EQW::ResolveBug(const char *id) {
 }
 
 void EQW::SendMessage(uint32 type, const char *msg) {
-    zoneserver_list.SendEmoteMessage(0, 0, 0, type, msg);
+    zoneserver_list.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::Player,
+		type,
+		msg
+	);
 }
 
 void EQW::WorldShutDown(uint32 time, uint32 interval) {

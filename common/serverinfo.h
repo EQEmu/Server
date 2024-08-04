@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 typedef struct eq_cpu_info_s {
 	std::string model;

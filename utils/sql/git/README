@@ -1,15 +1,4 @@
-On the move from svn -> git we lost the ability to track revision numbers on the repo.
+Database updates have been migrated into native code as of #2857.
 
-No big deal!
-
-What we'll do instead as follows:
-
--Optional SQL updates go in optional/
--Required SQL updates go in required/
-All updates will follow a specific format of YYYY_MM_DD_Desc.sql, this is so it's easy to sort.
-
-So the following is a good example of what I expect to see
-2013_02_16_GitConversion.sql
-
-
-The new bots/ folder contains two sub-folders named optional/ and required/ for updates.
+Main updates: https://github.com/EQEmu/Server/tree/master/common/database/database_update_manifest.cpp
+Bot updates: https://github.com/EQEmu/Server/tree/master/common/database/database_update_manifest_bots.cpp

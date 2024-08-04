@@ -18,7 +18,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
 #include "../common/global_define.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/misc_functions.h"
 
@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "clientlist.h"
 #include "database.h"
 #include "chatchannel.h"
+#include "../common/path_manager.h"
 
 #include <list>
 #include <vector>
@@ -33,7 +34,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include <cstdlib>
 #include <algorithm>
 
-extern Database database;
+extern UCSDatabase database;
 extern std::string WorldShortName;
 extern std::string GetMailPrefix();
 extern ChatChannelList *ChannelList;
@@ -47,8 +48,10 @@ int LookupCommand(const char *ChatCommand) {
 
 	for (int i = 0; i < CommandEndOfList; i++) {
 
-		if (!strcasecmp(Commands[i].CommandString, ChatCommand))
+		if (!strcasecmp(Commands[i].CommandString, ChatCommand)) {
 			return Commands[i].CommandCode;
+		}
+
 	}
 
 	return -1;
@@ -119,11 +122,11 @@ std::vector<std::string> ParseRecipients(std::string RecipientString) {
 
 		if (Comma == std::string::npos) {
 
-			RecipientList.push_back(RecipientString.substr(CurrentPos));
+			RecipientList.emplace_back(RecipientString.substr(CurrentPos));
 
 			break;
 		}
-		RecipientList.push_back(RecipientString.substr(CurrentPos, Comma - CurrentPos));
+		RecipientList.emplace_back(RecipientString.substr(CurrentPos, Comma - CurrentPos));
 
 		CurrentPos = Comma + 2;
 	}
@@ -345,7 +348,7 @@ static void ProcessMailTo(Client *c, std::string MailMessage) {
 	}
 }
 
-static void ProcessMailTo(Client *c, std::string from, std::string subject, std::string message) {
+static void ProcessMailTo(Client *c, const std::string& from, const std::string& subject, const std::string& message) {
 }
 
 static void ProcessSetMessageStatus(std::string SetMessageCommand) {
@@ -376,14 +379,14 @@ static void ProcessSetMessageStatus(std::string SetMessageCommand) {
 
 		if (NumEnd == std::string::npos) {
 
-			MessageNumber = atoi(SetMessageCommand.substr(NumStart).c_str());
+			MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart));
 
 			database.SetMessageStatus(MessageNumber, Status);
 
 			break;
 		}
 
-		MessageNumber = atoi(SetMessageCommand.substr(NumStart, NumEnd - NumStart).c_str());
+		MessageNumber = Strings::ToInt(SetMessageCommand.substr(NumStart, NumEnd - NumStart));
 
 		database.SetMessageStatus(MessageNumber, Status);
 
@@ -478,12 +481,15 @@ Clientlist::Clientlist(int ChatPort) {
 
 	const ucsconfig *Config = ucsconfig::get();
 
-	LogInfo("Loading [{}]", Config->MailOpCodesFile.c_str());
-	if (!ChatOpMgr->LoadOpcodes(Config->MailOpCodesFile.c_str()))
+
+	std::string opcodes_file = fmt::format("{}/{}", path.GetServerPath(), Config->MailOpCodesFile);
+
+	LogInfo("Loading [{}]", opcodes_file);
+	if (!ChatOpMgr->LoadOpcodes(opcodes_file.c_str()))
 		exit(1);
 
 	chatsf->OnNewConnection([this](std::shared_ptr<EQ::Net::EQStream> stream) {
-		LogF(Logs::General, Logs::Loginserver, "New Client UDP connection from {0}:{1}", stream->GetRemoteIP(), stream->GetRemotePort());
+		LogInfo("New Client UDP connection from [{0}] [{1}]", stream->GetRemoteIP(), stream->GetRemotePort());
 		stream->SetOpcodeManager(&ChatOpMgr);
 
 		auto c = new Client(stream);
@@ -565,7 +571,9 @@ void Clientlist::CheckForStaleConnectionsAll()
 
 void Clientlist::CheckForStaleConnections(Client *c) {
 
-	if (!c) return;
+	if (!c) {
+		return;
+	}
 
 	std::list<Client*>::iterator Iterator;
 
@@ -588,6 +596,28 @@ void Clientlist::CheckForStaleConnections(Client *c) {
 			Iterator = ClientChatConnections.erase(Iterator);
 		}
 	}
+}
+
+std::string RemoveDuplicateChannels(const std::string& in_channels) {
+	// Split the string by ", " and store the names in a vector
+	std::vector<std::string> channel_names = Strings::Split(in_channels, ", ");
+
+	// Remove duplicates by inserting the names of the channels into an unordered set
+	// and then copying the unique elements back into the original vector
+	std::unordered_set<std::string> unique_channels;
+	channel_names.erase(
+		std::remove_if(
+			channel_names.begin(), channel_names.end(),
+			[&unique_channels](const std::string &channel) {
+				return !unique_channels.insert(channel).second;
+			}
+		), channel_names.end()
+	);
+
+	// Concatenate the names of the unique channels into a single string
+	std::string unique_channels_string = Strings::Implode(", ", channel_names);
+
+	return unique_channels_string;
 }
 
 void Clientlist::Process()
@@ -614,6 +644,15 @@ void Clientlist::Process()
 
 		while (KeyValid && !(*it)->GetForceDisconnect() && (app = (*it)->ClientStream->PopPacket())) {
 			EmuOpcode opcode = app->GetOpcode();
+
+			auto o = (*it)->ClientStream->GetOpcodeManager();
+			LogPacketClientServer(
+				"[{}] [{:#06x}] Size [{}] {}",
+				OpcodeManager::EmuToName(app->GetOpcode()),
+				o->EmuToEQ(app->GetOpcode()) == 0 ? app->GetProtocolOpcode() : o->EmuToEQ(app->GetOpcode()),
+				app->Size(),
+				(LogSys.IsLogEnabled(Logs::Detail, Logs::PacketClientServer) ? DumpPacketToString(app) : "")
+			);
 
 			switch (opcode) {
 			case OP_MailLogin: {
@@ -670,10 +709,18 @@ void Clientlist::Process()
 				CheckForStaleConnections((*it));
 				break;
 			}
-
 			case OP_Mail: {
-				std::string CommandString = (const char *)app->pBuffer + 1;
-				ProcessOPMailCommand((*it), CommandString);
+				std::string command_string = (const char *)app->pBuffer + 1;
+				bool command_directed = false;
+				if (command_string.empty()) {
+					break;
+				}
+
+				if (Strings::Contains(Strings::ToLower(command_string), "leave")) {
+					command_directed = true;
+				}
+
+				ProcessOPMailCommand((*it), command_string, command_directed);
 				break;
 			}
 
@@ -704,106 +751,115 @@ void Clientlist::Process()
 	}
 }
 
-void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
+void Clientlist::ProcessOPMailCommand(Client *c, std::string command_string, bool command_directed)
 {
 
-	if (CommandString.length() == 0)
+	if (command_string.length() == 0)
 		return;
 
-	if (isdigit(CommandString[0]))
+	if (isdigit(command_string[0]))
 	{
 
-		c->SendChannelMessageByNumber(CommandString);
+		c->SendChannelMessageByNumber(command_string);
 
 		return;
 	}
 
-	if (CommandString[0] == '#') {
+	if (command_string[0] == '#') {
 
-		c->SendChannelMessage(CommandString);
+		c->SendChannelMessage(command_string);
 
 		return;
 	}
 
-	std::string Command, Parameters;
+	std::string command, parameters;
 
-	std::string::size_type Space = CommandString.find_first_of(" ");
+	std::string::size_type Space = command_string.find_first_of(" ");
 
 	if (Space != std::string::npos) {
 
-		Command = CommandString.substr(0, Space);
+		command = command_string.substr(0, Space);
 
-		std::string::size_type ParametersStart = CommandString.find_first_not_of(" ", Space);
+		std::string::size_type parameters_start = command_string.find_first_not_of(" ", Space);
 
-		if (ParametersStart != std::string::npos)
-			Parameters = CommandString.substr(ParametersStart);
+		if (parameters_start != std::string::npos)
+			parameters = command_string.substr(parameters_start);
 	}
-	else
-		Command = CommandString;
+	else {
+		command = command_string;
+	}
 
-	int CommandCode = LookupCommand(Command.c_str());
-
-	switch (CommandCode) {
+	auto command_code = LookupCommand(command.c_str());
+	switch (command_code) {
 
 	case CommandJoin:
-		c->JoinChannels(Parameters);
+		if (!command_directed) {
+			//Append saved channels to params
+			const auto saved_channels = database.CurrentPlayerChannels(c->GetName());
+			if (!saved_channels.empty()) {
+				parameters += fmt::format(", {}", Strings::Join(saved_channels, ", "));
+			}
+			parameters = RemoveDuplicateChannels(parameters);
+		}
+		c->JoinChannels(parameters, command_directed);
 		break;
 
 	case CommandLeaveAll:
-		c->LeaveAllChannels();
+		c->LeaveAllChannels(true, true);
 		break;
 
 	case CommandLeave:
-		c->LeaveChannels(Parameters);
+		c->LeaveChannels(parameters, command_directed);
 		break;
 
 	case CommandListAll:
+
 		ChannelList->SendAllChannels(c);
 		break;
 
 	case CommandList:
-		c->ProcessChannelList(Parameters);
+		c->ProcessChannelList(parameters);
 		break;
 
 	case CommandSet:
 		c->LeaveAllChannels(false);
-		c->JoinChannels(Parameters);
+		c->JoinChannels(parameters, command_directed);
 		break;
 
 	case CommandAnnounce:
-		c->ToggleAnnounce(Parameters);
+		c->ToggleAnnounce(parameters);
 		break;
 
 	case CommandSetOwner:
-		c->SetChannelOwner(Parameters);
+		c->SetChannelOwner(parameters);
 		break;
 
 	case CommandOPList:
-		c->OPList(Parameters);
+		c->OPList(parameters);
 		break;
 
 	case CommandInvite:
-		c->ChannelInvite(Parameters);
+		c->ChannelInvite(parameters);
 		break;
 
 	case CommandGrant:
-		c->ChannelGrantModerator(Parameters);
+		c->ChannelGrantModerator(parameters);
 		break;
 
 	case CommandModerate:
-		c->ChannelModerate(Parameters);
+		c->ChannelModerate(parameters);
 		break;
 
 	case CommandVoice:
-		c->ChannelGrantVoice(Parameters);
+		c->ChannelGrantVoice(parameters);
 		break;
 
 	case CommandKick:
-		c->ChannelKick(Parameters);
+		c->ChannelKick(parameters);
 		break;
 
 	case CommandPassword:
-		c->SetChannelPassword(Parameters);
+		c->SetChannelPassword(parameters);
 		break;
 
 	case CommandToggleInvites:
@@ -822,42 +878,43 @@ void Clientlist::ProcessOPMailCommand(Client *c, std::string CommandString)
 		break;
 
 	case CommandGetBody:
-		database.SendBody(c, atoi(Parameters.c_str()));
+		database.SendBody(c, Strings::ToInt(parameters));
 		break;
 
 	case CommandMailTo:
-		ProcessMailTo(c, Parameters);
+		ProcessMailTo(c, parameters);
 		break;
 
 	case CommandSetMessageStatus:
-		LogInfo("Set Message Status, Params: [{}]", Parameters.c_str());
-		ProcessSetMessageStatus(Parameters);
+		LogInfo("Set Message Status, Params: [{}]", parameters.c_str());
+		ProcessSetMessageStatus(parameters);
 		break;
 
 	case CommandSelectMailBox:
 	{
-		std::string::size_type NumStart = Parameters.find_first_of("0123456789");
-		c->ChangeMailBox(atoi(Parameters.substr(NumStart).c_str()));
+		std::string::size_type NumStart = parameters.find_first_of("0123456789");
+		c->ChangeMailBox(Strings::ToInt(parameters.substr(NumStart)));
 		break;
 	}
 	case CommandSetMailForwarding:
 		break;
 
 	case CommandBuddy:
-		RemoveApostrophes(Parameters);
-		ProcessCommandBuddy(c, Parameters);
+		RemoveApostrophes(parameters);
+		ProcessCommandBuddy(c, parameters);
 		break;
 
 	case CommandIgnorePlayer:
-		RemoveApostrophes(Parameters);
-		ProcessCommandIgnore(c, Parameters);
+		RemoveApostrophes(parameters);
+		ProcessCommandIgnore(c, parameters);
 		break;
 
 	default:
 		c->SendHelp();
-		LogInfo("Unhandled OP_Mail command: [{}]", CommandString.c_str());
+		LogInfo("Unhandled OP_Mail command: [{}]", command_string.c_str());
 	}
 }
+
 
 void Clientlist::CloseAllConnections() {
 
@@ -887,7 +944,8 @@ void Client::AddCharacter(int CharID, const char *CharacterName, int Level) {
 }
 
 void Client::SendKeepAlive() {
-	QueuePacket(new EQApplicationPacket(OP_SessionReady, 0));
+	EQApplicationPacket outapp(OP_SessionReady, 0);
+	QueuePacket(&outapp);
 }
 
 void Client::SendMailBoxes() {
@@ -925,7 +983,7 @@ void Client::SendMailBoxes() {
 	safe_delete(outapp);
 }
 
-Client *Clientlist::FindCharacter(std::string CharacterName) {
+Client *Clientlist::FindCharacter(const std::string& CharacterName) {
 
 	std::list<Client*>::iterator Iterator;
 
@@ -979,51 +1037,51 @@ int Client::ChannelCount() {
 
 }
 
-void Client::JoinChannels(std::string ChannelNameList) {
+void Client::JoinChannels(std::string& channel_name_list, bool command_directed) {
 
-	for (auto &elem : ChannelNameList) {
+	for (auto &elem : channel_name_list) {
 		if (elem == '%') {
 			elem = '/';
 		}
 	}
 
-	LogInfo("Client: [{}] joining channels [{}]", GetName().c_str(), ChannelNameList.c_str());
+	LogInfo("Client: [{}] joining channels [{}]", GetName().c_str(), channel_name_list.c_str());
 
-	int NumberOfChannels = ChannelCount();
+	auto number_of_channels = ChannelCount();
 
-	std::string::size_type CurrentPos = ChannelNameList.find_first_not_of(" ");
+	auto current_pos = channel_name_list.find_first_not_of(" ");
 
-	while (CurrentPos != std::string::npos) {
+	while (current_pos != std::string::npos) {
 
-		if (NumberOfChannels == MAX_JOINED_CHANNELS) {
+		if (number_of_channels == MAX_JOINED_CHANNELS) {
 
 			GeneralChannelMessage("You have joined the maximum number of channels. /leave one before trying to join another.");
 
 			break;
 		}
 
-		std::string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
+		auto comma = channel_name_list.find_first_of(", ", current_pos);
 
-		if (Comma == std::string::npos) {
+		if (comma == std::string::npos) {
+			auto* joined_channel = ChannelList->AddClientToChannel(channel_name_list.substr(current_pos), this, command_directed);
 
-			ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos), this);
-
-			if (JoinedChannel)
-				AddToChannelList(JoinedChannel);
+			if (joined_channel) {
+				AddToChannelList(joined_channel);
+			}
 
 			break;
 		}
 
-		ChatChannel* JoinedChannel = ChannelList->AddClientToChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this);
+		auto* joined_channel = ChannelList->AddClientToChannel(channel_name_list.substr(current_pos, comma - current_pos), this, command_directed);
 
-		if (JoinedChannel) {
+		if (joined_channel) {
 
-			AddToChannelList(JoinedChannel);
+			AddToChannelList(joined_channel);
 
-			NumberOfChannels++;
+			number_of_channels++;
 		}
 
-		CurrentPos = ChannelNameList.find_first_not_of(", ", Comma);
+		current_pos = channel_name_list.find_first_not_of(", ", comma);
 	}
 
 	std::string JoinedChannelsList, ChannelMessage;
@@ -1084,37 +1142,36 @@ void Client::JoinChannels(std::string ChannelNameList) {
 	safe_delete(outapp);
 }
 
-void Client::LeaveChannels(std::string ChannelNameList) {
+void Client::LeaveChannels(std::string& channel_name_list, bool command_directed) {
+	LogInfo("Client: [{}] leaving channels [{}]", GetName().c_str(), channel_name_list.c_str());
 
-	LogInfo("Client: [{}] leaving channels [{}]", GetName().c_str(), ChannelNameList.c_str());
+	auto current_pos = 0;
 
-	std::string::size_type CurrentPos = 0;
+	while (current_pos != std::string::npos) {
 
-	while (CurrentPos != std::string::npos) {
-
-		std::string::size_type Comma = ChannelNameList.find_first_of(", ", CurrentPos);
+		std::string::size_type Comma = channel_name_list.find_first_of(", ", current_pos);
 
 		if (Comma == std::string::npos) {
 
-			ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos), this);
+			auto* joined_channel = ChannelList->RemoveClientFromChannel(channel_name_list.substr(current_pos), this, command_directed);
 
-			if (JoinedChannel)
-				RemoveFromChannelList(JoinedChannel);
+			if (joined_channel)
+				RemoveFromChannelList(joined_channel);
 
 			break;
 		}
 
-		ChatChannel* JoinedChannel = ChannelList->RemoveClientFromChannel(ChannelNameList.substr(CurrentPos, Comma - CurrentPos), this);
+		auto* joined_channel = ChannelList->RemoveClientFromChannel(channel_name_list.substr(current_pos, Comma - current_pos), this, command_directed);
 
-		if (JoinedChannel)
-			RemoveFromChannelList(JoinedChannel);
+		if (joined_channel)
+			RemoveFromChannelList(joined_channel);
 
-		CurrentPos = ChannelNameList.find_first_not_of(", ", Comma);
+		current_pos = channel_name_list.find_first_not_of(", ", Comma);
 	}
 
-	std::string JoinedChannelsList, ChannelMessage;
+	std::string joined_channels_list, channel_message;
 
-	ChannelMessage = "Channels: ";
+	channel_message = "Channels: ";
 
 	char tmp[200];
 
@@ -1126,26 +1183,26 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 
 			if (ChannelCount) {
 
-				JoinedChannelsList = JoinedChannelsList + ",";
+				joined_channels_list = joined_channels_list + ",";
 
-				ChannelMessage = ChannelMessage + ",";
+				channel_message = channel_message + ",";
 			}
 
-			JoinedChannelsList = JoinedChannelsList + JoinedChannels[i]->GetName();
+			joined_channels_list = joined_channels_list + JoinedChannels[i]->GetName();
 
 			sprintf(tmp, "%i=%s(%i)", i + 1, JoinedChannels[i]->GetName().c_str(), JoinedChannels[i]->MemberCount(Status));
 
-			ChannelMessage += tmp;
+			channel_message += tmp;
 
 			ChannelCount++;
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_Mail, JoinedChannelsList.length() + 1);
+	auto outapp = new EQApplicationPacket(OP_Mail, joined_channels_list.length() + 1);
 
 	char *PacketBuffer = (char *)outapp->pBuffer;
 
-	sprintf(PacketBuffer, "%s", JoinedChannelsList.c_str());
+	sprintf(PacketBuffer, "%s", joined_channels_list.c_str());
 
 
 	QueuePacket(outapp);
@@ -1153,15 +1210,15 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 	safe_delete(outapp);
 
 	if (ChannelCount == 0)
-		ChannelMessage = "You are not on any channels.";
+		channel_message = "You are not on any channels.";
 
-	outapp = new EQApplicationPacket(OP_ChannelMessage, ChannelMessage.length() + 3);
+	outapp = new EQApplicationPacket(OP_ChannelMessage, channel_message.length() + 3);
 
 	PacketBuffer = (char *)outapp->pBuffer;
 
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
 	VARSTRUCT_ENCODE_TYPE(uint8, PacketBuffer, 0x00);
-	VARSTRUCT_ENCODE_STRING(PacketBuffer, ChannelMessage.c_str());
+	VARSTRUCT_ENCODE_STRING(PacketBuffer, channel_message.c_str());
 
 
 	QueuePacket(outapp);
@@ -1169,24 +1226,24 @@ void Client::LeaveChannels(std::string ChannelNameList) {
 	safe_delete(outapp);
 }
 
-void Client::LeaveAllChannels(bool SendUpdatedChannelList) {
+void Client::LeaveAllChannels(bool send_updated_channel_list, bool command_directed) {
 
 	for (auto &elem : JoinedChannels) {
 
 		if (elem) {
 
-			ChannelList->RemoveClientFromChannel(elem->GetName(), this);
+			ChannelList->RemoveClientFromChannel(elem->GetName(), this, command_directed);
 
 			elem = nullptr;
 		}
 	}
 
-	if (SendUpdatedChannelList)
+	if (send_updated_channel_list)
 		SendChannelList();
 }
 
 
-void Client::ProcessChannelList(std::string Input) {
+void Client::ProcessChannelList(const std::string& Input) {
 
 	if (Input.length() == 0) {
 
@@ -1198,7 +1255,7 @@ void Client::ProcessChannelList(std::string Input) {
 	std::string ChannelName = Input;
 
 	if (isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1359,7 +1416,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 	if (MessageStart == std::string::npos)
 		return;
 
-	int ChannelNumber = atoi(Message.substr(0, MessageStart).c_str());
+	int ChannelNumber = Strings::ToInt(Message.substr(0, MessageStart));
 
 	if ((ChannelNumber < 1) || (ChannelNumber > MAX_JOINED_CHANNELS)) {
 
@@ -1464,7 +1521,7 @@ void Client::SendChannelMessageByNumber(std::string Message) {
 
 }
 
-void Client::SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender) {
+void Client::SendChannelMessage(const std::string& ChannelName, const std::string& Message, Client *Sender) {
 
 	if (!Sender) return;
 
@@ -1491,7 +1548,7 @@ void Client::SendChannelMessage(std::string ChannelName, std::string Message, Cl
 	safe_delete(outapp);
 }
 
-void Client::ToggleAnnounce(std::string State)
+void Client::ToggleAnnounce(const std::string& State)
 {
 	if (State == "")
 		Announce = !Announce;
@@ -1558,7 +1615,7 @@ void Client::GeneralChannelMessage(const char *Characters) {
 
 }
 
-void Client::GeneralChannelMessage(std::string Message) {
+void Client::GeneralChannelMessage(const std::string& Message) {
 
 	auto outapp = new EQApplicationPacket(OP_ChannelMessage, Message.length() + 3);
 	char *PacketBuffer = (char *)outapp->pBuffer;
@@ -1602,7 +1659,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	std::string ChannelName = ChannelPassword.substr(ChannelStart);
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	std::string Message;
 
@@ -1630,6 +1687,7 @@ void Client::SetChannelPassword(std::string ChannelPassword) {
 	}
 
 	RequiredChannel->SetPassword(Password);
+	database.SaveChatChannel(RequiredChannel->GetName(), RequiredChannel->GetOwnerName(), Password, RequiredChannel->GetMinStatus()); // Update DB with new password
 
 	GeneralChannelMessage(Message);
 
@@ -1666,7 +1724,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("Set owner of channel [[{}]] to [[{}]]", ChannelName.c_str(), NewOwner.c_str());
 
@@ -1690,6 +1748,7 @@ void Client::SetChannelOwner(std::string CommandString) {
 	}
 
 	RequiredChannel->SetOwner(NewOwner);
+	database.SaveChatChannel(RequiredChannel->GetName(), NewOwner, RequiredChannel->GetPassword(), RequiredChannel->GetMinStatus()); // Update DB with new owner
 
 	if (RequiredChannel->IsModerator(NewOwner))
 		RequiredChannel->RemoveModerator(NewOwner);
@@ -1711,7 +1770,7 @@ void Client::OPList(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1754,7 +1813,7 @@ void Client::ChannelInvite(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] invites [[{}]] to channel [[{}]]", GetName().c_str(), Invitee.c_str(), ChannelName.c_str());
 
@@ -1824,7 +1883,7 @@ void Client::ChannelModerate(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	ChatChannel *RequiredChannel = ChannelList->FindChannel(ChannelName);
 
@@ -1882,7 +1941,7 @@ void Client::ChannelGrantModerator(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] gives [[{}]] moderator rights to channel [[{}]]", GetName().c_str(), Moderator.c_str(), ChannelName.c_str());
 
@@ -1963,7 +2022,7 @@ void Client::ChannelGrantVoice(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] gives [[{}]] voice to channel [[{}]]", GetName().c_str(), Voicee.c_str(), ChannelName.c_str());
 
@@ -2051,7 +2110,7 @@ void Client::ChannelKick(std::string CommandString) {
 	std::string ChannelName = CapitaliseName(CommandString.substr(ChannelStart));
 
 	if ((ChannelName.length() > 0) && isdigit(ChannelName[0]))
-		ChannelName = ChannelSlotName(atoi(ChannelName.c_str()));
+		ChannelName = ChannelSlotName(Strings::ToInt(ChannelName));
 
 	LogInfo("[[{}]] kicks [[{}]] from channel [[{}]]", GetName().c_str(), Kickee.c_str(), ChannelName.c_str());
 
@@ -2108,7 +2167,7 @@ void Client::ChannelKick(std::string CommandString) {
 
 	GeneralChannelMessage("Kicked " + Kickee + " from channel " + ChannelName);
 
-	RequiredClient->LeaveChannels(ChannelName);
+	RequiredClient->LeaveChannels(ChannelName, false);
 }
 
 void Client::ToggleInvites() {
@@ -2220,7 +2279,7 @@ void Client::SetConnectionType(char c) {
 	}
 }
 
-Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
+Client *Clientlist::IsCharacterOnline(const std::string& CharacterName) {
 
 	// This method is used to determine if the character we are a sending an email to is connected to the mailserver,
 	// so we can send them a new email notification.
@@ -2248,7 +2307,7 @@ Client *Clientlist::IsCharacterOnline(std::string CharacterName) {
 	return nullptr;
 }
 
-int Client::GetMailBoxNumber(std::string CharacterName) {
+int Client::GetMailBoxNumber(const std::string& CharacterName) {
 
 	for (unsigned int i = 0; i < Characters.size(); i++)
 		if (Characters[i].Name == CharacterName)
@@ -2257,7 +2316,7 @@ int Client::GetMailBoxNumber(std::string CharacterName) {
 	return -1;
 }
 
-void Client::SendNotification(int MailBoxNumber, std::string Subject, std::string From, int MessageID) {
+void Client::SendNotification(int MailBoxNumber, const std::string& Subject, const std::string& From, int MessageID) {
 
 	char TimeStamp[100];
 

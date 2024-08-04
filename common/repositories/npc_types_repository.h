@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_NPC_TYPES_REPOSITORY_H
 #define EQEMU_NPC_TYPES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_npc_types_repository.h"
 
 class NpcTypesRepository: public BaseNpcTypesRepository {
@@ -64,7 +44,32 @@ public:
      */
 
 	// Custom extended repository methods here
+	static uint32 GetOpenIDInZoneRange(Database& db, uint32 zone_id)
+	{
+		const uint32 min_id = zone_id * 1000;
+		const uint32 max_id = min_id + 999;
 
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT MAX({}) FROM `{}` WHERE `{}` BETWEEN {} AND {}",
+				PrimaryKey(),
+				TableName(),
+				PrimaryKey(),
+				min_id,
+				max_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		const uint32 npc_id = row[0] ? Strings::ToUnsignedInt(row[0]) + 1 : 0;
+
+		return npc_id < max_id ? npc_id : 0;
+	}
 };
 
 #endif //EQEMU_NPC_TYPES_REPOSITORY_H

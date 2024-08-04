@@ -26,13 +26,14 @@ public:
 	}
 
 	int32 GetAC() const;
-	int32 GetHP() const;
-	int32 GetHPRegen() const;
-	int32 GetMaxHP() const;
-	int32 GetManaRegen() const;
-	int32 GetEnduranceRegen() const;
-	int32 GetMana() const;
-	int32 GetEndurance() const;
+	int64 GetHP() const;
+	int64 GetFlatMaxHPChange() const;
+	int64 GetHPRegen() const;
+	int64 GetMaxHP() const;
+	int64 GetManaRegen() const;
+	int64 GetEnduranceRegen() const;
+	int64 GetMana() const;
+	int64 GetEndurance() const;
 	int32 GetATK() const;
 	int32 GetSTR() const;
 	int32 GetSTRCapMod() const;
@@ -100,8 +101,8 @@ public:
 	uint32 GetwindMod() const;
 	uint32 GetstringedMod() const;
 	uint32 GetsongModCap() const;
-	int8 Gethatemod() const;
-	int32 GetEnduranceReduction() const;
+	int32 Gethatemod() const;
+	int64 GetEnduranceReduction() const;
 	int32 GetStrikeThrough() const;
 	int32 GetMeleeMitigation() const;
 	int32 GetMeleeMitigationEffect() const;

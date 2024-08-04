@@ -8,11 +8,11 @@
 
 #include "dbcore.h"
 
-#include <errmsg.h>
 #include <fstream>
 #include <iostream>
 #include <mysqld_error.h>
 #include <string.h>
+#include "strings.h"
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -34,14 +34,16 @@
 
 DBcore::DBcore()
 {
-	mysql_init(&mysql);
-	pHost           = nullptr;
-	pUser           = nullptr;
-	pPassword       = nullptr;
-	pDatabase       = nullptr;
-	pCompress       = false;
-	pSSL            = false;
-	pStatus         = Closed;
+	mysql      = mysql_init(nullptr);
+	mysqlOwner = true;
+	pHost      = nullptr;
+	pUser      = nullptr;
+	pPassword  = nullptr;
+	pDatabase  = nullptr;
+	pCompress  = false;
+	pSSL       = false;
+	pStatus    = Closed;
+	m_mutex    = new Mutex;
 }
 
 DBcore::~DBcore()
@@ -51,16 +53,10 @@ DBcore::~DBcore()
 	 * are re-using the default database connection pointer when we dont have an
 	 * external configuration setup ex: (content_database)
 	 */
-	std::string mysql_connection_host;
-	if (mysql.host) {
-		mysql_connection_host = mysql.host;
+	if (mysqlOwner) {
+		mysql_close(mysql);
 	}
 
-	if (GetOriginHost() != mysql_connection_host) {
-		return;
-	}
-
-	mysql_close(&mysql);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
 	safe_delete_array(pPassword);
@@ -70,20 +66,21 @@ DBcore::~DBcore()
 // Sends the MySQL server a keepalive
 void DBcore::ping()
 {
-	if (!MDatabase.trylock()) {
+	if (!m_mutex->trylock()) {
 		// well, if's it's locked, someone's using it. If someone's using it, it doesnt need a keepalive
 		return;
 	}
-	mysql_ping(&mysql);
-	MDatabase.unlock();
+	mysql_ping(mysql);
+	m_mutex->unlock();
 }
 
-MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureOnce)
+MySQLRequestResult DBcore::QueryDatabase(const std::string& query, bool retryOnFailureOnce)
 {
-	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
+	auto r = QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
+	return r;
 }
 
-bool DBcore::DoesTableExist(std::string table_name)
+bool DBcore::DoesTableExist(const std::string& table_name)
 {
 	auto results = QueryDatabase(fmt::format("SHOW TABLES LIKE '{}'", table_name));
 
@@ -95,18 +92,16 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	BenchTimer timer;
 	timer.reset();
 
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 
 	// Reconnect if we are not connected before hand.
 	if (pStatus != Connected) {
 		Open();
 	}
 
-
-
 	// request query. != 0 indicates some kind of error.
-	if (mysql_real_query(&mysql, query, querylen) != 0) {
-		unsigned int errorNumber = mysql_errno(&mysql);
+	if (mysql_real_query(mysql, query, querylen) != 0) {
+		unsigned int errorNumber = mysql_errno(mysql);
 
 		if (errorNumber == CR_SERVER_GONE_ERROR) {
 			pStatus = Error;
@@ -130,26 +125,26 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 
 			auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
 
-			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+			snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(mysql), mysql_error(mysql));
 
-			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32) mysql_errno(&mysql), errorBuffer);
+			return MySQLRequestResult(nullptr, 0, 0, 0, 0, (uint32) mysql_errno(mysql), errorBuffer);
 		}
 
 		auto errorBuffer = new char[MYSQL_ERRMSG_SIZE];
-		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+		snprintf(errorBuffer, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(mysql), mysql_error(mysql));
 
 		/**
 		 * Error logging
 		 */
-		if (mysql_errno(&mysql) > 0 && strlen(query) > 0) {
-			LogMySQLError("[{}] [{}]\n[{}]", mysql_errno(&mysql), mysql_error(&mysql), query);
+		if (mysql_errno(mysql) > 0 && query[0] != '\0') {
+			LogMySQLError("MySQL Error ({}) [{}] Query [{}]", mysql_errno(mysql), mysql_error(mysql), query);
 		}
 
-		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(&mysql), errorBuffer);
+		return MySQLRequestResult(nullptr, 0, 0, 0, 0, mysql_errno(mysql), errorBuffer);
 	}
 
 	// successful query. get results.
-	MYSQL_RES *res     = mysql_store_result(&mysql);
+	MYSQL_RES *res     = mysql_store_result(mysql);
 	uint32    rowCount = 0;
 
 	if (res != nullptr) {
@@ -158,16 +153,16 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 
 	MySQLRequestResult requestResult(
 		res,
-		(uint32) mysql_affected_rows(&mysql),
+		(uint32) mysql_affected_rows(mysql),
 		rowCount,
-		(uint32) mysql_field_count(&mysql),
-		(uint32) mysql_insert_id(&mysql)
+		(uint32) mysql_field_count(mysql),
+		(uint32) mysql_insert_id(mysql)
 	);
 
 	if (LogSys.log_settings[Logs::MySQLQuery].is_category_enabled == 1) {
 		if ((strncasecmp(query, "select", 6) == 0)) {
 			LogMySQLQuery(
-				"{0} ({1} row{2} returned) ({3}s)",
+				"{0} -- ({1} row{2} returned) ({3}s)",
 				query,
 				requestResult.RowCount(),
 				requestResult.RowCount() == 1 ? "" : "s",
@@ -176,7 +171,7 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 		}
 		else {
 			LogMySQLQuery(
-				"{0} ({1} row{2} affected) ({3}s)",
+				"{0} -- ({1} row{2} affected) ({3}s)",
 				query,
 				requestResult.RowsAffected(),
 				requestResult.RowsAffected() == 1 ? "" : "s",
@@ -207,7 +202,7 @@ uint32 DBcore::DoEscapeString(char *tobuf, const char *frombuf, uint32 fromlen)
 {
 //	No good reason to lock the DB, we only need it in the first place to check char encoding.
 //	LockMutex lock(&MDatabase);
-	return mysql_real_escape_string(&mysql, tobuf, frombuf, fromlen);
+	return mysql_real_escape_string(mysql, tobuf, frombuf, fromlen);
 }
 
 bool DBcore::Open(
@@ -222,7 +217,7 @@ bool DBcore::Open(
 	bool iSSL
 )
 {
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
 	safe_delete_array(pPassword);
@@ -242,13 +237,13 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	if (errbuf) {
 		errbuf[0] = 0;
 	}
-	LockMutex lock(&MDatabase);
+	LockMutex lock(m_mutex);
 	if (GetStatus() == Connected) {
 		return true;
 	}
 	if (GetStatus() == Error) {
-		mysql_close(&mysql);
-		mysql_init(&mysql);        // Initialize structure again
+		mysql_close(mysql);
+		mysql_init(mysql);        // Initialize structure again
 	}
 	if (!pHost) {
 		return false;
@@ -265,7 +260,7 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	if (pSSL) {
 		flags |= CLIENT_SSL;
 	}
-	if (mysql_real_connect(&mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
+	if (mysql_real_connect(mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
 		pStatus = Connected;
 
 		std::string connected_origin_host = pHost;
@@ -275,19 +270,14 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	}
 	else {
 		if (errnum) {
-			*errnum = mysql_errno(&mysql);
+			*errnum = mysql_errno(mysql);
 		}
 		if (errbuf) {
-			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(&mysql), mysql_error(&mysql));
+			snprintf(errbuf, MYSQL_ERRMSG_SIZE, "#%i: %s", mysql_errno(mysql), mysql_error(mysql));
 		}
 		pStatus = Error;
 		return false;
 	}
-}
-
-void DBcore::SetMysql(MYSQL *mysql)
-{
-	DBcore::mysql = *mysql;
 }
 
 const std::string &DBcore::GetOriginHost() const
@@ -298,4 +288,151 @@ const std::string &DBcore::GetOriginHost() const
 void DBcore::SetOriginHost(const std::string &origin_host)
 {
 	DBcore::origin_host = origin_host;
+}
+
+std::string DBcore::Escape(const std::string& s)
+{
+	const std::size_t s_len = s.length();
+	std::vector<char> temp((s_len * 2) + 1, '\0');
+	mysql_real_escape_string(mysql, temp.data(), s.c_str(), s_len);
+
+	return temp.data();
+}
+
+void DBcore::SetMutex(Mutex *mutex)
+{
+	safe_delete(m_mutex);
+
+	DBcore::m_mutex = mutex;
+}
+
+// executes multiple statements in one query
+// do not use this in application logic
+// this was built and maintained for database migrations only
+MySQLRequestResult DBcore::QueryDatabaseMulti(const std::string &query)
+{
+	SetMultiStatementsOn();
+
+	BenchTimer timer;
+	timer.reset();
+
+	LockMutex lock(m_mutex);
+
+	// Reconnect if we are not connected before hand.
+	if (pStatus != Connected) {
+		Open();
+	}
+	auto r = MySQLRequestResult{};
+
+	int status = mysql_real_query(mysql, query.c_str(), query.length());
+
+	// process single result
+	if (status != 0) {
+		unsigned int error_number = mysql_errno(mysql);
+
+		if (error_number == CR_SERVER_GONE_ERROR) {
+			pStatus = Error;
+		}
+
+		// error logging
+		if (mysql_errno(mysql) > 0 && query.length() > 0 && mysql_errno(mysql) != 1065) {
+			std::string error_raw   = fmt::format("{}", mysql_error(mysql));
+			std::string mysql_err   = Strings::Trim(error_raw);
+			std::string clean_query = Strings::Replace(query, "\n", "");
+			LogMySQLError("[{}] ({}) query [{}]", mysql_err, mysql_errno(mysql), clean_query);
+
+			MYSQL_RES *res = mysql_store_result(mysql);
+
+			uint32 row_count = 0;
+			if (res) {
+				row_count = (uint32) mysql_num_rows(res);
+			}
+
+			r = MySQLRequestResult(
+				res,
+				(uint32) mysql_affected_rows(mysql),
+				row_count,
+				(uint32) mysql_field_count(mysql),
+				(uint32) mysql_insert_id(mysql)
+			);
+
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
+			if (res) {
+				mysql_free_result(res);
+			}
+
+			SetMultiStatementsOff();
+
+			return r;
+		}
+	}
+
+
+	int index = 0;
+
+	// there could be a query with a semicolon in the actual data, this is best effort for
+	// logging / display purposes
+	// rare that we see this when this is only used in DDL statements
+	auto pieces = Strings::Split(query, ";");
+
+	// process each statement result
+	do {
+		uint32    row_count = 0;
+		MYSQL_RES *res      = mysql_store_result(mysql);
+
+		r = MySQLRequestResult(
+			res,
+			(uint32) mysql_affected_rows(mysql),
+			row_count,
+			(uint32) mysql_field_count(mysql),
+			(uint32) mysql_insert_id(mysql)
+		);
+
+		if (pieces.size() >= index) {
+			auto piece = pieces[index];
+			LogMySQLQuery(
+				"{} -- ({} row{} affected) ({}s)",
+				piece,
+				r.RowsAffected(),
+				r.RowsAffected() == 1 ? "" : "s",
+				std::to_string(timer.elapsed())
+			);
+		}
+
+		if (res) {
+			row_count = (uint32) mysql_num_rows(res);
+		}
+
+		// more results? -1 = no, >0 = error, 0 = yes (keep looping)
+		if ((status = mysql_next_result(mysql)) > 0) {
+			if (mysql_errno(mysql) > 0) {
+				LogMySQLError("[{}] [{}]", mysql_errno(mysql), mysql_error(mysql));
+			}
+
+			mysql_free_result(res);
+
+			// error logging
+			std::string error_message = mysql_error(mysql);
+			r.SetErrorMessage(error_message);
+			r.SetErrorNumber(mysql_errno(mysql));
+
+			SetMultiStatementsOff();
+
+			// we handle errors elsewhere
+			return r;
+		}
+
+		if (res) {
+			mysql_free_result(res);
+		}
+
+		index++;
+	} while (status == 0);
+
+	SetMultiStatementsOff();
+
+	return r;
 }

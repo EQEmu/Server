@@ -4,34 +4,36 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_AA_ABILITY_REPOSITORY_H
 #define EQEMU_BASE_AA_ABILITY_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseAaAbilityRepository {
 public:
 	struct AaAbility {
-		int         id;
+		uint32_t    id;
 		std::string name;
-		int         category;
-		int         classes;
-		int         races;
-		int         drakkin_heritage;
-		int         deities;
-		int         status;
-		int         type;
-		int         charges;
-		int         grant_only;
-		int         first_rank_id;
-		int         enabled;
-		int         reset_on_death;
+		int32_t     category;
+		int32_t     classes;
+		int32_t     races;
+		int32_t     drakkin_heritage;
+		int32_t     deities;
+		int32_t     status;
+		int32_t     type;
+		int32_t     charges;
+		int8_t      grant_only;
+		int32_t     first_rank_id;
+		uint8_t     enabled;
+		int8_t      reset_on_death;
+		int8_t      auto_grant_enabled;
 	};
 
 	static std::string PrimaryKey()
@@ -56,12 +58,39 @@ public:
 			"first_rank_id",
 			"enabled",
 			"reset_on_death",
+			"auto_grant_enabled",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"name",
+			"category",
+			"classes",
+			"races",
+			"drakkin_heritage",
+			"deities",
+			"status",
+			"type",
+			"charges",
+			"grant_only",
+			"first_rank_id",
+			"enabled",
+			"reset_on_death",
+			"auto_grant_enabled",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -73,7 +102,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -89,27 +118,28 @@ public:
 
 	static AaAbility NewEntity()
 	{
-		AaAbility entry{};
+		AaAbility e{};
 
-		entry.id               = 0;
-		entry.name             = "";
-		entry.category         = -1;
-		entry.classes          = 131070;
-		entry.races            = 65535;
-		entry.drakkin_heritage = 127;
-		entry.deities          = 131071;
-		entry.status           = 0;
-		entry.type             = 0;
-		entry.charges          = 0;
-		entry.grant_only       = 0;
-		entry.first_rank_id    = -1;
-		entry.enabled          = 1;
-		entry.reset_on_death   = 0;
+		e.id                 = 0;
+		e.name               = "";
+		e.category           = -1;
+		e.classes            = 131070;
+		e.races              = 65535;
+		e.drakkin_heritage   = 127;
+		e.deities            = 131071;
+		e.status             = 0;
+		e.type               = 0;
+		e.charges            = 0;
+		e.grant_only         = 0;
+		e.first_rank_id      = -1;
+		e.enabled            = 1;
+		e.reset_on_death     = 0;
+		e.auto_grant_enabled = 0;
 
-		return entry;
+		return e;
 	}
 
-	static AaAbility GetAaAbilityEntry(
+	static AaAbility GetAaAbility(
 		const std::vector<AaAbility> &aa_abilitys,
 		int aa_ability_id
 	)
@@ -130,32 +160,34 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				aa_ability_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -180,35 +212,36 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		AaAbility aa_ability_entry
+		const AaAbility &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(aa_ability_entry.id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(aa_ability_entry.name) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(aa_ability_entry.category));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_ability_entry.classes));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_ability_entry.races));
-		update_values.push_back(columns[5] + " = " + std::to_string(aa_ability_entry.drakkin_heritage));
-		update_values.push_back(columns[6] + " = " + std::to_string(aa_ability_entry.deities));
-		update_values.push_back(columns[7] + " = " + std::to_string(aa_ability_entry.status));
-		update_values.push_back(columns[8] + " = " + std::to_string(aa_ability_entry.type));
-		update_values.push_back(columns[9] + " = " + std::to_string(aa_ability_entry.charges));
-		update_values.push_back(columns[10] + " = " + std::to_string(aa_ability_entry.grant_only));
-		update_values.push_back(columns[11] + " = " + std::to_string(aa_ability_entry.first_rank_id));
-		update_values.push_back(columns[12] + " = " + std::to_string(aa_ability_entry.enabled));
-		update_values.push_back(columns[13] + " = " + std::to_string(aa_ability_entry.reset_on_death));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.name) + "'");
+		v.push_back(columns[2] + " = " + std::to_string(e.category));
+		v.push_back(columns[3] + " = " + std::to_string(e.classes));
+		v.push_back(columns[4] + " = " + std::to_string(e.races));
+		v.push_back(columns[5] + " = " + std::to_string(e.drakkin_heritage));
+		v.push_back(columns[6] + " = " + std::to_string(e.deities));
+		v.push_back(columns[7] + " = " + std::to_string(e.status));
+		v.push_back(columns[8] + " = " + std::to_string(e.type));
+		v.push_back(columns[9] + " = " + std::to_string(e.charges));
+		v.push_back(columns[10] + " = " + std::to_string(e.grant_only));
+		v.push_back(columns[11] + " = " + std::to_string(e.first_rank_id));
+		v.push_back(columns[12] + " = " + std::to_string(e.enabled));
+		v.push_back(columns[13] + " = " + std::to_string(e.reset_on_death));
+		v.push_back(columns[14] + " = " + std::to_string(e.auto_grant_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				aa_ability_entry.id
+				e.id
 			)
 		);
 
@@ -217,79 +250,81 @@ public:
 
 	static AaAbility InsertOne(
 		Database& db,
-		AaAbility aa_ability_entry
+		AaAbility e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(aa_ability_entry.id));
-		insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
-		insert_values.push_back(std::to_string(aa_ability_entry.category));
-		insert_values.push_back(std::to_string(aa_ability_entry.classes));
-		insert_values.push_back(std::to_string(aa_ability_entry.races));
-		insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-		insert_values.push_back(std::to_string(aa_ability_entry.deities));
-		insert_values.push_back(std::to_string(aa_ability_entry.status));
-		insert_values.push_back(std::to_string(aa_ability_entry.type));
-		insert_values.push_back(std::to_string(aa_ability_entry.charges));
-		insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-		insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-		insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-		insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.category));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.deities));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.grant_only));
+		v.push_back(std::to_string(e.first_rank_id));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.reset_on_death));
+		v.push_back(std::to_string(e.auto_grant_enabled));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			aa_ability_entry.id = results.LastInsertedID();
-			return aa_ability_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		aa_ability_entry = NewEntity();
+		e = NewEntity();
 
-		return aa_ability_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<AaAbility> aa_ability_entries
+		const std::vector<AaAbility> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &aa_ability_entry: aa_ability_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(aa_ability_entry.id));
-			insert_values.push_back("'" + EscapeString(aa_ability_entry.name) + "'");
-			insert_values.push_back(std::to_string(aa_ability_entry.category));
-			insert_values.push_back(std::to_string(aa_ability_entry.classes));
-			insert_values.push_back(std::to_string(aa_ability_entry.races));
-			insert_values.push_back(std::to_string(aa_ability_entry.drakkin_heritage));
-			insert_values.push_back(std::to_string(aa_ability_entry.deities));
-			insert_values.push_back(std::to_string(aa_ability_entry.status));
-			insert_values.push_back(std::to_string(aa_ability_entry.type));
-			insert_values.push_back(std::to_string(aa_ability_entry.charges));
-			insert_values.push_back(std::to_string(aa_ability_entry.grant_only));
-			insert_values.push_back(std::to_string(aa_ability_entry.first_rank_id));
-			insert_values.push_back(std::to_string(aa_ability_entry.enabled));
-			insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.category));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.deities));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.grant_only));
+			v.push_back(std::to_string(e.first_rank_id));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.reset_on_death));
+			v.push_back(std::to_string(e.auto_grant_enabled));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -310,30 +345,31 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<AaAbility> GetWhere(Database& db, std::string where_filter)
+	static std::vector<AaAbility> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<AaAbility> all_entries;
 
@@ -348,30 +384,31 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			AaAbility entry{};
+			AaAbility e{};
 
-			entry.id               = atoi(row[0]);
-			entry.name             = row[1] ? row[1] : "";
-			entry.category         = atoi(row[2]);
-			entry.classes          = atoi(row[3]);
-			entry.races            = atoi(row[4]);
-			entry.drakkin_heritage = atoi(row[5]);
-			entry.deities          = atoi(row[6]);
-			entry.status           = atoi(row[7]);
-			entry.type             = atoi(row[8]);
-			entry.charges          = atoi(row[9]);
-			entry.grant_only       = atoi(row[10]);
-			entry.first_rank_id    = atoi(row[11]);
-			entry.enabled          = atoi(row[12]);
-			entry.reset_on_death   = atoi(row[13]);
+			e.id                 = row[0] ? static_cast<uint32_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.name               = row[1] ? row[1] : "";
+			e.category           = row[2] ? static_cast<int32_t>(atoi(row[2])) : -1;
+			e.classes            = row[3] ? static_cast<int32_t>(atoi(row[3])) : 131070;
+			e.races              = row[4] ? static_cast<int32_t>(atoi(row[4])) : 65535;
+			e.drakkin_heritage   = row[5] ? static_cast<int32_t>(atoi(row[5])) : 127;
+			e.deities            = row[6] ? static_cast<int32_t>(atoi(row[6])) : 131071;
+			e.status             = row[7] ? static_cast<int32_t>(atoi(row[7])) : 0;
+			e.type               = row[8] ? static_cast<int32_t>(atoi(row[8])) : 0;
+			e.charges            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.grant_only         = row[10] ? static_cast<int8_t>(atoi(row[10])) : 0;
+			e.first_rank_id      = row[11] ? static_cast<int32_t>(atoi(row[11])) : -1;
+			e.enabled            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 1;
+			e.reset_on_death     = row[13] ? static_cast<int8_t>(atoi(row[13])) : 0;
+			e.auto_grant_enabled = row[14] ? static_cast<int8_t>(atoi(row[14])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -396,6 +433,116 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const AaAbility &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back("'" + Strings::Escape(e.name) + "'");
+		v.push_back(std::to_string(e.category));
+		v.push_back(std::to_string(e.classes));
+		v.push_back(std::to_string(e.races));
+		v.push_back(std::to_string(e.drakkin_heritage));
+		v.push_back(std::to_string(e.deities));
+		v.push_back(std::to_string(e.status));
+		v.push_back(std::to_string(e.type));
+		v.push_back(std::to_string(e.charges));
+		v.push_back(std::to_string(e.grant_only));
+		v.push_back(std::to_string(e.first_rank_id));
+		v.push_back(std::to_string(e.enabled));
+		v.push_back(std::to_string(e.reset_on_death));
+		v.push_back(std::to_string(e.auto_grant_enabled));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<AaAbility> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back("'" + Strings::Escape(e.name) + "'");
+			v.push_back(std::to_string(e.category));
+			v.push_back(std::to_string(e.classes));
+			v.push_back(std::to_string(e.races));
+			v.push_back(std::to_string(e.drakkin_heritage));
+			v.push_back(std::to_string(e.deities));
+			v.push_back(std::to_string(e.status));
+			v.push_back(std::to_string(e.type));
+			v.push_back(std::to_string(e.charges));
+			v.push_back(std::to_string(e.grant_only));
+			v.push_back(std::to_string(e.first_rank_id));
+			v.push_back(std::to_string(e.enabled));
+			v.push_back(std::to_string(e.reset_on_death));
+			v.push_back(std::to_string(e.auto_grant_enabled));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_AA_ABILITY_REPOSITORY_H

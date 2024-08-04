@@ -92,26 +92,27 @@ public:
 	void SendMailBoxes();
 	inline void QueuePacket(const EQApplicationPacket *p, bool ack_req=true) { ClientStream->QueuePacket(p, ack_req); }
 	std::string GetName() { if(Characters.size()) return Characters[0].Name; else return ""; }
-	void JoinChannels(std::string ChannelList);
-	void LeaveChannels(std::string ChannelList);
-	void LeaveAllChannels(bool SendUpdatedChannelList = true);
+	void JoinChannels(std::string& channel_name_list, bool command_directed = false);
+	void LeaveChannels(std::string& channel_name_list, bool command_directed = false);
+	void LeaveAllChannels(bool send_updated_channel_list = true, bool command_directed = false);
 	void AddToChannelList(ChatChannel *JoinedChannel);
 	void RemoveFromChannelList(ChatChannel *JoinedChannel);
 	void SendChannelMessage(std::string Message);
-	void SendChannelMessage(std::string ChannelName, std::string Message, Client *Sender);
+	void SendChannelMessage(const std::string& ChannelName, const std::string& Message, Client *Sender);
 	void SendChannelMessageByNumber(std::string Message);
 	void SendChannelList();
 	void CloseConnection();
-	void ToggleAnnounce(std::string State);
+	void ToggleAnnounce(const std::string& State);
 	bool IsAnnounceOn() { return (Announce == true); }
 	void AnnounceJoin(ChatChannel *Channel, Client *c);
 	void AnnounceLeave(ChatChannel *Channel, Client *c);
-	void GeneralChannelMessage(std::string Message);
+	void GeneralChannelMessage(const std::string& Message);
 	void GeneralChannelMessage(const char *Characters);
 	void SetChannelPassword(std::string ChannelPassword);
-	void ProcessChannelList(std::string CommandString);
+	void ProcessChannelList(const std::string& Input);
 	void AccountUpdate();
 	int ChannelCount();
+	std::string RemoveDuplicateChannels(std::string& in_channels);
 	inline void SetAccountID(int inAccountID) { AccountID = inAccountID; }
 	inline int GetAccountID() { return AccountID; }
 	inline void SetAccountStatus(int inStatus) { Status = inStatus; }
@@ -138,14 +139,14 @@ public:
 	inline bool GetForceDisconnect() { return ForceDisconnect; }
 	std::string MailBoxName();
 	int GetMailBoxNumber() { return CurrentMailBox; }
-	int GetMailBoxNumber(std::string CharacterName);
+	int GetMailBoxNumber(const std::string& CharacterName);
 
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
 	EQ::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
 
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
-	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
+	void SendNotification(int MailBoxNumber, const std::string& Subject, const std::string& From, int MessageID);
 	void ChangeMailBox(int NewMailBox);
 	inline void SetMailBox(int NewMailBox) { CurrentMailBox = NewMailBox; }
 	void SendFriends();
@@ -183,11 +184,11 @@ public:
 	Clientlist(int MailPort);
 	void	Process();
 	void	CloseAllConnections();
-	Client *FindCharacter(std::string CharacterName);
+	Client *FindCharacter(const std::string& CharacterName);
 	void	CheckForStaleConnectionsAll();
 	void	CheckForStaleConnections(Client *c);
-	Client *IsCharacterOnline(std::string CharacterName);
-	void ProcessOPMailCommand(Client *c, std::string CommandString);
+	Client *IsCharacterOnline(const std::string& CharacterName);
+	void ProcessOPMailCommand(Client* c, std::string command_string, bool command_directed = false);
 
 private:
 	EQ::Net::EQStreamManager *chatsf;

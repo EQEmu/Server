@@ -28,11 +28,6 @@
 int ZoneLaunch::s_running = 0;	//the number of zones running under this launcher
 Timer ZoneLaunch::s_startTimer(1);	//I do not trust this things state after static initialization
 
-void ZoneLaunch::InitStartTimer() {
-	s_startTimer.Start(1);
-	s_startTimer.Trigger();
-}
-
 ZoneLaunch::ZoneLaunch(WorldServer *world, const char *launcher_name,
 const char *zone_name, uint16 port, const EQEmuConfig *config)
 : m_state(StateStartPending),

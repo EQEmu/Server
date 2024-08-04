@@ -6,14 +6,10 @@
 
 #include "../common/spdat.h"
 #include "masterentity.h"
-#include "questmgr.h"
 #include "zone.h"
-#include "zone_config.h"
 
 #include "lua_parser.h"
 #include "lua_mod.h"
-#include "lua_bit.h"
-#include "lua_entity.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
@@ -21,17 +17,12 @@
 #include "lua_client.h"
 #include "lua_inventory.h"
 #include "lua_npc.h"
-#include "lua_spell.h"
-#include "lua_entity_list.h"
 #include "lua_group.h"
 #include "lua_raid.h"
 #include "lua_corpse.h"
 #include "lua_object.h"
 #include "lua_door.h"
-#include "lua_spawn.h"
 #include "lua_packet.h"
-#include "lua_general.h"
-#include "lua_encounter.h"
 #include "lua_stat_bonuses.h"
 
 void LuaMod::Init()
@@ -45,6 +36,14 @@ void LuaMod::Init()
 	m_has_get_exp_for_level = parser_->HasFunction("GetEXPForLevel", package_name_);
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
+	m_has_calc_spell_effect_value_formula = parser_->HasFunction("CalcSpellEffectValue_formula", package_name_);
+	m_has_update_personal_faction = parser_->HasFunction("UpdatePersonalFaction", package_name_);
+	m_has_register_bug = parser_->HasFunction("RegisterBug", package_name_);
+	m_has_common_damage = parser_->HasFunction("CommonDamage", package_name_);
+	m_has_heal_damage = parser_->HasFunction("HealDamage", package_name_);
+	m_has_is_immune_to_spell = parser_->HasFunction("IsImmuneToSpell", package_name_);
+	m_has_set_aa_exp = parser_->HasFunction("SetAAEXP", package_name_);
+	m_has_set_exp = parser_->HasFunction("SetEXP", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -181,6 +180,61 @@ void GetExtraAttackOptions(luabind::adl::object &ret, ExtraAttackOptions *opts) 
 	}
 }
 
+void LuaMod::UpdatePersonalFaction(Mob *self, int32 npc_value, int32 faction_id, int32 current_value, int32 temp, int32 this_faction_min, int32 this_faction_max, int32 &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_update_personal_faction) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "UpdatePersonalFaction");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["npc_value"] = npc_value;
+		e["faction_id"] = faction_id;
+		e["current_value"] = current_value;
+		e["temp"] = temp;
+		e["this_faction_min"] = this_faction_min;
+		e["this_faction_max"] = this_faction_max;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
 void LuaMod::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts, bool &ignoreDefault) {
 	int start = lua_gettop(L);
 
@@ -206,7 +260,7 @@ void LuaMod::MeleeMitigation(Mob *self, Mob *attacker, DamageHitInfo &hit, Extra
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -253,7 +307,7 @@ void LuaMod::ApplyDamageTable(Mob *self, DamageHitInfo &hit, bool &ignoreDefault
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -301,7 +355,7 @@ void LuaMod::AvoidDamage(Mob *self, Mob *other, DamageHitInfo &hit, bool &return
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -354,7 +408,7 @@ void LuaMod::CheckHitChance(Mob *self, Mob* other, DamageHitInfo &hit, bool &ret
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -409,7 +463,7 @@ void LuaMod::CommonOutgoingHitSuccess(Mob *self, Mob *other, DamageHitInfo &hit,
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -459,7 +513,7 @@ void LuaMod::TryCriticalHit(Mob *self, Mob *defender, DamageHitInfo &hit, ExtraA
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -505,7 +559,7 @@ void LuaMod::GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ig
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -553,7 +607,7 @@ void LuaMod::GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, boo
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -581,10 +635,116 @@ void LuaMod::GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, boo
 	}
 }
 
-void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault)
+
+void LuaMod::SetEXP(Mob *self, ExpSource exp_source, uint64 current_exp, uint64 set_exp, bool is_rezz_exp, uint64 &return_value, bool &ignore_default)
 {
 	int start = lua_gettop(L);
-	uint32 retval = 0;
+
+	try {
+		if (!m_has_set_exp) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "SetEXP");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["exp_source"] = exp_source;
+		e["current_exp"] = current_exp;
+		e["set_exp"] = set_exp;
+		e["is_rezz_exp"] = is_rezz_exp;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+void LuaMod::SetAAEXP(Mob *self, ExpSource exp_source, uint64 current_aa_exp, uint64 set_aa_exp, bool is_rezz_exp, uint64 &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_set_aa_exp) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "SetAAEXP");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["exp_source"] = exp_source;
+		e["current_aa_exp"] = current_aa_exp;
+		e["set_aa_exp"] = set_aa_exp;
+		e["is_rezz_exp"] = is_rezz_exp;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint64 &returnValue, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
 
 	try {
 		if (!m_has_get_experience_for_kill) {
@@ -604,7 +764,7 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 		if (lua_pcall(L, 1, 1, 0)) {
 			std::string error = lua_tostring(L, -1);
 			parser_->AddError(error);
-			lua_pop(L, 1);
+			lua_pop(L, 2);
 			return;
 		}
 
@@ -617,7 +777,7 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
-				returnValue = luabind::object_cast<uint32>(returnValueObj);
+				returnValue = luabind::object_cast<uint64>(returnValueObj);
 			}
 		}
 	}
@@ -632,4 +792,294 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 	}
 }
 
+void LuaMod::IsImmuneToSpell(Mob *self, Mob* caster, uint16 spell_id, bool &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_is_immune_to_spell) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "IsImmuneToSpell");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(caster);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["caster"] = l_other;
+		e["spell_id"] = spell_id;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TBOOLEAN) {
+				return_value = luabind::object_cast<bool>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+void LuaMod::CalcSpellEffectValue_formula(Mob *self, uint32 formula, int64 base_value, int64 max_value, int caster_level, uint16 spell_id, int ticsremaining, int64 &returnValue, bool &ignoreDefault)
+{
+	int start = lua_gettop(L);
+	int64 retval = 0;
+
+	try {
+		if (!m_has_calc_spell_effect_value_formula) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "CalcSpellEffectValue_formula");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["formula"] = formula;
+		e["base_value"] = base_value;
+		e["max_value"] = max_value;
+		e["caster_level"] = caster_level;
+		e["spell_id"] = spell_id;
+		e["ticsremaining"] = ticsremaining;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				returnValue = luabind::object_cast<int64>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+
+void LuaMod::RegisterBug(Client *self, BaseBugReportsRepository::BugReports bug, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_register_bug) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "RegisterBug");
+
+		Lua_Client l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"]                = l_self;
+		e["zone"]                = bug.zone;
+		e["client_version_id"]   = bug.client_version_id;
+		e["client_version_name"] = bug.client_version_name;
+		e["account_id"]          = bug.account_id;
+		e["character_id"]        = bug.character_id;
+		e["character_name"]      = bug.character_name;
+		e["reporter_spoof"]      = bug.reporter_spoof;
+		e["category_id"]         = bug.category_id;
+		e["category_name"]       = bug.category_name;
+		e["reporter_name"]       = bug.reporter_name;
+		e["ui_path"]             = bug.ui_path;
+		e["pos_x"]               = bug.pos_x;
+		e["pos_y"]               = bug.pos_y;
+		e["pos_z"]               = bug.pos_z;
+		e["heading"]             = bug.heading;
+		e["time_played"]         = bug.time_played;
+		e["target_id"]           = bug.target_id;
+		e["target_name"]         = bug.target_name;
+		e["optional_info_mask"]  = bug.optional_info_mask;
+		e["_can_duplicate"]      = bug._can_duplicate;
+		e["_crash_bug"]          = bug._crash_bug;
+		e["_target_info"]        = bug._target_info;
+		e["_character_flags"]    = bug._character_flags;
+		e["_unknown_value"]      = bug._unknown_value;
+		e["bug_report"]          = bug.bug_report;
+		e["system_info"]         = bug.system_info;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+
+void LuaMod::CommonDamage(Mob *self, Mob* attacker, int64 value, uint16 spell_id, int skill_used, bool avoidable, int8 buff_slot, bool buff_tic, int special, int64 &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_common_damage) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "CommonDamage");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(attacker);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["attacker"] = l_other;
+		e["value"] = value;
+		e["spell_id"] = spell_id;
+		e["skill_used"] = skill_used;
+		e["avoidable"] = avoidable;
+		e["buff_slot"] = buff_slot;
+		e["buff_tic"] = buff_tic;
+		e["special"] = special;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+
+void LuaMod::HealDamage(Mob *self, Mob* caster, uint64 value, uint16 spell_id, uint64 &return_value, bool &ignore_default)
+{
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_heal_damage) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "HealDamage");
+
+		Lua_Mob l_self(self);
+		Lua_Mob l_other(caster);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["caster"] = l_other;
+		e["value"] = value;
+		e["spell_id"] = spell_id;
+
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 2);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto ignore_default_obj = ret["ignore_default"];
+			if (luabind::type(ignore_default_obj) == LUA_TBOOLEAN) {
+				ignore_default = ignore_default || luabind::object_cast<bool>(ignore_default_obj);
+			}
+
+			auto return_value_obj = ret["return_value"];
+			if (luabind::type(return_value_obj) == LUA_TNUMBER) {
+				return_value = luabind::object_cast<int64>(return_value_obj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
 #endif

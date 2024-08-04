@@ -4,21 +4,22 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_RULE_VALUES_REPOSITORY_H
 #define EQEMU_BASE_RULE_VALUES_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseRuleValuesRepository {
 public:
 	struct RuleValues {
-		int         ruleset_id;
+		uint8_t     ruleset_id;
 		std::string rule_name;
 		std::string rule_value;
 		std::string notes;
@@ -39,9 +40,24 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"ruleset_id",
+			"rule_name",
+			"rule_value",
+			"notes",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -53,7 +69,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -69,17 +85,17 @@ public:
 
 	static RuleValues NewEntity()
 	{
-		RuleValues entry{};
+		RuleValues e{};
 
-		entry.ruleset_id = 0;
-		entry.rule_name  = "";
-		entry.rule_value = "";
-		entry.notes      = "";
+		e.ruleset_id = 0;
+		e.rule_name  = "";
+		e.rule_value = "";
+		e.notes      = "";
 
-		return entry;
+		return e;
 	}
 
-	static RuleValues GetRuleValuesEntry(
+	static RuleValues GetRuleValues(
 		const std::vector<RuleValues> &rule_valuess,
 		int rule_values_id
 	)
@@ -100,22 +116,23 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				rule_values_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			RuleValues entry{};
+			RuleValues e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1] ? row[1] : "";
-			entry.rule_value = row[2] ? row[2] : "";
-			entry.notes      = row[3] ? row[3] : "";
+			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rule_name  = row[1] ? row[1] : "";
+			e.rule_value = row[2] ? row[2] : "";
+			e.notes      = row[3] ? row[3] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -140,25 +157,25 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		RuleValues rule_values_entry
+		const RuleValues &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(rule_values_entry.ruleset_id));
-		update_values.push_back(columns[1] + " = '" + EscapeString(rule_values_entry.rule_name) + "'");
-		update_values.push_back(columns[2] + " = '" + EscapeString(rule_values_entry.rule_value) + "'");
-		update_values.push_back(columns[3] + " = '" + EscapeString(rule_values_entry.notes) + "'");
+		v.push_back(columns[0] + " = " + std::to_string(e.ruleset_id));
+		v.push_back(columns[1] + " = '" + Strings::Escape(e.rule_name) + "'");
+		v.push_back(columns[2] + " = '" + Strings::Escape(e.rule_value) + "'");
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				rule_values_entry.ruleset_id
+				e.ruleset_id
 			)
 		);
 
@@ -167,59 +184,59 @@ public:
 
 	static RuleValues InsertOne(
 		Database& db,
-		RuleValues rule_values_entry
+		RuleValues e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
-		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
-		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
-		insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
+		v.push_back(std::to_string(e.ruleset_id));
+		v.push_back("'" + Strings::Escape(e.rule_name) + "'");
+		v.push_back("'" + Strings::Escape(e.rule_value) + "'");
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			rule_values_entry.ruleset_id = results.LastInsertedID();
-			return rule_values_entry;
+			e.ruleset_id = results.LastInsertedID();
+			return e;
 		}
 
-		rule_values_entry = NewEntity();
+		e = NewEntity();
 
-		return rule_values_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<RuleValues> rule_values_entries
+		const std::vector<RuleValues> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &rule_values_entry: rule_values_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(rule_values_entry.ruleset_id));
-			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_name) + "'");
-			insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
-			insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
+			v.push_back(std::to_string(e.ruleset_id));
+			v.push_back("'" + Strings::Escape(e.rule_name) + "'");
+			v.push_back("'" + Strings::Escape(e.rule_value) + "'");
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -240,20 +257,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RuleValues entry{};
+			RuleValues e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1] ? row[1] : "";
-			entry.rule_value = row[2] ? row[2] : "";
-			entry.notes      = row[3] ? row[3] : "";
+			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rule_name  = row[1] ? row[1] : "";
+			e.rule_value = row[2] ? row[2] : "";
+			e.notes      = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<RuleValues> GetWhere(Database& db, std::string where_filter)
+	static std::vector<RuleValues> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<RuleValues> all_entries;
 
@@ -268,20 +285,20 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			RuleValues entry{};
+			RuleValues e{};
 
-			entry.ruleset_id = atoi(row[0]);
-			entry.rule_name  = row[1] ? row[1] : "";
-			entry.rule_value = row[2] ? row[2] : "";
-			entry.notes      = row[3] ? row[3] : "";
+			e.ruleset_id = row[0] ? static_cast<uint8_t>(strtoul(row[0], nullptr, 10)) : 0;
+			e.rule_name  = row[1] ? row[1] : "";
+			e.rule_value = row[2] ? row[2] : "";
+			e.notes      = row[3] ? row[3] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -306,6 +323,94 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const RuleValues &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.ruleset_id));
+		v.push_back("'" + Strings::Escape(e.rule_name) + "'");
+		v.push_back("'" + Strings::Escape(e.rule_value) + "'");
+		v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<RuleValues> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.ruleset_id));
+			v.push_back("'" + Strings::Escape(e.rule_name) + "'");
+			v.push_back("'" + Strings::Escape(e.rule_value) + "'");
+			v.push_back("'" + Strings::Escape(e.notes) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_RULE_VALUES_REPOSITORY_H

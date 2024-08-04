@@ -3,13 +3,20 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/include/mysql"
+                "${default}",
+                "${workspaceFolder}/submodules/fmt/include",
+                "${workspaceFolder}/submodules/cereal/include",
+                "${workspaceFolder}/submodules/glm",
+                "${workspaceFolder}/submodules/libuv/include"
             ],
-            "defines": [],
+            "defines": [
+                "LUA_EQEMU=1"
+            ],
             "compilerPath": "/usr/bin/gcc",
-            "cStandard": "c11",
-            "cppStandard": "c++17"
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4

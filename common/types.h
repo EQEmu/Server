@@ -57,9 +57,6 @@ typedef const char Const_char;	//for perl XS
 
 #define safe_delete(d) if(d) { delete d; d=nullptr; }
 #define safe_delete_array(d) if(d) { delete[] d; d=nullptr; }
-#define L32(i)	((uint32) i)
-#define H32(i)	((uint32) (i >> 32))
-#define L16(i)	((uint16) i)
 
 #ifndef WIN32
 // More WIN32 compatability

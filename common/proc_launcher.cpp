@@ -64,7 +64,7 @@ void ProcLauncher::Process() {
 		if(GetExitCodeProcess(cur->second->proc_info.hProcess, &res)) {
 			//got exit code, see if its still running...
 			if(res == STILL_ACTIVE) {
-				cur++;
+				++cur;
 				continue;
 			}
 			//else, it died, handle properly
@@ -76,7 +76,7 @@ void ProcLauncher::Process() {
 
 		//if we get here, the current process died.
 		tmp = cur;
-		tmp++;
+		++tmp;
 		ProcessTerminated(cur);
 		cur = tmp;
 	}
@@ -174,7 +174,7 @@ ProcLauncher::ProcRef ProcLauncher::Launch(Spec *&to_launch) {
 	std::vector<std::string>::iterator cur, end;
 	cur = it->args.begin();
 	end = it->args.end();
-	for(; cur != end; cur++) {
+	for(; cur != end; ++cur) {
 		args += " ";
 		args += *cur;
 	}
@@ -306,7 +306,7 @@ void ProcLauncher::TerminateAll(bool final) {
 		std::map<ProcRef, Spec *>::iterator cur, end;
 		cur = m_running.begin();
 		end = m_running.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			Terminate(cur->first, true);
 		}
 	} else {
@@ -317,7 +317,7 @@ void ProcLauncher::TerminateAll(bool final) {
 		std::map<ProcRef, Spec *>::iterator cur, end;
 		cur = running.begin();
 		end = running.end();
-		for(; cur != end; cur++) {
+		for(; cur != end; ++cur) {
 			Terminate(cur->first, true);
 			safe_delete(cur->second);
 		}

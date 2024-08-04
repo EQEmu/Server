@@ -57,6 +57,10 @@ namespace EQ
 			virtual void SetOpcodeManager(OpcodeManager **opm) {
 				m_opcode_manager = opm;
 			}
+			virtual OpcodeManager * GetOpcodeManager() const
+			{
+				return (*m_opcode_manager);
+			};
 
 			virtual Stats GetStats() const;
 			virtual void ResetStats();

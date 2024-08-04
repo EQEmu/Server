@@ -24,7 +24,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/md5.h"
 #include "../common/packet_dump.h"
 #include "../common/servertalk.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "../common/misc_functions.h"
 #include "worlddb.h"
 #include "eql_config.h"
@@ -37,7 +37,6 @@ extern LauncherList launcher_list;
 LauncherLink::LauncherLink(int id, std::shared_ptr<EQ::Net::ServertalkServerConnection> c)
 	: ID(id),
 	tcpc(c),
-	authenticated(false),
 	m_name(""),
 	m_bootTimer(2000)
 {
@@ -107,11 +106,11 @@ void LauncherLink::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		cur = result.begin();
 		end = result.end();
 		ZoneState zs;
-		for (; cur != end; cur++) {
+		for (; cur != end; ++cur) {
 			zs.port = cur->port;
 			zs.up = false;
 			zs.starts = 0;
-			LogInfo("[{}]: Loaded zone [{}] on port [{}]", m_name.c_str(), cur->name.c_str(), zs.port);
+			LogInfo("[{}] Loaded zone [{}] on port [{}]", m_name.c_str(), cur->name.c_str(), zs.port);
 			m_states[cur->name] = zs;
 		}
 
@@ -127,10 +126,10 @@ void LauncherLink::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		std::map<std::string, ZoneState>::iterator res;
 		res = m_states.find(it->short_name);
 		if (res == m_states.end()) {
-			LogInfo("[{}]: reported state for zone [{}] which it does not have", m_name.c_str(), it->short_name);
+			LogInfo("[{}] reported state for zone [{}] which it does not have", m_name.c_str(), it->short_name);
 			break;
 		}
-		LogInfo("[{}]: [{}] reported state [{}] ([{}] starts)", m_name.c_str(), it->short_name, it->running ? "STARTED" : "STOPPED", it->start_count);
+		LogInfo("[{}] [{}] reported state [{}] ([{}] starts)", m_name.c_str(), it->short_name, it->running ? "STARTED" : "STOPPED", it->start_count);
 		res->second.up = it->running;
 		res->second.starts = it->start_count;
 		break;
@@ -153,7 +152,7 @@ void LauncherLink::BootZone(const char *short_name, uint16 port) {
 	zs.port = port;
 	zs.up = false;
 	zs.starts = 0;
-	LogInfo("[{}]: Loaded zone [{}] on port [{}]", m_name.c_str(), short_name, zs.port);
+	LogInfo("[{}] Loaded zone [{}] on port [{}]", m_name.c_str(), short_name, zs.port);
 	m_states[short_name] = zs;
 
 	StartZone(short_name, port);
@@ -233,7 +232,7 @@ void LauncherLink::BootDynamics(uint8 new_count) {
 		std::map<std::string, ZoneState>::iterator cur, end;
 		cur = m_states.begin();
 		end = m_states.end();
-		for (; cur != end; cur++) {
+		for (; cur != end; ++cur) {
 			StopZone(cur->first.c_str());
 		}
 	}
@@ -245,7 +244,7 @@ void LauncherLink::BootDynamics(uint8 new_count) {
 		std::map<std::string, ZoneState>::iterator cur, end;
 		cur = m_states.begin();
 		end = m_states.end();
-		for (; cur != end; cur++) {
+		for (; cur != end; ++cur) {
 			if (cur->first.find("dynamic_") == 0) {
 				if (found >= new_count) {
 					//this zone exceeds the number of allowed booted zones.
@@ -267,7 +266,7 @@ void LauncherLink::GetZoneList(std::vector<std::string> &l) {
 	std::map<std::string, ZoneState>::iterator cur, end;
 	cur = m_states.begin();
 	end = m_states.end();
-	for (; cur != end; cur++) {
+	for (; cur != end; ++cur) {
 		l.push_back(cur->first.c_str());
 	}
 }

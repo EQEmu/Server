@@ -5,6 +5,7 @@
 #include <map>
 #include <unordered_set>
 #include <array>
+#include "../emu_constants.h"
 
 struct MethodHandlerEntry
 {
@@ -174,13 +175,13 @@ Json::Value EQ::Net::WebsocketServer::Login(WebsocketServerConnection *connectio
 		auto r = _impl->login_handler(connection, user, pass);
 
 		if (r.logged_in) {
-			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
+			connection->SetAuthorized(true, r.account_name, r.account_id, AccountStatus::Max);
 			ret["status"] = "Ok";
 		}
 		else if (user == "admin" && (connection->RemoteIP() == "127.0.0.1" || connection->RemoteIP() == "::")) {
 			r.logged_in = true;
 			r.account_id = 0;
-			connection->SetAuthorized(true, r.account_name, r.account_id, 255);
+			connection->SetAuthorized(true, r.account_name, r.account_id, AccountStatus::Max);
 			ret["status"] = "Ok";
 		}
 		else {

@@ -17,13 +17,14 @@
 */
 
 #include "inventory_profile.h"
+#include "../common/data_verification.h"
 //#include "classes.h"
 //#include "global_define.h"
 //#include "item_instance.h"
 //#include "races.h"
 #include "rulesys.h"
 #include "shareddb.h"
-#include "string_util.h"
+#include "strings.h"
 
 //#include "../common/light_source.h"
 
@@ -57,108 +58,62 @@ static inline int32 GetNextItemInstSerialNumber() {
 // class EQ::ItemInstance
 //
 EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
-	m_use_type = ItemInstNormal;
-	if(item) {
-		m_item = new ItemData(*item);
-	} else {
-		m_item = nullptr;
-	}
-	m_charges = charges;
-	m_price = 0;
-	m_attuned = false;
-	m_merchantslot = 0;
-	if (m_item && m_item->IsClassCommon())
-		m_color = m_item->Color;
-	else
-		m_color = 0;
-	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
 
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	if (item) {
+		m_item = new ItemData(*item);
+	}
+
+	m_charges = charges;
+
+	if (m_item && m_item->IsClassCommon()) {
+		m_color = m_item->Color;
+	}
+
+	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
 EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
-	m_use_type = ItemInstNormal;
-	m_item = db->GetItem(item_id);
-	if(m_item) {
+
+	m_item     = db->GetItem(item_id);
+
+	if (m_item) {
 		m_item = new ItemData(*m_item);
-	}
-	else {
-		m_item = nullptr;
 	}
 
 	m_charges = charges;
-	m_price = 0;
-	m_merchantslot = 0;
-	m_attuned=false;
-	if (m_item && m_item->IsClassCommon())
-		m_color = m_item->Color;
-	else
-		m_color = 0;
-	m_merchantcount = 1;
-	m_SerialNumber = GetNextItemInstSerialNumber();
 
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	if (m_item && m_item->IsClassCommon()) {
+		m_color = m_item->Color;
+	} else {
+		m_color = 0;
+	}
+
+	m_SerialNumber  = GetNextItemInstSerialNumber();
 }
 
 EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
-	m_use_type = use_type;
-	m_item = nullptr;
-	m_charges = 0;
-	m_price = 0;
-	m_attuned = false;
-	m_merchantslot = 0;
-	m_color = 0;
-
-	m_exp = 0;
-	m_evolveLvl = 0;
-	m_activated = false;
-	m_scaledItem = nullptr;
-	m_evolveInfo = nullptr;
-	m_scaling = false;
-	m_ornamenticon = 0;
-	m_ornamentidfile = 0;
-	m_ornament_hero_model = 0;
-	m_recast_timestamp = 0;
-	m_new_id_file = 0;
+	m_use_type     = use_type;
 }
 
 // Make a copy of an EQ::ItemInstance object
 EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 {
-	m_use_type=copy.m_use_type;
-	if(copy.m_item)
-		m_item = new ItemData(*copy.m_item);
-	else
-		m_item = nullptr;
+	m_use_type = copy.m_use_type;
 
-	m_charges=copy.m_charges;
-	m_price=copy.m_price;
-	m_color=copy.m_color;
-	m_merchantslot=copy.m_merchantslot;
-	m_currentslot=copy.m_currentslot;
-	m_attuned=copy.m_attuned;
-	m_merchantcount=copy.m_merchantcount;
+	if (copy.m_item) {
+		m_item = new ItemData(*copy.m_item);
+	} else {
+		m_item = nullptr;
+	}
+
+	m_charges       = copy.m_charges;
+	m_price         = copy.m_price;
+	m_color         = copy.m_color;
+	m_merchantslot  = copy.m_merchantslot;
+	m_currentslot   = copy.m_currentslot;
+	m_attuned       = copy.m_attuned;
+	m_merchantcount = copy.m_merchantcount;
+
 	// Copy container contents
 	for (auto it = copy.m_contents.begin(); it != copy.m_contents.end(); ++it) {
 		ItemInstance* inst_old = it->second;
@@ -168,37 +123,42 @@ EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 			inst_new = inst_old->Clone();
 		}
 
-		if (inst_new != nullptr) {
+		if (inst_new) {
 			m_contents[it->first] = inst_new;
 		}
 	}
+
 	std::map<std::string, std::string>::const_iterator iter;
 	for (iter = copy.m_custom_data.begin(); iter != copy.m_custom_data.end(); ++iter) {
 		m_custom_data[iter->first] = iter->second;
 	}
-	m_SerialNumber = copy.m_SerialNumber;
-	m_custom_data = copy.m_custom_data;
-	m_timers = copy.m_timers;
 
-	m_exp = copy.m_exp;
+	m_SerialNumber = copy.m_SerialNumber;
+	m_custom_data  = copy.m_custom_data;
+	m_timers       = copy.m_timers;
+
+	m_exp       = copy.m_exp;
 	m_evolveLvl = copy.m_evolveLvl;
 	m_activated = copy.m_activated;
-	if (copy.m_scaledItem)
+
+	if (copy.m_scaledItem) {
 		m_scaledItem = new ItemData(*copy.m_scaledItem);
-	else
+	} else {
 		m_scaledItem = nullptr;
+	}
 
-	if(copy.m_evolveInfo)
+	if (copy.m_evolveInfo) {
 		m_evolveInfo = new EvolveInfo(*copy.m_evolveInfo);
-	else
+	} else {
 		m_evolveInfo = nullptr;
+	}
 
-	m_scaling = copy.m_scaling;
-	m_ornamenticon = copy.m_ornamenticon;
-	m_ornamentidfile = copy.m_ornamentidfile;
+	m_scaling             = copy.m_scaling;
+	m_ornamenticon        = copy.m_ornamenticon;
+	m_ornamentidfile      = copy.m_ornamentidfile;
 	m_ornament_hero_model = copy.m_ornament_hero_model;
-	m_recast_timestamp = copy.m_recast_timestamp;
-	m_new_id_file = copy.m_new_id_file;
+	m_recast_timestamp    = copy.m_recast_timestamp;
+	m_new_id_file         = copy.m_new_id_file;
 }
 
 // Clean up container contents
@@ -214,13 +174,15 @@ EQ::ItemInstance::~ItemInstance()
 bool EQ::ItemInstance::IsType(item::ItemClass item_class) const
 {
 	// IsType(<ItemClassTypes>) does not protect against 'm_item = nullptr'
-	
-	// Check usage type
-	if ((m_use_type == ItemInstWorldContainer) && (item_class == item::ItemClassBag))
-		return true;
 
-	if (!m_item)
+	// Check usage type
+	if (m_use_type == ItemInstWorldContainer && item_class == item::ItemClassBag) {
+		return true;
+	}
+
+	if (!m_item) {
 		return false;
+	}
 
 	return (m_item->ItemClass == item_class);
 }
@@ -243,96 +205,132 @@ bool EQ::ItemInstance::IsClassBook() const
 // Is item stackable?
 bool EQ::ItemInstance::IsStackable() const
 {
-	if (!m_item)
-		return false;
-	
-	return m_item->Stackable;
+	return (m_item && m_item->Stackable);
 }
 
 bool EQ::ItemInstance::IsCharged() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return false;
-	
-	if (m_item->MaxCharges > 1)
+	}
+
+	if (m_item->MaxCharges > 1) {
 		return true;
-	else
+	} else {
 		return false;
+	}
 }
 
 // Can item be equipped?
 bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
 {
-	if (!m_item || (m_item->Slots == 0))
+	if (!m_item || !m_item->Slots) {
 		return false;
+	}
 
 	return m_item->IsEquipable(race, class_);
+}
+
+// Can item be equipped by Class?
+bool EQ::ItemInstance::IsClassEquipable(uint16 class_) const
+{
+	if (!m_item || !m_item->Slots) {
+		return false;
+	}
+
+	return m_item->IsClassEquipable(class_);
+}
+
+// Can item be equipped by Race?
+bool EQ::ItemInstance::IsRaceEquipable(uint16 race) const
+{
+	if (!m_item || !m_item->Slots) {
+		return false;
+	}
+
+	return m_item->IsRaceEquipable(race);
 }
 
 // Can equip at this slot?
 bool EQ::ItemInstance::IsEquipable(int16 slot_id) const
 {
-	if (!m_item)
+	if (!m_item || !m_item->Slots) {
 		return false;
+	}
 
-	if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END)
+	if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END) {
 		return false;
+	}
 
 	return ((m_item->Slots & (1 << slot_id)) != 0);
 }
 
 bool EQ::ItemInstance::IsAugmentable() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return false;
+	}
 
 	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
-		if (m_item->AugSlotType[index] != 0)
+		if (m_item->AugSlotType[index] != 0) {
 			return true;
+		}
 	}
 
 	return false;
 }
 
 bool EQ::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
+	}
 
 	int index = invslot::EQUIPMENT_BEGIN;
 	for (; index <= invslot::EQUIPMENT_END; ++index) {
 		if (m_item->Slots & (1 << index)) {
-			if (aug_wear_slots & (1 << index))
+			if (aug_wear_slots & (1 << index)) {
 				break;
+			}
 		}
 	}
 
 	return (index <= EQ::invslot::EQUIPMENT_END);
 }
 
-int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augtype) const
+int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augment_type) const
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return INVALID_INDEX;
-
-	int index = invaug::SOCKET_BEGIN;
-	for (; index <= invaug::SOCKET_END; ++index) {
-		if (GetItem(index)) { continue; }
-		if (augtype == -1 || (m_item->AugSlotType[index] && ((1 << (m_item->AugSlotType[index] - 1)) & augtype)))
-			break;
 	}
 
-	return (index <= invaug::SOCKET_END) ? index : INVALID_INDEX;
+	for (int16 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; ++slot_id) {
+		if (IsAugmentSlotAvailable(augment_type, slot_id)) {
+			return slot_id;
+		}
+	}
+
+	return INVALID_INDEX;
 }
 
-bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
+bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augment_type, uint8 slot) const
 {
-	if (!m_item || !m_item->IsClassCommon())
-		 return false;
-
-	if ((!GetItem(slot) && m_item->AugSlotVisible[slot]) && augtype == -1 || (m_item->AugSlotType[slot] && ((1 << (m_item->AugSlotType[slot] - 1)) & augtype))) {
-		return true;
-	}
+	if (!m_item || !m_item->IsClassCommon() || GetItem(slot)) {
 		return false;
+	}
+
+	return (
+		(
+			augment_type == -1 ||
+			(
+				m_item->AugSlotType[slot] &&
+				((1 << (m_item->AugSlotType[slot] - 1)) & augment_type)
+			)
+		) &&
+		(
+			RuleB(Items, AugmentItemAllowInvisibleAugments) ||
+			m_item->AugSlotVisible[slot]
+		)
+	);
 }
 
 // Retrieve item inside container
@@ -348,9 +346,10 @@ EQ::ItemInstance* EQ::ItemInstance::GetItem(uint8 index) const
 
 uint32 EQ::ItemInstance::GetItemID(uint8 slot) const
 {
-	ItemInstance *item = GetItem(slot);
-	if (item)
+	const auto item = GetItem(slot);
+	if (item) {
 		return item->GetID();
+	}
 
 	return 0;
 }
@@ -381,7 +380,7 @@ EQ::ItemInstance* EQ::ItemInstance::PopItem(uint8 index)
 		m_contents.erase(index);
 		return inst; // Return pointer that needs to be deleted (or otherwise managed)
 	}
-	
+
 	return nullptr;
 }
 
@@ -474,14 +473,21 @@ uint8 EQ::ItemInstance::FirstOpenSlot() const
 
 uint8 EQ::ItemInstance::GetTotalItemCount() const
 {
-	if (!m_item)
+	if (!m_item) {
 		return 0;
-	
+	}
+
 	uint8 item_count = 1;
 
-	if (m_item && !m_item->IsClassBag()) { return item_count; }
+	if (!m_item->IsClassBag()) {
+		return item_count;
+	}
 
-	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) { if (GetItem(index)) { ++item_count; } }
+	for (int index = invbag::SLOT_BEGIN; index < m_item->BagSlots; ++index) {
+		if (GetItem(index)) {
+			++item_count;
+		}
+	}
 
 	return item_count;
 }
@@ -500,86 +506,108 @@ bool EQ::ItemInstance::IsNoneEmptyContainer()
 }
 
 // Retrieve augment inside item
-EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 slot) const
+EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 augment_index) const
 {
-	if (m_item && m_item->IsClassCommon())
-		return GetItem(slot);
+	if (m_item && m_item->IsClassCommon()) {
+		return GetItem(augment_index);
+	}
 
 	return nullptr;
 }
 
-EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAug(int32 ornamentationAugtype) const
+bool EQ::ItemInstance::IsOrnamentationAugment(EQ::ItemInstance* augment) const
 {
-	if (!m_item || !m_item->IsClassCommon()) { return nullptr; }
-	if (ornamentationAugtype == 0) { return nullptr; }
+	if (!m_item || !m_item->IsClassCommon() || !augment) {
+		return false;
+	}
 
-	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++)
-	{
-		if (GetAugment(i) && m_item->AugSlotType[i] == ornamentationAugtype)
-		{
-			const char *item_IDFile = GetAugment(i)->GetItem()->IDFile;
-			if (
-				(strncmp(item_IDFile, "IT64", strlen(item_IDFile)) == 0
-				|| strncmp(item_IDFile, "IT63", strlen(item_IDFile)) == 0)
-				&& GetAugment(i)->GetItem()->HerosForgeModel == 0
-				)
-			{
-				continue;
-			}
-			return this->GetAugment(i);
+	const auto augment_item = augment->GetItem();
+	if (!augment_item) {
+		return false;
+	}
+
+	const std::string& idfile = augment_item->IDFile;
+
+	if (
+		EQ::ValueWithin(
+			augment->GetAugmentType(),
+			OrnamentationAugmentTypes::StandardOrnamentation,
+			OrnamentationAugmentTypes::SpecialOrnamentation
+		) ||
+		(
+			idfile != "IT63" &&
+			idfile != "IT64"
+		) ||
+		augment_item->HerosForgeModel
+	) {
+		return true;
+	}
+
+	return false;
+}
+
+EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAugment() const
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return nullptr;
+	}
+
+	for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; i++) {
+		const auto augment = GetAugment(i);
+		if (augment && IsOrnamentationAugment(augment)) {
+			return augment;
 		}
 	}
 
 	return nullptr;
 }
 
-uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
+uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const
+{
 	// Not a Hero Forge item.
-	if (m_ornament_hero_model == 0 || material_slot < 0)
+	if (m_ornament_hero_model == 0 || material_slot < 0) {
 		return 0;
+	}
 
 	// Item is using an explicit Hero Forge ID
-	if (m_ornament_hero_model >= 1000)
+	if (m_ornament_hero_model >= 1000) {
 		return m_ornament_hero_model;
+	}
 
 	// Item is using a shorthand ID
 	return (m_ornament_hero_model * 100) + material_slot;
 }
 
-bool EQ::ItemInstance::UpdateOrnamentationInfo() {
-	if (!m_item || !m_item->IsClassCommon())
+bool EQ::ItemInstance::UpdateOrnamentationInfo()
+{
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
-	
-	bool ornamentSet = false;
+	}
 
-	int32 ornamentationAugtype = RuleI(Character, OrnamentationAugmentType);
-	if (GetOrnamentationAug(ornamentationAugtype))
-	{
-		const ItemData* ornamentItem;
-		ornamentItem = GetOrnamentationAug(ornamentationAugtype)->GetItem();
-		if (ornamentItem != nullptr)
-		{
-			SetOrnamentIcon(ornamentItem->Icon);
-			SetOrnamentHeroModel(ornamentItem->HerosForgeModel);
-			if (strlen(ornamentItem->IDFile) > 2)
-			{
-				SetOrnamentationIDFile(atoi(&ornamentItem->IDFile[2]));
-			}
-			else
-			{
+	const auto augment = GetOrnamentationAugment();
+
+	if (augment) {
+		const auto augment_item = GetOrnamentationAugment()->GetItem();
+
+		if (augment_item) {
+			SetOrnamentIcon(augment_item->Icon);
+			SetOrnamentHeroModel(augment_item->HerosForgeModel);
+
+			if (strlen(augment_item->IDFile) > 2) {
+				SetOrnamentationIDFile(Strings::ToUnsignedInt(&augment_item->IDFile[2]));
+			} else {
 				SetOrnamentationIDFile(0);
 			}
-			ornamentSet = true;
+
+			return true;
 		}
 	}
-	else
-	{
-		SetOrnamentIcon(0);
-		SetOrnamentHeroModel(0);
-		SetOrnamentationIDFile(0);
-	}
 
-	return ornamentSet;
+	SetOrnamentIcon(0);
+	SetOrnamentHeroModel(0);
+	SetOrnamentationIDFile(0);
+
+	return false;
 }
 
 bool EQ::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll) {
@@ -629,12 +657,13 @@ bool EQ::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *C
 	return false;
 }
 
-uint32 EQ::ItemInstance::GetAugmentItemID(uint8 slot) const
+uint32 EQ::ItemInstance::GetAugmentItemID(uint8 augment_index) const
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return 0;
+	}
 
-	return GetItemID(slot);
+	return GetItemID(augment_index);
 }
 
 // Add an augment to the item
@@ -642,7 +671,7 @@ void EQ::ItemInstance::PutAugment(uint8 slot, const ItemInstance& augment)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
-	
+
 	PutItem(slot, augment);
 }
 
@@ -655,7 +684,7 @@ void EQ::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id
 	if (aug) {
 		PutAugment(slot, *aug);
 		safe_delete(aug);
-	}	
+	}
 }
 
 // Remove augment from item and destroy it
@@ -663,7 +692,7 @@ void EQ::ItemInstance::DeleteAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
-	
+
 	DeleteItem(index);
 }
 
@@ -672,21 +701,62 @@ EQ::ItemInstance* EQ::ItemInstance::RemoveAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return nullptr;
-	
+
 	return PopItem(index);
 }
 
 bool EQ::ItemInstance::IsAugmented()
 {
-	if (!m_item || !m_item->IsClassCommon())
+	if (!m_item || !m_item->IsClassCommon()) {
 		return false;
-	
-	for (int index = invaug::SOCKET_BEGIN; index <= invaug::SOCKET_END; ++index) {
-		if (GetAugmentItemID(index))
+	}
+
+	for (uint8 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; ++slot_id) {
+		if (GetAugmentItemID(slot_id)) {
 			return true;
+		}
 	}
 
 	return false;
+}
+
+bool EQ::ItemInstance::ContainsAugmentByID(uint32 item_id)
+{
+	if (!m_item || !m_item->IsClassCommon()) {
+		return false;
+	}
+
+	if (!item_id) {
+		return false;
+	}
+
+	for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+		if (GetAugmentItemID(augment_slot) == item_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+int EQ::ItemInstance::CountAugmentByID(uint32 item_id)
+{
+	int quantity = 0;
+	if (!m_item || !m_item->IsClassCommon()) {
+		return quantity;
+	}
+
+	if (!item_id) {
+		return quantity;
+	}
+
+	for (uint8 augment_slot = invaug::SOCKET_BEGIN; augment_slot <= invaug::SOCKET_END; ++augment_slot) {
+		if (GetAugmentItemID(augment_slot) == item_id) {
+			quantity++;
+		}
+	}
+
+	return quantity;
 }
 
 // Has attack/delay?
@@ -753,7 +823,20 @@ std::string EQ::ItemInstance::GetCustomDataString() const {
 	return ret_val;
 }
 
-std::string EQ::ItemInstance::GetCustomData(std::string identifier) {
+void EQ::ItemInstance::SetCustomDataString(const std::string& str)
+{
+	auto components = Strings::Split(str, "^");
+	auto value_count = components.size() / 2;
+
+	for (auto i = 0; i < value_count; i++) {
+		auto identifier = components[i * 2];
+		auto value = components[(i * 2) + 1];
+
+		SetCustomData(identifier, value);
+	}
+}
+
+std::string EQ::ItemInstance::GetCustomData(const std::string& identifier) {
 	std::map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		return iter->second;
@@ -762,33 +845,33 @@ std::string EQ::ItemInstance::GetCustomData(std::string identifier) {
 	return "";
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, std::string value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, const std::string& value) {
 	DeleteCustomData(identifier);
 	m_custom_data[identifier] = value;
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, int value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, int value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, float value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, float value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::SetCustomData(std::string identifier, bool value) {
+void EQ::ItemInstance::SetCustomData(const std::string& identifier, bool value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQ::ItemInstance::DeleteCustomData(std::string identifier) {
+void EQ::ItemInstance::DeleteCustomData(const std::string& identifier) {
 	auto iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);
@@ -834,14 +917,15 @@ bool EQ::ItemInstance::IsDroppable(bool recurse) const
 				return false;
 		}
 	}
-	
+
 	return true;
 }
 
 void EQ::ItemInstance::Initialize(SharedDatabase *db) {
 	// if there's no actual item, don't do anything
-	if (!m_item)
+	if (!m_item) {
 		return;
+	}
 
 	// initialize scaling items
 	if (m_item->CharmFileID != 0) {
@@ -850,7 +934,7 @@ void EQ::ItemInstance::Initialize(SharedDatabase *db) {
 	}
 
 	// initialize evolving items
-	else if ((db) && m_item->LoreGroup >= 1000 && m_item->LoreGroup != -1) {
+	else if (db && m_item->LoreGroup >= 1000) {
 		// not complete yet
 	}
 }
@@ -1058,7 +1142,7 @@ int EQ::ItemInstance::GetItemElementalFlag(bool augments) const
 
 int EQ::ItemInstance::GetItemElementalDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->ElemDmgAmt;
@@ -1123,7 +1207,7 @@ int EQ::ItemInstance::GetItemRequiredLevel(bool augments) const
 
 int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->Damage;
@@ -1139,7 +1223,7 @@ int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 
 int EQ::ItemInstance::GetItemBackstabDamage(bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		damage = item->BackstabDmg;
@@ -1176,7 +1260,7 @@ int EQ::ItemInstance::GetItemBaneDamageBody(bool augments) const
 
 int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 {
-	int race = 0;
+	int race = Race::Doug;
 	const auto item = GetItem();
 	if (item) {
 		race = item->BaneDmgRace;
@@ -1195,9 +1279,9 @@ int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 	return race;
 }
 
-int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageBody(uint8 against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgBody == against)
@@ -1214,7 +1298,7 @@ int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) con
 
 int EQ::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) const
 {
-	int damage = 0;
+	int64 damage = 0;
 	const auto item = GetItem();
 	if (item) {
 		if (item->BaneDmgRace == against)
@@ -1680,6 +1764,175 @@ int EQ::ItemInstance::GetItemHaste(bool augments) const
 				}
 	}
 	return total;
+}
+
+int EQ::ItemInstance::RemoveTaskDeliveredItems()
+{
+	int count = IsStackable() ? GetCharges() : 1;
+	count -= GetTaskDeliveredCount();
+	if (IsStackable())
+	{
+		SetCharges(count);
+	}
+	SetTaskDeliveredCount(0);
+	return count;
+}
+
+uint32 EQ::ItemInstance::GetItemGuildFavor() const
+{
+	uint32 total = 0;
+	const auto item = GetItem();
+	if (item) {
+		return total = item->GuildFavor;
+	}
+	return 0;
+}
+
+std::vector<uint32> EQ::ItemInstance::GetAugmentIDs() const
+{
+	std::vector<uint32> augments;
+
+	for (uint8 slot_id = invaug::SOCKET_BEGIN; slot_id <= invaug::SOCKET_END; slot_id++) {
+		augments.push_back(GetAugment(slot_id) ? GetAugmentItemID(slot_id) : 0);
+	}
+
+	return augments;
+}
+
+int EQ::ItemInstance::GetItemRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Regen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemManaRegen(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ManaRegen;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemManaRegen();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDamageShield(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DamageShield;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDamageShield();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemDSMitigation(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->DSMitigation;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemDSMitigation();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemHealAmt(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->HealAmt;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemHealAmt();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSpellDamage(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->SpellDmg;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSpellDamage();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemClairvoyance(bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->Clairvoyance;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemClairvoyance();
+				}
+			}
+		}
+	}
+	return stat;
+}
+
+int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augments) const
+{
+	int        stat = 0;
+	const auto item = GetItem();
+	if (item) {
+		stat = item->ExtraDmgSkill == skill ? item->ExtraDmgAmt : 0;
+		if (augments) {
+			for (int i = invaug::SOCKET_BEGIN; i <= invaug::SOCKET_END; ++i) {
+				if (GetAugment(i)) {
+					stat += GetAugment(i)->GetItemSkillsStat(skill);
+				}
+			}
+		}
+	}
+	return stat;
 }
 
 //

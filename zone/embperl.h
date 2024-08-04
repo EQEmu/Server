@@ -18,22 +18,11 @@ Eglin
 #include <stdio.h>
 #include <string.h>
 
-//headers from the Perl distribution
-#include <EXTERN.h>
-#define WIN32IO_IS_STDIO
+#include <perlbind/perlbind.h>
+namespace perl = perlbind;
 
-#ifndef WIN32
-extern "C" {	//the perl headers dont do this for us...
-#endif
-#if _MSC_VER
-#define __inline__ __inline
-#define __builtin_expect 
-#endif
-#include <perl.h>
-#include <XSUB.h>
-#ifndef WIN32
-};
-#endif
+#undef Null
+
 #ifdef WIN32
 #define snprintf _snprintf
 #endif
@@ -80,18 +69,10 @@ class Embperl
 private:
 	//if we fail inside a script evaluation, this will hold the croak msg (not much help if we die during construction, but that's our own fault)
 	mutable std::string errmsg;
-	//kludgy workaround for the fact that we can't directly do something like SvIV(get_sv($big[0]{ass}->{struct}))
-	SV * my_get_sv(const char * varname) {
-		char buffer[256];
-		snprintf(buffer, 256, "if(defined(%s)) { $scratch::temp = %s; } else { $scratch::temp = 'UNDEF'; }", varname, varname);
-		eval(buffer);
-		return get_sv("scratch::temp", false);
-	}
 
 	//install a perl func
 	void init_eval_file(void);
 
-	bool in_use;	//true if perl is executing
 protected:
 	//the embedded interpreter
 	PerlInterpreter * my_perl;
@@ -104,74 +85,67 @@ public:
 
 	void Reinit();
 
-	//return the last error msg
-	std::string lasterr(void) const { return errmsg;};
 	//evaluate an expression. throws string errors on fail
-	int eval(const char * code);
+	int eval(const char* code);
 	//execute a subroutine. throws lasterr on failure
-	int dosub(const char * subname, const std::vector<std::string> * args = nullptr, int mode = G_SCALAR|G_EVAL);
-
-	//Access to perl variables
-	//all varnames here should be of the form package::name
-	//returns the contents of the perl variable named in varname as a c int
-	int geti(const char * varname) { return static_cast<int>(SvIV(my_get_sv(varname))); };
-	//returns the contents of the perl variable named in varname as a c float
-	float getd(const char * varname) { return static_cast<float>(SvNV(my_get_sv(varname)));};
-	//returns the contents of the perl variable named in varname as a string
-	std::string getstr(const char * varname) {
-		SV * temp = my_get_sv(varname);
-		return std::string(SvPV_nolen(temp),SvLEN(temp));
-	}
+	int dosub(const char* sub_name, const std::vector<std::string>* args = nullptr, int mode = G_SCALAR | G_EVAL);
 
 	//put an integer into a perl varable
-	void seti(const char *varname, int val) const {
-		SV *t = get_sv(varname, true);
+	void seti(const char* variable_name, int val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setiv(t, val);
 	}
+
 	//put a real into a perl varable
-	void setd(const char *varname, float val) const {
-		SV *t = get_sv(varname, true);
+	void setd(const char* variable_name, float val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setnv(t, val);
 	}
+
 	//put a string into a perl varable
-	void setstr(const char *varname, const char *val) const {
-		SV *t = get_sv(varname, true);
+	void setstr(const char* variable_name, const char* val) const
+	{
+		SV* t = get_sv(variable_name, true);
 		sv_setpv(t, val);
 	}
 
-	// put key-value pairs in hash
-	void sethash(const char *varname, std::map<std::string,std::string> &vals)
+	// put a pointer into a blessed perl variable
+	void setptr(const char* variable_name, const char* class_name, void* val) const
 	{
-		std::map<std::string,std::string>::iterator it;
+		SV* t = get_sv(variable_name, GV_ADD);
+		sv_setref_pv(t, class_name, val);
+	}
+
+	// put key-value pairs in hash
+	void sethash(const char* variable_name, std::map<std::string, std::string>& vals)
+	{
+		std::map<std::string, std::string>::iterator it;
 
 		// Get hash and clear it.
-		HV *hv = get_hv(varname, TRUE);
+		HV* hv = get_hv(variable_name, TRUE);
 		hv_clear(hv);
 
 		// Iterate through key-value pairs, storing them in hash
-		for (it = vals.begin(); it != vals.end(); ++it)
-		{
-			int keylen = static_cast<int>(it->first.length());
+		for (it = vals.begin(); it != vals.end(); ++it) {
+			int key_length = static_cast<int>(it->first.length());
 
-			SV *val = newSVpv(it->second.c_str(), it->second.length());
+			SV* val = newSVpv(it->second.c_str(), it->second.length());
 
 			// If val was not added to hash, reset reference count
-			if (hv_store(hv, it->first.c_str(), keylen, val, 0) == nullptr)
+			if (!hv_store(hv, it->first.c_str(), key_length, val, 0)) {
 				val->sv_refcnt = 0;
+			}
 		}
 	}
 
 	//loads a file and compiles it into our interpreter (assuming it hasn't already been read in)
 	//idea borrowed from perlembed
-	int eval_file(const char * packagename, const char * filename);
-
-	inline bool InUse() const { return(in_use); }
+	int eval_file(const char* package_name, const char* filename);
 
 	//check to see if a sub exists in package
-	bool SubExists(const char *package, const char *sub);
-
-	//check to see if a variable exists in package
-	bool VarExists(const char *package, const char *var);
+	bool SubExists(const char* package, const char* sub);
 };
 #endif //EMBPERL
 

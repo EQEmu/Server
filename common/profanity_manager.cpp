@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2019 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,14 +11,16 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
 #include "profanity_manager.h"
+#include "eqemu_logsys.h"
 #include "dbcore.h"
+#include "strings.h"
 
 #include <ctype.h>
 #include <cstring>
@@ -34,15 +36,17 @@ bool EQ::ProfanityManager::LoadProfanityList(DBcore *db) {
 		return true;
 	}
 
-	if (!load_database_entries(db))
+	if (!load_database_entries(db)) {
 		return false;
+	}
 
 	return true;
 }
 
 bool EQ::ProfanityManager::UpdateProfanityList(DBcore *db) {
-	if (!load_database_entries(db))
+	if (!load_database_entries(db)) {
 		return false;
+	}
 
 	update_originator_flag = true;
 
@@ -58,53 +62,60 @@ bool EQ::ProfanityManager::DeleteProfanityList(DBcore *db) {
 	return true;
 }
 
-bool EQ::ProfanityManager::AddProfanity(DBcore *db, const char *profanity) {
-	if (!db || !profanity)
+bool EQ::ProfanityManager::AddProfanity(DBcore *db, std::string profanity) {
+	if (!db || profanity.empty()) {
 		return false;
+	}
 
-	std::string entry(profanity);
+	std::string entry = Strings::ToLower(profanity);
 
-	std::transform(entry.begin(), entry.end(), entry.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
-
-	if (check_for_existing_entry(entry.c_str()))
+	if (check_for_existing_entry(entry)) {
 		return true;
+	}
 
-	if (entry.length() < REDACTION_LENGTH_MIN)
+	if (entry.length() < REDACTION_LENGTH_MIN) {
 		return false;
+	}
 
 	profanity_list.push_back(entry);
 
-	std::string query = "REPLACE INTO `profanity_list` (`word`) VALUES ('";
-	query.append(entry);
-	query.append("')");
+	auto query = fmt::format(
+		"REPLACE INTO `profanity_list` (`word`) VALUES ('{}')",
+		profanity
+	);
 	auto results = db->QueryDatabase(query);
-	if (!results.Success())
+
+	if (!results.Success()) {
 		return false;
+	}
 
 	update_originator_flag = true;
 
 	return true;
 }
 
-bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, const char *profanity) {
-	if (!db || !profanity)
+bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, std::string profanity) {
+	if (!db || profanity.empty()) {
 		return false;
+	}
 
-	std::string entry(profanity);
+	std::string entry = Strings::ToLower(profanity);
 
-	std::transform(entry.begin(), entry.end(), entry.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
-
-	if (!check_for_existing_entry(entry.c_str()))
+	if (!check_for_existing_entry(entry)) {
 		return true;
+	}
 
 	profanity_list.remove(entry);
 
-	std::string query = "DELETE FROM `profanity_list` WHERE `word` LIKE '";
-	query.append(entry);
-	query.append("'");
+	auto query = fmt::format(
+		"DELETE FROM `profanity_list` WHERE `word` = '{}'",
+		entry
+	);
 	auto results = db->QueryDatabase(query);
-	if (!results.Success())
+
+	if (!results.Success()) {
 		return false;
+	}
 
 	update_originator_flag = true;
 
@@ -112,29 +123,34 @@ bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, const char *profanity) {
 }
 
 void EQ::ProfanityManager::RedactMessage(char *message) {
-	if (!message)
+	if (!message) {
 		return;
+	}
 
-	std::string test_message(message);
+	std::string test_message = Strings::ToLower(message);
 	// hard-coded max length based on channel message buffer size (4096 bytes)..
 	// ..will need to change or remove if other sources are used for redaction
-	if (test_message.length() < REDACTION_LENGTH_MIN || test_message.length() >= 4096)
+	if (test_message.length() < REDACTION_LENGTH_MIN || test_message.length() >= 4096) {
 		return;
+	}
 
-	std::transform(test_message.begin(), test_message.end(), test_message.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
-	
 	for (const auto &iter : profanity_list) { // consider adding textlink checks if it becomes an issue
 		size_t pos = 0;
 		size_t start_pos = 0;
 
 		while (pos != std::string::npos) {
 			pos = test_message.find(iter, start_pos);
-			if (pos == std::string::npos)
+			if (pos == std::string::npos) {
 				continue;
+			}
 
-			if ((pos + iter.length()) == test_message.length() || !isalpha(test_message.at(pos + iter.length()))) {
-				if (pos == 0 || !isalpha(test_message.at(pos - 1)))
+			if (
+				(pos + iter.length()) == test_message.length() ||
+				!isalpha(test_message.at(pos + iter.length()))
+			) {
+				if (pos == 0 || !isalpha(test_message.at(pos - 1))) {
 					memset((message + pos), REDACTION_CHARACTER, iter.length());
+				}
 			}
 
 			start_pos = (pos + iter.length());
@@ -143,25 +159,29 @@ void EQ::ProfanityManager::RedactMessage(char *message) {
 }
 
 void EQ::ProfanityManager::RedactMessage(std::string &message) {
-	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096)
+	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096) {
 		return;
+	}
 
-	std::string test_message(const_cast<const std::string&>(message));
+	std::string test_message = Strings::ToLower(message);
 
-	std::transform(test_message.begin(), test_message.end(), test_message.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
-
-	for (const auto &iter : profanity_list) { // consider adding textlink checks if it becomes an issue
+	for (const auto &iter : profanity_list) {
 		size_t pos = 0;
 		size_t start_pos = 0;
 
 		while (pos != std::string::npos) {
 			pos = test_message.find(iter, start_pos);
-			if (pos == std::string::npos)
+			if (pos == std::string::npos) {
 				continue;
+			}
 
-			if ((pos + iter.length()) == test_message.length() || !isalpha(test_message.at(pos + iter.length()))) {
-				if (pos == 0 || !isalpha(test_message.at(pos - 1)))
+			if (
+				(pos + iter.length()) == test_message.length() ||
+				!isalpha(test_message.at(pos + iter.length()))
+			) {
+				if (pos == 0 || !isalpha(test_message.at(pos - 1))) {
 					message.replace(pos, iter.length(), iter.length(), REDACTION_CHARACTER);
+				}
 			}
 
 			start_pos = (pos + iter.length());
@@ -169,24 +189,18 @@ void EQ::ProfanityManager::RedactMessage(std::string &message) {
 	}
 }
 
-bool EQ::ProfanityManager::ContainsCensoredLanguage(const char *message) {
-	if (!message)
-		return false;
-
-	return ContainsCensoredLanguage(std::string(message));
-}
 
 bool EQ::ProfanityManager::ContainsCensoredLanguage(const std::string &message) {
-	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096)
+	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096) {
 		return false;
+	}
 
-	std::string test_message(message);
-
-	std::transform(test_message.begin(), test_message.end(), test_message.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
+	std::string test_message = Strings::ToLower(message);
 
 	for (const auto &iter : profanity_list) {
-		if (test_message.find(iter) != std::string::npos)
+		if (test_message.find(iter) != std::string::npos) {
 			return true;
+		}
 	}
 
 	return false;
@@ -197,54 +211,63 @@ const std::list<std::string> &EQ::ProfanityManager::GetProfanityList() {
 }
 
 bool EQ::ProfanityManager::IsCensorshipActive() {
-	return (profanity_list.size() != 0);
+	return profanity_list.size() != 0;
 }
 
 bool EQ::ProfanityManager::load_database_entries(DBcore *db) {
-	if (!db)
+	if (!db) {
 		return false;
+	}
 
 	profanity_list.clear();
 
 	std::string query = "SELECT `word` FROM `profanity_list`";
 	auto results = db->QueryDatabase(query);
-	if (!results.Success())
+	if (!results.Success()) {
 		return false;
+	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		if (std::strlen(row[0]) >= REDACTION_LENGTH_MIN) {
-			std::string entry(row[0]);
-			std::transform(entry.begin(), entry.end(), entry.begin(), [](unsigned char c) -> unsigned char { return tolower(c); });
-			if (!check_for_existing_entry(entry.c_str()))
-				profanity_list.push_back((std::string)entry);
+	for (auto row : results) {
+		std::string entry = Strings::ToLower(row[0]);
+		if (entry.length() >= REDACTION_LENGTH_MIN) {
+			if (!check_for_existing_entry(entry)) {
+				profanity_list.push_back(entry);
+			}
 		}
 	}
+
+	LogInfo("Loaded [{}] profanity entries", Strings::Commify(profanity_list.size()));
 
 	return true;
 }
 
 bool EQ::ProfanityManager::clear_database_entries(DBcore *db) {
-	if (!db)
+	if (!db) {
 		return false;
+	}
 
 	profanity_list.clear();
 
 	std::string query = "DELETE FROM `profanity_list`";
 	auto results = db->QueryDatabase(query);
-	if (!results.Success())
+
+	if (!results.Success()) {
 		return false;
+	}
 
 	return true;
 }
 
-bool EQ::ProfanityManager::check_for_existing_entry(const char *profanity) {
-	if (!profanity)
+bool EQ::ProfanityManager::check_for_existing_entry(const std::string& profanity) {
+	if (profanity.empty()) {
 		return false;
+	}
 
 	for (const auto &iter : profanity_list) {
-		if (iter.compare(profanity) == 0)
+		if (!iter.compare(profanity)) {
 			return true;
+		}
 	}
-	
+
 	return false;
 }

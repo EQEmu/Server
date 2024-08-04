@@ -1,1 +1,0 @@
-ALTER TABLE `npc_spells_entries` MODIFY `spellid` SMALLINT(5) UNSIGNED NOT NULL DEFAULT 0;

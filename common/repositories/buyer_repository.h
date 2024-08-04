@@ -1,29 +1,11 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_BUYER_REPOSITORY_H
 #define EQEMU_BUYER_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_buyer_repository.h"
+#include "base/base_buyer_trade_items_repository.h"
+#include "base/base_buyer_buy_lines_repository.h"
 
 class BuyerRepository: public BaseBuyerRepository {
 public:
@@ -65,6 +47,93 @@ public:
 
 	// Custom extended repository methods here
 
+	static bool UpdateWelcomeMessage(Database& db, uint32 char_id, const char *message) {
+
+		auto const b = GetWhere(db, fmt::format("`char_id` = '{}';", char_id));
+
+		if (b.empty()) {
+			return false;
+		}
+
+		auto buyer = b.front();
+		buyer.welcome_message = message;
+		return UpdateOne(db, buyer);
+	}
+
+	static std::string GetWelcomeMessage(Database& db, uint32 char_id) {
+
+		auto const b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return std::string();
+		}
+
+		return b.front().welcome_message;
+	}
+
+	static int UpdateTransactionDate(Database& db, uint32 char_id, time_t transaction_date) {
+		auto b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return 0;
+		}
+
+		auto e = b.front();
+		e.transaction_date = transaction_date;
+
+		return UpdateOne(db, e);
+	}
+
+	static time_t GetTransactionDate(Database& db, uint32 char_id) {
+		auto b = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+		if (b.empty()) {
+			return 0;
+		}
+
+		auto e = b.front();
+
+		return e.transaction_date;
+	}
+
+	static bool DeleteBuyer(Database &db, uint32 char_id)
+	{
+		if (char_id == 0) {
+			Truncate(db);
+			BaseBuyerBuyLinesRepository::Truncate(db);
+			BaseBuyerTradeItemsRepository::Truncate(db);
+		}
+		else {
+			auto buyer = GetWhere(db, fmt::format("`char_id` = '{}' LIMIT 1;", char_id));
+			if (buyer.empty()) {
+				return false;
+			}
+
+			auto buy_lines = BaseBuyerBuyLinesRepository::GetWhere(
+				db,
+				fmt::format("`buyer_id` = '{}'", buyer.front().id)
+			);
+			if (buy_lines.empty()) {
+				return false;
+			}
+
+			std::vector<std::string> buy_line_ids{};
+			for (auto const &bl: buy_lines) {
+				buy_line_ids.push_back(std::to_string(bl.id));
+			}
+
+			DeleteWhere(db, fmt::format("`char_id` = '{}';", char_id));
+			BaseBuyerBuyLinesRepository::DeleteWhere(
+				db,
+				fmt::format("`id` IN({})", Strings::Implode(", ", buy_line_ids))
+			);
+			BaseBuyerTradeItemsRepository::DeleteWhere(
+				db,
+				fmt::format(
+					"`buyer_buy_lines_id` IN({})",
+					Strings::Implode(", ", buy_line_ids))
+			);
+		}
+
+		return true;
+	}
 };
 
 #endif //EQEMU_BUYER_REPOSITORY_H

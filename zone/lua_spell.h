@@ -83,6 +83,8 @@ public:
 	int GetPVPResistCalc();
 	int GetPVPResistCap();
 	int GetSpellCategory();
+	int GetPVPDuration();
+	int GetPVPDurationCap();
 	int GetCanMGB();
 	int GetDispelFlag();
 	int GetMinResist();
@@ -107,6 +109,7 @@ public:
 	float GetMaxDistMod();
 	float GetMinRange();
 	int GetDamageShieldType();
+	int GetRank();
 };
 
 #endif

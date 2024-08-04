@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2014 EQEMu Development Team (http://eqemulator.net)
+	Copyright (C) 2001-2021 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -25,10 +25,24 @@
 #include <iterator>
 #include <type_traits>
 
-/* This uses mt19937 seeded with the std::random_device
- * The idea is to have this be included as a member of another class
- * so mocking out for testing is easier
- * If you need to reseed random.Reseed()
+#ifdef USE_SFMT19937
+// only GCC supports, so lets turn it off
+#ifndef __GNUC__
+#undef USE_SFMT19937
+#endif
+#ifdef __clang__
+#undef USE_SFMT19937
+#endif
+#endif
+
+#ifdef USE_ADDITIVE_LFIB_PRNG
+#include "additive_lagged_fibonacci_engine.h"
+#elif defined(USE_SFMT19937)
+#include <ext/random>
+#endif
+
+/* This uses mt19937 (or other compatible engine) seeded with the std::random_device. The idea is to have this be
+ * included as a member of another class so mocking out for testing is easier If you need to reseed random.Reseed()
  * Eventually this should be derived from an abstract base class
  */
 
@@ -40,7 +54,12 @@ namespace EQ {
 		{
 			if (low > high)
 				std::swap(low, high);
+// EQ uses biased int distribution, so I guess we can support it :P
+#ifdef BIASED_INT_DIST
+			return low + m_gen() % (high - low + 1);
+#else
 			return int_dist(m_gen, int_param_t(low, high)); // [low, high]
+#endif
 		}
 
 		// AKA old MakeRandomFloat
@@ -98,11 +117,24 @@ namespace EQ {
 		}
 
 	private:
+#ifndef BIASED_INT_DIST
 		typedef std::uniform_int_distribution<int>::param_type int_param_t;
-		typedef std::uniform_real_distribution<double>::param_type real_param_t;
-		std::mt19937 m_gen;
 		std::uniform_int_distribution<int> int_dist;
+#endif
+		typedef std::uniform_real_distribution<double>::param_type real_param_t;
 		std::uniform_real_distribution<double> real_dist;
+// define USE_CUSTOM_PRNG_ENGINE to any supported random engine like:
+// #define USE_CUSTOM_PRNG_ENGINE std::default_random_engine
+#ifdef USE_ADDITIVE_LFIB_PRNG
+		EQRand
+#elif defined(USE_SFMT19937)
+		__gnu_cxx::sfmt19937
+#elif defined(USE_CUSTOM_PRNG_ENGINE)
+		USE_CUSTOM_PRNG_ENGINE
+#else
+		std::mt19937
+#endif
+		m_gen;
 	};
 }
 

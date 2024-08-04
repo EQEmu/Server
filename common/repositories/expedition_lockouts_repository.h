@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_EXPEDITION_LOCKOUTS_REPOSITORY_H
 #define EQEMU_EXPEDITION_LOCKOUTS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_expedition_lockouts_repository.h"
 
 class ExpeditionLockoutsRepository: public BaseExpeditionLockoutsRepository {
@@ -65,6 +45,58 @@ public:
 
 	// Custom extended repository methods here
 
+	struct ExpeditionLockoutsWithTimestamp {
+		uint32_t    id;
+		uint32_t    expedition_id;
+		std::string event_name;
+		time_t      expire_time;
+		int         duration;
+		std::string from_expedition_uuid;
+	};
+
+	static std::vector<ExpeditionLockoutsWithTimestamp> GetWithTimestamp(
+		Database& db, const std::vector<uint32_t>& expedition_ids)
+	{
+		if (expedition_ids.empty())
+		{
+			return {};
+		}
+
+		std::vector<ExpeditionLockoutsWithTimestamp> all_entries;
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				id,
+				expedition_id,
+				event_name,
+				UNIX_TIMESTAMP(expire_time),
+				duration,
+				from_expedition_uuid
+			FROM expedition_lockouts
+			WHERE expedition_id IN ({})
+		),
+			Strings::Join(expedition_ids, ",")
+		));
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			ExpeditionLockoutsWithTimestamp entry{};
+
+			int col = 0;
+			entry.id                   = strtoul(row[col++], nullptr, 10);
+			entry.expedition_id        = strtoul(row[col++], nullptr, 10);
+			entry.event_name           = row[col++];
+			entry.expire_time          = strtoull(row[col++], nullptr, 10);
+			entry.duration             = strtol(row[col++], nullptr, 10);
+			entry.from_expedition_uuid = row[col++];
+
+			all_entries.emplace_back(std::move(entry));
+		}
+
+		return all_entries;
+	}
 };
 
 #endif //EQEMU_EXPEDITION_LOCKOUTS_REPOSITORY_H

@@ -1,0 +1,6 @@
+!Makefile
+base/*.sql
+base/*.zip
+base/db/
+base/maps/
+!base/expansion/Makefile

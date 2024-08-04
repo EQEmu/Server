@@ -1,2 +1,0 @@
-UPDATE `rule_values` SET `rule_value` = '6000' WHERE `rule_value` = '500' AND `rule_name` = 'Spells:AI_IdleNoSpellMinRecast';
-UPDATE `rule_values` SET `rule_value` = '60000' WHERE `rule_value` = '2000' AND `rule_name` = 'Spells:AI_IdleNoSpellMaxRecast';

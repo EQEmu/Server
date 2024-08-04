@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_RESPAWN_TIMES_REPOSITORY_H
 #define EQEMU_RESPAWN_TIMES_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_respawn_times_repository.h"
 
 class RespawnTimesRepository: public BaseRespawnTimesRepository {
@@ -64,7 +44,39 @@ public:
      */
 
 	// Custom extended repository methods here
+	static void ClearExpiredRespawnTimers(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}` WHERE (`start` + `duration`) < UNIX_TIMESTAMP(NOW())",
+				TableName()
+			)
+		);
+	}
 
+	static uint32 GetTimeRemaining(Database& db, uint32 spawn2_id, uint16 instance_id, time_t time_seconds)
+	{
+		const auto& l = RespawnTimesRepository::GetWhere(
+			db,
+			fmt::format(
+				"`id` = {} AND `instance_id` = {}",
+				spawn2_id,
+				instance_id
+			)
+		);
+
+		if (l.empty()) {
+			return 0;
+		}
+
+		auto r = l.front();
+
+		if ((r.start + r.duration) <= time_seconds) {
+			return 0;
+		}
+
+		return ((r.start + r.duration) - time_seconds);
+	}
 };
 
 #endif //EQEMU_RESPAWN_TIMES_REPOSITORY_H

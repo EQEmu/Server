@@ -4,48 +4,96 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_TRADER_REPOSITORY_H
 #define EQEMU_BASE_TRADER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseTraderRepository {
 public:
 	struct Trader {
-		int char_id;
-		int item_id;
-		int serialnumber;
-		int charges;
-		int item_cost;
-		int slot_id;
+		uint64_t id;
+		uint32_t char_id;
+		uint32_t item_id;
+		uint32_t aug_slot_1;
+		uint32_t aug_slot_2;
+		uint32_t aug_slot_3;
+		uint32_t aug_slot_4;
+		uint32_t aug_slot_5;
+		uint32_t aug_slot_6;
+		int32_t  item_sn;
+		int32_t  item_charges;
+		uint64_t item_cost;
+		uint8_t  slot_id;
+		uint32_t char_entity_id;
+		uint32_t char_zone_id;
+		int8_t   active_transaction;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("char_id");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
+			"id",
 			"char_id",
 			"item_id",
-			"serialnumber",
-			"charges",
+			"aug_slot_1",
+			"aug_slot_2",
+			"aug_slot_3",
+			"aug_slot_4",
+			"aug_slot_5",
+			"aug_slot_6",
+			"item_sn",
+			"item_charges",
 			"item_cost",
 			"slot_id",
+			"char_entity_id",
+			"char_zone_id",
+			"active_transaction",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"char_id",
+			"item_id",
+			"aug_slot_1",
+			"aug_slot_2",
+			"aug_slot_3",
+			"aug_slot_4",
+			"aug_slot_5",
+			"aug_slot_6",
+			"item_sn",
+			"item_charges",
+			"item_cost",
+			"slot_id",
+			"char_entity_id",
+			"char_zone_id",
+			"active_transaction",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -57,7 +105,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -73,25 +121,35 @@ public:
 
 	static Trader NewEntity()
 	{
-		Trader entry{};
+		Trader e{};
 
-		entry.char_id      = 0;
-		entry.item_id      = 0;
-		entry.serialnumber = 0;
-		entry.charges      = 0;
-		entry.item_cost    = 0;
-		entry.slot_id      = 0;
+		e.id                 = 0;
+		e.char_id            = 0;
+		e.item_id            = 0;
+		e.aug_slot_1         = 0;
+		e.aug_slot_2         = 0;
+		e.aug_slot_3         = 0;
+		e.aug_slot_4         = 0;
+		e.aug_slot_5         = 0;
+		e.aug_slot_6         = 0;
+		e.item_sn            = 0;
+		e.item_charges       = 0;
+		e.item_cost          = 0;
+		e.slot_id            = 0;
+		e.char_entity_id     = 0;
+		e.char_zone_id       = 0;
+		e.active_transaction = 0;
 
-		return entry;
+		return e;
 	}
 
-	static Trader GetTraderEntry(
+	static Trader GetTrader(
 		const std::vector<Trader> &traders,
 		int trader_id
 	)
 	{
 		for (auto &trader : traders) {
-			if (trader.char_id == trader_id) {
+			if (trader.id == trader_id) {
 				return trader;
 			}
 		}
@@ -106,24 +164,35 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				trader_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -148,27 +217,36 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Trader trader_entry
+		const Trader &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(trader_entry.char_id));
-		update_values.push_back(columns[1] + " = " + std::to_string(trader_entry.item_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(trader_entry.serialnumber));
-		update_values.push_back(columns[3] + " = " + std::to_string(trader_entry.charges));
-		update_values.push_back(columns[4] + " = " + std::to_string(trader_entry.item_cost));
-		update_values.push_back(columns[5] + " = " + std::to_string(trader_entry.slot_id));
+		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.item_id));
+		v.push_back(columns[3] + " = " + std::to_string(e.aug_slot_1));
+		v.push_back(columns[4] + " = " + std::to_string(e.aug_slot_2));
+		v.push_back(columns[5] + " = " + std::to_string(e.aug_slot_3));
+		v.push_back(columns[6] + " = " + std::to_string(e.aug_slot_4));
+		v.push_back(columns[7] + " = " + std::to_string(e.aug_slot_5));
+		v.push_back(columns[8] + " = " + std::to_string(e.aug_slot_6));
+		v.push_back(columns[9] + " = " + std::to_string(e.item_sn));
+		v.push_back(columns[10] + " = " + std::to_string(e.item_charges));
+		v.push_back(columns[11] + " = " + std::to_string(e.item_cost));
+		v.push_back(columns[12] + " = " + std::to_string(e.slot_id));
+		v.push_back(columns[13] + " = " + std::to_string(e.char_entity_id));
+		v.push_back(columns[14] + " = " + std::to_string(e.char_zone_id));
+		v.push_back(columns[15] + " = " + std::to_string(e.active_transaction));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				trader_entry.char_id
+				e.id
 			)
 		);
 
@@ -177,63 +255,83 @@ public:
 
 	static Trader InsertOne(
 		Database& db,
-		Trader trader_entry
+		Trader e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(trader_entry.char_id));
-		insert_values.push_back(std::to_string(trader_entry.item_id));
-		insert_values.push_back(std::to_string(trader_entry.serialnumber));
-		insert_values.push_back(std::to_string(trader_entry.charges));
-		insert_values.push_back(std::to_string(trader_entry.item_cost));
-		insert_values.push_back(std::to_string(trader_entry.slot_id));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.aug_slot_1));
+		v.push_back(std::to_string(e.aug_slot_2));
+		v.push_back(std::to_string(e.aug_slot_3));
+		v.push_back(std::to_string(e.aug_slot_4));
+		v.push_back(std::to_string(e.aug_slot_5));
+		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.item_sn));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.item_cost));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.active_transaction));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			trader_entry.char_id = results.LastInsertedID();
-			return trader_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		trader_entry = NewEntity();
+		e = NewEntity();
 
-		return trader_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Trader> trader_entries
+		const std::vector<Trader> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &trader_entry: trader_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(trader_entry.char_id));
-			insert_values.push_back(std::to_string(trader_entry.item_id));
-			insert_values.push_back(std::to_string(trader_entry.serialnumber));
-			insert_values.push_back(std::to_string(trader_entry.charges));
-			insert_values.push_back(std::to_string(trader_entry.item_cost));
-			insert_values.push_back(std::to_string(trader_entry.slot_id));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.aug_slot_1));
+			v.push_back(std::to_string(e.aug_slot_2));
+			v.push_back(std::to_string(e.aug_slot_3));
+			v.push_back(std::to_string(e.aug_slot_4));
+			v.push_back(std::to_string(e.aug_slot_5));
+			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.item_sn));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.item_cost));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.active_transaction));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -254,22 +352,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Trader> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Trader> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Trader> all_entries;
 
@@ -284,22 +392,32 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Trader entry{};
+			Trader e{};
 
-			entry.char_id      = atoi(row[0]);
-			entry.item_id      = atoi(row[1]);
-			entry.serialnumber = atoi(row[2]);
-			entry.charges      = atoi(row[3]);
-			entry.item_cost    = atoi(row[4]);
-			entry.slot_id      = atoi(row[5]);
+			e.id                 = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id            = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.item_id            = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.aug_slot_1         = row[3] ? static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) : 0;
+			e.aug_slot_2         = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.aug_slot_3         = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.aug_slot_4         = row[6] ? static_cast<uint32_t>(strtoul(row[6], nullptr, 10)) : 0;
+			e.aug_slot_5         = row[7] ? static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) : 0;
+			e.aug_slot_6         = row[8] ? static_cast<uint32_t>(strtoul(row[8], nullptr, 10)) : 0;
+			e.item_sn            = row[9] ? static_cast<int32_t>(atoi(row[9])) : 0;
+			e.item_charges       = row[10] ? static_cast<int32_t>(atoi(row[10])) : 0;
+			e.item_cost          = row[11] ? strtoull(row[11], nullptr, 10) : 0;
+			e.slot_id            = row[12] ? static_cast<uint8_t>(strtoul(row[12], nullptr, 10)) : 0;
+			e.char_entity_id     = row[13] ? static_cast<uint32_t>(strtoul(row[13], nullptr, 10)) : 0;
+			e.char_zone_id       = row[14] ? static_cast<uint32_t>(strtoul(row[14], nullptr, 10)) : 0;
+			e.active_transaction = row[15] ? static_cast<int8_t>(atoi(row[15])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -324,6 +442,118 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Trader &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.item_id));
+		v.push_back(std::to_string(e.aug_slot_1));
+		v.push_back(std::to_string(e.aug_slot_2));
+		v.push_back(std::to_string(e.aug_slot_3));
+		v.push_back(std::to_string(e.aug_slot_4));
+		v.push_back(std::to_string(e.aug_slot_5));
+		v.push_back(std::to_string(e.aug_slot_6));
+		v.push_back(std::to_string(e.item_sn));
+		v.push_back(std::to_string(e.item_charges));
+		v.push_back(std::to_string(e.item_cost));
+		v.push_back(std::to_string(e.slot_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.active_transaction));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Trader> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.item_id));
+			v.push_back(std::to_string(e.aug_slot_1));
+			v.push_back(std::to_string(e.aug_slot_2));
+			v.push_back(std::to_string(e.aug_slot_3));
+			v.push_back(std::to_string(e.aug_slot_4));
+			v.push_back(std::to_string(e.aug_slot_5));
+			v.push_back(std::to_string(e.aug_slot_6));
+			v.push_back(std::to_string(e.item_sn));
+			v.push_back(std::to_string(e.item_charges));
+			v.push_back(std::to_string(e.item_cost));
+			v.push_back(std::to_string(e.slot_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.active_transaction));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_TRADER_REPOSITORY_H

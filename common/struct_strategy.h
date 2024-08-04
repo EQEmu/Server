@@ -43,9 +43,6 @@ protected:
 //effectively a singleton, but I decided to do it this way for no apparent reason.
 namespace StructStrategyFactory {
 	void RegisterPatch(EmuOpcode first_opcode, const StructStrategy *structs);
-
-	//does NOT return ownership of the strategy.
-	const StructStrategy *FindPatch(EmuOpcode first_opcode);
 };
 
 

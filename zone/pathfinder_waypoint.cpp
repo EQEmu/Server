@@ -11,9 +11,6 @@
 #include "pathfinder_waypoint.h"
 #include "zone.h"
 #include "client.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/string_util.h"
-#include "../common/rulesys.h"
 
 extern Zone *zone;
 
@@ -123,26 +120,26 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 	if (result_start_n.size() == 0) {
 		return IPath();
 	}
-	
+
 	std::vector<RTreeValue> result_end_n;
 	m_impl->Tree.query(boost::geometry::index::nearest(Point(end.x, end.y, end.z), 1), std::back_inserter(result_end_n));
 	if (result_end_n.size() == 0) {
 		return IPath();
 	}
-	
+
 	auto &nearest_start = *result_start_n.begin();
 	auto &nearest_end = *result_end_n.begin();
-	
+
 	if (nearest_start.second == nearest_end.second) {
 		IPath Route;
 		Route.push_back(start);
 		Route.push_back(end);
 		return Route;
 	}
-	
+
 	std::vector<GraphType::vertex_descriptor> p(boost::num_vertices(m_impl->Graph));
 	try {
-		boost::astar_search(m_impl->Graph, nearest_start.second, 
+		boost::astar_search(m_impl->Graph, nearest_start.second,
 			distance_heuristic<GraphType, float, Node*>(&m_impl->Nodes[0], nearest_end.second),
 			boost::predecessor_map(&p[0])
 				.visitor(astar_goal_visitor<size_t>(nearest_end.second)));
@@ -150,7 +147,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 	catch (found_goal)
 	{
 		IPath Route;
-		
+
 		Route.push_front(end);
 		for (size_t v = nearest_end.second;; v = p[v]) {
 			if (p[v] == v) {
@@ -159,7 +156,7 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 			}
 			else {
 				auto &node = m_impl->Nodes[v];
-	
+
 				auto iter = node.edges.find((int)p[v + 1]);
 				if (iter != node.edges.end()) {
 					auto &edge = iter->second;
@@ -176,15 +173,15 @@ IPathfinder::IPath PathfinderWaypoint::FindRoute(const glm::vec3 &start, const g
 				}
 			}
 		}
-	
+
 		Route.push_front(start);
 		return Route;
 	}
-	
+
 	return IPath();
 }
 
-glm::vec3 PathfinderWaypoint::GetRandomLocation(const glm::vec3 &start)
+glm::vec3 PathfinderWaypoint::GetRandomLocation(const glm::vec3 &start, int flags)
 {
 	if (m_impl->Nodes.size() > 0) {
 		auto idx = zone->random.Int(0, (int)m_impl->Nodes.size() - 1);
@@ -192,7 +189,7 @@ glm::vec3 PathfinderWaypoint::GetRandomLocation(const glm::vec3 &start)
 
 		return node.v;
 	}
-	
+
 	return glm::vec3();
 }
 
@@ -205,32 +202,32 @@ void PathfinderWaypoint::DebugCommand(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#path info node_id: Gives information about node info (requires shownode target).");
 		return;
 	}
-	
+
 	if(!strcasecmp(sep->arg[1], "shownodes"))
 	{
-		ShowNodes();	
+		ShowNodes();
 		return;
 	}
-	
+
 	if (!strcasecmp(sep->arg[1], "show"))
 	{
 		if (c->GetTarget() != nullptr) {
 			auto target = c->GetTarget();
 			glm::vec3 start(c->GetX(), c->GetY(), c->GetZ());
 			glm::vec3 end(target->GetX(), target->GetY(), target->GetZ());
-	
+
 			ShowPath(c, start, end);
 		}
-	
+
 		return;
 	}
-	
+
 	if (!strcasecmp(sep->arg[1], "reload"))
 	{
 		Load(m_impl->FileName);
 		return;
 	}
-	
+
 	if (!strcasecmp(sep->arg[1], "info"))
 	{
 		NodeInfo(c);
@@ -242,25 +239,25 @@ void PathfinderWaypoint::Load(const std::string &filename) {
 	PathFileHeader Head;
 	Head.PathNodeCount = 0;
 	Head.version = 2;
-	
+
 	FILE *f = fopen(filename.c_str(), "rb");
 	if (f) {
 		char Magic[10];
-	
+
 		fread(&Magic, 9, 1, f);
-	
+
 		if (strncmp(Magic, "EQEMUPATH", 9))
 		{
 			LogError("Bad Magic String in .path file");
 			fclose(f);
 			return;
 		}
-	
+
 		fread(&Head, sizeof(Head), 1, f);
-	
+
 		LogInfo("Path File Header: Version [{}], PathNodes [{}]",
 			(long)Head.version, (long)Head.PathNodeCount);
-	
+
 		if (Head.version == 2)
 		{
 			LoadV2(f, Head);
@@ -281,13 +278,13 @@ void PathfinderWaypoint::Load(const std::string &filename) {
 void PathfinderWaypoint::LoadV2(FILE *f, const PathFileHeader &header)
 {
 	std::unique_ptr<PathNode[]> PathNodes(new PathNode[header.PathNodeCount]);
-	
+
 	fread(PathNodes.get(), sizeof(PathNode), header.PathNodeCount, f);
-	
+
 	int MaxNodeID = header.PathNodeCount - 1;
-	
+
 	m_impl->PathFileValid = true;
-	
+
 	m_impl->Nodes.reserve(header.PathNodeCount);
 	for (uint32 i = 0; i < header.PathNodeCount; ++i)
 	{
@@ -298,7 +295,7 @@ void PathfinderWaypoint::LoadV2(FILE *f, const PathFileHeader &header)
 		node.bestz = n.bestz;
 		m_impl->Nodes.push_back(node);
 	}
-	
+
 	auto weightmap = boost::get(boost::edge_weight, m_impl->Graph);
 	for (uint32 i = 0; i < header.PathNodeCount; ++i) {
 		for (uint32 j = 0; j < 50; ++j)
@@ -309,18 +306,18 @@ void PathfinderWaypoint::LoadV2(FILE *f, const PathFileHeader &header)
 				LogError("Path Node [{}], Neighbour [{}] ([{}]) out of range", i, j, PathNodes[i].Neighbours[j].id);
 				m_impl->PathFileValid = false;
 			}
-	
+
 			if (PathNodes[i].Neighbours[j].id > 0) {
 				Edge edge;
 				edge.distance = PathNodes[i].Neighbours[j].distance;
 				edge.door_id = PathNodes[i].Neighbours[j].DoorID;
 				edge.teleport = PathNodes[i].Neighbours[j].Teleport;
-	
+
 				node.edges[PathNodes[i].Neighbours[j].id] = edge;
 			}
 		}
 	}
-	
+
 	BuildGraph();
 	fclose(f);
 }
@@ -339,7 +336,7 @@ void PathfinderWaypoint::LoadV3(FILE *f, const PathFileHeader &header)
 		float y = 0.0f;
 		float z = 0.0f;
 		float best_z = 0.0f;
-	
+
 		fread(&id, sizeof(uint32), 1, f);
 		fread(&x, sizeof(float), 1, f);
 		fread(&y, sizeof(float), 1, f);
@@ -352,7 +349,7 @@ void PathfinderWaypoint::LoadV3(FILE *f, const PathFileHeader &header)
 		n.v.x = x;
 		n.v.y = y;
 		n.v.z = z;
-	
+
 		m_impl->Nodes.push_back(n);
 	}
 
@@ -377,10 +374,10 @@ void PathfinderWaypoint::LoadV3(FILE *f, const PathFileHeader &header)
 		auto &n = m_impl->Nodes[from];
 		n.edges[to] = e;
 	}
-	
+
 	m_impl->PathFileValid = true;
-	
-	BuildGraph();	
+
+	BuildGraph();
 	fclose(f);
 }
 
@@ -532,7 +529,7 @@ void PathfinderWaypoint::ShowNode(const Node &n) {
 	npc_type->current_hp = 4000000;
 	npc_type->max_hp = 4000000;
 	npc_type->race = 2254;
-	npc_type->gender = 2;
+	npc_type->gender = Gender::Neuter;
 	npc_type->class_ = 9;
 	npc_type->deity = 1;
 	npc_type->level = 75;

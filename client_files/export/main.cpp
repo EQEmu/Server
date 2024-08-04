@@ -25,11 +25,23 @@
 #include "../../common/platform.h"
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
-#include "../../common/string_util.h"
+#include "../../common/strings.h"
 #include "../../common/content/world_content_service.h"
+#include "../../common/zone_store.h"
+#include "../../common/path_manager.h"
+#include "../../common/repositories/base_data_repository.h"
+#include "../../common/repositories/db_str_repository.h"
+#include "../../common/repositories/skill_caps_repository.h"
+#include "../../common/repositories/spells_new_repository.h"
+#include "../../common/file.h"
+#include "../../common/events/player_event_logs.h"
+#include "../../common/skill_caps.h"
 
-EQEmuLogSys LogSys;
+EQEmuLogSys         LogSys;
 WorldContentService content_service;
+ZoneStore           zone_store;
+PathManager         path;
+PlayerEventLogs     player_event_logs;
 
 void ExportSpells(SharedDatabase *db);
 void ExportSkillCaps(SharedDatabase *db);
@@ -41,6 +53,8 @@ int main(int argc, char **argv)
 	RegisterExecutablePlatform(ExePlatformClientExport);
 	LogSys.LoadLogSettingsDefaults();
 	set_exception_handler();
+
+	path.LoadPaths();
 
 	LogInfo("Client Files Export Utility");
 	if (!EQEmuConfig::LoadConfig()) {
@@ -80,31 +94,30 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	} else {
-		content_db.SetMysql(database.getMySQL());
+		content_db.SetMySQL(database);
 	}
 
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->SetLogPath(path.GetLogPath())
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
-	std::string arg_1;
+	std::string export_type;
 
 	if (argv[1]) {
-		arg_1 = argv[1];
+		export_type = argv[1];
 	}
 
-	if (arg_1 == "spells") {
+	if (Strings::EqualFold(export_type, "spells")) {
 		ExportSpells(&content_db);
 		return 0;
-	}
-	if (arg_1 == "skills") {
+	} else if (Strings::EqualFold(export_type, "skills")) {
 		ExportSkillCaps(&content_db);
 		return 0;
-	}
-	if (arg_1 == "basedata") {
+	} else if (Strings::EqualFold(export_type, "basedata") || Strings::EqualFold(export_type, "base_data")) {
 		ExportBaseData(&content_db);
 		return 0;
-	}
-	if (arg_1 == "dbstring") {
+	} else if (Strings::EqualFold(export_type, "dbstr") || Strings::EqualFold(export_type, "dbstring")) {
 		ExportDBStrings(&database);
 		return 0;
 	}
@@ -119,182 +132,79 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void ExportSpells(SharedDatabase *db)
+void ExportSpells(SharedDatabase* db)
 {
-	LogInfo("Exporting Spells");
-
-	FILE *f = fopen("export/spells_us.txt", "w");
-	if (!f) {
+	std::ofstream file(fmt::format("{}/export/spells_us.txt", path.GetServerPath()));
+	if (!file || !file.is_open()) {
 		LogError("Unable to open export/spells_us.txt to write, skipping.");
 		return;
 	}
 
-	const std::string query   = "SELECT * FROM spells_new ORDER BY id";
-	auto              results = db->QueryDatabase(query);
+	const auto& lines = SpellsNewRepository::GetSpellFileLines(*db);
 
-	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			std::string       line;
-			unsigned int      fields = results.ColumnCount();
-			for (unsigned int i      = 0; i < fields; ++i) {
-				if (i != 0) {
-					line.push_back('^');
-				}
+	const std::string& file_string = Strings::Implode("\n", lines);
 
-				if (row[i] != nullptr) {
-					line += row[i];
-				}
-			}
+	file << file_string;
 
-			fprintf(f, "%s\n", line.c_str());
-		}
-	}
-	else {
-	}
+	file.close();
 
-	fclose(f);
+	LogInfo("Exported [{}] Spell{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 
-bool SkillUsable(SharedDatabase *db, int skill_id, int class_id)
+void ExportSkillCaps(SharedDatabase* db)
 {
-
-	bool res = false;
-
-	std::string query   = StringFormat(
-		"SELECT max(cap) FROM skill_caps WHERE class=%d AND skillID=%d",
-		class_id, skill_id
-	);
-	auto        results = db->QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	if (results.RowCount() == 0) {
-		return false;
-	}
-
-	auto row = results.begin();
-	if (row[0] && atoi(row[0]) > 0) {
-		return true;
-	}
-
-	return false;
-}
-
-int GetSkill(SharedDatabase *db, int skill_id, int class_id, int level)
-{
-
-	std::string query   = StringFormat(
-		"SELECT cap FROM skill_caps WHERE class=%d AND skillID=%d AND level=%d",
-		class_id, skill_id, level
-	);
-	auto        results = db->QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() == 0) {
-		return 0;
-	}
-
-	auto row = results.begin();
-	return atoi(row[0]);
-}
-
-void ExportSkillCaps(SharedDatabase *db)
-{
-	LogInfo("Exporting Skill Caps");
-
-	FILE *f = fopen("export/SkillCaps.txt", "w");
-	if (!f) {
+	std::ofstream file(fmt::format("{}/export/SkillCaps.txt", path.GetServerPath()));
+	if (!file || !file.is_open()) {
 		LogError("Unable to open export/SkillCaps.txt to write, skipping.");
 		return;
 	}
 
-	for (int cl = 1; cl <= 16; ++cl) {
-		for (int skill = 0; skill <= 77; ++skill) {
-			if (SkillUsable(db, skill, cl)) {
-				int      previous_cap = 0;
-				for (int level        = 1; level <= 100; ++level) {
-					int cap = GetSkill(db, skill, cl, level);
-					if (cap < previous_cap) {
-						cap = previous_cap;
-					}
+	const auto& lines = SkillCapsRepository::GetSkillCapFileLines(*db);
 
-					fprintf(f, "%d^%d^%d^%d^0\n", cl, skill, level, cap);
-					previous_cap = cap;
-				}
-			}
-		}
-	}
+	const std::string& file_string = Strings::Implode("\n", lines);
 
-	fclose(f);
+	file << file_string;
+
+	file.close();
+
+	LogInfo("Exported [{}] Skill Cap{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 
 void ExportBaseData(SharedDatabase *db)
 {
-	LogInfo("Exporting Base Data");
-
-	FILE *f = fopen("export/BaseData.txt", "w");
-	if (!f) {
+	std::ofstream file(fmt::format("{}/export/BaseData.txt", path.GetServerPath()));
+	if (!file || !file.is_open()) {
 		LogError("Unable to open export/BaseData.txt to write, skipping.");
 		return;
 	}
 
-	const std::string query   = "SELECT * FROM base_data ORDER BY level, class";
-	auto              results = db->QueryDatabase(query);
-	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			std::string       line;
-			unsigned int      fields   = results.ColumnCount();
-			for (unsigned int rowIndex = 0; rowIndex < fields; ++rowIndex) {
-				if (rowIndex != 0) {
-					line.push_back('^');
-				}
+	const auto& lines = BaseDataRepository::GetBaseDataFileLines(*db);
 
-				if (row[rowIndex] != nullptr) {
-					line += row[rowIndex];
-				}
-			}
+	const std::string& file_string = Strings::Implode("\n", lines);
 
-			fprintf(f, "%s\n", line.c_str());
-		}
-	}
+	file << file_string;
 
-	fclose(f);
+	file.close();
+
+	LogInfo("Exported [{}] Base Data Entr{}", lines.size(), lines.size() != 1 ? "ies" : "y");
 }
 
 void ExportDBStrings(SharedDatabase *db)
 {
-	LogInfo("Exporting DB Strings");
-
-	FILE *f = fopen("export/dbstr_us.txt", "w");
-	if (!f) {
+	std::ofstream file(fmt::format("{}/export/dbstr_us.txt", path.GetServerPath()));
+	if (!file || !file.is_open()) {
 		LogError("Unable to open export/dbstr_us.txt to write, skipping.");
 		return;
 	}
 
-	fprintf(f, "Major^Minor^String(New)\n");
-	const std::string query   = "SELECT * FROM db_str ORDER BY id, type";
-	auto              results = db->QueryDatabase(query);
-	if (results.Success()) {
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			std::string       line;
-			unsigned int      fields   = results.ColumnCount();
-			for (unsigned int rowIndex = 0; rowIndex < fields; ++rowIndex) {
-				if (rowIndex != 0) {
-					line.push_back('^');
-				}
+	const auto& lines = DbStrRepository::GetDBStrFileLines(*db);
 
-				if (row[rowIndex] != nullptr) {
-					line += row[rowIndex];
-				}
-			}
+	const std::string& file_string = Strings::Implode("\n", lines);
 
-			fprintf(f, "%s\n", line.c_str());
-		}
-	}
+	file << file_string;
 
-	fclose(f);
+	file.close();
+
+	LogInfo("Exported [{}] Database String{}", lines.size(), lines.size() != 1 ? "s" : "");
 }
 

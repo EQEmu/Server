@@ -1,7 +1,6 @@
 #include "raycast_mesh.h"
 #include <math.h>
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>

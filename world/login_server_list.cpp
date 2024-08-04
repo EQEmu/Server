@@ -52,15 +52,7 @@ LoginServerList::~LoginServerList() {
 void LoginServerList::Add(const char* iAddress, uint16 iPort, const char* Account, const char* Password, bool Legacy)
 {
 	auto loginserver = new LoginServer(iAddress, iPort, Account, Password, Legacy);
-	m_list.push_back(std::unique_ptr<LoginServer>(loginserver));
-}
-
-bool LoginServerList::SendInfo() {
-	for (auto &iter : m_list) {
-		(*iter).SendInfo();
-	}
-
-	return true;
+	m_list.emplace_back(std::unique_ptr<LoginServer>(loginserver));
 }
 
 bool LoginServerList::SendStatus() {
@@ -93,26 +85,6 @@ bool LoginServerList::SendAccountUpdate(ServerPacket* pack) {
 bool LoginServerList::Connected() {
 	for (auto &iter : m_list) {
 		if ((*iter).Connected()) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool LoginServerList::AllConnected() {
-	for (auto &iter : m_list) {
-		if (!(*iter).Connected()) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool LoginServerList::CanUpdate() {
-	for (auto &iter : m_list) {
-		if ((*iter).CanUpdate()) {
 			return true;
 		}
 	}

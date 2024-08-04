@@ -4,48 +4,72 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_BUYER_REPOSITORY_H
 #define EQEMU_BASE_BUYER_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseBuyerRepository {
 public:
 	struct Buyer {
-		int         charid;
-		int         buyslot;
-		int         itemid;
-		std::string itemname;
-		int         quantity;
-		int         price;
+		uint64_t    id;
+		uint32_t    char_id;
+		uint32_t    char_entity_id;
+		std::string char_name;
+		uint32_t    char_zone_id;
+		uint32_t    char_zone_instance_id;
+		time_t      transaction_date;
+		std::string welcome_message;
 	};
 
 	static std::string PrimaryKey()
 	{
-		return std::string("charid");
+		return std::string("id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"charid",
-			"buyslot",
-			"itemid",
-			"itemname",
-			"quantity",
-			"price",
+			"id",
+			"char_id",
+			"char_entity_id",
+			"char_name",
+			"char_zone_id",
+			"char_zone_instance_id",
+			"transaction_date",
+			"welcome_message",
+		};
+	}
+
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"char_id",
+			"char_entity_id",
+			"char_name",
+			"char_zone_id",
+			"char_zone_instance_id",
+			"UNIX_TIMESTAMP(transaction_date)",
+			"welcome_message",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -57,7 +81,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -73,25 +97,27 @@ public:
 
 	static Buyer NewEntity()
 	{
-		Buyer entry{};
+		Buyer e{};
 
-		entry.charid   = 0;
-		entry.buyslot  = 0;
-		entry.itemid   = 0;
-		entry.itemname = "";
-		entry.quantity = 0;
-		entry.price    = 0;
+		e.id                    = 0;
+		e.char_id               = 0;
+		e.char_entity_id        = 0;
+		e.char_name             = "";
+		e.char_zone_id          = 0;
+		e.char_zone_instance_id = 0;
+		e.transaction_date      = 0;
+		e.welcome_message       = "";
 
-		return entry;
+		return e;
 	}
 
-	static Buyer GetBuyerEntry(
+	static Buyer GetBuyer(
 		const std::vector<Buyer> &buyers,
 		int buyer_id
 	)
 	{
 		for (auto &buyer : buyers) {
-			if (buyer.charid == buyer_id) {
+			if (buyer.id == buyer_id) {
 				return buyer;
 			}
 		}
@@ -106,24 +132,27 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				buyer_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.char_entity_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.char_name             = row[3] ? row[3] : "";
+			e.char_zone_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.char_zone_instance_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.transaction_date      = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.welcome_message       = row[7] ? row[7] : "";
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -148,27 +177,28 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		Buyer buyer_entry
+		const Buyer &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(buyer_entry.charid));
-		update_values.push_back(columns[1] + " = " + std::to_string(buyer_entry.buyslot));
-		update_values.push_back(columns[2] + " = " + std::to_string(buyer_entry.itemid));
-		update_values.push_back(columns[3] + " = '" + EscapeString(buyer_entry.itemname) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(buyer_entry.quantity));
-		update_values.push_back(columns[5] + " = " + std::to_string(buyer_entry.price));
+		v.push_back(columns[1] + " = " + std::to_string(e.char_id));
+		v.push_back(columns[2] + " = " + std::to_string(e.char_entity_id));
+		v.push_back(columns[3] + " = '" + Strings::Escape(e.char_name) + "'");
+		v.push_back(columns[4] + " = " + std::to_string(e.char_zone_id));
+		v.push_back(columns[5] + " = " + std::to_string(e.char_zone_instance_id));
+		v.push_back(columns[6] + " = FROM_UNIXTIME(" + (e.transaction_date > 0 ? std::to_string(e.transaction_date) : "null") + ")");
+		v.push_back(columns[7] + " = '" + Strings::Escape(e.welcome_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				buyer_entry.charid
+				e.id
 			)
 		);
 
@@ -177,63 +207,67 @@ public:
 
 	static Buyer InsertOne(
 		Database& db,
-		Buyer buyer_entry
+		Buyer e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(buyer_entry.charid));
-		insert_values.push_back(std::to_string(buyer_entry.buyslot));
-		insert_values.push_back(std::to_string(buyer_entry.itemid));
-		insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
-		insert_values.push_back(std::to_string(buyer_entry.quantity));
-		insert_values.push_back(std::to_string(buyer_entry.price));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back("'" + Strings::Escape(e.char_name) + "'");
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.char_zone_instance_id));
+		v.push_back("FROM_UNIXTIME(" + (e.transaction_date > 0 ? std::to_string(e.transaction_date) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.welcome_message) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			buyer_entry.charid = results.LastInsertedID();
-			return buyer_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		buyer_entry = NewEntity();
+		e = NewEntity();
 
-		return buyer_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<Buyer> buyer_entries
+		const std::vector<Buyer> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &buyer_entry: buyer_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(buyer_entry.charid));
-			insert_values.push_back(std::to_string(buyer_entry.buyslot));
-			insert_values.push_back(std::to_string(buyer_entry.itemid));
-			insert_values.push_back("'" + EscapeString(buyer_entry.itemname) + "'");
-			insert_values.push_back(std::to_string(buyer_entry.quantity));
-			insert_values.push_back(std::to_string(buyer_entry.price));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back("'" + Strings::Escape(e.char_name) + "'");
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.char_zone_instance_id));
+			v.push_back("FROM_UNIXTIME(" + (e.transaction_date > 0 ? std::to_string(e.transaction_date) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.welcome_message) + "'");
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -254,22 +288,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.char_entity_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.char_name             = row[3] ? row[3] : "";
+			e.char_zone_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.char_zone_instance_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.transaction_date      = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.welcome_message       = row[7] ? row[7] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<Buyer> GetWhere(Database& db, std::string where_filter)
+	static std::vector<Buyer> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<Buyer> all_entries;
 
@@ -284,22 +320,24 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			Buyer entry{};
+			Buyer e{};
 
-			entry.charid   = atoi(row[0]);
-			entry.buyslot  = atoi(row[1]);
-			entry.itemid   = atoi(row[2]);
-			entry.itemname = row[3] ? row[3] : "";
-			entry.quantity = atoi(row[4]);
-			entry.price    = atoi(row[5]);
+			e.id                    = row[0] ? strtoull(row[0], nullptr, 10) : 0;
+			e.char_id               = row[1] ? static_cast<uint32_t>(strtoul(row[1], nullptr, 10)) : 0;
+			e.char_entity_id        = row[2] ? static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) : 0;
+			e.char_name             = row[3] ? row[3] : "";
+			e.char_zone_id          = row[4] ? static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) : 0;
+			e.char_zone_instance_id = row[5] ? static_cast<uint32_t>(strtoul(row[5], nullptr, 10)) : 0;
+			e.transaction_date      = strtoll(row[6] ? row[6] : "-1", nullptr, 10);
+			e.welcome_message       = row[7] ? row[7] : "";
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -324,6 +362,102 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const Buyer &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.char_id));
+		v.push_back(std::to_string(e.char_entity_id));
+		v.push_back("'" + Strings::Escape(e.char_name) + "'");
+		v.push_back(std::to_string(e.char_zone_id));
+		v.push_back(std::to_string(e.char_zone_instance_id));
+		v.push_back("FROM_UNIXTIME(" + (e.transaction_date > 0 ? std::to_string(e.transaction_date) : "null") + ")");
+		v.push_back("'" + Strings::Escape(e.welcome_message) + "'");
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<Buyer> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.char_id));
+			v.push_back(std::to_string(e.char_entity_id));
+			v.push_back("'" + Strings::Escape(e.char_name) + "'");
+			v.push_back(std::to_string(e.char_zone_id));
+			v.push_back(std::to_string(e.char_zone_instance_id));
+			v.push_back("FROM_UNIXTIME(" + (e.transaction_date > 0 ? std::to_string(e.transaction_date) : "null") + ")");
+			v.push_back("'" + Strings::Escape(e.welcome_message) + "'");
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_BUYER_REPOSITORY_H

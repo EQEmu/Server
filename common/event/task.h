@@ -1,14 +1,14 @@
 #pragma once
+#include <any>
 #include <functional>
 #include <exception>
 #include "event_loop.h"
-#include "../any.h"
 
 namespace EQ {
 	class Task
 	{
 	public:
-		typedef std::function<void(const EQ::Any&)> ResolveFn;
+		typedef std::function<void(const std::any&)> ResolveFn;
 		typedef std::function<void(const std::exception&)> RejectFn;
 		typedef std::function<void()> FinallyFn;
 		typedef std::function<void(ResolveFn, RejectFn)> TaskFn;
@@ -19,7 +19,7 @@ namespace EQ {
 			RejectFn on_catch;
 			FinallyFn on_finally;
 			bool has_result;
-			EQ::Any result;
+			std::any result;
 			bool has_error;
 			std::exception error;
 		};
@@ -63,7 +63,7 @@ namespace EQ {
 			uv_queue_work(EventLoop::Get().Handle(), m_work, [](uv_work_t* req) {
 				TaskBaton *baton = (TaskBaton*)req->data;
 
-				baton->fn([baton](const EQ::Any& result) {
+				baton->fn([baton](const std::any& result) {
 					baton->has_error = false;
 					baton->has_result = true;
 					baton->result = result;

@@ -16,7 +16,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-
 // Disgrace: for windows compile
 #ifndef WIN32
 	#include <sys/time.h>

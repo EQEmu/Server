@@ -1,33 +1,12 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_GROUP_LEADERS_REPOSITORY_H
 #define EQEMU_GROUP_LEADERS_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_group_leaders_repository.h"
 
 class GroupLeadersRepository: public BaseGroupLeadersRepository {
 public:
-
     /**
      * This file was auto generated and can be modified and extended upon
      *
@@ -64,7 +43,29 @@ public:
      */
 
 	// Custom extended repository methods here
+	static void ClearAllGroupLeaders(Database& db)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"DELETE FROM `{}`",
+				TableName()
+			)
+		);
+	}
 
+	static int UpdateLeadershipAA(Database &db, std::string &aa, uint32 group_id)
+	{
+		const auto group_leader = GetWhere(db, fmt::format("gid = '{}' LIMIT 1", group_id));
+		if(group_leader.empty()) {
+			return 0;
+		}
+
+		db.Encode(aa);
+		auto m = group_leader[0];
+		m.leadershipaa = aa;
+
+		return UpdateOne(db, m);
+	}
 };
 
 #endif //EQEMU_GROUP_LEADERS_REPOSITORY_H

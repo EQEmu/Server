@@ -1,28 +1,9 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 #define EQEMU_CHARACTER_CORPSES_REPOSITORY_H
 
+#include <glm/vec4.hpp>
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_character_corpses_repository.h"
 
 class CharacterCorpsesRepository: public BaseCharacterCorpsesRepository {
@@ -64,7 +45,192 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int BuryCorpse(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `is_buried` = 1 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
 
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int BuryDecayedCorpses(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `is_buried` = 1 WHERE `is_buried` = 0 AND (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) > {} AND time_of_death != 0",
+				TableName(),
+				RuleI(Character, CorpseDecayTime) / 1000
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int BuryInstance(Database& db, uint16 instance_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET is_buried = 1, instance_id = 0 WHERE instance_id = {}",
+				TableName(),
+				instance_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int BuryInstances(Database& db, const std::string& joined_instance_ids)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})",
+				TableName(),
+				joined_instance_ids
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static uint32 GetDecayTimer(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT (UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `{}` WHERE `{}` = {} AND `time_of_death` != 0",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		return Strings::ToUnsignedInt(row[0]);
+	}
+
+	static uint32 ResurrectCorpse(Database& db, uint32 corpse_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `is_rezzed` = 1 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static void SendAdventureCorpsesToGraveyard(
+		Database& db,
+		uint32 graveyard_zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = 0, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `instance_id` = {}",
+				TableName(),
+				graveyard_zone_id,
+				position.x,
+				position.y,
+				position.z,
+				position.w,
+				instance_id
+			)
+		);
+	}
+
+	static int SendToGraveyard(
+		Database& db,
+		uint32 corpse_id,
+		uint32 zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `zone_id` = {}, `instance_id` = {}, `x` = {:.2f}, `y` = {:.2f}, `z` = {:.2f}, `heading` = {:.2f}, `was_at_graveyard` = 1 WHERE `{}` = {}",
+				TableName(),
+				zone_id,
+				instance_id,
+				position.x,
+				position.y,
+				position.z,
+				position.w,
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+
+		return corpse_id;
+	}
+
+	static void SendToNonInstance(Database& db, uint32 corpse_id)
+	{
+		db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `instance_id` = 0 WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				corpse_id
+			)
+		);
+	}
+
+	static uint32 SetGuildConsentID(Database& db, uint32 character_id, uint32 guild_consent_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `guild_consent_id` = {} WHERE `charid` = {}",
+				TableName(),
+				guild_consent_id,
+				character_id
+			)
+		);
+
+		return results.Success() ? results.RowsAffected() : 0;
+	}
+
+	static int UnburyCorpse(
+		Database& db,
+		uint32 corpse_id,
+		uint32 zone_id,
+		uint16 instance_id,
+		const glm::vec4& position
+	)
+	{
+		auto corpse = FindOne(db, corpse_id);
+
+		if (corpse.id == 0) {
+			return 0;
+		}
+
+		corpse.is_buried		= 0;
+		corpse.zone_id			= zone_id;
+		corpse.instance_id		= instance_id;
+		corpse.x				= position.x;
+		corpse.y				= position.y;
+		corpse.z				= position.z;
+		corpse.heading			= position.w;
+		corpse.time_of_death	= time(nullptr);
+		corpse.was_at_graveyard = 0;
+
+		return UpdateOne(db, corpse);
+	}
 };
 
 #endif //EQEMU_CHARACTER_CORPSES_REPOSITORY_H

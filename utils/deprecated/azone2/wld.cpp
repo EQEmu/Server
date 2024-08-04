@@ -97,7 +97,7 @@ FRAG_CONSTRUCTOR(Data15) {
   plac->scale[1] = hdr->scale[1];
   plac->scale[2] = hdr->scale[1];
 
-  plac->model = atoi((const char*)&wld->sHash[-(int)hdr->ref]);
+  plac->model = Strings::ToInt((const char*)&wld->sHash[-(int)hdr->ref]);
 
   pl = new Placeable *[wld->model_data.plac_count + 1];
   memcpy(pl, wld->model_data.placeable, sizeof(Placeable *) * wld->model_data.plac_count);

@@ -4,23 +4,24 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * @docs https://docs.eqemu.io/developer/repositories
  */
 
 #ifndef EQEMU_BASE_CHARACTER_AURAS_REPOSITORY_H
 #define EQEMU_BASE_CHARACTER_AURAS_REPOSITORY_H
 
 #include "../../database.h"
-#include "../../string_util.h"
+#include "../../strings.h"
+#include <ctime>
 
 class BaseCharacterAurasRepository {
 public:
 	struct CharacterAuras {
-		int id;
-		int slot;
-		int spell_id;
+		int32_t id;
+		int8_t  slot;
+		int32_t spell_id;
 	};
 
 	static std::string PrimaryKey()
@@ -37,9 +38,23 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"id",
+			"slot",
+			"spell_id",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
-		return std::string(implode(", ", Columns()));
+		return std::string(Strings::Implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(Strings::Implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -51,7 +66,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -67,16 +82,16 @@ public:
 
 	static CharacterAuras NewEntity()
 	{
-		CharacterAuras entry{};
+		CharacterAuras e{};
 
-		entry.id       = 0;
-		entry.slot     = 0;
-		entry.spell_id = 0;
+		e.id       = 0;
+		e.slot     = 0;
+		e.spell_id = 0;
 
-		return entry;
+		return e;
 	}
 
-	static CharacterAuras GetCharacterAurasEntry(
+	static CharacterAuras GetCharacterAuras(
 		const std::vector<CharacterAuras> &character_aurass,
 		int character_auras_id
 	)
@@ -97,21 +112,22 @@ public:
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
-				"{} WHERE id = {} LIMIT 1",
+				"{} WHERE {} = {} LIMIT 1",
 				BaseSelect(),
+				PrimaryKey(),
 				character_auras_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			CharacterAuras entry{};
+			CharacterAuras e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
-			return entry;
+			return e;
 		}
 
 		return NewEntity();
@@ -136,24 +152,24 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		CharacterAuras character_auras_entry
+		const CharacterAuras &e
 	)
 	{
-		std::vector<std::string> update_values;
+		std::vector<std::string> v;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[0] + " = " + std::to_string(character_auras_entry.id));
-		update_values.push_back(columns[1] + " = " + std::to_string(character_auras_entry.slot));
-		update_values.push_back(columns[2] + " = " + std::to_string(character_auras_entry.spell_id));
+		v.push_back(columns[0] + " = " + std::to_string(e.id));
+		v.push_back(columns[1] + " = " + std::to_string(e.slot));
+		v.push_back(columns[2] + " = " + std::to_string(e.spell_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
-				implode(", ", update_values),
+				Strings::Implode(", ", v),
 				PrimaryKey(),
-				character_auras_entry.id
+				e.id
 			)
 		);
 
@@ -162,57 +178,57 @@ public:
 
 	static CharacterAuras InsertOne(
 		Database& db,
-		CharacterAuras character_auras_entry
+		CharacterAuras e
 	)
 	{
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
-		insert_values.push_back(std::to_string(character_auras_entry.id));
-		insert_values.push_back(std::to_string(character_auras_entry.slot));
-		insert_values.push_back(std::to_string(character_auras_entry.spell_id));
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.spell_id));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
-				implode(",", insert_values)
+				Strings::Implode(",", v)
 			)
 		);
 
 		if (results.Success()) {
-			character_auras_entry.id = results.LastInsertedID();
-			return character_auras_entry;
+			e.id = results.LastInsertedID();
+			return e;
 		}
 
-		character_auras_entry = NewEntity();
+		e = NewEntity();
 
-		return character_auras_entry;
+		return e;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<CharacterAuras> character_auras_entries
+		const std::vector<CharacterAuras> &entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &character_auras_entry: character_auras_entries) {
-			std::vector<std::string> insert_values;
+		for (auto &e: entries) {
+			std::vector<std::string> v;
 
-			insert_values.push_back(std::to_string(character_auras_entry.id));
-			insert_values.push_back(std::to_string(character_auras_entry.slot));
-			insert_values.push_back(std::to_string(character_auras_entry.spell_id));
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.spell_id));
 
-			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
 		}
 
-		std::vector<std::string> insert_values;
+		std::vector<std::string> v;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
-				implode(",", insert_chunks)
+				Strings::Implode(",", insert_chunks)
 			)
 		);
 
@@ -233,19 +249,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterAuras entry{};
+			CharacterAuras e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static std::vector<CharacterAuras> GetWhere(Database& db, std::string where_filter)
+	static std::vector<CharacterAuras> GetWhere(Database& db, const std::string &where_filter)
 	{
 		std::vector<CharacterAuras> all_entries;
 
@@ -260,19 +276,19 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			CharacterAuras entry{};
+			CharacterAuras e{};
 
-			entry.id       = atoi(row[0]);
-			entry.slot     = atoi(row[1]);
-			entry.spell_id = atoi(row[2]);
+			e.id       = row[0] ? static_cast<int32_t>(atoi(row[0])) : 0;
+			e.slot     = row[1] ? static_cast<int8_t>(atoi(row[1])) : 0;
+			e.spell_id = row[2] ? static_cast<int32_t>(atoi(row[2])) : 0;
 
-			all_entries.push_back(entry);
+			all_entries.push_back(e);
 		}
 
 		return all_entries;
 	}
 
-	static int DeleteWhere(Database& db, std::string where_filter)
+	static int DeleteWhere(Database& db, const std::string &where_filter)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -297,6 +313,92 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
+	static int64 GetMaxId(Database& db)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COALESCE(MAX({}), 0) FROM {}",
+				PrimaryKey(),
+				TableName()
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static int64 Count(Database& db, const std::string &where_filter = "")
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT COUNT(*) FROM {} {}",
+				TableName(),
+				(where_filter.empty() ? "" : "WHERE " + where_filter)
+			)
+		);
+
+		return (results.Success() && results.begin()[0] ? strtoll(results.begin()[0], nullptr, 10) : 0);
+	}
+
+	static std::string BaseReplace()
+	{
+		return fmt::format(
+			"REPLACE INTO {} ({}) ",
+			TableName(),
+			ColumnsRaw()
+		);
+	}
+
+	static int ReplaceOne(
+		Database& db,
+		const CharacterAuras &e
+	)
+	{
+		std::vector<std::string> v;
+
+		v.push_back(std::to_string(e.id));
+		v.push_back(std::to_string(e.slot));
+		v.push_back(std::to_string(e.spell_id));
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES ({})",
+				BaseReplace(),
+				Strings::Implode(",", v)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
+
+	static int ReplaceMany(
+		Database& db,
+		const std::vector<CharacterAuras> &entries
+	)
+	{
+		std::vector<std::string> insert_chunks;
+
+		for (auto &e: entries) {
+			std::vector<std::string> v;
+
+			v.push_back(std::to_string(e.id));
+			v.push_back(std::to_string(e.slot));
+			v.push_back(std::to_string(e.spell_id));
+
+			insert_chunks.push_back("(" + Strings::Implode(",", v) + ")");
+		}
+
+		std::vector<std::string> v;
+
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"{} VALUES {}",
+				BaseReplace(),
+				Strings::Implode(",", insert_chunks)
+			)
+		);
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_BASE_CHARACTER_AURAS_REPOSITORY_H

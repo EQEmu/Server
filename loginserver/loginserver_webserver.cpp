@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "loginserver_webserver.h"
 #include "server_manager.h"
 #include "login_server.h"
 #include "../common/json/json.h"
-#include "../common/string_util.h"
+#include "../common/strings.h"
 #include "account_management.h"
 
 extern LoginServer server;
@@ -51,14 +31,15 @@ namespace LoginserverWebserver {
 				auto        iter = server.server_manager->getWorldServers().begin();
 				while (iter != server.server_manager->getWorldServers().end()) {
 					Json::Value row;
-					row["server_long_name"]  = (*iter)->GetServerLongName();
-					row["server_short_name"] = (*iter)->GetServerLongName();
-					row["server_list_id"]    = (*iter)->GetServerListID();
-					row["server_status"]     = (*iter)->GetStatus();
-					row["zones_booted"]      = (*iter)->GetZonesBooted();
-					row["local_ip"]          = (*iter)->GetLocalIP();
-					row["remote_ip"]         = (*iter)->GetRemoteIP();
-					row["players_online"]    = (*iter)->GetPlayersOnline();
+					row["server_long_name"]    = (*iter)->GetServerLongName();
+					row["server_short_name"]   = (*iter)->GetServerShortName();
+					row["server_list_type_id"] = (*iter)->GetServerListID();
+					row["server_status"]       = (*iter)->GetStatus();
+					row["zones_booted"]        = (*iter)->GetZonesBooted();
+					row["local_ip"]            = (*iter)->GetLocalIP();
+					row["remote_ip"]           = (*iter)->GetRemoteIP();
+					row["players_online"]      = (*iter)->GetPlayersOnline();
+					row["world_id"]            = (*iter)->GetServerId();
 					response.append(row);
 					++iter;
 				}
@@ -316,6 +297,24 @@ namespace LoginserverWebserver {
 				LoginserverWebserver::SendResponse(response, res);
 			}
 		);
+
+		api.Get(
+			"/probes/healthcheck", [](const httplib::Request &request, httplib::Response &res) {
+				Json::Value response;
+				uint32 login_response = AccountManagement::HealthCheckUserLogin();
+
+				response["status"] = login_response;
+				if (login_response == 0) {
+					response["message"] = "Process unresponsive, exiting...";
+					LogInfo("Probes healthcheck unresponsive, exiting...");
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+				if (login_response == 0) {
+					std::exit(0);
+				}
+			}
+		);
 	}
 
 	/**
@@ -445,7 +444,7 @@ namespace LoginserverWebserver {
 			auto header_value = header.second;
 			if (header_key == "Authorization") {
 				authorization_key = header.second;
-				find_replace(authorization_key, "Bearer ", "");
+				Strings::FindReplace(authorization_key, "Bearer ", "");
 				if (LoginserverWebserver::TokenManager::TokenExists(authorization_key)) {
 					user_token = server.token_manager->GetToken(authorization_key);
 				}
@@ -481,8 +480,8 @@ namespace LoginserverWebserver {
 		for (auto row         = results.begin(); row != results.end(); ++row) {
 			LoginserverWebserver::TokenManager::token_data token_data;
 			token_data.token     = row[0];
-			token_data.can_write = std::stoi(row[1]) > 0;
-			token_data.can_read  = std::stoi(row[2]) > 0;
+			token_data.can_write = Strings::ToInt(row[1]) > 0;
+			token_data.can_read  = Strings::ToInt(row[2]) > 0;
 
 			LogDebug(
 				"Inserting api token to internal list [{0}] write {1} read {2}",
@@ -491,7 +490,7 @@ namespace LoginserverWebserver {
 				token_data.can_write
 			);
 
-			server.token_manager->loaded_api_tokens.insert(
+			server.token_manager->loaded_api_tokens.emplace(
 				std::make_pair(
 					token_data.token,
 					token_data

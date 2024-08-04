@@ -38,7 +38,7 @@ namespace EQ
 				_running = true;
 
 				for (size_t i = 0; i < threads; ++i) {
-					_threads.push_back(std::thread(std::bind(&TaskScheduler::ProcessWork, this)));
+					_threads.emplace_back(std::thread(std::bind(&TaskScheduler::ProcessWork, this)));
 				}
 			}
 			
@@ -60,8 +60,8 @@ namespace EQ
 			}
 			
 			template<typename Fn, typename... Args>
-			auto Enqueue(Fn&& fn, Args&&... args) -> std::future<typename std::result_of<Fn(Args...)>::type> {
-				using return_type = typename std::result_of<Fn(Args...)>::type;
+			auto Enqueue(Fn&& fn, Args&&... args) -> std::future<typename std::invoke_result<Fn, Args...>::type> {
+				using return_type = typename std::invoke_result<Fn, Args...>::type;
 			
 				auto task = std::make_shared<std::packaged_task<return_type()>>(
 					std::bind(std::forward<Fn>(fn), std::forward<Args>(args)...)

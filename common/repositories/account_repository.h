@@ -1,28 +1,8 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_ACCOUNT_REPOSITORY_H
 #define EQEMU_ACCOUNT_REPOSITORY_H
 
 #include "../database.h"
-#include "../string_util.h"
+#include "../strings.h"
 #include "base/base_account_repository.h"
 
 class AccountRepository: public BaseAccountRepository {
@@ -64,7 +44,69 @@ public:
      */
 
 	// Custom extended repository methods here
+	static int16 GetAccountStatus(Database& db, const uint32 account_id)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"SELECT `status`, TIMESTAMPDIFF(SECOND, NOW(), `suspendeduntil`) FROM `{}` WHERE `{}` = {}",
+				TableName(),
+				PrimaryKey(),
+				account_id
+			)
+		);
 
+		if (!results.Success() || !results.RowCount()) {
+			return 0;
+		}
+
+		auto row = results.begin();
+
+		int16 status    = static_cast<int16>(Strings::ToInt(row[0]));
+		int   date_diff = 0;
+
+		if (row[1]) {
+			date_diff = Strings::ToInt(row[1]);
+		}
+
+		if (date_diff > 0) {
+			status = -1;
+		}
+
+		return status;
+	}
+
+	static bool UpdatePassword(Database& db, const uint32 account_id, const std::string& password)
+	{
+		auto results = db.QueryDatabase(
+			fmt::format(
+				"UPDATE `{}` SET `password` = MD5('{}') WHERE `{}` = {}",
+				TableName(),
+				password,
+				PrimaryKey(),
+				account_id
+			)
+		);
+
+		return results.Success();
+	}
+
+	static std::string GetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id)
+	{
+		return AccountRepository::FindOne(db, account_id).auto_login_charname;
+	}
+
+	static bool SetAutoLoginCharacterNameByAccountID(Database& db, const uint32 account_id, const std::string& character_name)
+	{
+		auto e = AccountRepository::FindOne(db, account_id);
+
+		if (!e.id) {
+			return false;
+		}
+
+		e.auto_login_charname = character_name;
+
+		return AccountRepository::UpdateOne(db, e);
+	}
 };
 
 #endif //EQEMU_ACCOUNT_REPOSITORY_H

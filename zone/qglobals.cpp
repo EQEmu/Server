@@ -1,4 +1,4 @@
-#include "../common/string_util.h"
+#include "../common/strings.h"
 
 #include "qglobals.h"
 #include "client.h"
@@ -102,22 +102,6 @@ void QGlobalCache::GetQGlobals(std::list<QGlobal> &globals, NPC *n, Client *c, Z
 	}
 }
 
-bool QGlobalCache::GetQGlobal(QGlobal &g, std::string name, NPC *n, Client *c, Zone *z) {
-	std::list<QGlobal> globals;
-	QGlobalCache::GetQGlobals(globals, n, c, z);
-
-	auto iter = globals.begin();
-	while(iter != globals.end()) {
-		if(iter->name.compare(name) == 0) {
-			g = (*iter);
-			return true;
-		}
-		++iter;
-	}
-
-	return false;
-}
-
 void QGlobalCache::PurgeExpiredGlobals()
 {
 	if(!qGlobalBucket.size())
@@ -171,5 +155,5 @@ void QGlobalCache::LoadBy(const std::string &query)
 		return;
 
 	for (auto row = results.begin(); row != results.end(); ++row)
-		AddGlobal(0, QGlobal(row[0], atoi(row[1]), atoi(row[2]), atoi(row[3]), row[4], row[5] ? atoi(row[5]) : 0xFFFFFFFF));
+		AddGlobal(0, QGlobal(row[0], Strings::ToInt(row[1]), Strings::ToInt(row[2]), Strings::ToInt(row[3]), row[4], row[5] ? Strings::ToInt(row[5]) : 0xFFFFFFFF));
 }

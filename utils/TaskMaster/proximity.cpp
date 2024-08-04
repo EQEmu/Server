@@ -276,7 +276,7 @@ void MainFrame::SaveProximity(wxCommandEvent& event)
 
 	inStr.Clear();
 	inStr = mProxId->GetValue();
-	toSave.exploreid = atoi(inStr.mb_str());
+	toSave.exploreid = Strings::ToInt(inStr.mb_str());
 
 	inStr.Clear();
 	inStr = mProxMinx->GetValue();

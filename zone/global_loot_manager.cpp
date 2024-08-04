@@ -2,6 +2,7 @@
 #include "npc.h"
 #include "client.h"
 #include "zone.h"
+#include "dialogue_window.h"
 
 extern Zone *zone;
 
@@ -21,18 +22,77 @@ std::vector<int> GlobalLootManager::GetGlobalLootTables(NPC *mob) const
 	return tables;
 }
 
-void GlobalLootManager::ShowZoneGlobalLoot(Client *to) const
+void GlobalLootManager::ShowZoneGlobalLoot(Client *c) const
 {
-	for (auto &e : m_entries)
-		to->Message(Chat::White, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
+	std::string global_loot_table;
+
+	global_loot_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}{}",
+			DialogueWindow::TableCell("ID"),
+			DialogueWindow::TableCell("Table Name"),
+			DialogueWindow::TableCell("Loottable ID")
+		)
+	);
+
+	for (auto &e : m_entries) {
+		global_loot_table += DialogueWindow::TableRow(
+			fmt::format(
+				"{}{}{}",
+				DialogueWindow::TableCell(std::to_string(e.GetID())),
+				DialogueWindow::TableCell(e.GetDescription()),
+				DialogueWindow::TableCell(std::to_string(e.GetLootTableID()))
+			)
+		);
+	}
+
+	global_loot_table = DialogueWindow::Table(global_loot_table);
+
+	c->SendPopupToClient(
+		fmt::format(
+			"Global Loot for {} ({})",
+			zone->GetLongName(),
+			zone->GetZoneID()
+		).c_str(),
+		global_loot_table.c_str()
+	);
 }
 
-void GlobalLootManager::ShowNPCGlobalLoot(Client *to, NPC *who) const
+void GlobalLootManager::ShowNPCGlobalLoot(Client *c, NPC *t) const
 {
+	std::string global_loot_table;
+
+	global_loot_table += DialogueWindow::TableRow(
+		fmt::format(
+			"{}{}{}",
+			DialogueWindow::TableCell("ID"),
+			DialogueWindow::TableCell("Table Name"),
+			DialogueWindow::TableCell("Loottable ID")
+		)
+	);
+
 	for (auto &e : m_entries) {
-		if (e.PassesRules(who))
-			to->Message(Chat::White, " %s : %d table %d", e.GetDescription().c_str(), e.GetID(), e.GetLootTableID());
+		if (e.PassesRules(t)) {
+			global_loot_table += DialogueWindow::TableRow(
+				fmt::format(
+					"{}{}{}",
+					DialogueWindow::TableCell(std::to_string(e.GetID())),
+					DialogueWindow::TableCell(e.GetDescription()),
+					DialogueWindow::TableCell(std::to_string(e.GetLootTableID()))
+				)
+			);
+		}
 	}
+
+	global_loot_table = DialogueWindow::Table(global_loot_table);
+
+	c->SendPopupToClient(
+		fmt::format(
+			"Global Loot for {}",
+			c->GetTargetDescription(t)
+		).c_str(),
+		global_loot_table.c_str()
+	);
 }
 
 bool GlobalLootEntry::PassesRules(NPC *mob) const

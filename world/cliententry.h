@@ -60,7 +60,7 @@ public:
 	 * @param scl
 	 * @param iOnline
 	 */
-	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = 0);
+	ClientListEntry(uint32 id, uint32 iAccID, const char* iAccName, MD5& iMD5Pass, int16 iAdmin = AccountStatus::Player);
 	ClientListEntry(uint32 id, ZoneServer* iZS, ServerClientList_Struct* scl, CLE_Status iOnline);
 	~ClientListEntry();
 	bool	CheckStale();
@@ -68,9 +68,6 @@ public:
 	void	LSUpdate(ZoneServer* zoneserver);
 	void	LSZoneChange(ZoneToZone_Struct* ztz);
 	bool	CheckAuth(uint32 loginserver_account_id, const char* key_password);
-	bool	CheckAuth(const char* iName, MD5& iMD5Password);
-	bool	CheckAuth(uint32 id, const char* key, uint32 ip);
-	void	SetOnline(ZoneServer* iZS, CLE_Status iOnline);
 	void	SetOnline(CLE_Status iOnline = CLE_Status::Online);
 	void	SetChar(uint32 iCharID, const char* iCharName);
 	inline CLE_Status Online()		{ return pOnline; }
@@ -98,29 +95,32 @@ public:
 	inline void			SetAdmin(uint16 iAdmin)	{ padmin = iAdmin; }
 
 	// Character info
-	inline ZoneServer*	Server() const		{ return pzoneserver; }
-	inline void			ClearServer()		{ pzoneserver = 0; }
-	inline uint32		CharID() const		{ return pcharid; }
-	inline const char*	name() const		{ return pname; }
-	inline uint32		zone() const		{ return pzone; }
-	inline uint16		instance() const	{ return pinstance; }
-	inline uint8			level() const		{ return plevel; }
-	inline uint8			class_() const		{ return pclass_; }
-	inline uint16		race() const		{ return prace; }
-	inline uint8			Anon()				{ return panon; }
-	inline uint8			TellsOff() const	{ return ptellsoff; }
-	inline uint32		GuildID() const	{ return pguild_id; }
-	inline void			SetGuild(uint32 guild_id) { pguild_id = guild_id; }
-	inline bool			LFG() const			{ return pLFG; }
-	inline uint8			GetGM() const		{ return gm; }
-	inline void			SetGM(uint8 igm)	{ gm = igm; }
-	inline void			SetZone(uint32 zone) { pzone = zone; }
-	inline bool	IsLocalClient() const { return plocal; }
-	inline uint8			GetLFGFromLevel() const { return pLFGFromLevel; }
-	inline uint8			GetLFGToLevel() const { return pLFGToLevel; }
-	inline bool			GetLFGMatchFilter() const { return pLFGMatchFilter; }
-	inline const char*		GetLFGComments() const { return pLFGComments; }
-	inline uint8	GetClientVersion() { return pClientVersion; }
+	inline ZoneServer *Server() const { return pzoneserver; }
+	inline void ClearServer() { pzoneserver = 0; }
+	inline uint32 CharID() const { return pcharid; }
+	inline const char *name() const { return pname; }
+	inline uint32 zone() const { return pzone; }
+	inline uint16 instance() const { return pinstance; }
+	inline uint8 level() const { return plevel; }
+	inline uint8 class_() const { return pclass_; }
+	inline uint16 race() const { return prace; }
+	inline uint8 Anon() { return panon; }
+	inline uint8 TellsOff() const { return ptellsoff; }
+	inline uint32 GuildID() const { return pguild_id; }
+	inline uint32 GuildRank() const { return pguild_rank; }
+	inline bool GuildTributeOptIn() const { return pguild_tribute_opt_in; }
+	inline void SetGuild(uint32 guild_id) { pguild_id = guild_id; }
+	inline void SetGuildTributeOptIn(bool opt) { pguild_tribute_opt_in = opt; }
+	inline bool LFG() const { return pLFG; }
+	inline uint8 GetGM() const { return gm; }
+	inline void SetGM(uint8 igm) { gm = igm; }
+	inline void SetZone(uint32 zone) { pzone = zone; }
+	inline bool IsLocalClient() const { return plocal; }
+	inline uint8 GetLFGFromLevel() const { return pLFGFromLevel; }
+	inline uint8 GetLFGToLevel() const { return pLFGToLevel; }
+	inline bool GetLFGMatchFilter() const { return pLFGMatchFilter; }
+	inline const char *GetLFGComments() const { return pLFGComments; }
+	inline uint8 GetClientVersion() { return pClientVersion; }
 
 	inline bool TellQueueFull() const { return tell_queue.size() >= RuleI(World, TellQueueSize); }
 	inline bool TellQueueEmpty() const { return tell_queue.empty(); }
@@ -149,7 +149,6 @@ private:
 	// Account stuff
 	uint32	paccountid;
 	char	paccountname[32]{};
-	MD5		pMD5Pass;
 	int16	padmin{};
 
 	// Character info
@@ -164,6 +163,8 @@ private:
 	uint8	panon{};
 	uint8	ptellsoff{};
 	uint32	pguild_id{};
+	uint32  pguild_rank;
+	bool	pguild_tribute_opt_in{};
 	bool	pLFG{};
 	uint8	gm{};
 	uint8	pClientVersion{};

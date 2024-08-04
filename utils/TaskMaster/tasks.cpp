@@ -195,7 +195,7 @@ void MainFrame::OnRewardButton(wxCommandEvent& event)
 {
 	wxString ridStr = mRewardID->GetValue();
 	int rtype = mRewardMethod->GetCurrentSelection();
-	int rid = atoi(ridStr.mb_str());
+	int rid = Strings::ToInt(ridStr.mb_str());
 
 	ShowRewardChange(rtype,rid);
 }
@@ -224,15 +224,15 @@ void MainFrame::SaveTask(wxCommandEvent& event)
 		getStr.Clear();
 
 		getStr = mTaskMinLvl->GetValue();
-		ourTask.level_min = atoi(getStr.mb_str());
+		ourTask.level_min = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		getStr = mTaskMaxLvl->GetValue();
-		ourTask.level_max = atoi(getStr.mb_str());
+		ourTask.level_max = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		getStr = mTaskDuration->GetValue();
-		ourTask.duration = atoi(getStr.mb_str());
+		ourTask.duration = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		getStr = mRewardName->GetValue();
@@ -240,15 +240,15 @@ void MainFrame::SaveTask(wxCommandEvent& event)
 		getStr.Clear();
 
 		getStr = mRewardID->GetValue();
-		ourTask.rewardid = atoi(getStr.mb_str());
+		ourTask.rewardid = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		getStr = mRewardCash->GetValue();
-		ourTask.cashreward = atoi(getStr.mb_str());
+		ourTask.cashreward = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		getStr = mRewardXP->GetValue();
-		ourTask.xpreward = atoi(getStr.mb_str());
+		ourTask.xpreward = Strings::ToInt(getStr.mb_str());
 		getStr.Clear();
 
 		int * i = (int*)mStartZone->GetClientData(mStartZone->GetSelection());
