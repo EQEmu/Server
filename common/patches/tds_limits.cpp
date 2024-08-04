@@ -20,7 +20,9 @@
 #include "tds_limits.h"
 
 #include "../strings.h"
-
+#include "../types.h"
+#include "../emu_versions.h"
+#include "../skills.h"
 
 int16 TDS::invtype::GetInvTypeSize(int16 inv_type)
 {
