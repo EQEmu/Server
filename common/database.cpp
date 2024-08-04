@@ -66,6 +66,7 @@
 #endif
 
 #include "database.h"
+#include "data_verification.h"
 #include "eq_packet_structs.h"
 #include "extprofile.h"
 #include "strings.h"
@@ -308,13 +309,15 @@ bool Database::ReserveName(uint32 account_id, const std::string& name)
 		return false;
 	}
 
-	const int guild_id = RuleI(Character, DefaultGuild);
+	const uint32 guild_id   = RuleI(Character, DefaultGuild);
+	const uint8  guild_rank = EQ::Clamp(RuleI(Character, DefaultGuildRank), 0, 8);
 	if (guild_id != 0) {
 		if (e.id) {
 			auto g = GuildMembersRepository::NewEntity();
 
 			g.char_id  = e.id;
 			g.guild_id = guild_id;
+			g.rank_    = guild_rank;
 
 			GuildMembersRepository::InsertOne(*this, g);
 		}

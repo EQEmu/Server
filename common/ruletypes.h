@@ -178,6 +178,7 @@ RULE_BOOL(Character, NoSkillsOnHorse, false, "Enabling this will prevent Bind Wo
 RULE_BOOL(Character, UseNoJunkFishing, false, "Disregards junk items when fishing")
 RULE_BOOL(Character, SoftDeletes, true, "When characters are deleted in character select, they are only soft deleted")
 RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the guild # indicated")
+RULE_INT(Character, DefaultGuildRank, 8, "Default guild rank when Character:DefaultGuild is a non-0 value, default is 8 (Recruit)")
 RULE_BOOL(Character, ProcessFearedProximity, false, "Processes proximity checks when feared")
 RULE_BOOL(Character, EnableCharacterEXPMods, false, "Enables character zone-based experience modifiers.")
 RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based assisting against the aggresor in pvp.")
