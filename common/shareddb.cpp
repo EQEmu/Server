@@ -301,7 +301,7 @@ bool SharedDatabase::UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance*
 	// Update/Insert item
 	const std::string query = StringFormat("REPLACE INTO inventory "
 	                                       "(charid, slotid, itemid, charges, instnodrop, custom_data, color, "
-	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model) "
+	                                       "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, ornamenticon, ornamentidfile, ornament_hero_model, guid) "
 	                                       "VALUES( %lu, %lu, %lu, %lu, %lu, '%s', %lu, "
 	                                       "%lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu, %lu)",
 	                                       static_cast<unsigned long>(char_id), static_cast<unsigned long>(slot_id), static_cast<unsigned long>(inst->GetItem()->ID),
