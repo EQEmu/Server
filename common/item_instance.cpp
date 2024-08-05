@@ -32,10 +32,11 @@
 
 //#include <iostream>
 
-int32 NextItemInstSerialNumber = 1;
+int32 next_item_serial_number = 1;
+std::unordered_set<uint64> guids{};
 
-static inline int32 GetNextItemInstSerialNumber() {
-
+static inline int32 GetNextItemInstSerialNumber()
+{
 	// The Bazaar relies on each item a client has up for Trade having a unique
 	// identifier. This 'SerialNumber' is sent in Serialized item packets and
 	// is used in Bazaar packets to identify the item a player is buying or inspecting.
@@ -46,12 +47,18 @@ static inline int32 GetNextItemInstSerialNumber() {
 	// NextItemInstSerialNumber is the next one to hand out.
 	//
 	// It is very unlikely to reach 2,147,483,647. Maybe we should call abort(), rather than wrapping back to 1.
-	if(NextItemInstSerialNumber >= INT_MAX)
-		NextItemInstSerialNumber = 1;
-	else
-		NextItemInstSerialNumber++;
+	if (next_item_serial_number >= INT32_MAX) {
+		next_item_serial_number = 1;
+	}
+	else {
+		next_item_serial_number++;
+	}
 
-	return NextItemInstSerialNumber;
+	while (guids.contains(next_item_serial_number)) {
+		next_item_serial_number++;
+	}
+
+	return next_item_serial_number;
 }
 
 //
@@ -1935,6 +1942,15 @@ int EQ::ItemInstance::GetItemSkillsStat(EQ::skills::SkillType skill, bool augmen
 	return stat;
 }
 
+void EQ::ItemInstance::AddGUIDToMap(uint64 existing_serial_number)
+{
+	guids.emplace(existing_serial_number);
+}
+
+void EQ::ItemInstance::ClearGUIDMap()
+{
+	guids.clear();
+}
 //
 // class EvolveInfo
 //
