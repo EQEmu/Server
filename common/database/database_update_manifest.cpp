@@ -5718,6 +5718,17 @@ COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 AUTO_INCREMENT=1;
 )"
+	},
+	ManifestEntry{
+		.version     = 9282,
+		.description = "2024_08_05_fix_client_hotbar",
+		.check       = "SHOW COLUMNS FROM `inventory` LIKE 'guid'",
+		.condition   = "empty",
+		.match       = "",
+		.sql         = R"(
+ALTER TABLE `inventory`
+	ADD COLUMN `guid` BIGINT UNSIGNED NULL DEFAULT '0' AFTER `ornament_hero_model`;
+)"
 	}
 // -- template; copy/paste this when you need to create a new entry
 //	ManifestEntry{
