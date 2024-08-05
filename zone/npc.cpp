@@ -630,6 +630,17 @@ bool NPC::Process()
 		}
 	}
 
+	if ((IsPet() && GetOwner()->IsClient()) || (entity_list.GetClientByID(GetSwarmOwner()))) {
+		auto owner = GetOwner();
+		if (!owner) {
+			owner = entity_list.GetClientByID(GetSwarmOwner());
+		}
+
+		if (owner && owner->HasPet() && owner->GetPet()->GetPetOrder() == eStandingPetOrder::SPO_Guard) {
+
+		}
+	}
+
 	if (mob_close_scan_timer.Check()) {
 		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}
