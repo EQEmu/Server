@@ -150,6 +150,11 @@ uint16 Mob::GetSpellImpliedTargetID(uint16 spell_id, uint16 target_id) {
 		if (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet) {
 			if (GetPet()) {
 				return GetPet()->GetID();
+			} else if (!RuleB(Custom, EnableMultipet) && CastToClient()->GetAllPets().size() > 0) {
+				auto tar = CastToClient()->GetAllPets().front();
+				if (tar) {
+					return tar->GetID();
+				}
 			} else {
 				Message(Chat::SpellFailure, "You must have a pet in order to cast this spell or ability (%s).", spells[spell_id].name);
 				InterruptSpell(spell_id);
@@ -287,6 +292,8 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	target_id = GetSpellImpliedTargetID(spell_id, target_id);
+
+	SetEntityVariable(fmt::format("SpellGemHint_%d", spell_id), fmt::to_string(static_cast<uint32>(slot)));
 
 	if (!IsValidSpell(spell_id) ||
 		casting_spell_id ||
@@ -1996,6 +2003,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	// there should be no casting going on now
 	ZeroCastingVars();
 
+	DeleteEntityVariable(fmt::format("SpellGemHint_%d", spell_id));
+
 	// set the rapid recast timer for next time around
 	// Why do we have this? It mostly just causes issues when things are working correctly
 	// It also needs to be <users's ping to not cause issues
@@ -2207,7 +2216,11 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		}
 		case ST_Pet:
 		{
-			spell_target = GetPet();
+			if (!GetPet() && IsClient() && RuleB(Custom, EnableMultipet)) {
+				spell_target = CastToClient()->GetAllPets().empty() ? nullptr : CastToClient()->GetAllPets().front();
+			} else {
+				spell_target = GetPet();
+			}
 			if(!spell_target)
 			{
 				LogSpells("Spell [{}] canceled: invalid target (no pet)", spell_id);

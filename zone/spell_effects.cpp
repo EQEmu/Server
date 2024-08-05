@@ -1401,6 +1401,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						}
 					}
 
+					EQ::spells::CastingSlot cast_slot = static_cast<EQ::spells::CastingSlot>(Strings::ToUnsignedInt(GetEntityVariable(fmt::format("SpellGemHint_%d", spell_id))));
+
 					if (class_match) {
 						Message(Chat::SpellFailure, "You may only have one permanent pet from a particular class at any one time.");
 					} else
@@ -6689,7 +6691,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
 		Mob* proc_target = GetTarget();
 
-		Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(proc_spellid,(proc_target ?  proc_target->GetID() : GetID())));
+		Mob* new_target = entity_list.GetMob(GetSpellImpliedTargetID(proc_spellid,(proc_target ?  proc_target->GetID() : 0)));
 		if (new_target) {
 			proc_target = new_target;
 			LogSpells("Sympathetic Proc found new target with Implied Targeting: [{}]", new_target->GetCleanName());
